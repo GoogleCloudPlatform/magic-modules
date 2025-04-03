@@ -8,7 +8,6 @@ import (
 	"regexp"
 	"strings"
 	"time"
-	"encoding/json"
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/go-version"
@@ -133,28 +132,16 @@ var (
 			log.Printf("[DEBUG] fleet suppress pre_registered: %v\n", v)
 			return true
 		}
-		// Suppress if both old and new project fields are empty
-		var oldList, newList []map[string]interface{}
-    		if err := json.Unmarshal([]byte(oldValue), &oldList); err != nil {
-			log.Printf("[DEBUG] fleet suppress error unmarshalling old value: %v", err)
-        		return false
-    		}
-		if err := json.Unmarshal([]byte(newValue), &newList); err != nil {
-			log.Printf("[DEBUG] fleet suppress error unmarshalling new value: %v", err)
-        		return false
-   		}
-		var oldProject, newProject string
-		if len(oldList) == 1 {
-			if p, ok := oldList[0]["project"].(string); ok {
-				oldProject = p
-			}
-		}
-		if len(newList) == 1 {
-			if p, ok := newList[0]["project"].(string); ok {
-				newProject = p
-			}
-		}
-		return oldProject == "" && newProject == ""
+		// Suppress the addition of a fleet block (count changes 0 -> 1) if the "project" field being added is null or empty.
+                if k == "fleet.#" && oldValue == "0" && newValue == "1" { 
+                        // When transitioning from 0->1 blocks, d.Get/d.GetOk effectively reads the 'new' config value.
+                        projectVal, projectIsSet := d.GetOk("fleet.0.project")
+                        if !projectIsSet || projectVal.(string) == "" {
+                                log.Printf("[DEBUG] Suppressing diff for 'fleet.#' (0 -> 1) because fleet.0.project is null or empty in config.\n")
+                                return true
+                        }
+                }
+                return false
 	})
 )
 
