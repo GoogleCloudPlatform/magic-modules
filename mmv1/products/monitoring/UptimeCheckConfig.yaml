@@ -50,6 +50,12 @@ examples:
       display_name: 'http-uptime-check'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+  - name: 'uptime_check_config_http_password_wo'
+    primary_resource_id: 'http'
+    vars:
+      display_name: 'http-uptime-check'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
   - name: 'uptime_check_config_status_code'
     primary_resource_id: 'status_code'
     vars:
@@ -238,7 +244,9 @@ properties:
           - name: 'password'
             type: String
             description: The password to authenticate.
-            required: true
+            exactly_one_of:
+              - 'password'
+              - 'password_wo'
             sensitive: true
             conflicts:
               - 'password_wo'
@@ -246,6 +254,9 @@ properties:
           - name: 'passwordWo'
             type: String
             description: The password to authenticate.
+            exactly_one_of:
+              - 'passwordWo'
+              - 'password'
             required_with:
               - 'passwordWoVersion'
             write_only: true
