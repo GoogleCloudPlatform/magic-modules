@@ -327,7 +327,7 @@ mutex: 'alloydb/instance/{{name}}'
 
 ## Sweeper customization
 
-Sweepers are a testing infrastructure mechanism that automatically clean up resources created during tests. They run before tests start and can be run manually to clean up dangling resources. Sweepers help prevent test failures due to resource quota limits and reduce cloud infrastructure costs by removing test resources that were not properly cleaned up.
+Sweepers are a testing infrastructure mechanism that automatically clean up resources created during tests. They run before tests start and can be run manually to clean up dangling resources. Sweepers help prevent test failures due to resource quota limits and reduce cloud infrastructure costs by removing test resources that were not properly cleaned up. See [sweeper.go ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/sweeper.go).
 
 Sweeper generation is enabled by default, except in the following conditions which require customization here:
 - Resources with custom deletion code
