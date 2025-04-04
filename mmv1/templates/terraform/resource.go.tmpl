@@ -294,7 +294,8 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- $renderedIdFromName := "false" }}
 {{- $renderedInitial := "false" }}
 {{- range $prop := $.GettableProperties }}
-{{-  if $.InIdFormat $prop }}
+{{- /* Check if prop is potentially computed */}}
+{{-  if and ($.InIdFormat $prop) (and (or $prop.Output $prop.DefaultFromApi) (not $prop.IgnoreRead)) }}
 {{-  if and ($.CustomCode.Decoder) (eq $renderedInitial "false") }}
     // Set output-only resource properties from create API response
     res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
@@ -325,9 +326,9 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         }
     }
 {{-    end }}
-{{- end}}
-{{- end}}
-{{- end}}
+{{- end }}{{/* prop is potentially computed */}}
+{{- end }}{{/* range */}}
+{{- end }}{{/* not async create */}}
 
     // Store the ID now
     id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
