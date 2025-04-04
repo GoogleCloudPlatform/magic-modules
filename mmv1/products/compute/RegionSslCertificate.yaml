@@ -101,7 +101,8 @@ properties:
       The certificate in PEM format.
       The certificate chain must be no greater than 5 certs long.
       The chain must include at least one intermediate cert.
-    exactly_one_of:
+    immutable: true
+    at_least_one_of:
       - 'certificate'
       - 'certificateWo'
     sensitive: true
@@ -110,7 +111,7 @@ properties:
     description: 'The certificate in PEM format.'
     required_with:
       - 'certificateWoVersion'
-    exactly_one_of:
+    at_least_one_of:
       - 'certificate'
       - 'certificateWo'
     write_only: true
@@ -153,10 +154,12 @@ properties:
   - name: 'privateKey'
     type: String
     description: 'The write-only private key in PEM format.'
-    required: true
     immutable: true
     ignore_read: true
     sensitive: true
+    at_least_one_of:
+      - 'privateKey'
+      - 'privateKeyWo'
     diff_suppress_func: 'sha256DiffSuppress'
     custom_flatten: 'templates/terraform/custom_flatten/sha256.tmpl'
   - name: 'privateKeyWo'
@@ -164,7 +167,7 @@ properties:
     description: 'The write-only private key in PEM format.'
     required_with:
       - 'privateKeyWoVersion'
-    exactly_one_of:
+    at_least_one_of:
       - 'privateKey'
       - 'privateKeyWo'
     write_only: true
