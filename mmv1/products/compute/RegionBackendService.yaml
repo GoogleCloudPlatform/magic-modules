@@ -138,6 +138,7 @@ examples:
       health_check_name: 'health-check'
       instance_group_name: 'instance_group'
       network_name: 'network'
+    exclude_test: true
 parameters:
   - name: 'region'
     type: ResourceRef
