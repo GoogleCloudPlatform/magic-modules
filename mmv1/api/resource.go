@@ -1217,6 +1217,24 @@ func (r Resource) InIdFormat(prop Type) bool {
 	return slices.Contains(fields, google.Underscore(prop.Name))
 }
 
+// Returns true if at least one of the fields in the ID format is computed
+func (r Resource) HasComputedIdFormatFields() bool {
+	idFormatFields := map[string]struct{}{}
+	for _, f := range r.ExtractIdentifiers(r.GetIdFormat()) {
+		idFormatFields[f] = struct{}{}
+	}
+	for _, p := range r.GettableProperties() {
+		// Skip fields not in the id format
+		if _, ok := idFormatFields[p.Name]; !ok {
+			continue
+		}
+		if (p.Output || p.DefaultFromApi) && !p.IgnoreRead {
+			return true
+		}
+	}
+	return false
+}
+
 // ====================
 // Template Methods
 // ====================
