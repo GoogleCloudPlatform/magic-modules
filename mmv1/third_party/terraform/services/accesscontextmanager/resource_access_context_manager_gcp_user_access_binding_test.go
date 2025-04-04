@@ -85,7 +85,7 @@ resource "google_access_context_manager_access_policy" "access-policy" {
   title  = "my policy"
 }
 
-resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_access_binding_with_name" {
+resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_access_binding" {
   organization_id = "%{org_id}"
   group_key       = trimprefix(google_cloud_identity_group.group.id, "groups/")
   access_levels   = [
