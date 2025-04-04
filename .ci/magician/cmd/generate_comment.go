@@ -579,10 +579,14 @@ func detectMissingDocs(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) 
 		return nil, err
 	}
 
+	fmt.Println("detect missing docs return: ")
+	fmt.Println(output)
+
 	var missingDocs *MissingDocsSummary
 	if err = json.Unmarshal([]byte(output), &missingDocs); err != nil {
 		return nil, err
 	}
+	fmt.Printf("missingDocs = %v\n", *missingDocs)
 	return missingDocs, rnr.PopDir()
 }
 
