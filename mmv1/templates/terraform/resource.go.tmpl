@@ -291,43 +291,10 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- /* Set output-only resource properties from create API response (as long as Create isn't async) */}}
 {{- /* This is necessary so that the ID is built correctly. */}}
 {{- if or (not $.GetAsync) (not ($.GetAsync.Allow "Create")) }}
-{{- $renderedIdFromName := "false" }}
-{{- $renderedInitial := "false" }}
-{{- range $prop := $.GettableProperties }}
-{{- /* Check if prop is potentially computed */}}
-{{-  if and ($.InIdFormat $prop) (and (or $prop.Output $prop.DefaultFromApi) (not $prop.IgnoreRead)) }}
-{{-  if and ($.CustomCode.Decoder) (eq $renderedInitial "false") }}
-    // Set output-only resource properties from create API response
-    res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
+    err = resource{{ $.ResourceName }}SetComputedIdFormatFields(d, meta, res)
     if err != nil {
-        return fmt.Errorf("Error decoding response: %s", err)
+        return fmt.Errorf("Error setting computed ID format fields: %w")
     }
-    if res == nil {
-        return fmt.Errorf("Error decoding response, could not find object")
-    }
-    {{- $renderedInitial = "true" }}
-{{-  end }}
-{{-  if and (eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl") (eq $renderedIdFromName "false") }}
-    // Setting `name` field so that `id_from_name` flattener will work properly.
-    if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(res["name"], d, config)); err != nil {
-        return fmt.Errorf(`Error setting computed identity field "name": %s`, err)
-    }
-    {{- $renderedIdFromName = "true" }}
-{{-  end }}
-{{-    if and $prop.Output (not $prop.IgnoreRead) }}
-    if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
-        return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
-    }
-{{-    else if and $prop.DefaultFromApi (not $prop.IgnoreRead) }}
-    // {{ underscore $prop.Name }} is set by API when unset
-    if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("{{ underscore $prop.Name }}"))) {
-        if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
-            return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
-        }
-    }
-{{-    end }}
-{{- end }}{{/* prop is potentially computed */}}
-{{- end }}{{/* range */}}
 {{- end }}{{/* not async create */}}
 
     // Store the ID now
@@ -435,7 +402,17 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         return fmt.Errorf("Error waiting to create {{ $.Name -}}: %s", err)
 {{- end}}
     }
+    err = resource{{ $.ResourceName }}SetComputedIdFormatFields(d, meta, res)
+    if err != nil {
+        return fmt.Errorf("Error setting computed ID format fields: %w")
+    }
 
+    // This may have caused the ID to update - update it if so.
+    id, err = tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
+    if err != nil {
+        return fmt.Errorf("Error constructing id: %s", err)
+    }
+    d.SetId(id)
 {{- end}}
 {{- end}}
 
@@ -1233,3 +1210,50 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
 
     {{ $.CustomTemplate $.StateMigrationFile false -}}
 {{- end }}
+{{- /* Only render SetComputedIdFormatFields for resources with non-async create or polling async */}}
+{{- if or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create")))}}
+
+func resource{{ $.ResourceName }}SetComputedIdFormatFields(d *schema.ResourceData, meta interface{}, res map[string]interface{}) error {
+{{- $renderedIdFromName := "false" }}
+{{- $renderedInitial := "false" }}
+{{- range $prop := $.GettableProperties }}
+{{- /* Check if prop is potentially computed */}}
+{{-   if and ($.InIdFormat $prop) (and (or $prop.Output $prop.DefaultFromApi) (not $prop.IgnoreRead)) }}
+{{-     if eq $renderedInitial "false" }}
+    config := meta.(*transport_tpg.Config)
+{{-       if $.CustomCode.Decoder }}
+    // Set output-only resource properties from create API response
+    res, err := resource{{ $.ResourceName -}}Decoder(d, meta, res)
+    if err != nil {
+        return fmt.Errorf("decoding response: %w", err)
+    }
+    if res == nil {
+        return fmt.Errorf("decoding response, could not find object")
+    }
+{{-       end }}
+{{-       $renderedInitial = "true" }}
+{{-     end }}
+{{-     if and (eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl") (eq $renderedIdFromName "false") }}
+    // Setting `name` field so that `id_from_name` flattener will work properly.
+    if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(res["name"], d, config)); err != nil {
+        return fmt.Errorf(`Error setting computed identity field "name": %s`, err)
+    }
+    {{- $renderedIdFromName = "true" }}
+{{-     end }}
+{{-     if and $prop.Output (not $prop.IgnoreRead) }}
+    if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
+        return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
+    }
+{{-     else if and $prop.DefaultFromApi (not $prop.IgnoreRead) }}
+    // {{ underscore $prop.Name }} is set by API when unset
+    if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("{{ underscore $prop.Name }}"))) {
+        if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
+            return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
+        }
+    }
+{{-     end }}
+{{-   end }}{{/* prop is potentially computed */}}
+{{- end }}{{/* range */}}
+    return nil
+}
+{{- end}}
