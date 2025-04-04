@@ -49,7 +49,7 @@ async:
 collection_url_key: 'items'
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/ssl_certificate.tmpl'
-  encoder: 'templates/terraform/encoder/ssl_certificate.tmpl'
+  encoder: 'templates/terraform/encoders/ssl_certificate.go.tmpl'
 examples:
   - name: 'ssl_certificate_basic'
     primary_resource_id: 'default'
