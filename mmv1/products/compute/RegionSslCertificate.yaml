@@ -117,8 +117,6 @@ properties:
   - name: 'certificateWoVersion'
     type: String
     description: 'The certificate in PEM format.'
-    required_with:
-      - 'certificateWo'
     ignore_read: true
   - name: 'creationTimestamp'
     type: Time
@@ -173,6 +171,5 @@ properties:
   - name: 'privateKeyWoVersion'
     type: String
     description: 'The write-only private key in PEM format.'
-    required_with:
-      - 'privateKeyWo'
+    immutable: true
     ignore_read: true
