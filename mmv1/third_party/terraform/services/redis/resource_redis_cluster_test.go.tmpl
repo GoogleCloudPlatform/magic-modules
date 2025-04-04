@@ -1,10 +1,6 @@
 package redis_test
 
 import (
-{{- if ne $.TargetVersionName "ga" }}
-	"strings"
-	"os/exec"
-{{ end }}
 	"fmt"
 	"log"
 	"testing"
@@ -761,7 +757,6 @@ func testAccCheckRedisClusterExportBackup(t *testing.T, resourceName string, bac
 	}
 }
 
-
 {{- if ne $.TargetVersionName "ga" }}
 // Validate that persistence is updated for the cluster
 func TestAccRedisCluster_persistenceUpdate(t *testing.T) {
@@ -1262,59 +1257,6 @@ func createRedisClusterResourceConfig(params *ClusterParams, isSecondaryCluster 
 
 	crossClusterReplicationConfigBlock := ``
 	if isSecondaryCluster {
-		tfClusterResourceName = "test_secondary"
-		clusterName = params.secondaryClusterName
-		dependsOnBlock = dependsOnBlock + ", google_redis_cluster.test"
-
-		// Construct cross_cluster_replication_config block
-		pcBlock := ``
-		scsBlock := ``
-		if params.ccrRole == "SECONDARY" {
-			pcBlock = fmt.Sprintf(`
-			primary_cluster {
-				cluster = google_redis_cluster.test.id
-			}
-			`)
-		} else if params.ccrRole == "PRIMARY" {
-			scsBlock = fmt.Sprintf(`
-			secondary_clusters {
-				cluster = google_redis_cluster.test.id
-			}
-			`)
-		}
-		crossClusterReplicationConfigBlock = fmt.Sprintf(`
-		cross_cluster_replication_config {
-			cluster_role = "%s"
-			%s
-			%s
-		}
-		`, params.ccrRole, pcBlock, scsBlock)
-	}
-
-	return fmt.Sprintf(`
-		resource "google_redis_cluster" "%s" {
-		provider = google-beta
-		name           = "%s"
-		replica_count = %d
-		shard_count = %d
-		node_type = "%s"
-		deletion_protection_enabled = %v
-		region         = "us-central1"
-		psc_configs {
-				network = google_compute_network.producer_net.id
-		}
-		redis_configs = {
-			%s
-		}
-		%s
-		%s
-		%s
-		%s
-		depends_on = [
-				%s
-			]
-		}
-		`,
 		tfClusterResourceName = "test_secondary"
 		clusterName = params.secondaryClusterName
 		dependsOnBlock = dependsOnBlock + ", google_redis_cluster.test"
