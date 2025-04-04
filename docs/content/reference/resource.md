@@ -325,16 +325,16 @@ Example:
 mutex: 'alloydb/instance/{{name}}'
 ```
 
-## Sweeper customization
+## Sweeper
 
-Sweepers are a testing infrastructure mechanism that automatically clean up resources created during tests. They run before tests start and can be run manually to clean up dangling resources. Sweepers help prevent test failures due to resource quota limits and reduce cloud infrastructure costs by removing test resources that were not properly cleaned up. See [sweeper.go ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/sweeper.go).
+Sweepers are a testing infrastructure mechanism that automatically clean up resources created during tests. They run before tests start and can be run manually to clean up dangling resources. Sweepers help prevent test failures due to resource quota limits and reduce cloud infrastructure costs by removing test resources that were not properly cleaned up.
 
 Sweeper generation is enabled by default, except in the following conditions which require customization here:
 - Resources with custom deletion code
 - Resources with parent-child relationships (unless the parent relationship is configured)
 - Resources with complex URL parameters that aren't simple region/project parameters
 
-Simply defining the sweeper block in a resource will override these exclusions and enable sweeper generation for that resource, even with minimal configuration.
+Define the sweeper block in a resource to override these exclusions and enable sweeper generation for that resource.
 
 ### `exclude_sweeper`
 
@@ -350,9 +350,9 @@ exclude_sweeper: true
 
 ### `sweeper`
 
-Configures how test resources are swept (cleaned up) after tests. The sweeper system helps ensure resources created during tests are properly removed, even when tests fail unexpectedly. All fields within the `sweeper` block are optional, with reasonable defaults provided when not specified.
+Configures how test resources are swept (cleaned up) after tests. The sweeper system helps ensure resources created during tests are properly removed, even when tests fail unexpectedly. All fields within the `sweeper` block are optional, with reasonable defaults provided when not specified. See [sweeper.go ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/sweeper.go) for the implementation.
 
-- `identifier_field`: Specifies which field in the resource object should be used to identify resources for deletion. If not specified, defaults to "name" if present in the resource, otherwise falls back to "id".
+- `identifier_field`: Specifies which field in the API resource object should be used to identify resources for deletion. If not specified, defaults to "name" if present in the resource, otherwise falls back to "id".
 
 - `prefixes`: Specifies name prefixes that identify resources eligible for sweeping. Resources whose names start with any of these prefixes will be deleted. By default, resources with the `tf-test-` prefix are automatically eligible for sweeping even if no prefixes are specified.
 
@@ -363,8 +363,8 @@ Configures how test resources are swept (cleaned up) after tests. The sweeper sy
 - `parent`: Configures sweeping for resources that depend on parent resources (like a nodepool that belongs to a cluster).
 
   Required fields:
-  - `resource_type`: The type of the parent resource (e.g., "google_container_cluster")
-  - `child_field`: The field in your resource that references the parent (e.g., "cluster")
+  - `resource_type`: The type of the parent resource (for example, "google_container_cluster")
+  - `child_field`: The field in your resource that references the parent (for example, "cluster")
   - At least one of `parent_field` or `template` is required
 
   Options for getting parent reference:
@@ -376,11 +376,11 @@ Configures how test resources are swept (cleaned up) after tests. The sweeper sy
   
   - `parent_field_regex`: A regex pattern with a capture group to extract a specific portion of the parent field value. This is useful when you need more control over extracting parts of complex resource identifiers. The pattern must contain at least one capture group (in parentheses), and the first capture group's match will be used as the extracted value.
 
-- `query_string`: Allows appending additional query parameters to the resource's delete URL when performing delete operations. Format should include the starting character, e.g., "?force=true" or "&verbose=true". If not specified, no additional query parameters are added.
+- `query_string`: Allows appending additional query parameters to the resource's delete URL when performing delete operations. Format should include the starting character, for example, "?force=true" or "&verbose=true". If not specified, no additional query parameters are added.
 
 - `ensure_value`: Specifies a field that must be set to a specific value before deletion. Used for resources that have fields like 'deletionProtectionEnabled' that must be explicitly disabled before the resource can be deleted. All fields within the `ensure_value` block are required except `include_full_resource`:
   
-  - `field`: The API field name that needs to be updated before deletion. Can include dot notation for nested fields (e.g., "settings.deletionProtectionEnabled").
+  - `field`: The API field name that needs to be updated before deletion. Can include dot notation for nested fields (for example, "settings.deletionProtectionEnabled").
   
   - `value`: The required value that `field` must be set to before deletion. For boolean fields use "true" or "false", for integers use string representation, for string fields use the exact string value required.
   
