@@ -49,8 +49,15 @@ async:
 collection_url_key: 'items'
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/ssl_certificate.tmpl'
+  encoder: 'templates/terraform/encoder/ssl_certificate.tmpl'
 examples:
   - name: 'ssl_certificate_basic'
+    primary_resource_id: 'default'
+    ignore_read_extra:
+      - 'name_prefix'
+      # Uses id.UniqueId
+    skip_vcr: true
+  - name: 'ssl_certificate_basic_wo'
     primary_resource_id: 'default'
     ignore_read_extra:
       - 'name_prefix'
@@ -80,8 +87,26 @@ properties:
       The certificate in PEM format.
       The certificate chain must be no greater than 5 certs long.
       The chain must include at least one intermediate cert.
-    required: true
+    exactly_one_of:
+      - 'certificate'
+      - 'certificateWo'
     sensitive: true
+  - name: 'certificateWo'
+    type: String
+    description: 'The write-only certificate in PEM format.'
+    required_with:
+      - 'certificateWoVersion'
+    exactly_one_of:
+      - 'certificate'
+      - 'certificateWo'
+    write_only: true
+  - name: 'certificateWoVersion'
+    type: String
+    description: 'The write-only version of the certificate.'
+    immutable: true
+    ignore_read: true
+    required_with:
+      - 'certificateWo'
   - name: 'creationTimestamp'
     type: Time
     description: 'Creation timestamp in RFC3339 text format.'
@@ -116,10 +141,29 @@ properties:
       function: 'verify.ValidateGCEName'
   - name: 'privateKey'
     type: String
-    description: 'The write-only private key in PEM format.'
-    required: true
+    description: 'The private key in PEM format.'
+    exactly_one_of:
+      - 'privateKey'
+      - 'privateKeyWo'
     immutable: true
     ignore_read: true
     sensitive: true
     diff_suppress_func: 'sha256DiffSuppress'
     custom_flatten: 'templates/terraform/custom_flatten/sha256.tmpl'
+  - name: 'privateKeyWo'
+    type: String
+    description: 'The write-only private key in PEM format.'
+    required_with:
+      - 'privateKeyWoVersion'
+    exactly_one_of:
+      - 'privateKey'
+      - 'privateKeyWo'
+    write_only: true
+  - name: 'privateKeyWoVersion'
+    type: String
+    description: 'The write-only version of the private key.'
+    immutable: true
+    ignore_read: true
+    required_with:
+      - 'privateKeyWo'
+
