@@ -288,9 +288,9 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- end}}
         return fmt.Errorf("Error creating {{ $.Name -}}: %s", err)
     }
-{{- /* Set output-only resource properties from create API response (as long as Create doesn't use an async operation) */}}
+{{- /* Set output-only resource properties from create API response (as long as Create isn't async) */}}
 {{- /* This is necessary so that the ID is built correctly. */}}
-{{- if or (not $.GetAsync) (not (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.Allow "Create"))) }}
+{{- if or (not $.GetAsync) (not ($.GetAsync.Allow "Create")) }}
 {{- $renderedIdFromName := "false" }}
 {{- $renderedInitial := "false" }}
 {{- range $prop := $.GettableProperties }}
