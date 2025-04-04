@@ -227,93 +227,52 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 	}
 
 	if strings.Contains(linkTmpl, "{{project_id_or_project}}") {
+		var diagInfo diag.Diagnostics
 		switch req.(type) {
 			case resource.CreateRequest:
 				pReq := req.(resource.CreateRequest)
-		 		diagInfo := pReq.Plan.GetAttribute(ctx, path.Root("project_id"), &projectID)
-			    diags.Append(diagInfo...)
-			    if diags.HasError() {
-			        return nil
-			    }
-			    if projectID.ValueString() != "" {
-	    			project = fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), diags).ValueString()
-					if diags.HasError() {
-						return nil
-					}
-			    }
-				if shorten {
-					project = strings.TrimPrefix(project, "projects/")
-					projectID = types.StringValue(strings.TrimPrefix(projectID.ValueString(), "projects/"))
-				}
+				diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("project_id"), &projectID)
 			case resource.UpdateRequest:
 				pReq := req.(resource.UpdateRequest)
-		 		diagInfo := pReq.Plan.GetAttribute(ctx, path.Root("project_id"), &projectID)
-			    diags.Append(diagInfo...)
-			    if diags.HasError() {
-			        return nil
-			    }
-			    if projectID.ValueString() != "" {
-	    			project = fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), diags).ValueString()
-					if diags.HasError() {
-						return nil
-					}
-			    }
-				if shorten {
-					project = strings.TrimPrefix(project, "projects/")
-					projectID = types.StringValue(strings.TrimPrefix(projectID.ValueString(), "projects/"))
-				}
+				diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("project_id"), &projectID)
 			case resource.ReadRequest:
 				sReq := req.(resource.ReadRequest)
-		 		diagInfo := sReq.State.GetAttribute(ctx, path.Root("project_id"), &projectID)
-			    diags.Append(diagInfo...)
-			    if diags.HasError() {
-			        return nil
-			    }
-			    if projectID.ValueString() != "" {
-	    			project = fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), diags).ValueString()
-					if diags.HasError() {
-						return nil
-					}
-			    }
-				if shorten {
-					project = strings.TrimPrefix(project, "projects/")
-					projectID = types.StringValue(strings.TrimPrefix(projectID.ValueString(), "projects/"))
-				}
+				diagInfo = sReq.State.GetAttribute(ctx, path.Root("project_id"), &projectID)
 			case resource.DeleteRequest:
 				sReq := req.(resource.DeleteRequest)
-		 		diagInfo := sReq.State.GetAttribute(ctx, path.Root("project_id"), &projectID)
-			    diags.Append(diagInfo...)
-			    if diags.HasError() {
-			        return nil
-			    }
-			    if projectID.ValueString() != "" {
-	    			project = fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), diags).ValueString()
-					if diags.HasError() {
-						return nil
-					}
-			    }
-				if shorten {
-					project = strings.TrimPrefix(project, "projects/")
-					projectID = types.StringValue(strings.TrimPrefix(projectID.ValueString(), "projects/"))
-				}
+				diagInfo = sReq.State.GetAttribute(ctx, path.Root("project_id"), &projectID)
+		}
+		diags.Append(diagInfo...)
+		if diags.HasError() {
+			return nil
+		}
+		if projectID.ValueString() != "" {
+			project = fwresource.GetProjectFramework(data.Project, types.StringValue(config.Project), diags).ValueString()
+			if diags.HasError() {
+				return nil
+			}
+		}
+		if shorten {
+			project = strings.TrimPrefix(project, "projects/")
+			projectID = types.StringValue(strings.TrimPrefix(projectID.ValueString(), "projects/"))
 		}
 	}
 
 	if strings.Contains(linkTmpl, "{{region}}") {
- 		region = fwresource.GetRegionFramework(data.Region, types.StringValue(config.Region), diags).ValueString()
+		region = fwresource.GetRegionFramework(data.Region, types.StringValue(config.Region), diags).ValueString()
 		if diags.HasError() {
 			return nil
-	    }
+		}
 		if shorten {
 			region = strings.TrimPrefix(region, "regions/")
 		}
 	}
 
 	if strings.Contains(linkTmpl, "{{zone}}") {
- 		zone = fwresource.GetRegionFramework(data.Zone, types.StringValue(config.Zone), diags).ValueString()
+		zone = fwresource.GetRegionFramework(data.Zone, types.StringValue(config.Zone), diags).ValueString()
 		if diags.HasError() {
 			return nil
-	    }
+		}
 		if shorten {
 			zone = strings.TrimPrefix(region, "zones/")
 		}
@@ -339,115 +298,57 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 		}
 		if string(m[0]) == "%" {
 			var v types.String
+			var diagInfo diag.Diagnostics
 			switch req.(type) {
 				case resource.CreateRequest:
 					pReq := req.(resource.CreateRequest)
-			 		diagInfo := pReq.Plan.GetAttribute(ctx, path.Root("m[1:]"), &v)
-				    diags.Append(diagInfo...)
-				    if !diags.HasError() {
-					    if v.ValueString() != "" {
-							if shorten {
-								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
-							} else {
-								return fmt.Sprintf("%v", v.ValueString())
-							}
-						}
-				    }
+					diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("m[1:]"), &v)
 				case resource.UpdateRequest:
 					pReq := req.(resource.UpdateRequest)
-			 		diagInfo := pReq.Plan.GetAttribute(ctx, path.Root("m[1:]"), &v)
-				    diags.Append(diagInfo...)
-				    if !diags.HasError() {
-					    if v.ValueString() != "" {
-							if shorten {
-								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
-							} else {
-								return fmt.Sprintf("%v", v.ValueString())
-							}
-						}
-				    }
+					diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("m[1:]"), &v)
 				case resource.ReadRequest:
 					sReq := req.(resource.ReadRequest)
-			 		diagInfo := sReq.State.GetAttribute(ctx, path.Root("m[1:]"), &v)
-				    diags.Append(diagInfo...)
-				    if !diags.HasError() {
-					    if v.ValueString() != "" {
-							if shorten {
-								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
-							} else {
-								return fmt.Sprintf("%v", v.ValueString())
-							}
-						}
-				    }
+					diagInfo = sReq.State.GetAttribute(ctx, path.Root("m[1:]"), &v)
 				case resource.DeleteRequest:
 					sReq := req.(resource.DeleteRequest)
-			 		diagInfo := sReq.State.GetAttribute(ctx, path.Root("m[1:]"), &v)
-				    diags.Append(diagInfo...)
-				    if !diags.HasError() {
-					    if v.ValueString() != "" {
-							if shorten {
-								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
-							} else {
-								return fmt.Sprintf("%v", v.ValueString())
-							}
-						}
-				    }
+					diagInfo = sReq.State.GetAttribute(ctx, path.Root("m[1:]"), &v)
+			}
+			diags.Append(diagInfo...)
+			if !diags.HasError() {
+				if v.ValueString() != "" {
+					if shorten {
+						return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
+					} else {
+						return fmt.Sprintf("%v", v.ValueString())
+					}
+				}
 			}
 		} else {
 			var v types.String
+			var diagInfo diag.Diagnostics
 			switch req.(type) {
 				case resource.CreateRequest:
 					pReq := req.(resource.CreateRequest)
-			 		diagInfo := pReq.Plan.GetAttribute(ctx, path.Root("m"), &v)
-				    diags.Append(diagInfo...)
-				    if !diags.HasError() {
-					    if v.ValueString() != "" {
-							if shorten {
-								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
-							} else {
-								return fmt.Sprintf("%v", v.ValueString())
-							}
-						}
-				    }
+					diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("m"), &v)
 				case resource.UpdateRequest:
 					pReq := req.(resource.UpdateRequest)
-			 		diagInfo := pReq.Plan.GetAttribute(ctx, path.Root("m"), &v)
-				    diags.Append(diagInfo...)
-				    if !diags.HasError() {
-					    if v.ValueString() != "" {
-							if shorten {
-								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
-							} else {
-								return fmt.Sprintf("%v", v.ValueString())
-							}
-						}
-				    }
+					diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("m"), &v)
 				case resource.ReadRequest:
 					sReq := req.(resource.ReadRequest)
-			 		diagInfo := sReq.State.GetAttribute(ctx, path.Root("m"), &v)
-				    diags.Append(diagInfo...)
-				    if !diags.HasError() {
-					    if v.ValueString() != "" {
-							if shorten {
-								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
-							} else {
-								return fmt.Sprintf("%v", v.ValueString())
-							}
-						}
-				    }
+					diagInfo = sReq.State.GetAttribute(ctx, path.Root("m"), &v)
 				case resource.DeleteRequest:
 					sReq := req.(resource.DeleteRequest)
-			 		diagInfo := sReq.State.GetAttribute(ctx, path.Root("m"), &v)
-				    diags.Append(diagInfo...)
-				    if !diags.HasError() {
-					    if v.ValueString() != "" {
-							if shorten {
-								return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
-							} else {
-								return fmt.Sprintf("%v", v.ValueString())
-							}
-						}
-				    }
+					diagInfo = sReq.State.GetAttribute(ctx, path.Root("m"), &v)
+			}
+			diags.Append(diagInfo...)
+			if !diags.HasError() {
+				if v.ValueString() != "" {
+					if shorten {
+						return tpgresource.GetResourceNameFromSelfLink(fmt.Sprintf("%v", v.ValueString()))
+					} else {
+						return fmt.Sprintf("%v", v.ValueString())
+					}
+				}
 			}
 		}
 
