@@ -814,7 +814,7 @@ func TestAccComputeRouterNat_withNat64Configuration(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterNatDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -2098,7 +2098,6 @@ resource "google_compute_router_nat" "foobar" {
 func testAccComputeRouterNatWithNat64Configuration(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dns_policy" "foobar" {
-  provider                  = google-beta
   name                      = "tf-test-example-policy%{random_suffix}"
   enable_inbound_forwarding = false
   enable_logging            = false
@@ -2114,14 +2113,12 @@ resource "google_dns_policy" "foobar" {
 }
 
 resource "google_compute_network" "foobar" {
-  provider                 = google-beta
   name                     = "tf-test-network%{random_suffix}"
   enable_ula_internal_ipv6 = true
   auto_create_subnetworks  = false
 }
 
 resource "google_compute_subnetwork" "foobar" {
-  provider      = google-beta
   name          = "tf-test-subnetwork-%{random_suffix}"
   network       = google_compute_network.foobar.self_link
   ip_cidr_range = "10.0.0.0/16"
@@ -2129,7 +2126,6 @@ resource "google_compute_subnetwork" "foobar" {
 }
 
 resource "google_compute_subnetwork" "foobar2" {
-  provider = google-beta
   name             = "tf-test-subnetwork-2-%{random_suffix}"
   network          = google_compute_network.foobar.self_link
   ip_cidr_range    = "10.182.0.0/20"
@@ -2139,7 +2135,6 @@ resource "google_compute_subnetwork" "foobar2" {
 }
 
 resource "google_compute_router" "foobar" {
-  provider = google-beta
   name    = "tf-test-router%{random_suffix}"
   region  = google_compute_subnetwork.foobar.region
   network = google_compute_network.foobar.self_link
@@ -2149,7 +2144,6 @@ resource "google_compute_router" "foobar" {
 }
 
 resource "google_compute_router_nat" "foobar" {
-  provider               = google-beta
   name                   = "tf-test-router-nat%{random_suffix}"
   router                 = google_compute_router.foobar.name
   region                 = google_compute_router.foobar.region
@@ -2169,7 +2163,6 @@ resource "google_compute_router_nat" "foobar" {
 func testAccComputeRouterNatWithNat64ConfigurationUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dns_policy" "foobar" {
-  provider                  = google-beta
   name                      = "tf-test-example-policy%{random_suffix}"
   enable_inbound_forwarding = false
   enable_logging            = false
@@ -2185,14 +2178,12 @@ resource "google_dns_policy" "foobar" {
 }
 
 resource "google_compute_network" "foobar" {
-  provider = google-beta
   name                     = "tf-test-network%{random_suffix}"
   enable_ula_internal_ipv6 = true
   auto_create_subnetworks  = false
 }
 
 resource "google_compute_subnetwork" "foobar" {
-  provider      = google-beta
   name          = "tf-test-subnetwork-%{random_suffix}"
   network       = google_compute_network.foobar.self_link
   ip_cidr_range = "10.0.0.0/16"
@@ -2200,7 +2191,6 @@ resource "google_compute_subnetwork" "foobar" {
 }
 
 resource "google_compute_subnetwork" "foobar2" {
-  provider = google-beta
   name             = "tf-test-subnetwork-2-%{random_suffix}"
   network          = google_compute_network.foobar.self_link
   ip_cidr_range    = "10.182.0.0/20"
@@ -2210,7 +2200,6 @@ resource "google_compute_subnetwork" "foobar2" {
 }
 
 resource "google_compute_router" "foobar" {
-  provider = google-beta
   name    = "tf-test-router%{random_suffix}"
   region  = google_compute_subnetwork.foobar.region
   network = google_compute_network.foobar.self_link
@@ -2220,7 +2209,6 @@ resource "google_compute_router" "foobar" {
 }
 
 resource "google_compute_router_nat" "foobar" {
-  provider               = google-beta
   name                   = "tf-test-router-nat%{random_suffix}"
   router                 = google_compute_router.foobar.name
   region                 = google_compute_router.foobar.region

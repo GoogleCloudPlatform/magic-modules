@@ -105,6 +105,7 @@ properties:
     default_value: "Managed by Terraform"
   - name: 'dns64Config'
     type: NestedObject
+    default_from_api: true
     description: Configurations related to DNS64 for this Policy.
     properties:
       - name: 'scope'
