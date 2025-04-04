@@ -17,6 +17,7 @@ id_format: 'projects/{{project}}/locations/global/jobs/{{job_id}}'
 base_url: 'projects/{{project}}/locations/global/jobs'
 self_link: 'projects/{{project}}/locations/global/jobs/{{job_id}}'
 create_url: 'projects/{{project}}/locations/global/jobs?jobId={{job_id}}'
+delete_url: 'projects/{{project}}/locations/global/jobs/{{job_id}}'
 import_format:
   - 'projects/{{project}}/locations/global/jobs/{{job_id}}'
 timeouts:
@@ -46,7 +47,7 @@ examples:
       - 'delete_protection'
 custom_code:
   custom_update: 'templates/terraform/custom_update/storage_batch_operations_job.go.tmpl'
-  custom_delete: 'templates/terraform/custom_delete/storage_batch_operations_job.go.tmpl'
+  pre_delete: 'templates/terraform/custom_delete/storage_batch_operations_job.go.tmpl'
 virtual_fields:
   - name: 'delete_protection'
     description: |
