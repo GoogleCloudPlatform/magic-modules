@@ -87,7 +87,7 @@ properties:
       The certificate in PEM format.
       The certificate chain must be no greater than 5 certs long.
       The chain must include at least one intermediate cert.
-    exactly_one_of:
+    at_least_one_of:
       - 'certificate'
       - 'certificateWo'
     sensitive: true
@@ -96,7 +96,7 @@ properties:
     description: 'The write-only certificate in PEM format.'
     required_with:
       - 'certificateWoVersion'
-    exactly_one_of:
+    at_least_one_of:
       - 'certificate'
       - 'certificateWo'
     write_only: true
@@ -140,7 +140,7 @@ properties:
   - name: 'privateKey'
     type: String
     description: 'The private key in PEM format.'
-    exactly_one_of:
+    at_least_one_of:
       - 'privateKey'
       - 'privateKeyWo'
     immutable: true
@@ -153,7 +153,7 @@ properties:
     description: 'The write-only private key in PEM format.'
     required_with:
       - 'privateKeyWoVersion'
-    exactly_one_of:
+    at_least_one_of:
       - 'privateKey'
       - 'privateKeyWo'
     write_only: true
