@@ -258,13 +258,15 @@ properties:
     type: NestedObject
     description: |
      Backups stored in Cloud Storage buckets. The Cloud Storage buckets need to be the same region as the clusters.
-    # custom_flatten: 'templates/terraform/custom_flatten/redis_cluster_gcs_source_uirs.go.tmpl'
+    custom_flatten: 'templates/terraform/custom_flatten/redis_cluster_gcs_source.go.tmpl'
+    immutable: true
     properties:
       - name: 'uris'
         type: Array
         description: |
          URIs of the GCS objects to import. Example: gs://bucket1/object1, gs://bucket2/folder2/object2
         required: true
+        immutable: true
         item_type:
           type: String
   - name: 'managedBackupSource'

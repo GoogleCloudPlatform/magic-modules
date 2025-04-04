@@ -442,14 +442,14 @@ func testAccCheckRedisClusterOnDemandBackup(t *testing.T, resourceName string, b
 			Body:      backupRequest,
 		})
 
+		if err != nil {
+			return fmt.Errorf("Error creating on-demand backup for Redis cluster %s: %s", name, err)
+		}
+	    
 		// Wait for the operation to complete
 		err = redis.RedisOperationWaitTime(
 			config, res, project, "Creating Redis Cluster Backup", config.UserAgent,
 			time.Minute*20)
-
-		if err != nil {
-			return fmt.Errorf("Error creating on-demand backup for Redis cluster %s: %s", name, err)
-		}
 
 		// Check if the operation was successful
 		if res == nil {
@@ -468,11 +468,11 @@ func TestAccRedisCluster_gcsSource(t *testing.T) {
 	t.Parallel()
 	randomSuffix := acctest.RandString(t, 10)
 	// Will be populated by testAccCheckRedisClusterExportBackup
+
 	context := map[string]interface{}{
 		"random_suffix": randomSuffix,
-		"back_up":       "export_backup",
+		"back_up":       "back_me_up",
 		"gcs_bucket":    fmt.Sprintf("tf-test-redis-backup-%s", randomSuffix),
-		"export_file":   "",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -486,7 +486,7 @@ func TestAccRedisCluster_gcsSource(t *testing.T) {
 					// Create an on-demand backup
 					testAccCheckRedisClusterOnDemandBackup(t, "google_redis_cluster.cluster_gbs_main", context["back_up"].(string)),
 					// Export the backup to GCS and extract the actual backup file name
-					testAccCheckRedisClusterExportBackup(t, "google_redis_cluster.cluster_gbs_main", context["back_up"].(string), context["gcs_bucket"].(string), "redis-export-file", &context),
+					testAccCheckRedisClusterExportBackup(t, "google_redis_cluster.cluster_gbs_main", context["back_up"].(string), context["gcs_bucket"].(string), &context),
 				),
 			},
 			{
@@ -495,10 +495,11 @@ func TestAccRedisCluster_gcsSource(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccRedisCluster_gcsSource(t, context),
+				Config: testAccRedisCluster_gcsSource(context),
 			},
 		},
 	})
+
 }
 
 func testAccRedisCluster_gcsSourceSetup(context map[string]interface{}) string {
@@ -534,11 +535,7 @@ resource "google_storage_bucket_iam_member" "redis_backup_writer" {
 
 // testAccCheckRedisClusterListExportBackups(t, &context)
 
-func testAccRedisCluster_gcsSource(t *testing.T, context map[string]interface{}) string {
-	// Use the export filename from the context
-	context["gcs_uri"] = fmt.Sprintf("gs://%s/export_backup/%s", context["gcs_bucket"], context["export_file"])
-	log.Printf("[DEBUG] FULL PATH URI %s ", context["gcs_uri"])
-
+func testAccRedisCluster_gcsSource(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_redis_cluster" "cluster_gbs_main" {
   name                           = "tf-test-gbs-main-%{random_suffix}"
@@ -558,6 +555,10 @@ resource "google_storage_bucket" "redis_backup_bucket" {
 # Grant the Redis service account permission to access the bucket
 data "google_project" "project" {}
 
+data "google_storage_bucket_objects" "backup" {
+  bucket = "tf-test-redis-backup-%{random_suffix}"
+}
+
 resource "google_storage_bucket_iam_member" "redis_backup_writer" {
   bucket = google_storage_bucket.redis_backup_bucket.name
   role   = "roles/storage.admin"
@@ -571,7 +572,7 @@ resource "google_redis_cluster" "cluster_gbs" {
   region                         = "us-central1"
   deletion_protection_enabled    = false
   gcs_source {
-    uris                         = ["%{gcs_uri}"]
+    uris                         = [join("", ["gs://tf-test-redis-backup-%{random_suffix}/" , data.google_storage_bucket_objects.backup.bucket_objects[0]["name"]])]
   }
   depends_on                     = [google_storage_bucket_iam_member.redis_backup_writer]
 }
@@ -581,7 +582,7 @@ resource "google_redis_cluster" "cluster_gbs" {
 // testAccCheckRedisClusterExportBackup exports a Redis Cluster backup to a GCS destination,
 // verifies that the export operation was successful, and extracts the actual backup file name.
 // The extracted file name is saved to the context parameter.
-func testAccCheckRedisClusterExportBackup(t *testing.T, resourceName string, backupId string, gcsDestination string, exportFilename string, context *map[string]interface{}) resource.TestCheckFunc {
+func testAccCheckRedisClusterExportBackup(t *testing.T, resourceName string, backupId string, gcsDestination string, context *map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		log.Printf("[DEBUG] Starting Redis Cluster backup export for resource %s, backup %s to %s", resourceName, backupId, gcsDestination)
 
@@ -703,55 +704,6 @@ func testAccCheckRedisClusterExportBackup(t *testing.T, resourceName string, bac
 			log.Printf("[ERROR] Error during backup export operation: %s", err)
 			return fmt.Errorf("Error during backup export operation: %s", err)
 		}
-
-		// Get the operation details to extract the backup file name
-		if opName, ok := res["name"].(string); ok {
-			log.Printf("[DEBUG] Getting operation details for %s", opName)
-			opUrl := fmt.Sprintf("https://redis.googleapis.com/v1/%s", opName)
-
-			opRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "GET",
-				Project:   project,
-				RawURL:    opUrl,
-				UserAgent: config.UserAgent,
-			})
-
-			if err != nil {
-				log.Printf("[ERROR] Error getting operation details: %s", err)
-				return fmt.Errorf("Error getting operation details: %s", err)
-			}
-
-			log.Printf("[DEBUG] Operation details: %#v", opRes)
-
-			// Extract the fileName from the response
-			if response, ok := opRes["response"].(map[string]interface{}); ok {
-				if backupFiles, ok := response["backupFiles"].([]interface{}); ok && len(backupFiles) > 0 {
-					if backupFile, ok := backupFiles[0].(map[string]interface{}); ok {
-						if fileName, ok := backupFile["fileName"].(string); ok {
-							log.Printf("[DEBUG] Extracted backup file name: %s", fileName)
-
-							// Store the fileName in the context map
-							log.Printf("[DEBUG] Extracted backup file name: %s", fileName)
-
-							// Update the context directly with the file name
-							(*context)["export_file"] = fileName
-							log.Printf("[DEBUG] Saved fileName %s to context", fileName)
-
-							log.Printf("[DEBUG] Successfully exported backup %s to %s/%s (actual file: %s)",
-								backupId, gcsDestination, exportFilename, fileName)
-							return nil
-						}
-					}
-				}
-			}
-
-			log.Printf("[WARN] Could not extract backup file name from operation response")
-		}
-
-		// If we couldn't extract the file name, just log success with the provided filename
-		log.Printf("[DEBUG] Successfully exported backup %s to %s/%s", backupId, gcsDestination, exportFilename)
-		log.Printf("[DEBUG] Saved fileName %s to context", context)
 
 		return nil
 	}
