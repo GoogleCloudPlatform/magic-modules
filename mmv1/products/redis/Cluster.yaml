@@ -256,13 +256,13 @@ properties:
     output: true
   - name: 'gcsSource'
     type: NestedObject
-    description: | 
+    description: |
      Backups stored in Cloud Storage buckets. The Cloud Storage buckets need to be the same region as the clusters.
     # custom_flatten: 'templates/terraform/custom_flatten/redis_cluster_gcs_source_uirs.go.tmpl'
     properties:
       - name: 'uris'
         type: Array
-        description: | 
+        description: |
          URIs of the GCS objects to import. Example: gs://bucket1/object1, gs://bucket2/folder2/object2
         required: true
         item_type:
@@ -275,15 +275,15 @@ properties:
     properties:
       - name: 'backup'
         type: String
-        description: | 
-         Example: //redis.googleapis.com/projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backup} A shorter version (without the prefix) of the backup name is also supported, 
+        description: |
+         Example: //redis.googleapis.com/projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backup} A shorter version (without the prefix) of the backup name is also supported,
          like projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backupId} In this case, it assumes the backup is under redis.googleapis.com.
         required: true
         immutable: true
   - name: 'backupCollection'
     type: String
-    description: | 
-     The backup collection full resource name. 
+    description: |
+     The backup collection full resource name.
      Example: projects/{project}/locations/{location}/backupCollections/{collection}
     output: true
   - name: 'automatedBackupConfig'
