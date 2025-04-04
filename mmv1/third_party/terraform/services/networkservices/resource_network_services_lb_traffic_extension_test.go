@@ -26,7 +26,7 @@ func TestAccNetworkServicesLbTrafficExtension_update(t *testing.T) {
 				ResourceName:            "google_network_services_lb_traffic_extension.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "metadata", "terraform_labels"},
 			},
 			{
 				Config: testAccNetworkServicesLbTrafficExtension_update(context),
@@ -35,7 +35,7 @@ func TestAccNetworkServicesLbTrafficExtension_update(t *testing.T) {
 				ResourceName:            "google_network_services_lb_traffic_extension.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "metadata", "terraform_labels"},
 			},
 		},
 	})
@@ -230,6 +230,7 @@ resource "google_network_services_lb_traffic_extension" "default" {
 
   load_balancing_scheme = "INTERNAL_MANAGED"
   forwarding_rules      = [google_compute_forwarding_rule.default.self_link]
+  metadata              = {"exampleId": "test"}
 
   extension_chains {
     name = "chain1"
@@ -546,6 +547,7 @@ resource "google_network_services_lb_traffic_extension" "default" {
 
   load_balancing_scheme = "INTERNAL_MANAGED"
   forwarding_rules      = [google_compute_forwarding_rule.default.self_link]
+  metadata              = {"exampleId": "test"}
 
   extension_chains {
     name = "chain1"
