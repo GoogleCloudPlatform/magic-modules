@@ -407,7 +407,6 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     if err != nil {
         return fmt.Errorf("Error setting computed ID format fields: %w", err)
     }
-{{- end}}
 
     // This may have caused the ID to update - update it if so.
     id, err = tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
@@ -415,6 +414,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         return fmt.Errorf("Error constructing id: %s", err)
     }
     d.SetId(id)
+{{- end}}
 {{- end}}
 {{- end}}
 
