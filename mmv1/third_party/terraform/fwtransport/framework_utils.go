@@ -75,7 +75,7 @@ type SendRequestOptions struct {
 	ErrorAbortPredicates []transport_tpg.RetryErrorPredicateFunc
 }
 
-func SendRequest(opt SendRequestOptions, diags *diag.Diagnostics) (map[string]interface{}) {
+func SendRequest(opt SendRequestOptions, diags *diag.Diagnostics) map[string]interface{} {
 	reqHeaders := opt.Headers
 	if reqHeaders == nil {
 		reqHeaders = make(http.Header)
@@ -164,13 +164,13 @@ func SendRequest(opt SendRequestOptions, diags *diag.Diagnostics) (map[string]in
 }
 
 type DefaultVars struct {
-	BillingProject 		types.String
-	Project				types.String
-	Region				types.String
-	Zone				types.String
+	BillingProject types.String
+	Project        types.String
+	Region         types.String
+	Zone           types.String
 }
 
-func ReplaceVars(ctx context.Context, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string) (string) {
+func ReplaceVars(ctx context.Context, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string) string {
 	return ReplaceVarsRecursive(ctx, req, diags, data, config, linkTmpl, false, 0)
 }
 
@@ -182,14 +182,14 @@ func ReplaceVars(ctx context.Context, req interface{}, diags *diag.Diagnostics, 
 // access_policy: accessPolicies/foo
 // access_level: accessPolicies/foo/accessLevels/bar
 // becomes accessPolicies/foo/accessLevels/bar
-func ReplaceVarsForId(ctx context.Context, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string) (string) {
+func ReplaceVarsForId(ctx context.Context, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string) string {
 	return ReplaceVarsRecursive(ctx, req, diags, data, config, linkTmpl, true, 0)
 }
 
 // ReplaceVars must be done recursively because there are baseUrls that can contain references to regions
 // (eg cloudrun service) there aren't any cases known for 2+ recursion but we will track a run away
 // substitution as 10+ calls to allow for future use cases.
-func ReplaceVarsRecursive(ctx context.Context, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string, shorten bool, depth int) (string) {
+func ReplaceVarsRecursive(ctx context.Context, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string, shorten bool, depth int) string {
 	if depth > 10 {
 		diags.AddError("url building error", "Recursive substitution detected.")
 	}
@@ -212,7 +212,7 @@ func ReplaceVarsRecursive(ctx context.Context, req interface{}, diags *diag.Diag
 // This function replaces references to Terraform properties (in the form of {{var}}) with their value in Terraform
 // It also replaces {{project}}, {{project_id_or_project}}, {{region}}, and {{zone}} with their appropriate values
 // This function supports URL-encoding the result by prepending '%' to the field name e.g. {{%var}}
-func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string, shorten bool) (func(string) string) {
+func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{}, diags *diag.Diagnostics, data DefaultVars, config *transport_tpg.Config, linkTmpl string, shorten bool) func(string) string {
 	var project, region, zone string
 	var projectID types.String
 
@@ -229,18 +229,18 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 	if strings.Contains(linkTmpl, "{{project_id_or_project}}") {
 		var diagInfo diag.Diagnostics
 		switch req.(type) {
-			case resource.CreateRequest:
-				pReq := req.(resource.CreateRequest)
-				diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("project_id"), &projectID)
-			case resource.UpdateRequest:
-				pReq := req.(resource.UpdateRequest)
-				diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("project_id"), &projectID)
-			case resource.ReadRequest:
-				sReq := req.(resource.ReadRequest)
-				diagInfo = sReq.State.GetAttribute(ctx, path.Root("project_id"), &projectID)
-			case resource.DeleteRequest:
-				sReq := req.(resource.DeleteRequest)
-				diagInfo = sReq.State.GetAttribute(ctx, path.Root("project_id"), &projectID)
+		case resource.CreateRequest:
+			pReq := req.(resource.CreateRequest)
+			diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("project_id"), &projectID)
+		case resource.UpdateRequest:
+			pReq := req.(resource.UpdateRequest)
+			diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("project_id"), &projectID)
+		case resource.ReadRequest:
+			sReq := req.(resource.ReadRequest)
+			diagInfo = sReq.State.GetAttribute(ctx, path.Root("project_id"), &projectID)
+		case resource.DeleteRequest:
+			sReq := req.(resource.DeleteRequest)
+			diagInfo = sReq.State.GetAttribute(ctx, path.Root("project_id"), &projectID)
 		}
 		diags.Append(diagInfo...)
 		if diags.HasError() {
@@ -300,18 +300,18 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 			var v types.String
 			var diagInfo diag.Diagnostics
 			switch req.(type) {
-				case resource.CreateRequest:
-					pReq := req.(resource.CreateRequest)
-					diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("m[1:]"), &v)
-				case resource.UpdateRequest:
-					pReq := req.(resource.UpdateRequest)
-					diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("m[1:]"), &v)
-				case resource.ReadRequest:
-					sReq := req.(resource.ReadRequest)
-					diagInfo = sReq.State.GetAttribute(ctx, path.Root("m[1:]"), &v)
-				case resource.DeleteRequest:
-					sReq := req.(resource.DeleteRequest)
-					diagInfo = sReq.State.GetAttribute(ctx, path.Root("m[1:]"), &v)
+			case resource.CreateRequest:
+				pReq := req.(resource.CreateRequest)
+				diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("m[1:]"), &v)
+			case resource.UpdateRequest:
+				pReq := req.(resource.UpdateRequest)
+				diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("m[1:]"), &v)
+			case resource.ReadRequest:
+				sReq := req.(resource.ReadRequest)
+				diagInfo = sReq.State.GetAttribute(ctx, path.Root("m[1:]"), &v)
+			case resource.DeleteRequest:
+				sReq := req.(resource.DeleteRequest)
+				diagInfo = sReq.State.GetAttribute(ctx, path.Root("m[1:]"), &v)
 			}
 			diags.Append(diagInfo...)
 			if !diags.HasError() {
@@ -327,18 +327,18 @@ func BuildReplacementFunc(ctx context.Context, re *regexp.Regexp, req interface{
 			var v types.String
 			var diagInfo diag.Diagnostics
 			switch req.(type) {
-				case resource.CreateRequest:
-					pReq := req.(resource.CreateRequest)
-					diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("m"), &v)
-				case resource.UpdateRequest:
-					pReq := req.(resource.UpdateRequest)
-					diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("m"), &v)
-				case resource.ReadRequest:
-					sReq := req.(resource.ReadRequest)
-					diagInfo = sReq.State.GetAttribute(ctx, path.Root("m"), &v)
-				case resource.DeleteRequest:
-					sReq := req.(resource.DeleteRequest)
-					diagInfo = sReq.State.GetAttribute(ctx, path.Root("m"), &v)
+			case resource.CreateRequest:
+				pReq := req.(resource.CreateRequest)
+				diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("m"), &v)
+			case resource.UpdateRequest:
+				pReq := req.(resource.UpdateRequest)
+				diagInfo = pReq.Plan.GetAttribute(ctx, path.Root("m"), &v)
+			case resource.ReadRequest:
+				sReq := req.(resource.ReadRequest)
+				diagInfo = sReq.State.GetAttribute(ctx, path.Root("m"), &v)
+			case resource.DeleteRequest:
+				sReq := req.(resource.DeleteRequest)
+				diagInfo = sReq.State.GetAttribute(ctx, path.Root("m"), &v)
 			}
 			diags.Append(diagInfo...)
 			if !diags.HasError() {
