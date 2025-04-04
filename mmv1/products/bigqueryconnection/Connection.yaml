@@ -238,21 +238,20 @@ properties:
             type: String
             description: Password for database.
             exactly_one_of:
-              - 'passwordWo'
+              - 'cloud_sql.0.credential.0.passwordWo'
             sensitive: true
           - name: 'passwordWo'
             type: String
             description: Write-Only password for database.
             exactly_one_of:
-              - 'password'
+              - 'cloud_sql.0.credential.0.password'
             write_only: true
           - name: 'passwordWoVersion'
             type: String
-            custom_flatten: 'templates/terraform/custom_flatten/bigquery_connection_password_wo_version_flatten.go.tmpl'
             description: Write-Only version of password for database.
             immutable: true
             required_with:
-              - 'passwordWo'
+              - 'cloud_sql.0.credential.0.passwordWo'
 
       - name: 'type'
         type: Enum

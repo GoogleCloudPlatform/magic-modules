@@ -15,6 +15,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 		map[string]interface{}{
 			"username": d.Get("cloud_sql.0.credential.0.username"),
 			"password": d.Get("cloud_sql.0.credential.0.password"),
+			"password_wo_version": d.Get("cloud_sql.0.credential.0.password_wo_version"),
 		},
 	}
 }
