@@ -14,6 +14,8 @@
 ---
 name: 'FolderNotificationConfig'
 api_resource_type_kind: NotificationConfig
+api_variant_patterns:
+  - 'folders/{folder}/locations/{location}/notificationConfigs/{notificationConfig}'
 description:
   This is a continuous export that exports findings to a Pub/Sub topic.
 references:
