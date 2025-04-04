@@ -13,6 +13,8 @@
 
 ---
 name: 'TargetSite'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/collections/{collection}/dataStores/{dataStore}/siteSearchEngine/targetSites/{targetSite}'
 description: |
   TargetSite represents a URI pattern that the users want to confine their
   search.
