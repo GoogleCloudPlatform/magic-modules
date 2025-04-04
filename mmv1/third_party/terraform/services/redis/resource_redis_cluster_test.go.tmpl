@@ -2,13 +2,21 @@ package redis_test
 
 import (
 {{- if ne $.TargetVersionName "ga" }}
-	"fmt"
 	"strings"
+	"os/exec"
 {{ end }}
+	"fmt"
+	"log"
 	"testing"
+	"time"
+	"strings"
+
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/services/redis"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 {{- if ne $.TargetVersionName "ga" }}
 func TestAccRedisCluster_createUpdateClusterWithNodeType(t *testing.T) {
@@ -284,9 +292,9 @@ func TestAccRedisCluster_automatedBackupConfig(t *testing.T) {
 				Config: testAccRedisCluster_automatedBackupConfig(context),
 			},
 			{
-				ResourceName:       "google_redis_cluster.cluster_abc",
-				ImportState:        true,
-				ImportStateVerify:  true,
+				ResourceName:      "google_redis_cluster.cluster_abc",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccRedisCluster_automatedBackupConfigWithout(context),
@@ -316,7 +324,7 @@ resource "google_redis_cluster" "cluster_abc" {
    }
   }
 
-}	
+}   
 `, context)
 }
 
@@ -328,79 +336,147 @@ resource "google_redis_cluster" "cluster_abc" {
   region                         = "us-central1"
   deletion_protection_enabled    = false 
   
-}	
+}   
 `, context)
 }
 
-
-func TestAccRedisCluster_gcsSource(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccRedisCluster_gcsSource(context),
-			},
-			{
-				ResourceName:       "google_redis_cluster.cluster_gbs",
-				ImportState:        true,
-				ImportStateVerify:  true,
-			},
-			{
-				Config: testAccRedisCluster_gcsSourceWithout(context),
-			},
-			{
-				ResourceName:      "google_redis_cluster.cluster_gbs",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-
-func testAccRedisCluster_gcsSource(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_redis_cluster" "cluster_gbs" {
-  name                           = "tf-test-redis-gbs-%{random_suffix}"
-  shard_count                    = 1
-  region                         = "us-central1"
-  deletion_protection_enabled    = false
-  gcs_source {
-    uirs = ["gs://bucket1/object1"]
-  }
-
-}	
-`, context)
-}
-
-func testAccRedisCluster_gcsSourceWithout(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_redis_cluster" "cluster_gbs" {
-  name                           = "tf-test-redis-gbs-%{random_suffix}"
-  shard_count                    = 1
-  region                         = "us-central1"
-  deletion_protection_enabled    = false
-  gcs_backup_source {
-    uirs = [""]
-  }
-
-}	
-`, context)
-}
-
+// Validate that Import managedBackupSource can be used to create the cluster
 func TestAccRedisCluster_managedBackupSource(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
+		"back_up":       "back_me_up",
+	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRedisCluster_managedBackupSourceSetup(context),
+				Check: resource.ComposeTestCheckFunc(
+					// Create an on-demand backup
+					testAccCheckRedisClusterOnDemandBackup(t, "google_redis_cluster.cluster_mbs_main", context["back_up"].(string)),
+				),
+			},
+			{
+				ResourceName:      "google_redis_cluster.cluster_mbs_main",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccRedisCluster_managedBackupSourceImport(context),
+			},
+		},
+	})
+}
+
+func testAccRedisCluster_managedBackupSourceSetup(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_redis_cluster" "cluster_mbs_main" {
+  name                           = "tf-test-mbs-main-%{random_suffix}"
+  shard_count                    = 1
+  region                         = "us-central1"
+  deletion_protection_enabled    = false
+}
+`, context)
+}
+
+func testAccRedisCluster_managedBackupSourceImport(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_redis_cluster" "cluster_mbs_main" {
+  name                           = "tf-test-mbs-main-%{random_suffix}"
+  shard_count                    = 1
+  region                         = "us-central1"
+  deletion_protection_enabled    = false
+}
+
+resource "google_redis_cluster" "cluster_mb_copy" {
+  name                           = "tf-test-mbs-copy-%{random_suffix}"
+  shard_count                    = 1
+  region                         = "us-central1"
+  deletion_protection_enabled    = false
+   managed_backup_source {
+    backup                       = join("", [google_redis_cluster.cluster_mbs_main.backup_collection , "/backups/%{back_up}"])
+  }
+
+}   
+`, context)
+}
+
+// testAccCheckRedisClusterOnDemandBackup creates an on-demand backup for a Redis Cluster
+// and verifies that the backup operation was successful.
+func testAccCheckRedisClusterOnDemandBackup(t *testing.T, resourceName string, backupId string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Resource not found: %s", resourceName)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set for Redis cluster")
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+
+		// Extract the cluster name, project, and region from the resource
+		project, err := acctest.GetTestProject(rs.Primary, config)
+		if err != nil {
+			return err
+		}
+
+		region := rs.Primary.Attributes["region"]
+		name := rs.Primary.Attributes["name"]
+
+		// Construct the backup request
+		backupRequest := map[string]interface{}{
+			"backupId": backupId,
+		}
+
+		// Make the API call to create an on-demand backup
+		url := fmt.Sprintf("https://redis.googleapis.com/v1/projects/%s/locations/%s/clusters/%s:backup", project, region, name)
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    url,
+			UserAgent: config.UserAgent,
+			Body:      backupRequest,
+		})
+
+		// Wait for the operation to complete
+		err = redis.RedisOperationWaitTime(
+			config, res, project, "Creating Redis Cluster Backup", config.UserAgent,
+			time.Minute*20)
+
+		if err != nil {
+			return fmt.Errorf("Error creating on-demand backup for Redis cluster %s: %s", name, err)
+		}
+
+		// Check if the operation was successful
+		if res == nil {
+			return fmt.Errorf("Empty response when creating on-demand backup for Redis cluster %s", name)
+		}
+
+		// The API returns a long-running operation, we could wait for it to complete
+		// but for simplicity, we'll just check that the API call was successful
+
+		return nil
+	}
+}
+
+// Validate that Import gcsSource can be used to create the cluster
+func TestAccRedisCluster_gcsSource(t *testing.T) {
+	t.Parallel()
+	randomSuffix := acctest.RandString(t, 10)
+	// Will be populated by testAccCheckRedisClusterExportBackup
+	context := map[string]interface{}{
+		"random_suffix": randomSuffix,
+		"back_up":       "export_backup",
+		"gcs_bucket":    fmt.Sprintf("tf-test-redis-backup-%s", randomSuffix),
+		"export_file":   "",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -409,64 +485,282 @@ func TestAccRedisCluster_managedBackupSource(t *testing.T) {
 		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRedisCluster_managedBackupSource(context),
+				Config: testAccRedisCluster_gcsSourceSetup(context),
+				Check: resource.ComposeTestCheckFunc(
+					// Create an on-demand backup
+					testAccCheckRedisClusterOnDemandBackup(t, "google_redis_cluster.cluster_gbs_main", context["back_up"].(string)),
+					// Export the backup to GCS and extract the actual backup file name
+					testAccCheckRedisClusterExportBackup(t, "google_redis_cluster.cluster_gbs_main", context["back_up"].(string), context["gcs_bucket"].(string), "redis-export-file", &context),
+				),
 			},
 			{
-				ResourceName:       "google_redis_cluster.cluster_mbs",
-				ImportState:        true,
-				ImportStateVerify:  true,
-			},
-			{
-				Config: testAccRedisCluster_managedBackupSourceWithout(context),
-			},
-			{
-				ResourceName:      "google_redis_cluster.cluster_mbs",
+				ResourceName:      "google_redis_cluster.cluster_gbs_main",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config: testAccRedisCluster_gcsSource(t, context),
 			},
 		},
 	})
 }
 
-
-func testAccRedisCluster_managedBackupSource(context map[string]interface{}) string {
+func testAccRedisCluster_gcsSourceSetup(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_redis_cluster" "cluster_mbs" {
-  name                           = "tf-test-redis-mbs-%{random_suffix}"
-  shard_count                    = 1
-  region                         = "us-central1"
-  deletion_protection_enabled    = false
-   managed_backup_source {
-    backup = "projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backupId}"
-  }
-
-}
-
-resource "google_redis_cluster" "cluster_mbs_prime" {
-  name                           = "tf-test-redis-mbs-%{random_suffix}"
+resource "google_redis_cluster" "cluster_gbs_main" {
+  name                           = "tf-test-gbs-main-%{random_suffix}"
   shard_count                    = 1
   region                         = "us-central1"
   deletion_protection_enabled    = false
 }
 
+# Create a GCS bucket for exporting Redis backups
+resource "google_storage_bucket" "redis_backup_bucket" {
+  name                        = "tf-test-redis-backup-%{random_suffix}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+# Grant the Redis service account permission to access the bucket
+# The Memorystore service account has the format:
+# service-{project_number}@cloud-redis.iam.gserviceaccount.com
+data "google_project" "project" {}
+
+resource "google_storage_bucket_iam_member" "redis_backup_writer" {
+  bucket = google_storage_bucket.redis_backup_bucket.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:service-${data.google_project.project.number}@cloud-redis.iam.gserviceaccount.com"
+}
 
 `, context)
 }
 
-func testAccRedisCluster_managedBackupSourceWithout(context map[string]interface{}) string {
+// testAccCheckRedisClusterListExportBackups(t, &context)
+
+func testAccRedisCluster_gcsSource(t *testing.T, context map[string]interface{}) string {
+	// Use the export filename from the context
+	context["gcs_uri"] = fmt.Sprintf("gs://%s/export_backup/%s", context["gcs_bucket"], context["export_file"])
+	log.Printf("[DEBUG] FULL PATH URI %s ", context["gcs_uri"])
+
 	return acctest.Nprintf(`
-resource "google_redis_cluster" "cluster_mbs" {
-  name                           = "tf-test-redis-mbs-%{random_suffix}"
+resource "google_redis_cluster" "cluster_gbs_main" {
+  name                           = "tf-test-gbs-main-%{random_suffix}"
   shard_count                    = 1
   region                         = "us-central1"
   deletion_protection_enabled    = false
-   managed_backup_source {
-    backup = "projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backupId}"
-  }
+}
 
-}	
+# Reference the bucket created in the setup
+resource "google_storage_bucket" "redis_backup_bucket" {
+  name                        = "tf-test-redis-backup-%{random_suffix}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy               = true
+}
+
+# Grant the Redis service account permission to access the bucket
+data "google_project" "project" {}
+
+resource "google_storage_bucket_iam_member" "redis_backup_writer" {
+  bucket = google_storage_bucket.redis_backup_bucket.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:service-${data.google_project.project.number}@cloud-redis.iam.gserviceaccount.com"
+}
+
+# Create a Redis cluster that imports from the GCS bucket
+resource "google_redis_cluster" "cluster_gbs" {
+  name                           = "tf-test-gbs-copy-%{random_suffix}"
+  shard_count                    = 1
+  region                         = "us-central1"
+  deletion_protection_enabled    = false
+  gcs_source {
+    uris                         = ["%{gcs_uri}"]
+  }
+  depends_on                     = [google_storage_bucket_iam_member.redis_backup_writer]
+}
 `, context)
 }
+
+// testAccCheckRedisClusterExportBackup exports a Redis Cluster backup to a GCS destination,
+// verifies that the export operation was successful, and extracts the actual backup file name.
+// The extracted file name is saved to the context parameter.
+func testAccCheckRedisClusterExportBackup(t *testing.T, resourceName string, backupId string, gcsDestination string, exportFilename string, context *map[string]interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		log.Printf("[DEBUG] Starting Redis Cluster backup export for resource %s, backup %s to %s", resourceName, backupId, gcsDestination)
+
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Resource not found: %s", resourceName)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set for Redis cluster")
+		}
+
+		log.Printf("[DEBUG] Resource state: %#v", rs.Primary)
+
+		config := acctest.GoogleProviderConfig(t)
+
+		// Extract the cluster name, project, and region from the resource
+		project, err := acctest.GetTestProject(rs.Primary, config)
+		if err != nil {
+			return err
+		}
+
+		region := rs.Primary.Attributes["region"]
+		name := rs.Primary.Attributes["name"]
+
+		log.Printf("[DEBUG] Exporting backup for cluster: project=%s, region=%s, name=%s", project, region, name)
+
+		// Step 1: Find the backup collection ID for this cluster
+		// First, list all backup collections in this region
+		listCollectionsUrl := fmt.Sprintf("https://redis.googleapis.com/v1/projects/%s/locations/%s/backupCollections",
+			project, region)
+
+		log.Printf("[DEBUG] Listing backup collections URL: %s", listCollectionsUrl)
+
+		collectionsRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   project,
+			RawURL:    listCollectionsUrl,
+			UserAgent: config.UserAgent,
+		})
+
+		if err != nil {
+			log.Printf("[ERROR] Error listing backup collections: %s", err)
+			return fmt.Errorf("Error listing backup collections: %s", err)
+		}
+
+		log.Printf("[DEBUG] Backup collections response: %#v", collectionsRes)
+
+		// Find the backup collection that belongs to our cluster
+		backupCollectionId := ""
+		if collections, ok := collectionsRes["backupCollections"].([]interface{}); ok {
+			log.Printf("[DEBUG] Found %d backup collections", len(collections))
+			for i, collection := range collections {
+				if collectionMap, ok := collection.(map[string]interface{}); ok {
+					// The backup collection name format is projects/{project}/locations/{location}/backupCollections/{backupCollection}
+					cluster := collectionMap["cluster"].(string)
+					log.Printf("[DEBUG] CLuster %d Long name: %s", i, cluster)
+
+					parts := strings.Split(cluster, "/")
+					cluster_name := parts[len(parts)-1]
+
+					log.Printf("[DEBUG] CLuster %d name: %s-", i, cluster_name)
+					log.Printf("[DEBUG] Provided Cluster Name  name: %s-", name)
+
+					if strings.Contains(cluster_name, name) {
+						collection_id_long := collectionMap["name"].(string)
+						parts := strings.Split(collection_id_long, "/")
+						backupCollectionId = parts[len(parts)-1]
+						log.Printf("[DEBUG] Found collection ID: %s for cluster %s ", backupCollectionId, cluster_name)
+						break
+					}
+
+				}
+			}
+
+		} else {
+			log.Printf("[DEBUG] No 'backupCollections' field found in response or it's not a slice")
+		}
+
+		if backupCollectionId == "" {
+			return fmt.Errorf("Could not find backup collection for cluster %s", name)
+		}
+
+		exportRequest := map[string]interface{}{
+			"gcsBucket": gcsDestination,
+		}
+
+		log.Printf("[DEBUG] Export request: %#v", exportRequest)
+
+		exportUrl := fmt.Sprintf("https://redis.googleapis.com/v1/projects/%s/locations/%s/backupCollections/%s/backups/%s:export",
+			project, region, backupCollectionId, backupId)
+
+		log.Printf("[DEBUG] Export URL: %s", exportUrl)
+
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   project,
+			RawURL:    exportUrl,
+			UserAgent: config.UserAgent,
+			Body:      exportRequest,
+		})
+
+		if err != nil {
+			log.Printf("[ERROR] Error initiating backup export: %s", err)
+			return fmt.Errorf("Error initiating backup export: %s", err)
+		}
+
+		log.Printf("[DEBUG] Export response: %#v", res)
+
+		// Wait for the export operation to complete
+		log.Printf("[DEBUG] Waiting for export operation to complete")
+		err = redis.RedisOperationWaitTime(
+			config, res, project, "Exporting Redis Cluster Backup", config.UserAgent,
+			time.Minute*20)
+
+		if err != nil {
+			log.Printf("[ERROR] Error during backup export operation: %s", err)
+			return fmt.Errorf("Error during backup export operation: %s", err)
+		}
+
+		// Get the operation details to extract the backup file name
+		if opName, ok := res["name"].(string); ok {
+			log.Printf("[DEBUG] Getting operation details for %s", opName)
+			opUrl := fmt.Sprintf("https://redis.googleapis.com/v1/%s", opName)
+
+			opRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				Project:   project,
+				RawURL:    opUrl,
+				UserAgent: config.UserAgent,
+			})
+
+			if err != nil {
+				log.Printf("[ERROR] Error getting operation details: %s", err)
+				return fmt.Errorf("Error getting operation details: %s", err)
+			}
+
+			log.Printf("[DEBUG] Operation details: %#v", opRes)
+
+			// Extract the fileName from the response
+			if response, ok := opRes["response"].(map[string]interface{}); ok {
+				if backupFiles, ok := response["backupFiles"].([]interface{}); ok && len(backupFiles) > 0 {
+					if backupFile, ok := backupFiles[0].(map[string]interface{}); ok {
+						if fileName, ok := backupFile["fileName"].(string); ok {
+							log.Printf("[DEBUG] Extracted backup file name: %s", fileName)
+
+							// Store the fileName in the context map
+							log.Printf("[DEBUG] Extracted backup file name: %s", fileName)
+
+							// Update the context directly with the file name
+							(*context)["export_file"] = fileName
+							log.Printf("[DEBUG] Saved fileName %s to context", fileName)
+
+							log.Printf("[DEBUG] Successfully exported backup %s to %s/%s (actual file: %s)",
+								backupId, gcsDestination, exportFilename, fileName)
+							return nil
+						}
+					}
+				}
+			}
+
+			log.Printf("[WARN] Could not extract backup file name from operation response")
+		}
+
+		// If we couldn't extract the file name, just log success with the provided filename
+		log.Printf("[DEBUG] Successfully exported backup %s to %s/%s", backupId, gcsDestination, exportFilename)
+		log.Printf("[DEBUG] Saved fileName %s to context", context)
+
+		return nil
+	}
+}
+
 
 {{- if ne $.TargetVersionName "ga" }}
 // Validate that persistence is updated for the cluster
@@ -968,6 +1262,59 @@ func createRedisClusterResourceConfig(params *ClusterParams, isSecondaryCluster 
 
 	crossClusterReplicationConfigBlock := ``
 	if isSecondaryCluster {
+		tfClusterResourceName = "test_secondary"
+		clusterName = params.secondaryClusterName
+		dependsOnBlock = dependsOnBlock + ", google_redis_cluster.test"
+
+		// Construct cross_cluster_replication_config block
+		pcBlock := ``
+		scsBlock := ``
+		if params.ccrRole == "SECONDARY" {
+			pcBlock = fmt.Sprintf(`
+			primary_cluster {
+				cluster = google_redis_cluster.test.id
+			}
+			`)
+		} else if params.ccrRole == "PRIMARY" {
+			scsBlock = fmt.Sprintf(`
+			secondary_clusters {
+				cluster = google_redis_cluster.test.id
+			}
+			`)
+		}
+		crossClusterReplicationConfigBlock = fmt.Sprintf(`
+		cross_cluster_replication_config {
+			cluster_role = "%s"
+			%s
+			%s
+		}
+		`, params.ccrRole, pcBlock, scsBlock)
+	}
+
+	return fmt.Sprintf(`
+		resource "google_redis_cluster" "%s" {
+		provider = google-beta
+		name           = "%s"
+		replica_count = %d
+		shard_count = %d
+		node_type = "%s"
+		deletion_protection_enabled = %v
+		region         = "us-central1"
+		psc_configs {
+				network = google_compute_network.producer_net.id
+		}
+		redis_configs = {
+			%s
+		}
+		%s
+		%s
+		%s
+		%s
+		depends_on = [
+				%s
+			]
+		}
+		`,
 		tfClusterResourceName = "test_secondary"
 		clusterName = params.secondaryClusterName
 		dependsOnBlock = dependsOnBlock + ", google_redis_cluster.test"

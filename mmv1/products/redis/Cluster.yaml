@@ -258,6 +258,7 @@ properties:
     type: NestedObject
     description: | 
      Backups stored in Cloud Storage buckets. The Cloud Storage buckets need to be the same region as the clusters.
+    # custom_flatten: 'templates/terraform/custom_flatten/redis_cluster_gcs_source_uirs.go.tmpl'
     properties:
       - name: 'uris'
         type: Array
@@ -269,6 +270,8 @@ properties:
   - name: 'managedBackupSource'
     type: NestedObject
     description: "Backups that generated and managed by memorystore."
+    custom_flatten: 'templates/terraform/custom_flatten/redis_cluster_managed_backup_source.go.tmpl'
+    immutable: true
     properties:
       - name: 'backup'
         type: String
@@ -276,6 +279,13 @@ properties:
          Example: //redis.googleapis.com/projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backup} A shorter version (without the prefix) of the backup name is also supported, 
          like projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backupId} In this case, it assumes the backup is under redis.googleapis.com.
         required: true
+        immutable: true
+  - name: 'backupCollection'
+    type: String
+    description: | 
+     The backup collection full resource name. 
+     Example: projects/{project}/locations/{location}/backupCollections/{collection}
+    output: true
   - name: 'automatedBackupConfig'
     type: NestedObject
     description: "The automated backup config for a instance."
