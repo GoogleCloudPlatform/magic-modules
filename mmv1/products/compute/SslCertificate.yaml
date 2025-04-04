@@ -105,8 +105,6 @@ properties:
     description: 'The write-only version of the certificate.'
     immutable: true
     ignore_read: true
-    required_with:
-      - 'certificateWo'
   - name: 'creationTimestamp'
     type: Time
     description: 'Creation timestamp in RFC3339 text format.'
@@ -164,5 +162,3 @@ properties:
     description: 'The write-only version of the private key.'
     immutable: true
     ignore_read: true
-    required_with:
-      - 'privateKeyWo'
