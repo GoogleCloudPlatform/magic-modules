@@ -87,6 +87,7 @@ properties:
       The certificate in PEM format.
       The certificate chain must be no greater than 5 certs long.
       The chain must include at least one intermediate cert.
+    immutable: true
     at_least_one_of:
       - 'certificate'
       - 'certificateWo'
