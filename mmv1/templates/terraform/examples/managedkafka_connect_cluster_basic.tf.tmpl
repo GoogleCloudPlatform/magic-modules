@@ -35,6 +35,7 @@ resource "google_compute_subnetwork" "mkc_secondary_subnet" {
   ip_cidr_range = "10.3.0.0/16"
   region        = "us-central1"
   network       = "default"
+  depends_on = [google_project_service.compute]
 
   provider = google-beta
 }
