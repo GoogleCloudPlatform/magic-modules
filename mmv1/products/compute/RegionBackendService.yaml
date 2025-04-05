@@ -18,6 +18,9 @@ kind: 'compute#backendService'
 description: |
   A Region Backend Service defines a regionally-scoped group of virtual
   machines that will serve traffic for load balancing.
+
+  ~> **Note:** Recreating a `google_compute_region_backend_service` that references other dependent resources like `google_compute_instance_group` will give a `resourceInUseByAnotherResource` error, when decreasing the number of other dependent resources.
+  Use `lifecycle.create_before_destroy` on the dependent resources to avoid this type of error as shown in the Dynamic Backend Count example.
 references:
   guides:
     'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
@@ -128,6 +131,14 @@ examples:
       default_neg_name: 'network-endpoint'
       health_check_name: 'rbs-health-check'
       network_name: 'network'
+  - name: 'region_backend_service_dynamic_backend_count'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'region-service'
+      health_check_name: 'health-check'
+      instance_group_name: 'instance_group'
+      network_name: 'network'
+    exclude_test: true
 parameters:
   - name: 'region'
     type: ResourceRef
