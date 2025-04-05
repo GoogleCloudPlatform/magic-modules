@@ -187,3 +187,14 @@ properties:
         output: true
         description: |
           The `StorageIntelligence` edition that is applicable for the resource.
+  - name: 'trialConfig'
+    output: true
+    description: |
+      The trial configuration of the Storage Intelligence resource.
+    type: NestedObject
+    properties:
+      - name: expireTime
+        type: String
+        output: true
+        description: |
+          The time at which the trial expires.
