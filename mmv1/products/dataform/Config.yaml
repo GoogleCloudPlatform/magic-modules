@@ -1,0 +1,62 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Config'
+description: |-
+  A singleton resource represents a Dataform configuration for project location.
+min_version: 'beta'
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dataform/docs/'
+  api: 'https://cloud.google.com/dataform/reference/rest/v1beta1/projects.locations'
+
+base_url: 'projects/{{project}}/locations/{{region}}/config'
+self_link: 'projects/{{project}}/locations/{{region}}/config'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/config'
+exclude_delete: true
+custom_code:
+  test_check_destroy: templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+examples:
+  - name: 'dataform_config'
+    primary_resource_id: 'config'
+    min_version: 'beta'
+    vars:
+      project_name: 'project-1'
+      key_ring_name: 'example-key-ring'
+      crypto_key_name: 'example-crypto-key-name'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+parameters:
+  - name: 'region'
+    type: String
+    required: true
+    min_version: 'beta'
+    description: 'A reference to the region'
+    immutable: true
+    url_param_only: true
+properties:
+  - name: 'defaultKmsKeyName'
+    type: String
+    min_version: beta
+    description:
+      Optional. The customer managed KMS key that will be used as default for encryption of user data.
