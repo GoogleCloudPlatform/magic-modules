@@ -19,8 +19,8 @@ description: |
   A Region Backend Service defines a regionally-scoped group of virtual
   machines that will serve traffic for load balancing.
 
-  ~> **Note:** Recreating a `google_compute_region_backend_service` that references other dependant resources like `google_compute_instance_group` will give a `resourceInUseByAnotherResource` error.
-  Use `lifecycle.create_before_destroy` on this other resources to avoid this type of error as shown in the Dynamic Backend Count example.
+  ~> **Note:** Recreating a `google_compute_region_backend_service` that references other dependent resources like `google_compute_instance_group` will give a `resourceInUseByAnotherResource` error, when decreasing the number of other dependent resources.
+  Use `lifecycle.create_before_destroy` on the dependent resources to avoid this type of error as shown in the Dynamic Backend Count example.
 references:
   guides:
     'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
