@@ -78,10 +78,11 @@ func (s testFailureRateLabel) String() string {
 type testFailure struct {
 	TestName             string
 	AffectedResource     string
-	ErrorMessage         string
 	DebugLogLink         string
+	GaErrorMessageLink   string
 	GaFailureRate        string
 	GaFailureRateLabel   testFailureRateLabel
+	BetaErrorMessage     string
 	BetaFailureRate      string
 	BetaFailureRateLabel testFailureRateLabel
 }
@@ -253,7 +254,7 @@ func getTestInfoList(pVersion provider.Version, date time.Time, gcs Cloudstorage
 	lookupDate := date.Format("2006-01-02")
 
 	testStatusFileName := fmt.Sprintf("%s-%s.json", lookupDate, pVersion.String())
-	objectName := pVersion.String() + "/" + testStatusFileName
+	objectName := "test-metadata/" + pVersion.String() + "/" + testStatusFileName
 
 	var testInfoList []TestInfo
 	err := gcs.DownloadFile(NightlyDataBucket, objectName, testStatusFileName)
