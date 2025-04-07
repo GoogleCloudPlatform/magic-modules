@@ -282,7 +282,7 @@ properties:
                     type: Array
                     description: |
                       The email recipients who will receive the DataQualityScan results report.
-                    item_type: 
+                    item_type:
                       type: String
               - name: 'scoreThresholdTrigger'
                 type: NestedObject
