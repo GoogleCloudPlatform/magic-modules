@@ -184,6 +184,19 @@ properties:
             0% of its available Capacity. Valid range is [0.0,1.0].
           send_empty_value: true
           default_value: 1.0
+        - name: 'preference'
+          type: Enum
+          description: |
+            This field indicates whether this backend should be fully utilized before sending traffic to backends
+            with default preference. The possible values are:
+              - PREFERRED: Backends with this preference level will be filled up to their capacity limits first,
+                based on RTT.
+              - DEFAULT: If preferred backends don't have enough capacity, backends in this layer would be used and
+                traffic would be assigned based on the load balancing algorithm you use. This is the default
+          enum_values:
+            - 'PREFERRED'
+            - 'DEFAULT'
+          default_value: 'DEFAULT'
         - name: 'description'
           type: String
           description: |
@@ -503,6 +516,13 @@ properties:
     description: 'Cloud CDN configuration for this BackendService.'
     default_from_api: true
     properties:
+      - name: 'requestCoalescing'
+        type: Boolean
+        description: |
+          If true then Cloud CDN will combine multiple concurrent cache fill requests into a small number of requests
+          to the origin.
+        default_from_api: true
+        send_empty_value: true
       - name: 'cacheKeyPolicy'
         type: NestedObject
         description: 'The CacheKeyPolicy for this CdnPolicy.'
@@ -1515,3 +1535,25 @@ properties:
           Reference to the BackendAuthenticationConfig resource from the networksecurity.googleapis.com namespace.
           Can be used in authenticating TLS connections to the backend, as specified by the authenticationMode field.
           Can only be specified if authenticationMode is not NONE.
+  - name: 'maxStreamDuration'
+    type: NestedObject
+    description: |
+      Specifies the default maximum duration (timeout) for streams to this service. Duration is computed from the
+      beginning of the stream until the response has been completely processed, including all retries. A stream that
+      does not complete in this duration is closed.
+      If not specified, there will be no timeout limit, i.e. the maximum duration is infinite.
+      This value can be overridden in the PathMatcher configuration of the UrlMap that references this backend service.
+      This field is only allowed when the loadBalancingScheme of the backend service is INTERNAL_SELF_MANAGED.
+    properties:
+      - name: 'seconds'
+        type: String
+        description: |
+          Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive. (int64 format)
+        required: true
+      - name: 'nanos'
+        type: Integer
+        description: |
+          Span of time that's a fraction of a second at nanosecond resolution.
+          Durations less than one second are represented with a 0 seconds field and a positive nanos field.
+          Must be from 0 to 999,999,999 inclusive.
+
