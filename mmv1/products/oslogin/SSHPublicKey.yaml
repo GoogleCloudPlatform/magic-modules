@@ -13,6 +13,7 @@
 
 ---
 name: 'SSHPublicKey'
+api_resource_type_kind: SshPublicKey
 kind: 'user#sshPublicKeys'
 description: |
   The SSH public key information associated with a Google account.
@@ -34,7 +35,7 @@ timeouts:
   delete_minutes: 20
 custom_code:
   pre_create: 'templates/terraform/pre_create/os_login_ssh_public_key.go.tmpl'
-  post_create: 'templates/terraform/post_create/sshkeyfingerprint.go.tmpl'
+  post_create: 'templates/terraform/post_create/sshkeyfingerprint_and_sleep.go.tmpl'
 # Skip sweeper since due to URL containing user ID
 exclude_sweeper: true
 examples:

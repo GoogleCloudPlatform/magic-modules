@@ -36,15 +36,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 iam_policy:
   allowed_iam_role: 'roles/compute.admin'
@@ -62,13 +55,14 @@ examples:
   - name: 'compute_machine_image_kms'
     primary_resource_id: 'image'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-image%s", context["random_suffix"])'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
       vm_name: 'my-vm'
       image_name: 'my-image'
       key_name: 'key'
       keyring_name: 'keyring'
-    test_vars_overrides:
-      'policyChanged': 'acctest.BootstrapPSARole(t, "service-", "compute-system", "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
 parameters:
 properties:
   - name: 'name'

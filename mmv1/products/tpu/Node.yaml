@@ -34,18 +34,15 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/tpu_node.tmpl'
 custom_diff:
   - 'tpuNodeCustomizeDiff'
+sweeper:
+  url_substitutions:
+    - zone: "us-central1-b"
 examples:
   - name: 'tpu_node_basic'
     primary_resource_id: 'tpu'

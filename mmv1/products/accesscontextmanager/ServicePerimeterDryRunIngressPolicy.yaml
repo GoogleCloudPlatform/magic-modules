@@ -13,6 +13,7 @@
 
 ---
 name: 'ServicePerimeterDryRunIngressPolicy'
+api_resource_type_kind: ServicePerimeter
 description: |
   Manage a single IngressPolicy in the spec (dry-run) configuration for a service perimeter.
   IngressPolicies match requests based on ingressFrom and ingressTo stanzas. For an ingress policy to match,
@@ -27,8 +28,12 @@ description: |
   ~> **Note:** By default, updates to this resource will remove the IngressPolicy from the
   from the perimeter and add it back in a non-atomic manner. To ensure that the new IngressPolicy
   is added before the old one is removed, add a `lifecycle` block with `create_before_destroy = true` to this resource.
+  ~> **Note:** If this resource is used alongside a `google_access_context_manager_service_perimeter` resource,
+  the service perimeter resource must have a `lifecycle` block with `ignore_changes = [spec[0].ingress_policies]` so
+  they don't fight over which ingress rules should be in the policy.
 references:
   guides:
+    'Guide to Ingress and Egress Rules': 'https://cloud.google.com/vpc-service-controls/docs/ingress-egress-rules'
   api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/accessPolicies.servicePerimeters#ingresspolicy'
 docs:
 id_format: '{{perimeter}}'
@@ -39,7 +44,7 @@ create_verb: 'PATCH'
 update_mask: true
 delete_verb: 'PATCH'
 immutable: true
-mutex: '{{perimeter}}'
+mutex: '{{access_policy_id}}'
 import_format:
   - '{{perimeter}}'
 exclude_import: true
@@ -53,17 +58,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 identity:
   - ingressFrom
   - ingressTo
+  - title
 nested_query:
   keys:
     - spec
@@ -71,15 +71,25 @@ nested_query:
   is_list_of_ids: false
   modify_by_patch: true
 custom_code:
-  pre_create: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
+  constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
+  encoder: 'templates/terraform/encoders/access_context_manager_service_perimeter_dry_run_egress_policy.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/access_context_manager_service_perimeter_dry_run_ingress_policy.go.tmpl'
   pre_update: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
-  pre_delete: 'templates/terraform/pre_create/access_context_manager_dry_run_resource.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/access_context_manager_service_perimeter_dry_run_ingress_policy.go.tmpl'
+  post_read: 'templates/terraform/post_read/access_context_manager_service_perimeter_resource.go.tmpl'
   custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_ingress_policy.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 exclude_sweeper: true
+# Exclude tests for examples becauses tests run in parallel and will conflict when trying to create the org level access policy
 examples:
   - name: 'access_context_manager_service_perimeter_dry_run_ingress_policy'
+    vars:
+      ingress_policy_title: 'ingress policy title'
+    exclude_test: true
+  - name: 'access_context_manager_service_perimeter_dry_run_ingress_policy_granular_controls'
+    vars:
+      ingress_policy_title: 'granular controls ingress policy title'
     exclude_test: true
 parameters:
   - name: 'perimeter'
@@ -107,14 +117,19 @@ properties:
           - 'ANY_IDENTITY'
           - 'ANY_USER_ACCOUNT'
           - 'ANY_SERVICE_ACCOUNT'
+        diff_suppress_func: AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc
       - name: 'identities'
         type: Array
         description: |
-          A list of identities that are allowed access through this ingress policy.
-          Should be in the format of email address. The email address should represent
-          individual user or service account only.
+          Identities can be an individual user, service account, Google group,
+          or third-party identity. For third-party identity, only single identities
+          are supported and other identity types are not supported.The v1 identities
+          that have the prefix user, group and serviceAccount in
+          https://cloud.google.com/iam/docs/principal-identifiers#v1 are supported.
         item_type:
           type: String
+        diff_suppress_func: AccessContextManagerServicePerimeterDryRunIngressPolicyIngressFromIdentitiesDiffSuppressFunc
+        custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_ingress_policy_from_identities_custom_flatten.go.tmpl
       - name: 'sources'
         type: Array
         description: |
@@ -159,8 +174,18 @@ properties:
           then this `IngressTo` rule will authorize access to all
           resources inside the perimeter, provided that the request
           also matches the `operations` field.
+        custom_flatten: templates/terraform/custom_flatten/accesscontextmanager_ingress_policy_resources_custom_flatten.go.tmpl
+        diff_suppress_func: AccessContextManagerServicePerimeterDryRunIngressPolicyIngressToResourcesDiffSuppressFunc
         item_type:
           type: String
+      - name: 'roles'
+        type: Array
+        item_type:
+          type: String
+        description: |
+          A list of IAM roles that represent the set of operations that the sources
+          specified in the corresponding `IngressFrom`
+          are allowed to perform.
       - name: 'operations'
         type: Array
         description: |
@@ -196,3 +221,18 @@ properties:
                     description: |
                       Value for permission should be a valid Cloud IAM permission for the
                       corresponding `serviceName` in `ApiOperation`.
+  - name: 'title'
+    type: 'string'
+    description: |
+      Human readable title. Must be unique within the perimeter. Does not affect behavior.
+  - name: 'accessPolicyId'
+    type: String
+    description: |
+      The name of the Access Policy this resource belongs to.
+    ignore_read: true
+    output: true
+  - name: 'etag'
+    type: String
+    output: true
+    description: |
+      The perimeter etag is internally used to prevent overwriting the list of policies on PATCH calls. It is retrieved from the same GET perimeter API call that's used to get the current list of policies. The policy defined in this resource is added or removed from that list, and then this etag is sent with the PATCH call along with the updated policies.

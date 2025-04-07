@@ -13,6 +13,7 @@
 
 ---
 name: 'KeyRingImportJob'
+api_resource_type_kind: ImportJob
 description: |
   A `KeyRingImportJob` can be used to create `CryptoKeys` and `CryptoKeyVersions` using pre-existing
   key material, generated outside of Cloud KMS. A `KeyRingImportJob` expires 3 days after it is created.

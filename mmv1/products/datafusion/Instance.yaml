@@ -33,14 +33,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
@@ -51,6 +45,9 @@ iam_policy:
 custom_code:
   constants: 'templates/terraform/constants/data_fusion_instance_option.go.tmpl'
   pre_update: 'templates/terraform/pre_update/datafusion_instance_update.go.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
 examples:
   - name: 'data_fusion_instance_basic'
     primary_resource_id: 'basic_instance'
@@ -376,3 +373,12 @@ properties:
           enum_values:
             - 'ENABLED'
             - 'DISABLED'
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      A map of resource manager tags.
+      Resource manager tag keys and values have the same definition as resource manager tags.
+      Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_value_id}.
+      The field is ignored (both PUT & PATCH) when empty.
+    immutable: true
+    ignore_read: true

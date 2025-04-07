@@ -13,14 +13,11 @@
 
 ---
 name: 'OrganizationNotificationConfig'
-description: |
-  A Cloud Security Command Center (Cloud SCC) notification configs. A
-  notification config is a Cloud SCC resource that contains the
-  configuration to send notifications for create/update events of
-  findings, assets and etc.
-  ~> **Note:** In order to use Cloud SCC resources, your organization must be enrolled
-  in [SCC Standard/Premium](https://cloud.google.com/security-command-center/docs/quickstart-security-command-center).
-  Without doing so, you may run into errors during resource creation.
+api_resource_type_kind: NotificationConfig
+api_variant_patterns:
+  - 'organizations/{organization}/locations/{location}/notificationConfigs/{notificationConfig}'
+description:
+  This is a continuous export that exports findings to a Pub/Sub topic.
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/security-command-center/docs'
@@ -31,6 +28,8 @@ self_link: '{{name}}'
 create_url: 'organizations/{{organization}}/locations/{{location}}/notificationConfigs?configId={{config_id}}'
 update_verb: 'PATCH'
 update_mask: true
+import_format:
+  - '{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20

@@ -37,14 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'datastream_connection_profile_basic'
@@ -57,8 +51,12 @@ examples:
       private_connection_id: 'my-connection'
       connection_profile_id: 'my-profile'
       network_name: 'my-network'
+      subnetwork_name: 'my-subnetwork'
       database_instance_name: 'my-instance'
       deletion_protection: 'true'
+      nat_vm_name: 'nat-vm'
+      nat_vm_ip_name: 'nat-vm-ip'
+      ingress_firewall_name: 'ingress-rule'
     test_vars_overrides:
       'deletion_protection': 'false'
     oics_vars_overrides:
@@ -66,6 +64,8 @@ examples:
     external_providers: ["random", "time"]
     # Random provider
     skip_vcr: true
+    ignore_read_extra:
+      - 'postgresql_profile.0.password'
   - name: 'datastream_connection_profile_full'
     primary_resource_id: 'default'
     vars:
@@ -97,6 +97,15 @@ examples:
     test_vars_overrides:
       'deletion_protection': 'false'
     exclude_test: true
+  - name: 'datastream_connection_profile_salesforce'
+    primary_resource_id: 'default'
+    vars:
+      source_connection_profile_id: 'source-profile'
+    exclude_test: true
+  - name: 'datastream_connection_profile_postgres_secret_manager'
+    primary_resource_id: 'default'
+    vars:
+      source_connection_profile_id: 'source-profile'
 parameters:
   - name: 'connectionProfileId'
     type: String
@@ -143,6 +152,7 @@ properties:
       - 'bigquery_profile'
       - 'postgresql_profile'
       - 'sql_server_profile'
+      - 'salesforce_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -163,9 +173,12 @@ properties:
         type: String
         description: |
           Password for the Oracle connection.
-        required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_oracle_profile_password.go.tmpl'
+      - name: 'secretManagerStoredPassword'
+        type: String
+        description: |
+          A reference to a Secret Manager resource name storing the user's password.
       - name: 'databaseService'
         type: String
         description: |
@@ -185,6 +198,7 @@ properties:
       - 'bigquery_profile'
       - 'postgresql_profile'
       - 'sql_server_profile'
+      - 'salesforce_profile'
     properties:
       - name: 'bucket'
         type: String
@@ -206,6 +220,7 @@ properties:
       - 'bigquery_profile'
       - 'postgresql_profile'
       - 'sql_server_profile'
+      - 'salesforce_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -226,9 +241,12 @@ properties:
         type: String
         description: |
           Password for the MySQL connection.
-        required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_password.go.tmpl'
+      - name: 'secretManagerStoredPassword'
+        type: String
+        description: |
+          A reference to a Secret Manager resource name storing the user's password.
       - name: 'sslConfig'
         type: NestedObject
         description: |
@@ -289,6 +307,7 @@ properties:
       - 'bigquery_profile'
       - 'postgresql_profile'
       - 'sql_server_profile'
+      - 'salesforce_profile'
     properties:
       []
   - name: 'postgresqlProfile'
@@ -302,6 +321,7 @@ properties:
       - 'bigquery_profile'
       - 'postgresql_profile'
       - 'sql_server_profile'
+      - 'salesforce_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -322,14 +342,84 @@ properties:
         type: String
         description: |
           Password for the PostgreSQL connection.
-        required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_postgresql_profile_password.go.tmpl'
+      - name: 'secretManagerStoredPassword'
+        type: String
+        description: |
+          A reference to a Secret Manager resource name storing the user's password.
       - name: 'database'
         type: String
         description: |
           Database for the PostgreSQL connection.
         required: true
+  - name: 'salesforceProfile'
+    min_version: beta
+    type: NestedObject
+    description: |
+      Salesforce profile.
+    exactly_one_of:
+      - 'oracle_profile'
+      - 'gcs_profile'
+      - 'mysql_profile'
+      - 'bigquery_profile'
+      - 'postgresql_profile'
+      - 'sql_server_profile'
+      - 'salesforce_profile'
+    properties:
+      - name: 'domain'
+        type: String
+        description: |
+          Domain for the Salesforce Org.
+        required: true
+      - name: 'userCredentials'
+        type: NestedObject
+        description: |
+          User credentials to use for Salesforce authentication.
+        exactly_one_of:
+          - 'user_credentials'
+          - 'oauth2_client_credentials'
+        properties:
+          - name: 'username'
+            type: String
+            description: |
+              Username to use for authentication.
+          - name: 'password'
+            type: String
+            description: |
+              Password of the user.
+          - name: 'securityToken'
+            type: String
+            description: |
+              Security token of the user.
+          - name: 'secretManagerStoredPassword'
+            type: String
+            description: |
+              A reference to a Secret Manager resource name storing the user's password.
+          - name: 'secretManagerStoredSecurityToken'
+            type: String
+            description: |
+              A reference to a Secret Manager resource name storing the user's security token.
+      - name: 'oauth2ClientCredentials'
+        type: NestedObject
+        description: |
+          OAuth credentials to use for Salesforce authentication.
+        exactly_one_of:
+          - 'user_credentials'
+          - 'oauth2_client_credentials'
+        properties:
+          - name: 'client_id'
+            type: String
+            description: |
+              Client ID to use for authentication.
+          - name: 'clientSecret'
+            type: String
+            description: |
+              Client secret to use for authentication.
+          - name: 'secretManagerStoredClientSecret'
+            type: String
+            description: |
+              A reference to a Secret Manager resource name storing the client secret.
   - name: 'sqlServerProfile'
     type: NestedObject
     description: |
@@ -341,6 +431,7 @@ properties:
       - 'bigquery_profile'
       - 'postgresql_profile'
       - 'sql_server_profile'
+      - 'salesforce_profile'
     properties:
       - name: 'hostname'
         type: String
@@ -361,9 +452,12 @@ properties:
         type: String
         description: |
           Password for the SQL Server connection.
-        required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_sql_server_profile_password.go.tmpl'
+      - name: 'secretManagerStoredPassword'
+        type: String
+        description: |
+          A reference to a Secret Manager resource name storing the user's password.
       - name: 'database'
         type: String
         description: |
@@ -404,7 +498,6 @@ properties:
         type: String
         description: |
           SSH private key.
-        immutable: true
         sensitive: true
         conflicts:
           - forward_ssh_connectivity.0.password

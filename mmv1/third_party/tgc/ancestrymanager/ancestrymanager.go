@@ -11,7 +11,7 @@ import (
 	crmv3 "google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/storage/v1"
 
-	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources"
+	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 
@@ -364,7 +364,7 @@ func (m *manager) getProjectFromResource(d tpgresource.TerraformResourceData, co
 		m.errorLogger.Warn(fmt.Sprintf("Failed to retrieve project_id for %s from cai resource", cai.Name))
 
 		bucketField, ok := d.GetOk("bucket")
-		if ok {
+		if ok && m.storageClient != nil {
 			bucket := bucketField.(string)
 			resp, err := m.storageClient.Buckets.Get(bucket).Do()
 			if err == nil {

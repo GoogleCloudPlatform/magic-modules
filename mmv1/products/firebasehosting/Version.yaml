@@ -25,7 +25,7 @@ base_url: 'sites/{{site_id}}/versions'
 self_link: 'sites/{{site_id}}/versions/{{version_id}}'
 create_url: 'sites/{{site_id}}/versions'
 exclude_delete: true
- # not updatable
+# not updatable
 immutable: true
 import_format:
   - 'sites/{{site_id}}/versions/{{version_id}}'
@@ -35,11 +35,24 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  decoder: 'templates/terraform/decoders/firebasehosting_version.go.tmpl'
   post_create: 'templates/terraform/post_create/firebasehosting_version_immediate_finalize.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'firebasehosting_version_redirect'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      site_id: 'site-id'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+  - name: 'firebasehosting_version_headers'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      site_id: 'site-id'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+  - name: 'firebasehosting_version_headers_regex'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
@@ -100,7 +113,7 @@ properties:
     type: String
     description: The ID for the version as in sites/SITE_ID/versions/VERSION_ID
     min_version: 'beta'
-    ignore_read: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
     output: true
   - name: 'config'
     type: NestedObject
@@ -126,45 +139,45 @@ properties:
               description:
                 The user-supplied glob to match against the request URL path.
               min_version: 'beta'
-              exactly_one_of:
-                - 'glob'
-                - 'regex'
+              # exactly_one_of:
+              #   - 'glob'
+              #   - 'regex'
             - name: 'regex'
               type: String
               description:
                 The user-supplied RE2 regular expression to match against the
                 request URL path.
               min_version: 'beta'
-              exactly_one_of:
-                - 'glob'
-                - 'regex'
+              # exactly_one_of:
+              #   - 'glob'
+              #   - 'regex'
             - name: 'path'
               type: String
               description:
                 The URL path to rewrite the request to.
               min_version: 'beta'
-              exactly_one_of:
-                - 'path'
-                - 'function'
-                - 'run'
+              # exactly_one_of:
+              #   - 'path'
+              #   - 'function'
+              #   - 'run'
             - name: 'function'
               type: String
               description:
                 The function to proxy requests to. Must match the exported
                 function name exactly.
               min_version: 'beta'
-              exactly_one_of:
-                - 'path'
-                - 'function'
-                - 'run'
+              # exactly_one_of:
+              #   - 'path'
+              #   - 'function'
+              #   - 'run'
             - name: 'run'
               type: NestedObject
               description: The request will be forwarded to Cloud Run.
               min_version: 'beta'
-              exactly_one_of:
-                - 'path'
-                - 'function'
-                - 'run'
+              # exactly_one_of:
+              #   - 'path'
+              #   - 'function'
+              #   - 'run'
               properties:
                 - name: 'serviceId'
                   type: String
@@ -194,18 +207,18 @@ properties:
               description:
                 The user-supplied glob to match against the request URL path.
               min_version: 'beta'
-              exactly_one_of:
-                - 'glob'
-                - 'regex'
+              # exactly_one_of:
+              #   - 'glob'
+              #   - 'regex'
             - name: 'regex'
               type: String
               description:
                 The user-supplied RE2 regular expression to match against the
                 request URL path.
               min_version: 'beta'
-              exactly_one_of:
-                - 'glob'
-                - 'regex'
+              # exactly_one_of:
+              #   - 'glob'
+              #   - 'regex'
             - name: 'statusCode'
               type: Integer
               description:
@@ -228,4 +241,35 @@ properties:
                 }
                 ```
               min_version: 'beta'
+              required: true
+      - name: 'headers'
+        type: Array
+        description: |
+         An array of objects, where each object specifies a URL pattern that, if matched to the request URL path,
+         triggers Hosting to apply the specified custom response headers.
+        item_type:
+          description: |
+            A Header specifies a URL pattern that, if matched to the request URL path, triggers Hosting
+            to apply the specified custom response headers.
+          type: NestedObject
+          properties:
+            - name: 'glob'
+              type: String
+              description:
+                The user-supplied glob to match against the request URL path.
+              # exactly_one_of:
+              #   - 'glob'
+              #   - 'regex'
+            - name: 'regex'
+              type: String
+              description:
+                The user-supplied RE2 regular expression to match against the
+                request URL path.
+              # exactly_one_of:
+              #   - 'glob'
+              #   - 'regex'
+            - name: 'headers'
+              type: KeyValuePairs
+              description: |
+                The additional headers to add to the response. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
               required: true

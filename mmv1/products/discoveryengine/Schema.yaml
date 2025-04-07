@@ -13,6 +13,8 @@
 
 ---
 name: 'Schema'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/collections/{collection}/dataStores/{dataStore}/schemas/{schema}'
 description: |
   Schema defines the structure and layout of a type of document data.
 references:
@@ -31,24 +33,18 @@ timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
-autogen_async: true
+autogen_async: false
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'discoveryengine_schema_basic'

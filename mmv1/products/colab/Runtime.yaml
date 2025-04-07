@@ -1,0 +1,132 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+name: 'Runtime'
+api_resource_type_kind: NotebookRuntime
+description: |
+  'A runtime is a Google-provisioned virtual machine (VM) that can run the code in your notebook (IPYNB file).'
+
+references:
+  guides:
+    'Create a runtime': 'https://cloud.google.com/colab/docs/create-runtime'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.notebookRuntimes'
+base_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimes'
+self_link: 'projects/{{project}}/locations/{{location}}/notebookRuntimes/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimes:assign?notebook_runtime_id={{name}}'
+async:
+  type: 'OpAsync'
+  operation:
+    full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
+custom_code:
+  encoder: 'templates/terraform/encoders/colab_runtime.go.tmpl'
+  post_create: 'templates/terraform/post_create/colab_runtime.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/colab_runtime.go.tmpl'
+  constants: 'templates/terraform/constants/colab_runtime.go.tmpl'
+examples:
+  - name: 'colab_runtime_basic'
+    primary_resource_id: 'runtime'
+    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])'
+    region_override: 'us-central1'
+    vars:
+      runtime_name: 'colab-runtime'
+  - name: 'colab_runtime_stopped'
+    primary_resource_id: 'runtime'
+    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])'
+    region_override: 'us-central1'
+    vars:
+      runtime_name: 'colab-runtime'
+    ignore_read_extra:
+      - 'desired_state'
+  - name: 'colab_runtime_full'
+    primary_resource_id: 'runtime'
+    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime%s", context["random_suffix"])'
+    region_override: 'us-central1'
+    vars:
+      runtime_name: 'colab-runtime'
+      key_name: 'my-crypto-key'
+    test_vars_overrides:
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    ignore_read_extra:
+      - 'desired_state'
+      - 'auto_upgrade'
+virtual_fields:
+  - name: 'desired_state'
+    description: |
+      Desired state of the Colab Runtime. Set this field to `RUNNING` to start the runtime, and `STOPPED` to stop it.
+    type: String
+    default_value: "RUNNING"
+  - name: 'auto_upgrade'
+    description: |
+      Triggers an upgrade anytime the runtime is started if it is upgradable.
+    type: Boolean
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    url_param_only: true
+    description: 'The location for the resource: https://cloud.google.com/colab/docs/locations'
+    immutable: true
+  - name: 'name'
+    type: String
+    url_param_only: true
+    description: 'The resource name of the Runtime'
+    immutable: true
+properties:
+  - name: notebookRuntimeTemplateRef
+    type: NestedObject
+    description: |
+     'Runtime specific information used for NotebookRuntime creation.'
+    properties:
+      - name: 'notebookRuntimeTemplate'
+        type: String
+        immutable: true
+        required: true
+        description: 'The resource name of the NotebookRuntimeTemplate based on which a NotebookRuntime will be created.'
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: 'runtimeUser'
+    type: String
+    required: true
+    immutable: true
+    description: 'The user email of the NotebookRuntime.'
+  - name: 'displayName'
+    type: String
+    immutable: true
+    description:
+      Required. The display name of the Runtime.
+    required: true
+  - name: description
+    type: String
+    immutable: true
+    description: 'The description of the Runtime.'
+  - name: state
+    type: String
+    description: |
+      Output only. The state of the runtime.
+    output: true
+  - name: isUpgradable
+    type: Boolean
+    description: |
+      Output only. Checks if the NotebookRuntime is upgradable.
+    output: true
+  - name: expirationTime
+    type: String
+    description: |
+      Output only. Timestamp when this NotebookRuntime will be expired.
+    output: true
+  - name: notebookRuntimeType
+    type: String
+    description: |
+      Output only. The type of the notebook runtime.
+    output: true

@@ -49,7 +49,7 @@ func TestFormatVCRCassettesUpdateReplaying(t *testing.T) {
 					"#################################",
 					"",
 					"#################################",
-					"Errors occurred during REPLAYING mode: some error.",
+					"Errors occurred during REPLAYING mode.",
 					"#################################",
 				},
 				"\n",
@@ -401,7 +401,7 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 			ctlr := source.NewController("gopath", "hashicorp", "token", rnr)
 			vt, err := vcr.NewTester(map[string]string{
 				"SA_KEY": "sa_key",
-			}, "", "ci-vcr-cassettes", rnr)
+			}, "ci-vcr-cassettes", "", rnr)
 			if err != nil {
 				t.Fatalf("Failed to create new tester: %v", err)
 			}

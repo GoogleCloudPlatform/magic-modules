@@ -38,14 +38,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/spanner_instance.go.tmpl'
   encoder: 'templates/terraform/encoders/spanner_instance.go.tmpl'
@@ -60,10 +54,6 @@ examples:
       # Randomness
     skip_vcr: true
   - name: 'spanner_instance_processing_units'
-    primary_resource_id: 'example'
-      # Randomness
-    skip_vcr: true
-  - name: 'spanner_instance_with_autoscaling'
     primary_resource_id: 'example'
       # Randomness
     skip_vcr: true
@@ -228,6 +218,40 @@ properties:
               should be trying to achieve for the instance.
               This number is on a scale from 0 (no utilization) to 100 (full utilization).
 
+      - name: 'asymmetricAutoscalingOptions'
+        type: Array
+        description: |
+          Asymmetric autoscaling options for specific replicas.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'replicaSelection'
+              type: NestedObject
+              required: true
+              properties:
+                - name: 'location'
+                  type: String
+                  required: true
+                  description: |
+                    The location of the replica to apply asymmetric autoscaling options.
+            - name: 'overrides'
+              type: NestedObject
+              required: true
+              properties:
+                - name: 'autoscalingLimits'
+                  type: NestedObject
+                  required: true
+                  properties:
+                    - name: 'minNodes'
+                      type: Integer
+                      required: true
+                      description: |
+                        The minimum number of nodes for this specific replica.
+                    - name: 'maxNodes'
+                      type: Integer
+                      required: true
+                      description: |
+                        The maximum number of nodes for this specific replica.
   - name: 'edition'
     type: Enum
     description: |
@@ -238,3 +262,13 @@ properties:
       - 'STANDARD'
       - 'ENTERPRISE'
       - 'ENTERPRISE_PLUS'
+  - name: 'defaultBackupScheduleType'
+    type: Enum
+    description: |
+      Controls the default backup behavior for new databases within the instance.
+      Note that `AUTOMATIC` is not permitted for free instances, as backups and backup schedules are not allowed for free instances.
+      if unset or NONE, no default backup schedule will be created for new databases within the instance.
+    default_from_api: true
+    enum_values:
+      - 'NONE'
+      - 'AUTOMATIC'

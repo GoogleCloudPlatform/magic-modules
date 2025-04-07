@@ -57,7 +57,7 @@ func TestExecMembershipChecker_GooglerFlow(t *testing.T) {
 		userType:           github.GooglerUserType,
 		calledMethods:      make(map[string][][]any),
 		requestedReviewers: []github.User{github.User{Login: "reviewer1"}},
-		previousReviewers:  []github.User{github.User{Login: github.GetRandomReviewer()}, github.User{Login: "reviewer3"}},
+		previousReviewers:  []github.User{github.User{Login: github.GetRandomReviewer(nil)}, github.User{Login: "reviewer3"}},
 	}
 	cb := &mockCloudBuild{
 		calledMethods: make(map[string][][]any),
@@ -83,8 +83,8 @@ func TestExecMembershipChecker_AmbiguousUserFlow(t *testing.T) {
 		},
 		userType:           github.CommunityUserType,
 		calledMethods:      make(map[string][][]any),
-		requestedReviewers: []github.User{github.User{Login: github.GetRandomReviewer()}},
-		previousReviewers:  []github.User{github.User{Login: github.GetRandomReviewer()}, github.User{Login: "reviewer3"}},
+		requestedReviewers: []github.User{github.User{Login: github.GetRandomReviewer(nil)}},
+		previousReviewers:  []github.User{github.User{Login: github.GetRandomReviewer(nil)}, github.User{Login: "reviewer3"}},
 	}
 	cb := &mockCloudBuild{
 		calledMethods: make(map[string][][]any),

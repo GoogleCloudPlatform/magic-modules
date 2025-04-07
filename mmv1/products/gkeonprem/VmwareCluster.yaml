@@ -34,17 +34,13 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'gkeonprem#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 taint_resource_on_failed_create: true
+sweeper:
+  url_substitutions:
+    - region: "us-west1"
 examples:
   - name: 'gkeonprem_vmware_cluster_basic'
     primary_resource_id: 'cluster-basic'
@@ -558,6 +554,9 @@ properties:
   - name: 'enableControlPlaneV2'
     type: Boolean
     description: Enable control plane V2. Default to false.
+  - name: 'enableAdvancedCluster'
+    type: Boolean
+    description: Enable advanced cluster. Default to false.
   - name: 'disableBundledIngress'
     type: Boolean
     description: Disable bundled ingress.
@@ -652,26 +651,33 @@ properties:
     description: |
       VmwareVCenterConfig specifies vCenter config for the user cluster.
       Inherited from the admin cluster.
+    default_from_api: true
     properties:
       - name: 'resourcePool'
         type: String
         description: The name of the vCenter resource pool for the user cluster.
+        default_from_api: true
       - name: 'datastore'
         type: String
         description: The name of the vCenter datastore for the user cluster.
+        default_from_api: true
       - name: 'datacenter'
         type: String
         description: The name of the vCenter datacenter for the user cluster.
+        default_from_api: true
       - name: 'cluster'
         type: String
         description: The name of the vCenter cluster for the user cluster.
+        default_from_api: true
       - name: 'folder'
         type: String
         description: The name of the vCenter folder for the user cluster.
+        default_from_api: true
       - name: 'caCertData'
         type: String
         description:
           Contains the vCenter CA certificate public key for SSL verification.
+        default_from_api: true
       - name: 'address'
         type: String
         description: The vCenter IP address.
@@ -679,6 +685,7 @@ properties:
       - name: 'storagePolicyName'
         type: String
         description: The name of the vCenter storage policy for the user cluster.
+        default_from_api: true
   - name: 'status'
     type: NestedObject
     description: ResourceStatus representing detailed cluster state.

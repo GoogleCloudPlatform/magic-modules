@@ -1,0 +1,30 @@
+resource "google_datastream_stream" "default" {
+    display_name = "Salesforce to BigQuery"
+    location     = "us-central1"
+    stream_id    = "{{index $.Vars "stream_id"}}"
+
+    source_config {
+        source_connection_profile = "{{index $.Vars "source_connection_profile_id"}}"
+        salesforce_source_config {
+            polling_interval = "600s"
+            include_objects {
+              objects {
+                  object_name = "ObjectName"
+              }
+        }
+    }
+
+    destination_config {
+        destination_connection_profile = "{{index $.Vars "destination_connection_profile_id"}}"
+        bigquery_destination_config {
+            data_freshness = "900s"
+            source_hierarchy_datasets {
+                dataset_template {
+                    location = "us-central1"
+                }
+            }
+        }
+    }
+
+    backfill_none {}
+}

@@ -1,0 +1,139 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RegionalParameter'
+api_resource_type_kind: Parameter
+description: |
+  A Regional Parameter is a logical regional parameter.
+references:
+  guides:
+  api: 'https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/parameters'
+self_link: 'projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/parameters?parameter_id={{parameter_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+examples:
+  - name: 'regional_parameter_basic'
+    primary_resource_id: 'regional-parameter-basic'
+    vars:
+      parameter_id: 'regional_parameter'
+  - name: 'regional_parameter_with_format'
+    primary_resource_id: 'regional-parameter-with-format'
+    vars:
+      parameter_id: 'regional_parameter'
+  - name: 'regional_parameter_with_labels'
+    primary_resource_id: 'regional-parameter-with-labels'
+    vars:
+      parameter_id: 'regional_parameter'
+  - name: 'regional_parameter_with_kms_key'
+    primary_resource_id: 'regional-parameter-with-kms-key'
+    vars:
+      parameter_id: 'regional_parameter'
+      kms_key: 'kms-key'
+    test_vars_overrides:
+      'kms_key': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location of the regional parameter. eg us-central1
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'parameterId'
+    type: String
+    description: |
+      This must be unique within the project.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the regional Parameter. Format:
+      `projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}`
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |
+      The time at which the regional Parameter was created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The time at which the regional Parameter was updated.
+    output: true
+  - name: 'policyMember'
+    type: NestedObject
+    description: |
+      An object containing a unique resource identity tied to the regional parameter.
+    output: true
+    properties:
+      - name: 'iamPolicyUidPrincipal'
+        type: String
+        description: |
+          IAM policy binding member referring to a Google Cloud resource by system-assigned unique identifier. If
+          a resource is deleted and recreated with the same name, the binding will not be applicable to the new
+          resource. Format:
+          `principal://parametermanager.googleapis.com/projects/{{project}}/uid/locations/{{location}}/parameters/{{uid}}`
+        output: true
+      - name: 'iamPolicyNamePrincipal'
+        type: String
+        description: |
+          IAM policy binding member referring to a Google Cloud resource by user-assigned name. If a resource is
+          deleted and recreated with the same name, the binding will be applicable to the new resource. Format:
+          `principal://parametermanager.googleapis.com/projects/{{project}}/name/locations/{{location}}/parameters/{{parameter_id}}`
+        output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      The labels assigned to this regional Parameter.
+
+      Label keys must be between 1 and 63 characters long, have a UTF-8 encoding of maximum 128 bytes,
+      and must conform to the following PCRE regular expression: [\p{Ll}\p{Lo}][\p{Ll}\p{Lo}\p{N}_-]{0,62}
+
+      Label values must be between 0 and 63 characters long, have a UTF-8 encoding of maximum 128 bytes,
+      and must conform to the following PCRE regular expression: [\p{Ll}\p{Lo}\p{N}_-]{0,63}
+
+      No more than 64 labels can be assigned to a given resource.
+
+      An object containing a list of "key": value pairs. Example:
+      { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+  - name: 'format'
+    type: Enum
+    description: |
+      The format type of the regional parameter.
+    default_value: 'UNFORMATTED'
+    immutable: true
+    enum_values:
+      - 'UNFORMATTED'
+      - 'YAML'
+      - 'JSON'
+  - name: 'kmsKey'
+    type: String
+    description: |
+      The resource name of the Cloud KMS CryptoKey used to encrypt regional parameter version payload. Format
+      `projects/{{project}}/locations/{{location}}/keyRings/{{key_ring}}/cryptoKeys/{{crypto_key}}`

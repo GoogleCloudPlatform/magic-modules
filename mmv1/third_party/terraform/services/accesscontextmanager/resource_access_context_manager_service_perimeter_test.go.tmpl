@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
+	"github.com/hashicorp/terraform-provider-google/google/services/accesscontextmanager"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -37,6 +38,7 @@ func testAccAccessContextManagerServicePerimeter_basicTest(t *testing.T) {
 
 func testAccAccessContextManagerServicePerimeter_updateTest(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
+	projectNumber := envvar.GetTestProjectNumberFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -60,7 +62,7 @@ func testAccAccessContextManagerServicePerimeter_updateTest(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccAccessContextManagerServicePerimeter_updateAllowed(org, "my policy", "level", "perimeter"),
+				Config: testAccAccessContextManagerServicePerimeter_updateAllowed(org, "my policy", "level", "perimeter", projectNumber),
 			},
 			{
 				ResourceName:      "google_access_context_manager_service_perimeter.test-access",
@@ -76,7 +78,7 @@ func testAccAccessContextManagerServicePerimeter_updateTest(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccAccessContextManagerServicePerimeter_updateAllowed(org, "my policy", "level", "perimeter"),
+				Config: testAccAccessContextManagerServicePerimeter_updateAllowed(org, "my policy", "level", "perimeter", projectNumber),
 			},
 			{
 				ResourceName:      "google_access_context_manager_service_perimeter.test-access",
@@ -181,7 +183,7 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 `, org, policyTitle, levelTitleName, levelTitleName, perimeterTitleName, perimeterTitleName)
 }
 
-func testAccAccessContextManagerServicePerimeter_updateAllowed(org, policyTitle, levelTitleName, perimeterTitleName string) string {
+func testAccAccessContextManagerServicePerimeter_updateAllowed(org, policyTitle, levelTitleName, perimeterTitleName, projectNumber string) string {
 	return fmt.Sprintf(`
 resource "google_access_context_manager_access_policy" "test-access" {
   parent = "organizations/%s"
@@ -217,6 +219,8 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 		}
 
 		ingress_policies {
+			title = "ingress policy 1"
+
 			ingress_from {
 				sources {
 					access_level = google_access_context_manager_access_level.test-access.name
@@ -252,6 +256,7 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 			}
 		}
 		ingress_policies {
+			title = "ingress policy 2"
 			ingress_from {
 				identities = ["user:test@google.com"]
 			}
@@ -259,13 +264,29 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 				resources = ["*"]
 			}
 		}
+		ingress_policies {
+			title = "ingress policy 3"
+			ingress_from {
+				identities = ["user:test@google.com"]
+			}
+			ingress_to {
+				resources = ["*"]
+				roles = ["roles/bigquery.admin"]
+			}
+		}
 
 		egress_policies {
+			title = "egress policy 1"
 			egress_from {
 				identity_type = "ANY_USER_ACCOUNT"
 				sources {
 					access_level = google_access_context_manager_access_level.test-access.name
 				}
+					
+				sources {
+					resource = "projects/%s"
+				}
+					
 				source_restriction = "SOURCE_RESTRICTION_ENABLED"
 			}
 			egress_to {
@@ -279,11 +300,22 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 			}
 		}
 		egress_policies {
+			title = "egress policy 2"
 			egress_from {
 				identities = ["user:test@google.com"]
 			}
 			egress_to {
 				resources = ["*"]
+			}
+		}
+		egress_policies {
+			title = "egress policy 3"
+			egress_from {
+				identities = ["user:test@google.com"]
+			}
+			egress_to {
+				resources = ["*"]
+				roles = ["roles/bigquery.admin"]
 			}
 		}
   }
@@ -297,6 +329,8 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 		}
 
 		ingress_policies {
+			title = "ingress policy 1"
+
 			ingress_from {
 				sources {
 					access_level = google_access_context_manager_access_level.test-access.name
@@ -332,20 +366,28 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 			}
 		}
 		ingress_policies {
+			title = "ingress policy 2"
 			ingress_from {
 				identities = ["user:test@google.com"]
 			}
 			ingress_to {
 				resources = ["*"]
+				roles = ["roles/bigquery.admin"]
 			}
 		}
 
 		egress_policies {
+			title = "egress policy 1"
 			egress_from {
 				identity_type = "ANY_USER_ACCOUNT"
 				sources {
 					access_level = google_access_context_manager_access_level.test-access.name
 				}
+
+				sources {
+					resource = "projects/%s"
+				}
+					
 				source_restriction = "SOURCE_RESTRICTION_ENABLED"
 			}
 			egress_to {
@@ -359,6 +401,7 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 			}
 		}
 		egress_policies {
+			title = "egress policy 2"
 			egress_from {
 				identities = ["user:test@google.com"]
 			}
@@ -366,9 +409,18 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 				resources = ["*"]
 			}
 		}
+		egress_policies {
+			egress_from {
+				identity_type = "ANY_IDENTITY"
+			}
+			egress_to {
+				resources = ["*"]
+				roles = ["roles/bigquery.admin"]
+			}
+		}
   }
 }
-`, org, policyTitle, levelTitleName, levelTitleName, perimeterTitleName, perimeterTitleName)
+`, org, policyTitle, levelTitleName, levelTitleName, perimeterTitleName, perimeterTitleName, projectNumber, projectNumber)
 }
 
 func testAccAccessContextManagerServicePerimeter_updateDryrun(org, policyTitle, levelTitleName, perimeterTitleName string) string {
@@ -410,3 +462,60 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 `, org, policyTitle, levelTitleName, levelTitleName, perimeterTitleName, perimeterTitleName)
 }
 
+
+type IdentityTypeDiffSuppressFuncDiffSuppressTestCase struct {
+	Name               string
+	AreEqual bool
+	Before         	   string
+	After              string
+}
+
+
+var identityTypeDiffSuppressTestCases = []IdentityTypeDiffSuppressFuncDiffSuppressTestCase{
+	{
+		AreEqual: false,
+		Before: "A",
+		After: "B",
+	},
+	{
+		AreEqual: true,
+		Before: "A",
+		After: "A",
+	},
+	{
+		AreEqual: false,
+		Before: "",
+		After: "A",
+	},
+	{
+		AreEqual: false,
+		Before: "A",
+		After: "",
+	},
+	{
+		AreEqual: true,
+		Before: "",
+		After: "IDENTITY_TYPE_UNSPECIFIED",
+	},
+	{
+		AreEqual: false,
+		Before: "IDENTITY_TYPE_UNSPECIFIED",
+		After: "",
+	},
+}
+
+func TestUnitAccessContextManagerServicePerimeter_identityTypeDiff(t *testing.T) {
+	for _, tc := range identityTypeDiffSuppressTestCases {
+		tc.Test(t)
+	}
+}
+
+
+func (tc *IdentityTypeDiffSuppressFuncDiffSuppressTestCase) Test(t *testing.T) {
+	actual := accesscontextmanager.AccessContextManagerServicePerimeterIdentityTypeDiffSuppressFunc("", tc.Before, tc.After, nil)
+	if actual != tc.AreEqual {
+		t.Errorf(
+			"Unexpected difference found. Before: \"%s\", after: \"%s\", actual: %t, expected: %t",
+			tc.Before, tc.After, actual, tc.AreEqual)
+	}
+}

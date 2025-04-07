@@ -38,10 +38,25 @@ import (
 )
 {{ range $e := $.Res.TestExamples }}
 func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T) {
+	{{- if $e.SkipTest }}
+	t.Skip("{{$e.SkipTest}}")
+	{{- end }}
+
 	{{- if $e.SkipVcr }}
 	acctest.SkipIfVcr(t)
 	{{- end }}
 	t.Parallel()
+
+	{{- if $e.BootstrapIam }}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	{{- range $iam := $e.BootstrapIam }}
+		{
+			Member: "{{$iam.Member}}",
+			Role:   "{{$iam.Role}}",
+		},
+	{{- end}}
+	})
+	{{- end }}
 
 	context := map[string]interface{}{
 	{{- template "EnvVarContext" dict "TestEnvVars" $e.TestEnvVars "HasNewLine" false}}

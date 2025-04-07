@@ -1,0 +1,163 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'MirroringDeploymentGroup'
+description: |-
+  A deployment group aggregates many zonal mirroring backends (deployments)
+  into a single global mirroring service. Consumers can connect this service
+  using an endpoint group.
+references:
+  guides:
+    'Mirroring deployment group overview': 'https://cloud.google.com/network-security-integration/docs/out-of-band/deployment-groups-overview'
+  api: 'https://cloud.google.com/network-security-integration/docs/reference/rest/v1/projects.locations.mirroringDeploymentGroups'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/mirroringDeploymentGroups/{{mirroring_deployment_group_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/mirroringDeploymentGroups'
+self_link: 'projects/{{project}}/locations/{{location}}/mirroringDeploymentGroups/{{mirroring_deployment_group_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/mirroringDeploymentGroups?mirroringDeploymentGroupId={{mirroring_deployment_group_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/mirroringDeploymentGroups/{{mirroring_deployment_group_id}}'
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+sweeper:
+  url_substitutions:
+    - region: "global"
+examples:
+  - name: 'network_security_mirroring_deployment_group_basic'
+    config_path: 'templates/terraform/examples/network_security_mirroring_deployment_group_basic.tf.tmpl'
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'example-network'
+      subnetwork_name: 'example-subnet'
+      deployment_group_id: 'example-dg'
+parameters:
+  - name: 'location'
+    type: String
+    description: |-
+      The cloud location of the deployment group, currently restricted to `global`.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'mirroringDeploymentGroupId'
+    type: String
+    description: |-
+      The ID to use for the new deployment group, which will become the final
+      component of the deployment group's resource name.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      The resource name of this deployment group, for example:
+      `projects/123456789/locations/global/mirroringDeploymentGroups/my-dg`.
+      See https://google.aip.dev/122 for more details.
+    immutable: true
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |-
+      The timestamp when the resource was created.
+      See https://google.aip.dev/148#timestamps.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |-
+      The timestamp when the resource was most recently updated.
+      See https://google.aip.dev/148#timestamps.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |-
+      Labels are key/value pairs that help to organize and filter resources.
+  - name: 'network'
+    type: String
+    description: |-
+      The network that will be used for all child deployments, for example:
+      `projects/{project}/global/networks/{network}`.
+      See https://google.aip.dev/124.
+    required: true
+    immutable: true
+  - name: 'connectedEndpointGroups'
+    type: Array
+    description: |-
+      The list of endpoint groups that are connected to this resource.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: |-
+            The connected endpoint group's resource name, for example:
+            `projects/123456789/locations/global/mirroringEndpointGroups/my-eg`.
+            See https://google.aip.dev/124.
+          output: true
+  - name: 'state'
+    type: String
+    description: |-
+      The current state of the deployment group.
+      See https://google.aip.dev/216.
+      Possible values:
+      STATE_UNSPECIFIED
+      ACTIVE
+      CREATING
+      DELETING
+    output: true
+  - name: 'reconciling'
+    type: Boolean
+    description: |-
+      The current state of the resource does not match the user's intended state,
+      and the system is working to reconcile them. This is part of the normal
+      operation (e.g. adding a new deployment to the group)
+      See https://google.aip.dev/128.
+    output: true
+  - name: description
+    type: String
+    description: |-
+      User-provided description of the deployment group.
+      Used as additional context for the deployment group.
+  - name: locations
+    type: Array
+    is_set: true
+    description: |-
+      The list of locations where the deployment group is present.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: location
+          type: String
+          description: |-
+            The cloud location, e.g. `us-central1-a` or `asia-south1-b`.
+          output: true
+        - name: state
+          type: String
+          description: |-
+            The current state of the association in this location.
+            Possible values:
+            STATE_UNSPECIFIED
+            ACTIVE
+            OUT_OF_SYNC
+          output: true

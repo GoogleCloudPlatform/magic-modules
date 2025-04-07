@@ -13,6 +13,10 @@
 
 ---
 name: 'Contact'
+api_variant_patterns:
+  - 'folders/{folder}/contacts/{contact}'
+  - 'organizations/{organization}/contacts/{contact}'
+  - 'projects/{project}/contacts/{contact}'
 description: |
   A contact that will receive notifications from Google Cloud.
 references:
@@ -38,6 +42,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  post_import: 'templates/terraform/post_import/essential_contacts_contact.go.tmpl'
 examples:
   - name: 'essential_contact'
     primary_resource_id: 'contact'

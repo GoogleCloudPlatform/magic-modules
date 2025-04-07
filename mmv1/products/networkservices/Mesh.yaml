@@ -17,18 +17,17 @@ description: |
   Mesh represents a logical configuration grouping for workload to workload communication within a
   service mesh. Routes that point to mesh dictate how requests are routed within this logical
   mesh boundary.
-min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/traffic-director/docs/reference/network-services/rest/v1beta1/projects.locations.meshes'
 docs:
-base_url: 'projects/{{project}}/locations/global/meshes'
-self_link: 'projects/{{project}}/locations/global/meshes/{{name}}'
-create_url: 'projects/{{project}}/locations/global/meshes?meshId={{name}}'
+base_url: 'projects/{{project}}/locations/{{location}}/meshes'
+self_link: 'projects/{{project}}/locations/{{location}}/meshes/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/meshes?meshId={{name}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
-  - 'projects/{{project}}/locations/global/meshes/{{name}}'
+  - 'projects/{{project}}/locations/{{location}}/meshes/{{name}}'
 timeouts:
   insert_minutes: 30
   update_minutes: 30
@@ -39,36 +38,36 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
+schema_version: 1
+state_upgraders: true
+sweeper:
+  url_substitutions:
+    - region: "global"
 examples:
   - name: 'network_services_mesh_basic'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       resource_name: 'my-mesh'
   - name: 'network_services_mesh_no_port'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       resource_name: 'my-mesh-noport'
+  - name: 'network_services_mesh_location'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-mesh'
 parameters:
   - name: 'name'
     type: String
     description: |
       Short name of the Mesh resource to be created.
-    min_version: 'beta'
     url_param_only: true
     required: true
 properties:
@@ -76,29 +75,24 @@ properties:
     type: String
     description: |
       Server-defined URL of this resource.
-    min_version: 'beta'
     output: true
   - name: 'createTime'
     type: Time
     description: |
       Time the Mesh was created in UTC.
-    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: Time
     description: |
       Time the Mesh was updated in UTC.
-    min_version: 'beta'
     output: true
   - name: 'labels'
     type: KeyValueLabels
     description: Set of label tags associated with the Mesh resource.
-    min_version: 'beta'
   - name: 'description'
     type: String
     description: |
       A free-text description of the resource. Max length 1024 characters.
-    min_version: 'beta'
   - name: 'interceptionPort'
     type: Integer
     description: |
@@ -107,4 +101,12 @@ properties:
       be redirected to this port regardless of its actual ip:port destination. If unset, a port
       '15001' is used as the interception port. This will is applicable only for sidecar proxy
       deployments.
-    min_version: 'beta'
+  - name: 'location'
+    type: String
+    description: |
+      Location (region) of the Mesh resource to be created. Only the value 'global' is currently allowed; defaults to 'global' if omitted.
+    url_param_only: true
+    immutable: true
+    default_value: 'global'
+    validation:
+      regex: '^global$'

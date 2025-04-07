@@ -36,21 +36,13 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/private_connection.go.tmpl'
   post_create: 'templates/terraform/post_create/private_connection.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/private_connection.go.tmpl'
   post_import: 'templates/terraform/post_import/private_connection.go.tmpl'
-# Skipping the sweeper since the resource needs force-deletion
-exclude_sweeper: true
 schema_version: 1
 state_upgraders: true
 examples:

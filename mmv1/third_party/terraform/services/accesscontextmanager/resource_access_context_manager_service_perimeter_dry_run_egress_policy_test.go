@@ -20,13 +20,14 @@ func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basicTest(t *
 	//projects := acctest.BootstrapServicePerimeterProjects(t, 1)
 	policyTitle := acctest.RandString(t, 10)
 	perimeterTitle := "perimeter"
+	projectNumber := envvar.GetTestProjectNumberFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basic(org, policyTitle, perimeterTitle),
+				Config: testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basic(org, policyTitle, perimeterTitle, projectNumber),
 			},
 			{
 				Config: testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_destroy(org, policyTitle, perimeterTitle),
@@ -83,7 +84,7 @@ func testAccCheckAccessContextManagerServicePerimeterDryRunEgressPolicyDestroyPr
 	}
 }
 
-func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basic(org, policyTitle, perimeterTitleName string) string {
+func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_basic(org, policyTitle, perimeterTitleName, projectNumber string) string {
 	return fmt.Sprintf(`
 %s
 
@@ -102,6 +103,7 @@ resource "google_access_context_manager_access_level" "test-access" {
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "test-access1" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
+	title = "egress policy title 1"
 	egress_from {
 		identity_type = "ANY_USER_ACCOUNT"
 	}
@@ -117,6 +119,7 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 
 resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "test-access2" {
 	perimeter = google_access_context_manager_service_perimeter.test-access.name
+	title = "egress policy title 2"
 	egress_from {
 		identity_type = "ANY_USER_ACCOUNT"
 		sources {
@@ -124,10 +127,24 @@ resource "google_access_context_manager_service_perimeter_dry_run_egress_policy"
 		}
 		source_restriction = "SOURCE_RESTRICTION_ENABLED"
 	}
+	egress_to {
+		resources = ["*"]
+		roles = ["roles/bigquery.admin"]
+	}
   	depends_on = [google_access_context_manager_service_perimeter_dry_run_egress_policy.test-access1]
 }
 
-`, testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_destroy(org, policyTitle, perimeterTitleName))
+resource "google_access_context_manager_service_perimeter_dry_run_egress_policy" "test-access3" {
+  perimeter = google_access_context_manager_service_perimeter.test-access.name
+	egress_from {
+		sources {
+			resource = "projects/%s"
+		}
+		source_restriction = "SOURCE_RESTRICTION_ENABLED"
+	}
+}
+
+`, testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_destroy(org, policyTitle, perimeterTitleName), projectNumber)
 }
 
 func testAccAccessContextManagerServicePerimeterDryRunEgressPolicy_destroy(org, policyTitle, perimeterTitleName string) string {

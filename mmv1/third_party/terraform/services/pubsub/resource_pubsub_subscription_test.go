@@ -36,6 +36,30 @@ func TestAccPubsubSubscription_emptyTTL(t *testing.T) {
 	})
 }
 
+func TestAccPubsubSubscription_emptyRetryPolicy(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	subscription := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubSubscription_emptyRetryPolicy(topic, subscription),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscription,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccPubsubSubscription_basic(t *testing.T) {
 	t.Parallel()
 
@@ -183,6 +207,9 @@ func TestAccPubsubSubscriptionBigQuery_update(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscriptionShort, false, ""),
@@ -214,10 +241,24 @@ func TestAccPubsubSubscriptionBigQuery_serviceAccount(t *testing.T) {
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
 
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
+			Role:   "roles/bigquery.dataEditor",
+		},
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
+			Role:   "roles/bigquery.metadataViewer",
+		},
+	})
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscriptionShort, false, "bq-test-sa"),
@@ -307,6 +348,31 @@ func TestAccPubsubSubscriptionCloudStorage_updateAvro(t *testing.T) {
 			},
 			{
 				Config: testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscriptionShort, "pre-", "-suffix", "YYYY-MM-DD/hh_mm_ssZ", 1000, "300s", 1000, "", "avro"),
+			},
+			{
+				ResourceName:      "google_pubsub_subscription.foo",
+				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccPubsubSubscriptionCloudStorage_emptyAvroConfig(t *testing.T) {
+	t.Parallel()
+
+	bucket := fmt.Sprintf("tf-test-bucket-%s", acctest.RandString(t, 10))
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubSubscriptionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscriptionShort, "pre-", "-suffix", "YYYY-MM-DD/hh_mm_ssZ", 1000, "300s", 1000, "", "empty-avro"),
 			},
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
@@ -494,6 +560,22 @@ resource "google_pubsub_subscription" "foo" {
 `, topic, subscription)
 }
 
+func testAccPubsubSubscription_emptyRetryPolicy(topic, subscription string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+}
+
+resource "google_pubsub_subscription" "foo" {
+  name  = "%s"
+  topic = google_pubsub_topic.foo.id
+
+  retry_policy {
+  }
+}
+`, topic, subscription)
+}
+
 func testAccPubsubSubscription_push(topicFoo, saAccount, subscription string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" { }
@@ -633,6 +715,7 @@ resource "google_pubsub_subscription" "foo" {
 func testAccPubsubSubscriptionBigQuery_basic(dataset, table, topic, subscription string, useTableSchema bool, serviceAccountId string) string {
 	serviceAccountEmailField := ""
 	serviceAccountResource := ""
+	tfDependencies := ""
 	if serviceAccountId != "" {
 		serviceAccountResource = fmt.Sprintf(`
 resource "google_service_account" "bq_write_service_account" {
@@ -640,41 +723,35 @@ resource "google_service_account" "bq_write_service_account" {
   display_name = "BQ Write Service Account"
 }
 
-resource "google_project_iam_member" "viewer" {
-	project = data.google_project.project.project_id
-	role   = "roles/bigquery.metadataViewer"
-	member = "serviceAccount:${google_service_account.bq_write_service_account.email}"
+resource "google_project_iam_member" "bigquery_metadata_viewer" {
+  project = data.google_project.project.project_id
+  role    = "roles/bigquery.metadataViewer"
+  member  = "serviceAccount:${google_service_account.bq_write_service_account.email}"
 }
 
-resource "google_project_iam_member" "editor" {
-	project = data.google_project.project.project_id
-	role   = "roles/bigquery.dataEditor"
-	member = "serviceAccount:${google_service_account.bq_write_service_account.email}"
+resource "google_project_iam_member" "bigquery_data_editor" {
+  project = data.google_project.project.project_id
+  role    = "roles/bigquery.dataEditor"
+  member  = "serviceAccount:${google_service_account.bq_write_service_account.email}"
 }`, serviceAccountId)
 		serviceAccountEmailField = "service_account_email = google_service_account.bq_write_service_account.email"
+		tfDependencies = `    google_project_iam_member.bigquery_metadata_viewer,
+    google_project_iam_member.bigquery_data_editor,
+    time_sleep.wait_30_seconds,`
 	} else {
-		serviceAccountResource = fmt.Sprintf(`
-resource "google_project_iam_member" "viewer" {
-	project = data.google_project.project.project_id
-	role   = "roles/bigquery.metadataViewer"
-	member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "editor" {
-	project = data.google_project.project.project_id
-	role   = "roles/bigquery.dataEditor"
-	member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
-}
-	`)
+		tfDependencies = "    time_sleep.wait_30_seconds,"
 	}
-
 	return fmt.Sprintf(`
-data "google_project" "project" { }
+data "google_project" "project" {}
+
+resource "time_sleep" "wait_30_seconds" {
+  create_duration = "30s"
+}
 
 %s
 
 resource "google_bigquery_dataset" "test" {
-	dataset_id = "%s"
+  dataset_id = "%s"
 }
 
 resource "google_bigquery_table" "test" {
@@ -705,15 +782,14 @@ resource "google_pubsub_subscription" "foo" {
   bigquery_config {
     table = "${google_bigquery_table.test.project}.${google_bigquery_table.test.dataset_id}.${google_bigquery_table.test.table_id}"
     use_table_schema = %t
-		%s
+    %s
   }
 
   depends_on = [
-    google_project_iam_member.viewer,
-    google_project_iam_member.editor
+    %s
   ]
 }
-	`, serviceAccountResource, dataset, table, topic, subscription, useTableSchema, serviceAccountEmailField)
+	`, serviceAccountResource, dataset, table, topic, subscription, useTableSchema, serviceAccountEmailField, tfDependencies)
 }
 
 func testAccPubsubSubscriptionCloudStorage_basic(bucket, topic, subscription, filenamePrefix, filenameSuffix, filenameDatetimeFormat string, maxBytes int, maxDuration string, maxMessages int, serviceAccountId, outputFormat string) string {
@@ -779,6 +855,8 @@ resource "google_storage_bucket_iam_member" "admin" {
     use_topic_schema = true
   }
 `
+	} else if outputFormat == "empty-avro" {
+		outputFormatString = `avro_config {}`
 	}
 	return fmt.Sprintf(`
 data "google_project" "project" { }

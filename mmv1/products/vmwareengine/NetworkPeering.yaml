@@ -19,7 +19,7 @@ references:
   guides:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networks/addPeering'
 docs:
-base_url: 'projects/{{project}}/locations/global/networkPeering'
+base_url: 'projects/{{project}}/locations/global/networkPeerings'
 self_link: 'projects/{{project}}/locations/global/networkPeerings/{{name}}'
 create_url: 'projects/{{project}}/locations/global/networkPeerings?networkPeeringId={{name}}'
 update_verb: 'PATCH'
@@ -35,14 +35,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'vmware_engine_network_peering_ven'
