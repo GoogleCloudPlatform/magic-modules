@@ -1640,6 +1640,7 @@ resource "google_cloud_run_service" "default" {
   metadata {
     annotations = {
       "run.googleapis.com/iap-enabled": true
+      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
@@ -1664,6 +1665,7 @@ resource "google_cloud_run_service" "default" {
   metadata {
     annotations = {
       "run.googleapis.com/iap-enabled": false
+      "run.googleapis.com/launch-stage" = "BETA"
     }
   }
 
