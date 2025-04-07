@@ -115,13 +115,13 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Computed:    true,
 				Description: `Base 64 MD5 hash of the uploaded data.`,
 			},
-      
+
 			"source_md5hash": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: `Used to trigger updates, Base 64 MD5 hash of the uploaded data.`,
-      },
-      
+			},
+
 			"md5hexhash": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -484,7 +484,7 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 		if err := d.Set("detect_md5hash", res.Md5Hash); err != nil {
 			return fmt.Errorf("Error setting detect_md5hash: %s", err)
 		}
-  }
+	}
 	hash, err := base64.StdEncoding.DecodeString(res.Md5Hash)
 	if err != nil {
 		return fmt.Errorf("Error decoding md5hash: %s", err)
