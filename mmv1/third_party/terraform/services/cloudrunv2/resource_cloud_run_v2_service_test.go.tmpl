@@ -1601,7 +1601,7 @@ resource "google_cloud_run_v2_service" "default" {
   location = "us-central1"
   deletion_protection = false
   ingress = "INGRESS_TRAFFIC_ALL"
-  launch_stage = "GA"
+  launch_stage = "BETA"
   iap_enabled = true
 
   template {
@@ -1621,7 +1621,7 @@ resource "google_cloud_run_v2_service" "default" {
   location = "us-central1"
   deletion_protection = false
   ingress = "INGRESS_TRAFFIC_ALL"
-  launch_stage = "GA"
+  launch_stage = "BETA"
   iap_enabled = false
 
   template {
