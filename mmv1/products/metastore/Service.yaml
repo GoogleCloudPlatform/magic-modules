@@ -324,10 +324,6 @@ properties:
         description: |
           A Cloud Storage URI of a folder, in the format gs://<bucket_name>/<path_inside_bucket>. A sub-folder <backup_folder> containing backup files will be stored below it.
         required: true
-  - name: 'deletionProtection'
-    type: Boolean
-    description: |
-      Indicates if the dataproc metastore should be protected against accidental deletions.
   - name: 'maintenanceWindow'
     type: NestedObject
     description: |
