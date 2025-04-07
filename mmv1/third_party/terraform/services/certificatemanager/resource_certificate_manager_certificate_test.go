@@ -1,5 +1,7 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package certificatemanager_test
 
 import (
@@ -18,7 +20,7 @@ func TestAccCertificateManagerCertificate_tags(t *testing.T) {
 	tagKey := acctest.BootstrapSharedTestTagKey(t, "ccm-certificates-tagkey")
 	tagValue := acctest.BootstrapSharedTestTagValue(t, "ccm-certificates-tagvalue", tagKey)
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
