@@ -13,6 +13,10 @@
 
 ---
 name: 'Policy'
+api_variant_patterns:
+  - 'folders/{folder}/policies/{policy}'
+  - 'organizations/{organization}/policies/{policy}'
+  - 'projects/{project}/policies/{policy}'
 description: "Defines an organization policy which is used to specify constraints for configurations of Google Cloud resources."
 references:
   guides:

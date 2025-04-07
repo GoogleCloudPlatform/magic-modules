@@ -40,9 +40,10 @@ custom_code:
   constants: 'templates/terraform/constants/compute_resource_policy.go.tmpl'
 sweeper:
   url_substitutions:
-    - region: "us-east4"
     - region: "us-central1"
     - region: "europe-west1"
+    - region: "us-east4"
+    - region: "europe-west9"
 examples:
   - name: 'resource_policy_basic'
     primary_resource_id: 'foo'
@@ -94,6 +95,11 @@ examples:
     vars:
       name: 'gce-policy'
   - name: 'resource_policy_placement_policy_gpu_topology'
+    primary_resource_id: 'baz'
+    min_version: 'beta'
+    vars:
+      name: 'gce-policy'
+  - name: 'resource_policy_placement_policy_tpu_topology'
     primary_resource_id: 'baz'
     min_version: 'beta'
     vars:
@@ -329,6 +335,12 @@ properties:
           Specifies the shape of the GPU slice, in slice based GPU families eg. A4X.
         conflicts:
           - group_placement_policy.0.max_distance
+        immutable: true
+        min_version: 'beta'
+      - name: 'tpuTopology'
+        type: String
+        description: |
+          Specifies the shape of the TPU slice.
         immutable: true
         min_version: 'beta'
   - name: 'instanceSchedulePolicy'

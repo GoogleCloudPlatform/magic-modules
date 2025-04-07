@@ -21,9 +21,8 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 			return nil, nil
 		}
 
-		// set enable field basing on the enable_flow_logs field. It's needed for case when enable_flow_logs
-		// is set to true to avoid conflict with the API. In that case API will return default values for log_config
-		transformed["enable"] = d.Get("enable_flow_logs")
+		// send enable = false to ensure logging is disabled if there is no config
+		transformed["enable"] = false
 		return transformed, nil
 	}
 
