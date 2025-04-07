@@ -121,8 +121,6 @@ var createTestFailureTicketCmd = &cobra.Command{
 		}
 		date := now.In(loc)
 
-		date = time.Date(2025, 04, 06, 18, 0, 0, 0, loc)
-
 		return execCreateTestFailureTicket(date, gh, gcs)
 	},
 }

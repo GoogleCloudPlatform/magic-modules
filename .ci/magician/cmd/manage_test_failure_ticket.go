@@ -68,8 +68,6 @@ var manageTestFailureTicketCmd = &cobra.Command{
 		}
 		date := now.In(loc)
 
-		date = time.Date(2025, 04, 06, 18, 0, 0, 0, loc)
-
 		return execManageTestFailureTicket(date, gh, gcs)
 	},
 }
@@ -147,10 +145,16 @@ func execManageTestFailureTicket(now time.Time, gh *github.Client, gcs Cloudstor
 			Body: github.String(comment),
 		}
 		_, _, err = gh.Issues.CreateComment(ctx, GithubOwner, GithubRepo, ticketNumber, issueComment)
+		if err != nil {
+			return fmt.Errorf("error posting comment to issue %d: %w", ticketNumber, err)
+		}
 		issueRquest := &github.IssueRequest{
 			State: github.String("closed"),
 		}
 		_, _, err = gh.Issues.Edit(ctx, GithubOwner, GithubRepo, ticketNumber, issueRquest)
+		if err != nil {
+			return fmt.Errorf("error closing issue %d: %w", ticketNumber, err)
+		}
 	}
 
 	return nil
