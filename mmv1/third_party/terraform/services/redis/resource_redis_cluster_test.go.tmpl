@@ -396,7 +396,6 @@ resource "google_redis_cluster" "cluster_mb_copy" {
    managed_backup_source {
     backup                       = join("", [google_redis_cluster.cluster_mbs_main.backup_collection , "/backups/%{back_up}"])
   }
-
 }   
 `, context)
 }
@@ -456,9 +455,6 @@ func testAccCheckRedisClusterOnDemandBackup(t *testing.T, resourceName string, b
 			return fmt.Errorf("Empty response when creating on-demand backup for Redis cluster %s", name)
 		}
 
-		// The API returns a long-running operation, we could wait for it to complete
-		// but for simplicity, we'll just check that the API call was successful
-
 		return nil
 	}
 }
@@ -513,10 +509,10 @@ resource "google_redis_cluster" "cluster_gbs_main" {
 
 # Create a GCS bucket for exporting Redis backups
 resource "google_storage_bucket" "redis_backup_bucket" {
-  name                        = "tf-test-redis-backup-%{random_suffix}"
-  location                    = "us-central1"
-  uniform_bucket_level_access = true
-  force_destroy               = true
+  name                           = "tf-test-redis-backup-%{random_suffix}"
+  location                       = "us-central1"
+  uniform_bucket_level_access    = true
+  force_destroy                  = true
 }
 
 # Grant the Redis service account permission to access the bucket
@@ -525,44 +521,41 @@ resource "google_storage_bucket" "redis_backup_bucket" {
 data "google_project" "project" {}
 
 resource "google_storage_bucket_iam_member" "redis_backup_writer" {
-  bucket = google_storage_bucket.redis_backup_bucket.name
-  role   = "roles/storage.admin"
-  member = "serviceAccount:service-${data.google_project.project.number}@cloud-redis.iam.gserviceaccount.com"
+  bucket 						= google_storage_bucket.redis_backup_bucket.name
+  role   						= "roles/storage.admin"
+  member 						= "serviceAccount:service-${data.google_project.project.number}@cloud-redis.iam.gserviceaccount.com"
 }
-
 `, context)
 }
-
-// testAccCheckRedisClusterListExportBackups(t, &context)
 
 func testAccRedisCluster_gcsSource(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_redis_cluster" "cluster_gbs_main" {
-  name                           = "tf-test-gbs-main-%{random_suffix}"
-  shard_count                    = 1
-  region                         = "us-central1"
-  deletion_protection_enabled    = false
+  name                            = "tf-test-gbs-main-%{random_suffix}"
+  shard_count                     = 1
+  region                          = "us-central1"
+  deletion_protection_enabled     = false
 }
 
 # Reference the bucket created in the setup
 resource "google_storage_bucket" "redis_backup_bucket" {
-  name                        = "tf-test-redis-backup-%{random_suffix}"
-  location                    = "us-central1"
-  uniform_bucket_level_access = true
-  force_destroy               = true
+  name                        	  = "tf-test-redis-backup-%{random_suffix}"
+  location                    	  = "us-central1"
+  uniform_bucket_level_access 	  = true
+  force_destroy               	  = true
 }
 
 # Grant the Redis service account permission to access the bucket
 data "google_project" "project" {}
 
 data "google_storage_bucket_objects" "backup" {
-  bucket = "tf-test-redis-backup-%{random_suffix}"
+  bucket 					      = "tf-test-redis-backup-%{random_suffix}"
 }
 
 resource "google_storage_bucket_iam_member" "redis_backup_writer" {
-  bucket = google_storage_bucket.redis_backup_bucket.name
-  role   = "roles/storage.admin"
-  member = "serviceAccount:service-${data.google_project.project.number}@cloud-redis.iam.gserviceaccount.com"
+  bucket 						  = google_storage_bucket.redis_backup_bucket.name
+  role   						  = "roles/storage.admin"
+  member 						  = "serviceAccount:service-${data.google_project.project.number}@cloud-redis.iam.gserviceaccount.com"
 }
 
 # Create a Redis cluster that imports from the GCS bucket
@@ -645,8 +638,8 @@ func testAccCheckRedisClusterExportBackup(t *testing.T, resourceName string, bac
 					parts := strings.Split(cluster, "/")
 					cluster_name := parts[len(parts)-1]
 
-					log.Printf("[DEBUG] CLuster %d name: %s-", i, cluster_name)
-					log.Printf("[DEBUG] Provided Cluster Name  name: %s-", name)
+					log.Printf("[DEBUG] CLuster %d name: %s", i, cluster_name)
+					log.Printf("[DEBUG] Provided Cluster Name  name: %s", name)
 
 					if strings.Contains(cluster_name, name) {
 						collection_id_long := collectionMap["name"].(string)
