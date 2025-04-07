@@ -45,6 +45,43 @@ func TestAccBigQueryTable_Basic(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryTable_DataPolicies(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	dataPolicyID := fmt.Sprintf("tf_test_data_policy_%s", acctest.RandString(t, 10))
+	dataCatTaxonomy := fmt.Sprintf("tf_test_taxonomy_%s", acctest.RandString(t, 10))
+	projectID := envvar.GetTestProjectFromEnv()
+	dataPolicyName := fmt.Sprintf("projects/%s/locations/us-central1/dataPolicies/%s", projectID, dataPolicyID)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableDataPolicies(datasetID, tableID, dataPolicyID, dataCatTaxonomy, dataPolicyName),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_schema_changes"},
+			},
+			{
+				Config: testAccBigQueryTableUpdated(datasetID, tableID),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_schema_changes"},
+			},
+		},
+	})
+}
+
 func TestAccBigQueryTable_TableMetadataView(t *testing.T) {
 	t.Parallel()
 
@@ -1979,6 +2016,89 @@ EOH
 
 }
 `, datasetID, tableID)
+}
+
+func testAccBigQueryTableDataPolicies(datasetID, tableID, dataPolicyID, dataCatTaxonomy, dataPolicyName string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+	location   = "us-central1"
+  dataset_id = "%s"
+}
+
+resource "google_bigquery_datapolicy_data_policy" "data_policy" {
+  location         = "us-central1"
+  data_policy_id   = "%s"
+  policy_tag       = google_data_catalog_policy_tag.policy_tag.name
+  data_policy_type = "COLUMN_LEVEL_SECURITY_POLICY"
+}
+
+resource "google_data_catalog_policy_tag" "policy_tag" {
+  taxonomy     = google_data_catalog_taxonomy.taxonomy.id
+  display_name = "Low security"
+  description  = "A policy tag normally associated with low security items"
+}
+
+resource "google_data_catalog_taxonomy" "taxonomy" {
+  region                 = "us-central1"
+  display_name           = "%s"
+  description            = "A collection of policy tags"
+  activated_policy_types = ["FINE_GRAINED_ACCESS_CONTROL"]
+}
+
+resource "google_bigquery_table" "test" {
+  depends_on = [google_bigquery_datapolicy_data_policy.data_policy]
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+  ignore_schema_changes = [
+    "dataPolicies"
+  ]
+
+  schema     = <<EOH
+[
+  {
+    "name": "ts",
+    "type": "TIMESTAMP",
+    "dataPolicies": [
+      {
+        "name": "%s"
+      }
+    ]
+  },
+  {
+    "name": "some_string",
+    "type": "STRING"
+  },
+  {
+    "name": "some_int",
+    "type": "INTEGER"
+  },
+  {
+    "name": "city",
+    "type": "RECORD",
+    "fields": [
+  {
+    "name": "id",
+    "type": "INTEGER"
+  },
+  {
+    "name": "coord",
+    "type": "RECORD",
+    "fields": [
+    {
+    "name": "lon",
+    "type": "FLOAT"
+    }
+    ]
+  }
+    ]
+  }
+]
+EOH
+
+}
+`, datasetID, dataPolicyID, dataCatTaxonomy, tableID, dataPolicyName)
 }
 
 func testAccBigQueryTableBasicWithTableMetadataView(datasetID, tableID string) string {
