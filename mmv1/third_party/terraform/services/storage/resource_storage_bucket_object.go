@@ -17,6 +17,7 @@ import (
 
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"net/http"
 
 	"google.golang.org/api/googleapi"
@@ -114,11 +115,19 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Computed:    true,
 				Description: `Base 64 MD5 hash of the uploaded data.`,
 			},
-
+      
 			"source_md5hash": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: `Used to trigger updates, Base 64 MD5 hash of the uploaded data.`,
+      },
+      
+			"md5hexhash": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Optional:    false,
+				Required:    false,
+				Description: `Hex value of md5hash`,
 			},
 
 			"source": {
@@ -475,7 +484,17 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 		if err := d.Set("detect_md5hash", res.Md5Hash); err != nil {
 			return fmt.Errorf("Error setting detect_md5hash: %s", err)
 		}
+  }
+	hash, err := base64.StdEncoding.DecodeString(res.Md5Hash)
+	if err != nil {
+		return fmt.Errorf("Error decoding md5hash: %s", err)
 	}
+	// encode
+	md5HexHash := hex.EncodeToString(hash)
+	if err := d.Set("md5hexhash", md5HexHash); err != nil {
+		return fmt.Errorf("Error setting md5hexhash: %s", err)
+	}
+
 	if err := d.Set("generation", res.Generation); err != nil {
 		return fmt.Errorf("Error setting generation: %s", err)
 	}
