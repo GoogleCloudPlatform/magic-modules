@@ -35,6 +35,7 @@ func TestAccStorageBatchOperationsJobs_jobWithPrefixDeleteObjectAllVersions(t *t
 	t.Parallel()
 	bucketName := acctest.TestBucketName(t)
 	jobID := fmt.Sprintf("tf-test-job-%d", acctest.RandInt(t))
+	liveObjectJobID := fmt.Sprintf("tf-test-job-%d", acctest.RandInt(t))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -48,20 +49,8 @@ func TestAccStorageBatchOperationsJobs_jobWithPrefixDeleteObjectAllVersions(t *t
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"job_id", "location", "delete_protection"},
 			},
-		},
-	})
-}
-
-func TestAccStorageBatchOperationsJobs_jobWithPrefixDeleteLiveObject(t *testing.T) {
-	t.Parallel()
-	bucketName := acctest.TestBucketName(t)
-	jobID := fmt.Sprintf("tf-test-job-%d", acctest.RandInt(t))
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageBatchOperationsJobWithPrefixDeleteObject(bucketName, jobID),
+				Config: testAccStorageBatchOperationsJobWithPrefixDeleteLiveObject(bucketName, liveObjectJobID),
 			},
 			{
 				ResourceName:            "google_storage_batch_operations_job.job",
@@ -222,7 +211,7 @@ resource "google_storage_batch_operations_job" "job" {
 `, bucketName, jobID)
 }
 
-func testAccStorageBatchOperationsJobWithPrefixDeleteObject(bucketName, jobID string) string {
+func testAccStorageBatchOperationsJobWithPrefixDeleteLiveObject(bucketName, jobID string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
