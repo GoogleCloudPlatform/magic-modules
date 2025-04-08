@@ -131,7 +131,6 @@ properties:
     properties:
         name: 'allowedPersistenceRegions'
         is_set: true
-      - name: 'allowedPersistenceRegions'
         type: Array
         description: |
           A list of IDs of GCP regions where messages that are published to
