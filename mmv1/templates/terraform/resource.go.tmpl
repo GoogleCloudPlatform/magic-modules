@@ -1215,10 +1215,11 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
 {{- /* Only render SetComputedIdFormatFields for resources with non-async create or polling async */}}
 {{- if and $.HasComputedIdFormatFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
 
+// resource{{$.ResourceName}}SetComputedIdFormatFields sets computed resource properties from create API response
+// so that they're available on the subsequent Read call.
 func resource{{ $.ResourceName }}SetComputedIdFormatFields(d *schema.ResourceData, meta interface{}, res map[string]interface{}) error {
     config := meta.(*transport_tpg.Config)
 {{- if $.CustomCode.Decoder }}
-    // Set output-only resource properties from create API response
     res, err := resource{{ $.ResourceName -}}Decoder(d, meta, res)
     if err != nil {
         return fmt.Errorf("decoding response: %w", err)
