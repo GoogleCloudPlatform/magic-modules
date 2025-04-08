@@ -62,6 +62,7 @@ async:
 identity:
   - egressFrom
   - egressTo
+  - title
 nested_query:
   keys:
     - status
@@ -72,11 +73,20 @@ custom_code:
   constants: 'templates/terraform/constants/access_context_manager.go.tmpl'
   custom_import: 'templates/terraform/custom_import/access_context_manager_service_perimeter_egress_policy.go.tmpl'
   encoder: 'templates/terraform/encoders/access_context_manager_service_perimeter_egress_policy.go.tmpl'
+  post_read: 'templates/terraform/post_read/access_context_manager_service_perimeter_resource.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/access_context_manager_service_perimeter_egress_policy.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/access_context_manager_service_perimeter_egress_policy.go.tmpl'
 exclude_tgc: true
 # Skipping the sweeper due to the non-standard base_url and because this is fine-grained under ServicePerimeter
 exclude_sweeper: true
 examples:
   - name: 'access_context_manager_service_perimeter_egress_policy'
+    vars:
+      egress_policy_title: 'egress policy title'
+    exclude_test: true
+  - name: 'access_context_manager_service_perimeter_egress_policy_granular_controls'
+    vars:
+      egress_policy_title: 'granular controls egress policy title'
     exclude_test: true
 parameters:
   - name: 'perimeter'
@@ -167,6 +177,14 @@ properties:
           s3://bucket/path). Currently '*' is not allowed.
         item_type:
           type: String
+      - name: 'roles'
+        type: Array
+        item_type:
+          type: String
+        description: |
+          A list of IAM roles that represent the set of operations that the sources
+          specified in the corresponding `EgressFrom`
+          are allowed to perform.
       - name: 'operations'
         type: Array
         description: |
@@ -202,9 +220,18 @@ properties:
                     description: |
                       Value for permission should be a valid Cloud IAM permission for the
                       corresponding `serviceName` in `ApiOperation`.
+  - name: 'title'
+    type: 'string'
+    description: |
+      Human readable title. Must be unique within the perimeter. Does not affect behavior.
   - name: 'accessPolicyId'
     type: String
     description: |
       The name of the Access Policy this resource belongs to.
     ignore_read: true
     output: true
+  - name: 'etag'
+    type: String
+    output: true
+    description: |
+      The perimeter etag is internally used to prevent overwriting the list of policies on PATCH calls. It is retrieved from the same GET perimeter API call that's used to get the current list of policies. The policy defined in this resource is added or removed from that list, and then this etag is sent with the PATCH call along with the updated policies.

@@ -36,9 +36,10 @@ async:
     resource_inside_response: false
 custom_code:
 sweeper:
-  regions:
-    - us-central1
-    - us-west1
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-west1"
+    - region: "us-east1"
 examples:
   - name: 'public_delegated_prefixes_basic'
     primary_resource_id: 'prefixes'
@@ -50,6 +51,16 @@ examples:
     # resource_compute_public_advertised_prefix_test.go
     exclude_test: true
   - name: 'public_delegated_prefixes_ipv6'
+    vars:
+      pap_name: "ipv6-pap"
+      root_pdp_name: "ipv6-root-pdp"
+      sub_pdp_name: "ipv6-sub-pdp"
+    test_env_vars:
+      desc: 'PAP_DESCRIPTION'
+    # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
+    # resource_compute_public_advertised_prefix_test.go
+    exclude_test: true
+  - name: 'public_delegated_prefix_ipv6_subnet_mode'
     vars:
       pap_name: "ipv6-pap"
       root_pdp_name: "ipv6-root-pdp"
@@ -93,12 +104,14 @@ properties:
     type: Enum
     description: |
       Specifies the mode of this IPv6 PDP. MODE must be one of: DELEGATION,
-      EXTERNAL_IPV6_FORWARDING_RULE_CREATION.
+      EXTERNAL_IPV6_FORWARDING_RULE_CREATION and EXTERNAL_IPV6_SUBNETWORK_CREATION.
     enum_values:
       - 'DELEGATION'
       - 'EXTERNAL_IPV6_FORWARDING_RULE_CREATION'
+      - 'EXTERNAL_IPV6_SUBNETWORK_CREATION'
   - name: 'allocatablePrefixLength'
     type: Integer
+    default_from_api: true
     description:
       The allocatable prefix length supported by this public delegated prefix.
       This field is optional and cannot be set for prefixes in DELEGATION mode.

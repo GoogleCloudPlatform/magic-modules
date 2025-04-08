@@ -45,8 +45,8 @@ async:
     resource_inside_response: false
 custom_code:
 sweeper:
-  regions:
-    - "us-west1"
+  url_substitutions:
+    - region: "us-west1"
 examples:
   - name: 'network_services_authz_extension_basic'
     primary_resource_id: 'default'
@@ -142,9 +142,8 @@ properties:
   - name: 'wireFormat'
     type: Enum
     description: |
-      The format of communication supported by the callout extension.
-    default_value: "EXT_PROC_GRPC"
-    custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
+      The format of communication supported by the callout extension. Will be set to EXT_PROC_GRPC by the backend if no value is set.
+    default_from_api: true
     enum_values:
       - 'WIRE_FORMAT_UNSPECIFIED'
       - 'EXT_PROC_GRPC'

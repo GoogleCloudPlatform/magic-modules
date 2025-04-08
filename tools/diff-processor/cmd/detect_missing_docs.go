@@ -1,10 +1,7 @@
 package cmd
 
 import (
-	newProvider "google/provider/new/google/provider"
-	oldProvider "google/provider/old/google/provider"
 	"slices"
-	"sort"
 
 	"encoding/json"
 	"fmt"
@@ -13,9 +10,11 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/detector"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/spf13/cobra"
 	"golang.org/x/exp/maps"
+
+	newProvider "google/provider/new/google/provider"
+	oldProvider "google/provider/old/google/provider"
 )
 
 const detectMissingDocDesc = `Compute list of fields missing documents`
@@ -27,17 +26,25 @@ type MissingDocsInfo struct {
 }
 
 type detectMissingDocsOptions struct {
-	rootOptions       *rootOptions
-	computeSchemaDiff func() diff.SchemaDiff
-	newResourceSchema map[string]*schema.Resource
-	stdout            io.Writer
+	rootOptions                 *rootOptions
+	computeSchemaDiff           func() diff.SchemaDiff
+	computeDatasourceSchemaDiff func() diff.SchemaDiff
+	stdout                      io.Writer
+}
+
+type MissingDocsSummary struct {
+	Resource   []detector.MissingDocDetails
+	DataSource []detector.MissingDocDetails
 }
 
 func newDetectMissingDocsCmd(rootOptions *rootOptions) *cobra.Command {
 	o := &detectMissingDocsOptions{
 		rootOptions: rootOptions,
 		computeSchemaDiff: func() diff.SchemaDiff {
-			return diff.ComputeSchemaDiff(oldProvider.ResourceMap(), newProvider.ResourceMap())
+			return schemaDiff
+		},
+		computeDatasourceSchemaDiff: func() diff.SchemaDiff {
+			return diff.ComputeSchemaDiff(oldProvider.DatasourceMap(), newProvider.DatasourceMap())
 		},
 		stdout: os.Stdout,
 	}
@@ -54,26 +61,40 @@ func newDetectMissingDocsCmd(rootOptions *rootOptions) *cobra.Command {
 }
 func (o *detectMissingDocsOptions) run(args []string) error {
 	schemaDiff := o.computeSchemaDiff()
-	detectedResources, err := detector.DetectMissingDocs(schemaDiff, args[0], o.newResourceSchema)
+	detectedResources, err := detector.DetectMissingDocs(schemaDiff, args[0])
 	if err != nil {
 		return err
 	}
-	resources := maps.Keys(detectedResources)
-	slices.Sort(resources)
-	info := []MissingDocsInfo{}
-	for _, r := range resources {
-		details := detectedResources[r]
-		sort.Strings(details.Fields)
-		info = append(info, MissingDocsInfo{
-			Name:     r,
-			FilePath: details.FilePath,
-			Fields:   details.Fields,
-		})
+
+	datasourceSchemaDiff := o.computeDatasourceSchemaDiff()
+	detectedDataSources, err := detector.DetectMissingDocsForDatasource(datasourceSchemaDiff, args[0])
+	if err != nil {
+		return err
 	}
 
-	if err := json.NewEncoder(o.stdout).Encode(info); err != nil {
+	sum := MissingDocsSummary{
+		Resource:   sortMissingDocDetails(detectedResources),
+		DataSource: sortMissingDocDetails(detectedDataSources),
+	}
+
+	if err := json.NewEncoder(o.stdout).Encode(sum); err != nil {
 		return fmt.Errorf("error encoding json: %w", err)
 	}
 
 	return nil
+}
+
+func sortMissingDocDetails(m map[string]detector.MissingDocDetails) []detector.MissingDocDetails {
+	itemNames := maps.Keys(m)
+	slices.Sort(itemNames)
+	arr := []detector.MissingDocDetails{}
+	for _, itemName := range itemNames {
+		details := m[itemName]
+		arr = append(arr, detector.MissingDocDetails{
+			Name:     itemName,
+			FilePath: details.FilePath,
+			Fields:   details.Fields,
+		})
+	}
+	return arr
 }

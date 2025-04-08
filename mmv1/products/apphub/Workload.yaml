@@ -13,6 +13,8 @@
 
 ---
 name: 'Workload'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/applications/{application}/workloads/{workload}'
 description: 'Workload represents a binary deployment (such as Managed Instance Groups (MIGs), GKE deployments, etc.) that performs the smallest logical subset of business functionality.
   It registers identified workload to the Application.'
 docs:
@@ -29,6 +31,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+autogen_status: V29ya2xvYWQK
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'

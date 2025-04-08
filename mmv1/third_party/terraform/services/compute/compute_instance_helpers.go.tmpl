@@ -181,6 +181,15 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 	if v, ok := original["maintenance_interval"]; ok {
 		scheduling.MaintenanceInterval = v.(string)
 	}
+
+	if v, ok := original["graceful_shutdown"]; ok {
+		transformedGracefulShutdown, err := expandGracefulShutdown(v)
+		if err != nil {
+			return nil, err
+		}
+		scheduling.GracefulShutdown = transformedGracefulShutdown
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "GracefulShutdown")
+	}
 {{- end }}
 	if v, ok := original["local_ssd_recovery_timeout"]; ok {
 		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
@@ -189,6 +198,9 @@ func expandScheduling(v interface{}) (*compute.Scheduling, error) {
 		}
 		scheduling.LocalSsdRecoveryTimeout = transformedLocalSsdRecoveryTimeout
 		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "LocalSsdRecoveryTimeout")
+	}
+	if v, ok := original["termination_time"]; ok {
+		scheduling.TerminationTime = v.(string)
 	}
 	return scheduling, nil
 }
@@ -278,6 +290,55 @@ func expandComputeLocalSsdRecoveryTimeoutSeconds(v interface{}) (interface{}, er
 	return v, nil
 }
 
+{{- if ne $.TargetVersionName "ga" }}
+func expandGracefulShutdown(v interface{}) (*compute.SchedulingGracefulShutdown, error) {
+	l := v.([]interface{})
+	gracefulShutdown := compute.SchedulingGracefulShutdown{}
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+	original := raw.(map[string]interface{})
+
+	originalMaxDuration := original["max_duration"].([]interface{})
+	maxDuration, err := expandGracefulShutdownMaxDuration(originalMaxDuration)
+	if err != nil {
+		return nil, err
+	}
+	if maxDuration != nil {
+		gracefulShutdown.MaxDuration = maxDuration
+	}
+
+	gracefulShutdown.Enabled = original["enabled"].(bool)
+	gracefulShutdown.ForceSendFields = append(gracefulShutdown.ForceSendFields, "Enabled")
+	return &gracefulShutdown, nil
+}
+
+func expandGracefulShutdownMaxDuration(v interface{}) (*compute.Duration, error) {
+	l := v.([]interface{})
+	duration := compute.Duration{}
+	if len(l) == 0 || l[0] == nil {
+		return nil, nil
+	}
+	raw := l[0]
+
+	maxDurationMap := raw.(map[string]interface{})
+	transformedNanos := maxDurationMap["nanos"]
+	transformedSeconds := maxDurationMap["seconds"]
+
+	if val := reflect.ValueOf(transformedNanos); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+		duration.Nanos = int64(transformedNanos.(int))
+	}
+	if val := reflect.ValueOf(transformedSeconds); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+		duration.Seconds = int64(transformedSeconds.(int))
+	}
+
+	duration.ForceSendFields = append(duration.ForceSendFields, "Seconds")
+
+	return &duration, nil
+}
+{{ end }}
+
 func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	schedulingMap := map[string]interface{}{
 		"on_host_maintenance": resp.OnHostMaintenance,
@@ -286,6 +347,7 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 		"provisioning_model":  resp.ProvisioningModel,
 		"instance_termination_action": resp.InstanceTerminationAction,
 		"availability_domain": resp.AvailabilityDomain,
+		"termination_time":    resp.TerminationTime,
 	}
 
 	if resp.AutomaticRestart != nil {
@@ -307,6 +369,10 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 
 	if resp.MaintenanceInterval != "" {
 		schedulingMap["maintenance_interval"] = resp.MaintenanceInterval
+	}
+
+	if resp.GracefulShutdown != nil {
+		schedulingMap["graceful_shutdown"] = flattenGracefulShutdown(resp.GracefulShutdown)
 	}
 {{- end }}
 
@@ -355,6 +421,28 @@ func flattenComputeLocalSsdRecoveryTimeout(v *compute.Duration) []interface{} {
 	transformed["seconds"] = v.Seconds
 	return []interface{}{transformed}
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func flattenGracefulShutdown(v *compute.SchedulingGracefulShutdown) []interface{} {
+	if v == nil {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["enabled"] = v.Enabled
+	transformed["max_duration"] = flattenGracefulShutdownMaxDuration(v.MaxDuration)
+	return []interface{}{transformed}
+}
+
+func flattenGracefulShutdownMaxDuration(v *compute.Duration) []interface{} {
+	if v == nil {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["nanos"] = v.Nanos
+	transformed["seconds"] = v.Seconds
+	return []interface{}{transformed}
+}
+{{- end }}
 
 func flattenAccessConfigs(accessConfigs []*compute.AccessConfig) ([]map[string]interface{}, string) {
 	flattened := make([]map[string]interface{}, len(accessConfigs))
@@ -423,7 +511,8 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			"stack_type":          iface.StackType,
 			"ipv6_access_config": flattenIpv6AccessConfigs(iface.Ipv6AccessConfigs),
 			"ipv6_address":        iface.Ipv6Address,
-			"queue_count":         iface.QueueCount,			
+			"queue_count":         iface.QueueCount,
+			"internal_ipv6_prefix_length": iface.InternalIpv6PrefixLength,
 		}
 		// Instance template interfaces never have names, so they're absent
 		// in the instance template network_interface schema. We want to use the
@@ -436,7 +525,6 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			internalIP = iface.NetworkIP
 		}
 
-		{{ if ne $.TargetVersionName `ga` -}}
 		if iface.NetworkAttachment != "" {
 			networkAttachment, err := tpgresource.GetRelativePath(iface.NetworkAttachment)
 			if err != nil {
@@ -444,7 +532,6 @@ func flattenNetworkInterfaces(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 			flattened[i]["network_attachment"] = networkAttachment
 		}
-		{{- end }}
 
 		{{ if ne $.TargetVersionName `ga` -}}
 		// the security_policy for a network_interface is found in one of its accessConfigs.
@@ -511,8 +598,6 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 	for i, raw := range configs {
 		data := raw.(map[string]interface{})
 
-
-		{{ if ne $.TargetVersionName `ga` -}}
 		var networkAttachment = ""
 		network := data["network"].(string)
 		subnetwork := data["subnetwork"].(string)
@@ -523,16 +608,6 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		if networkAttachment == "" && network == "" && subnetwork == "" {
 			return nil, fmt.Errorf("exactly one of network, subnetwork, or network_attachment must be provided")
 		}
-
-		{{- else }}
-
-		network := data["network"].(string)
-		subnetwork := data["subnetwork"].(string)
-		if network == "" && subnetwork == "" {
-			return nil, fmt.Errorf("exactly one of network or subnetwork must be provided")
-		}
-
-		{{ end }}
 
 		nf, err := tpgresource.ParseNetworkFieldValue(network, d, config)
 		if err != nil {
@@ -548,9 +623,7 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 		ifaces[i] = &compute.NetworkInterface{
 			NetworkIP:         data["network_ip"].(string),
 			Network:           nf.RelativeLink(),
-			{{- if ne $.TargetVersionName "ga" }}
 			NetworkAttachment: networkAttachment,
-			{{- end }}
 			Subnetwork:        sf.RelativeLink(),
 			AccessConfigs:     expandAccessConfigs(data["access_config"].([]interface{})),
 			AliasIpRanges:     expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
@@ -559,6 +632,7 @@ func expandNetworkInterfaces(d tpgresource.TerraformResourceData, config *transp
 			QueueCount:        int64(data["queue_count"].(int)),
 			Ipv6AccessConfigs: expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
 			Ipv6Address:       data["ipv6_address"].(string),
+			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
 		}
 	}
 	return ifaces, nil
@@ -723,7 +797,16 @@ func schedulingHasChangeRequiringReboot(d *schema.ResourceData) bool {
 	oScheduling := o.([]interface{})[0].(map[string]interface{})
 	newScheduling := n.([]interface{})[0].(map[string]interface{})
 
-	return hasNodeAffinitiesChanged(oScheduling, newScheduling) || hasMaxRunDurationChanged(oScheduling, newScheduling)
+{{ if ne $.TargetVersionName `ga` -}}
+	return hasNodeAffinitiesChanged(oScheduling, newScheduling) ||
+		hasMaxRunDurationChanged(oScheduling, newScheduling) ||
+		hasGracefulShutdownChangedWithReboot(d, oScheduling, newScheduling) ||
+		hasTerminationTimeChanged(oScheduling, newScheduling)
+{{- else }}
+	return (hasNodeAffinitiesChanged(oScheduling, newScheduling) ||
+		hasMaxRunDurationChanged(oScheduling, newScheduling) ||
+		hasTerminationTimeChanged(oScheduling, newScheduling))
+{{- end }}
 }
 
 // Terraform doesn't correctly calculate changes on schema.Set, so we do it manually
@@ -768,15 +851,90 @@ func schedulingHasChangeWithoutReboot(d *schema.ResourceData) bool {
 	if oScheduling["host_error_timeout_seconds"] != newScheduling["host_error_timeout_seconds"] {
 		return true
 	}
+
+	if hasGracefulShutdownChanged(oScheduling, newScheduling) {
+		return true
+	}
 {{- end }}
 
 	return false
 }
 
+func hasTerminationTimeChanged(oScheduling, nScheduling map[string]interface{}) bool {
+	oTerminationTime := oScheduling["termination_time"].(string)
+	nTerminationTime := nScheduling["termination_time"].(string)
+
+	if len(oTerminationTime) == 0 && len(nTerminationTime) == 0 {
+		return false
+	}
+	if len(oTerminationTime) == 0 || len(nTerminationTime) == 0 {
+		return true
+	}
+
+	if oTerminationTime != nTerminationTime {
+		return true
+	}
+
+	return false
+}
+
+{{ if ne $.TargetVersionName `ga` -}}
+func hasGracefulShutdownChangedWithReboot(d *schema.ResourceData, oScheduling, nScheduling map[string]interface{}) bool {
+	allow_stopping_for_update := d.Get("allow_stopping_for_update").(bool)
+	if !allow_stopping_for_update {
+		return false
+	}
+	return hasGracefulShutdownChanged(oScheduling, nScheduling)
+}
+
+func hasGracefulShutdownChanged(oScheduling, nScheduling map[string]interface{}) bool {
+	oGrShut := oScheduling["graceful_shutdown"].([]interface{})
+	nGrShut := nScheduling["graceful_shutdown"].([]interface{})
+
+	if (len(oGrShut) == 0 || oGrShut[0] == nil) && (len(nGrShut) == 0 || nGrShut[0] == nil) {
+		return false
+	}
+	if (len(oGrShut) == 0 || oGrShut[0] == nil) || (len(nGrShut) == 0 || nGrShut[0] == nil) {
+		return true
+	}
+
+	oldGrShut := oGrShut[0].(map[string]interface{})
+	newGrShut := nGrShut[0].(map[string]interface{})
+	oldMaxDuration := oldGrShut["max_duration"].([]interface{})
+	newMaxDuration := newGrShut["max_duration"].([]interface{})
+	var oldMaxDurationMap map[string]interface{}
+	var newMaxDurationMap map[string]interface{}
+
+	if len(oldMaxDuration) > 0 && oldMaxDuration[0] != nil {
+		oldMaxDurationMap = oldMaxDuration[0].(map[string]interface{})
+	} else {
+		oldMaxDurationMap = nil
+	}
+
+	if len(newMaxDuration) > 0 && newMaxDuration[0] != nil {
+		newMaxDurationMap = newMaxDuration[0].(map[string]interface{})
+	} else {
+		newMaxDurationMap = nil
+	}
+
+	if oldGrShut["enabled"] != newGrShut["enabled"] {
+		return true
+	}
+	if oldMaxDurationMap["seconds"] != newMaxDurationMap["seconds"] {
+		return true
+	}
+	if oldMaxDurationMap["nanos"] != newMaxDurationMap["nanos"] {
+		return true
+	}
+
+	return false
+}
+{{- end }}
+
 func hasMaxRunDurationChanged(oScheduling, nScheduling map[string]interface{}) bool {
 	oMrd := oScheduling["max_run_duration"].([]interface{})
 	nMrd := nScheduling["max_run_duration"].([]interface{})
-	
+
 	if (len(oMrd) == 0 || oMrd[0] == nil) &&  (len(nMrd) == 0 || nMrd[0] == nil) {
 		return false
 	}
@@ -822,7 +980,7 @@ func hasNodeAffinitiesChanged(oScheduling, newScheduling map[string]interface{})
 	return false
 }
 
-func expandReservationAffinity(d *schema.ResourceData) (*compute.ReservationAffinity, error) {
+func expandReservationAffinity(d tpgresource.TerraformResourceData) (*compute.ReservationAffinity, error) {
 	_, ok := d.GetOk("reservation_affinity")
 	if !ok {
 		return nil, nil
@@ -893,6 +1051,34 @@ func expandNetworkPerformanceConfig(d tpgresource.TerraformResourceData, config 
 	}, nil
 }
 
+func flattenComputeInstanceGuestOsFeatures(v interface{}) []interface{} {
+	if v == nil {
+		return nil
+	}
+	features, ok := v.([]*compute.GuestOsFeature)
+	if !ok {
+		return nil
+	}
+	var result []interface{}
+	for _, feature := range features {
+		if feature != nil && feature.Type != "" {
+			result = append(result, feature.Type)
+		}
+	}
+	return result
+}
+
+func expandComputeInstanceGuestOsFeatures(v interface{}) []*compute.GuestOsFeature {
+	if v == nil {
+		return nil
+	}
+	var result []*compute.GuestOsFeature
+	for _, feature := range v.([]interface{}) {
+		result = append(result, &compute.GuestOsFeature{Type: feature.(string)})
+	}
+	return result
+}
+
 func flattenNetworkPerformanceConfig(c *compute.NetworkPerformanceConfig) []map[string]interface{} {
 	if c == nil {
 		return nil
@@ -900,6 +1086,64 @@ func flattenNetworkPerformanceConfig(c *compute.NetworkPerformanceConfig) []map[
 	return []map[string]interface{}{
 		{
 			"total_egress_bandwidth_tier": c.TotalEgressBandwidthTier,
+		},
+	}
+}
+
+func expandComputeInstanceEncryptionKey(d tpgresource.TerraformResourceData) *compute.CustomerEncryptionKey {
+	iek, ok := d.GetOk("instance_encryption_key")
+	if !ok {
+		return nil
+	}
+
+	iekRes := iek.([]interface{})[0].(map[string]interface{})
+	return &compute.CustomerEncryptionKey{
+		KmsKeyName:      	  iekRes["kms_key_self_link"].(string),
+		Sha256:          	  iekRes["sha256"].(string),
+		KmsKeyServiceAccount: iekRes["kms_key_service_account"].(string),
+	}
+}
+
+func flattenComputeInstanceEncryptionKey(v *compute.CustomerEncryptionKey) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"kms_key_self_link": 	   v.KmsKeyName,
+			"sha256":            	   v.Sha256,
+			"kms_key_service_account": v.KmsKeyServiceAccount,
+		},
+	}
+}
+
+func expandComputeInstanceSourceEncryptionKey(d tpgresource.TerraformResourceData, field string) *compute.CustomerEncryptionKey {
+	cek, ok := d.GetOk(field)
+	if !ok {
+		return nil
+	}
+
+	cekRes := cek.([]interface{})[0].(map[string]interface{})
+	return &compute.CustomerEncryptionKey{
+		RsaEncryptedKey:      cekRes["rsa_encrypted_key"].(string),
+		RawKey:               cekRes["raw_key"].(string),
+		KmsKeyName:           cekRes["kms_key_self_link"].(string),
+		Sha256:               cekRes["sha256"].(string),
+		KmsKeyServiceAccount: cekRes["kms_key_service_account"].(string),
+	}
+}
+
+func flattenComputeInstanceSourceEncryptionKey(v *compute.CustomerEncryptionKey) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"rsa_encrypted_key":       v.RsaEncryptedKey,
+			"raw_key":                 v.RawKey,
+			"kms_key_self_link":       v.KmsKeyName,
+			"sha256":                  v.Sha256,
+			"kms_key_service_account": v.KmsKeyServiceAccount,
 		},
 	}
 }

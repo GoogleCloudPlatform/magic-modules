@@ -37,6 +37,7 @@ iam_policy:
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   min_version: 'beta'
 custom_code:
+  pre_delete: 'templates/terraform/pre_delete/dataform_repository.go.tmpl'
 examples:
   - name: 'dataform_repository'
     primary_resource_id: 'dataform_repository'
@@ -51,6 +52,9 @@ examples:
     # This example is used in the docs to address this issue
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     exclude_test: true
+    ignore_read_extra:
+      - 'deletion_policy'
+    exclude_import_test: true
   - name: 'dataform_repository_with_cloudsource_repo'
     primary_resource_id: 'dataform_repository'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataform_repository%s", context["random_suffix"])'
@@ -66,6 +70,9 @@ examples:
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     # See : https://issuetracker.google.com/issues/287850319
     exclude_docs: true
+    ignore_read_extra:
+      - 'deletion_policy'
+    exclude_import_test: true
   - name: 'dataform_repository_with_cloudsource_repo_and_ssh'
     primary_resource_id: 'dataform_repository'
     min_version: 'beta'
@@ -78,6 +85,15 @@ examples:
     # See : https://github.com/hashicorp/terraform-provider-google/issues/17335
     # See : https://issuetracker.google.com/issues/287850319
     exclude_docs: true
+virtual_fields:
+  - name: 'deletion_policy'
+    type: Enum
+    description: |
+      Policy to control how the repository and its child resources are deleted. When set to `FORCE`, any child resources of this repository will also be deleted. Possible values: `DELETE`, `FORCE`. Defaults to `DELETE`.
+    default_value: 'DELETE'
+    enum_values:
+      - 'DELETE'
+      - 'FORCE'
 parameters:
   - name: 'region'
     type: String

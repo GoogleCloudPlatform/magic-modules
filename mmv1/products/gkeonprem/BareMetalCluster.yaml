@@ -39,8 +39,8 @@ async:
 custom_code:
 taint_resource_on_failed_create: true
 sweeper:
-  regions:
-    - "us-west1"
+  url_substitutions:
+    - region: "us-west1"
 examples:
   - name: 'gkeonprem_bare_metal_cluster_basic'
     primary_resource_id: 'cluster-basic'

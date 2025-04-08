@@ -30,6 +30,7 @@ timeouts:
 import_format:
   - 'projects/{{project}}/locations/{{location}}/autonomousDatabases/{{autonomous_database_id}}'
 autogen_async: true
+autogen_status: QXV0b25vbW91c0RhdGFiYXNl
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
