@@ -634,7 +634,6 @@ resource "google_pubsub_topic" "foo" {
 			function_name = "%s"
 			code = "%s"
 		}
-		disabled = false
 	}
 }
 	`, topic, functionName, code)
