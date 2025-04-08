@@ -30,9 +30,9 @@ The following arguments are supported:
   (optional) 
   The ID of the project in which the resource belongs. If it is not provided, the provider project is used.
 
-* `location` -
+* `region` -
   (optional)
-  The canonical id of the location.If it is not provided, the provider project is used. For example: us-east1.
+  The canonical id of the region. If it is not provided, the provider project is used. For example: us-east1.
 
 ## Attributes Reference
 
