@@ -456,6 +456,7 @@ func trimDescription(description string) string {
 	description, _ = strings.CutPrefix(description, "Optional. ")
 	description, _ = strings.CutPrefix(description, "Output only. ")
 	description, _ = strings.CutPrefix(description, "Required. ")
+	description, _ = strings.CutPrefix(description, "Immutable. ")
 	lines := strings.Split(description, "\n")
 	var trimmedDescription []string
 	for _, line := range lines {
