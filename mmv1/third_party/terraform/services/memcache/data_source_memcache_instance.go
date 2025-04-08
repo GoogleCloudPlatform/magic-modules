@@ -28,19 +28,19 @@ func DataSourceMemcacheInstance() *schema.Resource {
 func dataSourceMemcacheInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	location, err := tpgresource.GetLocation(d, config)
+	region, err := tpgresource.GetRegion(d, config)
 	if err != nil {
 		return err
 	}
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/instances/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/instances/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
 
 	// Setting location field, as this is set as a required field in instance resource to build the url
-	d.Set("location", location)
+	d.Set("region", region)
 
 	err = resourceMemcacheInstanceRead(d, meta)
 	if err != nil {
