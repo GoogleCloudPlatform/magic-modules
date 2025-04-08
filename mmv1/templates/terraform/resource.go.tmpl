@@ -294,7 +294,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- if and $.HasComputedIdFormatFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
     // Set computed resource properties from create API response so that they're available on the subsequent Read
     // call.
-{{- /* Don't render decoder for PollAsync resources - their decoders are expected to return `nil` until the resource completion completes, but we need to set their computed fields in order to call PollRead - so can never be a dependency on the decoder. */}}
+{{- /* Don't render decoder for PollAsync resources - their decoders are expected to return `nil` until the resource completion completes, but we need to set their computed fields in order to call PollRead - so there can never be a dependency on the decoder. */}}
 {{- if and $.CustomCode.Decoder (or (not $.GetAsync) (not ($.GetAsync.IsA "PollAsync"))) }}
     res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
     if err != nil {
