@@ -46,6 +46,136 @@ func TestAccMemorystoreInstance_updateReplicaCount(t *testing.T) {
 	})
 }
 
+func TestAccMemorystoreInstance_automatedBackupConfig(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMemorystoreInstance_automatedBackupConfig(context),
+			},
+			{
+				ResourceName:      "google_memorystore_instance.test_abc",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccMemorystoreInstance_automatedBackupConfigWithout(context),
+			},
+			{
+				ResourceName:      "google_memorystore_instance.test_abc",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccMemorystoreInstance_automatedBackupConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+// Primary instance
+resource "google_memorystore_instance" "test_abc" {
+  instance_id                    = "tf-test-instance-abc-%{random_suffix}"
+  shard_count                    = 1
+  location                       = "us-central1"
+  replica_count                  = 0
+  node_type                      = "SHARED_CORE_NANO"
+  deletion_protection_enabled    = false
+  desired_psc_auto_connections {
+    network                      = google_compute_network.primary_producer_net.id
+    project_id                   = data.google_project.project.project_id
+  }
+  automated_backup_config {
+   retention                     = "259200s"
+   fixed_frequency_schedule {
+    start_time {
+      hours                      = 20
+    }
+   }
+  }
+  depends_on  					 = [ google_network_connectivity_service_connection_policy.primary_policy ]
+}
+
+resource "google_network_connectivity_service_connection_policy" "primary_policy" {
+  name                           = "tf-test-abc-policy-%{random_suffix}"
+  location                       = "us-central1"
+  service_class                  = "gcp-memorystore"
+  description                    = "my basic service connection policy"
+  network                        = google_compute_network.primary_producer_net.id
+  psc_config {                 
+    subnetworks                  = [google_compute_subnetwork.primary_producer_subnet.id]
+  }
+}
+
+resource "google_compute_subnetwork" "primary_producer_subnet" {
+  name                           = "tf-test-abc-%{random_suffix}"
+  ip_cidr_range                  = "10.0.4.0/29"
+  region                         = "us-central1"
+  network                        = google_compute_network.primary_producer_net.id
+}
+
+resource "google_compute_network" "primary_producer_net" {
+  name                           = "tf-test-abc-net-%{random_suffix}"
+  auto_create_subnetworks        = false
+}
+
+data "google_project" "project" {
+}
+`, context)
+}
+
+func testAccMemorystoreInstance_automatedBackupConfigWithout(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+// Primary instance
+resource "google_memorystore_instance" "test_abc" {
+  instance_id                    = "tf-test-instance-abc-%{random_suffix}"
+  shard_count                    = 1
+  location                       = "us-central1"
+  replica_count                  = 0
+  node_type                      = "SHARED_CORE_NANO"
+  deletion_protection_enabled    = false
+  desired_psc_auto_connections {
+    network                      = google_compute_network.primary_producer_net.id
+    project_id                   = data.google_project.project.project_id
+  }
+  depends_on  					 = [ google_network_connectivity_service_connection_policy.primary_policy ]
+}
+
+resource "google_network_connectivity_service_connection_policy" "primary_policy" {
+  name                           = "tf-test-abc-policy-%{random_suffix}"
+  location                       = "us-central1"
+  service_class                  = "gcp-memorystore"
+  description                    = "my basic service connection policy"
+  network                        = google_compute_network.primary_producer_net.id
+  psc_config {                 
+    subnetworks                  = [google_compute_subnetwork.primary_producer_subnet.id]
+  }
+}
+
+resource "google_compute_subnetwork" "primary_producer_subnet" {
+  name                           = "tf-test-abc-%{random_suffix}"
+  ip_cidr_range                  = "10.0.4.0/29"
+  region                         = "us-central1"
+  network                        = google_compute_network.primary_producer_net.id
+}
+
+resource "google_compute_network" "primary_producer_net" {
+  name                           = "tf-test-abc-net-%{random_suffix}"
+  auto_create_subnetworks        = false
+}
+
+data "google_project" "project" {
+}
+`, context)
+}
+
 // Validate that shard count is updated for the cluster
 func TestAccMemorystoreInstance_updateShardCount(t *testing.T) {
 	t.Parallel()
@@ -83,7 +213,7 @@ func TestAccMemorystoreInstance_updateShardCount(t *testing.T) {
 	})
 }
 
-// Validate that engineConfigs is updated for the cluster
+// Validate that engineConfigs is updated for the instance
 func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 	t.Parallel()
 
@@ -95,7 +225,7 @@ func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				// create cluster
+				// create instance
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
 					name:                 name,
 					shardCount:           3,
@@ -158,7 +288,7 @@ func TestAccMemorystoreInstance_updateRedisConfigs(t *testing.T) {
 	})
 }
 
-// Validate that deletion protection is updated for the cluster
+// Validate that deletion protection is updated for the instance
 func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 	t.Parallel()
 
@@ -170,7 +300,7 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				// create cluster with deletion protection true
+				// create instance with deletion protection true
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
 					name:                      name,
 					shardCount:                3,
@@ -188,7 +318,7 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				// update cluster with deletion protection false
+				// update instance with deletion protection false
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
 					name:                      name,
 					shardCount:                3,
@@ -209,7 +339,7 @@ func TestAccMemorystoreInstance_updateDeletionProtection(t *testing.T) {
 	})
 }
 
-// Validate that node type is updated for the cluster
+// Validate that node type is updated for the instance
 func TestAccMemorystoreInstance_updateNodeType(t *testing.T) {
 	t.Parallel()
 
@@ -221,7 +351,7 @@ func TestAccMemorystoreInstance_updateNodeType(t *testing.T) {
 		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				// create cluster with node type highmem medium
+				// create instance with node type highmem medium
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
 					name:                 name,
 					shardCount:           3,
@@ -235,7 +365,7 @@ func TestAccMemorystoreInstance_updateNodeType(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				// update cluster with node type standard small
+				// update instance with node type standard small
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
 					name:                 name,
 					shardCount:           3,
@@ -252,7 +382,7 @@ func TestAccMemorystoreInstance_updateNodeType(t *testing.T) {
 	})
 }
 
-// Validate that engine version is updated for the cluster
+// Validate that engine version is updated for the instance
 func TestAccMemorystoreInstance_updateEngineVersion(t *testing.T) {
 	t.Parallel()
 
@@ -264,7 +394,7 @@ func TestAccMemorystoreInstance_updateEngineVersion(t *testing.T) {
 		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				// create cluster with engine version 7.2
+				// create instance with engine version 7.2
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
 					name:                 name,
 					shardCount:           3,
@@ -278,7 +408,7 @@ func TestAccMemorystoreInstance_updateEngineVersion(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				// update cluster with engine version 8.0
+				// update instance with engine version 8.0
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
 					name:                 name,
 					shardCount:           3,
@@ -295,7 +425,7 @@ func TestAccMemorystoreInstance_updateEngineVersion(t *testing.T) {
 	})
 }
 
-// Validate that persistence config is updated for the cluster
+// Validate that persistence config is updated for the instance
 func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 	t.Parallel()
 
@@ -327,6 +457,68 @@ func TestAccMemorystoreInstance_updatePersistence(t *testing.T) {
 			{
 				// clean up the resource
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: false, zoneDistributionMode: "MULTI_ZONE", persistenceMode: "RDB", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+			},
+		},
+	})
+}
+
+// Validate that cross-instance replication works for switchover and detach operations
+func TestAccMemorystoreInstance_switchoverAndDetachSecondary(t *testing.T) {
+	t.Parallel()
+
+	primaryName := fmt.Sprintf("tf-test-prim-%d", acctest.RandInt(t))
+	secondaryName := fmt.Sprintf("tf-test-sec-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMemorystoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// create primary and secondary instances
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
+					name:                  primaryName,
+					replicaCount:          0,
+					shardCount:            1,
+					zoneDistributionMode:  "MULTI_ZONE",
+					shouldCreateSecondary: true,
+					secondaryInstanceName: secondaryName,
+					icrRole:               "SECONDARY",
+				}),
+			},
+			{
+				ResourceName:      "google_memorystore_instance.test_secondary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Switchover to secondary instance
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
+					name:                  primaryName,
+					replicaCount:          0,
+					shardCount:            1,
+					zoneDistributionMode:  "MULTI_ZONE",
+					shouldCreateSecondary: true,
+					secondaryInstanceName: secondaryName,
+					icrRole:               "PRIMARY",
+				}),
+			},
+			{
+				ResourceName:      "google_memorystore_instance.test_secondary",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// Detach secondary instance and delete the instances
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{
+					name:                  primaryName,
+					replicaCount:          0,
+					shardCount:            1,
+					zoneDistributionMode:  "MULTI_ZONE",
+					shouldCreateSecondary: true,
+					secondaryInstanceName: secondaryName,
+					icrRole:               "NONE",
+				}),
 			},
 		},
 	})
@@ -419,6 +611,70 @@ type InstanceParams struct {
 	maintenanceNanos          int
 	engineVersion             string
 	userEndpointCount         int
+	shouldCreateSecondary     bool
+	secondaryInstanceName     string
+	icrRole                   string
+}
+
+func createSecondaryInstanceResource(params *InstanceParams) string {
+	crossInstanceReplicationConfigBlock := ``
+
+	// Construct cross_instance_replication_config block
+	primaryInstanceBlock := ``
+	secondaryInstancesBlock := ``
+
+	if params.icrRole == "SECONDARY" {
+		primaryInstanceBlock = fmt.Sprintf(`
+		primary_instance {
+			instance = google_memorystore_instance.test.id
+		}
+		`)
+	} else if params.icrRole == "PRIMARY" {
+		secondaryInstancesBlock = fmt.Sprintf(`
+		secondary_instances {
+			instance = google_memorystore_instance.test.id
+		}
+		`)
+	}
+
+	crossInstanceReplicationConfigBlock = fmt.Sprintf(`
+	cross_instance_replication_config {
+		instance_role = "%s"
+		%s
+		%s
+	}
+	`, params.icrRole, primaryInstanceBlock, secondaryInstancesBlock)
+
+	return fmt.Sprintf(`
+resource "google_memorystore_instance" "test_secondary" {
+    instance_id  = "%s"
+	replica_count = %d
+	shard_count = %d
+	node_type = "%s"
+	location         = "us-west2"
+	desired_psc_auto_connections  {
+			network = google_compute_network.producer_net.id
+            project_id = data.google_project.project.project_id
+	}
+    deletion_protection_enabled = %t
+	engine_version = "%s"
+	zone_distribution_config {
+		mode = "%s"
+	}
+	%s
+	depends_on = [
+			google_network_connectivity_service_connection_policy.default,
+			google_memorystore_instance.test
+		]
+	
+	lifecycle {
+		ignore_changes = [
+			# Ignore changes to cross_instance_replication_config as it will be managed by the primary instance
+			cross_instance_replication_config,
+		]
+	}
+}
+`, params.secondaryInstanceName, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, params.engineVersion, params.zoneDistributionMode, crossInstanceReplicationConfigBlock)
 }
 
 func createMemorystoreInstanceEndpointsWithOneUserCreatedConnections(params *InstanceParams) string {
@@ -673,6 +929,11 @@ func createOrUpdateMemorystoreInstance(params *InstanceParams) string {
 		`, params.persistenceMode)
 	}
 
+	secondaryInstanceBlock := ``
+	if params.shouldCreateSecondary {
+		// Create secondary instance resource
+		secondaryInstanceBlock = createSecondaryInstanceResource(params)
+	}
 	if params.userEndpointCount == 2 {
 		createMemorystoreInstanceEndpointsWithTwoUserCreatedConnections(params)
 	} else if params.userEndpointCount == 1 {
@@ -685,7 +946,7 @@ resource "google_memorystore_instance" "test" {
 	replica_count = %d
 	shard_count = %d
 	node_type = "%s"
-	location         = "europe-west1"
+	location         = "us-west2"
 	desired_psc_auto_connections  {
 			network = google_compute_network.producer_net.id
             project_id = data.google_project.project.project_id
@@ -704,9 +965,11 @@ resource "google_memorystore_instance" "test" {
 	%s
 }
 
+%s
+
 resource "google_network_connectivity_service_connection_policy" "default" {
 	name = "%s"
-	location = "europe-west1"
+	location = "us-west2"
 	service_class = "gcp-memorystore"
 	description   = "my basic service connection policy"
 	network = google_compute_network.producer_net.id
@@ -718,7 +981,7 @@ resource "google_network_connectivity_service_connection_policy" "default" {
 resource "google_compute_subnetwork" "producer_subnet" {
 	name          = "%s"
 	ip_cidr_range = "10.0.0.248/29"
-	region        = "europe-west1"
+	region        = "us-west2"
 	network       = google_compute_network.producer_net.id
 }
 
@@ -729,5 +992,5 @@ resource "google_compute_network" "producer_net" {
 
 data "google_project" "project" {
 }
-`, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, params.engineVersion, strBuilder.String(), zoneDistributionConfigBlock, maintenancePolicyBlock, persistenceBlock, lifecycleBlock, params.name, params.name, params.name)
+`, params.name, params.replicaCount, params.shardCount, params.nodeType, params.deletionProtectionEnabled, params.engineVersion, strBuilder.String(), zoneDistributionConfigBlock, maintenancePolicyBlock, persistenceBlock, lifecycleBlock, secondaryInstanceBlock, params.name, params.name, params.name)
 }

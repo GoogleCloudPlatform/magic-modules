@@ -1,5 +1,4 @@
 package parametermanagerregional
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"fmt"
@@ -42,5 +41,3 @@ func dataSourceParameterManagerRegionalRegionalParameterRead(d *schema.ResourceD
 	}
 	return nil
 }
-
-{{ end }}
