@@ -2584,6 +2584,7 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 }
 
 func TestAccComputeInstance_confidentialHyperDiskBootDisk(t *testing.T) {
+	// Test change
 	t.Parallel()
 	kms := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-hyperdisk-key1")
 
