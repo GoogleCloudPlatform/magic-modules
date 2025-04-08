@@ -280,3 +280,26 @@ properties:
       Denotes whether the firewall policy rule is disabled.
       When set to true, the firewall policy rule is not enforced and traffic behaves as if it did not exist.
       If this is unspecified, the firewall policy rule will be enabled.
+  - name: 'targetSecureTags'
+    type: Array
+    send_empty_value: true
+    description: |
+      A list of secure tags that controls which instances the firewall rule applies to.
+      If targetSecureTag are specified, then the firewall rule applies only to instances in the parent node that have one of those EFFECTIVE secure tags, if all the targetSecureTag are in INEFFECTIVE state, then this rule will be ignored.
+      targetSecureTag may not be set at the same time as targetServiceAccounts. If neither targetServiceAccounts nor targetSecureTag are specified, the firewall rule applies to all instances under specified parent node. Maximum number of target label tags allowed is 256.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: |
+            Name of the secure tag, created with TagManager's TagValue API.
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+        - name: 'state'
+          type: Enum
+          description: |
+            State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
+          output: true
+          enum_values:
+            - 'EFFECTIVE'
+            - 'INEFFECTIVE'
