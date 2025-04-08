@@ -411,3 +411,10 @@ properties:
     output: true
     item_type:
       type: String
+  - name: 'testing'
+    type: String
+    description: |
+      This is for learning purposes.
+    output: true
+    item_type:
+      type: String
