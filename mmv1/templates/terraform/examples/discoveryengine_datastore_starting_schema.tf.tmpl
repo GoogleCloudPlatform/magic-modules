@@ -1,0 +1,13 @@
+resource "google_discovery_engine_data_store" "starting_schema" {
+  location                     = "global"
+  data_store_id                = "{{index $.Vars "data_store_id"}}"
+  display_name                 = "tf-test-structured-datastore"
+  industry_vertical            = "GENERIC"
+  content_config               = "NO_CONTENT"
+  solution_types               = ["SOLUTION_TYPE_SEARCH"]
+  create_advanced_site_search  = false
+  skip_default_schema_creation = false
+  starting_schema {
+    json_schema                = "{\"$schema\":\"https://json-schema.org/draft/2020-12/schema\",\"datetime_detection\":true,\"type\":\"object\",\"geolocation_detection\":true}"
+  }
+}
