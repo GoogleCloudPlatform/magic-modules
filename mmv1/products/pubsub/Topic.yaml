@@ -129,7 +129,7 @@ properties:
       constraints are in effect.
     default_from_api: true
     properties:
-        - name: 'allowedPersistenceRegions'
+      - name: 'allowedPersistenceRegions'
         is_set: true
         type: Array
         description: |
