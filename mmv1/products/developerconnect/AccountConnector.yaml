@@ -64,7 +64,7 @@ autogen_status: QWNjb3VudENvbm5lY3Rvcg==
 parameters:
   - name: location
     type: String
-    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    description: The location of the resource.
     immutable: true
     url_param_only: true
     required: true
