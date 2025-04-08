@@ -303,4 +303,3 @@ properties:
           enum_values:
             - 'EFFECTIVE'
             - 'INEFFECTIVE'
-            
