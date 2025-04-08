@@ -484,3 +484,4 @@ properties:
     type: Boolean
     description: |
       If set to true, the specified action is not enforced.
+    send_empty_value: true

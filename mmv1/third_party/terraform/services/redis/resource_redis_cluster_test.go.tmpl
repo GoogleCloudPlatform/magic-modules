@@ -1,16 +1,17 @@
 package redis_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
+{{- if ne $.TargetVersionName "ga" }}
 	"fmt"
 	"strings"
+{{ end }}
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
-
-func TestAccRedisCluster_createClusterWithNodeType(t *testing.T) {
+{{- if ne $.TargetVersionName "ga" }}
+func TestAccRedisCluster_createUpdateClusterWithNodeType(t *testing.T) {
 
 	t.Parallel()
 
@@ -22,7 +23,7 @@ func TestAccRedisCluster_createClusterWithNodeType(t *testing.T) {
 		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				// create cluster with replica count 1
+				// create cluster with node type "REDIS_STANDARD_SMALL"
 				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, deletionProtectionEnabled: true, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", maintenanceDay: "TUESDAY", maintenanceHours: 2, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
@@ -32,41 +33,50 @@ func TestAccRedisCluster_createClusterWithNodeType(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"psc_configs"},
 			},
 			{
+				// update cluster with node type "REDIS_HIGHMEM_MEDIUM"
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, deletionProtectionEnabled: true, nodeType: "REDIS_HIGHMEM_MEDIUM", zoneDistributionMode: "MULTI_ZONE", maintenanceDay: "TUESDAY", maintenanceHours: 2, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
 				// clean up the resource
-				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, deletionProtectionEnabled: false, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE",  maintenanceDay: "TUESDAY", maintenanceHours: 2, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 1, shardCount: 3, deletionProtectionEnabled: false, nodeType: "REDIS_HIGHMEM_MEDIUM", zoneDistributionMode: "MULTI_ZONE", maintenanceDay: "TUESDAY", maintenanceHours: 2, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 		},
 	})
 }
 
-
 // Validate zone distribution for the cluster.
 func TestAccRedisCluster_createClusterWithZoneDistribution(t *testing.T) {
-        t.Parallel()
+	t.Parallel()
 
-        name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
-        acctest.VcrTest(t, resource.TestCase{
-                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-                ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-                CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
-                Steps: []resource.TestStep{
-                        {
-                                // create cluster with replica count 1
-                                Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "SINGLE_ZONE", zone: "us-central1-b"}),
-                        },
-                        {
-                                ResourceName:      "google_redis_cluster.test",
-                                ImportState:       true,
-                                ImportStateVerify: true,
-                                ImportStateVerifyIgnore: []string{"psc_configs"},
-                        },
-                        {
-                                // clean up the resource
-                                Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "SINGLE_ZONE", zone: "us-central1-b"}),
-                        },
-                },
-        })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// create cluster with replica count 1
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "SINGLE_ZONE", zone: "us-central1-b"}),
+			},
+			{
+				ResourceName:            "google_redis_cluster.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"psc_configs"},
+			},
+			{
+				// clean up the resource
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "SINGLE_ZONE", zone: "us-central1-b"}),
+			},
+		},
+	})
 }
 
 // Validate that replica count is updated for the cluster
@@ -171,14 +181,14 @@ func TestAccRedisCluster_updateRedisConfigs(t *testing.T) {
 			{
 				// create cluster
 				Config: createOrUpdateRedisCluster(&ClusterParams{
-					name:           name,
-					shardCount:     3,
+					name:                 name,
+					shardCount:           3,
 					zoneDistributionMode: "MULTI_ZONE",
-					maintenanceDay: "MONDAY",
-					maintenanceHours: 1,
-					maintenanceMinutes: 0,
-					maintenanceSeconds: 0,
-					maintenanceNanos: 0,
+					maintenanceDay:       "MONDAY",
+					maintenanceHours:     1,
+					maintenanceMinutes:   0,
+					maintenanceSeconds:   0,
+					maintenanceNanos:     0,
 					redisConfigs: map[string]string{
 						"maxmemory-policy": "volatile-ttl",
 					}}),
@@ -192,14 +202,14 @@ func TestAccRedisCluster_updateRedisConfigs(t *testing.T) {
 			{
 				// add a new redis config key-value pair and update existing redis config
 				Config: createOrUpdateRedisCluster(&ClusterParams{
-					name:           name,
-					shardCount:     3,
+					name:                 name,
+					shardCount:           3,
 					zoneDistributionMode: "MULTI_ZONE",
-					maintenanceDay: "MONDAY",
-					maintenanceHours: 1,
-					maintenanceMinutes: 0,
-					maintenanceSeconds: 0,
-					maintenanceNanos: 0,
+					maintenanceDay:       "MONDAY",
+					maintenanceHours:     1,
+					maintenanceMinutes:   0,
+					maintenanceSeconds:   0,
+					maintenanceNanos:     0,
 					redisConfigs: map[string]string{
 						"maxmemory-policy":  "allkeys-lru",
 						"maxmemory-clients": "90%",
@@ -215,12 +225,11 @@ func TestAccRedisCluster_updateRedisConfigs(t *testing.T) {
 				// remove all redis configs
 				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, shardCount: 3, zoneDistributionMode: "MULTI_ZONE", maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
-
 		},
 	})
 }
 
-// Validate that deletion protection enabled/disabled cluster is created updated 
+// Validate that deletion protection enabled/disabled cluster is created updated
 func TestAccRedisCluster_createUpdateDeletionProtection(t *testing.T) {
 	t.Parallel()
 
@@ -233,7 +242,7 @@ func TestAccRedisCluster_createUpdateDeletionProtection(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create cluster with deletion protection set to false
-        		Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "MULTI_ZONE"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "MULTI_ZONE"}),
 			},
 			{
 				ResourceName:            "google_redis_cluster.test",
@@ -243,7 +252,7 @@ func TestAccRedisCluster_createUpdateDeletionProtection(t *testing.T) {
 			},
 			{
 				// update deletion protection to true
-        		Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: true, zoneDistributionMode: "MULTI_ZONE"}),
 			},
 			{
 				ResourceName:            "google_redis_cluster.test",
@@ -253,14 +262,77 @@ func TestAccRedisCluster_createUpdateDeletionProtection(t *testing.T) {
 			},
 			{
 				// update deletion protection to false and delete the cluster
-        		Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "MULTI_ZONE"}),
+				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, deletionProtectionEnabled: false, zoneDistributionMode: "MULTI_ZONE"}),
 			},
+		},
+	})
+}
+{{ end }}
+func TestAccRedisCluster_automatedBackupConfig(t *testing.T) {
+	t.Parallel()
 
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRedisCluster_automatedBackupConfig(context),
+			},
+			{
+				ResourceName:       "google_redis_cluster.cluster_abc",
+				ImportState:        true,
+				ImportStateVerify:  true,
+			},
+			{
+				Config: testAccRedisCluster_automatedBackupConfigWithout(context),
+			},
+			{
+				ResourceName:      "google_redis_cluster.cluster_abc",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
 
+func testAccRedisCluster_automatedBackupConfig(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_redis_cluster" "cluster_abc" {
+  name                           = "tf-test-redis-abc-%{random_suffix}"
+  shard_count                    = 1
+  region                         = "us-central1"
+  deletion_protection_enabled    = false
+  automated_backup_config {
+   retention                     = "259200s"
+   fixed_frequency_schedule {
+    start_time {
+      hours                      = 20
+    }
+   }
+  }
 
+}	
+`, context)
+}
+
+func testAccRedisCluster_automatedBackupConfigWithout(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_redis_cluster" "cluster_abc" {
+  name                           = "tf-test-redis-abc-%{random_suffix}"
+  shard_count                    = 1
+  region                         = "us-central1"
+  deletion_protection_enabled    = false 
+  
+}	
+`, context)
+}
+
+{{- if ne $.TargetVersionName "ga" }}
 // Validate that persistence is updated for the cluster
 func TestAccRedisCluster_persistenceUpdate(t *testing.T) {
 	t.Parallel()
@@ -291,7 +363,7 @@ func TestAccRedisCluster_persistenceUpdate(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"psc_configs"},
-			},			{
+			}, {
 				// update persistence to RDB
 				Config: createOrUpdateRedisCluster(&ClusterParams{name: name, replicaCount: 0, shardCount: 3, nodeType: "REDIS_STANDARD_SMALL", zoneDistributionMode: "MULTI_ZONE", persistenceBlock: "persistence_config {\nmode = \"RDB\"\nrdb_config {\nrdb_snapshot_period = \"ONE_HOUR\"\nrdb_snapshot_start_time = \"2024-10-02T15:01:23Z\"\n}\n}"}),
 			},
@@ -309,7 +381,7 @@ func TestAccRedisCluster_persistenceUpdate(t *testing.T) {
 	})
 }
 
-// Validate that deletion protection enabled/disabled cluster is created updated 
+// Validate that deletion protection enabled/disabled cluster is created updated
 func TestAccRedisCluster_switchoverAndDetachSecondary(t *testing.T) {
 	t.Parallel()
 
@@ -675,10 +747,10 @@ func createRedisClusterUserCreatedConnection2(params *ClusterParams) string {
 }
 
 func createOrUpdateRedisCluster(params *ClusterParams) string {
-	clusterResourceBlock := createRedisClusterResourceConfig(params, /*isSecondaryCluster*/false)
+	clusterResourceBlock := createRedisClusterResourceConfig(params /*isSecondaryCluster*/, false)
 	secClusterResourceBlock := ``
 	if params.shouldCreateSecondary {
-		secClusterResourceBlock = createRedisClusterResourceConfig(params, /*isSecondaryCluster*/true)
+		secClusterResourceBlock = createRedisClusterResourceConfig(params /*isSecondaryCluster*/, true)
 	}
 
 	endpointBlock := createRedisClusterEndpoints(params)
@@ -826,5 +898,4 @@ func createRedisClusterResourceConfig(params *ClusterParams, isSecondaryCluster 
 		crossClusterReplicationConfigBlock,
 		dependsOnBlock)
 }
-
 {{ end }}
