@@ -228,6 +228,10 @@ func (p *Product) TerraformName() string {
 	return google.Underscore(p.Name)
 }
 
+func (p *Product) AnsibleName() string {
+	return p.TerraformName()
+}
+
 func (p *Product) ServiceBaseUrl() string {
 	if p.CaiBaseUrl != "" {
 		return p.CaiBaseUrl

@@ -13,6 +13,7 @@
 package api
 
 import (
+	"cmp"
 	"fmt"
 	"log"
 	"maps"
@@ -546,6 +547,14 @@ func (r Resource) AllUserProperties() []*Type {
 	return google.Concat(r.UserProperites(), r.UserParameters())
 }
 
+func (r Resource) SortedUserProperties() []*Type {
+	props := google.Concat(r.UserProperites(), r.UserParameters())
+	slices.SortFunc(props, func(a, b *Type) int {
+		return cmp.Compare(a.Name, b.Name)
+	})
+	return props
+}
+
 func (r Resource) RequiredProperties() []*Type {
 	return google.Select(r.AllUserProperties(), func(p *Type) bool {
 		return p.Required
@@ -1066,6 +1075,14 @@ func (r Resource) TerraformName() string {
 		return r.LegacyName
 	}
 	return fmt.Sprintf("google_%s_%s", r.ProductMetadata.TerraformName(), google.Underscore(r.Name))
+}
+
+func (r Resource) AnsibleName() string {
+	if r.LegacyName != "" {
+		return fmt.Sprintf("gcp_%s_%s", google.Underscore(r.ProductMetadata.AnsibleName()), google.Underscore(strings.Replace(r.LegacyName, "google_", "", 1)))
+	}
+
+	return fmt.Sprintf("gcp_%s_%s", google.Underscore(r.ProductMetadata.AnsibleName()), google.Underscore(r.Name))
 }
 
 func (r Resource) ImportIdFormatsFromResource() []string {
