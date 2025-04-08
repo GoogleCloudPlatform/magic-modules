@@ -260,6 +260,8 @@ properties:
      Backups stored in Cloud Storage buckets. The Cloud Storage buckets need to be the same region as the clusters.
     custom_flatten: 'templates/terraform/custom_flatten/redis_cluster_gcs_source.go.tmpl'
     immutable: true
+    conflicts:
+      - managedBackupSource
     properties:
       - name: 'uris'
         type: Array
@@ -274,12 +276,14 @@ properties:
     description: "Backups that generated and managed by memorystore."
     custom_flatten: 'templates/terraform/custom_flatten/redis_cluster_managed_backup_source.go.tmpl'
     immutable: true
+    conflicts:
+      - gcsSource
     properties:
       - name: 'backup'
         type: String
         description: |
          Example: //redis.googleapis.com/projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backup} A shorter version (without the prefix) of the backup name is also supported,
-         like projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backupId} In this case, it assumes the backup is under redis.googleapis.com.
+         like projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backupId}. In this case, it assumes the backup is under redis.googleapis.com.
         required: true
         immutable: true
   - name: 'backupCollection'

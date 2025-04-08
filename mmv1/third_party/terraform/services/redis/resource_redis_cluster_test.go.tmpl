@@ -400,8 +400,7 @@ resource "google_redis_cluster" "cluster_mb_copy" {
 `, context)
 }
 
-// testAccCheckRedisClusterOnDemandBackup creates an on-demand backup for a Redis Cluster
-// and verifies that the backup operation was successful.
+// Takes the backup and verifies that the backup operation was successful.
 func testAccCheckRedisClusterOnDemandBackup(t *testing.T, resourceName string, backupId string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resourceName]
@@ -463,8 +462,6 @@ func testAccCheckRedisClusterOnDemandBackup(t *testing.T, resourceName string, b
 func TestAccRedisCluster_gcsSource(t *testing.T) {
 	t.Parallel()
 	randomSuffix := acctest.RandString(t, 10)
-	// Will be populated by testAccCheckRedisClusterExportBackup
-
 	context := map[string]interface{}{
 		"random_suffix": randomSuffix,
 		"back_up":       "back_me_up",
@@ -481,8 +478,8 @@ func TestAccRedisCluster_gcsSource(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					// Create an on-demand backup
 					testAccCheckRedisClusterOnDemandBackup(t, "google_redis_cluster.cluster_gbs_main", context["back_up"].(string)),
-					// Export the backup to GCS and extract the actual backup file name
-					testAccCheckRedisClusterExportBackup(t, "google_redis_cluster.cluster_gbs_main", context["back_up"].(string), context["gcs_bucket"].(string), &context),
+					// Export the backup to GCS
+					testAccCheckRedisClusterExportBackup(t, "google_redis_cluster.cluster_gbs_main", context["back_up"].(string), context["gcs_bucket"].(string)),
 				),
 			},
 			{
@@ -509,7 +506,7 @@ resource "google_redis_cluster" "cluster_gbs_main" {
 
 # Create a GCS bucket for exporting Redis backups
 resource "google_storage_bucket" "redis_backup_bucket" {
-  name                           = "tf-test-redis-backup-%{random_suffix}"
+  name                           = "%{gcs_bucket}"
   location                       = "us-central1"
   uniform_bucket_level_access    = true
   force_destroy                  = true
@@ -539,7 +536,7 @@ resource "google_redis_cluster" "cluster_gbs_main" {
 
 # Reference the bucket created in the setup
 resource "google_storage_bucket" "redis_backup_bucket" {
-  name                        	  = "tf-test-redis-backup-%{random_suffix}"
+  name                        	  = "%{gcs_bucket}"
   location                    	  = "us-central1"
   uniform_bucket_level_access 	  = true
   force_destroy               	  = true
@@ -549,7 +546,7 @@ resource "google_storage_bucket" "redis_backup_bucket" {
 data "google_project" "project" {}
 
 data "google_storage_bucket_objects" "backup" {
-  bucket 					      = "tf-test-redis-backup-%{random_suffix}"
+  bucket 					      = "%{gcs_bucket}"
 }
 
 resource "google_storage_bucket_iam_member" "redis_backup_writer" {
@@ -565,17 +562,14 @@ resource "google_redis_cluster" "cluster_gbs" {
   region                         = "us-central1"
   deletion_protection_enabled    = false
   gcs_source {
-    uris                         = [join("", ["gs://tf-test-redis-backup-%{random_suffix}/" , data.google_storage_bucket_objects.backup.bucket_objects[0]["name"]])]
+    uris                         = [join("", ["gs://%{gcs_bucket}/" , data.google_storage_bucket_objects.backup.bucket_objects[0]["name"]])]
   }
   depends_on                     = [google_storage_bucket_iam_member.redis_backup_writer]
 }
 `, context)
 }
 
-// testAccCheckRedisClusterExportBackup exports a Redis Cluster backup to a GCS destination,
-// verifies that the export operation was successful, and extracts the actual backup file name.
-// The extracted file name is saved to the context parameter.
-func testAccCheckRedisClusterExportBackup(t *testing.T, resourceName string, backupId string, gcsDestination string, context *map[string]interface{}) resource.TestCheckFunc {
+func testAccCheckRedisClusterExportBackup(t *testing.T, resourceName string, backupId string, gcsDestination string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		log.Printf("[DEBUG] Starting Redis Cluster backup export for resource %s, backup %s to %s", resourceName, backupId, gcsDestination)
 
