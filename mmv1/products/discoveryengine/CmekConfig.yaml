@@ -22,7 +22,7 @@ references:
 base_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs'
 self_link: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
 # Update API is also used as create API for some reason.
-create_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}?&setDefault={{set_default}}'
 create_verb: 'PATCH'
 update_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
 update_verb: 'PATCH'
@@ -51,6 +51,8 @@ examples:
   primary_resource_name: 'fmt.Sprintf("tf_test_cmek_config%s", context["random_suffix"])'
   vars:
     cmek_config_id: 'cmek-config-id'
+  ignore_read_extra:
+  - 'project'
 parameters:
   - name: 'location'
     type: String
@@ -66,7 +68,12 @@ parameters:
       The unique id of the cmek config.
     url_param_only: true
     immutable: true
-    output: true
+  - name: 'setDefault'
+    type: Boolean
+    description: |
+      Set the following CmekConfig as the default to be used for child resources
+      if one is not specified.
+    url_param_only: true
 properties:
   - name: 'name'
     type: String
