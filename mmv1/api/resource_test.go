@@ -358,12 +358,11 @@ func TestMagicianLocation(t *testing.T) {
 	}
 }
 
-
 func TestHasComputedIdFormatFields(t *testing.T) {
-	cases := []struct{
+	cases := []struct {
 		name, description string
-		resource Resource
-		want bool
+		resource          Resource
+		want              bool
 	}{
 		{
 			name: "no properties",
@@ -390,7 +389,7 @@ func TestHasComputedIdFormatFields(t *testing.T) {
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
 				Properties: []*Type{
 					{
-						Name: "field",
+						Name:   "field",
 						Output: true,
 					},
 				},
@@ -403,7 +402,7 @@ func TestHasComputedIdFormatFields(t *testing.T) {
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
 				Properties: []*Type{
 					{
-						Name: "resource",
+						Name:   "resource",
 						Output: true,
 					},
 				},
@@ -416,8 +415,8 @@ func TestHasComputedIdFormatFields(t *testing.T) {
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
 				Properties: []*Type{
 					{
-						Name: "resource",
-						Output: true,
+						Name:       "resource",
+						Output:     true,
 						IgnoreRead: true,
 					},
 				},
@@ -430,7 +429,7 @@ func TestHasComputedIdFormatFields(t *testing.T) {
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
 				Properties: []*Type{
 					{
-						Name: "field",
+						Name:           "field",
 						DefaultFromApi: true,
 					},
 				},
@@ -443,7 +442,7 @@ func TestHasComputedIdFormatFields(t *testing.T) {
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
 				Properties: []*Type{
 					{
-						Name: "resource",
+						Name:           "resource",
 						DefaultFromApi: true,
 					},
 				},
@@ -456,9 +455,9 @@ func TestHasComputedIdFormatFields(t *testing.T) {
 				IdFormat: "projects/{{project}}/resource/{{resource}}",
 				Properties: []*Type{
 					{
-						Name: "resource",
+						Name:           "resource",
 						DefaultFromApi: true,
-						IgnoreRead: true,
+						IgnoreRead:     true,
 					},
 				},
 			},
@@ -470,7 +469,7 @@ func TestHasComputedIdFormatFields(t *testing.T) {
 				IdFormat: "projects/{{project}}/resource/{{resource_id}}",
 				Properties: []*Type{
 					{
-						Name: "resourceId",
+						Name:   "resourceId",
 						Output: true,
 					},
 				},
