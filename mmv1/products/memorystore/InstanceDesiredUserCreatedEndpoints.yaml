@@ -1,0 +1,164 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'InstanceDesiredUserCreatedEndpoints'
+api_resource_type_kind: Instance
+description: |
+  Manages user created connections for Memorystore instance
+docs:
+  note: |
+    Please ensure your connections meet the requirements outlined at
+    https://cloud.devsite.corp.google.com/memorystore/docs/valkey/about-multiple-vpc-networking#application_connection_requirements.
+    If you remove a connections item from the resource, the corresponding forwarding rule will no longer be functioning.
+    If the corresponding forwarding rule is represented in your terraform configuration it is recommended to delete that
+    `google_compute_forwarding_rule` resource at the same time.
+references:
+  guides:
+  api: 'https://cloud.google.com/memorystore/docs/valkey/reference/rest/v1/projects.locations.instances'
+id_format: 'projects/{{project}}/locations/{{region}}/instances/{{name}}'
+base_url: 'projects/{{project}}/locations/{{region}}/instances'
+self_link: 'projects/{{project}}/locations/{{region}}/instances/{{name}}'
+create_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}?updateMask=endpoints'
+create_verb: PATCH
+update_verb: 'PATCH'
+update_url: 'projects/{{project}}/locations/{{region}}/instances/{{name}}?updateMask=endpoints'
+update_mask: true
+custom_code:
+  custom_delete: 'templates/terraform/custom_delete/memorystore_instance_desired_user_created_endpoints.go.tmpl'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 120
+  delete_minutes: 30
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+examples:
+  - name: 'memorystore_instance_desired_user_created_endpoints'
+    primary_resource_id: 'instance-user-conn'
+    vars:
+      instance_name: 'instance-user-conn'
+      network1_name: 'net1'
+      subnet_network1_name: 'subnet-net1'
+      ip1_network1_name: 'ip1-net1'
+      ip2_network1_name: 'ip2-net1'
+      forwarding_rule1_network1_name: 'fwd1-net1'
+      forwarding_rule2_network1_name: 'fwd2-net1'
+      network2_name: 'network2'
+      subnet_network2_name: 'subnet-net2'
+      ip1_network2_name: 'ip1-net2'
+      ip2_network2_name: 'ip2-net2'
+      forwarding_rule1_network2_name: 'fwd1-net2'
+      forwarding_rule2_network2_name: 'fwd2-net2'
+  - name: 'memorystore_instance_desired_user_and_auto_created_endpoints'
+    primary_resource_id: 'instance-user-auto-conn'
+    vars:
+      instance_name: 'instance-user-auto-conn'
+      network1_name: 'net1'
+      subnet_network1_name: 'subnet-net1'
+      policy_name: 'scpolicy'
+      network2_name: 'network2'
+      subnet_network2_name: 'subnet-net2'
+      ip1_network2_name: 'ip1-net2'
+      ip2_network2_name: 'ip2-net2'
+      forwarding_rule1_network2_name: 'fwd1-net2'
+      forwarding_rule2_network2_name: 'fwd2-net2'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the Memorystore instance these endpoints should be added to.
+    required: true
+    url_param_only: true
+  - name: 'region'
+    type: String
+    description: |
+      The name of the region of the Memorystore instance these endpoints should be added to.
+    url_param_only: true
+    required: true
+properties:
+  - name: 'desiredUserCreatedEndpoints'
+    api_name: 'endpoints'
+    type: Array
+    description: "A list of desired user endpoints"
+    custom_flatten: 'templates/terraform/custom_flatten/memorystore_instance_desired_user_created_connections_desired_endpoints.go.tmpl'
+    item_type:
+      type: NestedObject
+      description: |
+        Instance Endpoint consists of PSC connections that are created
+        as a group in each VPC network for accessing the Instance. In each group,
+        there shall be one connection for each service attachment in the Instance.
+      properties:
+        - name: connections
+          type: Array
+          item_type:
+            type: NestedObject
+            name: 'connections'
+            properties:
+              - name: 'pscConnection'
+                type: NestedObject
+                description: |
+                  Detailed information of a PSC connection that is created by the customer
+                  who owns the cluster.
+                properties:
+                  - name: 'pscConnectionId'
+                    type: String
+                    description:
+                      "The PSC connection id of the forwarding rule connected
+                      to the\nservice attachment."
+                    required: true
+                  - name: 'ipAddress'
+                    type: String
+                    description:
+                      "The IP allocated on the consumer network for the
+                      PSC forwarding rule. "
+                    required: true
+                  - name: 'forwardingRule'
+                    type: String
+                    description: "The URI of the consumer side forwarding rule.\nFormat:\nprojects/{project}/regions/{region}/forwardingRules/{forwarding_rule} "
+                    required: true
+                  - name: 'projectId'
+                    type: String
+                    description:
+                      "The consumer project_id where the forwarding rule is
+                      created from. "
+                    default_from_api: true
+                  - name: 'network'
+                    type: String
+                    description:
+                      "The consumer network where the IP address resides, in
+                      the form of\nprojects/{project_id}/global/networks/{network_id}. "
+                    required: true
+                  - name: 'serviceAttachment'
+                    type: String
+                    description:
+                      "The service attachment which is the target of the PSC connection, in the form of
+                      projects/{project-id}/regions/{region}/serviceAttachments/{service-attachment-id}."
+                    required: true
+                  - name: 'pscConnectionStatus'
+                    type: Enum
+                    description:
+                      "Output Only. The status of the PSC connection: whether a connection exists and ACTIVE or it no longer exists.
+                      \n Possible values:\n ACTIVE \n NOT_FOUND"
+                    output: true
+                  - name: 'connectionType'
+                    type: Enum
+                    description:
+                      "Output Only. Type of a PSC Connection.
+                      \n Possible values:\n CONNECTION_TYPE_DISCOVERY \n CONNECTION_TYPE_PRIMARY \n CONNECTION_TYPE_READER"
+                    output: true

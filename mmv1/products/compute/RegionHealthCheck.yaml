@@ -14,6 +14,8 @@
 ---
 name: 'RegionHealthCheck'
 api_resource_type_kind: HealthCheck
+api_variant_patterns:
+  - 'projects/{project}/regions/{region}/healthChecks/{healthCheck}'
 kind: 'compute#healthCheck'
 description: |
   Health Checks determine whether instances are responsive and able to do work.
@@ -51,11 +53,11 @@ custom_code:
 custom_diff:
   - 'healthCheckCustomizeDiff'
 sweeper:
-  regions:
-    - "europe-west1"
-    - "us-central1"
-    - "europe-west4"
-    - "us-west1"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west4"
+    - region: "europe-west1"
+    - region: "us-west1"
 examples:
   - name: 'region_health_check_tcp'
     primary_resource_id: 'tcp-region-health-check'

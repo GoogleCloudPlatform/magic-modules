@@ -39,10 +39,11 @@ collection_url_key: 'items'
 custom_code:
   constants: 'templates/terraform/constants/compute_resource_policy.go.tmpl'
 sweeper:
-  regions:
-    - "europe-west1"
-    - "us-central1"
-    - "us-east4"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west1"
+    - region: "us-east4"
+    - region: "europe-west9"
 examples:
   - name: 'resource_policy_basic'
     primary_resource_id: 'foo'
@@ -76,6 +77,31 @@ examples:
       name: 'gce-policy'
   - name: 'resource_policy_consistency_group'
     primary_resource_id: 'cgroup'
+    vars:
+      name: 'gce-policy'
+  - name: 'resource_policy_workload_policy'
+    primary_resource_id: 'bar'
+    min_version: 'beta'
+    vars:
+      name: 'gce-policy'
+  - name: 'resource_policy_workload_policy_accelerator_topology'
+    primary_resource_id: 'bar'
+    min_version: 'beta'
+    vars:
+      name: 'gce-policy'
+  - name: 'resource_policy_workload_policy_max_topology_distance'
+    primary_resource_id: 'bar'
+    min_version: 'beta'
+    vars:
+      name: 'gce-policy'
+  - name: 'resource_policy_placement_policy_gpu_topology'
+    primary_resource_id: 'baz'
+    min_version: 'beta'
+    vars:
+      name: 'gce-policy'
+  - name: 'resource_policy_placement_policy_tpu_topology'
+    primary_resource_id: 'baz'
+    min_version: 'beta'
     vars:
       name: 'gce-policy'
 parameters:
@@ -300,6 +326,22 @@ properties:
         type: Integer
         description: |
           Specifies the number of max logical switches.
+        conflicts:
+          - group_placement_policy.0.gpu_topology
+        min_version: 'beta'
+      - name: 'gpuTopology'
+        type: String
+        description: |
+          Specifies the shape of the GPU slice, in slice based GPU families eg. A4X.
+        conflicts:
+          - group_placement_policy.0.max_distance
+        immutable: true
+        min_version: 'beta'
+      - name: 'tpuTopology'
+        type: String
+        description: |
+          Specifies the shape of the TPU slice.
+        immutable: true
         min_version: 'beta'
   - name: 'instanceSchedulePolicy'
     type: NestedObject
@@ -368,3 +410,38 @@ properties:
           Enable disk consistency on the resource policy.
         required: true
         immutable: true
+  - name: 'workloadPolicy'
+    type: NestedObject
+    description: |
+      Represents the workload policy.
+    min_version: 'beta'
+    properties:
+      - name: 'type'
+        type: Enum
+        description: |
+          The type of workload policy.
+        immutable: true
+        required: true
+        enum_values:
+          - 'HIGH_AVAILABILITY'
+          - 'HIGH_THROUGHPUT'
+      - name: 'maxTopologyDistance'
+        type: Enum
+        description: |
+          The maximum topology distance. This field can be set only when the workload policy type is HIGH_THROUGHPUT
+          and cannot be set if accelerator topology is set.
+        immutable: true
+        enum_values:
+          - 'BLOCK'
+          - 'CLUSTER'
+          - 'SUBBLOCK'
+        conflicts:
+          - 'workload_policy.0.accelerator_topology'
+      - name: 'acceleratorTopology'
+        type: String
+        description: |
+          The accelerator topology. This field can be set only when the workload policy type is HIGH_THROUGHPUT
+          and cannot be set if max topology distance is set.
+        immutable: true
+        conflicts:
+          - 'workload_policy.0.max_topology_distance'

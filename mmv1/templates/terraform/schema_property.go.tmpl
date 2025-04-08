@@ -161,6 +161,9 @@ Default value: {{ .ItemType.DefaultValue -}}
 {{ if .Sensitive -}}
     Sensitive: true,
 {{ end -}}
+{{ if .WriteOnly -}}
+  WriteOnly: true,
+{{ end -}}
 {{ if not (eq .DefaultValue nil ) -}}
     Default: {{ .GoLiteral .DefaultValue -}},
 {{ end -}}

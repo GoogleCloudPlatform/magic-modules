@@ -61,6 +61,7 @@ examples:
       network: 'network'
     test_env_vars:
       org_id: 'ORG_ID'
+    min_version: beta
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef
