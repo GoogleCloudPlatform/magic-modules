@@ -464,6 +464,19 @@ func TestHasComputedIdFormatFields(t *testing.T) {
 			},
 			want: false,
 		},
+		{
+			name: "converts prop.name to snake case",
+			resource: Resource{
+				IdFormat: "projects/{{project}}/resource/{{resource_id}}",
+				Properties: []*Type{
+					{
+						Name: "resourceId",
+						Output: true,
+					},
+				},
+			},
+			want: true,
+		},
 	}
 
 	for _, tc := range cases {

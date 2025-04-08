@@ -1225,7 +1225,7 @@ func (r Resource) HasComputedIdFormatFields() bool {
 	}
 	for _, p := range r.GettableProperties() {
 		// Skip fields not in the id format
-		if _, ok := idFormatFields[p.Name]; !ok {
+		if _, ok := idFormatFields[google.Underscore(p.Name)]; !ok {
 			continue
 		}
 		if (p.Output || p.DefaultFromApi) && !p.IgnoreRead {
