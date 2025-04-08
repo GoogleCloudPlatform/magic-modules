@@ -60,6 +60,7 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
     - '{{service_id}}'
+custom_code:
 examples:
   - name: 'dataproc_metastore_service_basic'
     primary_resource_id: 'default'
@@ -323,10 +324,6 @@ properties:
         description: |
           A Cloud Storage URI of a folder, in the format gs://<bucket_name>/<path_inside_bucket>. A sub-folder <backup_folder> containing backup files will be stored below it.
         required: true
-  - name: 'deletionProtection'
-    type: Boolean
-    description: |
-      Indicates if the dataproc metastore should be protected against accidental deletions.
   - name: 'maintenanceWindow'
     type: NestedObject
     description: |
