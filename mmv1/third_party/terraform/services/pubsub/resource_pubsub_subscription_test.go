@@ -596,7 +596,7 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 	})
 }
 
-func testAccPubsubSubscription_javascriptUdfSettings(topic, subscription, functionName, code string) string {
+func testAccPubsubSubscription_javascriptSettings(topic, subscription, functionName, code string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
   name = "%s"
@@ -606,8 +606,8 @@ resource "google_pubsub_subscription" "foo" {
   name  = "%s"
   topic = google_pubsub_topic.foo.id
   message_transforms {
-		disabled = true
-    javascript_udf {
+    disabled = true
+    javascript_ {
       function_name = "%s"
       code = "%s"
     }
@@ -616,7 +616,7 @@ resource "google_pubsub_subscription" "foo" {
 `, topic, subscription, functionName, code)
 }
 
-func testAccPubsubSubscription_javascriptUdfSettings_noEnabled(topic, subscription, functionName, code string) string {
+func testAccPubsubSubscription_javascriptSettings_noEnabled(topic, subscription, functionName, code string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "foo" {
   name = "%s"
