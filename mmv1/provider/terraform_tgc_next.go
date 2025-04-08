@@ -58,7 +58,7 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 	return t
 }
 
-func (tgc TerraformGoogleConversionNext) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversionNext) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs, generateTests bool) {
 	tgc.GenerateTfToCaiObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
 	tgc.GenerateCaiToHclObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
 }
@@ -82,7 +82,7 @@ func (tgc TerraformGoogleConversionNext) CompileTfToCaiCommonFiles(outputFolder 
 		"pkg/tfplan2cai/converters/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
 		"pkg/tfplan2cai/converters/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
 	}
-	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, ProviderName(tgc))
 	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
 }
 
@@ -92,7 +92,7 @@ func (tgc TerraformGoogleConversionNext) CompileCaiToHclCommonFiles(outputFolder
 	resourceConverters := map[string]string{
 		"pkg/cai2hcl/converters/resource_converters.go": "templates/tgc_next/cai2hcl/resource_converters.go.tmpl",
 	}
-	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, ProviderName(tgc))
 	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
 }
 

@@ -49,7 +49,7 @@ func NewTerraformOiCS(product *api.Product, versionName string, startTime time.T
 	return toics
 }
 
-func (toics TerraformOiCS) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (toics TerraformOiCS) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs, generateTests bool) {
 	toics.GenerateObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
 }
 
@@ -67,7 +67,7 @@ func (toics TerraformOiCS) GenerateObjects(outputFolder, resourceToGenerate stri
 }
 
 func (toics TerraformOiCS) GenerateObject(object api.Resource, outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
-	templateData := NewTemplateData(outputFolder, toics.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, toics.TargetVersionName, ProviderName(toics))
 
 	if !object.IsExcluded() {
 		log.Printf("Generating %s resource", object.Name)

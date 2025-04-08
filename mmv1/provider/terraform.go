@@ -69,7 +69,7 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 	return t
 }
 
-func (t Terraform) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (t Terraform) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs, generateTests bool) {
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
 	}
@@ -95,7 +95,7 @@ func (t *Terraform) GenerateObjects(outputFolder, resourceToGenerate string, gen
 }
 
 func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
-	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, t.TargetVersionName, ProviderName(t))
 
 	if !object.IsExcluded() {
 		log.Printf("Generating %s resource", object.Name)
@@ -200,7 +200,7 @@ func (t *Terraform) GenerateOperation(outputFolder string) {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_operation.go", google.Underscore(t.Product.Name)))
-	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, t.TargetVersionName, ProviderName(t))
 	templateData.GenerateOperationFile(targetFilePath, *asyncObjects[0])
 }
 
@@ -418,7 +418,7 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string, ge
 func (t Terraform) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
 	t.generateResourcesForVersion(products)
 	files := t.getCommonCompileFiles(t.TargetVersionName)
-	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, t.TargetVersionName, ProviderName(t))
 	t.CompileFileList(outputFolder, files, *templateData, products)
 }
 

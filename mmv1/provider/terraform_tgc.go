@@ -68,7 +68,7 @@ func NewTerraformGoogleConversion(product *api.Product, versionName string, star
 	return t
 }
 
-func (tgc TerraformGoogleConversion) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversion) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs, generateTests bool) {
 	// Temporary shim to generate the missing resources directory. Can be removed
 	// once the folder exists downstream.
 	resourcesFolder := path.Join(outputFolder, "converters/google/resources")
@@ -97,7 +97,7 @@ func (tgc TerraformGoogleConversion) GenerateObject(object api.Resource, outputF
 		return
 	}
 
-	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, ProviderName(tgc))
 
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
@@ -198,7 +198,7 @@ func (tgc TerraformGoogleConversion) CompileCommonFiles(outputFolder string, pro
 		testSource[target] = source
 	}
 
-	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
+	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName, ProviderName(tgc))
 	tgc.CompileFileList(outputFolder, testSource, *templateData, products)
 
 	resourceConverters := map[string]string{
