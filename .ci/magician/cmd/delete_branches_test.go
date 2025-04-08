@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"magician/exec"
-	"magician/source"
+	"magician/github"
+	"os"
 	"testing"
 )
 
@@ -12,9 +13,14 @@ func TestFetchPRNumber(t *testing.T) {
 		t.Errorf("error creating Runner: %s", err)
 	}
 
-	ctlr := source.NewController("", "modular-magician", "", rnr)
+	githubToken, ok := os.LookupEnv("GITHUB_TOKEN_CLASSIC")
+	if !ok {
+		t.Errorf("did not provide GITHUB_TOKEN_CLASSIC environment variable")
+	}
 
-	prNumber, err := fetchPRNumber("8c6e61bb62d52c950008340deafc1e2a2041898a", "main", rnr, ctlr)
+	gh := github.NewClient(githubToken)
+
+	prNumber, err := fetchPRNumber("8c6e61bb62d52c950008340deafc1e2a2041898a", "main", rnr, gh)
 
 	if err != nil {
 		t.Errorf("error fetching PR number: %s", err)

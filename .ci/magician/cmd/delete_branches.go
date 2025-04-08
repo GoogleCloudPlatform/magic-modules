@@ -18,8 +18,10 @@ package cmd
 import (
 	"fmt"
 	"magician/exec"
+	"magician/github"
 	"magician/source"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -46,24 +48,22 @@ var deleteBranchesCmd = &cobra.Command{
 			return fmt.Errorf("did not provide GITHUB_TOKEN_CLASSIC environment variable")
 		}
 
-		goPath, ok := os.LookupEnv("GOPATH")
-		if !ok {
-			return fmt.Errorf("did not provide GOPATH environment variable")
-		}
-
 		rnr, err := exec.NewRunner()
 		if err != nil {
 			return fmt.Errorf("error creating Runner: %s", err)
 		}
 
-		ctlr := source.NewController(goPath, "modular-magician", githubToken, rnr)
+		gh := github.NewClient(githubToken)
+		if err != nil {
+			return fmt.Errorf("error creating GitHub client: %s", err)
+		}
 
-		return execDeleteBranchesCmd(baseBranch, sha, githubToken, rnr, ctlr)
+		return execDeleteBranchesCmd(baseBranch, sha, githubToken, rnr, gh)
 	},
 }
 
-func execDeleteBranchesCmd(baseBranch, sha, githubToken string, runner source.Runner, controller *source.Controller) error {
-	prNumber, err := fetchPRNumber(sha, baseBranch, runner, controller)
+func execDeleteBranchesCmd(baseBranch, sha, githubToken string, runner ExecRunner, gh GithubClient) error {
+	prNumber, err := fetchPRNumber(sha, baseBranch, runner, gh)
 
 	if err != nil {
 		return err
@@ -74,38 +74,24 @@ func execDeleteBranchesCmd(baseBranch, sha, githubToken string, runner source.Ru
 	return err
 }
 
-func fetchPRNumber(sha, baseBranch string, runner source.Runner, controller *source.Controller) (string, error) {
-	repo := &source.Repo{
-		Name:   "terraform-provider-google-beta",
-		Branch: baseBranch,
-	}
-	controller.SetPath(repo)
-
-	if err := controller.Clone(repo); err != nil {
-		return "", err
-	}
-
-	controller.SetPath(repo)
-
-	if err := runner.PushDir(repo.Path); err != nil {
-		return "", err
-	}
-
-	message, err := runner.Run("git", []string{
-		"show",
-		"-s",
-		"--format=%s",
-		sha,
-	}, nil)
+func fetchPRNumber(sha, baseBranch string, runner ExecRunner, gh GithubClient) (string, error) {
+	message, err := gh.GetCommitMessage("hashicorp", "terraform-provider-google-beta", sha)
 	if err != nil {
 		return "", fmt.Errorf("error getting commit message: %s", err)
 	}
 
-	messageParts := strings.Split(message, " ")
+	messageLines := strings.Split(message, "\n")
 
-	prNumber := messageParts[len(messageParts)-1]
+	messageParts := strings.Split(messageLines[0], " ")
 
-	return strings.Trim(prNumber, "()#\n"), nil
+	prNumber := strings.Trim(messageParts[len(messageParts)-1], "()#\n")
+
+	_, err = strconv.ParseInt(prNumber, 10, 64)
+	if err != nil {
+		return "", fmt.Errorf("error parsing PR number: %s", err)
+	}
+
+	return prNumber, nil
 }
 
 var repoList = []string{
