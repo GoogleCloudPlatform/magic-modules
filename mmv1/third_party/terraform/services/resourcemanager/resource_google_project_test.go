@@ -530,7 +530,8 @@ resource "google_project" "acceptance" {
   deletion_policy = "DELETE"
   labels = {
 	"%s": "%s"
-  }`, pid, pid, org, key, value)
+  }
+}`, pid, pid, org, key, value)
 }
 
 func testAccProject_deleteDefaultNetwork(pid, org, billing string) string {

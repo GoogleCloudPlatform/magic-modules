@@ -586,7 +586,7 @@ func TestAccComputeInstance_ipv6ExternalReservation(t *testing.T) {
 						testAccComputeInstance_ipv6ExternalReservation(instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-west2-a", instanceName),
+			computeInstanceImportStep("us-west2-a", instanceName, []string{}),
 		},
 	})
 }
@@ -613,7 +613,7 @@ func TestAccComputeInstance_internalIPv6(t *testing.T) {
 				testAccComputeInstance_internalIpv6(ipName, instanceName)),
         ),
       },
-      computeInstanceImportStep("us-west2-a", instanceName),
+      computeInstanceImportStep("us-west2-a", instanceName, []string{}),
     },
   })
 }
@@ -697,7 +697,7 @@ func TestAccComputeInstance_networkTier(t *testing.T) {
 						testAccComputeInstance_networkTier(instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -825,7 +825,7 @@ func TestAccComputeInstance_kmsDiskEncryption(t *testing.T) {
 						testAccComputeInstance_disks_kms(bootKmsKeyName, diskNameToEncryptionKey, instanceName, acctest.RandString(t, 10))),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -1127,7 +1127,7 @@ func TestAccComputeInstance_attachedDisk(t *testing.T) {
 						testAccComputeInstance_attachedDisk(diskName, instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -1154,7 +1154,7 @@ func TestAccComputeInstance_attachedDisk_sourceUrl(t *testing.T) {
 						testAccComputeInstance_attachedDisk_sourceUrl(diskName, instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -1181,7 +1181,7 @@ func TestAccComputeInstance_attachedDisk_modeRo(t *testing.T) {
 						testAccComputeInstance_attachedDisk_modeRo(diskName, instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -1263,7 +1263,7 @@ func TestAccComputeInstance_bootDisk_source(t *testing.T) {
 						testAccComputeInstance_bootDisk_source(diskName, instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -1290,7 +1290,7 @@ func TestAccComputeInstance_bootDisk_sourceUrl(t *testing.T) {
 						testAccComputeInstance_bootDisk_sourceUrl(diskName, instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -1339,7 +1339,7 @@ func TestAccComputeInstance_bootDisk_mode(t *testing.T) {
 						testAccComputeInstance_bootDisk_mode(instanceName, diskMode)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -1380,7 +1380,7 @@ func TestAccComputeInstance_with375GbScratchDisk(t *testing.T) {
 						testAccComputeInstance_with375GbScratchDisk(instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -1428,7 +1428,7 @@ func TestAccComputeInstance_with18TbScratchDisk(t *testing.T) {
 						testAccComputeInstance_with18TbScratchDisk(instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -1572,7 +1572,7 @@ func TestAccComputeInstance_serviceAccount(t *testing.T) {
 						testAccComputeInstance_serviceAccount(instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -1598,7 +1598,7 @@ func TestAccComputeInstance_noServiceAccount(t *testing.T) {
 						testAccComputeInstance_noServiceAccount(instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -1624,7 +1624,7 @@ func TestAccComputeInstance_serviceAccountEmail_0scopes(t *testing.T) {
 						testAccComputeInstance_serviceAccountEmail_0scopes(instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -1751,7 +1751,7 @@ func TestAccComputeInstance_scheduling(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 			{
 				Config: testAccComputeInstance_schedulingUpdated(instanceName),
 				Check: resource.ComposeTestCheckFunc(
@@ -1761,7 +1761,7 @@ func TestAccComputeInstance_scheduling(t *testing.T) {
 						testAccComputeInstance_schedulingUpdated(instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -1932,7 +1932,7 @@ func TestAccComputeInstance_enableUefiNetworking(t *testing.T) {
 						testAccComputeInstance_enableUefiNetworking(context_1)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", context_1["instance_name"].(string)),
+			computeInstanceImportStep("us-central1-a", context_1["instance_name"].(string), []string{}),
 		},
 	})
 }
@@ -1992,7 +1992,7 @@ func TestAccComputeInstance_reservationAffinities(t *testing.T) {
 					testAccCheckComputeInstanceHasReservationAffinity(&instance, "NO_RESERVATION"),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 			{
 				Config: testAccComputeInstance_reservationAffinity_nonSpecificReservationConfig(instanceName, "ANY_RESERVATION"),
 				Check: resource.ComposeTestCheckFunc(
@@ -2000,7 +2000,7 @@ func TestAccComputeInstance_reservationAffinities(t *testing.T) {
 					testAccCheckComputeInstanceHasReservationAffinity(&instance, "ANY_RESERVATION"),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 			{
 				Config: testAccComputeInstance_reservationAffinity_specificReservationConfig(instanceName),
 				Check: resource.ComposeTestCheckFunc(
@@ -2010,7 +2010,7 @@ func TestAccComputeInstance_reservationAffinities(t *testing.T) {
 						testAccComputeInstance_reservationAffinity_specificReservationConfig(instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -2056,7 +2056,7 @@ func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.host_error_timeout_seconds", "90"),
 				),
 			},
-			computeInstanceImportStep(context_1["zone"].(string), context_1["instance_name"].(string)),
+			computeInstanceImportStep(context_1["zone"].(string), context_1["instance_name"].(string), []string{}),
 			{
 				Config: testAccComputeInstance_hostErrorTimeoutSeconds(context_2),
 				Check: resource.ComposeTestCheckFunc(
@@ -2064,7 +2064,7 @@ func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.host_error_timeout_seconds", "120"),
 				),
 			},
-			computeInstanceImportStep(context_2["zone"].(string), context_2["instance_name"].(string)),
+			computeInstanceImportStep(context_2["zone"].(string), context_2["instance_name"].(string), []string{}),
 			{
 				Config: testAccComputeInstance_hostErrorTimeoutSeconds(context_3),
 				Check: resource.ComposeTestCheckFunc(
@@ -2072,7 +2072,7 @@ func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.host_error_timeout_seconds", "0"),
 				),
 			},
-			computeInstanceImportStep(context_3["zone"].(string), context_3["instance_name"].(string)),
+			computeInstanceImportStep(context_3["zone"].(string), context_3["instance_name"].(string), []string{}),
 			{
 				Config: testAccComputeInstance_hostErrorTimeoutSeconds(context_4),
 				Check: resource.ComposeTestCheckFunc(
@@ -2082,7 +2082,7 @@ func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 						testAccComputeInstance_hostErrorTimeoutSeconds(context_4)),
 				),
 			},
-			computeInstanceImportStep(context_4["zone"].(string), context_4["instance_name"].(string)),
+			computeInstanceImportStep(context_4["zone"].(string), context_4["instance_name"].(string), []string{}),
 		},
 	})
 }
@@ -2109,7 +2109,7 @@ func TestAccComputeInstance_subnet_auto(t *testing.T) {
 						testAccComputeInstance_subnet_auto(acctest.RandString(t, 10), instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -2135,7 +2135,7 @@ func TestAccComputeInstance_subnet_custom(t *testing.T) {
 						testAccComputeInstance_subnet_custom(acctest.RandString(t, 10), instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -2320,7 +2320,7 @@ func TestAccComputeInstance_multiNic(t *testing.T) {
 						testAccComputeInstance_multiNic(instanceName, networkName, subnetworkName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -2516,7 +2516,7 @@ func TestAccComputeInstance_primaryAliasIpRange(t *testing.T) {
 						testAccComputeInstance_primaryAliasIpRange(instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-east1-d", instanceName),
+			computeInstanceImportStep("us-east1-d", instanceName, []string{}),
 		},
 	})
 }
@@ -2577,7 +2577,7 @@ func TestAccComputeInstance_aliasIpRangeCommonAddresses(t *testing.T) {
 					testAccCheckComputeInstanceHasAliasIpRange(&instance, "inst-test-tertiary", "10.1.2.0/24"),
 				),
 			},
-			computeInstanceImportStep("us-east1-d", instanceName),
+			computeInstanceImportStep("us-east1-d", instanceName, []string{}),
 			{
 				Config: testAccComputeInstance_secondaryAliasIpRangeUpdateWithCommonAddress(networkName, subnetName, instanceName),
 				Check: resource.ComposeTestCheckFunc(
@@ -2586,7 +2586,7 @@ func TestAccComputeInstance_aliasIpRangeCommonAddresses(t *testing.T) {
 					testAccCheckComputeInstanceHasAliasIpRange(&instance, "inst-test-tertiary", "10.1.3.0/24"),
 				),
 			},
-			computeInstanceImportStep("us-east1-d", instanceName),
+			computeInstanceImportStep("us-east1-d", instanceName, []string{}),
 			{
 				Config: testAccComputeInstance_secondaryAliasIpRangeUpdateWithCommonAddressDifferentRanges(networkName, subnetName, instanceName),
 				Check: resource.ComposeTestCheckFunc(
@@ -2622,7 +2622,7 @@ func TestAccComputeInstance_hostname(t *testing.T) {
 						testAccComputeInstance_hostname(instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -3556,7 +3556,7 @@ func TestAccComputeInstance_networkIpUpdate(t *testing.T) {
 					testAccCheckComputeInstanceHasNetworkIP(&instance, "10.3.0.3"),
 				),
 			},
-			computeInstanceImportStep("us-east1-d", instanceName),
+			computeInstanceImportStep("us-east1-d", instanceName, []string{}),
 			{
 				Config: testAccComputeInstance_networkIpUpdateByHand(suffix, instanceName),
 				Check: resource.ComposeTestCheckFunc(
@@ -3564,7 +3564,7 @@ func TestAccComputeInstance_networkIpUpdate(t *testing.T) {
 					testAccCheckComputeInstanceHasNetworkIP(&instance, "10.3.0.4"),
 				),
 			},
-			computeInstanceImportStep("us-east1-d", instanceName),
+			computeInstanceImportStep("us-east1-d", instanceName, []string{}),
 			{
 				Config: testAccComputeInstance_networkIpUpdateWithComputeAddress(suffix, instanceName),
 				Check: resource.ComposeTestCheckFunc(
@@ -3574,7 +3574,7 @@ func TestAccComputeInstance_networkIpUpdate(t *testing.T) {
 						testAccComputeInstance_networkIpUpdateWithComputeAddress(suffix, instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-east1-d", instanceName),
+			computeInstanceImportStep("us-east1-d", instanceName, []string{}),
 		},
 	})
 }
@@ -3620,7 +3620,7 @@ func TestAccComputeInstance_spotVM(t *testing.T) {
 						testAccComputeInstance_spotVM(instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -3643,7 +3643,7 @@ func TestAccComputeInstance_spotVM_update(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 			{
 				Config: testAccComputeInstance_spotVM(instanceName),
 				Check: resource.ComposeTestCheckFunc(
@@ -3651,7 +3651,7 @@ func TestAccComputeInstance_spotVM_update(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -3718,7 +3718,7 @@ func TestAccComputeInstance_standardVM_maxRunDuration_stopTerminationAction(t *t
 						testAccComputeInstance_standardVM_maxRunDuration(instanceName, instanceTerminationAction)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -3750,7 +3750,7 @@ func TestAccComputeInstance_localSsdVM_maxRunDuration_stopTerminationAction(t *t
 						testAccComputeInstance_localSsdVM_maxRunDuration(instanceName, instanceTerminationAction)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -3782,7 +3782,7 @@ func TestAccComputeInstance_spotVM_maxRunDuration_deleteTerminationAction(t *tes
 						testAccComputeInstance_spotVM_maxRunDuration(instanceName, instanceTerminationAction)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -3814,7 +3814,7 @@ func TestAccComputeInstance_standardVM_maxRunDuration_deleteTerminationAction(t 
 						testAccComputeInstance_standardVM_maxRunDuration(instanceName, instanceTerminationAction)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -3840,7 +3840,7 @@ func TestAccComputeInstance_spotVM_maxRunDuration_update(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 			{
 				Config: testAccComputeInstance_spotVM_maxRunDuration(instanceName, "DELETE"),
 				Check: resource.ComposeTestCheckFunc(
@@ -3849,7 +3849,7 @@ func TestAccComputeInstance_spotVM_maxRunDuration_update(t *testing.T) {
 					testAccCheckComputeInstanceMaxRunDuration(&instance, expectedMaxRunDuration),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -3879,7 +3879,7 @@ func TestAccComputeInstance_localSsdRecoveryTimeout(t *testing.T) {
 						testAccComputeInstance_localSsdRecoveryTimeout(instanceName)),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
@@ -3905,7 +3905,7 @@ func TestAccComputeInstance_localSsdRecoveryTimeout_update(t *testing.T) {
 						t, "google_compute_instance.foobar", &instance),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 			{
 				Config: testAccComputeInstance_localSsdRecoveryTimeout(instanceName),
 				Check: resource.ComposeTestCheckFunc(
@@ -3914,7 +3914,7 @@ func TestAccComputeInstance_localSsdRecoveryTimeout_update(t *testing.T) {
 					testAccCheckComputeInstanceLocalSsdRecoveryTimeout(&instance, expectedLocalSsdRecoveryTimeout),
 				),
 			},
-			computeInstanceImportStep("us-central1-a", instanceName),
+			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
 		},
 	})
 }
