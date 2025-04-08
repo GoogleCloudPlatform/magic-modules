@@ -13,6 +13,8 @@
 
 ---
 name: 'DataStore'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/collections/{collection}/dataStores/{dataStore}'
 description: |
   Data store is a collection of websites and documents used to find answers for
   end-user's questions in Discovery Engine (a.k.a. Vertex AI Search and
@@ -34,7 +36,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
+autogen_async: false
 async:
   actions: ['create', 'delete']
   type: 'OpAsync'
@@ -44,9 +46,11 @@ async:
     resource_inside_response: false
 custom_code:
 sweeper:
-  regions:
-    - "global"
-    - "eu"
+  dependencies:
+    - 'google_discovery_engine_chat_engine'
+  url_substitutions:
+    - region: "eu"
+    - region: "global"
 examples:
   - name: 'discoveryengine_datastore_basic'
     primary_resource_id: 'basic'

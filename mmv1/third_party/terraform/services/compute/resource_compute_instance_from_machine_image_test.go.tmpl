@@ -4,6 +4,7 @@ package compute_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -76,6 +77,37 @@ func TestAccComputeInstanceFromMachineImage_maxRunDuration(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "attached_disk.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "scheduling.0.automatic_restart", "false"),
 					testAccCheckComputeInstanceMaxRunDuration(&instance, expectedMaxRunDuration),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstanceFromMachineImage_terminationTime(t *testing.T) {
+	// Uses time.Now
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	var instance compute.Instance
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	generatedInstanceName := fmt.Sprintf("tf-test-generated-%s", acctest.RandString(t, 10))
+	resourceName := "google_compute_instance_from_machine_image.foobar"
+	now := time.Now().UTC()
+	terminationTime := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 9999, now.Location()).Format(time.RFC3339)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceFromMachineImageDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImage_terminationTime(instanceName, generatedInstanceName, terminationTime),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
+
+					// Check that fields were set based on the template
+					resource.TestCheckResourceAttr(resourceName, "scheduling.0.automatic_restart", "false"),
+					resource.TestCheckResourceAttr(resourceName, "scheduling.0.termination_time", terminationTime),
 				),
 			},
 		},
@@ -280,6 +312,36 @@ func TestAccComputeInstanceFromMachineImage_confidentialInstanceConfigMain(t *te
 					testAccCheckComputeInstanceHasConfidentialInstanceConfig(&instance, false, "TDX"),
 				),
 
+			},
+		},
+	})
+}
+
+func TestAccComputeInstanceFromMachineImage_withSourceMachineImageEncryptionKey(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	var resourceName = "google_compute_instance_from_machine_image.foobar"
+	var machineImageName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	bootDiskID := "tf-instance-from-mi-test-disk"
+	serviceAccountEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", "tf-test-sa", envvar.GetTestProjectFromEnv())
+	keyRingSuffix := acctest.RandString(t, 10)
+	keyNameSuffix := acctest.RandString(t, 10)
+	
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceFromMachineImage_withSourceMachineImageEncryptionKey(instanceName, machineImageName, bootDiskID, serviceAccountEmail, keyRingSuffix, keyNameSuffix),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, resourceName, &instance),
+					resource.TestCheckResourceAttr(resourceName, 
+						"source_machine_image_encryption_key.0.kms_key_name",
+						fmt.Sprintf("projects/%s/locations/global/keyRings/tf-test-keyring-%s/cryptoKeys/tf-test-key-%s", envvar.GetTestProjectFromEnv(), keyRingSuffix, keyNameSuffix)),
+				),
 			},
 		},
 	})
@@ -709,6 +771,65 @@ resource "google_compute_instance_from_machine_image" "foobar" {
 }
 `, instance, instance, newInstance)
 }
+
+func testAccComputeInstanceFromMachineImage_terminationTime(instance, newInstance, terminationTime string) string {
+	return fmt.Sprintf(`
+resource "google_compute_instance" "vm" {
+  provider     = google-beta
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-12"
+    }
+  }
+
+  name         = "%s"
+  machine_type = "n1-standard-1"
+
+  network_interface {
+    network = "default"
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  scheduling {
+    automatic_restart = false
+    instance_termination_action = "STOP"
+    termination_time = "%s"
+  }
+
+}
+
+resource "google_compute_machine_image" "foobar" {
+  provider        = google-beta
+  name            = "%s"
+  source_instance = google_compute_instance.vm.self_link
+}
+
+resource "google_compute_instance_from_machine_image" "foobar" {
+  provider = google-beta
+  name = "%s"
+  zone = "us-central1-a"
+
+  source_machine_image = google_compute_machine_image.foobar.self_link
+
+  labels = {
+    my_key = "my_value"
+  }
+  scheduling {
+    automatic_restart = false
+    provisioning_model = "STANDARD"
+    instance_termination_action = "STOP"
+    termination_time = "%s"
+    on_instance_stop_action {
+      discard_local_ssd = true
+    }
+  }
+}
+`, instance, terminationTime, instance, newInstance, terminationTime)
+}
 {{- end }}
 
 
@@ -1029,6 +1150,91 @@ resource "google_compute_instance_from_machine_image" "foobar" {
   }
 }
 `, projectID, projectID, org, billingId, instance, instance, newInstance)
+}
+
+func testAccComputeInstanceFromMachineImage_withSourceMachineImageEncryptionKey(instanceName, machineImageName, bootDiskID, serviceAccountEmail, keyRingSuffix, keyNameSuffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_service_account" "test_service_account" {
+  account_id   = "tf-test-sa"
+  display_name = "Test Service Account"
+}
+
+resource "google_kms_key_ring" "keyring" {
+  name     = "tf-test-keyring-%s"
+  location = "global"
+}
+
+resource "google_kms_crypto_key" "key" {
+  name            = "tf-test-key-%s"
+  key_ring        = google_kms_key_ring.keyring.id
+
+  lifecycle {
+    prevent_destroy = false
+  }
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = google_kms_crypto_key.key.id
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:${google_service_account.test_service_account.email}"
+}
+
+resource "google_compute_machine_image" "foobar" {
+  name                   = "%s"
+  source_instance        = google_compute_instance.mi-source.id
+  machine_image_encryption_key {
+    kms_key_name = google_kms_crypto_key.key.id
+    kms_key_service_account = google_service_account.test_service_account.email
+  }
+}
+
+resource "google_compute_instance" "mi-source" {
+  name           = "%s-source"
+  machine_type   = "e2-medium"
+  zone           = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    email  = google_service_account.test_service_account.email
+    scopes = ["cloud-platform"]
+  }
+
+  scheduling {
+    automatic_restart = true
+  }
+}
+
+resource "google_compute_instance_from_machine_image" "foobar" {
+  name = "%s"
+  zone = "us-central1-a"
+  
+  source_machine_image = google_compute_machine_image.foobar.self_link
+  
+  source_machine_image_encryption_key {
+    kms_key_name = google_kms_crypto_key.key.id
+    kms_key_service_account = google_service_account.test_service_account.email
+  }
+  
+  service_account {
+    email  = google_service_account.test_service_account.email
+    scopes = ["cloud-platform"]
+  }
+}
+`, keyRingSuffix, keyNameSuffix, machineImageName, instanceName, instanceName)
 }
 
 {{- else }}

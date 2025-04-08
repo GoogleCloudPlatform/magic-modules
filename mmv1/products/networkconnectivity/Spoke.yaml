@@ -38,9 +38,9 @@ async:
 custom_code:
 legacy_long_form_project: true
 sweeper:
-  regions:
-    - "us-central1"
-    - "global"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "global"
 examples:
   - name: 'network_connectivity_spoke_linked_vpc_network_basic'
     primary_resource_id: 'primary'

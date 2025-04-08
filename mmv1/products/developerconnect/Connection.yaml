@@ -14,6 +14,10 @@
 ---
 name: Connection
 description: A connection for GitHub, GitHub Enterprise, GitLab, and GitLab Enterprise.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/developer-connect/docs/overview'
+  api: 'https://cloud.google.com/developer-connect/docs/api/reference/rest/v1/projects.locations.connections'
 base_url: projects/{{project}}/locations/{{location}}/connections
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/connections/{{connection_id}}
@@ -68,6 +72,20 @@ examples:
     vars:
       connection_name: 'tf-test-connection'
   - name: 'developer_connect_connection_gitlab_enterprise_doc'
+    exclude_test: true
+  - name: 'developer_connect_connection_bbc'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
+    vars:
+      connection_name: 'tf-test-connection'
+  - name: 'developer_connect_connection_bbc_doc'
+    exclude_test: true
+  - name: 'developer_connect_connection_bbdc'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
+    vars:
+      connection_name: 'tf-test-connection'
+  - name: 'developer_connect_connection_bbdc_doc'
     exclude_test: true
 autogen_async: true
 async:
@@ -298,6 +316,132 @@ properties:
             type: String
             description: Output only. The username associated with this token.
             output: true
+  - name: bitbucketCloudConfig
+    type: NestedObject
+    description: Configuration for connections to an instance of Bitbucket Cloud.
+    properties:
+      - name: workspace
+        type: String
+        description: Required. The Bitbucket Cloud Workspace ID to be connected to Google Cloud Platform.
+        required: true
+      - name: webhookSecretSecretVersion
+        type: String
+        description: |-
+          Required. Immutable. SecretManager resource containing the webhook secret used to verify webhook
+          events, formatted as `projects/*/secrets/*/versions/*`. This is used to
+          validate and create webhooks.
+        immutable: true
+        required: true
+      - name: readAuthorizerCredential
+        type: NestedObject
+        description: |-
+          Represents a personal access token that authorized the Connection,
+          and associated metadata.
+        required: true
+        properties:
+          - name: userTokenSecretVersion
+            type: String
+            description: |-
+              Required. A SecretManager resource containing the user token that authorizes
+              the Developer Connect connection. Format:
+              `projects/*/secrets/*/versions/*`.
+            required: true
+          - name: username
+            type: String
+            description: Output only. The username associated with this token.
+            output: true
+      - name: authorizerCredential
+        type: NestedObject
+        description: |-
+          Represents a personal access token that authorized the Connection,
+          and associated metadata.
+        required: true
+        properties:
+          - name: userTokenSecretVersion
+            type: String
+            description: |-
+              Required. A SecretManager resource containing the user token that authorizes
+              the Developer Connect connection. Format:
+              `projects/*/secrets/*/versions/*`.
+            required: true
+          - name: username
+            type: String
+            description: Output only. The username associated with this token.
+            output: true
+  - name: bitbucketDataCenterConfig
+    type: NestedObject
+    description: Configuration for connections to an instance of Bitbucket Data Center.
+    properties:
+      - name: webhookSecretSecretVersion
+        type: String
+        description: |-
+          Required. Immutable. SecretManager resource containing the webhook secret used to verify webhook
+          events, formatted as `projects/*/secrets/*/versions/*`. This is used to
+          validate webhooks.
+        immutable: true
+        required: true
+      - name: readAuthorizerCredential
+        type: NestedObject
+        description: |-
+          Represents a personal access token that authorized the Connection,
+          and associated metadata.
+        required: true
+        properties:
+          - name: userTokenSecretVersion
+            type: String
+            description: |-
+              Required. A SecretManager resource containing the user token that authorizes
+              the Developer Connect connection. Format:
+              `projects/*/secrets/*/versions/*`.
+            required: true
+          - name: username
+            type: String
+            description: Output only. The username associated with this token.
+            output: true
+      - name: authorizerCredential
+        type: NestedObject
+        description: |-
+          Represents a personal access token that authorized the Connection,
+          and associated metadata.
+        required: true
+        properties:
+          - name: username
+            type: String
+            description: Output only. The username associated with this token.
+            output: true
+          - name: userTokenSecretVersion
+            type: String
+            description: |-
+              Required. A SecretManager resource containing the user token that authorizes
+              the Developer Connect connection. Format:
+              `projects/*/secrets/*/versions/*`.
+            required: true
+      - name: serviceDirectoryConfig
+        type: NestedObject
+        description: |-
+          ServiceDirectoryConfig represents Service Directory configuration for a
+          connection.
+        properties:
+          - name: service
+            type: String
+            description: |-
+              Required. The Service Directory service name.
+              Format:
+              projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.
+            required: true
+      - name: sslCaCertificate
+        type: String
+        description: |-
+          Optional. SSL certificate authority to trust when making requests to Bitbucket Data
+          Center.
+      - name: serverVersion
+        type: String
+        description: Output only. Version of the Bitbucket Data Center server running on the `host_uri`.
+        output: true
+      - name: hostUri
+        type: String
+        description: Required. The URI of the Bitbucket Data Center host this connection is for.
+        required: true
   - name: updateTime
     type: String
     description: Output only. [Output only] Update timestamp

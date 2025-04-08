@@ -37,9 +37,11 @@ var (
 		"scheduling.0.availability_domain",
 		"scheduling.0.max_run_duration",
 		"scheduling.0.on_instance_stop_action",
+		"scheduling.0.termination_time",
 {{- if ne $.TargetVersionName "ga" }}
 		"scheduling.0.maintenance_interval",
 		"scheduling.0.host_error_timeout_seconds",
+		"scheduling.0.graceful_shutdown",
 {{- end }}
 		"scheduling.0.local_ssd_recovery_timeout",
 	}
@@ -776,6 +778,15 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
+						"termination_time": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							AtLeastOneOf: schedulingKeys,
+							Description: `Specifies the timestamp, when the instance will be terminated,
+in RFC3339 text format. If specified, the instance termination action
+will be performed at the termination time.`,
+						},
 {{- if ne $.TargetVersionName "ga" }}
 						"host_error_timeout_seconds": {
 							Type:        schema.TypeInt,
@@ -821,6 +832,53 @@ be from 0 to 999,999,999 inclusive.`,
 								},
 							},
 						},
+{{ if ne $.TargetVersionName `ga` }}
+						"graceful_shutdown": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							ForceNew:    true,
+							Description: `Settings for the instance to perform a graceful shutdown.`,
+							MaxItems:    1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										ForceNew:    true,
+										Description: `Opts-in for graceful shutdown.`,
+									},
+									"max_duration": {
+										Type:     schema.TypeList,
+										Optional: true,
+										Description: `The time allotted for the instance to gracefully shut down.
+										If the graceful shutdown isn't complete after this time, then the instance
+										transitions to the STOPPING state.`,
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"seconds": {
+													Type:     schema.TypeInt,
+													Required: true,
+													ForceNew: true,
+													Description: `Span of time at a resolution of a second.
+													The value must be between 1 and 3600, which is 3,600 seconds (one hour).`,
+												},
+												"nanos": {
+													Type:     schema.TypeInt,
+													Optional: true,
+													ForceNew: true,
+													Description: `Span of time that's a fraction of a second at nanosecond
+													resolution. Durations less than one second are represented
+													with a 0 seconds field and a positive nanos field. Must
+													be from 0 to 999,999,999 inclusive.`,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+{{- end }}
 					},
 				},
 			},
@@ -1920,6 +1978,18 @@ func resourceComputeInstanceTemplateRead(d *schema.ResourceData, meta interface{
 	}
 	if instanceTemplate.Properties.Scheduling != nil {
 		scheduling := flattenScheduling(instanceTemplate.Properties.Scheduling)
+{{ if ne $.TargetVersionName `ga` }}
+		// Workaroud: API doesn't update the scheduling.graceful_shutdown.max_duration.nanos field.
+		// To avoid diff, we need to set the value from the state not from API response.
+		if nanos, ok := d.GetOk("scheduling.0.graceful_shutdown.0.max_duration.0.nanos"); ok {
+			graceful_shutdown := scheduling[0]["graceful_shutdown"].([]interface{})[0].(map[string]interface{})
+			max_duration := graceful_shutdown["max_duration"].([]interface{})[0].(map[string]interface{})
+			max_duration["nanos"] = int64(nanos.(int))
+
+			graceful_shutdown["max_duration"] = []interface{}{max_duration}
+			scheduling[0]["graceful_shutdown"] = []interface{}{graceful_shutdown}
+		}
+{{- end }}
 		if err = d.Set("scheduling", scheduling); err != nil {
 			return fmt.Errorf("Error setting scheduling: %s", err)
 		}

@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package storagetransfer_test
 
 import (
@@ -78,8 +80,51 @@ func TestAccStorageTransferJob_basic(t *testing.T) {
 	})
 }
 
+func TestAccStorageTransferJob_updateLoggingConfig(t *testing.T) {
+	t.Parallel()
+
+	testDataSourceBucketName := acctest.RandString(t, 10)
+	testDataSinkName := acctest.RandString(t, 10)
+	testTransferJobDescription := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageTransferJob_noLoggingConfig(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription),
+			},
+			{
+				ResourceName:      "google_storage_transfer_job.transfer_job",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccStorageTransferJob_loggingConfig(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription),
+			},
+			{
+				ResourceName:      "google_storage_transfer_job.transfer_job",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccStorageTransferReplicationJob_basic(t *testing.T) {
 	t.Parallel()
+
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gs-project-accounts.iam.gserviceaccount.com",
+			Role:   "roles/pubsub.publisher",
+		},
+		{
+			Member: "serviceAccount:project-{project_number}@storage-transfer-service.iam.gserviceaccount.com",
+			Role:   "roles/storagetransfer.serviceAgent",
+		},
+	})
 
 	testDataSourceBucketName := acctest.RandString(t, 10)
 	testDataSinkName := acctest.RandString(t, 10)
@@ -126,6 +171,14 @@ func TestAccStorageTransferReplicationJob_basic(t *testing.T) {
 			},
 			{
 				Config: testAccStorageTransferReplicationJob_with_transferOptions(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testUpdatedTransferReplicationJobDescription, false, false, testOverwriteWhen[2]),
+			},
+			{
+				ResourceName:      "google_storage_transfer_job.transfer_job",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccStorageTransferReplicationJob_with_metadataOptions(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testUpdatedTransferReplicationJobDescription, false, false, testOverwriteWhen[2]),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -187,6 +240,13 @@ func TestAccStorageTransferJob_omitScheduleEndDate(t *testing.T) {
 func TestAccStorageTransferJob_posixSource(t *testing.T) {
 	t.Parallel()
 
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:project-{project_number}@storage-transfer-service.iam.gserviceaccount.com",
+			Role:   "roles/pubsub.admin",
+		},
+	})
+
 	testDataSinkName := acctest.RandString(t, 10)
 	testTransferJobDescription := acctest.RandString(t, 10)
 	testSourceAgentPoolName := fmt.Sprintf("tf-test-source-agent-pool-%s", acctest.RandString(t, 10))
@@ -204,11 +264,26 @@ func TestAccStorageTransferJob_posixSource(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccStorageTransferJob_posixSourceLoggingConfig(envvar.GetTestProjectFromEnv(), testDataSinkName, testTransferJobDescription, testSourceAgentPoolName),
+			},
+			{
+				ResourceName:      "google_storage_transfer_job.transfer_job",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
 func TestAccStorageTransferJob_posixSink(t *testing.T) {
 	t.Parallel()
+
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:project-{project_number}@storage-transfer-service.iam.gserviceaccount.com",
+			Role:   "roles/pubsub.admin",
+		},
+	})
 
 	testDataSourceName := acctest.RandString(t, 10)
 	testTransferJobDescription := acctest.RandString(t, 10)
@@ -367,6 +442,38 @@ func TestAccStorageTransferJob_objectConditions(t *testing.T) {
 	})
 }
 
+func TestAccStorageTransferJob_metadataOptions(t *testing.T) {
+	t.Parallel()
+
+	testDataSourceBucketName := acctest.RandString(t, 10)
+	testDataSinkName := acctest.RandString(t, 10)
+	testTransferJobDescription := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageTransferJob_basicWithNoMetadataOptions(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription),
+			},
+			{
+				ResourceName:      "google_storage_transfer_job.transfer_job",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccStorageTransferJob_withMetadataOptions(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription),
+			},
+			{
+				ResourceName:      "google_storage_transfer_job.transfer_job",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 	t.Parallel()
 
@@ -428,6 +535,13 @@ func TestAccStorageTransferJob_notificationConfig(t *testing.T) {
 
 func TestAccStorageTransferJob_hdfsSource(t *testing.T) {
 	t.Parallel()
+
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:project-{project_number}@storage-transfer-service.iam.gserviceaccount.com",
+			Role:   "roles/pubsub.admin",
+		},
+	})
 
 	testDataSinkName := acctest.RandString(t, 10)
 	otherDataSinkName := acctest.RandString(t, 10)
@@ -797,6 +911,17 @@ resource "google_storage_transfer_job" "transfer_job" {
     }
 	  repeat_interval = "604800s"
   }
+  
+  logging_config {
+    log_actions      = [
+      "COPY",
+      "DELETE"
+    ]
+    log_action_states = [
+      "SUCCEEDED",
+      "FAILED"
+    ]
+  }
 
   notification_config {
     pubsub_topic  = google_pubsub_topic.topic.id
@@ -814,6 +939,172 @@ resource "google_storage_transfer_job" "transfer_job" {
   ]
 }
 `, project, dataSourceBucketName, project, dataSinkBucketName, project, pubsubTopicName, transferJobDescription, project)
+}
+
+func testAccStorageTransferJob_noLoggingConfig(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string) string {
+	return fmt.Sprintf(`
+data "google_storage_transfer_project_service_account" "default" {
+  project = "%s"
+}
+
+resource "google_storage_bucket" "data_source" {
+  name          = "%s"
+  project       = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "data_source" {
+  bucket = google_storage_bucket.data_source.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_bucket" "data_sink" {
+  name          = "%s"
+  project       = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "data_sink" {
+  bucket = google_storage_bucket.data_sink.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_transfer_job" "transfer_job" {
+  description = "%s"
+  project     = "%s"
+
+  transfer_spec {
+    gcs_data_source {
+      bucket_name = google_storage_bucket.data_source.name
+      path  = "foo/bar/"
+    }
+    gcs_data_sink {
+      bucket_name = google_storage_bucket.data_sink.name
+      path  = "foo/bar/"
+    }
+  }
+
+  schedule {
+    schedule_start_date {
+      year  = 2018
+      month = 10
+      day   = 1
+    }
+    schedule_end_date {
+      year  = 2019
+      month = 10
+      day   = 1
+    }
+    start_time_of_day {
+      hours   = 0
+      minutes = 30
+      seconds = 0
+      nanos   = 0
+    }
+	  repeat_interval = "604800s"
+  }
+
+  depends_on = [
+    google_storage_bucket_iam_member.data_source,
+    google_storage_bucket_iam_member.data_sink,
+  ]
+}
+`, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project)
+}
+
+func testAccStorageTransferJob_loggingConfig(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string) string {
+	return fmt.Sprintf(`
+data "google_storage_transfer_project_service_account" "default" {
+  project = "%s"
+}
+
+resource "google_storage_bucket" "data_source" {
+  name          = "%s"
+  project       = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "data_source" {
+  bucket = google_storage_bucket.data_source.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_bucket" "data_sink" {
+  name          = "%s"
+  project       = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "data_sink" {
+  bucket = google_storage_bucket.data_sink.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_transfer_job" "transfer_job" {
+  description = "%s"
+  project     = "%s"
+
+  transfer_spec {
+    gcs_data_source {
+      bucket_name = google_storage_bucket.data_source.name
+      path  = "foo/bar/"
+    }
+    gcs_data_sink {
+      bucket_name = google_storage_bucket.data_sink.name
+      path  = "foo/bar/"
+    }
+  }
+
+  schedule {
+    schedule_start_date {
+      year  = 2018
+      month = 10
+      day   = 1
+    }
+    schedule_end_date {
+      year  = 2019
+      month = 10
+      day   = 1
+    }
+    start_time_of_day {
+      hours   = 0
+      minutes = 30
+      seconds = 0
+      nanos   = 0
+    }
+	  repeat_interval = "604800s"
+  }
+  
+  logging_config {
+    log_actions      = [
+      "COPY",
+      "DELETE"
+    ]
+    log_action_states = [
+      "SUCCEEDED",
+      "FAILED"
+    ]
+    enable_on_prem_gcs_transfer_logs = false
+  }
+
+  depends_on = [
+    google_storage_bucket_iam_member.data_source,
+    google_storage_bucket_iam_member.data_sink,
+  ]
+}
+`, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project)
 }
 
 func testAccStorageTransferJob_transferJobName(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string, testTransferJobName string) string {
@@ -983,19 +1274,11 @@ resource "google_storage_bucket_iam_member" "data_sink" {
   member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
 }
 
-resource "google_project_iam_member" "pubsub" {
-	project = data.google_storage_transfer_project_service_account.default.project
-  role    = "roles/pubsub.admin"
-  member  = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
-}
-
 resource "google_storage_transfer_agent_pool" "foo" {
   name         = "%s"
   bandwidth_limit {
     limit_mbps = "120"
   }
-
-  depends_on = [google_project_iam_member.pubsub]
 }
 
 resource "google_storage_transfer_job" "transfer_job" {
@@ -1032,10 +1315,77 @@ resource "google_storage_transfer_job" "transfer_job" {
     }
   }
 
-  depends_on = [
-    google_storage_bucket_iam_member.data_sink,
-    google_project_iam_member.pubsub
-  ]
+  depends_on = [google_storage_bucket_iam_member.data_sink]
+}
+`, project, dataSinkBucketName, project, sourceAgentPoolName, transferJobDescription, project)
+}
+
+func testAccStorageTransferJob_posixSourceLoggingConfig(project string, dataSinkBucketName string, transferJobDescription string, sourceAgentPoolName string) string {
+	return fmt.Sprintf(`
+data "google_storage_transfer_project_service_account" "default" {
+  project = "%s"
+}
+
+resource "google_storage_bucket" "data_sink" {
+  name          = "%s"
+  project       = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "data_sink" {
+  bucket = google_storage_bucket.data_sink.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_transfer_agent_pool" "foo" {
+  name         = "%s"
+  bandwidth_limit {
+    limit_mbps = "120"
+  }
+}
+
+resource "google_storage_transfer_job" "transfer_job" {
+  description = "%s"
+  project     = "%s"
+
+  transfer_spec {
+    source_agent_pool_name = google_storage_transfer_agent_pool.foo.id
+    posix_data_source {
+    	root_directory = "/some/path"
+    }
+    gcs_data_sink {
+      bucket_name = google_storage_bucket.data_sink.name
+      path  = "foo/bar/"
+    }
+  }
+  
+  logging_config {
+    enable_on_prem_gcs_transfer_logs = true
+  }
+
+  schedule {
+    schedule_start_date {
+      year  = 2018
+      month = 10
+      day   = 1
+    }
+    schedule_end_date {
+      year  = 2019
+      month = 10
+      day   = 1
+    }
+    start_time_of_day {
+      hours   = 0
+      minutes = 30
+      seconds = 0
+      nanos   = 0
+    }
+  }
+
+  depends_on = [google_storage_bucket_iam_member.data_sink]
 }
 `, project, dataSinkBucketName, project, sourceAgentPoolName, transferJobDescription, project)
 }
@@ -1060,19 +1410,11 @@ resource "google_storage_bucket_iam_member" "data_sink" {
   member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
 }
 
-resource "google_project_iam_member" "pubsub" {
-	project = data.google_storage_transfer_project_service_account.default.project
-  role    = "roles/pubsub.admin"
-  member  = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
-}
-
 resource "google_storage_transfer_agent_pool" "foo" {
   name         = "%s"
   bandwidth_limit {
     limit_mbps = "120"
   }
-
-  depends_on = [google_project_iam_member.pubsub]
 }
 
 resource "google_storage_transfer_job" "transfer_job" {
@@ -1109,10 +1451,7 @@ resource "google_storage_transfer_job" "transfer_job" {
     }
   }
 
-  depends_on = [
-    google_storage_bucket_iam_member.data_sink,
-    google_project_iam_member.pubsub
-  ]
+  depends_on = [google_storage_bucket_iam_member.data_sink]
 }
 `, project, dataSinkBucketName, project, sourceAgentPoolName, transferJobDescription, project, hdfsPath, gcsPath)
 }
@@ -1137,19 +1476,11 @@ resource "google_storage_bucket_iam_member" "data_source" {
   member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
 }
 
-resource "google_project_iam_member" "pubsub" {
-	project = data.google_storage_transfer_project_service_account.default.project
-  role    = "roles/pubsub.admin"
-  member  = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
-}
-
 resource "google_storage_transfer_agent_pool" "foo" {
   name         = "%s"
   bandwidth_limit {
     limit_mbps = "120"
   }
-
-  depends_on = [google_project_iam_member.pubsub]
 }
 
 resource "google_storage_transfer_job" "transfer_job" {
@@ -1164,6 +1495,10 @@ resource "google_storage_transfer_job" "transfer_job" {
     gcs_data_source {
       bucket_name = google_storage_bucket.data_source.name
     }
+  }
+  
+  logging_config {
+    enable_on_prem_gcs_transfer_logs = false
   }
 
   schedule {
@@ -1185,10 +1520,7 @@ resource "google_storage_transfer_job" "transfer_job" {
     }
   }
 
-  depends_on = [
-    google_storage_bucket_iam_member.data_source,
-    google_project_iam_member.pubsub
-  ]
+  depends_on = [google_storage_bucket_iam_member.data_source]
 }
 `, project, dataSourceBucketName, project, sinkAgentPoolName, transferJobDescription, project)
 }
@@ -1689,26 +2021,6 @@ data "google_storage_transfer_project_service_account" "default" {
   project = "%s"
 }
 
-data "google_project" "my_project" {
-  project_id = "%s"
-}
-
-resource "google_project_iam_binding" "pubsub_publisher" {
-  project = "%s"
-  role    = "roles/pubsub.publisher"
-  members = [
-    "serviceAccount:service-${data.google_project.my_project.number}@gs-project-accounts.iam.gserviceaccount.com",
-  ]
-}
-
-resource "google_project_iam_binding" "service_agent_binding" {
-  project = "%s"
-  role    = "roles/storagetransfer.serviceAgent"
-  members = [
-    "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}",
-  ]
-}
-
 resource "google_storage_bucket" "data_source" {
   name          = "%s"
   project       = "%s"
@@ -1754,37 +2066,16 @@ resource "google_storage_transfer_job" "transfer_job" {
 
   depends_on = [
     google_storage_bucket_iam_member.data_source,
-    google_storage_bucket_iam_member.data_sink,
-    google_project_iam_binding.pubsub_publisher
+    google_storage_bucket_iam_member.data_sink
   ]
 }
-`, project, project, project, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project)
+`, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project)
 }
 
 func testAccStorageTransferReplicationJob_with_transferOptions(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string, overwriteObjectsAlreadyExistingInSink bool, deleteObjectsUniqueInSink bool, overwriteWhenVal string) string {
 	return fmt.Sprintf(`
 data "google_storage_transfer_project_service_account" "default" {
   project = "%s"
-}
-
-data "google_project" "my_project" {
-  project_id = "%s"
-}
-
-resource "google_project_iam_binding" "pubsub_publisher" {
-  project = "%s"
-  role    = "roles/pubsub.publisher"
-  members = [
-    "serviceAccount:service-${data.google_project.my_project.number}@gs-project-accounts.iam.gserviceaccount.com",
-  ]
-}
-
-resource "google_project_iam_binding" "service_agent_binding" {
-  project = "%s"
-  role    = "roles/storagetransfer.serviceAgent"
-  members = [
-    "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}",
-  ]
 }
 
 resource "google_storage_bucket" "data_source" {
@@ -1850,9 +2141,261 @@ resource "google_storage_transfer_job" "transfer_job" {
 
   depends_on = [
     google_storage_bucket_iam_member.data_source,
-    google_storage_bucket_iam_member.data_sink,
-    google_project_iam_binding.pubsub_publisher
+    google_storage_bucket_iam_member.data_sink
   ]
 }
-`, project, project, project, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project, overwriteObjectsAlreadyExistingInSink, deleteObjectsUniqueInSink, overwriteWhenVal)
+`, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project, overwriteObjectsAlreadyExistingInSink, deleteObjectsUniqueInSink, overwriteWhenVal)
+}
+
+func testAccStorageTransferReplicationJob_with_metadataOptions(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string, overwriteObjectsAlreadyExistingInSink bool, deleteObjectsUniqueInSink bool, overwriteWhenVal string) string {
+	return fmt.Sprintf(`
+data "google_storage_transfer_project_service_account" "default" {
+  project = "%s"
+}
+
+resource "google_storage_bucket" "data_source" {
+  name          = "%s"
+  project       = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "data_source" {
+  bucket = google_storage_bucket.data_source.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_bucket" "data_sink" {
+  name          = "%s"
+  project       = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "data_sink" {
+  bucket = google_storage_bucket.data_sink.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_transfer_job" "transfer_job" {
+  description = "%s"
+  project     = "%s"
+
+  replication_spec {
+    gcs_data_source {
+      bucket_name = google_storage_bucket.data_source.name
+      path  = "foo/bar/"
+    }
+    gcs_data_sink {
+      bucket_name = google_storage_bucket.data_sink.name
+      path  = "foo/bar/"
+    }
+    transfer_options {
+      overwrite_objects_already_existing_in_sink = %t
+      delete_objects_unique_in_sink = %t
+      overwrite_when = "%s"
+      delete_objects_from_source_after_transfer = false
+      metadata_options {
+        symlink = "SYMLINK_SKIP"
+        uid = "UID_NUMBER"
+        mode = "MODE_SKIP"
+        gid = "GID_SKIP"
+        acl = "ACL_DESTINATION_BUCKET_DEFAULT"
+        storage_class = "STORAGE_CLASS_DESTINATION_BUCKET_DEFAULT"
+        temporary_hold = "TEMPORARY_HOLD_SKIP"
+        kms_key = "KMS_KEY_DESTINATION_BUCKET_DEFAULT"
+        time_created = "TIME_CREATED_PRESERVE_AS_CUSTOM_TIME"
+      }
+    }
+    object_conditions {
+      last_modified_since = "2020-01-01T00:00:00Z"
+      last_modified_before = "2020-01-01T00:00:00Z"
+      exclude_prefixes = [
+        "a/b/c", 
+      ]
+      include_prefixes = [
+        "a/b"
+      ]
+      max_time_elapsed_since_last_modification="300s"
+      min_time_elapsed_since_last_modification="3s"
+    }
+  }
+
+  depends_on = [
+    google_storage_bucket_iam_member.data_source,
+    google_storage_bucket_iam_member.data_sink
+  ]
+}
+`, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project, overwriteObjectsAlreadyExistingInSink, deleteObjectsUniqueInSink, overwriteWhenVal)
+}
+
+func testAccStorageTransferJob_basicWithNoMetadataOptions(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string) string {
+	return fmt.Sprintf(`
+data "google_storage_transfer_project_service_account" "default" {
+  project = "%s"
+}
+
+resource "google_storage_bucket" "data_source" {
+  name          = "%s"
+  project       = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "data_source" {
+  bucket = google_storage_bucket.data_source.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_bucket" "data_sink" {
+  name          = "%s"
+  project       = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "data_sink" {
+  bucket = google_storage_bucket.data_sink.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_transfer_job" "transfer_job" {
+  description = "%s"
+  project     = "%s"
+
+  transfer_spec {
+    gcs_data_source {
+      bucket_name = google_storage_bucket.data_source.name
+      path  = "foo/bar/"
+    }
+    gcs_data_sink {
+      bucket_name = google_storage_bucket.data_sink.name
+      path  = "foo/bar/"
+    }
+  }
+
+  schedule {
+    schedule_start_date {
+      year  = 2018
+      month = 10
+      day   = 1
+    }
+    schedule_end_date {
+      year  = 2019
+      month = 10
+      day   = 1
+    }
+    start_time_of_day {
+      hours   = 0
+      minutes = 30
+      seconds = 0
+      nanos   = 0
+    }
+	  repeat_interval = "604800s"
+  }
+
+  depends_on = [
+    google_storage_bucket_iam_member.data_source,
+    google_storage_bucket_iam_member.data_sink,
+  ]
+}
+`, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project)
+}
+
+func testAccStorageTransferJob_withMetadataOptions(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string) string {
+	return fmt.Sprintf(`
+data "google_storage_transfer_project_service_account" "default" {
+  project = "%s"
+}
+
+resource "google_storage_bucket" "data_source" {
+  name          = "%s"
+  project       = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "data_source" {
+  bucket = google_storage_bucket.data_source.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_bucket" "data_sink" {
+  name          = "%s"
+  project       = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_iam_member" "data_sink" {
+  bucket = google_storage_bucket.data_sink.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_transfer_job" "transfer_job" {
+  description = "%s"
+  project     = "%s"
+
+  transfer_spec {
+    gcs_data_source {
+      bucket_name = google_storage_bucket.data_source.name
+      path  = "foo/bar/"
+    }
+    gcs_data_sink {
+      bucket_name = google_storage_bucket.data_sink.name
+      path  = "foo/bar/"
+    }
+    transfer_options {
+      metadata_options {
+        symlink = "SYMLINK_SKIP"
+        uid = "UID_NUMBER"
+        mode = "MODE_SKIP"
+        gid = "GID_SKIP"
+        acl = "ACL_DESTINATION_BUCKET_DEFAULT"
+        storage_class = "STORAGE_CLASS_DESTINATION_BUCKET_DEFAULT"
+        temporary_hold = "TEMPORARY_HOLD_SKIP"
+        kms_key = "KMS_KEY_DESTINATION_BUCKET_DEFAULT"
+        time_created = "TIME_CREATED_PRESERVE_AS_CUSTOM_TIME"
+      }
+    }
+  }
+
+  schedule {
+    schedule_start_date {
+      year  = 2018
+      month = 10
+      day   = 1
+    }
+    schedule_end_date {
+      year  = 2019
+      month = 10
+      day   = 1
+    }
+    start_time_of_day {
+      hours   = 0
+      minutes = 30
+      seconds = 0
+      nanos   = 0
+    }
+	  repeat_interval = "604800s"
+  }
+
+  depends_on = [
+    google_storage_bucket_iam_member.data_source,
+    google_storage_bucket_iam_member.data_sink,
+  ]
+}
+`, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project)
 }

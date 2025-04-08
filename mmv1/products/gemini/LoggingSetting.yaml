@@ -23,9 +23,11 @@ id_format: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging
 import_format:
   - projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}
 mutex: projects/{{project}}/locations/{{location}}/loggingSettings/{{logging_setting_id}}
+sweeper:
+  url_substitutions:
+    - region: "global"
 examples:
   - name: gemini_logging_setting_basic
-    min_version: 'beta'
     primary_resource_id: "example"
     vars:
       logging_setting_id: ls1-tf
@@ -45,9 +47,7 @@ parameters:
   - name: loggingSettingId
     type: String
     description: |-
-      Required. Id of the requesting object.
-      If auto-generating Id server-side, remove this field and
-      setting_id from the method_signature of Create RPC.
+      Id of the Logging Setting.
     immutable: true
     url_param_only: true
     required: true
@@ -60,18 +60,18 @@ properties:
     output: true
   - name: createTime
     type: String
-    description: Output only. [Output only] Create time stamp.
+    description: Create time stamp.
     output: true
   - name: updateTime
     type: String
-    description: Output only. [Output only] Update time stamp.
+    description: Update time stamp.
     output: true
   - name: labels
     type: KeyValueLabels
-    description: Optional. Labels as key value pairs.
+    description: Labels as key value pairs.
   - name: logPromptsAndResponses
     type: Boolean
-    description: Optional. Whether to log prompts and responses.
+    description: Whether to log prompts and responses.
   - name: logMetadata
     type: Boolean
-    description: Optional. Whether to log metadata.
+    description: Whether to log metadata.

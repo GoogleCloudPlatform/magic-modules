@@ -42,6 +42,7 @@ custom_code:
   constants: 'templates/terraform/constants/billing_budget.tmpl'
 schema_version: 1
 state_upgraders: true
+exclude_sweeper: true
 examples:
   - name: 'billing_budget_basic'
     primary_resource_id: 'budget'
