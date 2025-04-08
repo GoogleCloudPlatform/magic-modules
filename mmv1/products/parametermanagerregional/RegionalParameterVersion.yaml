@@ -16,7 +16,6 @@ name: 'RegionalParameterVersion'
 api_resource_type_kind: ParameterVersion
 description: |
   A Regional Parameter Version resource that stores the actual value of the regional parameter.
-min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters.versions'
@@ -35,22 +34,30 @@ timeouts:
 examples:
   - name: 'regional_parameter_version_basic'
     primary_resource_id: 'regional-parameter-version-basic'
-    min_version: 'beta'
     vars:
       parameter_id: 'regional_parameter'
       parameter_version_id: 'regional_parameter_version'
   - name: 'regional_parameter_version_with_json_format'
     primary_resource_id: 'regional-parameter-version-with-json-format'
-    min_version: 'beta'
     vars:
       parameter_id: 'regional_parameter'
       parameter_version_id: 'regional_parameter_version'
   - name: 'regional_parameter_version_with_yaml_format'
     primary_resource_id: 'regional-parameter-version-with-yaml-format'
-    min_version: 'beta'
     vars:
       parameter_id: 'regional_parameter'
       parameter_version_id: 'regional_parameter_version'
+  - name: 'regional_parameter_version_with_kms_key'
+    primary_resource_id: 'regional-parameter-version-with-kms-key'
+    vars:
+      parameter_id: 'regional_parameter'
+      parameter_version_id: 'regional_parameter_version'
+      kms_key: 'kms-key'
+    test_vars_overrides:
+      'kms_key': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pm.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
 custom_code:
   pre_create: 'templates/terraform/pre_create/parameter_manager_regional_parameter_version.go.tmpl'
   custom_import: 'templates/terraform/custom_import/parameter_manager_regional_parameter_version.go.tmpl'
@@ -116,3 +123,9 @@ properties:
         immutable: true
         sensitive: true
         custom_expand: 'templates/terraform/custom_expand/base64.go.tmpl'
+  - name: 'kmsKeyVersion'
+    type: String
+    output: true
+    description: |
+      The resource name of the Cloud KMS CryptoKeyVersion used to decrypt regional parameter version payload. Format
+      `projects/{{project}}/locations/{{location}}/keyRings/{{key_ring}}/cryptoKeys/{{crypto_key}}/cryptoKeyVersions/{{crypto_key_version}}`
