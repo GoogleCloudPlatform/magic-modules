@@ -31,6 +31,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
+	fwResource "github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -402,6 +403,12 @@ func (p *frameworkTestProvider) Configure(ctx context.Context, req provider.Conf
 func (p *frameworkTestProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	ds := p.FrameworkProvider.DataSources(ctx)
 	ds = append(ds, fwprovider.NewGoogleProviderConfigPluginFrameworkDataSource) // google_provider_config_plugin_framework
+	return ds
+}
+
+func (p *frameworkTestProvider) Resources(ctx context.Context) []func() datasource.DataSource {
+	ds := p.FrameworkProvider.Resources(ctx)
+	ds = append(ds, fwprovider.NewGooglePubsubLiteReservationFWResource) // google_fwprovider_pubsub_lite_reservation
 	return ds
 }
 
