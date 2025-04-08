@@ -74,6 +74,9 @@ func ParseInstanceFieldValue(instance string, d TerraformResourceData, config *t
 func ParseInstanceGroupFieldValue(instanceGroup string, d TerraformResourceData, config *transport_tpg.Config) (*ZonalFieldValue, error) {
 	return ParseZonalFieldValue("instanceGroups", instanceGroup, "project", "zone", d, config, false)
 }
+func ParseRegionalInstanceGroupManagersFieldValue(instanceGroupManager string, d TerraformResourceData, config *transport_tpg.Config) (*RegionalFieldValue, error) {
+	return ParseRegionalFieldValue("instanceGroupManagers", instanceGroupManager, "project", "region", "zone", d, config, false)
+}
 
 func ParseInstanceTemplateFieldValue(instanceTemplate string, d TerraformResourceData, config *transport_tpg.Config) (*GlobalFieldValue, error) {
 	return ParseGlobalFieldValue("instanceTemplates", instanceTemplate, "project", d, config, false)
@@ -97,6 +100,10 @@ func ParseNetworkEndpointGroupFieldValue(networkEndpointGroup string, d Terrafor
 
 func ParseNetworkEndpointGroupRegionalFieldValue(networkEndpointGroup string, d TerraformResourceData, config *transport_tpg.Config) (*RegionalFieldValue, error) {
 	return ParseRegionalFieldValue("networkEndpointGroups", networkEndpointGroup, "project", "region", "zone", d, config, false)
+}
+
+func ParseSnapshotFieldValue(snapshot string, d TerraformResourceData, config *transport_tpg.Config) (*GlobalFieldValue, error) {
+	return ParseGlobalFieldValue("snapshots", snapshot, "project", d, config, false)
 }
 
 // ------------------------------------------------------------

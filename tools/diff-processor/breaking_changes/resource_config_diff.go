@@ -10,7 +10,7 @@ import (
 // structure for rules regarding resource config changes
 type ResourceConfigDiffRule struct {
 	Identifier string
-	Messages func(resource string, resourceConfigDiff diff.ResourceConfigDiff) []string
+	Messages   func(resource string, resourceConfigDiff diff.ResourceConfigDiff) []string
 }
 
 // ResourceConfigDiffRules is a list of ResourceConfigDiffRule

@@ -1,4 +1,0 @@
-func flatten<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-    // ignore read on this field
-    return d.Get("quota_config.0.annotations")
-}

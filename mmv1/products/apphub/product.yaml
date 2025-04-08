@@ -11,13 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
---- !ruby/object:Api::Product
-name: Apphub
-display_name: App Hub
+---
+name: 'Apphub'
+display_name: 'App Hub'
 versions:
-  - !ruby/object:Api::Product::Version
-    name: ga
-    base_url: https://apphub.googleapis.com/v1/
+  - name: 'ga'
+    base_url: 'https://apphub.googleapis.com/v1/'
 scopes:
-  - https://www.googleapis.com/auth/cloud-platform
+  - 'https://www.googleapis.com/auth/cloud-platform'

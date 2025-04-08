@@ -1,21 +1,5 @@
 ---
 steps:
-    - name: 'gcr.io/cloud-builders/gcloud'
-      id: "Stop Other Ongoing Build"
-      entrypoint: 'bash'
-      args:
-      - -c
-      - |
-        on_going_build=($(gcloud builds list --ongoing --format='value[separator=","](id,substitutions.REVISION_ID)' --filter="substitutions.TRIGGER_NAME:$TRIGGER_NAME substitutions._PR_NUMBER:$_PR_NUMBER" | xargs))
-        for (( i=0; i<${#on_going_build[@]}; i++ )); do
-          IFS="," read -r -a fields <<< "${on_going_build[i]}"
-          if [ "$i" -gt "0" ] && [ "${fields[1]}" != $COMMIT_SHA ]; then # skip current
-            echo "Cancelling build ${fields[0]}"
-
-            gcloud builds cancel ${fields[0]}
-          fi
-        done
-
     # The GCB / GH integration uses a shallow clone of the repo. We need to convert
     # that to a full clone in order to work with it properly.
     # https://cloud.google.com/source-repositories/docs/integrating-with-cloud-build#unshallowing_clones
@@ -235,7 +219,7 @@ steps:
         - $COMMIT_SHA
         - $BUILD_ID
         - $PROJECT_ID
-        - "18"  # Build step
+        - "19"  # Build step
         - terraform-google-conversion
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
@@ -267,7 +251,7 @@ steps:
     - name: 'gcr.io/graphite-docker-images/go-plus'
       id: gcb-tpg-vcr-test
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
-      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES", "GOOGLE_BILLING_ACCOUNT", "GOOGLE_CUST_ID", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"]
+      secretEnv: ["GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES", "GOOGLE_BILLING_ACCOUNT", "GOOGLE_CHRONICLE_INSTANCE_ID", "GOOGLE_CUST_ID", "GOOGLE_IDENTITY_USER", "GOOGLE_MASTER_BILLING_ACCOUNT", "GOOGLE_ORG", "GOOGLE_ORG_2", "GOOGLE_ORG_DOMAIN", "GOOGLE_PROJECT", "GOOGLE_PROJECT_NUMBER", "GOOGLE_SERVICE_ACCOUNT", "SA_KEY", "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION", "GOOGLE_VMWAREENGINE_PROJECT"]
       waitFor: ["diff"]
       env:
         - BASE_BRANCH=$_BASE_BRANCH
@@ -280,7 +264,7 @@ steps:
         - $COMMIT_SHA
         - $BUILD_ID
         - $PROJECT_ID
-        - "22"  # Build step
+        - "23"  # Build step
 
     - name: 'gcr.io/graphite-docker-images/go-plus'
       entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
@@ -293,7 +277,7 @@ steps:
         - COMMIT_SHA=$COMMIT_SHA
 
 # Long timeout to enable waiting on VCR test
-timeout: 20000s
+timeout: 64800s
 options:
     machineType: 'N1_HIGHCPU_32'
 
@@ -306,6 +290,8 @@ availableSecrets:
       env: GITHUB_TOKEN_MAGIC_MODULES
     - versionName: projects/673497134629/secrets/ci-test-billing-account/versions/latest
       env: GOOGLE_BILLING_ACCOUNT
+    - versionName: projects/673497134629/secrets/ci-test-chronicle-instance-id/versions/latest
+      env: GOOGLE_CHRONICLE_INSTANCE_ID
     - versionName: projects/673497134629/secrets/ci-test-cust-id/versions/latest
       env: GOOGLE_CUST_ID
     - versionName: projects/673497134629/secrets/ci-test-identity-user/versions/latest
@@ -328,3 +314,5 @@ availableSecrets:
       env: SA_KEY
     - versionName: projects/673497134629/secrets/ci-test-public-advertised-prefix-description/versions/latest
       env: GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION
+    - versionName: projects/673497134629/secrets/ci-test-vmwareengine-project/versions/latest
+      env: GOOGLE_VMWAREENGINE_PROJECT

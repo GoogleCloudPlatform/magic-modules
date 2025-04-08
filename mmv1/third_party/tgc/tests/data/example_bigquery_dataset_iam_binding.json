@@ -14,7 +14,8 @@
         },
         "defaultTableExpirationMs": 3600000,
         "labels": {
-          "env": "dev"
+          "env": "dev",
+          "goog-terraform-provisioned": "true"
         },
         "location": "EU",
         "friendlyName": ""

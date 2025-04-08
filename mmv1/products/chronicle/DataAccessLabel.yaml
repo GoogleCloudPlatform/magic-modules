@@ -1,0 +1,97 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: DataAccessLabel
+description: A DataAccessLabel is a label on events to define user access to data.
+references:
+  guides:
+    'Introduction to data RBAC': 'https://cloud.google.com/chronicle/docs/onboard/onboard-datarbac'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.dataAccessLabels'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels/{{data_access_label_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels?dataAccessLabelId={{data_access_label_id}}
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels/{{data_access_label_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/dataAccessLabels/{{data_access_label_id}}
+update_verb: PATCH
+update_mask: true
+autogen_status: RGF0YUFjY2Vzc0xhYmVs
+
+examples:
+  - name: 'chronicle_dataaccesslabel_basic'
+    primary_resource_id: 'example'
+    vars:
+      data_access_label_id: label-id
+      description: label-description
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+
+parameters:
+  - name: location
+    type: String
+    description: The location of the resource. This is the geographical region where the Chronicle instance resides, such as "us" or "europe-west2".
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: instance
+    type: String
+    description: The unique identifier for the Chronicle instance, which is the same as the customer ID.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: dataAccessLabelId
+    type: String
+    description: |-
+      Required. The ID to use for the data access label, which will become the label's
+      display name and the final component of the label's resource name. The
+      maximum number of characters should be 63. Regex pattern is as per AIP:
+      https://google.aip.dev/122#resource-id-segments
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: author
+    type: String
+    description: Output only. The user who created the data access label.
+    output: true
+  - name: lastEditor
+    type: String
+    description: Output only. The user who last updated the data access label.
+    output: true
+  - name: description
+    type: String
+    description: Optional. A description of the data access label for a human reader.
+  - name: udmQuery
+    type: String
+    description: A UDM query over event data.
+    required: true
+  - name: name
+    type: String
+    description: |-
+      The unique resource name of the data access label. This unique identifier is generated using values provided for the URL parameters.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/dataAccessLabels/{data_access_label_id}
+    output: true
+  - name: displayName
+    type: String
+    description: Output only. The short name displayed for the label as it appears on event data. This is same as data access label id.
+    output: true
+  - name: createTime
+    type: String
+    description: Output only. The time at which the data access label was created.
+    output: true
+  - name: updateTime
+    type: String
+    description: Output only. The time at which the data access label was last updated.
+    output: true

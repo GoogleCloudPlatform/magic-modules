@@ -13,7 +13,7 @@ import (
 // regarding field attribute changes
 type FieldDiffRule struct {
 	Identifier string
-	Messages func(resource, field string, fieldDiff diff.FieldDiff) []string
+	Messages   func(resource, field string, fieldDiff diff.FieldDiff) []string
 }
 
 // FieldDiffRules is a list of FieldDiffRule
@@ -27,7 +27,6 @@ var FieldDiffRules = []FieldDiffRule{
 	FieldGrowingMin,
 	FieldShrinkingMax,
 	FieldRemovingDiffSuppress,
-	FieldAddingSubfieldToConfigModeAttr,
 }
 
 var FieldChangingType = FieldDiffRule{
@@ -126,14 +125,29 @@ func FieldDefaultModificationMessages(resource, field string, fieldDiff diff.Fie
 	if fieldDiff.Old == nil || fieldDiff.New == nil {
 		return nil
 	}
-	tmpl := "Field `%s` default value changed from %s to %s on `%s`"
+
 	if fieldDiff.Old.Default != fieldDiff.New.Default {
-		oldDefault := fmt.Sprintf("%v", fieldDiff.Old.Default)
-		newDefault := fmt.Sprintf("%v", fieldDiff.New.Default)
+		tmpl := "Field `%s` default value changed from `%s` to `%s` on `%s`"
+		oldDefault := formatDefaultValue(fieldDiff.Old.Default)
+		newDefault := formatDefaultValue(fieldDiff.New.Default)
 		return []string{fmt.Sprintf(tmpl, field, oldDefault, newDefault, resource)}
 	}
 
 	return nil
+}
+
+// formatDefaultValue properly formats default values to distinguish between nil, empty string, and other values
+func formatDefaultValue(value interface{}) string {
+	if value == nil {
+		return "<nil>"
+	}
+
+	// Special handling for empty strings
+	if s, ok := value.(string); ok && s == "" {
+		return `""`
+	}
+
+	return fmt.Sprintf("%v", value)
 }
 
 var FieldGrowingMin = FieldDiffRule{
@@ -147,7 +161,7 @@ func FieldGrowingMinMessages(resource, field string, fieldDiff diff.FieldDiff) [
 		return nil
 	}
 	tmpl := "Field `%s` MinItems went from %s to %s on `%s`"
-	if fieldDiff.Old.MinItems < fieldDiff.New.MinItems || fieldDiff.Old.MinItems == 0 && fieldDiff.New.MinItems > 0 {
+	if fieldDiff.Old.MinItems < fieldDiff.New.MinItems {
 		oldMin := strconv.Itoa(fieldDiff.Old.MinItems)
 		if fieldDiff.Old.MinItems == 0 {
 			oldMin = "unset"
@@ -168,13 +182,16 @@ func FieldShrinkingMaxMessages(resource, field string, fieldDiff diff.FieldDiff)
 	if fieldDiff.Old == nil || fieldDiff.New == nil {
 		return nil
 	}
-	tmpl := "Field `%s` MinItems went from %s to %s on `%s`"
-	if fieldDiff.Old.MaxItems > fieldDiff.New.MaxItems || fieldDiff.Old.MaxItems == 0 && fieldDiff.New.MaxItems > 0 {
-		oldMax := strconv.Itoa(fieldDiff.Old.MaxItems)
-		if fieldDiff.Old.MaxItems == 0 {
-			oldMax = "unset"
-		}
-		newMax := strconv.Itoa(fieldDiff.New.MaxItems)
+	tmpl := "Field `%s` MaxItems went from %s to %s on `%s`"
+	if fieldDiff.New.MaxItems == 0 {
+		return nil
+	}
+	newMax := strconv.Itoa(fieldDiff.New.MaxItems)
+	if fieldDiff.Old.MaxItems == 0 {
+		return []string{fmt.Sprintf(tmpl, field, "unset", newMax, resource)}
+	}
+	oldMax := strconv.Itoa(fieldDiff.Old.MaxItems)
+	if fieldDiff.Old.MaxItems > fieldDiff.New.MaxItems {
 		return []string{fmt.Sprintf(tmpl, field, oldMax, newMax, resource)}
 	}
 	return nil
@@ -194,35 +211,6 @@ func FieldRemovingDiffSuppressMessages(resource, field string, fieldDiff diff.Fi
 	tmpl := "Field `%s` lost its diff suppress function"
 	if fieldDiff.Old.DiffSuppressFunc != nil && fieldDiff.New.DiffSuppressFunc == nil {
 		return []string{fmt.Sprintf(tmpl, field)}
-	}
-	return nil
-}
-
-var FieldAddingSubfieldToConfigModeAttr = FieldDiffRule{
-	Identifier: "field-adding-subfield-to-config-mode-attr",
-	Messages:   FieldAddingSubfieldToConfigModeAttrMessages,
-}
-
-func FieldAddingSubfieldToConfigModeAttrMessages(resource, field string, fieldDiff diff.FieldDiff) []string {
-	if fieldDiff.Old == nil || fieldDiff.New == nil {
-		return nil
-	}
-	if fieldDiff.New.ConfigMode == schema.SchemaConfigModeAttr {
-		newObj, ok := fieldDiff.New.Elem.(*schema.Resource)
-		if !ok {
-			return nil
-		}
-		oldObj, ok := fieldDiff.Old.Elem.(*schema.Resource)
-		if !ok {
-			return nil
-		}
-		// TODO: Add resource to this message
-		tmpl := "Field `%s` gained a subfield `%s` when it has SchemaConfigModeAttr"
-		for subfield := range newObj.Schema {
-			if _, ok := oldObj.Schema[subfield]; !ok {
-				return []string{fmt.Sprintf(tmpl, field, subfield)}
-			}
-		}
 	}
 	return nil
 }

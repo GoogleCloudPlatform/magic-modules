@@ -12,85 +12,87 @@
 # limitations under the License.
 
 ---
-!ruby/object:Api::Resource
-name: "DeviceCheckConfig"
-base_url: projects/{{project}}/apps/{{app_id}}/deviceCheckConfig
-self_link: projects/{{project}}/apps/{{app_id}}/deviceCheckConfig
-create_url: projects/{{project}}/apps/{{app_id}}/deviceCheckConfig?updateMask=tokenTtl,keyId,privateKey
-create_verb: :PATCH
-update_verb: :PATCH
-update_mask: true
-skip_delete: true
+name: 'DeviceCheckConfig'
 description: |
   An app's DeviceCheck configuration object. Note that the Team ID registered with your
   app is used as part of the validation process. Make sure your `google_firebase_apple_app` has a team_id present.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
-    "Official Documentation": "https://firebase.google.com/docs/app-check"
-  api: "https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.apps.deviceCheckConfig"
+    'Official Documentation': 'https://firebase.google.com/docs/app-check'
+  api: 'https://firebase.google.com/docs/reference/appcheck/rest/v1/projects.apps.deviceCheckConfig'
+docs:
+base_url: 'projects/{{project}}/apps/{{app_id}}/deviceCheckConfig'
+self_link: 'projects/{{project}}/apps/{{app_id}}/deviceCheckConfig'
+create_url: 'projects/{{project}}/apps/{{app_id}}/deviceCheckConfig?updateMask=tokenTtl,keyId,privateKey'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+update_mask: true
+exclude_delete: true
 import_format:
-  [
-    "projects/{{project}}/apps/{{app_id}}/deviceCheckConfig",
-    "{{project}}/{{app_id}}",
-    "{{app_id}}",
-  ]
+  - 'projects/{{project}}/apps/{{app_id}}/deviceCheckConfig'
+  - '{{project}}/{{app_id}}'
+  - '{{app_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "firebase_app_check_device_check_config_full"
+  - name: 'firebase_app_check_device_check_config_full'
+    primary_resource_id: 'default'
     min_version: 'beta'
-    # Need the time_sleep resource
-    external_providers: ["random", "time"]
-    primary_resource_id: "default"
     vars:
-      bundle_id: "bundle.id.devicecheck"
-      key_id: "Key ID"
-      private_key_path: "path/to/private-key.p8"
-      team_id: "9987654321"
-      token_ttl: "7200s"
+      bundle_id: 'bundle.id.devicecheck'
+      key_id: 'Key ID'
+      private_key_path: 'path/to/private-key.p8'
+      team_id: '9987654321'
+      token_ttl: '7200s'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
     test_vars_overrides:
       # Don't add random suffix
-      private_key_path: '"test-fixtures/private-key-2.p8"'
-      team_id: '"9987654321"'
-      token_ttl: '"7200s"'
-    test_env_vars:
-      project_id: :PROJECT_NAME
+      'private_key_path': '"test-fixtures/private-key-2.p8"'
+      'team_id': '"9987654321"'
+      'token_ttl': '"7200s"'
+    # Need the time_sleep resource
+    external_providers: ["random", "time"]
 parameters:
-  - !ruby/object:Api::Type::String
-    name: app_id
+  - name: 'app_id'
+    type: String
     description: |
       The ID of an
       [Apple App](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.iosApps#IosApp.FIELDS.app_id).
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       The relative resource name of the DeviceCheck configuration object
     output: true
-  - !ruby/object:Api::Type::String
-    name: tokenTtl
+  - name: 'tokenTtl'
+    type: String
     description: |
       Specifies the duration for which App Check tokens exchanged from DeviceCheck artifacts will be valid.
       If unset, a default value of 1 hour is assumed. Must be between 30 minutes and 7 days, inclusive.
 
       A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: keyId
+  - name: 'keyId'
+    type: String
     description: |
       The key identifier of a private key enabled with DeviceCheck, created in your Apple Developer account.
     required: true
-  - !ruby/object:Api::Type::String
-    name: privateKey
+  - name: 'privateKey'
+    type: String
     description: |
       The contents of the private key (.p8) file associated with the key specified by keyId.
     required: true
-    sensitive: true
     ignore_read: true
-  - !ruby/object:Api::Type::Boolean
-    name: privateKeySet
+    sensitive: true
+  - name: 'privateKeySet'
+    type: Boolean
     description: |
       Whether the privateKey field was previously set. Since App Check will never return the
       privateKey field, this field is the only way to find out whether it was previously set.

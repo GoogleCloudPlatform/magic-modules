@@ -91,10 +91,9 @@ resource "google_compute_region_instance_group_manager" "appserver" {
   }
 }
 ```
-## Example Usage with standby policy (`google-beta` provider)
+## Example Usage with standby policy (`google` provider)
 ```hcl
 resource "google_compute_region_instance_group_manager" "igm-sr" {
-  provider = google-beta
   name = "tf-sr-igm"
 
   base_instance_name        = "tf-sr-igm-instance"
@@ -184,11 +183,11 @@ group. You can specify only one value. Structure is documented below. For more i
   allInstancesConfig on the group, you must update the group's instances to
   apply the configuration.
 
-* `standby_policy` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The standby policy for stopped and suspended instances. Structure is documented below. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/suspended-and-stopped-vms-in-mig) and [API](https://cloud.google.com/compute/docs/reference/rest/beta/regionInstanceGroupManagers/patch)
+* `standby_policy` - (Optional) The standby policy for stopped and suspended instances. Structure is documented below. For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/suspended-and-stopped-vms-in-mig).
 
-* `target_suspended_size` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The target number of suspended instances for this managed instance group.
+* `target_suspended_size` - (Optional) The target number of suspended instances for this managed instance group.
 
-* `target_stopped_size` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) The target number of stopped instances for this managed instance group.
+* `target_stopped_size` - (Optional) The target number of stopped instances for this managed instance group.
 
 * `update_policy` - (Optional) The update policy for this managed instance group. Structure is [documented below](#nested_update_policy). For more information, see the [official documentation](https://cloud.google.com/compute/docs/instance-groups/updating-managed-instance-groups) and [API](https://cloud.google.com/compute/docs/reference/rest/beta/regionInstanceGroupManagers/patch)
 
@@ -205,6 +204,7 @@ group. You can specify one or more values. For more information, see the [offici
 
 * `params` - (Optional [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Input only additional params for instance group manager creation. Structure is [documented below](#nested_params). For more information, see [API](https://cloud.google.com/compute/docs/reference/rest/beta/instanceGroupManagers/insert).
 
+* `instance_flexibility_policy` - (Optional) The flexibility policy for managed instance group. Instance flexibility allows managed instance group to create VMs from multiple types of machines. Instance flexibility configuration on managed instance group overrides instance template configuration. Structure is [documented below](#nested_instance_flexibility_policy).
 - - -
 
 The `standby_policy` block supports:
@@ -255,14 +255,45 @@ update_policy {
 instance_lifecycle_policy {
   force_update_on_repair    = "YES"
   default_action_on_failure = "DO_NOTHING"
+  on_failed_health_check    = "DO_NOTHING"   //google-beta only
+
 }
 ```
 
 * `force_update_on_repair` - (Optional), Specifies whether to apply the group's latest configuration when repairing a VM. Valid options are: `YES`, `NO`. If `YES` and you updated the group's instance template or per-instance configurations after the VM was created, then these changes are applied when VM is repaired. If `NO` (default), then updates are applied in accordance with the group's update policy type.
-* `default_action_on_failure` - (Optional), Default behavior for all instance or health check failures. Valid options are: `REPAIR`, `DO_NOTHING`. If `DO_NOTHING` then instances will not be repaired. If `REPAIR` (default), then failed instances will be repaired.
+* `default_action_on_failure` - (Optional), Specifies the action that a MIG performs on a failed VM. If the value of the `on_failed_health_check` field is `DEFAULT_ACTION`, then the same action also applies to the VMs on which your application fails a health check. Valid options are: `DO_NOTHING`, `REPAIR`. If `DO_NOTHING`, then MIG does not repair a failed VM. If `REPAIR` (default), then MIG automatically repairs a failed VM by recreating it. For more information, see about repairing VMs in a MIG.
+* `on_failed_health_check` - (Optional, Beta), Specifies the action that a MIG performs on an unhealthy VM. A VM is marked as unhealthy when the application running on that VM fails a health check. Valid options are: `DEFAULT_ACTION`, `DO_NOTHING`, `REPAIR`. If `DEFAULT_ACTION` (default), then MIG uses the same action configured for the  `default_action_on_failure` field. If `DO_NOTHING`, then MIG does not repair unhealthy VM. If `REPAIR`, then MIG automatically repairs an unhealthy VM by recreating it. For more information, see about repairing VMs in a MIG. 
 
 - - -
+<a name="nested_instance_flexibility_policy"></a>The `instance_flexibility_policy` block supports:
 
+```hcl
+instance_flexibility_policy {
+  instance_selections {
+    name = "instance_selection_name"
+    rank = 1
+    machine_types = ["n1-standard-16"]
+  }
+}
+```
+
+* `instance_selections` - (Optional), Named instance selections configuring properties that the group will use when creating new VMs. One can specify multiple instance selection to allow managed instance group to create VMs from multiple types of machines, based on preference and availability. Structure is [documented below](#nested_instance_selections).
+- - -
+<a name="nested_instance_selections"></a>The `instance_selections` block supports:
+
+```hcl
+instance_selections {
+  name = "instance_selection_name"
+  rank = 1
+  machine_types = ["n1-standard-1", "n1-standard-16"]
+}
+```
+
+* `name` - (Required), Name of the instance selection, e.g. instance_selection_with_n1_machines_types. Instance selection names must be unique within the flexibility policy.
+* `rank` - (Optional), Preference of this instance selection. Lower number means higher preference. Managed instance group will first try to create a VM based on the machine-type with lowest rank and fallback to next rank based on availability. Machine types and instance selections with the same rank have the same preference.
+* `machine_types` - (Required), A list of full machine-type names, e.g. "n1-standard-16".
+
+- - -
 <a name="nested_all_instances_config"></a>The `all_instances_config` block supports:
 
 ```hcl
@@ -320,9 +351,9 @@ version {
 }
 ```
 
-* `name` - (Required) - Version name.
-
 * `instance_template` - (Required) - The full URL to an instance template from which all new instances of this version will be created.
+
+* `name` - (Optional) - Version name.
 
 * `target_size` - (Optional) - The number of instances calculated as a fixed number or a percentage depending on the settings. Structure is [documented below](#nested_target_size).
 

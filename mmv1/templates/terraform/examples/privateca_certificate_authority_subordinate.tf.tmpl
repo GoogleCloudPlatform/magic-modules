@@ -1,0 +1,80 @@
+resource "google_privateca_certificate_authority" "root-ca" {
+  pool = "{{index $.Vars "pool_name"}}"
+  certificate_authority_id = "{{index $.Vars "certificate_authority_id"}}-root"
+  location = "us-central1"
+  config {
+    subject_config {
+      subject {
+        organization = "ACME"
+        common_name = "my-certificate-authority"
+      }
+    }
+    x509_config {
+      ca_options {
+        # is_ca *MUST* be true for certificate authorities
+        is_ca = true
+      }
+      key_usage {
+        base_key_usage {
+          # cert_sign and crl_sign *MUST* be true for certificate authorities
+          cert_sign = true
+          crl_sign = true
+        }
+        extended_key_usage {
+        }
+      }
+    }
+  }
+  key_spec {
+    algorithm = "RSA_PKCS1_4096_SHA256"
+  }
+
+  // Disable CA deletion related safe checks for easier cleanup.
+  deletion_protection                    = false
+  skip_grace_period                      = true
+  ignore_active_certificates_on_deletion = true
+}
+
+resource "google_privateca_certificate_authority" "{{$.PrimaryResourceId}}" {
+  // This example assumes this pool already exists.
+  // Pools cannot be deleted in normal test circumstances, so we depend on static pools
+  pool = "{{index $.Vars "pool_name"}}"
+  certificate_authority_id = "{{index $.Vars "certificate_authority_id"}}-sub"
+  location = "{{index $.Vars "pool_location"}}"
+  deletion_protection = {{index $.Vars "deletion_protection"}}
+  subordinate_config {
+    certificate_authority = google_privateca_certificate_authority.root-ca.name
+  }
+  config {
+    subject_config {
+      subject {
+        organization = "ACME"
+        common_name = "my-subordinate-authority"
+      }
+    }
+    x509_config {
+      ca_options {
+        is_ca = true
+        # Force the sub CA to only issue leaf certs.
+        # Use e.g.
+        #    max_issuer_path_length = 1
+        # if you need to chain more subordinates.
+        zero_max_issuer_path_length = true
+      }
+      key_usage {
+        base_key_usage {
+          cert_sign = true
+          crl_sign = true
+        }
+        extended_key_usage {
+        }
+      }
+    }
+  }
+  # valid for 5 years
+  lifetime = "${5 * 365 * 24 * 3600}s"
+  key_spec {
+    algorithm = "RSA_PKCS1_2048_SHA256"
+  }
+  type = "SUBORDINATE"
+}

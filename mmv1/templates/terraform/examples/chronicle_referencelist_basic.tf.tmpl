@@ -1,0 +1,10 @@
+resource "google_chronicle_reference_list" "{{$.PrimaryResourceId}}" {
+ location = "us"
+ instance = "{{index $.TestEnvVars "chronicle_id"}}"
+ reference_list_id = "{{index $.Vars "reference_list_id"}}"
+ description = "referencelist-description"
+ entries {
+  value = "referencelist-entry-value"
+ }
+ syntax_type = "REFERENCE_LIST_SYNTAX_TYPE_PLAIN_TEXT_STRING"
+}

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,39 +11,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Config'
-base_url: projects/{{project}}/configs
-self_link: projects/{{project}}/configs/{{name}}
-min_version: beta
 description: |
   A RuntimeConfig resource is the primary resource in the Cloud RuntimeConfig service.
   A RuntimeConfig resource consists of metadata and a hierarchy of variables.
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: 'config'
-  method_name_separator: ':'
+min_version: 'beta'
 exclude_resource: true
+docs:
+base_url: 'projects/{{project}}/configs'
+self_link: 'projects/{{project}}/configs/{{name}}'
+import_format:
+  - 'projects/{{project}}/configs/{{config}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'config'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+custom_code:
 exclude_tgc: true
-import_format: ['projects/{{project}}/configs/{{config}}']
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'runtimeconfig_config_basic'
-    min_version: beta
+  - name: 'runtimeconfig_config_basic'
     primary_resource_id: 'config'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-my-config%s\",
-      context[\"random_suffix\"\
-      ])"
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-config%s", context["random_suffix"])'
+    min_version: 'beta'
     vars:
       config_name: 'my-config'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The name of the runtime config.
+    min_version: 'beta'
     required: true
     immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       The description to associate with the runtime config.
+    min_version: 'beta'

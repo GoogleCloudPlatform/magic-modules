@@ -63,6 +63,8 @@ func TestAccProject_create(t *testing.T) {
 				Config: testAccProject(pid, org),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
+					acctest.GetTestMetadataForTgc("resourcemanager", "google_project.acceptance",
+						testAccProject(pid, org)),
 				),
 			},
 		},
@@ -155,6 +157,14 @@ func TestAccProject_labels(t *testing.T) {
 					testAccCheckGoogleProjectHasNoLabels(t, "google_project.acceptance", pid),
 				),
 			},
+			{
+				Config: testAccProject_labels(pid, org, map[string]string{"label": "label-value"}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleProjectHasLabels(t, "google_project.acceptance", pid, map[string]string{"label": "label-value"}),
+					acctest.GetTestMetadataForTgc("resourcemanager", "google_project.acceptance",
+						testAccProject_labels(pid, org, map[string]string{"test": "that"})),
+				),
+			},
 		},
 	})
 }
@@ -188,6 +198,10 @@ func TestAccProject_parentFolder(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProject_parentFolder(pid, folderDisplayName, org),
+				Check: resource.ComposeTestCheckFunc(
+					acctest.GetTestMetadataForTgc("resourcemanager", "google_project.acceptance",
+						testAccProject_parentFolder(pid, folderDisplayName, org)),
+				),
 			},
 		},
 	})
@@ -229,6 +243,46 @@ func TestAccProject_migrateParent(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_policy"},
+			},
+		},
+	})
+}
+
+// Test that a Project resource can be created with tags
+func TestAccProject_tags(t *testing.T) {
+	t.Parallel()
+
+	org := envvar.GetTestOrgFromEnv(t)
+	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "crm-projects-tagkey")
+	tagValue := acctest.BootstrapSharedTestTagValue(t, "crm-projects-tagvalue", tagKey)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck: func() { acctest.AccTestPreCheck(t) },
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccProject_tags(pid, org, map[string]string{org + "/" + tagKey: tagValue}),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
+				),
+			},
+			// Make sure import supports tags
+			{
+				ResourceName:            "google_project.acceptance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"tags", "deletion_policy"}, // we don't read tags back
+			},
+			// Update tags tries to replace project but fails due to deletion policy
+			{
+				Config:      testAccProject_tags(pid, org, map[string]string{}),
+				ExpectError: regexp.MustCompile("deletion_policy"),
+			},
+			{
+				Config: testAccProject_tagsAllowDestroy(pid, org, map[string]string{org + "/" + tagKey: tagValue}),
 			},
 		},
 	})
@@ -552,4 +606,37 @@ resource "google_folder" "folder1" {
   deletion_protection = false
 }
 `, pid, pid, org, folderName, org)
+}
+
+func testAccProject_tags(pid, org string, tags map[string]string) string {
+	r := fmt.Sprintf(`
+resource "google_project" "acceptance" {
+  project_id = "%s"
+  name       = "%s"
+  org_id     = "%s"
+  tags = {`, pid, pid, org)
+
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+	l += fmt.Sprintf("}\n}")
+	return r + l
+}
+
+func testAccProject_tagsAllowDestroy(pid, org string, tags map[string]string) string {
+	r := fmt.Sprintf(
+		`resource "google_project" "acceptance" {
+	 project_id = "%s"
+  name       = "%s"
+  org_id     = "%s"
+  deletion_policy = "DELETE"
+  tags = {`, pid, pid, org)
+	l := ""
+	for key, value := range tags {
+		l += fmt.Sprintf("%q = %q\n", key, value)
+	}
+
+	l += fmt.Sprintf("}\n}")
+	return r + l
 }

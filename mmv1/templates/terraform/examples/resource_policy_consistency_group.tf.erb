@@ -1,7 +1,0 @@
-resource "google_compute_resource_policy" "cgroup" {
-  name   = "<%= ctx[:vars]['name'] %>"
-  region = "europe-west1"
-  disk_consistency_group_policy {
-    enabled = true
-  }
-}

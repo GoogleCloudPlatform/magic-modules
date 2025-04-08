@@ -10,7 +10,8 @@
          "data":{
             "ikeVersion":2,
             "labels":{
-               "foo":"bar"
+               "foo":"bar",
+               "goog-terraform-provisioned": "true"
             },
             "name":"tunnel-1",
             "peerExternalGatewayInterface":0,
@@ -71,6 +72,9 @@
          "data":{
             "addressType":"EXTERNAL",
             "name":"vpn-static-ip",
+            "labels": {
+              "goog-terraform-provisioned": "true"
+            },
             "region":"projects/{{.Provider.project}}/global/regions/us-central1"
          }
       },

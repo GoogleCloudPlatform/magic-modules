@@ -1,0 +1,30 @@
+resource "google_iam_principal_access_boundary_policy" "pab_policy" {
+  organization   = "{{index $.TestEnvVars "org_id"}}"
+  location       = "global"
+  display_name   = "{{index $.Vars "display_name"}}"
+  principal_access_boundary_policy_id = "{{index $.Vars "pab_policy_id"}}"
+}
+
+resource "google_folder" "folder" {
+  display_name        = "{{index $.Vars "folder_name"}}"
+  parent              = "organizations/{{index $.TestEnvVars "org_id"}}"
+  deletion_protection = false
+}
+
+resource "time_sleep" "wait_120s" {
+  depends_on      = [google_folder.folder]
+  create_duration = "120s"
+}
+
+resource "google_iam_folders_policy_binding" "{{$.PrimaryResourceId}}" {
+  folder         = google_folder.folder.folder_id
+  location       = "global"
+  display_name   = "{{index $.Vars "display_name"}}"
+  policy_kind    = "PRINCIPAL_ACCESS_BOUNDARY"
+  policy_binding_id = "{{index $.Vars "folder_binding_id"}}"
+  policy         = "organizations/{{index $.TestEnvVars "org_id"}}/locations/global/principalAccessBoundaryPolicies/${google_iam_principal_access_boundary_policy.pab_policy.principal_access_boundary_policy_id}"
+  target {
+    principal_set = "//cloudresourcemanager.googleapis.com/folders/${google_folder.folder.folder_id}"
+  }
+  depends_on = [time_sleep.wait_120s]
+}

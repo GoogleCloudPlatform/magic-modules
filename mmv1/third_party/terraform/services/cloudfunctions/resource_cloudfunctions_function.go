@@ -136,10 +136,10 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Minute),
-			Read:   schema.DefaultTimeout(5 * time.Minute),
-			Update: schema.DefaultTimeout(5 * time.Minute),
-			Delete: schema.DefaultTimeout(5 * time.Minute),
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Read:   schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
 		CustomizeDiff: customdiff.All(
@@ -287,7 +287,7 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 			"runtime": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: `The runtime in which the function is going to run. Eg. "nodejs12", "nodejs14", "python37", "go111".`,
+				Description: `The runtime in which the function is going to run. Eg. "nodejs20", "python37", "go111".`,
 			},
 
 			"service_account_email": {
@@ -911,7 +911,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 		updateMaskArr = append(updateMaskArr, "buildEnvironmentVariables")
 	}
 
-	if d.HasChange("vpc_connector") {
+	if d.HasChange("vpc_connector") || d.HasChange("vpc_connector_egress_settings") {
 		function.VpcConnector = d.Get("vpc_connector").(string)
 		updateMaskArr = append(updateMaskArr, "vpcConnector")
 	}

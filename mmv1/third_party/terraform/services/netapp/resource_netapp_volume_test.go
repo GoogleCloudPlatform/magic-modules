@@ -18,7 +18,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func TestAccNetappVolume_netappVolumeBasicExample_update(t *testing.T) {
+func TestAccNetappVolume_NetappVolumeBasicExample_update(t *testing.T) {
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
 		"random_suffix": acctest.RandString(t, 10),
@@ -112,14 +112,14 @@ func testAccNetappVolume_volumeBasicExample_basic(context map[string]interface{}
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default" {
     name = "tf-test-test-pool%{random_suffix}"
-    location = "us-west2"
+    location = "us-west4"
     service_level = "PREMIUM"
     capacity_gib = "2048"
     network = data.google_compute_network.default.id
 }
 
 resource "google_netapp_volume" "test_volume" {
-    location = "us-west2"
+    location = "us-west4"
     name = "tf-test-test-volume%{random_suffix}"
     capacity_gib = "100"
     share_name = "tf-test-test-volume%{random_suffix}"
@@ -137,7 +137,7 @@ func testAccNetappVolume_volumeBasicExample_full(context map[string]interface{})
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default" {
     name = "tf-test-test-pool%{random_suffix}"
-    location = "us-west2"
+    location = "us-west4"
     service_level = "PREMIUM"
     capacity_gib = "2048"
     network = data.google_compute_network.default.id
@@ -145,14 +145,14 @@ resource "google_netapp_storage_pool" "default" {
     
 resource "google_netapp_storage_pool" "default2" {
     name = "tf-test-pool%{random_suffix}"
-    location = "us-west2"
+    location = "us-west4"
     service_level = "EXTREME"
     capacity_gib = "2048"
     network = data.google_compute_network.default.id
 }
         
 resource "google_netapp_volume" "test_volume" {
-    location = "us-west2"
+    location = "us-west4"
     name = "tf-test-test-volume%{random_suffix}"
     capacity_gib = "100"
     share_name = "tf-test-test-volume%{random_suffix}"
@@ -224,22 +224,21 @@ func testAccNetappVolume_volumeBasicExample_update(context map[string]interface{
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default" {
     name = "tf-test-test-pool%{random_suffix}"
-    location = "us-west2"
+    location = "us-west4"
     service_level = "PREMIUM"
     capacity_gib = "2048"
     network = data.google_compute_network.default.id
 }
-    
 resource "google_netapp_storage_pool" "default2" {
     name = "tf-test-pool%{random_suffix}"
-    location = "us-west2"
+    location = "us-west4"
     service_level = "EXTREME"
     capacity_gib = "2048"
     network = data.google_compute_network.default.id
 }
 
 resource "google_netapp_volume" "test_volume" {
-    location = "us-west2"
+    location = "us-west4"
     name = "tf-test-test-volume%{random_suffix}"
     capacity_gib = "200"
     share_name = "tf-test-test-volume%{random_suffix}"
@@ -306,14 +305,14 @@ func testAccNetappVolume_volumeBasicExample_updatesnapshot(context map[string]in
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default2" {
     name = "tf-test-pool%{random_suffix}"
-    location = "us-west2"
+    location = "us-west4"
     service_level = "EXTREME"
     capacity_gib = "2048"
     network = data.google_compute_network.default.id
 }
     
 resource "google_netapp_volume" "test_volume" {
-    location = "us-west2"
+    location = "us-west4"
     name = "tf-test-test-volume%{random_suffix}"
     capacity_gib = "200"
     share_name = "tf-test-test-volume%{random_suffix}"
@@ -365,14 +364,14 @@ func testAccNetappVolume_volumeBasicExample_createclonevolume(context map[string
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default2" {
     name = "tf-test-pool%{random_suffix}"
-    location = "us-west2"
+    location = "us-west4"
     service_level = "EXTREME"
     capacity_gib = "2048"
     network = data.google_compute_network.default.id
 }
     
 resource "google_netapp_volume" "test_volume" {
-    location = "us-west2"
+    location = "us-west4"
     name = "tf-test-test-volume%{random_suffix}"
     capacity_gib = "200"
     share_name = "tf-test-test-volume%{random_suffix}"
@@ -414,7 +413,7 @@ resource "google_netapp_volume_snapshot" "test-snapshot" {
 }
 
 resource "google_netapp_volume" "test_volume_clone" {
-    location = "us-west2"
+    location = "us-west4"
     name = "tf-test-test-volume-clone%{random_suffix}"
     capacity_gib = "200"
     share_name = "tf-test-test-volume-clone%{random_suffix}"
@@ -437,14 +436,14 @@ func testAccNetappVolume_volumeBasicExample_createBackupConfig(context map[strin
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default2" {
     name = "tf-test-pool%{random_suffix}"
-    location = "us-west2"
+    location = "us-west4"
     service_level = "EXTREME"
     capacity_gib = "2048"
     network = data.google_compute_network.default.id
 }
 
 resource "google_netapp_volume" "test_volume" {
-    location = "us-west2"
+    location = "us-west4"
     name = "tf-test-test-volume%{random_suffix}"
     capacity_gib = "200"
     share_name = "tf-test-test-volume%{random_suffix}"
@@ -470,13 +469,13 @@ resource "time_sleep" "wait_30_minutes" {
 }
 
 resource "google_netapp_backup_vault" "backup-vault" {
-    location = "us-west2"
+    location = "us-west4"
     name = "tf-test-vault%{random_suffix}"
 }
 
 resource "google_netapp_backup_policy" "backup-policy" {
     name          		 = "tf-test-backup-policy%{random_suffix}"
-    location 			 = "us-west2"
+    location 			 = "us-west4"
     daily_backup_limit   = 2
     weekly_backup_limit  = 0
     monthly_backup_limit = 0
@@ -494,14 +493,14 @@ func testAccNetappVolume_volumeBasicExample_updateBackupConfigRemoveBackupPolicy
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default2" {
     name = "tf-test-pool%{random_suffix}"
-    location = "us-west2"
+    location = "us-west4"
     service_level = "EXTREME"
     capacity_gib = "2048"
     network = data.google_compute_network.default.id
 }
 
 resource "google_netapp_volume" "test_volume" {
-    location = "us-west2"
+    location = "us-west4"
     name = "tf-test-test-volume%{random_suffix}"
     capacity_gib = "200"
     share_name = "tf-test-test-volume%{random_suffix}"
@@ -523,13 +522,13 @@ resource "time_sleep" "wait_30_minutes" {
 }
 
 resource "google_netapp_backup_vault" "backup-vault" {
-    location = "us-west2"
+    location = "us-west4"
     name = "tf-test-vault%{random_suffix}"
 }
 
 resource "google_netapp_backup_policy" "backup-policy" {
     name          		 = "tf-test-backup-policy%{random_suffix}"
-    location 			 = "us-west2"
+    location 			 = "us-west4"
     daily_backup_limit   = 2
     weekly_backup_limit  = 0
     monthly_backup_limit = 0
@@ -547,14 +546,14 @@ func testAccNetappVolume_volumeBasicExample_updateBackupConfigRemoveBackupVault(
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default2" {
     name = "tf-test-pool%{random_suffix}"
-    location = "us-west2"
+    location = "us-west4"
     service_level = "EXTREME"
     capacity_gib = "2048"
     network = data.google_compute_network.default.id
 }
 
 resource "google_netapp_volume" "test_volume" {
-    location = "us-west2"
+    location = "us-west4"
     name = "tf-test-test-volume%{random_suffix}"
     capacity_gib = "200"
     share_name = "tf-test-test-volume%{random_suffix}"
@@ -573,13 +572,13 @@ resource "time_sleep" "wait_30_minutes" {
 }
 
 resource "google_netapp_backup_vault" "backup-vault" {
-    location = "us-west2"
+    location = "us-west4"
     name = "tf-test-vault%{random_suffix}"
 }
 
 resource "google_netapp_backup_policy" "backup-policy" {
     name          		 = "tf-test-backup-policy%{random_suffix}"
-    location 			 = "us-west2"
+    location 			 = "us-west4"
     daily_backup_limit   = 2
     weekly_backup_limit  = 0
     monthly_backup_limit = 0
@@ -619,7 +618,7 @@ func testAccNetappVolume_volumeBasicExample_cleanupScheduledBackup(t *testing.T,
 			createTime time.Time
 		}
 		var backupDataList []BackupData
-		for i, _ := range backups {
+		for i := range backups {
 			backup := backups[i].(map[string]interface{})
 			backupName := backup["name"].(string)
 			backupCreateTimeStr := backup["createTime"].(string)
@@ -636,7 +635,7 @@ func testAccNetappVolume_volumeBasicExample_cleanupScheduledBackup(t *testing.T,
 		sort.Slice(backupDataList, func(i, j int) bool {
 			return backupDataList[i].createTime.After(backupDataList[j].createTime)
 		})
-		for i, _ := range backupDataList {
+		for i := range backupDataList {
 			baseUrl, err := tpgresource.ReplaceVarsForTest(config, rs, "{{NetappBasePath}}")
 			if err != nil {
 				return fmt.Errorf("Error : %v", err)
@@ -658,4 +657,98 @@ func testAccNetappVolume_volumeBasicExample_cleanupScheduledBackup(t *testing.T,
 		}
 		return nil
 	}
+}
+
+func TestAccNetappVolume_autoTieredNetappVolume_update(t *testing.T) {
+	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetappVolumeDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetappVolume_autoTieredVolume_default(context),
+			},
+			{
+				ResourceName:            "google_netapp_volume.test_volume",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetappVolume_autoTieredVolume_custom(context),
+			},
+			{
+				ResourceName:            "google_netapp_volume.test_volume",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetappVolume_autoTieredVolume_default(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_netapp_storage_pool" "default" {
+    name = "tf-test-pool%{random_suffix}"
+    location = "us-west4"
+    service_level = "PREMIUM"
+    capacity_gib = "2048"
+    network = data.google_compute_network.default.id
+    allow_auto_tiering = true
+}
+resource "google_netapp_volume" "test_volume" {
+    location = "us-west4"
+    name = "tf-test-volume%{random_suffix}"
+    capacity_gib = "100"
+    share_name = "tf-test-volume%{random_suffix}"
+    storage_pool = google_netapp_storage_pool.default.name
+    protocols = ["NFSV3"]
+    tiering_policy {
+        cooling_threshold_days = 31
+        tier_action = "ENABLED"
+    }
+}
+data "google_compute_network" "default" {
+    name = "%{network_name}"
+}
+`, context)
+}
+
+func testAccNetappVolume_autoTieredVolume_custom(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_netapp_storage_pool" "default" {
+    name = "tf-test-pool%{random_suffix}"
+    location = "us-west4"
+    service_level = "PREMIUM"
+    capacity_gib = "2048"
+    network = data.google_compute_network.default.id
+    allow_auto_tiering = true
+}
+
+resource "google_netapp_volume" "test_volume" {
+    location = "us-west4"
+    name = "tf-test-volume%{random_suffix}"
+    capacity_gib = "100"
+    share_name = "tf-test-volume%{random_suffix}"
+    storage_pool = google_netapp_storage_pool.default.name
+    protocols = ["NFSV3"]
+    tiering_policy {
+        cooling_threshold_days = 20
+        tier_action = "ENABLED"
+    }
+}
+
+data "google_compute_network" "default" {
+    name = "%{network_name}"
+}
+`, context)
 }

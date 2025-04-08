@@ -1,0 +1,10 @@
+parent := d.Get("parent").(string)
+var opRes map[string]interface{}
+err = ComputeOrgOperationWaitTimeWithResponse(
+  config, res, &opRes, parent, "Deleting FirewallPolicy", userAgent,
+  d.Timeout(schema.TimeoutCreate))
+
+if err != nil {
+  // The resource didn't actually delete
+  return fmt.Errorf("Error waiting to delete FirewallPolicy: %s", err)
+}

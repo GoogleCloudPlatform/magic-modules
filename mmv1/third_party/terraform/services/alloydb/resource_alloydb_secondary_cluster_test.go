@@ -11,8 +11,6 @@ import (
 // The cluster creation should succeed with minimal number of arguments
 func TestAccAlloydbCluster_secondaryClusterMandatoryFields(t *testing.T) {
 	t.Parallel()
-	// https://github.com/hashicorp/terraform-provider-google/issues/16231
-	acctest.SkipIfVcr(t)
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 		"random_suffix": acctest.RandString(t, 10),
@@ -151,9 +149,6 @@ data "google_compute_network" "default" {
 // Validation test to ensure proper error is raised if secondary_config field is provided but no cluster_type is specified.
 func TestAccAlloydbCluster_secondaryClusterDefinedSecondaryConfigButMissingClusterTypeSecondary(t *testing.T) {
 	t.Parallel()
-
-	// Unskip in https://github.com/hashicorp/terraform-provider-google/issues/16231
-	acctest.SkipIfVcr(t)
 
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
@@ -381,7 +376,7 @@ func TestAccAlloydbCluster_secondaryClusterUsingCMEK(t *testing.T) {
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 		"random_suffix": acctest.RandString(t, 10),
-		"key_name":      "tf-test-key-" + acctest.RandString(t, 10),
+		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-alloydb-secondary-key1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -439,7 +434,7 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   encryption_config {
-    kms_key_name = google_kms_crypto_key.key.id
+    kms_key_name = "%{kms_key_name}"
   }
 
   depends_on = [
@@ -454,18 +449,8 @@ data "google_compute_network" "default" {
   name = "%{network_name}"
 }
 
-resource "google_kms_key_ring" "keyring" {
-  name     = "%{key_name}"
-  location = "us-east1"
-}
-
-resource "google_kms_crypto_key" "key" {
-  name     = "%{key_name}"
-  key_ring = google_kms_key_ring.keyring.id
-}
-
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
-  crypto_key_id = google_kms_crypto_key.key.id
+  crypto_key_id = "%{kms_key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
@@ -1234,7 +1219,7 @@ data "google_compute_global_address" "private_ip_alloc" {
 `, context)
 }
 
-// This test passes if automated backup policy and inital user can be added and deleted from the promoted secondary cluster
+// This test passes if automated backup policy and initial user can be added and deleted from the promoted secondary cluster
 func TestAccAlloydbCluster_secondaryClusterPromoteAndAddAndDeleteAutomatedBackupPolicyAndInitialUser(t *testing.T) {
 	t.Parallel()
 

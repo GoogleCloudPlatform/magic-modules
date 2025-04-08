@@ -1,6 +1,6 @@
 ---
 title: "Client-side fields"
-weight: 400
+weight: 150
 ---
 
 # Client-side fields
@@ -9,8 +9,8 @@ Client-side fields are most often used as flags to modify the behavior of a Terr
 
 Common client-side fields include:
 
-- [`deletion_protection`]({{< ref "/best-practices#deletion_protection" >}})
-- [`deletion_policy`]({{< ref "/best-practices#deletion_policy" >}})
+- [`deletion_protection`]({{< ref "/best-practices/deletion-behaviors#deletion_protection" >}})
+- [`deletion_policy`]({{< ref "/best-practices/deletion-behaviors#deletion_policy" >}})
 
 {{< tabs "schema" >}}
 {{< tab "MMv1" >}}
@@ -21,8 +21,8 @@ Instead of adding the field in `parameters` or `properties`, use a section calle
 Example:
 ```yaml
 virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: 'deletion_protection'
+  - name: 'deletion_protection'
+    type: Boolean
     default_value: true
     description: |
       Whether Terraform will be prevented from destroying the CertificateAuthority.

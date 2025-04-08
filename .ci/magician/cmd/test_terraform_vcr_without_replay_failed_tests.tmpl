@@ -1,7 +1,0 @@
-{{- if .ReplayingErr -}}
-$\textcolor{red}{\textsf{Errors occurred during REPLAYING mode. Please fix them to complete your PR.}}$
-{{- else -}}
-$\textcolor{green}{\textsf{All tests passed!}}$
-{{- end}}
-
-View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-{{.PRNumber}}/artifacts/{{.BuildID}}/build-log/replaying_test.log)

@@ -1,0 +1,6 @@
+resource "google_netapp_kmsconfig" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "kms_name"}}"
+  description="this is a test description"
+  crypto_key_name="{{index $.Vars "kms_key_name"}}"
+  location="us-central1"
+}

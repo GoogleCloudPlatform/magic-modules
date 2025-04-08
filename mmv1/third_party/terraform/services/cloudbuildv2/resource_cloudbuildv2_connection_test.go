@@ -740,11 +740,11 @@ resource "google_cloudbuildv2_connection" "primary" {
 
   gitlab_config {
     authorizer_credential {
-      user_token_secret_version = "projects/407304063574/secrets/gle-private-api/versions/1"
+      user_token_secret_version = "projects/407304063574/secrets/gle-private-api/versions/latest"
     }
 
     read_authorizer_credential {
-      user_token_secret_version = "projects/407304063574/secrets/gle-private-read-token/versions/1"
+      user_token_secret_version = "projects/407304063574/secrets/gle-private-read-token/versions/latest"
     }
 
     webhook_secret_secret_version = "projects/407304063574/secrets/gle-webhook-secret/versions/latest"
@@ -754,7 +754,7 @@ resource "google_cloudbuildv2_connection" "primary" {
       service = "projects/407304063574/locations/us-west1/namespaces/private-conn/services/gitlab-private"
     }
 
-    ssl_ca = "-----BEGIN CERTIFICATE-----\nMIIDcTCCAlmgAwIBAgIUbxJ3jxaRf5IPcUiQWRPRqpLL4s4wDQYJKoZIhvcNAQEL\nBQAwTjELMAkGA1UEBhMCVVMxGzAZBgNVBAoMEkdvb2dsZSBDbG91ZCBCdWlsZDEi\nMCAGA1UEAwwZZ2xlLXVzLmdsZS11cy1wcml2YXRlLmNvbTAeFw0yMzEwMjAxNjQ3\nNDJaFw0yNDEwMTkxNjQ3NDJaME4xCzAJBgNVBAYTAlVTMRswGQYDVQQKDBJHb29n\nbGUgQ2xvdWQgQnVpbGQxIjAgBgNVBAMMGWdsZS11cy5nbGUtdXMtcHJpdmF0ZS5j\nb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDRE84wKcuzc+beQ323\nIsNVVOF1+WZ975LvXpIt8Mw1bcYeYUcvgBXSXAByHGMtef8OBb9BUvLOVZdT3Xow\nCUbhCiK3zQy29pCn0rsneIvzGUXQgQRXK/Zap1N/hif4E7CIgjuvCN0Mn6BfDV/H\nXFm6EV3YUJrRPBr1rZik7doaYYwaJshCSTBtZxXZdvsG/OBuAXbJ9GB0B62EiTBz\n5g6yRdATut+PbgfzaWlPsgL3TTH+HPNCMO+ULnFupfZwRCtV+dJng76QYGs8fmFo\ntiWeElcsU8W7aqmjOkKRWcFsHpxPNXp8GG+jsZrVAnMOR3QeRLvowysSQD99IrGH\nAhwlAgMBAAGjRzBFMCQGA1UdEQQdMBuCGWdsZS11cy5nbGUtdXMtcHJpdmF0ZS5j\nb20wHQYDVR0OBBYEFKCIp5BruT4fpeDFQ2bKgdUvpfbWMA0GCSqGSIb3DQEBCwUA\nA4IBAQAQ4pUQmmd7eNIu9MQGna9lHYRFL0/G3mrK6Dcfm2As9qdcRw3dph8/iute\nxKDdBsnt6jDHrsjN0Na7Eq0040oBJrxG/NtqGX0zHNdpAT61bQ6j9reAT+KOrHys\nDJXH2lPuFW183AU7mmvcbXTEwkKex1i+DNoEdGYUbBfnWWeuhGzFog+/f9mtjoHL\nplcmx0VWHBQ5KO9Aq4OR/86DSg5QRPk76W9k3cM2ShXMm3TmTBZ+taJFfjZo5jP+\n7PLt2z9grSvFSXh2jnMyAs2yP4c+WezOXZLijqROr378AGBaksQK0CP+CYjZRpn1\nvndr1njLbvSjIypwKgZROb4P6XVa\n-----END CERTIFICATE-----\n"
+	ssl_ca = "-----BEGIN CERTIFICATE-----\nMIIFbjCCA1agAwIBAgIUH+nsWsqagMW9Ld8E9J71yPLPpD8wDQYJKoZIhvcNAQEL\nBQAwJDEiMCAGA1UEAwwZZ2xlLXVzLmdsZS11cy1wcml2YXRlLmNvbTAeFw0yNDEw\nMzExNjQzMjBaFw0zNDEwMjkxNjQzMjBaMCQxIjAgBgNVBAMMGWdsZS11cy5nbGUt\ndXMtcHJpdmF0ZS5jb20wggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDL\n+dUU8MHo+Eskx4SSnI1thRIiljgsyJSzSOplaD4lqahFnrG0cB0ovKpyRL4A+0wM\nzVW7W1Pfi8DiEOxxfNo7pEj+0zrzJHHqnzW9kApIlRmO1TBBJ7i9HaVamJ1Od01b\n2WI/pnKFEvNfLQSDQBulhkHZ2McyauDhb1DxefKnVX8ac6qhxtc4IzrezIQuJ18N\nDPtNLUDD4rtU4mIX4lx1yBIplrgypAo1HDbJOwW8OR76MtjAY7ek3K6UCyduQtwy\nmfZ23b3Eg69W10HVMVTy6m5NaGKi/TWy2MJ71hKUQ1+tWIPH5SL7FzYPKL4XXw5W\np61LhIiBAd2tgD41b2cQxhUbVifc1qHtnwNz/tE77M9ySH37rEUIlExzr3D3JV+f\nXjXEXUr9as8GRnS5zhD/opKe7wKbwpYMHhylK1h6XH/sBO7dBajf5xCvpZZBDzrK\nkpTqwHspT7p40WF9d8odjEk/xZKn5LdcDG2I+4U7SVS5e8ud41HUQxJwQx56lKfh\n2WB+zs7nSyMfspTj4doY1OADEC1VQCyGrwlbclKTKmUWrgwQdm38KxDzW5Juyjmm\nzvfsWIlSMdnes0qVVo38N3Jz8/MHCLD79R2veWgA2fbqS3+4h2dRkR7htjaVlJMJ\nt7SwFiG39ic3OZpo+wTkaHlG4CBnbFDueUsOW2wEpQIDAQABo4GXMIGUMB0GA1Ud\nDgQWBBTExgzH2gz9+rJHvlTFPO0AvG88azAfBgNVHSMEGDAWgBTExgzH2gz9+rJH\nvlTFPO0AvG88azAPBgNVHRMBAf8EBTADAQH/MEEGA1UdEQQ6MDiCGWdsZS11cy5n\nbGUtdXMtcHJpdmF0ZS5jb22CGyouZ2xlLXVzLmdsZS11cy1wcml2YXRlLmNvbTAN\nBgkqhkiG9w0BAQsFAAOCAgEAjkd1ZNoekoWrmozD+Ta1OM0zWhv04eqhP8aYzhbd\nXRS+GyF6ifMwfWg9HogkH22ZPT5GszaL5DacSyOUqZgJ905Q6g1EFPnaKmFVHHeC\nzZAhg5oedAzcakZpYwZDSiLuPgsQfwgRnqWIYR8JcIM5bKRZNGyOg8eZ8cKu23A2\nPavL4B3Ra1l93KllKm21rigIhLPIPLoEyxEg9c9oTJF92r0+aRdf2Ln853260Fqf\ncEUWoXhqMGvDv/YEbqDjGQ/Kh7ZWdlIWhcKFOA0gluF7oExjt/MgSitukgg3aaic\n/eXXOrZDNYH7Ve610NUuNlhub1M47Tp7EgjUJVWlsKK84T8ZcZq7Hn4BzioUr95d\nHao6u19HWA/ISM8bwzHaYxscFI4u6phEL0HJzLf4EysEmS0rAnLxyol0apNx6znR\nhXsqxnSexKhXoLqnK1Vuhcg8DsvobXHqg68EGZ7BZ3ycPYaHSWU8Xh3l1gtYkcQ6\nzxXsKIijlpVKuYJvGA3EOMoZu6+2MYF8Tgp3N4sKMvPhqBhsmgxOYF5OkAbGlsUP\nyCYWFDBFHmbhvUu5JpbKuID2CPkBi16EetemvMQ9PGlLq/0fO/BBNkn6TYn9Kvg8\nAyvuONz54uFEAIKPCcZIosa3ml+5/pt+tBhtVzHA6vMxn18IYaNpuTwSxi/+M10K\nRjw=\n-----END CERTIFICATE-----\n"
   }
 
   project     = "%{project_name}"
@@ -800,11 +800,11 @@ resource "google_cloudbuildv2_connection" "primary" {
 
   bitbucket_data_center_config {
     authorizer_credential {
-      user_token_secret_version = "projects/407304063574/secrets/private-bbdc-api-token/versions/1"
+      user_token_secret_version = "projects/407304063574/secrets/private-bbdc-api-token/versions/latest"
     }
 
     read_authorizer_credential {
-      user_token_secret_version = "projects/407304063574/secrets/private-bbdc-read-token/versions/1"
+      user_token_secret_version = "projects/407304063574/secrets/private-bbdc-read-token/versions/latest"
     }
 
     webhook_secret_secret_version = "projects/407304063574/secrets/bbdc-webhook-secret/versions/latest"
@@ -814,7 +814,7 @@ resource "google_cloudbuildv2_connection" "primary" {
     service = "projects/407304063574/locations/us-west1/namespaces/private-conn/services/private-bitbucket"
   }
 
-	ssl_ca = "-----BEGIN CERTIFICATE-----\nMIIDjDCCAnSgAwIBAgIUBh5+3oeT1vmUSS5rSNaFfy6igSAwDQYJKoZIhvcNAQEL\nBQAwVzELMAkGA1UEBhMCVVMxGzAZBgNVBAoMEkdvb2dsZSBDbG91ZCBCdWlsZDEr\nMCkGA1UEAwwicHJpdmF0ZS1iaXRidWNrZXQucHJvY3Rvci10ZXN0LmNvbTAeFw0y\nMzEyMTIyMzI5NTlaFw0yNDEyMTEyMzI5NTlaMFcxCzAJBgNVBAYTAlVTMRswGQYD\nVQQKDBJHb29nbGUgQ2xvdWQgQnVpbGQxKzApBgNVBAMMInByaXZhdGUtYml0YnVj\na2V0LnByb2N0b3ItdGVzdC5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK\nAoIBAQCNfMx4ImGD4imZR64RbmRtpUNmypDokx2/S9kgobmyNvBWeSgRVhOGHGbU\nUgyvENcEg803K8unwF2jF6sdGrocRnIdPpr2tUoViOM2Ss6ds+TD8a2kqBA6+hmQ\nOMJiEIirpGT3Mw1pYTpuLisfIeeuuYssoS5k18kFLZ+Mk6MUSAHCgC8EowUZLGBZ\nagh9OhrjpMSXyidv+2d7FKTh/k3BWffVkDXehjvWjcr47hSvQwqW5m773ewCq0uD\nwxUgO6MAAAxLJz15cjhfvk4ishgSqcp49IZrx+xsNCLbHjPVyGkrL2OhgFaGsQS/\nq6GkXYfJ1sJYrf5Xm1EXbZlQZzJPAgMBAAGjUDBOMC0GA1UdEQQmMCSCInByaXZh\ndGUtYml0YnVja2V0LnByb2N0b3ItdGVzdC5jb20wHQYDVR0OBBYEFISmuuTpHKMB\n+m1h62gEqg1ovC86MA0GCSqGSIb3DQEBCwUAA4IBAQAwIwR6pIum9EZyLtC438Q1\nEgH3SKqbdyMFCkFSBvr4WfFU6ja1pn5ZxzJWt5TRFlI9GMy7BupQrxJGebOiFuUC\noNJpc4QDt9a0/GKh48DGF7uKo9XK33p0v1ahq3ewNT/CUnHewQNX7aXXP1/rL+br\nZPA20XWURUTviMik7DdhaXKQv76K9coI3H74heeBUp+OHKgUkqA3D1QIGNRGOKos\n4z6MyBWVpMUIeJQGtIQBd9CY1hBN231iG1+hdOlOMwgyNVK2GS738r+HbngFo9v4\nh2I1HMUHVcHiPQLqwZ2/OTmTmF1aWCUbhnAvoisu20rHVcGnVIOqMrHYFzdGr3ZQ\n-----END CERTIFICATE-----\n"  
+        ssl_ca = "-----BEGIN CERTIFICATE-----\nMIIEWDCCA0CgAwIBAgIUPHTFNv00au9lCZnZIbpDZOVNz8swDQYJKoZIhvcNAQEL\nBQAwgaIxCzAJBgNVBAYTAkNBMRAwDgYDVQQIDAdPbnRhcmlvMRAwDgYDVQQHDAdU\nb3JvbnRvMQ8wDQYDVQQKDAZHb29nbGUxDDAKBgNVBAsMA0dDUDErMCkGA1UEAwwi\ncHJpdmF0ZS1iaXRidWNrZXQucHJvY3Rvci10ZXN0LmNvbTEjMCEGCSqGSIb3DQEJ\nARYUbW9uaWNhbGl1QGdvb2dsZS5jb20wHhcNMjUwMTEzMjIyODU5WhcNMzUwMTEx\nMjIyODU5WjCBojELMAkGA1UEBhMCQ0ExEDAOBgNVBAgMB09udGFyaW8xEDAOBgNV\nBAcMB1Rvcm9udG8xDzANBgNVBAoMBkdvb2dsZTEMMAoGA1UECwwDR0NQMSswKQYD\nVQQDDCJwcml2YXRlLWJpdGJ1Y2tldC5wcm9jdG9yLXRlc3QuY29tMSMwIQYJKoZI\nhvcNAQkBFhRtb25pY2FsaXVAZ29vZ2xlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQAD\nggEPADCCAQoCggEBAKNbLKjUD04cq5S9Z0HIdPjOSNsswegSDy4+DCN/tWYU+CiB\nKFFHVT+WUa5IGWCzUh2qXtJAls3zpsEP/EwiF2gnIR2nerLv5ppQdd5ejo57jo/u\nPqm7NVnjWEnruCt9UXyVbvCocj/FBcubBDkRzNsEx7e/aPk/deaj3YjJBbdKbNJu\nXmU5bOfnHjAqsiAsAj09W9f/ZifMZnQdGCpopbaJA+0Rr8ZcxMPsBauI5MClIy2R\n2hNWtiOLJpp4hplnIy1M2npn/sjT8FBTrClzpaDDicI4EiBVZPQTOwERd1Gdk3Us\nXBxUIi3Jje9utZeVQTEPuiUnOqIQ7GHn9ynRW3kCAwEAAaOBgzCBgDAdBgNVHQ4E\nFgQUpAZEKba/ZJUJGJ0+4q9kCCfEOv4wHwYDVR0jBBgwFoAUpAZEKba/ZJUJGJ0+\n4q9kCCfEOv4wDwYDVR0TAQH/BAUwAwEB/zAtBgNVHREEJjAkgiJwcml2YXRlLWJp\ndGJ1Y2tldC5wcm9jdG9yLXRlc3QuY29tMA0GCSqGSIb3DQEBCwUAA4IBAQA8TqtB\nQGF+ibVmcwQZeI295w8Xfy7hBiKPrl6h+ReB1zJKyspCfvSLzfFyvBWIzbVCaGIh\nRbeDPh9divTKI4w1jhNhUbL7pLVnpvX4kAvnZzbAljQwzvHfwyuMsZNtfp0c7Rc/\nbowtxNce5Mgqver477od2zwLlQjyeKWaolILKGGL0NfRIx2VeZzpXblo0pksKpLb\n3Ncw41hFYI552FTQ3eqjbCYNNWn2nzBg+FqEL8eYRHIUGCj9bcm8dvBGp1fffuNp\nlFQt8ifUATTRqUt8q3/ukN9IYCJSKc5TGrWu34/QVyReOnZ6EBL0JFSd9u+/ckXn\ntOIt3W2yI+EOFLUJ\n-----END CERTIFICATE-----"
   }
 
   project     = "%{project_name}"

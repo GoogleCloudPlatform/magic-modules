@@ -1,0 +1,140 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ReferenceList
+description: Reference lists are user-defined lists of values which users can use in multiple Rules.
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.referenceLists'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/referenceLists
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/referenceLists/{{reference_list_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/referenceLists?referenceListId={{reference_list_id}}
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/referenceLists/{{reference_list_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/referenceLists/{{reference_list_id}}
+update_verb: PATCH
+update_mask: true
+exclude_delete: true
+autogen_status: UmVmZXJlbmNlTGlzdA==
+
+examples:
+  - name: 'chronicle_referencelist_basic'
+    primary_resource_id: 'example'
+    vars:
+      reference_list_id: reference_list_id
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+
+parameters:
+  - name: location
+    type: String
+    description: The location of the resource. This is the geographical region where the Chronicle instance resides, such as "us" or "europe-west2".
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: instance
+    type: String
+    description: The unique identifier for the Chronicle instance, which is the same as the customer ID.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: referenceListId
+    type: String
+    description: |-
+      Required. The ID to use for the reference list. This is also the display name for
+      the reference list. It must satisfy the following requirements:
+      - Starts with letter.
+      - Contains only letters, numbers and underscore.
+      - Has length < 256.
+      - Must be unique.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    description: |-
+      Output only. The resource name of the reference list.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/referenceLists/{reference_list}
+    output: true
+  - name: description
+    type: String
+    description: Required. A user-provided description of the reference list.
+    required: true
+  - name: entries
+    type: Array
+    description: |-
+      Required. The entries of the reference list.
+      When listed, they are returned in the order that was specified at creation
+      or update. The combined size of the values of the reference list may not
+      exceed 6MB.
+      This is returned only when the view is REFERENCE_LIST_VIEW_FULL.
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: value
+          type: String
+          description: Required. The value of the entry. Maximum length is 512 characters.
+          required: true
+  - name: scopeInfo
+    type: NestedObject
+    output: true
+    description: ScopeInfo specifies the scope info of the reference list.
+    properties:
+      - name: referenceListScope
+        type: NestedObject
+        description: ReferenceListScope specifies the list of scope names of the reference list.
+        required: true
+        properties:
+          - name: scopeNames
+            type: Array
+            description: |-
+              Optional. The list of scope names of the reference list. The scope names should be
+              full resource names and should be of the format:
+              "projects/{project}/locations/{location}/instances/{instance}/dataAccessScopes/{scope_name}".
+            item_type:
+              type: String
+  - name: displayName
+    type: String
+    description: Output only. The unique display name of the reference list.
+    output: true
+  - name: revisionCreateTime
+    type: String
+    description: Output only. The timestamp when the reference list was last updated.
+    output: true
+  - name: rules
+    type: Array
+    description: |-
+      Output only. The resource names for the associated self-authored Rules that use this
+      reference list.
+      This is returned only when the view is REFERENCE_LIST_VIEW_FULL.
+    output: true
+    item_type:
+      type: String
+  - name: syntaxType
+    type: String
+    description: |2-
+
+      Possible values:
+      REFERENCE_LIST_SYNTAX_TYPE_PLAIN_TEXT_STRING
+      REFERENCE_LIST_SYNTAX_TYPE_REGEX
+      REFERENCE_LIST_SYNTAX_TYPE_CIDR
+    required: true
+  - name: ruleAssociationsCount
+    type: Integer
+    description: Output only. The count of self-authored rules using the reference list.
+    output: true

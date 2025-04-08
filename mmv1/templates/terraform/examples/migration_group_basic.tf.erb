@@ -1,9 +1,0 @@
-resource "google_migration_center_group" "<%= ctx[:primary_resource_id] %>" {
-  location     = "us-central1"
-  group_id     = "<%= ctx[:vars]['group_name'] %>"
-  description  = "Terraform integration test description"
-  display_name = "Terraform integration test display"
-  labels       = {
-    key = "value"
-  }
-}

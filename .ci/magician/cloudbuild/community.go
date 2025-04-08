@@ -23,7 +23,7 @@ import (
 	cloudbuildv1 "google.golang.org/api/cloudbuild/v1"
 )
 
-func (cb *Client) ApproveCommunityChecker(prNumber, commitSha string) error {
+func (cb *Client) ApproveDownstreamGenAndTest(prNumber, commitSha string) error {
 	buildId, err := getPendingBuildId(PROJECT_ID, commitSha)
 	if err != nil {
 		return err
@@ -42,9 +42,9 @@ func (cb *Client) ApproveCommunityChecker(prNumber, commitSha string) error {
 }
 
 func getPendingBuildId(projectId, commitSha string) (string, error) {
-	COMMUNITY_CHECKER_TRIGGER, ok := os.LookupEnv("COMMUNITY_CHECKER_TRIGGER")
+	COMMUNITY_CHECKER_TRIGGER, ok := os.LookupEnv("DOWNSTREAM_GENERATION_AND_TEST_TRIGGER")
 	if !ok {
-		return "", fmt.Errorf("Did not provide COMMUNITY_CHECKER_TRIGGER environment variable")
+		return "", fmt.Errorf("Did not provide DOWNSTREAM_GENERATION_AND_TEST_TRIGGER environment variable")
 	}
 
 	ctx := context.Background()

@@ -1,8 +1,0 @@
-resource "google_compute_resource_policy" "baz" {
-  name   = "<%= ctx[:vars]['name'] %>"
-  region = "us-central1"
-  group_placement_policy {
-    vm_count = 2
-    collocation = "COLLOCATED"
-  }
-}

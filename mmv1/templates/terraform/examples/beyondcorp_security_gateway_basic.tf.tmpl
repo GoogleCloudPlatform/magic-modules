@@ -1,0 +1,5 @@
+resource "google_beyondcorp_security_gateway" "{{$.PrimaryResourceId}}" {
+  security_gateway_id = "{{index $.Vars "security_gateway_name"}}"
+  display_name = "My Security Gateway resource"
+  hubs { region = "us-central1" }
+}

@@ -67,6 +67,7 @@ type Property struct {
 	Optional  bool
 	Computed  bool
 	Sensitive bool
+	WriteOnly bool
 
 	ForceNew    bool
 	Description string
@@ -246,7 +247,7 @@ func (p Property) ChangeStateGetter() string {
 }
 
 // Builds a Getter for constructing a shallow
-// version of the object for destory purposes
+// version of the object for destroy purposes
 func (p Property) StateGetterForDestroyTest() string {
 	pullValueFromState := fmt.Sprintf(`rs.Primary.Attributes["%s"]`, p.Name())
 

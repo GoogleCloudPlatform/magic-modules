@@ -1,0 +1,22 @@
+resource: 'google_compute_instance_group'
+generation_type: 'handwritten'
+api_service_name: 'compute.googleapis.com'
+{{- if ne $.TargetVersionName "ga" }}
+api_version: 'beta'
+{{- else }}
+api_version: 'v1'
+{{- end }}
+api_resource_type_kind: 'InstanceGroup'
+api_variant_patterns:
+  - 'projects/{project}/zones/{zone}/instanceGroups/{instanceGroup}'
+fields:
+  - field: 'description'
+  - field: 'instances'
+  - field: 'name'
+  - field: 'named_port.name'
+  - field: 'named_port.port'
+  - field: 'network'
+  - field: 'project'
+  - field: 'self_link'
+  - field: 'size'
+  - field: 'zone'

@@ -10,6 +10,9 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "addressType": "EXTERNAL",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
         "name": "global-appserver-ip"
       }
     }

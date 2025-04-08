@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,28 +11,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'License'
 kind: 'compute#license'
-base_url: /projects/{{project}}/global/licenses
-collection_url_key: 'items'
-readonly: true
-has_self_link: true
 description: |
   A License resource represents a software license. Licenses are used to
   track software usage in images, persistent disks, snapshots, and virtual
   machine instances.
 # Used as a resource reference
 exclude: true
+readonly: true
+docs:
+base_url: '/projects/{{project}}/global/licenses'
+has_self_link: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+collection_url_key: 'items'
+custom_code:
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       Name of the resource. The name is 1-63 characters long
       and complies with RFC1035.
     output: true
-  - !ruby/object:Api::Type::Boolean
-    name: 'chargesUseFee'
+  - name: 'chargesUseFee'
+    type: Boolean
     description: |
       If true, the customer will be charged license fee for
       running software that contains this license on an instance.

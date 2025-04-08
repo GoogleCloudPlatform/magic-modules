@@ -1,0 +1,33 @@
+data "google_project" "project" {}
+
+resource "google_tags_tag_key" "tag_key1" {
+  parent     = data.google_project.project.id
+  short_name = "{{index $.Vars "tag_key1"}}"
+}
+
+resource "google_tags_tag_value" "tag_value1" {
+  parent     = google_tags_tag_key.tag_key1.id
+  short_name = "{{index $.Vars "tag_value1"}}"
+}
+
+resource "google_tags_tag_key" "tag_key2" {
+  parent     = data.google_project.project.id
+  short_name = "{{index $.Vars "tag_key2"}}"
+}
+
+resource "google_tags_tag_value" "tag_value2" {
+  parent     = google_tags_tag_key.tag_key2.id
+  short_name = "{{index $.Vars "tag_value2"}}"
+}
+
+resource "google_bigquery_dataset" "{{$.PrimaryResourceId}}" {
+  dataset_id    = "{{index $.Vars "dataset_id"}}"
+  friendly_name = "test"
+  description   = "This is a test description"
+  location      = "EU"
+
+  resource_tags = {
+    (google_tags_tag_key.tag_key1.namespaced_name) = google_tags_tag_value.tag_value1.short_name
+    (google_tags_tag_key.tag_key2.namespaced_name) = google_tags_tag_value.tag_value2.short_name
+  }
+}

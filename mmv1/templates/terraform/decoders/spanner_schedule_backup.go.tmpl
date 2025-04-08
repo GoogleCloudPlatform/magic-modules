@@ -1,0 +1,15 @@
+config := meta.(*transport_tpg.Config)
+d.SetId(res["name"].(string))
+if err := tpgresource.ParseImportId([]string{"projects/(?P<project>[^/]+)/instances/(?P<instance>[^/]+)/databases/(?P<database>[^/]+)/backupSchedules/(?P<name>[^/]+)"}, d, config); err != nil {
+  return nil, err
+}
+res["project"] = d.Get("project").(string)
+res["instance"] = d.Get("instance").(string)
+res["database"] = d.Get("database").(string)
+res["name"] = d.Get("name").(string)
+id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}instance{{"}}"}}/{{"{{"}}database{{"}}"}}/{{"{{"}}name{{"}}"}}")
+if err != nil {
+  return nil, err
+}
+d.SetId(id)
+return res, nil

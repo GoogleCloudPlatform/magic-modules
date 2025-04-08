@@ -22,6 +22,9 @@ func TestAccAlloydbCluster_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "subscription_type", "STANDARD"),
+				),
 			},
 			{
 				ResourceName:            "google_alloydb_cluster.default",
@@ -53,13 +56,184 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
+}
 
-  labels = {
-	foo = "bar" 
+data "google_project" "project" {
+}
+
+resource "google_compute_network" "default" {
+  name = "tf-test-alloydb-cluster%{random_suffix}"
+}
+`, context)
+}
+
+func TestAccAlloydbCluster_upgrade(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-upgrade-1"),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_beforeUpgrade(context),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "labels", "terraform_labels", "skip_await_major_version_upgrade"},
+			},
+			{
+				Config: testAccAlloydbCluster_afterUpgrade(context),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "labels", "terraform_labels", "skip_await_major_version_upgrade"},
+			},
+		},
+	})
+}
+
+func testAccAlloydbCluster_beforeUpgrade(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  skip_await_major_version_upgrade = false
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network_config {
+    network = data.google_compute_network.default.id
   }
+  database_version = "POSTGRES_14"
+}
 
-  lifecycle {
-    prevent_destroy = true
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 8
+  }
+}
+
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+`, context)
+}
+
+func testAccAlloydbCluster_afterUpgrade(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  skip_await_major_version_upgrade = false
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network_config {
+    network = data.google_compute_network.default.id
+  }
+  database_version = "POSTGRES_15"
+}
+
+resource "google_alloydb_instance" "default" {
+  cluster       = google_alloydb_cluster.default.name
+  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
+  instance_type = "PRIMARY"
+
+  machine_config {
+    cpu_count = 8
+  }
+}
+
+data "google_compute_network" "default" {
+  name = "%{network_name}"
+}
+`, context)
+}
+
+// Trial cluster creation should succeed with subscription type field set to Trial.
+func TestAccAlloydbCluster_withSubscriptionTypeTrial(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_withSubscriptionTypeTrial(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "subscription_type", "TRIAL"),
+					resource.TestMatchResourceAttr("google_alloydb_cluster.default", "trial_metadata.0.start_time", regexp.MustCompile(".+")),
+					resource.TestMatchResourceAttr("google_alloydb_cluster.default", "trial_metadata.0.end_time", regexp.MustCompile(".+")),
+				),
+			},
+		},
+	})
+}
+
+func testAccAlloydbCluster_withSubscriptionTypeTrial(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  subscription_type = "TRIAL"
+  network_config {
+  	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+}
+
+data "google_project" "project" {
+}
+
+resource "google_compute_network" "default" {
+  name = "tf-test-alloydb-cluster%{random_suffix}"
+}
+`, context)
+}
+
+// Standard cluster creation should succeed with subscription type field set to Standard.
+func TestAccAlloydbCluster_withSubscriptionTypeStandard(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_withSubscriptionTypeStandard(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "subscription_type", "STANDARD"),
+				),
+			},
+		},
+	})
+}
+
+func testAccAlloydbCluster_withSubscriptionTypeStandard(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  subscription_type = "STANDARD"
+  network_config {
+  	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
 }
 
@@ -474,7 +648,7 @@ func TestAccAlloydbCluster_usingCMEK(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"key_name":      "tf-test-key-" + acctest.RandString(t, 10),
+		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-alloydb-cluster-key1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -504,7 +678,7 @@ resource "google_alloydb_cluster" "default" {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
   encryption_config {
-    kms_key_name = google_kms_crypto_key.key.id
+    kms_key_name = "%{kms_key_name}"
   }
   depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
@@ -512,16 +686,8 @@ resource "google_compute_network" "default" {
   name = "tf-test-alloydb-cluster%{random_suffix}"
 }
 data "google_project" "project" {}
-resource "google_kms_key_ring" "keyring" {
-  name     = "%{key_name}"
-  location = "us-central1"
-}  
-resource "google_kms_crypto_key" "key" {
-  name     = "%{key_name}"
-  key_ring = google_kms_key_ring.keyring.id
-}
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
-  crypto_key_id = google_kms_crypto_key.key.id
+  crypto_key_id = "%{kms_key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
@@ -533,7 +699,8 @@ func TestAccAlloydbCluster_CMEKInAutomatedBackupIsUpdatable(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"key_name":      "tf-test-key-" + acctest.RandString(t, 10),
+		"kms_key_name1": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-alloydb-backup-update-key1").CryptoKey.Name,
+		"kms_key_name2": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-alloydb-backup-update-key2").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -581,14 +748,14 @@ resource "google_alloydb_cluster" "default" {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
   encryption_config {
-    kms_key_name = google_kms_crypto_key.key.id
+    kms_key_name = "%{kms_key_name1}"
   }
   automated_backup_policy {
     location      = "us-central1"
     backup_window = "1800s"
     enabled       = true
     encryption_config {
-      kms_key_name = google_kms_crypto_key.key.id
+      kms_key_name = "%{kms_key_name1}"
     }
     time_based_retention {
       retention_period = "510s"
@@ -606,18 +773,8 @@ resource "google_compute_network" "default" {
 
 data "google_project" "project" {}
 
-resource "google_kms_key_ring" "keyring" {
-  name     = "%{key_name}"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "key" {
-  name     = "%{key_name}"
-  key_ring = google_kms_key_ring.keyring.id
-}
-
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
-  crypto_key_id = google_kms_crypto_key.key.id
+  crypto_key_id = "%{kms_key_name1}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
@@ -633,14 +790,14 @@ resource "google_alloydb_cluster" "default" {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
   encryption_config {
-    kms_key_name = google_kms_crypto_key.key.id
+    kms_key_name = "%{kms_key_name1}"
   }
   automated_backup_policy {
     location      = "us-central1"
     backup_window = "1800s"
     enabled       = true
     encryption_config {
-      kms_key_name = google_kms_crypto_key.key2.id
+      kms_key_name = "%{kms_key_name2}"
     }
     time_based_retention {
       retention_period = "510s"
@@ -658,29 +815,14 @@ resource "google_compute_network" "default" {
 
 data "google_project" "project" {}
 
-resource "google_kms_key_ring" "keyring" {
-  name     = "%{key_name}"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "key" {
-  name     = "%{key_name}"
-  key_ring = google_kms_key_ring.keyring.id
-}
-
-resource "google_kms_crypto_key" "key2" {
-  name     = "%{key_name}-2"
-  key_ring = google_kms_key_ring.keyring.id
-}
-
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
-  crypto_key_id = google_kms_crypto_key.key.id
+  crypto_key_id = "%{kms_key_name1}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 
 resource "google_kms_crypto_key_iam_member" "crypto_key2" {
-  crypto_key_id = google_kms_crypto_key.key2.id
+  crypto_key_id = "%{kms_key_name2}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
@@ -696,14 +838,14 @@ resource "google_alloydb_cluster" "default" {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
   encryption_config {
-    kms_key_name = google_kms_crypto_key.key.id
+    kms_key_name = "%{kms_key_name1}"
   }
   automated_backup_policy {
     location      = "us-central1"
     backup_window = "1800s"
     enabled       = true
     encryption_config {
-      kms_key_name = google_kms_crypto_key.key2.id
+      kms_key_name = "%{kms_key_name2}"
     }
     time_based_retention {
       retention_period = "510s"
@@ -718,29 +860,14 @@ resource "google_compute_network" "default" {
 
 data "google_project" "project" {}
 
-resource "google_kms_key_ring" "keyring" {
-  name     = "%{key_name}"
-  location = "us-central1"
-}
-
-resource "google_kms_crypto_key" "key" {
-  name     = "%{key_name}"
-  key_ring = google_kms_key_ring.keyring.id
-}
-
-resource "google_kms_crypto_key" "key2" {
-	name     = "%{key_name}-2"
-	key_ring = google_kms_key_ring.keyring.id
-}
-
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
-  crypto_key_id = google_kms_crypto_key.key.id
+  crypto_key_id = "%{kms_key_name1}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
 
 resource "google_kms_crypto_key_iam_member" "crypto_key2" {
-  crypto_key_id = google_kms_crypto_key.key2.id
+  crypto_key_id = "%{kms_key_name2}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
@@ -1345,6 +1472,7 @@ func TestAccAlloydbCluster_withPrivateServiceConnect(t *testing.T) {
 				Config: testAccAlloydbCluster_withPrivateServiceConnect(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "psc_config.0.psc_enabled", "true"),
+					resource.TestMatchResourceAttr("google_alloydb_cluster.default", "psc_config.0.service_owned_project_number", regexp.MustCompile("^[1-9]\\d*$")),
 				),
 			},
 		},
@@ -1362,4 +1490,119 @@ resource "google_alloydb_cluster" "default" {
 }
 data "google_project" "project" {}
 `, context)
+}
+
+// Ensures cluster update from unspecified to standard and standard to standard works with no change in config.
+func TestAccAlloydbCluster_standardClusterUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_alloydb_cluster.default", "subscription_type", "STANDARD"),
+				),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+			},
+			{
+				Config: testAccAlloydbCluster_withSubscriptionTypeStandard(context),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+			},
+			{
+				Config: testAccAlloydbCluster_withSubscriptionTypeStandard(context),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+			},
+		},
+	})
+}
+
+// Ensures cluster update succeeds with subscription type from trial to standard and trial to trial results in no change in config.
+func TestAccAlloydbCluster_trialClusterUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_withSubscriptionTypeTrial(context),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+			},
+			{
+				Config: testAccAlloydbCluster_withSubscriptionTypeTrial(context),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+			},
+			{
+				Config: testAccAlloydbCluster_withSubscriptionTypeStandard(context),
+			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+			},
+		},
+	})
+}
+
+// Ensures cluster update throws expected errors for subscription update from standard to trial.
+func TestAccAlloydbCluster_standardClusterUpdateFailure(t *testing.T) {
+	t.Parallel()
+	errorPattern := `.*The request was invalid: invalid subscription_type update`
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckAlloydbClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAlloydbCluster_withSubscriptionTypeStandard(context),
+			},
+			{
+				Config:      testAccAlloydbCluster_withSubscriptionTypeTrial(context),
+				ExpectError: regexp.MustCompile(errorPattern),
+			},
+		},
+	})
 }

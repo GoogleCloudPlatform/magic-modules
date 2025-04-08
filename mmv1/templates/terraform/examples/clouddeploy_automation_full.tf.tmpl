@@ -1,0 +1,80 @@
+resource "google_clouddeploy_automation" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "automation"}}"
+  location = "us-central1"
+  delivery_pipeline = google_clouddeploy_delivery_pipeline.pipeline.name
+  service_account = "{{index $.TestEnvVars "service_account"}}"
+  annotations = {
+    my_first_annotation = "example-annotation-1"
+    my_second_annotation = "example-annotation-2"
+  }
+  labels = {
+    my_first_label = "example-label-1"
+    my_second_label = "example-label-2"
+  }
+  description = "automation resource"
+  selector {
+    targets {
+      id = "test"
+      labels = {
+      	foo = "bar"
+      }
+    }
+  }
+  suspended = true
+  rules {
+    promote_release_rule{
+      id = "promote-release"
+      wait = "200s"
+      destination_target_id = "@next"
+      destination_phase = "stable"
+    }
+  }
+  rules {
+    advance_rollout_rule {
+      id                    = "advance-rollout"
+      source_phases         = ["canary"]
+      wait                  = "200s"
+    }
+  }
+  rules {
+    repair_rollout_rule {
+      id                    = "repair-rollout"
+      phases                = ["stable"]
+      jobs                  = ["deploy"]
+      repair_phases {
+          retry  {
+                      attempts = "1"
+                      wait     = "200s"
+                      backoff_mode = "BACKOFF_MODE_LINEAR"
+                  }
+       }
+      repair_phases {
+             rollback {
+                         destination_phase = "stable"
+                         disable_rollback_if_rollout_pending = true
+                      }
+          }
+    }
+  }
+  rules {
+    timed_promote_release_rule {
+      id                    = "timed-promote-release"
+      destination_target_id   = "@next"
+      schedule              = "0 9 * * 1"
+      time_zone              = "America/New_York"
+      destination_phase      = "stable"
+    }
+  }
+}
+
+resource "google_clouddeploy_delivery_pipeline" "pipeline" {
+  name = "{{index $.Vars "delivery_pipeline"}}"
+  location = "us-central1"
+  serial_pipeline  {
+    stages {
+      target_id = "test"
+      profiles = ["test-profile"]
+    }
+  }
+}
+

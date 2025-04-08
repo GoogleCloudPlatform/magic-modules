@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,86 +11,93 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Fulfillment'
-base_url: 'projects/{{project}}/agent/fulfillment/'
-self_link: '{{name}}'
-update_verb: :PATCH
-delete_verb: :PATCH
-create_verb: :PATCH
-create_url: projects/{{project}}/agent/fulfillment/?updateMask=name,displayName,enabled,genericWebService,features
-update_url: projects/{{project}}/agent/fulfillment/
-delete_url: projects/{{project}}/agent/fulfillment/?updateMask=name,displayName,enabled,genericWebService,features
-update_mask: true
 description: |
   By default, your agent responds to a matched intent with a static response. If you're using one of the integration options, you can provide a more dynamic response by using fulfillment. When you enable fulfillment for an intent, Dialogflow responds to that intent by calling a service that you define. For example, if an end-user wants to schedule a haircut on Friday, your service can check your database and respond to the end-user with availability information for Friday.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dialogflow/es/docs/fulfillment-overview'
   api: 'https://cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.agent/getFulfillment'
+docs:
+id_format: '{{name}}'
+base_url: 'projects/{{project}}/agent/fulfillment/'
+self_link: '{{name}}'
+create_url: 'projects/{{project}}/agent/fulfillment/?updateMask=name,displayName,enabled,genericWebService,features'
+create_verb: 'PATCH'
+update_url: 'projects/{{project}}/agent/fulfillment/'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/agent/fulfillment/?updateMask=name,displayName,enabled,genericWebService,features'
+delete_verb: 'PATCH'
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
+  custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
+# Skip sweeper gen since this is a child resource.
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dialogflow_fulfillment_basic'
+  - name: 'dialogflow_fulfillment_basic'
     primary_resource_id: 'basic_fulfillment'
-    skip_test: true
     vars:
       fulfillment_name: 'basic-fulfillment'
-# Skip sweeper gen since this is a child resource.
-skip_sweeper: true
-id_format: '{{name}}'
-import_format: ['{{name}}']
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/self_link_as_name_set_project.go.erb
-  post_create: 'templates/terraform/post_create/set_computed_name.erb'
+    exclude_test: true
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The unique identifier of the fulfillment.
       Format: projects/<Project ID>/agent/fulfillment - projects/<Project ID>/locations/<Location ID>/agent/fulfillment
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
-    required: true
+    output: true
+  - name: 'displayName'
+    type: String
     description: |
       The human-readable name of the fulfillment, unique within the agent.
-  - !ruby/object:Api::Type::Boolean
-    name: 'enabled'
+    required: true
+  - name: 'enabled'
+    type: Boolean
     description: |
       Whether fulfillment is enabled.
-  - !ruby/object:Api::Type::Array
-    name: 'features'
+  - name: 'features'
+    type: Array
     description: |
       The field defines whether the fulfillment is enabled for certain features.
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::Enum
-          name: 'type'
-          required: true
+        - name: 'type'
+          type: Enum
           description: |
             The type of the feature that enabled for fulfillment.
             * SMALLTALK: Fulfillment is enabled for SmallTalk.
-          values:
-            - :SMALLTALK
-  - !ruby/object:Api::Type::NestedObject
-    name: 'genericWebService'
+          required: true
+          enum_values:
+            - 'SMALLTALK'
+  - name: 'genericWebService'
+    type: NestedObject
     description: |
       Represents configuration for a generic web service. Dialogflow supports two mechanisms for authentications: - Basic authentication with username and password. - Authentication with additional authentication headers.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'uri'
-        required: true
+      - name: 'uri'
+        type: String
         description: |
           The fulfillment URI for receiving POST requests. It must use https protocol.
-      - !ruby/object:Api::Type::String
-        name: 'username'
+        required: true
+      - name: 'username'
+        type: String
         description: |
           The user name for HTTP Basic authentication.
-      - !ruby/object:Api::Type::String
-        name: 'password'
+      - name: 'password'
+        type: String
         description: |
           The password for HTTP Basic authentication.
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: 'requestHeaders'
+      - name: 'requestHeaders'
+        type: KeyValuePairs
         description: |
           The HTTP request headers to send together with fulfillment requests.

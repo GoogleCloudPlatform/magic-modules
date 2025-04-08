@@ -1,0 +1,12 @@
+resource "google_secure_source_manager_instance" "{{$.PrimaryResourceId}}" {
+    location = "us-central1"
+    instance_id = "{{index $.Vars "instance_id"}}"
+    labels = {
+      "foo" = "bar"
+    }
+
+    # Prevent accidental deletions.
+    lifecycle {
+      prevent_destroy = "{{index $.Vars "prevent_destroy"}}"
+    }
+}
