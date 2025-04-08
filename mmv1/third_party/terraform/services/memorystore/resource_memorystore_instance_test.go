@@ -614,7 +614,7 @@ func TestAccMemorystoreInstance_gcsSource(t *testing.T) {
 					// Create an on-demand backup
 					testAccCheckMemorystoreInstanceOnDemandBackup(t, "google_memorystore_instance.instance_gbs_main", context["back_up"].(string)),
 					// Export the backup to GCS and extract the actual backup file name
-					testAccCheckMemorystoreInstanceExportBackup(t, "google_memorystore_instance.instance_gbs_main", context["back_up"].(string), context["gcs_bucket"].(string), &context),
+					testAccCheckMemorystoreInstanceExportBackup(t, "google_memorystore_instance.instance_gbs_main", context["back_up"].(string), context["gcs_bucket"].(string)),
 				),
 			},
 			{
@@ -641,7 +641,7 @@ resource "google_memorystore_instance" "instance_gbs_main" {
 
 # Create a GCS bucket for exporting Memorystore backups
 resource "google_storage_bucket" "memorystore_backup_bucket" {
-  name                           = "tf-test-memorystore-backup-%{random_suffix}"
+  name                           = "%{gcs_bucket}"
   location                       = "us-central1"
   uniform_bucket_level_access    = true
   force_destroy                  = true
@@ -681,7 +681,7 @@ resource "google_storage_bucket" "memorystore_backup_bucket" {
 data "google_project" "project" {}
 
 data "google_storage_bucket_objects" "backup" {
-  bucket                         = "tf-test-memorystore-backup-%{random_suffix}"
+  bucket                         = "%{gcs_bucket}"
 }
 
 # Grant the Memorystore service account permission to access the bucket
@@ -699,7 +699,7 @@ resource "google_memorystore_instance" "instance_gbs_copy" {
   location                       = "us-central1"
   deletion_protection_enabled    = false
   gcs_source {
-    uris                         = [join("", ["gs://tf-test-memorystore-backup-%{random_suffix}/" , data.google_storage_bucket_objects.backup.bucket_objects[0]["name"]])]
+    uris                         = [join("", ["gs://%{gcs_bucket}/" , data.google_storage_bucket_objects.backup.bucket_objects[0]["name"]])]
   }
 
   depends_on                     = [google_storage_bucket_iam_member.memorystore_backup_writer]
@@ -707,9 +707,8 @@ resource "google_memorystore_instance" "instance_gbs_copy" {
 `, context)
 }
 
-// testAccCheckMemorystoreInstanceExportBackup exports a Memorystore Instance backup to a GCS destination,
-// verifies that the export operation was successful, and extracts the actual backup file name.
-func testAccCheckMemorystoreInstanceExportBackup(t *testing.T, resourceName string, backupId string, gcsDestination string, context *map[string]interface{}) resource.TestCheckFunc {
+// Verifies that the export operation was successful
+func testAccCheckMemorystoreInstanceExportBackup(t *testing.T, resourceName string, backupId string, gcsDestination string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		log.Printf("[DEBUG] Starting Memorystore Instance backup export for resource %s, backup %s to %s", resourceName, backupId, gcsDestination)
 

@@ -709,8 +709,10 @@ properties:
   - name: 'gcsSource'
     type: NestedObject
     description: "GCS source for the instance."
-    immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/memorystore_instance_gcs_source.go.tmpl'
+    immutable: true
+    conflicts:
+      - managedBackupSource
     properties:
       - name: 'uris'
         type: Array
@@ -724,13 +726,15 @@ properties:
   - name: 'managedBackupSource'
     type: NestedObject
     description: "Managed backup source for the instance."
-    immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/memorystore_instance_managed_backup_source.go.tmpl'
+    immutable: true
+    conflicts:
+      - gcsSource
     properties:
       - name: 'backup'
         type: String
         description: |
-          Example: //redis.googleapis.com/projects/{project}/locations/{location}/backups/{backupId} in this case, it assumes the backup is under redis.googleapis.com.
+          Example: //memorystore.googleapis.com/projects/{project}/locations/{location}/backups/{backupId}. In this case, it assumes the backup is under memorystore.googleapis.com.
         immutable: true
         required: true
   - name: 'backupCollection'
