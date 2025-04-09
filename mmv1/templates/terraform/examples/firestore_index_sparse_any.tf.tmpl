@@ -17,7 +17,7 @@ resource "google_firestore_index" "{{$.PrimaryResourceId}}" {
 	api_scope   = "MONGODB_COMPATIBLE_API"
 	query_scope = "COLLECTION_GROUP"
 	multikey    = true
-	density     = "DENSE"
+	density     = "SPARSE_ANY"
 
 	fields {
 		field_path = "name"
