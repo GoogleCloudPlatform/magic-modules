@@ -607,7 +607,7 @@ resource "google_pubsub_subscription" "foo" {
   topic = google_pubsub_topic.foo.id
   message_transforms {
     disabled = true
-    javascript_ {
+    javascript_udf {
       function_name = "%s"
       code = "%s"
     }
