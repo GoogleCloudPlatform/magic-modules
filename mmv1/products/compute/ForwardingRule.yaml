@@ -13,6 +13,8 @@
 
 ---
 name: 'ForwardingRule'
+api_variant_patterns:
+  - 'projects/{project}/regions/{region}/forwardingRules/{forwardingRule}'
 kind: 'compute#forwardingRule'
 description: |
   A ForwardingRule resource. A ForwardingRule resource specifies which pool
