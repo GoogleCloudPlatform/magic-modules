@@ -5283,6 +5283,7 @@ resource "google_sql_database_instance" "instance" {
 	    retained_backups = 4
 	  }
     }
+    retain_backups_on_delete = true
   }
 }
 `, masterID)
