@@ -12218,6 +12218,13 @@ resource "google_container_cluster" "primary" {
   location         = "us-central1"
   enable_autopilot = true
 
+  # node_config_defaults is NOT allowed on Autopilot clusters.
+	# However, empty values for such a field should not cause failures.
+	node_pool_defaults {
+		node_config_defaults {
+		}
+	}
+
 	node_pool_auto_config {
     node_kubelet_config {
       insecure_kubelet_readonly_port_enabled = "%s"
