@@ -149,12 +149,12 @@ properties:
         description: 'enable flag to permanently delete object and all object versions if versioning is enabled on bucket.'
         immutable: true
         required: true
+        send_empty_value: true
     exactly_one_of:
       - 'delete_object'
       - 'put_metadata'
       - 'rewrite_object'
       - 'put_object_hold'
-    custom_expand: 'templates/terraform/custom_expand/storage_batch_operations_job_delete_object.go.tmpl'
     custom_flatten: 'templates/terraform/custom_flatten/storage_batch_operations_job_delete_object.go.tmpl'
   - name: 'putMetadata'
     type: NestedObject
