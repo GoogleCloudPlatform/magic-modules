@@ -358,6 +358,38 @@ func TestAccDataprocCluster_withResourceManagerTags(t *testing.T) {
 	var cluster dataproc.Cluster
 	randString := acctest.RandString(t, 10)
 	projectId  := envvar.GetTestProjectFromEnv()
+
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+        {
+            Member: "serviceAccount:service-{project_number}@dataproc-accounts.iam.gserviceaccount.com",
+            Role:   "roles/resourcemanager.tagViewer",
+        },
+        {
+            Member: "serviceAccount:service-{project_number}@dataproc-accounts.iam.gserviceaccount.com",
+            Role:   "roles/resourcemanager.tagAdmin",
+        },
+        {
+            Member: "serviceAccount:{project_number}compute@developer.gserviceaccount.com",
+            Role:   "roles/resourcemanager.tagViewer",
+        },
+        {
+            Member: "serviceAccount:{project_number}compute@developer.gserviceaccount.com",
+            Role:   "roles/resourcemanager.tagAdmin",
+        },				
+        {
+            Member: "serviceAccount:service-{project_number}@dataproc-accounts.iam.gserviceaccount.com",
+            Role:   "roles/storage.objectUser",
+        },	
+        {
+            Member: "serviceAccount:service-{project_number}@dataproc-accounts.iam.gserviceaccount.com",
+            Role:   "roles/compute.networkUser",
+        },	
+        {
+            Member: "serviceAccount:{project_number}-compute@developer.gserviceaccount.com",
+            Role:   " roles/dataproc.worker",
+        },						
+    })
+
 	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster-rmtags")
 	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster-rmtags", networkName)
 	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster-rmtags", networkName)
@@ -1445,6 +1477,12 @@ resource "google_dataproc_cluster" "basic" {
 			}
 		}
 	}
+	depends_on = [
+		google_tags_tag_binding.binding
+	]
+  }
+
+
 }
 `, projectId, randString, subnet)
 }
