@@ -81,4 +81,4 @@ properties:
     description: |
       The resource policy to be attached to the instance for scheduling start/stop
       operations. Do not specify the self link.
-    required: true 
+    required: true
