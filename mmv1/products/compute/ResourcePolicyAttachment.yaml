@@ -14,9 +14,16 @@
 ---
 name: 'ResourcePolicyAttachment'
 api_resource_type_kind: Instance
-description: 'Attaches resource policies to compute instances'
+description: |
+  Adds existing resource policies to a compute instance. You can only add one policy
+  which will be applied to this instance for scheduling start/stop operations.
+
+  This resource can be used instead of setting the resource_policy directly in the
+  compute instance resource to avoid dependency issues when using instance-level IAM
+  permissions.
+docs:
 id_format: '{{project}}/{{zone}}/{{instance}}/{{name}}'
-base_url: 'projects/{{project}}/zones/{{zone}}/instances'
+base_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}'
 self_link: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}'
 create_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}/addResourcePolicies'
 delete_url: 'projects/{{project}}/zones/{{zone}}/instances/{{instance}}/removeResourcePolicies'
@@ -24,9 +31,10 @@ delete_verb: 'POST'
 immutable: true
 timeouts:
   insert_minutes: 20
+  update_minutes: 20
   delete_minutes: 20
 async:
-  actions: ['create', 'delete']
+  actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
@@ -43,31 +51,34 @@ custom_code:
   encoder: 'templates/terraform/encoders/compute_resource_policy_attachment.go.tmpl'
   decoder: 'templates/terraform/decoders/compute_resource_policy_attachment.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/compute_resource_policy_attachment.go.tmpl'
+examples:
+  - name: 'compute_resource_policy_attachment_basic'
+    primary_resource_id: 'attachment'
+    vars:
+      instance_name: 'my-instance'
+      policy_name: 'my-resource-policy'
 parameters:
   - name: 'instance'
     type: ResourceRef
+    description: |
+      The name of the instance in which the resource policies are attached to.
+    url_param_only: true
     required: true
     resource: 'Instance'
     imports: 'name'
-    immutable: true
-    description: 'The name of the instance to attach the resource policy to.'
   - name: 'zone'
     type: ResourceRef
-    required: true
+    description: 'A reference to the zone where the instance resides.'
+    url_param_only: true
+    required: false
+    ignore_read: true
+    default_from_api: true
     resource: 'Zone'
     imports: 'name'
-    immutable: true
-    description: 'The zone where the instance resides.'
 properties:
   - name: 'name'
     type: String
-    required: true
-    immutable: true
-    description: 'The name of the resource policy to attach.'
-examples:
-  - name: "compute_resource_policy_attachment_basic"
-    primary_resource_id: "policy_attachment"
-    vars:
-      instance_name: "tf-test-attachment-instance"
-      policy_name: "tf-test-attachment-policy"
-      zone: "us-central1-a"
+    description: |
+      The resource policy to be attached to the instance for scheduling start/stop
+      operations. Do not specify the self link.
+    required: true 

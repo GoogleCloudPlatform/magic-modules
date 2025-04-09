@@ -1,5 +1,2 @@
-if v, ok := res["resourcePolicies"]; ok && len(v.([]interface{})) > 0 {
-	policy := v.([]interface{})[0].(string)
-	res["name"] = tpgresource.GetResourceNameFromSelfLink(policy)
-}
-return res, nil
+res["name"] = tpgresource.GetResourceNameFromSelfLink(res["name"].(string))
+return res, nil 
