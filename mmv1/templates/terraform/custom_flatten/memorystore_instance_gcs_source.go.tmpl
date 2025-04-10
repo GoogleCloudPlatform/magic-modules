@@ -1,9 +1,0 @@
-// flatten GCS source into a map
-func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	if len(d.Get("gcs_source").([]interface{})) > 0 {
-		transformed := make(map[string]interface{})
-		transformed["uris"] = d.Get("gcs_source.0.uris")
-		return []interface{}{transformed}
-	}
-    	return nil
-}

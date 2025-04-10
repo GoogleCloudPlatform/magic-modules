@@ -496,6 +496,11 @@ func TestAccMemorystoreInstance_managedBackupSource(t *testing.T) {
 			{
 				Config: testAccMemorystoreInstance_managedBackupSourceImport(context),
 			},
+			{
+				ResourceName:      "google_memorystore_instance.instance_mbs_main",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -624,6 +629,11 @@ func TestAccMemorystoreInstance_gcsSource(t *testing.T) {
 			},
 			{
 				Config: testAccMemorystoreInstance_gcsSource(context),
+			},
+			{
+				ResourceName:      "google_memorystore_instance.instance_gbs_main",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
