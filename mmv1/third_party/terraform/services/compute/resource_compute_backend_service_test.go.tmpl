@@ -944,157 +944,138 @@ func TestAccComputeBackendService_regionNegBackend(t *testing.T) {
 }
 {{- end }}
 
-func TestAccComputeBackendService_withDynamicBackends(t *testing.T) {
-	t.Parallel()
-
-	randString := acctest.RandString(t, 10)
-
-	instanceName := fmt.Sprintf("tf-test-%s", randString)
-	urlMapName := fmt.Sprintf("um-tf-test-%s", randString)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeRegionBackendService_withDynamicBackends(instanceName, urlMapName),
-				Check:  acctest.TestCheckForEachResourceNumber("google_compute_backend_service.foobar", 4),
-			},
-			// {
-			// 	ResourceName:      "google_compute_backend_service.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
-			// {
-			// 	Config: testAccComputeRegionBackendService_withDynamicBackendCountUpdate(serviceName, netName, checkName, igName),
-			// },
-			// {
-			// 	ResourceName:      "google_compute_region_backend_service.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
-			// {
-			// 	Config: testAccComputeRegionBackendService_withDynamicBackendCount(serviceName, netName, checkName, igName),
-			// },
-			// {
-			// 	ResourceName:      "google_compute_region_backend_service.foobar",
-			// 	ImportState:       true,
-			// 	ImportStateVerify: true,
-			// },
-		},
-	})
-}
-
-func testAccComputeRegionBackendService_withDynamicBackends(instanceName, urlMapName string) string {
-	return fmt.Sprintf(`
-locals {
-  instances = {
-    # name: zone
-    "a-%[1]s" : "us-central1-b",
-    "b-%[1]s" : "us-central1-a",
-    "c-%[1]s" : "us-central1-c",
-    "d-%[1]s" : "us-central1-b",
-    "e-%[1]s" : "us-central1-a",
-  }
-}
-
-data "google_compute_image" "my_image" {
-  family  = "debian-11"
-  project = "debian-cloud"
-}
-
-resource "google_compute_instance" "default" {
-  for_each     = local.instances
-  name         = each.key
-  machine_type = "f1-micro"
-  zone         = each.value
-
-  boot_disk {
-    initialize_params {
-      image = data.google_compute_image.my_image.self_link
-    }
-  }
-
-  network_interface {
-    network    = "default"
-    subnetwork = "default"
-  }
-  metadata_startup_script = <<EOF
-#! /bin/bash
-apt-get update
-apt-get install apache2 -y
-a2ensite default-ssl
-a2enmod ssl
-vm_hostname="$(curl -H "Metadata-Flavor:Google" \
-http://169.254.169.254/computeMetadata/v1/instance/name)"
-echo "Page served from: $vm_hostname" | \
-tee /var/www/html/index.html
-systemctl restart apache2
-EOF
-
-}
-
-resource "google_compute_instance_group" "default" {
-  for_each = local.instances
-  name     = each.key
-  zone     = each.value
-
-  instances = [google_compute_instance.default[each.key].self_link]
-
-  named_port {
-    name = "http"
-    port = "80"
-  }
-}
-
-resource "google_compute_backend_service" "default" {
-  for_each = local.instances
-  name     = each.key
-
-  backend {
-    group = google_compute_instance_group.default[each.key].self_link
-  }
-
-  health_checks = [google_compute_http_health_check.default[each.key].self_link]
-  port_name     = "http"
-}
-
-resource "google_compute_http_health_check" "default" {
-  for_each           = local.instances
-  name               = "${each.key}-hc"
-  request_path       = "/"
-  check_interval_sec = 1
-  timeout_sec        = 1
-}
-
-
-resource "google_compute_url_map" "foobar" {
-  name            = "%s"
-  default_service = google_compute_backend_service.default["a-%[1]s"].self_link
-
-  dynamic "host_rule" {
-    for_each = keys(local.instances)
-    content {
-      hosts        = ["${host_rule.value}.example.com"]
-      path_matcher = host_rule.value
-    }
-  }
-
-  dynamic "path_matcher" {
-    for_each = keys(local.instances)
-    content {
-      name            = path_matcher.value
-      default_service = google_compute_backend_service.default[path_matcher.value].self_link
-    }
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-`, instanceName, urlMapName)
-}
+// Uncomment when for_each is supported by terraform-plugin-sdk
+// Ref -> https://github.com/hashicorp/terraform-plugin-sdk/issues/536
+// func TestAccComputeBackendService_withDynamicBackends(t *testing.T) {
+// 	t.Parallel()
+// 
+// 	randString := acctest.RandString(t, 10)
+// 
+// 	instanceName := fmt.Sprintf("tf-test-%s", randString)
+// 	urlMapName := fmt.Sprintf("um-tf-test-%s", randString)
+// 
+// 	acctest.VcrTest(t, resource.TestCase{
+// 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+// 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+// 		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
+// 		Steps: []resource.TestStep{
+// 			{
+// 				Config: testAccComputeRegionBackendService_withDynamicBackends(instanceName, urlMapName),
+// 				Check:  acctest.TestCheckForEachResourceNumber("google_compute_backend_service.foobar", 4),
+// 			},
+// 		},
+// 	})
+// }
+// 
+// func testAccComputeRegionBackendService_withDynamicBackends(instanceName, urlMapName string) string {
+// 	return fmt.Sprintf(`
+// locals {
+//   instances = {
+//     # name: zone
+//     "a-%[1]s" : "us-central1-b",
+//     "b-%[1]s" : "us-central1-a",
+//     "c-%[1]s" : "us-central1-c",
+//     "d-%[1]s" : "us-central1-b",
+//     "e-%[1]s" : "us-central1-a",
+//   }
+// }
+// 
+// data "google_compute_image" "my_image" {
+//   family  = "debian-11"
+//   project = "debian-cloud"
+// }
+// 
+// resource "google_compute_instance" "default" {
+//   for_each     = local.instances
+//   name         = each.key
+//   machine_type = "f1-micro"
+//   zone         = each.value
+// 
+//   boot_disk {
+//     initialize_params {
+//       image = data.google_compute_image.my_image.self_link
+//     }
+//   }
+// 
+//   network_interface {
+//     network    = "default"
+//     subnetwork = "default"
+//   }
+//   metadata_startup_script = <<EOF
+// #! /bin/bash
+// apt-get update
+// apt-get install apache2 -y
+// a2ensite default-ssl
+// a2enmod ssl
+// vm_hostname="$(curl -H "Metadata-Flavor:Google" \
+// http://169.254.169.254/computeMetadata/v1/instance/name)"
+// echo "Page served from: $vm_hostname" | \
+// tee /var/www/html/index.html
+// systemctl restart apache2
+// EOF
+// 
+// }
+// 
+// resource "google_compute_instance_group" "default" {
+//   for_each = local.instances
+//   name     = each.key
+//   zone     = each.value
+// 
+//   instances = [google_compute_instance.default[each.key].self_link]
+// 
+//   named_port {
+//     name = "http"
+//     port = "80"
+//   }
+// }
+// 
+// resource "google_compute_backend_service" "default" {
+//   for_each = local.instances
+//   name     = each.key
+// 
+//   backend {
+//     group = google_compute_instance_group.default[each.key].self_link
+//   }
+// 
+//   health_checks = [google_compute_http_health_check.default[each.key].self_link]
+//   port_name     = "http"
+// }
+// 
+// resource "google_compute_http_health_check" "default" {
+//   for_each           = local.instances
+//   name               = "${each.key}-hc"
+//   request_path       = "/"
+//   check_interval_sec = 1
+//   timeout_sec        = 1
+// }
+// 
+// 
+// resource "google_compute_url_map" "foobar" {
+//   name            = "%s"
+//   default_service = google_compute_backend_service.default["a-%[1]s"].self_link
+// 
+//   dynamic "host_rule" {
+//     for_each = keys(local.instances)
+//     content {
+//       hosts        = ["${host_rule.value}.example.com"]
+//       path_matcher = host_rule.value
+//     }
+//   }
+// 
+//   dynamic "path_matcher" {
+//     for_each = keys(local.instances)
+//     content {
+//       name            = path_matcher.value
+//       default_service = google_compute_backend_service.default[path_matcher.value].self_link
+//     }
+//   }
+// 
+//   lifecycle {
+//     create_before_destroy = true
+//   }
+// }
+// `, instanceName, urlMapName)
+// }
 
 func testAccComputeBackendService_trafficDirectorBasic(serviceName, checkName string) string {
 	return fmt.Sprintf(`

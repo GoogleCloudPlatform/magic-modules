@@ -111,17 +111,20 @@ func TestCheckAttributeValuesEqual(i *string, j *string) resource.TestCheckFunc 
 	}
 }
 
-func TestCheckForEachResourceNumber(resourceName string, n int) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		_, ok := s.RootModule().Resources[resourceName] // To find a datasource, include `data.` at the start of the resourceName value
+// Uncomment when for_each is supported by terraform-plugin-sdk
+// Ref -> https://github.com/hashicorp/terraform-plugin-sdk/issues/536
+// TestCheckForEachResourceNumber checks the count of resources that are being created when using for_each
+// func TestCheckForEachResourceNumber(resourceName string, n int) resource.TestCheckFunc {
+// 	return func(s *terraform.State) error {
+// 		_, ok := s.RootModule().Resources[resourceName] // To find a datasource, include `data.` at the start of the resourceName value
 
-		if !ok {
-			return fmt.Errorf("resource name %s not found in state", resourceName)
-		}
+// 		if !ok {
+// 			return fmt.Errorf("resource name %s not found in state", resourceName)
+// 		}
 
-		return nil
-	}
-}
+// 		return nil
+// 	}
+// }
 
 // testStringValue returns string values from string pointers, handling nil pointers.
 func testStringValue(sPtr *string) string {
