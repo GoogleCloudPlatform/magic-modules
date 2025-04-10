@@ -132,6 +132,11 @@ func ResourceApigeeApi() *schema.Resource {
 					return true
 				},
 			},
+			"dummy_field": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `new field to test missing doc detector`,
+			},
 		},
 		UseJSONNumber: true,
 	}
