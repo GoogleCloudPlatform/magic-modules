@@ -32,14 +32,6 @@ timeouts:
   update_minutes: 75
   delete_minutes: 75
 autogen_async: true
-virtual_fields:
-  - name: 'deletion_protection'
-    description: |
-      Whether Terraform will be prevented from destroying the service. Defaults to false.
-      When the field is set to true in Terraform state, a `terraform apply`
-      or `terraform destroy` that would delete the service will fail.
-    type: Boolean
-    default_value: false
 custom_code: !ruby/object:Provider::Terraform::CustomCode
   pre_delete: 'templates/terraform/pre_delete/metastore_service.go.tmpl'
 async:
@@ -68,7 +60,7 @@ examples:
     vars:
       metastore_service_name: 'metastore-srv'
     ignore_read_extra:
-      - 'deletion_protection'
+      - 'deletionProtection'
   - name: 'dataproc_metastore_service_deletion_protection'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
@@ -324,6 +316,13 @@ properties:
         description: |
           A Cloud Storage URI of a folder, in the format gs://<bucket_name>/<path_inside_bucket>. A sub-folder <backup_folder> containing backup files will be stored below it.
         required: true
+  - name: 'deletionProtection'
+    type: Boolean
+    description: |
+      Indicates if the dataproc metastore should be protected against accidental deletions.Defaults to false.
+      When the field is set to true in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the service will fail.
+    default_value: false
   - name: 'maintenanceWindow'
     type: NestedObject
     description: |
