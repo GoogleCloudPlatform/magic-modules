@@ -8,6 +8,7 @@ import (
 	"log"
 	"runtime"
 
+	"github.com/gammazero/workerpool"
 	"github.com/hashicorp/terraform-provider-google/google/sweeper"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
