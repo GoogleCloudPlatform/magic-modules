@@ -265,6 +265,7 @@ properties:
     properties:
       - name: 'uris'
         type: Array
+        is_set: true
         description: |
          URIs of the GCS objects to import. Example: gs://bucket1/object1, gs://bucket2/folder2/object2
         required: true
