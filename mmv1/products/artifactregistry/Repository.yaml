@@ -489,6 +489,7 @@ properties:
                 enum_values:
                   - 'DEBIAN'
                   - 'UBUNTU'
+                  - 'DEBIAN_SNAPSHOT'
               - name: 'repositoryPath'
                 type: String
                 description: |-
