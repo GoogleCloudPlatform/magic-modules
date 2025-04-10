@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package certificatemanager_test
 
 import (
@@ -29,7 +27,7 @@ func TestAccCertificateManagerIssuanceConfig_tags(t *testing.T) {
 				Config: testAccCertificateManagerIssuanceConfigTags(context, map[string]string{org + "/" + tagKey: tagValue}),
 			},
 			{
-				ResourceName:            "google_certificate_manager_issuance_config.default",
+				ResourceName:            "google_certificate_manager_certificate_issuance_config.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "tags"},
@@ -40,7 +38,7 @@ func TestAccCertificateManagerIssuanceConfig_tags(t *testing.T) {
 
 func testAccCertificateManagerIssuanceConfigTags(context map[string]interface{}, tags map[string]string) string {
 	r := acctest.Nprintf(`
-resource "google_certificate_manager_issuance_config" "default" {
+resource "google_certificate_manager_certificate_issuance_config" "default" {
         name        = "tf-test-issuance-config%{random_suffix}"
         description = "sample description for the issaunce config"
         location    = "us-central1"
