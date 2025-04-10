@@ -20,6 +20,9 @@ func TestAccOSConfigV2PolicyOrchestratorForFolder_basic(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccOSConfigV2PolicyOrchestratorForFolder_basic(context),
@@ -80,18 +83,18 @@ resource "google_folder_iam_member" "iam_progressiverollout_service_agent" {
     member = google_folder_service_identity.ripple_sa.member
 }
 
-resource "time_sleep" "wait_7_min" {
+resource "time_sleep" "wait_5_min" {
     depends_on = [
         google_folder_iam_member.iam_osconfig_service_agent,
         google_folder_iam_member.iam_osconfig_rollout_service_agent,
         google_folder_iam_member.iam_progressiverollout_service_agent,
     ]
-    create_duration = "420s"
+    create_duration = "300s"
 }
 
 
 resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrator_for_folder" {
-    depends_on = [time_sleep.wait_7_min]
+    depends_on = [time_sleep.wait_5_min]
 
     policy_orchestrator_id = "tf-test-po-folder%{random_suffix}"
     folder_id = google_folder.my_folder.folder_id

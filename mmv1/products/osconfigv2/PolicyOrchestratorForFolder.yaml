@@ -36,6 +36,8 @@ examples:
     test_env_vars:
       org_id: ORG_ID
       zone: 'ZONE'
+    external_providers:
+      - "time"
 autogen_async: true
 async:
   operation:
