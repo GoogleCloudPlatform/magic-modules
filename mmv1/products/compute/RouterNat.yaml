@@ -96,7 +96,6 @@ examples:
     exclude_test: true
   - name: 'router_nat_private'
     primary_resource_id: 'nat_type'
-    min_version: 'beta'
     vars:
       router_name: 'my-router'
       nat_name: 'my-router-nat'
@@ -430,7 +429,6 @@ properties:
                   These subnetworks must have purpose set to PRIVATE_NAT.
                   This field is used for private NAT.
               is_set: true
-              min_version: 'beta'
               set_hash_func: computeRouterNatRulesSubnetHash
               custom_flatten: 'templates/terraform/custom_flatten/nat_rules_subnets_set.tmpl'
               custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
@@ -448,7 +446,6 @@ properties:
                 This is only supported on patch/update, and these subnetworks must have previously been used as active ranges in this NAT Rule.
                 This field is used for private NAT.
               is_set: true
-              min_version: 'beta'
               set_hash_func: computeRouterNatRulesSubnetHash
               custom_flatten: 'templates/terraform/custom_flatten/nat_rules_subnets_set.tmpl'
               custom_expand: 'templates/terraform/custom_expand/array_resourceref_with_validation.go.tmpl'
@@ -473,7 +470,6 @@ properties:
       If unspecified, it defaults to PUBLIC.
       If `PUBLIC` NAT used for public IP translation.
       If `PRIVATE` NAT used for private IP translation.
-    min_version: 'beta'
     immutable: true
     default_value: "PUBLIC"
     enum_values:
