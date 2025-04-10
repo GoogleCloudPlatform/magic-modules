@@ -2871,7 +2871,7 @@ func TestAccSqlDatabaseInstance_useCustomerManagedServerCa(t *testing.T) {
 	resourceName := "google_sql_database_instance.instance"
 
 	context := map[string]interface{}{
-		"projectID":    envvar.GetTestProjectFromEnv(),
+		"projectID":       envvar.GetTestProjectFromEnv(),
 		"databaseName":    "tf-test-" + acctest.RandString(t, 10),
 		"casRandomSuffix": acctest.RandString(t, 10),
 	}
