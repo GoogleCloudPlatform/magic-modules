@@ -100,7 +100,6 @@ func deleteObjects(config *transport_tpg.Config, bucket string) bool {
 				}
 			})
 		}
-
 		wp.StopWait()
 	}
 
