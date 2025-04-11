@@ -466,17 +466,20 @@ func TestAccRedisInstance_tags(t *testing.T) {
 
 	t.Parallel()
 
-	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-	org := envvar.GetTestOrgFromEnv(t)
 	tagKey := acctest.BootstrapSharedTestTagKey(t, "redis-instances-tagkey")
-	tagValue := acctest.BootstrapSharedTestTagValue(t, "redis-instances-tagvalue", tagKey)
+	context := map[string]interface{}{
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      acctest.BootstrapSharedTestTagValue(t, "redis-instances-tagvalue", tagKey),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckRedisInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRedisInstanceTags(name, map[string]string{org + "/" + tagKey: tagValue}),
+				Config: testAccRedisInstanceTags(context),
 			},
 			{
 				ResourceName:            "google_redis_instance.test",
@@ -488,19 +491,15 @@ func TestAccRedisInstance_tags(t *testing.T) {
 	})
 }
 
-func testAccRedisInstanceTags(name string, tags map[string]string) string {
+func testAccRedisInstanceTags(context map[string]interface{) string {
 
-	r := fmt.Sprintf(`
+	return acctest.Nprintf(`
 	resource "google_redis_instance" "test" {
-	  name = "tf-instance-%s"
+	  name = "tf-test-instance-%{random_suffix}"
 	  memory_size_gb = 5
-	  tags = {`, name)
-
-	l := ""
-	for key, value := range tags {
-		l += fmt.Sprintf("%q = %q\n", key, value)
-	}
-
-	l += fmt.Sprintf("}\n}")
-	return r + l
+	  tags = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
 }
