@@ -25,7 +25,7 @@ func TestAccStorageBatchOperationsJobs_createJobWithPrefix(t *testing.T) {
 				ResourceName:            "google_storage_batch_operations_job.job",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"job_id", "location", "delete_protection"},
+				ImportStateVerifyIgnore: []string{"job_id", "delete_protection"},
 			},
 		},
 	})
@@ -47,7 +47,7 @@ func TestAccStorageBatchOperationsJobs_jobWithPrefixDeleteObjectAllVersions(t *t
 				ResourceName:            "google_storage_batch_operations_job.job",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"job_id", "location", "delete_protection"},
+				ImportStateVerifyIgnore: []string{"job_id", "delete_protection"},
 			},
 			{
 				Config: testAccStorageBatchOperationsJobWithPrefixDeleteLiveObject(bucketName, liveObjectJobID),
@@ -56,7 +56,7 @@ func TestAccStorageBatchOperationsJobs_jobWithPrefixDeleteObjectAllVersions(t *t
 				ResourceName:            "google_storage_batch_operations_job.job",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"job_id", "location", "delete_protection"},
+				ImportStateVerifyIgnore: []string{"job_id", "delete_protection"},
 			},
 		},
 	})
@@ -77,7 +77,7 @@ func TestAccStorageBatchOperationsJobs_jobWithPrefixObjectHold(t *testing.T) {
 				ResourceName:            "google_storage_batch_operations_job.job",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"job_id", "location", "delete_protection"},
+				ImportStateVerifyIgnore: []string{"job_id", "delete_protection"},
 			},
 		},
 	})
@@ -98,7 +98,7 @@ func TestAccStorageBatchOperationsJobs_jobWithPrefixObjectTemporaryHold(t *testi
 				ResourceName:            "google_storage_batch_operations_job.job",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"job_id", "location", "delete_protection"},
+				ImportStateVerifyIgnore: []string{"job_id", "delete_protection"},
 			},
 		},
 	})
@@ -119,7 +119,7 @@ func TestAccStorageBatchOperationsJobs_createJobWithManifest(t *testing.T) {
 				ResourceName:            "google_storage_batch_operations_job.job",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"job_id", "location", "delete_protection"},
+				ImportStateVerifyIgnore: []string{"job_id", "delete_protection"},
 			},
 		},
 	})
@@ -145,7 +145,7 @@ func TestAccStorageBatchOperationsJobs_batchOperationJobKmsKey(t *testing.T) {
 				ResourceName:            "google_storage_batch_operations_job.job",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"job_id", "location", "delete_protection"},
+				ImportStateVerifyIgnore: []string{"job_id", "delete_protection"},
 			},
 		},
 	})

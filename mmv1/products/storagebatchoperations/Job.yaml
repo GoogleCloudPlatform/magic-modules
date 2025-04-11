@@ -55,6 +55,14 @@ virtual_fields:
     type: Boolean
     default_value: true
 parameters:
+  - name: 'jobId'
+    type: String
+    description: 'The ID of the job.'
+    url_param_only: true
+    immutable: true
+    validation:
+      regex: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?.$'
+properties:
   - name: 'createTime'
     type: String
     description: |
@@ -65,13 +73,6 @@ parameters:
     description: |
       The timestamp at which this storage batch operation was most recently updated.
     output: true
-  - name: 'jobId'
-    type: String
-    description: 'The ID of the job.'
-    url_param_only: true
-    immutable: true
-    validation:
-      regex: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?.$'
   - name: 'scheduleTime'
     type: String
     description: |
@@ -86,8 +87,7 @@ parameters:
     type: String
     description: |
       State of the job.
-    output: true
-properties:
+    output: true  
   - name: 'bucketList'
     type: NestedObject
     description: List of buckets and their objects to be transformed. Currently, only one bucket configuration is supported. If multiple buckets are specified, an error will be returned
