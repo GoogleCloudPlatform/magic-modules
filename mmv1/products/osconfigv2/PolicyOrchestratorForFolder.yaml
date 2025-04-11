@@ -38,6 +38,7 @@ examples:
       zone: 'ZONE'
     external_providers:
       - "time"
+    # google_folder_iam_member does not support replay mode
     skip_vcr: true
 autogen_async: true
 async:

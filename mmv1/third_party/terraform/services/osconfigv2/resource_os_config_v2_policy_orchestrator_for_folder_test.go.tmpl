@@ -9,7 +9,7 @@ import (
 )
 
 func TestAccOSConfigV2PolicyOrchestratorForFolder_basic(t *testing.T) {
-	acctest.SkipIfVcr(t)
+	acctest.SkipIfVcr(t) // google_folder_iam_member does not support replay mode
 	t.Parallel()
 
 	context := map[string]interface{}{
