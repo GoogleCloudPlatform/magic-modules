@@ -230,7 +230,6 @@ resource "google_network_services_lb_traffic_extension" "default" {
 
   load_balancing_scheme = "INTERNAL_MANAGED"
   forwarding_rules      = [google_compute_forwarding_rule.default.self_link]
-  metadata              = {"exampleId": "test"}
 
   extension_chains {
     name = "chain1"
@@ -248,6 +247,9 @@ resource "google_network_services_lb_traffic_extension" "default" {
 
       supported_events = ["REQUEST_HEADERS"]
       forward_headers  = ["custom-header"]
+      metadata = {
+        "exampleId": "test"
+      }
     }
   }
 
@@ -547,7 +549,6 @@ resource "google_network_services_lb_traffic_extension" "default" {
 
   load_balancing_scheme = "INTERNAL_MANAGED"
   forwarding_rules      = [google_compute_forwarding_rule.default.self_link]
-  metadata              = {"exampleId": "test"}
 
   extension_chains {
     name = "chain1"
@@ -565,6 +566,9 @@ resource "google_network_services_lb_traffic_extension" "default" {
 
       supported_events = ["REQUEST_HEADERS"]
       forward_headers = ["custom-header"]
+      metadata = {
+        "exampleId": "test"
+      }
     }
   }
 
