@@ -491,7 +491,7 @@ func TestAccRedisInstance_tags(t *testing.T) {
 	})
 }
 
-func testAccRedisInstanceTags(context map[string]interface{) string {
+func testAccRedisInstanceTags(context map[string]interface{}) string {
 
 	return acctest.Nprintf(`
 	resource "google_redis_instance" "test" {
