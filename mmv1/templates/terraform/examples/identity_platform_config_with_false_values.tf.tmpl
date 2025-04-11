@@ -33,7 +33,7 @@ resource "google_identity_platform_config" "default" {
   blocking_functions {
     triggers {
       event_type   = "beforeSignIn"
-      function_uri = "https://test.cloudfunctions.test/function-1"
+      function_uri = "https://us-east1-{{index $.Vars "project_id"}}.cloudfunctions.net/before-sign-in"
     }
     forward_inbound_credentials {
       refresh_token = false
