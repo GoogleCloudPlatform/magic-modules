@@ -156,6 +156,13 @@ func ResourceBigtableTable() *schema.Resource {
 				},
 				Description: `Defines an automated backup policy for a table, specified by Retention Period and Frequency. To _create_ a table with automated backup disabled, omit this argument. To disable automated backup on an _existing_ table that has automated backup enabled, set both Retention Period and Frequency to "0". If this argument is not provided in the configuration on update, the resource's automated backup policy will _not_ be modified.`,
 			},
+			"row_key_schema": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: typeDiffFunc,
+				Description:      `Defines the row key schema of a table. To create or update a table with a row key schema, specify this argument. Note that in-place update is not supported. To update a schema, please clear it (by omitting the field), and update the resource again with a new schema`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -305,6 +312,15 @@ func resourceBigtableTableCreate(d *schema.ResourceData, meta interface{}) error
 	}
 	tblConf.ColumnFamilies = columnFamilies
 
+	// Set the row key schema if given
+	if rks, ok := d.GetOk("row_key_schema"); ok {
+		parsedSchema, err := getRowKeySchema(rks)
+		if err != nil {
+			return err
+		}
+		tblConf.RowKeySchema = parsedSchema
+	}
+
 	// This method may return before the table's creation is complete - we may need to wait until
 	// it exists in the future.
 	// Set a longer timeout as creating table and adding column families can be pretty slow.
@@ -405,6 +421,14 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 		default:
 			return fmt.Errorf("error: Unknown type of automated backup configuration")
 		}
+	}
+
+	if table.RowKeySchema != nil {
+		marshalledRowKey, err := bigtable.MarshalJSON(table.RowKeySchema)
+		if err != nil {
+			return err
+		}
+		d.Set("row_key_schema", marshalledRowKey)
 	}
 
 	return nil
@@ -577,6 +601,24 @@ func resourceBigtableTableUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
+	if d.HasChange("row_key_schema") {
+		changedRks := d.Get("row_key_schema").(string)
+		if len(changedRks) == 0 {
+			log.Printf("[DEBUG] row_key_schema removed from configuration")
+			if err := c.UpdateTableRemoveRowKeySchema(ctxWithTimeout, name); err != nil {
+				return fmt.Errorf("error removing row key schema on table %v: %v", name, err)
+			}
+		} else {
+			rks, err := getRowKeySchema(changedRks)
+			if err != nil {
+				return fmt.Errorf("failed to parse row key schema string %v: %v", changedRks, err)
+			}
+			if err = c.UpdateTableWithRowKeySchema(ctxWithTimeout, name, *rks); err != nil {
+				return fmt.Errorf("failed to update row key schema for table %v: %v", name, err)
+			}
+		}
+	}
+
 	return resourceBigtableTableRead(d, meta)
 }
 
@@ -686,4 +728,16 @@ func getType(input interface{}) (bigtable.Type, error) {
 		return nil, err
 	}
 	return output, nil
+}
+
+func getRowKeySchema(input interface{}) (*bigtable.StructType, error) {
+	rks, err := getType(input)
+	if err != nil {
+		return nil, err
+	}
+	structRks, ok := rks.(bigtable.StructType)
+	if !ok {
+		return nil, fmt.Errorf("only struct type is accepted as row key schema")
+	}
+	return &structRks, nil
 }
