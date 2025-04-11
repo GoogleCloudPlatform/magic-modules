@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -35,6 +36,7 @@ import (
 var fPath = flag.String("path", "", "to be removed - path to the root service directory holding samples")
 var tPath = flag.String("overrides", "", "path to the root directory holding overrides files")
 var cPath = flag.String("handwritten", "handwritten", "path to the root directory holding handwritten files to copy")
+var gPath = flag.String("templates", "templates", "path to the templates directory")
 var oPath = flag.String("output", "", "path to output generated files to")
 
 var sFilter = flag.String("service", "", "optional service name. If specified, only this service is generated")
@@ -298,7 +300,7 @@ type SerializationInput struct {
 func generateSerializationLogic(specs map[Version][]*Resource) {
 	buf := bytes.Buffer{}
 	tmpl, err := template.New("serialization.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/serialization.go.tmpl",
+		filepath.Join(*gPath, "serialization.go.tmpl"),
 	)
 	if err != nil {
 		glog.Exit(err)

@@ -1,0 +1,12 @@
+load("@gazelle//:def.bzl", "gazelle")
+
+# gazelle:exclude .ci
+# gazelle:exclude .github
+# gazelle:exclude docs
+# gazelle:exclude mmv1
+# gazelle:exclude scripts
+# gazelle:exclude tools
+# gazelle:exclude tpgtools/ignored_handwritten
+# gazelle:exclude tpgtools/serializable
+# gazelle:prefix github.com/GoogleCloudPlatform/magic-modules
+gazelle(name = "gazelle")

@@ -1,0 +1,126 @@
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+
+filegroup(
+    name = "api",
+    srcs = glob([
+        "api/**/*",
+    ]),
+)
+
+filegroup(
+    name = "overrides",
+    srcs = glob([
+        "overrides/**/*",
+    ]),
+)
+
+filegroup(
+    name = "templates",
+    srcs = glob([
+        "templates/**/*",
+    ]),
+)
+
+genrule(
+    name = "empty_serialization",
+    srcs = [
+        "serialization.go.base",
+    ],
+    outs = ["empty_serialization.go"],
+    cmd = "cp $< $@",
+    visibility = ["//visibility:private"],
+)
+
+genrule(
+    name = "bootstrapped_serialization",
+    srcs = [
+        ":api",
+        ":overrides",
+        ":templates",
+    ],
+    outs = ["serialization.go"],
+    cmd = "$(location :bootstrap_tpgtools) --overrides tpgtools/overrides --path tpgtools/api --templates tpgtools/templates --mode serialization --output $(@D)",
+    tools = [":bootstrap_tpgtools"],
+    visibility = ["//visibility:private"],
+)
+
+go_library(
+    name = "tpgtools_lib",
+    srcs = [
+        "documentation.go",
+        "file_utils.go",
+        "id.go",
+        "main.go",
+        "main_helpers.go",
+        "misc_utils.go",
+        "names.go",
+        "override.go",
+        "override_details.go",
+        "product.go",
+        "property.go",
+        "property_helpers.go",
+        "resource.go",
+        "sample.go",
+        "serialization_helpers.go",
+        "strings.go",
+        "type.go",
+        "versions.go",
+    ],
+    importpath = "github.com/GoogleCloudPlatform/magic-modules/tpgtools",
+    visibility = ["//visibility:private"],
+    deps = [
+        "@com_github_golang_glog//:glog",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//dcl",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/cloudresourcemanager",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/cloudresourcemanager/alpha",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/cloudresourcemanager/beta",
+        "@com_github_kylelemons_godebug//pretty",
+        "@com_github_nasa9084_go_openapi//:go-openapi",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+        "@org_bitbucket_creachadair_stringset//:stringset",
+    ],
+)
+
+go_binary(
+    name = "bootstrap_tpgtools",
+    srcs = [
+        ":empty_serialization",
+    ],
+    embed = [":tpgtools_lib"],
+    visibility = ["//visibility:private"],
+)
+
+go_binary(
+    name = "tpgtools",
+    srcs = [
+        ":bootstrapped_serialization",
+    ],
+    embed = [":tpgtools_lib"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/apikeys",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/apikeys/beta",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/assuredworkloads",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/assuredworkloads/beta",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/cloudbuild",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/cloudbuild/beta",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/clouddeploy",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/clouddeploy/beta",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/containeraws",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/containeraws/beta",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/containerazure",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/containerazure/beta",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/dataplex",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/dataplex/beta",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/dataproc",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/dataproc/beta",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/firebaserules",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/firebaserules/beta",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/gkehub",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/gkehub/beta",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/recaptchaenterprise",
+        "@com_github_googlecloudplatform_declarative_resource_client_library//services/google/recaptchaenterprise/beta",
+        "@com_github_hashicorp_hcl//hcl/fmtcmd",
+    ],
+)
