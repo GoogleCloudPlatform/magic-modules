@@ -1,0 +1,15 @@
+func validateSecurityProfileGroupPrefix(v interface{}, k string) (warnings []string, errors []error) {
+	value := v.(string)
+	lenValue := len(value)
+	if lenValue == 0 {
+		errors = append(errors, fmt.Errorf("the empty string is not a valid security_profile_group value"))
+		return nil, errors
+	} else if lenValue >= 2 {
+		secondString := value[1]
+		if secondString != '/' {
+			errors = append(errors, fmt.Errorf("%q (%q) security_profile_group value is required to start with two forward slashes, not just one ", k, value))
+			return nil, errors
+		}
+	}
+	return nil, nil
+}
