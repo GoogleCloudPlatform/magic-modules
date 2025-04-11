@@ -2616,14 +2616,16 @@ func TestAccSqlDatabaseInstance_MysqlSwitchoverSuccess(t *testing.T) {
 				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
 			},
 			// Let's make sure that setting and unsetting failover replica works.
+			// Make sure we test both normalized and shortened version of DR replica
+			// names.
 			{
-				Config: googleSqlDatabaseInstance_mysqlSetFailoverReplica(project, primaryName, replicaName),
+				Config: googleSqlDatabaseInstance_mysqlSetFailoverReplica(project, primaryName, replicaName, false /* =useNormalizedDrReplicaName */),
 			},
 			{
 				Config: googleSqlDatabaseInstance_mysqlUnsetFailoverReplica(project, primaryName, replicaName),
 			},
 			{
-				Config: googleSqlDatabaseInstance_mysqlSetFailoverReplica(project, primaryName, replicaName),
+				Config: googleSqlDatabaseInstance_mysqlSetFailoverReplica(project, primaryName, replicaName, true /* =useNormalizedDrReplicaName */),
 			},
 			{
 				// Split into two configs because current TestStep implementation checks diff before refreshing.
@@ -2692,14 +2694,16 @@ func TestAccSqlDatabaseInstance_PostgresSwitchoverSuccess(t *testing.T) {
 				ImportStateVerifyIgnore: ignoredReplicaConfigurationFields,
 			},
 			// Let's make sure that setting and unsetting failover replica works.
+			// Make sure we test both normalized and shortened version of DR replica
+			// names.
 			{
-				Config: googleSqlDatabaseInstance_postgresSetFailoverReplica(project, primaryName, replicaName),
+				Config: googleSqlDatabaseInstance_postgresSetFailoverReplica(project, primaryName, replicaName, false /* =useNormalizedDrReplicaName */),
 			},
 			{
 				Config: googleSqlDatabaseInstance_postgresUnsetFailoverReplica(project, primaryName, replicaName),
 			},
 			{
-				Config: googleSqlDatabaseInstance_postgresSetFailoverReplica(project, primaryName, replicaName),
+				Config: googleSqlDatabaseInstance_postgresSetFailoverReplica(project, primaryName, replicaName, true /* =useNormalizedDrReplicaName */),
 			},
 			{
 				// Split into two configs because current TestStep implementation checks diff before refreshing.
@@ -3779,7 +3783,12 @@ resource "google_sql_database_instance" "original-replica" {
 `, project, primaryName, project, replicaName)
 }
 
-func googleSqlDatabaseInstance_mysqlSetFailoverReplica(project, primaryName, replicaName string) string {
+func googleSqlDatabaseInstance_mysqlSetFailoverReplica(project, primaryName, replicaName string, useNormalizedDrReplicaName bool) string {
+	drReplicaName := fmt.Sprintf("%s:%s", project, replicaName)
+	if !useNormalizedDrReplicaName {
+		drReplicaName = replicaName
+	}
+
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "original-primary" {
   project             = "%s"
@@ -3790,7 +3799,7 @@ resource "google_sql_database_instance" "original-primary" {
   deletion_protection = false
 
   replication_cluster {
-    failover_dr_replica_name = "%s:%s"
+    failover_dr_replica_name = "%s"
   }
 
   settings {
@@ -3817,7 +3826,7 @@ resource "google_sql_database_instance" "original-replica" {
     edition           = "ENTERPRISE_PLUS"
   }
 }
-`, project, primaryName, project, replicaName, project, replicaName, primaryName)
+`, project, primaryName, drReplicaName, project, replicaName, primaryName)
 }
 
 func googleSqlDatabaseInstance_mysqlUnsetFailoverReplica(project, primaryName, replicaName string) string {
@@ -4053,7 +4062,11 @@ resource "google_sql_database_instance" "original-replica" {
 `, project, primaryName, project, replicaName)
 }
 
-func googleSqlDatabaseInstance_postgresSetFailoverReplica(project, primaryName, replicaName string) string {
+func googleSqlDatabaseInstance_postgresSetFailoverReplica(project, primaryName, replicaName string, useNormalizedDrReplicaName bool) string {
+	drReplicaName := fmt.Sprintf("%s:%s", project, replicaName)
+	if !useNormalizedDrReplicaName {
+		drReplicaName = replicaName
+	}
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "original-primary" {
   project             = "%s"
@@ -4064,7 +4077,7 @@ resource "google_sql_database_instance" "original-primary" {
   deletion_protection = false
 
   replication_cluster {
-    failover_dr_replica_name = "%s:%s"
+    failover_dr_replica_name = "%s"
   }
 
   settings {
@@ -4091,7 +4104,7 @@ resource "google_sql_database_instance" "original-replica" {
     edition           = "ENTERPRISE_PLUS"
   }
 }
-`, project, primaryName, project, replicaName, project, replicaName, primaryName)
+`, project, primaryName, drReplicaName, project, replicaName, primaryName)
 }
 
 func googleSqlDatabaseInstance_postgresUnsetFailoverReplica(project, primaryName, replicaName string) string {
