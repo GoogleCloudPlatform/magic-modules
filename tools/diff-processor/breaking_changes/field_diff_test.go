@@ -1,6 +1,7 @@
 package breaking_changes
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
@@ -12,6 +13,7 @@ type fieldTestCase struct {
 	oldField          *schema.Schema
 	newField          *schema.Schema
 	expectedViolation bool
+	messageRegex      string // Optional regex to validate the message content
 }
 
 func TestFieldBecomingRequired(t *testing.T) {
@@ -272,6 +274,28 @@ var FieldDefaultModificationTestCases = []fieldTestCase{
 		},
 		newField:          nil,
 		expectedViolation: false,
+	},
+	{
+		name: "default value change - nil to empty string",
+		oldField: &schema.Schema{
+			Default: nil,
+		},
+		newField: &schema.Schema{
+			Default: "",
+		},
+		expectedViolation: true,
+		messageRegex:      "default value changed from `<nil>` to `\"\"` on",
+	},
+	{
+		name: "default value change - empty string to nil",
+		oldField: &schema.Schema{
+			Default: "",
+		},
+		newField: &schema.Schema{
+			Default: nil,
+		},
+		expectedViolation: true,
+		messageRegex:      " default value changed from `\"\"` to `<nil>` on",
 	},
 }
 
@@ -568,11 +592,35 @@ var FieldShrinkingMaxTestCases = []fieldTestCase{
 	},
 }
 
+// Extended check method that also validates message content when expected
 func (tc *fieldTestCase) check(rule FieldDiffRule, t *testing.T) {
 	messages := rule.Messages("resource", "field", diff.FieldDiff{Old: tc.oldField, New: tc.newField})
-
 	violation := len(messages) > 0
+
+	// Check violation expectation
 	if tc.expectedViolation != violation {
 		t.Errorf("Test `%s` failed: expected %v violations, got %v", tc.name, tc.expectedViolation, violation)
+		return
+	}
+
+	// If we have a messageRegex and there are messages, validate the content
+	if tc.messageRegex != "" && len(messages) > 0 {
+		matched := false
+		for _, msg := range messages {
+			match, err := regexp.MatchString(tc.messageRegex, msg)
+			if err != nil {
+				t.Errorf("Test `%s` failed: invalid regex pattern: %v", tc.name, err)
+				return
+			}
+			if match {
+				matched = true
+				break
+			}
+		}
+
+		if !matched {
+			t.Errorf("Test `%s` failed: message didn't match expected pattern '%s'. Got messages: %v",
+				tc.name, tc.messageRegex, messages)
+		}
 	}
 }

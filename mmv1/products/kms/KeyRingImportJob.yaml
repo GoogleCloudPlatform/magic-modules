@@ -82,6 +82,10 @@ properties:
     enum_values:
       - 'RSA_OAEP_3072_SHA1_AES_256'
       - 'RSA_OAEP_4096_SHA1_AES_256'
+      - 'RSA_OAEP_3072_SHA256_AES_256'
+      - 'RSA_OAEP_4096_SHA256_AES_256'
+      - 'RSA_OAEP_3072_SHA256'
+      - 'RSA_OAEP_4096_SHA256'
   - name: 'protectionLevel'
     type: Enum
     description: |
