@@ -53,7 +53,6 @@ examples:
 
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/chronicle_rule.go.tmpl'
-  post_create: 'templates/terraform/post_create/chronicle_rule_id.go.tmpl'
 
 virtual_fields:
   - name: 'deletion_policy'
