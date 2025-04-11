@@ -1,0 +1,12 @@
+resource "google_network_connectivity_internal_range" "{{$.PrimaryResourceId}}" {
+  name    = "{{index $.Vars "internal_range_name"}}"
+  network = google_compute_network.default.id
+  usage   = "EXTERNAL_TO_VPC"
+  peering = "FOR_SELF"
+  ip_cidr_range = "1234:0:1:1::/64"
+}
+
+resource "google_compute_network" "default" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}
