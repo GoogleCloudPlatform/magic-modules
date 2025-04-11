@@ -1,7 +1,6 @@
 package certificatemanager_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -12,19 +11,20 @@ import (
 func TestAccCertificateManagerIssuanceConfig_tags(t *testing.T) {
 	t.Parallel()
 
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "certificate_manager_issuance_config-tagkey")
 	context := map[string]interface{}{
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      acctest.BootstrapSharedTestTagValue(t, "certificate_manager_issuance_config-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
 	}
-	org := envvar.GetTestOrgFromEnv(t)
-	tagKey := acctest.BootstrapSharedTestTagKey(t, "certificate-manager-issuance-config-tagkey")
-	tagValue := acctest.BootstrapSharedTestTagValue(t, "certificate-manager-issuance-config-tagvalue", tagKey)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCertificateManagerIssuanceConfigTags(context, map[string]string{org + "/" + tagKey: tagValue}),
+				Config: testAccCertificateManagerIssuanceConfigTags(context),
 			},
 			{
 				ResourceName:            "google_certificate_manager_certificate_issuance_config.default",
@@ -36,19 +36,25 @@ func TestAccCertificateManagerIssuanceConfig_tags(t *testing.T) {
 	})
 }
 
-func testAccCertificateManagerIssuanceConfigTags(context map[string]interface{}, tags map[string]string) string {
-	r := acctest.Nprintf(`
+func testAccCertificateManagerIssuanceConfigTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_certificate_manager_certificate_issuance_config" "default" {
-        name        = "tf-test-issuance-config%{random_suffix}"
-        description = "sample description for the issaunce config"
-        location    = "us-central1"
-tags = {`, context)
+  name        = "tf-test-issuance-config%{random_suffix}"
+  description = "sample description for the issaunce config"
+  location    = "us-central1"
 
-	l := ""
-	for key, value := range tags {
-		l += fmt.Sprintf("%q = %q\n", key, value)
-	}
+  lifetime                    = "2592000s"
+  key_algorithm               = "RSA_2048"
+  rotation_window_percentage  = 80
 
-	l += fmt.Sprintf("}\n}")
-	return r + l
+  certificate_authority_config {
+    certificate_authority_service_config {
+      ca_pool = "projects/%{org}/locations/us-central1/caPools/tf-test-ca-pool%{random_suffix}"
+    }
+  }
+  tags = {
+    "%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
 }

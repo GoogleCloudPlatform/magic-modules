@@ -1,11 +1,6 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package certificatemanager_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -15,16 +10,19 @@ import (
 
 func TestAccCertificateManagerCertificateMap_tags(t *testing.T) {
 	t.Parallel()
-	org := envvar.GetTestOrgFromEnv(t)
-	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-	tagKey := acctest.BootstrapSharedTestTagKey(t, "ccm-certificatemaps-tagkey")
-	tagValue := acctest.BootstrapSharedTestTagValue(t, "ccm-certificatemaps-tagvalue", tagKey)
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "ccm-certificate-map-tagkey")
+	context := map[string]interface{}{
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      acctest.BootstrapSharedTestTagValue(t, "ccm-certificate-map-tagvalue", tagKey),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCertificateManagerCertificateMapTags(name, map[string]string{org + "/" + tagKey: tagValue}),
+				Config: testAccCertificateManagerCertificateMapTags(context),
 			},
 			{
 				ResourceName:            "google_certificate_manager_certificate_map.certificatemap",
@@ -35,18 +33,14 @@ func TestAccCertificateManagerCertificateMap_tags(t *testing.T) {
 	})
 }
 
-func testAccCertificateManagerCertificateMapTags(name string, tags map[string]string) string {
-	r := fmt.Sprintf(`
+func testAccCertificateManagerCertificateMapTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_certificate_manager_certificate_map" "certificatemap" {
-  name = "tf-certificate-map-%s"
+  name = "tf-test-certificate-map-%{random_suffix}"
   description = "Global cert"
-tags = {`, name)
-
-	l := ""
-	for key, value := range tags {
-		l += fmt.Sprintf("%q = %q\n", key, value)
-	}
-
-	l += fmt.Sprintf("}\n}")
-	return r + l
+  tags = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
 }

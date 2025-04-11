@@ -1,9 +1,6 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package certificatemanager_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -102,12 +99,14 @@ resource "google_certificate_manager_trust_config" "default" {
 func TestAccCertificateManagerTrustConfig_tags(t *testing.T) {
 	t.Parallel()
 
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "certificate-manager-trust-config-tagkey")
+
 	context := map[string]interface{}{
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      acctest.BootstrapSharedTestTagValue(t, "certificate-manager-trust-config-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
 	}
-	org := envvar.GetTestOrgFromEnv(t)
-	tagKey := acctest.BootstrapSharedTestTagKey(t, "certificate-manager-trust-config-tagkey")
-	tagValue := acctest.BootstrapSharedTestTagValue(t, "certificate-manager-trust-config-tagvalue", tagKey)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -115,7 +114,7 @@ func TestAccCertificateManagerTrustConfig_tags(t *testing.T) {
 		CheckDestroy:             testAccCheckCertificateManagerTrustConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCertificateManagerTrustConfigTags(context, map[string]string{org + "/" + tagKey: tagValue}),
+				Config: testAccCertificateManagerTrustConfigTags(context),
 			},
 			{
 				ResourceName:            "google_certificate_manager_trust_config.default",
@@ -127,8 +126,8 @@ func TestAccCertificateManagerTrustConfig_tags(t *testing.T) {
 	})
 }
 
-func testAccCertificateManagerTrustConfigTags(context map[string]interface{}, tags map[string]string) string {
-	r := acctest.Nprintf(`
+func testAccCertificateManagerTrustConfigTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_certificate_manager_trust_config" "default" {
         name        = "tf-test-trust-config%{random_suffix}"
         description = "sample description for the trust config 2"
@@ -136,13 +135,9 @@ resource "google_certificate_manager_trust_config" "default" {
         allowlisted_certificates  {
           pem_certificate = file("test-fixtures/cert.pem") 
         }
-tags = {`, context)
-
-	l := ""
-	for key, value := range tags {
-		l += fmt.Sprintf("%q = %q\n", key, value)
-	}
-
-	l += fmt.Sprintf("}\n}")
-	return r + l
+tags = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
 }
