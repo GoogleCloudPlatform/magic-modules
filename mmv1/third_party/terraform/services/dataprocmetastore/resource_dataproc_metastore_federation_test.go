@@ -10,12 +10,12 @@ import (
 func TestAccMetastoreFederation_tags(t *testing.T) {
 	t.Parallel()
 
-	org := envvar.GetTestOrgFromEnv(t)
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "dataproc_metastore_federation-tagkey")
 	context := map[string]interface{}{
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      acctest.BootstrapSharedTestTagValue(t, "dataproc_metastore_federation-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
-		"tag_key":       org + "/" + acctest.BootstrapSharedTestTagKey(t, "metastore-federations-tagkey"),
-		"tag_value":     acctest.BootstrapSharedTestTagValue(t, "metastore-federations-tagvalue", acctest.BootstrapSharedTestTagKey(t, "metastore-federations-tagkey")),
-	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -35,7 +35,7 @@ func TestAccMetastoreFederation_tags(t *testing.T) {
 }
 
 func testAccMetastoreFederationTags(context map[string]interface{}) string {
-	r := acctest.Nprintf(`
+	return acctest.Nprintf(`
 		resource "google_dataproc_metastore_service" "default" {
 			service_id = "tf-test-service-%{random_suffix}"
 			location   = "us-central1"
@@ -59,10 +59,9 @@ func testAccMetastoreFederationTags(context map[string]interface{}) string {
 			}
 
 			tags = {
-				"%{tag_key}" = "%{tag_value}"
-			}
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
 		}
 	`, context)
 
-	return r
 }
