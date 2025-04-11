@@ -1,5 +1,4 @@
 package parametermanager
-{{ if ne $.TargetVersionName `ga` -}}
 
 import (
 	"fmt"
@@ -41,5 +40,3 @@ func dataSourceParameterManagerParameterRead(d *schema.ResourceData, meta interf
 	}
 	return nil
 }
-
-{{ end }}
