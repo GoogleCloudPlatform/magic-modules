@@ -87,7 +87,7 @@ properties:
     type: String
     description: |
       State of the job.
-    output: true  
+    output: true
   - name: 'bucketList'
     type: NestedObject
     description: List of buckets and their objects to be transformed. Currently, only one bucket configuration is supported. If multiple buckets are specified, an error will be returned
