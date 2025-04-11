@@ -130,6 +130,13 @@ properties:
       If not set, defaults to the "10.0.0.0/8" address space. This can be used to search in other rfc-1918 address spaces like "172.16.0.0/12" and "192.168.0.0/16" or non-rfc-1918 address spaces used in the VPC.
     item_type:
       type: String
+  - name: 'excludeCidrRanges'
+    type: Array
+    description: |
+      Optional. List of IP CIDR ranges to be excluded. Resulting reserved Internal Range will not overlap with any CIDR blocks mentioned in this list.
+      Only IPv4 CIDR ranges are supported.
+    item_type:
+      type: String
   - name: 'users'
     type: Array
     description: |
