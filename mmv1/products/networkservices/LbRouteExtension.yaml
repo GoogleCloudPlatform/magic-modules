@@ -153,7 +153,10 @@ properties:
               - name: 'service'
                 type: String
                 description: |
-                  The reference to the service that runs the extension. Must be a reference to a backend service
+                  The reference to the service that runs the extension.
+
+                  * To configure a callout extension, service must be a fully-qualified reference to a backend service.
+                  * To configure a plugin extension, service must be a reference to a WasmPlugin resource.
                 required: true
                 diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
               - name: 'timeout'
