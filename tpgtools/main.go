@@ -381,7 +381,7 @@ func generateResourceFile(res *Resource) {
 	}
 
 	tmpl, err := template.New("resource.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/resource.go.tmpl",
+		filepath.Join(*gPath, "resource.go.tmpl"),
 	)
 	if err != nil {
 		glog.Exit(err)
@@ -423,7 +423,7 @@ func generateSweeperFile(res *Resource) {
 	}
 
 	tmpl, err := template.New("sweeper.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/sweeper.go.tmpl",
+		filepath.Join(*gPath, "sweeper.go.tmpl"),
 	)
 	if err != nil {
 		glog.Exit(err)
@@ -465,7 +465,7 @@ func generateResourceTestFile(res *Resource) {
 	}
 
 	tmpl, err := template.New("test_file.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/test_file.go.tmpl",
+		filepath.Join(*gPath, "test_file.go.tmpl"),
 	)
 	if err != nil {
 		glog.Exit(err)
@@ -500,7 +500,7 @@ func generateResourceTestFile(res *Resource) {
 
 func generateProviderResourcesFile(resources []*Resource) {
 	tmpl, err := template.New("provider_dcl_resources.go.tmpl").Funcs(TemplateFunctions).ParseFiles(
-		"templates/provider_dcl_resources.go.tmpl",
+		filepath.Join(*gPath, "provider_dcl_resources.go.tmpl"),
 	)
 	if err != nil {
 		glog.Exit(err)
@@ -518,8 +518,13 @@ func generateProviderResourcesFile(resources []*Resource) {
 
 	if oPath == nil || *oPath == "" {
 		fmt.Print(string(formatted))
-	} else if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "provider", "provider_dcl_resources.go"), formatted, 0644); err != nil {
-		glog.Exit(err)
+	} else {
+		if err := os.MkdirAll(filepath.Join(*oPath, terraformResourceDirectory, "provider"), 0755); err != nil {
+			glog.Exit(err)
+		}
+		if err = ioutil.WriteFile(path.Join(*oPath, terraformResourceDirectory, "provider", "provider_dcl_resources.go"), formatted, 0644); err != nil {
+			glog.Exit(err)
+		}
 	}
 }
 
@@ -530,7 +535,7 @@ func generateProductsFile(fileName string, products []*ProductMetadata) {
 	templateFileName := fileName + ".go.tmpl"
 	// Generate endpoints file
 	tmpl, err := template.New(templateFileName).Funcs(TemplateFunctions).ParseFiles(
-		"templates/" + templateFileName,
+		filepath.Join(*gPath, templateFileName),
 	)
 	if err != nil {
 		glog.Exit(err)
