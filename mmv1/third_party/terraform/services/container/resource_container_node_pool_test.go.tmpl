@@ -1059,12 +1059,15 @@ func TestAccContainerNodePool_withGPU(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withGPU(cluster, np, networkName, subnetworkName),
+				Config: testAccContainerNodePool_withGPU(cluster, np, networkName, subnetworkName, "LATEST"),
 			},
 			{
 				ResourceName:      "google_container_node_pool.np_with_gpu",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerNodePool_withGPU(cluster, np, networkName, subnetworkName, "DEFAULT"),
 			},
 		},
 	})
@@ -4102,7 +4105,7 @@ resource "google_container_node_pool" "with_upgrade_settings" {
 `, clusterName, networkName, subnetworkName, nodePoolName, makeUpgradeSettings(maxSurge, maxUnavailable, strategy, nodePoolSoakDuration, batchNodeCount, batchPercentage, batchSoakDuration))
 }
 
-func testAccContainerNodePool_withGPU(cluster, np, networkName, subnetworkName string) string {
+func testAccContainerNodePool_withGPU(cluster, np, networkName, subnetworkName, version string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1c" {
   location = "us-central1-c"
@@ -4145,7 +4148,7 @@ resource "google_container_node_pool" "np_with_gpu" {
     guest_accelerator {
       type               = "nvidia-tesla-a100"
       gpu_partition_size = "1g.5gb"
-      count              = 1
+      count              = "%s"
       gpu_driver_installation_config {
         gpu_driver_version = "LATEST"
       }
@@ -4156,7 +4159,7 @@ resource "google_container_node_pool" "np_with_gpu" {
     }
   }
 }
-`, cluster, networkName, subnetworkName, np)
+`, cluster, networkName, subnetworkName, np, version)
 }
 
 func testAccContainerNodePool_withNodeConfigScopeAlias(cluster, np, networkName, subnetworkName string) string {
