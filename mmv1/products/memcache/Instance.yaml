@@ -37,7 +37,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
+custom_code:
   pre_delete: 'templates/terraform/pre_delete/memcache_instance.go.tmpl'
 examples:
   - name: 'memcache_instance_basic'
@@ -337,7 +337,7 @@ virtual_fields:
   - name: 'deletion_protection'
     description: |
       Whether Terraform will be prevented from destroying the instance. Defaults to true.
-      When a`terraform destroy` or `terraform apply` would delete the instance,
+      When a `terraform destroy` or `terraform apply` would delete the instance,
       the command will fail if this field is not set to false in Terraform state.
       When the field is set to true or unset in Terraform state, a `terraform apply`
       or `terraform destroy` that would delete the instance will fail.

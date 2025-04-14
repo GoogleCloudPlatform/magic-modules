@@ -125,7 +125,24 @@ func TestAccMemcacheInstance_deletionprotection(t *testing.T) {
                                 ExpectError: regexp.MustCompile("deletion_protection"),
                         },
 			{
+				ResourceName:            "google_memcache_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"reserved_ip_range_id", "deletion_protection"},
+			},
+			{
 				Config: testAccMemcacheInstance_update(prefix, name, network),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_memcache_instance.test", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_memcache_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"reserved_ip_range_id", "deletion_protection"},
 			},
 		},
 	})
