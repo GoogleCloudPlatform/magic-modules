@@ -337,7 +337,7 @@ func TestAccWorkbenchInstance_updateMetadataKey(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "update_time"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "update_time", "health_info", "health_state"},
 			},
       		{
 				Config: testAccWorkbenchInstance_updateMetadataKey(context),
@@ -350,7 +350,7 @@ func TestAccWorkbenchInstance_updateMetadataKey(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "update_time"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "update_time", "health_info", "health_state"},
 			},
 			{
 				Config: testAccWorkbenchInstance_updateMetadata(context),
@@ -363,7 +363,7 @@ func TestAccWorkbenchInstance_updateMetadataKey(t *testing.T) {
 				ResourceName:            "google_workbench_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "update_time"},
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "update_time", "health_info", "health_state"},
 			},
 		},
 	})
