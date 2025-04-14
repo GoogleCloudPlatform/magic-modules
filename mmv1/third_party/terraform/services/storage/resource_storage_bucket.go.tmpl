@@ -1050,7 +1050,7 @@ func resourceStorageBucketRead(d *schema.ResourceData, meta interface{}) error {
 
 	// There seems to be some eventual consistency errors in some cases, so we want to check a few times
 	// to make sure it exists before moving on
-	res, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Projection("full").Do()
+	res, err := config.NewStorageClient(userAgent).Buckets.Get(bucket).Do()
 
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Storage Bucket %q", d.Get("name").(string)))
