@@ -1,0 +1,5 @@
+// The response from Create nests the resource inside a "subscription" key.
+if s, ok := res["subscription"]; ok {
+  return s.(map[string]interface{}), nil
+}
+return res, nil

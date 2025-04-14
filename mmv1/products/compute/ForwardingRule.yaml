@@ -13,6 +13,8 @@
 
 ---
 name: 'ForwardingRule'
+api_variant_patterns:
+  - 'projects/{project}/regions/{region}/forwardingRules/{forwardingRule}'
 kind: 'compute#forwardingRule'
 description: |
   A ForwardingRule resource. A ForwardingRule resource specifies which pool
@@ -48,6 +50,8 @@ custom_diff:
   - 'forwardingRuleCustomizeDiff'
 legacy_long_form_project: true
 sweeper:
+  dependencies:
+    - "google_network_connectivity_service_connection_policy"
   url_substitutions:
     - region: "us-west2"
     - region: "us-central1"
