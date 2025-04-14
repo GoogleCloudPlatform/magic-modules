@@ -2258,10 +2258,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 					Name: name,
 					Accelerators: expandGuestAccelerator(d.Get(prefix + "node_config.0.guest_accelerator")),
 				}
-				if req.Accelerators == nil {
-					req.Accelerators = []*container.AcceleratorConfig{}
-					req.ForceSendFields = []string{"Accelerators"}
-				}
+
 				updateF := func() error {
 					clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
 					if config.UserProjectOverride {
