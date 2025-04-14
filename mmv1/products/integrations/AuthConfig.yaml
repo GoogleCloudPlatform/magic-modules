@@ -37,7 +37,6 @@ timeouts:
   delete_minutes: 20
 custom_code:
   pre_create: 'templates/terraform/pre_create/integrations_auth_config.go.tmpl'
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   pre_update: 'templates/terraform/pre_update/integrations_auth_config.go.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 sweeper:
