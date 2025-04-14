@@ -36,11 +36,11 @@ type GooglePubsubLiteReservationFWResource struct {
 }
 
 type GooglePubsubLiteReservationModel struct {
-	Id        types.String `tfsdk:"id"`
-	Project   types.String `tfsdk:"project"`
-	Region    types.String `tfsdk:"region"`
-	Name      types.String `tfsdk:"name"`
-	ThroughputCapacity    types.Int64 `tfsdk:"throughput_capacity"`
+	Id                 types.String `tfsdk:"id"`
+	Project            types.String `tfsdk:"project"`
+	Region             types.String `tfsdk:"region"`
+	Name               types.String `tfsdk:"name"`
+	ThroughputCapacity types.Int64  `tfsdk:"throughput_capacity"`
 }
 
 // Metadata returns the resource type name.
@@ -283,9 +283,9 @@ func (d *GooglePubsubLiteReservationFWResource) Update(ctx context.Context, req 
 	headers := make(http.Header)
 
 	updateMask := []string{}
- 	if !plan.ThroughputCapacity.Equal(state.ThroughputCapacity) {
+	if !plan.ThroughputCapacity.Equal(state.ThroughputCapacity) {
 		updateMask = append(updateMask, "throughputCapacity")
-    }
+	}
 
 	// updateMask is a URL parameter but not present in the schema, so ReplaceVars
 	// won't set it
