@@ -9,7 +9,6 @@ import (
 )
 
 func TestAccOSConfigV2PolicyOrchestratorForFolder_basic(t *testing.T) {
-	acctest.SkipIfVcr(t) // google_folder_iam_member does not support replay mode
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -72,25 +71,21 @@ resource "google_folder_iam_member" "iam_osconfig_service_agent" {
 }
 
 resource "google_folder_iam_member" "iam_osconfig_rollout_service_agent" {
-    depends_on = [time_sleep.wait_30_sec]
+    depends_on = [google_folder_iam_member.iam_osconfig_service_agent]
     folder     = google_folder.my_folder.folder_id
     role       = "roles/osconfig.rolloutServiceAgent"
     member     = "serviceAccount:service-folder-${google_folder.my_folder.folder_id}@gcp-sa-osconfig-rollout.iam.gserviceaccount.com"
 }
 
 resource "google_folder_iam_member" "iam_progressiverollout_service_agent" {
-    depends_on = [time_sleep.wait_30_sec]
+    depends_on = [google_folder_iam_member.iam_osconfig_rollout_service_agent]
     folder = google_folder.my_folder.folder_id
     role   = "roles/progressiverollout.serviceAgent"
     member = google_folder_service_identity.ripple_sa.member
 }
 
 resource "time_sleep" "wait_3_min" {
-    depends_on = [
-        google_folder_iam_member.iam_osconfig_service_agent,
-        google_folder_iam_member.iam_osconfig_rollout_service_agent,
-        google_folder_iam_member.iam_progressiverollout_service_agent,
-    ]
+    depends_on = [google_folder_iam_member.iam_progressiverollout_service_agent]
     create_duration = "180s"
 }
 
