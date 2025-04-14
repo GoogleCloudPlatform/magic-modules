@@ -1672,7 +1672,7 @@ func TestAccSQLDatabaseInstance_DefaultEdition(t *testing.T) {
 	t.Parallel()
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	databaseVersion := "POSTGRES_16"
-	enterprisePlusTier := "db-perf-optimized-C4A-4"
+	enterprisePlusTier := "db-c4a-highmem-4"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
