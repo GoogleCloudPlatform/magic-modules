@@ -13,3 +13,10 @@ resource "google_gemini_code_tools_setting" "{{$.PrimaryResourceId}}" {
         uri_override = "my_uri_override"
     }
 }
+
+resource "google_gemini_code_tools_setting_binding" "{{$.PrimaryResourceId}}" {
+    code_tools_setting_id = google_gemini_code_tools_setting.basic.code_tools_setting_id
+    setting_binding_id = "{{index $.Vars "setting_binding_id"}}"
+    location = "global"
+    target = "{{index $.Vars "target"}}"
+}
