@@ -427,7 +427,7 @@ is set to true. Defaults to ZONAL.`,
 							Computed:         true,
 							ForceNew:         true,
 							DiffSuppressFunc: caseDiffDashSuppress,
-							Description:      `The type of supported data disk is tier dependent and can be PD_SSD or PD_HDD or HyperDisk_Balanced `,
+							Description:      `The type of data disk. The default type is tier dependent and can be PD_SSD, PD_HDD, or HyperDisk_Balanced.`,
 						},
 						"ip_configuration": {
 							Type:     schema.TypeList,
