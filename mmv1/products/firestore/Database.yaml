@@ -72,6 +72,24 @@ examples:
       - 'project'
       - 'etag'
       - 'deletion_policy'
+  - name: 'firestore_database_with_tags'
+    primary_resource_id: 'database'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+      tags: 
+        {
+          "123/environment": "production"
+        }
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
+    exclude_test: true
   - name: 'firestore_cmek_database'
     primary_resource_id: 'database'
     vars:
@@ -312,3 +330,12 @@ properties:
         output: true
         item_type:
           type: String
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      Input only. A map of resource manager tags. Resource manager tag keys
+      and values have the same definition as resource manager
+      tags. Each item must be expressed as `<tag-key-namespaced-name>=<tag-value-short-name>`. 
+      Example: `123/environment=production,123/costCenter=marketing`.
+    immutable: true
+    ignore_read: true
