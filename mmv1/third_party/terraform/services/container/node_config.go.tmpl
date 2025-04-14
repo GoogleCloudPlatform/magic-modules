@@ -149,7 +149,7 @@ func schemaNodeConfig() *schema.Schema {
 				"guest_accelerator": {
 					Type:     schema.TypeList,
 					Optional: true,
-					Computed: true,
+					ForceNew: true,
 					Description: `List of the type and count of accelerator cards attached to the instance.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
