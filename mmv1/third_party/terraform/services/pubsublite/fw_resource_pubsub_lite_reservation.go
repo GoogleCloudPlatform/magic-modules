@@ -45,7 +45,7 @@ type GooglePubsubLiteReservationModel struct {
 
 // Metadata returns the resource type name.
 func (d *GooglePubsubLiteReservationFWResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "fwprovider_pubsub_lite_reservation"
+	resp.TypeName = req.ProviderTypeName + "_fwprovider_pubsub_lite_reservation"
 }
 
 func (d *GooglePubsubLiteReservationFWResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
