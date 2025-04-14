@@ -72,24 +72,6 @@ examples:
       - 'project'
       - 'etag'
       - 'deletion_policy'
-  - name: 'firestore_database_with_tags'
-    primary_resource_id: 'database'
-    vars:
-      database_id: 'database-id'
-      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-      tags: 
-        {
-          "123/environment": "production"
-        }
-    test_env_vars:
-      project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
-    ignore_read_extra:
-      - 'project'
-      - 'etag'
-      - 'deletion_policy'
-    exclude_test: true
   - name: 'firestore_cmek_database'
     primary_resource_id: 'database'
     vars:
@@ -329,7 +311,7 @@ properties:
            `projects/{project_id}/locations/{kms_location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}/cryptoKeyVersions/{key_version}`.
         output: true
         item_type:
-          type: String
+          type: String=
   - name: 'tags'
     type: KeyValuePairs
     description: |
