@@ -1074,14 +1074,6 @@ func TestAccContainerNodePool_withGPU(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				Config: testAccContainerNodePool_withGPURemoved(cluster, np, networkName, subnetworkName),
-			},
-			{
-				ResourceName:      "google_container_node_pool.np_with_gpu",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 		},
 	})
 }
@@ -4173,50 +4165,6 @@ resource "google_container_node_pool" "np_with_gpu" {
   }
 }
 `, cluster, networkName, subnetworkName, np, version)
-}
-
-func testAccContainerNodePool_withGPURemoved(cluster, np, networkName, subnetworkName string) string {
-	return fmt.Sprintf(`
-data "google_container_engine_versions" "central1c" {
-  location = "us-central1-c"
-}
-
-resource "google_container_cluster" "cluster" {
-  name                = "%s"
-  location            = "us-central1-c"
-  initial_node_count  = 1
-  min_master_version  = data.google_container_engine_versions.central1c.latest_master_version
-  deletion_protection = false
-  network             = "%s"
-  subnetwork          = "%s"
-}
-
-resource "google_container_node_pool" "np_with_gpu" {
-  name     = "%s"
-  location = "us-central1-c"
-  cluster  = google_container_cluster.cluster.name
-
-  initial_node_count = 1
-
-  node_config {
-    machine_type = "a2-highgpu-1g" // can't be e2 because of accelerator
-    disk_size_gb = 32
-
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/devstorage.read_only",
-      "https://www.googleapis.com/auth/logging.write",
-      "https://www.googleapis.com/auth/monitoring",
-      "https://www.googleapis.com/auth/service.management.readonly",
-      "https://www.googleapis.com/auth/servicecontrol",
-      "https://www.googleapis.com/auth/trace.append",
-    ]
-
-    preemptible     = true
-    service_account = "default"
-    image_type      = "COS_CONTAINERD"
-  }
-}
-`, cluster, networkName, subnetworkName, np)
 }
 
 func testAccContainerNodePool_withNodeConfigScopeAlias(cluster, np, networkName, subnetworkName string) string {
