@@ -317,11 +317,11 @@ properties:
     description: |
       Input only. A map of resource manager tags. Resource manager tag keys
       and values have the same definition as resource manager
-      tags. Each item must be expressed as `<tag_Key_id> : <tag_value_id>` or `<tag-key-namespaced-name>=<tag-value-short-name>`. 
+      Each item must be expressed as `<tag_Key_id> : <tag_value_id>` or `<tag-key-namespaced-name>=<tag-value-short-name>`.
       For example, the following are valid inputs:
       {"tagKeys/123": "tagValues/456", "tagKeys/333": "tagValues/444"}
       {"123/environment": "production", "345/abc": "xyz"}
-      Invalid combinations of ID and namespaced format is not supported. 
+      Invalid combinations of ID and namespaced format is not supported.
       For example, the following is invalid:
       {"123/environment" : "tagValues/444"}
       Inconsistent format is not supported.
