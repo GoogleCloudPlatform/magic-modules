@@ -25,7 +25,6 @@ update_verb: PATCH
 id_format: organizations/{{organization_id}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
 import_format:
   - organizations/{{organization_id}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
-min_version: beta
 examples:
   - name: osconfigv2_policy_orchestrator_for_organization_basic
     primary_resource_id: policy_orchestrator_for_organization
