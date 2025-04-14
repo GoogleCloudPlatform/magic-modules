@@ -163,6 +163,17 @@ parameters:
           RFC 4648 base64 to either encrypt or decrypt this resource.
         # The docs list this field but it is never returned.
         sensitive: true
+      - name: 'rsaEncryptedKey'
+        type: String
+        description: |
+          Specifies an encryption key stored in Google Cloud KMS, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+        sensitive: true
+      - name: 'kmsKeySelfLink'
+        type: String
+        description: |
+          The name of the encryption key that is stored in Google Cloud KMS.
+        api_name: kmsKeyName
       - name: 'kmsKeyServiceAccount'
         type: String
         description: |
