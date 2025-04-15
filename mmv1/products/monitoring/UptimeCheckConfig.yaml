@@ -176,6 +176,9 @@ properties:
       result in uptime checks running from all regions.
     item_type:
       type: String
+  - name: 'logCheckFailures'
+    type: Boolean
+    description: Specifies whether to log the results of failed probes to Cloud Logging.
   - name: 'checkerType'
     type: Enum
     description:
