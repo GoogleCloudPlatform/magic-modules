@@ -149,18 +149,14 @@ func TestAccComputeBackendService_withBackendAndIAP(t *testing.T) {
 func TestAccComputeBackendService_withBackendAndPreference(t *testing.T) {
 	t.Parallel()
 
-	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	igName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	itName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	randomSuffix := acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeBackendService_withBackendAndPreference(
-					serviceName, igName, itName, checkName, "DEFAULT", 10),
+				Config: testAccComputeBackendService_withBackendAndPreference(randomSuffix, "INTERNAL_MANAGED", "DEFAULT", 10),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.lipsum",
@@ -168,8 +164,39 @@ func TestAccComputeBackendService_withBackendAndPreference(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeBackendService_withBackendAndPreference(
-					serviceName, igName, itName, checkName, "PREFERRED", 20),
+				Config: testAccComputeBackendService_withBackendAndPreference(randomSuffix, "INTERNAL_MANAGED", "PREFERRED", 20),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.lipsum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeBackendService_withBackendAndPreference(randomSuffix, "INTERNAL_SELF_MANAGED", "DEFAULT", 10),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.lipsum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeBackendService_withBackendAndPreference(randomSuffix, "INTERNAL_SELF_MANAGED", "PREFERRED", 20),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.lipsum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeBackendService_withBackendAndPreference(randomSuffix, "EXTERNAL_MANAGED", "DEFAULT", 10),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.lipsum",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeBackendService_withBackendAndPreference(randomSuffix, "EXTERNAL_MANAGED", "PREFERRED", 20),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.lipsum",
@@ -2603,8 +2630,7 @@ resource "google_compute_health_check" "health_check" {
 `, context)
 }
 
-func testAccComputeBackendService_withBackendAndPreference(
-	serviceName, igName, itName, checkName, preference string, timeout int64) string {
+func testAccComputeBackendService_withBackendAndPreference(suffix, loadBalancingScheme, preference string, timeout int64) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family  = "debian-11"
@@ -2612,11 +2638,11 @@ data "google_compute_image" "my_image" {
 }
 
 resource "google_compute_backend_service" "lipsum" {
-  name        = "%s"
+  name        = "test-lipsum-backend-service-%s"
   description = "Hello World 1234"
   protocol    = "TCP"
   timeout_sec = %v
-  load_balancing_scheme = "INTERNAL_MANAGED"
+  load_balancing_scheme = "%s"
 
   backend {
     group = google_compute_instance_group_manager.foobar.instance_group
@@ -2627,7 +2653,7 @@ resource "google_compute_backend_service" "lipsum" {
 }
 
 resource "google_compute_instance_group_manager" "foobar" {
-  name = "%s"
+  name = "test-foobar-instance-group-manager-%s"
   version {
     instance_template = google_compute_instance_template.foobar.self_link
     name              = "primary"
@@ -2638,7 +2664,7 @@ resource "google_compute_instance_group_manager" "foobar" {
 }
 
 resource "google_compute_instance_template" "foobar" {
-  name         = "%s"
+  name         = "test-foobar-instance-template-%s"
   machine_type = "e2-medium"
 
   network_interface {
@@ -2653,11 +2679,10 @@ resource "google_compute_instance_template" "foobar" {
 }
 
 resource "google_compute_health_check" "health_check" {
-  name = "%s"
+  name = "test-health-check-%s"
   http_health_check {
     port = 80
   }
 }
-`, serviceName, timeout, preference, igName, itName, checkName)
+`, suffix, timeout, loadBalancingScheme, preference, suffix, suffix, suffix)
 }
-

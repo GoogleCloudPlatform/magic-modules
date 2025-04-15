@@ -188,7 +188,7 @@ properties:
           type: Enum
           description: |
             This field indicates whether this backend should be fully utilized before sending traffic to backends
-            with default preference. The possible values are:
+            with default preference. This field cannot be set when loadBalancingScheme is set to 'EXTERNAL'. The possible values are:
               - PREFERRED: Backends with this preference level will be filled up to their capacity limits first,
                 based on RTT.
               - DEFAULT: If preferred backends don't have enough capacity, backends in this layer would be used and
