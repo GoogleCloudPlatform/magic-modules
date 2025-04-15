@@ -19,7 +19,9 @@
 
 {{ range $providerVersion, $errorMessageLink := .ErrorMessageLinks }}
 
+{{ if $errorMessageLink }}
 - [{{ $providerVersion }} error message]({{ $errorMessageLink }})
+{{ end }}
 
 {{ end }}
 
@@ -28,6 +30,8 @@
 
 {{ range $providerVersion, $debugLogLink := .DebugLogLinks }}
 
+{{ if $debugLogLink }}
 - [{{ $providerVersion }} debug log]({{ $debugLogLink }})
+{{ end }}
 
 {{ end }}
