@@ -328,7 +328,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
         return fmt.Errorf("Error waiting to create {{ $.Name -}}: %s", err)
     }
 
-    err = resource{{ $.ResourceName }}PostCreateSetComputedFields(d, meta, res)
+    err = resource{{ $.ResourceName }}PostCreateSetComputedFields(d, meta, opRes)
     if err != nil {
         return fmt.Errorf("setting computed ID format fields: %w", err)
     }
