@@ -248,6 +248,81 @@ resource "google_network_connectivity_internal_range" "default" {
   usage   = "EXTERNAL_TO_VPC"
   peering = "FOR_SELF"
 }
+
+resource "google_compute_network" "default" {
+  name                    = "tf-test-internal-ranges%{random_suffix}"
+  auto_create_subnetworks = false
+}
+`, context)
+}
+
+func TestAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesExcludeCIDRExample_full(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	resourceName := "google_network_connectivity_internal_range.default"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				CheckDestroy: testAccCheckNetworkConnectivityInternalRangeDestroyProducer(t),
+				Config:       testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesExcludeCIDRExample_full(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						resourceName, "exclude_cidr_ranges.#", "6"),
+					resource.TestCheckResourceAttr(
+						resourceName, "exclude_cidr_ranges.0", "10.5.0.0/24"),
+					resource.TestCheckResourceAttr(
+						resourceName, "exclude_cidr_ranges.1", "10.4.1.0/24"),
+					resource.TestCheckResourceAttr(
+						resourceName, "exclude_cidr_ranges.2", "10.4.0.0/24"),
+					resource.TestCheckResourceAttr(
+						resourceName, "exclude_cidr_ranges.3", "10.4.12.0/24"),
+					resource.TestCheckResourceAttr(
+						resourceName, "exclude_cidr_ranges.4", "10.4.32.0/24"),
+					resource.TestCheckResourceAttr(
+						resourceName, "exclude_cidr_ranges.5", "10.6.0.0/24"),
+				),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "network", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesExcludeCIDRExample_full(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_network_connectivity_internal_range" "default" {
+  name    = "basic%{random_suffix}"
+  description = "Test internal range exclude CIDR"
+  network = google_compute_network.default.name
+
+  prefix_length = 24
+  target_cidr_range = [
+    "10.4.0.0/16",
+	"10.5.0.0/16",
+  ]
+  exclude_cidr_ranges = [
+    "10.5.0.0/24",
+    "10.4.1.0/24",
+    "10.4.0.0/24",
+    "10.4.12.0/24",
+	"10.4.32.0/24",
+	"10.6.0.0/24",
+  ]
+  usage   = "FOR_VPC"
+  peering = "FOR_SELF"
+}
+
 resource "google_compute_network" "default" {
   name                    = "tf-test-internal-ranges%{random_suffix}"
   auto_create_subnetworks = false
