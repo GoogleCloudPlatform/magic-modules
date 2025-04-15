@@ -335,4 +335,3 @@ properties:
     description: The reasons for the current state in the lifecycle
     item_type:
       type: String
-
