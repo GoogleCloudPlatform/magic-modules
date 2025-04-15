@@ -3,4 +3,5 @@ resource "google_gke_backup_restore_channel" "basic" {
   location = "us-central1"
   description = "{{index $.Vars "description"}}"
   destination_project = "{{index $.Vars "destination_project"}}"
+  labels = { "key": "some-value" }
 }
