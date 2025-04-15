@@ -3,6 +3,8 @@ package labeler
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"regexp"
 	"sort"
 	"time"
 
@@ -45,20 +47,47 @@ func GetIssues(repository, since string) ([]*github.Issue, error) {
 	var allIssues []*github.Issue
 	ctx := context.Background()
 
-	for {
-		issues, resp, err := client.Issues.ListByRepo(ctx, owner, repo, opt)
-		if err != nil {
-			return nil, fmt.Errorf("listing issues: %w", err)
-		}
-		allIssues = append(allIssues, issues...)
+	issues, resp, err := client.Issues.ListByRepo(ctx, owner, repo, opt)
+	if err != nil {
+		return nil, fmt.Errorf("listing issues: %w", err)
+	}
+	allIssues = append(allIssues, issues...)
 
-		if resp.NextPage == 0 {
+	for {
+		nextURL := getNextPageURL(resp.Response)
+		if nextURL == "" {
 			break
 		}
-		opt.Page = resp.NextPage
+
+		req, err := http.NewRequestWithContext(ctx, "GET", nextURL, nil)
+		if err != nil {
+			return nil, fmt.Errorf("creating request for next page: %w", err)
+		}
+
+		var nextPageIssues []*github.Issue
+		resp, err = client.Do(ctx, req, &nextPageIssues)
+		if err != nil {
+			return nil, fmt.Errorf("getting next page issues (%s): %w", nextURL, err)
+		}
+
+		allIssues = append(allIssues, nextPageIssues...)
 	}
 
 	return allIssues, nil
+}
+
+func getNextPageURL(resp *http.Response) string {
+	if resp == nil {
+		return ""
+	}
+	if linkHeader := resp.Header.Get("Link"); linkHeader != "" {
+		re := regexp.MustCompile(`<([^>]+)>; rel="next"`)
+		match := re.FindStringSubmatch(linkHeader)
+		if len(match) > 1 {
+			return match[1]
+		}
+	}
+	return ""
 }
 
 // ComputeIssueUpdates remains the same as it doesn't interact with GitHub API
