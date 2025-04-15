@@ -186,7 +186,7 @@ func TestAccNetappBackup_NetappFlexBackup(t *testing.T) {
 }
 
 func testAccNetappBackup_FlexBackup(context map[string]interface{}) string {
-    return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
