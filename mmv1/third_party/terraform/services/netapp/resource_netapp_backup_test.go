@@ -193,12 +193,10 @@ data "google_compute_network" "default" {
 
 resource "google_netapp_storage_pool" "default" {
   name = "tf-test-backup-pool%{random_suffix}"
-  location = "us-east4"
+  location = "europe-north1-a"
   service_level = "FLEX"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
-  zone = "us-east4-a"
-  replica_zone = "us-east4-b"
 }
 
 resource "google_netapp_volume" "default" {
