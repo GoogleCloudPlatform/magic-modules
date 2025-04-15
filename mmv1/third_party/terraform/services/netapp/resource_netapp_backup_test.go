@@ -182,6 +182,7 @@ resource "google_netapp_storage_pool" "default" {
   service_level = "FLEX"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
+  zone = "europe-west6-a"
 }
 
 resource "google_netapp_volume" "default" {
