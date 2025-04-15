@@ -196,7 +196,6 @@ properties:
           enum_values:
             - 'PREFERRED'
             - 'DEFAULT'
-          default_value: 'DEFAULT'
         - name: 'description'
           type: String
           description: |
@@ -1488,6 +1487,29 @@ properties:
           - 'log_config.0.sample_rate'
         diff_suppress_func: 'suppressWhenDisabled'
         default_value: 1.0
+      - name: 'optionalMode'
+        type: Enum
+        description: |
+          Specifies the optional logging mode for the load balancer traffic.
+          Supported values: INCLUDE_ALL_OPTIONAL, EXCLUDE_ALL_OPTIONAL, CUSTOM.
+        enum_values:
+          - 'INCLUDE_ALL_OPTIONAL'
+          - 'EXCLUDE_ALL_OPTIONAL'
+          - 'CUSTOM'
+        at_least_one_of:
+          - 'log_config.0.enable'
+          - 'log_config.0.sample_rate'
+          - 'log_config.0.optional_mode'
+        default_from_api: true
+      - name: 'optionalFields'
+        type: Array
+        description: |
+          This field can only be specified if logging is enabled for this backend service and "logConfig.optionalMode"
+          was set to CUSTOM. Contains a list of optional fields you want to include in the logs.
+          For example: serverInstance, serverGkeDetails.cluster, serverGkeDetails.pod.podNamespace
+        item_type:
+          type: String
+        default_from_api: true
   - name: 'serviceLbPolicy'
     type: String
     description: |
