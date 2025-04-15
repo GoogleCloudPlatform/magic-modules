@@ -39,14 +39,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-iam_policy:
-  method_name_separator: ':'
-  parent_resource_attribute: 'name'
-  base_url: 'projects/{{project}}/locations/{{location}}/restoreChannels/{{name}}'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
-  import_format:
-    - 'projects/{{project}}/locations/{{location}}/restoreChannels/{{name}}'
-    - '{{name}}'
 custom_code:
 examples:
   - name: 'gkebackup_restorechannel_basic'
