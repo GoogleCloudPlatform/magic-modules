@@ -4,7 +4,7 @@
 // `extraStatements` in the call to the `create` endpoint and all DDL (other than
 //  <CREATE DATABASE>) is run post-create, by calling the `updateDdl` endpoint 
 
-_, ok := opRes["name"]
+_, ok := res["name"]
 if !ok {
 	return fmt.Errorf("Create response didn't contain critical fields. Create may not have succeeded.")
 }
