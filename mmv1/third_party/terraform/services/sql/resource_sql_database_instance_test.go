@@ -2910,9 +2910,8 @@ func TestAccSqlDatabaseInstance_useCustomSubjectAlternateName(t *testing.T) {
 		"projectID":       envvar.GetTestProjectFromEnv(),
 		"databaseName":    "tf-test-" + acctest.RandString(t, 10),
 		"casRandomSuffix": acctest.RandString(t, 10),
-		"customSan":      "test.example.com",
+		"customSan":       "test.example.com",
 	}
-
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2926,7 +2925,7 @@ func TestAccSqlDatabaseInstance_useCustomSubjectAlternateName(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "CUSTOMER_MANAGED_CAS_CA"),
 					resource.TestCheckTypeSetElemAttr(resourceName, "settings.0.ip_configuration.0.custom_subject_alternative_names.*", "test.example.com"),
 				),
-			},	
+			},
 			{
 				ResourceName:            resourceName,
 				ImportState:             true,
