@@ -647,7 +647,7 @@ properties:
           - name: 'maxRetries'
             type: Integer
             description: |-
-              Number of retries allowed per Task, before marking this Task failed.
+              Number of retries allowed per Task, before marking this Task failed. Defaults to 3. Minimum value is 0.
             send_empty_value: true
             default_value: 3
   - name: 'observedGeneration'
