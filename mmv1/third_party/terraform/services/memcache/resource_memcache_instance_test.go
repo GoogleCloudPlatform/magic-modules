@@ -178,4 +178,3 @@ data "google_compute_network" "memcache_network" {
 }
 `, name, region, network)
 }
-
