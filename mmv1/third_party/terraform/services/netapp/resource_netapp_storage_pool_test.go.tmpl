@@ -421,7 +421,7 @@ resource "google_service_networking_connection" "default" {
 resource "google_netapp_storage_pool" "test_pool" {
   provider = google-beta
   name = "tf-test-pool%{random_suffix}"
-  location = "us-east4"
+  location = "us-east4-a"
   service_level = "FLEX"
   capacity_gib = "2048"
   network = google_compute_network.peering_network.id
