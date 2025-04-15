@@ -125,7 +125,6 @@ func TestAccMemcacheInstance_deletionprotection(t *testing.T) {
 				Config:      testAccMemcacheInstance_deletionprotection(prefix, name, network, "us-west2"),
 				ExpectError: regexp.MustCompile("deletion_protection"),
 			},
-                        },
 			{
 				ResourceName:            "google_memcache_instance.test",
 				ImportState:             true,
