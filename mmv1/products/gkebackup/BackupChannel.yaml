@@ -23,7 +23,6 @@ references:
     'Official Documentation': 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke'
   api: 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/projects.locations.backupChannels'
 docs:
-min_version: beta
 base_url: 'projects/{{project}}/locations/{{location}}/backupChannels'
 create_url: 'projects/{{project}}/locations/{{location}}/backupChannels?backupChannelId={{name}}'
 update_verb: 'PATCH'
@@ -60,7 +59,6 @@ examples:
       'destination_project': '"projects/24240755850"'
     test_env_vars:
       project: 'PROJECT_NAME'
-    min_version: 'beta'
 parameters:
   - name: 'location'
     type: String

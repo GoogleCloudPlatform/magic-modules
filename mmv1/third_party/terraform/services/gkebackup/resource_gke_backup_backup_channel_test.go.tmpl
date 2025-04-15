@@ -13,20 +13,21 @@ func TestAccGKEBackupBackupChannel_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": acctest.RandString(t, 10),
+		"project":             envvar.GetTestProjectFromEnv(),
+		"destination_project": "projects/24240755850",
+		"random_suffix":       acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckGKEBackupBackupChannelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGKEBackupBackupChannel_basic(context),
 			},
 			{
-				ResourceName:            "google_gke_backup_backup_channel.backupchannel",
+				ResourceName:            "google_gke_backup_backup_channel.basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
@@ -37,14 +38,11 @@ func TestAccGKEBackupBackupChannel_update(t *testing.T) {
 
 func testAccGKEBackupBackupChannel_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_gke_backup_backup_channel" "backupchannel" {
-  name = "tf-test-testbackupchannel%{random_suffix}"
+resource "google_gke_backup_backup_channel" "basic" {
+  name = "tf-test-basic-channel%{random_suffix}"
   location = "us-central1"
-  destination_project = "projects/24240755850"
-  description = "some-description"
-  labels = {
-    "some-key-1": "some-value-1"
-  }
+  description = ""
+  destination_project = "%{destination_project}"
 }
 `, context)
 }
