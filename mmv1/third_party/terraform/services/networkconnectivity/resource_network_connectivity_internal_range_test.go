@@ -219,6 +219,14 @@ func TestAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesEx
 				Config: testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesExcludeCIDRExample_full(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
+						resourceName, "description", "Test internal range exclude CIDR"),
+					resource.TestCheckResourceAttr(
+						resourceName, "target_cidr_range.0", "10.4.0.0/16"),
+					resource.TestCheckResourceAttr(
+						resourceName, "target_cidr_range.1", "10.5.0.0/16"),
+					resource.TestCheckResourceAttr(
+						resourceName, "prefix_length", "24"),
+					resource.TestCheckResourceAttr(
 						resourceName, "exclude_cidr_ranges.#", "6"),
 					resource.TestCheckResourceAttr(
 						resourceName, "exclude_cidr_ranges.0", "10.5.0.0/24"),
