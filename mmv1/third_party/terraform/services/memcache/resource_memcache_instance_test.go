@@ -2,8 +2,8 @@ package memcache_test
 
 import (
 	"fmt"
-	"testing"
 	"regexp"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -121,9 +121,9 @@ func TestAccMemcacheInstance_deletionprotection(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"reserved_ip_range_id", "deletion_protection"},
 			},
 			{
-                                Config: testAccMemcacheInstance_deletionprotection(prefix, name, network, "us-west2"),
-                                ExpectError: regexp.MustCompile("deletion_protection"),
-                        },
+				Config:      testAccMemcacheInstance_deletionprotection(prefix, name, network, "us-west2"),
+				ExpectError: regexp.MustCompile("deletion_protection"),
+			},
 			{
 				Config: testAccMemcacheInstance_update(prefix, name, network),
 			},
@@ -160,4 +160,3 @@ data "google_compute_network" "memcache_network" {
 }
 `, name, region, network)
 }
-
