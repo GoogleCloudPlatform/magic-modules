@@ -39,15 +39,6 @@ func TestAccNetappBackup_NetappBackupFull_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
 			},
-			{
-				Config: testAccNetappBackup_NetappFlexBackup(context),
-			},
-			{
-				ResourceName:            "google_netapp_backup.test_backup",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
-			},
 		},
 	})
 }
@@ -170,19 +161,44 @@ resource "google_netapp_backup" "test_backup" {
 `, context)
 }
 
-func testAccNetappBackup_NetappFlexBackup(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+func TestAccNetappBackup_NetappFlexBackup(t *testing.T) {
+	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetappBackupDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetappBackup_FlexBackup(context),
+			},
+			{
+				ResourceName:            "google_netapp_backup.test_backup",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
+			},
+		},
+	})
+}
+
+func testAccNetappBackup_FlexBackup(context map[string]interface{}) string {
+    return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
 }
 
 resource "google_netapp_storage_pool" "default" {
   name = "tf-test-backup-pool%{random_suffix}"
-  location = "europe-west6"
+  location = "us-east4"
   service_level = "FLEX"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
-  zone = "europe-west6-a"
+  zone = "us-east4-a"
+  replica_zone = "us-east4-b"
 }
 
 resource "google_netapp_volume" "default" {
@@ -204,15 +220,15 @@ resource "google_netapp_backup_vault" "default" {
 }
 
 resource "google_netapp_volume_snapshot" "default" {
-	depends_on = [google_netapp_volume.default]
-	location = google_netapp_volume.default.location
-	volume_name = google_netapp_volume.default.name
-	description = "This is a test description"
-	name = "testvolumesnap%{random_suffix}"
-	labels = {
-	  key= "test"
-	  value= "snapshot"
-	}
+    depends_on = [google_netapp_volume.default]
+    location = google_netapp_volume.default.location
+    volume_name = google_netapp_volume.default.name
+    description = "This is a test description"
+    name = "testvolumesnap%{random_suffix}"
+    labels = {
+      key= "test"
+      value= "snapshot"
+    }
   }
 
 resource "google_netapp_backup" "test_backup" {
@@ -223,8 +239,8 @@ resource "google_netapp_backup" "test_backup" {
   vault_name = google_netapp_backup_vault.default.name
   source_snapshot = google_netapp_volume_snapshot.default.id
   labels = {
-	key= "test"
-	value= "backup"
+    key= "test"
+    value= "backup"
   }
 }
 `, context)
