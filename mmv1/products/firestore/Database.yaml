@@ -311,7 +311,7 @@ properties:
            `projects/{project_id}/locations/{kms_location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}/cryptoKeyVersions/{key_version}`.
         output: true
         item_type:
-          type: String=
+          type: String
   - name: 'tags'
     type: KeyValuePairs
     description: |
