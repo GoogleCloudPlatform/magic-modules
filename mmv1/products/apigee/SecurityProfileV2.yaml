@@ -14,7 +14,7 @@
 ---
 name: 'SecurityProfileV2'
 description: |
-  An `Risk Assessment V2's Security profile` in Apigee.
+  Security profile for risk assessment version 2 in Apigee.
 references:
   guides:
     'Creating a security profile': 'https://cloud.google.com/apigee/docs/api-security/security-scores#security-profiles-v2'
@@ -38,7 +38,7 @@ examples:
       security_profile_id: "my-profile"
     exclude_test: true
   - name: 'apigee_security_profile_v2_basic_test'
-    primary_resource_id: 'apigee_security_rav2_profile'
+    primary_resource_id: 'apigee_security_profile_v2'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
@@ -86,3 +86,13 @@ properties:
             - 'MINOR'
             - 'MODERATE'
             - 'MAJOR'
+  - name: 'createTime'
+    type: String
+    description: |
+      The timestamp at which this profile was created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The timestamp at which this profile was most recently updated.
+    output: true

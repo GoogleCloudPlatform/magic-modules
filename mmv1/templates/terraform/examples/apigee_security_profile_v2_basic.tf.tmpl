@@ -34,12 +34,13 @@ resource "google_apigee_addons_config" "apigee_org_security_addons_config" {
   }
 }
 
-resource "google_apigee_security_profile_v2" "apigee_security_rav2_profile" {
-  profile_id  = "{{index $.Vars "security_profile_id"}}"
-  org_id      = google_apigee_organization.apigee_org.id
+resource "google_apigee_security_profile_v2" "security_profile_v2" {
   depends_on = [
     google_apigee_addons_config.apigee_org_security_addons_config
   ]
+  profile_id  = "{{index $.Vars "security_profile_id"}}"
+  org_id      = google_apigee_organization.apigee_org.id
+  description = "terraform test description"
   profile_assessment_configs {
     assessment = "auth-policies-check"
     weight = "MAJOR"
