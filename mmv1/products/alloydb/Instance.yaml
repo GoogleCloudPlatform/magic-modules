@@ -268,6 +268,9 @@ properties:
       - name: 'trackActiveQueries'
         type: Boolean
         description: 'Track actively running queries. If not set, default value is "off".'
+      - name: 'assistiveExperiencesEnabled'
+        type: Boolean
+        description: 'Whether assistive experiences are enabled for this AlloyDB instance.'
   - name: 'readPoolConfig'
     type: NestedObject
     description: 'Read pool specific config. If the instance type is READ_POOL, this configuration must be provided.'
