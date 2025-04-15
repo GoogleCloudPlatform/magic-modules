@@ -213,10 +213,10 @@ func TestAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesEx
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkConnectivityInternalRangeDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				CheckDestroy: testAccCheckNetworkConnectivityInternalRangeDestroyProducer(t),
-				Config:       testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesExcludeCIDRExample_full(context),
+				Config: testAccNetworkConnectivityInternalRange_networkConnectivityInternalRangesExcludeCIDRExample_full(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						resourceName, "exclude_cidr_ranges.#", "6"),
