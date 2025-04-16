@@ -248,7 +248,7 @@ resource "google_network_services_lb_traffic_extension" "default" {
       supported_events = ["REQUEST_HEADERS"]
       forward_headers  = ["custom-header"]
       metadata = {
-        "exampleId": "test"
+        "exampleId" = "test"
       }
     }
   }
@@ -567,7 +567,7 @@ resource "google_network_services_lb_traffic_extension" "default" {
       supported_events = ["REQUEST_HEADERS"]
       forward_headers = ["custom-header"]
       metadata = {
-        "exampleId": "test"
+        "exampleId" = "test"
       }
     }
   }
