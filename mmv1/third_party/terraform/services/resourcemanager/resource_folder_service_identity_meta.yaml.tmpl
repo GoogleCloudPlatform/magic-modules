@@ -1,3 +1,4 @@
+{{ if ne $.TargetVersionName "ga" -}}
 resource: 'google_folder_service_identity'
 generation_type: 'handwritten'
 api_service_name: 'serviceusage.googleapis.com'
@@ -8,3 +9,4 @@ fields:
   - field: 'member'
   - field: 'folder'
   - field: 'service'
+{{ end }}
