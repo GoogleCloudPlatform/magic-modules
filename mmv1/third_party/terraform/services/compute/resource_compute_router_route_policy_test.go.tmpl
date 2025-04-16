@@ -32,12 +32,6 @@ func TestAccComputeRouterRoutePolicy_PriorityZero(t *testing.T) {
 
 func testAccComputeRouterRoutePolicyPriorityZero(routerName, routePolicyName string) string {
 	return fmt.Sprintf(`
-provider "google" {
-  project = "vpn-test-project-422614"
-  region  = "us-central1"
-  zone    = "us-central1-c"
-}
-
 resource "google_compute_network" "vpc" {
   name                    = "vpc-%[1]s"
   auto_create_subnetworks = false
