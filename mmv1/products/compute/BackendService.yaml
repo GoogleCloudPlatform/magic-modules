@@ -1509,7 +1509,6 @@ properties:
           For example: serverInstance, serverGkeDetails.cluster, serverGkeDetails.pod.podNamespace
         item_type:
           type: String
-        default_from_api: true
   - name: 'serviceLbPolicy'
     type: String
     description: |
