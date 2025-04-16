@@ -23,8 +23,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/fwprovider"
 	tpgprovider "github.com/hashicorp/terraform-provider-google/google/provider"
-	"github.com/hashicorp/terraform-provider-google/google/services/pubsublite"
 	"github.com/hashicorp/terraform-provider-google/google/services/compute"
+	"github.com/hashicorp/terraform-provider-google/google/services/pubsublite"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
