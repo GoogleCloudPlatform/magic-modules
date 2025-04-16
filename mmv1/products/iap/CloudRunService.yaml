@@ -46,6 +46,9 @@ examples:
     vars:
       cloud_run_service_name: 'cloud-run-service'
 parameters:
+  - name: 'location'
+    type: String
+    description: The location of a cloud run service.
 properties:
   - name: 'name'
     type: String
