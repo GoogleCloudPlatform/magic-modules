@@ -31,7 +31,7 @@ import_format:
   - '{{org_id}}/securityProfilesV2/{{profile_id}}'
   - '{{org_id}}/{{profile_id}}'
 custom_code:
-  custom_import: 'templates/terraform/custom_import/apigee_environment.go.tmpl'
+  custom_import: "templates/terraform/custom_import/apigee_security_profile_v2.go.tmpl"
 examples:
   - name: 'apigee_security_profile_v2_basic'
     vars:
