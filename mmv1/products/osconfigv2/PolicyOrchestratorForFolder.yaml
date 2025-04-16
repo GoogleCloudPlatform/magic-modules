@@ -325,7 +325,6 @@ properties:
                                   description: |-
                                     Required. The desired state the agent should maintain for this package.
                                     Possible values:
-                                    DESIRED_STATE_UNSPECIFIED
                                     INSTALLED
                                     REMOVED
                                   required: true
