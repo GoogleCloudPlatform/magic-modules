@@ -360,13 +360,13 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     {{-     if and (eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl") (eq $renderedIdFromName "false") }}
     // Setting `name` field so that `id_from_name` flattener will work properly.
     if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(opRes["name"], d, config)); err != nil {
-        return fmt.Errorf(`Error setting computed identity field "name": %s`, err)
+        return err
     }
     {{-       $renderedIdFromName = "true" }}
     {{-     end }}
     {{-     if and $prop.Output (not $prop.IgnoreRead) }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
-        return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
+        return err
     }
     {{-     else if and $prop.DefaultFromApi (not $prop.IgnoreRead) }}
     // {{ underscore $prop.Name }} is set by API when unset
