@@ -81,7 +81,7 @@ properties:
   - name: name
     type: String
     description: |-
-      Immutable. Identifier. In form of
+      Identifier. In form of
       * `organizations/{organization_id}/locations/global/policyOrchestrators/{orchestrator_id}`
       * `folders/{folder_id}/locations/global/policyOrchestrators/{orchestrator_id}`
       * `projects/{project_id_or_number}/locations/global/policyOrchestrators/{orchestrator_id}`
@@ -89,24 +89,24 @@ properties:
     immutable: true
   - name: description
     type: String
-    description: Optional. Freeform text describing the purpose of the resource.
+    description: Freeform text describing the purpose of the resource.
   - name: etag
     type: String
     description: |-
-      Output only. This checksum is computed by the server based on the value of other
+      This checksum is computed by the server based on the value of other
       fields, and may be sent on update and delete requests to ensure the
       client has an up-to-date value before proceeding.
     output: true
   - name: reconciling
     type: Boolean
     description: |-
-      Output only. Set to true, if the there are ongoing changes being applied by the
+      Set to true, if the there are ongoing changes being applied by the
       orchestrator.
     output: true
   - name: action
     type: String
     description: |-
-      Required. Action to be done by the orchestrator in
+      Action to be done by the orchestrator in
       `projects/{project_id}/zones/{zone_id}` locations defined by the
       `orchestration_scope`. Allowed values:
       - `UPSERT` - Orchestrator will create or update target resources.
@@ -150,7 +150,7 @@ properties:
               Length of the description is limited to 1024 characters.
           - name: osPolicies
             type: Array
-            description: Required. List of OS policies to be applied to the VMs.
+            description: List of OS policies to be applied to the VMs.
             required: true
             item_type:
               type: NestedObject
@@ -158,7 +158,7 @@ properties:
                 - name: id
                   type: String
                   description: |-
-                    Required. The id of the OS policy with the following restrictions:
+                    The id of the OS policy with the following restrictions:
 
                     * Must contain only lowercase letters, numbers, and hyphens.
                     * Must start with a letter.
@@ -174,7 +174,7 @@ properties:
                 - name: mode
                   type: String
                   description: |-
-                    Required. Policy mode
+                    Policy mode
                     Possible values:
                     MODE_UNSPECIFIED
                     VALIDATION
@@ -183,7 +183,7 @@ properties:
                 - name: resourceGroups
                   type: Array
                   description: |-
-                    Required. List of resource groups for the policy.
+                    List of resource groups for the policy.
                     For a particular VM, resource groups are evaluated in the order specified
                     and the first resource group that is applicable is selected and the rest
                     are ignored.
@@ -216,7 +216,7 @@ properties:
                           properties:
                             - name: osShortName
                               type: String
-                              description: Required. The OS short name
+                              description: The OS short name
                               required: true
                             - name: osVersion
                               type: String
@@ -231,7 +231,7 @@ properties:
                       - name: resources
                         type: Array
                         description: |-
-                          Required. List of resources configured for this resource group.
+                          List of resources configured for this resource group.
                           The resources are executed in the exact order specified here.
                         required: true
                         item_type:
@@ -240,7 +240,7 @@ properties:
                             - name: id
                               type: String
                               description: |-
-                                Required. The id of the resource with the following restrictions:
+                                The id of the resource with the following restrictions:
 
                                 * Must contain only lowercase letters, numbers, and hyphens.
                                 * Must start with a letter.
@@ -261,7 +261,7 @@ properties:
                                   properties:
                                     - name: name
                                       type: String
-                                      description: Required. Package name.
+                                      description: Package name.
                                       required: true
                                 - name: msi
                                   type: NestedObject
@@ -279,7 +279,7 @@ properties:
                                             - name: uri
                                               type: String
                                               description: |-
-                                                Required. URI from which to fetch the object. It should contain both the
+                                                URI from which to fetch the object. It should contain both the
                                                 protocol and path following the format `{protocol}://{location}`.
                                               required: true
                                             - name: sha256Checksum
@@ -291,11 +291,11 @@ properties:
                                           properties:
                                             - name: bucket
                                               type: String
-                                              description: Required. Bucket of the Cloud Storage object.
+                                              description: Bucket of the Cloud Storage object.
                                               required: true
                                             - name: object
                                               type: String
-                                              description: Required. Name of the Cloud Storage object.
+                                              description: Name of the Cloud Storage object.
                                               required: true
                                             - name: generation
                                               type: String
@@ -323,7 +323,7 @@ properties:
                                 - name: desiredState
                                   type: String
                                   description: |-
-                                    Required. The desired state the agent should maintain for this package.
+                                    The desired state the agent should maintain for this package.
                                     Possible values:
                                     INSTALLED
                                     REMOVED
@@ -337,7 +337,7 @@ properties:
                                   properties:
                                     - name: name
                                       type: String
-                                      description: Required. Package name.
+                                      description: Package name.
                                       required: true
                                 - name: deb
                                   type: NestedObject
@@ -358,7 +358,7 @@ properties:
                                             - name: uri
                                               type: String
                                               description: |-
-                                                Required. URI from which to fetch the object. It should contain both the
+                                                URI from which to fetch the object. It should contain both the
                                                 protocol and path following the format `{protocol}://{location}`.
                                               required: true
                                         - name: gcs
@@ -370,11 +370,11 @@ properties:
                                               description: Generation number of the Cloud Storage object.
                                             - name: bucket
                                               type: String
-                                              description: Required. Bucket of the Cloud Storage object.
+                                              description: Bucket of the Cloud Storage object.
                                               required: true
                                             - name: object
                                               type: String
-                                              description: Required. Name of the Cloud Storage object.
+                                              description: Name of the Cloud Storage object.
                                               required: true
                                         - name: localPath
                                           type: String
@@ -403,7 +403,7 @@ properties:
                                   properties:
                                     - name: name
                                       type: String
-                                      description: Required. Package name.
+                                      description: Package name.
                                       required: true
                                 - name: zypper
                                   type: NestedObject
@@ -414,7 +414,7 @@ properties:
                                   properties:
                                     - name: name
                                       type: String
-                                      description: Required. Package name.
+                                      description: Package name.
                                       required: true
                                 - name: rpm
                                   type: NestedObject
@@ -439,7 +439,7 @@ properties:
                                             - name: uri
                                               type: String
                                               description: |-
-                                                Required. URI from which to fetch the object. It should contain both the
+                                                URI from which to fetch the object. It should contain both the
                                                 protocol and path following the format `{protocol}://{location}`.
                                               required: true
                                             - name: sha256Checksum
@@ -451,11 +451,11 @@ properties:
                                           properties:
                                             - name: bucket
                                               type: String
-                                              description: Required. Bucket of the Cloud Storage object.
+                                              description: Bucket of the Cloud Storage object.
                                               required: true
                                             - name: object
                                               type: String
-                                              description: Required. Name of the Cloud Storage object.
+                                              description: Name of the Cloud Storage object.
                                               required: true
                                             - name: generation
                                               type: String
@@ -485,7 +485,7 @@ properties:
                                     - name: components
                                       type: Array
                                       description: |-
-                                        Required. List of components for this repository. Must contain at least one
+                                        List of components for this repository. Must contain at least one
                                         item.
                                       required: true
                                       item_type:
@@ -498,7 +498,7 @@ properties:
                                     - name: archiveType
                                       type: String
                                       description: |-
-                                        Required. Type of archive files in this repository.
+                                        Type of archive files in this repository.
                                         Possible values:
                                         ARCHIVE_TYPE_UNSPECIFIED
                                         DEB
@@ -506,11 +506,11 @@ properties:
                                       required: true
                                     - name: uri
                                       type: String
-                                      description: Required. URI for this repository.
+                                      description: URI for this repository.
                                       required: true
                                     - name: distribution
                                       type: String
-                                      description: Required. Distribution of this repository.
+                                      description: Distribution of this repository.
                                       required: true
                                 - name: yum
                                   type: NestedObject
@@ -524,7 +524,7 @@ properties:
                                       description: The display name of the repository.
                                     - name: baseUrl
                                       type: String
-                                      description: Required. The location of the repository directory.
+                                      description: The location of the repository directory.
                                       required: true
                                     - name: gpgKeys
                                       type: Array
@@ -534,7 +534,7 @@ properties:
                                     - name: id
                                       type: String
                                       description: |-
-                                        Required. A one word, unique name for this repository. This is  the `repo
+                                        A one word, unique name for this repository. This is  the `repo
                                         id` in the yum config file and also the `display_name` if
                                         `display_name` is omitted. This id is also used as the unique
                                         identifier when checking for resource conflicts.
@@ -548,7 +548,7 @@ properties:
                                   properties:
                                     - name: baseUrl
                                       type: String
-                                      description: Required. The location of the repository directory.
+                                      description: The location of the repository directory.
                                       required: true
                                     - name: gpgKeys
                                       type: Array
@@ -558,7 +558,7 @@ properties:
                                     - name: id
                                       type: String
                                       description: |-
-                                        Required. A one word, unique name for this repository. This is the `repo
+                                        A one word, unique name for this repository. This is the `repo
                                         id` in the zypper config file and also the `display_name` if
                                         `display_name` is omitted. This id is also used as the unique
                                         identifier when checking for GuestPolicy conflicts.
@@ -575,11 +575,11 @@ properties:
                                   properties:
                                     - name: name
                                       type: String
-                                      description: Required. The name of the repository.
+                                      description: The name of the repository.
                                       required: true
                                     - name: url
                                       type: String
-                                      description: Required. The url of the repository.
+                                      description: The url of the repository.
                                       required: true
                             - name: exec
                               type: NestedObject
@@ -624,7 +624,7 @@ properties:
                                     - name: interpreter
                                       type: String
                                       description: |-
-                                        Required. The script interpreter to use.
+                                        The script interpreter to use.
                                         Possible values:
                                         INTERPRETER_UNSPECIFIED
                                         NONE
@@ -659,7 +659,7 @@ properties:
                                             - name: uri
                                               type: String
                                               description: |-
-                                                Required. URI from which to fetch the object. It should contain both the
+                                                URI from which to fetch the object. It should contain both the
                                                 protocol and path following the format `{protocol}://{location}`.
                                               required: true
                                             - name: sha256Checksum
@@ -671,11 +671,11 @@ properties:
                                           properties:
                                             - name: bucket
                                               type: String
-                                              description: Required. Bucket of the Cloud Storage object.
+                                              description: Bucket of the Cloud Storage object.
                                               required: true
                                             - name: object
                                               type: String
-                                              description: Required. Name of the Cloud Storage object.
+                                              description: Name of the Cloud Storage object.
                                               required: true
                                             - name: generation
                                               type: String
@@ -700,7 +700,7 @@ properties:
                                     - name: interpreter
                                       type: String
                                       description: |-
-                                        Required. The script interpreter to use.
+                                        The script interpreter to use.
                                         Possible values:
                                         INTERPRETER_UNSPECIFIED
                                         NONE
@@ -727,7 +727,7 @@ properties:
                                             - name: uri
                                               type: String
                                               description: |-
-                                                Required. URI from which to fetch the object. It should contain both the
+                                                URI from which to fetch the object. It should contain both the
                                                 protocol and path following the format `{protocol}://{location}`.
                                               required: true
                                             - name: sha256Checksum
@@ -739,11 +739,11 @@ properties:
                                           properties:
                                             - name: bucket
                                               type: String
-                                              description: Required. Bucket of the Cloud Storage object.
+                                              description: Bucket of the Cloud Storage object.
                                               required: true
                                             - name: object
                                               type: String
-                                              description: Required. Name of the Cloud Storage object.
+                                              description: Name of the Cloud Storage object.
                                               required: true
                                             - name: generation
                                               type: String
@@ -787,7 +787,7 @@ properties:
                                         - name: uri
                                           type: String
                                           description: |-
-                                            Required. URI from which to fetch the object. It should contain both the
+                                            URI from which to fetch the object. It should contain both the
                                             protocol and path following the format `{protocol}://{location}`.
                                           required: true
                                         - name: sha256Checksum
@@ -799,11 +799,11 @@ properties:
                                       properties:
                                         - name: bucket
                                           type: String
-                                          description: Required. Bucket of the Cloud Storage object.
+                                          description: Bucket of the Cloud Storage object.
                                           required: true
                                         - name: object
                                           type: String
-                                          description: Required. Name of the Cloud Storage object.
+                                          description: Name of the Cloud Storage object.
                                           required: true
                                         - name: generation
                                           type: String
@@ -818,12 +818,12 @@ properties:
                                     The size of the content is limited to 32KiB.
                                 - name: path
                                   type: String
-                                  description: Required. The absolute path of the file within the VM.
+                                  description: The absolute path of the file within the VM.
                                   required: true
                                 - name: state
                                   type: String
                                   description: |-
-                                    Required. Desired state of the file.
+                                    Desired state of the file.
                                     Possible values:
                                     DESIRED_STATE_UNSPECIFIED
                                     PRESENT
@@ -856,14 +856,14 @@ properties:
           - name: revisionId
             type: String
             description: |-
-              Output only. The assignment revision ID
+              The assignment revision ID
               A new revision is committed whenever a rollout is triggered for a OS policy
               assignment
             output: true
           - name: baseline
             type: Boolean
             description: |-
-              Output only. Indicates that this revision has been successfully rolled out in this zone
+              Indicates that this revision has been successfully rolled out in this zone
               and new VMs will be assigned OS policies from this revision.
 
               For a given OS policy assignment, there is only one revision with a value
@@ -871,7 +871,7 @@ properties:
             output: true
           - name: deleted
             type: Boolean
-            description: Output only. Indicates that this revision deletes the OS policy assignment.
+            description: Indicates that this revision deletes the OS policy assignment.
             output: true
           - name: instanceFilter
             type: NestedObject
@@ -926,7 +926,7 @@ properties:
                   properties:
                     - name: osShortName
                       type: String
-                      description: Required. The OS short name
+                      description: The OS short name
                       required: true
                     - name: osVersion
                       type: String
@@ -968,7 +968,7 @@ properties:
               - name: minWaitDuration
                 type: String
                 description: |-
-                  Required. This determines the minimum duration of time to wait after the
+                  This determines the minimum duration of time to wait after the
                   configuration changes are applied through the current rollout. A
                   VM continues to count towards the `disruption_budget` at least
                   until this duration of time has passed after configuration changes are
@@ -976,7 +976,7 @@ properties:
                 required: true
           - name: revisionCreateTime
             type: String
-            description: Output only. The timestamp that the revision was created.
+            description: The timestamp that the revision was created.
             output: true
           - name: etag
             type: String
@@ -986,7 +986,7 @@ properties:
           - name: rolloutState
             type: String
             description: |-
-              Output only. OS policy assignment rollout state
+              OS policy assignment rollout state
               Possible values:
               ROLLOUT_STATE_UNSPECIFIED
               IN_PROGRESS
@@ -997,19 +997,19 @@ properties:
           - name: reconciling
             type: Boolean
             description: |-
-              Output only. Indicates that reconciliation is in progress for the revision.
+              Indicates that reconciliation is in progress for the revision.
               This value is `true` when the `rollout_state` is one of:
               * IN_PROGRESS
               * CANCELLING
             output: true
           - name: uid
             type: String
-            description: Output only. Server generated unique id for the OS policy assignment resource.
+            description: Server generated unique id for the OS policy assignment resource.
             output: true
       - name: id
         type: String
         description: |-
-          Optional. ID of the resource to be used while generating set of affected resources.
+          ID of the resource to be used while generating set of affected resources.
 
           For UPSERT action the value is auto-generated during PolicyOrchestrator
           creation when not set. When the value is set it should following next
@@ -1035,25 +1035,25 @@ properties:
         properties:
           - name: progress
             type: Double
-            description: Output only. An estimated percentage of the progress. Number between 0 and 100.
+            description: An estimated percentage of the progress. Number between 0 and 100.
             output: true
           - name: performedActions
             type: String
-            description: Output only. Overall number of actions done by the orchestrator so far.
+            description: Overall number of actions done by the orchestrator so far.
             output: true
           - name: failedActions
             type: String
             description: |-
-              Output only. Number of orchestration actions which failed so far. For more details,
+              Number of orchestration actions which failed so far. For more details,
               query the Cloud Logs.
             output: true
           - name: startTime
             type: String
-            description: Output only. Start time of the wave iteration.
+            description: Start time of the wave iteration.
             output: true
           - name: finishTime
             type: String
-            description: Output only. Finish time of the wave iteration.
+            description: Finish time of the wave iteration.
             output: true
           - name: error
             type: NestedObject
@@ -1092,7 +1092,7 @@ properties:
           - name: state
             type: String
             description: |-
-              Output only. State of the iteration.
+              State of the iteration.
               Possible values:
               STATE_UNSPECIFIED
               PROCESSING
@@ -1104,7 +1104,7 @@ properties:
           - name: rolloutResource
             type: String
             description: |-
-              Output only. Handle to the Progressive Rollouts API rollout resource, which contains
+              Handle to the Progressive Rollouts API rollout resource, which contains
               detailed information about a particular orchestration iteration.
             output: true
       - name: previousIterationState
@@ -1113,21 +1113,21 @@ properties:
         properties:
           - name: performedActions
             type: String
-            description: Output only. Overall number of actions done by the orchestrator so far.
+            description: Overall number of actions done by the orchestrator so far.
             output: true
           - name: failedActions
             type: String
             description: |-
-              Output only. Number of orchestration actions which failed so far. For more details,
+              Number of orchestration actions which failed so far. For more details,
               query the Cloud Logs.
             output: true
           - name: startTime
             type: String
-            description: Output only. Start time of the wave iteration.
+            description: Start time of the wave iteration.
             output: true
           - name: finishTime
             type: String
-            description: Output only. Finish time of the wave iteration.
+            description: Finish time of the wave iteration.
             output: true
           - name: error
             type: NestedObject
@@ -1166,7 +1166,7 @@ properties:
           - name: state
             type: String
             description: |-
-              Output only. State of the iteration.
+              State of the iteration.
               Possible values:
               STATE_UNSPECIFIED
               PROCESSING
@@ -1178,21 +1178,21 @@ properties:
           - name: rolloutResource
             type: String
             description: |-
-              Output only. Handle to the Progressive Rollouts API rollout resource, which contains
+              Handle to the Progressive Rollouts API rollout resource, which contains
               detailed information about a particular orchestration iteration.
             output: true
           - name: progress
             type: Double
-            description: Output only. An estimated percentage of the progress. Number between 0 and 100.
+            description: An estimated percentage of the progress. Number between 0 and 100.
             output: true
   - name: updateTime
     type: String
-    description: Output only. Timestamp when the policy orchestrator resource was last modified.
+    description: Timestamp when the policy orchestrator resource was last modified.
     output: true
   - name: state
     type: String
     description: |-
-      Optional. State of the orchestrator. Can be updated to change orchestrator behaviour.
+      State of the orchestrator. Can be updated to change orchestrator behaviour.
       Allowed values:
       - `ACTIVE` - orchestrator is actively looking for actions to be taken.
       - `STOPPED` - orchestrator won't make any changes.
@@ -1209,7 +1209,7 @@ properties:
       - name: selectors
         type: Array
         description: |-
-          Optional. Selectors of the orchestration scope. There is a logical AND between each
+          Selectors of the orchestration scope. There is a logical AND between each
           selector defined.
 
           When there is no explicit `ResourceHierarchySelector` selector specified,
@@ -1225,14 +1225,14 @@ properties:
                 - name: includedProjects
                   type: Array
                   description: |-
-                    Optional. Names of the projects in scope.
+                    Names of the projects in scope.
                     Format: `projects/{project_number}`
                   item_type:
                     type: String
                 - name: includedFolders
                   type: Array
                   description: |-
-                    Optional. Names of the folders in scope.
+                    Names of the folders in scope.
                     Format: `folders/{folder_id}`
                   item_type:
                     type: String
@@ -1243,14 +1243,14 @@ properties:
                 - name: includedLocations
                   type: Array
                   description: |-
-                    Optional. Names of the locations in scope.
+                    Names of the locations in scope.
                     Format: `us-central1-a`
                   item_type:
                     type: String
   - name: createTime
     type: String
-    description: Output only. Timestamp when the policy orchestrator resource was created.
+    description: Timestamp when the policy orchestrator resource was created.
     output: true
   - name: labels
     type: KeyValueLabels
-    description: Optional. Labels as key value pairs
+    description: Labels as key value pairs
