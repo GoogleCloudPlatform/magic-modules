@@ -488,7 +488,6 @@ func TestAccBigQueryDataset_bigqueryDatasetExternalReferenceAws(t *testing.T) {
 	})
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccBigQueryDataset_externalCatalogDatasetOptions_update(t *testing.T) {
 	t.Parallel()
 
@@ -498,7 +497,7 @@ func TestAccBigQueryDataset_externalCatalogDatasetOptions_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -523,7 +522,6 @@ func TestAccBigQueryDataset_externalCatalogDatasetOptions_update(t *testing.T) {
 	})
 }
 
-{{- end }}
 func testAccAddTable(t *testing.T, datasetID string, tableID string) resource.TestCheckFunc {
 	// Not actually a check, but adds a table independently of terraform
 	return func(s *terraform.State) error {
@@ -966,8 +964,6 @@ resource "google_bigquery_dataset" "dataset" {
 func testAccBigQueryDataset_externalCatalogDatasetOptions_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigquery_dataset" "dataset" {
-  provider = google-beta
-
   dataset_id    = "dataset%{random_suffix}"
   friendly_name = "test"
   description   = "This is a test description"
@@ -986,8 +982,6 @@ resource "google_bigquery_dataset" "dataset" {
 func testAccBigQueryDataset_externalCatalogDatasetOptions_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigquery_dataset" "dataset" {
-  provider = google-beta
-
   dataset_id    = "dataset%{random_suffix}"
   friendly_name = "test"
   description   = "This is a test description"
