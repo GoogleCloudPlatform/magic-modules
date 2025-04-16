@@ -182,7 +182,7 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 	}
 
 	// Upload test status data file to gcs bucket
-	objectName := pVersion.String() + "/" + testStatusFileName
+	objectName := fmt.Sprintf("test-metadata/%s/%s", pVersion.String(), testStatusFileName)
 	err = gcs.WriteToGCSBucket(NightlyDataBucket, objectName, testStatusFileName)
 	if err != nil {
 		return err
