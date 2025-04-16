@@ -18,9 +18,6 @@ kind: 'compute#backendService'
 description: |
   A Region Backend Service defines a regionally-scoped group of virtual
   machines that will serve traffic for load balancing.
-
-  ~> **Note:** Recreating a `google_compute_region_backend_service` that references other dependent resources like `google_compute_instance_group` will give a `resourceInUseByAnotherResource` error, when decreasing the number of other dependent resources.
-  Use `lifecycle.create_before_destroy` on the dependent resources to avoid this type of error as shown in the Dynamic Backend Count example.
 references:
   guides:
     'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
@@ -131,14 +128,6 @@ examples:
       default_neg_name: 'network-endpoint'
       health_check_name: 'rbs-health-check'
       network_name: 'network'
-  - name: 'region_backend_service_dynamic_backend_count'
-    primary_resource_id: 'default'
-    vars:
-      region_backend_service_name: 'region-service'
-      health_check_name: 'health-check'
-      instance_group_name: 'instance_group'
-      network_name: 'network'
-    exclude_test: true
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -1439,3 +1428,13 @@ properties:
         required: true
         enum_values:
           - 'CONSISTENT_HASH_SUBSETTING'
+      - name: 'subsetSize'
+        type: Integer
+        description: |
+          The number of backends per backend group assigned to each proxy instance or each service mesh client.
+          An input parameter to the CONSISTENT_HASH_SUBSETTING algorithm. Can only be set if policy is set to
+          CONSISTENT_HASH_SUBSETTING. Can only be set if load balancing scheme is INTERNAL_MANAGED or INTERNAL_SELF_MANAGED.
+          subsetSize is optional for Internal HTTP(S) load balancing and required for Traffic Director.
+          If you do not provide this value, Cloud Load Balancing will calculate it dynamically to optimize the number
+          of proxies/clients visible to each backend and vice versa.
+          Must be greater than 0. If subsetSize is larger than the number of backends/endpoints, then subsetting is disabled.
