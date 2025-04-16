@@ -1,0 +1,9 @@
+// Create operations will return the retrohunt name as `metadata.retrohunt`
+if metadata, ok := res["metadata"]; ok {
+	if retrohunt, ok := metadata.(map[string]interface{})["retrohunt"]; ok {
+		return map[string]interface{}{
+			"name": retrohunt,
+		}, nil
+	}
+}
+return res, nil
