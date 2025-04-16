@@ -24,6 +24,7 @@ base_url: 'projects/{{project}}/iap_web/cloud_run-{{location}}/services/{{name}}
 self_link: 'projects/{{project}}/iap_web/cloud_run-{{location}}/services/{{name}}'
 import_format:
   - 'projects/{{project}}/iap_web/cloud_run-{{location}}/services/{{name}}'
+  - '{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
