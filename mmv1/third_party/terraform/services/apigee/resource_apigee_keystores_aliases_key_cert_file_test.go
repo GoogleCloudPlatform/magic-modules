@@ -28,7 +28,10 @@ func TestAccApigeeKeystoresAliasesKeyCertFile_apigeeKeystoresAliasesKeyCertFileT
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckApigeeKeystoresAliasesKeyCertFileDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckApigeeKeystoresAliasesKeyCertFileDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeKeystoresAliasesKeyCertFile_apigeeKeystoresAliasesKeyCertFileTestExample(context),

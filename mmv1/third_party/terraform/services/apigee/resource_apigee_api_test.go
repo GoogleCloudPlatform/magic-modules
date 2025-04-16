@@ -29,7 +29,10 @@ func TestAccApigeeApi_apigeeApiTestExample(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckApigeeApiDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckApigeeApiDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeApi_apigeeApiTestExample(context),

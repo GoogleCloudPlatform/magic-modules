@@ -27,7 +27,10 @@ func TestAccApigeeSharedflowDeployment_apigeeSharedflowDeploymentTestExample(t *
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckApigeeSharedflowDeploymentDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckApigeeSharedflowDeploymentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeSharedflowDeployment_apigeeSharedflowDeploymentTestExample(context, "./test-fixtures/apigee_sharedflow_bundle.zip"),

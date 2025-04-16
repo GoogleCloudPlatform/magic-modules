@@ -21,7 +21,10 @@ func TestAccApigeeTargetServer_apigeeTargetServerTest_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckApigeeTargetServerDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckApigeeTargetServerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeTargetServer_apigeeTargetServerTest_basic(context),
@@ -221,7 +224,10 @@ func TestAccApigeeTargetServer_apigeeTargetServerTest_clientAuthEnabled(t *testi
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckApigeeTargetServerDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckApigeeTargetServerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeTargetServer_apigeeTargetServerTest_full(context),

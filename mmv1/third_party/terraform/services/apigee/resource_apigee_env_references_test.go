@@ -21,7 +21,10 @@ func TestAccApigeeEnvReferences_apigeeEnvironmentReferenceTest_Update(t *testing
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckApigeeEnvReferencesDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckApigeeEnvReferencesDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeEnvReferences_apigeeEnvironmentReferenceTest_full(context),

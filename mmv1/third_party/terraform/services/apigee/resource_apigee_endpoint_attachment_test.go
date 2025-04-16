@@ -27,7 +27,10 @@ func TestAccApigeeEndpointAttachment_apigeeEndpointAttachmentBasicTestExample(t 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckApigeeEndpointAttachmentDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckApigeeEndpointAttachmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeEndpointAttachment_apigeeEndpointAttachmentBasicTestExample(context),

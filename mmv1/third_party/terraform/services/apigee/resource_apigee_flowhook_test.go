@@ -27,7 +27,10 @@ func TestAccApigeeFlowhook_apigeeFlowhookTestExample(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckApigeeFlowhookDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckApigeeFlowhookDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeFlowhook_apigeeFlowhookTestExample(context),

@@ -29,7 +29,10 @@ func TestAccApigeeSharedFlow_apigeeSharedflowTestExample(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckApigeeSharedFlowDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckApigeeSharedFlowDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccApigeeSharedFlow_apigeeSharedflowTestExample(context),
