@@ -172,6 +172,14 @@ examples:
       'zip_path': '"./test-fixtures/function-source.zip"'
     ignore_read_extra:
       - 'deletion_protection'
+  - name: 'cloudrunv2_service_iap'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-iap-service%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      cloud_run_service_name: 'cloudrun-iap-service'
+    ignore_read_extra:
+      - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -1214,3 +1222,8 @@ properties:
     description: |
       A system-generated fingerprint for this version of the resource. May be used to detect modification conflict during updates.
     output: true
+  - name: 'iapEnabled'
+    type: Boolean
+    description: |
+      Used to enable/disable IAP for the service.
+    min_version: 'beta'
