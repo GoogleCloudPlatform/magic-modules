@@ -720,6 +720,7 @@ func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs_update(c
 	`, context)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesNetworkMatch(t *testing.T) {
 	t.Parallel()
 
@@ -940,3 +941,4 @@ func testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context map[stri
 	}
 	`, context)
 }
+{{- end }}

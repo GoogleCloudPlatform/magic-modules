@@ -239,6 +239,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule" {
 `, context)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeRegionSecurityPolicyRule_regionSecurityPolicyRuleNetworkMatchUpdate(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
@@ -463,6 +464,7 @@ resource "google_compute_region_security_policy_rule" "policy_rule_network_match
 }
 `, context)
 }
+{{- end }}
 
 func TestAccComputeRegionSecurityPolicyRule_withPreconfiguredWafConfig(t *testing.T) {
 	t.Parallel()
