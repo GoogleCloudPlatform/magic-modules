@@ -72,10 +72,10 @@ properties:
   - name: 'responseType'
     type: NestedObject
     description: |
-      The response type to request for in the OAuth authorization flow. 
-      You can set either idToken or code to true, but not both. 
+      The response type to request for in the OAuth authorization flow.
+      You can set either idToken or code to true, but not both.
       Setting both types to be simultaneously true ({code: true, idToken: true}) is not yet supported.
-    properties: 
+    properties:
       - name: 'idToken'
         type: Boolean
         description: |
@@ -83,4 +83,4 @@ properties:
       - name: 'code'
         type: Boolean
         description: |
-          If true, authorization code is returned from IdP's authorization endpoint.          
+          If true, authorization code is returned from IdP's authorization endpoint.
