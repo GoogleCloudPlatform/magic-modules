@@ -71,11 +71,8 @@ resource "google_apigee_addons_config" "apigee_org_security_addons_config" {
 }
 
 resource "google_apigee_security_profile_v2" "{{$.PrimaryResourceId}}" {
-  depends_on = [
-    google_apigee_addons_config.apigee_org_security_addons_config
-  ]
   org_id      = google_apigee_organization.apigee_org.id
-  profile_id  = "tf-test-profile%{random_suffix}"
+  profile_id  = "tf-test-profile"
   description = "terraform test description"
   profile_assessment_configs {
     assessment = "auth-policies-check"
@@ -89,4 +86,7 @@ resource "google_apigee_security_profile_v2" "{{$.PrimaryResourceId}}" {
     assessment = "threat-policies-check"
     weight = "MINOR"
   }
+  depends_on = [
+    google_apigee_addons_config.apigee_org_security_addons_config
+  ]
 }

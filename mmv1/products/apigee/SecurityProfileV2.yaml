@@ -21,7 +21,7 @@ references:
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityProfilesV2/create'
 docs:
 base_url: '{{org_id}}/securityProfilesV2'
-self_link: '{{org_id}}/securityProfilesV2/{{profileId}}'
+self_link: '{{org_id}}/securityProfilesV2/{{profile_id}}'
 create_url: '{{org_id}}/securityProfilesV2?security_profile_v2_id={{profile_id}}'
 update_verb: 'PATCH'
 update_mask: true
@@ -38,7 +38,7 @@ examples:
       security_profile_id: "my-profile"
     exclude_test: true
   - name: 'apigee_security_profile_v2_basic_test'
-    primary_resource_id: 'apigee_security_profile_v2'
+    primary_resource_id: 'security_profile_v2'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
@@ -62,11 +62,16 @@ parameters:
     immutable: true
     url_param_only: true
 properties:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the security profile v2 resource,
+      in the format `organizations/{{org_name}}/securityProfilesV2/{{profile_id}}`.
+    output: true
   - name: 'description'
     type: String
     description: |
       Description of the security profile.
-    required: false
   - name: 'profileAssessmentConfigs'
     type: Map
     description: |
