@@ -59,10 +59,7 @@ parameters:
   - name: folderId
     type: String
     description: |-
-      Part of `parent`. Required. The parent resource name in the form of:
-      * `organizations/{organization_id}/locations/global`
-      * `folders/{folder_id}/locations/global`
-      * `projects/{project_id_or_number}/locations/global`
+      The parent resource name in the form of `folders/{folder_id}/locations/global`.
     immutable: true
     url_param_only: true
     required: true
