@@ -19,11 +19,11 @@ description: |
 # GCP resources, and should not be used to generate anything other than IAM support.
 exclude_resource: true
 docs:
-id_format: 'projects/{{project}}/iap_web/cloud_run-{{region}}/services/{{name}}'
-base_url: 'projects/{{project}}/iap_web/cloud_run-{{region}}/services/{{name}}'
-self_link: 'projects/{{project}}/iap_web/cloud_run-{{region}}/services/{{name}}'
+id_format: 'projects/{{project}}/iap_web/cloud_run-{{location}}/services/{{name}}'
+base_url: 'projects/{{project}}/iap_web/cloud_run-{{location}}/services/{{name}}'
+self_link: 'projects/{{project}}/iap_web/cloud_run-{{location}}/services/{{name}}'
 import_format:
-  - 'projects/{{project}}/iap_web/cloud_run-{{region}}/services/{{name}}'
+  - 'projects/{{project}}/iap_web/cloud_run-{{location}}/services/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -39,7 +39,7 @@ iam_policy:
 custom_code:
 exclude_tgc: true
 examples:
-  - name: 'cloud_run_service_iap'
+  - name: 'cloudrunv2_service_basic'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloud-run-service%s", context["random_suffix"])'
     vars:
