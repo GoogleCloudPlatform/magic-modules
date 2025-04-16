@@ -172,12 +172,12 @@ properties:
                     Policy description.
                     Length of the description is limited to 1024 characters.
                 - name: mode
-                  type: String
+                  type: Enum
                   description: |-
                     Policy mode
-                    Possible values:
-                    VALIDATION
-                    ENFORCEMENT
+                  enum_values:
+                    - 'VALIDATION'
+                    - 'ENFORCEMENT'
                   required: true
                 - name: resourceGroups
                   type: Array
@@ -320,12 +320,12 @@ properties:
                                       item_type:
                                         type: String
                                 - name: desiredState
-                                  type: String
+                                  type: Enum
                                   description: |-
                                     The desired state the agent should maintain for this package.
-                                    Possible values:
-                                    INSTALLED
-                                    REMOVED
+                                  enum_values:
+                                    - 'INSTALLED'
+                                    - 'REMOVED'
                                   required: true
                                 - name: apt
                                   type: NestedObject
@@ -495,12 +495,12 @@ properties:
                                         URI of the key file for this repository. The agent maintains a
                                         keyring at `/etc/apt/trusted.gpg.d/osconfig_agent_managed.gpg`.
                                     - name: archiveType
-                                      type: String
+                                      type: Enum
                                       description: |-
                                         Type of archive files in this repository.
-                                        Possible values:
-                                        DEB
-                                        DEB_SRC
+                                      enum_values:
+                                        - 'DEB'
+                                        - 'DEB_SRC'
                                       required: true
                                     - name: uri
                                       type: String
@@ -620,13 +620,13 @@ properties:
                                       item_type:
                                         type: String
                                     - name: interpreter
-                                      type: String
+                                      type: Enum
                                       description: |-
                                         The script interpreter to use.
-                                        Possible values:
-                                        NONE
-                                        SHELL
-                                        POWERSHELL
+                                      enum_values:
+                                        - 'NONE'
+                                        - 'SHELL'
+                                        - 'POWERSHELL'
                                       required: true
                                     - name: outputFilePath
                                       type: String
@@ -695,13 +695,13 @@ properties:
                                       item_type:
                                         type: String
                                     - name: interpreter
-                                      type: String
+                                      type: Enum
                                       description: |-
                                         The script interpreter to use.
-                                        Possible values:
-                                        NONE
-                                        SHELL
-                                        POWERSHELL
+                                      enum_values:
+                                        - 'NONE'
+                                        - 'SHELL'
+                                        - 'POWERSHELL'
                                       required: true
                                     - name: outputFilePath
                                       type: String
@@ -817,13 +817,13 @@ properties:
                                   description: The absolute path of the file within the VM.
                                   required: true
                                 - name: state
-                                  type: String
+                                  type: Enum
                                   description: |-
                                     Desired state of the file.
-                                    Possible values:
-                                    PRESENT
-                                    ABSENT
-                                    CONTENTS_MATCH
+                                  enum_values:
+                                    - 'PRESENT'
+                                    - 'ABSENT'
+                                    - 'CONTENTS_MATCH'
                                   required: true
                                 - name: permissions
                                   type: String
