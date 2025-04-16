@@ -29,6 +29,14 @@ update_verb: PATCH
 update_mask: true
 id_format: '{{dataset}}/pipelineJobs/{{name}}'
 import_format: ['{{%dataset}}/pipelineJobs/{{name}}', '{{name}}', '{{dataset}}/pipelineJobs?pipelineJobId={{name}}']
+autogen_async: true
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
 examples:
   - name: 'healthcare_pipeline_job_reconciliation'
     primary_resource_id: 'example-pipeline'
@@ -42,7 +50,7 @@ examples:
     vars:
       backfill_pipeline_name: 'example_backfill_pipeline'
       dataset_name: 'example_dataset'
-      mapping_pipeline_name: 'example_mapping_pipeline'
+      mapping_pipeline_name: 'example_mapping_pipeline_job'
   - name: 'healthcare_pipeline_job_whistle_mapping'
     primary_resource_id: 'example-mapping-pipeline'
     vars:
