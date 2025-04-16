@@ -51,6 +51,9 @@ func testAccNetworkServicesEdgeCacheOrigin_update_0(name string) string {
 		timeout {
 			connect_timeout = "10s"
 		}
+		flex_shielding {
+			flex_shielding_regions = ["AFRICA_SOUTH1"]
+		}
 	}
 `, name)
 }
