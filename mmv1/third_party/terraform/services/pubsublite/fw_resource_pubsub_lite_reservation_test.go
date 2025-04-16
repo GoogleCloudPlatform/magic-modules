@@ -1,13 +1,10 @@
 package pubsublite_test
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
 func TestAccResourceFWPubsubLiteReservation_basic(t *testing.T) {
@@ -31,6 +28,7 @@ func testAccResourceFWPubsubLiteReservation_basic(context map[string]interface{}
 	return acctest.Nprintf(`
 resource "google_fwprovider_pubsub_lite_reservation" "basic" {
   name = "tf-test-example-reservation%{random_suffix}"
+  region = "us-central1"
   project = data.google_project.project.number
   throughput_capacity = 2
 }

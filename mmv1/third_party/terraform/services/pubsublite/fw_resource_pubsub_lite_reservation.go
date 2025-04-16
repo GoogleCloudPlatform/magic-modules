@@ -77,6 +77,11 @@ func (d *GooglePubsubLiteReservationFWResource) Schema(_ context.Context, _ reso
 				MarkdownDescription: "The project id of the Pubsub Lite Reservation.",
 				Required:            true,
 			},
+			"region": schema.StringAttribute{
+				Description:         "The region of the Pubsub Lite Reservation.",
+				MarkdownDescription: "The region of the Pubsub Lite Reservation.",
+				Required:            true,
+			},
 			"name": schema.StringAttribute{
 				Description:         `The display name of the project.`,
 				MarkdownDescription: `The display name of the project.`,
@@ -135,7 +140,7 @@ func (d *GooglePubsubLiteReservationFWResource) Create(ctx context.Context, req 
 	schemaDefaultVals.Project = data.Project
 	schemaDefaultVals.Region = data.Region
 
-	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, d.providerConfig, "{{PubSubLiteBasePath}}projects/{{project}}/locations/{{region}}/instances/{{name}}")
+	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, d.providerConfig, "{{PubsubLiteBasePath}}projects/{{project}}/locations/{{region}}/reservations/{{name}}")
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -158,7 +163,7 @@ func (d *GooglePubsubLiteReservationFWResource) Create(ctx context.Context, req 
 	tflog.Trace(ctx, "create fwprovider google_pubsub_lite resource")
 
 	// Put data in model
-	data.Id = types.StringValue(fmt.Sprintf("projects/%s/locations/%s/instances/%s", data.Project.ValueString(), data.Region.ValueString(), data.Name.ValueString()))
+	data.Id = types.StringValue(fmt.Sprintf("projects/%s/locations/%s/reservations/%s", data.Project.ValueString(), data.Region.ValueString(), data.Name.ValueString()))
 	data.ThroughputCapacity = types.Int64Value(res["throughputCapacity"].(int64))
 
 	// Save data into Terraform state
