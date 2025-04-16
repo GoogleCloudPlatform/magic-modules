@@ -395,40 +395,21 @@ func TestAccNetappStoragePool_customPerformanceStoragePoolCreateExample_update(t
 
 func testAccNetappStoragePool_customPerformanceStoragePoolCreateExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_compute_network" "peering_network" {
-  provider = google-beta
-  name = "tf-test-network%{random_suffix}"
-}
-
-# Create an IP address
-resource "google_compute_global_address" "private_ip_alloc" {
-  provider = google-beta
-  name          = "tf-test-address%{random_suffix}"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 16
-  network       = google_compute_network.peering_network.id
-}
-
-# Create a private connection
-resource "google_service_networking_connection" "default" {
-  provider = google-beta
-  network                 = google_compute_network.peering_network.id
-  service                 = "netapp.servicenetworking.goog"
-  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
-}
-
 resource "google_netapp_storage_pool" "test_pool" {
   provider = google-beta
   name = "tf-test-pool%{random_suffix}"
   location = "us-east4-a"
   service_level = "FLEX"
   capacity_gib = "2048"
-  network = google_compute_network.peering_network.id
+  network = data.google_compute_network.default.id
   description = "this is a test description"
   custom_performance_enabled = true
   total_throughput_mibps = "64"
   total_iops = "1024"
+}
+
+data "google_compute_network" "default" {
+    name = "%{network_name}"
 }
 `, context)
 }
