@@ -61,6 +61,11 @@ func (m *mockGithub) GetPullRequestComments(prNumber string) ([]github.PullReque
 	return m.pullRequestComments, nil
 }
 
+func (m *mockGithub) GetCommitMessage(owner, repo, sha string) (string, error) {
+	m.calledMethods["GetCommitMessage"] = append(m.calledMethods["GetCommitMessage"], []any{owner, repo, sha})
+	return "commit message", nil
+}
+
 func (m *mockGithub) GetTeamMembers(organization, team string) ([]github.User, error) {
 	m.calledMethods["GetTeamMembers"] = append(m.calledMethods["GetTeamMembers"], []any{organization, team})
 	if team == "" {
