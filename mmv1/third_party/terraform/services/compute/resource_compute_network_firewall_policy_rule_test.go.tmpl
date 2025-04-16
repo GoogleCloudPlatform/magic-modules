@@ -520,7 +520,7 @@ resource "google_compute_network_firewall_policy_rule" "fw_policy_rule1" {
   priority               = 9000
   enable_logging         = true
   action                 = "apply_security_profile_group"
-  security_profile_group = "${security_profile_group_prefix}networksecurity.googleapis.com/${google_network_security_security_profile_group.security_profile_group_updated.id}"
+  security_profile_group = "%{security_profile_group_prefix}networksecurity.googleapis.com/${google_network_security_security_profile_group.security_profile_group_updated.id}"
   direction              = "INGRESS"
   disabled               = false
   match {
