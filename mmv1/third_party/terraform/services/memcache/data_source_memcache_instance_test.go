@@ -21,6 +21,13 @@ func TestAccMemcacheInstanceDatasourceConfig(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMemcacheInstanceDatasourceConfig(context),
+				Check: acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+					"data.google_memcache_instance.default",
+					"google_memcache_instance.instance",
+					map[string]struct{}{
+						"resource": {},
+					},
+				),
 			},
 		},
 	})
@@ -47,19 +54,18 @@ resource "google_service_networking_connection" "private_service_connection" {
 }
 
 resource "google_memcache_instance" "instance" {
-  name = "test-instance2"
-  authorized_network      = google_service_networking_connection.private_service_connection.network
-  region                  = "us-central1"
+  name                     = "test-instance"
+  authorized_network       = google_service_networking_connection.private_service_connection.network
+  region                   = "us-central1"
   node_config {
-    cpu_count             = 1
-    memory_size_mb        = 1024
+    cpu_count              = 1
+    memory_size_mb         = 1024
   }
-  node_count              = 1
+  node_count               = 1
 }
 data "google_memcache_instance" "default" {
-name                      = google_memcache_instance.instance.name
-region                    = "us-central1"
+name                       = google_memcache_instance.instance.name
+region                     = "us-central1"
 }
-
 `, context)
 }
