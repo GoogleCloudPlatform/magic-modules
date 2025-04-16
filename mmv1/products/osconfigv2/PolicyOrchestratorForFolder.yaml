@@ -176,7 +176,6 @@ properties:
                   description: |-
                     Policy mode
                     Possible values:
-                    MODE_UNSPECIFIED
                     VALIDATION
                     ENFORCEMENT
                   required: true
@@ -500,7 +499,6 @@ properties:
                                       description: |-
                                         Type of archive files in this repository.
                                         Possible values:
-                                        ARCHIVE_TYPE_UNSPECIFIED
                                         DEB
                                         DEB_SRC
                                       required: true
@@ -626,7 +624,6 @@ properties:
                                       description: |-
                                         The script interpreter to use.
                                         Possible values:
-                                        INTERPRETER_UNSPECIFIED
                                         NONE
                                         SHELL
                                         POWERSHELL
@@ -702,7 +699,6 @@ properties:
                                       description: |-
                                         The script interpreter to use.
                                         Possible values:
-                                        INTERPRETER_UNSPECIFIED
                                         NONE
                                         SHELL
                                         POWERSHELL
@@ -825,7 +821,6 @@ properties:
                                   description: |-
                                     Desired state of the file.
                                     Possible values:
-                                    DESIRED_STATE_UNSPECIFIED
                                     PRESENT
                                     ABSENT
                                     CONTENTS_MATCH
@@ -988,7 +983,6 @@ properties:
             description: |-
               OS policy assignment rollout state
               Possible values:
-              ROLLOUT_STATE_UNSPECIFIED
               IN_PROGRESS
               CANCELLING
               CANCELLED
@@ -1094,7 +1088,6 @@ properties:
             description: |-
               State of the iteration.
               Possible values:
-              STATE_UNSPECIFIED
               PROCESSING
               COMPLETED
               FAILED
@@ -1168,7 +1161,6 @@ properties:
             description: |-
               State of the iteration.
               Possible values:
-              STATE_UNSPECIFIED
               PROCESSING
               COMPLETED
               FAILED
