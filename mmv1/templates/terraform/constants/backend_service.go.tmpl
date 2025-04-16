@@ -156,3 +156,16 @@ func resourceGoogleComputeBackendServiceBackendHash(v interface{}) int {
 	log.Printf("[DEBUG] computed hash value of %v from %v", tpgresource.Hashcode(buf.String()), buf.String())
 	return tpgresource.Hashcode(buf.String())
 }
+
+func isLoadBalancingSchemeUpdateable(_ context.Context, d *schema.ResourceDiff, _ interface{}) bool {
+	externalManagedMigrationState, ok := d.GetOk("external_managed_migration_state")
+	if !ok || externalManagedMigrationState.(string) == "" {
+		return true
+	}
+
+	loadBalancingScheme, ok := d.GetOk("load_balancing_scheme")
+	if ok && loadBalancingScheme.(string) == "EXTERNAL" || loadBalancingScheme.(string) == "EXTERNAL_MANAGED" {
+		return false
+	}
+	return true
+}

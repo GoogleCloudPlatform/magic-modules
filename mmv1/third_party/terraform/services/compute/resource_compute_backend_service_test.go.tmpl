@@ -2,6 +2,7 @@ package compute_test
 
 import (
 	"fmt"
+	"time"
 	"regexp"
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -1071,6 +1072,190 @@ func TestAccComputeBackendService_backendServiceMaxDuration(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccComputeBackendService_externalManagedMigrationState(t *testing.T) {
+	t.Parallel()
+	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeBackendService_externalManagedMigrationState(serviceName, checkName, "PREPARE", "EXTERNAL"),
+				ExpectError: regexp.MustCompile("External managed migration is only allowed for existing resources."),
+			},
+			{
+				Config:      testAccComputeBackendService_externalManagedMigrationState(serviceName, checkName, "TEST_ALL_TRAFFIC", "EXTERNAL"),
+				ExpectError: regexp.MustCompile("External managed migration is only allowed for existing resources."),
+			},
+			{
+				Config:      testAccComputeBackendService_externalManagedMigrationState(serviceName, checkName, "TEST_BY_PERCENTAGE", "EXTERNAL"),
+				ExpectError: regexp.MustCompile("External managed migration is only allowed for existing resources."),
+			},
+			{
+				Config: testAccComputeBackendService_basicExternalManagedMigrationState(serviceName, checkName, "EXTERNAL"),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeBackendService_externalManagedMigrationState(serviceName, checkName, "PREPARE", "EXTERNAL"),
+			},
+			{
+				ResourceName:            "google_compute_backend_service.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"external_managed_migration_state"},
+			},
+			{
+				PreConfig: func() {
+					// Wait for previous change to propagate
+					time.Sleep(7 * time.Minute)
+				},
+				Config: testAccComputeBackendService_externalManagedMigrationState(serviceName, checkName, "TEST_ALL_TRAFFIC", "EXTERNAL"),
+			},
+			{
+				ResourceName:            "google_compute_backend_service.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"external_managed_migration_state"},
+			},
+			{
+				PreConfig: func() {
+					// Wait for previous change to propagate
+					time.Sleep(7 * time.Minute)
+				},
+				Config: testAccComputeBackendService_externalManagedMigrationState(serviceName, checkName, "TEST_ALL_TRAFFIC", "EXTERNAL_MANAGED"),
+			},
+			{
+				ResourceName:            "google_compute_backend_service.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"external_managed_migration_state"},
+			},
+			{
+				PreConfig: func() {
+					// Wait for previous change to propagate
+					time.Sleep(7 * time.Minute)
+				},
+				Config: testAccComputeBackendService_externalManagedMigrationState(serviceName, checkName, "TEST_ALL_TRAFFIC", "EXTERNAL"),
+			},
+			{
+				ResourceName:            "google_compute_backend_service.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"external_managed_migration_state"},
+			},
+			{
+				PreConfig: func() {
+					// Wait for previous change to propagate
+					time.Sleep(7 * time.Minute)
+				},
+				Config: testAccComputeBackendService_externalManagedMigrationState(serviceName, checkName, "PREPARE", "EXTERNAL"),
+			},
+			{
+				ResourceName:            "google_compute_backend_service.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"external_managed_migration_state"},
+			},
+		},
+	})
+}
+
+func TestAccComputeBackendService_externalManagedMigrationTestingPercentage(t *testing.T) {
+	t.Parallel()
+
+	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeBackendService_basicExternalManagedMigrationState(serviceName, checkName, "EXTERNAL"),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeBackendService_externalManagedMigrationState(serviceName, checkName, "PREPARE", "EXTERNAL"),
+			},
+			{
+				ResourceName:            "google_compute_backend_service.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"external_managed_migration_state"},
+			},
+			{
+				PreConfig: func() {
+					// Wait for previous change to propagate
+					time.Sleep(7 * time.Minute)
+				},
+				Config: testAccComputeBackendService_externalManagedMigrationTestingPercentage(serviceName, checkName, "EXTERNAL", 45.1),
+			},
+			{
+				ResourceName:            "google_compute_backend_service.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"external_managed_migration_state"},
+			},
+			{
+				PreConfig: func() {
+					// Wait for previous change to propagate
+					time.Sleep(7 * time.Minute)
+				},
+				Config: testAccComputeBackendService_externalManagedMigrationTestingPercentage(serviceName, checkName, "EXTERNAL", 65.0),
+			},
+			{
+				ResourceName:            "google_compute_backend_service.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"external_managed_migration_state"},
+			},
+			{
+				Config:      testAccComputeBackendService_externalManagedMigrationTestingPercentage(serviceName, checkName, "EXTERNAL_MANAGED", 65.0),
+				ExpectError: regexp.MustCompile("Cannot change load balancing scheme before the external_migration_state is set to TEST_ALL_TRAFFIC"),
+			},
+			{
+				Config:      testAccComputeBackendService_externalManagedMigrationTestingPercentage(serviceName, checkName, "EXTERNAL", -1.0),
+				ExpectError: regexp.MustCompile("Must be greater than or equal to 0.0"),
+			},
+			{
+				Config:      testAccComputeBackendService_externalManagedMigrationTestingPercentage(serviceName, checkName, "EXTERNAL", 101.0),
+				ExpectError: regexp.MustCompile("Must be less than or equal to 100.0"),
+			},
+		},
+	})
+}
+
+func testAccComputeBackendService_externalManagedMigrationTestingPercentage(serviceName, checkName, loadBalancingScheme string, percentage float64) string {
+	return fmt.Sprintf(`
+resource "google_compute_backend_service" "foobar" {
+  name          = "%s"
+  health_checks = [google_compute_http_health_check.zero.self_link]
+  load_balancing_scheme = "%s"
+  external_managed_migration_state = "TEST_BY_PERCENTAGE"
+  external_managed_migration_testing_percentage = %f
+}
+
+resource "google_compute_http_health_check" "zero" {
+  name               = "%s"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}
+`, serviceName, loadBalancingScheme, percentage, checkName)
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
@@ -2730,6 +2915,41 @@ resource "google_compute_health_check" "health_check" {
   }
 }
 `, suffix, timeout, loadBalancingScheme, preference, suffix, suffix, suffix)
+}
+
+func testAccComputeBackendService_basicExternalManagedMigrationState(serviceName, checkName, loadBalancingScheme string) string {
+	return fmt.Sprintf(`
+resource "google_compute_backend_service" "foobar" {
+  name          = "%s"
+  health_checks = [google_compute_http_health_check.zero.self_link]
+  load_balancing_scheme = "%s"
+}
+
+resource "google_compute_http_health_check" "zero" {
+  name               = "%s"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}
+`, serviceName, loadBalancingScheme, checkName)
+}
+
+func testAccComputeBackendService_externalManagedMigrationState(serviceName, checkName, externalManagedEnum, loadBalancingScheme string) string {
+	return fmt.Sprintf(`
+resource "google_compute_backend_service" "foobar" {
+  name          = "%s"
+  health_checks = [google_compute_http_health_check.zero.self_link]
+  load_balancing_scheme = "%s"
+  external_managed_migration_state = "%s"
+}
+
+resource "google_compute_http_health_check" "zero" {
+  name               = "%s"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}
+`, serviceName, loadBalancingScheme, externalManagedEnum, checkName)
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
