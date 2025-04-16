@@ -282,6 +282,8 @@ func TestAccComputeNetworkFirewallSecurityProfileGroupDiffsuppress(t *testing.T)
         ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule1",
         ImportState:       true,
         ImportStateVerify: true,
+        // Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
       },
     },
   })
