@@ -109,8 +109,7 @@ func TestVCRMergeRunE(t *testing.T) {
 		{
 			name: "GITHUB_TOKEN_CLASSIC is missing in env var",
 			envVars: map[string]string{
-				"BASE_BRANCH":          "main",
-				"GITHUB_TOKEN_CLASSIC": "",
+				"BASE_BRANCH": "main",
 			},
 		},
 		{

@@ -20,6 +20,3 @@ jobs:
         run: |
           cd .ci/magician
           go test ./... -v
-        env:
-          GITHUB_TOKEN_CLASSIC: ${{ secrets.GITHUB_TOKEN }}
-
