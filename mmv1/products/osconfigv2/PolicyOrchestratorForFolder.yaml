@@ -66,7 +66,7 @@ parameters:
   - name: policyOrchestratorId
     type: String
     description: |-
-      Required. The logical identifier of the policy orchestrator, with the following
+      The logical identifier of the policy orchestrator, with the following
       restrictions:
 
       * Must contain only lowercase letters, numbers, and hyphens.
