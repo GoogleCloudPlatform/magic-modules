@@ -16,7 +16,6 @@ func TestAccComputeFutureReservation_update(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"project":       envvar.GetTestProjectFromEnv(),
-		"zone":          envvar.GetTestZoneFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -52,9 +51,8 @@ func testAccComputeFutureReservation_full(context map[string]interface{}) string
 	return acctest.Nprintf(`
 resource "google_compute_future_reservation" "gce_future_reservation" {
   provider = google-beta
-  name     = "tf_test_gce_future_reservation%{random_suffix}"
+  name     = "tf-fr%{random_suffix}"
   project  = "%{project}"
-  zone     = "%{zone}"
   auto_created_reservations_delete_time = "2025-08-03T00:00:00Z"
 
   auto_created_reservations_duration {
@@ -66,14 +64,14 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
 
   commitment_info {
     commitment_name           = "tf-test-commitment%{random_suffix}"
-    commitment_plan           = "TWELVE_MONTH"
-    previous_commitment_terms = "EXTEND_TO_FIT"
+    commitment_plan           = "ONE_YEAR"
+    previous_commitment_terms = "RETAIN"
   }
 
-  deployment_type  = "MIG"
+  deployment_type  = "STANDARD"
   description      = "Test future reservation description"
   name_prefix      = "tf-test-fr-px"
-  planning_status  = "DRAFTING"
+  planning_status  = "SUBMITTED"
   reservation_name = "tf-reservation%{random_suffix}"
   scheduling_type  = "STANDARD"
 
@@ -82,25 +80,6 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
     projects   = ["%{project}"]
   }
   specific_reservation_required = true
-  specific_sku_properties {
-    instance_properties {
-      guest_accelerators {
-        accelerator_count = 1
-        accelerator_type  = "nvidia-tesla-t4"
-      }
-
-      local_ssds {
-        disk_size_gb = 375
-        interface    = "NVME"
-      }
-
-      location_hint                      = "us-central1"
-      maintenance_freeze_duration_hours = 24
-      maintenance_interval               = "PERIODIC"
-      min_cpu_platform                   = "Intel Skylake"
-    }
-    source_instance_template = "projects/%{project}/global/instanceTemplates/example-template"
-  }
   time_window {
     start_time = "2025-08-01T00:00:00Z"
     end_time   = "2025-08-02T00:00:00Z"
@@ -119,7 +98,6 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
 	provider = google-beta
 	name     = "tf-test-fr%{random_suffix}"
 	project  = "%{project}"
-	zone     = "%{zone}"
   
 	auto_created_reservations_delete_time = "2025-08-04T00:00:00Z"
   
@@ -136,7 +114,7 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
 	  previous_commitment_terms = "RETAIN"
 	}
   
-	deployment_type  = "MIG"
+	deployment_type  = "STANDARD"
 	description      = "Updated test future reservation description"
 	name_prefix      = "tf-test-fr-up"
 	planning_status  = "SUBMITTED"
@@ -148,24 +126,6 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
 	  projects   = ["%{project}"]
 	}
 	specific_reservation_required = false
-	specific_sku_properties {
-    	instance_properties {
-      		guest_accelerators {
-        		accelerator_count = 2
-        		accelerator_type  = "nvidia-tesla-v100"
-      		}
-
-      		local_ssds {
-        		disk_size_gb = 375
-        		interface    = "SCSI"
-      		}
-      		location_hint                      = "us-central1-b"
-      		maintenance_freeze_duration_hours = 12
-      		maintenance_interval               = "PERIODIC"
-      		min_cpu_platform                   = "Intel Cascade Lake"
-    	}
-    	source_instance_template = "projects/%{project}/global/instanceTemplates/example-template-update"
-  	}
 	time_window {
 		start_time = "2025-08-01T00:00:00Z"
 		end_time   = "2025-08-03T00:00:00Z"
