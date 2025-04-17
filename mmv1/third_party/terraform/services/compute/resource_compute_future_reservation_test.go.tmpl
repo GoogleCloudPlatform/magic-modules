@@ -64,16 +64,10 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
 
   commitment_info {
     commitment_name           = "tf-test-commitment%{random_suffix}"
-    commitment_plan           = "ONE_YEAR"
-    previous_commitment_terms = "RETAIN"
   }
-
-  deployment_type  = "STANDARD"
   description      = "Test future reservation description"
   name_prefix      = "tf-test-fr-px"
-  planning_status  = "SUBMITTED"
   reservation_name = "tf-reservation%{random_suffix}"
-  scheduling_type  = "STANDARD"
 
   share_settings {
     share_type = "SPECIFIC_PROJECTS"
@@ -96,7 +90,7 @@ func testAccComputeFutureReservation_update(context map[string]interface{}) stri
 	return acctest.Nprintf(`
 resource "google_compute_future_reservation" "gce_future_reservation" {
 	provider = google-beta
-	name     = "tf-test-fr%{random_suffix}"
+	name     = "tf-fr%{random_suffix}"
 	project  = "%{project}"
   
 	auto_created_reservations_delete_time = "2025-08-04T00:00:00Z"
@@ -110,16 +104,12 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
   
 	commitment_info {
 	  commitment_name           = "tf-test-commitment-update%{random_suffix}"
-	  commitment_plan           = "ONE_YEAR"
-	  previous_commitment_terms = "RETAIN"
 	}
   
-	deployment_type  = "STANDARD"
 	description      = "Updated test future reservation description"
 	name_prefix      = "tf-test-fr-up"
 	planning_status  = "SUBMITTED"
 	reservation_name = "tf-reservation-up%{random_suffix}"
-	scheduling_type  = "STANDARD"
   
 	share_settings {
 	  share_type = "SPECIFIC_PROJECTS"
