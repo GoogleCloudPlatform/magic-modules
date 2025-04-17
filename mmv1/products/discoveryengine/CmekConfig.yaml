@@ -52,7 +52,7 @@ examples:
     vars:
       cmek_config_id: 'cmek-config-id'
     ignore_read_extra:
-    - 'project'
+      - 'project'
 parameters:
   - name: 'location'
     type: String
