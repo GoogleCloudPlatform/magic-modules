@@ -76,6 +76,20 @@ examples:
     exclude_docs: true
     # Resource creation race
     skip_vcr: true
+  - name: 'apigee_organization_cloud_basic_data_residency'
+    exclude_test: true
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test.
+  - name: 'apigee_organization_cloud_basic_data_residency_test'
+    primary_resource_id: 'org'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    ignore_read_extra:
+      - 'properties'
+    exclude_docs: true
+    # Resource creation race
+    skip_vcr: true
   - name: 'apigee_organization_cloud_full'
     exclude_test: true
   # This is a more verbose version of the above that creates all
