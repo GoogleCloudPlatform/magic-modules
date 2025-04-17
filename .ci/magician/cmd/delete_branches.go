@@ -98,7 +98,7 @@ var repoList = []string{
 	"terraform-provider-google",
 	"terraform-provider-google-beta",
 	"terraform-google-conversion",
-	"tf-oics",
+	"docs-examples",
 }
 
 func deleteBranches(prNumber, githubToken string, runner source.Runner) error {
