@@ -43,11 +43,7 @@ func testAccDnsPolicy_privateUpdate(suffix, forwarding, first_nameserver, second
 resource "google_dns_policy" "example-policy" {
   name                      = "example-policy-%s"
   enable_inbound_forwarding = %s
-  dns64_config: {
-    scope: {
-      all_queries: %s,
-    },
-  },
+  enable_dns64_all_queries = %s
   alternative_name_server_config {
     target_name_servers {
       ipv4_address = "%s"
