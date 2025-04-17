@@ -1,6 +1,7 @@
 resource "google_discovery_engine_cmek_config" "basic" {
-  location            = "global"
+  location            = "us"
   cmek_config_id      = "{{index $.Vars "cmek_config_id"}}"
-  kms_key             = "projects/1067888929963/locations/global/keyRings/key-ring-1/cryptoKeys/crypto-key-1"
-  kms_key_version     = "projects/1067888929963/locations/global/keyRings/key-ring-1/cryptoKeys/crypto-key-1/cryptoKeyVersions/1"
+  kms_key             = "projects/1067888929963/locations/us/keyRings/key-ring-1/cryptoKeys/crypto-key-1"
+  kms_key_version     = "projects/1067888929963/locations/us/keyRings/key-ring-1/cryptoKeys/crypto-key-1/cryptoKeyVersions/1"
+  set_default         = true
 }

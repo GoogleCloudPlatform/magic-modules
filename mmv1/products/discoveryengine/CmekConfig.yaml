@@ -57,8 +57,8 @@ parameters:
   - name: 'location'
     type: String
     description: |
-      The geographic location where the data store should reside. The value can
-      only be one of "global", "us" and "eu".
+      The geographic location where the CMEK config should reside. The value can
+      only be one of "us" and "eu".
     url_param_only: true
     required: true
     immutable: true
