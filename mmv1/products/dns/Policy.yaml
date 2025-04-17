@@ -121,6 +121,14 @@ properties:
     send_empty_value: true
     update_url: 'projects/{{project}}/policies/{{name}}'
     update_verb: 'PATCH'
+  - name: 'enableDns64AllQueries'
+    type: Boolean
+    description: |
+      Specifies whether to allow networks bound to this policy to use DNS64
+      for IPv6-only VM instances.
+    send_empty_value: true
+    update_url: 'projects/{{project}}/policies/{{name}}'
+    update_verb: 'PATCH'
   - name: 'name'
     type: String
     description: |
