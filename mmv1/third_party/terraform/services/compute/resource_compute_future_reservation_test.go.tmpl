@@ -15,6 +15,8 @@ func TestAccComputeFutureReservation_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"zone":          envvar.GetTestZoneFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -86,7 +88,7 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
         accelerator_count = 1
         accelerator_type  = "nvidia-tesla-t4"
       }
-	  
+
       local_ssds {
         disk_size_gb = 375
         interface    = "NVME"
