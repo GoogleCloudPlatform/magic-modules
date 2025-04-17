@@ -140,7 +140,7 @@ func (d *GooglePubsubLiteReservationFWResource) Create(ctx context.Context, req 
 	schemaDefaultVals.Project = data.Project
 	schemaDefaultVals.Region = data.Region
 
-	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, d.providerConfig, "{{PubsubLiteBasePath}}projects/{{project}}/locations/{{region}}/reservations/{{name}}")
+	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, d.providerConfig, "{{PubsubLiteBasePath}}projects/{{project}}/locations/{{region}}/reservations?reservationId={{name}}")
 	if resp.Diagnostics.HasError() {
 		return
 	}
