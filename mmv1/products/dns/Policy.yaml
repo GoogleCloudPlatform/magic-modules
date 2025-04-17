@@ -123,6 +123,7 @@ properties:
     update_verb: 'PATCH'
   - name: 'enableDns64AllQueries'
     type: Boolean
+    custom_expand: 'templates/terraform/custom_expand/dns_policy_enable_dns64_all_queries.go.tmpl'
     description: |
       Specifies whether to allow networks bound to this policy to use DNS64
       for IPv6-only VM instances.
