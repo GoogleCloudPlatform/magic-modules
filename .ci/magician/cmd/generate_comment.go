@@ -16,6 +16,7 @@
 package cmd
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -34,6 +35,9 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 
 	"github.com/spf13/cobra"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/parser"
+	"go.abhg.dev/goldmark/frontmatter"
 	"golang.org/x/exp/maps"
 
 	_ "embed"
@@ -329,6 +333,11 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 				errors[repo.Title] = append(errors[repo.Title], "The missing doc detector failed to run.")
 			}
 			data.MissingDocs = missingDocs
+
+			errStrs := checkDocumentFrontmatter(repo)
+			if len(errStrs) > 0 {
+				errors[repo.Title] = append(errors[repo.Title], errStrs...)
+			}
 		}
 
 		simpleDiff, err := computeAffectedResources(diffProcessorPath, rnr, repo)
@@ -635,4 +644,38 @@ func pathChanged(path string, changedFiles []string) bool {
 
 func init() {
 	rootCmd.AddCommand(generateCommentCmd)
+}
+
+// checkDocumentFrontmatter checks changed markdown files' frontmatter
+// structure in the repo and returns error strings when applicable.
+func checkDocumentFrontmatter(repo source.Repo) []string {
+	var errs []string
+	for _, f := range repo.ChangedFiles {
+		if !strings.HasSuffix(f, ".markdown") {
+			continue
+		}
+		src, err := os.ReadFile(filepath.Join(repo.Path, f))
+		if err != nil {
+			errs = append(errs, "Error reading file "+f)
+			continue
+		}
+
+		md := goldmark.New(
+			goldmark.WithExtensions(&frontmatter.Extender{}),
+		)
+
+		ctx := parser.NewContext()
+		var buff bytes.Buffer
+
+		err = md.Convert(src, &buff, parser.WithContext(ctx))
+		if err != nil {
+			errs = append(errs, "Error parsing file "+f)
+			continue
+		}
+		if d := frontmatter.Get(ctx); d == nil {
+			errs = append(errs, fmt.Sprintf("No frontmatter found in file %s. This is usually due to an incorrect structure in the frontmatter.", f))
+		}
+
+	}
+	return errs
 }
