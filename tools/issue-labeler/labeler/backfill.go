@@ -54,7 +54,7 @@ func GetIssues(repository, since string) ([]*github.Issue, error) {
 	allIssues = append(allIssues, issues...)
 
 	for {
-		// use link headers instead of page parameter based pagination as 
+		// use link headers instead of page parameter based pagination as
 		// it is not supported for large datasets
 		nextURL := getNextPageURL(resp.Response)
 		if nextURL == "" {
