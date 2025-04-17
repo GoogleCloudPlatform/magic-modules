@@ -114,6 +114,9 @@ func deleteBranches(prNumber, githubToken string, runner source.Runner) error {
 			}, nil)
 
 			if err != nil {
+				if strings.Contains(err.Error(), "does not exist") {
+					continue
+				}
 				return err
 			}
 		}
