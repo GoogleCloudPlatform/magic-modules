@@ -17,5 +17,7 @@ display_name: 'Identity-Aware Proxy'
 versions:
   - name: 'ga'
     base_url: 'https://iap.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://iap.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
