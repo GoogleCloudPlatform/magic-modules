@@ -1,59 +1,53 @@
 
 // InverseTransformAspects converts the "aspects" map back to a slice of maps,
 // re-inserting the "aspectKey". Modifies obj in-place.
-// WARNING: Will PANIC if assumptions are incorrect.
-
 func InverseTransformAspects(obj map[string]interface{}) {
-    originalMap := obj["aspects"].(map[string]interface{})
-    newSlice := make([]interface{}, 0, len(originalMap))
+	originalMap := obj["aspects"].(map[string]interface{})
+	newSlice := make([]interface{}, 0, len(originalMap))
 
-    for key, value := range originalMap {                 
-	innerMap := value.(map[string]interface{})        
-	innerMapCopy := make(map[string]interface{}, len(innerMap)+1) 
+	for key, value := range originalMap {
+		innerMap := value.(map[string]interface{})
+		innerMapCopy := make(map[string]interface{}, len(innerMap)+1)
 
-	for k, v := range innerMap {
-	    innerMapCopy[k] = v
+		for k, v := range innerMap {
+			innerMapCopy[k] = v
+		}
+		innerMapCopy["aspectKey"] = key
+
+		newSlice = append(newSlice, innerMapCopy)
 	}
-	innerMapCopy["aspectKey"] = key
-
-	newSlice = append(newSlice, innerMapCopy)
-    }
-    obj["aspects"] = newSlice
+	obj["aspects"] = newSlice
 }
-
 
 // TransformAspects concisely transforms the "aspects" slice within obj into a map.
 // It assumes obj["aspects"] exists and is a []interface{} containing
 // map[string]interface{} elements, each with a string "aspectKey".
 // Modifies obj in-place.
-// WARNING: Will PANIC if assumptions are incorrect.
-
 func TransformAspects(obj map[string]interface{}) {
-    originalSlice := obj["aspects"].([]interface{})
-    newMap := make(map[string]interface{}, len(originalSlice))
-    for _, item := range originalSlice {
-	aspectMap := item.(map[string]interface{})
-	key := aspectMap["aspectKey"].(string)
-	valueCopy := make(map[string]interface{}, len(aspectMap)-1)
-	for k, v := range aspectMap {
-	    if k != "aspectKey" {
-		valueCopy[k] = v
-	    }
+	originalSlice := obj["aspects"].([]interface{})
+	newMap := make(map[string]interface{}, len(originalSlice))
+	for _, item := range originalSlice {
+		aspectMap := item.(map[string]interface{})
+		key := aspectMap["aspectKey"].(string)
+		valueCopy := make(map[string]interface{}, len(aspectMap)-1)
+		for k, v := range aspectMap {
+			if k != "aspectKey" {
+				valueCopy[k] = v
+			}
+		}
+		newMap[key] = valueCopy
 	}
-	newMap[key] = valueCopy
-    }
-    obj["aspects"] = newMap
+	obj["aspects"] = newMap
 }
 
-
-// Suppress diffs in aspectType name when the value read from api
-// has the project ID instead of the project number
-func AspectTypeProjectIDDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
-  var a2, b2 string
-  re := regexp.MustCompile("^[^\\.]+\\.")
-  reN := regexp.MustCompile("^\\d+\\.")
-  replacement := []byte("**equal**")
-  a2 = string(reN.ReplaceAll([]byte(old), replacement))
-  b2 = string(re.ReplaceAll([]byte(new), replacement))
-  return a2 == b2
+// Suppress diffs when the value read from api
+// has the project number instead of the project name
+func AspectTypeProjectNumberDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
+	var a2, b2 string
+	re := regexp.MustCompile("^\\d+\\.")
+	reN := regexp.MustCompile("^[^\\.]+\\.")
+	replacement := []byte("projects/equal")
+	a2 = string(re.ReplaceAll([]byte(old), replacement))
+	b2 = string(reN.ReplaceAll([]byte(new), replacement))
+	return a2 == b2
 }

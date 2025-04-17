@@ -57,6 +57,8 @@ examples:
   - name: 'dataplex_entry_full'
     primary_resource_id: 'test_entry_full'
     primary_resource_name: 'fmt.Sprintf("tf-test-entry%s", context["random_suffix"])'
+    ignore_read_extra:
+      - 'aspects'
     vars:
       entry_id: 'entry-full'
       entry_group_name: 'entry-group-full'
@@ -127,7 +129,7 @@ properties:
     properties:
     - name: "aspectKey"
       type: String
-      diff_suppress_func: 'AspectTypeProjectIDDiffSuppress'
+      diff_suppress_func: 'AspectTypeProjectNumberDiffSuppress'
       required: true
       description: |
         Depending on how the aspect is attached to the entry, the format of the aspect key can be one of the following:
