@@ -440,9 +440,9 @@ The optional `settings.ip_configuration.psc_config` sublist supports:
 
 * The optional `psc_config.psc_auto_connections` subblock - (Optional) A comma-separated list of networks or a comma-separated list of network-project pairs. Each project in this list is represented by a project number (numeric) or by a project ID (alphanumeric). This allows Private Service Connect connections to be created automatically for the specified networks.
 
-* `consumer_network` - "The consumer network of this consumer endpoint. This must be a resource path that includes both the host project and the network name. For example, `projects/project1/global/networks/network1`. The consumer host project of this network might be different from the consumer service project."
+* `consumer_network` - The consumer network of this consumer endpoint. This must be a resource path that includes both the host project and the network name. For example, `projects/project1/global/networks/network1`. The consumer host project of this network might be different from the consumer service project.
 
-* `consumer_service_project_id` - (Optional) The project ID of consumer service project of this consumer endpoint.
+* `consumer_service_project_id` -  The project ID of consumer service project of this consumer endpoint.
 
 The optional `settings.location_preference` subblock supports:
 
