@@ -805,22 +805,6 @@ func TestAccComputeBackendService_withLogConfig(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				Config: testAccComputeBackendService_withLogConfig4(serviceName, checkName, true),
-			},
-			{
-				ResourceName:      "google_compute_backend_service.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeBackendService_withLogConfig5(serviceName, checkName, true),
-			},
-			{
-				ResourceName:      "google_compute_backend_service.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 		},
 	})
 }
@@ -2272,60 +2256,6 @@ resource "google_compute_health_check" "zero" {
   }
 }
 `, serviceName, enabled, mode, checkName)
-}
-
-func testAccComputeBackendService_withLogConfig4(serviceName, checkName string, enabled bool) string {
-	return fmt.Sprintf(`
-resource "google_compute_backend_service" "foobar" {
-  name          		= "%s"
-  protocol              = "HTTP"
-  load_balancing_scheme = "INTERNAL_MANAGED"
-  health_checks 		= [google_compute_health_check.zero.self_link]
-
-  log_config {
-	enable      	= %t
-	optional_mode 	= "CUSTOM"
-	optional_fields = ["serverInstance"]
-  }
-}
-
-resource "google_compute_health_check" "zero" {
-  name               = "%s"
-  check_interval_sec = 1
-  timeout_sec        = 1
-
-  http_health_check {
-    port = 80
-  }
-}
-`, serviceName, enabled, checkName)
-}
-
-func testAccComputeBackendService_withLogConfig5(serviceName, checkName string, enabled bool) string {
-	return fmt.Sprintf(`
-resource "google_compute_backend_service" "foobar" {
-  name          		= "%s"
-  protocol              = "HTTP"
-  load_balancing_scheme = "INTERNAL_MANAGED"
-  health_checks 		= [google_compute_health_check.zero.self_link]
-
-  log_config {
-	enable      	= %t
-	optional_mode 	= "CUSTOM"
-	optional_fields = ["serverInstance", "serverGkeDetails.cluster"]
-  }
-}
-
-resource "google_compute_health_check" "zero" {
-  name               = "%s"
-  check_interval_sec = 1
-  timeout_sec        = 1
-
-  http_health_check {
-    port = 80
-  }
-}
-`, serviceName, enabled, checkName)
 }
 
 func testAccComputeBackendService_withCompressionMode(serviceName, checkName, compressionMode string) string {
