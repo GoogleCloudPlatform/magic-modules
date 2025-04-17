@@ -19,7 +19,7 @@ if len(nameParts) == 4 {
     return nil, fmt.Errorf(
         "Saw %s when the name is expected to have shape %s",
         d.Get("name"),
-        "organizations/{{"{{"}}org_name{{"}}"}}/profile_id/{{"{{"}}name{{"}}"}}")
+        "organizations/{{"{{"}}org_name{{"}}"}}/securityProfileV2/{{"{{"}}name{{"}}"}}")
 }
 
 // Replace import id for the resource id
