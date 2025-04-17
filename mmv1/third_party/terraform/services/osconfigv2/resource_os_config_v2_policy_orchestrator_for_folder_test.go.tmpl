@@ -111,10 +111,18 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
     orchestrated_resource {
         id = "tf-test-test-orchestrated-resource-folder%{random_suffix}"
         os_policy_assignment_v1_payload {
+            description = "ospa for create"
+            name = "ospa-1"
             os_policies {
                 id = "tf-test-test-os-policy-folder%{random_suffix}"
-                mode = "VALIDATION"
+                description = "policy for create"
+                allow_no_resource_group_match = true
+                mode = "ENFORCEMENT"
                 resource_groups {
+                    inventory_filters {
+                        os_short_name = "windows-10"
+                        os_version    = "10.0.19044"
+                    }
                     resources {
                         id = "resource-tf"
                         file {
@@ -126,8 +134,20 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
                 }
             }
             instance_filter {
+                all = false
                 inventories {
                     os_short_name = "windows-10"
+                    os_version = "10.0.19044"
+                }
+                exclusion_labels {
+                    labels = {
+                        label1 = "test-exclusion-label-1"
+                    }
+                }
+                inclusion_labels {
+                    labels = {
+                        label1 = "test-inclusion-label-1"
+                    }
                 }
             }
             rollout {
@@ -145,6 +165,9 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
         selectors {
             location_selector {
                 included_locations = ["%{zone}"]
+            }
+            resource_hierarchy_selector {
+                included_folders  = [google_folder.my_folder.folder_id]
             }
         }
     }
@@ -171,28 +194,71 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
     orchestrated_resource {
         id = "tf-test-test-orchestrated-resource-folder%{random_suffix}"
         os_policy_assignment_v1_payload {
+            description = "ospa for update"
+            name = "ospa-2"
             os_policies {
                 id = "tf-test-test-os-policy-folder%{random_suffix}"
-                mode = "VALIDATION"
+                description = "policy for update"
+                allow_no_resource_group_match = false
+                mode = "ENFORCEMENT"
                 resource_groups {
+                    inventory_filters {
+                        os_short_name = "debian"
+                        os_version    = "11"
+                    }
                     resources {
                         id = "resource-tf"
-                        file {
-                            content = "file-content-tf-2"
-                            path = "file-path-tf-2"
-                            state = "PRESENT"
+                        exec {
+                            enforce {
+                                args             = ["--arg1", "--arg2"]
+                                interpreter      = "SHELL"
+                                output_file_path = "/tmp/enforce_output.txt"
+                                file {
+                                    allow_insecure = false
+                                    gcs {
+                                        bucket     = "my-bucket"
+                                        generation = 1
+                                        object     = "scripts/enforce.sh"
+                                    }
+                                }
+                            }
+                            validate {
+                                args             = ["--validate"]
+                                interpreter      = "POWERSHELL"
+                                output_file_path = "C:\\validate_out.txt"
+                                file {
+                                      allow_insecure = false
+                                      gcs {
+                                          bucket     = "my-bucket"
+                                          generation = 2
+                                          object     = "scripts/validate.ps1"
+                                      }
+                                }
+                            }
                         }
                     }
                 }
             }
             instance_filter {
+                all = false
                 inventories {
-                    os_short_name = "ubuntu"
+                    os_short_name = "debian"
+                    os_version = "11"
+                }
+                exclusion_labels {
+                    labels = {
+                        label1 = "test-exclusion-label-2"
+                    }
+                }
+                inclusion_labels {
+                    labels = {
+                        label1 = "test-inclusion-label-2"
+                    }
                 }
             }
             rollout {
                 disruption_budget {
-                    percent = 50
+                    fixed = 1
                 }
                 min_wait_duration = "120s"
             }
@@ -205,6 +271,9 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
         selectors {
             location_selector {
                 included_locations = ["%{zone}"]
+            }
+            resource_hierarchy_selector {
+                included_folders  = [google_folder.my_folder.folder_id]
             }
         }
     }

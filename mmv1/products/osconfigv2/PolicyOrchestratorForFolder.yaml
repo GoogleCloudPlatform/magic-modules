@@ -978,6 +978,7 @@ properties:
             description: |-
               The etag for this OS policy assignment.
               If this is provided on update, it must match the server's etag.
+            output: true
           - name: rolloutState
             type: String
             description: |-
@@ -1059,12 +1060,14 @@ properties:
 
               You can find out more about this error model and how to work with it in the
               [API Design Guide](https://cloud.google.com/apis/design/errors).
+            output: true
             properties:
               - name: details
                 type: Array
                 description: |-
                   A list of messages that carry the error details.  There is a common set of
                   message types for APIs to use.
+                output: true
                 item_type:
                   type: NestedObject
                   properties:
@@ -1072,17 +1075,21 @@ properties:
                       type: String
                       description: |-
                         A URL/resource name that uniquely identifies the type of the serialized protocol buffer message
+                      output: true
                     - name: value
                       type: String
+                      output: true
               - name: code
                 type: Integer
                 description: The status code, which should be an enum value of google.rpc.Code.
+                output: true
               - name: message
                 type: String
                 description: |-
                   A developer-facing error message, which should be in English. Any
                   user-facing error message should be localized and sent in the
                   google.rpc.Status.details field, or localized by the client.
+                output: true
           - name: state
             type: String
             description: |-
@@ -1103,6 +1110,7 @@ properties:
       - name: previousIterationState
         type: NestedObject
         description: Describes the state of a single iteration of the orchestrator.
+        output: true
         properties:
           - name: performedActions
             type: String
@@ -1132,21 +1140,25 @@ properties:
 
               You can find out more about this error model and how to work with it in the
               [API Design Guide](https://cloud.google.com/apis/design/errors).
+            output: true
             properties:
               - name: code
                 type: Integer
                 description: The status code, which should be an enum value of google.rpc.Code.
+                output: true
               - name: message
                 type: String
                 description: |-
                   A developer-facing error message, which should be in English. Any
                   user-facing error message should be localized and sent in the
                   google.rpc.Status.details field, or localized by the client.
+                output: true
               - name: details
                 type: Array
                 description: |-
                   A list of messages that carry the error details.  There is a common set of
                   message types for APIs to use.
+                output: true
                 item_type:
                   type: NestedObject
                   properties:
@@ -1154,8 +1166,10 @@ properties:
                       type: String
                       description: |-
                         A URL/resource name that uniquely identifies the type of the serialized protocol buffer message
+                      output: true
                     - name: value
                       type: String
+                      output: true
           - name: state
             type: String
             description: |-
