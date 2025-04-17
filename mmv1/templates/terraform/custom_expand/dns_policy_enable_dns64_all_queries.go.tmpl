@@ -1,0 +1,13 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+  if v == nil || !v.(bool) {
+    return nil, nil
+  }
+  transformed = {
+    dns64_config: {
+    scope: {
+      all_queries: v.(string),
+      },
+    }
+  }
+  return transformed, nil
+}
