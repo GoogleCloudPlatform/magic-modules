@@ -166,8 +166,10 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
             location_selector {
                 included_locations = ["%{zone}"]
             }
+        }
+        selectors {
             resource_hierarchy_selector {
-                included_folders  = [google_folder.my_folder.folder_id]
+                included_folders  = ["folders/${google_folder.my_folder.folder_id}"]
             }
         }
     }
@@ -272,8 +274,10 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
             location_selector {
                 included_locations = ["%{zone}"]
             }
+        }
+        selectors {
             resource_hierarchy_selector {
-                included_folders  = [google_folder.my_folder.folder_id]
+                included_folders  = ["folders/${google_folder.my_folder.folder_id}"]
             }
         }
     }
