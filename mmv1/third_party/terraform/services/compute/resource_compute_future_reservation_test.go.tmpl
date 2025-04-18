@@ -60,7 +60,7 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
   planning_status = "SUBMITTED"
   reservation_mode = "DEFAULT"
   commitment_info {
-    commitment_name           = "tf-test-commitment%{random_suffix}"
+    commitment_name = "tf-test-commitment%{random_suffix}"
 	commitment_plan = "TWELVE_MONTH"
   }
   description      = "Test future reservation description"
@@ -75,6 +75,12 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
   time_window {
     start_time = "2025-08-01T00:00:00Z"
     end_time   = "2025-08-02T00:00:00Z"
+  }
+  specific_sku_properties {
+    total_count = "1"
+    instance_properties {
+      machine_type = "n1-standard-1"
+    }
   }
 }
 `, context)
@@ -94,7 +100,7 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
 	planning_status = "DRAFT"
 	reservation_mode = "CALENDAR"
 	commitment_info {
-	  commitment_name           = "tf-test-commitment-update%{random_suffix}"
+	  commitment_name = "tf-test-commitment-update%{random_suffix}"
 	  commitment_plan = "TWELVE_MONTH"
 	}
 	description      = "Updated test future reservation description"
@@ -109,7 +115,13 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
 	time_window {
 		start_time = "2025-08-01T00:00:00Z"
 		end_time   = "2025-08-03T00:00:00Z"
-	  }
+	}
+	specific_sku_properties {
+    total_count = "2"
+    instance_properties {
+      machine_type = "n1-standard-2"
+    }
+  }
 }
 `, context)
 }
