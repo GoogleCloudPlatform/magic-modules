@@ -175,6 +175,20 @@ properties:
         type: Enum
         description: |
           Current state of this Future Reservation
+        enum_values:
+          - 'APPROVED'
+          - 'CANCELLED'
+          - 'COMMITTED'
+          - 'DECLINED'
+          - 'DRAFTING'
+          - 'FAILED'
+          - 'FAILED_PARTIALLY_FULFILLED'
+          - 'FULFILLED'
+          - 'PENDING_AMENDMENT_APPROVAL'
+          - 'PENDING_APPROVAL'
+          - 'PROCUREMENT_STATUS_UNSPECIFIED'
+          - 'PROCURING'
+          - 'PROVISIONING'
       - name: 'lockTime'
         type: String
         description: |
@@ -387,6 +401,10 @@ properties:
     type: Enum
     description: |
       Planning state before being submitted for evaluation
+    enum_values:
+      - 'DRAFT'
+      - 'PLANNING_STATUS_UNSPECIFIED'
+      - 'SUBMITTED'
   - name: 'autoDeleteAutoCreatedReservations'
     type: Boolean
     description: |
@@ -403,6 +421,10 @@ properties:
     type: Enum
     description: |
       Type of the deployment requested as part of future reservation.
+    enum_values:
+      - 'DENSE'
+      - 'DEPLOYMENT_TYPE_UNSPECIFIED'
+      - 'FLEXIBLE'
   - name: 'reservationMode'
     type: Enum
     description: |
@@ -420,6 +442,10 @@ properties:
         type: Enum
         description: |
           Indicates if a Commitment needs to be created as part of FR delivery. If this field is not present, then no commitment needs to be created.
+        enum_values:
+          - 'INVALID'
+          - 'THIRTY_SIX_MONTH'
+          - 'TWELVE_MONTH'
       - name: 'commitmentName'
         type: String
         description: |
@@ -432,11 +458,14 @@ properties:
     type: Enum
     description: |
       Maintenance information for this reservation
+    enum_values:
+      - 'GROUPED'
+      - 'GROUP_MAINTENANCE_TYPE_UNSPECIFIED'
+      - 'INDEPENDENT'
   - name: 'specificSkuProperties'
     type: NestedObject
     description: |
       Future Reservation configuration to indicate instance properties and total count.
-    output: true
     properties:
       - name: 'instanceProperties'
         type: NestedObject
