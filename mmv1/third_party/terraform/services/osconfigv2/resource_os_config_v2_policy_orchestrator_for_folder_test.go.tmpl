@@ -35,6 +35,11 @@ func TestAccOSConfigV2PolicyOrchestratorForFolder_basic(t *testing.T) {
 			},
 			{
 				Config: testAccOSConfigV2PolicyOrchestratorForFolder_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_os_config_v2_policy_orchestrator_for_folder.policy_orchestrator_for_folder", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_os_config_v2_policy_orchestrator_for_folder.policy_orchestrator_for_folder",
