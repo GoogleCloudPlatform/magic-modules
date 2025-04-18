@@ -56,6 +56,8 @@ virtual_fields:
     description: |
       Specifies whether to allow networks bound to this policy to use DNS64
       for IPv6-only VM instances.
+    custom_code:
+      pre_create: 'templates/terraform/pre_create/dns_policy_enable_dns64_all_queries.go.tmpl'
 parameters:
 properties:
   - name: 'alternativeNameServerConfig'
