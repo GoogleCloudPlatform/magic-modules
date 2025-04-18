@@ -65,8 +65,6 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
   }
   description      = "Test future reservation description"
   name_prefix      = "tf-test-fr-px"
-  reservation_name = "tf-reservation%{random_suffix}"
-
   share_settings {
     share_type = "SPECIFIC_PROJECTS"
     projects   = ["%{project}"]
@@ -92,7 +90,6 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
 	provider = google-beta
 	name     = "tf-fr%{random_suffix}"
 	project  = "%{project}"
-  
 	auto_created_reservations_delete_time = "2025-08-04T00:00:00Z"
 	auto_delete_auto_created_reservations = false
 	deployment_type = "FLEXIBLE"
@@ -105,7 +102,6 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
 	}
 	description      = "Updated test future reservation description"
 	name_prefix      = "tf-test-fr-up"
-	reservation_name = "tf-reservation-up%{random_suffix}"
   
 	share_settings {
 	  share_type = "SPECIFIC_PROJECTS"
