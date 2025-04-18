@@ -403,6 +403,14 @@ properties:
     type: Enum
     description: |
       Type of the deployment requested as part of future reservation.
+  - name: 'reservationMode'
+  type: Enum
+  description: |
+    The reservation mode which determines reservation-termination behavior and expected pricing.
+  enum_values:
+    - 'CALENDAR'
+    - 'DEFAULT'
+    - 'RESERVATION_MODE_UNSPECIFIED'
   - name: 'commitmentInfo'
     type: NestedObject
     description: |

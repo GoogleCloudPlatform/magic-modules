@@ -11,4 +11,12 @@ resource "google_compute_future_reservation" "{{$.PrimaryResourceId}}" {
   share_settings {
     share_type = "LOCAL"
   }
+
+  specific_sku_properties {
+    total_count = "1"
+
+    instance_properties {
+      machine_type = "n1-standard-1"
+    }
+  }
 }
