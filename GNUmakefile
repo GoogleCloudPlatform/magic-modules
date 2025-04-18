@@ -82,7 +82,6 @@ tpgtools: validate_environment serialize
 	@cd tpgtools;\
 		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
 
-# Proposed rewrite for the clean-provider target
 clean-provider: validate_environment
 	@if [ -n "$(PRODUCT)" ]; then \
 		printf "\n\e[1;33mWARNING:\e[0m Skipping clean-provider step because PRODUCT ('$(PRODUCT)') is set.\n"; \
