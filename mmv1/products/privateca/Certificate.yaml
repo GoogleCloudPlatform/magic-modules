@@ -21,8 +21,8 @@ description: |
   `tier = "ENTERPRISE"`
 references:
   guides:
-    'Official Documentation': 'https://cloud.google.com/certificate-authority-service'
-  api: 'https://cloud.google.com/certificate-authority-service/docs/reference/rest'
+    'Certificate Authority Service Overview': 'https://cloud.google.com/certificate-authority-service/docs/overview'
+  api: 'https://cloud.google.com/certificate-authority-service/docs/reference/rest/v1/projects.locations.caPools.certificates'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates'
 create_url: 'projects/{{project}}/locations/{{location}}/caPools/{{pool}}/certificates?certificateId={{name}}'
