@@ -1,6 +1,6 @@
 val := d.Get("enableDns64AllQueries").(bool)
 if  val == nil {
-	return nil
+	val = false
 }
 dns64Config := make(map[string]interface{})
 scope := make(map[string]interface{})
