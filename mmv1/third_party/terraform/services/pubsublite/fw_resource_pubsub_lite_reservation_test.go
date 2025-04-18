@@ -20,6 +20,9 @@ func TestAccResourceFWPubsubLiteReservation_basic(t *testing.T) {
 			{
 				Config: testAccResourceFWPubsubLiteReservation_basic(context),
 			},
+			{
+				Config: testAccResourceFWPubsubLiteReservation_upgrade(context),
+			},
 		},
 	})
 }
@@ -31,6 +34,20 @@ resource "google_fwprovider_pubsub_lite_reservation" "basic" {
   region = "us-central1"
   project = data.google_project.project.number
   throughput_capacity = 2
+}
+
+data "google_project" "project" {
+}
+`, context)
+}
+
+func testAccResourceFWPubsubLiteReservation_upgrade(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_fwprovider_pubsub_lite_reservation" "basic" {
+  name = "tf-test-example-reservation%{random_suffix}"
+  region = "us-central1"
+  project = data.google_project.project.number
+  throughput_capacity = 3
 }
 
 data "google_project" "project" {
