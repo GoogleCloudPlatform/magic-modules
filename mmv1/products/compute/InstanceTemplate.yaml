@@ -4,6 +4,10 @@ kind: 'compute#instanceTemplate'
 description: |
   Resource that enables a convenient way to save a virtual machine (VM) instance's configuration
   that includes all of its properties and allows you to create a new instance from it.
+references:
+  guides:
+    'Creating Instance Templates': 'https://cloud.google.com/compute/docs/instance-templates/create-instance-templates'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/instanceTemplates'
 base_url: 'projects/{{project}}/global/instanceTemplates'
 has_self_link: true
 exclude_resource: true
