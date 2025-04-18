@@ -50,6 +50,12 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
+virtual_fields:
+  - name: 'enableDns64AllQueries'
+    type: Boolean
+    description: |
+      Specifies whether to allow networks bound to this policy to use DNS64
+      for IPv6-only VM instances.
 parameters:
 properties:
   - name: 'alternativeNameServerConfig'
@@ -118,16 +124,6 @@ properties:
     description: |
       Controls whether logging is enabled for the networks bound to this policy.
       Defaults to no logging if not set.
-    send_empty_value: true
-    update_url: 'projects/{{project}}/policies/{{name}}'
-    update_verb: 'PATCH'
-  - name: 'enableDns64AllQueries'
-    type: Boolean
-    custom_expand: 'templates/terraform/custom_expand/dns_policy_enable_dns64_all_queries.go.tmpl'
-    custom_flatten: 'templates/terraform/custom_flatten/dns_policy_enable_dns64_all_queries.go.tmpl'
-    description: |
-      Specifies whether to allow networks bound to this policy to use DNS64
-      for IPv6-only VM instances.
     send_empty_value: true
     update_url: 'projects/{{project}}/policies/{{name}}'
     update_verb: 'PATCH'
