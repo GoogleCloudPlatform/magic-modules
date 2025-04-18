@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"regexp"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/golang/glog"
@@ -56,40 +56,51 @@ func GetIssues(repository, since string) ([]*github.Issue, error) {
 	for {
 		// use link headers instead of page parameter based pagination as
 		// it is not supported for large datasets
-		nextURL := getNextPageURL(resp.Response)
-		if nextURL == "" {
+
+		next := parseNextLink(resp.Response)
+		if next == "" {
 			break
 		}
 
-		req, err := http.NewRequestWithContext(ctx, "GET", nextURL, nil)
+		req, err := client.NewRequest("GET", next, nil)
 		if err != nil {
-			return nil, fmt.Errorf("creating request for next page: %w", err)
+			return allIssues, err
+		}
+		req.Header.Set("Accept", "application/vnd.github.raw+json")
+
+		var issues []*github.Issue
+		resp, err = client.Do(ctx, req, &issues)
+		if err != nil {
+			return allIssues, err
 		}
 
-		var nextPageIssues []*github.Issue
-		resp, err = client.Do(ctx, req, &nextPageIssues)
-		if err != nil {
-			return nil, fmt.Errorf("getting next page issues (%s): %w", nextURL, err)
-		}
-
-		allIssues = append(allIssues, nextPageIssues...)
+		allIssues = append(allIssues, issues...)
 	}
 
 	return allIssues, nil
 }
 
-func getNextPageURL(resp *http.Response) string {
-	if resp == nil {
-		return ""
-	}
-	if linkHeader := resp.Header.Get("Link"); linkHeader != "" {
-		re := regexp.MustCompile(`<([^>]+)>; rel="next"`)
-		match := re.FindStringSubmatch(linkHeader)
-		if len(match) > 1 {
-			return match[1]
+// parseNextLink finds the next page for a GitHub API request by parsing the previous response's Link header.
+// https://docs.github.com/en/rest/using-the-rest-api/using-pagination-in-the-rest-api?apiVersion=2022-11-28#using-link-headers
+func parseNextLink(resp *http.Response) string {
+	var next string
+	for _, hdr := range resp.Header.Values("Link") {
+		links := strings.Split(hdr, ",")
+		for _, link := range links {
+			pair := strings.Split(strings.TrimSpace(link), ";")
+			if len(pair) == 2 {
+				if strings.TrimSpace(pair[0]) == `rel="next"` {
+					next = strings.Trim(pair[1], "<> ")
+				} else if strings.TrimSpace(pair[1]) == `rel="next"` {
+					next = strings.Trim(pair[0], "<> ")
+				}
+				if next != "" {
+					break
+				}
+			}
 		}
 	}
-	return ""
+	return next
 }
 
 // ComputeIssueUpdates remains the same as it doesn't interact with GitHub API
