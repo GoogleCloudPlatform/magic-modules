@@ -1,9 +1,7 @@
-val := d.Get("enableDns64AllQueries").(bool)
-if  val == nil {
-	val = false
+if val, ok := d.Get("enableDns64AllQueries").(bool); ok {
+	dns64Config := make(map[string]interface{})
+	scope := make(map[string]interface{})
+	scope["allQueries"] = val
+	dns64Config["scope"] = scope
+	obj["dns64Config"] = dns64Config
 }
-dns64Config := make(map[string]interface{})
-scope := make(map[string]interface{})
-scope["allQueries"] = val
-dns64Config["scope"] = scope
-obj["dns64Config"] = dns64Config
