@@ -272,9 +272,7 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
             }
         }
     }
-    labels = {
-        state = "active"
-    }
+    labels = {}
     orchestration_scope {
         selectors {
             location_selector {
