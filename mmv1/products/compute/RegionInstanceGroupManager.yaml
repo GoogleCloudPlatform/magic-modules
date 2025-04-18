@@ -28,7 +28,7 @@ description: |
 exclude: true
 references:
   guides:
-    'Creating Groups of Managed Instances': 'https://cloud.google.com/compute/docs/instance-groups/creating-groups-of-managed-instances'
+    'Creating Regional Managed Instance Groups': 'https://cloud.google.com/compute/docs/instance-groups/distributing-instances-with-regional-instance-groups'
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionInstanceGroupManagers'
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/instanceGroupManagers'
