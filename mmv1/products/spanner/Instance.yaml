@@ -77,7 +77,6 @@ properties:
       the instance is created. The name must be between 6 and 30 characters
       in length.
       If not provided, a random string starting with `tf-` will be selected.
-    required: true
     immutable: true
         # This resource supports a sort of odd autogenerate-if-not-set
         # system, which is done in the encoder.  Consequently we have
