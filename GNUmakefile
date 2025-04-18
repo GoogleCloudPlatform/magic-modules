@@ -54,7 +54,6 @@ ifeq ($(FORCE_DCL),)
   FORCE_DCL=latest
 endif
 
-# Define SHOULD_SKIP_CLEAN based on SKIP_CLEAN value (optional, but keeps original logic structure)
 SHOULD_SKIP_CLEAN := false # Default: do not skip
 ifneq ($(SKIP_CLEAN),)
   ifneq ($(SKIP_CLEAN),false)
