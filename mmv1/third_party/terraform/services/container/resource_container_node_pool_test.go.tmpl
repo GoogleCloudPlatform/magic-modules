@@ -4514,7 +4514,7 @@ func testAccContainerNodePool_withHostMaintenancePolicy(cluster, networkName, su
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
   name               = "%s"
-  location           = "asia-east1-c"
+  location           = "us-central1-a"
   initial_node_count = 1
   node_config {
     host_maintenance_policy {
@@ -4529,7 +4529,7 @@ resource "google_container_cluster" "cluster" {
 
 resource "google_container_node_pool" "np" {
   name               = "%s"
-  location           = "asia-east1-c"
+  location           = "us-central1-a"
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
   node_config {
