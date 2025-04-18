@@ -123,7 +123,7 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
                 id = "tf-test-test-os-policy-folder%{random_suffix}"
                 description = "policy for create"
                 allow_no_resource_group_match = true
-                mode = "ENFORCEMENT"
+                mode = "VALIDATION"
                 resource_groups {
                     inventory_filters {
                         os_short_name = "windows-10"
