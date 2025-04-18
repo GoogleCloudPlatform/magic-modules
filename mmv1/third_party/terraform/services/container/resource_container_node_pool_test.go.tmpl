@@ -4490,8 +4490,8 @@ func TestAccContainerNodePool_withHostMaintenancePolicy(t *testing.T) {
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
-	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster-1")
-	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster-1", networkName)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
 			PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -5131,8 +5131,8 @@ func TestAccContainerNodePool_defaultDriverInstallation(t *testing.T) {
 
 	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
 	np := fmt.Sprintf("tf-test-nodepool-%s", acctest.RandString(t, 10))
-	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster-1")
-	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluste1", networkName)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
