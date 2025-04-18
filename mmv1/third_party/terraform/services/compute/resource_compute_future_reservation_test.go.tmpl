@@ -55,9 +55,13 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
   project  = "%{project}"
   auto_created_reservations_delete_time = "2025-08-03T00:00:00Z"
   auto_delete_auto_created_reservations = true
-
+  deployment_type = "FLEXIBLE"
+  scheduling_type = "GROUPED"
+  planning_status = "SUBMITTED"
+  reservation_mode = "DEFAULT"
   commitment_info {
     commitment_name           = "tf-test-commitment%{random_suffix}"
+	commitment_plan = "TWELVE_MONTH"
   }
   description      = "Test future reservation description"
   name_prefix      = "tf-test-fr-px"
@@ -85,11 +89,14 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
   
 	auto_created_reservations_delete_time = "2025-08-04T00:00:00Z"
 	auto_delete_auto_created_reservations = false
-  
+	deployment_type = "FLEXIBLE"
+	scheduling_type = "INDEPENDENT"
+	planning_status = "DRAFT"
+	reservation_mode = "CALENDAR"
 	commitment_info {
 	  commitment_name           = "tf-test-commitment-update%{random_suffix}"
+	  commitment_plan = "TWELVE_MONTH"
 	}
-  
 	description      = "Updated test future reservation description"
 	name_prefix      = "tf-test-fr-up"
 	reservation_name = "tf-reservation-up%{random_suffix}"
