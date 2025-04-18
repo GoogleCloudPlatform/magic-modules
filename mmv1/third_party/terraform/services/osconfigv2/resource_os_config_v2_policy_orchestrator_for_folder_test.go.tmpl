@@ -200,7 +200,7 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
     description = "Updated description"
 
     orchestrated_resource {
-        id = "tf-test-test-orchestrated-resource-folder%{random_suffix}"
+        id = "tf-test-updated-orchestrated-resource-folder%{random_suffix}"
         os_policy_assignment_v1_payload {
             description = "ospa for update"
             name = "ospa-2"
@@ -278,7 +278,7 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
     orchestration_scope {
         selectors {
             location_selector {
-                included_locations = ["%{zone}"]
+                included_locations = ["us-central2-b"]
             }
         }
         selectors {
