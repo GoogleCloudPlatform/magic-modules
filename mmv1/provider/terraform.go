@@ -26,6 +26,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
@@ -407,7 +408,9 @@ func (t Terraform) CopyFileList(outputFolder string, files map[string]string, ge
 		if filepath.Ext(target) == ".go" || (filepath.Ext(target) == ".mod" && generateCode) {
 			t.replaceImportPath(outputFolder, target)
 		}
-
+		if filepath.Ext(target) == ".go" || filepath.Ext(target) == ".markdown" {
+			t.addCopyfileHeader(source, outputFolder, target)
+		}
 		if filepath.Ext(target) == ".go" {
 			t.addHashicorpCopyRightHeader(outputFolder, target)
 		}
@@ -507,7 +510,71 @@ func (t Terraform) CompileFileList(outputFolder string, files map[string]string,
 			continue
 		}
 		t.replaceImportPath(outputFolder, target)
+		if filepath.Ext(targetFile) == ".go" || filepath.Ext(targetFile) == ".markdown" {
+			t.addCopyfileHeader(source, outputFolder, target)
+		}
 		t.addHashicorpCopyRightHeader(outputFolder, target)
+	}
+}
+
+func (t Terraform) addCopyfileHeader(srcpath, outputFolder, target string) {
+	githubPrefix := "https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/"
+	if !strings.HasPrefix(srcpath, githubPrefix) {
+		srcpath = githubPrefix + srcpath
+	}
+
+	targetFile := filepath.Join(outputFolder, target)
+	sourceByte, err := os.ReadFile(targetFile)
+	if err != nil {
+		log.Fatalf("Cannot read file %s to add copy file header: %s", targetFile, err)
+	}
+
+	srcStr := string(sourceByte)
+	if strings.Contains(srcStr, "***     AUTO GENERATED CODE    ***    Type: Handwritten     ***") {
+		return
+	}
+
+	templateFile := "templates/terraform/handwritten_file.go.tmpl"
+	content := srcStr
+	if filepath.Ext(target) == ".markdown" {
+		templateFile = "templates/terraform/handwritten_file.md.tmpl"
+		// Remove the first line since the template has that.
+		content = strings.TrimPrefix(srcStr, "---\n")
+	}
+	tmpl, err := template.New(filepath.Base(templateFile)).ParseFiles(
+		templateFile,
+	)
+	if err != nil {
+		log.Println(fmt.Errorf("error parsing template file %s: %v", templateFile, err))
+		return
+	}
+
+	sb := new(strings.Builder)
+	data := struct {
+		Source  string
+		Content string
+	}{
+		Source:  srcpath,
+		Content: content,
+	}
+	if err := tmpl.Execute(sb, data); err != nil {
+		log.Println(fmt.Errorf("error executing template file %s: %v", templateFile, err))
+		return
+	}
+
+	// format go file
+	sourceByte = []byte(sb.String())
+	if filepath.Ext(targetFile) == ".go" {
+		sourceByte, err = format.Source(sourceByte)
+		if err != nil {
+			log.Printf("error formatting %s: %s\n", targetFile, err)
+			return
+		}
+	}
+
+	err = os.WriteFile(targetFile, sourceByte, 0644)
+	if err != nil {
+		log.Fatalf("Cannot write file %s to add copy file header: %s", target, err)
 	}
 }
 
