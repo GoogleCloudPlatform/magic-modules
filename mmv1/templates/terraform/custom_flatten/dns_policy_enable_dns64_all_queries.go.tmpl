@@ -1,27 +1,27 @@
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
     if v == nil {
-        return v
+        return false
     }
     transformed, ok := v.(map[string]interface{})
-	if !ok {
-		return nil
-	}
-	dns64Config, ok := transformed["dns64Config"].(map[string]interface{})
-	if !ok {
-		return nil
-	}
-	scope, ok := dns64Config["scope"].(map[string]interface{})
-	if !ok {
-		return nil
-	}
-	allQueriesRaw, ok := scope["allQueries"]
-	if !ok {
-		return nil
-	}
+    if !ok {
+	return nil
+    }
+    dns64Config, ok := transformed["dns64Config"].(map[string]interface{})
+    if !ok {
+	return nil
+    }
+    scope, ok := dns64Config["scope"].(map[string]interface{})
+    if !ok {
+	return nil
+    }
+    allQueriesRaw, ok := scope["allQueries"]
+    if !ok {
+	return nil
+    }
 
-	b, err := strconv.ParseBool(allQueriesRaw.(string))
-	if err != nil {
-		return nil
-	}
-	return b
+    b, err := strconv.ParseBool(allQueriesRaw.(string))
+    if err != nil {
+	return nil
+    }
+    return b
 }
