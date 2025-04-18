@@ -128,4 +128,3 @@ properties:
     description: |
       Total number of deployed resources within scope.
     output: true
-
