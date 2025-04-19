@@ -17,6 +17,10 @@ description: |
   A CaPool represents a group of CertificateAuthorities that form a trust anchor. A CaPool can be used to manage
   issuance policies for one or more CertificateAuthority resources and to rotate CA certificates in and out of the
   trust anchor.
+references:
+  guides:
+    'Certificate Authority Service Overview': 'https://cloud.google.com/certificate-authority-service/docs/overview'
+  api: 'https://cloud.google.com/certificate-authority-service/docs/reference/rest/v1/projects.locations.caPools'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/caPools'
 self_link: 'projects/{{project}}/locations/{{location}}/caPools/{{name}}'
