@@ -315,6 +315,12 @@ properties:
       * zones/{zone}/disks/{disk}
       * regions/{region}/disks/{disk}
     diff_suppress_func: 'sourceDiskDiffSuppress'
+  - name: 'DiskId'
+    type: String
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - name: 'sourceDiskId'
     type: String
     description: |
