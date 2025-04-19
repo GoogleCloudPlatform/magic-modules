@@ -141,6 +141,7 @@ service/cloudresourcemanager-crm:
   - google_organization_iam_member
   - google_organization_iam_policy
   - google_resource_manager_lien
+  - google_resource_manager_capability
 service/cloudresourcemanager-tags:
   resources:
   - google_tags_.*
@@ -243,6 +244,7 @@ service/compute-pd:
   resources:
   - google_compute_attached_disk.*
   - google_compute_disk.*
+  - google_compute_storage_pool.*
   - google_compute_region_disk.*
   - google_compute_image.*
   - google_compute_snapshot.*
@@ -477,6 +479,9 @@ service/managedkafka:
 service/memcache:
   resources:
   - google_memcache_instance
+service/memorystore:
+  resources:
+  - google_memorystore.*
 service/metastore:
   resources:
   - google_dataproc_metastore_.*
@@ -626,7 +631,6 @@ service/redis-cluster:
 service/redis-instance:
   resources:
   - google_redis_instance
-  - google_memorystore_instance.*
 service/regional-endpoints:
   resources:
   - google_network_connectivity_regional_endpoint

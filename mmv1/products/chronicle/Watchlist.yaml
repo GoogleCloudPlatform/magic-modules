@@ -29,7 +29,6 @@ update_mask: true
 autogen_status: V2F0Y2hsaXN0
 custom_code:
   encoder: 'templates/terraform/encoders/chronicle_watchlist.go.tmpl'
-  post_create: 'templates/terraform/post_create/chronicle_watchlist_id.go.tmpl'
 examples:
   - name: 'chronicle_watchlist_basic'
     primary_resource_id: 'example'

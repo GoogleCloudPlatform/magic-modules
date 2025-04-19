@@ -51,6 +51,27 @@ If you believe this detection to be incorrect please raise the concern with your
 An `override-missing-service-label` label can be added to allow merging.
 {{end}}
 
+{{- if and (.MissingDocs) (or .MissingDocs.Resource .MissingDocs.DataSource) }}
+## Missing doc report (experimental)
+
+{{ if .MissingDocs.Resource }}
+The following resources have fields missing in documents. 
+{{ range $inx, $missingDocInfo := .MissingDocs.Resource }}
+- `{{ $missingDocInfo.Name }}` 
+  - Expected Document Path: `{{ $missingDocInfo.FilePath }}`
+  - Fields: `{{ $missingDocInfo.Fields }}`
+{{- end }}
+{{- end }}
+
+{{ if .MissingDocs.DataSource }}
+The following data sources are missing documents:
+{{ range $inx, $missingDocInfo := .MissingDocs.DataSource }}
+- `{{ $missingDocInfo.Name }}`, expect file `{{ $missingDocInfo.FilePath }}` to exist.
+{{- end }}
+{{- end }}
+
+{{- end }}
+
 {{- $errorsLength := len .Errors}}
 {{- if gt $errorsLength 0}}
 ## Errors

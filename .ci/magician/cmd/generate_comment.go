@@ -60,6 +60,17 @@ type MissingTestInfo struct {
 	Tests         []string
 }
 
+type MissingDocInfo struct {
+	Name     string
+	FilePath string
+	Fields   []string
+}
+
+type MissingDocsSummary struct {
+	Resource   []MissingDocInfo
+	DataSource []MissingDocInfo
+}
+
 type Errors struct {
 	Title  string
 	Errors []string
@@ -71,6 +82,7 @@ type diffCommentData struct {
 	BreakingChanges      []BreakingChange
 	MissingServiceLabels []string
 	MissingTests         map[string]*MissingTestInfo
+	MissingDocs          *MissingDocsSummary
 	Errors               []Errors
 }
 
@@ -310,6 +322,13 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 				errors[repo.Title] = append(errors[repo.Title], "The missing test detector failed to run.")
 			}
 			data.MissingTests = missingTests
+
+			missingDocs, err := detectMissingDocs(diffProcessorPath, repo.Path, rnr)
+			if err != nil {
+				fmt.Println("Error running missing doc detector: ", err)
+				errors[repo.Title] = append(errors[repo.Title], "The missing doc detector failed to run.")
+			}
+			data.MissingDocs = missingDocs
 		}
 
 		simpleDiff, err := computeAffectedResources(diffProcessorPath, rnr, repo)
@@ -547,6 +566,24 @@ func detectMissingTests(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner)
 		return nil, err
 	}
 	return missingTests, rnr.PopDir()
+}
+
+// Run the missing doc detector and return the results.
+func detectMissingDocs(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) (*MissingDocsSummary, error) {
+	if err := rnr.PushDir(diffProcessorPath); err != nil {
+		return nil, err
+	}
+
+	output, err := rnr.Run("bin/diff-processor", []string{"detect-missing-docs", tpgbLocalPath}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var missingDocs *MissingDocsSummary
+	if err = json.Unmarshal([]byte(output), &missingDocs); err != nil {
+		return nil, err
+	}
+	return missingDocs, rnr.PopDir()
 }
 
 func formatDiffComment(data diffCommentData) (string, error) {
