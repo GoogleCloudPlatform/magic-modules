@@ -143,6 +143,7 @@ properties:
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
   - name: 'labels'
     type: KeyValueLabels
+    default_from_api: true
     description: 'Labels to identify and group the runtime template.'
   - name: idleShutdownConfig
     type: NestedObject
@@ -155,17 +156,21 @@ properties:
         description: 'The duration after which the runtime is automatically shut down. An input of 0s disables the idle shutdown feature, and a valid range is [10m, 24h].'
   - name: eucConfig
     type: NestedObject
+    default_from_api: true
     description: 'EUC configuration of the NotebookRuntimeTemplate.'
     properties:
       - name: 'eucDisabled'
         type: Boolean
+        default_from_api: true
         description: 'Disable end user credential access for the runtime.'
   - name: shieldedVmConfig
     type: NestedObject
+    default_from_api: true
     description: 'Runtime Shielded VM spec.'
     properties:
       - name: 'enableSecureBoot'
         type: Boolean
+        default_from_api: true
         description: 'Enables secure boot for the runtime.'
   - name: 'networkTags'
     type: Array
