@@ -389,6 +389,15 @@ func TestAccNetappStoragePool_customPerformanceStoragePoolCreateExample_update(t
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
 			},
+			{
+				Config: testAccNetappStoragePool_customPerformanceStoragePoolCreateExample_update(context),
+			},
+			{
+				ResourceName:            "google_netapp_storage_pool.test_pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+			},
 		},
 	})
 }
@@ -406,6 +415,28 @@ resource "google_netapp_storage_pool" "test_pool" {
   custom_performance_enabled = true
   total_throughput_mibps = "64"
   total_iops = "1024"
+}
+
+data "google_compute_network" "default" {
+    provider = google-beta
+    name = "%{network_name}"
+}
+`, context)
+}
+
+func TestAccNetappStoragePool_customPerformanceStoragePoolCreateExample_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_netapp_storage_pool" "test_pool" {
+  provider = google-beta
+  name = "tf-test-pool%{random_suffix}"
+  location = "us-east4-a"
+  service_level = "FLEX"
+  capacity_gib = "2048"
+  network = data.google_compute_network.default.id
+  description = "this is updated test description"
+  custom_performance_enabled = true
+  total_throughput_mibps = "200"
+  total_iops = "2000"
 }
 
 data "google_compute_network" "default" {
