@@ -1,0 +1,3 @@
+if err := d.Set("enable_dns64_all_queries", res["dns64Config"]["scope"]["allQueries"]); err != nil {
+	log.Printf("[ERROR] Unable to set enable_dns64_all_queries: %s", err)
+}
