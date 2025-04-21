@@ -93,6 +93,7 @@ clean-provider:
 		echo "Executing clean-provider in $(OUTPUT_PATH)..."; \
 		( \
 			cd $(OUTPUT_PATH) && \
+			go mod download;
 			echo "---> Changing directory to $(OUTPUT_PATH)" && \
 			echo "---> Running go mod download..." && \
 			echo "---> Finding files to remove..." && \
@@ -104,7 +105,6 @@ clean-provider:
 				-not -name "CHANGELOG.md" \
 				-not -name "CHANGELOG_v*.md" \
 				-not -name "GNUmakefile" \
-				-not -name "Makefile" \
 				-not -name "docscheck.sh" \
 				-not -name "LICENSE" \
 				-not -name "CODEOWNERS" \
