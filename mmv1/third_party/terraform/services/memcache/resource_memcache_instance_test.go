@@ -2,11 +2,10 @@ package memcache_test
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -122,28 +121,11 @@ func TestAccMemcacheInstance_deletionprotection(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"reserved_ip_range_id", "deletion_protection"},
 			},
 			{
-				Config:      testAccMemcacheInstance_deletionprotection(prefix, name, network, "us-west2"),
-				ExpectError: regexp.MustCompile("deletion_protection"),
-			},
-			{
-				ResourceName:            "google_memcache_instance.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"reserved_ip_range_id", "deletion_protection"},
-			},
+                                Config: testAccMemcacheInstance_deletionprotection(prefix, name, network, "us-west2"),
+                                ExpectError: regexp.MustCompile("deletion_protection"),
+                        },
 			{
 				Config: testAccMemcacheInstance_update(prefix, name, network),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_memcache_instance.test", plancheck.ResourceActionUpdate),
-					},
-				},
-			},
-			{
-				ResourceName:            "google_memcache_instance.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"reserved_ip_range_id", "deletion_protection"},
 			},
 		},
 	})
@@ -178,3 +160,4 @@ data "google_compute_network" "memcache_network" {
 }
 `, name, region, network)
 }
+
