@@ -1,0 +1,16 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "openapi_generate",
+    srcs = ["parser.go"],
+    importpath = "github.com/GoogleCloudPlatform/magic-modules/mmv1/openapi_generate",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//mmv1/api",
+        "//mmv1/api/product",
+        "//mmv1/api/resource",
+        "//mmv1/google",
+        "@com_github_getkin_kin_openapi//openapi3",
+        "@in_gopkg_yaml_v2//:yaml_v2",
+    ],
+)

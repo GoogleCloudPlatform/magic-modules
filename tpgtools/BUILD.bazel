@@ -179,6 +179,7 @@ go_library(
     name = "tpgtools_lib",
     srcs = [
         "documentation.go",
+        "empty_serialization.go",
         "file_utils.go",
         "id.go",
         "main.go",
@@ -192,6 +193,7 @@ go_library(
         "property_helpers.go",
         "resource.go",
         "sample.go",
+        "serialization.go",
         "serialization_helpers.go",
         "strings.go",
         "type.go",
@@ -215,18 +217,14 @@ go_library(
 
 go_binary(
     name = "bootstrap_tpgtools",
-    srcs = [
-        ":empty_serialization",
-    ],
+    srcs = [":empty_serialization"],
     embed = [":tpgtools_lib"],
     visibility = ["//visibility:private"],
 )
 
 go_binary(
     name = "tpgtools_compiler",
-    srcs = [
-        ":bootstrapped_serialization",
-    ],
+    srcs = [":bootstrapped_serialization"],
     embed = [":tpgtools_lib"],
     visibility = ["//visibility:private"],
     deps = ["@com_github_hashicorp_hcl//hcl/fmtcmd"] +
@@ -242,13 +240,22 @@ genrule(
         ":templates",
     ],
     outs = [
-        "terraform-provider-google/google/provider/provider_dcl_resources.go",
-        "terraform-provider-google/google/transport/provider_dcl_client_creation.go",
-        "terraform-provider-google/google/transport/provider_dcl_endpoints.go",
-    ] + ["terraform-provider-google/google/services/{}/resource_{}.go".format(v["service"], k) for (k, v) in RESOURCES.items()]
-      + ["terraform-provider-google/google/services/{}/resource_{}_sweeper.go".format(v["service"], k) for (k, v) in RESOURCES.items() if v['sweeper'] == True]
-      + ["terraform-provider-google/google/services/{}/resource_{}_generated_test.go".format(v["service"], k) for (k, v) in RESOURCES.items() if v['test'] == True]
-      + ["terraform-provider-google/website/docs/r/{}.html.markdown".format(k) for (k, v) in RESOURCES.items() if v['docs'] == True],
+               "terraform-provider-google/google/provider/provider_dcl_resources.go",
+               "terraform-provider-google/google/transport/provider_dcl_client_creation.go",
+               "terraform-provider-google/google/transport/provider_dcl_endpoints.go",
+           ] + ["terraform-provider-google/google/services/{}/resource_{}.go".format(
+               v["service"],
+               k,
+           ) for (k, v) in RESOURCES.items()] +
+           ["terraform-provider-google/google/services/{}/resource_{}_sweeper.go".format(
+               v["service"],
+               k,
+           ) for (k, v) in RESOURCES.items() if v["sweeper"] == True] +
+           ["terraform-provider-google/google/services/{}/resource_{}_generated_test.go".format(
+               v["service"],
+               k,
+           ) for (k, v) in RESOURCES.items() if v["test"] == True] +
+           ["terraform-provider-google/website/docs/r/{}.html.markdown".format(k) for (k, v) in RESOURCES.items() if v["docs"] == True],
     cmd = "$(location :tpgtools_compiler) --overrides tpgtools/overrides --path tpgtools/api --templates tpgtools/templates --version ga --output $(RULEDIR)/ga",
     tools = [":tpgtools_compiler"],
     visibility = ["//visibility:public"],
@@ -262,13 +269,22 @@ genrule(
         ":templates",
     ],
     outs = [
-        "terraform-provider-google-beta/google-beta/provider/provider_dcl_resources.go",
-        "terraform-provider-google-beta/google-beta/transport/provider_dcl_client_creation.go",
-        "terraform-provider-google-beta/google-beta/transport/provider_dcl_endpoints.go",
-    ] + ["terraform-provider-google-beta/google-beta/services/{}/resource_{}.go".format(v["service"], k) for (k, v) in RESOURCES.items()]
-      + ["terraform-provider-google-beta/google-beta/services/{}/resource_{}_sweeper.go".format(v["service"], k) for (k, v) in RESOURCES.items() if v['sweeper'] == True]
-      + ["terraform-provider-google-beta/google-beta/services/{}/resource_{}_generated_test.go".format(v["service"], k) for (k, v) in RESOURCES.items() if v['test'] == True]
-      + ["terraform-provider-google-beta/website/docs/r/{}.html.markdown".format(k) for (k, v) in RESOURCES.items() if v['docs'] == True],
+               "terraform-provider-google-beta/google-beta/provider/provider_dcl_resources.go",
+               "terraform-provider-google-beta/google-beta/transport/provider_dcl_client_creation.go",
+               "terraform-provider-google-beta/google-beta/transport/provider_dcl_endpoints.go",
+           ] + ["terraform-provider-google-beta/google-beta/services/{}/resource_{}.go".format(
+               v["service"],
+               k,
+           ) for (k, v) in RESOURCES.items()] +
+           ["terraform-provider-google-beta/google-beta/services/{}/resource_{}_sweeper.go".format(
+               v["service"],
+               k,
+           ) for (k, v) in RESOURCES.items() if v["sweeper"] == True] +
+           ["terraform-provider-google-beta/google-beta/services/{}/resource_{}_generated_test.go".format(
+               v["service"],
+               k,
+           ) for (k, v) in RESOURCES.items() if v["test"] == True] +
+           ["terraform-provider-google-beta/website/docs/r/{}.html.markdown".format(k) for (k, v) in RESOURCES.items() if v["docs"] == True],
     cmd = "$(location :tpgtools_compiler) --overrides tpgtools/overrides --path tpgtools/api --templates tpgtools/templates --version beta --output $(RULEDIR)/terraform-provider-google-beta",
     tools = [":tpgtools_compiler"],
     visibility = ["//visibility:public"],
