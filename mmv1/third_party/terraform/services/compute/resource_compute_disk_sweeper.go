@@ -68,7 +68,7 @@ func testSweepDisk(region string) error {
 			prefixes := []string{
 				"pvc-", // https://github.com/kubernetes/kubernetes/issues/109328
 			}
-			if !sweeper.IsSweepableTestResource(id) && !sweeper.HasAnyPrefix(id, prefixes){
+			if !sweeper.IsSweepableTestResource(id) && !sweeper.HasAnyPrefix(id, prefixes) {
 				nonPrefixCount++
 				continue
 			}
