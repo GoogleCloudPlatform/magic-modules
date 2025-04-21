@@ -107,7 +107,7 @@ properties:
           GOOGLE
           SENTRY
           ROVO
-	  NEW_RELIC
+          NEW_RELIC
           DATASTAX
       - name: scopes
         type: Array
