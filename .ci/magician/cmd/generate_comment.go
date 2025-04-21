@@ -574,7 +574,7 @@ func detectMissingDocs(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) 
 		return nil, err
 	}
 
-	output, err := rnr.Run("bin/diff-processor", []string{"detect-missing-docs", fmt.Sprintf("%s/google-beta/services", tpgbLocalPath)}, nil)
+	output, err := rnr.Run("bin/diff-processor", []string{"detect-missing-docs", tpgbLocalPath}, nil)
 	if err != nil {
 		return nil, err
 	}

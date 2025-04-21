@@ -1,0 +1,181 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+   l := v.([]interface{})
+   req := make([]interface{}, 0, len(l))
+   for _, raw := range l {
+       if raw == nil {
+           continue
+       }
+       original := raw.(map[string]interface{})
+       transformed := make(map[string]interface{})
+
+
+       transformedPriority, err := expandComputeRouterRoutePolicyTermsPriority(original["priority"], d, config)
+       if err != nil {
+           return nil, err
+       } else if val := reflect.ValueOf(transformedPriority); val.IsValid() {
+           transformed["priority"] = transformedPriority
+       }
+
+
+       transformedMatch, err := expandComputeRouterRoutePolicyTermsMatch(original["match"], d, config)
+       if err != nil {
+           return nil, err
+       } else if val := reflect.ValueOf(transformedMatch); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+           transformed["match"] = transformedMatch
+       }
+
+
+       transformedActions, err := expandComputeRouterRoutePolicyTermsActions(original["actions"], d, config)
+       if err != nil {
+           return nil, err
+       } else if val := reflect.ValueOf(transformedActions); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+           transformed["actions"] = transformedActions
+       }
+
+
+       req = append(req, transformed)
+   }
+   return req, nil
+}
+
+
+
+
+func expandComputeRouterRoutePolicyTermsPriority(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+   return v, nil
+}
+
+
+func expandComputeRouterRoutePolicyTermsMatch(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+   l := v.([]interface{})
+   if len(l) == 0 || l[0] == nil {
+       return nil, nil
+   }
+   raw := l[0]
+   original := raw.(map[string]interface{})
+   transformed := make(map[string]interface{})
+
+
+   transformedExpression, err := expandComputeRouterRoutePolicyTermsMatchExpression(original["expression"], d, config)
+   if err != nil {
+       return nil, err
+   } else if val := reflect.ValueOf(transformedExpression); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+       transformed["expression"] = transformedExpression
+   }
+
+
+   transformedTitle, err := expandComputeRouterRoutePolicyTermsMatchTitle(original["title"], d, config)
+   if err != nil {
+       return nil, err
+   } else if val := reflect.ValueOf(transformedTitle); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+       transformed["title"] = transformedTitle
+   }
+
+
+   transformedDescription, err := expandComputeRouterRoutePolicyTermsMatchDescription(original["description"], d, config)
+   if err != nil {
+       return nil, err
+   } else if val := reflect.ValueOf(transformedDescription); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+       transformed["description"] = transformedDescription
+   }
+
+
+   transformedLocation, err := expandComputeRouterRoutePolicyTermsMatchLocation(original["location"], d, config)
+   if err != nil {
+       return nil, err
+   } else if val := reflect.ValueOf(transformedLocation); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+       transformed["location"] = transformedLocation
+   }
+
+
+   return transformed, nil
+}
+
+
+func expandComputeRouterRoutePolicyTermsMatchExpression(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+   return v, nil
+}
+
+
+func expandComputeRouterRoutePolicyTermsMatchTitle(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+   return v, nil
+}
+
+
+func expandComputeRouterRoutePolicyTermsMatchDescription(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+   return v, nil
+}
+
+
+func expandComputeRouterRoutePolicyTermsMatchLocation(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+   return v, nil
+}
+
+
+func expandComputeRouterRoutePolicyTermsActions(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+   l := v.([]interface{})
+   req := make([]interface{}, 0, len(l))
+   for _, raw := range l {
+       if raw == nil {
+           continue
+       }
+       original := raw.(map[string]interface{})
+       transformed := make(map[string]interface{})
+
+
+       transformedExpression, err := expandComputeRouterRoutePolicyTermsActionsExpression(original["expression"], d, config)
+       if err != nil {
+           return nil, err
+       } else if val := reflect.ValueOf(transformedExpression); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+           transformed["expression"] = transformedExpression
+       }
+
+
+       transformedTitle, err := expandComputeRouterRoutePolicyTermsActionsTitle(original["title"], d, config)
+       if err != nil {
+           return nil, err
+       } else if val := reflect.ValueOf(transformedTitle); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+           transformed["title"] = transformedTitle
+       }
+
+
+       transformedDescription, err := expandComputeRouterRoutePolicyTermsActionsDescription(original["description"], d, config)
+       if err != nil {
+           return nil, err
+       } else if val := reflect.ValueOf(transformedDescription); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+           transformed["description"] = transformedDescription
+       }
+
+
+       transformedLocation, err := expandComputeRouterRoutePolicyTermsActionsLocation(original["location"], d, config)
+       if err != nil {
+           return nil, err
+       } else if val := reflect.ValueOf(transformedLocation); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+           transformed["location"] = transformedLocation
+       }
+
+
+       req = append(req, transformed)
+   }
+   return req, nil
+}
+
+
+func expandComputeRouterRoutePolicyTermsActionsExpression(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+   return v, nil
+}
+
+
+func expandComputeRouterRoutePolicyTermsActionsTitle(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+   return v, nil
+}
+
+
+func expandComputeRouterRoutePolicyTermsActionsDescription(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+   return v, nil
+}
+
+
+func expandComputeRouterRoutePolicyTermsActionsLocation(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+   return v, nil
+}
