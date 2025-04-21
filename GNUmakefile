@@ -78,7 +78,7 @@ mmv1: validate_environment
 		fi
 
 tpgtools: validate_environment serialize
-	@echo "Executing tpgtools build for $(OUTPUT_PATH)"; \
+	@echo "Executing tpgtools build for $(OUTPUT_PATH)";
 	@cd tpgtools;\
 		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
 
