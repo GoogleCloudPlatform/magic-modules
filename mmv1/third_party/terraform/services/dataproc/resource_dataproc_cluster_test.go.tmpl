@@ -1480,9 +1480,6 @@ resource "google_dataproc_cluster" "basic" {
 	depends_on = [
 		google_tags_tag_binding.binding
 	]
-  }
-
-
 }
 `, projectId, randString, subnet)
 }
