@@ -94,7 +94,7 @@ tgc:
 	cd mmv1;\
 		go run . --version beta --provider tgc --output $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile)\
 		&& go run . --version beta --provider tgc_cai2hcl --output $(OUTPUT_PATH)/cai2hcl $(mmv1_compile)\
-		&& go run . --version beta --provider tgc_next --output $(OUTPUT_PATH)/pkg $(mmv1_compile);\
+		&& go run . --version beta --provider tgc_next --output $(OUTPUT_PATH) $(mmv1_compile);\
 
 tf-oics:
 	cd mmv1;\

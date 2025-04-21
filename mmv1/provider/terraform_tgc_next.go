@@ -78,9 +78,9 @@ func (tgc TerraformGoogleConversionNext) CompileTfToCaiCommonFiles(outputFolder 
 	log.Printf("Compiling common files for tgc tfplan2cai.")
 
 	resourceConverters := map[string]string{
-		"tfplan2cai/converters/resource_converters.go":                       "templates/tgc_next/tfplan2cai/resource_converters.go.tmpl",
-		"tfplan2cai/converters/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
-		"tfplan2cai/converters/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
+		"pkg/tfplan2cai/converters/resource_converters.go":                       "templates/tgc_next/tfplan2cai/resource_converters.go.tmpl",
+		"pkg/tfplan2cai/converters/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
+		"pkg/tfplan2cai/converters/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
 	}
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
 	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
@@ -90,7 +90,7 @@ func (tgc TerraformGoogleConversionNext) CompileCaiToHclCommonFiles(outputFolder
 	log.Printf("Compiling common files for tgc tfplan2cai.")
 
 	resourceConverters := map[string]string{
-		"cai2hcl/converters/resource_converters.go": "templates/tgc_next/cai2hcl/resource_converters.go.tmpl",
+		"pkg/cai2hcl/converters/resource_converters.go": "templates/tgc_next/cai2hcl/resource_converters.go.tmpl",
 	}
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
 	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
@@ -140,8 +140,8 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 
 func (tgc TerraformGoogleConversionNext) CopyTfToCaiCommonFiles(outputFolder string) {
 	resourceConverters := map[string]string{
-		"tfplan2cai/converters/services/compute/image.go":     "third_party/terraform/services/compute/image.go",
-		"tfplan2cai/converters/services/compute/disk_type.go": "third_party/terraform/services/compute/disk_type.go",
+		"pkg/tfplan2cai/converters/services/compute/image.go":     "third_party/terraform/services/compute/image.go",
+		"pkg/tfplan2cai/converters/services/compute/disk_type.go": "third_party/terraform/services/compute/disk_type.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }
