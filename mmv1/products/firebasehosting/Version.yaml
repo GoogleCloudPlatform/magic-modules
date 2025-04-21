@@ -35,7 +35,6 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  decoder: 'templates/terraform/decoders/firebasehosting_version.go.tmpl'
   post_create: 'templates/terraform/post_create/firebasehosting_version_immediate_finalize.tmpl'
 exclude_sweeper: true
 examples:
@@ -114,7 +113,7 @@ properties:
     type: String
     description: The ID for the version as in sites/SITE_ID/versions/VERSION_ID
     min_version: 'beta'
-    ignore_read: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
     output: true
   - name: 'config'
     type: NestedObject

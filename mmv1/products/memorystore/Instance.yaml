@@ -193,6 +193,37 @@ properties:
             description:
               "Output only. Target node type for the instance."
             output: true
+  - name: 'automatedBackupConfig'
+    type: NestedObject
+    description: "The automated backup config for a instance."
+    custom_flatten: 'templates/terraform/custom_flatten/memorystore_instance_automated_backup_config.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/memorystore_instance_automated_backup_config.go.tmpl'
+    properties:
+      - name: 'fixedFrequencySchedule'
+        type: NestedObject
+        description: "Trigger automated backups at a fixed frequency."
+        required: true
+        properties:
+          - name: 'startTime'
+            type: NestedObject
+            description: |
+              The start time of every automated backup in UTC.
+              It must be set to the start of an hour. This field is required.
+            required: true
+            properties:
+              - name: 'hours'
+                type: Integer
+                description: |
+                  Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or equal to 23.
+                  An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                required: true
+      - name: 'retention'
+        type: String
+        description: |
+            How long to keep automated backups before the backups are deleted.
+            The value should be between 1 day and 365 days. If not specified, the default value is 35 days.
+            A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s". The default_value is "3024000s"
+        required: true
   - name: 'uid'
     type: String
     description: "Output only. System assigned, unique identifier for the instance. "
@@ -706,3 +737,41 @@ properties:
           description:
             "Output only. Ports of the exposed endpoint."
           output: true
+  - name: 'gcsSource'
+    type: NestedObject
+    description: "GCS source for the instance."
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - managedBackupSource
+    properties:
+      - name: 'uris'
+        type: Array
+        is_set: true
+        description: |
+          URIs of the GCS objects to import.
+          Example: gs://bucket1/object1, gs//bucket2/folder2/object2
+        immutable: true
+        required: true
+        item_type:
+          type: String
+  - name: 'managedBackupSource'
+    type: NestedObject
+    description: "Managed backup source for the instance."
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - gcsSource
+    properties:
+      - name: 'backup'
+        type: String
+        description: |
+          Example: //memorystore.googleapis.com/projects/{project}/locations/{location}/backups/{backupId}. In this case, it assumes the backup is under memorystore.googleapis.com.
+        immutable: true
+        required: true
+  - name: 'backupCollection'
+    type: String
+    description: |
+      The backup collection full resource name.
+      Example: projects/{project}/locations/{location}/backupCollections/{collection}
+    output: true

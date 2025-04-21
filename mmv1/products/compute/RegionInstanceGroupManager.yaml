@@ -13,6 +13,8 @@
 
 ---
 name: 'RegionInstanceGroupManager'
+api_variant_patterns:
+  - 'projects/{project}/regions/{region}/instanceGroupManagers/{instanceGroupManager}'
 kind: 'compute#instanceGroupManager'
 description: |
   Creates a managed instance group using the information that you specify in
