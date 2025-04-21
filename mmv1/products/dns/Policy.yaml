@@ -32,6 +32,7 @@ timeouts:
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/detach_network.tmpl'
   pre_create: 'templates/terraform/pre_create/dns_policy_enable_dns64_all_queries.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/dns_policy_enable_dns64_all_queries.go.tmpl'
 examples:
   - name: 'dns_policy_basic'
     primary_resource_id: 'example-policy'
