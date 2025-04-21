@@ -27,7 +27,7 @@ func TestAccCertificateManagerIssuanceConfig_tags(t *testing.T) {
 				Config: testAccCertificateManagerIssuanceConfigTags(context),
 			},
 			{
-				ResourceName:            "google_certificate_manager_certificate_issuance_config.default",
+				ResourceName:            "google_certificate_manager_certificate_issuance_config.issuanceconfig",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "tags"},
@@ -38,23 +38,68 @@ func TestAccCertificateManagerIssuanceConfig_tags(t *testing.T) {
 
 func testAccCertificateManagerIssuanceConfigTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_certificate_manager_certificate_issuance_config" "default" {
-  name        = "tf-test-issuance-config%{random_suffix}"
-  description = "sample description for the issaunce config"
-  location    = "us-central1"
-
-  lifetime                    = "2592000s"
-  key_algorithm               = "RSA_2048"
-  rotation_window_percentage  = 80
-
+resource "google_certificate_manager_certificate_issuance_config" "issuanceconfig" {
+  name    = "tf-test-issuance-config%{random_suffix}"
+  description = "sample description for the certificate issuanceConfigs"
   certificate_authority_config {
     certificate_authority_service_config {
-      ca_pool = "projects/%{org}/locations/us-central1/caPools/tf-test-ca-pool%{random_suffix}"
+        ca_pool = google_privateca_ca_pool.pool.id
     }
   }
+  lifetime = "1814400s"
+  rotation_window_percentage = 34
+  key_algorithm = "ECDSA_P256"
+  labels = { "name": "wrench", "count": "3" }
+
+  depends_on=[google_privateca_certificate_authority.ca_authority]
   tags = {
-    "%{org}/%{tagKey}" = "%{tagValue}"
+	"%{org}/%{tagKey}" = "%{tagValue}"
   }
+}
+
+resource "google_privateca_ca_pool" "pool" {
+  name     = "ca-pool"
+  location = "us-central1"
+  tier     = "ENTERPRISE"
+}
+
+resource "google_privateca_certificate_authority" "ca_authority" {
+  location = "us-central1"
+  pool = google_privateca_ca_pool.pool.name
+  certificate_authority_id = "ca-authority"
+  config {
+    subject_config {
+      subject {
+        organization = "HashiCorp"
+        common_name = "my-certificate-authority"
+      }
+      subject_alt_name {
+        dns_names = ["hashicorp.com"]
+      }
+    }
+    x509_config {
+      ca_options {
+        is_ca = true
+      }
+      key_usage {
+        base_key_usage {
+          cert_sign = true
+          crl_sign = true
+        }
+        extended_key_usage {
+          server_auth = true
+        }
+      }
+    }
+  }
+  key_spec {
+    algorithm = "RSA_PKCS1_4096_SHA256"
+  }
+
+  // Disable CA deletion related safe checks for easier cleanup.
+  deletion_protection                    = false
+  skip_grace_period                      = true
+  ignore_active_certificates_on_deletion = true
 }
 `, context)
 }
