@@ -309,7 +309,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 
 {{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
 {{  if ($.GetAsync.IsA "OpAsync") -}}
-{{    if and $.GetAsync.Result.ResourceInsideResponse $.GetIdentity -}}
+{{    if and $.GetAsync.Result.ResourceInsideResponse (or $.GetIdentity $.HasComputedIdFormatFields) -}}
     // Use the resource in the operation response to populate
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
@@ -352,6 +352,36 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
 {{- end}}
 {{- end}}
+    {{- if $.HasComputedIdFormatFields}}
+    {{- $renderedIdFromName := "false" }}
+    {{- range $prop := $.GettableProperties }}
+    {{- /* Check if prop is potentially computed */}}
+    {{-   if and ($.InIdFormat $prop) (and (or $prop.Output $prop.DefaultFromApi) (not $prop.IgnoreRead)) }}
+    {{-     if and (eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl") (eq $renderedIdFromName "false") }}
+    // Setting `name` field so that `id_from_name` flattener will work properly.
+    if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(opRes["name"], d, config)); err != nil {
+        return err
+    }
+    {{-       $renderedIdFromName = "true" }}
+    {{-     end }}
+    {{-     if and $prop.Output (not $prop.IgnoreRead) }}
+    if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
+        return err
+    }
+    {{-     else if and $prop.DefaultFromApi (not $prop.IgnoreRead) }}
+    // {{ underscore $prop.Name }} is set by API when unset
+    if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("{{ underscore $prop.Name }}"))) {
+        if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
+            return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
+        }
+    }
+    {{-     end }}
+    {{-   end }}{{/* prop is potentially computed */}}
+    {{- end }}{{/* range */}}
+    {{- else}}
+{{- /*
+    Temporarily keeping these resources the same - but setting properties here should be unnecessary because the impacted fields aren't expected to change as a result of the API request. Will remove in a separate step for clarity.
+ */}}
 {{- range $prop := $.GettableProperties }}
 {{-  if $.IsInIdentity $prop }}
     if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
@@ -359,6 +389,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
 {{- end}}
 {{- end}}
+    {{- end}}
 
     // This may have caused the ID to update - update it if so.
     id, err = tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
