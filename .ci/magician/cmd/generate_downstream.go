@@ -300,9 +300,6 @@ func runMake(downstreamRepo *source.Repo, command string, rnr ExecRunner) error 
 			return err
 		}
 	case "terraform":
-		if _, err := rnr.Run("make", []string{"clean-provider", "OUTPUT_PATH=" + downstreamRepo.Path}, nil); err != nil {
-			return err
-		}
 		if _, err := rnr.Run("make", []string{"provider", "OUTPUT_PATH=" + downstreamRepo.Path, fmt.Sprintf("VERSION=%s", downstreamRepo.Version)}, nil); err != nil {
 			return err
 		}

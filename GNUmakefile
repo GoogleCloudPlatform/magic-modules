@@ -65,7 +65,7 @@ terraform build provider: validate_environment clean-provider mmv1 tpgtools
 	@echo "Provider generation process finished for $(VERSION) in $(OUTPUT_PATH)"
 
 
-mmv1: validate_environment
+mmv1:
 	@echo "Executing mmv1 build for $(OUTPUT_PATH)"; 
   # Chaining these with "&&" is critical so this will exit non-0 if the first
   # command fails, since we're not forcing bash and errexit / pipefail here.
@@ -77,12 +77,12 @@ mmv1: validate_environment
 			go run . --output $(OUTPUT_PATH) --version $(VERSION) $(mmv1_compile); \
 		fi
 
-tpgtools: validate_environment serialize
+tpgtools: serialize
 	@echo "Executing tpgtools build for $(OUTPUT_PATH)";
 	@cd tpgtools;\
 		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
 
-clean-provider: validate_environment
+clean-provider:
 	@if [ -n "$(PRODUCT)" ]; then \
 		printf "\n\e[1;33mWARNING:\e[0m Skipping clean-provider step because PRODUCT ('$(PRODUCT)') is set.\n"; \
 		printf "         Ensure your downstream repository ($(OUTPUT_PATH)) is synchronized with\n"; \
