@@ -102,11 +102,14 @@ data "google_compute_network" "memcache_network" {
 func TestAccMemcacheInstance_tags(t *testing.T) {
 	t.Parallel()
 
-        org := envvar.GetTestOrgFromEnv(t)
-        prefix := fmt.Sprintf("%d", acctest.RandInt(t))
-	name := fmt.Sprintf("tf-test-%s", prefix)
-	tagKey := acctest.BootstrapSharedTestTagKey(t, "memcache-instances-tagkey")
-	tagValue := acctest.BootstrapSharedTestTagValue(t, "memcache-instances-tagvalue", tagKey)
+	tagKey := acctest.BootstrapSharedTestTagKey(t, "memcache_instance-tagkey")
+
+	context := map[string]interface{}{
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      acctest.BootstrapSharedTestTagValue(t, "memcache_instance-tagvalue", tagKey),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -114,7 +117,7 @@ func TestAccMemcacheInstance_tags(t *testing.T) {
 		CheckDestroy:             testAccCheckMemcacheInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMemcacheInstanceTags(prefix, name, map[string]string{org + "/" + tagKey: tagValue}),
+				Config: testAccMemcacheInstanceTags(context),
 			},
 			{
 				ResourceName:            "google_memcache_instance.test",
@@ -126,29 +129,26 @@ func TestAccMemcacheInstance_tags(t *testing.T) {
 	})
 }
 
-func testAccMemcacheInstanceTags(prefix string, name string, tags map[string]string) string {
+func testAccMemcacheInstanceTags(context map[string]interface{}) string {
 
-	r := fmt.Sprintf(`
-  provider "google" {
+	return acctest.Nprintf(`
+
+provider "google" {
   project                 = "kshitij-memcached-test"
   user_project_override   = true
 }
 	
   resource "google_memcache_instance" "test" {
-  name = "%s"
+  name = "tf-test-instance-%{random_suffix}"
   region = "us-central1"
   node_config {
     cpu_count      = 1
     memory_size_mb = 1024
   }
   node_count = 1
-	 tags = {`, name)
-
-	l := ""
-	for key, value := range tags {
-		l += fmt.Sprintf("%q = %q\n", key, value)
-	}
-
-	l += fmt.Sprintf("}\n}")
-	return r + l
+  tags = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
 }
