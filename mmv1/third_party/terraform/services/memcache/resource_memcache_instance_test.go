@@ -133,15 +133,11 @@ func TestAccMemcacheInstance_deletionprotection(t *testing.T) {
 
 func testAccMemcacheInstance_deletionprotection(prefix, name, network, region string) string {
 	return fmt.Sprintf(`
- provider "google" {
-  project                 = "tags-partner-integ-test"
-  user_project_override   = true
-}
 resource "google_memcache_instance" "test" {
   name = "%s"
   region = "%s"
   authorized_network = data.google_compute_network.memcache_network.id
-  deletion_protection = true
+  deletion_protection = false
   node_config {
     cpu_count      = 1
     memory_size_mb = 1024
