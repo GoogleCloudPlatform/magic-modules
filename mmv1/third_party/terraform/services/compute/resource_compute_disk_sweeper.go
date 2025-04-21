@@ -66,7 +66,7 @@ func testSweepDisk(region string) error {
 			id := obj["name"].(string)
 			// Increment count and skip if resource is not sweepable.
 			prefixes := []string{
-				"pvc-", // https://github.com/kubernetes/kubernetes/issues/109328
+				"pvc-", // b/291168201
 			}
 			if !sweeper.IsSweepableTestResource(id) && !sweeper.HasAnyPrefix(id, prefixes) {
 				nonPrefixCount++
