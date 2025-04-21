@@ -42,6 +42,7 @@ make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform
 - `SKIP_CLEAN`: If set to `true`, skips the default pre-generation cleanup of `OUTPUT_PATH` during a full provider build. Has no effect if `PRODUCT` is specified (as cleanup is already skipped). Example: `make provider VERSION=ga OUTPUT_PATH=... SKIP_CLEAN=true`.
 - `RESOURCE`: Limits generation to the specified resource within a particular product. For `mmv1` resources, matches the resource's `name` field (set in its configuration file).For `tpgtools` resources, matches the terraform resource name.
 - `ENGINE`: Modifies `make provider` to only generate code using the specified engine. Valid values are `mmv1` or `tpgtools`. (Providing `tpgtools` will still generate any prerequisite mmv1 files required for tpgtools.)
+- `UNSAFE_BUILD`: If set to `true`, skips the validation check that ensures `OUTPUT_PATH` contains a `go.mod` file identifying it as a Terraform provider module. This check acts as a safety measure against modifying/cleaning up incorrect directories; use this flag with caution only if you are certain `OUTPUT_PATH` is correct but fails validation.
 
 #### Cleaning up old files
 
