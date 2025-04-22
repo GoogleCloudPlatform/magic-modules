@@ -1,3 +1,44 @@
+// ProjectNumberValidation checks if the input string conforms to the pattern:
+// "projects/<project-number>/<anything>"
+func ProjectNumberValidation(i interface{}, k string) (warnings []string, errors []error) {
+	v, ok := i.(string)
+
+	if !ok {
+		errors = append(errors, fmt.Errorf("expected type of field %q to be string, but got %T", k, i))
+		return warnings, errors
+	}
+
+	var projectNumberRegex = regexp.MustCompile(`^projects\/[1-9]\d*\/.*$`)
+	if !projectNumberRegex.MatchString(v) {
+		errors = append(errors, fmt.Errorf(
+			"field %q has an invalid format: %q. Expected format: 'projects/<project-number>/<anything>'. Please note that project IDs are not supported.",
+			k, v,
+		))
+	}
+
+	return warnings, errors
+}
+
+// ProjectNumberValidation checks if the input string conforms to the pattern:
+// "projects/<project-number>/<anything>"
+func AspectProjectNumberValidation(i interface{}, k string) (warnings []string, errors []error) {
+	v, ok := i.(string)
+	if !ok {
+		errors = append(errors, fmt.Errorf("expected type of field %q to be string, but got %T", k, i))
+		return warnings, errors
+	}
+
+	var numberDotAnythingRegex = regexp.MustCompile(`^[1-9]\d*\..*$`)
+
+	if !numberDotAnythingRegex.MatchString(v) {
+		errors = append(errors, fmt.Errorf(
+			"field %q has an invalid format: %q. Expected format: '<project number>.anything'. Please note that project IDs are not supported.",
+			k, v,
+		))
+	}
+
+	return warnings, errors
+}
 
 func FilterAspects(aspectKeySet map[string]struct{}, res map[string]interface{}) {
 	if res["aspects"] == nil {
@@ -58,16 +99,4 @@ func TransformAspects(obj map[string]interface{}) {
 		newMap[key] = valueCopy
 	}
 	obj["aspects"] = newMap
-}
-
-// Suppress diffs when the value read from api
-// has the project number instead of the project name
-func AspectTypeProjectNumberDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
-	var a2, b2 string
-	re := regexp.MustCompile("^\\d+\\.")
-	reN := regexp.MustCompile("^[^\\.]+\\.")
-	replacement := []byte("projects/equal")
-	a2 = string(re.ReplaceAll([]byte(old), replacement))
-	b2 = string(reN.ReplaceAll([]byte(new), replacement))
-	return a2 == b2
 }

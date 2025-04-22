@@ -103,6 +103,8 @@ properties:
   type: String
   required: true
   immutable: true
+  validation:
+    function: ProjectNumberValidation
   description: |
     The relative resource name of the entry type that was used to create this entry, in the format projects/{project_id_or_number}/locations/{locationId}/entryTypes/{entryTypeId}.
 
@@ -130,6 +132,9 @@ properties:
     - name: "aspectKey"
       type: String
       required: true
+      validation:
+        function: AspectProjectNumberValidation
+
       description: |
         Depending on how the aspect is attached to the entry, the format of the aspect key can be one of the following:
 
