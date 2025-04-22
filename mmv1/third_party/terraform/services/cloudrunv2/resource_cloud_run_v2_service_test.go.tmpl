@@ -1562,12 +1562,28 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceWithTags(t *testing.T) {
 	t.Parallel()
 
   tagKey := acctest.BootstrapSharedTestTagKey(t, "cloud-run-tagkey")
+  updatedTagKey := acctest.BootstrapSharedTestTagKey(t, "new-cloud-run-tagkey")
 	context := map[string]interface{}{
 		"org":           envvar.GetTestOrgFromEnv(t),
+    "random_suffix": acctest.RandString(t, 10),
     "tagKey":        tagKey,
     "tagValue":      acctest.BootstrapSharedTestTagValue(t, "cloud-run-tagvalue", tagKey),
-    "random_suffix": acctest.RandString(t, 10),
+    "deletion_protection": true,
 	}
+	updateContext := map[string]interface{}{
+		"org":           envvar.GetTestOrgFromEnv(t),
+    "random_suffix": acctest.RandString(t, 10),
+    "tagKey":        updatedTagKey,
+    "tagValue":      acctest.BootstrapSharedTestTagValue(t, "new-cloud-run-tagvalue", updatedTagKey),
+    "deletion_protection": true,
+	}
+  contextWithoutDeletionProtection := map[string]interface{}{
+    "org":           envvar.GetTestOrgFromEnv(t),
+    "random_suffix": acctest.RandString(t, 10),
+    "tagKey":        tagKey,
+    "tagValue":      acctest.BootstrapSharedTestTagValue(t, "cloud-run-tagvalue", tagKey),
+    "deletion_protection": false,
+  }
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1583,8 +1599,13 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceWithTags(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "deletion_protection", "labels", "location", "name", "terraform_labels", "tags"},
 			},
+      // Update tags tries to replace project but fails due to deletion policy
+      {
+        Config: testAccCloudRunV2Service_cloudrunv2ServiceWithTagsAndDeletionProtection(updateContext),
+        ExpectError: regexp.MustCompile("deletion_policy"),
+      },
 			{
-				Config: testAccCloudRunV2Service_cloudrunv2ServiceWithTagsAndNoDeletionProtection(context),
+				Config: testAccCloudRunV2Service_cloudrunv2ServiceWithTagsAndDeletionProtection(contextWithoutDeletionProtection),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_service.default",
@@ -1602,7 +1623,7 @@ func testAccCloudRunV2Service_cloudrunv2ServiceWithTagsAndDeletionProtection(con
     provider = google-beta
     name     = "tf-test-cloudrun-tags-service%{random_suffix}"
     location = "us-central1"
-    deletion_protection = true
+    deletion_protection = %{deletion_protection}
     ingress = "INGRESS_TRAFFIC_ALL"
     tags = {
     	"%{org}/%{tagKey}" = "%{tagValue}"
@@ -1615,26 +1636,6 @@ func testAccCloudRunV2Service_cloudrunv2ServiceWithTagsAndDeletionProtection(con
   }
   `, context)
   }
-
-func testAccCloudRunV2Service_cloudrunv2ServiceWithTagsAndNoDeletionProtection(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-	  resource "google_cloud_run_v2_service" "default" {
-    provider = google-beta
-    name     = "tf-test-cloudrun-tags-service%{random_suffix}"
-    location = "us-central1"
-    deletion_protection = false
-    ingress = "INGRESS_TRAFFIC_ALL"
-    tags = {
-    	"%{org}/%{tagKey}" = "%{tagValue}"
-
-    template {
-      containers {
-        image = "us-docker.pkg.dev/cloudrun/container/hello"
-      }
-    }
-  }
-  `, context)
-}
 
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccCloudRunV2Service_cloudrunv2ServiceIapUpdate(t *testing.T) {
