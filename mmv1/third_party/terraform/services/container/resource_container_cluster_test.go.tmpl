@@ -7112,7 +7112,7 @@ resource "google_container_cluster" "max_run_duration" {
 func testAccContainerCluster_withFlexStart(clusterName, npName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "flex_start" {
-  min_master_version = "1.32.2-gke.1717000"
+  min_master_version = "1.32.3-gke.1717000"
 
   name                = "%s"
   location            = "us-central1-a"
