@@ -2,8 +2,8 @@ package memcache_test
 
 import (
 	"fmt"
-	"testing"
 	"regexp"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -121,9 +121,9 @@ func TestAccMemcacheInstance_deletionprotection(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"reserved_ip_range_id", "deletion_protection"},
 			},
 			{
-                                Config: testAccMemcacheInstance_deletionprotection(prefix, name, network, "us-west2"),
-                                ExpectError: regexp.MustCompile("deletion_protection"),
-                        },
+				Config:      testAccMemcacheInstance_deletionprotection(prefix, name, network, "us-west2"),
+				ExpectError: regexp.MustCompile("deletion_protection"),
+			},
 			{
 				Config: testAccMemcacheInstance_update(prefix, name, network),
 			},
@@ -133,15 +133,11 @@ func TestAccMemcacheInstance_deletionprotection(t *testing.T) {
 
 func testAccMemcacheInstance_deletionprotection(prefix, name, network, region string) string {
 	return fmt.Sprintf(`
- provider "google" {
-  project                 = "tags-partner-integ-test"
-  user_project_override   = true
-}
 resource "google_memcache_instance" "test" {
   name = "%s"
   region = "%s"
   authorized_network = data.google_compute_network.memcache_network.id
-  deletion_protection = true
+  deletion_protection = false
   node_config {
     cpu_count      = 1
     memory_size_mb = 1024
@@ -160,4 +156,3 @@ data "google_compute_network" "memcache_network" {
 }
 `, name, region, network)
 }
-
