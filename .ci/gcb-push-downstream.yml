@@ -211,6 +211,18 @@ steps:
       args:
         - "check-cassettes"
 
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      id: magician-delete-branches
+      waitFor: ["vcr-merge"]
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv:
+        - "GITHUB_TOKEN_CLASSIC"
+      args:
+        - "delete-branches"
+        - $COMMIT_SHA
+        - $BRANCH_NAME
+
+
 # set extremely long 1 day timeout, in order to ensure that any jams / backlogs can be cleared.
 timeout: 86400s
 options:
