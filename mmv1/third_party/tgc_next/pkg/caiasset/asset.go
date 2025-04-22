@@ -11,13 +11,13 @@ type Asset struct {
 	// The name, in a peculiar format: `\\<api>.googleapis.com/<self_link>`
 	Name string `json:"name"`
 	// The type name in `google.<api>.<resourcename>` format.
-	Type          string           `json:"assetType"`
+	Type          string           `json:"asset_type"`
 	Resource      *AssetResource   `json:"resource,omitempty"`
-	IAMPolicy     *IAMPolicy       `json:"iamPolicy,omitempty"`
-	OrgPolicy     []*OrgPolicy     `json:"orgPolicy,omitempty"`
+	IAMPolicy     *IAMPolicy       `json:"iam_policy,omitempty"`
+	OrgPolicy     []*OrgPolicy     `json:"org_policy,omitempty"`
 	V2OrgPolicies []*V2OrgPolicies `json:"v2_org_policies,omitempty"`
 	Ancestors     []string         `json:"ancestors"`
-	TfplanAddress []string         `json:"tfplanAddress,omitempty"`
+	TfplanAddress []string         `json:"tfplan_address,omitempty"`
 }
 
 // IAMPolicy is the representation of a Cloud IAM policy set on a cloud resource.
@@ -34,8 +34,8 @@ type IAMBinding struct {
 // AssetResource is nested within the Asset type.
 type AssetResource struct {
 	Version              string                 `json:"version"`
-	DiscoveryDocumentURI string                 `json:"discoveryDocumentUri"`
-	DiscoveryName        string                 `json:"discoveryName"`
+	DiscoveryDocumentURI string                 `json:"discovery_document_uri"`
+	DiscoveryName        string                 `json:"discovery_name"`
 	Parent               string                 `json:"parent"`
 	Data                 map[string]interface{} `json:"data"`
 	Location             string                 `json:"location,omitempty"`

@@ -36,10 +36,7 @@ func NewComputeInstanceConverter(provider *schema.Provider) models.Converter {
 }
 
 // Convert converts asset to HCL resource blocks.
-func (c *ComputeInstanceConverter) Convert(asset *caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
-	if asset == nil || asset.Resource == nil && asset.Resource.Data == nil {
-		return nil, nil
-	}
+func (c *ComputeInstanceConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
 	var blocks []*models.TerraformResourceBlock
 	block, err := c.convertResourceData(asset)
 	if err != nil {
@@ -49,8 +46,8 @@ func (c *ComputeInstanceConverter) Convert(asset *caiasset.Asset) ([]*models.Ter
 	return blocks, nil
 }
 
-func (c *ComputeInstanceConverter) convertResourceData(asset *caiasset.Asset) (*models.TerraformResourceBlock, error) {
-	if asset == nil || asset.Resource == nil || asset.Resource.Data == nil {
+func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
 
