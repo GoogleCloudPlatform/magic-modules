@@ -1,0 +1,73 @@
+{{/*
+	The license inside this block applies to this file
+	Copyright 2025 Google Inc.
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+*/ -}}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+
+	l := v.([]interface{})
+	if len(l) == 0 {
+		return nil
+	}
+
+  result := make([]interface{}, len(l))
+    
+	for _, raw := range l {
+		if raw == nil {
+			continue
+		}
+		original := raw.(map[string]interface{})
+		transformed := make(map[string]interface{})
+    startDate:=original["startDate"].((map[string]interface{}))
+		startTime :=original["startTime"].(map[string]interface{})
+    endDate:=original["startDate"].((map[string]interface{}))
+		endTime :=original["startTime"].(map[string]interface{})
+    // start:=fmt.Sprintf("%d-%d-%d %d:%d", startDate["year"].(int),startDate["month"].(int),startDate["day"].(int),startTime["hours"].(int),startTime["minutes"].(int))
+    //end:=fmt.Sprintf("%d-%d-%d %d:%d", endDate["year"].(int),endDate["month"].(int),endDate["day"].(int),endTime["hours"].(int),endTime["minutes"].(int))
+    start:=dateTimeString(startDate,startTime)
+    end:=dateTimeString(endDate,endTime)
+    transformed["start"]=start
+    transformed["end"]=end
+		result = append(result, transformed)
+	}
+
+	return result
+ }
+
+ func dateTimeString(d map[string]interface{},t map[string]interface{}) string {
+
+   var year int
+   var month int
+   var day int
+    var hours int
+   var minutes int
+
+  if floatVal, ok := d["year"].(float64); ok {
+    year =  int(floatVal)
+  }
+  if floatVal, ok := d["month"].(float64); ok {
+    month = int(floatVal)
+  }
+  if floatVal, ok := d["day"].(float64); ok {
+    day = int(floatVal)
+  }
+  if floatVal, ok := t["hours"].(float64); ok {
+    hours = int(floatVal)
+  }
+   if floatVal, ok := t["minutes"].(float64); ok {
+     minutes = int(floatVal)
+   }
+
+   return fmt.Sprintf("%04d-%02d-%02d %02d:%02d", year, month, day, hours,minutes)
+ }
