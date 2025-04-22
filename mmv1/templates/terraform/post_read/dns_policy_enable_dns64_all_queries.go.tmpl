@@ -1,10 +1,8 @@
-if resMap, ok := res.(map[string]interface{}); ok {
-	if dns64Config, ok := resMap["dns64Config"].(map[string]interface{}); ok {
-		if scope, ok := dns64Config["scope"].(map[string]interface{}); ok {
-			if allQueries, ok := scope["allQueries"].(bool); ok {
-				if err := d.Set("enable_dns64_all_queries", allQueries); err != nil {
-					log.Printf("[ERROR] Unable to set enable_dns64_all_queries: %s", err)
-				}
+if dns64Config, ok := res["dns64Config"].(map[string]interface{}); ok {
+	if scope, ok := dns64Config["scope"].(map[string]interface{}); ok {
+		if allQueries, ok := scope["allQueries"].(bool); ok {
+			if err := d.Set("enable_dns64_all_queries", allQueries); err != nil {
+				log.Printf("[ERROR] Unable to set enable_dns64_all_queries: %s", err)
 			}
 		}
 	}
