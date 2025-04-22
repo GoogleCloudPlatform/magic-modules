@@ -13,6 +13,9 @@ resource "google_beyondcorp_application" "{{$.PrimaryResourceId}}" {
     hostname = "my-vm-service.com"
   }
   upstreams {
+    egress_policy {
+      regions = ["us-central1"]
+    }
     network {
         name = "projects/${data.google_project.project.project_id}/global/networks/default"
     }

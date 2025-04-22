@@ -121,6 +121,16 @@ properties:
     item_type:
       type: NestedObject
       properties:
+        - name: egressPolicy
+          type: NestedObject
+          description: Optional. Routing policy information.
+          properties:
+            - name: regions
+              type: Array
+              description: Required. List of regions where the application sends traffic to.
+              required: true
+              item_type:
+                type: String
         - name: network
           type: NestedObject
           exactly_one_of:
