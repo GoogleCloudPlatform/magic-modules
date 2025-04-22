@@ -1,9 +1,5 @@
-resource "google_integrations_client" "client" {
-  location = "us-west2"
-}
-
 resource "google_integrations_auth_config" "{{$.PrimaryResourceId}}" {
-    location = "us-west2"
+    location = "us-east4"
     display_name = "{{index $.Vars "auth_config_name"}}"
     description = "Test auth config created via terraform"
     decrypted_credential {
@@ -13,5 +9,4 @@ resource "google_integrations_auth_config" "{{$.PrimaryResourceId}}" {
             token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
         }
     }
-    depends_on = [google_integrations_client.client]
 }
