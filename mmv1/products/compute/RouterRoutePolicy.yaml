@@ -158,6 +158,7 @@ properties:
                 description: |
                   String indicating the location of the expression for error
                   reporting, e.g. a file name and a position in the file
+    custom_expand: 'templates/terraform/custom_expand/expand_route_policy_terms.go.tmpl'
   - name: 'fingerprint'
     type: Fingerprint
     description: |
