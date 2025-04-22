@@ -1,199 +1,348 @@
-package dataplex
+package dataplex_test
 
 import (
-	"reflect"
-	"sort"
+	//"fmt"
+	//"strings"
 	"testing"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	//"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	//"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	//transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func TestAspectTypeProjectNumberDiffSuppress(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		ExpectDiffSuppress bool
-	}{
-		"different project identifiers": {
-			Old:                "123123131.us-central1.some-aspect",
-			New:                "some-project.us-central1.some-aspect",
-			ExpectDiffSuppress: true,
-		},
-		"different resources": {
-			Old:                "123123131.us-central1.some-aspect",
-			New:                "some-project.us-central1.some-other-aspect",
-			ExpectDiffSuppress: false,
-		},
+func TestAccDataplexEntry_dataplexEntryUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project_number": envvar.GetTestProjectNumberFromEnv(),
+		"random_suffix":  acctest.RandString(t, 10),
 	}
 
-	for tn, tc := range cases {
-		if AspectTypeProjectNumberDiffSuppress("diffSuppress", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
-	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataplexEntryDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataplexEntry_dataplexEntryFullUpdatePreapre(context),
+			},
+			{
+				ResourceName:            "google_dataplex_entry.test_entry_full",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"aspects", "entry_group_id", "entry_id", "location"},
+			},
+			{
+				Config: testAccDataplexEntry_dataplexEntryUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataplex_entry.test_entry_full", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_dataplex_entry.test_entry_full",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"aspects", "entry_group_id", "entry_id", "location"},
+			},
+		},
+	})
 }
 
-func TestTransformAspects(t *testing.T) {
-	cases := map[string]struct {
-		InputObj    map[string]interface{}
-		ExpectedObj map[string]interface{}
-	}{
-		"Empty aspects slice": {
-			InputObj: map[string]interface{}{
-				"aspects": []interface{}{},
-				"other":   "data",
-			},
-			ExpectedObj: map[string]interface{}{
-				"aspects": map[string]interface{}{},
-				"other":   "data",
-			},
-		},
-		"Single aspect": {
-			InputObj: map[string]interface{}{
-				"aspects": []interface{}{
-					map[string]interface{}{"aspectKey": "aspect1", "data": "value1"},
-				},
-			},
-			ExpectedObj: map[string]interface{}{
-				"aspects": map[string]interface{}{
-					"aspect1": map[string]interface{}{"data": "value1"},
-				},
-			},
-		},
-		"Multiple unique aspects": {
-			InputObj: map[string]interface{}{
-				"aspects": []interface{}{
-					map[string]interface{}{"aspectKey": "aspectA", "value": 123, "enabled": true},
-					map[string]interface{}{"aspectKey": "aspectB", "config": "settings"},
-				},
-				"id": "test1",
-			},
-			ExpectedObj: map[string]interface{}{
-				"aspects": map[string]interface{}{
-					"aspectA": map[string]interface{}{"value": 123, "enabled": true},
-					"aspectB": map[string]interface{}{"config": "settings"},
-				},
-				"id": "test1",
-			},
-		},
-		"Aspect with only aspectKey": {
-			InputObj: map[string]interface{}{
-				"aspects": []interface{}{
-					map[string]interface{}{"aspectKey": "minimal"},
-				},
-			},
-			ExpectedObj: map[string]interface{}{
-				"aspects": map[string]interface{}{
-					"minimal": map[string]interface{}{},
-				},
-			},
-		},
-		"Duplicate aspectKeys (last one wins)": {
-			InputObj: map[string]interface{}{
-				"aspects": []interface{}{
-					map[string]interface{}{"aspectKey": "dupKey", "data": "first"},
-					map[string]interface{}{"aspectKey": "otherKey", "data": "unique"},
-					map[string]interface{}{"aspectKey": "dupKey", "data": "second"},
-				},
-			},
-			ExpectedObj: map[string]interface{}{
-				"aspects": map[string]interface{}{
-					"dupKey":   map[string]interface{}{"data": "second"},
-					"otherKey": map[string]interface{}{"data": "unique"},
-				},
-			},
-		},
-	}
+func testAccDataplexEntry_dataplexEntryFullUpdatePreapre(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataplex_aspect_type" "tf-test-aspect-type-full%{random_suffix}-one" {
+  aspect_type_id         = "tf-test-aspect-type-full%{random_suffix}-one"
+  location     = "us-central1"
+  project      = "%{project_number}"
 
-	for name, tc := range cases {
-		inputCopy := make(map[string]interface{}, len(tc.InputObj))
-		for k, v := range tc.InputObj {
-			inputCopy[k] = v
-		}
-
-		t.Run(name, func(t *testing.T) {
-			TransformAspects(inputCopy)
-
-			if !reflect.DeepEqual(inputCopy, tc.ExpectedObj) {
-				t.Errorf("Test case %q failed:\nInput (after transform):\n%#v\nExpected:\n%#v",
-					name, inputCopy, tc.ExpectedObj)
-			}
-		})
-	}
+  metadata_template = <<EOF
+{
+  "name": "tf-test-template",
+  "type": "record",
+  "recordFields": [
+    {
+      "name": "type",
+      "type": "enum",
+      "annotations": {
+        "displayName": "Type",
+        "description": "Specifies the type of view represented by the entry."
+      },
+      "index": 1,
+      "constraints": {
+        "required": true
+      },
+      "enumValues": [
+        {
+          "name": "VIEW",
+          "index": 1
+        }
+      ]
+    }
+  ]
+}
+EOF
 }
 
-func TestInverseTransformAspectsConcise(t *testing.T) {
-	cases := map[string]struct {
-		InputObj    map[string]interface{}
-		ExpectedObj map[string]interface{}
-	}{
-		"Empty": {
-			InputObj:    map[string]interface{}{"aspects": map[string]interface{}{}, "id": 1},
-			ExpectedObj: map[string]interface{}{"aspects": []interface{}{}, "id": 1},
-		},
-		"Simple": {
-			InputObj:    map[string]interface{}{"aspects": map[string]interface{}{"k1": map[string]interface{}{"d": "v1"}}},
-			ExpectedObj: map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "k1", "d": "v1"}}},
-		},
-		"Multiple": {
-			InputObj: map[string]interface{}{"aspects": map[string]interface{}{
-				"k2": map[string]interface{}{"v": 2},
-				"k1": map[string]interface{}{"v": 1},
-			}},
-			ExpectedObj: map[string]interface{}{"aspects": []interface{}{
-				map[string]interface{}{"aspectKey": "k1", "v": 1},
-				map[string]interface{}{"aspectKey": "k2", "v": 2},
-			}},
-		},
-		"InnerMapEmpty": {
-			InputObj:    map[string]interface{}{"aspects": map[string]interface{}{"k_empty": map[string]interface{}{}}},
-			ExpectedObj: map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "k_empty"}}},
-		},
-		"InnerMapOverwritesKey": {
-			InputObj:    map[string]interface{}{"aspects": map[string]interface{}{"outer": map[string]interface{}{"aspectKey": "inner", "data": "stuff"}}},
-			ExpectedObj: map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "outer", "data": "stuff"}}},
-		},
-		"ComplexInnerMap": {
-			InputObj: map[string]interface{}{"aspects": map[string]interface{}{
-				"complex_key": map[string]interface{}{"field_a": 123, "field_b": true, "field_c": "hello world"},
-			}},
-			ExpectedObj: map[string]interface{}{"aspects": []interface{}{
-				map[string]interface{}{"aspectKey": "complex_key", "field_a": 123, "field_b": true, "field_c": "hello world"},
-			}},
-		},
-		"MixedInnerMaps": {
-			InputObj: map[string]interface{}{"aspects": map[string]interface{}{
-				"normal":    map[string]interface{}{"data": 1},
-				"empty":     map[string]interface{}{},
-				"overwrite": map[string]interface{}{"aspectKey": "ignored", "val": true},
-			}, "other_data": "preserved"},
-			ExpectedObj: map[string]interface{}{"aspects": []interface{}{
-				map[string]interface{}{"aspectKey": "empty"}, // Alphabetical for stable expected def
-				map[string]interface{}{"aspectKey": "normal", "data": 1},
-				map[string]interface{}{"aspectKey": "overwrite", "val": true},
-			}, "other_data": "preserved"},
-		},
-	}
+resource "google_dataplex_aspect_type" "tf-test-aspect-type-full%{random_suffix}-two" {
+  aspect_type_id         = "tf-test-aspect-type-full%{random_suffix}-two"
+  location     = "us-central1"
+  project      = "%{project_number}"
 
-	for name, tc := range cases {
-		t.Run(name, func(t *testing.T) {
-			InverseTransformAspects(tc.InputObj)
-
-			sortSlice := func(slice []interface{}) {
-				sort.SliceStable(slice, func(i, j int) bool {
-					keyI := slice[i].(map[string]interface{})["aspectKey"].(string)
-					keyJ := slice[j].(map[string]interface{})["aspectKey"].(string)
-					return keyI < keyJ
-				})
-			}
-
-			if actualSlice, ok := tc.InputObj["aspects"].([]interface{}); ok {
-				sortSlice(actualSlice)
-			}
-			if expectedSlice, ok := tc.ExpectedObj["aspects"].([]interface{}); ok {
-				sortSlice(expectedSlice)
-			}
-
-			if !reflect.DeepEqual(tc.InputObj, tc.ExpectedObj) {
-				t.Errorf("Test case %q failed:\nActual (sorted slice):\n%#v\nExpected (sorted slice):\n%#v", name, tc.InputObj, tc.ExpectedObj)
-			}
-		})
-	}
+  metadata_template = <<EOF
+{
+  "name": "tf-test-template",
+  "type": "record",
+  "recordFields": [
+    {
+      "name": "story",
+      "type": "enum",
+      "annotations": {
+        "displayName": "Story",
+        "description": "Specifies the story of an entry."
+      },
+      "index": 1,
+      "constraints": {
+        "required": true
+      },
+      "enumValues": [
+        {
+          "name": "SEQUENCE",
+          "index": 1
+        },
+        {
+          "name": "DESERT_ISLAND",
+          "index": 2
+        }
+      ]
+    }
+  ]
 }
+EOF
+}
+
+resource "google_dataplex_entry_group" "tf-test-entry-group-full%{random_suffix}" {
+  entry_group_id = "tf-test-entry-group-full%{random_suffix}"
+  project = "%{project_number}"
+  location = "us-central1"
+}
+
+resource "google_dataplex_entry_type" "tf-test-entry-type-full%{random_suffix}" {
+  entry_type_id = "tf-test-entry-type-full%{random_suffix}"
+  project = "%{project_number}"
+  location = "us-central1"
+
+  labels = { "tag": "test-tf" }
+  display_name = "terraform entry type"
+  description = "entry type created by Terraform"
+
+  type_aliases = ["TABLE", "DATABASE"]
+  platform = "GCS"
+  system = "CloudSQL"
+
+  required_aspects {
+    type = google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-one.name
+  }
+}
+
+resource "google_dataplex_entry" "test_entry_full" {
+  entry_group_id = google_dataplex_entry_group.tf-test-entry-group-full%{random_suffix}.entry_group_id
+  project = "%{project_number}"
+  location = "us-central1"
+  entry_id = "tf-test-entry-full%{random_suffix}"
+  entry_type = google_dataplex_entry_type.tf-test-entry-type-full%{random_suffix}.name
+  fully_qualified_name = "bigquery:%{project_number}.test-dataset"
+  parent_entry = "projects/%{project_number}/locations/us-central1/entryGroups/tf-test-entry-group-full%{random_suffix}/entries/some-other-entry"
+  entry_source {
+    resource = "bigquery:%{project_number}.test-dataset"
+    system = "System III"
+    platform = "BigQuery"
+    display_name = "Human readable name"
+    description = "Description from source system"
+    labels = {
+      "old-label": "old-value"
+      "some-label": "some-value"
+    }
+
+    ancestors {
+      name = "ancestor-one"
+      type = "type-one"
+    }
+
+    ancestors {
+      name = "ancestor-two"
+      type = "type-two"
+    }
+
+    create_time = "2023-08-03T19:19:00.094Z"
+    update_time = "2023-08-03T20:19:00.094Z"
+  }
+
+  aspects {
+    aspect_key = "%{project_number}.us-central1.tf-test-aspect-type-full%{random_suffix}-one"
+    aspect_value {
+      data = <<EOF
+          {"type": "VIEW"    }
+        EOF
+    }
+  }
+
+  aspects {
+    aspect_key = "%{project_number}.us-central1.tf-test-aspect-type-full%{random_suffix}-two"
+    aspect_value {
+      data = <<EOF
+          {"story": "SEQUENCE"    }
+        EOF
+    }
+  }
+}
+`, context)
+}
+
+func testAccDataplexEntry_dataplexEntryUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataplex_aspect_type" "tf-test-aspect-type-full%{random_suffix}-one" {
+  aspect_type_id         = "tf-test-aspect-type-full%{random_suffix}-one"
+  location     = "us-central1"
+  project      = "%{project_number}"
+
+  metadata_template = <<EOF
+{
+  "name": "tf-test-template",
+  "type": "record",
+  "recordFields": [
+    {
+      "name": "type",
+      "type": "enum",
+      "annotations": {
+        "displayName": "Type",
+        "description": "Specifies the type of view represented by the entry."
+      },
+      "index": 1,
+      "constraints": {
+        "required": true
+      },
+      "enumValues": [
+        {
+          "name": "VIEW",
+          "index": 1
+        }
+      ]
+    }
+  ]
+}
+EOF
+}
+
+resource "google_dataplex_aspect_type" "tf-test-aspect-type-full%{random_suffix}-two" {
+  aspect_type_id         = "tf-test-aspect-type-full%{random_suffix}-two"
+  location     = "us-central1"
+  project      = "%{project_number}"
+
+  metadata_template = <<EOF
+{
+  "name": "tf-test-template",
+  "type": "record",
+  "recordFields": [
+    {
+      "name": "story",
+      "type": "enum",
+      "annotations": {
+        "displayName": "Story",
+        "description": "Specifies the story of an entry."
+      },
+      "index": 1,
+      "constraints": {
+        "required": true
+      },
+      "enumValues": [
+        {
+          "name": "SEQUENCE",
+          "index": 1
+        },
+        {
+          "name": "DESERT_ISLAND",
+          "index": 2
+        }
+      ]
+    }
+  ]
+}
+EOF
+}
+
+resource "google_dataplex_entry_group" "tf-test-entry-group-full%{random_suffix}" {
+  entry_group_id = "tf-test-entry-group-full%{random_suffix}"
+  project = "%{project_number}"
+  location = "us-central1"
+}
+
+resource "google_dataplex_entry_type" "tf-test-entry-type-full%{random_suffix}" {
+  entry_type_id = "tf-test-entry-type-full%{random_suffix}"
+  project = "%{project_number}"
+  location = "us-central1"
+
+  labels = { "tag": "test-tf" }
+  display_name = "terraform entry type"
+  description = "entry type created by Terraform"
+
+  type_aliases = ["TABLE", "DATABASE"]
+  platform = "GCS"
+  system = "CloudSQL"
+
+  required_aspects {
+    type = google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-one.name
+  }
+}
+
+resource "google_dataplex_entry" "test_entry_full" {
+  entry_group_id = google_dataplex_entry_group.tf-test-entry-group-full%{random_suffix}.entry_group_id
+  project = "%{project_number}"
+  location = "us-central1"
+  entry_id = "tf-test-entry-full%{random_suffix}"
+  entry_type = google_dataplex_entry_type.tf-test-entry-type-full%{random_suffix}.name
+  fully_qualified_name = "bigquery:%{project_number}.test-dataset-modified"
+  parent_entry = "projects/%{project_number}/locations/us-central1/entryGroups/tf-test-entry-group-full%{random_suffix}/entries/some-other-entry"
+  entry_source {
+    resource = "bigquery:%{project_number}.test-dataset-modified"
+    system = "System III - modified"
+    platform = "BigQuery-modified"
+    display_name = "Human readable name-modified"
+    description = "Description from source system-modified"
+    labels = {
+      "some-label": "some-value-modified"
+      "new-label": "new-value"
+    }
+
+    ancestors {
+      name = "ancestor-one"
+      type = "type-one"
+    }
+
+    ancestors {
+      name = "ancestor-two"
+      type = "type-two"
+    }
+
+    create_time = "2024-08-03T19:19:00.094Z"
+    update_time = "2024-08-03T20:19:00.094Z"
+  }
+
+  aspects {
+    aspect_key = "%{project_number}.us-central1.tf-test-aspect-type-full%{random_suffix}-two"
+    aspect_value {
+      data = <<EOF
+          {"story": "DESERT_ISLAND"    }
+        EOF
+    }
+  }
+}
+`, context)
+}
+

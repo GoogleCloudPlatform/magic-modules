@@ -1,22 +1,41 @@
 
+func FilterAspects(aspectKeySet map[string]struct{}, res map[string]interface{}) {
+	if res["aspects"] == nil {
+		return
+	}
+	aspectsMap := res["aspects"].(map[string]interface{})
+	for key := range aspectsMap {
+		if _, keep := aspectKeySet[key]; !keep {
+			delete(aspectsMap, key)
+		}
+	}
+}
+
+func AddAspectsToSet(aspectKeySet map[string]struct{}, aspects interface{}) {
+	for _, aspectItemRaw := range aspects.([]interface{}) {
+		aspectMap := aspectItemRaw.(map[string]interface{})
+		keyString := aspectMap["aspect_key"].(string)
+		aspectKeySet[keyString] = struct{}{}
+	}
+}
+
 // InverseTransformAspects converts the "aspects" map back to a slice of maps,
 // re-inserting the "aspectKey". Modifies obj in-place.
-func InverseTransformAspects(obj map[string]interface{}) {
-	originalMap := obj["aspects"].(map[string]interface{})
+func InverseTransformAspects(res map[string]interface{}) {
+	if res["aspects"] == nil {
+		return
+	}
+	originalMap := res["aspects"].(map[string]interface{})
 	newSlice := make([]interface{}, 0, len(originalMap))
 
 	for key, value := range originalMap {
 		innerMap := value.(map[string]interface{})
-		innerMapCopy := make(map[string]interface{}, len(innerMap)+1)
-
-		for k, v := range innerMap {
-			innerMapCopy[k] = v
-		}
-		innerMapCopy["aspectKey"] = key
-
-		newSlice = append(newSlice, innerMapCopy)
+		box := make(map[string]interface{}, 2)
+		box["aspectKey"] = key
+		box["aspectValue"] = innerMap
+		newSlice = append(newSlice, box)
 	}
-	obj["aspects"] = newSlice
+	res["aspects"] = newSlice
 }
 
 // TransformAspects concisely transforms the "aspects" slice within obj into a map.
@@ -24,16 +43,17 @@ func InverseTransformAspects(obj map[string]interface{}) {
 // map[string]interface{} elements, each with a string "aspectKey".
 // Modifies obj in-place.
 func TransformAspects(obj map[string]interface{}) {
+	if obj["aspects"] == nil {
+		return
+	}
 	originalSlice := obj["aspects"].([]interface{})
 	newMap := make(map[string]interface{}, len(originalSlice))
 	for _, item := range originalSlice {
 		aspectMap := item.(map[string]interface{})
 		key := aspectMap["aspectKey"].(string)
 		valueCopy := make(map[string]interface{}, len(aspectMap)-1)
-		for k, v := range aspectMap {
-			if k != "aspectKey" {
-				valueCopy[k] = v
-			}
+		for k, v := range aspectMap["aspectValue"].(map[string]interface{}) {
+			valueCopy[k] = v
 		}
 		newMap[key] = valueCopy
 	}
