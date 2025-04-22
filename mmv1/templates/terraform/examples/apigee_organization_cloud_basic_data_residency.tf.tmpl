@@ -1,0 +1,12 @@
+provider "google" {
+  apigee_custom_endpoint = "https://eu-apigee.googleapis.com/v1/"
+}
+
+data "google_client_config" "current" {}
+
+resource "google_apigee_organization" "org" {
+  description         = "Terraform-provisioned basic Apigee Org under European Union hosting jurisdiction."
+  project_id          = data.google_client_config.current.project
+  disable_vpc_peering = true
+}
+
