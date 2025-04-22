@@ -355,7 +355,10 @@ properties:
             - name: 'ipv4Address'
               type: String
               description: 'IPv4 address of a target name server.'
-              required: true
+            - name: 'domainName'
+              type: String
+              description: 'Fully qualified domain name for the forwarding target.'
+              min_version: 'beta'
             - name: 'forwardingPath'
               type: Enum
               description: |
@@ -365,6 +368,9 @@ properties:
               enum_values:
                 - 'default'
                 - 'private'
+          exactly_one_of:
+            - 'ipv4_address'
+            - 'domain_name'
   - name: 'peeringConfig'
     type: NestedObject
     description: |

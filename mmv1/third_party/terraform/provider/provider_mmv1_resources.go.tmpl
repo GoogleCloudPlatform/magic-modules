@@ -113,6 +113,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_snapshot":                          compute.DataSourceGoogleComputeSnapshot(),
 	"google_compute_ssl_certificate":                   compute.DataSourceGoogleComputeSslCertificate(),
 	"google_compute_ssl_policy":                        compute.DataSourceGoogleComputeSslPolicy(),
+	"google_compute_storage_pool_types":                compute.DataSourceGoogleComputeStoragePoolTypes(),
 	"google_compute_subnetwork":                        compute.DataSourceGoogleComputeSubnetwork(),
 	"google_compute_subnetworks":                       compute.DataSourceGoogleComputeSubnetworks(),
 	"google_compute_vpn_gateway":                       compute.DataSourceGoogleComputeVpnGateway(),
@@ -382,6 +383,9 @@ var handwrittenResources = map[string]*schema.Resource{
 	"google_endpoints_service":                     servicemanagement.ResourceEndpointsService(),
 	"google_folder":                                resourcemanager.ResourceGoogleFolder(),
 	"google_folder_organization_policy":            resourcemanager.ResourceGoogleFolderOrganizationPolicy(),
+	{{- if ne $.TargetVersionName "ga" }}
+	"google_folder_service_identity":               resourcemanager.ResourceFolderServiceIdentity(),
+	{{- end }}
 	"google_logging_billing_account_sink":          logging.ResourceLoggingBillingAccountSink(),
 	"google_logging_billing_account_exclusion":     logging.ResourceLoggingExclusion(logging.BillingAccountLoggingExclusionSchema, logging.NewBillingAccountLoggingExclusionUpdater, logging.BillingAccountLoggingExclusionIdParseFunc),
 	"google_logging_billing_account_bucket_config": logging.ResourceLoggingBillingAccountBucketConfig(),
