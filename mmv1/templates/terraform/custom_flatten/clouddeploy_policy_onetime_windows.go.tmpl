@@ -31,10 +31,8 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 		transformed := make(map[string]interface{})
     startDate:=original["startDate"].((map[string]interface{}))
 		startTime :=original["startTime"].(map[string]interface{})
-    endDate:=original["startDate"].((map[string]interface{}))
-		endTime :=original["startTime"].(map[string]interface{})
-    // start:=fmt.Sprintf("%d-%d-%d %d:%d", startDate["year"].(int),startDate["month"].(int),startDate["day"].(int),startTime["hours"].(int),startTime["minutes"].(int))
-    //end:=fmt.Sprintf("%d-%d-%d %d:%d", endDate["year"].(int),endDate["month"].(int),endDate["day"].(int),endTime["hours"].(int),endTime["minutes"].(int))
+    endDate:=original["endDate"].((map[string]interface{}))
+		endTime :=original["endTime"].(map[string]interface{})
     start:=dateTimeString(startDate,startTime)
     end:=dateTimeString(endDate,endTime)
     transformed["start"]=start
