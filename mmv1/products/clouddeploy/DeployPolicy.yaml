@@ -176,7 +176,9 @@ properties:
                   type: Array
                   description: "Optional. One-time windows within which actions are restricted."
                   custom_expand: "templates/terraform/custom_expand/clouddeploy_policy_onetime_windows.go.tmpl"
-                  custom_flatten: "templates/terraform/custom_flatten/clouddeploy_policy_onetime_windows.go.tmpl"
+                  ignore_read: true
+
+                  #                  custom_flatten: "templates/terraform/custom_flatten/clouddeploy_policy_onetime_windows.go.tmpl"
                   item_type:
                     type: NestedObject
                     properties:
