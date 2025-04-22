@@ -54,9 +54,5 @@ resource "google_resource_manager_capability" "capability" {
   capability_name  = "app-management"
   depends_on = [time_sleep.wait_30s]
 }
-provider "google-beta" {
-  user_project_override = true
-  billing_project     = "terraform-dev-govardhanit"
-}
 `, context)
 }

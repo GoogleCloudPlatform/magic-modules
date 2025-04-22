@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,14 +13,14 @@
 
 ---
   name: 'Capability'
-  # TODO
-  description: |
-    Capability
-  # TODO   
+  description:
+    An app-enabled folder is a folder within the Google Cloud resource hierarchy that has been configured for application management.
+    This folder lets you define and manage App Hub applications. These applications are functional groupings of services and workloads
+    that span multiple projects within that folder and its descendant projects.  
   references:
     guides:
-      'Official Documentation': ''
-    api: ''
+      'Official Documentation': 'https://cloud.google.com/resource-manager/docs/manage-applications'
+    api: 'https://cloud.google.com/resource-manager/reference/rest'
   min_version: beta
 
   import_format:
