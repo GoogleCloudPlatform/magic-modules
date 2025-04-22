@@ -613,6 +613,27 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
         finish_digit = "#"
       }
     }
+
+    knowledge_connector_settings {
+      enabled = true
+      trigger_fulfillment {
+        messages {
+          responseType = "HANDLER_PROMPT"
+          channel = "some-channel"
+          messages {
+            output_audio_text {
+              text = "some output text"
+            }
+          }
+        }
+      }
+      data_store_connections {
+        data_store_type = "UNSTRUCTURED"
+        data_store = "projects/${data.google_project.project.number}/locations/${google_dialogflow_cx_agent.agent_page.location}/collections/default_collection/dataStores/some-datastore"
+        document_processing_mode = "DOCUMENTS"
+      }
+      target_page = google_dialogflow_cx_page.my_page2.id
+    }
   }
 
   resource "google_dialogflow_cx_page" "my_page2" {
@@ -626,6 +647,9 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
     generic_web_service {
       uri = "https://example.com"
     }
+  }
+
+  data "google_project" "project" {
   }
 `, context)
 }

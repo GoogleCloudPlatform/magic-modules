@@ -364,6 +364,30 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
         enable_consent_based_redaction = true
       }
     }
+
+    knowledge_connector_settings {
+      enabled = true
+      trigger_fulfillment {
+        messages {
+          channel = "some-channel"
+          end_interaction {}
+        }
+      }
+      data_store_connections {
+        data_store_type = "UNSTRUCTURED"
+        data_store = "projects/${data.google_project.project.number}/locations/${google_dialogflow_cx_agent.agent_entity.location}/collections/default_collection/dataStores/some-datastore"
+        document_processing_mode = "DOCUMENTS"
+      }
+      target_page = google_dialogflow_cx_page.my_page.id
+    }
+  }
+
+  resource "google_dialogflow_cx_page" "my_page" {
+    parent       = google_dialogflow_cx_agent.agent_page.start_flow
+    display_name = "MyPage"
+  }
+
+  data "google_project" "project" {
   }
 `, context)
 }
