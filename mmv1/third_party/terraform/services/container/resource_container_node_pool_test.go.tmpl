@@ -4477,7 +4477,7 @@ func TestAccContainerNodePool_withFlexStart(t *testing.T) {
 func testAccContainerNodePool_withFlexStart(clusterName, np, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
-  min_master_version = "1.32.2-gke.1652003"
+  min_master_version = "1.32.2-gke.1717000"
   
   name                = "%s"
   location            = "us-central1-a"
