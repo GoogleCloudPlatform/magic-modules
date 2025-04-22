@@ -328,8 +328,8 @@ func setProvider(forceProvider, version string, productApi *api.Product, startTi
 		return provider.NewTerraformGoogleConversion(productApi, version, startTime)
 	case "tgc_cai2hcl":
 		return provider.NewCaiToTerraformConversion(productApi, version, startTime)
-	case "tgc_v7":
-		return provider.NewTerraformGoogleConversionV7(productApi, version, startTime)
+	case "tgc_next":
+		return provider.NewTerraformGoogleConversionNext(productApi, version, startTime)
 	case "oics":
 		return provider.NewTerraformOiCS(productApi, version, startTime)
 	default:

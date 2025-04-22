@@ -11,8 +11,7 @@ Your PR generated some diffs in downstreams - here they are.
 {{end -}}
 {{end -}}
 
-{{- $breakingChangesLength := len .BreakingChanges }}
-{{- if gt $breakingChangesLength 0}}
+{{if gt (len .BreakingChanges) 0}}
 ## Breaking Change(s) Detected
 
 The following breaking change(s) were detected within your pull request.
@@ -39,6 +38,39 @@ Please add an acceptance test which includes these fields. The test should inclu
 
 {{- end }}
 {{end}}
+
+{{if gt (len .MissingServiceLabels) 0}}
+## Missing service labels
+
+The following new resources do not have corresponding service labels:
+
+{{- range .MissingServiceLabels}}
+- {{.}}{{end}}
+
+If you believe this detection to be incorrect please raise the concern with your reviewer. Googlers: This error is safe to ignore once you've completed go/fix-missing-service-labels.
+An `override-missing-service-label` label can be added to allow merging.
+{{end}}
+
+{{- if and (.MissingDocs) (or .MissingDocs.Resource .MissingDocs.DataSource) }}
+## Missing doc report (experimental)
+
+{{ if .MissingDocs.Resource }}
+The following resources have fields missing in documents. 
+{{ range $inx, $missingDocInfo := .MissingDocs.Resource }}
+- `{{ $missingDocInfo.Name }}` 
+  - Expected Document Path: `{{ $missingDocInfo.FilePath }}`
+  - Fields: `{{ $missingDocInfo.Fields }}`
+{{- end }}
+{{- end }}
+
+{{ if .MissingDocs.DataSource }}
+The following data sources are missing documents:
+{{ range $inx, $missingDocInfo := .MissingDocs.DataSource }}
+- `{{ $missingDocInfo.Name }}`, expect file `{{ $missingDocInfo.FilePath }}` to exist.
+{{- end }}
+{{- end }}
+
+{{- end }}
 
 {{- $errorsLength := len .Errors}}
 {{- if gt $errorsLength 0}}
