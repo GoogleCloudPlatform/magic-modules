@@ -676,7 +676,7 @@ func TestAccComputeInstanceTemplate_EncryptKMS(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstanceTemplate_encryptionKMS(acctest.RandString(t, 10), tpgresource.GetResourceNameFromSelfLink(kms.CryptoKey.Name), tpgresource.GetResourceNameFromSelfLink(kms.KeyRing.Name)),
+				Config: testAccComputeInstanceTemplate_encryptionKMS(acctest.RandString(t, 10), kms.CryptoKey.Name, tpgresource.GetResourceNameFromSelfLink(kms.KeyRing.Name)),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 				),
@@ -3703,23 +3703,13 @@ data "google_compute_image" "my_image" {
   project = "debian-cloud"
 }
 
-data "google_kms_key_ring" "ring" {
-  name     = "%s"
-  location = "us-central1"
-}
-
-data "google_kms_crypto_key" "key" {
-  name     = "%s"
-  key_ring = data.google_kms_key_ring.ring.id
-}
-
 resource "google_service_account" "test" {
   account_id   = "tf-test-sa-%s"
   display_name = "KMS Ops Account"
 }
 
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
-  crypto_key_id = data.google_kms_crypto_key.key.id
+  crypto_key_id = "%s"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        = "serviceAccount:${google_service_account.test.email}"
 }
@@ -3749,7 +3739,7 @@ resource "google_compute_instance_template" "foobar" {
     my_label = "foobar"
   }
 }
-`, keyRingName, kmsLink, suffix, suffix, kmsLink)
+`, suffix, kmsLink, suffix, kmsLink)
 }
 
 func testAccComputeInstanceTemplate_sourceSnapshotEncryptionKey_RawKey(context map[string]interface{}) string {
@@ -3875,7 +3865,7 @@ resource "google_compute_disk" "disk" {
 }
 
 resource "google_compute_image" "image" {
-  name         = "debian-image"
+  name         = "tf-test-debian-image-%{random_suffix}"
   source_disk   = google_compute_disk.disk.id
   image_encryption_key {
 	raw_key = "%{raw_key}"
@@ -3918,7 +3908,7 @@ resource "google_compute_disk" "disk" {
 }
 
 resource "google_compute_image" "image" {
-  name         = "debian-image"
+  name         = "tf-test-debian-image-%{random_suffix}"
   source_disk   = google_compute_disk.disk.id
   image_encryption_key {
 	rsa_encrypted_key = "%{rsa_encrypted_key}"

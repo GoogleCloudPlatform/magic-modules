@@ -4395,7 +4395,7 @@ resource "google_compute_disk" "disk" {
 }
 
 resource "google_compute_image" "image" {
-  name         = "debian-image"
+  name         = "tf-test-debian-image-%{random_suffix}"
   source_disk   = google_compute_disk.disk.id
   image_encryption_key {
 	raw_key = "%{raw_key}"
@@ -4439,7 +4439,7 @@ resource "google_compute_disk" "disk" {
 }
 
 resource "google_compute_image" "image" {
-  name         = "debian-image"
+  name         = "tf-test-debian-image-%{random_suffix}"
   source_disk   = google_compute_disk.disk.id
   image_encryption_key {
 	rsa_encrypted_key = "%{rsa_encrypted_key}"
