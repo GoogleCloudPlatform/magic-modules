@@ -28,9 +28,32 @@ jobs:
           if [ ! -z "$yamlfiles" ]; then
             echo "yamlfiles=repo/${yamlfiles//$'\n'/ repo/}" >> $GITHUB_OUTPUT
           fi
+          newyamlfiles=$(git diff --name-only origin/${{ github.base_ref }} --diff-filter=A -- mmv1/products)
+          if [ ! -z "$newyamlfiles" ]; then
+            echo "newyamlfiles=repo/${newyamlfiles//$'\n'/ repo/}" >> $GITHUB_OUTPUT 
+          fi
       - name: Install yamllint
         if: ${{ !failure() && steps.pull_request.outputs.yamlfiles != '' }}
         run: pip install yamllint==1.32.0 pyyaml==6.0.1 pathspec==0.12.1 --no-deps
       - name: Lint YAML files
         if: ${{ !failure() && steps.pull_request.outputs.yamlfiles != '' }}
         run: yamllint -c repo/.yamllint ${{steps.pull_request.outputs.yamlfiles}}
+      - name: Check copyright
+        if: ${{ !failure() && steps.pull_request.outputs.newyamlfiles != '' }}
+        run: |
+            has_error="false"
+            newyamlfiles="${{ steps.pull_request.outputs.newyamlfiles }}"
+            for file in $newyamlfiles; do
+              copyright_exist="false"
+              grep -q -E -i '.*copyright.*google.*' $file && copyright_exist="true"
+              if [ $copyright_exist == "false" ]; then               
+                echo "Copyright statement NOT found in $file."
+                has_error="true"
+              fi
+            done
+            if [ "$has_error" == "true" ]; then
+              exit 1
+            else
+              echo "All new product yaml files are valid."
+            fi    
+           
