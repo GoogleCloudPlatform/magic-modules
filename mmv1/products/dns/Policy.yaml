@@ -54,7 +54,7 @@ examples:
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
 virtual_fields:
-  - name: 'enableDns64AllQueries'
+  - name: 'enable_dns64_all_queries'
     type: Boolean
     description: |
       Specifies whether to allow networks bound to this policy to use DNS64
