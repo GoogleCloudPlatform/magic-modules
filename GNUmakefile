@@ -93,9 +93,9 @@ clean-provider:
 		echo "Executing clean-provider in $(OUTPUT_PATH)..."; \
 		( \
 			cd $(OUTPUT_PATH) && \
-			go mod download;
 			echo "---> Changing directory to $(OUTPUT_PATH)" && \
-			echo "---> Running go mod download..." && \
+			echo "---> Downloading Go module dependencies... (Ensures tools like gofmt can find relevant code)" && \
+			go mod download && \
 			echo "---> Finding files to remove..." && \
 			find . -type f \
 				-not -wholename "./.git*" \
@@ -112,6 +112,7 @@ clean-provider:
 				-not -name ".go-version" \
 				-not -name ".hashibot.hcl" \
 				-not -name "go.mod" \
+				-not -name "go.sum" \
 				-not -wholename "./examples*" \
 				-print0 | xargs -0 --no-run-if-empty rm -f && \
 			echo "---> clean-provider actions finished." \
