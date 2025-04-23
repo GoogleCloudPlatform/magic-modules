@@ -35,6 +35,7 @@ description: |
  the next apply. You can trigger a manual
  [zone switch](https://cloud.google.com/netapp/volumes/docs/configure-and-use/storage-pools/edit-or-delete-storage-pool#switch_active_and_replica_zones)
  via Terraform by swapping the value of the `zone` and `replica_zone` parameters in your HCL code.
+ Note: Custom Performance FLEX storage pools are supported in beta provider currently.
 
 references:
   guides:
@@ -172,3 +173,19 @@ properties:
       Optional. True if the storage pool supports Auto Tiering enabled volumes. Default is false.
       Auto-tiering can be enabled after storage pool creation but it can't be disabled once enabled.
     immutable: true
+  - name: 'customPerformanceEnabled'
+    type: Boolean
+    description: |
+      Optional. True if using Independent Scaling of capacity and performance (Hyperdisk). Default is false.
+    immutable: true
+    min_version: 'beta'
+  - name: 'totalThroughputMibps'
+    type: String
+    description: |
+      Optional. Custom Performance Total Throughput of the pool (in MiB/s).
+    min_version: 'beta'
+  - name: 'totalIops'
+    type: String
+    description: |
+      Optional. Custom Performance Total IOPS of the pool If not provided, it will be calculated based on the totalThroughputMibps
+    min_version: 'beta'
