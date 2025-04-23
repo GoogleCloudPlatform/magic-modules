@@ -57,7 +57,7 @@ resource "google_bigtable_instance" "instance" {
   name          = "%s"
   cluster {
     cluster_id = "%s-c"
-    zone       = "us-east7-b"
+    zone       = "us-east1-b"
   }
 
   deletion_protection = false

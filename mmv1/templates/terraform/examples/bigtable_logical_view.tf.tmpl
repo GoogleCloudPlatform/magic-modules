@@ -2,7 +2,7 @@ resource "google_bigtable_instance" "instance" {
   name = "{{index $.Vars "instance_name"}}"
   cluster {
     cluster_id   = "cluster-1"
-    zone         = "us-east7-b"
+    zone         = "us-east1-b"
     num_nodes    = 3
     storage_type = "HDD"
   }
