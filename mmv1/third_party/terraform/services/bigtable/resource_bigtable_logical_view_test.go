@@ -77,7 +77,7 @@ resource "google_bigtable_logical_view" "logical_view" {
   instance        = google_bigtable_instance.instance.name
   deletion_protection = %v
   query = <<EOT
-SELECT _key, CF['%s'] 
+SELECT _key, CF['%s'] AS column
 FROM %s
 EOT  
 
