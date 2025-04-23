@@ -70,7 +70,7 @@ The following arguments are supported:
 {{- end }}
 
 {{ range $v := $.Objects }}
-  {{- if and ($v.Required) ($v.ShouldGenerateNestedSchema) }}
+  {{- if and ($v.Required) ($v.IsTopLevel) ($v.ShouldGenerateNestedSchema) }}
 The `{{$v.Name}}` block supports:
     {{ range $p := $v.Properties }}
 * `{{$p.Name}}` -
@@ -100,7 +100,7 @@ The `{{$v.Name}}` block supports:
 {{- end }}
 
 {{ range $v := $.Objects }}
-  {{- if and ($v.Optional) ($v.ShouldGenerateNestedSchema) }}
+  {{- if and (or ($v.Optional) (and ($v.Required) (not $v.IsTopLevel))) ($v.ShouldGenerateNestedSchema) }}
 The `{{$v.Name}}` block supports:
     {{ range $p := $v.Properties }}
 * `{{$p.Name}}` -
