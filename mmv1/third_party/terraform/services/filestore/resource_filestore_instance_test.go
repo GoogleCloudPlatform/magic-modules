@@ -324,12 +324,8 @@ func TestAccFilestoreInstance_performanceConfig(t *testing.T) {
 			},
 			{
 				Config: testAccFilestoreInstance_defaultConfig(name, location, tier),
-			},
-			{
-				ResourceName:            "google_filestore_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone"},
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile("custom performance cannot be cleared"),
 			},
 		},
 	})
