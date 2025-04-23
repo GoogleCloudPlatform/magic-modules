@@ -105,9 +105,6 @@ func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*m
 	hclData["reservation_affinity"] = flattenReservationAffinity(instance.ReservationAffinity)
 	hclData["key_revocation_action_type"] = instance.KeyRevocationActionType
 
-	// TODO: convert details from the boot disk assets (separate disk assets) into initialize_params in cai2hcl?
-	// It needs to integrate the disk assets into instance assets with the resolver.
-
 	ctyVal, err := utils.MapToCtyValWithSchema(hclData, c.schema)
 	if err != nil {
 		return nil, err
@@ -187,6 +184,12 @@ func flattenBootDisk(disk *compute.AttachedDisk, instanceName string) []map[stri
 	if !strings.HasSuffix(disk.Source, instanceName) {
 		result["source"] = tpgresource.ConvertSelfLinkToV1(disk.Source)
 	}
+
+	// TODO: convert details from the boot disk assets (separate disk assets) into initialize_params in cai2hcl
+	result["initialize_params"] = []map[string]interface{}{{
+		"architecture": disk.Architecture,
+		"size":         disk.DiskSizeGb,
+	}}
 
 	if len(result) == 0 {
 		return nil
