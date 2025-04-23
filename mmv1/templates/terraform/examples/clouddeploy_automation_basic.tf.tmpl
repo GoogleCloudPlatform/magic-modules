@@ -9,7 +9,6 @@ resource "google_clouddeploy_automation" "{{$.PrimaryResourceId}}" {
       id = "*"
     }
   }
-  suspended = false
   rules {
     promote_release_rule {
       id = "promote-release"
