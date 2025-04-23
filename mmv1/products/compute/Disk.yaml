@@ -214,9 +214,13 @@ properties:
         ignore_read: true
       - name: 'rawKeyWo'
         type: String
+        diff_suppress_func: suppressEncryptionKeyDiff
         description: |
-          Specifies a 256-bit customer-supplied encryption key, encoded in
-          RFC 4648 base64 to either encrypt or decrypt this resource.
+          A write-only field representing a 256-bit customer-supplied 
+          encryption key, encoded in RFC 4648 base64 to either encrypt 
+          or decrypt this resource. This value can only be provided during
+          disk creation. Changing this field forces the disk to be 
+          recreated. This field is writ-only and not returned by the API.
         write_only: true
         required_with:
           - 'disk_encryption_key.0.rawKeyWoVersion'
@@ -242,9 +246,13 @@ properties:
           - 'disk_encryption_key.0.rsaEncryptedKeyWo'
       - name: 'rsaEncryptedKeyWo'
         type: String
+        diff_suppress_func: suppressEncryptionKeyDiff
         description: |
-          Specifies a 256-bit customer-supplied encryption key, encoded in
-          RFC 4648 base64 to either encrypt or decrypt this resource.
+          A write-only field representing a 256-bit customer-supplied 
+          encryption key, encoded in RFC 4648 base64 to either encrypt 
+          or decrypt this resource. This value can only be provided during
+          disk creation. Changing this field forces the disk to be 
+          recreated. This field is writ-only and not returned by the API.
         write_only: true
         required_with:
           - 'disk_encryption_key.0.rsaEncryptedKeyWoVersion'
