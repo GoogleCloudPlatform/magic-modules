@@ -57,7 +57,7 @@ resource "google_bigtable_instance" "instance" {
   name          = "%s"
   cluster {
     cluster_id = "%s-c"
-    zone       = "us-east1-b"
+    zone       = "us-east7-b"
   }
 
   deletion_protection = false
@@ -76,7 +76,7 @@ resource "google_bigtable_logical_view" "logical_view" {
   logical_view_id = "%s"
   instance        = google_bigtable_instance.instance.name
   query = <<EOT
-SELECT _key, CF['%s'] 
+SELECT _key, CF['%s'] AS column
 FROM %s
 EOT  
 
