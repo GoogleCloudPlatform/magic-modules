@@ -45,13 +45,14 @@ func TestAccBigQueryTable_Basic(t *testing.T) {
 	})
 }
 
-func TestAccBigQueryTable_DataPolicies(t *testing.T) {
+func TestAccBigQueryTable_IgnoreSchemaDataPoliciesChanges(t *testing.T) {
 	t.Parallel()
 
-	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	dataPolicyID := fmt.Sprintf("tf_test_data_policy_%s", acctest.RandString(t, 10))
-	dataCatTaxonomy := fmt.Sprintf("tf_test_taxonomy_%s", acctest.RandString(t, 10))
+	random_suffix := acctest.RandString(t, 10)
+	datasetID := fmt.Sprintf("tf_test_dataset_%s", random_suffix)
+	tableID := fmt.Sprintf("tf_test_table_%s", random_suffix)
+	dataPolicyID := fmt.Sprintf("tf_test_data_policy_%s", random_suffix)
+	dataCatTaxonomy := fmt.Sprintf("tf_test_taxonomy_%s", random_suffix)
 	projectID := envvar.GetTestProjectFromEnv()
 	dataPolicyName := fmt.Sprintf("projects/%s/locations/us-central1/dataPolicies/%s", projectID, dataPolicyID)
 
@@ -2021,7 +2022,7 @@ EOH
 func testAccBigQueryTableDataPolicies(datasetID, tableID, dataPolicyID, dataCatTaxonomy, dataPolicyName string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
-	location   = "us-central1"
+  location   = "us-central1"
   dataset_id = "%s"
 }
 
@@ -2029,7 +2030,10 @@ resource "google_bigquery_datapolicy_data_policy" "data_policy" {
   location         = "us-central1"
   data_policy_id   = "%s"
   policy_tag       = google_data_catalog_policy_tag.policy_tag.name
-  data_policy_type = "COLUMN_LEVEL_SECURITY_POLICY"
+  data_policy_type = "DATA_MASKING_POLICY"
+  data_masking_policy {
+      predefined_expression = "SHA256"
+  }
 }
 
 resource "google_data_catalog_policy_tag" "policy_tag" {
@@ -2059,16 +2063,16 @@ resource "google_bigquery_table" "test" {
 [
   {
     "name": "ts",
-    "type": "TIMESTAMP",
+    "type": "TIMESTAMP"
+  },
+  {
+    "name": "some_string",
+    "type": "STRING",
     "dataPolicies": [
       {
         "name": "%s"
       }
     ]
-  },
-  {
-    "name": "some_string",
-    "type": "STRING"
   },
   {
     "name": "some_int",

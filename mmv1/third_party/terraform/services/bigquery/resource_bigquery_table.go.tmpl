@@ -11,6 +11,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	
+	"golang.org/x/exp/slices"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -136,16 +138,6 @@ func valueIsInArray(value interface{}, array []interface{}) bool {
 	return false
 }
 
-// Helper function to check if a string is in a slice
-func stringInSlice(s string, list []string) bool {
-	for _, v := range list {
-		if v == s {
-			return true
-		}
-	}
-	return false
-}
-
 func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interface{}, d *schema.ResourceData) bool {
 	// we rely on the fallback to nil if the object does not have the key
 	valA := objectA[key]
@@ -179,7 +171,7 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 			}
 		}
 		// Suppress diffs for the "dataPolicies" field if it was present in "ignore_schema_changes"
-		return stringInSlice("dataPolicies", ignoreSchemaChanges)
+		return slices.Contains(ignoreSchemaChanges, "dataPolicies")
 	}
 
 	// otherwise rely on default behavior
