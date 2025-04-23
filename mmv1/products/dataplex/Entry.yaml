@@ -37,6 +37,7 @@ custom_code:
   decoder: templates/terraform/decoders/dataplex_entry.go.tmpl
   encoder: templates/terraform/encoders/dataplex_entry.go.tmpl
   pre_read: templates/terraform/pre_read/dataplex_entry.go.tmpl
+  pre_update: templates/terraform/pre_update/dataplex_entry.go.tmpl
 
 timeouts:
   insert_minutes: 5
@@ -53,7 +54,7 @@ examples:
       aspect_type_name: "aspect-type-basic"
       entry_type_name: "entry-type-basic"
     test_env_vars:
-      project_name: 'PROJECT_NAME'
+      project_number: 'PROJECT_NUMBER'
   - name: 'dataplex_entry_full'
     primary_resource_id: 'test_entry_full'
     primary_resource_name: 'fmt.Sprintf("tf-test-entry%s", context["random_suffix"])'
@@ -65,7 +66,7 @@ examples:
       aspect_type_name: "aspect-type-full"
       entry_type_name: "entry-type-full"
     test_env_vars:
-      project_name: 'PROJECT_NAME'
+      project_number: 'PROJECT_NUMBER'
 
 parameters:
 - name: 'location'
@@ -96,15 +97,16 @@ properties:
   output: true
   immutable: true
   description: |
-    The relative resource name of the entry, in the format projects/{project_id_or_number}/locations/{locationId}/entryGroups/{entryGroupId}/entries/{entryId}.
+    The relative resource name of the entry, in the format projects/{project_number}/locations/{locationId}/entryGroups/{entryGroupId}/entries/{entryId}.
 
 - name: 'entryType'
   type: String
   required: true
   immutable: true
-  diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  validation:
+    function: ProjectNumberValidation
   description: |
-    The relative resource name of the entry type that was used to create this entry, in the format projects/{project_id_or_number}/locations/{locationId}/entryTypes/{entryTypeId}.
+    The relative resource name of the entry type that was used to create this entry, in the format projects/{project_number}/locations/{locationId}/entryTypes/{entryTypeId}.
 
 - name: 'createTime'
   type: Time
@@ -129,54 +131,59 @@ properties:
     properties:
     - name: "aspectKey"
       type: String
-      diff_suppress_func: 'AspectTypeProjectNumberDiffSuppress'
       required: true
+      validation:
+        function: AspectProjectNumberValidation
+
       description: |
         Depending on how the aspect is attached to the entry, the format of the aspect key can be one of the following:
 
-        If the aspect is attached directly to the entry: {project_id_or_number}.{locationId}.{aspectTypeId}
-        If the aspect is attached to an entry's path: {project_id_or_number}.{locationId}.{aspectTypeId}@{path}
+        If the aspect is attached directly to the entry: {project_number}.{locationId}.{aspectTypeId}
+        If the aspect is attached to an entry's path: {project_number}.{locationId}.{aspectTypeId}@{path}
 
-    - name: "aspectType"
-      type: String
-      output: true
-      description: |
-        The resource name of the type used to create this Aspect.
+    - name: "aspectValue"
+      type: NestedObject
+      properties:
+      - name: "aspectType"
+        type: String
+        output: true
+        description: |
+          The resource name of the type used to create this Aspect.
 
-    - name: "path"
-      type: String
-      output: true
-      description: |
-        The path in the entry under which the aspect is attached.
+      - name: "path"
+        type: String
+        output: true
+        description: |
+          The path in the entry under which the aspect is attached.
 
-    - name: "createTime"
-      type: Time
-      output: true
-      description: |
-        The time when the Aspect was created.
+      - name: "createTime"
+        type: Time
+        output: true
+        description: |
+          The time when the Aspect was created.
 
-    - name: "updateTime"
-      type: Time
-      output: true
-      description: |
-        The time when the Aspect was last modified.
+      - name: "updateTime"
+        type: Time
+        output: true
+        description: |
+          The time when the Aspect was last modified.
 
-    - name: "data"
-      type: String
-      required: true
-      state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-      custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-      custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-      validation:
-        function: 'validation.StringIsJSON'
-      description: |
-        The content of the aspect in JSON form, according to its aspect type schema. The maximum size of the field is 120KB (encoded as UTF-8).
+      - name: "data"
+        type: String
+        required: true
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+        validation:
+          function: 'validation.StringIsJSON'
+        description: |
+          The content of the aspect in JSON form, according to its aspect type schema. The maximum size of the field is 120KB (encoded as UTF-8).
 
 - name: 'parentEntry'
   type: String
   immutable: true
   description: |
-    The resource name of the parent entry, in the format projects/{project_id_or_number}/locations/{locationId}/entryGroups/{entryGroupId}/entries/{entryId}.
+    The resource name of the parent entry, in the format projects/{project_number}/locations/{locationId}/entryGroups/{entryGroupId}/entries/{entryId}.
 
 - name: "fullyQualifiedName"
   type: String

@@ -1,7 +1,7 @@
 resource "google_dataplex_aspect_type" "{{index $.Vars "aspect_type_name"}}-one" {
   aspect_type_id         = "{{index $.Vars "aspect_type_name"}}-one"
   location     = "us-central1"
-  project      = "{{index $.TestEnvVars "project_name"}}"
+  project      = "{{index $.TestEnvVars "project_number"}}"
 
   metadata_template = <<EOF
 {
@@ -34,7 +34,7 @@ EOF
 resource "google_dataplex_aspect_type" "{{index $.Vars "aspect_type_name"}}-two" {
   aspect_type_id         = "{{index $.Vars "aspect_type_name"}}-two"
   location     = "us-central1"
-  project      = "{{index $.TestEnvVars "project_name"}}"
+  project      = "{{index $.TestEnvVars "project_number"}}"
 
   metadata_template = <<EOF
 {
@@ -66,13 +66,13 @@ EOF
 
 resource "google_dataplex_entry_group" "{{index $.Vars "entry_group_name"}}" {
   entry_group_id = "{{index $.Vars "entry_group_name"}}"
-  project = "{{index $.TestEnvVars "project_name"}}"
+  project = "{{index $.TestEnvVars "project_number"}}"
   location = "us-central1"
 }
 
 resource "google_dataplex_entry_type" "{{index $.Vars "entry_type_name"}}" {
   entry_type_id = "{{index $.Vars "entry_type_name"}}"
-  project = "{{index $.TestEnvVars "project_name"}}"
+  project = "{{index $.TestEnvVars "project_number"}}"
   location = "us-central1"
 
   required_aspects {
@@ -82,14 +82,14 @@ resource "google_dataplex_entry_type" "{{index $.Vars "entry_type_name"}}" {
 
 resource "google_dataplex_entry" "{{$.PrimaryResourceId}}" {
   entry_group_id = google_dataplex_entry_group.{{index $.Vars "entry_group_name"}}.entry_group_id
-  project = "{{index $.TestEnvVars "project_name"}}"
+  project = "{{index $.TestEnvVars "project_number"}}"
   location = "us-central1"
   entry_id = "{{index $.Vars "entry_id"}}"
   entry_type = google_dataplex_entry_type.{{index $.Vars "entry_type_name"}}.name
-  fully_qualified_name = "bigquery:{{index $.TestEnvVars "project_name"}}.test-dataset"
-  parent_entry = "projects/{{index $.TestEnvVars "project_name"}}/locations/us-central1/entryGroups/{{index $.Vars "entry_group_name"}}/entries/some-other-entry"
+  fully_qualified_name = "bigquery:{{index $.TestEnvVars "project_number"}}.test-dataset"
+  parent_entry = "projects/{{index $.TestEnvVars "project_number"}}/locations/us-central1/entryGroups/{{index $.Vars "entry_group_name"}}/entries/some-other-entry"
   entry_source {
-    resource = "bigquery:{{index $.TestEnvVars "project_name"}}.test-dataset"
+    resource = "bigquery:{{index $.TestEnvVars "project_number"}}.test-dataset"
     system = "System III"
     platform = "BigQuery"
     display_name = "Human readable name"
@@ -113,16 +113,20 @@ resource "google_dataplex_entry" "{{$.PrimaryResourceId}}" {
   }
 
   aspects {
-    aspect_key = "{{index $.TestEnvVars "project_name"}}.us-central1.{{index $.Vars "aspect_type_name"}}-one" 
-    data = <<EOF
-        {"type": "VIEW"    }
-      EOF
+    aspect_key = "{{index $.TestEnvVars "project_number"}}.us-central1.{{index $.Vars "aspect_type_name"}}-one"
+    aspect_value {
+      data = <<EOF
+          {"type": "VIEW"    }
+        EOF
     }
+  }
 
   aspects {
-    aspect_key = "{{index $.TestEnvVars "project_name"}}.us-central1.{{index $.Vars "aspect_type_name"}}-two" 
-    data = <<EOF
-        {"story": "SEQUENCE"    }
-      EOF
+    aspect_key = "{{index $.TestEnvVars "project_number"}}.us-central1.{{index $.Vars "aspect_type_name"}}-two"
+    aspect_value {
+      data = <<EOF
+          {"story": "SEQUENCE"    }
+        EOF
     }
+  }
 }
