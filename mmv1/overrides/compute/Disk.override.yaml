@@ -1,6 +1,6 @@
 resource: Disk
 overrides:
   rawKeyWo:
-    diff_suppress_func: suppressEmptyDiff
+    diff_suppress_func: suppressEncryptionKeyDiff
   rsaEncryptedKeyWo:
-    diff_suppress_func: suppressEmptyDiff
+    diff_suppress_func: suppressEncryptionKeyDiff

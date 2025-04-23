@@ -303,3 +303,7 @@ func ExpandStoragePoolUrl(v interface{}, d tpgresource.TerraformResourceData, co
 	}
 	return replacedStr, nil
 }
+
+func suppressEncryptionKeyDiff(k, old, new string, d *schema.ResorceData) bool {
+	return old== "" && new == ""
+}
