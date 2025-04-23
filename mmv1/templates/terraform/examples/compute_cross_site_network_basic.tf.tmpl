@@ -1,0 +1,13 @@
+locals {
+  project = "{{index $.Vars "project"}}" # Google Cloud Platform Project ID
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_compute_cross_site_network" "{{$.PrimaryResourceId}}" {
+  name                 = "{{index $.Vars "name"}}"
+  description         = "{{index $.Vars "description"}}"
+  provider = google-beta
+}
