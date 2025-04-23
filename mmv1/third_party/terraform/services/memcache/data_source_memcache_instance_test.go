@@ -21,12 +21,9 @@ func TestAccMemcacheInstanceDatasourceConfig(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMemcacheInstanceDatasourceConfig(context),
-				Check: acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+				Check: acctest.CheckDataSourceStateMatchesResourceState(
 					"data.google_memcache_instance.default",
 					"google_memcache_instance.instance",
-					map[string]struct{}{
-						"resource": {},
-					},
 				),
 			},
 		},
