@@ -214,6 +214,7 @@ properties:
         ignore_read: true
       - name: 'rawKeyWo'
         type: String
+        immutable: true
         diff_suppress_func: suppressEncryptionKeyDiff
         description: |
           A write-only field representing a 256-bit customer-supplied 
@@ -246,6 +247,7 @@ properties:
           - 'disk_encryption_key.0.rsaEncryptedKeyWo'
       - name: 'rsaEncryptedKeyWo'
         type: String
+        immutable: true
         diff_suppress_func: suppressEncryptionKeyDiff
         description: |
           A write-only field representing a 256-bit customer-supplied 
