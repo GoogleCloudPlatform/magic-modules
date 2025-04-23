@@ -2817,6 +2817,94 @@ func TestAccSqlDatabaseInstance_PostgresSwitchoverSuccess(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_PostgresConnectionPool(t *testing.T) {
+	t.Parallel()
+	instanceName := "tf-test-enterprise-connpool-pg-" + acctest.RandString(t, 10)
+	enterprisePlusTier := "db-perf-optimized-N-2"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_PostgresConnectionPoolNoFlag(instanceName, enterprisePlusTier),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_PostgresConnectionPoolWithFlags(instanceName, enterprisePlusTier),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_sql_database_instance.instance", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_PostgresConnectionPoolDisabled(instanceName, enterprisePlusTier),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_sql_database_instance.instance", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_EditionConfig(instanceName, enterprisePlusTier, "ENTERPRISE_PLUS"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_sql_database_instance.instance", plancheck.ResourceActionNoop),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_MySQLConnectionPool(t *testing.T) {
+	t.Parallel()
+	instanceName := "tf-test-enterprise-connpool-my-" + acctest.RandString(t, 10)
+	enterprisePlusTier := "db-perf-optimized-N-2"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_MySQLConnectionPoolWithFlags(instanceName, enterprisePlusTier),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 	t.Parallel()
 
@@ -6150,3 +6238,133 @@ resource "google_sql_database_instance" "instance" {
 }
 `, instance, databaseVersion, deletionProtection, activationPolicy)
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func testGoogleSqlDatabaseInstance_PostgresConnectionPoolNoFlag(databaseName, tier string) string {
+	return fmt.Sprintf(`
+
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-east1"
+  database_version    = "POSTGRES_14"
+  deletion_protection = false
+  settings {
+    tier = "%s"
+    edition = "ENTERPRISE_PLUS"
+    backup_configuration {
+      transaction_log_retention_days = 7
+    }
+    connection_pool_config {
+      connection_pooling_enabled = true
+    }
+  }
+}`, databaseName, tier)
+}
+
+func testGoogleSqlDatabaseInstance_PostgresConnectionPoolWithFlags(databaseName, tier string) string {
+	return fmt.Sprintf(`
+
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-east1"
+  database_version    = "POSTGRES_14"
+  deletion_protection = false
+  settings {
+    tier = "%s"
+    edition = "ENTERPRISE_PLUS"
+    backup_configuration {
+      transaction_log_retention_days = 7
+    }
+    connection_pool_config {
+      connection_pooling_enabled = true
+      flags {
+        name = "pool_mode"
+        value = "session"
+      }
+      flags {
+        name = "max_pool_size"
+        value = "49"
+      }
+      flags {
+        name = "min_pool_size"
+        value = "1"
+      }
+      flags {
+        name = "max_client_connections"
+        value = "4999"
+      }
+      flags {
+        name = "client_connection_idle_timeout"
+        value = "1"
+      }
+      flags {
+        name = "server_connection_idle_timeout"
+        value = "599"
+      }
+      flags {
+        name = "query_wait_timeout"
+        value = "119"
+      }
+      flags {
+        name = "max_prepared_statements"
+        value = "1"
+      }
+      flags {
+        name = "ignore_startup_parameters"
+        value = "client_encoding,timezone"
+      }
+      flags {
+        name = "server_lifetime"
+        value = "3599"
+      }
+    }
+  }
+}`, databaseName, tier)
+}
+
+func testGoogleSqlDatabaseInstance_PostgresConnectionPoolDisabled(databaseName, tier string) string {
+	return fmt.Sprintf(`
+
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-east1"
+  database_version    = "POSTGRES_14"
+  deletion_protection = false
+  settings {
+    tier = "%s"
+    edition = "ENTERPRISE_PLUS"
+    backup_configuration {
+      transaction_log_retention_days = 7
+    }
+    connection_pool_config {
+      connection_pooling_enabled = false
+    }
+  }
+}`, databaseName, tier)
+}
+
+func testGoogleSqlDatabaseInstance_MySQLConnectionPoolWithFlags(databaseName, tier string) string {
+	return fmt.Sprintf(`
+
+resource "google_sql_database_instance" "instance" {
+  name             = "%s"
+  region           = "us-east1"
+  database_version    = "MYSQL_8_4"
+  deletion_protection = false
+  settings {
+    tier = "%s"
+    edition = "ENTERPRISE_PLUS"
+    backup_configuration {
+      transaction_log_retention_days = 7
+    }
+    connection_pool_config {
+      connection_pooling_enabled = true
+      flags {
+        name = "max_pool_size"
+        value = "3"
+      }
+    }
+  }
+}`, databaseName, tier)
+}
+{{- end }}
