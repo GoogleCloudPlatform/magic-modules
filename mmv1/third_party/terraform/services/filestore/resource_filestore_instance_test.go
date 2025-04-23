@@ -325,7 +325,6 @@ func TestAccFilestoreInstance_performanceConfig(t *testing.T) {
 			},
 			{
 				Config:      testAccFilestoreInstance_defaultConfig(name, location, tier),
-				PlanOnly:    true,
 				ExpectError: regexp.MustCompile("custom performance cannot be cleared"),
 			},
 		},
