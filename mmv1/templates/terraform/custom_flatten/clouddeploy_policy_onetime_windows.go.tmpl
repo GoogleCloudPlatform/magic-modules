@@ -22,13 +22,12 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	}
 
   result := make([]interface{}, len(l))
-    
-	for _, raw := range l {
+	for i, raw := range l {
 		if raw == nil {
 			continue
 		}
 		original := raw.(map[string]interface{})
-		transformed := make(map[string]interface{})
+		transformed := make(map[string]string)
     startDate:=original["startDate"].((map[string]interface{}))
 		startTime :=original["startTime"].(map[string]interface{})
     endDate:=original["endDate"].((map[string]interface{}))
@@ -37,7 +36,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     end:=dateTimeString(endDate,endTime)
     transformed["start"]=start
     transformed["end"]=end
-		result = append(result, transformed)
+		result[i]=transformed
 	}
 
 	return result
@@ -48,7 +47,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
    var year int
    var month int
    var day int
-    var hours int
+   var hours int
    var minutes int
 
   if floatVal, ok := d["year"].(float64); ok {
