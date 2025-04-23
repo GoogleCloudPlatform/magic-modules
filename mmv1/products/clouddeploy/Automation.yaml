@@ -235,13 +235,14 @@ properties:
                       - 'rollback'
                     type: NestedObject
                     send_empty_value: true
+                    allow_empty_object: true
                     properties:
                       - name: 'destinationPhase'
                         type: String
                         description: "Optional. The starting phase ID for the Rollout. If unspecified, the Rollout will start in the stable phase."
                       - name: 'disableRollbackIfRolloutPending'
                         type: Boolean
-                        default_value: false
+                        send_empty_value: true
                         description: "Optional. If pending rollout exists on the target, the rollback operation will be aborted."
         - name: 'timedPromoteReleaseRule'
           type: NestedObject
