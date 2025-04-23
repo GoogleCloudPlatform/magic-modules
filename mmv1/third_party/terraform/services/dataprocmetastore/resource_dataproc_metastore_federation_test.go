@@ -69,7 +69,7 @@ func TestAccMetastoreFederation_tags(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"tags"},
 			},
 		},
-	}),
+	})
 }
 
 func testAccMetastoreFederationDeletionProtection(name string, location string) string {
@@ -130,24 +130,20 @@ func testAccMetastoreFederationTags(context map[string]interface{}) string {
 			service_id = "tf-test-service-%{random_suffix}"
 			location   = "us-central1"
 			tier       = "DEVELOPER"
-
 			hive_metastore_config {
 				version           = "3.1.2"
 				endpoint_protocol = "GRPC"
 			}
 		}
-
 		resource "google_dataproc_metastore_federation" "default" {
 			location      = "us-central1"
 			federation_id = "tf-test-federation-%{random_suffix}"
 			version       = "3.1.2"
-
 			backend_metastores {
 				rank           = "1"
 				name           = google_dataproc_metastore_service.default.id
 				metastore_type = "DATAPROC_METASTORE"
 			}
-
 			tags = {
 	"%{org}/%{tagKey}" = "%{tagValue}"
   }
