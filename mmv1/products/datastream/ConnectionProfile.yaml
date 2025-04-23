@@ -102,6 +102,10 @@ examples:
     vars:
       source_connection_profile_id: 'source-profile'
     exclude_test: true
+  - name: 'datastream_connection_profile_postgres_secret_manager'
+    primary_resource_id: 'default'
+    vars:
+      source_connection_profile_id: 'source-profile'
 parameters:
   - name: 'connectionProfileId'
     type: String
@@ -169,9 +173,12 @@ properties:
         type: String
         description: |
           Password for the Oracle connection.
-        required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_oracle_profile_password.go.tmpl'
+      - name: 'secretManagerStoredPassword'
+        type: String
+        description: |
+          A reference to a Secret Manager resource name storing the user's password.
       - name: 'databaseService'
         type: String
         description: |
@@ -234,9 +241,12 @@ properties:
         type: String
         description: |
           Password for the MySQL connection.
-        required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_mysql_profile_password.go.tmpl'
+      - name: 'secretManagerStoredPassword'
+        type: String
+        description: |
+          A reference to a Secret Manager resource name storing the user's password.
       - name: 'sslConfig'
         type: NestedObject
         description: |
@@ -332,9 +342,12 @@ properties:
         type: String
         description: |
           Password for the PostgreSQL connection.
-        required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_postgresql_profile_password.go.tmpl'
+      - name: 'secretManagerStoredPassword'
+        type: String
+        description: |
+          A reference to a Secret Manager resource name storing the user's password.
       - name: 'database'
         type: String
         description: |
@@ -375,15 +388,15 @@ properties:
             type: String
             description: |
               Password of the user.
-          - name: 'security_token'
+          - name: 'securityToken'
             type: String
             description: |
               Security token of the user.
-          - name: 'secret_manager_stored_password'
+          - name: 'secretManagerStoredPassword'
             type: String
             description: |
               A reference to a Secret Manager resource name storing the user's password.
-          - name: 'secret_manager_stored_security_token'
+          - name: 'secretManagerStoredSecurityToken'
             type: String
             description: |
               A reference to a Secret Manager resource name storing the user's security token.
@@ -399,11 +412,11 @@ properties:
             type: String
             description: |
               Client ID to use for authentication.
-          - name: 'client_secret'
+          - name: 'clientSecret'
             type: String
             description: |
               Client secret to use for authentication.
-          - name: 'secret_manager_stored_client_secret'
+          - name: 'secretManagerStoredClientSecret'
             type: String
             description: |
               A reference to a Secret Manager resource name storing the client secret.
@@ -439,9 +452,12 @@ properties:
         type: String
         description: |
           Password for the SQL Server connection.
-        required: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/datastream_connection_profile_sql_server_profile_password.go.tmpl'
+      - name: 'secretManagerStoredPassword'
+        type: String
+        description: |
+          A reference to a Secret Manager resource name storing the user's password.
       - name: 'database'
         type: String
         description: |
@@ -482,7 +498,6 @@ properties:
         type: String
         description: |
           SSH private key.
-        immutable: true
         sensitive: true
         conflicts:
           - forward_ssh_connectivity.0.password
