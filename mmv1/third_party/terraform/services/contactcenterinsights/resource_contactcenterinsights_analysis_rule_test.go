@@ -88,11 +88,11 @@ resource "google_contact_center_ai_insights_analysis_rule" "basic_analysis_rule"
   conversation_filter = "test-filter"
   annotator_selector {
     run_interruption_annotator = true
-	issue_models    = "some_issue_model_id"
-    phrase_matchers = "some_phrase_matcher_id"
+	issue_models    = ["some_issue_model_id"]
+    phrase_matchers = ["some_phrase_matcher_id"]
     qa_config {
       scorecard_list {
-        qa_scorecard_revisions = "some_scorecard_revision_id"
+        qa_scorecard_revisions = ["some_scorecard_revision_id"]
       }
     }
     run_entity_annotator         = true
@@ -124,11 +124,11 @@ resource "google_contact_center_ai_insights_analysis_rule" "basic_analysis_rule"
   conversation_filter = ""
   annotator_selector {
     run_interruption_annotator = false
-	issue_models    = "alt_issue_model_id"
-    phrase_matchers = "alt_phrase_matcher_id"
+	issue_models    = ["alt_issue_model_id"]
+    phrase_matchers = ["alt_phrase_matcher_id"]
     qa_config {
       scorecard_list {
-        qa_scorecard_revisions = "alt_scorecard_revision_id"
+        qa_scorecard_revisions = ["alt_scorecard_revision_id"]
       }
     }
     run_entity_annotator         = false
