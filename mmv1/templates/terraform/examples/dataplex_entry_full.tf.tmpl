@@ -75,14 +75,6 @@ resource "google_dataplex_entry_type" "{{index $.Vars "entry_type_name"}}" {
   project = "{{index $.TestEnvVars "project_name"}}"
   location = "us-central1"
 
-  labels = { "tag": "test-tf" }
-  display_name = "terraform entry type"
-  description = "entry type created by Terraform"
-
-  type_aliases = ["TABLE", "DATABASE"]
-  platform = "GCS"
-  system = "CloudSQL"
-
   required_aspects {
     type = google_dataplex_aspect_type.{{index $.Vars "aspect_type_name"}}-one.name
   }
