@@ -13,3 +13,5 @@ doc_hide:
   - full.tf.tmpl
 test_hide:
   - basic_workload.yaml
+  - basic.tf.tmpl # basic_update.tf.tmpl auto hides
+  - full.tf.tmpl
