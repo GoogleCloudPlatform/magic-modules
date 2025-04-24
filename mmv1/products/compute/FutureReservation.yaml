@@ -342,6 +342,11 @@ properties:
                     type: Enum
                     description: |
                       Type of sharing for this shared-reservation
+                    enum_values:
+                      - 'LOCAL'
+                      - 'ORGANIZATION'
+                      - 'SHARE_TYPE_UNSPECIFIED'
+                      - 'SPECIFIC_PROJECTS'
                   - name: 'projects'
                     type: Array
                     description: |
@@ -405,8 +410,10 @@ properties:
       - 'DRAFT'
       - 'PLANNING_STATUS_UNSPECIFIED'
       - 'SUBMITTED'
+    default_from_api: true
   - name: 'autoDeleteAutoCreatedReservations'
     type: Boolean
+    ignore_read: true
     description: |
       Setting for enabling or disabling automatic deletion for auto-created reservation. If set to true, auto-created reservations will be deleted at Future Reservation's end time (default) or at user's defined timestamp if any of the [autoCreatedReservationsDeleteTime, autoCreatedReservationsDuration] values is specified. For keeping auto-created reservation indefinitely, this value should be set to false.
   - name: 'specificReservationRequired'
@@ -454,6 +461,9 @@ properties:
         type: Enum
         description: |
           Only applicable if FR is delivering to the same reservation. If set, all parent commitments will be extended to match the end date of the plan for this commitment.
+        enum_values:
+          - 'EXTEND'
+          - 'PREVIOUSCOMMITMENTTERM_UNSPECIFIED'
   - name: 'schedulingType'
     type: Enum
     description: |
@@ -537,6 +547,7 @@ properties:
           The instance template that will be used to populate the ReservedInstanceProperties of the future reservation
   - name: 'autoCreatedReservationsDeleteTime'
     type: String
+    ignore_read: true
     description: |
       Future timestamp when the FR auto-created reservations will be deleted by Compute Engine.
   - name: 'autoCreatedReservationsDuration'

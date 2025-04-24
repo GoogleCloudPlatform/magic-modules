@@ -7,16 +7,11 @@ resource "google_compute_future_reservation" "{{$.PrimaryResourceId}}" {
     start_time = "2025-08-01T00:00:00Z"
     end_time   = "2025-08-02T00:00:00Z"
   }
-
-  share_settings {
-    share_type = "LOCAL"
-  }
-
   specific_sku_properties {
     total_count = "1"
 
     instance_properties {
-      machine_type = "n1-standard-1"
+      machine_type = "e2-standard-2"
     }
   }
 }
