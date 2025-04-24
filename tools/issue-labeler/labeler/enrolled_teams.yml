@@ -141,6 +141,7 @@ service/cloudresourcemanager-crm:
   - google_organization_iam_member
   - google_organization_iam_policy
   - google_resource_manager_lien
+  - google_resource_manager_capability
 service/cloudresourcemanager-tags:
   resources:
   - google_tags_.*
@@ -243,6 +244,7 @@ service/compute-pd:
   resources:
   - google_compute_attached_disk.*
   - google_compute_disk.*
+  - google_compute_storage_pool.*
   - google_compute_region_disk.*
   - google_compute_image.*
   - google_compute_snapshot.*
@@ -287,6 +289,9 @@ service/compute-vpn:
   - google_compute_ha_vpn_gateway
   - google_compute_external_vpn_gateway
   - google_compute_vpn_.*
+service/contactcenterinsights:
+  resources:
+  - google_contact_center_insights_.*
 service/container:
   resources:
   - google_container_cluster
@@ -430,6 +435,7 @@ service/iam-serviceaccount:
   resources:
   - google_project_default_service_accounts
   - google_project_service_identity
+  - google_folder_service_identity
   - google_service_account.*
 service/iam-wlid:
   resources:
@@ -473,6 +479,9 @@ service/managedkafka:
 service/memcache:
   resources:
   - google_memcache_instance
+service/memorystore:
+  resources:
+  - google_memorystore.*
 service/metastore:
   resources:
   - google_dataproc_metastore_.*
@@ -584,6 +593,9 @@ service/oslogin:
 service/parallelstore:
   resources:
   - google_parallelstore_.*
+service/parametermanager:
+  resources:
+  - google_parameter_manager_.*
 service/policy-based-routing:
   resources:
   - google_network_connectivity_policy_based_route
@@ -615,11 +627,10 @@ service/recaptchaenterprise:
   - google_recaptcha_enterprise_key
 service/redis-cluster:
   resources:
-  - google_redis_cluster
+  - google_redis_cluster.*
 service/redis-instance:
   resources:
   - google_redis_instance
-  - google_memorystore_instance
 service/regional-endpoints:
   resources:
   - google_network_connectivity_regional_endpoint

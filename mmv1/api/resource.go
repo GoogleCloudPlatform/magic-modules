@@ -22,6 +22,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"golang.org/x/exp/slices"
 )
@@ -339,6 +340,14 @@ type Resource struct {
 	// preferred wherever possible. Its main purpose is for supporting
 	// fine-grained resources and legacy resources.
 	ApiResourceTypeKind string `yaml:"api_resource_type_kind,omitempty"`
+
+	// The API URL patterns used by this resource that represent variants e.g.,
+	// "folders/{folder}/feeds/{feed}". Each pattern must match the value
+	// defined in the API exactly. The use of `api_variant_patterns` is only
+	// meaningful when the resource type has multiple parent types available.
+	// This is commonly used for resources that have a project, folder, and
+	// organization variant, however most resources do not need it.
+	ApiVariantPatterns []string `yaml:"api_variant_patterns,omitempty"`
 
 	ImportPath     string `yaml:"-"`
 	SourceYamlFile string `yaml:"-"`
@@ -1202,6 +1211,30 @@ func (r Resource) GetIdFormat() string {
 	return idFormat
 }
 
+// Returns true if the Type is in the ID format and false otherwise.
+func (r Resource) InIdFormat(prop Type) bool {
+	fields := r.ExtractIdentifiers(r.GetIdFormat())
+	return slices.Contains(fields, google.Underscore(prop.Name))
+}
+
+// Returns true if at least one of the fields in the ID format is computed
+func (r Resource) HasComputedIdFormatFields() bool {
+	idFormatFields := map[string]struct{}{}
+	for _, f := range r.ExtractIdentifiers(r.GetIdFormat()) {
+		idFormatFields[f] = struct{}{}
+	}
+	for _, p := range r.GettableProperties() {
+		// Skip fields not in the id format
+		if _, ok := idFormatFields[google.Underscore(p.Name)]; !ok {
+			continue
+		}
+		if (p.Output || p.DefaultFromApi) && !p.IgnoreRead {
+			return true
+		}
+	}
+	return false
+}
+
 // ====================
 // Template Methods
 // ====================
@@ -1841,6 +1874,10 @@ func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {
 }
 
 func (r Resource) ShouldGenerateSweepers() bool {
+	if !r.ExcludeSweeper && !utils.IsEmpty(r.Sweeper) {
+		return true
+	}
+
 	allowedKeys := []string{"project", "region", "location", "zone", "billing_account"}
 	if !urlContainsOnlyAllowedKeys(r.ListUrlTemplate(), allowedKeys) {
 		return false

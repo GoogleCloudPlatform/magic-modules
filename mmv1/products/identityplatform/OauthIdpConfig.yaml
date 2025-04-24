@@ -69,3 +69,18 @@ properties:
     type: String
     description: |
       The client secret of the OAuth client, to enable OIDC code flow.
+  - name: 'responseType'
+    type: NestedObject
+    description: |
+      The response type to request for in the OAuth authorization flow.
+      You can set either idToken or code to true, but not both.
+      Setting both types to be simultaneously true ({code: true, idToken: true}) is not yet supported.
+    properties:
+      - name: 'idToken'
+        type: Boolean
+        description: |
+          If true, ID token is returned from IdP's authorization endpoint.
+      - name: 'code'
+        type: Boolean
+        description: |
+          If true, authorization code is returned from IdP's authorization endpoint.
