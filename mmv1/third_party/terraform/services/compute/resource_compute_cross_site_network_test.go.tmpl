@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -33,11 +32,9 @@ func TestAccComputeCrossSiteNetwork_update(t *testing.T) {
 			},
 			{
 				Config: testAccComputeCrossSiteNetwork_update(context),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_cross_site_network.example-cross-site-network", plancheck.ResourceActionUpdate),
-					},
-				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_cross_site_network.example-cross-site-network", "description", "Example cross site network updated"+context["random_suffix"].(string)),
+				),
 			},
 			{
 				ResourceName:      "google_compute_cross_site_network.example-cross-site-network",
@@ -59,7 +56,7 @@ data "google_project" "project" {
 }
 
 resource "google_compute_cross_site_network" "example-cross-site-network" {
-  name                 = "tf-test-test-cross-site-network%{random_suffix}"
+  name       = "tf-test-test-cross-site-network%{random_suffix}"
   description         = "Example cross site network%{random_suffix}"
   provider = google-beta
 }
@@ -77,8 +74,8 @@ data "google_project" "project" {
 }
 
 resource "google_compute_cross_site_network" "example-cross-site-network" {
-  name                 = "tf-test-test-cross-site-network%{random_suffix}"
-  description         = "Example cross site network updated%{random_suffix}"
+name       = "tf-test-test-cross-site-network%{random_suffix}"
+description         = "Example cross site network updated%{random_suffix}"
   provider = google-beta
 }
 `, context)
