@@ -130,6 +130,7 @@ properties:
     default_from_api: true
     properties:
       - name: 'allowedPersistenceRegions'
+        is_set: true
         type: Array
         description: |
           A list of IDs of GCP regions where messages that are published to

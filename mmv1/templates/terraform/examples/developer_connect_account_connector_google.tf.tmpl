@@ -1,0 +1,9 @@
+resource "google_developer_connect_account_connector" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+  account_connector_id = "{{index $.Vars "account_connector_name"}}"
+
+  provider_oauth_config {
+    system_provider_id = "GOOGLE"
+    scopes = ["https://www.googleapis.com/auth/drive.readonly"]
+  }
+}

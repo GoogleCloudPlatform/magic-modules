@@ -1,0 +1,140 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: AccountConnector
+description: Description
+base_url: projects/{{project}}/locations/{{location}}/accountConnectors
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/accountConnectors/{{account_connector_id}}
+create_url: projects/{{project}}/locations/{{location}}/accountConnectors?accountConnectorId={{account_connector_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/accountConnectors/{{account_connector_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/accountConnectors/{{account_connector_id}}
+examples:
+  - name: developer_connect_account_connector_github
+    primary_resource_id: 'my-account-connector'
+    primary_resource_name: 'fmt.Sprintf("tf-test-account-connector%s", context["random_suffix"])'
+    vars:
+      account_connector_name: tf-test-ac
+  - name: developer_connect_account_connector_gitlab
+    primary_resource_id: 'my-account-connector'
+    vars:
+      account_connector_name: tf-test-ac
+  - name: developer_connect_account_connector_google
+    primary_resource_id: 'my-account-connector'
+    vars:
+      account_connector_name: tf-test-ac
+  - name: developer_connect_account_connector_sentry
+    primary_resource_id: 'my-account-connector'
+    vars:
+      account_connector_name: tf-test-ac
+  - name: developer_connect_account_connector_rovo
+    primary_resource_id: 'my-account-connector'
+    vars:
+      account_connector_name: tf-test-ac
+  - name: developer_connect_account_connector_new_relic
+    primary_resource_id: 'my-account-connector'
+    vars:
+      account_connector_name: tf-test-ac
+  - name: developer_connect_account_connector_datastax
+    primary_resource_id: 'my-account-connector'
+    vars:
+      account_connector_name: tf-test-ac
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: QWNjb3VudENvbm5lY3Rvcg==
+parameters:
+  - name: location
+    type: String
+    description: The location of the resource.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: accountConnectorId
+    type: String
+    description: |-
+      Required. The ID to use for the AccountConnector, which will become the final
+      component of the AccountConnector's resource name. Its format should adhere
+      to https://google.aip.dev/122#resource-id-segments Names must be unique
+      per-project per-location.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: oauthStartUri
+    type: String
+    description: Output only. Start OAuth flow by clicking on this URL.
+    output: true
+  - name: providerOauthConfig
+    type: NestedObject
+    description: ProviderOAuthConfig is the OAuth config for a provider.
+    properties:
+      - name: systemProviderId
+        type: String
+        immutable: true
+        description: |2-
+          List of providers that are owned by Developer Connect.
+
+          Possible values:
+          GITHUB
+          GITLAB
+          GOOGLE
+          SENTRY
+          ROVO
+          NEW_RELIC
+          DATASTAX
+      - name: scopes
+        type: Array
+        description: |-
+          Required. User selected scopes to apply to the Oauth config
+          In the event of changing scopes, user records under AccountConnector will
+          be deleted and users will re-auth again.
+        required: true
+        item_type:
+          type: String
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the userConnection, in the format
+      `projects/{project}/locations/{location}/accountConnectors/{account_connector_id}`.
+    output: true
+  - name: createTime
+    type: String
+    description: Output only. The timestamp when the userConnection was created.
+    output: true
+  - name: updateTime
+    type: String
+    description: Output only. The timestamp when the userConnection was updated.
+    output: true
+  - name: annotations
+    type: KeyValueAnnotations
+    description: Optional. Allows users to store small amounts of arbitrary data.
+  - name: labels
+    type: KeyValueLabels
+    description: Optional. Labels as key value pairs
