@@ -41,20 +41,17 @@ func TestInsightsView(t *testing.T) {
 			},
 			{
 				Config: testAccContactCenterInsightsView_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_contact_center_insights_view.full_view", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_contact_center_insights_view.full_view",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location"},
-			},
-			{
-				Config: testAccContactCenterInsightsView_update(context),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_contact_center_insights_view.full_view", plancheck.ResourceActionUpdate),
-					},
-				},
 			},
 		},
 	})
