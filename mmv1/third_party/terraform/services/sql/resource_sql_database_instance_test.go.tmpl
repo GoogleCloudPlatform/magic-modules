@@ -2817,6 +2817,7 @@ func TestAccSqlDatabaseInstance_PostgresSwitchoverSuccess(t *testing.T) {
 	})
 }
 
+{{ if ne $.TargetVersionName "ga" }}
 func TestAccSqlDatabaseInstance_PostgresConnectionPool(t *testing.T) {
 	t.Parallel()
 	instanceName := "tf-test-enterprise-connpool-pg-" + acctest.RandString(t, 10)
@@ -2904,6 +2905,7 @@ func TestAccSqlDatabaseInstance_MySQLConnectionPool(t *testing.T) {
 		},
 	})
 }
+{{- end }}
 
 func TestAccSqlDatabaseInstance_updateSslOptionsForPostgreSQL(t *testing.T) {
 	t.Parallel()

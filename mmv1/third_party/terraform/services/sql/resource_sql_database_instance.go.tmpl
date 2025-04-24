@@ -2191,10 +2191,15 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance.InstanceType = d.Get("instance_type").(string)
 	}
 
+{{ if ne $.TargetVersionName "ga" }}
 	// Database Version is required for all calls with Google ML integration or Managed Connection Pool enabled
 	// or it will be rejected by the API.
 	if d.Get("settings.0.enable_google_ml_integration").(bool) ||
 		d.Get("settings.0.connection_pool_config.0.connection_pooling_enabled").(bool) {
+{{- else }}
+	// Database Version is required for all calls with Google ML integration enabled or it will be rejected by the API.
+	if d.Get("settings.0.enable_google_ml_integration").(bool) {
+{{- end }}
 		instance.DatabaseVersion = databaseVersion
 	}
 
@@ -2282,6 +2287,7 @@ func databaseVersionDiffSuppress(_, oldVersion, newVersion string, _ *schema.Res
 	return false
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func connectionPoolConfigDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if k == "settings.0.connection_pool_config.#" {
 		if old == "0" && new == "1" {
@@ -2300,6 +2306,7 @@ func connectionPoolConfigDiffSuppress(k, old, new string, d *schema.ResourceData
 	}
 	return false
 }
+{{- end }}
 
 func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
