@@ -5,7 +5,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataSourceGoogleStorageControlProjectIntelligenceConfig_basic(t *testing.T) {
@@ -13,7 +12,7 @@ func TestAccDataSourceGoogleStorageControlProjectIntelligenceConfig_basic(t *tes
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"project":       envvar.GetTestProjectFromEnv(),
+		"project":       acctest.BootstrapProject(t, "tf-test-stor-int-", GetTestBillingAccountFromEnv(t), []string{"storage.googleapis.com"}),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
