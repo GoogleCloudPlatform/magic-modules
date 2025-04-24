@@ -24,7 +24,7 @@ func TestAccAssuredWorkloadsWorkload_BasicHandWritten(t *testing.T) {
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
-		CheckDestroy:             testAccCheckAssuredWorkloadsWorkloadDestroyProducer(t),
+		CheckDestroy: testAccCheckAssuredWorkloadsWorkloadDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAssuredWorkloadsWorkload_BasicHandWritten(context),
@@ -173,4 +173,3 @@ resource "time_sleep" "wait_120_seconds" {
 }
 `, context)
 }
-
