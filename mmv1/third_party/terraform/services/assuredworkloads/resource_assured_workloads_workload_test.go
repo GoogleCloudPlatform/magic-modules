@@ -1,8 +1,6 @@
 package assuredworkloads_test
 
 import (
-	"context"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"testing"
 
