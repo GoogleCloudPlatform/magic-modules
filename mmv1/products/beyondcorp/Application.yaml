@@ -138,8 +138,9 @@ properties:
             - name: name
               type: string
               description: |-
-                Optional. Network name is of the format:
+                Required. Network name is of the format:
                 `projects/{project}/global/networks/{network}`
+              required: true
   - name: name
     type: String
     description: Identifier. Name of the resource.
