@@ -25,8 +25,6 @@ self_link: '{{org_id}}/securityProfilesV2/{{profile_id}}'
 create_url: '{{org_id}}/securityProfilesV2?security_profile_v2_id={{profile_id}}'
 update_verb: 'PATCH'
 update_mask: true
-delete_url: "{{org_id}}/securityProfilesV2/{{profile_id}}"
-immutable: false
 import_format:
   - '{{org_id}}/securityProfilesV2/{{profile_id}}'
   - '{{org_id}}/{{profile_id}}'

@@ -40,15 +40,15 @@ resource "google_apigee_security_profile_v2" "security_profile_v2" {
   description = "terraform test description"
   profile_assessment_configs {
     assessment = "auth-policies-check"
-    weight = "MAJOR"
+    weight     = "MAJOR"
   }
   profile_assessment_configs {
     assessment = "mediation-policies-check"
-    weight = "MODERATE"
+    weight     = "MODERATE"
   }
   profile_assessment_configs {
     assessment = "threat-policies-check"
-    weight = "MINOR"
+    weight     = "MINOR"
   }
   depends_on = [
     google_apigee_addons_config.apigee_org_security_addons_config
