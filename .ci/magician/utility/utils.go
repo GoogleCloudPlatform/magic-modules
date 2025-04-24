@@ -62,6 +62,7 @@ func makeHTTPRequest(url, method, credentials string, body any) (*http.Response,
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", credentials))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
+
 	fmt.Println("")
 	fmt.Println("request url: ", url)
 	fmt.Println("request body: ", string(jsonBody))
@@ -79,6 +80,7 @@ func makeHTTPRequest(url, method, credentials string, body any) (*http.Response,
 	}
 
 	fmt.Println("response status-code: ", resp.StatusCode)
+	fmt.Println("response body: ", string(respBodyBytes))
 	fmt.Println("")
 
 	return resp, respBodyBytes, nil
