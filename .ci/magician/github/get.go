@@ -116,7 +116,7 @@ func (gh *Client) GetCommitMessage(owner, repo, sha string) (string, error) {
 		} `json:"commit"`
 	}
 
-	err := utils.RequestCall(url, "GET", gh.token, &commit, nil)
+	err := utils.RequestCallSilent(url, "GET", gh.token, &commit, nil)
 	if err != nil {
 		return "", err
 	}
