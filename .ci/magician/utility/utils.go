@@ -79,6 +79,7 @@ func makeHTTPRequest(url, method, credentials string, body any) (*http.Response,
 	}
 
 	fmt.Println("response status-code: ", resp.StatusCode)
+	fmt.Println("response body: ", string(respBodyBytes))
 	fmt.Println("")
 
 	return resp, respBodyBytes, nil
