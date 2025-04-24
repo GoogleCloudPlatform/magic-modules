@@ -149,7 +149,6 @@ properties:
                     description: |
                       A list of identities derived from the client's certificate. This field will not match on a request unless mutual TLS is enabled for the Forwarding rule or Gateway. Each identity is a string whose value is matched against the URI SAN, or DNS SAN or the subject field in the client's certificate. The match can be exact, prefix, suffix or a substring match. One of exact, prefix, suffix or contains must be specified.
                       Limited to 5 principals.
-                    deprecation_message: 'This field is currently being reworked. Using this field will return a *Not a valid field* Error for this provider version.'
                     item_type:
                       type: NestedObject
                       properties:
@@ -246,7 +245,6 @@ properties:
                     description: |
                       A list of identities derived from the client's certificate. This field will not match on a request unless mutual TLS is enabled for the Forwarding rule or Gateway. Each identity is a string whose value is matched against the URI SAN, or DNS SAN or the subject field in the client's certificate. The match can be exact, prefix, suffix or a substring match. One of exact, prefix, suffix or contains must be specified.
                       Limited to 5 principals.
-                    deprecation_message: 'This field is currently being reworked. Using this field will return a *Not a valid field* Error for this provider version.'
                     item_type:
                       type: NestedObject
                       properties:
