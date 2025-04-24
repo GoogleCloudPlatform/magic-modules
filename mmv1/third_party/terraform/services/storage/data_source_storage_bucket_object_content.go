@@ -34,7 +34,7 @@ func DataSourceGoogleStorageBucketObjectContent() *schema.Resource {
 
 	dsSchema["output_sha512"] = &schema.Schema{
 		Type:        schema.TypeString,
-		Description: "SHA512 encoded version of the object content",
+		Description: "SHA512 checksum of object content.",
 		Computed:    true,
 		Optional:    false,
 		Required:    false,
@@ -42,7 +42,7 @@ func DataSourceGoogleStorageBucketObjectContent() *schema.Resource {
 
 	dsSchema["output_base64sha512"] = &schema.Schema{
 		Type:        schema.TypeString,
-		Description: "Base64 of SHA512 encoded version of the object content",
+		Description: "Base64 encoded SHA512 checksum of object content.",
 		Computed:    true,
 		Optional:    false,
 		Required:    false,
