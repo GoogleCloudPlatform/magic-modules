@@ -570,11 +570,13 @@ func ResourceStorageBucket() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				Required: false,
 			},
 			"updated": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				Required: false,
 			},
 		},
 		UseJSONNumber: true,
