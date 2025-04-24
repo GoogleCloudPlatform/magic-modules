@@ -466,7 +466,7 @@ resource "google_spanner_database" "basic" {
   ddl = []
   deletion_protection = false
 }
-`, instanceName, instanceName, databaseName, databaseName)
+`, instanceName, instanceName, databaseName)
 }
 
 func testAccSpannerDatabase_defaultTimeZoneUpdate2(instanceName, databaseName string) string {
@@ -487,7 +487,7 @@ resource "google_spanner_database" "basic" {
   ]
   deletion_protection = false
 }
-`, instanceName, instanceName, databaseName, databaseName)
+`, instanceName, instanceName, databaseName)
 }
 
 func TestAccSpannerDatabase_enableDropProtection(t *testing.T) {
