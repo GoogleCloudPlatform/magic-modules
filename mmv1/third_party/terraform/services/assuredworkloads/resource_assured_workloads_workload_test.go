@@ -1,11 +1,18 @@
 package assuredworkloads_test
 
 import (
+	"context"
+	"fmt"
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
+	assuredworkloads "github.com/GoogleCloudPlatform/declarative-resource-client-library/services/google/assuredworkloads"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccAssuredWorkloadsWorkload_BasicHandWritten(t *testing.T) {
@@ -61,6 +68,9 @@ func TestAccAssuredWorkloadsWorkload_FullHandWritten(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		CheckDestroy:             testAccCheckAssuredWorkloadsWorkloadDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -172,4 +182,47 @@ resource "time_sleep" "wait_120_seconds" {
   depends_on = [google_folder.folder1]
 }
 `, context)
+}
+
+func testAccCheckAssuredWorkloadsWorkloadDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "rs.google_assured_workloads_workload" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			billingProject := ""
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			obj := &assuredworkloads.Workload{
+				ComplianceRegime:              assuredworkloads.WorkloadComplianceRegimeEnumRef(rs.Primary.Attributes["compliance_regime"]),
+				DisplayName:                   dcl.String(rs.Primary.Attributes["display_name"]),
+				Location:                      dcl.String(rs.Primary.Attributes["location"]),
+				Organization:                  dcl.String(rs.Primary.Attributes["organization"]),
+				BillingAccount:                dcl.String(rs.Primary.Attributes["billing_account"]),
+				EnableSovereignControls:       dcl.Bool(rs.Primary.Attributes["enable_sovereign_controls"] == "true"),
+				Partner:                       assuredworkloads.WorkloadPartnerEnumRef(rs.Primary.Attributes["partner"]),
+				PartnerServicesBillingAccount: dcl.String(rs.Primary.Attributes["partner_services_billing_account"]),
+				ProvisionedResourcesParent:    dcl.String(rs.Primary.Attributes["provisioned_resources_parent"]),
+				ViolationNotificationsEnabled: dcl.Bool(rs.Primary.Attributes["violation_notifications_enabled"] == "true"),
+				CreateTime:                    dcl.StringOrNil(rs.Primary.Attributes["create_time"]),
+				KajEnrollmentState:            assuredworkloads.WorkloadKajEnrollmentStateEnumRef(rs.Primary.Attributes["kaj_enrollment_state"]),
+				Name:                          dcl.StringOrNil(rs.Primary.Attributes["name"]),
+			}
+
+			client := transport_tpg.NewDCLAssuredWorkloadsClient(config, config.UserAgent, billingProject, 0)
+			_, err := client.GetWorkload(context.Background(), obj)
+			if err == nil {
+				return fmt.Errorf("google_assured_workloads_workload still exists %v", obj)
+			}
+		}
+		return nil
+	}
 }
