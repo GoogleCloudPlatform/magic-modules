@@ -568,15 +568,13 @@ func ResourceStorageBucket() *schema.Resource {
 			},
 			"time_created": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
-				Required: false,
+				Description: `The creation time of the bucket in RFC 3339 format.`
 			},
 			"updated": {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
-				Required: false,
+				Description: `The time at which the bucket's metadata or IAM policy was last updated, in RFC 3339 format.`
 			},
 		},
 		UseJSONNumber: true,
