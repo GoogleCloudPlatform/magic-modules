@@ -530,7 +530,7 @@ func TestAccContainerCluster_withFlexStart(t *testing.T) {
 				ResourceName:            "google_container_cluster.flex_start",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "min_master_version"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "min_master_version", "node_pool.0.node_config.0.taint"},
 			},
 		},
 	})
@@ -7138,6 +7138,12 @@ resource "google_container_cluster" "flex_start" {
 	  reservation_affinity {
       	consume_reservation_type = "NO_RESERVATION"
       }
+
+      taint {
+	    key    = "taint_key"
+		value  = "taint_value"
+		effect = "NO_SCHEDULE"
+	  }
     }
   }
 
