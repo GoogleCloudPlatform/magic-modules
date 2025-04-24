@@ -1,7 +1,7 @@
 resource "google_folder" "folder" {
   provider         = google-beta
   display_name     = "{{index $.Vars "display_name"}}"
-  parent           = "{{index $.TestEnvVars "org_id"}}"
+  parent           = "organizations/{{index $.TestEnvVars "org_id"}}"
 }
 resource "time_sleep" "wait_60s" {
   depends_on = [google_folder.folder]

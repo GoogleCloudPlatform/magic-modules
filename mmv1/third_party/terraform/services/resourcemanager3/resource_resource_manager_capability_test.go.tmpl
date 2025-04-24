@@ -31,7 +31,7 @@ func TestAccResourceManagerCapability_resourceManagerCapabilityExample_basic(t *
 				ResourceName:      "google_resource_manager_capability.capability",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"capability_name", "parent", "org_id"},
+				ImportStateVerifyIgnore: []string{"capability_name", "parent"},
 			},
 		},
 	})
@@ -42,7 +42,7 @@ func testAccResourceManagerCapability_resourceManagerCapabilityExample_basic(con
 resource "google_folder" "folder" {
   provider         = google-beta
   display_name     = "my-folder%{random_suffix}"
-  parent           = "%{org_id}"
+  parent           = "organizations/%{org_id}"
   deletion_protection = false
 }
 resource "time_sleep" "wait_60s" {
