@@ -42,11 +42,6 @@ examples:
       instance_name: 'bt-instance'
       table_name: 'bt-table'
       logical_view_name: 'bt-logical-view'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'deletion_protection': 'false'
-    oics_vars_overrides:
-      'deletion_protection': 'false'
     # bigtable instance does not use the shared HTTP client, this test creates an instance
     skip_vcr: true
 parameters:
@@ -76,7 +71,3 @@ properties:
     description:
       'The logical view''s select query.'
     required: true
-  - name: 'deletionProtection'
-    type: Boolean
-    description:
-      'Set to true to make the logical view protected against deletion.'

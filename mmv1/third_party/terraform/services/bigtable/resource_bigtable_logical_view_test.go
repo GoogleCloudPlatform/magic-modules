@@ -19,14 +19,14 @@ func TestAccBigtableLogicalView_update(t *testing.T) {
 
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	lvName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	mvName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigtableLogicalView_update(instanceName, tableName, lvName, "col1", true),
+				Config: testAccBigtableLogicalView_update(instanceName, tableName, mvName, "col1"),
 			},
 			{
 				ResourceName:      "google_bigtable_logical_view.logical_view",
@@ -34,7 +34,7 @@ func TestAccBigtableLogicalView_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccBigtableLogicalView_update(instanceName, tableName, lvName, "col2", false),
+				Config: testAccBigtableLogicalView_update(instanceName, tableName, mvName, "col2"),
 
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
@@ -51,7 +51,7 @@ func TestAccBigtableLogicalView_update(t *testing.T) {
 	})
 }
 
-func testAccBigtableLogicalView_update(instanceName, tableName, lvName, colName string, dp bool) string {
+func testAccBigtableLogicalView_update(instanceName, tableName, mvName, colName string) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
   name          = "%s"
@@ -75,7 +75,6 @@ resource "google_bigtable_table" "table" {
 resource "google_bigtable_logical_view" "logical_view" {
   logical_view_id = "%s"
   instance        = google_bigtable_instance.instance.name
-  deletion_protection = %v
   query = <<EOT
 SELECT _key, CF['%s'] AS column
 FROM %s
@@ -85,5 +84,5 @@ EOT
     google_bigtable_table.table
   ]
 }
-`, instanceName, instanceName, tableName, lvName, dp, colName, fmt.Sprintf("`%s`", tableName))
+`, instanceName, instanceName, tableName, mvName, colName, fmt.Sprintf("`%s`", tableName))
 }
