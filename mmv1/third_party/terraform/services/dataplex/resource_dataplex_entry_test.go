@@ -1,49 +1,48 @@
 package dataplex_test
 
 import (
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"reflect"
 	"sort"
 	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	dataplex "github.com/hashicorp/terraform-provider-google/google/services/dataplex"
 )
 
 func TestProjectNumberValidation(t *testing.T) {
+	fieldName := "some_field"
 	testCases := []struct {
 		name        string
 		input       interface{}
-		fieldName   string
 		expectError bool
 		errorMsg    string
 	}{
-		{"valid input", "projects/1234567890/locations/us-central1", "resourceName", false, ""},
-		{"valid input with only number", "projects/987/stuff", "name", false, ""},
-		{"valid input with trailing slash content", "projects/1/a/b/c", "parent", false, ""},
-		{"valid input minimal", "projects/1/a", "field_a", false, ""},
-		{"valid input trailing slash only", "projects/555/", "field_b", false, ""},
-		{"invalid type - int", 123, "resourceName", true, `expected type of field "resourceName" to be string, but got int`},
-		{"invalid type - nil", nil, "resourceName", true, `expected type of field "resourceName" to be string, but got <nil>`},
-		{"invalid format - missing 'projects/' prefix", "12345/locations/us", "resourceName", true, "has an invalid format"},
-		{"invalid format - project number starts with 0", "projects/0123/data", "resourceName", true, "has an invalid format"},
-		{"invalid format - no project number", "projects//data", "resourceName", true, "has an invalid format"},
-		{"invalid format - letters instead of number", "projects/abc/data", "resourceName", true, "has an invalid format"},
-		{"invalid format - missing content after number/", "projects/123", "resourceName", true, "has an invalid format"},
-		{"invalid format - empty string", "", "resourceName", true, "has an invalid format"},
+		{"valid input", "projects/1234567890/locations/us-central1", false, ""},
+		{"valid input with only number", "projects/987/stuff", false, ""},
+		{"valid input with trailing slash content", "projects/1/a/b/c", false, ""},
+		{"valid input minimal", "projects/1/a", false, ""},
+		{"invalid input trailing slash only", "projects/555/", true, "has an invalid format"},
+		{"invalid type - int", 123, true, `to be string, but got int`},
+		{"invalid type - nil", nil, true, `to be string, but got <nil>`},
+		{"invalid format - missing 'projects/' prefix", "12345/locations/us", true, "has an invalid format"},
+		{"invalid format - project number starts with 0", "projects/0123/data", true, "has an invalid format"},
+		{"invalid format - no project number", "projects//data", true, "has an invalid format"},
+		{"invalid format - letters instead of number", "projects/abc/data", true, "has an invalid format"},
+		{"invalid format - missing content after number/", "projects/123", true, "has an invalid format"},
+		{"invalid format - empty string", "", true, "has an invalid format"},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, errors := dataplex.ProjectNumberValidation(tc.input, tc.fieldName)
+			_, errors := dataplex.ProjectNumberValidation(tc.input, fieldName)
 			hasError := len(errors) > 0
 
 			if hasError != tc.expectError {
-				t.Fatalf("ProjectNumberValidation() error expectation mismatch: got error = %v (%v), want error = %v", hasError, errors, tc.expectError)
+				t.Fatalf("%s: ProjectNumberValidation() error expectation mismatch: got error = %v (%v), want error = %v", tc.name, hasError, errors, tc.expectError)
 			}
 
 			if tc.expectError && tc.errorMsg != "" {
@@ -55,7 +54,7 @@ func TestProjectNumberValidation(t *testing.T) {
 					}
 				}
 				if !found {
-					t.Errorf("ProjectNumberValidation() expected error containing %q, but got: %v", tc.errorMsg, errors)
+					t.Errorf("%s: ProjectNumberValidation() expected error containing %q, but got: %v", tc.name, tc.errorMsg, errors)
 				}
 			}
 		})
@@ -63,33 +62,33 @@ func TestProjectNumberValidation(t *testing.T) {
 }
 
 func TestAspectProjectNumberValidation(t *testing.T) {
+	fieldName := "some_field"
 	testCases := []struct {
 		name        string
 		input       interface{}
-		fieldName   string
 		expectError bool
 		errorMsg    string
 	}{
-		{"valid input", "1234567890.compute.googleapis.com/Disk", "aspect_type", false, ""},
-		{"valid input minimal", "1.a", "aspect_type", false, ""},
-		{"valid input trailing dot only", "987.", "aspect_type", false, ""},
-		{"invalid type - int", 456, "aspect_type", true, `expected type of field "aspect_type" to be string, but got int`},
-		{"invalid type - nil", nil, "aspect_type", true, `expected type of field "aspect_type" to be string, but got <nil>`},
-		{"invalid format - missing number", ".compute.googleapis.com/Disk", "aspect_type", true, "has an invalid format"},
-		{"invalid format - number starts with 0", "0123.compute.googleapis.com/Disk", "aspect_type", true, "has an invalid format"},
-		{"invalid format - missing dot", "12345compute", "aspect_type", true, "has an invalid format"},
-		{"invalid format - letters instead of number", "abc.compute.googleapis.com/Disk", "aspect_type", true, "has an invalid format"},
-		{"invalid format - missing content after dot", "12345", "aspect_type", true, "has an invalid format"},
-		{"invalid format - empty string", "", "aspect_type", true, "has an invalid format"},
+		{"valid input", "1234567890.compute.googleapis.com/Disk", false, ""},
+		{"valid input minimal", "1.a", false, ""},
+		{"invalid input trailing dot only", "987.", true, "has an invalid format"},
+		{"invalid type - int", 456, true, `to be string, but got int`},
+		{"invalid type - nil", nil, true, `to be string, but got <nil>`},
+		{"invalid format - missing number", ".compute.googleapis.com/Disk", true, "has an invalid format"},
+		{"invalid format - number starts with 0", "0123.compute.googleapis.com/Disk", true, "has an invalid format"},
+		{"invalid format - missing dot", "12345compute", true, "has an invalid format"},
+		{"invalid format - letters instead of number", "abc.compute.googleapis.com/Disk", true, "has an invalid format"},
+		{"invalid format - missing content after dot", "12345", true, "has an invalid format"},
+		{"invalid format - empty string", "", true, "has an invalid format"},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, errors := dataplex.AspectProjectNumberValidation(tc.input, tc.fieldName)
+			_, errors := dataplex.AspectProjectNumberValidation(tc.input, fieldName)
 			hasError := len(errors) > 0
 
 			if hasError != tc.expectError {
-				t.Fatalf("AspectProjectNumberValidation() error expectation mismatch: got error = %v (%v), want error = %v", hasError, errors, tc.expectError)
+				t.Fatalf("%s: AspectProjectNumberValidation() error expectation mismatch: got error = %v (%v), want error = %v", tc.name, hasError, errors, tc.expectError)
 			}
 
 			if tc.expectError && tc.errorMsg != "" {
@@ -101,7 +100,7 @@ func TestAspectProjectNumberValidation(t *testing.T) {
 					}
 				}
 				if !found {
-					t.Errorf("AspectProjectNumberValidation() expected error containing %q, but got: %v", tc.errorMsg, errors)
+					t.Errorf("%s: AspectProjectNumberValidation() expected error containing %q, but got: %v", tc.name, tc.errorMsg, errors)
 				}
 			}
 		})
@@ -110,43 +109,19 @@ func TestAspectProjectNumberValidation(t *testing.T) {
 
 func TestFilterAspects(t *testing.T) {
 	testCases := []struct {
-		name             string
-		aspectKeySet     map[string]struct{}
-		resInput         map[string]interface{}
-		expectedAspects  map[string]interface{}
-		expectNilAspects bool
+		name            string
+		aspectKeySet    map[string]struct{}
+		resInput        map[string]interface{}
+		expectedAspects map[string]interface{}
 	}{
-		{
-			name:             "aspects is nil",
-			aspectKeySet:     map[string]struct{}{"keep": {}},
-			resInput:         map[string]interface{}{"otherKey": "value"},
-			expectedAspects:  nil,
-			expectNilAspects: true,
-		},
-		{
-			name:            "empty aspectKeySet",
-			aspectKeySet:    map[string]struct{}{},
-			resInput:        map[string]interface{}{"aspects": map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}}},
-			expectedAspects: map[string]interface{}{},
-		},
-		{
-			name:            "keep all aspects",
-			aspectKeySet:    map[string]struct{}{"one": {}, "two": {}},
-			resInput:        map[string]interface{}{"aspects": map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}}},
-			expectedAspects: map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}},
-		},
-		{
-			name:            "keep some aspects",
-			aspectKeySet:    map[string]struct{}{"two": {}, "three_not_present": {}},
-			resInput:        map[string]interface{}{"aspects": map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}}},
-			expectedAspects: map[string]interface{}{"two": map[string]interface{}{"data": 2}},
-		},
-		{
-			name:            "input aspects map is empty",
-			aspectKeySet:    map[string]struct{}{"keep": {}},
-			resInput:        map[string]interface{}{"aspects": map[string]interface{}{}},
-			expectedAspects: map[string]interface{}{},
-		},
+		{"aspects is nil",
+			map[string]struct{}{"keep": {}},
+			map[string]interface{}{"otherKey": "value"},
+			nil},
+		{"empty aspectKeySet", map[string]struct{}{}, map[string]interface{}{"aspects": map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}}}, map[string]interface{}{}},
+		{"keep all aspects", map[string]struct{}{"one": {}, "two": {}}, map[string]interface{}{"aspects": map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}}}, map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}}},
+		{"keep some aspects", map[string]struct{}{"two": {}, "three_not_present": {}}, map[string]interface{}{"aspects": map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}}}, map[string]interface{}{"two": map[string]interface{}{"data": 2}}},
+		{"input aspects map is empty", map[string]struct{}{"keep": {}}, map[string]interface{}{"aspects": map[string]interface{}{}}, map[string]interface{}{}},
 	}
 
 	for _, tc := range testCases {
@@ -156,24 +131,24 @@ func TestFilterAspects(t *testing.T) {
 
 			actualAspectsRaw, aspectsKeyExists := resCopy["aspects"]
 
-			if tc.expectNilAspects {
+			if tc.expectedAspects == nil {
 				if aspectsKeyExists && actualAspectsRaw != nil {
-					t.Errorf("Expected 'aspects' to be nil or absent, but got: %v", actualAspectsRaw)
+					t.Errorf("%s: Expected 'aspects' to be nil or absent, but got: %v", tc.name, actualAspectsRaw)
 				}
 				return
 			}
 
 			if !aspectsKeyExists {
-				t.Fatalf("Expected 'aspects' key to exist, but it was absent")
+				t.Fatalf("%s: Expected 'aspects' key to exist, but it was absent", tc.name)
 			}
 
 			actualAspects, ok := actualAspectsRaw.(map[string]interface{})
 			if !ok {
-				t.Fatalf("Expected 'aspects' to be a map[string]interface{}, but got %T", actualAspectsRaw)
+				t.Fatalf("%s: Expected 'aspects' to be a map[string]interface{}, but got %T", tc.name, actualAspectsRaw)
 			}
 
 			if !reflect.DeepEqual(actualAspects, tc.expectedAspects) {
-				t.Errorf("FilterAspects() result mismatch:\ngot:  %#v\nwant: %#v", actualAspects, tc.expectedAspects)
+				t.Errorf("%s: FilterAspects() result mismatch:\ngot:  %#v\nwant: %#v", tc.name, actualAspects, tc.expectedAspects)
 			}
 		})
 	}
@@ -208,14 +183,14 @@ func TestAddAspectsToSet(t *testing.T) {
 			defer func() {
 				r := recover()
 				if tc.expectPanic && r == nil {
-					t.Errorf("Expected a panic, but AddAspectsToSet did not panic")
+					t.Errorf("%s: Expected a panic, but AddAspectsToSet did not panic", tc.name)
 				} else if !tc.expectPanic && r != nil {
-					t.Errorf("AddAspectsToSet panicked unexpectedly: %v", r)
+					t.Errorf("%s: AddAspectsToSet panicked unexpectedly: %v", tc.name, r)
 				}
 
 				if !tc.expectPanic {
 					if !reflect.DeepEqual(currentSet, tc.expectedSet) {
-						t.Errorf("AddAspectsToSet() result mismatch:\ngot:  %v\nwant: %v", currentSet, tc.expectedSet)
+						t.Errorf("%s: AddAspectsToSet() result mismatch:\ngot:  %v\nwant: %v", tc.name, currentSet, tc.expectedSet)
 					}
 				}
 			}()
@@ -266,9 +241,9 @@ func TestInverseTransformAspects(t *testing.T) {
 			defer func() {
 				r := recover()
 				if tc.expectPanic && r == nil {
-					t.Errorf("Expected a panic, but InverseTransformAspects did not panic")
+					t.Errorf("%s: Expected a panic, but InverseTransformAspects did not panic", tc.name)
 				} else if !tc.expectPanic && r != nil {
-					t.Errorf("InverseTransformAspects panicked unexpectedly: %v", r)
+					t.Errorf("%s: InverseTransformAspects panicked unexpectedly: %v", tc.name, r)
 				}
 
 				if !tc.expectPanic {
@@ -276,25 +251,25 @@ func TestInverseTransformAspects(t *testing.T) {
 
 					if tc.expectNilAspects {
 						if aspectsKeyExists && actualAspectsRaw != nil {
-							t.Errorf("Expected 'aspects' to be nil or absent, but got: %v", actualAspectsRaw)
+							t.Errorf("%s: Expected 'aspects' to be nil or absent, but got: %v", tc.name, actualAspectsRaw)
 						}
 						return
 					}
 
 					if !aspectsKeyExists && !tc.expectNilAspects { // Should exist if not expecting nil
-						t.Fatalf("Expected 'aspects' key in result map, but it was missing")
+						t.Fatalf("%s: Expected 'aspects' key in result map, but it was missing", tc.name)
 					}
 
 					actualAspects, ok := actualAspectsRaw.([]interface{})
 					if !ok && !tc.expectNilAspects { // Type check only if we didn't expect nil and key exists
-						t.Fatalf("Expected 'aspects' to be []interface{}, but got %T", actualAspectsRaw)
+						t.Fatalf("%s: Expected 'aspects' to be []interface{}, but got %T", tc.name, actualAspectsRaw)
 					}
 
 					sortAspectSlice(actualAspects)
 					sortAspectSlice(tc.expectedAspects) // Ensure expected is sorted if non-nil
 
 					if !reflect.DeepEqual(actualAspects, tc.expectedAspects) {
-						t.Errorf("InverseTransformAspects() result mismatch:\ngot:  %#v\nwant: %#v", actualAspects, tc.expectedAspects)
+						t.Errorf("%s: InverseTransformAspects() result mismatch:\ngot:  %#v\nwant: %#v", tc.name, actualAspects, tc.expectedAspects)
 					}
 				}
 			}()
@@ -332,9 +307,9 @@ func TestTransformAspects(t *testing.T) {
 			defer func() {
 				r := recover()
 				if tc.expectPanic && r == nil {
-					t.Errorf("Expected a panic, but TransformAspects did not panic")
+					t.Errorf("%s: Expected a panic, but TransformAspects did not panic", tc.name)
 				} else if !tc.expectPanic && r != nil {
-					t.Errorf("TransformAspects panicked unexpectedly: %v", r)
+					t.Errorf("%s: TransformAspects panicked unexpectedly: %v", tc.name, r)
 				}
 
 				if !tc.expectPanic {
@@ -342,22 +317,22 @@ func TestTransformAspects(t *testing.T) {
 
 					if tc.expectNilAspects {
 						if aspectsKeyExists && actualAspectsRaw != nil {
-							t.Errorf("Expected 'aspects' to be nil or absent, but got: %v", actualAspectsRaw)
+							t.Errorf("%s: Expected 'aspects' to be nil or absent, but got: %v", tc.name, actualAspectsRaw)
 						}
 						return
 					}
 
 					if !aspectsKeyExists && !tc.expectNilAspects {
-						t.Fatalf("Expected 'aspects' key in result map, but it was missing")
+						t.Fatalf("%s: Expected 'aspects' key in result map, but it was missing", tc.name)
 					}
 
 					actualAspects, ok := actualAspectsRaw.(map[string]interface{})
 					if !ok && !tc.expectNilAspects {
-						t.Fatalf("Expected 'aspects' to be map[string]interface{}, but got %T", actualAspectsRaw)
+						t.Fatalf("%s: Expected 'aspects' to be map[string]interface{}, but got %T", tc.name, actualAspectsRaw)
 					}
 
 					if !reflect.DeepEqual(actualAspects, tc.expectedAspects) {
-						t.Errorf("TransformAspects() result mismatch:\ngot:  %#v\nwant: %#v", actualAspects, tc.expectedAspects)
+						t.Errorf("%s: TransformAspects() result mismatch:\ngot:  %#v\nwant: %#v", tc.name, actualAspects, tc.expectedAspects)
 					}
 				}
 			}()
@@ -525,14 +500,6 @@ resource "google_dataplex_entry_type" "tf-test-entry-type-full%{random_suffix}" 
   entry_type_id = "tf-test-entry-type-full%{random_suffix}"
   project = "%{project_number}"
   location = "us-central1"
-
-  labels = { "tag": "test-tf" }
-  display_name = "terraform entry type"
-  description = "entry type created by Terraform"
-
-  type_aliases = ["TABLE", "DATABASE"]
-  platform = "GCS"
-  system = "CloudSQL"
 
   required_aspects {
     type = google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-one.name

@@ -8,7 +8,7 @@ func ProjectNumberValidation(i interface{}, k string) (warnings []string, errors
 		return warnings, errors
 	}
 
-	var projectNumberRegex = regexp.MustCompile(`^projects\/[1-9]\d*\/.*$`)
+	var projectNumberRegex = regexp.MustCompile(`^projects\/[1-9]\d*\/.+$`)
 	if !projectNumberRegex.MatchString(v) {
 		errors = append(errors, fmt.Errorf(
 			"field %q has an invalid format: %q. Expected format: 'projects/<project-number>/<anything>'. Please note that project IDs are not supported.",
@@ -28,7 +28,7 @@ func AspectProjectNumberValidation(i interface{}, k string) (warnings []string, 
 		return warnings, errors
 	}
 
-	var numberDotAnythingRegex = regexp.MustCompile(`^[1-9]\d*\..*$`)
+	var numberDotAnythingRegex = regexp.MustCompile(`^[1-9]\d*\..+$`)
 
 	if !numberDotAnythingRegex.MatchString(v) {
 		errors = append(errors, fmt.Errorf(
@@ -91,12 +91,11 @@ func TransformAspects(obj map[string]interface{}) {
 	newMap := make(map[string]interface{}, len(originalSlice))
 	for _, item := range originalSlice {
 		aspectMap := item.(map[string]interface{})
+
 		key := aspectMap["aspectKey"].(string)
-		valueCopy := make(map[string]interface{}, len(aspectMap)-1)
-		for k, v := range aspectMap["aspectValue"].(map[string]interface{}) {
-			valueCopy[k] = v
-		}
-		newMap[key] = valueCopy
+		value := aspectMap["aspectValue"].(map[string]interface{})
+
+		newMap[key] = value
 	}
 	obj["aspects"] = newMap
 }
