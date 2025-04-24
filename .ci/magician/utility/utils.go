@@ -133,7 +133,7 @@ func RequestCall(url, method, credentials string, result any, body any) error {
 	return processResponse(resp, respBodyBytes, result)
 }
 
-// RequestCall makes a single HTTP request without retries
+// RequestCallSilent makes a single HTTP request without retries and does not log the request and response
 func RequestCallSilent(url, method, credentials string, result any, body any) error {
 	resp, respBodyBytes, err := makeHTTPRequest(url, method, credentials, body, false)
 	if err != nil {
