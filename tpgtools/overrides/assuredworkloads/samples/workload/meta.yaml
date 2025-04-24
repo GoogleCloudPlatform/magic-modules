@@ -13,5 +13,3 @@ doc_hide:
   - full.tf.tmpl
 test_hide:
   - basic_workload.yaml
-external_providers:
-  - "time"
