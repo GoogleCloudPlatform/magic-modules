@@ -1211,6 +1211,12 @@ func (r Resource) GetIdFormat() string {
 	return idFormat
 }
 
+// Returns true if the Type is in the ID format and false otherwise.
+func (r Resource) InIdFormat(prop Type) bool {
+	fields := r.ExtractIdentifiers(r.GetIdFormat())
+	return slices.Contains(fields, google.Underscore(prop.Name))
+}
+
 // ====================
 // Template Methods
 // ====================
