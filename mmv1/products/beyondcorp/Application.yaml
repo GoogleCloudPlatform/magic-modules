@@ -133,8 +133,6 @@ properties:
                 type: String
         - name: network
           type: NestedObject
-          exactly_one_of:
-            - network
           description: Network to forward traffic to.
           properties:
             - name: name
