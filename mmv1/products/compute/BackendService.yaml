@@ -21,6 +21,9 @@ description: |
   For managed internal load balancing, use a regional backend service instead.
 
   Currently self-managed internal load balancing is only available in beta.
+
+  ~> **Note:** Recreating a `google_compute_backend_service` that references other dependent resources like `google_compute_url_map` will give a `resourceInUseByAnotherResource` error, when modifying the number of other dependent resources.
+  Use `lifecycle.create_before_destroy` on the dependent resources to avoid this type of error as shown in the Dynamic Backends example.
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-service'
@@ -127,6 +130,18 @@ examples:
       default_neg_name: 'network-endpoint'
       health_check_name: 'health-check'
       network_name: 'network'
+  - name: 'backend_service_tls_settings'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
+      authentication_name: 'authentication'
+  - name: 'backend_service_dynamic_backends'
+    primary_resource_id: 'default'
+    vars:
+      url_map_name: 'url_map'
+    exclude_test: true
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
@@ -177,6 +192,18 @@ properties:
             0% of its available Capacity. Valid range is [0.0,1.0].
           send_empty_value: true
           default_value: 1.0
+        - name: 'preference'
+          type: Enum
+          description: |
+            This field indicates whether this backend should be fully utilized before sending traffic to backends
+            with default preference. This field cannot be set when loadBalancingScheme is set to 'EXTERNAL'. The possible values are:
+              - PREFERRED: Backends with this preference level will be filled up to their capacity limits first,
+                based on RTT.
+              - DEFAULT: If preferred backends don't have enough capacity, backends in this layer would be used and
+                traffic would be assigned based on the load balancing algorithm you use. This is the default
+          enum_values:
+            - 'PREFERRED'
+            - 'DEFAULT'
         - name: 'description'
           type: String
           description: |
@@ -496,6 +523,13 @@ properties:
     description: 'Cloud CDN configuration for this BackendService.'
     default_from_api: true
     properties:
+      - name: 'requestCoalescing'
+        type: Boolean
+        description: |
+          If true then Cloud CDN will combine multiple concurrent cache fill requests into a small number of requests
+          to the origin.
+        default_from_api: true
+        send_empty_value: true
       - name: 'cacheKeyPolicy'
         type: NestedObject
         description: 'The CacheKeyPolicy for this CdnPolicy.'
@@ -1461,8 +1495,93 @@ properties:
           - 'log_config.0.sample_rate'
         diff_suppress_func: 'suppressWhenDisabled'
         default_value: 1.0
+      - name: 'optionalMode'
+        type: Enum
+        description: |
+          Specifies the optional logging mode for the load balancer traffic.
+          Supported values: INCLUDE_ALL_OPTIONAL, EXCLUDE_ALL_OPTIONAL, CUSTOM.
+        enum_values:
+          - 'INCLUDE_ALL_OPTIONAL'
+          - 'EXCLUDE_ALL_OPTIONAL'
+          - 'CUSTOM'
+        at_least_one_of:
+          - 'log_config.0.enable'
+          - 'log_config.0.sample_rate'
+          - 'log_config.0.optional_mode'
+        default_from_api: true
+      - name: 'optionalFields'
+        type: Array
+        description: |
+          This field can only be specified if logging is enabled for this backend service and "logConfig.optionalMode"
+          was set to CUSTOM. Contains a list of optional fields you want to include in the logs.
+          For example: serverInstance, serverGkeDetails.cluster, serverGkeDetails.pod.podNamespace
+        item_type:
+          type: String
   - name: 'serviceLbPolicy'
     type: String
     description: |
       URL to networkservices.ServiceLbPolicy resource.
       Can only be set if load balancing scheme is EXTERNAL, EXTERNAL_MANAGED, INTERNAL_MANAGED or INTERNAL_SELF_MANAGED and the scope is global.
+  - name: 'tlsSettings'
+    type: NestedObject
+    description: |
+      Configuration for Backend Authenticated TLS and mTLS. May only be specified when the backend protocol is SSL, HTTPS or HTTP2.
+    min_version: beta
+    properties:
+      - name: 'sni'
+        type: String
+        description: |
+          Server Name Indication - see RFC3546 section 3.1. If set, the load balancer sends this string as the SNI hostname in the
+          TLS connection to the backend, and requires that this string match a Subject Alternative Name (SAN) in the backend's
+          server certificate. With a Regional Internet NEG backend, if the SNI is specified here, the load balancer uses it
+          regardless of whether the Regional Internet NEG is specified with FQDN or IP address and port.
+      - name: 'subjectAltNames'
+        type: Array
+        description: |
+          A list of Subject Alternative Names (SANs) that the Load Balancer verifies during a TLS handshake with the backend.
+          When the server presents its X.509 certificate to the Load Balancer, the Load Balancer inspects the certificate's SAN field,
+          and requires that at least one SAN match one of the subjectAltNames in the list. This field is limited to 5 entries.
+          When both sni and subjectAltNames are specified, the load balancer matches the backend certificate's SAN only to
+          subjectAltNames.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'dnsName'
+              type: String
+              description: The SAN specified as a DNS Name.
+              exactly_one_of:
+                - tlsSettings.0.uniform_resource_identifier
+                - tlsSettings.0.dns_name
+            - name: 'uniformResourceIdentifier'
+              type: String
+              description: The SAN specified as a URI.
+              exactly_one_of:
+                - tlsSettings.0.uniform_resource_identifier
+                - tlsSettings.0.dns_name
+      - name: 'authenticationConfig'
+        type: String
+        description: |
+          Reference to the BackendAuthenticationConfig resource from the networksecurity.googleapis.com namespace.
+          Can be used in authenticating TLS connections to the backend, as specified by the authenticationMode field.
+          Can only be specified if authenticationMode is not NONE.
+  - name: 'maxStreamDuration'
+    type: NestedObject
+    description: |
+      Specifies the default maximum duration (timeout) for streams to this service. Duration is computed from the
+      beginning of the stream until the response has been completely processed, including all retries. A stream that
+      does not complete in this duration is closed.
+      If not specified, there will be no timeout limit, i.e. the maximum duration is infinite.
+      This value can be overridden in the PathMatcher configuration of the UrlMap that references this backend service.
+      This field is only allowed when the loadBalancingScheme of the backend service is INTERNAL_SELF_MANAGED.
+    properties:
+      - name: 'seconds'
+        type: String
+        description: |
+          Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive. (int64 format)
+        required: true
+      - name: 'nanos'
+        type: Integer
+        description: |
+          Span of time that's a fraction of a second at nanosecond resolution.
+          Durations less than one second are represented with a 0 seconds field and a positive nanos field.
+          Must be from 0 to 999,999,999 inclusive.

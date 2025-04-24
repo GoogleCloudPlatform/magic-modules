@@ -165,6 +165,8 @@ An update test is an **acceptance test** that creates the target resource and th
    - Add `ConfigPlanChecks` to the update step of the test to ensure the resource is updated in-place.
    - The resulting test function would look similar to this:
    ```go
+   import "github.com/hashicorp/terraform-plugin-testing/plancheck"
+
    func TestAccPubsubTopic_update(t *testing.T) {
       ...
       acctest.VcrTest(t, resource.TestCase{
@@ -225,6 +227,8 @@ An update test is an **acceptance test** that creates the target resource and th
    - Add `ConfigPlanChecks` to the update step of the test to ensure the resource is updated in-place.
    - The resulting test function would look similar to this:
    ```go
+   import "github.com/hashicorp/terraform-plugin-testing/plancheck"
+
    func TestAccPubsubTopic_update(t *testing.T) {
       ...
       acctest.VcrTest(t, resource.TestCase{
@@ -320,7 +324,7 @@ func TestAccProductResource_update(t *testing.T) {
 
 ### IAM resources
 
-Specify member/role pairs that should always exist. `{project_number}` will be replaced with the default project's project number, and `{organization_id}` will be replaced with the test organization's ID.
+Specify member/role pairs that should always exist. `{project_number}` will be replaced with the default project's project number. `{organization_id}` will be replaced with the "target" test organization's ID – we don't modify IAM in the main test org to avoid accidentally locking ourselves out.
 
 Permissions attached to resources created _in_ a test should instead be provisioned with standard terraform resources.
 
@@ -329,32 +333,66 @@ Example usage:
 {{< tabs "bootstrap-iam" >}}
 {{< tab "MMv1" >}}
 ```yaml
+# Project-level IAM
 examples:
   - name: service_resource_basic
     primary_resource_id: example
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com"
         role: "roles/bigquery.dataEditor"
+```
+
+```yaml
+# Org-level IAM
+examples:
+  - name: service_resource_basic
+    primary_resource_id: example
+    bootstrap_iam:
       - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
         role: "roles/osconfig.serviceAgent"
+    test_env_vars:
+      org_id: ORG_TARGET
 ```
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 ```go
-func TestAccProductResource_update(t *testing.T) {
-   t.Parallel()
+// Project-level IAM
+import (
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+)
 
-   acctest.BootstrapIamMembers(t, []acctest.IamMember{
-      {
-         Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
-         Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
-      },
-      {
-         Member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com",
-         Role:   "roles/osconfig.serviceAgent",
-      },
-   })
-   // rest of test
+func TestAccProductResource_update(t *testing.T) {
+    t.Parallel()
+
+    acctest.BootstrapIamMembers(t, []acctest.IamMember{
+        {
+            Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
+            Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+        },
+    })
+    // rest of test
+}
+```
+```go
+// Org-level IAM
+import (
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
+)
+
+func TestAccProductResource_update(t *testing.T) {
+    t.Parallel()
+
+    acctest.BootstrapIamMembers(t, []acctest.IamMember{
+        {
+            Member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com",
+            Role:   "roles/osconfig.serviceAgent",
+        },
+    })
+    context := map[string]string{
+        "org_id": envvar.GetTestOrgTargetFromEnv(t),
+    }
+    // rest of test
 }
 ```
 {{< /tab >}}

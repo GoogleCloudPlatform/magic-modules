@@ -526,6 +526,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Looker",
         "path" to "./google/services/looker"
     ),
+    "lustre" to mapOf(
+        "name" to "lustre",
+        "displayName" to "GoogleCloudManagedLustre",
+        "path" to "./google/services/lustre"
+    ),
     "managedkafka" to mapOf(
         "name" to "managedkafka",
         "displayName" to "Managedkafka",
@@ -760,6 +765,11 @@ var ServicesListGa = mapOf(
         "name" to "storage",
         "displayName" to "Storage",
         "path" to "./google/services/storage"
+    ),
+    "storagebatchoperations" to mapOf(
+        "name" to "storagebatchoperations",
+        "displayName" to "StorageBatchOperations",
+        "path" to "./google/services/storagebatchoperations"
     ),
     "storagecontrol" to mapOf(
         "name" to "storagecontrol",

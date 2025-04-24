@@ -531,6 +531,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Looker",
         "path" to "./google-beta/services/looker"
     ),
+    "lustre" to mapOf(
+        "name" to "lustre",
+        "displayName" to "GoogleCloudManagedLustre",
+        "path" to "./google-beta/services/lustre"
+    ),
     "managedkafka" to mapOf(
         "name" to "managedkafka",
         "displayName" to "Managedkafka",
@@ -765,6 +770,11 @@ var ServicesListBeta = mapOf(
         "name" to "storage",
         "displayName" to "Storage",
         "path" to "./google-beta/services/storage"
+    ),
+    "storagebatchoperations" to mapOf(
+        "name" to "storagebatchoperations",
+        "displayName" to "StorageBatchOperations",
+        "path" to "./google-beta/services/storagebatchoperations"
     ),
     "storagecontrol" to mapOf(
         "name" to "storagecontrol",

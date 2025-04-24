@@ -45,6 +45,8 @@ custom_code:
 custom_diff:
   - 'resourceComputeRouterCustomDiff'
 sweeper:
+  prefixes:
+    - "swg-autogen-router" # Secure Web Proxy(SWP) auto-generated router prefix.
   url_substitutions:
     - region: "us-central1"
     - region: "us-east1"
@@ -62,6 +64,14 @@ examples:
     vars:
       router_name: 'test-router'
       network_name: 'test-network'
+    ignore_read_extra:
+      - 'advertisedIpRanges'
+  - name: 'compute_router_md5encrypted'
+    primary_resource_id: 'foobar'
+    vars:
+      router_name: 'test-router'
+      network_name: 'test-network'
+    exclude_docs: true
     ignore_read_extra:
       - 'advertisedIpRanges'
 parameters:
@@ -206,3 +216,20 @@ properties:
       Indicates if a router is dedicated for use with encrypted VLAN
       attachments (interconnectAttachments).
     immutable: true
+  - name: 'md5AuthenticationKeys'
+    ignore_read: true
+    type: NestedObject
+    description: |
+      Keys used for MD5 authentication.
+    properties:
+      - name: 'name'
+        type: String
+        description: |
+          Name used to identify the key. Must be unique within a router.
+          Must be referenced by exactly one bgpPeer. Must comply with RFC1035.
+        required: true
+      - name: 'key'
+        type: String
+        description: |
+          Value of the key used for MD5 authentication.
+        required: true
