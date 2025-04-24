@@ -12,9 +12,7 @@ resource "google_vertex_ai_feature_online_store" "{{$.PrimaryResourceId}}" {
       cpu_utilization_target = 80
     }
   }
-  embedding_management {
-    enabled = true
-  }
+  optimized {}
   force_destroy = true
 }
 
