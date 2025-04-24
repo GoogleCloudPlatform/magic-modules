@@ -49,7 +49,7 @@ func defaultRetryConfig() retryConfig {
 }
 
 // makeHTTPRequest performs the actual HTTP request and returns the response
-func makeHTTPRequest(url, method, credentials string, body any, logrequest bool) (*http.Response, []byte, error) {
+func makeHTTPRequest(url, method, credentials string, body any) (*http.Response, []byte, error) {
 	client := &http.Client{}
 	jsonBody, err := json.Marshal(body)
 	if err != nil {
@@ -63,12 +63,10 @@ func makeHTTPRequest(url, method, credentials string, body any, logrequest bool)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
-	if logrequest {
-		fmt.Println("")
-		fmt.Println("request url: ", url)
-		fmt.Println("request body: ", string(jsonBody))
-		fmt.Println("")
-	}
+	fmt.Println("")
+	fmt.Println("request url: ", url)
+	fmt.Println("request body: ", string(jsonBody))
+	fmt.Println("")
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -81,11 +79,9 @@ func makeHTTPRequest(url, method, credentials string, body any, logrequest bool)
 		return nil, nil, err
 	}
 
-	if logrequest {
-		fmt.Println("response status-code: ", resp.StatusCode)
-		fmt.Println("response body: ", string(respBodyBytes))
-		fmt.Println("")
-	}
+	fmt.Println("response status-code: ", resp.StatusCode)
+	fmt.Println("response body: ", string(respBodyBytes))
+	fmt.Println("")
 
 	return resp, respBodyBytes, nil
 }
@@ -125,17 +121,7 @@ func processResponse(resp *http.Response, respBodyBytes []byte, result any) erro
 
 // RequestCall makes a single HTTP request without retries
 func RequestCall(url, method, credentials string, result any, body any) error {
-	resp, respBodyBytes, err := makeHTTPRequest(url, method, credentials, body, true)
-	if err != nil {
-		return err
-	}
-
-	return processResponse(resp, respBodyBytes, result)
-}
-
-// RequestCallSilent makes a single HTTP request without retries and does not log the request and response
-func RequestCallSilent(url, method, credentials string, result any, body any) error {
-	resp, respBodyBytes, err := makeHTTPRequest(url, method, credentials, body, false)
+	resp, respBodyBytes, err := makeHTTPRequest(url, method, credentials, body)
 	if err != nil {
 		return err
 	}
@@ -169,7 +155,7 @@ func requestCallWithRetry(url, method, credentials string, result any, body any,
 			time.Sleep(backoff)
 		}
 
-		resp, respBodyBytes, err := makeHTTPRequest(url, method, credentials, body, true)
+		resp, respBodyBytes, err := makeHTTPRequest(url, method, credentials, body)
 		if err != nil {
 			lastErr = err
 			continue // Network error, retry
