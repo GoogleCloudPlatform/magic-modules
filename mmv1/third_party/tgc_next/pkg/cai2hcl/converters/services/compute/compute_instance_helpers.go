@@ -2,7 +2,6 @@ package compute
 
 import (
 	"strconv"
-	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
@@ -32,9 +31,9 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 		schedulingMap["min_node_cpus"] = resp.MinNodeCpus
 	}
 
-	if resp.OnHostMaintenance != "MIGRATE" {
-		schedulingMap["on_host_maintenance"] = resp.OnHostMaintenance
-	}
+	// if resp.OnHostMaintenance != "MIGRATE" {
+	schedulingMap["on_host_maintenance"] = resp.OnHostMaintenance
+	// }
 
 	if resp.AutomaticRestart != nil && !*resp.AutomaticRestart {
 		schedulingMap["automatic_restart"] = *resp.AutomaticRestart
@@ -56,9 +55,9 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 		schedulingMap["node_affinities"] = nodeAffinities
 	}
 
-	if resp.ProvisioningModel != "STANDARD" {
-		schedulingMap["provisioning_model"] = resp.ProvisioningModel
-	}
+	// if resp.ProvisioningModel != "STANDARD" {
+	schedulingMap["provisioning_model"] = resp.ProvisioningModel
+	// }
 
 	if resp.AvailabilityDomain != 0 {
 		schedulingMap["availability_domain"] = resp.AvailabilityDomain
@@ -175,13 +174,13 @@ func flattenNetworkInterfaces(networkInterfaces []*compute.NetworkInterface, pro
 			"ipv6_address":       iface.Ipv6Address,
 		}
 
-		if !strings.HasSuffix(iface.Network, "/default") {
-			flattened[i]["network"] = tpgresource.ConvertSelfLinkToV1(iface.Network)
-		}
+		// if !strings.HasSuffix(iface.Network, "/default") {
+		flattened[i]["network"] = tpgresource.ConvertSelfLinkToV1(iface.Network)
+		// }
 
-		if !strings.HasSuffix(iface.Subnetwork, "/default") {
-			flattened[i]["subnetwork"] = tpgresource.ConvertSelfLinkToV1(iface.Subnetwork)
-		}
+		// if !strings.HasSuffix(iface.Subnetwork, "/default") {
+		flattened[i]["subnetwork"] = tpgresource.ConvertSelfLinkToV1(iface.Subnetwork)
+		// }
 
 		subnetProject := utils.ParseFieldValue(iface.Subnetwork, "projects")
 		if subnetProject != project {
