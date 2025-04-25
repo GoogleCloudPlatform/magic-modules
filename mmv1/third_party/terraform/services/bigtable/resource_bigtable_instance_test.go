@@ -641,30 +641,6 @@ resource "google_bigtable_instance" "instance" {
 `, instanceName, instanceName, numNodes, nodeScalingFactorAttribute)
 }
 
-func testAccBigtableInstance_nodeScalingFactorCluster(instanceName string, clusterName string, numNodes int, nodeScalingFactor string, allowDestroy bool) string {
-	deletion_protection := ""
-	if allowDestroy {
-		deletion_protection = "deletion_protection = false"
-	}
-	nodeScalingFactorAttribute := ""
-	if nodeScalingFactor != "" {
-		nodeScalingFactorAttribute = fmt.Sprintf("node_scaling_factor = \"%s\"", nodeScalingFactor)
-	}
-	return fmt.Sprintf(`
-resource "google_bigtable_instance" "instance" {
-  name = "%s"
-  cluster {
-    cluster_id   = "%s"
-    zone         = "us-central1-b"
-    num_nodes    = %d
-    storage_type = "SSD"
-	%s
-  }
-  %s
-}
-`, instanceName, clusterName, numNodes, nodeScalingFactorAttribute, deletion_protection)
-}
-
 func testAccBigtableInstance_multipleClustersSameID(instanceName string) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
