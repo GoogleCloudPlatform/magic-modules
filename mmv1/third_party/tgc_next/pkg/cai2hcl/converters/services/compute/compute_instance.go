@@ -82,6 +82,7 @@ func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*m
 	hclData["resource_policies"] = instance.ResourcePolicies
 
 	bootDisk, ads, scratchDisks := flattenDisks(instance.Disks, instance.Name)
+
 	hclData["boot_disk"] = bootDisk
 	hclData["attached_disk"] = ads
 	hclData["scratch_disk"] = scratchDisks
@@ -179,14 +180,16 @@ func flattenBootDisk(disk *compute.AttachedDisk, instanceName string) []map[stri
 		}
 	}
 
-	// Don't convert the field with the default value
-	if disk.Interface != "SCSI" {
-		result["interface"] = disk.Interface
-	}
+	result["interface"] = disk.Interface
 
 	if !strings.HasSuffix(disk.Source, instanceName) {
 		result["source"] = tpgresource.ConvertSelfLinkToV1(disk.Source)
 	}
+
+	result["initialize_params"] = []map[string]interface{}{{
+		"architecture": disk.Architecture,
+		"size":         disk.DiskSizeGb,
+	}}
 
 	if len(result) == 0 {
 		return nil
@@ -204,10 +207,7 @@ func flattenScratchDisk(disk *compute.AttachedDisk) map[string]interface{} {
 		result["device_name"] = disk.DeviceName
 	}
 
-	// Don't convert the field with the default value
-	if disk.Interface != "SCSI" {
-		result["interface"] = disk.Interface
-	}
+	result["interface"] = disk.Interface
 
 	return result
 }

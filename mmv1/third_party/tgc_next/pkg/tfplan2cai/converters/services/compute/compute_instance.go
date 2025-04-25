@@ -152,7 +152,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating partner metadata: %s", err)
 	}
 
-	networkInterfaces, err := expandNetworkInterfaces(d, config)
+	networkInterfaces, err := expandInstanceNetworkInterfaces(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
 	}
@@ -306,6 +306,10 @@ func expandBootDisk(d tpgresource.TerraformResourceData, config *transport_tpg.C
 		disk.DeviceName = v.(string)
 	}
 
+	if v, ok := d.GetOk("boot_disk.0.interface"); ok {
+		disk.Interface = v.(string)
+	}
+
 	if v, ok := d.GetOk("boot_disk.0.disk_encryption_key_raw"); ok {
 		if v != "" {
 			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
@@ -334,6 +338,10 @@ func expandBootDisk(d tpgresource.TerraformResourceData, config *transport_tpg.C
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.size"); ok {
 			disk.DiskSizeGb = int64(v.(int))
 		}
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.architecture"); ok {
+		disk.Architecture = v.(string)
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.mode"); ok {
@@ -450,4 +458,39 @@ func GetComputeDiskData(d tpgresource.TerraformResourceData, config *transport_t
 	}
 
 	return diskDetails, nil
+}
+
+func expandInstanceNetworkInterfaces(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*compute.NetworkInterface, error) {
+	configs := d.Get("network_interface").([]interface{})
+	ifaces := make([]*compute.NetworkInterface, len(configs))
+	for i, raw := range configs {
+		data := raw.(map[string]interface{})
+
+		var networkAttachment = ""
+		network := data["network"].(string)
+		subnetwork := data["subnetwork"].(string)
+		if networkAttachmentObj, ok := data["network_attachment"]; ok {
+			networkAttachment = networkAttachmentObj.(string)
+		}
+		// Checks if networkAttachment is not specified in resource, network or subnetwork have to be specified.
+		if networkAttachment == "" && network == "" && subnetwork == "" {
+			return nil, fmt.Errorf("exactly one of network, subnetwork, or network_attachment must be provided")
+		}
+
+		ifaces[i] = &compute.NetworkInterface{
+			NetworkIP:                data["network_ip"].(string),
+			Network:                  network,
+			NetworkAttachment:        networkAttachment,
+			Subnetwork:               subnetwork,
+			AccessConfigs:            expandAccessConfigs(data["access_config"].([]interface{})),
+			AliasIpRanges:            expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
+			NicType:                  data["nic_type"].(string),
+			StackType:                data["stack_type"].(string),
+			QueueCount:               int64(data["queue_count"].(int)),
+			Ipv6AccessConfigs:        expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
+			Ipv6Address:              data["ipv6_address"].(string),
+			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
+		}
+	}
+	return ifaces, nil
 }
