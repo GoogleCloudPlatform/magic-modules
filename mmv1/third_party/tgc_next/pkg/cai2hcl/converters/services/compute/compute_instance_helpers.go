@@ -1,7 +1,9 @@
 package compute
 
 import (
+	"log"
 	"strconv"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
@@ -23,6 +25,8 @@ func flattenAliasIpRange(ranges []*compute.AliasIpRange) []map[string]interface{
 func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	schedulingMap := make(map[string]interface{}, 0)
 
+	// gracefulShutdown is not in the cai asset, so graceful_shutdown is skipped.
+
 	if resp.InstanceTerminationAction != "" {
 		schedulingMap["instance_termination_action"] = resp.InstanceTerminationAction
 	}
@@ -31,9 +35,7 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 		schedulingMap["min_node_cpus"] = resp.MinNodeCpus
 	}
 
-	// if resp.OnHostMaintenance != "MIGRATE" {
 	schedulingMap["on_host_maintenance"] = resp.OnHostMaintenance
-	// }
 
 	if resp.AutomaticRestart != nil && !*resp.AutomaticRestart {
 		schedulingMap["automatic_restart"] = *resp.AutomaticRestart
@@ -55,9 +57,7 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 		schedulingMap["node_affinities"] = nodeAffinities
 	}
 
-	// if resp.ProvisioningModel != "STANDARD" {
 	schedulingMap["provisioning_model"] = resp.ProvisioningModel
-	// }
 
 	if resp.AvailabilityDomain != 0 {
 		schedulingMap["availability_domain"] = resp.AvailabilityDomain
@@ -166,21 +166,17 @@ func flattenNetworkInterfaces(networkInterfaces []*compute.NetworkInterface, pro
 		ac, externalIP = flattenAccessConfigs(iface.AccessConfigs)
 
 		flattened[i] = map[string]interface{}{
-			"network_ip":         iface.NetworkIP,
-			"access_config":      ac,
-			"alias_ip_range":     flattenAliasIpRange(iface.AliasIpRanges),
-			"nic_type":           iface.NicType,
-			"ipv6_access_config": flattenIpv6AccessConfigs(iface.Ipv6AccessConfigs),
-			"ipv6_address":       iface.Ipv6Address,
+			"network_ip":                  iface.NetworkIP,
+			"access_config":               ac,
+			"alias_ip_range":              flattenAliasIpRange(iface.AliasIpRanges),
+			"nic_type":                    iface.NicType,
+			"stack_type":                  iface.StackType,
+			"ipv6_access_config":          flattenIpv6AccessConfigs(iface.Ipv6AccessConfigs),
+			"ipv6_address":                iface.Ipv6Address,
+			"network":                     tpgresource.ConvertSelfLinkToV1(iface.Network),
+			"subnetwork":                  tpgresource.ConvertSelfLinkToV1(iface.Subnetwork),
+			"internal_ipv6_prefix_length": iface.InternalIpv6PrefixLength,
 		}
-
-		// if !strings.HasSuffix(iface.Network, "/default") {
-		flattened[i]["network"] = tpgresource.ConvertSelfLinkToV1(iface.Network)
-		// }
-
-		// if !strings.HasSuffix(iface.Subnetwork, "/default") {
-		flattened[i]["subnetwork"] = tpgresource.ConvertSelfLinkToV1(iface.Subnetwork)
-		// }
 
 		subnetProject := utils.ParseFieldValue(iface.Subnetwork, "projects")
 		if subnetProject != project {
@@ -220,11 +216,16 @@ func flattenNetworkInterfaces(networkInterfaces []*compute.NetworkInterface, pro
 func flattenServiceAccounts(serviceAccounts []*compute.ServiceAccount) []map[string]interface{} {
 	result := make([]map[string]interface{}, len(serviceAccounts))
 	for i, serviceAccount := range serviceAccounts {
+		scopes := serviceAccount.Scopes
+		if len(scopes) == 0 {
+			scopes = []string{}
+		}
 		result[i] = map[string]interface{}{
 			"email":  serviceAccount.Email,
-			"scopes": serviceAccount.Scopes,
+			"scopes": scopes,
 		}
 	}
+	log.Printf("flattenServiceAccounts %#v", result)
 	return result
 }
 
@@ -233,7 +234,7 @@ func flattenGuestAccelerators(accelerators []*compute.AcceleratorConfig) []map[s
 	for i, accelerator := range accelerators {
 		acceleratorsSchema[i] = map[string]interface{}{
 			"count": accelerator.AcceleratorCount,
-			"type":  accelerator.AcceleratorType,
+			"type":  tpgresource.GetResourceNameFromSelfLink(accelerator.AcceleratorType),
 		}
 	}
 	return acceleratorsSchema
@@ -303,11 +304,13 @@ func flattenReservationAffinity(affinity *compute.ReservationAffinity) []map[str
 		return nil
 	}
 
+	// The values of ConsumeReservationType in cai assets are NO_ALLOCATION, SPECIFIC_ALLOCATION, ANY_ALLOCATION
+	crt := strings.ReplaceAll(affinity.ConsumeReservationType, "_ALLOCATION", "_RESERVATION")
 	flattened := map[string]interface{}{
-		"type": affinity.ConsumeReservationType,
+		"type": crt,
 	}
 
-	if affinity.ConsumeReservationType == "SPECIFIC_RESERVATION" {
+	if crt == "SPECIFIC_RESERVATION" {
 		flattened["specific_reservation"] = []map[string]interface{}{{
 			"key":    affinity.Key,
 			"values": affinity.Values,
@@ -324,6 +327,19 @@ func flattenNetworkPerformanceConfig(c *compute.NetworkPerformanceConfig) []map[
 	return []map[string]interface{}{
 		{
 			"total_egress_bandwidth_tier": c.TotalEgressBandwidthTier,
+		},
+	}
+}
+
+func flattenComputeInstanceEncryptionKey(v *compute.CustomerEncryptionKey) []map[string]interface{} {
+	if v == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"kms_key_self_link":       v.KmsKeyName,
+			"sha256":                  v.Sha256,
+			"kms_key_service_account": v.KmsKeyServiceAccount,
 		},
 	}
 }
