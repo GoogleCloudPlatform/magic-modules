@@ -37,6 +37,12 @@ examples:
     vars:
       security_gateway_name: default
       application_name: google
+  - name: beyondcorp_security_gateway_application_vpc
+    primary_resource_id: example
+    primary_resource_name: 'fmt.Sprintf("default%s", context["random_suffix"]), fmt.Sprintf("google%s", context["random_suffix"])'
+    vars:
+      security_gateway_name: default
+      application_name: my-vm-service
 autogen_async: true
 async:
   operation:
@@ -109,6 +115,32 @@ properties:
           description: Optional. Ports of the application.
           item_type:
             type: Integer
+  - name: upstreams
+    type: Array
+    description: Optional. List of which upstream resource(s) to forward traffic to.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: egressPolicy
+          type: NestedObject
+          description: Optional. Routing policy information.
+          properties:
+            - name: regions
+              type: Array
+              description: Required. List of regions where the application sends traffic to.
+              required: true
+              item_type:
+                type: String
+        - name: network
+          type: NestedObject
+          description: Network to forward traffic to.
+          properties:
+            - name: name
+              type: string
+              description: |-
+                Required. Network name is of the format:
+                `projects/{project}/global/networks/{network}`
+              required: true
   - name: name
     type: String
     description: Identifier. Name of the resource.
