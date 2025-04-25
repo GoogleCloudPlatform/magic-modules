@@ -24,9 +24,6 @@ docs:
 base_url: 'projects/{{project}}/global/crossSiteNetworks'
 self_link: 'projects/{{project}}/global/crossSiteNetworks/{{name}}'
 update_verb: 'PATCH'
-custom_code:
-  custom_delete: templates/terraform/custom_delete/cross_site_network.go.tmpl
-  test_check_destroy: templates/terraform/custom_check_destroy/cross_site_network.go.tmpl
 timeouts:
   insert_minutes: 20
   update_minutes: 20
