@@ -111,6 +111,7 @@ properties:
       - name: 'scope'
         type: NestedObject
         description: The scope to which DNS64 config will be applied to.
+        required: true
         properties:
           - name: 'allQueries'
             type: Boolean
