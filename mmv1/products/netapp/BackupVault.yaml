@@ -88,3 +88,15 @@ properties:
     description: |
       Labels as key value pairs. Example: `{ "owner": "Bob", "department": "finance", "purpose": "testing" }`.
     required: false
+  - name: 'backupVaultType'
+    type: Enum
+    description: |
+      Type of backup vault to be created. Default is IN_REGION.
+    enum_values:
+      - 'BACKUP_VAULT_TYPE_UNSPECIFIED'
+      - 'IN_REGION'
+      - 'CROSS_REGION'
+  - name: 'backupRegion'
+    type: String
+    description: |
+      Region in which backup is stored.
