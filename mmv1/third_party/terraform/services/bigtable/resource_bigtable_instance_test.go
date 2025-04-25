@@ -561,7 +561,7 @@ func TestAccBigtableInstance_createWithNodeScalingFactorDefault(t *testing.T) {
 			{
 				// Create config with nothing specified for node scaling factor.
 				// Ensure that we get 1X back.
-				Config: testAccBigtableInstance_nodeScalingFactor_disallowDestroy(instanceName, 2, ""),
+				Config: testAccBigtableInstance_nodeScalingFactor_allowDestroy(instanceName, 2, ""),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.num_nodes", "2"),
 					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.node_scaling_factor", "NodeScalingFactor1X"),
@@ -572,14 +572,6 @@ func TestAccBigtableInstance_createWithNodeScalingFactorDefault(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
-			},
-			{
-				// Update deletion protection to allow cleanup after the test. Node scaling factor should remain as is.
-				Config: testAccBigtableInstance_nodeScalingFactor_allowDestroy(instanceName, 2, ""),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.num_nodes", "2"),
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.node_scaling_factor", "NodeScalingFactor1X"),
-				),
 			},
 		},
 	})
