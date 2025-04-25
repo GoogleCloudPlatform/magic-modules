@@ -411,3 +411,11 @@ properties:
     output: true
     item_type:
       type: String
+  - name: 'interconnectGroups'
+    type: Array
+    description: |
+      URLs of InterconnectGroups that include this Interconnect.
+      Order is arbitrary and items are unique.
+    output: true
+    item_type:
+      type: String
