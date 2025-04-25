@@ -144,9 +144,7 @@ func testAccMetastoreFederationTags(context map[string]interface{}) string {
 				name           = google_dataproc_metastore_service.default.id
 				metastore_type = "DATAPROC_METASTORE"
 			}
-			tags = {
-	"%{org}/%{tagKey}" = "%{tagValue}"
-  }
+			tags = {"%{org}/%{tagKey}" = "%{tagValue}"}
 		}
 	`, context)
 
