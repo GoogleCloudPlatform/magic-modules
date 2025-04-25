@@ -51,6 +51,8 @@ examples:
     primary_resource_id: 'tpu'
     vars:
       node_name: 'test-tpu'
+    # resource is deprecated
+    exclude_test: true
   - name: 'tpu_node_full'
     primary_resource_id: 'tpu'
     vars:
@@ -65,6 +67,8 @@ examples:
       network_name: 'tpu-node-network'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "vpc-network-1")'
+    # resource is deprecated
+    exclude_test: true
     exclude_docs: true
 parameters:
   # TODO: resourceref?
