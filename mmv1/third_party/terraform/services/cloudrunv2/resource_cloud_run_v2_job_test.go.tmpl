@@ -660,7 +660,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithGRPCStartupProbeUpdate(t *testing.T) 
 		CheckDestroy:             testAccCheckCloudRunV2JobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudRunV2Job_cloudrunv2JobWithEmptyTCPStartupProbe(context),
+				Config: testAccCloudRunV2Job_cloudrunv2JobWithEmptyGRPCStartupProbe(context),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_job.default",
@@ -669,7 +669,7 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithGRPCStartupProbeUpdate(t *testing.T) 
 				ImportStateVerifyIgnore: []string{"location", "launch_stage", "deletion_protection"},
 			},
 			{
-				Config: testAccCloudRunV2Job_cloudrunv2JobWithTCPStartupProbe(context),
+				Config: testAccCloudRunV2Job_cloudrunv2JobWithGRPCStartupProbe(context),
 			},
 			{
 				ResourceName:            "google_cloud_run_v2_job.default",
