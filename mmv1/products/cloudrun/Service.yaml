@@ -145,6 +145,14 @@ examples:
       cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
       project: 'PROJECT_NAME'
+  - name: 'cloud_run_service_iap'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      cloud_run_service_name: 'cloudrun-srv'
+    test_env_vars:
+      project: 'PROJECT_NAME'
 virtual_fields:
   - name: 'autogenerate_revision_name'
     description: |

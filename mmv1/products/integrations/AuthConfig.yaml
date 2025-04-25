@@ -13,6 +13,8 @@
 
 ---
 name: 'AuthConfig'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/authConfigs/{authConfig}'
 description: |
   The AuthConfig resource use to hold channels and connection config data.
 references:
@@ -35,21 +37,13 @@ timeouts:
   delete_minutes: 20
 custom_code:
   pre_create: 'templates/terraform/pre_create/integrations_auth_config.go.tmpl'
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   pre_update: 'templates/terraform/pre_update/integrations_auth_config.go.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 sweeper:
   url_substitutions:
-    - region: "asia-east1"
+    - region: "us-east4"
     - region: "southamerica-west1"
     - region: "asia-east2"
-    - region: "us-south1"
-    - region: "northamerica-northeast2"
-    - region: "us-west4"
-    - region: "us-west2"
-    - region: "us-west3"
-    - region: "southamerica-east1"
-    - region: "northamerica-northeast1"
 examples:
   - name: 'integrations_auth_config_basic'
     primary_resource_id: 'basic_example'

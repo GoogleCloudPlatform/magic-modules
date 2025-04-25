@@ -96,6 +96,9 @@ func execReassignReviewer(prNumber, newPrimaryReviewer string, gh GithubClient) 
 			return err
 		}
 	} else {
+		if err := gh.RemovePullRequestReviewers(prNumber, []string{currentReviewer}); err != nil {
+			fmt.Printf("Failed to remove reviewer %s from pull request: %s\n", currentReviewer, err)
+		}
 		fmt.Println("Updating reviewer comment")
 		err := gh.UpdateComment(prNumber, comment, reviewerComment.ID)
 		if err != nil {

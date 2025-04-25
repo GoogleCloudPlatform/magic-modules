@@ -13,6 +13,8 @@
 
 ---
 name: 'InstantSnapshot'
+api_variant_patterns:
+  - 'projects/{project}/zones/{zone}/instantSnapshots/{instantSnapshot}'
 kind: 'compute#instantSnapshot'
 description: |
   Represents an instant snapshot resource.

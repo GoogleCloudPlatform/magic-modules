@@ -15,7 +15,6 @@
 name: 'Parameter'
 description: |
   A Parameter resource is a logical parameter.
-min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters'
@@ -34,17 +33,14 @@ timeouts:
 examples:
   - name: 'parameter_config_basic'
     primary_resource_id: 'parameter-basic'
-    min_version: 'beta'
     vars:
       parameter_id: 'parameter'
   - name: 'parameter_with_format'
     primary_resource_id: 'parameter-with-format'
-    min_version: 'beta'
     vars:
       parameter_id: 'parameter'
   - name: 'parameter_with_labels'
     primary_resource_id: 'parameter-with-labels'
-    min_version: 'beta'
     vars:
       parameter_id: 'parameter'
   - name: 'parameter_with_kms_key'

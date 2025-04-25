@@ -101,7 +101,7 @@ func ResourceStorageBucket() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				Description: `When deleting a bucket, this boolean option will delete all contained objects. If you try to delete a bucket that contains objects, Terraform will fail that run.`,
+				Description: `When deleting a bucket, this boolean option will delete all contained objects, or anywhereCaches (if any). If you try to delete a bucket that contains objects or anywhereCaches, Terraform will fail that run, deleting anywhereCaches may take 80 minutes to complete.`,
 			},
 
 			"labels": {
@@ -566,6 +566,16 @@ func ResourceStorageBucket() *schema.Resource {
 					},
 				},
 			},
+			"time_created": {
+				Type:     schema.TypeString,
+				Computed: true,
+				Description: `The creation time of the bucket in RFC 3339 format.`,
+			},
+			"updated": {
+				Type:     schema.TypeString,
+				Computed: true,
+				Description: `The time at which the bucket's metadata or IAM policy was last updated, in RFC 3339 format.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -588,6 +598,106 @@ func labelKeyValidator(val interface{}, key string) (warns []string, errs []erro
 		}
 	}
 	return
+}
+
+func getAnywhereCacheListResult(d *schema.ResourceData, config *transport_tpg.Config) ([]interface{}, error) {
+	// Define the cache list URL
+	cacheListUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{StorageBasePath}}b/{{name}}/anywhereCaches/"}}")
+	if err != nil {
+		return nil, err
+	}
+
+	// Send request to get resource list
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   config.Project,
+		RawURL:    cacheListUrl,
+		UserAgent: config.UserAgent,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	resourceList, ok := res["items"]
+	if !ok {
+		return nil, nil // No cache exists, return nil list and no error
+	}
+
+	rl, ok := resourceList.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("unexpected type for resource list: %T", resourceList)
+	}
+
+	return rl, nil
+}
+
+func deleteAnywhereCacheIfAny(d *schema.ResourceData, config *transport_tpg.Config) error {
+	// Get the initial list of Anywhere Caches
+	cacheList, err := getAnywhereCacheListResult(d, config)
+	if err != nil {
+		return err
+	}
+
+	// If no cache exists initially, return early
+	if len(cacheList) == 0 {
+		return nil
+	}
+
+	// Iterate over each object in the resource list
+	for _, item := range cacheList {
+		// Ensure the item is a map
+		obj, ok := item.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("unexpected type for resource list item: %T", item)
+		}
+
+		// Check the state of the object
+		state, ok := obj["state"].(string)
+		if !ok {
+			continue // If state is not a string, skip this item
+		}
+		if !strings.EqualFold(state, "running") && !strings.EqualFold(state, "paused")  {
+			continue
+		}
+
+		// Disable the cache if state is running or paused
+		anywhereCacheId, ok := obj["anywhereCacheId"].(string)
+		if !ok {
+			return fmt.Errorf("missing or invalid anywhereCacheId: %v", obj)
+		}
+		anywhereCacheUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{StorageBasePath}}b/{{name}}/anywhereCaches/"}}")
+		if err != nil {
+			return err
+		}
+		disableUrl := anywhereCacheUrl + fmt.Sprintf("%s/disable", anywhereCacheId)
+
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   config.Project,
+			RawURL:    disableUrl,
+			UserAgent: config.UserAgent,
+		})
+		if err != nil {
+			return err
+		}
+	}
+	time.Sleep(80 * time.Minute) // It takes around 70 minutes of time for cache to finally delete post it disable time.
+
+	// Post this time, we check again!
+	// Get the list of Anywhere Caches after the sleep
+	cacheList, err = getAnywhereCacheListResult(d, config)
+	if err != nil {
+		return err
+	}
+
+	// Check if the cache list is now empty
+	if len(cacheList) == 0 {
+		return nil
+	}
+
+	return fmt.Errorf("Error while deleting the cache: caches still exists post 80mins of their disable time")
 }
 
 func resourceDataplexLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
@@ -992,8 +1102,15 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 			break
 		}
 
-		if len(res.Items) == 0 {
-			break // 0 items, bucket empty
+		cacheList, cacheListErr := getAnywhereCacheListResult(d, config)
+		if cacheListErr != nil {
+			// If we get any error, try deleting the bucket anyway in case it's empty
+			// This would help our customers to avoid requiring extra storage.anywhereCaches.list permission.
+			break
+		}
+
+		if len(res.Items) == 0 && len(cacheList) == 0 {
+			break // 0 items and no caches, bucket empty
 		}
 
 		if d.Get("retention_policy.0.is_locked").(bool) {
@@ -1011,10 +1128,11 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 		}
 
 		if !d.Get("force_destroy").(bool) {
-			deleteErr := fmt.Errorf("Error trying to delete bucket %s containing objects without `force_destroy` set to true", bucket)
+			deleteErr := fmt.Errorf("Error trying to delete bucket %s without `force_destroy` set to true", bucket)
 			log.Printf("Error! %s : %s\n\n", bucket, deleteErr)
 			return deleteErr
 		}
+
 		// GCS requires that a bucket be empty (have no objects or object
 		// versions) before it can be deleted.
 		log.Printf("[DEBUG] GCS Bucket attempting to forceDestroy\n\n")
@@ -1030,6 +1148,13 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 		// Terraform's top-level -parallelism flag, but that's not plumbed nor
 		// is it scheduled to be plumbed to individual providers.
 		wp := workerpool.New(runtime.NumCPU() - 1)
+
+		wp.Submit(func() {
+			err = deleteAnywhereCacheIfAny(d, config)
+			if err != nil {
+				deleteObjectError = fmt.Errorf("error deleting the caches on the bucket %s : %w", bucket, err)
+			}
+		})
 
 		for _, object := range res.Items {
 			log.Printf("[DEBUG] Found %s", object.Name)
@@ -1189,6 +1314,14 @@ func flattenBucketCustomPlacementConfig(cfc *storage.BucketCustomPlacementConfig
 	})
 
 	return customPlacementConfig
+}
+
+func flattenTimeCreated(v interface{}) interface{} {
+	return v
+}
+
+func flattenUpdated(v interface{}) interface{} {
+	return v
 }
 
 func expandBucketDataLocations(configured interface{}) []string {
@@ -1916,6 +2049,12 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	}
 	if err := d.Set("custom_placement_config", flattenBucketCustomPlacementConfig(res.CustomPlacementConfig)); err != nil {
 		return fmt.Errorf("Error setting custom_placement_config: %s", err)
+	}
+	if err := d.Set("time_created", flattenTimeCreated(res.TimeCreated)); err != nil {
+		return fmt.Errorf("Error setting time_created: %s", err)
+	}
+	if err := d.Set("updated", flattenUpdated(res.Updated)); err != nil {
+		return fmt.Errorf("Error setting updated: %s", err)
 	}
 	// Needs to hide rpo field for single-region buckets.
 	// Check the Rpo field from API response to determine whether bucket is in single region config or not.

@@ -13,6 +13,8 @@
 
 ---
 name: 'DataStore'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/collections/{collection}/dataStores/{dataStore}'
 description: |
   Data store is a collection of websites and documents used to find answers for
   end-user's questions in Discovery Engine (a.k.a. Vertex AI Search and
