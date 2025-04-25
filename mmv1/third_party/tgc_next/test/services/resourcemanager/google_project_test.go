@@ -11,9 +11,6 @@ func TestAccProject_labels(t *testing.T) {
 
 	test.AssertTestFile(
 		t,
-		"TestAccProject_labels",
-		"google_project",
-		"cloudresourcemanager.googleapis.com/Project",
 		[]string{
 			"billing_account",
 			"auto_create_network",
@@ -28,9 +25,6 @@ func TestAccProject_parentFolder(t *testing.T) {
 
 	test.AssertTestFile(
 		t,
-		"TestAccProject_parentFolder",
-		"google_project",
-		"cloudresourcemanager.googleapis.com/Project",
 		[]string{
 			"billing_account",
 			"auto_create_network",
@@ -39,3 +33,101 @@ func TestAccProject_parentFolder(t *testing.T) {
 		},
 	)
 }
+
+func TestAccProject_abandon(t *testing.T) {
+	t.Parallel()
+
+	test.AssertTestFile(
+		t,
+		[]string{
+			"billing_account",
+			"auto_create_network",
+			"deletion_policy",
+			"tags",
+		},
+	)
+}
+
+func TestAccProject_create(t *testing.T) {
+	t.Parallel()
+
+	test.AssertTestFile(
+		t,
+		[]string{
+			"billing_account",
+			"auto_create_network",
+			"deletion_policy",
+			"tags",
+		},
+	)
+}
+
+func TestAccProject_deleteDefaultNetwork(t *testing.T) {
+	t.Parallel()
+
+	test.AssertTestFile(
+		t,
+		[]string{
+			"billing_account",
+			"auto_create_network",
+			"deletion_policy",
+			"tags",
+		},
+	)
+}
+
+func TestAccProject_billing(t *testing.T) {
+	t.Parallel()
+
+	test.AssertTestFile(
+		t,
+		[]string{
+			"billing_account",
+			"auto_create_network",
+			"deletion_policy",
+			"tags",
+		},
+	)
+}
+
+func TestAccProject_migrateParent(t *testing.T) {
+	t.Parallel()
+
+	test.AssertTestFile(
+		t,
+		[]string{
+			"billing_account",
+			"auto_create_network",
+			"deletion_policy",
+			"tags",
+		},
+	)
+}
+
+func TestAccProject_noAllowDestroy(t *testing.T) {
+	t.Parallel()
+
+	test.AssertTestFile(
+		t,
+		[]string{
+			"billing_account",
+			"auto_create_network",
+			"deletion_policy",
+			"tags",
+		},
+	)
+}
+
+// func TestAccProject_tags(t *testing.T) {
+// 	t.Parallel()
+
+// 	test.AssertTestFile(
+// 		t,
+// 		[]string{
+// 			"billing_account",
+// 			"auto_create_network",
+// 			"deletion_policy",
+// 			"tags",
+// 		},
+// 	)
+// }

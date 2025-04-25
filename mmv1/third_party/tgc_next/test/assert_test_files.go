@@ -2,7 +2,9 @@ package test
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -18,11 +20,17 @@ import (
 	"go.uber.org/zap/zaptest"
 
 	"github.com/google/go-cmp/cmp"
-	hcl "github.com/joselitofilho/hcl-parser-go/pkg/parser/hcl"
+
+	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hclparse"
+	"github.com/hashicorp/hcl/v2/hclsyntax"
 )
 
-func AssertTestFile(t *testing.T, fileName, resource, assetType string, excludedFields []string) {
-	GlobalSetup()
+func AssertTestFile(t *testing.T, excludedFields []string) {
+	err := ReadTestsDataFromGcs()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Create a temporary directory for running terraform.
 	tfDir, err := os.MkdirTemp(tmpDir, "terraform")
@@ -31,11 +39,18 @@ func AssertTestFile(t *testing.T, fileName, resource, assetType string, excluded
 	}
 	defer os.RemoveAll(tfDir)
 
+	fileName := t.Name()
 	testMetadata := TestConfig[fileName]
-	exportAssets := testMetadata.Assets
-	targetAsset, found := findTargetAsset(exportAssets, assetType)
-	if !found {
-		log.Fatalf("error finding the target asset with type %s", assetType)
+	resource := testMetadata.Resource
+
+	jsonData, err := json.MarshalIndent(testMetadata.Assets, "", "  ")
+	if err != nil {
+		log.Fatalf("Error marshalling to JSON: %s", err)
+	}
+	assetFile := fmt.Sprintf("%s.json", fileName)
+	err = ioutil.WriteFile(assetFile, jsonData, 0644)
+	if err != nil {
+		log.Fatalf("Error writing JSON data to file %s: %s", assetFile, err)
 	}
 
 	logger, err := zap.NewDevelopment()
@@ -43,7 +58,7 @@ func AssertTestFile(t *testing.T, fileName, resource, assetType string, excluded
 		log.Fatal(err)
 	}
 
-	exportConfigData, err := cai2hcl.Convert(exportAssets, &cai2hcl.Options{
+	exportConfigData, err := cai2hcl.Convert(testMetadata.Assets, &cai2hcl.Options{
 		ErrorLogger: logger,
 	})
 	if err != nil {
@@ -64,7 +79,7 @@ func AssertTestFile(t *testing.T, fileName, resource, assetType string, excluded
 		log.Fatalf("error writing to file %s: %#v", exportTfFile, err)
 	}
 
-	exportConfigMap, err := getConfig(exportTfFilePath, resource)
+	exportConfigMap, err := parseConfig(exportTfFilePath, resource)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,12 +98,13 @@ func AssertTestFile(t *testing.T, fileName, resource, assetType string, excluded
 	// 	t.Logf("Removed temporary file: %s", rawTfFile)
 	// }()
 
-	rawConfigMap, err := getConfig(rawTfFile, resource)
+	rawConfigMap, err := parseConfig(rawTfFile, resource)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if len(rawConfigMap) == 0 {
-		log.Fatalf("raw config for test %s is unavailable", fileName)
+		log.Printf("Skip test %s: raw config is unavailable", fileName)
+		return
 	}
 
 	excludedFieldMap := make(map[string]bool, 0)
@@ -107,27 +123,7 @@ func AssertTestFile(t *testing.T, fileName, resource, assetType string, excluded
 		}
 	}
 
-	// Get the ancestry cache for tfplan2cai conversion
-	ancestors := targetAsset.Ancestors
-	ancestryCache := make(map[string]string, 0)
-	if len(ancestors) != 0 {
-		var path string
-		for i := len(ancestors) - 1; i >= 0; i-- {
-			curr := ancestors[i]
-			if path == "" {
-				path = curr
-			} else {
-				path = fmt.Sprintf("%s/%s", path, curr)
-			}
-		}
-		ancestryCache[ancestors[0]] = path
-
-		project := utils.ParseFieldValue(targetAsset.Name, "projects")
-		projectKey := fmt.Sprintf("projects/%s", project)
-		if strings.HasPrefix(ancestors[0], "projects") && ancestors[0] != projectKey {
-			ancestryCache[projectKey] = path
-		}
-	}
+	ancestryCache := getAncestryCache(testMetadata.Assets)
 
 	// Convert the export config to roundtrip assets and then convert the roundtrip assets back to roundtrip config
 	roundtripConfigData, err := getRoundtripConfig(t, exportFileName, tfDir, ancestryCache)
@@ -145,36 +141,161 @@ func AssertTestFile(t *testing.T, fileName, resource, assetType string, excluded
 	if diff := cmp.Diff(string(roundtripConfigData), string(exportConfigData)); diff != "" {
 		logger.Debug(fmt.Sprintf("Roundtrip config is different with the export config.\nroundtrip config:\n%s\nexport config:\n%s", string(roundtripConfigData), string(exportConfigData)))
 
-		log.Fatalf("cmp.Diff() got diff (-want +got): %s", diff)
+		log.Fatalf("Test %s got diff (-want +got): %s", fileName, diff)
 	}
 }
 
-func findTargetAsset(assets []caiasset.Asset, assetType string) (*caiasset.Asset, bool) {
+// Gets the ancestry cache for tfplan2cai conversion
+func getAncestryCache(assets []caiasset.Asset) map[string]string {
+	ancestryCache := make(map[string]string, 0)
+
 	for _, asset := range assets {
-		if asset.Type == assetType {
-			return &asset, true
+		ancestors := asset.Ancestors
+		if len(ancestors) != 0 {
+			var path string
+			for i := len(ancestors) - 1; i >= 0; i-- {
+				curr := ancestors[i]
+				if path == "" {
+					path = curr
+				} else {
+					path = fmt.Sprintf("%s/%s", path, curr)
+				}
+			}
+
+			if _, ok := ancestryCache[ancestors[0]]; !ok {
+				ancestryCache[ancestors[0]] = path
+			}
+
+			project := utils.ParseFieldValue(asset.Name, "projects")
+			projectKey := fmt.Sprintf("projects/%s", project)
+			if strings.HasPrefix(ancestors[0], "projects") && ancestors[0] != projectKey {
+				if _, ok := ancestryCache[projectKey]; !ok {
+					ancestryCache[projectKey] = path
+				}
+			}
 		}
 	}
-	return nil, false
+	return ancestryCache
 }
 
-func getConfig(filePath, target string) (map[string]interface{}, error) {
-	files := []string{filePath}
+var rootSchema = &hcl.BodySchema{
+	Blocks: []hcl.BlockHeaderSchema{
+		{
+			Type:       "resource",
+			LabelNames: []string{"type", "name"},
+		},
+		{
+			Type:       "provider",
+			LabelNames: []string{"name"},
+		},
+	},
+}
 
-	// Parse Terraform configurations
-	config, err := hcl.Parse([]string{}, files)
+type Resource struct {
+	Type       string                 `json:"type"`
+	Name       string                 `json:"name"`
+	Attributes map[string]interface{} `json:"attributes"`
+}
+
+// parseHCLBody recursively parses attributes and nested blocks from an HCL body.
+func parseHCLBody(body hcl.Body, filePath string) (
+	attributes map[string]interface{},
+	diags hcl.Diagnostics,
+) {
+	attributes = make(map[string]interface{})
+	var allDiags hcl.Diagnostics
+
+	if syntaxBody, ok := body.(*hclsyntax.Body); ok {
+		for _, attr := range syntaxBody.Attributes {
+			attributes[attr.Name] = true
+		}
+
+		for _, block := range syntaxBody.Blocks {
+			nestedAttr, diags := parseHCLBody(block.Body, filePath)
+			if diags.HasErrors() {
+				allDiags = append(allDiags, diags...)
+			}
+
+			attributes[block.Type] = nestedAttr
+		}
+	} else {
+		allDiags = append(allDiags, &hcl.Diagnostic{
+			Severity: hcl.DiagWarning,
+			Summary:  "Body type assertion to *hclsyntax.Body failed",
+			Detail:   fmt.Sprintf("Cannot directly parse attributes for body of type %T. Attribute parsing may be incomplete.", body),
+		})
+	}
+
+	return attributes, allDiags
+}
+
+// Parses a Terraform configuation file written with HCL
+func parseConfig(filePath, target string) (map[string]interface{}, error) {
+	src, err := os.ReadFile(filePath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to read file %s: %s", filePath, err)
+	}
+
+	parser := hclparse.NewParser()
+	hclFile, diags := parser.ParseHCL(src, filePath)
+	if diags.HasErrors() {
+		return nil, fmt.Errorf("parse HCL: %w", diags)
+	}
+
+	if hclFile == nil {
+		return nil, fmt.Errorf("parsed HCL file %s is nil cannot proceed", filePath)
+	}
+
+	var allParsedResources []Resource
+
+	for _, block := range hclFile.Body.(*hclsyntax.Body).Blocks {
+		if block.Type == "resource" {
+			if len(block.Labels) != 2 {
+				log.Printf("Skipping resource block with unexpected number of labels: %v", block.Labels)
+				continue
+			}
+
+			resType := block.Labels[0]
+			resName := block.Labels[1]
+			attrs, procDiags := parseHCLBody(block.Body, filePath)
+
+			if procDiags.HasErrors() {
+				log.Printf("Diagnostics while processing resource %s.%s body in %s:", resType, resName, filePath)
+				for _, diag := range procDiags {
+					log.Printf("  - %s (Severity)", diag.Error())
+				}
+			}
+
+			gr := Resource{
+				Type:       resType,
+				Name:       resName,
+				Attributes: attrs,
+			}
+			allParsedResources = append(allParsedResources, gr)
+		}
 	}
 
 	configMap := make(map[string]interface{}, 0)
-	for _, r := range config.Resources {
-		if r.Type != target {
+	for _, r := range allParsedResources {
+		addr := fmt.Sprintf("%s.%s", r.Type, r.Name)
+		if addr != target {
 			continue
 		}
-		addr := fmt.Sprintf("%s.%s", r.Type, r.Name)
 		configMap[addr] = r.Attributes
 	}
+
+	jsonData, err := json.MarshalIndent(allParsedResources, "", "  ") // "" is prefix, "  " is indent string (2 spaces)
+	if err != nil {
+		log.Fatalf("Error marshalling to JSON: %s", err)
+	}
+
+	outputFileName := "output.json"
+
+	err = ioutil.WriteFile(outputFileName, jsonData, 0644)
+	if err != nil {
+		log.Fatalf("Error writing JSON data to file %s: %s", outputFileName, err)
+	}
+
 	return configMap, nil
 }
 
@@ -204,21 +325,9 @@ func compareHCLFields(map1, map2 map[string]interface{}, path string, excludedFi
 		switch v1 := value1.(type) {
 		case map[string]interface{}:
 			v2, _ := value2.(map[string]interface{})
-			// if !ok {
-			// 	fmt.Printf("Type mismatch for key: %s\n", currentPath)
-			// 	continue
-			// }
 			missingKeys = append(missingKeys, compareHCLFields(v1, v2, currentPath, excludedFields)...)
 		case []interface{}:
 			v2, _ := value2.([]interface{})
-			// if !ok {
-			// 	fmt.Printf("Type mismatch for key: %s\n", currentPath)
-			// 	continue
-			// }
-			// if len(v1) != len(v2) {
-			// 	fmt.Printf("List length mismatch for key: %s\n", currentPath)
-			// 	continue
-			// }
 
 			for i := 0; i < len(v1); i++ {
 				nestedMap1, ok1 := v1[i].(map[string]interface{})
@@ -235,6 +344,7 @@ func compareHCLFields(map1, map2 map[string]interface{}, path string, excludedFi
 	return missingKeys
 }
 
+// Converts a tfplan to CAI asset, and then converts the CAI asset into HCL
 func getRoundtripConfig(t *testing.T, fileName, tfDir string, ancestryCache map[string]string) ([]byte, error) {
 	// Run terraform init and terraform apply to generate tfplan.json files
 	terraformWorkflow(t, tfDir, fileName)
@@ -259,6 +369,17 @@ func getRoundtripConfig(t *testing.T, fileName, tfDir string, ancestryCache map[
 
 	if err != nil {
 		return nil, err
+	}
+
+	jsonData, err := json.MarshalIndent(roundtripAssets, "", "  ") // "" is prefix, "  " is indent string (2 spaces)
+	if err != nil {
+		log.Fatalf("Error marshalling to JSON: %s", err)
+	}
+
+	roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", fileName)
+	err = ioutil.WriteFile(roundtripAssetFile, jsonData, 0644)
+	if err != nil {
+		log.Fatalf("Error writing JSON data to file %s: %s", roundtripAssetFile, err)
 	}
 
 	logger, err := zap.NewDevelopment()

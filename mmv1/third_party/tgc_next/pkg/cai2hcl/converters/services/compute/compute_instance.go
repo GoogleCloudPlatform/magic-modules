@@ -1,7 +1,9 @@
 package compute
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
@@ -80,6 +82,7 @@ func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*m
 	hclData["labels"] = utils.RemoveTerraformAttributionLabel(instance.Labels)
 	hclData["service_account"] = flattenServiceAccounts(instance.ServiceAccounts)
 	hclData["resource_policies"] = instance.ResourcePolicies
+	log.Printf("service account %#v", hclData["service_account"])
 
 	bootDisk, ads, scratchDisks := flattenDisks(instance.Disks, instance.Name)
 
@@ -104,7 +107,14 @@ func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*m
 	hclData["confidential_instance_config"] = flattenConfidentialInstanceConfig(instance.ConfidentialInstanceConfig)
 	hclData["advanced_machine_features"] = flattenAdvancedMachineFeatures(instance.AdvancedMachineFeatures)
 	hclData["reservation_affinity"] = flattenReservationAffinity(instance.ReservationAffinity)
-	hclData["key_revocation_action_type"] = instance.KeyRevocationActionType
+	hclData["key_revocation_action_type"] = strings.TrimSuffix(instance.KeyRevocationActionType, "_ON_KEY_REVOCATION")
+	hclData["instance_encryption_key"] = flattenComputeInstanceEncryptionKey(instance.InstanceEncryptionKey)
+
+	partnerMetadata, err := flattenPartnerMetadata(instance.PartnerMetadata)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing partner metadata: %s", err)
+	}
+	hclData["partner_metadata"] = partnerMetadata
 
 	// TODO: convert details from the boot disk assets (separate disk assets) into initialize_params in cai2hcl?
 	// It needs to integrate the disk assets into instance assets with the resolver.
@@ -135,11 +145,24 @@ func flattenDisks(disks []*compute.AttachedDisk, instanceName string) ([]map[str
 				"device_name": disk.DeviceName,
 				"mode":        disk.Mode,
 			}
+
 			if key := disk.DiskEncryptionKey; key != nil {
 				if key.KmsKeyName != "" {
 					// The response for crypto keys often includes the version of the key which needs to be removed
 					// format: projects/<project>/locations/<region>/keyRings/<keyring>/cryptoKeys/<key>/cryptoKeyVersions/1
 					di["kms_key_self_link"] = strings.Split(disk.DiskEncryptionKey.KmsKeyName, "/cryptoKeyVersions")[0]
+				}
+
+				if key.RsaEncryptedKey != "" {
+					di["disk_encryption_key_rsa"] = key.RsaEncryptedKey
+				}
+
+				if key.RawKey != "" {
+					di["disk_encryption_key_raw"] = key.RawKey
+				}
+
+				if key.KmsKeyServiceAccount != "" {
+					di["disk_encryption_service_account"] = key.KmsKeyServiceAccount
 				}
 			}
 			attachedDisks = append(attachedDisks, di)
@@ -173,23 +196,33 @@ func flattenBootDisk(disk *compute.AttachedDisk, instanceName string) []map[stri
 	}
 
 	if disk.DiskEncryptionKey != nil {
+		// disk_encryption_key_sha256 is computed, so it is not converted.
+
 		if disk.DiskEncryptionKey.KmsKeyName != "" {
 			// The response for crypto keys often includes the version of the key which needs to be removed
 			// format: projects/<project>/locations/<region>/keyRings/<keyring>/cryptoKeys/<key>/cryptoKeyVersions/1
 			result["kms_key_self_link"] = strings.Split(disk.DiskEncryptionKey.KmsKeyName, "/cryptoKeyVersions")[0]
 		}
+
+		if disk.DiskEncryptionKey.KmsKeyServiceAccount != "" {
+			// The response for crypto keys often includes the version of the key which needs to be removed
+			// format: projects/<project>/locations/<region>/keyRings/<keyring>/cryptoKeys/<key>/cryptoKeyVersions/1
+			result["disk_encryption_service_account"] = disk.DiskEncryptionKey.KmsKeyServiceAccount
+		}
+
+		if disk.DiskEncryptionKey.RsaEncryptedKey != "" {
+			result["disk_encryption_key_rsa"] = disk.DiskEncryptionKey.RsaEncryptedKey
+		}
+
+		if disk.DiskEncryptionKey.RawKey != "" {
+			result["disk_encryption_key_raw"] = disk.DiskEncryptionKey.RawKey
+		}
 	}
 
 	result["interface"] = disk.Interface
-
-	if !strings.HasSuffix(disk.Source, instanceName) {
-		result["source"] = tpgresource.ConvertSelfLinkToV1(disk.Source)
-	}
-
-	result["initialize_params"] = []map[string]interface{}{{
-		"architecture": disk.Architecture,
-		"size":         disk.DiskSizeGb,
-	}}
+	// "source" field is converted and "initialize_params" is not converted as these two fields conflict with each other.
+	result["source"] = tpgresource.ConvertSelfLinkToV1(disk.Source)
+	result["guest_os_features"] = flattenComputeInstanceGuestOsFeatures(disk.GuestOsFeatures)
 
 	if len(result) == 0 {
 		return nil
@@ -209,5 +242,38 @@ func flattenScratchDisk(disk *compute.AttachedDisk) map[string]interface{} {
 
 	result["interface"] = disk.Interface
 
+	return result
+}
+
+func flattenPartnerMetadata(partnerMetadata map[string]compute.StructuredEntries) (map[string]string, error) {
+	partnerMetadataMap := make(map[string]string)
+	for key, value := range partnerMetadata {
+
+		jsonString, err := json.Marshal(&value)
+		if err != nil {
+			return nil, err
+		}
+		if value.Entries != nil {
+			partnerMetadataMap[key] = string(jsonString)
+		}
+
+	}
+	return partnerMetadataMap, nil
+}
+
+func flattenComputeInstanceGuestOsFeatures(v interface{}) []interface{} {
+	if v == nil {
+		return nil
+	}
+	features, ok := v.([]*compute.GuestOsFeature)
+	if !ok {
+		return nil
+	}
+	var result []interface{}
+	for _, feature := range features {
+		if feature != nil && feature.Type != "" {
+			result = append(result, feature.Type)
+		}
+	}
 	return result
 }
