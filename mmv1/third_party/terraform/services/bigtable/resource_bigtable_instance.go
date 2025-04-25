@@ -819,7 +819,6 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 			}
 		}
 
-		// Do NOT ForceNew for node scaling factor. Return the error on diffs.
 		oNsf, nNsf := diff.GetChange(fmt.Sprintf("cluster.%d.node_scaling_factor", i))
 		if oNsf != nNsf {
 			err := diff.ForceNew(fmt.Sprintf("cluster.%d.node_scaling_factor", i))

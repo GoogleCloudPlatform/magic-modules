@@ -591,7 +591,6 @@ func TestAccBigtableInstance_createWithNodeScalingFactorThenUpdateViaForceNew(t 
 		Steps: []resource.TestStep{
 			{
 				// Create config with node scaling factor as 2x.
-				// Enforce deletion protection to ensure that we don't do a ForceNew when trying to update node scaling factor later.
 				Config: testAccBigtableInstance_nodeScalingFactor_allowDestroy(instanceName, 2, "NodeScalingFactor2X"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.num_nodes", "2"),
@@ -623,18 +622,6 @@ func TestAccBigtableInstance_createWithNodeScalingFactorThenUpdateViaForceNew(t 
 }
 
 func testAccBigtableInstance_nodeScalingFactor_allowDestroy(instanceName string, numNodes int, nodeScalingFactor string) string {
-	return testAccBigtableInstance_nodeScalingFactor(instanceName, numNodes, nodeScalingFactor, true)
-}
-
-func testAccBigtableInstance_nodeScalingFactor_disallowDestroy(instanceName string, numNodes int, nodeScalingFactor string) string {
-	return testAccBigtableInstance_nodeScalingFactor(instanceName, numNodes, nodeScalingFactor, false)
-}
-
-func testAccBigtableInstance_nodeScalingFactor(instanceName string, numNodes int, nodeScalingFactor string, allowDestroy bool) string {
-	deletion_protection := ""
-	if allowDestroy {
-		deletion_protection = "deletion_protection = false"
-	}
 	nodeScalingFactorAttribute := ""
 	if nodeScalingFactor != "" {
 		nodeScalingFactorAttribute = fmt.Sprintf("node_scaling_factor = \"%s\"", nodeScalingFactor)
@@ -649,9 +636,9 @@ resource "google_bigtable_instance" "instance" {
     storage_type = "SSD"
 	%s
   }
-  %s
+  deletion_protection = false
 }
-`, instanceName, instanceName, numNodes, nodeScalingFactorAttribute, deletion_protection)
+`, instanceName, instanceName, numNodes, nodeScalingFactorAttribute)
 }
 
 func testAccBigtableInstance_nodeScalingFactorCluster(instanceName string, clusterName string, numNodes int, nodeScalingFactor string, allowDestroy bool) string {
