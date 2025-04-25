@@ -47,10 +47,6 @@ func TestAccComputeCrossSiteNetwork_update(t *testing.T) {
 
 func testAccComputeCrossSiteNetwork_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-locals {
-  project = "" # Google Cloud Platform Project ID
-}
-
 data "google_project" "project" {
   provider = google-beta
 }
@@ -65,10 +61,6 @@ resource "google_compute_cross_site_network" "example-cross-site-network" {
 
 func testAccComputeCrossSiteNetwork_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-locals {
-  project = "" # Google Cloud Platform Project ID
-}
-
 data "google_project" "project" {
   provider = google-beta
 }

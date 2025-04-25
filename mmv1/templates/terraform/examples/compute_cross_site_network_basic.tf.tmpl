@@ -1,7 +1,3 @@
-locals {
-  project = "{{index $.Vars "project"}}" # Google Cloud Platform Project ID
-}
-
 data "google_project" "project" {
   provider = google-beta
 }
