@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"time"
 
@@ -72,6 +73,7 @@ func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, r
 func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
 	tgc.CompileTfToCaiCommonFiles(outputFolder, products)
 	tgc.CompileCaiToHclCommonFiles(outputFolder, products)
+	tgc.CompileTestFiles(outputFolder)
 }
 
 func (tgc TerraformGoogleConversionNext) CompileTfToCaiCommonFiles(outputFolder string, products []*api.Product) {
@@ -94,6 +96,22 @@ func (tgc TerraformGoogleConversionNext) CompileCaiToHclCommonFiles(outputFolder
 	}
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
 	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
+}
+
+func (tgc TerraformGoogleConversionNext) CompileTestFiles(outputFolder string) {
+	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
+
+	// Read file
+	productTests := []resourceTests{}
+
+	for _, test := range productTests {
+		targetFolder := path.Join(outputFolder, "test/services", test.Product)
+		if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+			log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+		}
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_generated_test.go", test.Resource))
+		templateData.GenerateTGCNextTestFile(targetFilePath, test)
+	}
 }
 
 func (tgc TerraformGoogleConversionNext) CompileFileList(outputFolder string, files map[string]string, fileTemplate TemplateData, products []*api.Product) {
@@ -197,4 +215,16 @@ func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target 
 	if err != nil {
 		log.Fatalf("Cannot write file %s to replace import path: %s", target, err)
 	}
+}
+
+type resourceTests struct {
+	Resource string
+	Product  string
+	Tests    []ResourceTest
+}
+type ResourceTest struct {
+	Resource       string
+	Product        string
+	Name           string
+	ExcludedFields []string
 }
