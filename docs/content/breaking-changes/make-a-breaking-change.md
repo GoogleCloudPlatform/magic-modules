@@ -200,7 +200,7 @@ with the following changes:
 1. Add the upgrade guide entries to
 [{{< param upgradeGuide >}}](https://github.com/GoogleCloudPlatform/magic-modules/blob/FEATURE-BRANCH-major-release-6.0.0/mmv1/third_party/terraform/website/docs/guides/{{< param upgradeGuide >}}). Entries should focus on the changes that users need to make when upgrading
 to `{{% param "majorVersion" %}}`, rather than how to write configurations
-after upgrading. See [Terraform provider for Google Cloud 6.0.0 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_5_upgrade)
+after upgrading. See [Terraform provider for Google Cloud 6.0.0 Upgrade Guide](https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/version_6_upgrade)
 and other upgrade guides for examples.
 1. Remove any deprecation notices and warnings (including in documentation) not already removed by the breaking change.
 1. When you create your pull request,
