@@ -62,6 +62,7 @@ func DecodeJSON(data map[string]interface{}, v interface{}) error {
 func MapToCtyValWithSchema(m map[string]interface{}, s map[string]*schema.Schema) (cty.Value, error) {
 	m = normalizeFlattenedObj(m, s).(map[string]interface{})
 
+	// log.Printf("MapToCtyValWithSchema m %#v", m)
 	b, err := json.Marshal(&m)
 	if err != nil {
 		return cty.NilVal, fmt.Errorf("error marshaling map as JSON: %v", err)
