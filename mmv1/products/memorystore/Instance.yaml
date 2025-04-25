@@ -120,7 +120,28 @@ virtual_fields:
             "Required. The consumer network where the IP address resides, in
             the form of\nprojects/{project_id}/global/networks/{network_id}. "
           required: true
+  - name: 'desired_auto_created_endpoints'
+    description: "Immutable. User inputs for the auto-created
+      endpoints connections. "
+    type: Array
+    immutable: true
+    item_type:
+      type: NestedObject
+      properties:
+        - type: String
+          name: project_id
+          description:
+            "Required. The consumer project_id where the forwarding rule is
+            created from. "
+          required: true
+        - type: String
+          name: network
+          description:
+            "Required. The consumer network where the IP address resides, in
+            the form of\nprojects/{project_id}/global/networks/{network_id}. "
+          required: true
 parameters:
+  
   - name: 'location'
     type: String
     description:
@@ -486,7 +507,7 @@ properties:
   - name: 'endpoints'
     type: Array
     description: "Endpoints for the instance."
-    output: true
+    # output: true
     item_type:
       type: NestedObject
       properties:
@@ -521,13 +542,13 @@ properties:
                     description:
                       "Output only. The consumer project_id where the forwarding rule is
                       created from. "
-                    output: true
+                    # output: true
                   - name: 'network'
                     type: String
                     description:
                       "Output only. The consumer network where the IP address resides, in
                       the form of\nprojects/{project_id}/global/networks/{network_id}. "
-                    output: true
+                    # output: true
                   - name: 'serviceAttachment'
                     type: String
                     description:
