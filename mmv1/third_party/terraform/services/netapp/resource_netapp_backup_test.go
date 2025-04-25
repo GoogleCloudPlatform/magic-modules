@@ -278,7 +278,7 @@ data "google_compute_network" "default" {
 
 resource "google_netapp_storage_pool" "default" {
   name = "tf-test-backup-pool%{random_suffix}"
-  location = "us-west2"
+  location = "us-east4"
   service_level = "PREMIUM"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
@@ -301,7 +301,7 @@ resource "google_netapp_backup_vault" "default" {
   name = "tf-test-backup-vault%{random_suffix}"
   location = google_netapp_storage_pool.default.location
   backup_vault_type = "CROSS_REGION"
-  backup_region = google_netapp_storage_pool.default.location
+  backup_region = "us-west4"
 }
 
 resource "google_netapp_volume_snapshot" "default" {
