@@ -779,7 +779,7 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 		return err
 	}
 
-	// Clusters can't have their zone, storage_type, or kms_key_name updated,
+	// Clusters can't have their zone, storage_type, kms_key_name, or node_scaling_factor updated,
 	// ForceNew if it's changed. This will show a diff with the old state on
 	// the left side and the unmodified new state on the right and the ForceNew
 	// attributed to the _old state index_ even if the diff appears to have moved.
@@ -787,13 +787,6 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 	// SetNew call.
 	// We've implemented it here because it doesn't return an error in the
 	// client and silently fails.
-	//
-	// On the other hand, clusters can't change node_scaling_factor, but we
-	// don't want to ForceNew in that case. The server side will reject such updates,
-	// but the Golang client currently uses PartialUpdateCluster without including
-	// node_scaling_factor in the update_mask. As it is, the update will not happen
-	// but TF will fail on verification. An explicit error here on diffs would be
-	// clearer for users.
 	for i := 0; i < newCount.(int); i++ {
 		oldId, newId := diff.GetChange(fmt.Sprintf("cluster.%d.cluster_id", i))
 		if oldId != newId {
@@ -829,7 +822,10 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 		// Do NOT ForceNew for node scaling factor. Return the error on diffs.
 		oNsf, nNsf := diff.GetChange(fmt.Sprintf("cluster.%d.node_scaling_factor", i))
 		if oNsf != nNsf {
-			return fmt.Errorf("Immutable field 'node_scaling_factor' cannot be updated.")
+			err := diff.ForceNew(fmt.Sprintf("cluster.%d.node_scaling_factor", i))
+			if err != nil {
+				return fmt.Errorf("Error setting node scaling factor: %s", err)
+			}
 		}
 	}
 
