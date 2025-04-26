@@ -138,6 +138,11 @@ properties:
         - name: 'promoteReleaseRule'
           type: NestedObject
           description: "Optional. `PromoteReleaseRule` will automatically promote a release from the current target to a specified target."
+          exactly_one_of:
+            - 'promoteReleaseRule'
+            - 'advanceRolloutRule'
+            - 'repairRolloutRule'
+            - 'timedPromoteReleaseRule'
           properties:
             - name: 'id'
               type: String
@@ -155,6 +160,11 @@ properties:
         - name: 'advanceRolloutRule'
           type: NestedObject
           description: "Optional. The `AdvanceRolloutRule` will automatically advance a successful Rollout."
+          exactly_one_of:
+            - 'promoteReleaseRule'
+            - 'advanceRolloutRule'
+            - 'repairRolloutRule'
+            - 'timedPromoteReleaseRule'
           properties:
             - name: 'id'
               type: String
@@ -171,6 +181,11 @@ properties:
         - name: 'repairRolloutRule'
           type: NestedObject
           description: "Optional. The RepairRolloutRule will automatically repair a failed rollout."
+          exactly_one_of:
+            - 'promoteReleaseRule'
+            - 'advanceRolloutRule'
+            - 'repairRolloutRule'
+            - 'timedPromoteReleaseRule'
           properties:
             - name: 'id'
               type: String
@@ -194,6 +209,9 @@ properties:
                 properties:
                   - name: 'retry'
                     description: "Optional. Retries a failed job."
+                    exactly_one_of:
+                      - 'retry'
+                      - 'rollback'
                     type: NestedObject
                     properties:
                       - name: 'attempts'
@@ -212,7 +230,12 @@ properties:
                           - 'BACKOFF_MODE_EXPONENTIAL'
                   - name: 'rollback'
                     description: "Optional. Rolls back a Rollout."
+                    exactly_one_of:
+                      - 'retry'
+                      - 'rollback'
                     type: NestedObject
+                    send_empty_value: true
+                    allow_empty_object: true
                     properties:
                       - name: 'destinationPhase'
                         type: String
@@ -224,6 +247,11 @@ properties:
         - name: 'timedPromoteReleaseRule'
           type: NestedObject
           description: "Optional. The `TimedPromoteReleaseRule` will automatically promote a release from the current target(s) to the specified target(s) on a configured schedule."
+          exactly_one_of:
+            - 'promoteReleaseRule'
+            - 'advanceRolloutRule'
+            - 'repairRolloutRule'
+            - 'timedPromoteReleaseRule'
           properties:
             - name: 'id'
               type: String

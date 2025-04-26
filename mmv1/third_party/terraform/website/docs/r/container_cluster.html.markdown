@@ -931,6 +931,8 @@ gvnic {
 
 * `max_run_duration` - (Optional) The runtime of each node in the node pool in seconds, terminated by 's'. Example: "3600s".
 
+* `flex_start` - (Optional) Enables Flex Start provisioning model for the node pool.
+
 * `local_ssd_count` - (Optional) The amount of local SSD disks that will be
     attached to each cluster node. Defaults to 0.
 
@@ -1106,7 +1108,7 @@ sole_tenant_config {
 
 * `gpu_driver_version` (Required) - Mode for how the GPU driver is installed.
     Accepted values are:
-    * `"GPU_DRIVER_VERSION_UNSPECIFIED"`: Default value is to not install any GPU driver.
+    * `"GPU_DRIVER_VERSION_UNSPECIFIED"`: Default value is to install the "Default" GPU driver. Before GKE `1.30.1-gke.1156000`, the default value is to not install any GPU driver.
     * `"INSTALLATION_DISABLED"`: Disable GPU driver auto installation and needs manual installation.
     * `"DEFAULT"`: "Default" GPU driver in COS and Ubuntu.
     * `"LATEST"`: "Latest" GPU driver in COS.
