@@ -33,6 +33,7 @@ func ConvertResource(rdList []*models.FakeResourceDataWithMeta, cfg *transport_t
 				if errors.Cause(err) == cai.ErrNoConversion {
 					continue
 				}
+				return assets, err
 			}
 
 			// TODO: combine assets and fetch full policy for IAM bindings/members

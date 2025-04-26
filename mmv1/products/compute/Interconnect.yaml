@@ -81,10 +81,11 @@ properties:
     type: ResourceRef
     description: |
       URL of the InterconnectLocation object that represents where this connection is to be provisioned.
-      Specifies the location inside Google's Networks, should not be passed in case of cross-cloud interconnect.
+      Specifies the location inside Google's Networks.
     immutable: true
     resource: 'InterconnectLocations'
     imports: 'selfLink'
+    required: true
   - name: 'linkType'
     type: Enum
     description: |
