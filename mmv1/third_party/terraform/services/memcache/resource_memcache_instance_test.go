@@ -137,7 +137,7 @@ resource "google_memcache_instance" "test" {
   name = "%s"
   region = "%s"
   authorized_network = data.google_compute_network.memcache_network.id
-  deletion_protection = false
+  deletion_protection = true
   node_config {
     cpu_count      = 1
     memory_size_mb = 1024
