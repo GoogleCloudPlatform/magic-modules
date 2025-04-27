@@ -91,7 +91,7 @@ properties:
   - name: 'backupVaultType'
     type: Enum
     description: |
-      Type of backup vault to be created. Default is IN_REGION.
+      Type of the backup vault to be created. Default is IN_REGION.
     enum_values:
       - 'BACKUP_VAULT_TYPE_UNSPECIFIED'
       - 'IN_REGION'
