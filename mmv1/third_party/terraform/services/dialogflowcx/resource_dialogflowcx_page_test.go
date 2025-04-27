@@ -618,12 +618,9 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
       enabled = true
       trigger_fulfillment {
         messages {
-          responseType = "HANDLER_PROMPT"
           channel = "some-channel"
-          messages {
-            output_audio_text {
-              text = "some output text"
-            }
+          output_audio_text {
+            text = "some output text"
           }
         }
       }

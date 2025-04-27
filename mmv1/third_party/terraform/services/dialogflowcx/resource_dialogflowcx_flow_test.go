@@ -370,7 +370,9 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
       trigger_fulfillment {
         messages {
           channel = "some-channel"
-          end_interaction {}
+          output_audio_text {
+            text = "some output text"
+          }
         }
       }
       data_store_connections {
@@ -383,7 +385,7 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
   }
 
   resource "google_dialogflow_cx_page" "my_page" {
-    parent       = google_dialogflow_cx_agent.agent_page.start_flow
+    parent       = google_dialogflow_cx_agent.agent_entity.start_flow
     display_name = "MyPage"
   }
 

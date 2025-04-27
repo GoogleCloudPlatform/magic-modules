@@ -656,17 +656,7 @@ properties:
             item_type:
               type: NestedObject
               properties:
-                - name: 'responseType'
-                  type: Enum
-                  description: |
-                    Represents different response types.
-                    * ENTRY_PROMPT: The response is from an entry prompt in the page.
-                    * PARAMETER_PROMPT: The response is from form-filling prompt in the page.
-                    * HANDLER_PROMPT: The response is from a transition route or an [event handler][EventHandler] in the page or flow or transition route group.
-                  enum_values:
-                    - 'ENTRY_PROMPT'
-                    - 'PARAMETER_PROMPT'
-                    - 'HANDLER_PROMPT'
+                # 'responseType' is ignored when creating/updating resources, so we skip this field. See https://github.com/GoogleCloudPlatform/magic-modules/pull/8757/commits/65ad64bd008c60498d9b27b767dc7bc664d42c0b.
                 - name: 'channel'
                   type: String
                   description: |
@@ -769,7 +759,6 @@ properties:
                     This field is part of a union field `message`: Only one of `text`, `payload`, `conversationSuccess`, `outputAudioText`, `liveAgentHandoff`, `endInteraction`, `playAudio`, `mixedAudio`, `telephonyTransferCall`, or `knowledgeInfoCard` may be set.
                   output: true
                   allow_empty_object: true
-                  send_empty_value: true
                   properties: []  # Meant to be an empty object with no properties.
                 - name: 'playAudio'
                   type: NestedObject
@@ -838,7 +827,7 @@ properties:
                   allow_empty_object: true
                   send_empty_value: true
                   properties: []  # Meant to be an empty object with no properties.
-                # Although ResponseMessage has a field named "toolCall", we can't include it here because it references the Tool resource, which hasn't been available on Terraform. 
+                # Although ResponseMessage has a field named "toolCall", we can't include it here because it references the Tool resource, which hasn't been available on Terraform.
                 # See https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3beta1/ResponseMessage
           - name: 'webhook'
             type: String

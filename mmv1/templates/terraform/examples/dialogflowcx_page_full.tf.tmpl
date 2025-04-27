@@ -558,6 +558,12 @@ resource "google_dialogflow_cx_page" "{{$.PrimaryResourceId}}" {
         knowledge_info_card {}
       }
       messages {
+        channel = "some-channel"
+        text {
+          text = ["information completed, navigating to page 2"]
+        }
+      }
+      messages {
         payload = <<EOF
           {"some-key": "some-value", "other-key": ["other-value"]}
         EOF
