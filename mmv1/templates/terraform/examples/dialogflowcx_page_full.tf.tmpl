@@ -670,6 +670,14 @@ resource "google_dialogflow_cx_page" "my_page2" {
   display_name = "MyPage2"
 }
 
+resource "google_discovery_engine_data_store" "my_datastore" {
+  location          = "global"
+  data_store_id     = "some-datastore"
+  display_name      = "some-datastore"
+  industry_vertical = "GENERIC"
+  content_config    = "NO_CONTENT"
+}
+
 resource "google_dialogflow_cx_webhook" "my_webhook" {
   parent       = google_dialogflow_cx_agent.agent.id
   display_name = "MyWebhook"

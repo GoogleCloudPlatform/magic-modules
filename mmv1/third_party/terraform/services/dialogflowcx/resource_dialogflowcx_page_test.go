@@ -638,6 +638,14 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
     display_name = "MyPage2"
   }
 
+  resource "google_discovery_engine_data_store" "my_datastore" {
+    location          = "global"
+    data_store_id     = "some-datastore"
+    display_name      = "some-datastore"
+    industry_vertical = "GENERIC"
+    content_config    = "NO_CONTENT"
+  }
+
   resource "google_dialogflow_cx_webhook" "my_webhook" {
     parent       = google_dialogflow_cx_agent.agent_page.id
     display_name = "MyWebhook"

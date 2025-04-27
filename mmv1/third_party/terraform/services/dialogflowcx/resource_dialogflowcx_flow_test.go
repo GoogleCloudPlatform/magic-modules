@@ -389,6 +389,14 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
     display_name = "MyPage"
   }
 
+  resource "google_discovery_engine_data_store" "my_datastore" {
+    location          = "global"
+    data_store_id     = "some-datastore"
+    display_name      = "some-datastore"
+    industry_vertical = "GENERIC"
+    content_config    = "NO_CONTENT"
+  }
+
   data "google_project" "project" {
   }
 `, context)
