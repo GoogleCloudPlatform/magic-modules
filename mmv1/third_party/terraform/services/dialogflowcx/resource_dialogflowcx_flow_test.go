@@ -377,7 +377,7 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
       }
       data_store_connections {
         data_store_type = "UNSTRUCTURED"
-        data_store = "projects/${data.google_project.project.number}/locations/${google_dialogflow_cx_agent.agent_entity.location}/collections/default_collection/dataStores/some-datastore"
+        data_store = "projects/${data.google_project.project.number}/locations/${google_dialogflow_cx_agent.agent_entity.location}/collections/default_collection/dataStores/datastore-flow-update"
         document_processing_mode = "DOCUMENTS"
       }
       target_page = google_dialogflow_cx_page.my_page.id
@@ -391,8 +391,8 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
 
   resource "google_discovery_engine_data_store" "my_datastore" {
     location          = "global"
-    data_store_id     = "some-datastore"
-    display_name      = "some-datastore"
+    data_store_id     = "datastore-flow-update"
+    display_name      = "datastore-flow-update"
     industry_vertical = "GENERIC"
     content_config    = "NO_CONTENT"
   }

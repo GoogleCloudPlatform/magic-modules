@@ -658,7 +658,7 @@ resource "google_dialogflow_cx_page" "{{$.PrimaryResourceId}}" {
     }
     data_store_connections {
       data_store_type = "PUBLIC_WEB"
-      data_store = "projects/${data.google_project.project.number}/locations/${google_dialogflow_cx_agent.agent.location}/collections/default_collection/dataStores/some-datastore"
+      data_store = "projects/${data.google_project.project.number}/locations/${google_dialogflow_cx_agent.agent.location}/collections/default_collection/dataStores/datastore-page-full"
       document_processing_mode = "CHUNKS"
     }
     target_page = google_dialogflow_cx_page.my_page2.id
@@ -672,8 +672,8 @@ resource "google_dialogflow_cx_page" "my_page2" {
 
 resource "google_discovery_engine_data_store" "my_datastore" {
   location          = "global"
-  data_store_id     = "some-datastore"
-  display_name      = "some-datastore"
+  data_store_id     = "datastore-page-full"
+  display_name      = "datastore-page-full"
   industry_vertical = "GENERIC"
   content_config    = "NO_CONTENT"
 }
