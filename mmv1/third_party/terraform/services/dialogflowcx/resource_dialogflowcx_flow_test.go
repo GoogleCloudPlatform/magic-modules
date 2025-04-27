@@ -385,7 +385,7 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
   }
 
   resource "google_dialogflow_cx_page" "my_page" {
-    parent       = google_dialogflow_cx_agent.agent_entity.start_flow
+    parent       = google_dialogflow_cx_agent.agent_entity.my_flow
     display_name = "MyPage"
   }
 
