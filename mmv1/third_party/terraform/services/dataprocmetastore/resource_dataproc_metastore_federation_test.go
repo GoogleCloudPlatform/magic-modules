@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
 func TestAccMetastoreFederation_deletionprotection(t *testing.T) {
@@ -54,6 +55,7 @@ func TestAccMetastoreFederation_tags(t *testing.T) {
 		"tagKey":        tagKey,
 		"tagValue":      acctest.BootstrapSharedTestTagValue(t, "dataproc_metastore_federation-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
+		"new_tag_value": acctest.BootstrapSharedTestTagValue(t, "dataproc_metastore_federation-new-tagvalue", tagKey),
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -61,6 +63,20 @@ func TestAccMetastoreFederation_tags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMetastoreFederationTags(context),
+			},
+			{
+				ResourceName:            "google_dataproc_metastore_federation.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"tags"},
+			},
+			{
+				Config: testAccMetastoreFederationTagsUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataproc_metastore_federation.default", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_dataproc_metastore_federation.default",
@@ -148,4 +164,29 @@ func testAccMetastoreFederationTags(context map[string]interface{}) string {
 		}
 	`, context)
 
+}
+
+func testAccMetastoreFederationTagsUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		resource "google_dataproc_metastore_service" "default" {
+			service_id = "tf-test-service-%{random_suffix}"
+			location   = "us-central1"
+			tier       = "DEVELOPER"
+			hive_metastore_config {
+				version           = "3.1.2"
+				endpoint_protocol = "GRPC"
+			}
+		}
+		resource "google_dataproc_metastore_federation" "default" {
+			location      = "us-central1"
+			federation_id = "tf-test-federation-%{random_suffix}"
+			version       = "3.1.2"
+			backend_metastores {
+				rank           = "1"
+				name           = google_dataproc_metastore_service.default.id
+				metastore_type = "DATAPROC_METASTORE"
+			}
+			tags = {"%{org}/%{tagKey}" = "%{new_tag_value}"}
+		}
+	`, context)
 }
