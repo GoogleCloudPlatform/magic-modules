@@ -1538,6 +1538,7 @@ properties:
         type: String
         description: |
           The target page to transition to. Format: projects/<ProjectID>/locations/<LocationID>/agents/<AgentID>/flows/<FlowID>/pages/<PageID>.
+          The page must be in the same host flow (the flow that owns this `KnowledgeConnectorSettings`).
           This field is part of a union field `target`: Only one of `targetPage` or `targetFlow` may be set.
       - name: 'targetFlow'
         type: String

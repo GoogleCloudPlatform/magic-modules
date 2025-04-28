@@ -380,13 +380,8 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
         data_store = "projects/${data.google_project.project.number}/locations/${google_dialogflow_cx_agent.agent_entity.location}/collections/default_collection/dataStores/datastore-flow-update"
         document_processing_mode = "DOCUMENTS"
       }
-      target_page = google_dialogflow_cx_page.my_page.id
+      target_flow = google_dialogflow_cx_agent.agent_entity.start_flow
     }
-  }
-
-  resource "google_dialogflow_cx_page" "my_page" {
-    parent       = google_dialogflow_cx_agent.agent_entity.my_flow
-    display_name = "MyPage"
   }
 
   resource "google_discovery_engine_data_store" "my_datastore" {
@@ -552,6 +547,10 @@ resource "google_dialogflow_cx_intent" "default_welcome_intent" {
   }
 }
 
+resource "google_dialogflow_cx_page" "my_page" {
+  parent       = google_dialogflow_cx_agent.agent.default_start_flow
+  display_name = "MyPage"
+}
 
 resource "google_dialogflow_cx_flow" "default_start_flow" {
   parent                = google_dialogflow_cx_agent.agent.id
@@ -597,6 +596,18 @@ resource "google_dialogflow_cx_flow" "default_start_flow" {
         }
       }
     }
+  }
+
+  knowledge_connector_settings {
+    enabled = false
+    trigger_fulfillment {
+      messages {
+        output_audio_text {
+          text = "We can update the knowledge_connector_settings in this flow!"
+        }
+      }
+    }
+    target_page = google_dialogflow_cx_page.my_page.id
   }
 }
 `, context)
