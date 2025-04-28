@@ -90,7 +90,7 @@ func TestAccComputeInterconnectAttachmentGroup_update(t *testing.T) {
 				Config: testAccComputeInterconnectAttachmentGroup_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-					   plancheck.ExpectResourceAction("google_compute_interconnect_group.example-interconnect-attachment-group", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_compute_interconnect_attachment_group.example-interconnect-attachment-group", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
