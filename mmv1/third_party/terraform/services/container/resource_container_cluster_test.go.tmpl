@@ -503,7 +503,7 @@ func TestAccContainerCluster_withMaxRunDuration(t *testing.T) {
 	})
 }
 
-
+{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withFlexStart(t *testing.T) {
 	t.Parallel()
 
@@ -535,6 +535,7 @@ func TestAccContainerCluster_withFlexStart(t *testing.T) {
 		},
 	})
 }
+{{- end }}
 
 func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 	t.Parallel()
@@ -7154,6 +7155,7 @@ resource "google_container_cluster" "max_run_duration" {
 `, clusterName, npName, duration, networkName, subnetworkName)
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withFlexStart(clusterName, npName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "flex_start" {
@@ -7199,6 +7201,7 @@ resource "google_container_cluster" "flex_start" {
 }
 `, clusterName, npName, networkName, subnetworkName)
 }
+{{- end }}
 
 func testAccContainerCluster_withILBSubSetting(clusterName, npName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
