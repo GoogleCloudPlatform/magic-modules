@@ -339,7 +339,9 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 	}
 
 	if _, err := rnr.Run("git", []string{"commit", "--signoff", "-m", commitMessage}, nil); err != nil {
-		return "", err
+		if !strings.Contains(err.Error(), "nothing to commit") {
+			return "", err
+		}
 	}
 
 	commitSha, err := rnr.Run("git", []string{"rev-parse", "HEAD"}, nil)
