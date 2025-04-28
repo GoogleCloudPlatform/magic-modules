@@ -81,10 +81,10 @@ properties:
       name: mapObjectName
       type: NestedObject
       properties:
-      - name: 'interconnect'
-        type: String
-        description: |
-          The URL of an Interconnect in this group. All Interconnects in the group are unique.
+        - name: 'interconnect'
+          type: String
+          description: |
+            The URL of an Interconnect in this group. All Interconnects in the group are unique.
   - name: 'intent'
     type: NestedObject
     description: |

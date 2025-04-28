@@ -83,8 +83,8 @@ properties:
       name: mapObjectName
       type: NestedObject
       properties:
-      - name: 'attachment'
-        type: String
+        - name: 'attachment'
+          type: String
   - name: 'InterconnectGroup'
     type: String
     description: |
