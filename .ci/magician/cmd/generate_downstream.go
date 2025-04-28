@@ -300,11 +300,9 @@ func runMake(downstreamRepo *source.Repo, command string, rnr ExecRunner) error 
 			return err
 		}
 	case "terraform":
-		// --- legacy -- can be cleaned up after go/mm-pull/13722 is submitted
 		if _, err := rnr.Run("make", []string{"clean-provider", "OUTPUT_PATH=" + downstreamRepo.Path}, nil); err != nil {
 			return err
 		}
-		// -------------------------------------------------------------------
 		if _, err := rnr.Run("make", []string{"provider", "OUTPUT_PATH=" + downstreamRepo.Path, fmt.Sprintf("VERSION=%s", downstreamRepo.Version)}, nil); err != nil {
 			return err
 		}
@@ -340,9 +338,10 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 		return "", err
 	}
 
-	_, commitErr := rnr.Run("git", []string{"commit", "--signoff", "-m", commitMessage}, nil)
-	if commitErr != nil && !strings.Contains(commitErr.Error(), "nothing to commit") {
-		return "", commitErr
+	if _, err := rnr.Run("git", []string{"commit", "--signoff", "-m", commitMessage}, nil); err != nil {
+		if !strings.Contains(err.Error(), "nothing to commit") {
+			return "", err
+		}
 	}
 
 	commitSha, err := rnr.Run("git", []string{"rev-parse", "HEAD"}, nil)
@@ -369,7 +368,7 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 		}
 	}
 
-	return commitSha, commitErr
+	return commitSha, err
 }
 
 func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequest, rnr ExecRunner) error {
