@@ -101,3 +101,18 @@ properties:
     type: String
     description: |
       Region in which backup is stored.
+  - name: 'sourceRegion'
+    type: String
+    description: |
+      Region in which the backup vault is created.
+    output: true
+  - name: 'sourceBackupVault'
+    type: String
+    description: |
+      Name of the Backup vault created in source region.
+    output: true
+  - name: 'destinationBackupVault'
+    type: String
+    description: |
+      Name of the Backup vault created in backup region.
+    output: true
