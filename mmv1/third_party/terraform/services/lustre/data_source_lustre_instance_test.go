@@ -58,7 +58,6 @@ data "google_compute_network" "lustre-network" {
 
 data "google_lustre_instance" "default" {
   instance_id         = google_lustre_instance.instance.instance_id
-  location            = "us-central1"
 }
 `, context)
 }
