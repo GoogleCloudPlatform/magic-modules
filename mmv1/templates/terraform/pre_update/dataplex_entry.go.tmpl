@@ -1,0 +1,23 @@
+if d.HasChange("aspects") {
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"deleteMissingAspects": "true"})
+	if err != nil {
+		return err
+	}
+
+	aspectKeysOfInterest := make(map[string]struct{})
+	currentAspects, futureAspects := d.GetChange("aspects")
+	AddAspectsToSet(aspectKeysOfInterest, currentAspects)
+	AddAspectsToSet(aspectKeysOfInterest, futureAspects)
+	aspectKeysArray := make([]interface{}, 0, len(aspectKeysOfInterest))
+
+	for key := range aspectKeysOfInterest {
+		aspectKeysArray = append(aspectKeysArray, key)
+	}
+
+	url, err = transport_tpg.AddArrayQueryParams(url, "aspectKeys", aspectKeysArray)
+	fmt.Println("NEW URL: ", url)
+	if err != nil {
+		return err
+	}
+}
+
