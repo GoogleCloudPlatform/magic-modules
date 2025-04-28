@@ -42,27 +42,12 @@ custom_code:
   post_create: 'templates/terraform/post_create/interconnect_attachment.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/interconnect_attachment.go.tmpl'
 examples:
-  - name: 'interconnect_attachment_basic'
-    primary_resource_id: 'on_prem'
+  - name: 'interconnect_attachment_group_basic'
+    primary_resource_id: 'example-interconnect-attachment-group'
     vars:
-      interconnect_attachment_name: 'on-prem-attachment'
-      router_name: 'router-1'
-      network_name: 'network-1'
-  - name: 'interconnect_attachment_dedicated'
-    primary_resource_id: 'on_prem'
-    vars:
-      interconnect_name: 'interconenct-1'
-      interconnect_attachment_name: 'on-prem-attachment'
-      router_name: 'router-1'
-      network_name: 'network-1'
-    exclude_docs: true
-  - name: 'compute_interconnect_attachment_ipsec_encryption'
-    primary_resource_id: 'ipsec-encrypted-interconnect-attachment'
-    vars:
-      interconnect_attachment_name: 'test-interconnect-attachment'
-      address_name: 'test-address'
-      router_name: 'test-router'
-      network_name: 'test-network'
+      interconnect_group_name: 'example-interconnect-attachment-group'
+    test_vars_overrides:
+      'deletion_protection': 'false'
 parameters:
   - name: 'region'
     type: ResourceRef
