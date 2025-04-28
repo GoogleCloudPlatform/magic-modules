@@ -293,6 +293,13 @@ func schemaNodeConfig() *schema.Schema {
                 ValidateFunc: validation.IntAtLeast(0),
                 Description:  `Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD must be 375 or 3000 GB in size, and all local SSDs must share the same size.`,
               },
+              "data_cache_count": {
+                Type:         schema.TypeInt,
+				Optional:     true,
+                ForceNew:     true,
+                ValidateFunc: validation.IntAtLeast(0),
+                Description:  `Number of local SSDs to be utilized for GKE Data Cache. Uses NVMe interfaces.`,
+              },
             },
           },
         },
@@ -347,13 +354,11 @@ func schemaNodeConfig() *schema.Schema {
 					Optional: true,
 					MaxItems: 1,
 					Description: `Enable or disable gvnic in the node pool.`,
-					ForceNew: true,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"enabled": {
 								Type:        schema.TypeBool,
 								Required:    true,
-								ForceNew:    true,
 								Description: `Whether or not gvnic is enabled`,
 							},
 						},
@@ -819,15 +824,13 @@ func schemaNodeConfig() *schema.Schema {
 					Type:        schema.TypeList,
 					Optional:    true,
 					Computed:    true,
-					ForceNew:    true,
 					MaxItems:    1,
-					Description: `Configuration for the confidential nodes feature, which makes nodes run on confidential VMs. Warning: This configuration can't be changed (or added/removed) after pool creation without deleting and recreating the entire pool.`,
+					Description: `Configuration for the confidential nodes feature, which makes nodes run on confidential VMs.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"enabled": {
 								Type:        schema.TypeBool,
 								Required:    true,
-								ForceNew:    true,
 								Description: `Whether Confidential Nodes feature is enabled for all nodes in this pool.`,
 							},
 						},
@@ -871,6 +874,12 @@ func schemaNodeConfig() *schema.Schema {
 					Optional:    true,
 					ForceNew:    true,
 					Description: `The runtime of each node in the node pool in seconds, terminated by 's'. Example: "3600s".`,
+				},
+				"flex_start" : {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					ForceNew:    true,
+					Description: `Enables Flex Start provisioning model for the node pool`,
 				},
 			},
 		},
@@ -1044,6 +1053,11 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.EphemeralStorageLocalSsdConfig = &container.EphemeralStorageLocalSsdConfig{
 			LocalSsdCount: int64(conf["local_ssd_count"].(int)),
 		}
+		dataCacheCount, ok := conf["data_cache_count"]
+		if ok {
+			nc.EphemeralStorageLocalSsdConfig.DataCacheCount = int64(dataCacheCount.(int))
+		}
+
 	}
 
 	if v, ok := nodeConfig["secondary_boot_disks"]; ok && len(v.([]interface{})) > 0 {
@@ -1260,6 +1274,10 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 
 	if v,ok := nodeConfig["max_run_duration"]; ok {
 		nc.MaxRunDuration = v.(string)
+	}
+
+	if v,ok := nodeConfig["flex_start"]; ok {
+		nc.FlexStart = v.(bool)
 	}
 
 	{{ if ne $.TargetVersionName `ga` -}}
@@ -1693,6 +1711,7 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"node_group":               c.NodeGroup,
 		"advanced_machine_features": flattenAdvancedMachineFeaturesConfig(c.AdvancedMachineFeatures),
 		"max_run_duration": 		 c.MaxRunDuration,
+		"flex_start":				 c.FlexStart,
 		"sole_tenant_config":        flattenSoleTenantConfig(c.SoleTenantConfig),
 		"fast_socket":               flattenFastSocket(c.FastSocket),
 		"resource_manager_tags":     flattenResourceManagerTags(c.ResourceManagerTags),
@@ -1798,6 +1817,7 @@ func flattenEphemeralStorageLocalSsdConfig(c *container.EphemeralStorageLocalSsd
 	if c != nil {
 		result = append(result, map[string]interface{}{
 			"local_ssd_count": c.LocalSsdCount,
+			"data_cache_count": c.DataCacheCount,
 		})
 	}
 	return result
@@ -2256,6 +2276,42 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 		}
 
+		if d.HasChange(prefix + "node_config.0.confidential_nodes") {
+			if _, ok := d.GetOk(prefix + "node_config.0.confidential_nodes"); ok {
+				req := &container.UpdateNodePoolRequest{
+					Name: name,
+					ConfidentialNodes: expandConfidentialNodes(d.Get(prefix + "node_config.0.confidential_nodes")),
+				}
+				if req.ConfidentialNodes == nil {
+					req.ConfidentialNodes = &container.ConfidentialNodes{}
+					req.ForceSendFields = []string{"ConfidentialNodes"}
+				}
+				updateF := func() error {
+					clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+					if config.UserProjectOverride {
+						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+					}
+					op, err := clusterNodePoolsUpdateCall.Do()
+					if err != nil {
+						return err
+					}
+
+					// Wait until it's updated
+					return ContainerOperationWait(config, op,
+						nodePoolInfo.project,
+						nodePoolInfo.location,
+						"updating GKE node pool confidential_nodes", userAgent,
+						timeout)
+				}
+
+				if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
+						return err
+				}
+
+				log.Printf("[INFO] Updated confidential_nodes for node pool %s", name)
+			}
+		}
+
 		if d.HasChange("node_config.0.disk_size_gb") ||
 			d.HasChange("node_config.0.disk_type") ||
 			d.HasChange("node_config.0.machine_type") ||
@@ -2624,6 +2680,39 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			log.Printf("[INFO] Updated gcfs_config for node pool %s", name)
+		}
+
+		if d.HasChange(prefix + "node_config.0.gvnic") {
+			gvnicEnabled := bool(d.Get(prefix + "node_config.0.gvnic.0.enabled").(bool))
+			req := &container.UpdateNodePoolRequest{
+				NodePoolId: name,
+				Gvnic: &container.VirtualNIC{
+					Enabled: gvnicEnabled,
+				},
+			}
+			updateF := func() error {
+				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				if config.UserProjectOverride {
+					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+				}
+				op, err := clusterNodePoolsUpdateCall.Do()
+				if err != nil {
+					return err
+				}
+
+				// Wait until it's updated
+				return ContainerOperationWait(config, op,
+					nodePoolInfo.project,
+					nodePoolInfo.location,
+					"updating GKE node pool gvnic", userAgent,
+					timeout)
+			}
+
+			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
+					return err
+			}
+
+			log.Printf("[INFO] Updated gvnic for node pool %s", name)
 		}
 
 		if d.HasChange(prefix + "node_config.0.kubelet_config") {
