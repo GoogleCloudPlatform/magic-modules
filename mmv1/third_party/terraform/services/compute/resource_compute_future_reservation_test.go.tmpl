@@ -57,7 +57,7 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
   }
 
   specific_sku_properties {
-    total_count = "1"
+    total_count = "2"
     instance_properties {
       machine_type = "e2-standard-2"
     }
@@ -74,7 +74,7 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
   project  = "%{project}"
   auto_delete_auto_created_reservations = true
 
-  description      = "Updated test future reservation"
+  description      = "test future reservation"
   time_window {
     start_time = "2025-08-01T00:00:00Z"
     end_time   = "2025-08-02T00:00:00Z"
@@ -82,7 +82,7 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
   specific_sku_properties {
     total_count = "1"
     instance_properties {
-      machine_type = "e2-standard-4"
+      machine_type = "e2-standard-2"
     }
   }
 }

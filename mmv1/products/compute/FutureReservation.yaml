@@ -164,7 +164,6 @@ properties:
     type: String
     description: |
       Name prefix for the reservations to be created at the time of delivery. The name prefix must comply with RFC1035. Maximum allowed length for name prefix is 20. Automatically created reservations name format will be -date-####.
-    # Look into maximum length
   - name: 'status'
     type: NestedObject
     description: |
@@ -212,7 +211,6 @@ properties:
             type: String
             description: |
               ID of the instance template used to populate the Future Reservation properties.
-      # Enum values are listed in docs, TODO
       - name: 'amendmentStatus'
         type: Enum
         description: |
@@ -337,7 +335,6 @@ properties:
                   The previous share settings of the Future Reservation.
                 output: true
                 properties:
-                # Might need a enum value. TODO
                   - name: 'shareType'
                     type: Enum
                     description: |
