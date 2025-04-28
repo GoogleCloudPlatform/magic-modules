@@ -21,12 +21,9 @@ func TestAccLustreInstanceDatasource_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLustreInstanceDatasource_basic(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrPair("data.google_lustre_instance.instance", "instance_id", "google_lustre_instance.instance", "instance_id"),
-					resource.TestCheckResourceAttrPair("data.google_lustre_instance.instance", "name", "google_lustre_instance.instance", "name"),
-					resource.TestCheckResourceAttrPair("data.google_lustre_instance.instance", "filesystem", "google_lustre_instance.instance", "filesystem"),
-					resource.TestCheckResourceAttrPair("data.google_lustre_instance.instance", "capacity_gib", "google_lustre_instance.instance", "capacity_gib"),
-					resource.TestCheckResourceAttrPair("data.google_lustre_instance.instance", "network", "google_lustre_instance.instance", "network"),
+				Check: acctest.CheckDataSourceStateMatchesResourceState(
+					"data.google_lustre_instance.default",
+					"google_lustre_instance.instance",
 				),
 			},
 		},
@@ -43,7 +40,7 @@ resource "google_lustre_instance" "instance" {
   gke_support_enabled = false
   capacity_gib        = 18000
   timeouts {
-    create = "120m"
+    create            = "120m"
   }
 }
 
@@ -56,13 +53,12 @@ resource "google_lustre_instance" "instance" {
 // config, add an additional network resource or change
 // this from "data"to "resource"
 data "google_compute_network" "lustre-network" {
-  name = "%{network_name}"
+  name                = "%{network_name}"
 }
 
-data "google_lustre_instance" "instance" {
-  name     = google_lustre_instance.instance.name
-  region   = "us-central1"
-  depends_on = [google_lustre_instance.instance]
+data "google_lustre_instance" "default" {
+  instance_id         = google_lustre_instance.instance.instance_id
+  location            = "us-central1"
 }
 `, context)
 }

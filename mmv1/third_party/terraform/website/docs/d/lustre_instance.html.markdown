@@ -21,9 +21,9 @@ data "google_lustre_instance" "instance" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the Lustre instance.
+* `instance_id` - (Required) The instance id of the Lustre instance.
 
-* `region` - (Optional) The ID of the region in which the resource belongs. If it is not provided, the provider region is used.
+* `location` - (Optional) The ID of the region in which the resource belongs. If it is not provided, the provider region is used.
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it is not provided, the provider project is used.
 
