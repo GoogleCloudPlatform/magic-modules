@@ -431,10 +431,10 @@ is set to true. Defaults to ZONAL.`,
 						"disk_type": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							Default:          "PD_SSD",
+							Computed:         true,
 							ForceNew:         true,
 							DiffSuppressFunc: caseDiffDashSuppress,
-							Description:      `The type of data disk: PD_SSD, PD_HDD, or HYPERDISK_BALANCED. Defaults to PD_SSD.`,
+							Description:      `The type of supported data disk is tier dependent and can be PD_SSD or PD_HDD or HyperDisk_Balanced `,
 						},
 {{- if ne $.TargetVersionName "ga" }}
 						"data_disk_provisioned_iops": {
@@ -1058,8 +1058,30 @@ is set to true. Defaults to ZONAL.`,
 			"dns_name": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: `The dns name of the instance.`,
+				Description: `The instance-level dns name of the instance for PSC instances or public IP CAS instances.`,
 			},
+                        "dns_names": {
+                                 Type:        schema.TypeList,
+                                 Computed:    true,
+                                 Elem: &schema.Resource{
+                                         Schema: map[string]*schema.Schema{
+                                                 "name": {
+                                                         Type:     schema.TypeString,
+                                                         Computed: true,
+                                                 },
+                                                 "connection_type": {
+                                                         Type:     schema.TypeString,
+                                                         Computed: true,
+                                                 },
+                                                 "dns_scope": {
+                                                         Type:     schema.TypeString,
+                                                         Computed: true,
+                                                 },
+  
+                                         },
+                                 },
+                                 Description: `The list of DNS names used by this instance. Different connection types for an instance may have different DNS names. DNS names can apply to an individual instance or a cluster of instances.`,
+                         },
 			"restore_backup_context": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -1432,7 +1454,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		UserLabels:                    tpgresource.ConvertStringMap(_settings["user_labels"].(map[string]interface{})),
 		BackupConfiguration:           expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
 		DatabaseFlags:                 expandDatabaseFlags(_settings["database_flags"].(*schema.Set).List()),
-		ConnectionPoolConfig:      expandConnectionPoolConfig(_settings["connection_pool_config"].([]interface{})),
+		ConnectionPoolConfig:      	   expandConnectionPoolConfig(_settings["connection_pool_config"].(*schema.Set).List()),
 		IpConfiguration:               expandIpConfiguration(_settings["ip_configuration"].([]interface{}), databaseVersion),
 		LocationPreference:            expandLocationPreference(_settings["location_preference"].([]interface{})),
 		MaintenanceWindow:             expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),
@@ -1890,6 +1912,9 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("dns_name", instance.DnsName); err != nil {
 		return fmt.Errorf("Error setting dns_name: %s", err)
 	}
+        if err := d.Set("dns_names", flattenDnsNames(instance.DnsNames)); err != nil {
+                return fmt.Errorf("Error setting dns_names: %s", err)
+        }
 	d.SetId(instance.Name)
 
 	return nil
@@ -2543,28 +2568,36 @@ func flattenReplicationCluster(replicationCluster *sqladmin.ReplicationCluster, 
 	return []map[string]interface{}{data}
 }
 
-func flattenConnectionPoolFlags(connectionPoolFlags []*sqladmin.ConnectionPoolFlags) []map[string]interface{} {
-	var mcpflags []map[string]interface{}
+func flattenConnectionPoolFlags(connectionPoolFlags []*sqladmin.ConnectionPoolFlags) []interface{} {
+	if len(connectionPoolFlags) == 0 { // Handles nil or empty slice
+        return make([]interface{}, 0) // Explicitly return empty slice
+    }
 
-	for _, mcpflag := range connectionPoolFlags {
-		data := map[string]interface{}{
-			"name":  mcpflag.Name,
-			"value": mcpflag.Value,
-		}
-
-		mcpflags = append(mcpflags, data)
-	}
-	return mcpflags
+    mcpflags := make([]interface{}, len(connectionPoolFlags)) // Pre-allocate for efficiency
+    for i, mcpflag := range connectionPoolFlags {
+        data := map[string]interface{}{
+            "name":  mcpflag.Name,
+            "value": mcpflag.Value,
+        }
+        mcpflags[i] = data
+    }
+    return mcpflags
 }
 
-func flattenConnectionPoolConfig(connectionPoolConfig *sqladmin.ConnectionPoolConfig) interface{}{
-	data := map[string]interface{}{
-		"connection_pool_enabled": connectionPoolConfig.ConnectionPoolingEnabled,
-	}
-	if connectionPoolConfig.Flags != nil {
-		data["connection_pool_flags"] = flattenConnectionPoolFlags(connectionPoolConfig.Flags)
-	}
-	return []map[string]interface{}{data}
+func flattenConnectionPoolConfig(connectionPoolConfig *sqladmin.ConnectionPoolConfig) []interface{}{
+	if connectionPoolConfig == nil {
+        return []interface{}{
+            map[string]interface{}{
+                "connection_pooling_enabled": false,
+                "flags":                      make([]interface{}, 0), // Default to empty flags
+            },
+        }
+    }
+    data := map[string]interface{}{
+        "connection_pooling_enabled": connectionPoolConfig.ConnectionPoolingEnabled, // Corrected key
+        "flags":                      flattenConnectionPoolFlags(connectionPoolConfig.Flags), // Corrected key
+    }
+    return []interface{}{data}
 }
 
 func flattenIpConfiguration(ipConfiguration *sqladmin.IpConfiguration, d *schema.ResourceData) interface{} {
@@ -2694,6 +2727,23 @@ func flattenIpAddresses(ipAddresses []*sqladmin.IpMapping) []map[string]interfac
 	}
 
 	return ips
+}
+
+
+func flattenDnsNames(dnsNames []*sqladmin.DnsNameMapping) []map[string]interface{} {
+        var dns []map[string]interface{}
+ 
+        for _, mapping := range dnsNames {
+                data := map[string]interface{}{
+                        "name":            mapping.Name,
+                        "connection_type": mapping.ConnectionType,
+                        "dns_scope":       mapping.DnsScope,
+                }
+
+                dns = append(dns, data)
+        }
+ 
+        return dns
 }
 
 func flattenServerCaCerts(caCerts []*sqladmin.SslCert) []map[string]interface{} {
