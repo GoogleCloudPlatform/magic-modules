@@ -74,7 +74,7 @@ properties:
       format for resource links as keys.
       Note that there are add-members and remove-members methods in gcloud.
       The size of this map is limited by an "Interconnects per group" quota.
-    key_name: 'interconnect'
+    key_name: 'key_interconnect'
     key_description: |
       Resource name
     value_type:
@@ -193,7 +193,7 @@ properties:
               properties:
                 - name: 'blockerType'
                   type: Enum
-                  desciption: |
+                  description: |
                     The category of an unmet SLA requirement. The Intended
                     SLA Blockers section below explains this field and how it relates to
                     other fields in intendedCapabilityBlockers.

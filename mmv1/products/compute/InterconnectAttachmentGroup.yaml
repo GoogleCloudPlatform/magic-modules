@@ -76,7 +76,7 @@ properties:
       format for resource links as keys.
       Note that there are add-members and remove-members methods in gcloud.
       The size of this map is limited by an "Attachments per group" quota.
-    key_name: 'attachment'
+    key_name: 'key_attachment'
     key_description: |
       Resource name
     value_type:
@@ -117,54 +117,57 @@ properties:
         type: Array
         description: |
           The regions Attachments in this group are in.
-        properties:
-          - name: 'metros'
-            type: Array
-            description: |
-              The metros of Attachments in this group in this region.
-            item_type:
-              type: NestedObject
-              properties:
-                - name: 'metro'
-                  type: String
-                  description: |
-                    The name of the metro, as a three-letter lowercase
-                    string like "iad". This is the first component of the location of an
-                    Interconnect.
-                - name: 'facilities'
-                  type: Array
-                  description: |
-                    The facilities used for this group's Attachments'
-                    Interconnects.
-                  item_type:
-                    type: NestedObject
-                    properties:
-                      - name: 'facility'
-                        type: String
-                        description: |
-                          The name of a facility, like "iad-1234".
-                      - name: 'zones'
-                        type: Array
-                        description: |
-                          The zones that Interconnects in this facility are
-                          present in.
-                        item_type:
-                          type: NestedObject
-                          properties:
-                            - name: 'zone'
-                              type: String
-                              description: |
-                                The zones that Attachments in this group are present
-                                in, in the given facilities.  This is inherited from their
-                                Interconnects.
-                            - name: 'attachment'
-                              type: Array
-                              description: |
-                                URLs of Attachments in the given zone, to the given
-                                region, on Interconnects in the given facility and metro. Every
-                                Attachment in the AG has such an entry.
-                              item_type:
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'region'
+            - name: 'metros'
+              type: Array
+              description: |
+                The metros of Attachments in this group in this region.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'metro'
+                    type: String
+                    description: |
+                      The name of the metro, as a three-letter lowercase
+                      string like "iad". This is the first component of the location of an
+                      Interconnect.
+                  - name: 'facilities'
+                    type: Array
+                    description: |
+                      The facilities used for this group's Attachments'
+                      Interconnects.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'facility'
+                          type: String
+                          description: |
+                            The name of a facility, like "iad-1234".
+                        - name: 'zones'
+                          type: Array
+                          description: |
+                            The zones that Interconnects in this facility are
+                            present in.
+                          item_type:
+                            type: NestedObject
+                            properties:
+                              - name: 'zone'
                                 type: String
+                                description: |
+                                  The zones that Attachments in this group are present
+                                  in, in the given facilities.  This is inherited from their
+                                  Interconnects.
+                              - name: 'attachment'
+                                type: Array
+                                description: |
+                                  URLs of Attachments in the given zone, to the given
+                                  region, on Interconnects in the given facility and metro. Every
+                                  Attachment in the AG has such an entry.
+                                item_type:
+                                  type: String
     output: true
   - name: 'configured'
     type: NestedObject
@@ -227,6 +230,8 @@ properties:
                     detail. These are region names formatted like "us-central1". This
                     will be set for some blockers (like INCOMPATIBLE_REGIONS) but does
                     not apply to others.
+                  item_type:
+                    type: String
                 - name: 'metros'
                   type: Array
                   description: |
