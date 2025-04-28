@@ -412,6 +412,7 @@ properties:
     description: |
       Directory Services configuration.
       Should only be set if protocol is "NFS_V4_1".
+    immutable: true
     properties:
       - name: 'ldap'
         type: NestedObject
