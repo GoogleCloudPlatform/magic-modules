@@ -96,6 +96,7 @@ properties:
       - 'BACKUP_VAULT_TYPE_UNSPECIFIED'
       - 'IN_REGION'
       - 'CROSS_REGION'
+    default_from_api: true
   - name: 'backupRegion'
     type: String
     description: |
