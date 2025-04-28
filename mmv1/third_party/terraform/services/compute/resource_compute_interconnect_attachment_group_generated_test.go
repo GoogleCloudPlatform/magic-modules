@@ -86,7 +86,10 @@ func TestAccComputeInterconnectAttachmentGroup_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeInterconnectAttachmentGroup_basic(context),
+				Config: testAccComputeInterconnectAttachmentGroup_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+					   plancheck.ExpectResourceAction("google_compute_interconnect_group.example-interconnect-attachment-group", plancheck.ResourceActionUpdate),
 			},
 			{
 				ResourceName:      "google_compute_interconnect_attachment_group.example-interconnect-attachment-group",
