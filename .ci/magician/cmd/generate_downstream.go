@@ -338,10 +338,9 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 		return "", err
 	}
 
-	if _, err := rnr.Run("git", []string{"commit", "--signoff", "-m", commitMessage}, nil); err != nil {
-		if !strings.Contains(err.Error(), "nothing to commit") {
-			return "", err
-		}
+	_, commitErr := rnr.Run("git", []string{"commit", "--signoff", "-m", commitMessage}, nil)
+	if commitErr != nil && !strings.Contains(commitErr.Error(), "nothing to commit") {
+		return "", commitErr
 	}
 
 	commitSha, err := rnr.Run("git", []string{"rev-parse", "HEAD"}, nil)
@@ -368,7 +367,7 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 		}
 	}
 
-	return commitSha, err
+	return commitSha, commitErr
 }
 
 func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequest, rnr ExecRunner) error {
