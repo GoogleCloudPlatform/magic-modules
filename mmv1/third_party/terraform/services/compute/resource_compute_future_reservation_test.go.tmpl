@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
 func TestAccComputeFutureReservation_update(t *testing.T) {
@@ -32,6 +33,11 @@ func TestAccComputeFutureReservation_update(t *testing.T) {
 			},
 			{
 				Config: testAccComputeFutureReservation_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_future_reservation.gce_future_reservation", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_compute_future_reservation.gce_future_reservation",
@@ -48,6 +54,7 @@ func testAccComputeFutureReservation_full(context map[string]interface{}) string
 resource "google_compute_future_reservation" "gce_future_reservation" {
   provider = google-beta
   name     = "tf-fr%{random_suffix}"
+  name_prefix = "fr-%{random_suffix}"
   project  = "%{project}"
   auto_delete_auto_created_reservations = true
   description      = "test future reservation"
@@ -71,9 +78,9 @@ func testAccComputeFutureReservation_update(context map[string]interface{}) stri
 resource "google_compute_future_reservation" "gce_future_reservation" {
   provider = google-beta
   name     = "tf-fr%{random_suffix}"
+  name_prefix = "fru-%{random_suffix}"
   project  = "%{project}"
   auto_delete_auto_created_reservations = false
-
   description      = "test future reservation"
   time_window {
     start_time = "2025-08-01T00:00:00Z"
