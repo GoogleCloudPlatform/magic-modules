@@ -41,6 +41,10 @@ custom_code:
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   decoder: 'templates/terraform/decoders/long_name_to_self_link.go.tmpl'
   post_create: 'templates/terraform/post_create/sleep.go.tmpl'
+  constants: 'templates/terraform/constants/vpc_access_connector.go.tmpl'
+custom_diff:
+  - 'customdiff.ForceNewIfChange("min_instances", isInstanceShrinkage)'
+  - 'customdiff.ForceNewIfChange("max_instances", isInstanceShrinkage)'
 examples:
   - name: 'vpc_access_connector'
     primary_resource_id: 'connector'

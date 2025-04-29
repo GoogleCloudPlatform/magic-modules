@@ -1,0 +1,11 @@
+func isInstanceShrinkage(old, new, meta interface{}) error {
+    // max and min instances can only increase in-place,
+    // so we must create a new resource if it is decreased.
+    if old == nil || new == nil {
+        return nil
+    }
+    if new.(int) < old.(int) {
+        return fmt.Errorf("instance count cannot be decreased")
+    }
+    return nil
+}
