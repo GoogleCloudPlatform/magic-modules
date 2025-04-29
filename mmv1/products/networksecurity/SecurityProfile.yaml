@@ -58,7 +58,6 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
   - name: 'network_security_security_profile_mirroring'
-    min_version: 'beta'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-security-profile'
@@ -68,7 +67,6 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
   - name: 'network_security_security_profile_intercept'
-    min_version: 'beta'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-security-profile'

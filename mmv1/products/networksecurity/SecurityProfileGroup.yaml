@@ -50,7 +50,6 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
   - name: 'network_security_security_profile_group_mirroring'
-    min_version: 'beta'
     primary_resource_id: 'default'
     vars:
       network_name: 'network'
@@ -61,7 +60,6 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
   - name: 'network_security_security_profile_group_intercept'
-    min_version: 'beta'
     primary_resource_id: 'default'
     vars:
       network_name: 'network'
