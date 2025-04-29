@@ -41,7 +41,6 @@ type mockRunner struct {
 	cwd           string
 	dirStack      *list.List
 	notifyError   bool
-	fileContents  map[string]string
 }
 
 func sortedEnvString(env map[string]string) string {
@@ -108,14 +107,10 @@ func (mr *mockRunner) Walk(root string, fn filepath.WalkFunc) error {
 }
 
 func (mr *mockRunner) ReadFile(name string) (string, error) {
-	return mr.fileContents[name], nil
+	return "", nil
 }
 
 func (mr *mockRunner) WriteFile(name, data string) error {
-	if mr.fileContents == nil {
-		mr.fileContents = make(map[string]string)
-	}
-	mr.fileContents[name] = data
 	return nil
 }
 
