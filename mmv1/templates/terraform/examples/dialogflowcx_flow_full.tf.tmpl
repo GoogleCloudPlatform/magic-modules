@@ -412,6 +412,7 @@ resource "google_discovery_engine_data_store" "my_datastore" {
   display_name      = "datastore-flow-full"
   industry_vertical = "GENERIC"
   content_config    = "NO_CONTENT"
+  solution_types    = ["SOLUTION_TYPE_CHAT"]
 }
 
 resource "google_dialogflow_cx_webhook" "my_webhook" {

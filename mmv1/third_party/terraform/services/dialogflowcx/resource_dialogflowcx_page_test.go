@@ -626,7 +626,7 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
       }
       data_store_connections {
         data_store_type = "UNSTRUCTURED"
-        data_store = "projects/${data.google_project.project.number}/locations/${google_dialogflow_cx_agent.agent_page.location}/collections/default_collection/dataStores/datastore"
+        data_store = "projects/${data.google_project.project.number}/locations/${google_dialogflow_cx_agent.agent_page.location}/collections/default_collection/dataStores/datastore-page-update"
         document_processing_mode = "DOCUMENTS"
       }
       target_page = google_dialogflow_cx_page.my_page2.id
