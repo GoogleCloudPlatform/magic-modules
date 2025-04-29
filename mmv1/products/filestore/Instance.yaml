@@ -418,12 +418,14 @@ properties:
         type: NestedObject
         description: |
           Configuration for LDAP servers.
+        immutable: true
         properties:
           - name: 'domain'
             type: String
             required: true
             description: |
               The LDAP domain name in the format of `my-domain.com`.
+            immutable: true
           - name: 'servers'
             required: true
             type: Array
@@ -434,6 +436,7 @@ properties:
               2. IP address, for example: `10.0.0.1`, `10.0.0.2`, `10.0.0.3`.
               All servers names must be in the same format: either all DNS names or all
               IP addresses.
+            immutable: true
             item_type:
               type: String
           - name: 'usersOu'
@@ -442,9 +445,11 @@ properties:
               The users Organizational Unit (OU) is optional. This parameter is a hint
               to allow faster lookup in the LDAP namespace. In case that this parameter
               is not provided, Filestore instance will query the whole LDAP namespace.
+            immutable: true
           - name: 'groupsOu'
             type: String
             description: |
               The groups Organizational Unit (OU) is optional. This parameter is a hint
               to allow faster lookup in the LDAP namespace. In case that this parameter
               is not provided, Filestore instance will query the whole LDAP namespace.
+            immutable: true
