@@ -45,11 +45,9 @@ var (
 )
 
 type Diff struct {
-	Title        string
-	Repo         string
-	ShortStat    string
-	CommitSHA    string
-	OldCommitSHA string
+	Title     string
+	Repo      string
+	ShortStat string
 }
 
 type BreakingChange struct {
@@ -79,6 +77,7 @@ type Errors struct {
 }
 
 type diffCommentData struct {
+	PrNumber             int
 	Diffs                []Diff
 	BreakingChanges      []BreakingChange
 	MissingServiceLabels []string
@@ -215,7 +214,9 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	}
 
 	// Initialize repos
-	data := diffCommentData{}
+	data := diffCommentData{
+		PrNumber: prNumber,
+	}
 	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
 		errors[repo.Title] = []string{}
 		repo.Branch = newBranch
@@ -261,24 +262,10 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo diff shortstats")
 		}
 		if shortStat != "" {
-			variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo.Name)
-			oldVariablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo.Name)
-			commitSHA, err := rnr.ReadFile(variablePath)
-			if err != nil {
-				errors[repo.Title] = append(errors[repo.Title], "Failed to read commit sha from file")
-				continue
-			}
-			oldCommitSHA, err := rnr.ReadFile(oldVariablePath)
-			if err != nil {
-				errors[repo.Title] = append(errors[repo.Title], "Failed to read old commit sha from file")
-				continue
-			}
 			diffs = append(diffs, Diff{
-				Title:        repo.Title,
-				Repo:         repo.Name,
-				ShortStat:    shortStat,
-				CommitSHA:    commitSHA,
-				OldCommitSHA: oldCommitSHA,
+				Title:     repo.Title,
+				Repo:      repo.Name,
+				ShortStat: shortStat,
 			})
 			repo.ChangedFiles, err = ctlr.DiffNameOnly(repo, oldBranch, newBranch)
 			if err != nil {
