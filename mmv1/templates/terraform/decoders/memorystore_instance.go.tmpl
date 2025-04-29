@@ -42,4 +42,58 @@ for _, raw := range connections {
 }
 
 d.Set("desired_psc_auto_connections", transformed)
+
+// Retrieve endpoints.connections.pscAutoConnection from API response
+endpoints, ok := res["endpoints"]
+if ok {
+	endpointsArray, ok := endpoints.([]interface{})
+	if !ok || len(endpointsArray) == 0 {
+		// No endpoints or empty array, nothing to process
+	} else {
+		transformed := make([]interface{}, 0)
+		uniqueEndpoints := make(map[string]bool) // Track unique project+network combos
+		
+		for _, endpoint := range endpointsArray {
+			endpointData, ok := endpoint.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			
+			connections, ok := endpointData["connections"].([]interface{})
+			if !ok {
+				continue
+			}
+			
+			for _, connection := range connections {
+				connectionData, ok := connection.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				
+				pscAutoConnection, ok := connectionData["pscAutoConnection"].(map[string]interface{})
+				if !ok {
+					continue
+				}
+				
+				projectID, projectOk := pscAutoConnection["projectId"].(string)
+				networkID, networkOk := pscAutoConnection["network"].(string)
+				
+				if projectOk && networkOk {
+					uniqueKey := projectID + networkID
+					if !uniqueEndpoints[uniqueKey] { // Check for uniqueness
+						uniqueEndpoints[uniqueKey] = true
+						transformed = append(transformed, map[string]interface{}{
+							"project_id": projectID,
+							"network":    networkID,
+						})
+					}
+				}
+			}
+		}
+		
+		if len(transformed) > 0 {
+			d.Set("desired_auto_created_endpoints", transformed)
+		}
+	}
+}
 return res, nil

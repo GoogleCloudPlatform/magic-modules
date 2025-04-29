@@ -26,190 +26,47 @@ for _, raw := range l {
 
 obj["pscAutoConnections"] = req
 
-//  if the automated_backup_config is not defined, automatedBackupMode needs to be passed and set to DISABLED in the expand
+// Handle desired_auto_created_endpoints virtual field
+v, ok = d.GetOk("desired_auto_created_endpoints")
+if ok {
+    l := v.([]interface{})
+    if len(l) > 0 {
+        endpoints := make([]interface{}, 1)
+        endpointObj := make(map[string]interface{})
+        connections := make([]interface{}, 0, len(l))
+        
+        for _, raw := range l {
+            if raw == nil {
+                continue
+            }
+            desiredEndpoint := raw.(map[string]interface{})
+            connectionObj := make(map[string]interface{})
+            pscAutoConnection := make(map[string]interface{})
+            
+            projectId := desiredEndpoint["project_id"]
+            if val := reflect.ValueOf(projectId); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+                pscAutoConnection["projectId"] = projectId
+            }
+            
+            network := desiredEndpoint["network"]
+            if val := reflect.ValueOf(network); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+                pscAutoConnection["network"] = network
+            }
+            
+            connectionObj["pscAutoConnection"] = pscAutoConnection
+            connections = append(connections, connectionObj)
+        }
+        
+        endpointObj["connections"] = connections
+        endpoints[0] = endpointObj
+        obj["endpoints"] = endpoints
+    }
+}
+
+//  If the automated_backup_config is not defined, automatedBackupMode needs to be passed and set to DISABLED in the expand
 if obj["automatedBackupConfig"] == nil {
     config := meta.(*transport_tpg.Config)
     automatedBackupConfigProp, _ := expandMemorystoreInstanceAutomatedBackupConfig(d.Get("automated_backup_config"), d, config)
     obj["automatedBackupConfig"] = automatedBackupConfigProp
 }
 return obj, nil
-
-
-v, ok := d.GetOk("desired_auto_created_endpoints")
-if !ok {
-    return obj, nil // No desired connections, nothing to update
-}
-l := v.([]interface{})
-req := make([]interface{}, 0, len(l))
-for _, raw := range l {
-    if raw == nil {
-        continue
-    }
-    originalDesiredEndpoints := raw.(map[string]interface{})
-    transformedConnectionReq := make(map[string]interface{})
-
-    projectId := originalDesiredEndpoints["project_id"]
-    network := originalDesiredEndpoints["network"]
-
-
-
-
-    if val := reflect.ValueOf(projectId); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-        transformedConnectionReq["projectId"] = projectId
-    }
-
-    if val := reflect.ValueOf(network); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-        transformedConnectionReq["network"] = network
-    }
-
-    req = append(req, connectionReq)
-}
-
-
-
-
-func expandMemorystoreInstanceEndpoints(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	l := v.([]interface{})
-	req := make([]interface{}, 0, len(l))
-	for _, raw := range l {
-		if raw == nil {
-			continue
-		}
-		original := raw.(map[string]interface{})
-		transformed := make(map[string]interface{})
-
-		transformedConnections, err := expandMemorystoreInstanceEndpointsConnections(original["connections"], d, config)
-		if err != nil {
-			return nil, err
-		} else if val := reflect.ValueOf(transformedConnections); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-			transformed["connections"] = transformedConnections
-		}
-
-		req = append(req, transformed)
-	}
-	return req, nil
-}
-
-func expandMemorystoreInstanceEndpointsConnections(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	l := v.([]interface{})
-	req := make([]interface{}, 0, len(l))
-	for _, raw := range l {
-		if raw == nil {
-			continue
-		}
-		original := raw.(map[string]interface{})
-		transformed := make(map[string]interface{})
-
-		transformedPscAutoConnection, err := expandMemorystoreInstanceEndpointsConnectionsPscAutoConnection(original["psc_auto_connection"], d, config)
-		if err != nil {
-			return nil, err
-		} else if val := reflect.ValueOf(transformedPscAutoConnection); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-			transformed["pscAutoConnection"] = transformedPscAutoConnection
-		}
-
-		req = append(req, transformed)
-	}
-	return req, nil
-}
-
-
-
-func expandMemorystoreInstanceEndpointsConnectionsPscAutoConnection(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	l := v.([]interface{})
-	if len(l) == 0 || l[0] == nil {
-		return nil, nil
-	}
-	raw := l[0]
-	original := raw.(map[string]interface{})
-	transformed := make(map[string]interface{})
-
-	transformedPscConnectionId, err := expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionPscConnectionId(original["psc_connection_id"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedPscConnectionId); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["pscConnectionId"] = transformedPscConnectionId
-	}
-
-	transformedIpAddress, err := expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionIpAddress(original["ip_address"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedIpAddress); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["ipAddress"] = transformedIpAddress
-	}
-
-	transformedForwardingRule, err := expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionForwardingRule(original["forwarding_rule"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedForwardingRule); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["forwardingRule"] = transformedForwardingRule
-	}
-
-	transformedProjectId, err := expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionProjectId(original["project_id"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedProjectId); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["projectId"] = transformedProjectId
-	}
-
-	transformedNetwork, err := expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionNetwork(original["network"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedNetwork); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["network"] = transformedNetwork
-	}
-
-	transformedServiceAttachment, err := expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionServiceAttachment(original["service_attachment"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedServiceAttachment); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["serviceAttachment"] = transformedServiceAttachment
-	}
-
-	transformedConnectionType, err := expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionConnectionType(original["connection_type"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedConnectionType); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["connectionType"] = transformedConnectionType
-	}
-
-	transformedPort, err := expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionPort(original["port"], d, config)
-	if err != nil {
-		return nil, err
-	} else if val := reflect.ValueOf(transformedPort); val.IsValid() && !tpgresource.IsEmptyValue(val) {
-		transformed["port"] = transformedPort
-	}
-
-	return transformed, nil
-}
-
-func expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionPscConnectionId(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionIpAddress(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionForwardingRule(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionProjectId(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionNetwork(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionServiceAttachment(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionConnectionType(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-
-func expandMemorystoreInstanceEndpointsConnectionsPscAutoConnectionPort(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}

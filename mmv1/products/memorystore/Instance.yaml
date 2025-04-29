@@ -101,8 +101,7 @@ examples:
       'secondary_instance_prevent_destroy': 'false'
 virtual_fields:
   - name: 'desired_psc_auto_connections'
-    description: "Immutable. User inputs for the auto-created
-      PSC connections. "
+    description: "Please use desired_auto_created_endpoints "
     type: Array
     immutable: true
     item_type:
@@ -141,7 +140,6 @@ virtual_fields:
             the form of\nprojects/{project_id}/global/networks/{network_id}. "
           required: true
 parameters:
-  
   - name: 'location'
     type: String
     description:
@@ -507,7 +505,7 @@ properties:
   - name: 'endpoints'
     type: Array
     description: "Endpoints for the instance."
-    # output: true
+    output: true
     item_type:
       type: NestedObject
       properties:
@@ -542,13 +540,13 @@ properties:
                     description:
                       "Output only. The consumer project_id where the forwarding rule is
                       created from. "
-                    # output: true
+                    output: true
                   - name: 'network'
                     type: String
                     description:
                       "Output only. The consumer network where the IP address resides, in
                       the form of\nprojects/{project_id}/global/networks/{network_id}. "
-                    # output: true
+                    output: true
                   - name: 'serviceAttachment'
                     type: String
                     description:
