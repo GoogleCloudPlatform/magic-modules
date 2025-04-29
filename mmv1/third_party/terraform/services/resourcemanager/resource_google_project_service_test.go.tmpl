@@ -21,7 +21,7 @@ func TestAccProjectService_basic(t *testing.T) {
 	acctest.SkipIfVcr(t)
 
 	org := envvar.GetTestOrgFromEnv(t)
-	pid := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	pid := fmt.Sprintf("tf-ftest-%d", acctest.RandInt(t))
 	services := []string{"iam.googleapis.com", "cloudresourcemanager.googleapis.com"}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
