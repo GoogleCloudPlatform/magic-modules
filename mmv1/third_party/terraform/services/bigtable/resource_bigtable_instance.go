@@ -155,6 +155,7 @@ func ResourceBigtableInstance() *schema.Resource {
 						"node_scaling_factor": {
 							Type:         schema.TypeString,
 							Optional:     true,
+							ForceNew:     true,
 							Default:      "NodeScalingFactor1X",
 							ValidateFunc: validation.StringInSlice([]string{"NodeScalingFactor1X", "NodeScalingFactor2X"}, false),
 							Description:  `The node scaling factor of this cluster. One of "NodeScalingFactor1X" or "NodeScalingFactor2X". Defaults to "NodeScalingFactor1X".`,
@@ -816,14 +817,6 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 			err := diff.ForceNew(fmt.Sprintf("cluster.%d.kms_key_name", i))
 			if err != nil {
 				return fmt.Errorf("Error setting cluster diff: %s", err)
-			}
-		}
-
-		oNsf, nNsf := diff.GetChange(fmt.Sprintf("cluster.%d.node_scaling_factor", i))
-		if oNsf != nNsf {
-			err := diff.ForceNew(fmt.Sprintf("cluster.%d.node_scaling_factor", i))
-			if err != nil {
-				return fmt.Errorf("Error setting node scaling factor: %s", err)
 			}
 		}
 	}
