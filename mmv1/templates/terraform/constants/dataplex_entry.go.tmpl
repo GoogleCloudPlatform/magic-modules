@@ -1,3 +1,26 @@
+// GetEntry supports up to 100 aspects. Therefore we set a threshold at 99.
+const maxAspectNumber = 99
+
+// NumberOfAspectsValidation checks if the number of aspects on an entry exceeds certain threshold.
+func NumberOfAspectsValidation(i interface{}, k string) (warnings []string, errors []error) {
+	s, isSlice := i.([]interface{})
+	m, isMap := i.(map[string]interface{})
+
+	if !isSlice && !isMap {
+		errors = append(errors, fmt.Errorf("expected type of field %q to be array, but got %T", k, i))
+		return warnings, errors
+	}
+
+	if len(s)+len(m) > maxAspectNumber {
+		errors = append(errors, fmt.Errorf(
+			"field %q has an invalid content: %q. The maximal number of aspects is 99.",
+			k, i,
+		))
+	}
+
+	return warnings, errors
+}
+
 // ProjectNumberValidation checks if the input string conforms to the pattern:
 // "projects/<project-number>/<anything>"
 func ProjectNumberValidation(i interface{}, k string) (warnings []string, errors []error) {
