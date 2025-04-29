@@ -12,6 +12,9 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/sql"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+{{- if ne $.TargetVersionName "ga" }}
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+{{- end }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
@@ -537,6 +540,43 @@ func TestAccSqlDatabaseInstance_diskspecs(t *testing.T) {
 		},
 	})
 }
+
+{{- if ne $.TargetVersionName "ga" }}
+func TestAccSqlDatabaseInstance_hyperdisk(t *testing.T) {
+	t.Parallel()
+	enterprisePlusName := "tf-test-enterprise-plus" + acctest.RandString(t, 10)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstance_hyperdisk_default(enterprisePlusName),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstance_hyperdisk(enterprisePlusName, 3000, 140),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_sql_database_instance.instance", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+{{- end }}
 
 func TestAccSqlDatabaseInstance_maintenance(t *testing.T) {
 	t.Parallel()
@@ -1704,7 +1744,7 @@ func TestAccSQLDatabaseInstance_DefaultEdition(t *testing.T) {
 	t.Parallel()
 	databaseName := "tf-test-" + acctest.RandString(t, 10)
 	databaseVersion := "POSTGRES_16"
-	enterprisePlusTier := "db-perf-optimized-N-2"
+	enterprisePlusTier := "db-c4a-highmem-4"
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -2889,6 +2929,9 @@ func TestAccSqlDatabaseInstance_useCasBasedServerCa(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_mode", "GOOGLE_MANAGED_CAS_CA"),
 					resource.TestCheckResourceAttr(resourceName, "settings.0.ip_configuration.0.server_ca_pool", ""),
+					resource.TestCheckResourceAttr(resourceName, "dns_names.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "dns_names.0.connection_type", "PUBLIC"),
+					resource.TestCheckResourceAttr(resourceName, "dns_names.0.dns_scope", "INSTANCE"),
 				),
 			},
 			{
@@ -2916,6 +2959,9 @@ func TestAccSqlDatabaseInstance_useCustomSubjectAlternateName(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 
 		Steps: []resource.TestStep{
@@ -2950,6 +2996,9 @@ func TestAccSqlDatabaseInstance_useCustomerManagedServerCa(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 
 		Steps: []resource.TestStep{
@@ -3030,6 +3079,15 @@ resource "google_privateca_ca_pool_iam_member" "granting" {
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloud-sql.iam.gserviceaccount.com"
 }
 
+resource "time_sleep" "wait_2_mins" {
+  depends_on = [
+    google_privateca_certificate_authority.customer_ca,
+    google_privateca_ca_pool_iam_member.granting
+  ]
+
+  create_duration = "120s"
+}
+
 resource "google_sql_database_instance" "instance" {
   name                = "%{databaseName}"
   region              = "us-central1"
@@ -3045,10 +3103,7 @@ resource "google_sql_database_instance" "instance" {
 	}
   }
 
-  depends_on = [
-      google_privateca_certificate_authority.customer_ca,
-      google_privateca_ca_pool_iam_member.granting
-  ]
+  depends_on = [time_sleep.wait_2_mins]
 }
 `, context)
 }
@@ -3114,6 +3169,16 @@ resource "google_privateca_ca_pool_iam_member" "granting" {
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-cloud-sql.iam.gserviceaccount.com"
 }
 
+
+resource "time_sleep" "wait_2_mins" {
+  depends_on = [
+    google_privateca_certificate_authority.customer_ca,
+    google_privateca_ca_pool_iam_member.granting
+  ]
+
+  create_duration = "120s"
+}
+
 resource "google_sql_database_instance" "instance" {
   name                = "%{databaseName}"
   region              = "us-central1"
@@ -3128,10 +3193,7 @@ resource "google_sql_database_instance" "instance" {
 	}
   }
 
-  depends_on = [
-      google_privateca_certificate_authority.customer_ca,
-      google_privateca_ca_pool_iam_member.granting
-  ]
+  depends_on = [time_sleep.wait_2_mins]
 }
 `, context)
 }
@@ -5230,6 +5292,46 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `
+
+{{- if ne $.TargetVersionName "ga" }}
+func testGoogleSqlDatabaseInstance_hyperdisk_default(databaseName string) string {
+	return fmt.Sprintf(`
+
+resource "google_sql_database_instance" "instance" {
+  provider = google-beta
+
+  name             = "%s"
+  region           = "us-east1"
+  database_version    = "POSTGRES_17"
+  deletion_protection = false
+  settings {
+    tier = "db-c4a-highmem-2"
+    edition = "ENTERPRISE_PLUS"
+    disk_type = "HYPERDISK_BALANCED"
+  }
+}`, databaseName)
+}
+
+func testGoogleSqlDatabaseInstance_hyperdisk(databaseName string, iops, throughput int64) string {
+	return fmt.Sprintf(`
+
+resource "google_sql_database_instance" "instance" {
+  provider = google-beta
+
+  name             = "%s"
+  region           = "us-east1"
+  database_version    = "POSTGRES_17"
+  deletion_protection = false
+  settings {
+    tier = "db-c4a-highmem-2"
+    edition = "ENTERPRISE_PLUS"
+    disk_type = "HYPERDISK_BALANCED"
+    data_disk_provisioned_iops = %d
+    data_disk_provisioned_throughput = %d
+  }
+}`, databaseName, iops, throughput)
+}
+{{- end }}
 
 var testGoogleSqlDatabaseInstance_maintenance = `
 resource "google_sql_database_instance" "instance" {

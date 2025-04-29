@@ -34,11 +34,7 @@ func NewProjectConverter(provider *tfschema.Provider) models.Converter {
 }
 
 // Convert converts asset resource data.
-func (c *ProjectConverter) Convert(asset *caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
-	if asset == nil || asset.Resource == nil && asset.Resource.Data == nil {
-		return nil, nil
-	}
-
+func (c *ProjectConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
 	var blocks []*models.TerraformResourceBlock
 	block, err := c.convertResourceData(asset)
 	if err != nil {
@@ -48,8 +44,8 @@ func (c *ProjectConverter) Convert(asset *caiasset.Asset) ([]*models.TerraformRe
 	return blocks, nil
 }
 
-func (c *ProjectConverter) convertResourceData(asset *caiasset.Asset) (*models.TerraformResourceBlock, error) {
-	if asset == nil || asset.Resource == nil || asset.Resource.Data == nil {
+func (c *ProjectConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
 

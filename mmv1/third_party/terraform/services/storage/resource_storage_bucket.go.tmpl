@@ -566,6 +566,16 @@ func ResourceStorageBucket() *schema.Resource {
 					},
 				},
 			},
+			"time_created": {
+				Type:     schema.TypeString,
+				Computed: true,
+				Description: `The creation time of the bucket in RFC 3339 format.`,
+			},
+			"updated": {
+				Type:     schema.TypeString,
+				Computed: true,
+				Description: `The time at which the bucket's metadata or IAM policy was last updated, in RFC 3339 format.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -590,9 +600,12 @@ func labelKeyValidator(val interface{}, key string) (warns []string, errs []erro
 	return
 }
 
-func getAnywhereCacheListResult(config *transport_tpg.Config, bucket string) ([]interface{}, error) {
+func getAnywhereCacheListResult(d *schema.ResourceData, config *transport_tpg.Config) ([]interface{}, error) {
 	// Define the cache list URL
-	cacheListUrl := fmt.Sprintf("https://storage.googleapis.com/storage/v1/b/%s/anywhereCaches/", bucket)
+	cacheListUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{StorageBasePath}}b/{{name}}/anywhereCaches/"}}")
+	if err != nil {
+		return nil, err
+	}
 
 	// Send request to get resource list
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -619,9 +632,9 @@ func getAnywhereCacheListResult(config *transport_tpg.Config, bucket string) ([]
 	return rl, nil
 }
 
-func deleteAnywhereCacheIfAny(config *transport_tpg.Config, bucket string) error {
+func deleteAnywhereCacheIfAny(d *schema.ResourceData, config *transport_tpg.Config) error {
 	// Get the initial list of Anywhere Caches
-	cacheList, err := getAnywhereCacheListResult(config, bucket)
+	cacheList, err := getAnywhereCacheListResult(d, config)
 	if err != nil {
 		return err
 	}
@@ -653,8 +666,13 @@ func deleteAnywhereCacheIfAny(config *transport_tpg.Config, bucket string) error
 		if !ok {
 			return fmt.Errorf("missing or invalid anywhereCacheId: %v", obj)
 		}
-		disableUrl := fmt.Sprintf("https://storage.googleapis.com/storage/v1/b/%s/anywhereCaches/%s/disable", bucket, anywhereCacheId)
-		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		anywhereCacheUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{StorageBasePath}}b/{{name}}/anywhereCaches/"}}")
+		if err != nil {
+			return err
+		}
+		disableUrl := anywhereCacheUrl + fmt.Sprintf("%s/disable", anywhereCacheId)
+
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
 			Project:   config.Project,
@@ -669,7 +687,7 @@ func deleteAnywhereCacheIfAny(config *transport_tpg.Config, bucket string) error
 
 	// Post this time, we check again!
 	// Get the list of Anywhere Caches after the sleep
-	cacheList, err = getAnywhereCacheListResult(config, bucket)
+	cacheList, err = getAnywhereCacheListResult(d, config)
 	if err != nil {
 		return err
 	}
@@ -1084,9 +1102,11 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 			break
 		}
 
-		cacheList, cacheListErr := getAnywhereCacheListResult(config, bucket)
+		cacheList, cacheListErr := getAnywhereCacheListResult(d, config)
 		if cacheListErr != nil {
-			return cacheListErr
+			// If we get any error, try deleting the bucket anyway in case it's empty
+			// This would help our customers to avoid requiring extra storage.anywhereCaches.list permission.
+			break
 		}
 
 		if len(res.Items) == 0 && len(cacheList) == 0 {
@@ -1130,7 +1150,7 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 		wp := workerpool.New(runtime.NumCPU() - 1)
 
 		wp.Submit(func() {
-			err = deleteAnywhereCacheIfAny(config, bucket)
+			err = deleteAnywhereCacheIfAny(d, config)
 			if err != nil {
 				deleteObjectError = fmt.Errorf("error deleting the caches on the bucket %s : %w", bucket, err)
 			}
@@ -1294,6 +1314,14 @@ func flattenBucketCustomPlacementConfig(cfc *storage.BucketCustomPlacementConfig
 	})
 
 	return customPlacementConfig
+}
+
+func flattenTimeCreated(v interface{}) interface{} {
+	return v
+}
+
+func flattenUpdated(v interface{}) interface{} {
+	return v
 }
 
 func expandBucketDataLocations(configured interface{}) []string {
@@ -2021,6 +2049,12 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	}
 	if err := d.Set("custom_placement_config", flattenBucketCustomPlacementConfig(res.CustomPlacementConfig)); err != nil {
 		return fmt.Errorf("Error setting custom_placement_config: %s", err)
+	}
+	if err := d.Set("time_created", flattenTimeCreated(res.TimeCreated)); err != nil {
+		return fmt.Errorf("Error setting time_created: %s", err)
+	}
+	if err := d.Set("updated", flattenUpdated(res.Updated)); err != nil {
+		return fmt.Errorf("Error setting updated: %s", err)
 	}
 	// Needs to hide rpo field for single-region buckets.
 	// Check the Rpo field from API response to determine whether bucket is in single region config or not.
