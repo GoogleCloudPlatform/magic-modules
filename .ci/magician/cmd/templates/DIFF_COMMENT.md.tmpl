@@ -7,7 +7,7 @@ Your PR hasn't generated any diffs, but I'll let you know if a future commit doe
 Your PR generated some diffs in downstreams - here they are.
 
 {{range .Diffs -}}
-{{.Title}}: [Diff](https://github.com/modular-magician/{{.Repo}}/compare/{{.OldCommitSHA}}..{{.CommitSHA}}) ({{.ShortStat}})
+{{.Title}}: [Diff](https://github.com/modular-magician/{{.Repo}}/compare/auto-pr-{{$.PrNumber}}-old..auto-pr-{{$.PrNumber}}) ({{.ShortStat}})
 {{end -}}
 {{end -}}
 
