@@ -1,0 +1,7 @@
+if d.HasChange("min_instances") && !d.HasChange("max_instances") {
+    obj["maxInstances"] = d.Get("max_instances").(int)
+}
+
+if d.HasChange("max_instances") && !d.HasChange("min_instances") {
+    obj["minInstances"] = d.Get("min_instances").(int)
+}

@@ -42,6 +42,7 @@ custom_code:
   decoder: 'templates/terraform/decoders/long_name_to_self_link.go.tmpl'
   post_create: 'templates/terraform/post_create/sleep.go.tmpl'
   constants: 'templates/terraform/constants/vpc_access_connector.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/vpc_access_connector_instances.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("min_instances", isInstanceShrinkage)'
   - 'customdiff.ForceNewIfChange("max_instances", isInstanceShrinkage)'
@@ -132,6 +133,8 @@ properties:
     default_from_api: true
     conflicts:
       - min_throughput
+    required_with:
+      - max_instances
   - name: 'maxInstances'
     type: Integer
     description: |
@@ -140,6 +143,8 @@ properties:
     default_from_api: true
     conflicts:
       - max_throughput
+    required_with:
+      - min_instances
   - name: 'maxThroughput'
     type: Integer
     description: |
