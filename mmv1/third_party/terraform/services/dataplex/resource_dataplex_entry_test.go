@@ -621,6 +621,7 @@ resource "google_dataplex_entry" "test_entry_full" {
         EOF
     }
   }
+ depends_on = [google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-two, google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-two]
 }
 `, context)
 }
@@ -762,6 +763,7 @@ resource "google_dataplex_entry" "test_entry_full" {
         EOF
     }
   }
+ depends_on = [google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-two, google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-two]
 }
 `, context)
 }
