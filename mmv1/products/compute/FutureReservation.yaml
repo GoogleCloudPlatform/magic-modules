@@ -46,6 +46,7 @@ async:
     resource_inside_response: false
 collection_url_key: 'items'
 custom_code:
+  update_encoder: 'templates/terraform/update_encoder/future_reservation.go.tmpl'
 min_version: beta
 examples:
   - name: 'future_reservation_basic'
