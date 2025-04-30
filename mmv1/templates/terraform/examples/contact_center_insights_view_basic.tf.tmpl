@@ -1,5 +1,4 @@
 resource "google_contact_center_insights_view" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "resource_name}}"
   location = "{{index $.Vars "location_name"}}"
-  create_time = "2025-01-01T00:00:00Z"
 }
