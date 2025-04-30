@@ -1574,15 +1574,15 @@ func TestAccStorageBucket_IPFilter(t *testing.T) {
 	var noIPfilter storage.Bucket
 	bucketName := fmt.Sprintf("tf-test-ip-filter-bucket-%d", acctest.RandInt(t))
 	nwSuffix := acctest.RandString(t, 8)
-  project := envvar.GetTestProjectFromEnv()
-  serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
+	project := envvar.GetTestProjectFromEnv()
+	serviceAccount := envvar.GetTestServiceAccountFromEnv(t)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
-      {
+			{
 				Config: testAccStorageBucket_withoutIPFilter(bucketName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
@@ -2798,7 +2798,7 @@ func testAccStorageBucket_IPFilter(bucketName string, nwSuffix string, project s
 	return fmt.Sprintf(`
 resource "google_compute_network" "vpc_gcs_ipfilter1" {
   name = "tf-test-storage-ipfilter1-%s"
-	auto_create_subnetworks = false
+  auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "ipfilter_1" {
@@ -2808,7 +2808,7 @@ resource "google_compute_subnetwork" "ipfilter_1" {
   network       = google_compute_network.vpc_gcs_ipfilter1.id
 }
 
-resource "google_project_iam_custom_role" "ip_filter_role" {
+resource "google_project_iam_custom_role" "_%s" {
   role_id     = "ipFilterExemptRole"
   title       = "IP Filter Exempt Role"
   description = "A custom role to bypass IP Filtering on GCS bucket."
@@ -2824,27 +2824,27 @@ resource "google_project_iam_member" "primary" {
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "us-central1"
-	uniform_bucket_level_access = true
+  uniform_bucket_level_access = true
   force_destroy = true
   ip_filter  {
     mode = "Enabled"
-		public_network_source {
-			allowed_ip_cidr_ranges = ["0.0.0.0/0", "::/0"]
-		}
-		vpc_network_sources {
-			network = google_compute_network.vpc_gcs_ipfilter1.id
-			allowed_ip_cidr_ranges = ["0.0.0.0/0", "::/0"]
-		}
+    public_network_source {
+      allowed_ip_cidr_ranges = ["0.0.0.0/0", "::/0"]
+    }
+    vpc_network_sources {
+      network = google_compute_network.vpc_gcs_ipfilter1.id
+      allowed_ip_cidr_ranges = ["0.0.0.0/0", "::/0"]
+    }
   }
 }
-`, nwSuffix, nwSuffix, project, project, serviceAccount, bucketName)
+`, nwSuffix, nwSuffix, nwSuffix, project, project, serviceAccount, bucketName)
 }
 
 func testAccStorageBucket_IPFilter_disable(bucketName string, nwSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "vpc_gcs_ipfilter1" {
   name = "tf-test-storage-ipfilter1-%s"
-	auto_create_subnetworks = false
+  auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "ipfilter_1" {
@@ -2856,7 +2856,7 @@ resource "google_compute_subnetwork" "ipfilter_1" {
 
 resource "google_compute_network" "vpc_gcs_ipfilter2" {
   name = "tf-test-storage-ipfilter2-%s"
-	auto_create_subnetworks = false
+  auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "ipfilter_2" {
@@ -2867,24 +2867,24 @@ resource "google_compute_subnetwork" "ipfilter_2" {
 }
 
 resource "google_storage_bucket" "bucket" {
-	name     = "%s"
-	location = "us-central1"
-	uniform_bucket_level_access = true
-	force_destroy = true
-	ip_filter {
-		mode = "Disabled"
-		public_network_source {
-			allowed_ip_cidr_ranges = ["192.0.2.0/24", "2001:db8::/32"]
-		}
-		vpc_network_sources {
-			network = google_compute_network.vpc_gcs_ipfilter1.id
-			allowed_ip_cidr_ranges = ["0.0.0.0/0", "::/0"]
-		}
-		vpc_network_sources {
-			network = google_compute_network.vpc_gcs_ipfilter2.id
-			allowed_ip_cidr_ranges = ["10.201.0.0/16", "10.202.0.0/16"]
-		}
-	}
+  name     = "%s"
+  location = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy = true
+  ip_filter {
+    mode = "Disabled"
+    public_network_source {
+      allowed_ip_cidr_ranges = ["192.0.2.0/24", "2001:db8::/32"]
+    }
+    vpc_network_sources {
+      network = google_compute_network.vpc_gcs_ipfilter1.id
+      allowed_ip_cidr_ranges = ["0.0.0.0/0", "::/0"]
+    }
+    vpc_network_sources {
+      network = google_compute_network.vpc_gcs_ipfilter2.id
+      allowed_ip_cidr_ranges = ["10.201.0.0/16", "10.202.0.0/16"]
+    }
+  }
 }
 `, nwSuffix, nwSuffix, nwSuffix, nwSuffix, bucketName)
 }
@@ -2892,10 +2892,10 @@ resource "google_storage_bucket" "bucket" {
 func testAccStorageBucket_withoutIPFilter(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
-	name     = "%s"
-	location = "us-central1"
-	uniform_bucket_level_access = true
-	force_destroy = true
+  name     = "%s"
+  location = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy = true
 }
 `, bucketName)
 }
