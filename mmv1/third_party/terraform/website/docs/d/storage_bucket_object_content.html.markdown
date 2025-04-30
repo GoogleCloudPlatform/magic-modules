@@ -49,5 +49,3 @@ The following attributes are exported:
 * `content_hexsha512` - (Computed) SHA512 checksum of file content.
 
 * `content_base64sha512` - (Computed) Base64 encoded SHA512 checksum of file content.
-
-
