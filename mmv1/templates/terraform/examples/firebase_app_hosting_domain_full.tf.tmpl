@@ -4,6 +4,8 @@ resource "google_firebase_app_hosting_domain" "example" {
   backend          = google_firebase_app_hosting_backend.example.backend_id
   domain_id        = "{{index $.Vars "domain_id"}}"
 
+  disabled = true
+
   serve {
     redirect {
       uri = "google.com"

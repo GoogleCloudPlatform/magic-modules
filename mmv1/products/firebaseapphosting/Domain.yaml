@@ -91,6 +91,7 @@ properties:
     properties:
       - name: certState
         type: String
+        output: true
         description: |-
           Possible values:
           CERT_PREPARING
@@ -128,6 +129,7 @@ properties:
                     output: true
                   - name: checkError
                     type: NestedObject
+                    output: true
                     description: |-
                       The `Status` type defines a logical error model that is suitable for
                       different programming environments, including REST APIs and RPC APIs. It is
@@ -140,14 +142,17 @@ properties:
                       - name: code
                         type: Integer
                         description: The status code, which should be an enum value of google.rpc.Code.
+                        output: true
                       - name: message
                         type: String
+                        output: true
                         description: |-
                           A developer-facing error message, which should be in English. Any
                           user-facing error message should be localized and sent in the
                           google.rpc.Status.details field, or localized by the client.
                       - name: details
                         type: String
+                        output: true
                         description: |
                           A list of messages that carry the error details.
                         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
@@ -222,6 +227,7 @@ properties:
                     output: true
                   - name: checkError
                     type: NestedObject
+                    output: true
                     description: |-
                       The `Status` type defines a logical error model that is suitable for
                       different programming environments, including REST APIs and RPC APIs. It is
@@ -233,15 +239,18 @@ properties:
                     properties:
                       - name: code
                         type: Integer
+                        output: true
                         description: The status code, which should be an enum value of google.rpc.Code.
                       - name: message
                         type: String
+                        output: true
                         description: |-
                           A developer-facing error message, which should be in English. Any
                           user-facing error message should be localized and sent in the
                           google.rpc.Status.details field, or localized by the client.
                       - name: details
                         type: String
+                        output: true
                         description: |
                           A list of messages that carry the error details.
                         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
@@ -316,15 +325,18 @@ properties:
           properties:
             - name: code
               type: Integer
+              output: true
               description: The status code, which should be an enum value of google.rpc.Code.
             - name: message
               type: String
+              output: true
               description: |-
                 A developer-facing error message, which should be in English. Any
                 user-facing error message should be localized and sent in the
                 google.rpc.Status.details field, or localized by the client.
             - name: details
               type: String
+              output: true
               description: |
                 A list of messages that carry the error details.
               state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
@@ -334,6 +346,7 @@ properties:
                 function: 'validation.StringIsJSON'
       - name: hostState
         type: String
+        output: true
         description: |-
           Possible values:
           HOST_UNHOSTED
@@ -344,6 +357,7 @@ properties:
           HOST_ACTIVE
       - name: ownershipState
         type: String
+        output: true
         description: |-
           Possible values:
           OWNERSHIP_MISSING
