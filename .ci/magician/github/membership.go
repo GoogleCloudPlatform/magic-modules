@@ -50,12 +50,18 @@ func (gh *Client) GetUserType(user string) UserType {
 		return CoreContributorUserType
 	}
 
-	if isOrgMember(user, "GoogleCloudPlatform", gh.token) {
+	if gh.IsTeamMember("GoogleCloudPlatform", "terraform", user) {
+		fmt.Printf("Debug test --- User '%s' is an active member of the 'terraform' team in 'GoogleCloudPlatform' organization\n", user)
+	} else {
+		fmt.Printf("Debug test --- User '%s' is not an active member of the 'terraform' team in 'GoogleCloudPlatform' organization\n", user)
+	}
+
+	if gh.IsOrgMember(user, "GoogleCloudPlatform") {
 		fmt.Println("User is a GCP org member")
 		return GooglerUserType
 	}
 
-	if isOrgMember(user, "googlers", gh.token) {
+	if gh.IsOrgMember(user, "googlers") {
 		fmt.Println("User is a googlers org member")
 		return GooglerUserType
 	}
@@ -72,13 +78,6 @@ func IsCoreContributor(user string) bool {
 func IsCoreReviewer(user string) bool {
 	_, isCoreReviewer := reviewerRotation[user]
 	return isCoreReviewer
-}
-
-func isOrgMember(author, org, githubToken string) bool {
-	url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, author)
-	err := utils.RequestCallWithRetry(url, "GET", githubToken, nil, nil)
-
-	return err == nil
 }
 
 // GetRandomReviewer returns a random available reviewer (optionally excluding some people from the reviewer pool)

@@ -145,3 +145,28 @@ func (gh *Client) GetTeamMembers(organization, team string) ([]User, error) {
 	}
 	return members, nil
 }
+
+func (gh *Client) IsOrgMember(author, org string) bool {
+	url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, author)
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, nil, nil)
+	return err == nil
+}
+
+func (gh *Client) IsTeamMember(organization, teamSlug, username string) bool {
+	type TeamMembership struct {
+		URL   string `json:"url"`
+		Role  string `json:"role"`
+		State string `json:"state"`
+	}
+
+	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/memberships/%s", organization, teamSlug, username)
+	var membership TeamMembership
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, &membership, nil)
+
+	if err != nil {
+		return false
+	}
+
+	// User is considered a member if state is "active"
+	return membership.State == "active"
+}
