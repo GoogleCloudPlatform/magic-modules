@@ -106,7 +106,7 @@ func TestAccVPCAccessConnector_vpcAccessConnectorUpdateOnlyMinInstancesCauseUpda
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_vpc_access_connector.connector", "machine_type", "e2-standard-4"),
 					resource.TestCheckResourceAttr("google_vpc_access_connector.connector", "min_instances", "3"),
-					resource.TestCheckResourceAttr("google_vpc_access_connector.connector", "max_instances", "3"),
+					resource.TestCheckResourceAttr("google_vpc_access_connector.connector", "max_instances", "4"),
 				),
 			},
 			{
@@ -242,7 +242,7 @@ resource "google_vpc_access_connector" "connector" {
   }
   machine_type = "e2-standard-4"
   min_instances = 2
-  max_instances = 3
+  max_instances = 4
   region        = "us-central1"
 }
 
@@ -269,7 +269,7 @@ resource "google_vpc_access_connector" "connector" {
   }
   machine_type = "e2-standard-4"
   min_instances = 3
-  max_instances = 3
+  max_instances = 4
   region        = "us-central1"
 }
 
