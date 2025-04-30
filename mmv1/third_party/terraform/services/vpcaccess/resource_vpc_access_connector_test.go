@@ -76,6 +76,48 @@ func TestAccVPCAccessConnector_vpcAccessConnectorUpdateAllMutableFieldsCauseUpda
 	})
 }
 
+func TestAccVPCAccessConnector_vpcAccessConnectorUpdateOnlyMinInstancesCauseUpdateInPlace(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckVPCAccessConnectorDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVPCAccessConnector_vpcAccessConnectorThroughput(context),
+			},
+			{
+				ResourceName:      "google_vpc_access_connector.connector",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccVPCAccessConnector_vpcAccessConnectorUpdateOnlyMinInstances(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_vpc_access_connector.connector", plancheck.ResourceActionUpdate),
+					},
+				},
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_vpc_access_connector.connector", "machine_type", "e2-standard-4"),
+					resource.TestCheckResourceAttr("google_vpc_access_connector.connector", "min_instances", "3"),
+					resource.TestCheckResourceAttr("google_vpc_access_connector.connector", "max_instances", "3"),
+				),
+			},
+			{
+				ResourceName:      "google_vpc_access_connector.connector",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func TestAccVPCAccessConnector_vpcAccessConnectorUpdateImmutableFieldCauseReplace(t *testing.T) {
 	t.Parallel()
 
@@ -200,6 +242,33 @@ resource "google_vpc_access_connector" "connector" {
   }
   machine_type = "e2-standard-4"
   min_instances = 2
+  max_instances = 3
+  region        = "us-central1"
+}
+
+resource "google_compute_subnetwork" "custom_test" {
+  name          = "tf-test-vpc-con%{random_suffix}"
+  ip_cidr_range = "10.2.0.0/28"
+  region        = "us-central1"
+  network       = google_compute_network.custom_test.id
+}
+
+resource "google_compute_network" "custom_test" {
+  name                    = "tf-test-vpc-con%{random_suffix}"
+  auto_create_subnetworks = false
+}
+`, context)
+}
+
+func testAccVPCAccessConnector_vpcAccessConnectorUpdateOnlyMinInstances(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vpc_access_connector" "connector" {
+  name          = "tf-test-vpc-con%{random_suffix}"
+  subnet {
+    name = google_compute_subnetwork.custom_test.name
+  }
+  machine_type = "e2-standard-4"
+  min_instances = 3
   max_instances = 3
   region        = "us-central1"
 }
