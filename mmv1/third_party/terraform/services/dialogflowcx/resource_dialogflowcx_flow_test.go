@@ -390,6 +390,7 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
     display_name      = "datastore-flow-update"
     industry_vertical = "GENERIC"
     content_config    = "NO_CONTENT"
+    solution_types    = ["SOLUTION_TYPE_CHAT"]
   }
 
   data "google_project" "project" {
