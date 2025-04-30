@@ -133,8 +133,7 @@ properties:
           required: true
           validation:
             function: AspectProjectNumberValidation
-
-            description: |
+          description: |
               Depending on how the aspect is attached to the entry, the format of the aspect key can be one of the following:
 
               If the aspect is attached directly to the entry: {project_number}.{locationId}.{aspectTypeId}
