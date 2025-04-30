@@ -24,11 +24,15 @@ func ResourceConverterProject() cai.ResourceConverter {
 func GetProjectAndBillingInfoCaiObjects(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
 	if projectAsset, err := GetProjectCaiObject(d, config); err == nil {
 		assets := []caiasset.Asset{projectAsset}
-		if billingAsset, err := GetProjectBillingInfoCaiObject(d, config); err == nil {
-			assets = append(assets, billingAsset)
+		if _, ok := d.GetOk("billing_account"); !ok {
 			return assets, nil
 		} else {
-			return []caiasset.Asset{}, err
+			if billingAsset, err := GetProjectBillingInfoCaiObject(d, config); err == nil {
+				assets = append(assets, billingAsset)
+				return assets, nil
+			} else {
+				return []caiasset.Asset{}, err
+			}
 		}
 	} else {
 		return []caiasset.Asset{}, err
@@ -135,10 +139,6 @@ func GetProjectBillingInfoCaiObject(d tpgresource.TerraformResourceData, config 
 }
 
 func GetProjectBillingInfoData(d tpgresource.TerraformResourceData, project string) (map[string]interface{}, error) {
-	if _, ok := d.GetOk("billing_account"); !ok {
-		return nil, cai.ErrNoConversion
-	}
-
 	ba := &cloudbilling.ProjectBillingInfo{
 		BillingAccountName: fmt.Sprintf("billingAccounts/%s", d.Get("billing_account")),
 		Name:               fmt.Sprintf("projects/%s/billingInfo", project),

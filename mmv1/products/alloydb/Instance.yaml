@@ -363,6 +363,7 @@ properties:
                 The network attachment must be in the same region as the instance.
   - name: 'networkConfig'
     type: NestedObject
+    default_from_api: true
     description: |
       Instance level network configuration.
     properties:
