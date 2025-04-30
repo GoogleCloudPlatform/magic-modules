@@ -32,7 +32,7 @@ func DataSourceGoogleStorageBucketObjectContent() *schema.Resource {
 		Required:    false,
 	}
 
-	dsSchema["output_sha512"] = &schema.Schema{
+	dsSchema["content_hexsha512"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "SHA512 checksum of object content.",
 		Computed:    true,
@@ -40,7 +40,7 @@ func DataSourceGoogleStorageBucketObjectContent() *schema.Resource {
 		Required:    false,
 	}
 
-	dsSchema["output_base64sha512"] = &schema.Schema{
+	dsSchema["content_base64sha512"] = &schema.Schema{
 		Type:        schema.TypeString,
 		Description: "Base64 encoded SHA512 checksum of object content.",
 		Computed:    true,
@@ -92,11 +92,11 @@ func dataSourceGoogleStorageBucketObjectContentRead(d *schema.ResourceData, meta
 	}
 
 	sha512Sum := sha512.Sum512(objectBytes)
-	if err := d.Set("output_sha512", hex.EncodeToString(sha512Sum[:])); err != nil {
+	if err := d.Set("content_hexsha512", hex.EncodeToString(sha512Sum[:])); err != nil {
 		return fmt.Errorf("Error setting output_sha512: %s", err)
 	}
 
-	if err := d.Set("output_base64sha512", base64.StdEncoding.EncodeToString(sha512Sum[:])); err != nil {
+	if err := d.Set("content_base64sha512", base64.StdEncoding.EncodeToString(sha512Sum[:])); err != nil {
 		return fmt.Errorf("Error setting output_base64sha512: %s", err)
 	}
 
