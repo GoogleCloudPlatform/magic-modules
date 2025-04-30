@@ -8,11 +8,8 @@ weight: 30
 
 ### `make` / `make provider`
 
-Generates the code for the downstream `google` and `google-beta` providers.
-By default, when generating a full provider (without `PRODUCT` specified), this
-command will first run validation and then clean the `OUTPUT_PATH` directory of
-previously generated files (preserving `.git`, `examples/`, etc.) before generating
-new code, unless the `SKIP_CLEAN` variable is set to `true`. See `SKIP_CLEAN` and `PRODUCT` arguments below for details.
+Generates the code for the downstream `google` and `google-beta` providers
+into the `OUTPUT_PATH`, overriding and deleting any local changes.
 
 {{< hint info >}}
 **Note:** Generation works best if the downstream provider has a commit checked out corresponding to the latest `main` branch commit that is present in your `magic-modules` working branch. This can generally be identified based on matching commit messages.
