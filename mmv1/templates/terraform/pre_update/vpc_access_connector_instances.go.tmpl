@@ -1,5 +1,3 @@
-newUpdateMask := []string{}
-
 if d.HasChange("min_instances") && !d.HasChange("max_instances") {
     obj["maxInstances"] = d.Get("max_instances").(int)
     updateMask = append(updateMask, "maxInstances", "minInstances")
