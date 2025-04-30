@@ -68,6 +68,7 @@ func testAccInsightsView(context map[string]interface{}) string {
 	
 	resource "google_contact_center_insights_view" "default" {
 	  	project = google_project.project.project_id
+		location = "us-central1"
 		display_name = "test-view"
 		create_time = "2024-01-01T00:00:00Z"
 		update_time = "2024-01-01T00:00:00Z"
@@ -79,6 +80,7 @@ func testAccInsightsView(context map[string]interface{}) string {
 func testAccContactCenterInsightsView_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_contact_center_ai_insights_view" "full_view" {
+  location = "us-central1"
   display_name = "view-display-name-%{random_suffix}"
   create_time = "2025-01-01T00:00:00Z"
   update_time = "2025-01-01T00:00:00Z"
@@ -90,6 +92,7 @@ resource "google_contact_center_ai_insights_view" "full_view" {
 func testAccContactCenterInsightsView_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_contact_center_ai_insights_view" "full_view" {
+  location = "us-central1"
   display_name = "view-display-name-%{random_suffix}-updated"
   create_time = "2025-01-02T00:00:00Z"
   update_time = "2025-01-02T00:00:00Z"

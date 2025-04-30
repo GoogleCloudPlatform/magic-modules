@@ -30,10 +30,12 @@ examples:
     primary_resource_id: 'basic_view'
     vars:
       resource_name: 'basic_view'
+      location_name: 'us-central1'
   - name: 'contact_center_insights_view_full'
     primary_resource_id: 'full_view'
     vars:
       resource_name: 'full_view'
+      location_name: 'us-central1'
 parameters:
   - name: location
     type: String
