@@ -31,7 +31,7 @@ func testAccMemorystoreInstanceDatasourceConfig(context map[string]interface{}) 
 	return acctest.Nprintf(`
 resource "google_memorystore_instance" "instance-basic" {
   instance_id                 = "tf-test-memorystore-instance%{random_suffix}"
-  shard_count                 = 3
+  shard_count                 = 1
   desired_psc_auto_connections {
     network                   = google_compute_network.producer_net.id
     project_id                = data.google_project.project.project_id
@@ -52,7 +52,6 @@ resource "google_network_connectivity_service_connection_policy" "default" {
     subnetworks               = [google_compute_subnetwork.producer_subnet.id]
   }
 }
-
 
 resource "google_compute_subnetwork" "producer_subnet" {
 	name                      = "%{network_name}-sn"

@@ -104,6 +104,8 @@ virtual_fields:
     description: "Please use desired_auto_created_endpoints "
     type: Array
     immutable: true
+    conflicts:
+      - desired_auto_created_endpoints
     item_type:
       type: NestedObject
       properties:
@@ -124,6 +126,8 @@ virtual_fields:
       endpoints connections. "
     type: Array
     immutable: true
+    conflicts:
+      - desired_psc_auto_connections
     item_type:
       type: NestedObject
       properties:
