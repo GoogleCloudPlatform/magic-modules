@@ -24,7 +24,7 @@ provider changes to the `google` and `google-beta` Terraform providers.
   + [Adding custom resource code]({{< ref "/develop/custom-code" >}}).
   + [Promoting a resource to GA]({{< ref "/develop/promote-to-ga" >}}).
 
-**Note on Default Behavior:** By default, running a full `make provider` command now cleans the output directory (`OUTPUT_PATH`) before generating code to prevent sync issues. Use `SKIP_CLEAN=true` to bypass this. Specifying `PRODUCT=...` also skips the clean; this is considered **advanced usage**, and it's recommended to run a full, clean build beforehand if your repositories might be out of sync. See the [`make` commands reference]({{< ref "/reference/make-commands" >}}) for details.
+By default, running a full `make provider` command cleans the output directory (`OUTPUT_PATH`) before generating code to prevent sync issues. This will override and delete any changes to that directory. See the [`make` commands reference]({{< ref "/reference/make-commands" >}}) for details on advanced usage.
 
 ## Generate a provider change
 
