@@ -375,25 +375,8 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
           }
         }
       }
-      data_store_connections {
-        data_store_type = "UNSTRUCTURED"
-        data_store = "projects/${data.google_project.project.number}/locations/${google_dialogflow_cx_agent.agent_entity.location}/collections/default_collection/dataStores/${google_discovery_engine_data_store.my_datastore.data_store_id}"
-        document_processing_mode = "DOCUMENTS"
-      }
       target_flow = google_dialogflow_cx_agent.agent_entity.start_flow
     }
-  }
-
-  resource "google_discovery_engine_data_store" "my_datastore" {
-    location          = "global"
-    data_store_id     = "datastore-flow-update%{random_suffix}"
-    display_name      = "datastore-flow-update"
-    industry_vertical = "GENERIC"
-    content_config    = "NO_CONTENT"
-    solution_types    = ["SOLUTION_TYPE_CHAT"]
-  }
-
-  data "google_project" "project" {
   }
 `, context)
 }
