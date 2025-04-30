@@ -51,10 +51,9 @@ func (gh *Client) GetUserType(user string) UserType {
 	}
 
 	if gh.IsTeamMember("GoogleCloudPlatform", "terraform", user) {
-		fmt.Println("User is an active member of the 'terraform' team in 'GoogleCloudPlatform' organization")
-		return GooglerUserType
+		fmt.Printf("Debug test --- User '%s' is an active member of the 'terraform' team in 'GoogleCloudPlatform' organization\n", user)
 	} else {
-		fmt.Printf("User '%s' is not an active member of the 'terraform' team in 'GoogleCloudPlatform' organization\n", user)
+		fmt.Printf("Debug test --- User '%s' is not an active member of the 'terraform' team in 'GoogleCloudPlatform' organization\n", user)
 	}
 
 	if gh.IsOrgMember(user, "GoogleCloudPlatform") {
