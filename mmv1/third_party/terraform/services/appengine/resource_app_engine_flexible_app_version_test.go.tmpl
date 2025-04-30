@@ -79,14 +79,14 @@ resource "google_project_service" "appengineflex" {
 
 resource "google_service_account" "custom_service_account" {
   provider = google-beta
-  project      = google_project_service.service.project
-  account_id   = "{{index $.Vars "account_id"}}"
+  project      = google_project_service.appengineflex.project
+  account_id   = "my-account"
   display_name = "Custom Service Account"
 }
 
 resource "google_project_iam_member" "editor" {
   provider = google-beta
-  project = google_project_service.service.project
+  project = google_project_service.appengineflex.project
   role    = "roles/editor"
   member  = "serviceAccount:${google_service_account.custom_service_account.email}"
 }
@@ -284,14 +284,14 @@ resource "google_project_service" "appengineflex" {
 
 resource "google_service_account" "custom_service_account" {
   provider = google-beta
-  project      = google_project_service.service.project
-  account_id   = "{{index $.Vars "account_id"}}"
+  project      = google_project_service.appengineflex.project
+  account_id   = "my-account"
   display_name = "Custom Service Account"
 }
 
 resource "google_project_iam_member" "editor" {
   provider = google-beta
-  project = google_project_service.service.project
+  project = google_project_service.appengineflex.project
   role    = "roles/editor"
   member  = "serviceAccount:${google_service_account.custom_service_account.email}"
 }
