@@ -129,4 +129,5 @@ resource "google_dataplex_entry" "{{$.PrimaryResourceId}}" {
         EOF
     }
   }
+ depends_on = [google_dataplex_aspect_type.{{index $.Vars "aspect_type_name"}}-two, google_dataplex_aspect_type.{{index $.Vars "aspect_type_name"}}-one]
 }

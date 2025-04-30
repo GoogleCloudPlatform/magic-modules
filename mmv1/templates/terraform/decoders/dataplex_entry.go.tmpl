@@ -1,3 +1,11 @@
+aspects := res["aspects"]
+if aspects != nil {
+	_, errors := NumberOfAspectsValidation(aspects, "aspects")
+	if len(errors) > 0 {
+		return nil, errors[0]
+	}
+}
+
 aspectKeysOfInterest := make(map[string]struct{})
 if d.HasChange("aspects") {
 	currentAspects, futureAspects := d.GetChange("aspects")

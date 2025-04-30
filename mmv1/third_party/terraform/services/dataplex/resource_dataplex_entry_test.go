@@ -1,6 +1,7 @@
 package dataplex_test
 
 import (
+	"fmt"
 	"reflect"
 	"sort"
 	"strings"
@@ -12,6 +13,70 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	dataplex "github.com/hashicorp/terraform-provider-google/google/services/dataplex"
 )
+
+func TestNumberOfAspectsValidation(t *testing.T) {
+	fieldName := "aspects"
+	numbers_100 := make([]interface{}, 100)
+	for i := 0; i < 100; i++ {
+		numbers_100[i] = i
+	}
+	numbers_99 := make([]interface{}, 99)
+	for i := 0; i < 99; i++ {
+		numbers_99[i] = i
+	}
+	numbers_empty := make([]interface{}, 0)
+	map_100 := make(map[string]interface{}, 100)
+	for i := 0; i < 100; i++ {
+		key := fmt.Sprintf("key%d", i)
+		map_100[key] = i
+	}
+	map_99 := make(map[string]interface{}, 99)
+	for i := 0; i < 99; i++ {
+		key := fmt.Sprintf("key%d", i)
+		map_99[key] = i
+	}
+	map_empty := make(map[string]interface{}, 0)
+
+	testCases := []struct {
+		name        string
+		input       interface{}
+		expectError bool
+		errorMsg    string
+	}{
+		{"too many aspects in a slice", numbers_100, true, "The maximal number of aspects is 99."},
+		{"max number of aspects in a slice", numbers_99, false, ""},
+		{"min number of aspects in a slice", numbers_empty, false, ""},
+		{"too many aspects in a map", map_100, true, "The maximal number of aspects is 99."},
+		{"max number of aspects in a map", map_99, false, ""},
+		{"min number of aspects in a map", map_empty, false, ""},
+		{"a string is not a valid input", "xelpatad", true, "to be array"},
+		{"nil is not a valid input", nil, true, "to be array"},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, errors := dataplex.NumberOfAspectsValidation(tc.input, fieldName)
+			hasError := len(errors) > 0
+
+			if hasError != tc.expectError {
+				t.Fatalf("%s: NumberOfAspectsValidation() error expectation mismatch: got error = %v (%v), want error = %v", tc.name, hasError, errors, tc.expectError)
+			}
+
+			if tc.expectError && tc.errorMsg != "" {
+				found := false
+				for _, err := range errors {
+					if strings.Contains(err.Error(), tc.errorMsg) { // Check if error message contains the expected substring
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("%s: NumberOfAspectsValidation() expected error containing %q, but got: %v", tc.name, tc.errorMsg, errors)
+				}
+			}
+		})
+	}
+}
 
 func TestProjectNumberValidation(t *testing.T) {
 	fieldName := "some_field"
@@ -556,6 +621,7 @@ resource "google_dataplex_entry" "test_entry_full" {
         EOF
     }
   }
+ depends_on = [google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-two, google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-two]
 }
 `, context)
 }
@@ -697,6 +763,7 @@ resource "google_dataplex_entry" "test_entry_full" {
         EOF
     }
   }
+ depends_on = [google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-two, google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-two]
 }
 `, context)
 }
