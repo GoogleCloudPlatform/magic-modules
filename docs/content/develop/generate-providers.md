@@ -36,29 +36,13 @@ By default, running a full `make provider` command cleans the output directory (
    ```
 1. Generate changes for the `google` provider:
     ```bash
-    # Full Build (Recommended)
     make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
-
-    # Product-Only Build (Advanced - Example: 'compute' product)
-    make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=compute
     ```
-
-    If you have already performed a full, clean build and want to iterate faster on a specific product, you *can* limit generation using `PRODUCT`. This skips the pre-generation cleanup and only generates files related to the specified product (plus common handwritten files).
-      
-    Replace `compute` with the desired product name from the [`mmv1/products`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products) directory.
 
 1. Generate changes for the `google-beta` provider:
     ```bash
-    # Full Build (Recommended)
     make provider VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
-
-    # Product-Only Build (Advanced - Example: 'compute' product)
-    make provider VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta" PRODUCT=compute
     ```
-
-    If you have already performed a full, clean build and want to iterate faster on a specific product, you *can* limit generation using `PRODUCT`. This skips the pre-generation cleanup and only generates files related to the specified product (plus common handwritten files).
-
-   Replace `compute` with the desired product name from the [`mmv1/products`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products) directory.
 
 1. Confirm that the expected changes were generated:
    ```bash
@@ -70,11 +54,8 @@ By default, running a full `make provider` command cleans the output directory (
 
 
    {{< hint info >}}
-   **Note**: There may be additional changes present due to specifying a
-   `PRODUCT=` value or due to the `magic-modules` repository being out of sync
-   with the provider repositories.
+   **Note**: You might see additional changes in your `git diff` output beyond your own. This can happen if your `magic-modules` repository is out of sync with the provider repositories, causing the generator to also apply any pending updates from `magic-modules`.
    {{< /hint >}}
-
 
 ## Troubleshoot
 

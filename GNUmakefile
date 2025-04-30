@@ -82,11 +82,12 @@ tpgtools: serialize
 	@cd tpgtools;\
 		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
 
-clean-provider:
+clean-provider: check_safe_build
 	@if [ -n "$(PRODUCT)" ]; then \
 		printf "\n\e[1;33mWARNING:\e[0m Skipping clean-provider step because PRODUCT ('$(PRODUCT)') is set.\n"; \
-		printf "         Ensure your downstream repository ($(OUTPUT_PATH)) is synchronized with\n"; \
-		printf "         the Magic Modules branch to avoid potential build inconsistencies.\n\n"; \
+		printf "         Ensure your downstream repository is synchronized with the Magic Modules branch\n"; \
+		printf "         to avoid potential build inconsistencies.\n"; \
+		printf "         Downstream repository (OUTPUT_PATH): %s\n\n" "$(OUTPUT_PATH)"; \
 	elif [ "$(SHOULD_SKIP_CLEAN)" = "true" ]; then \
 		printf "\e[1;33mINFO:\e[0m Skipping clean-provider step because SKIP_CLEAN is set to a non-false value ('$(SKIP_CLEAN)').\n"; \
 	else \
@@ -163,11 +164,16 @@ upgrade-dcl:
 		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod; echo "$$SUM_LINE" >> go.sum
 
 
-validate_environment:
+validate_environment: check_parameters check_safe_build
+
+check_parameters:
 # only print doctor script to console if there was a dependency failure detected.
 	@./scripts/doctor 2>&1 > /dev/null || ./scripts/doctor
-	@[ -d "$(OUTPUT_PATH)" ] || (printf " \e[1;31mERROR: directory '$(OUTPUT_PATH)' does not exist - ENV variable \033[0mOUTPUT_PATH\e[1;31m should be set to a provider directory. \033[0m \n" && exit 1);
-	@[ -n "$(VERSION)" ] || (printf " \e[1;31mERROR: version '$(VERSION)' does not exist - ENV variable \033[0mVERSION\e[1;31m should be set to ga or beta \033[0m \n" && exit 1);
+	@[ -d "$(OUTPUT_PATH)" ] || (printf "\n\e[1;31mERROR: directory '$(OUTPUT_PATH)' does not exist - ENV variable \033[0mOUTPUT_PATH\e[1;31m should be set to a provider directory. \033[0m \n\n" && exit 1);
+	@[ -n "$(VERSION)" ] || (printf "\n\e[1;31mERROR: version '$(VERSION)' does not exist - ENV variable \033[0mVERSION\e[1;31m should be set to ga or beta \033[0m \n\n" && exit 1);
+
+
+check_safe_build:
 	@if [ "$(UNSAFE_BUILD)" = "true" ]; then \
 		printf "\e[1;33mWARNING:\e[0m UNSAFE_BUILD=true, skipping OUTPUT_PATH go.mod validation.\n"; \
 	else \
