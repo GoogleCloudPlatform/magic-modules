@@ -14,6 +14,8 @@ if d.HasChange("aspects") {
 		aspectKeysArray = append(aspectKeysArray, key)
 	}
 
+	sort.Strings(aspectKeysArray)
+
 	url, err = transport_tpg.AddArrayQueryParams(url, "aspectKeys", aspectKeysArray)
 	fmt.Println("NEW URL: ", url)
 	if err != nil {
