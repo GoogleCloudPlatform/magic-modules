@@ -13,6 +13,8 @@
 
 ---
 name: 'Batch'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/batches/{batch}'
 description: |
   Dataproc Serverless Batches lets you run Spark workloads without requiring you to
   provision and manage your own Dataproc cluster.

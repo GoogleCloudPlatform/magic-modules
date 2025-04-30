@@ -260,6 +260,27 @@ properties:
         description: |
           Description for the destination volume.
         immutable: true
+      - name: 'tieringPolicy'
+        type: NestedObject
+        description: |-
+          Tiering policy for the volume.
+        update_mask_fields:
+          - 'tiering_policy.cooling_threshold_days'
+          - 'tiering_policy.tier_action'
+        properties:
+          - name: 'coolingThresholdDays'
+            type: Integer
+            description: |
+              Optional. Time in days to mark the volume's data block as cold and make it eligible for tiering, can be range from 2-183.
+              Default is 31.
+          - name: 'tierAction'
+            type: Enum
+            description: |
+              Optional. Flag indicating if the volume has tiering policy enable/pause. Default is PAUSED.
+            default_value: "PAUSED"
+            enum_values:
+              - 'ENABLED'
+              - 'PAUSED'
   - name: 'sourceVolume'
     type: String
     description: |

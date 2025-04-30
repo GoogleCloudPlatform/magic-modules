@@ -14,14 +14,13 @@
 ---
 name: RuleDeployment
 description: The RuleDeployment resource represents the deployment state of a Rule.
-min_version: 'beta'
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/RuleDeployment'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/RuleDeployment'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rules}}/deployments
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
-create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment?updateMask=enabled,alerting,archived,runFrequency
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
 id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/deployment
@@ -29,11 +28,24 @@ create_verb: PATCH
 update_verb: PATCH
 update_mask: true
 exclude_delete: true
+autogen_status: UnVsZURlcGxveW1lbnQ=
+
+custom_code:
+  constants: 'templates/terraform/constants/chronicle_rule_deployment.go.tmpl'
+  custom_create: 'templates/terraform/custom_create/chronicle_rule_deployment.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/chronicle_rule_deployment.go.tmpl'
 
 examples:
   - name: 'chronicle_ruledeployment_basic'
     primary_resource_id: 'example'
-    min_version: 'beta'
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+  - name: 'chronicle_ruledeployment_disabled'
+    primary_resource_id: 'example'
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+  - name: 'chronicle_ruledeployment_run_frequency_missing'
+    primary_resource_id: 'example'
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
 
@@ -79,7 +91,9 @@ properties:
     type: Boolean
     description: |-
       The archive state of the rule deployment.
-      Cannot be set to true unless enabled is set to false.
+      Cannot be set to true unless enabled is set to false i.e.
+      archiving requires a two-step process: first, disable the rule by
+      setting 'enabled' to false, then set 'archive' to true.
       If set to true, alerting will automatically be set to false.
       If currently set to true, enabled, alerting, and run_frequency cannot be
       updated.
@@ -90,6 +104,7 @@ properties:
     output: true
   - name: runFrequency
     type: String
+    diff_suppress_func: 'chronicleRuleDeploymentNilRunFrequencyDiffSuppressFunc'
     description: |2-
 
       The run frequency of the rule deployment.

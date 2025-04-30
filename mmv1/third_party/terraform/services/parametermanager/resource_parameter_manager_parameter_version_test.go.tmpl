@@ -1,5 +1,4 @@
 package parametermanager_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -17,7 +16,7 @@ func TestAccParameterManagerParameterVersion_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckParameterManagerParameterVersionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -54,12 +53,10 @@ func TestAccParameterManagerParameterVersion_update(t *testing.T) {
 func testAccParameterManagerParameterVersion_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_parameter_manager_parameter" "parameter-update" {
-  provider = google-beta
   parameter_id = "tf_test_parameter%{random_suffix}"
 }
 
 resource "google_parameter_manager_parameter_version" "parameter-version-update" {
-  provider = google-beta
   parameter = google_parameter_manager_parameter.parameter-update.id
   parameter_version_id = "tf_test_parameter_version%{random_suffix}"
   parameter_data = "parameter-version-data"
@@ -70,12 +67,10 @@ resource "google_parameter_manager_parameter_version" "parameter-version-update"
 func testAccParameterManagerParameterVersion_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_parameter_manager_parameter" "parameter-update" {
-  provider = google-beta
   parameter_id = "tf_test_parameter%{random_suffix}"
 }
 
 resource "google_parameter_manager_parameter_version" "parameter-version-update" {
-  provider = google-beta
   parameter = google_parameter_manager_parameter.parameter-update.id
   parameter_version_id = "tf_test_parameter_version%{random_suffix}"
   parameter_data = "parameter-version-data"
@@ -83,5 +78,3 @@ resource "google_parameter_manager_parameter_version" "parameter-version-update"
 }
 `, context)
 }
-
-{{ end }}

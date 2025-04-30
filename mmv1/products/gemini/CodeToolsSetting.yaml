@@ -1,0 +1,104 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: CodeToolsSetting
+description: The resource for managing CodeTools settings for Admin Control.
+base_url: projects/{{project}}/locations/{{location}}/codeToolsSettings
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_tools_setting_id}}
+create_url: projects/{{project}}/locations/{{location}}/codeToolsSettings?codeToolsSettingId={{code_tools_setting_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_tools_setting_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_tools_setting_id}}
+mutex: projects/{{project}}/locations/{{location}}/codeToolsSettings/{{code_tools_setting_id}}
+sweeper:
+  url_substitutions:
+    - region: "global"
+examples:
+  - name: gemini_code_tools_setting_basic
+    primary_resource_id: example
+    exclude_test: true
+    vars:
+      code_tools_setting_id: ls1-tf
+autogen_async: false
+autogen_status: RGF0YVNoYXJpbmdXaXRoR29vZ2xlU2V0dGluZw==
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+  - name: codeToolsSettingId
+    type: String
+    description: |-
+      Id of the Code Tools Setting.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    description: |-
+      Identifier. Name of the resource.
+      Format:projects/{project}/locations/{location}/codeToolsSettings/{codeToolsSetting}
+    output: true
+  - name: createTime
+    type: String
+    description: Create time stamp.
+    output: true
+  - name: updateTime
+    type: String
+    description: Update time stamp.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key value pairs.
+  - name: enabledTool
+    type: Array
+    description: Represents the full set of enabled tools.
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: accountConnector
+          type: String
+          description: |-
+            Link to the Dev Connect Account Connector that holds the user credentials.
+            projects/{project}/locations/{location}/accountConnectors/{account_connector_id}
+        - name: handle
+          type: String
+          description: Handle used to invoke the tool.
+          required: true
+        - name: tool
+          type: String
+          description: Link to the Tool
+          required: true
+        - name: config
+          type: Array
+          description: Configuration parameters for the tool.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: key
+                type: String
+                description: Key of the configuration item.
+                required: true
+              - name: value
+                type: String
+                description: Value of the configuration item.
+                required: true
+        - name: uriOverride
+          type: String
+          description: Overridden URI, if allowed by Tool.

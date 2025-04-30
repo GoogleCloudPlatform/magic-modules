@@ -293,7 +293,7 @@ properties:
       - name: 'sourceBackup'
         type: String
         description: |-
-          Full name of the snapshot to use for creating this volume.
+          Full name of the backup to use for creating this volume.
           `source_snapshot` and `source_backup` cannot be used simultaneously.
           Format: `projects/{{project}}/locations/{{location}}/backupVaults/{{backupVaultId}}/backups/{{backup}}`.
         immutable: true
@@ -511,7 +511,7 @@ properties:
       - name: 'coolingThresholdDays'
         type: Integer
         description: |
-          Optional. Time in days to mark the volume's data block as cold and make it eligible for tiering, can be range from 7-183.
+          Optional. Time in days to mark the volume's data block as cold and make it eligible for tiering, can be range from 2-183.
           Default is 31.
       - name: 'tierAction'
         type: Enum

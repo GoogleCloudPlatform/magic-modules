@@ -76,6 +76,9 @@ type Sample struct {
 	// ExtraDependencies are the additional golang dependencies the injected code may require
 	ExtraDependencies []string `yaml:"extra_dependencies"`
 
+	// ExternalProviders are the external providers needed for tests
+	ExternalProviders []string `yaml:"external_providers"`
+
 	// Type is the resource type.
 	Type string `yaml:"type"`
 

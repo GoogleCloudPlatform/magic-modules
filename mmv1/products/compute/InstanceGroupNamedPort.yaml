@@ -14,6 +14,8 @@
 ---
 name: 'InstanceGroupNamedPort'
 api_resource_type_kind: InstanceGroup
+api_variant_patterns:
+  - 'projects/{project}/zones/{zone}/instanceGroups/{instanceGroup}'
 description: |
   Mange the named ports setting for a managed instance group without
   managing the group as whole. This resource is primarily intended for use

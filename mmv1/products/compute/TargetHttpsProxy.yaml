@@ -132,6 +132,7 @@ properties:
     enum_values:
       - 'STRICT'
       - 'PERMISSIVE'
+      - 'UNRESTRICTED'
       - 'DISABLED'
   - name: 'certificateManagerCertificates'
     type: Array

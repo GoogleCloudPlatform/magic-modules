@@ -13,6 +13,11 @@
 
 ---
 name: 'LogView'
+api_variant_patterns:
+  - 'billingAccounts/{billingAccount}/locations/{location}/buckets/{bucket}/views/{view}'
+  - 'folders/{folder}/locations/{location}/buckets/{bucket}/views/{view}'
+  - 'organizations/{organization}/locations/{location}/buckets/{bucket}/views/{view}'
+  - 'projects/{project}/locations/{location}/buckets/{bucket}/views/{view}'
 description: 'Describes a view over log entries in a bucket.'
 references:
   guides:

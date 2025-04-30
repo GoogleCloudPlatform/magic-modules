@@ -13,7 +13,7 @@
 
 ---
 name: Apihub
-display_name: API hub
+display_name: "API Hub"
 scopes:
   - https://www.googleapis.com/auth/cloud-platform
 versions:

@@ -13,6 +13,8 @@
 
 ---
 name: 'HealthCheck'
+api_variant_patterns:
+  - 'projects/{project}/global/healthChecks/{healthCheck}'
 kind: 'compute#healthCheck'
 description: |
   Health Checks determine whether instances are responsive and able to do work.
@@ -54,6 +56,9 @@ custom_code:
   encoder: 'templates/terraform/encoders/health_check_type.tmpl'
 custom_diff:
   - 'healthCheckCustomizeDiff'
+sweeper:
+  dependencies:
+    - "google_compute_subnetwork"
 examples:
   - name: 'health_check_tcp'
     primary_resource_id: 'tcp-health-check'

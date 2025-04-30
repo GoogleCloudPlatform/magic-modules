@@ -9,6 +9,7 @@ resource "google_network_security_intercept_deployment_group" "{{$.PrimaryResour
   intercept_deployment_group_id = "{{index $.Vars "deployment_group_id"}}"
   location                      = "global"
   network                       = google_compute_network.network.id
+  description                   = "some description"
   labels = {
     foo = "bar"
   }

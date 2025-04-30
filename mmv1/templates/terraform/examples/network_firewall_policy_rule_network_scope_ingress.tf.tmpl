@@ -1,10 +1,12 @@
 resource "google_compute_network_firewall_policy" "basic_network_firewall_policy" {
+  provider = google-beta
   name        = "{{index $.Vars "fw_policy"}}"
   description = "Sample global network firewall policy"
   project     = "{{index $.TestEnvVars "project_name"}}"
 }
 
 resource "google_compute_network_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
   action          = "allow"
   description     = "This is a simple rule description"
   direction       = "INGRESS"
@@ -26,5 +28,6 @@ resource "google_compute_network_firewall_policy_rule" "{{$.PrimaryResourceId}}"
 }
 
 resource "google_compute_network" "network" {
+  provider = google-beta
   name     = "{{index $.Vars "network"}}"
 }

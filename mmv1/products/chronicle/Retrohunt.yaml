@@ -14,11 +14,10 @@
 ---
 name: Retrohunt
 description: Retrohunt is an execution of a Rule over a time range in the past.
-min_version: 'beta'
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.rules.retrohunts'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.rules.retrohunts'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts/{{retrohunt}}
@@ -27,14 +26,13 @@ id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/ru
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts/{{retrohunt}}
 exclude_delete: true
+autogen_status: UmV0cm9odW50
 
 custom_code:
-  decoder: 'templates/terraform/decoders/chronicle_retrohunt.go.tmpl'
   post_create: 'templates/terraform/post_create/chronicle_retrohunt_id.go.tmpl'
 examples:
   - name: 'chronicle_retrohunt_basic'
     primary_resource_id: example
-    min_version: 'beta'
     exclude_import_test: true
     skip_vcr: true
     vars:
@@ -50,13 +48,11 @@ async:
   actions: [create]
   type: OpAsync
   operation:
-    full_url: 'https://{{location}}-chronicle.googleapis.com/v1beta/{{op_id}}'
+    full_url: 'https://{{location}}-chronicle.googleapis.com/v1/{{op_id}}'
     timeouts:
       insert_minutes: 20
       update_minutes: 20
       delete_minutes: 20
-  result:
-    resource_inside_response: true
 exclude_sweeper: true
 parameters:
   - name: location
@@ -78,6 +74,7 @@ parameters:
     type: String
     description: The retrohunt ID of the Retrohunt. A retrohunt is an execution of a Rule over a time range in the past.
     default_from_api: true
+    custom_flatten: "templates/terraform/custom_flatten/id_from_name.tmpl"
 properties:
   - name: progressPercentage
     type: Double

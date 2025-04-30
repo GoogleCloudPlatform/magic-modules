@@ -13,11 +13,16 @@
 
 ---
 name: 'ListingSubscription'
+api_resource_type_kind: Subscription
 description: A Bigquery Analytics Hub listing subscription
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
   api: 'https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.subscriptions'
+docs:
+  note: |-
+    When importing the resource with `terraform import`, provide the destination project and location
+    in the format projects/{{destination_project}}/locations/{{destination_location}}/subscriptions/{{subscription_id}}
 base_url: 'projects/{{project}}/locations/{{location}}/subscriptions'
 self_link: 'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}:subscribe'
@@ -25,8 +30,13 @@ immutable: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}'
 custom_code:
-  post_create: templates/terraform/post_create/analytics_hub_subscription.go.tmpl
+  decoder: 'templates/terraform/decoders/bigqueryanalyticshub_listing_subscription.go.tmpl'
+  pre_read: 'templates/terraform/pre_read/bigqueryanalyticshub_listing_subscription.tmpl'
+  pre_delete: 'templates/terraform/pre_read/bigqueryanalyticshub_listing_subscription.tmpl'
   post_import: templates/terraform/post_import/analytics_hub_subscription.go.tmpl
+sweeper:
+  url_substitutions:
+    - region: "US"
 examples:
   - name: 'bigquery_analyticshub_listing_subscription_basic'
     primary_resource_id: 'subscription'
@@ -57,7 +67,7 @@ parameters:
   - name: 'location'
     type: String
     description: |
-      The name of the location for this subscription.
+      The name of the location of the data exchange. Distinct from the location of the destination data set.
     url_param_only: true
     required: true
     custom_flatten: 'templates/terraform/custom_flatten/bigquery_dataset_location.go.tmpl'
@@ -112,7 +122,7 @@ properties:
     description: |-
       The subscription id used to reference the subscription.
     output: true
-    ignore_read: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
   - name: 'creationTime'
     type: Time
     description: |-

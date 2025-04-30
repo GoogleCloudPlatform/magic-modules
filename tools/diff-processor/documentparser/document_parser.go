@@ -7,21 +7,19 @@ import (
 	"strings"
 )
 
-const (
-	nestedNamePattern = `\(#(nested_[a-z0-9_]+)\)`
+var (
+	fieldNameRegex      = regexp.MustCompile("[\\*|-]\\s+`([a-z0-9_\\./]+)`") // * `xxx`
+	nestedObjectRegex   = regexp.MustCompile(`<a\s+name="([a-z0-9_]+)">`)     // <a name="xxx">
+	nestedHashTagRegex  = regexp.MustCompile(`\(#(nested_[a-z0-9_]+)\)`)      // #(nested_xxx)
+	horizontalLineRegex = regexp.MustCompile("- - -|-{3,}")                   // - - - or ---
 
-	itemNamePattern   = "\\* `([a-z0-9_\\./]+)`"
-	nestedLinkPattern = `<a\s+name="([a-z0-9_]+)">`
-
-	sectionSeparator      = "## "
-	nestedObjectSeparator = `<a name="nested_`
-	listItemSeparator     = "* `"
+	sectionSeparator = "## "
 )
 
 // DocumentParser parse *.html.markdown resource doc files.
 type DocumentParser struct {
-	argumentRoot   *node
-	attriibuteRoot *node
+	root        *node
+	nestedBlock map[string]string
 }
 
 type node struct {
@@ -31,15 +29,17 @@ type node struct {
 }
 
 func NewParser() *DocumentParser {
-	return &DocumentParser{}
+	return &DocumentParser{
+		nestedBlock: make(map[string]string),
+	}
 }
 
-func (d *DocumentParser) Arguments() []string {
+func (d *DocumentParser) FlattenFields() []string {
 	var paths []string
 	traverse(
 		&paths,
 		"",
-		d.argumentRoot,
+		d.root,
 	)
 	sort.Strings(paths)
 	return paths
@@ -63,17 +63,6 @@ func traverse(paths *[]string, path string, n *node) {
 	}
 }
 
-func (d *DocumentParser) Attributes() []string {
-	var paths []string
-	traverse(
-		&paths,
-		"",
-		d.attriibuteRoot,
-	)
-	sort.Strings(paths)
-	return paths
-}
-
 // Parse parse a resource document markdown's arguments and attributes section.
 // The parsed file format is defined in mmv1/templates/terraform/resource.html.markdown.tmpl.
 func (d *DocumentParser) Parse(src []byte) error {
@@ -86,51 +75,43 @@ func (d *DocumentParser) Parse(src []byte) error {
 			argument = p
 		}
 	}
-	if len(argument) != 0 {
-		argumentParts := strings.Split(argument, "- - -")
-		for _, part := range argumentParts {
-			n, err := d.parseSection(part)
-			if err != nil {
+	for _, text := range []string{argument, attribute} {
+		if len(text) != 0 {
+			sections := horizontalLineRegex.Split(text, -1)
+			var allTopLevelFieldSections string
+			for _, part := range sections {
+				topLevelPropertySection, err := d.extractNestedObject(part)
+				if err != nil {
+					return err
+				}
+				allTopLevelFieldSections += topLevelPropertySection
+			}
+			root := &node{
+				text: allTopLevelFieldSections,
+			}
+			if err := d.bfs(root, d.nestedBlock); err != nil {
 				return err
 			}
-			if d.argumentRoot == nil {
-				d.argumentRoot = n
+			if d.root == nil {
+				d.root = root
 			} else {
-				d.argumentRoot.children = append(d.argumentRoot.children, n.children...)
+				d.root.children = append(d.root.children, root.children...)
 			}
 		}
-	}
-	if len(attribute) != 0 {
-		n, err := d.parseSection(attribute)
-		if err != nil {
-			return err
-		}
-		d.attriibuteRoot = n
 	}
 	return nil
 }
 
-func (d *DocumentParser) parseSection(input string) (*node, error) {
-	parts := strings.Split(input, "\n"+nestedObjectSeparator)
-	nestedBlock := make(map[string]string)
+func (d *DocumentParser) extractNestedObject(input string) (string, error) {
+	parts := splitWithRegexp(input, nestedObjectRegex)
 	for _, p := range parts[1:] {
-		nestedName, err := findPattern(nestedObjectSeparator+p, nestedLinkPattern)
-		if err != nil {
-			return nil, err
-		}
+		nestedName := findPattern(p, nestedObjectRegex)
 		if nestedName == "" {
-			return nil, fmt.Errorf("could not find nested object name in %s", nestedObjectSeparator+p)
+			return "", fmt.Errorf("could not find nested object name in %s", p)
 		}
-		nestedBlock[nestedName] = p
+		d.nestedBlock[nestedName] = p
 	}
-	// bfs to traverse the first part without nested blocks.
-	root := &node{
-		text: parts[0],
-	}
-	if err := d.bfs(root, nestedBlock); err != nil {
-		return nil, err
-	}
-	return root, nil
+	return parts[0], nil
 }
 
 func (d *DocumentParser) bfs(root *node, nestedBlock map[string]string) error {
@@ -143,24 +124,22 @@ func (d *DocumentParser) bfs(root *node, nestedBlock map[string]string) error {
 		l := len(queue)
 		for _, cur := range queue {
 			// the separator should always at the beginning of the line
-			items := strings.Split(cur.text, "\n"+listItemSeparator)
-			for _, item := range items[1:] {
-				text := listItemSeparator + item
-				itemName, err := findItemName(text)
-				if err != nil {
-					return err
+			parts := splitWithRegexp(cur.text, fieldNameRegex)
+			for _, p := range parts[1:] {
+				p = strings.ReplaceAll(p, "\n", "")
+				fieldName := findPattern(p, fieldNameRegex)
+				if fieldName == "" {
+					return fmt.Errorf("could not find field name in %s", p)
 				}
 				// There is a special case in some hand written resource eg. in compute_instance, where its attributes is in a.0.b.0.c format.
-				itemName = strings.ReplaceAll(itemName, ".0.", ".")
-				nestedName, err := findNestedName(text)
-				if err != nil {
-					return err
-				}
+				fieldName = strings.ReplaceAll(fieldName, ".0.", ".")
 				newNode := &node{
-					name: itemName,
+					name: fieldName,
 				}
 				cur.children = append(cur.children, newNode)
-				if text, ok := nestedBlock[nestedName]; ok {
+
+				nestedHashTag := findPattern(p, nestedHashTagRegex)
+				if text, ok := nestedBlock[nestedHashTag]; ok {
 					newNode.text = text
 					queue = append(queue, newNode)
 				}
@@ -172,31 +151,27 @@ func (d *DocumentParser) bfs(root *node, nestedBlock map[string]string) error {
 	return nil
 }
 
-func findItemName(text string) (name string, err error) {
-	name, err = findPattern(text, itemNamePattern)
-	if err != nil {
-		return "", err
-	}
-	if name == "" {
-		return "", fmt.Errorf("cannot find item name from %s", text)
-	}
-	return
-}
-
-func findPattern(text string, pattern string) (string, error) {
-	re, err := regexp.Compile(pattern)
-	if err != nil {
-		return "", err
-	}
+func findPattern(text string, re *regexp.Regexp) string {
 	match := re.FindStringSubmatch(text)
-
 	if match != nil {
-		return match[1], nil
+		return match[1]
 	}
-	return "", nil
+	return ""
 }
 
-func findNestedName(text string) (string, error) {
-	s := strings.ReplaceAll(text, "\n", "")
-	return findPattern(s, nestedNamePattern)
+func splitWithRegexp(text string, re *regexp.Regexp) []string {
+	matches := re.FindAllStringIndex(text, -1)
+	if len(matches) == 0 {
+		return []string{text}
+	}
+	var parts []string
+	start := 0
+	for _, match := range matches {
+		end := match[0]
+
+		parts = append(parts, text[start:end])
+		start = end
+	}
+	parts = append(parts, text[start:])
+	return parts
 }

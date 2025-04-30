@@ -28,7 +28,8 @@ self_link: 'locations/global/firewallPolicies/{{firewall_policy}}/getAssociation
 create_url: 'locations/global/firewallPolicies/{{firewall_policy}}/addAssociation'
 delete_url: 'locations/global/firewallPolicies/{{firewall_policy}}/removeAssociation?name={{name}}'
 delete_verb: 'POST'
-immutable: true
+update_url: 'locations/global/firewallPolicies/{{firewall_policy}}/addAssociation?replaceExistingAssociation=true'
+update_verb: 'POST'
 import_format:
   - 'locations/global/firewallPolicies/{{firewall_policy}}/associations/{{name}}'
   - '{{firewall_policy}}/{{name}}'
@@ -37,6 +38,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  custom_update: 'templates/terraform/custom_update/firewall_policy_association_update.go.tmpl'
   pre_read: 'templates/terraform/pre_read/compute_firewall_policy_association.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_firewall_policy_association_operation.go.tmpl'
   post_delete: 'templates/terraform/post_delete/compute_firewall_policy_association_operation.go.tmpl'
@@ -52,14 +54,28 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
     exclude_test: true
+  - name: 'firewall_policy_association_swapover'
+    primary_resource_id: 'default'
+    vars:
+      policy_name: 'my-policy'
+      association_name: 'my-association'
+      folder_name: 'my-folder'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    exclude_test: true
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef
     description: |
       The firewall policy of the resource.
+
+      This field can be updated to refer to a different Firewall Policy, which will create a new association from that new
+      firewall policy with the flag to override the existing attachmentTarget's policy association.
+
+      **Note** Due to potential risks with this operation it is *highly* recommended to use the `create_before_destroy` life cycle option
+      on your exisiting firewall policy so as to prevent a situation where your attachment target has no associated policy.
     ignore_read: true
     required: true
-    immutable: true
     diff_suppress_func: 'tpgresource.CompareResourceNames'
     custom_expand: 'templates/terraform/custom_expand/compute_firewall_policy_association.go.tmpl'
     resource: 'FirewallPolicy'
@@ -70,11 +86,13 @@ properties:
     description: |
       The name for an association.
     required: true
+    immutable: true
   - name: 'attachmentTarget'
     type: String
     description: |
       The target that the firewall policy is attached to.
     required: true
+    immutable: true
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - name: 'shortName'
     type: String

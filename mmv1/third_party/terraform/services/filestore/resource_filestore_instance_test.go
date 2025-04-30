@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"reflect"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -185,7 +186,7 @@ resource "google_filestore_instance" "instance" {
   networks {
     network           = "default"
     modes             = ["MODE_IPV4"]
-    reserved_ip_range = "172.19.31.8/29"
+    reserved_ip_range = "172.30.250.0/29"
   }
 }
 `, name)
@@ -323,13 +324,8 @@ func TestAccFilestoreInstance_performanceConfig(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"zone"},
 			},
 			{
-				Config: testAccFilestoreInstance_defaultConfig(name, location, tier),
-			},
-			{
-				ResourceName:            "google_filestore_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"zone"},
+				Config:      testAccFilestoreInstance_defaultConfig(name, location, tier),
+				ExpectError: regexp.MustCompile("custom performance cannot be cleared"),
 			},
 		},
 	})
@@ -412,10 +408,14 @@ resource "google_filestore_instance" "instance" {
 
 func TestAccFilestoreInstance_tags(t *testing.T) {
 	t.Parallel()
-	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
-	org := envvar.GetTestOrgFromEnv(t)
+
 	tagKey := acctest.BootstrapSharedTestTagKey(t, "filestore-instances-tagkey")
-	tagValue := acctest.BootstrapSharedTestTagValue(t, "filestore-instances-tagvalue", tagKey)
+	context := map[string]interface{}{
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      acctest.BootstrapSharedTestTagValue(t, "filestore-instances-tagvalue", tagKey),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -423,7 +423,7 @@ func TestAccFilestoreInstance_tags(t *testing.T) {
 		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFileInstanceTags(name, map[string]string{org + "/" + tagKey: tagValue}),
+				Config: testAccFileInstanceTags(context),
 			},
 			{
 				ResourceName:            "google_filestore_instance.instance",
@@ -435,10 +435,10 @@ func TestAccFilestoreInstance_tags(t *testing.T) {
 	})
 }
 
-func testAccFileInstanceTags(name string, tags map[string]string) string {
-	r := fmt.Sprintf(`
+func testAccFileInstanceTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_filestore_instance" "instance" {
-  name = "tf-test-instance-%s"
+  name = "tf-test-instance-%{random_suffix}"
   zone = "us-central1-b"
   tier = "BASIC_HDD"
   file_shares {
@@ -450,15 +450,11 @@ resource "google_filestore_instance" "instance" {
     modes             = ["MODE_IPV4"]
     reserved_ip_range = "172.19.31.8/29"
   }
-tags = {`, name)
-
-	l := ""
-	for key, value := range tags {
-		l += fmt.Sprintf("%q = %q\n", key, value)
-	}
-
-	l += fmt.Sprintf("}\n}")
-	return r + l
+  tags = {
+    "%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
 }
 
 func TestAccFilestoreInstance_replication(t *testing.T) {
@@ -466,7 +462,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"location_1":    "us-central1",
+		"location_1":    "us-east1",
 		"location_2":    "us-west1",
 		"tier":          "ENTERPRISE",
 	}
@@ -491,7 +487,7 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 func testAccFilestoreInstance_replication(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_filestore_instance" "instance" {
-  name             = "tf-instance-%{random_suffix}"
+  name             = "tf-test-instance-%{random_suffix}"
   location         = "%{location_1}"
   tier             = "%{tier}"
   description      = "An instance created during testing."
@@ -508,7 +504,7 @@ resource "google_filestore_instance" "instance" {
 }
 
 resource "google_filestore_instance" "replica-instance" {
-  name          	= "tf-rinstance-%{random_suffix}"
+  name          	= "tf-test-instance-%{random_suffix}"
   location      	= "%{location_2}"
   tier          	= "%{tier}"
   description   	= "An replica instance created during testing."

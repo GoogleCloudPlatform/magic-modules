@@ -1,5 +1,4 @@
 resource "google_privateca_ca_pool" "default" {
-  provider = google-beta
   name      = "{{index $.Vars "privateca_ca_pool_name"}}"
   location  = "us-central1"
   tier     = "DEVOPS"
@@ -23,9 +22,7 @@ resource "google_privateca_ca_pool" "default" {
   }
 }
 
-
 resource "google_privateca_certificate_authority" "default" {
-  provider = google-beta
   pool = google_privateca_ca_pool.default.name
   certificate_authority_id = "{{index $.Vars "privateca_certificate_authority_id"}}"
   location = "us-central1"
@@ -62,19 +59,15 @@ resource "google_privateca_certificate_authority" "default" {
 }
 
 data "google_project" "project" {
-  provider = google-beta
 }
 
 resource "google_privateca_ca_pool_iam_member" "tls_inspection_permission" {
-  provider = google-beta
-
   ca_pool = google_privateca_ca_pool.default.id
   role = "roles/privateca.certificateManager"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-networksecurity.iam.gserviceaccount.com"
 }
 
 resource "google_network_security_tls_inspection_policy" "default" {
-  provider = google-beta
   name     = "{{index $.Vars "privateca_ca_tls_name"}}"
   location = "us-central1"
   ca_pool  = google_privateca_ca_pool.default.id
@@ -82,7 +75,6 @@ resource "google_network_security_tls_inspection_policy" "default" {
 }
 
 resource "google_network_security_gateway_security_policy" "{{$.PrimaryResourceId}}" {
-  provider    = google-beta
   name        = "{{index $.Vars "resource_name"}}"
   location    = "us-central1"
   description = "my description"

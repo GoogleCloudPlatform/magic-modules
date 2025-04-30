@@ -50,7 +50,7 @@ For more information about types of resources and the generation process overall
 1. Using an editor of your choice, in the appropriate [product folder]({{<ref "/#mmv1" >}}), create a file called `RESOURCE_NAME.yaml`. Replace `RESOURCE_NAME` with the name of the API resource you are adding support for. For example, a configuration file for [NatAddress](https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.instances.natAddresses) would be called `NatAddress.yaml`.
 2. Copy the following template into the new file:
    ```yaml
-   # Copyright 2024 Google Inc.
+   # Copyright {{< now >}} Google Inc.
    # Licensed under the Apache License, Version 2.0 (the "License");
    # you may not use this file except in compliance with the License.
    # You may obtain a copy of the License at

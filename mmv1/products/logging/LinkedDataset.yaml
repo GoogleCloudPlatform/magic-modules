@@ -14,6 +14,11 @@
 ---
 name: 'LinkedDataset'
 api_resource_type_kind: Link
+api_variant_patterns:
+  - 'billingAccounts/{billingAccount}/locations/{location}/buckets/{bucket}/links/{link}'
+  - 'folders/{folder}/locations/{location}/buckets/{bucket}/links/{link}'
+  - 'organizations/{organization}/locations/{location}/buckets/{bucket}/links/{link}'
+  - 'projects/{project}/locations/{location}/buckets/{bucket}/links/{link}'
 description: |
   Describes a BigQuery linked dataset
 references:

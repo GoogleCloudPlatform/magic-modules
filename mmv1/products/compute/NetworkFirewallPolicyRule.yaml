@@ -38,6 +38,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/network_firewall_policy_rule.go.tmpl'
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -64,6 +66,7 @@ examples:
       fw_policy: 'fw-policy'
     test_env_vars:
       project_name: 'PROJECT_NAME'
+    min_version: beta
   - name: 'network_firewall_policy_rule_network_scope_ingress'
     primary_resource_id: 'primary'
     vars:
@@ -71,6 +74,7 @@ examples:
       network: 'network'
     test_env_vars:
       project_name: 'PROJECT_NAME'
+    min_version: beta
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef
@@ -266,6 +270,7 @@ properties:
       A fully-qualified URL of a SecurityProfile resource instance.
       Example: https://networksecurity.googleapis.com/v1/projects/{project}/locations/{location}/securityProfileGroups/my-security-profile-group
       Must be specified if action = 'apply_security_profile_group' and cannot be specified for other actions.
+    diff_suppress_func: 'SecurityProfileGroupPrefixSlashes'
   - name: 'tlsInspect'
     type: Boolean
     description: |

@@ -687,3 +687,7 @@ properties:
               type: String
               description: The lifecycle state of the condition.
               output: true
+  - type: Boolean
+    name: enableAdvancedCluster
+    description: If set, the advanced cluster feature is enabled.
+    output: true

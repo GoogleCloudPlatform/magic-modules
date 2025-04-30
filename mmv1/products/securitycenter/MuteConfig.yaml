@@ -13,6 +13,10 @@
 
 ---
 name: 'MuteConfig'
+api_variant_patterns:
+  - 'folders/{folder}/muteConfigs/{muteConfig}'
+  - 'organizations/{organization}/muteConfigs/{muteConfig}'
+  - 'projects/{project}/muteConfigs/{muteConfig}'
 description: |
   Mute Findings is a volume management feature in Security Command Center
   that lets you manually or programmatically hide irrelevant findings,
@@ -102,3 +106,20 @@ properties:
       field is set by the server and will be ignored if provided on
       config creation or update.
     output: true
+  - name: 'type'
+    type: Enum
+    description: |
+      The type of the mute config, which determines what type of mute state the config affects.
+    default_value: "DYNAMIC"
+    enum_values:
+      - 'MUTE_CONFIG_TYPE_UNSPECIFIED'
+      - 'STATIC'
+      - 'DYNAMIC'
+  - name: 'expiryTime'
+    type: String
+    description: |
+      Optional. The expiry of the mute config. Only applicable for dynamic configs.
+      If the expiry is set, when the config expires, it is removed from all findings.
+
+      A timestamp in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to
+      nine fractional digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
