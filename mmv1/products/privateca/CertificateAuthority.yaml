@@ -565,7 +565,6 @@ properties:
               - name: 'organization'
                 type: String
                 description: The organization of the subject.
-                required: true
                 immutable: true
               - name: 'organizationalUnit'
                 type: String
