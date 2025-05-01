@@ -118,6 +118,13 @@ examples:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
       - 'deletion_protection'
+  - name: 'cloudrunv2_job_multicontainer'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
+    vars:
+      cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -349,6 +356,10 @@ properties:
                         required: true
                       - name: 'value'
                         type: String
+                        # env is a set.
+                        # The env.value has value "" in Terraform state, but it has value nil in Terraform plan,
+                        # which causes the diffs for unchanged env. default_value: "" is to suppress the diffs.
+                        default_value: ""
                         description: |-
                           Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
                         # exactly_one_of:
@@ -643,7 +654,7 @@ properties:
           - name: 'maxRetries'
             type: Integer
             description: |-
-              Number of retries allowed per Task, before marking this Task failed.
+              Number of retries allowed per Task, before marking this Task failed. Defaults to 3. Minimum value is 0.
             send_empty_value: true
             default_value: 3
   - name: 'observedGeneration'

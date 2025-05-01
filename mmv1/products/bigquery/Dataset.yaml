@@ -95,7 +95,6 @@ examples:
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
-    min_version: 'beta'
   - name: 'bigquery_dataset_resource_tags'
     primary_resource_id: 'dataset'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataset%s", context["random_suffix"])'
@@ -435,17 +434,14 @@ properties:
     description: |
       Options defining open source compatible datasets living in the BigQuery catalog. Contains
       metadata of open source database, schema or namespace represented by the current dataset.
-    min_version: beta
     properties:
       - name: 'parameters'
         type: KeyValuePairs
         description: |
           A map of key value pairs defining the parameters and properties of the open source schema.
           Maximum size of 2Mib.
-        min_version: beta
       - name: 'defaultStorageLocationUri'
         type: String
         description: |
           The storage location URI for all tables in the dataset. Equivalent to hive metastore's
           database locationUri. Maximum length of 1024 characters.
-        min_version: beta

@@ -1,6 +1,6 @@
 [
     {
-        "name": "//gkehub.googleapis.com/projects/{{.Provider.project}}/locations/global/features/multiclusterservicediscovery",
+        "name": "//gkehub.googleapis.com/projects/{{.Provider.project}}/locations/global/features/multiclusterservicediscovery?return_partial_success=true",
         "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
         "asset_type": "gkehub.googleapis.com/Feature",
         "resource": {

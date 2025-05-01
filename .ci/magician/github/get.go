@@ -37,6 +37,7 @@ type PullRequest struct {
 	Body           string  `json:"body"`
 	Labels         []Label `json:"labels"`
 	MergeCommitSha string  `json:"merge_commit_sha"`
+	Merged         bool    `json:"merged"`
 }
 
 type PullRequestComment struct {
@@ -51,7 +52,7 @@ func (gh *Client) GetPullRequest(prNumber string) (PullRequest, error) {
 
 	var pullRequest PullRequest
 
-	err := utils.RequestCall(url, "GET", gh.token, &pullRequest, nil)
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, &pullRequest, nil)
 
 	return pullRequest, err
 }
@@ -61,7 +62,7 @@ func (gh *Client) GetPullRequests(state, base, sort, direction string) ([]PullRe
 
 	var pullRequests []PullRequest
 
-	err := utils.RequestCall(url, "GET", gh.token, &pullRequests, nil)
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, &pullRequests, nil)
 
 	return pullRequests, err
 }
@@ -73,7 +74,7 @@ func (gh *Client) GetPullRequestRequestedReviewers(prNumber string) ([]User, err
 		Users []User `json:"users"`
 	}
 
-	err := utils.RequestCall(url, "GET", gh.token, &requestedReviewers, nil)
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, &requestedReviewers, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +89,7 @@ func (gh *Client) GetPullRequestPreviousReviewers(prNumber string) ([]User, erro
 		User User `json:"user"`
 	}
 
-	err := utils.RequestCall(url, "GET", gh.token, &reviews, nil)
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, &reviews, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -106,11 +107,28 @@ func (gh *Client) GetPullRequestPreviousReviewers(prNumber string) ([]User, erro
 	return result, nil
 }
 
+func (gh *Client) GetCommitMessage(owner, repo, sha string) (string, error) {
+	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/commits/%s", owner, repo, sha)
+
+	var commit struct {
+		Commit struct {
+			Message string `json:"message"`
+		} `json:"commit"`
+	}
+
+	err := utils.RequestCall(url, "GET", gh.token, &commit, nil)
+	if err != nil {
+		return "", err
+	}
+
+	return commit.Commit.Message, nil
+}
+
 func (gh *Client) GetPullRequestComments(prNumber string) ([]PullRequestComment, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/comments", prNumber)
 
 	var comments []PullRequestComment
-	err := utils.RequestCall(url, "GET", gh.token, &comments, nil)
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, &comments, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -121,9 +139,34 @@ func (gh *Client) GetTeamMembers(organization, team string) ([]User, error) {
 	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/members", organization, team)
 
 	var members []User
-	err := utils.RequestCall(url, "GET", gh.token, &members, nil)
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, &members, nil)
 	if err != nil {
 		return nil, err
 	}
 	return members, nil
+}
+
+func (gh *Client) IsOrgMember(author, org string) bool {
+	url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, author)
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, nil, nil)
+	return err == nil
+}
+
+func (gh *Client) IsTeamMember(organization, teamSlug, username string) bool {
+	type TeamMembership struct {
+		URL   string `json:"url"`
+		Role  string `json:"role"`
+		State string `json:"state"`
+	}
+
+	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/memberships/%s", organization, teamSlug, username)
+	var membership TeamMembership
+	err := utils.RequestCallWithRetry(url, "GET", gh.token, &membership, nil)
+
+	if err != nil {
+		return false
+	}
+
+	// User is considered a member if state is "active"
+	return membership.State == "active"
 }

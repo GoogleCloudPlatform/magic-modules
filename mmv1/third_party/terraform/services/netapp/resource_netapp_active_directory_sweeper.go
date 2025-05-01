@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	sweeper.AddTestSweepers("NetappActiveDirectory", testSweepNetappActiveDirectory)
+	sweeper.AddTestSweepersLegacy("NetappActiveDirectory", testSweepNetappActiveDirectory)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region

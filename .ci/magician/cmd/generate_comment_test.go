@@ -93,6 +93,7 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/magic-modules/tools/diff-processor", "make", []string{"build"}, diffProcessorEnv},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-docs", "/mock/dir/tpgb"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"schema-diff"}, map[string]string(nil)},
 		},
 	} {
@@ -238,6 +239,55 @@ func TestFormatDiffComment(t *testing.T) {
 				"generated some diffs",
 				"## Breaking Change(s) Detected",
 				"## Errors",
+			},
+		},
+		"missing docs are displayed": {
+			data: diffCommentData{
+				MissingDocs: &MissingDocsSummary{
+					Resource: []MissingDocInfo{
+						{
+							Name:     "resource-a",
+							FilePath: "website/docs/r/resource-a.html.markdown",
+							Fields:   []string{"field-a", "field-b"},
+						},
+						{
+							Name:     "resource-b",
+							FilePath: "website/docs/r/resource-b.html.markdown",
+							Fields:   []string{"field-a", "field-b"},
+						},
+					},
+					DataSource: []MissingDocInfo{
+						{
+							Name:     "resource-a",
+							FilePath: "website/docs/d/resource-a.html.markdown",
+						},
+						{
+							Name:     "resource-b",
+							FilePath: "website/docs/d/resource-b.html.markdown",
+						},
+					},
+				},
+			},
+			expectedStrings: []string{
+				"## Diff report",
+				"## Missing doc report",
+			},
+		},
+		"missing docs should not be displayed": {
+			data: diffCommentData{
+				MissingDocs: &MissingDocsSummary{
+					Resource:   []MissingDocInfo{},
+					DataSource: []MissingDocInfo{},
+				},
+			},
+			notExpectedStrings: []string{
+				"## Missing doc report",
+			},
+		},
+		"missing docs should not be displayed when MissingDocs is nil": {
+			data: diffCommentData{},
+			notExpectedStrings: []string{
+				"## Missing doc report",
 			},
 		},
 	}
