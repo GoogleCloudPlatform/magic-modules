@@ -93,7 +93,7 @@ func dataSourceGoogleStorageBucketObjectContentRead(d *schema.ResourceData, meta
 
 	sha512Sum := sha512.Sum512(objectBytes)
 	if err := d.Set("content_hexsha512", hex.EncodeToString(sha512Sum[:])); err != nil {
-		return fmt.Errorf("Error setting output_sha512: %s", err)
+		return fmt.Errorf("Error setting content_sha512: %s", err)
 	}
 
 	if err := d.Set("content_base64sha512", base64.StdEncoding.EncodeToString(sha512Sum[:])); err != nil {
