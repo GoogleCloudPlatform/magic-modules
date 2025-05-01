@@ -101,11 +101,12 @@ examples:
       'secondary_instance_prevent_destroy': 'false'
 virtual_fields:
   - name: 'desired_psc_auto_connections'
-    description: "Please use desired_auto_created_endpoints "
+    description: "Immutable. User inputs for the auto-created PSC connections. "
+    deprecation_message: '`desired_psc_auto_connections` is deprecated and will be removed in a future major release. Use `desired_auto_created_endpoints` instead.'
     type: Array
     immutable: true
     conflicts:
-      - desired_auto_created_endpoints
+      - desiredAutoCreatedEndpoints
     item_type:
       type: NestedObject
       properties:
@@ -125,9 +126,10 @@ virtual_fields:
     description: "Immutable. User inputs for the auto-created
       endpoints connections. "
     type: Array
+    # is_set: true
     immutable: true
     conflicts:
-      - desired_psc_auto_connections
+      - desiredPscAutoConnections
     item_type:
       type: NestedObject
       properties:
