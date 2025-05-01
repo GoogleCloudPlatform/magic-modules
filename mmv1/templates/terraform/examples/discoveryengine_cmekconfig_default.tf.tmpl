@@ -1,7 +1,7 @@
 data "google_project" "project" {
 }
 
-resource "google_discovery_engine_cmek_config" "basic" {
+resource "google_discovery_engine_cmek_config" "default" {
   location            = "us"
   cmek_config_id      = "{{index $.Vars "cmek_config_id"}}"
   kms_key             = "projects/${data.google_project.project.project_id}/locations/us/keyRings/{{index $.Vars "kms_key_ring_name"}}/cryptoKeys/{{index $.Vars "kms_key_name"}}-1"

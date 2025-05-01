@@ -46,8 +46,8 @@ async:
   result:
     resource_inside_response: true
 examples:
-  - name: 'discoveryengine_cmekconfig_basic'
-    primary_resource_id: 'basic'
+  - name: 'discoveryengine_cmekconfig_default'
+    primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf_test_cmek_config%s", context["random_suffix"])'
     vars:
       cmek_config_id: 'cmek-config-id'
