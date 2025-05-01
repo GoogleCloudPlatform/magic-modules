@@ -67,8 +67,8 @@ terraform build provider: validate_environment clean-provider mmv1 tpgtools
 
 mmv1:
 	@echo "Executing mmv1 build for $(OUTPUT_PATH)"; 
-  # Chaining these with "&&" is critical so this will exit non-0 if the first
-  # command fails, since we're not forcing bash and errexit / pipefail here.
+		# Chaining these with "&&" is critical so this will exit non-0 if the first
+		# command fails, since we're not forcing bash and errexit / pipefail here.
 	@cd mmv1;\
 		if [ "$(VERSION)" = "ga" ]; then \
 			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile) \
@@ -174,19 +174,13 @@ check_parameters:
 
 
 check_safe_build:
-	@if [ "$(UNSAFE_BUILD)" = "true" ]; then \
-		printf "\e[1;33mWARNING:\e[0m UNSAFE_BUILD=true, skipping OUTPUT_PATH go.mod validation.\n"; \
-	else \
-		([ -f "$(OUTPUT_PATH)/go.mod" ] && head -n 1 "$(OUTPUT_PATH)/go.mod" | grep -q 'terraform') || \
+	@([ -f "$(OUTPUT_PATH)/go.mod" ] && head -n 1 "$(OUTPUT_PATH)/go.mod" | grep -q 'terraform') || \
 		( \
 			printf "\n\e[1;31mERROR: Validation failed for OUTPUT_PATH '$(OUTPUT_PATH)'.\n" && \
 			printf "       Either go.mod is missing or the module name within it does not contain 'terraform'.\n" && \
 			printf "       This is a safety check before cleaning/building. Halting.\033[0m\n\n" && \
-			printf "       \e[1;33mHINT:\e[0m To bypass this safety check (if you are sure OUTPUT_PATH is correct),\n" && \
-			printf "             run 'make UNSAFE_BUILD=true'. Use with caution.\n\n" && \
 			exit 1 \
 		); \
-	fi
 
 doctor:
 	./scripts/doctor
