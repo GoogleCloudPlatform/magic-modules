@@ -21,6 +21,9 @@ description: |
   For managed internal load balancing, use a regional backend service instead.
 
   Currently self-managed internal load balancing is only available in beta.
+
+  ~> **Note:** Recreating a `google_compute_backend_service` that references other dependent resources like `google_compute_url_map` will give a `resourceInUseByAnotherResource` error, when modifying the number of other dependent resources.
+  Use `lifecycle.create_before_destroy` on the dependent resources to avoid this type of error as shown in the Dynamic Backends example.
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-service'
@@ -134,6 +137,11 @@ examples:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
       authentication_name: 'authentication'
+  - name: 'backend_service_dynamic_backends'
+    primary_resource_id: 'default'
+    vars:
+      url_map_name: 'url_map'
+    exclude_test: true
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
