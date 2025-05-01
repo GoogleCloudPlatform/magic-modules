@@ -82,32 +82,34 @@ properties:
     type: NestedObject
     exactly_one_of:
       - include_all_resources
-      - include
+      # TODO(hashicorp/terraform-provider-google#22581): add this block back + test once deployment is supported
+      # - include
     properties: []
     send_empty_value: true
     allow_empty_object: true
-  - name: 'include'
-    type: NestedObject
-    properties:
-      - name: 'resources'
-        type: Array
-        required: true
-        item_type:
-          type: NestedObject
-          properties:
-            - name: 'type'
-              type: Enum
-              description: 'Type of this resource'
-              enum_values:
-                - 'API_PROXY'
-              required: true
-            - name: 'name'
-              type: String
-              description: 'Name of this resource'
-              required: true
-    exactly_one_of:
-      - include_all_resources
-      - include
+  # TODO(hashicorp/terraform-provider-google#22581): add this block back + test once deployment is supported
+  # - name: 'include'
+  #   type: NestedObject
+  #   properties:
+  #     - name: 'resources'
+  #       type: Array
+  #       required: true
+  #       item_type:
+  #         type: NestedObject
+  #         properties:
+  #           - name: 'type'
+  #             type: Enum
+  #             description: 'Type of this resource'
+  #             enum_values:
+  #               - 'API_PROXY'
+  #             required: true
+  #           - name: 'name'
+  #             type: String
+  #             description: 'Name of this resource'
+  #             required: true
+  #   exactly_one_of:
+  #     - include_all_resources
+  #     - include
   - name: 'createTime'
     type: String
     description: |
