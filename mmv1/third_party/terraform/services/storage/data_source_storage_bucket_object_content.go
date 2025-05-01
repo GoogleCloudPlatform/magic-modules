@@ -97,7 +97,7 @@ func dataSourceGoogleStorageBucketObjectContentRead(d *schema.ResourceData, meta
 	}
 
 	if err := d.Set("content_base64sha512", base64.StdEncoding.EncodeToString(sha512Sum[:])); err != nil {
-		return fmt.Errorf("Error setting output_base64sha512: %s", err)
+		return fmt.Errorf("Error setting content_base64sha512: %s", err)
 	}
 
 	d.SetId(bucket + "-" + name)
