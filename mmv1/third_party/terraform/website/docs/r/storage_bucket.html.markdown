@@ -165,13 +165,17 @@ The following arguments are supported:
 
 * `uniform_bucket_level_access` - (Optional, Default: false) Enables [Uniform bucket-level access](https://cloud.google.com/storage/docs/uniform-bucket-level-access) access to a bucket.
 
-* `public_access_prevention` - (Optional) Prevents public access to a bucket. Acceptable values are "inherited" or "enforced". If "inherited", the bucket uses [public access prevention](https://cloud.google.com/storage/docs/public-access-prevention). only if the bucket is subject to the public access prevention organization policy constraint. Defaults to "inherited".
+* `public_access_prevention` - (Optional) Prevents public access to a bucket. Acceptable values are "inherited" or "enforced". If "inherited", the bucket uses [public access prevention](https://cloud.google.com/storage/docs/public-access-prevention) only if the bucket is subject to the public access prevention organization policy constraint. Defaults to "inherited".
 
 * `custom_placement_config` - (Optional) The bucket's custom location configuration, which specifies the individual regions that comprise a dual-region bucket. If the bucket is designated a single or multi-region, the parameters are empty. Structure is [documented below](#nested_custom_placement_config).
 
 * `soft_delete_policy` -  (Optional, Computed) The bucket's soft delete policy, which defines the period of time that soft-deleted objects will be retained, and cannot be permanently deleted. If the block is not provided, Server side value will be kept which means removal of block won't generate any terraform change. Structure is [documented below](#nested_soft_delete_policy).
 
 * `hierarchical_namespace` -  (Optional, ForceNew) The bucket's hierarchical namespace policy, which defines the bucket capability to handle folders in logical structure. Structure is [documented below](#nested_hierarchical_namespace). To use this configuration, `uniform_bucket_level_access` must be enabled on bucket.
+
+* `time_created` -  (Computed) The creation time of the bucket in RFC 3339 format.
+
+* `updated` -  (Computed) The time at which the bucket's metadata or IAM policy was last updated, in RFC 3339 format.
 
 <a name="nested_lifecycle_rule"></a>The `lifecycle_rule` block supports:
 

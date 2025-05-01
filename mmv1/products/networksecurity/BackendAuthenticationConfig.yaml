@@ -32,7 +32,7 @@ async:
     base_url: '{{op_id}}'
 sweeper:
   url_substitutions:
-    - region: 'global'
+    - region: "global"
 examples:
   - name: 'network_security_backend_authentication_config_basic'
     primary_resource_id: 'default'

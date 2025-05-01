@@ -35,6 +35,11 @@ examples:
     primary_resource_id: 'reservation'
     vars:
       name: 'my-reservation'
+  - name: 'bigquery_reservation_with_disaster_recovery'
+    primary_resource_id: 'reservation'
+    vars:
+      name: 'my-reservation'
+    exclude_docs: true
 parameters:
   - name: 'location'
     type: String
@@ -90,3 +95,64 @@ properties:
         type: Integer
         description: |
           Number of slots to be scaled when needed.
+  - name: 'primaryLocation'
+    type: String
+    description: |
+      The current location of the reservation's primary replica. This field is only set for
+      reservations using the managed disaster recovery feature.
+    output: true
+  - name: 'secondaryLocation'
+    type: String
+    description: |
+      The current location of the reservation's secondary replica. This field is only set for
+      reservations using the managed disaster recovery feature. Users can set this in create
+      reservation calls to create a failover reservation or in update reservation calls to convert
+      a non-failover reservation to a failover reservation(or vice versa).
+  - name: 'originalPrimaryLocation'
+    type: String
+    description: |
+      The location where the reservation was originally created. This is set only during the
+      failover reservation's creation. All billing charges for the failover reservation will be
+      applied to this location.
+    output: true
+  - name: 'replicationStatus'
+    type: NestedObject
+    description: |
+      The Disaster Recovery(DR) replication status of the reservation. This is only available for
+      the primary replicas of DR/failover reservations and provides information about the both the
+      staleness of the secondary and the last error encountered while trying to replicate changes
+      from the primary to the secondary. If this field is blank, it means that the reservation is
+      either not a DR reservation or the reservation is a DR secondary or that any replication
+      operations on the reservation have succeeded.
+    properties:
+      - name: 'error'
+        type: NestedObject
+        description: |
+          The last error encountered while trying to replicate changes from the primary to the
+          secondary. This field is only available if the replication has not succeeded since.
+        properties:
+          - name: 'code'
+            type: Integer
+            description: |
+              The status code, which should be an enum value of [google.rpc.Code](https://cloud.google.com/bigquery/docs/reference/reservations/rpc/google.rpc#google.rpc.Code).
+            output: true
+          - name: 'message'
+            type: String
+            description: |
+              A developer-facing error message, which should be in English.
+            output: true
+        output: true
+      - name: 'lastErrorTime'
+        type: Time
+        description: |
+          The time at which the last error was encountered while trying to replicate changes from
+          the primary to the secondary. This field is only available if the replication has not
+          succeeded since.
+        output: true
+      - name: 'lastReplicationTime'
+        type: Time
+        description: |
+          A timestamp corresponding to the last change on the primary that was successfully
+          replicated to the secondary.
+        output: true
+    output: true

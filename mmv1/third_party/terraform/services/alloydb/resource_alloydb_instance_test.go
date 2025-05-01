@@ -81,6 +81,7 @@ resource "google_alloydb_instance" "default" {
 
   machine_config {
     cpu_count = 4
+    machine_type = "n2-highmem-4"
   }
 
   labels = {
@@ -860,6 +861,7 @@ resource "google_alloydb_instance" "default" {
   instance_type = "PRIMARY"
   machine_config {
     cpu_count = 2
+    machine_type = "n2-highmem-2"
   }
   psc_instance_config {
 	allowed_consumer_projects = ["${data.google_project.project.number}"]
