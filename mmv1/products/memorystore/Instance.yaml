@@ -102,7 +102,7 @@ examples:
 virtual_fields:
   - name: 'desired_psc_auto_connections'
     description: "Immutable. User inputs for the auto-created PSC connections. "
-    deprecation_message: '`desired_psc_auto_connections` is deprecated and will be removed in a future major release. Use `desired_auto_created_endpoints` instead.'
+    deprecation_message: '`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead.'
     type: Array
     immutable: true
     conflicts:
@@ -282,6 +282,7 @@ properties:
     description:
       "Output only. Endpoints clients can connect to the instance through.
       Currently only one\ndiscovery endpoint is supported. "
+    deprecation_message: '`discovery_endpoints` is deprecated  Use `endpoints` instead.'
     output: true
     item_type:
       type: NestedObject
@@ -700,6 +701,7 @@ properties:
     description:
       "Output only. User inputs and resource details of the auto-created
       PSC connections. "
+    deprecation_message: '`psc_auto_connections` is deprecated  Use `endpoints.connections.pscAutoConnections` instead.'
     output: true
     item_type:
       type: NestedObject

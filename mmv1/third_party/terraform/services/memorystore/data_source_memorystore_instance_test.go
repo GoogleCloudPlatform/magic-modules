@@ -32,7 +32,7 @@ func testAccMemorystoreInstanceDatasourceConfig(context map[string]interface{}) 
 resource "google_memorystore_instance" "instance-basic" {
   instance_id                 = "tf-test-memorystore-instance%{random_suffix}"
   shard_count                 = 1
-  desired_psc_auto_connections {
+  desired_auto_created_endpoints {
     network                   = google_compute_network.producer_net.id
     project_id                = data.google_project.project.project_id
   }
