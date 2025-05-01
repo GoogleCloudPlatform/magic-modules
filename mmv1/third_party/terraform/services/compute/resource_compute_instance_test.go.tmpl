@@ -4319,8 +4319,16 @@ func TestAccComputeInstance_keyRevocationActionType(t *testing.T) {
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "key_revocation_action_type", ""),
+				),
+			},
+			{
+				Config: testAccComputeInstance_keyRevocationActionType(context_2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "key_revocation_action_type", "STOP"),
 					acctest.GetTestMetadataForTgc("compute", "google_compute_instance.foobar", 
-						testAccComputeInstance_keyRevocationActionType(context_3)),
+						testAccComputeInstance_keyRevocationActionType(context_2)),
 				),
 			},
 		},
@@ -9587,7 +9595,8 @@ resource "google_compute_instance" "foobar" {
 		values = ["%[1]s"]
 	}
   }
-}`, instanceName)
+}
+`, instanceName)
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
@@ -10266,7 +10275,6 @@ resource "google_compute_resource_policy" "foo" {
     collocation = "COLLOCATED"
   }
 }
-
 `, instance, instance, suffix)
 }
 
@@ -10941,7 +10949,8 @@ resource "google_compute_instance" "foobar" {
   		}
   	})
   }
-}`, instance)
+}
+`, instance)
 }
 {{- end }}
 
@@ -12268,7 +12277,8 @@ resource "google_compute_instance" "foobar" {
 	network_interface {
 		network = "default"
 	}
-}`, context)
+}
+`, context)
 }
 
 func testAccComputeInstance_nicStackTypeUpdate_ipv6(context map[string]interface{}) string {
