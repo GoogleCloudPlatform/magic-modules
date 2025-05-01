@@ -90,7 +90,7 @@ if ok {
 				}
 			}
 		}
-		
+		log.Printf("[DEBUG] FYou are in Decode and printing this for transformed %#v", transformed)
 		if len(transformed) > 0 {
 			d.Set("desired_auto_created_endpoints", transformed)
 		}

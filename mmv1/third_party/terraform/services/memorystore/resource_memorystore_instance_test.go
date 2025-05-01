@@ -93,7 +93,7 @@ resource "google_memorystore_instance" "test_abc" {
   replica_count                  = 0
   node_type                      = "SHARED_CORE_NANO"
   deletion_protection_enabled    = false
-  desired_psc_auto_connections {
+  desired_auto_created_endpoints {
     network                      = google_compute_network.primary_producer_net.id
     project_id                   = data.google_project.project.project_id
   }
@@ -146,7 +146,7 @@ resource "google_memorystore_instance" "test_abc" {
   replica_count                  = 0
   node_type                      = "SHARED_CORE_NANO"
   deletion_protection_enabled    = false
-  desired_psc_auto_connections {
+  desired_auto_created_endpoints {
     network                      = google_compute_network.primary_producer_net.id
     project_id                   = data.google_project.project.project_id
   }
@@ -1033,7 +1033,7 @@ resource "google_memorystore_instance" "test_secondary" {
 	shard_count = %d
 	node_type = "%s"
 	location         = "us-west2"
-	desired_psc_auto_connections  {
+	desired_auto_created_endpoints  {
 			network = google_compute_network.producer_net.id
             project_id = data.google_project.project.project_id
 	}
@@ -1328,7 +1328,7 @@ resource "google_memorystore_instance" "test" {
 	shard_count = %d
 	node_type = "%s"
 	location         = "us-west2"
-	desired_psc_auto_connections  {
+	desired_auto_created_endpoints  {
 			network = google_compute_network.producer_net.id
             project_id = data.google_project.project.project_id
 	}
