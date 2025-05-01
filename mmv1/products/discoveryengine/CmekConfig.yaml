@@ -21,7 +21,7 @@ references:
   api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/CmekConfig'
 base_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs'
 self_link: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
-# Update API is also used as create API for some reason.
+# Update API is also used as create API.
 create_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}?&setDefault={{set_default}}'
 create_verb: 'PATCH'
 update_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
