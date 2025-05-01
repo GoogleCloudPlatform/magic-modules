@@ -1632,6 +1632,15 @@ func TestAccAlloydbCluster_withDenyPeriods(t *testing.T) {
 			{
 				Config: testAccAlloydbCluster_withUpdateToDenyPeriods(context),
 			},
+			{
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+			},
+			{
+				Config: testAccAlloydbCluster_removeDenyPeriods(context),
+			},
 		},
 	})
 }
@@ -1696,6 +1705,23 @@ resource "google_alloydb_cluster" "default" {
     }
    }
   }
+}
+data "google_project" "project" {}
+resource "google_compute_network" "default" {
+  name = "tf-test-alloydb-cluster%{random_suffix}"
+}
+`, context)
+}
+
+func testAccAlloydbCluster_removeDenyPeriods(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-east1"
+  network_config {
+		network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
+  }
+
 }
 data "google_project" "project" {}
 resource "google_compute_network" "default" {
