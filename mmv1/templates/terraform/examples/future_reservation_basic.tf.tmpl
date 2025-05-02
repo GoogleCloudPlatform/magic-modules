@@ -3,9 +3,11 @@ resource "google_compute_future_reservation" "{{$.PrimaryResourceId}}" {
   name     = "{{index $.Vars "future_reservation_name"}}"
   project  = "{{index $.TestEnvVars "project"}}"
   auto_delete_auto_created_reservations = true
+  planning_status = "DRAFT"
+  name_prefix = "fr-basic"
   time_window {
-    start_time = "2025-08-01T00:00:00Z"
-    end_time   = "2025-08-02T00:00:00Z"
+    start_time = "2025-11-01T00:00:00Z"
+    end_time   = "2025-11-02T00:00:00Z"
   }
   specific_sku_properties {
     total_count = "1"
