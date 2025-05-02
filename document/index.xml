@@ -11,13 +11,13 @@
 &lt;ol>
 &lt;li>Complete the steps in &lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/">Set up your development environment&lt;/a> to set up your environment and your Google Cloud project.&lt;/li>
 &lt;li>Ensure that your &lt;code>magic-modules&lt;/code>, &lt;code>terraform-provider-google&lt;/code>, and &lt;code>terraform-provider-google-beta&lt;/code> repositories are up to date.
-&lt;pre tabindex="0">&lt;code>cd ~/magic-modules
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-&lt;/code>&lt;/pre>&lt;/li>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>cd ~/magic-modules
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
 &lt;/ol>
 &lt;h2 id="add-documentation-1">
  Add documentation

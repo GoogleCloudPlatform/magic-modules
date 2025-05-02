@@ -61,40 +61,13 @@ is not declared using the corresponding property.&lt;/p>
  &lt;code>make&lt;/code> / &lt;code>make provider&lt;/code>
  &lt;a class="anchor" href="#make--make-provider">#&lt;/a>
 &lt;/h3>
-&lt;p>Generates the code for the downstream &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/code> providers.&lt;/p>
+&lt;p>Generates the code for the downstream &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/code> providers
+into the &lt;code>OUTPUT_PATH&lt;/code>, overriding and deleting any local changes.&lt;/p>
 &lt;blockquote class="book-hint info">
  &lt;strong>Note:&lt;/strong> Generation works best if the downstream provider has a commit checked out corresponding to the latest &lt;code>main&lt;/code> branch commit that is present in your &lt;code>magic-modules&lt;/code> working branch. This can generally be identified based on matching commit messages.
 &lt;/blockquote>
 
-&lt;p>Examples:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>make provider VERSION&lt;span style="color:#f92672">=&lt;/span>ga OUTPUT_PATH&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>$GOPATH&lt;span style="color:#e6db74">/src/github.com/hashicorp/terraform-provider-google&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>make provider VERSION&lt;span style="color:#f92672">=&lt;/span>beta OUTPUT_PATH&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>$GOPATH&lt;span style="color:#e6db74">/src/github.com/hashicorp/terraform-provider-google-beta&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># Only generate a specific product (plus all common files)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>make provider VERSION&lt;span style="color:#f92672">=&lt;/span>ga OUTPUT_PATH&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>$GOPATH&lt;span style="color:#e6db74">/src/github.com/hashicorp/terraform-provider-google&amp;#34;&lt;/span> PRODUCT&lt;span style="color:#f92672">=&lt;/span>pubsub
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># Only generate only a specific resources for a product&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>make provider VERSION&lt;span style="color:#f92672">=&lt;/span>ga OUTPUT_PATH&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>$GOPATH&lt;span style="color:#e6db74">/src/github.com/hashicorp/terraform-provider-google&amp;#34;&lt;/span> PRODUCT&lt;span style="color:#f92672">=&lt;/span>pubsub RESOURCE&lt;span style="color:#f92672">=&lt;/span>Topic
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># Only generate common files, including all third_party code&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>make provider VERSION&lt;span style="color:#f92672">=&lt;/span>ga OUTPUT_PATH&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>$GOPATH&lt;span style="color:#e6db74">/src/github.com/hashicorp/terraform-provider-google&amp;#34;&lt;/span> PRODUCT&lt;span style="color:#f92672">=&lt;/span>doesnotexist
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="arguments">
- Arguments
- &lt;a class="anchor" href="#arguments">#&lt;/a>
-&lt;/h4>
-&lt;ul>
-&lt;li>&lt;code>OUTPUT_PATH&lt;/code>: Required. The location you are generating provider code into.&lt;/li>
-&lt;li>&lt;code>VERSION&lt;/code>: Required. The version of the provider you are building into. Valid values are &lt;code>ga&lt;/code> and &lt;code>beta&lt;/code>.&lt;/li>
-&lt;li>&lt;code>PRODUCT&lt;/code>: Limits generations to the specified folder within &lt;code>mmv1/products&lt;/code> or &lt;code>tpgtools/api&lt;/code>. Handwritten files from &lt;code>mmv1/third_party/terraform&lt;/code> are always generated into the downstream regardless of this setting, so you can provide a non-existent product name to generate only handwritten code. Required if &lt;code>RESOURCE&lt;/code> is specified.&lt;/li>
-&lt;li>&lt;code>RESOURCE&lt;/code>: Limits generation to the specified resource within a particular product. For &lt;code>mmv1&lt;/code> resources, matches the resource&amp;rsquo;s &lt;code>name&lt;/code> field (set in its configuration file).For &lt;code>tpgtools&lt;/code> resources, matches the terraform resource name.&lt;/li>
-&lt;li>&lt;code>ENGINE&lt;/code>: Modifies &lt;code>make provider&lt;/code> to only generate code using the specified engine. Valid values are &lt;code>mmv1&lt;/code> or &lt;code>tpgtools&lt;/code>. (Providing &lt;code>tpgtools&lt;/code> will still generate any prerequisite mmv1 files required for tpgtools.)&lt;/li>
-&lt;/ul>
-&lt;h4 id="cleaning-up-old-files">
- Cleaning up old files
- &lt;a class="anchor" href="#cleaning-up-old-files">#&lt;/a>
-&lt;/h4>
-&lt;p>Magic Modules will only generate on top of whatever is in the downstream repository. This means that, from time
-to time, you may end up with stale files or changes in your downstream that cause compilation or tests to fail.&lt;/p></description></item><item><title>MMv1 metadata reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</guid><description>&lt;h1 id="mmv1-metadata-reference">
+&lt;p>Examples:&lt;/p></description></item><item><title>MMv1 metadata reference</title><link>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/reference/metadata/</guid><description>&lt;h1 id="mmv1-metadata-reference">
  MMv1 metadata reference
  &lt;a class="anchor" href="#mmv1-metadata-reference">#&lt;/a>
 &lt;/h1>

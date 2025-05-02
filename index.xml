@@ -11,13 +11,13 @@
 &lt;ol>
 &lt;li>Complete the steps in &lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/">Set up your development environment&lt;/a> to set up your environment and your Google Cloud project.&lt;/li>
 &lt;li>Ensure that your &lt;code>magic-modules&lt;/code>, &lt;code>terraform-provider-google&lt;/code>, and &lt;code>terraform-provider-google-beta&lt;/code> repositories are up to date.
-&lt;pre tabindex="0">&lt;code>cd ~/magic-modules
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-&lt;/code>&lt;/pre>&lt;/li>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>cd ~/magic-modules
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
 &lt;/ol>
 &lt;h2 id="add-documentation-1">
  Add documentation
@@ -175,13 +175,13 @@ have specific mitigating circumstances that make them non-breaking.&lt;/p></desc
 &lt;ol>
 &lt;li>Complete the steps in &lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/">Set up your development environment&lt;/a> to set up your environment and your Google Cloud project.&lt;/li>
 &lt;li>Ensure that your &lt;code>magic-modules&lt;/code>, &lt;code>terraform-provider-google&lt;/code>, and &lt;code>terraform-provider-google-beta&lt;/code> repositories are up to date.
-&lt;pre tabindex="0">&lt;code>cd ~/magic-modules
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-&lt;/code>&lt;/pre>&lt;/li>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>cd ~/magic-modules
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
 &lt;/ol>
 &lt;h2 id="add-a-resource-1">
  Add a resource
@@ -369,40 +369,13 @@ additional work to implement.&lt;/p></description></item><item><title>Labels and
  &lt;code>make&lt;/code> / &lt;code>make provider&lt;/code>
  &lt;a class="anchor" href="#make--make-provider">#&lt;/a>
 &lt;/h3>
-&lt;p>Generates the code for the downstream &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/code> providers.&lt;/p>
+&lt;p>Generates the code for the downstream &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/code> providers
+into the &lt;code>OUTPUT_PATH&lt;/code>, overriding and deleting any local changes.&lt;/p>
 &lt;blockquote class="book-hint info">
  &lt;strong>Note:&lt;/strong> Generation works best if the downstream provider has a commit checked out corresponding to the latest &lt;code>main&lt;/code> branch commit that is present in your &lt;code>magic-modules&lt;/code> working branch. This can generally be identified based on matching commit messages.
 &lt;/blockquote>
 
-&lt;p>Examples:&lt;/p>
-&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>make provider VERSION&lt;span style="color:#f92672">=&lt;/span>ga OUTPUT_PATH&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>$GOPATH&lt;span style="color:#e6db74">/src/github.com/hashicorp/terraform-provider-google&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>make provider VERSION&lt;span style="color:#f92672">=&lt;/span>beta OUTPUT_PATH&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>$GOPATH&lt;span style="color:#e6db74">/src/github.com/hashicorp/terraform-provider-google-beta&amp;#34;&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># Only generate a specific product (plus all common files)&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>make provider VERSION&lt;span style="color:#f92672">=&lt;/span>ga OUTPUT_PATH&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>$GOPATH&lt;span style="color:#e6db74">/src/github.com/hashicorp/terraform-provider-google&amp;#34;&lt;/span> PRODUCT&lt;span style="color:#f92672">=&lt;/span>pubsub
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># Only generate only a specific resources for a product&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>make provider VERSION&lt;span style="color:#f92672">=&lt;/span>ga OUTPUT_PATH&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>$GOPATH&lt;span style="color:#e6db74">/src/github.com/hashicorp/terraform-provider-google&amp;#34;&lt;/span> PRODUCT&lt;span style="color:#f92672">=&lt;/span>pubsub RESOURCE&lt;span style="color:#f92672">=&lt;/span>Topic
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>&lt;span style="color:#75715e"># Only generate common files, including all third_party code&lt;/span>
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>make provider VERSION&lt;span style="color:#f92672">=&lt;/span>ga OUTPUT_PATH&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;&lt;/span>$GOPATH&lt;span style="color:#e6db74">/src/github.com/hashicorp/terraform-provider-google&amp;#34;&lt;/span> PRODUCT&lt;span style="color:#f92672">=&lt;/span>doesnotexist
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h4 id="arguments">
- Arguments
- &lt;a class="anchor" href="#arguments">#&lt;/a>
-&lt;/h4>
-&lt;ul>
-&lt;li>&lt;code>OUTPUT_PATH&lt;/code>: Required. The location you are generating provider code into.&lt;/li>
-&lt;li>&lt;code>VERSION&lt;/code>: Required. The version of the provider you are building into. Valid values are &lt;code>ga&lt;/code> and &lt;code>beta&lt;/code>.&lt;/li>
-&lt;li>&lt;code>PRODUCT&lt;/code>: Limits generations to the specified folder within &lt;code>mmv1/products&lt;/code> or &lt;code>tpgtools/api&lt;/code>. Handwritten files from &lt;code>mmv1/third_party/terraform&lt;/code> are always generated into the downstream regardless of this setting, so you can provide a non-existent product name to generate only handwritten code. Required if &lt;code>RESOURCE&lt;/code> is specified.&lt;/li>
-&lt;li>&lt;code>RESOURCE&lt;/code>: Limits generation to the specified resource within a particular product. For &lt;code>mmv1&lt;/code> resources, matches the resource&amp;rsquo;s &lt;code>name&lt;/code> field (set in its configuration file).For &lt;code>tpgtools&lt;/code> resources, matches the terraform resource name.&lt;/li>
-&lt;li>&lt;code>ENGINE&lt;/code>: Modifies &lt;code>make provider&lt;/code> to only generate code using the specified engine. Valid values are &lt;code>mmv1&lt;/code> or &lt;code>tpgtools&lt;/code>. (Providing &lt;code>tpgtools&lt;/code> will still generate any prerequisite mmv1 files required for tpgtools.)&lt;/li>
-&lt;/ul>
-&lt;h4 id="cleaning-up-old-files">
- Cleaning up old files
- &lt;a class="anchor" href="#cleaning-up-old-files">#&lt;/a>
-&lt;/h4>
-&lt;p>Magic Modules will only generate on top of whatever is in the downstream repository. This means that, from time
-to time, you may end up with stale files or changes in your downstream that cause compilation or tests to fail.&lt;/p></description></item><item><title>Review a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/code-review/review-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/code-review/review-pr/</guid><description>&lt;h1 id="review-a-pull-request">
+&lt;p>Examples:&lt;/p></description></item><item><title>Review a pull request</title><link>https://googlecloudplatform.github.io/magic-modules/code-review/review-pr/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/code-review/review-pr/</guid><description>&lt;h1 id="review-a-pull-request">
  Review a pull request
  &lt;a class="anchor" href="#review-a-pull-request">#&lt;/a>
 &lt;/h1>
@@ -535,13 +508,13 @@ Some acceptance tests may be skipped in VCR and manual testing is required.
 &lt;ol>
 &lt;li>Complete the steps in &lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/">Set up your development environment&lt;/a> to set up your environment and your Google Cloud project.&lt;/li>
 &lt;li>Ensure that your &lt;code>magic-modules&lt;/code>, &lt;code>terraform-provider-google&lt;/code>, and &lt;code>terraform-provider-google-beta&lt;/code> repositories are up to date.
-&lt;pre tabindex="0">&lt;code>cd ~/magic-modules
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-&lt;/code>&lt;/pre>&lt;/li>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>cd ~/magic-modules
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
 &lt;/ol>
 &lt;h2 id="add-iam-support-1">
  Add IAM support
@@ -635,13 +608,7 @@ provider changes to the &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/c
 &lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/custom-code/">Adding custom resource code&lt;/a>.&lt;/li>
 &lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/promote-to-ga/">Promoting a resource to GA&lt;/a>.&lt;/li>
 &lt;/ul>
-&lt;h2 id="generate-a-provider-change">
- Generate a provider change
- &lt;a class="anchor" href="#generate-a-provider-change">#&lt;/a>
-&lt;/h2>
-&lt;ol>
-&lt;li>
-&lt;p>Clone the &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/code> provider repositories with the following commands:&lt;/p></description></item><item><title>Client-side fields</title><link>https://googlecloudplatform.github.io/magic-modules/develop/client-side-fields/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/client-side-fields/</guid><description>&lt;h1 id="client-side-fields">
+&lt;p>By default, running a full &lt;code>make provider&lt;/code> command cleans the output directory (&lt;code>OUTPUT_PATH&lt;/code>) before generating code to prevent sync issues. This will override and delete any changes to that directory. See the &lt;a href="https://googlecloudplatform.github.io/magic-modules/reference/make-commands/">&lt;code>make&lt;/code> commands reference&lt;/a> for details on advanced usage.&lt;/p></description></item><item><title>Client-side fields</title><link>https://googlecloudplatform.github.io/magic-modules/develop/client-side-fields/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/client-side-fields/</guid><description>&lt;h1 id="client-side-fields">
  Client-side fields
  &lt;a class="anchor" href="#client-side-fields">#&lt;/a>
 &lt;/h1>

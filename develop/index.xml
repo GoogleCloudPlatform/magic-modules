@@ -43,13 +43,13 @@ all resources associated with the project.
 &lt;ol>
 &lt;li>Complete the steps in &lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/">Set up your development environment&lt;/a> to set up your environment and your Google Cloud project.&lt;/li>
 &lt;li>Ensure that your &lt;code>magic-modules&lt;/code>, &lt;code>terraform-provider-google&lt;/code>, and &lt;code>terraform-provider-google-beta&lt;/code> repositories are up to date.
-&lt;pre tabindex="0">&lt;code>cd ~/magic-modules
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-&lt;/code>&lt;/pre>&lt;/li>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>cd ~/magic-modules
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
 &lt;/ol>
 &lt;h2 id="add-a-resource-1">
  Add a resource
@@ -86,13 +86,13 @@ additional work to implement.&lt;/p></description></item><item><title>Add IAM su
 &lt;ol>
 &lt;li>Complete the steps in &lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/set-up-dev-environment/">Set up your development environment&lt;/a> to set up your environment and your Google Cloud project.&lt;/li>
 &lt;li>Ensure that your &lt;code>magic-modules&lt;/code>, &lt;code>terraform-provider-google&lt;/code>, and &lt;code>terraform-provider-google-beta&lt;/code> repositories are up to date.
-&lt;pre tabindex="0">&lt;code>cd ~/magic-modules
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-git checkout main &amp;amp;&amp;amp; git clean -f . &amp;amp;&amp;amp; git checkout -- . &amp;amp;&amp;amp; git pull
-&lt;/code>&lt;/pre>&lt;/li>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>cd ~/magic-modules
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>git checkout main &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git clean -f . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git checkout -- . &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> git pull
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
 &lt;/ol>
 &lt;h2 id="add-iam-support-1">
  Add IAM support
@@ -168,13 +168,7 @@ provider changes to the &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/c
 &lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/custom-code/">Adding custom resource code&lt;/a>.&lt;/li>
 &lt;li>&lt;a href="https://googlecloudplatform.github.io/magic-modules/develop/promote-to-ga/">Promoting a resource to GA&lt;/a>.&lt;/li>
 &lt;/ul>
-&lt;h2 id="generate-a-provider-change">
- Generate a provider change
- &lt;a class="anchor" href="#generate-a-provider-change">#&lt;/a>
-&lt;/h2>
-&lt;ol>
-&lt;li>
-&lt;p>Clone the &lt;code>google&lt;/code> and &lt;code>google-beta&lt;/code> provider repositories with the following commands:&lt;/p></description></item><item><title>Client-side fields</title><link>https://googlecloudplatform.github.io/magic-modules/develop/client-side-fields/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/client-side-fields/</guid><description>&lt;h1 id="client-side-fields">
+&lt;p>By default, running a full &lt;code>make provider&lt;/code> command cleans the output directory (&lt;code>OUTPUT_PATH&lt;/code>) before generating code to prevent sync issues. This will override and delete any changes to that directory. See the &lt;a href="https://googlecloudplatform.github.io/magic-modules/reference/make-commands/">&lt;code>make&lt;/code> commands reference&lt;/a> for details on advanced usage.&lt;/p></description></item><item><title>Client-side fields</title><link>https://googlecloudplatform.github.io/magic-modules/develop/client-side-fields/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/develop/client-side-fields/</guid><description>&lt;h1 id="client-side-fields">
  Client-side fields
  &lt;a class="anchor" href="#client-side-fields">#&lt;/a>
 &lt;/h1>
