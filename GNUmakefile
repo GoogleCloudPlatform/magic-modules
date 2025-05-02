@@ -85,9 +85,9 @@ tpgtools: serialize
 clean-provider: check_safe_build
 	@if [ -n "$(PRODUCT)" ]; then \
 		printf "\n\e[1;33mWARNING:\e[0m Skipping clean-provider step because PRODUCT ('$(PRODUCT)') is set.\n"; \
-		printf "         Ensure your downstream repository is synchronized with the Magic Modules branch\n"; \
-		printf "         to avoid potential build inconsistencies.\n"; \
-		printf "         Downstream repository (OUTPUT_PATH): %s\n\n" "$(OUTPUT_PATH)"; \
+		printf " Ensure your downstream repository is synchronized with the Magic Modules branch\n"; \
+		printf " to avoid potential build inconsistencies.\n"; \
+		printf " Downstream repository (OUTPUT_PATH): %s\n\n" "$(OUTPUT_PATH)"; \
 	elif [ "$(SHOULD_SKIP_CLEAN)" = "true" ]; then \
 		printf "\e[1;33mINFO:\e[0m Skipping clean-provider step because SKIP_CLEAN is set to a non-false value ('$(SKIP_CLEAN)').\n"; \
 	else \
@@ -95,31 +95,22 @@ clean-provider: check_safe_build
 		( \
 			cd $(OUTPUT_PATH) && \
 			echo "---> Changing directory to $(OUTPUT_PATH)" && \
-			echo "---> Downloading Go module dependencies... (Ensures tools like gofmt can find relevant code)" && \
-			go mod download && \
-			echo "---> Finding files to remove..." && \
-			find . -type f \
-				-not -wholename "./.git*" \
-				-not -wholename "./.changelog*" \
-				-not -name ".travis.yml" \
-				-not -name ".golangci.yml" \
-				-not -name "CHANGELOG.md" \
-				-not -name "CHANGELOG_v*.md" \
-				-not -name "GNUmakefile" \
-				-not -name "docscheck.sh" \
-				-not -name "LICENSE" \
-				-not -name "CODEOWNERS" \
-				-not -name "README.md" \
-				-not -name ".go-version" \
-				-not -name ".hashibot.hcl" \
-				-not -name "go.mod" \
-				-not -name "go.sum" \
-				-not -wholename "./examples*" \
-				-print0 | xargs -0 --no-run-if-empty rm -f && \
-			echo "---> clean-provider actions finished." \
+			if ! command -v git > /dev/null 2>&1; then \
+				printf "\e[1;33mINFO:\e[0m Skipping git-based cleaning because git is not installed.\n"; \
+			elif ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then \
+				printf "\e[1;33mINFO:\e[0m Skipping git-based cleaning because $(OUTPUT_PATH) is not a git repository.\n"; \
+			else \
+				echo "---> Downloading Go module dependencies... (Ensures tools like gofmt can find relevant code)" && \
+				go mod download && \
+				echo "---> Finding tracked files to remove..." && \
+				git ls-files | grep -v -E '(\.git|\.changelog|\.travis\.yml|\.golangci\.yml|CHANGELOG\.md|CHANGELOG_v.*\.md|GNUmakefile|docscheck\.sh|LICENSE|CODEOWNERS|README\.md|\.go-version|\.hashibot\.hcl|go\.mod|go\.sum|examples)' | xargs -r git rm -q -f && \
+				echo "---> Tracked files have been removed with git rm" && \
+				echo "---> Unstaging changes with git reset..." && \
+				git reset -q && \
+				echo "---> clean-provider actions finished. Changes have been unstaged."; \
+			fi \
 		) && echo "clean-provider target finished successfully."; \
 	fi
-
 
 clean-tgc:
 	cd $(OUTPUT_PATH);\
