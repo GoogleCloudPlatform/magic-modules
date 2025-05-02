@@ -1649,7 +1649,7 @@ func testAccAlloydbCluster_withDenyPeriods(context map[string]interface{}) strin
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-east2"
+  location   = "asia-east1"
   network_config {
 		network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
@@ -1683,7 +1683,7 @@ func testAccAlloydbCluster_withUpdateToDenyPeriods(context map[string]interface{
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-east2"
+  location   = "asia-east1"
   network_config {
 		network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
@@ -1717,7 +1717,7 @@ func testAccAlloydbCluster_removeDenyPeriods(context map[string]interface{}) str
 	return acctest.Nprintf(`
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-east2"
+  location   = "asia-east1"
   network_config {
 		network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
