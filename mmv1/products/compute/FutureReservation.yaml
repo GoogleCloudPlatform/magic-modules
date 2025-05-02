@@ -96,7 +96,6 @@ properties:
     type: String
     description: |
       An optional description of this resource.
-    immutable: true
   - name: 'timeWindow'
     type: NestedObject
     description: |
@@ -112,7 +111,6 @@ properties:
         type: String
         description: |
           End time of the future reservation in RFC3339 format.
-        required: true
       - name: 'duration'
         type: NestedObject
         description: |
@@ -186,7 +184,6 @@ properties:
           - 'FULFILLED'
           - 'PENDING_AMENDMENT_APPROVAL'
           - 'PENDING_APPROVAL'
-          - 'PROCUREMENT_STATUS_UNSPECIFIED'
           - 'PROCURING'
           - 'PROVISIONING'
       - name: 'lockTime'
@@ -216,12 +213,10 @@ properties:
         type: Enum
         description: |
           The current status of the requested amendment.
-        output: true
       - name: 'lastKnownGoodState'
         type: NestedObject
         description: |
           This field represents the future reservation before an amendment was requested. If the amendment is declined, the Future Reservation will be reverted to the last known good state. The last known good state is not set when updating a future reservation whose Procurement Status is DRAFTING.
-        output: true
         properties:
           - name: 'futureReservationSpecs'
             type: NestedObject
@@ -232,7 +227,6 @@ properties:
                 type: NestedObject
                 description: |
                   The previous instance related properties of the Future Reservation.
-                output: true
                 properties:
                   - name: 'instanceProperties'
                     type: NestedObject
@@ -306,13 +300,11 @@ properties:
                 type: NestedObject
                 description: |
                   [Output Only] The previous time window of the Future Reservation.
-                output: true
                 properties:
                   - name: 'startTime'
                     type: String
                     description: |
                       Start time of the Future Reservation. The startTime is an RFC3339 string.
-                    output: true
                   - name: 'endTime'
                     type: String
                     description: |
@@ -334,7 +326,6 @@ properties:
                 type: NestedObject
                 description: |
                   The previous share settings of the Future Reservation.
-                output: true
                 properties:
                   - name: 'shareType'
                     type: Enum
@@ -343,7 +334,6 @@ properties:
                     enum_values:
                       - 'LOCAL'
                       - 'ORGANIZATION'
-                      - 'SHARE_TYPE_UNSPECIFIED'
                       - 'SPECIFIC_PROJECTS'
                   - name: 'projects'
                     type: Array
@@ -370,27 +360,22 @@ properties:
             type: Enum
             description: |
               The status of the last known good state for the Future Reservation
-            output: true
           - name: 'namePrefix'
             type: String
             description: |
               The name prefix of the Future Reservation before an amendment was requested.
-            output: true
           - name: 'description'
             type: String
             description: |
               The description of the FutureReservation before an amendment was requested.
-            output: true
           - name: 'lockTime'
             type: String
             description: |
               The lock time of the FutureReservation before an amendment was requested.
-            output: true
           - name: 'existingMatchingUsageInfo'
             type: NestedObject
             description: |
               Represents the matching usage for the future reservation before an amendment was requested.
-            output: true
             properties:
               - name: 'count'
                 type: String
@@ -406,7 +391,6 @@ properties:
       Planning state before being submitted for evaluation
     enum_values:
       - 'DRAFT'
-      - 'PLANNING_STATUS_UNSPECIFIED'
       - 'SUBMITTED'
     default_from_api: true
   - name: 'autoDeleteAutoCreatedReservations'
@@ -428,7 +412,6 @@ properties:
       Type of the deployment requested as part of future reservation.
     enum_values:
       - 'DENSE'
-      - 'DEPLOYMENT_TYPE_UNSPECIFIED'
       - 'FLEXIBLE'
   - name: 'reservationMode'
     type: Enum
@@ -437,7 +420,6 @@ properties:
     enum_values:
       - 'CALENDAR'
       - 'DEFAULT'
-      - 'RESERVATION_MODE_UNSPECIFIED'
   - name: 'commitmentInfo'
     type: NestedObject
     description: |
@@ -461,14 +443,12 @@ properties:
           Only applicable if FR is delivering to the same reservation. If set, all parent commitments will be extended to match the end date of the plan for this commitment.
         enum_values:
           - 'EXTEND'
-          - 'PREVIOUSCOMMITMENTTERM_UNSPECIFIED'
   - name: 'schedulingType'
     type: Enum
     description: |
       Maintenance information for this reservation
     enum_values:
       - 'GROUPED'
-      - 'GROUP_MAINTENANCE_TYPE_UNSPECIFIED'
       - 'INDEPENDENT'
   - name: 'specificSkuProperties'
     type: NestedObject

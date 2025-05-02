@@ -56,11 +56,12 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
   name     = "tf-fr%{random_suffix}"
   name_prefix = "fr-%{random_suffix}"
   project  = "%{project}"
+  planning_status = "DRAFT"
   auto_delete_auto_created_reservations = true
   description      = "test future reservation"
   time_window {
-    start_time = "2025-08-01T00:00:00Z"
-    end_time   = "2025-08-02T00:00:00Z"
+    start_time = "2025-11-01T00:00:00Z"
+    end_time   = "2025-11-02T00:00:00Z"
   }
 
   specific_sku_properties {
@@ -80,11 +81,12 @@ resource "google_compute_future_reservation" "gce_future_reservation" {
   name     = "tf-fr%{random_suffix}"
   name_prefix = "fru-%{random_suffix}"
   project  = "%{project}"
+  planning_status = "SUBMITTED"
   auto_delete_auto_created_reservations = false
-  description      = "test future reservation"
+  description      = "test updated future reservation"
   time_window {
-    start_time = "2025-08-01T00:00:00Z"
-    end_time   = "2025-08-02T00:00:00Z"
+    start_time = "2025-11-01T00:00:00Z"
+    end_time   = "2025-11-02T00:00:00Z"
   }
   specific_sku_properties {
     total_count = "1"
