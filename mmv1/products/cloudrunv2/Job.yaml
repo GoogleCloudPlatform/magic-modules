@@ -484,9 +484,9 @@ properties:
                       send_empty_value: true
                       allow_empty_object: true
                       exactly_one_of:
-                        - 'template.0.spec.0.containers.0.startup_probe.0.tcp_socket'
-                        - 'template.0.spec.0.containers.0.startup_probe.0.http_get'
-                        - 'template.0.spec.0.containers.0.startup_probe.0.grpc'
+                        - 'template.0.containers.0.startup_probe.0.tcp_socket'
+                        - 'template.0.containers.0.startup_probe.0.http_get'
+                        - 'template.0.containers.0.startup_probe.0.grpc'
                       properties:
                         - name: 'port'
                           type: Integer
@@ -501,9 +501,9 @@ properties:
                       send_empty_value: true
                       allow_empty_object: true
                       exactly_one_of:
-                        - 'template.0.spec.0.containers.0.startup_probe.0.tcp_socket'
-                        - 'template.0.spec.0.containers.0.startup_probe.0.http_get'
-                        - 'template.0.spec.0.containers.0.startup_probe.0.grpc'
+                        - 'template.0.containers.0.startup_probe.0.tcp_socket'
+                        - 'template.0.containers.0.startup_probe.0.http_get'
+                        - 'template.0.containers.0.startup_probe.0.grpc'
                       properties:
                         - name: 'path'
                           type: String
@@ -541,9 +541,9 @@ properties:
                       send_empty_value: true
                       allow_empty_object: true
                       exactly_one_of:
-                        - 'template.0.spec.0.containers.0.startup_probe.0.tcp_socket'
-                        - 'template.0.spec.0.containers.0.startup_probe.0.http_get'
-                        - 'template.0.spec.0.containers.0.startup_probe.0.grpc'
+                        - 'template.0.containers.0.startup_probe.0.tcp_socket'
+                        - 'template.0.containers.0.startup_probe.0.http_get'
+                        - 'template.0.containers.0.startup_probe.0.grpc'
                       properties:
                         - name: 'port'
                           type: Integer
@@ -595,8 +595,8 @@ properties:
                       send_empty_value: true
                       allow_empty_object: true
                       exactly_one_of:
-                        - 'template.0.spec.0.containers.0.liveness_probe.0.http_get'
-                        - 'template.0.spec.0.containers.0.liveness_probe.0.grpc'
+                        - 'template.0.containers.0.liveness_probe.0.http_get'
+                        - 'template.0.containers.0.liveness_probe.0.grpc'
                       properties:
                         - name: 'path'
                           type: String
@@ -634,8 +634,8 @@ properties:
                       send_empty_value: true
                       allow_empty_object: true
                       exactly_one_of:
-                        - 'template.0.spec.0.containers.0.liveness_probe.0.http_get'
-                        - 'template.0.spec.0.containers.0.liveness_probe.0.grpc'
+                        - 'template.0.containers.0.liveness_probe.0.http_get'
+                        - 'template.0.containers.0.liveness_probe.0.grpc'
                       properties:
                         - name: 'port'
                           type: Integer
