@@ -437,6 +437,12 @@ properties:
                   type: String
                   description: |-
                     Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image.
+                - name: 'dependsOn'
+                  type: Array
+                  description: |-
+                    Names of the containers that must start before this container.
+                  item_type:
+                    type: String
           - name: 'volumes'
             type: Array
             description: |-
