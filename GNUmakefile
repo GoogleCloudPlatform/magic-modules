@@ -103,8 +103,7 @@ clean-provider: check_safe_build
 				echo "---> Downloading Go module dependencies... (Ensures tools like gofmt can find relevant code)" && \
 				go mod download && \
 				echo "---> Finding tracked files to remove..." && \
-				git ls-files | grep -v -E '(\.git|\.changelog|\.travis\.yml|\.golangci\.yml|CHANGELOG\.md|CHANGELOG_v.*\.md|GNUmakefile|docscheck\.sh|LICENSE|CODEOWNERS|README\.md|\.go-version|\.hashibot\.hcl|go\.mod|go\.sum|examples)' | xargs -r git rm -q -f && \
-				echo "---> Tracked files have been removed with git rm" && \
+				git ls-files | grep -v -E '(^\.git|^\.changelog|^\.travis\.yml$$|^\.golangci\.yml$$|^CHANGELOG\.md$$|^CHANGELOG_v.*\.md$$|^GNUmakefile$$|^docscheck\.sh$$|^LICENSE$$|^CODEOWNERS$$|^README\.md$$|^\.go-version$$|^\.hashibot\.hcl$$|^go\.mod$$|^go\.sum$$|^examples)' | xargs -r git rm -f -q && \
 				echo "---> Unstaging changes with git reset..." && \
 				git reset -q && \
 				echo "---> clean-provider actions finished. Changes have been unstaged."; \
