@@ -5,7 +5,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
 )
 
-func ConvertResource(asset *caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func ConvertResource(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
 	converter, ok := ConverterMap[asset.Type]
 	if !ok {
 		return nil, nil

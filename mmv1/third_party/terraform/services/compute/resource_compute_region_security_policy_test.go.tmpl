@@ -1,12 +1,13 @@
 package compute_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	{{- if ne $.TargetVersionName "ga" }}
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	{{- end }}
 )
 
 func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyBasicUpdateExample(t *testing.T) {
@@ -721,6 +722,7 @@ func testAccComputeRegionSecurityPolicy_withMultipleEnforceOnKeyConfigs_update(c
 	`, context)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeRegionSecurityPolicy_regionSecurityPolicyWithRulesNetworkMatch(t *testing.T) {
 	t.Parallel()
 
@@ -941,5 +943,4 @@ func testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context map[stri
 	}
 	`, context)
 }
-
 {{- end }}
