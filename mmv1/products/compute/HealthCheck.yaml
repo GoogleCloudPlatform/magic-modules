@@ -900,21 +900,9 @@ properties:
         type: Integer
         description: |
           The port number for the health check request.
-          Must be specified if portName and portSpecification are not set
-          or if port_specification is USE_FIXED_PORT. Valid values are 1 through 65535.
+          Must be specified if port_specification is USE_FIXED_PORT. Valid values are 1 through 65535.
         at_least_one_of:
           - 'grpc_tls_health_check.0.port'
-          - 'grpc_tls_health_check.0.port_name'
-          - 'grpc_tls_health_check.0.port_specification'
-          - 'grpc_tls_health_check.0.grpc_service_name'
-      - name: 'portName'
-        type: String
-        description: |
-          Port name as defined in InstanceGroup#NamedPort#name. If both port and
-          port_name are defined, port takes precedence.
-        at_least_one_of:
-          - 'grpc_tls_health_check.0.port'
-          - 'grpc_tls_health_check.0.port_name'
           - 'grpc_tls_health_check.0.port_specification'
           - 'grpc_tls_health_check.0.grpc_service_name'
       - name: 'portSpecification'
@@ -932,11 +920,9 @@ properties:
             port or named port specified in the Backend Service is used for health
             checking.
 
-          If not specified, gRPC with TLS health check follows behavior specified in `port` and
-          `portName` fields.
+          If not specified, gRPC with TLS health check follows behavior specified in the `port` field.
         at_least_one_of:
           - 'grpc_tls_health_check.0.port'
-          - 'grpc_tls_health_check.0.port_name'
           - 'grpc_tls_health_check.0.port_specification'
           - 'grpc_tls_health_check.0.grpc_service_name'
         enum_values:
@@ -953,7 +939,6 @@ properties:
           The grpcServiceName can only be ASCII.
         at_least_one_of:
           - 'grpc_tls_health_check.0.port'
-          - 'grpc_tls_health_check.0.port_name'
           - 'grpc_tls_health_check.0.port_specification'
           - 'grpc_tls_health_check.0.grpc_service_name'
   - name: 'logConfig'
