@@ -60,3 +60,79 @@ func subnetworkLogConfigDiffSuppress(k, old, new string, d *schema.ResourceData)
 
 	return false
 }
+
+// DiffSuppressFunc for `secondary_ip_range`.
+func suppressUnmanagedSecondaryIpRangesDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
+	// Check if secondary_ip_range is part of the diff
+	if !diff.HasChange("secondary_ip_range") {
+		return nil
+	}
+
+	oldRaw, newRaw := diff.GetChange("secondary_ip_range")
+
+	// Get the set of ranges from the prior state
+	oldSet, ok := oldRaw.(*schema.Set)
+	if !ok {
+		// If prior state wasn't a set (e.g., first run), don't suppress
+		return nil
+	}
+	priorStateRanges := map[int]interface{}{}
+	for _, item := range oldSet.List() {
+		priorStateRanges[schema.HashKey(item)] = item
+	}
+
+	// Get the set of ranges from the config (new desired state)
+	newSet, ok := newRaw.(*schema.Set)
+	if !ok {
+		// Should not happen if HasChange is true, but handle defensively
+		return nil
+	}
+	configRanges := map[int]interface{}{}
+	for _, item := range newSet.List() {
+		configRanges[schema.HashKey(item)] = item
+	}
+
+	// Get the set of ranges read from the API (during refresh, stored in the diff's "old" value)
+	// Note: diff.Get() returns the state *after* refresh, which might include unmanaged ranges.
+	refreshedStateRangesRaw := diff.Get("secondary_ip_range")
+	refreshedSet, ok := refreshedStateRangesRaw.(*schema.Set)
+	if !ok {
+		// If refreshed state isn't a set, something is wrong, don't suppress
+		return nil
+	}
+	refreshedStateRanges := map[int]interface{}{}
+	for _, item := range refreshedSet.List() {
+		refreshedStateRanges[schema.HashKey(item)] = item
+	}
+
+	// Check if the only change is the removal of ranges not previously managed by Terraform
+	onlyRemovingUnmanaged := true
+	for hash, _ := range refreshedStateRanges {
+		_, inConfig := configRanges[hash]
+		_, inPriorState := priorStateRanges[hash]
+
+		if !inConfig && inPriorState {
+			// A range managed by TF is being removed by the config - DO NOT suppress
+			onlyRemovingUnmanaged = false
+			break
+		}
+		if inConfig && !inPriorState {
+			// A range is being added by the config - DO NOT suppress (let the add happen)
+			// Or a range is being modified (handled by hash changes) - DO NOT suppress
+			onlyRemovingUnmanaged = false
+			break
+		}
+		// Cases covered:
+		// - !inConfig && !inPriorState: Unmanaged range exists in API, ignore.
+		// - inConfig && inPriorState: Managed range exists and is still in config, ignore.
+	}
+
+	if onlyRemovingUnmanaged && len(refreshedStateRanges) > len(configRanges) {
+		// Suppress the diff for secondary_ip_range if the only difference is
+		// the presence of unmanaged ranges in the refreshed state.
+		// Use a plan modifier to set the computed value back to the refreshed state.
+		return tfplanmodifier.SetAttributeComputed(diff, "secondary_ip_range")
+	}
+
+	return nil
+}

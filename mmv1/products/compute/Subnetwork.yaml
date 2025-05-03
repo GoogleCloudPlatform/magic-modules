@@ -70,6 +70,7 @@ custom_code:
 custom_diff:
   - 'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)'
   - 'sendSecondaryIpRangeIfEmptyDiff'
+  - 'suppressUnmanagedSecondaryIpRangesDiff'
 sweeper:
   dependencies:
     - "google_compute_forwarding_rule"
