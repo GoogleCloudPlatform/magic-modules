@@ -5,8 +5,21 @@ func sensitiveLabelCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v
 	for _, sl := range sensitiveLabels {
 		mapLabel := diff.Get("labels." + sl).(string)
 		authLabel := diff.Get("sensitive_labels.0." + sl).(string)
-		if mapLabel != "" && authLabel != "" {
-			return fmt.Errorf("Sensitive label [%s] cannot be set in both `labels` and the `sensitive_labels` block.", sl)
+		woLabel := diff.Get("sensitive_labels.0." + sl + "_wo").(string)
+		count := 0
+
+		if mapLabel != "" {
+			count++
+		}
+		if authLabel != "" {
+			count++
+		}
+		if woLabel != "" {
+			count++
+		}
+
+		if count > 1 {
+			return fmt.Errorf("Sensitive label [%s] cannot be set in multiple places. Use only one of `labels`, `sensitive_labels`, or `sensitive_labels_wo`.", sl)
 		}
 	}
 	return nil
