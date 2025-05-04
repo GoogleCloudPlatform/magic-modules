@@ -66,9 +66,6 @@ iam_policy:
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/subnetwork.tmpl'
   constants: 'templates/terraform/constants/subnetwork.tmpl'
-  imports:
-    - "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-    - "github.com/hashicorp/terraform-provider-google-beta/google-beta/tfplanmodifier"
   post_update: 'templates/terraform/post_update/compute_subnetwork.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)'
