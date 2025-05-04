@@ -22,15 +22,17 @@ for _, sl := range sensitiveLabels {
 	if auth, _ := d.GetOkExists("sensitive_labels.0." + sl); auth != "" {
 		labels[sl] = auth.(string)
 	}
-	if auth, _ := d.GetOkExists("sensitive_labels_wo.0." + sl + "_wo"); auth != "" {
-		labels[sl] = auth.(string)
-	}
 }
 
-obj["labels"] = labels
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
+	for _, sp := range sensitiveWoLabels {
+		if auth, _ := d.GetRawConfigAt(cty.GetAttrPath("sensitive_labels_wo").IndexInt(0).GetAttr(sp)); !auth.IsNull() && auth.Type().Equals(cty.String) {
+			sp = sp[:len(sp)-3] // _wo is convention for write-only labels and are removed here
+			labels[sp] = auth.AsString()
+		}
+	}
+{{- end }}
 
-delete(obj, "sensitive_labels_wo.0.auth_token_wo_version")
-delete(obj, "sensitive_labels_wo.0.password_wo_version")
-delete(obj, "sensitive_labels_wo.0.service_key_wo_version")
+obj["labels"] = labels
 
 return obj, nil
