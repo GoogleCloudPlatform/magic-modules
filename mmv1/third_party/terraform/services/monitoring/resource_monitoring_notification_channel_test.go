@@ -110,6 +110,7 @@ func TestAccMonitoringNotificationChannel_updateSensitiveLabels_slack(t *testing
 		},
 	})
 }
+
 func TestAccMonitoringNotificationChannel_updateSensitiveLabels(t *testing.T) {
 	t.Parallel()
 
@@ -134,6 +135,48 @@ func TestAccMonitoringNotificationChannel_updateSensitiveLabels(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels.%", "labels.password", "sensitive_labels"},
+			},
+		},
+	})
+}
+
+func TestAccMonitoringNotificationChannel_updateSensitiveLabelsWo(t *testing.T) {
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringNotificationChannelDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMonitoringNotificationChannel_createSensitiveWoLabels(),
+			},
+			{
+				ResourceName:            "google_monitoring_notification_channel.pagerduty",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.%", "sensitive_labels_wo"},
+			},
+			{
+				ResourceName:            "google_monitoring_notification_channel.basicauth",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.%", "sensitive_labels_wo"},
+			},
+			{
+				Config: testAccMonitoringNotificationChannel_updateSensitiveWoLabels(),
+			},
+			{
+				ResourceName:            "google_monitoring_notification_channel.pagerduty",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.%", "sensitive_labels_wo"},
+			},
+			{
+				ResourceName:            "google_monitoring_notification_channel.basicauth",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.%", "sensitive_labels_wo"},
 			},
 		},
 	})
@@ -229,6 +272,64 @@ resource "google_monitoring_notification_channel" "pagerduty" {
 
 	sensitive_labels {
 		service_key = "some_service_key"
+	}
+}
+`)
+}
+
+func testAccMonitoringNotificationChannel_createSensitiveWoLabels() string {
+	return fmt.Sprintf(`
+
+resource "google_monitoring_notification_channel" "basicauth" {
+	display_name = "TFTest Basicauth Channel"
+	type         = "webhook_basicauth"
+	labels = {
+		"username" = "username"
+		"url"      = "http://fakeurl.com"
+	}
+
+	sensitive_labels_wo {
+		password_wo         = "somepassword"
+		password_wo_version = 1
+	}
+}
+
+resource "google_monitoring_notification_channel" "pagerduty" {
+	display_name = "TFTest Pagerduty Channel"
+	type         = "pagerduty"
+
+	sensitive_labels_wo {
+		service_key_wo         = "some_service_key"
+		service_key_wo_version = 1
+	}
+}
+`)
+}
+
+func testAccMonitoringNotificationChannel_updateSensitiveWoLabels() string {
+	return fmt.Sprintf(`
+
+resource "google_monitoring_notification_channel" "basicauth" {
+	display_name = "TFTest Basicauth Channel"
+	type         = "webhook_basicauth"
+	labels = {
+		"username" = "username"
+		"url"      = "http://fakeurl.com"
+	}
+
+	sensitive_labels_wo {
+		password_wo         = "another_password"
+		password_wo_version = 2
+	}
+}
+
+resource "google_monitoring_notification_channel" "pagerduty" {
+	display_name = "TFTest Pagerduty Channel"
+	type         = "pagerduty"
+
+	sensitive_labels_wo {
+		service_key_wo         = "another_service_key"
+		service_key_wo_version = 2
 	}
 }
 `)
