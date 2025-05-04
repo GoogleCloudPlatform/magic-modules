@@ -16,10 +16,20 @@ if labelmap, ok := res["labels"]; ok {
 		if _, apiOk := labels[sl]; apiOk {
 			if _, exists := d.GetOkExists("sensitive_labels.0." + sl); exists {
 				delete(labels, sl)
-			} else if _, exists := d.GetOkExists("sensitive_labels_wo.0." + sl + "_wo"); exists {
-				delete(labels, sl)
 			} else {
 				labels[sl] = d.Get("labels." + sl)
+			}
+		}
+	}
+
+	for _, sp := range sensitiveWoLabels {
+		if _, apiOk := labels[sp]; apiOk {
+			if _, exists := d.GetOkExists("sensitive_labels_wo.0." + sp); exists {
+				delete(labels, sp)
+			} else if _, exists := d.GetOkExists("sensitive_labels_wo.0." + sp + "version"); exists {
+				delete(labels, sp)
+			} else {
+				labels[sp] = d.Get("labels." + sp)
 			}
 		}
 	}

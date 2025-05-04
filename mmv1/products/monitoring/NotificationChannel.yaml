@@ -140,9 +140,9 @@ properties:
     type: NestedObject
     description: |
       Different notification type behaviors are configured primarily using the the `labels` field on this
-      resource. This block contains write-only (supported since terraform v1.11) labels which contain secrets 
+      resource. This block contains write-only (supported since terraform v1.11) labels which contain secrets
       or passwords.
-      
+
       For more info see [using write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html).
 
       Credentials may not be specified in both locations and will cause an error.
