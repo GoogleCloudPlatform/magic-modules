@@ -1,3 +1,22 @@
+if obj["instanceType"] == nil || obj["instanceType"] != nil && obj["instanceType"] == "PROVISIONED" {
+	// when provisioning a PROVISIONED instance, or instance_type is not set at all
+	// exactly one of the following fields must be specified (cannot use exatcly_one_of because of the FREE_INSTANCE case):
+	count := 0
+	if obj["autoscalingConfig"] != nil {
+		count++
+	}
+	if obj["nodeCount"] != nil {
+		count++
+	}
+	if obj["processingUnits"] != nil {
+		count++
+	}
+
+	if count != 1 {
+		return nil, fmt.Errorf("Exactly one of `autoscaling_config`, `num_nodes`, or `processing_units` must be specified")
+	}
+}
+
 // Temp Logic to accommodate autoscaling_config, processing_units and num_nodes
 if obj["processingUnits"] == nil && obj["nodeCount"] == nil && obj["autoscalingConfig"] == nil {
 	obj["nodeCount"] = 1
@@ -11,6 +30,12 @@ if obj["name"] == nil {
 	newObj["instanceId"] = d.Get("name").(string)
 } else {
 	newObj["instanceId"] = obj["name"]
+}
+if obj["instanceType"] != nil && obj["instanceType"] == "FREE_INSTANCE" {
+	// when provisioning a FREE_INSTANCE, the following fields cannot be specified
+	delete(obj, "nodeCount")
+	delete(obj, "processingUnits")
+	delete(obj, "autoscalingConfig")
 }
 delete(obj, "name")
 return newObj, nil
