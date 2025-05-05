@@ -141,7 +141,7 @@ func TestAccComputeNetworkPeering_stackType(t *testing.T) {
 
 }
 
-func TestAccComputeNetworkPeering_stackType(t *testing.T) {
+func TestAccComputeNetworkPeering_updateStrategy(t *testing.T) {
 	t.Parallel()
 
 	primaryNetworkName := fmt.Sprintf("tf-test-network-1-%d", acctest.RandInt(t))
@@ -155,7 +155,7 @@ func TestAccComputeNetworkPeering_stackType(t *testing.T) {
 		CheckDestroy:             testAccComputeNetworkPeeringDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeNetworkPeering_stackTypeDefault(primaryNetworkName, peeringNetworkName, peeringName),
+				Config: testAccComputeNetworkPeering_updateStrategyDefault(primaryNetworkName, peeringNetworkName, peeringName),
 			},
 			{
 				ResourceName:      "google_compute_network_peering.foo",
@@ -164,7 +164,7 @@ func TestAccComputeNetworkPeering_stackType(t *testing.T) {
 				ImportStateId:     importId,
 			},
 			{
-				Config: testAccComputeNetworkPeering_stackTypeUpdate(primaryNetworkName, peeringNetworkName, peeringName),
+				Config: testAccComputeNetworkPeering_updateStrategyUpdate(primaryNetworkName, peeringNetworkName, peeringName),
 			},
 			{
 				ResourceName:      "google_compute_network_peering.foo",
