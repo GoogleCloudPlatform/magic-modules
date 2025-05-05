@@ -33,6 +33,24 @@ func TestAccUniverseDomainDisk(t *testing.T) {
 	})
 }
 
+func TestAccUniverseDomainDiskImage(t *testing.T) {
+	// Skip this test in all env since this can only run in specific test project.
+	t.Skip()
+
+	universeDomain := envvar.GetTestUniverseDomainFromEnv(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccUniverseDomain_basic_disk_image(universeDomain),
+			},
+		},
+	})
+}
+
 func TestAccDefaultUniverseDomainDisk(t *testing.T) {
 	universeDomain := "googleapis.com"
 
@@ -63,6 +81,8 @@ func TestAccDefaultUniverseDomain_doesNotMatchExplicit(t *testing.T) {
 	})
 }
 
+
+
 func testAccUniverseDomain_basic_disk(universeDomain string) string {
 	return fmt.Sprintf(`
 provider "google" {
@@ -81,6 +101,23 @@ resource "google_compute_instance_template" "instance_template" {
   network_interface {
 	network = "default"
   }
+}
+`, universeDomain)
+}
+
+func testAccUniverseDomain_basic_disk_image(universeDomain string) string {
+	return fmt.Sprintf(`
+provider "google" {
+  universe_domain = "%s"
+}
+
+resource "google_compute_disk" "primary" {
+  name  = "async-test-disk"
+  type  = "pd-ssd"
+  zone  = "u-us"
+
+  physical_block_size_bytes = 4096
+  image = "projects/project-name:debian-cloud/global/images/debian-12"
 }
 `, universeDomain)
 }
