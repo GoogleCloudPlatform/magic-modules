@@ -61,4 +61,4 @@ properties:
   - name: 'description'
     type: String
     description: |
-      An optional description of this resource. Provide this property when you create the resource.
+      An optional description of this resource.
