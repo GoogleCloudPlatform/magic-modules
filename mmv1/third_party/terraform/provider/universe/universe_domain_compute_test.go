@@ -158,4 +158,3 @@ func testAccCheckComputeDiskDestroyProducer(t *testing.T) func(s *terraform.Stat
 		return nil
 	}
 }
-
