@@ -81,8 +81,6 @@ func TestAccDefaultUniverseDomain_doesNotMatchExplicit(t *testing.T) {
 	})
 }
 
-
-
 func testAccUniverseDomain_basic_disk(universeDomain string) string {
 	return fmt.Sprintf(`
 provider "google" {
@@ -160,3 +158,4 @@ func testAccCheckComputeDiskDestroyProducer(t *testing.T) func(s *terraform.Stat
 		return nil
 	}
 }
+
