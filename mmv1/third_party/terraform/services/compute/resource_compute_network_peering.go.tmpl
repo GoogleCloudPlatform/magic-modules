@@ -119,6 +119,7 @@ func ResourceComputeNetworkPeering() *schema.Resource {
 				ValidateFunc: verify.ValidateEnum([]string{"INDEPENDENT", "CONSENSUS"}),
 				Description: `The update strategy determines the semantics for updates and deletes to the peering connection configuration. The default value is INDEPENDENT. Possible values: ["INDEPENDENT", "CONSENSUS"]`,
 				Default: "INDEPENDENT",
+				Version:     "beta", // This field is only available in beta.
 			},
 		},
 		UseJSONNumber: true,
