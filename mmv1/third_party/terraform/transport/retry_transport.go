@@ -106,7 +106,6 @@ func (t *retryTransport) RoundTrip(req *http.Request) (resp *http.Response, resp
 	}
 
 	log.Printf("[DEBUG] Retry Transport: starting RoundTrip retry loop")
-Retry:
 	for {
 		// RoundTrip contract says request body can/will be consumed, so we need to
 		// copy the request body for each attempt.
