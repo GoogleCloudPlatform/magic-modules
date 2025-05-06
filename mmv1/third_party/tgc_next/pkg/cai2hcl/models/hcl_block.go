@@ -49,7 +49,7 @@ func hclWriteBlock(val cty.Value, body *hclwrite.Body) error {
 				return err
 			}
 		case objValType.IsCollectionType():
-			if objVal.LengthInt() == 0 {
+			if objVal.LengthInt() == 0 && !objValType.IsSetType() {
 				continue
 			}
 			// Presumes map should not contain object type.
