@@ -55,12 +55,16 @@ examples:
       workforce_pool_id: 'example-pool'
     test_env_vars:
       org_id: 'ORG_ID'
+    # generated iam_policy tests are bugged because IamImportQualifiersForTest()
+    # does not support 'workforce_pool_id' (see big if/else/break branching)
+    exclude_test: true
   - name: 'iam_workforce_pool_full'
     primary_resource_id: 'example'
     vars:
       workforce_pool_id: 'example-pool'
     test_env_vars:
       org_id: 'ORG_ID'
+    exclude_test: true
 iam_policy:
   parent_resource_attribute: 'workforce_pool_id'
   method_name_separator: ':'
