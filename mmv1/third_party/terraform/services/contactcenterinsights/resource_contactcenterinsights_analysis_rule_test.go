@@ -80,7 +80,7 @@ func testAccInsightsAnalysisRule(context map[string]interface{}) string {
 
 func testAccContactCenterInsightsAnalysisRule_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_contact_center_ai_insights_analysis_rule" "basic_analysis_rule" {
+resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
   display_name = "analysis-rule-display-name-%{random_suffix}"
   location = "us-central1"
   create_time = "2025-01-01T00:00:00Z"
@@ -116,7 +116,7 @@ resource "google_contact_center_ai_insights_analysis_rule" "basic_analysis_rule"
 
 func testAccContactCenterInsightsAnalysisRule_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_contact_center_ai_insights_analysis_rule" "basic_analysis_rule" {
+resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
   display_name = "analysis-rule-display-name-%{random_suffix}-updated"
   location = "us-central1"
   create_time = "2025-01-02T00:00:00Z"
