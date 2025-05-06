@@ -1,4 +1,3 @@
 resource "google_contact_center_insights_view" "{{$.PrimaryResourceId}}" {
-  name = "{{index $.Vars "resource_name"}}"
   location = "{{index $.Vars "location_name"}}"
 }
