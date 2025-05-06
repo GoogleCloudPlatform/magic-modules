@@ -1,0 +1,30 @@
+// Code to detach neg from any backend service
+backendsUrl, err := tpgresource.ReplaceVars(d, config, "{{ComputeBasePath}}projects/{{project}}/regions/{{region}}/backendServices")
+if err != nil {
+    return err
+}
+
+backendServicesRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "GET",
+    Project:   project,
+    RawURL:    backendsUrl,
+    UserAgent: userAgent,
+})
+if err != nil {
+    return transport_tpg.HandleNotFoundError(err, d, "Error while trying to list available Backend Services")
+}
+
+if backendServices, ok := backendServicesRes["items"].([]interface{}); ok {
+    for _, backendServiceI := range backendServices {
+        log.Printf("Backend Service %+v", backendServiceI)
+        backendService := backendServiceI.(map[string]interface{})
+        if backends, ok := backendService["backends"].([]interface{}); ok {
+            for _, backend := range backends {
+                log.Printf("Backend Service Backend %+v", backend)
+            }
+        }
+    }
+}
+
+log.Print("ASDFASDFASDFASDFASDFASDFASDFASSDF=[]")
