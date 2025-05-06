@@ -21,6 +21,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -39,6 +40,9 @@ type TemplateData struct {
 	TerraformResourceDirectory string
 	TerraformProviderModule    string
 
+	AnsiblePluginDirectory string
+	AnsibleTestDirectories map[string]string
+
 	// TODO rewrite: is this needed?
 	//     # Information about the local environment
 	//     # (which formatters are enabled, start-time)
@@ -50,23 +54,60 @@ var BETA_VERSION = "beta"
 var ALPHA_VERSION = "alpha"
 var PRIVATE_VERSION = "private"
 
+const ANSIBLE_PROVIDER = "ansible"
+
 var goimportFiles sync.Map
 
-func NewTemplateData(outputFolder string, versionName string) *TemplateData {
+func NewTemplateData(outputFolder string, versionName string, providerName string) *TemplateData {
 	td := TemplateData{OutputFolder: outputFolder, VersionName: versionName}
 
-	if versionName == GA_VERSION {
-		td.TerraformResourceDirectory = "google"
-		td.TerraformProviderModule = "github.com/hashicorp/terraform-provider-google"
-	} else if versionName == ALPHA_VERSION || versionName == PRIVATE_VERSION {
-		td.TerraformResourceDirectory = "google-private"
-		td.TerraformProviderModule = "internal/terraform-next"
+	// log.Printf("Generating template data for provider %s", providerName)
+	if providerName == ANSIBLE_PROVIDER {
+		td.AnsiblePluginDirectory = path.Join("plugins", "modules")
+		td.AnsibleTestDirectories = make(map[string]string)
+		td.AnsibleTestDirectories["integration"] = path.Join("tests", "integration", "targets")
 	} else {
-		td.TerraformResourceDirectory = "google-beta"
-		td.TerraformProviderModule = "github.com/hashicorp/terraform-provider-google-beta"
+		if versionName == GA_VERSION {
+			td.TerraformResourceDirectory = "google"
+			td.TerraformProviderModule = "github.com/hashicorp/terraform-provider-google"
+		} else if versionName == ALPHA_VERSION || versionName == PRIVATE_VERSION {
+			td.TerraformResourceDirectory = "google-private"
+			td.TerraformProviderModule = "internal/terraform-next"
+		} else {
+			td.TerraformResourceDirectory = "google-beta"
+			td.TerraformProviderModule = "github.com/hashicorp/terraform-provider-google-beta"
+		}
 	}
-
 	return &td
+}
+
+func (td *TemplateData) GenerateAnsibleModuleFile(outputFolder, module string, resource api.Resource) {
+	templatePath := path.Join("templates", ANSIBLE_PROVIDER, "plugins", "module.py.tmpl")
+	filePath := path.Join(outputFolder, fmt.Sprintf("%s.py", module))
+	templates := []string{
+		path.Join("templates", ANSIBLE_PROVIDER, "templates.tmpl"),
+		path.Join("templates", ANSIBLE_PROVIDER, "plugins", "documentation.tmpl"),
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
+func fileExists(filePath string) bool {
+	_, error := os.Stat(filePath)
+	return !errors.Is(error, os.ErrNotExist)
+}
+
+func (td *TemplateData) GenerateAnsibleTestFile(outputFolder, testType, filePath string, resource api.Resource, overwrite bool) {
+	template := fmt.Sprintf("%s.tmpl", filePath)
+	templatePath := path.Join("templates", ANSIBLE_PROVIDER, "tests", testType, template)
+	templates := []string{
+		path.Join("templates", ANSIBLE_PROVIDER, "templates.tmpl"),
+		templatePath,
+	}
+	outputFilePath := path.Join(outputFolder, filePath)
+	if !fileExists(outputFilePath) || overwrite {
+		td.GenerateFile(outputFilePath, templatePath, resource, false, templates...)
+	}
 }
 
 func (td *TemplateData) GenerateResourceFile(filePath string, resource api.Resource) {

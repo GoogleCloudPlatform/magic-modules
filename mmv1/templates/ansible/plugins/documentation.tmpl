@@ -1,0 +1,59 @@
+{{- define "doc_header" -}}
+################################################################################
+# Documentation
+################################################################################
+{{- end -}}
+
+{{- define "doc_metadata" -}}
+ANSIBLE_METADATA = {
+    'metadata_version': '1.1',
+    'status': ["preview"],
+    'supported_by': 'community'
+}
+{{- end -}}
+
+{{- define "doc_yaml" -}}
+DOCUMENTATION = '''
+---
+module: {{ $.AnsibleName }}
+description:
+  {{- range $desc := split (trimSpace $.Description) ".\n" }}
+- >
+    {{- range $descLine := split $desc "\n" }}
+  {{ trim $descLine "." }}
+    {{- end }}.
+  {{- end }}
+short_description: Creates a GCP {{ $.ProductMetadata.Name }}.{{ $.Name }} resource
+author: Google Inc. (@googlecloudplatform)
+requirements:
+- python >= 2.6
+- requests >= 2.18.4
+- google-auth >= 1.3.0
+options:
+  state:
+    description:
+      - Whether the given object should exist in GCP
+      choices:
+      - present
+      - absent
+      default: present
+      type: str
+  {{- range $property := $.SortedUserProperties }}
+    {{- if not $property.Output }}
+      {{- if eq $property.Type "Array" }}
+  {{ plural (underscore $property.Name) }}:
+      {{- else }}
+  {{ underscore $property.Name }}:
+      {{- end }}
+    type: {{ $property.Type }}
+    description:
+      {{- range $desc := split (trimSpace $property.Description) ".\n" }}
+      - >
+        {{- range $descLine := split (trimSpace $desc) "\n" }}
+        {{ trim $descLine "." }}
+        {{- end }}.
+      {{- end }}
+    {{- end }}
+  {{- end }}
+'''
+{{- end -}}

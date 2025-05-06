@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"text/template"
 
@@ -63,6 +64,9 @@ var TemplateFunctions = template.FuncMap{
 	"plural":        Plural,
 	"contains":      strings.Contains,
 	"join":          strings.Join,
+	"split":         strings.Split,
+	"trim":          strings.Trim,
+	"trimSpace":     strings.TrimSpace,
 	"lower":         strings.ToLower,
 	"upper":         strings.ToUpper,
 	"hasSuffix":     strings.HasSuffix,
@@ -73,6 +77,7 @@ var TemplateFunctions = template.FuncMap{
 	"plus":          plus,
 	"firstSentence": FirstSentence,
 	"trimTemplate":  TrimTemplate,
+	"now":           time.Now,
 }
 
 // Temporary function to simulate how Ruby MMv1's lines() function works
