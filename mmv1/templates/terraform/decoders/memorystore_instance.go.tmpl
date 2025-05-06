@@ -1,10 +1,5 @@
 // Retrieve pscAutoConnections from API response
 v, ok := res["pscAutoConnections"]
-if !ok {
-	if _, endpointsFound := res["endpoints"]; endpointsFound {
-		return res, nil // For Cluster Disabled instances, we would have 'endpoints' instead of 'pscAutoConnections'
-	}
-}
 if ok {
 	connections, ok := v.([]interface{})
 	if !ok {
@@ -90,8 +85,8 @@ if ok {
 				}
 			}
 		}
-		log.Printf("[DEBUG] FYou are in Decode and printing this for transformed %#v", transformed)
 		if len(transformed) > 0 {
+			log.Printf("[DEBUG] Setting desired_auto_created_endpoints for %#v", transformed)
 			d.Set("desired_auto_created_endpoints", transformed)
 		}
 	}
