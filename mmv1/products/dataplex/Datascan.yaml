@@ -267,6 +267,48 @@ properties:
                 description: |
                   The BigQuery table to export DataQualityScan results to.
                   Format://bigquery.googleapis.com/projects/PROJECT_ID/datasets/DATASET_ID/tables/TABLE_ID
+          - name: 'notificationReport'
+            type: NestedObject
+            description: |
+              The configuration of notification report post scan action.
+            properties:
+              - name: 'recipients'
+                type: NestedObject
+                description: |
+                  The individuals or groups who are designated to receive notifications upon triggers.
+                required: true
+                properties:
+                  - name: 'emails'
+                    type: Array
+                    description: |
+                      The email recipients who will receive the DataQualityScan results report.
+                    item_type:
+                      type: String
+              - name: 'scoreThresholdTrigger'
+                type: NestedObject
+                description: |
+                  This trigger is triggered when the DQ score in the job result is less than a specified input score.
+                properties:
+                  - name: 'scoreThreshold'
+                    type: Double
+                    description: |
+                      The score range is in [0,100].
+              - name: 'jobFailureTrigger'
+                type: NestedObject
+                description: |
+                  This trigger is triggered when the scan job itself fails, regardless of the result.
+                send_empty_value: true
+                allow_empty_object: true
+                properties:
+                  []
+              - name: 'jobEndTrigger'
+                type: NestedObject
+                description: |
+                  This trigger is triggered whenever a scan job run ends, regardless of the result.
+                send_empty_value: true
+                allow_empty_object: true
+                properties:
+                  []
       - name: 'rules'
         type: Array
         description: |
