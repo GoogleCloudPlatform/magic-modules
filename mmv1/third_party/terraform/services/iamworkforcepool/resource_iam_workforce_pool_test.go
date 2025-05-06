@@ -1,10 +1,17 @@
 package iamworkforcepool_test
 
 import (
+	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"testing"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccIAMWorkforcePoolWorkforcePool_full(t *testing.T) {
@@ -28,11 +35,6 @@ func TestAccIAMWorkforcePoolWorkforcePool_full(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-            {
-                ResourceName:      "google_iam_workforce_pool_iam_member.my_member",
-				ImportState:       true,
-				ImportStateVerify: true,
-            },
 			{
 				Config: testAccIAMWorkforcePoolWorkforcePool_full_update(context),
 			},
@@ -41,11 +43,6 @@ func TestAccIAMWorkforcePoolWorkforcePool_full(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				ResourceName:      "google_iam_workforce_pool_iam_member.my_member",
-				ImportState:       true,
-				ImportStateVerify: true,
-			}
 		},
 	})
 }
@@ -83,6 +80,44 @@ func TestAccIAMWorkforcePoolWorkforcePool_minimal(t *testing.T) {
 	})
 }
 
+func testAccCheckIAMWorkforcePoolWorkforcePoolDestroyProducer(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_iam_workforce_pool" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}IAMWorkforcePoolBasePath{{"}}"}}locations/{{"{{"}}location{{"}}"}}/workforcePools/{{"{{"}}workforce_pool_id{{"}}"}}")
+			if err != nil {
+				return err
+			}
+
+			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+			if err != nil {
+				return nil
+			}
+
+			if v := res["state"]; v == "DELETED" {
+				return nil
+			}
+
+			return fmt.Errorf("IAMWorkforcePool still exists at %s", url)
+		}
+
+		return nil
+	}
+}
+
 func testAccIAMWorkforcePoolWorkforcePool_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_iam_workforce_pool" "my_pool" {
@@ -99,13 +134,6 @@ resource "google_iam_workforce_pool" "my_pool" {
     }
     disable_programmatic_signin = false
   }
-}
-
-resource  "google_iam_workforce_pool_iam_member" "my_member" {
-  location          = google_iam_workforce_pool.my_pool.location
-  workforce_pool_id = google_iam_workforce_pool.my_pool.workforce_pool_id
-  role              = "roles/iam.workforcePoolViewer"
-  member            = "user:jane@example.com"
 }
 `, context)
 }
@@ -136,13 +164,6 @@ resource "google_iam_workforce_pool" "my_pool" {
     }
     disable_programmatic_signin = false
   }
-}
-
-resource  "google_iam_workforce_pool_iam_member" "my_member" {
-  location          = google_iam_workforce_pool.my_pool.location
-  workforce_pool_id = google_iam_workforce_pool.my_pool.workforce_pool_id
-  role              = "roles/iam.workforcePoolViewer"
-  member            = "user:bob@example.com"
 }
 `, context)
 }
