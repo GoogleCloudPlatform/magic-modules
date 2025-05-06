@@ -440,8 +440,7 @@ service/iam-serviceaccount:
 service/iam-wlid:
   resources:
   - google_iam_access_boundary_policy
-  - google_iam_workload_identity_pool
-  - google_iam_workload_identity_pool_provider
+  - google_iam_workload_identity_pool.*
 service/iam-workforce:
   resources:
   - google_iam_workforce_pool.*
