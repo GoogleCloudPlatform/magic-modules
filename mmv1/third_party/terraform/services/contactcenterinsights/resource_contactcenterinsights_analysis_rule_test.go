@@ -37,7 +37,7 @@ func TestInsightsAnalysisRule(t *testing.T) {
 				ResourceName:            "google_contact_center_insights_analysis_rule.basic_analysis_rule",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"analysis_rule_id", "location"},
 			},
 			{
 				Config: testAccContactCenterInsightsAnalysisRule_update(context),
@@ -51,7 +51,7 @@ func TestInsightsAnalysisRule(t *testing.T) {
 				ResourceName:            "google_contact_center_insights_analysis_rule.basic_analysis_rule",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"analysis_rule_id", "location"},
 			},
 		},
 	})
@@ -83,6 +83,7 @@ func testAccContactCenterInsightsAnalysisRule_full(context map[string]interface{
 resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
   display_name = "analysis-rule-display-name-%{random_suffix}"
   location = "us-central1"
+  analysis_rule_id = "some-analysis-rule-%{random_suffix}"
   create_time = "2025-01-01T00:00:00Z"
   update_time = "2025-01-01T00:00:00Z"
   conversation_filter = "test-filter"
@@ -119,6 +120,7 @@ func testAccContactCenterInsightsAnalysisRule_update(context map[string]interfac
 resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
   display_name = "analysis-rule-display-name-%{random_suffix}-updated"
   location = "us-central1"
+  analysis_rule_id = "some-analysis-rule-%{random_suffix}"
   create_time = "2025-01-02T00:00:00Z"
   update_time = "2025-01-02T00:00:00Z"
   conversation_filter = ""
