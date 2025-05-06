@@ -38,6 +38,8 @@ func TestAccUniverseDomainDiskImage(t *testing.T) {
 	t.Skip()
 
 	universeDomain := envvar.GetTestUniverseDomainFromEnv(t)
+	zone := envvar.GetTestZoneFromEnv()
+	prefix := envvar.GetProjectPrefixFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -45,7 +47,7 @@ func TestAccUniverseDomainDiskImage(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeDiskDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccUniverseDomain_basic_disk_image(universeDomain),
+				Config: testAccUniverseDomain_basic_disk_image(universeDomain, zone, prefix),
 			},
 		},
 	})
@@ -103,7 +105,7 @@ resource "google_compute_instance_template" "instance_template" {
 `, universeDomain)
 }
 
-func testAccUniverseDomain_basic_disk_image(universeDomain string) string {
+func testAccUniverseDomain_basic_disk_image(universeDomain, zone, prefix string) string {
 	return fmt.Sprintf(`
 provider "google" {
   universe_domain = "%s"
@@ -112,12 +114,12 @@ provider "google" {
 resource "google_compute_disk" "primary" {
   name  = "async-test-disk"
   type  = "pd-ssd"
-  zone  = "u-us"
+  zone  = "%s"
 
   physical_block_size_bytes = 4096
-  image = "projects/project-name:debian-cloud/global/images/debian-12"
+  image = "projects/%s:debian-cloud/global/images/debian-12"
 }
-`, universeDomain)
+`, universeDomain, zone, prefix)
 }
 
 func testAccCheckComputeDiskDestroyProducer(t *testing.T) func(s *terraform.State) error {
