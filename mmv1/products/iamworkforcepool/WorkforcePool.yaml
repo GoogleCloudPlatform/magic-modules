@@ -61,6 +61,13 @@ examples:
       workforce_pool_id: 'example-pool'
     test_env_vars:
       org_id: 'ORG_ID'
+iam_policy:
+  parent_resource_attribute: 'workforce_pool_id'
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  import_format:
+    - 'locations/{{location}}/workforcePools/{{workforce_pool_id}}'
+    - '{{workforce_pool_id}}'
 parameters:
 properties:
   - name: 'location'
