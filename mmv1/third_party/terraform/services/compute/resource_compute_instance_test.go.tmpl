@@ -2096,11 +2096,19 @@ func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.host_error_timeout_seconds", "0"),
-					acctest.GetTestMetadataForTgc("compute", "google_compute_instance.foobar", 
-						testAccComputeInstance_hostErrorTimeoutSeconds(context_4)),
 				),
 			},
 			computeInstanceImportStep(context_4["zone"].(string), context_4["instance_name"].(string), []string{}),
+			{
+				Config: testAccComputeInstance_hostErrorTimeoutSeconds(context_1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.host_error_timeout_seconds", "90"),
+					acctest.GetTestMetadataForTgc("compute", "google_compute_instance.foobar", 
+						testAccComputeInstance_hostErrorTimeoutSeconds(context_1)),
+				),
+			},
+			computeInstanceImportStep(context_1["zone"].(string), context_1["instance_name"].(string), []string{}),
 		},
 	})
 }
