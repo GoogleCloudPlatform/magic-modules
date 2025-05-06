@@ -28,6 +28,11 @@ func TestAccIAMWorkforcePoolWorkforcePool_full(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+            {
+                ResourceName:      "google_iam_workforce_pool_iam_member.my_member",
+				ImportState:       true,
+				ImportStateVerify: true,
+            },
 			{
 				Config: testAccIAMWorkforcePoolWorkforcePool_full_update(context),
 			},
@@ -36,6 +41,11 @@ func TestAccIAMWorkforcePoolWorkforcePool_full(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				ResourceName:      "google_iam_workforce_pool_iam_member.my_member",
+				ImportState:       true,
+				ImportStateVerify: true,
+			}
 		},
 	})
 }
@@ -90,6 +100,13 @@ resource "google_iam_workforce_pool" "my_pool" {
     disable_programmatic_signin = false
   }
 }
+
+resource  "google_iam_workforce_pool_iam_member" "my_member" {
+  location          = google_iam_workforce_pool.my_pool.location
+  workforce_pool_id = google_iam_workforce_pool.my_pool.workforce_pool_id
+  role              = "roles/iam.workforcePoolViewer"
+  member            = "user:jane@example.com"
+}
 `, context)
 }
 
@@ -119,6 +136,13 @@ resource "google_iam_workforce_pool" "my_pool" {
     }
     disable_programmatic_signin = false
   }
+}
+
+resource  "google_iam_workforce_pool_iam_member" "my_member" {
+  location          = google_iam_workforce_pool.my_pool.location
+  workforce_pool_id = google_iam_workforce_pool.my_pool.workforce_pool_id
+  role              = "roles/iam.workforcePoolViewer"
+  member            = "user:bob@example.com"
 }
 `, context)
 }
