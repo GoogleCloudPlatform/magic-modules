@@ -15,16 +15,33 @@ if err != nil {
     return transport_tpg.HandleNotFoundError(err, d, "Error while trying to list available Backend Services")
 }
 
-	if backendServices, ok := backendServicesRes["items"].([]interface{}); ok {
-		for _, backendServiceI := range backendServices {
-			log.Printf("Backend Service %+v\n", backendServiceI)
-			backendService := backendServiceI.(map[string]interface{})
-			if backends, ok := backendService["backends"].([]interface{}); ok {
-				for _, backend := range backends {
-					log.Printf("Backend Service Backend %+v\n", backend)
-				}
-			}
-		}
-	}
+if backendServices, ok := backendServicesRes["items"].([]interface{}); ok {
+    for _, backendServiceI := range backendServices {
+        log.Printf("Backend Service %+v\n", backendServiceI)
+        backendService := backendServiceI.(map[string]interface{})
+        if backends, ok := backendService["backends"].([]interface{}); ok {
+            // obj := make(map[string]interface{})
+            backendSrvProject, backendSrvRegion, backendSrvName, err := tpgresource.GetLocationalResourcePropertiesFromSelfLinkString(backendService["selfLink"].(string))
+            if err != nil {
+                return err
+            }
+
+            filteredBackends := make([]interface{}, 0, len(backends))
+            for _, backendI := range backends {
+                backend := backendI.(map[string]interface{})
+                log.Printf("id %s   name %s  link %s      backend:%s", d.Id(), d.Get("name"), d.Get("self_link"), backend["group"].(string))
+
+                if d.Id() != backend["group"].(string) {
+                    filteredBackends = append(filteredBackends, backendI)
+                }
+            }
+            patchUrl := fmt.Sprintf("%sprojects/%s/regions/%s/backendServices/%s",
+                config.ComputeBasePath, backendSrvProject, backendSrvRegion, backendSrvName)
+
+            log.Println(patchUrl)
+
+        }
+    }
+}
 
 log.Print("ASDFASDFASDFASDFASDFASDFASDFASSDF=[]")
