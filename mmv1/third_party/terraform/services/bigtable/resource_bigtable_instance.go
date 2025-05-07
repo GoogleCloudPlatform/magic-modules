@@ -155,7 +155,7 @@ func ResourceBigtableInstance() *schema.Resource {
 						"node_scaling_factor": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ForceNew:     true,
+							ForceNew:     false,
 							Default:      "NodeScalingFactor1X",
 							ValidateFunc: validation.StringInSlice([]string{"NodeScalingFactor1X", "NodeScalingFactor2X"}, false),
 							Description:  `The node scaling factor of this cluster. One of "NodeScalingFactor1X" or "NodeScalingFactor2X". Defaults to "NodeScalingFactor1X".`,
