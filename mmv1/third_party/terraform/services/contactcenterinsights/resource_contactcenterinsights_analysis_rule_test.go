@@ -105,7 +105,6 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
     run_silence_annotator        = true
     run_summarization_annotator  = true
     summarization_config {
-      conversation_profile = "some_conversation_profile"
       summarization_model  = "BASELINE_MODEL"
     }
   }
@@ -142,7 +141,6 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
     run_silence_annotator        = false
     run_summarization_annotator  = false
     summarization_config {
-      conversation_profile = "alt_conversation_profile"
       summarization_model  = "BASELINE_MODEL_V2_0"
     }
   }
