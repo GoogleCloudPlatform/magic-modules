@@ -73,6 +73,9 @@ func testAccInsightsAnalysisRule(context map[string]interface{}) string {
 		update_time = "2024-01-01T00:00:00Z"
 		conversation_filter = "test-filter"
 		analysis_percentage = 0.5
+		summarization_config {
+		  conversation_profile = "some_conversation_profile"
+		}
 		active = true
 	}
 	`, context)
