@@ -143,3 +143,13 @@ properties:
       Format: `projects/{{projectId}}/locations/{{location}}/volumes/{{volumename}}/snapshots/{{snapshotname}}``
     required: false
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: 'volumeRegion'
+    type: String
+    description: |
+      Region of the volume from which the backup was created.
+    output: true
+  - name: 'backupRegion'
+    type: String
+    description: |
+      Region in which backup is stored.
+    output: true
