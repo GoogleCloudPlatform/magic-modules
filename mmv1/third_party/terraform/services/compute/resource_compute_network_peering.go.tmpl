@@ -219,8 +219,8 @@ func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{})
 	if err := d.Set("stack_type", flattenNetworkPeeringStackType(peering.StackType, d, config)); err != nil {
 		return fmt.Errorf("Error setting stack_type: %s", err)
 	}
-	if err := d.Set("stack_type", flattenNetworkPeeringUpdateStrategy(peering.StackType, d, config)); err != nil {
-		return fmt.Errorf("Error setting stack_type: %s", err)
+	if err := d.Set("update_strategy", flattenNetworkPeeringUpdateStrategy(peering.UpdateStrategy, d, config)); err != nil {
+		return fmt.Errorf("Error setting update_strategy: %s", err)
 	}
 
 	return nil
@@ -346,7 +346,7 @@ func flattenNetworkPeeringStackType(v interface{}, d *schema.ResourceData, confi
 }
 
 func flattenNetworkPeeringUpdateStrategy(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	// To prevent the perma-diff caused by the absence of `stack_type` in API responses for older resource
+	// To prevent the perma-diff caused by the absence of `update_strategy` in API responses for older resource
 	if v == nil || tpgresource.IsEmptyValue(reflect.ValueOf(v)) {
 		return "INDEPENDENT"
 	}
