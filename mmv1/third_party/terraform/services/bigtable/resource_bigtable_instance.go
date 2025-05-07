@@ -155,7 +155,7 @@ func ResourceBigtableInstance() *schema.Resource {
 						"node_scaling_factor": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ForceNew:     false,
+							ForceNew:     true,
 							Default:      "NodeScalingFactor1X",
 							ValidateFunc: validation.StringInSlice([]string{"NodeScalingFactor1X", "NodeScalingFactor2X"}, false),
 							Description:  `The node scaling factor of this cluster. One of "NodeScalingFactor1X" or "NodeScalingFactor2X". Defaults to "NodeScalingFactor1X".`,
@@ -739,6 +739,7 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 		_, newId := diff.GetChange(fmt.Sprintf("cluster.%d.cluster_id", i))
 		_, c := diff.GetChange(fmt.Sprintf("cluster.%d", i))
 		typedCluster := c.(map[string]interface{})
+		log.Printf("[DEBUG] typedCluster: %#v", typedCluster)
 		typedCluster["state"] = "READY"
 		clusters[newId.(string)] = typedCluster
 	}
@@ -824,6 +825,14 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 	return nil
 }
 
+func resourceBigtableInstanceClusterDefaultNodeScalingFactor(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	return resourceBigtableInstanceCLusterDefaultNodeScalingFactorFunc(diff, func(nodeScalingFactor string) error {
+		return diff.SetNew("node_scaling_factor", nodeScalingFactor)
+	})
+}
+func resourceBigtableInstanceCLusterDefaultNodeScalingFactorFunc(diff tpgresource.TerraformResourceDiff, setNew func([]interface{}) error) error {
+	// todo implementation
+}
 func resourceBigtableInstanceImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
 	if err := tpgresource.ParseImportId([]string{
