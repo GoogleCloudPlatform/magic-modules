@@ -101,7 +101,7 @@ examples:
       'secondary_instance_prevent_destroy': 'false'
 virtual_fields:
   - name: 'desired_psc_auto_connections'
-    description: "Immutable. User inputs for the auto-created PSC connections. "
+    description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead."
     deprecation_message: '`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead.'
     type: Array
     immutable: true
