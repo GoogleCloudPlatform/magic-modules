@@ -4580,13 +4580,20 @@ func TestAccContainerNodePool_withFlexStart(t *testing.T) {
 
 func testAccContainerNodePool_withFlexStart(clusterName, np, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
+data "google_container_engine_versions" "central1a" {
+  location = "us-central1-a"
+}
+
 resource "google_container_cluster" "cluster" {
-  min_master_version = "1.32.3-gke.1717000"
-  
   name                = "%s"
   location            = "us-central1-a"
   initial_node_count  = 1
   deletion_protection = false
+
+  min_master_version = data.google_container_engine_versions.central1a.release_channel_latest_version["RAPID"]
+  release_channel {
+    channel = "RAPID"
+  }
   network             = "%s"
   subnetwork          = "%s"
 }
