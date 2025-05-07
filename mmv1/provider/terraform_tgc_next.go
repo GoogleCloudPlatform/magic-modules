@@ -74,7 +74,7 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		// common
 		"pkg/provider/provider_validators.go": "third_party/terraform/provider/provider_validators.go.tmpl",
 
-		// tfplan2ai
+		// tfplan2cai
 		"pkg/tfplan2cai/converters/resource_converters.go":                       "templates/tgc_next/tfplan2cai/resource_converters.go.tmpl",
 		"pkg/tfplan2cai/converters/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
 		"pkg/tfplan2cai/converters/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
