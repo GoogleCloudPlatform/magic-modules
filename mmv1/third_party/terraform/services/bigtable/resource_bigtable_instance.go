@@ -825,14 +825,6 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 	return nil
 }
 
-func resourceBigtableInstanceClusterDefaultNodeScalingFactor(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
-	return resourceBigtableInstanceCLusterDefaultNodeScalingFactorFunc(diff, func(nodeScalingFactor string) error {
-		return diff.SetNew("node_scaling_factor", nodeScalingFactor)
-	})
-}
-func resourceBigtableInstanceCLusterDefaultNodeScalingFactorFunc(diff tpgresource.TerraformResourceDiff, setNew func([]interface{}) error) error {
-	// todo implementation
-}
 func resourceBigtableInstanceImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
 	if err := tpgresource.ParseImportId([]string{
