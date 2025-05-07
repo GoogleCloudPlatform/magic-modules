@@ -84,6 +84,10 @@ func AssertTestFile(t *testing.T, excludedFields []string) {
 		log.Fatal(err)
 	}
 
+	if len(exportConfigMap) == 0 {
+		log.Fatalf("%s - Missing resource after cai2hcl conversion: %s.", t.Name(), resource)
+	}
+
 	rawTfFile := fmt.Sprintf("%s.tf", fileName)
 	err = os.WriteFile(rawTfFile, []byte(testMetadata.RawConfig), 0644)
 	if err != nil {
@@ -112,15 +116,9 @@ func AssertTestFile(t *testing.T, excludedFields []string) {
 		excludedFieldMap[f] = true
 	}
 
-	for address, rawConfig := range rawConfigMap {
-		if exportConfig, ok := exportConfigMap[address]; !ok {
-			log.Fatalf("%s - Missing resource after cai2hcl conversion: %s.", t.Name(), address)
-		} else {
-			missingKeys := compareHCLFields(rawConfig.(map[string]interface{}), exportConfig.(map[string]interface{}), "", excludedFieldMap)
-			if len(missingKeys) > 0 {
-				log.Fatalf("%s - Missing fields in resource %s after cai2hcl conversion:\n%s", t.Name(), address, missingKeys)
-			}
-		}
+	missingKeys := compareHCLFields(rawConfigMap, exportConfigMap, "", excludedFieldMap)
+	if len(missingKeys) > 0 {
+		log.Fatalf("%s - Missing fields in resource %s after cai2hcl conversion:\n%s", t.Name(), resource, missingKeys)
 	}
 
 	ancestryCache := getAncestryCache(testMetadata.Assets)
@@ -278,10 +276,10 @@ func parseConfig(filePath, target string) (map[string]interface{}, error) {
 	configMap := make(map[string]interface{}, 0)
 	for _, r := range allParsedResources {
 		addr := fmt.Sprintf("%s.%s", r.Type, r.Name)
-		if addr != target {
-			continue
+		if addr == target {
+			configMap = r.Attributes
+			break
 		}
-		configMap[addr] = r.Attributes
 	}
 
 	jsonData, err := json.MarshalIndent(allParsedResources, "", "  ") // "" is prefix, "  " is indent string (2 spaces)
