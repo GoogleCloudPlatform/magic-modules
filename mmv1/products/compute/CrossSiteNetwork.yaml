@@ -13,7 +13,6 @@
 
 ---
 name: 'CrossSiteNetwork'
-# kind: 'compute/crossSiteNetwork'
 description: |
   Represents a cross-site-network resource. A CrossSiteNetwork is used to establish L2 connectivity between groups of Interconnects.
 min_version: beta
