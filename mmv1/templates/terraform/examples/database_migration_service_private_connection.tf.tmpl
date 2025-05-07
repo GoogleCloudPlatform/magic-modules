@@ -12,7 +12,7 @@ resource "google_database_migration_service_private_connection" "{{$.PrimaryReso
 		subnet = "10.0.0.0/29"
 	}
 
-	create_without_validation = "{{index $.Vars "create_without_validation"}}"
+	create_without_validation = {{index $.Vars "create_without_validation"}}
 }
 
 resource "google_compute_network" "default" {
