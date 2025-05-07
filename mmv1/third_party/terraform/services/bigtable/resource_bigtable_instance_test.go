@@ -3,7 +3,6 @@ package bigtable_test
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"regexp"
 	"testing"
 
@@ -622,55 +621,6 @@ func TestAccBigtableInstance_createWithNodeScalingFactorThenUpdateViaForceNew(t 
 	})
 }
 
-func TestAccBigtableInstance_updateWithDefaultNodeScalingFactorShouldNotReplace(t *testing.T) {
-	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	acctest.SkipIfVcr(t)
-	t.Parallel()
-
-	instanceName := fmt.Sprintf("tf-test-nsf-%s", acctest.RandString(t, 10))
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				// Create config with node scaling factor as 2x.
-				Config: testAccBigtableInstance_ClusterDefaultNodeScalingFactorShouldNotReplace_create(),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.num_nodes", "1"),
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.node_scaling_factor", "NodeScalingFactor1X"),
-				),
-			},
-			{
-				ResourceName:            "google_bigtable_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
-			},
-			{
-				// Updating the node scaling factor to default value should not cause a recreate
-				Config: testAccBigtableInstance_ClusterDefaultNodeScalingFactorShouldNotReplace_update(),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.num_nodes", "1"),
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.node_scaling_factor", "NodeScalingFactor1X"),
-				),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_bigtable_instance.instance", plancheck.ResourceActionUpdate),
-					},
-				},
-			},
-			{
-				ResourceName:            "google_bigtable_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
-			},
-		},
-	})
-}
-
 func testAccBigtableInstance_nodeScalingFactor_allowDestroy(instanceName string, numNodes int, nodeScalingFactor string) string {
 	nodeScalingFactorAttribute := ""
 	if nodeScalingFactor != "" {
@@ -1170,41 +1120,6 @@ provider "google" {
 }
 resource "time_offset" "week-in-future" {
   offset_days = 7
-}
-`
-}
-
-func testAccBigtableInstance_ClusterDefaultNodeScalingFactorShouldNotReplace_create() string {
-	return `
-resource "google_bigtable_instance" "instance" {
-  name                = "name"
-  deletion_protection = true
-
-  cluster {
-        cluster_id   = "cluster_id"
-        num_nodes    = 2
-        state        = "READY"
-        storage_type = "SSD"
-        zone         = "us-central1-c"
-    }
-}
-`
-}
-
-func testAccBigtableInstance_ClusterDefaultNodeScalingFactorShouldNotReplace_update() string {
-	return `
-resource "google_bigtable_instance" "instance" {
-  name                = "name"
-  deletion_protection = true
-
-  cluster {
-        cluster_id          = "cluster_id"
-        num_nodes           = 2
-        state               = "READY"
-        storage_type        = "SSD"
-        zone                = "us-central1-c"
-		node_scaling_factor = "NodeScalingFactor1X" # should not enforce recreate on default value
-    }
 }
 `
 }

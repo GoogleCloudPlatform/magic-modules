@@ -56,6 +56,7 @@ func ResourceBigtableInstance() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			resourceBigtableInstanceClusterReorderTypeList,
 			resourceBigtableInstanceUniqueClusterID,
+			resourceBigtableInstanceIgnoreNodeScalingFactorNullFromRecreate,
 			tpgresource.SetLabelsDiff,
 		),
 
@@ -695,6 +696,21 @@ func resourceBigtableInstanceUniqueClusterID(_ context.Context, diff *schema.Res
 	return nil
 }
 
+func resourceBigtableInstanceIgnoreNodeScalingFactorNullFromRecreate(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	oldCount, _ := diff.GetChange("cluster.#")
+
+	for i := 0; i < oldCount.(int); i++ {
+		oldNodeScalingFactor, newNodeScalingFactor := diff.GetChange(fmt.Sprintf("cluster.%d.node_scaling_factor", i))
+		if oldNodeScalingFactor == "" && newNodeScalingFactor == "NodeScalingFactor1X" {
+			if err := diff.SetNew(fmt.Sprintf("cluster.%d.node_scaling_factor", i), oldNodeScalingFactor); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
 // resourceBigtableInstanceClusterReorderTypeList causes the cluster block to
 // act like a TypeSet while it's a TypeList underneath. It preserves state
 // ordering on updates, and causes the resource to get recreated if it would
@@ -739,7 +755,6 @@ func resourceBigtableInstanceClusterReorderTypeListFunc(diff tpgresource.Terrafo
 		_, newId := diff.GetChange(fmt.Sprintf("cluster.%d.cluster_id", i))
 		_, c := diff.GetChange(fmt.Sprintf("cluster.%d", i))
 		typedCluster := c.(map[string]interface{})
-		log.Printf("[DEBUG] typedCluster: %#v", typedCluster)
 		typedCluster["state"] = "READY"
 		clusters[newId.(string)] = typedCluster
 	}
