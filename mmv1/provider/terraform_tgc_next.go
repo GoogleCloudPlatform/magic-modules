@@ -70,28 +70,19 @@ func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, r
 }
 
 func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
-	tgc.CompileTfToCaiCommonFiles(outputFolder, products)
-	tgc.CompileCaiToHclCommonFiles(outputFolder, products)
-}
-
-func (tgc TerraformGoogleConversionNext) CompileTfToCaiCommonFiles(outputFolder string, products []*api.Product) {
-	log.Printf("Compiling common files for tgc tfplan2cai.")
-
 	resourceConverters := map[string]string{
+		// common
+		"pkg/provider/provider_validators.go": "third_party/terraform/provider/provider_validators.go.tmpl",
+
+		// tfplan2cai
 		"pkg/tfplan2cai/converters/resource_converters.go":                       "templates/tgc_next/tfplan2cai/resource_converters.go.tmpl",
 		"pkg/tfplan2cai/converters/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
 		"pkg/tfplan2cai/converters/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
-	}
-	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
-	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
-}
 
-func (tgc TerraformGoogleConversionNext) CompileCaiToHclCommonFiles(outputFolder string, products []*api.Product) {
-	log.Printf("Compiling common files for tgc tfplan2cai.")
-
-	resourceConverters := map[string]string{
+		// cai2hcl
 		"pkg/cai2hcl/converters/resource_converters.go": "templates/tgc_next/cai2hcl/resource_converters.go.tmpl",
 	}
+
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
 	tgc.CompileFileList(outputFolder, resourceConverters, *templateData, products)
 }
@@ -134,8 +125,18 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		log.Println(fmt.Errorf("error copying directory %v: %v", outputFolder, err))
 	}
 
-	tgc.CopyTfToCaiCommonFiles(outputFolder)
-	tgc.CopyCaiToHclCommonFiles(outputFolder)
+	resourceConverters := map[string]string{
+		// common
+		"pkg/provider/mtls_util.go":      "third_party/terraform/provider/mtls_util.go",
+		"pkg/verify/validation.go":       "third_party/terraform/verify/validation.go",
+		"pkg/verify/path_or_contents.go": "third_party/terraform/verify/path_or_contents.go",
+		"pkg/version/version.go":         "third_party/terraform/version/version.go",
+
+		// tfplan2cai
+		"pkg/tfplan2cai/converters/services/compute/image.go":     "third_party/terraform/services/compute/image.go",
+		"pkg/tfplan2cai/converters/services/compute/disk_type.go": "third_party/terraform/services/compute/disk_type.go",
+	}
+	tgc.CopyFileList(outputFolder, resourceConverters)
 }
 
 func (tgc TerraformGoogleConversionNext) CopyTfToCaiCommonFiles(outputFolder string) {
@@ -193,6 +194,7 @@ func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target 
 	// replace google to google-beta
 	gaImportPath := ImportPathFromVersion("ga")
 	sourceByte = bytes.Replace(sourceByte, []byte(gaImportPath), []byte(TERRAFORM_PROVIDER_BETA+"/"+RESOURCE_DIRECTORY_BETA), -1)
+
 	err = os.WriteFile(targetFile, sourceByte, 0644)
 	if err != nil {
 		log.Fatalf("Cannot write file %s to replace import path: %s", target, err)
