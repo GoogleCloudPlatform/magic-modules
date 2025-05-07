@@ -71,7 +71,6 @@ jobs:
             else
               export VERSION=beta
             fi
-            make clean-provider
             make provider
           elif [ "$GH_REPO" == "terraform-google-conversion" ]; then
             UPSTREAM_OWNER=GoogleCloudPlatform
