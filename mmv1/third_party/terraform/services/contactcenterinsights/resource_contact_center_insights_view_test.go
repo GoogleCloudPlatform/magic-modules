@@ -14,7 +14,7 @@ func TestInsightsView(t *testing.T) {
 
 	context := map[string]interface{}{
 		"project_name":    envvar.GetTestProjectFromEnv(),
-		"region":          envvar.GetTestRegionFromEnv(),
+		"region":          "us-central1",
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 		"random_suffix":   acctest.RandString(t, 10),
