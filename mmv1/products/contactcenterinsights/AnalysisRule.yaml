@@ -25,7 +25,7 @@ references:
   api: 'https://cloud.google.com/contact-center/insights/docs/reference/rest/v1/projects.locations.analysisRules'
 base_url: projects/{{project}}/locations/{{location}}/analysisRules
 self_link: projects/{{project}}/locations/{{location}}/analysisRules/{{analysis_rule}}
-create_url: projects/{{project}}/locations/{{location}}/analysisRules?analysisRuleId={{analysis_rule}}
+create_url: projects/{{project}}/locations/{{location}}/analysisRules
 update_verb: 'PATCH'
 update_mask: true
 id_format: projects/{{project}}/locations/{{location}}/analysisRules/{{analysis_rule}}
