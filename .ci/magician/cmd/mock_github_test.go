@@ -29,6 +29,7 @@ type mockGithub struct {
 	pullRequestComments []github.PullRequestComment
 	teamMembers         map[string][]github.User
 	calledMethods       map[string][][]any
+	commitMessage       string
 }
 
 func (m *mockGithub) GetPullRequest(prNumber string) (github.PullRequest, error) {
@@ -59,6 +60,11 @@ func (m *mockGithub) GetPullRequestPreviousReviewers(prNumber string) ([]github.
 func (m *mockGithub) GetPullRequestComments(prNumber string) ([]github.PullRequestComment, error) {
 	m.calledMethods["GetPullRequestComments"] = append(m.calledMethods["GetPullRequestComments"], []any{prNumber})
 	return m.pullRequestComments, nil
+}
+
+func (m *mockGithub) GetCommitMessage(owner, repo, sha string) (string, error) {
+	m.calledMethods["GetCommitMessage"] = append(m.calledMethods["GetCommitMessage"], []any{owner, repo, sha})
+	return m.commitMessage, nil
 }
 
 func (m *mockGithub) GetTeamMembers(organization, team string) ([]github.User, error) {
