@@ -59,14 +59,8 @@ resource "google_clouddeploy_deploy_policy" "deploy_policy" {
       time_windows {
         time_zone = "America/Los_Angeles"
         weekly_windows {
-            start_time {
-                hours = "12"
-                minutes = "00"
-            }
-            end_time {
-                hours = "13"
-                minutes = "00"
-            }
+            start_time ="12:00"
+            end_time = "13:00"
         }
       }
     }
@@ -91,14 +85,8 @@ resource "google_clouddeploy_deploy_policy" "deploy_policy" {
       time_windows {
         time_zone = "America/Los_Angeles"
         weekly_windows {
-            start_time {
-                hours = "12"
-                minutes = "00"
-            }
-            end_time {
-                hours = "13"
-                minutes = "00"
-            }
+            start_time ="12:00"
+            end_time = "13:00"
         }
       }
     }
@@ -111,36 +99,14 @@ resource "google_clouddeploy_deploy_policy" "deploy_policy" {
         time_windows {
         time_zone = "America/Los_Angeles"
         weekly_windows {
-            start_time {
-                hours = "13"
-                minutes = "00"
-            }
-            end_time {
-                hours = "14"
-                minutes = "00"
-            }
+            start_time ="12:00"
+            end_time = "13:00"
             days_of_week = ["MONDAY"]
           }
 
         one_time_windows {
-        start_time {
-            hours = "15"
-            minutes = "00"
-        }
-        end_time {
-            hours = "16"
-            minutes = "00"
-        }
-        start_date {
-            year = "2019"
-            month = "01"
-            day = "01"
-        }
-        end_date {
-            year = "2019"
-            month = "12"
-            day = "31"
-        }
+          start = "2024-12-22 17:00"
+          end = "2025-01-02 09:00"
       }
      }
     }

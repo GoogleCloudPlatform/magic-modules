@@ -175,71 +175,19 @@ properties:
                 - name: oneTimeWindows
                   type: Array
                   description: "Optional. One-time windows within which actions are restricted."
+                  custom_expand: "templates/terraform/custom_expand/clouddeploy_policy_onetime_windows.go.tmpl"
+                  custom_flatten: "templates/terraform/custom_flatten/clouddeploy_policy_onetime_windows.go.tmpl"
                   item_type:
                     type: NestedObject
                     properties:
-                      - name: "startDate"
-                        type: NestedObject
-                        description: "Required. Start date."
+                      - name: "start"
+                        type: String
+                        description: "Required. Start date and time in the datetime format, e.g. 2024-01-02 09:00:00."
                         required: true
-                        properties:
-                          - name: "year"
-                            type: Integer
-                            description: "Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year."
-                          - name: month
-                            type: Integer
-                            description: "Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day."
-                          - name: day
-                            type: Integer
-                            description: "Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant."
-                      - name: "endDate"
-                        type: NestedObject
-                        description: "Required. End date."
+                      - name: "end"
+                        type: String
+                        description: "Required. End date and time,  in the datetime format, e.g. 2025-01-02 09:00:00."
                         required: true
-                        properties:
-                          - name: "year"
-                            type: Integer
-                            description: "Year of the date. Must be from 1 to 9999."
-                          - name: month
-                            type: Integer
-                            description: "Month of a year. Must be from 1 to 12."
-                          - name: day
-                            type: Integer
-                            description: "Day of a month. Must be from 1 to 31 and valid for the year and month."
-                      - name: "startTime"
-                        type: NestedObject
-                        description: "Required. Start time (inclusive). Use 00:00 for the beginning of the day."
-                        required: true
-                        properties:
-                          - name: "hours"
-                            type: Integer
-                            description: 'Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.'
-                          - name: minutes
-                            type: Integer
-                            description: "Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59."
-                          - name: seconds
-                            type: Integer
-                            description: "Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An API may allow the value 60 if it allows leap-seconds."
-                          - name: nanos
-                            type: Integer
-                            description: "Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to 999,999,999."
-                      - name: "endTime"
-                        type: NestedObject
-                        description: "Required. End time (exclusive). You may use 24:00 for the end of the day."
-                        required: true
-                        properties:
-                          - name: "hours"
-                            type: Integer
-                            description: 'Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.'
-                          - name: minutes
-                            type: Integer
-                            description: "Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59."
-                          - name: seconds
-                            type: Integer
-                            description: "Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An API may allow the value 60 if it allows leap-seconds."
-                          - name: nanos
-                            type: Integer
-                            description: "Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to 999,999,999."
                 - name: weeklyWindows
                   type: Array
                   description: "Optional. Recurring weekly windows within which actions are restricted."
@@ -260,34 +208,12 @@ properties:
                             - "SATURDAY"
                             - "SUNDAY"
                       - name: "startTime"
-                        type: NestedObject
                         description: "Optional. Start time (inclusive). Use 00:00 for the beginning of the day. If you specify startTime you must also specify endTime. If left empty, this will block for the entire day for the days specified in daysOfWeek."
-                        properties:
-                          - name: "hours"
-                            type: Integer
-                            description: 'Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.'
-                          - name: minutes
-                            type: Integer
-                            description: "Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59."
-                          - name: seconds
-                            type: Integer
-                            description: "Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An API may allow the value 60 if it allows leap-seconds."
-                          - name: nanos
-                            type: Integer
-                            description: "Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to 999,999,999."
+                        type: String
+                        custom_expand: "templates/terraform/custom_expand/clouddeploy_policy_time_only.go.tmpl"
+                        custom_flatten: "templates/terraform/custom_flatten/clouddeploy_policy_time_only.go.tmpl"
                       - name: "endTime"
-                        type: NestedObject
+                        type: String
                         description: "Optional. End time (exclusive). Use 24:00 to indicate midnight. If you specify endTime you must also specify startTime. If left empty, this will block for the entire day for the days specified in daysOfWeek."
-                        properties:
-                          - name: "hours"
-                            type: Integer
-                            description: 'Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.'
-                          - name: minutes
-                            type: Integer
-                            description: "Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59."
-                          - name: seconds
-                            type: Integer
-                            description: "Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An API may allow the value 60 if it allows leap-seconds."
-                          - name: nanos
-                            type: Integer
-                            description: "Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to 999,999,999."
+                        custom_expand: "templates/terraform/custom_expand/clouddeploy_policy_time_only.go.tmpl"
+                        custom_flatten: "templates/terraform/custom_flatten/clouddeploy_policy_time_only.go.tmpl"
