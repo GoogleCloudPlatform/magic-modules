@@ -327,6 +327,29 @@ Example: Regex
     regex: '^[a-zA-Z][a-zA-Z0-9_]*$'
 ```
 
+### `is_set`
+If true, the field is a Set rather than an Array. Set fields represent an
+unordered set of unique elements. `set_hash_func` may be used to customize the
+hash function used to index elements in the set, otherwise the schema default
+function will be used. Adding this property to an existing field is usually a
+breaking change.
+
+```yaml
+- name: 'fieldOne'
+  type: Array
+  is_set: true
+```
+
+### `set_hash_func`
+Specifies a function for hashing elements in a Set field. If unspecified,
+`schema.HashString` will be used if the elements are strings, otherwise
+`schema.HashSchema`. The hash function should be defined in
+`custom_code.constants`.
+
+```yaml
+set_hash_func: functionName
+```
+
 ### `api_name`
 Specifies a name to use for communication with the API that is different than
 the name of the field in Terraform. In general, setting an `api_name` is not
