@@ -33,14 +33,12 @@ async:
   operation:
     base_url: '{{op_id}}'
 iam_policy:
+  exclude_import_test: true
   method_name_separator: ':'
   parent_resource_attribute: 'glossary_id'
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
-    [
-      'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}',
-      '{{glossary_id}}',
-    ]
+    - 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}'
 custom_code:
 examples:
   - name: 'dataplex_glossary_basic'
