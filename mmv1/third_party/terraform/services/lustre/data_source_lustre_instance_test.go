@@ -11,7 +11,6 @@ func TestAccLustreInstanceDatasource_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedTestNetwork(t, "default-vpc"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -26,6 +25,11 @@ func TestAccLustreInstanceDatasource_basic(t *testing.T) {
 					"google_lustre_instance.instance",
 				),
 			},
+			{
+				ResourceName:      "google_lustre_instance.instance",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -33,31 +37,45 @@ func TestAccLustreInstanceDatasource_basic(t *testing.T) {
 func testAccLustreInstanceDatasource_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_lustre_instance" "instance" {
-  instance_id         = "tf-test-my-instance%{random_suffix}"
-  location            = "us-central1-a"
-  filesystem          = "testfs"
-  network             = data.google_compute_network.lustre-network.id
-  gke_support_enabled = false
-  capacity_gib        = 18000
-  timeouts {
-    create            = "120m"
-  }
+  instance_id             = "my-instance-%{random_suffix}"
+  location                = "us-central1-a"
+  filesystem              = "testfs"
+  capacity_gib            = 18000
+  network                 = google_compute_network.producer_net.id
+  gke_support_enabled     = false
+       
+ depends_on               = [ google_service_networking_connection.service_con ]
 }
 
-// This example assumes this network already exists.
-// The API creates a tenant network per network authorized for a
-// Lustre instance and that network is not deleted when the user-created
-// network (authorized_network) is deleted, so this prevents issues
-// with tenant network quota.
-// If this network hasn't been created and you are using this example in your
-// config, add an additional network resource or change
-// this from "data"to "resource"
-data "google_compute_network" "lustre-network" {
-  name                = "%{network_name}"
+resource "google_compute_subnetwork" "producer_subnet" {
+  name                    = "tf-test-my-subnet-%{random_suffix}"
+  ip_cidr_range           = "10.0.0.248/29"
+  region                  = "us-central1"
+  network                 = google_compute_network.producer_net.id
+}
+
+resource "google_compute_network" "producer_net" {
+  name                    = "tf-test-my-network-%{random_suffix}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_global_address" "private_ip_alloc" {
+  name                    = "private-ip-alloc-%{random_suffix}"
+  purpose                 = "VPC_PEERING"
+  address_type            = "INTERNAL"
+  prefix_length           = 16
+  network                 = google_compute_network.producer_net.id
+}
+
+resource "google_service_networking_connection" "service_con" {
+  network                 = google_compute_network.producer_net.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.private_ip_alloc.name]
 }
 
 data "google_lustre_instance" "default" {
-  instance_id         = google_lustre_instance.instance.instance_id
+  instance_id             = google_lustre_instance.instance.instance_id
+  location                = "us-central1-a"
 }
 `, context)
 }
