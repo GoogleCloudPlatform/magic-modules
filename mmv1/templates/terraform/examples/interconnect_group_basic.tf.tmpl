@@ -1,4 +1,6 @@
 resource "google_compute_interconnect_group" "{{$.PrimaryResourceId}}" {
   name   = "{{index $.Vars "interconnect_group_name"}}"
-  intent = "NO_SLA"
+  intent {
+    topology_capability = "NO_SLA"
+  }
 }
