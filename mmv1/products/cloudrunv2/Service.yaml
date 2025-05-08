@@ -1246,4 +1246,3 @@ properties:
       Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_value_id}.
     immutable: true
     ignore_read: true
-
