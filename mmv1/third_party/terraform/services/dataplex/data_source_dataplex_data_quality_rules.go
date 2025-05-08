@@ -40,7 +40,7 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 							Type:     schema.TypeBool,
 							Computed: true,
 							Optional: true,
-							Descriptiont: `Rows with null values will automatically fail a rule, unless ignoreNull is true. In that case, such null rows are trivially considered passing. 
+							Description: `Rows with null values will automatically fail a rule, unless ignoreNull is true. In that case, such null rows are trivially considered passing. 
 											This field is only valid for the following type of rules: RangeExpectation, RegexExpectation, SetExpectation, UniquenessExpectation`,
 						},
 						"dimension": {
