@@ -1,0 +1,41 @@
+package dataplex_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccDataplexDataQualityRules(t *testing.T) {
+	t.Parallel()
+
+	// projects/dataplex-back-end-dev-project/locations/us-central1/dataScans/a111
+	context := map[string]interface{}{
+		"project":      "dataplex-back-end-dev-project",
+		"location":     "us-central1",
+		"data_scan_id": "a111",
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataplexDataQualityRules_config(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("data.google_dataplex_data_quality_rules", "rule"),
+				),
+			},
+		},
+	})
+}
+
+func testAccDataplexDataQualityRules_config(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+		data "google_dataplex_data_quality_rules" "generated_dq_rules" {
+			project		 = "%{proejct}"
+			location	 = "%{location}"
+			data_scan_id = "%{data_scan_id}"
+		}`, context)
+}
