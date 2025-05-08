@@ -165,7 +165,7 @@ properties:
                     is satisfied when the beginning of an object's name
                     is an exact case-sensitive match with the prefix.
                   item_type:
-                    type: String    
+                    type: String
                 - name: 'noncurrentTimeBefore'
                   type: Time
                   description: |
