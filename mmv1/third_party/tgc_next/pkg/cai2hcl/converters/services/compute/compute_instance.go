@@ -3,7 +3,6 @@ package compute
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
@@ -69,7 +68,7 @@ func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*m
 	hclData["network_performance_config"] = flattenNetworkPerformanceConfig(instance.NetworkPerformanceConfig)
 
 	// Set the networks
-	networkInterfaces, _, _, err := flattenNetworkInterfaces(instance.NetworkInterfaces, project)
+	networkInterfaces, _, _, err := flattenNetworkInterfacesTgc(instance.NetworkInterfaces, project)
 	if err != nil {
 		return nil, err
 	}
@@ -80,18 +79,16 @@ func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*m
 	}
 
 	hclData["labels"] = utils.RemoveTerraformAttributionLabel(instance.Labels)
-	hclData["service_account"] = flattenServiceAccounts(instance.ServiceAccounts)
+	hclData["service_account"] = flattenServiceAccountsTgc(instance.ServiceAccounts)
 	hclData["resource_policies"] = instance.ResourcePolicies
-	log.Printf("service account %#v", hclData["service_account"])
 
 	bootDisk, ads, scratchDisks := flattenDisks(instance.Disks, instance.Name)
-
 	hclData["boot_disk"] = bootDisk
 	hclData["attached_disk"] = ads
 	hclData["scratch_disk"] = scratchDisks
 
-	hclData["scheduling"] = flattenScheduling(instance.Scheduling)
-	hclData["guest_accelerator"] = flattenGuestAccelerators(instance.GuestAccelerators)
+	hclData["scheduling"] = flattenSchedulingTgc(instance.Scheduling)
+	hclData["guest_accelerator"] = flattenGuestAcceleratorsTgc(instance.GuestAccelerators)
 	hclData["shielded_instance_config"] = flattenShieldedVmConfig(instance.ShieldedInstanceConfig)
 	hclData["enable_display"] = flattenEnableDisplay(instance.DisplayDevice)
 	hclData["min_cpu_platform"] = instance.MinCpuPlatform
@@ -106,7 +103,7 @@ func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*m
 	hclData["hostname"] = instance.Hostname
 	hclData["confidential_instance_config"] = flattenConfidentialInstanceConfig(instance.ConfidentialInstanceConfig)
 	hclData["advanced_machine_features"] = flattenAdvancedMachineFeatures(instance.AdvancedMachineFeatures)
-	hclData["reservation_affinity"] = flattenReservationAffinity(instance.ReservationAffinity)
+	hclData["reservation_affinity"] = flattenReservationAffinityTgc(instance.ReservationAffinity)
 	hclData["key_revocation_action_type"] = strings.TrimSuffix(instance.KeyRevocationActionType, "_ON_KEY_REVOCATION")
 	hclData["instance_encryption_key"] = flattenComputeInstanceEncryptionKey(instance.InstanceEncryptionKey)
 
@@ -145,7 +142,6 @@ func flattenDisks(disks []*compute.AttachedDisk, instanceName string) ([]map[str
 				"device_name": disk.DeviceName,
 				"mode":        disk.Mode,
 			}
-
 			if key := disk.DiskEncryptionKey; key != nil {
 				if key.KmsKeyName != "" {
 					// The response for crypto keys often includes the version of the key which needs to be removed
@@ -259,21 +255,4 @@ func flattenPartnerMetadata(partnerMetadata map[string]compute.StructuredEntries
 
 	}
 	return partnerMetadataMap, nil
-}
-
-func flattenComputeInstanceGuestOsFeatures(v interface{}) []interface{} {
-	if v == nil {
-		return nil
-	}
-	features, ok := v.([]*compute.GuestOsFeature)
-	if !ok {
-		return nil
-	}
-	var result []interface{}
-	for _, feature := range features {
-		if feature != nil && feature.Type != "" {
-			result = append(result, feature.Type)
-		}
-	}
-	return result
 }

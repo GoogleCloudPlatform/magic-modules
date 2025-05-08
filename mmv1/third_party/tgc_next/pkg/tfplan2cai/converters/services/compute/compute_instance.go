@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	compute "google.golang.org/api/compute/v0.beta"
 	"google.golang.org/api/googleapi"
 
@@ -1501,7 +1500,6 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	}
 
 	// Build up the list of disks
-
 	disks := []*compute.AttachedDisk{}
 	if _, hasBootDisk := d.GetOk("boot_disk"); hasBootDisk {
 		bootDisk, err := expandBootDisk(d, config, project)
@@ -1523,7 +1521,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 
 	for i := 0; i < attachedDisksCount; i++ {
 		diskConfig := d.Get(fmt.Sprintf("attached_disk.%d", i)).(map[string]interface{})
-		disk, err := expandAttachedDiskForTgc(diskConfig, d, config)
+		disk, err := expandAttachedDiskTgc(diskConfig, d, config)
 		if err != nil {
 			return nil, err
 		}
@@ -1531,7 +1529,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		disks = append(disks, disk)
 	}
 
-	scheduling, err := expandSchedulingForTgc(d.Get("scheduling"))
+	scheduling, err := expandSchedulingTgc(d.Get("scheduling"))
 	if err != nil {
 		return nil, fmt.Errorf("error creating scheduling: %s", err)
 	}
@@ -1598,76 +1596,9 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		DisplayDevice:              expandDisplayDevice(d),
 		ResourcePolicies:           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:        reservationAffinity,
-		KeyRevocationActionType:    expandKeyRevocationActionType(d),
+		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
 		InstanceEncryptionKey:      expandComputeInstanceEncryptionKey(d),
 	}, nil
-}
-
-func expandKeyRevocationActionType(d tpgresource.TerraformResourceData) string {
-	raw, ok := d.GetOk("key_revocation_action_type")
-	if !ok {
-		return ""
-	}
-
-	v := raw.(string)
-	if v != "" {
-		return fmt.Sprintf("%s_ON_KEY_REVOCATION", v)
-	}
-	return ""
-}
-
-func expandAttachedDisk(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
-	config := meta.(*transport_tpg.Config)
-
-	s := diskConfig["source"].(string)
-	var sourceLink string
-	if strings.Contains(s, "regions/") {
-		source, err := tpgresource.ParseRegionDiskFieldValue(s, d, config)
-		if err != nil {
-			return nil, err
-		}
-		sourceLink = source.RelativeLink()
-	} else {
-		source, err := tpgresource.ParseDiskFieldValue(s, d, config)
-		if err != nil {
-			return nil, err
-		}
-		sourceLink = source.RelativeLink()
-	}
-
-	disk := &compute.AttachedDisk{
-		Source: sourceLink,
-	}
-
-	if v, ok := diskConfig["mode"]; ok {
-		disk.Mode = v.(string)
-	}
-
-	if v, ok := diskConfig["device_name"]; ok {
-		disk.DeviceName = v.(string)
-	}
-
-	keyValue, keyOk := diskConfig["disk_encryption_key_raw"]
-	if keyOk {
-		if keyValue != "" {
-			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
-				RawKey: keyValue.(string),
-			}
-		}
-	}
-
-	kmsValue, kmsOk := diskConfig["kms_key_self_link"]
-	if kmsOk {
-		if keyOk && keyValue != "" && kmsValue != "" {
-			return nil, errors.New("Only one of kms_key_self_link and disk_encryption_key_raw can be set")
-		}
-		if kmsValue != "" {
-			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
-				KmsKeyName: kmsValue.(string),
-			}
-		}
-	}
-	return disk, nil
 }
 
 // See comment on expandInstanceTemplateGuestAccelerators regarding why this
@@ -1937,7 +1868,7 @@ func expandInstanceNetworkInterfaces(d tpgresource.TerraformResourceData, config
 	return ifaces, nil
 }
 
-func expandSchedulingForTgc(v interface{}) (*compute.Scheduling, error) {
+func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 	if v == nil {
 		// We can't set default values for lists.
 		return &compute.Scheduling{
@@ -2057,7 +1988,7 @@ func expandSchedulingForTgc(v interface{}) (*compute.Scheduling, error) {
 	return scheduling, nil
 }
 
-func expandAttachedDiskForTgc(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
+func expandAttachedDiskTgc(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
 	config := meta.(*transport_tpg.Config)
 
 	s := diskConfig["source"].(string)

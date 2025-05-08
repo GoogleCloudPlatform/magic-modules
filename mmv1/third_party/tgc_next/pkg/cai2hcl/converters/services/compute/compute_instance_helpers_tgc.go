@@ -1,8 +1,6 @@
 package compute
 
 import (
-	"log"
-	"strconv"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
@@ -11,7 +9,7 @@ import (
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
-func flattenAliasIpRange(ranges []*compute.AliasIpRange) []map[string]interface{} {
+func flattenAliasIpRangeTgc(ranges []*compute.AliasIpRange) []map[string]interface{} {
 	rangesSchema := make([]map[string]interface{}, 0, len(ranges))
 	for _, ipRange := range ranges {
 		rangesSchema = append(rangesSchema, map[string]interface{}{
@@ -22,7 +20,7 @@ func flattenAliasIpRange(ranges []*compute.AliasIpRange) []map[string]interface{
 	return rangesSchema
 }
 
-func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
+func flattenSchedulingTgc(resp *compute.Scheduling) []map[string]interface{} {
 	schedulingMap := make(map[string]interface{}, 0)
 
 	// gracefulShutdown is not in the cai asset, so graceful_shutdown is skipped.
@@ -90,74 +88,7 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	return []map[string]interface{}{schedulingMap}
 }
 
-func flattenComputeMaxRunDuration(v *compute.Duration) []interface{} {
-	if v == nil {
-		return nil
-	}
-	transformed := make(map[string]interface{})
-	transformed["nanos"] = v.Nanos
-	transformed["seconds"] = v.Seconds
-	return []interface{}{transformed}
-}
-
-func flattenOnInstanceStopAction(v *compute.SchedulingOnInstanceStopAction) []interface{} {
-	if v == nil {
-		return nil
-	}
-	transformed := make(map[string]interface{})
-	transformed["discard_local_ssd"] = v.DiscardLocalSsd
-	return []interface{}{transformed}
-}
-
-func flattenComputeLocalSsdRecoveryTimeout(v *compute.Duration) []interface{} {
-	if v == nil {
-		return nil
-	}
-	transformed := make(map[string]interface{})
-	transformed["nanos"] = v.Nanos
-	transformed["seconds"] = v.Seconds
-	return []interface{}{transformed}
-}
-
-func flattenAccessConfigs(accessConfigs []*compute.AccessConfig) ([]map[string]interface{}, string) {
-	flattened := make([]map[string]interface{}, len(accessConfigs))
-	natIP := ""
-	for i, ac := range accessConfigs {
-		flattened[i] = map[string]interface{}{
-			"nat_ip":       ac.NatIP,
-			"network_tier": ac.NetworkTier,
-		}
-		if ac.SetPublicPtr {
-			flattened[i]["public_ptr_domain_name"] = ac.PublicPtrDomainName
-		}
-		if natIP == "" {
-			natIP = ac.NatIP
-		}
-		if ac.SecurityPolicy != "" {
-			flattened[i]["security_policy"] = ac.SecurityPolicy
-		}
-	}
-	return flattened, natIP
-}
-
-func flattenIpv6AccessConfigs(ipv6AccessConfigs []*compute.AccessConfig) []map[string]interface{} {
-	flattened := make([]map[string]interface{}, len(ipv6AccessConfigs))
-	for i, ac := range ipv6AccessConfigs {
-		flattened[i] = map[string]interface{}{
-			"network_tier": ac.NetworkTier,
-		}
-		flattened[i]["public_ptr_domain_name"] = ac.PublicPtrDomainName
-		flattened[i]["external_ipv6"] = ac.ExternalIpv6
-		flattened[i]["external_ipv6_prefix_length"] = strconv.FormatInt(ac.ExternalIpv6PrefixLength, 10)
-		flattened[i]["name"] = ac.Name
-		if ac.SecurityPolicy != "" {
-			flattened[i]["security_policy"] = ac.SecurityPolicy
-		}
-	}
-	return flattened
-}
-
-func flattenNetworkInterfaces(networkInterfaces []*compute.NetworkInterface, project string) ([]map[string]interface{}, string, string, error) {
+func flattenNetworkInterfacesTgc(networkInterfaces []*compute.NetworkInterface, project string) ([]map[string]interface{}, string, string, error) {
 	flattened := make([]map[string]interface{}, len(networkInterfaces))
 	var internalIP, externalIP string
 
@@ -168,7 +99,7 @@ func flattenNetworkInterfaces(networkInterfaces []*compute.NetworkInterface, pro
 		flattened[i] = map[string]interface{}{
 			"network_ip":                  iface.NetworkIP,
 			"access_config":               ac,
-			"alias_ip_range":              flattenAliasIpRange(iface.AliasIpRanges),
+			"alias_ip_range":              flattenAliasIpRangeTgc(iface.AliasIpRanges),
 			"nic_type":                    iface.NicType,
 			"stack_type":                  iface.StackType,
 			"ipv6_access_config":          flattenIpv6AccessConfigs(iface.Ipv6AccessConfigs),
@@ -182,6 +113,8 @@ func flattenNetworkInterfaces(networkInterfaces []*compute.NetworkInterface, pro
 		if subnetProject != project {
 			flattened[i]["subnetwork_project"] = subnetProject
 		}
+
+		// The field name is computed, no it is not converted.
 
 		if iface.StackType != "IPV4_ONLY" {
 			flattened[i]["stack_type"] = iface.StackType
@@ -213,7 +146,7 @@ func flattenNetworkInterfaces(networkInterfaces []*compute.NetworkInterface, pro
 	return flattened, internalIP, externalIP, nil
 }
 
-func flattenServiceAccounts(serviceAccounts []*compute.ServiceAccount) []map[string]interface{} {
+func flattenServiceAccountsTgc(serviceAccounts []*compute.ServiceAccount) []map[string]interface{} {
 	result := make([]map[string]interface{}, len(serviceAccounts))
 	for i, serviceAccount := range serviceAccounts {
 		scopes := serviceAccount.Scopes
@@ -225,11 +158,10 @@ func flattenServiceAccounts(serviceAccounts []*compute.ServiceAccount) []map[str
 			"scopes": scopes,
 		}
 	}
-	log.Printf("flattenServiceAccounts %#v", result)
 	return result
 }
 
-func flattenGuestAccelerators(accelerators []*compute.AcceleratorConfig) []map[string]interface{} {
+func flattenGuestAcceleratorsTgc(accelerators []*compute.AcceleratorConfig) []map[string]interface{} {
 	acceleratorsSchema := make([]map[string]interface{}, len(accelerators))
 	for i, accelerator := range accelerators {
 		acceleratorsSchema[i] = map[string]interface{}{
@@ -240,66 +172,7 @@ func flattenGuestAccelerators(accelerators []*compute.AcceleratorConfig) []map[s
 	return acceleratorsSchema
 }
 
-func flattenConfidentialInstanceConfig(ConfidentialInstanceConfig *compute.ConfidentialInstanceConfig) []map[string]interface{} {
-	if ConfidentialInstanceConfig == nil {
-		return nil
-	}
-
-	return []map[string]interface{}{{
-		"enable_confidential_compute": ConfidentialInstanceConfig.EnableConfidentialCompute,
-		"confidential_instance_type":  ConfidentialInstanceConfig.ConfidentialInstanceType,
-	}}
-}
-
-func flattenAdvancedMachineFeatures(AdvancedMachineFeatures *compute.AdvancedMachineFeatures) []map[string]interface{} {
-	if AdvancedMachineFeatures == nil {
-		return nil
-	}
-	return []map[string]interface{}{{
-		"enable_nested_virtualization": AdvancedMachineFeatures.EnableNestedVirtualization,
-		"threads_per_core":             AdvancedMachineFeatures.ThreadsPerCore,
-		"turbo_mode":                   AdvancedMachineFeatures.TurboMode,
-		"visible_core_count":           AdvancedMachineFeatures.VisibleCoreCount,
-		"performance_monitoring_unit":  AdvancedMachineFeatures.PerformanceMonitoringUnit,
-		"enable_uefi_networking":       AdvancedMachineFeatures.EnableUefiNetworking,
-	}}
-}
-
-func flattenShieldedVmConfig(shieldedVmConfig *compute.ShieldedInstanceConfig) []map[string]bool {
-	if shieldedVmConfig == nil {
-		return nil
-	}
-
-	shieldedInstanceConfig := map[string]bool{}
-
-	if shieldedVmConfig.EnableSecureBoot {
-		shieldedInstanceConfig["enable_secure_boot"] = shieldedVmConfig.EnableSecureBoot
-	}
-
-	if !shieldedVmConfig.EnableVtpm {
-		shieldedInstanceConfig["enable_vtpm"] = shieldedVmConfig.EnableVtpm
-	}
-
-	if !shieldedVmConfig.EnableIntegrityMonitoring {
-		shieldedInstanceConfig["enable_integrity_monitoring"] = shieldedVmConfig.EnableIntegrityMonitoring
-	}
-
-	if len(shieldedInstanceConfig) == 0 {
-		return nil
-	}
-
-	return []map[string]bool{shieldedInstanceConfig}
-}
-
-func flattenEnableDisplay(displayDevice *compute.DisplayDevice) interface{} {
-	if displayDevice == nil {
-		return nil
-	}
-
-	return displayDevice.EnableDisplay
-}
-
-func flattenReservationAffinity(affinity *compute.ReservationAffinity) []map[string]interface{} {
+func flattenReservationAffinityTgc(affinity *compute.ReservationAffinity) []map[string]interface{} {
 	if affinity == nil {
 		return nil
 	}
@@ -318,28 +191,4 @@ func flattenReservationAffinity(affinity *compute.ReservationAffinity) []map[str
 	}
 
 	return []map[string]interface{}{flattened}
-}
-
-func flattenNetworkPerformanceConfig(c *compute.NetworkPerformanceConfig) []map[string]interface{} {
-	if c == nil {
-		return nil
-	}
-	return []map[string]interface{}{
-		{
-			"total_egress_bandwidth_tier": c.TotalEgressBandwidthTier,
-		},
-	}
-}
-
-func flattenComputeInstanceEncryptionKey(v *compute.CustomerEncryptionKey) []map[string]interface{} {
-	if v == nil {
-		return nil
-	}
-	return []map[string]interface{}{
-		{
-			"kms_key_self_link":       v.KmsKeyName,
-			"sha256":                  v.Sha256,
-			"kms_key_service_account": v.KmsKeyServiceAccount,
-		},
-	}
 }

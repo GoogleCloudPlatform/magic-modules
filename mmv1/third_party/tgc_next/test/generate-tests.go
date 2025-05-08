@@ -9,11 +9,11 @@ import (
 func generateTests(TestConfig map[string]TestMetadata, resource, asset string) {
 	testsPerResource := make(map[string][]string, 0)
 	for test, config := range TestConfig {
-		if _, ok := testsPerResource[config.Resource]; !ok {
-			testsPerResource[config.Resource] = make([]string, 0)
+		if _, ok := testsPerResource[config.Address]; !ok {
+			testsPerResource[config.Address] = make([]string, 0)
 		}
 
-		testsPerResource[config.Resource] = append(testsPerResource[config.Resource], test)
+		testsPerResource[config.Address] = append(testsPerResource[config.Address], test)
 	}
 
 	for r, tests := range testsPerResource {

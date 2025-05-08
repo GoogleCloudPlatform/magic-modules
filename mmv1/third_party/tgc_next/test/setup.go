@@ -17,7 +17,7 @@ type TestMetadata struct {
 	Test       string
 	RawConfig  string
 	Service    string
-	Resource   string
+	Address    string
 	AssetNames []string
 	Assets     []caiasset.Asset
 }
@@ -32,12 +32,11 @@ func ReadTestsDataFromGcs() error {
 	if !setupDone {
 		cacheMutex.Lock()
 
-		bucketName := "cai_assets"
+		bucketName := "cai_assets_metadata"
 		currentDate := time.Now()
 
 		for len(TestConfig) == 0 {
-			previousDate := currentDate.AddDate(0, 0, -1)
-			objectName := fmt.Sprintf("nightly_tests/%s/nightly_tests_meta.json", previousDate.Format("2006-01-02"))
+			objectName := fmt.Sprintf("nightly_tests/%s/nightly_tests_meta.json", currentDate.Format("2006-01-02"))
 			log.Printf("Read object  %s from the bucket %s", objectName, bucketName)
 
 			ctx := context.Background()
@@ -47,9 +46,16 @@ func ReadTestsDataFromGcs() error {
 			}
 			defer client.Close()
 
+			currentDate = currentDate.AddDate(0, 0, -1)
+
 			rc, err := client.Bucket(bucketName).Object(objectName).NewReader(ctx)
 			if err != nil {
-				return fmt.Errorf("Object(%q).NewReader: %v", objectName, err)
+				if err == storage.ErrObjectNotExist {
+					log.Printf("Object '%s' in bucket '%s' does NOT exist.\n", objectName, bucketName)
+					continue
+				} else {
+					return fmt.Errorf("Object(%q).NewReader: %v", objectName, err)
+				}
 			}
 			defer rc.Close()
 
@@ -62,8 +68,6 @@ func ReadTestsDataFromGcs() error {
 			if err != nil {
 				return fmt.Errorf("json.Unmarshal: %v", err)
 			}
-
-			currentDate = previousDate
 
 			// generateTests(TestConfig, "google_compute_instance", "compute.googleapis.com/Instance")
 

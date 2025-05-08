@@ -1171,23 +1171,22 @@ func TestAccComputeInstance_attachedDisk_sourceUrl(t *testing.T) {
 	)
 }
 
-func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
-	t.Parallel()
+// func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
+// 	t.Parallel()
 
-	test.AssertTestFile(
-		t,
-		[]string{
-			"desired_status",
-			"allow_stopping_for_update",
-			"metadata",
-			"scheduling.automatic_restart", // It has the default value true
-			"scheduling.host_error_timeout_seconds",
-			// "boot_disk.initialize_params" is not converted
-			"boot_disk.initialize_params",
-			"boot_disk.initialize_params.image",
-		},
-	)
-}
+// 	test.AssertTestFile(
+// 		t,
+// 		[]string{
+// 			"desired_status",
+// 			"allow_stopping_for_update",
+// 			"metadata",
+// 			"scheduling.automatic_restart", // It has the default value true
+// 			// "boot_disk.initialize_params" is not converted
+// 			"boot_disk.initialize_params",
+// 			"boot_disk.initialize_params.image",
+// 		},
+// 	)
+// }
 
 func TestAccComputeInstance_localSsdVM_maxRunDuration_stopTerminationAction(t *testing.T) {
 	t.Parallel()

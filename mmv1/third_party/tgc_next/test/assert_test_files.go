@@ -41,7 +41,7 @@ func AssertTestFile(t *testing.T, excludedFields []string) {
 
 	fileName := t.Name()
 	testMetadata := TestConfig[fileName]
-	resource := testMetadata.Resource
+	address := testMetadata.Address
 
 	jsonData, err := json.MarshalIndent(testMetadata.Assets, "", "  ")
 	if err != nil {
@@ -79,13 +79,13 @@ func AssertTestFile(t *testing.T, excludedFields []string) {
 		log.Fatalf("error writing to file %s: %#v", exportTfFile, err)
 	}
 
-	exportConfigMap, err := parseConfig(exportTfFilePath, resource)
+	exportConfigMap, err := parseConfig(exportTfFilePath, "")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	if len(exportConfigMap) == 0 {
-		log.Fatalf("%s - Missing resource after cai2hcl conversion: %s.", t.Name(), resource)
+		log.Fatalf("%s - Missing address after cai2hcl conversion: %s.", t.Name(), address)
 	}
 
 	rawTfFile := fmt.Sprintf("%s.tf", fileName)
@@ -102,7 +102,7 @@ func AssertTestFile(t *testing.T, excludedFields []string) {
 	// 	t.Logf("Removed temporary file: %s", rawTfFile)
 	// }()
 
-	rawConfigMap, err := parseConfig(rawTfFile, resource)
+	rawConfigMap, err := parseConfig(rawTfFile, address)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -118,7 +118,7 @@ func AssertTestFile(t *testing.T, excludedFields []string) {
 
 	missingKeys := compareHCLFields(rawConfigMap, exportConfigMap, "", excludedFieldMap)
 	if len(missingKeys) > 0 {
-		log.Fatalf("%s - Missing fields in resource %s after cai2hcl conversion:\n%s", t.Name(), resource, missingKeys)
+		log.Fatalf("%s - Missing fields in address %s after cai2hcl conversion:\n%s", t.Name(), address, missingKeys)
 	}
 
 	ancestryCache := getAncestryCache(testMetadata.Assets)
@@ -174,19 +174,6 @@ func getAncestryCache(assets []caiasset.Asset) map[string]string {
 		}
 	}
 	return ancestryCache
-}
-
-var rootSchema = &hcl.BodySchema{
-	Blocks: []hcl.BlockHeaderSchema{
-		{
-			Type:       "resource",
-			LabelNames: []string{"type", "name"},
-		},
-		{
-			Type:       "provider",
-			LabelNames: []string{"name"},
-		},
-	},
 }
 
 type Resource struct {
@@ -249,7 +236,7 @@ func parseConfig(filePath, target string) (map[string]interface{}, error) {
 	for _, block := range hclFile.Body.(*hclsyntax.Body).Blocks {
 		if block.Type == "resource" {
 			if len(block.Labels) != 2 {
-				log.Printf("Skipping resource block with unexpected number of labels: %v", block.Labels)
+				log.Printf("Skipping address block with unexpected number of labels: %v", block.Labels)
 				continue
 			}
 
@@ -258,7 +245,7 @@ func parseConfig(filePath, target string) (map[string]interface{}, error) {
 			attrs, procDiags := parseHCLBody(block.Body, filePath)
 
 			if procDiags.HasErrors() {
-				log.Printf("Diagnostics while processing resource %s.%s body in %s:", resType, resName, filePath)
+				log.Printf("Diagnostics while processing address %s.%s body in %s:", resType, resName, filePath)
 				for _, diag := range procDiags {
 					log.Printf("  - %s (Severity)", diag.Error())
 				}
@@ -276,7 +263,7 @@ func parseConfig(filePath, target string) (map[string]interface{}, error) {
 	configMap := make(map[string]interface{}, 0)
 	for _, r := range allParsedResources {
 		addr := fmt.Sprintf("%s.%s", r.Type, r.Name)
-		if addr == target {
+		if target == "" || addr == target {
 			configMap = r.Attributes
 			break
 		}
