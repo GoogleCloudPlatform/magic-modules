@@ -40,8 +40,7 @@ examples:
   - name: 'interconnect_attachment_group_basic'
     primary_resource_id: 'example-interconnect-attachment-group'
     vars:
-      interconnect_name: 'example-interconnect'
-      customer_name: 'example_customer'
+      interconnect_attachment_group_name: 'example-interconnect-attachment-group'
       deletion_protection: 'true'
     test_vars_overrides:
       'deletion_protection': 'false'
