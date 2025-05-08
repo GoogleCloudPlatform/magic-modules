@@ -57,7 +57,7 @@ properties:
     description: |
       The timestamp at which this folder was most recently updated.
     output: true
-  - name: 'lifecycleRules'
+  - name: 'lifecycleRule'
     type: NestedObject
     properties:
       - name: 'rule'
