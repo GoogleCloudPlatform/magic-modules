@@ -10,5 +10,5 @@ resource "google_netapp_storage_pool" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
   service_level = "PREMIUM"
   capacity_gib = "2048"
-  network = google_compute_network.peering_network.id
+  network = data.google_compute_network.default.id
 }
