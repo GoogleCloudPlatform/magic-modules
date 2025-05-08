@@ -1627,7 +1627,7 @@ func testAccCloudRunV2Service_cloudrunv2ServiceWithTagsAndDeletionProtection(con
     ingress = "INGRESS_TRAFFIC_ALL"
     tags = {
     	"%{org}/%{tagKey}" = "%{tagValue}"
-
+    }
     template {
       containers {
         image = "us-docker.pkg.dev/cloudrun/container/hello"
