@@ -412,19 +412,10 @@ func (p *frameworkTestProvider) DataSources(ctx context.Context) []func() dataso
 	return ds
 }
 
-<<<<<<< HEAD
 func (p *frameworkTestProvider) Resources(ctx context.Context) []func() fwResource.Resource {
 	r := p.FrameworkProvider.Resources(ctx)
-	r = append(r, pubsublite.NewGooglePubsubLiteReservationFWResource) // google_fwprovider_pubsub_lite_reservation
+	r = append(r, pubsublite.NewGooglePubsubLiteReservationFWResource, sql.NewSQLUserFWResource) // google_fwprovider_pubsub_lite_reservation
 	return r
-=======
-// Resources overrides the provider's Resources function so that we can append test-specific resources
-// Similar to the Datasources override
-func (p *frameworkTestProvider) Resources(ctx context.Context) []func() fwResource.Resource {
-	rs := p.FrameworkProvider.Resources(ctx)
-	rs = append(rs, sql.NewSQLUserFWResource) // google_fw_sql_user
-	return rs
->>>>>>> 1d5c7ed64 (Framework SQL User resource draft)
 }
 
 // GetSDKProvider gets the SDK provider for use in acceptance tests
