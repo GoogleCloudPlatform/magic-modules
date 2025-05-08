@@ -236,11 +236,11 @@ properties:
   - name: 'securityMode'
     type: Enum
     description: Optional. The security mode of the routine, if defined. If not defined, the security mode is automatically determined from the routine's configuration.
-    ignore_read: true
     enum_values:
       - 'SECURITY_MODE_UNSPECIFIED'
       - 'DEFINER'
       - 'INVOKER'
+    diff_suppress_func: 'tpgresource.EmptyOrDefaultStringSuppress("SECURITY_MODE_UNSPECIFIED")'
   - name: 'sparkOptions'
     type: NestedObject
     description: |
