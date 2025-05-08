@@ -155,7 +155,6 @@ properties:
                         output: true
                         description: |
                           A list of messages that carry the error details.
-                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
                         custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                         custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                         validation:
@@ -253,7 +252,6 @@ properties:
                         output: true
                         description: |
                           A list of messages that carry the error details.
-                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
                         custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
                         custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
                         validation:
@@ -339,7 +337,6 @@ properties:
               output: true
               description: |
                 A list of messages that carry the error details.
-              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
               custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
               custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
               validation:
@@ -382,10 +379,6 @@ properties:
       Server-computed checksum based on other values; may be sent
       on update or delete to ensure operation is done on expected resource.
     output: true
-  - name: disabled
-    type: Boolean
-    description: Whether the domain is disabled. Defaults to false.
-    default_value: false
   - name: serve
     type: NestedObject
     description: |-
@@ -425,13 +418,4 @@ properties:
   - name: createTime
     type: String
     description: Time at which the domain was created.
-    output: true
-  - name: type
-    type: String
-    description: |-
-      The type of the domain. All domains created by users are CUSTOM.
-      A DEFAULT domain is auto created along with the Backend and can only be disabled.
-      Possible values:
-      DEFAULT
-      CUSTOM
     output: true
