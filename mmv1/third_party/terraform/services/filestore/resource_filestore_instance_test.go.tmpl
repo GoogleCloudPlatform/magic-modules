@@ -1,11 +1,13 @@
 package filestore_test
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"reflect"
 	"regexp"
 	"testing"
+	"text/template"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -592,4 +594,114 @@ resource "google_filestore_instance" "instance" {
 }
 `, name, location, tier)
 }
+
+{{- end }}
+{{- if ne $.TargetVersionName "ga" }}
+
+func TestAccFilestoreInstance_psc(t *testing.T) {
+	t.Parallel()
+
+	data := map[string]string{
+		"Name": fmt.Sprintf("tf-test-%d", acctest.RandInt(t)),
+		"Location": "us-central1",
+		"Tier": "REGIONAL",
+	}
+	config, err := executeTemplate(pscInstanceConfigTemplate, data)
+	if err != nil {
+		t.Fatalf("Failed to execute config template: %v", err)
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: config,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.connect_mode", "PRIVATE_SERVICE_CONNECT"),
+				),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+		},
+	})
+}
+
+func executeTemplate(tmplString string, data any) (string, error) {
+	tmpl, err := template.New("tmpl").Delims("[[", "]]").Parse(tmplString)
+	if err != nil {
+		return "", err
+	}
+	var b bytes.Buffer
+	if err := tmpl.Execute(&b, data); err != nil {
+		return "", err
+	}
+	return b.String(), nil
+}
+
+const pscInstanceConfigTemplate = `
+data "google_client_config" "current" {}
+
+resource "google_compute_network" "psc_network" {
+  provider                = google-beta
+  name                    = "[[.Name]]"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "psc_subnet" {
+  provider      = google-beta
+  name          = "[[.Name]]"
+  ip_cidr_range = "10.2.0.0/16"
+  region        = "[[.Location]]"
+  network       = google_compute_network.psc_network.id
+}
+
+resource "google_network_connectivity_service_connection_policy" "default" {
+  provider      = google-beta
+  name          = "[[.Name]]"
+  location      = "[[.Location]]"
+  service_class = "google-cloud-filestore"
+  network       = google_compute_network.psc_network.id
+  psc_config {
+    subnetworks = [google_compute_subnetwork.psc_subnet.id]
+  }
+}
+
+resource "google_filestore_instance" "instance" {
+  provider = google-beta
+  depends_on = [
+    google_network_connectivity_service_connection_policy.default
+  ]
+  name        = "[[.Name]]"
+  location    = "[[.Location]]"
+  tier        = "[[.Tier]]"
+  description = "An instance created during testing."
+  protocol    = "NFS_V4_1"
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+
+    nfs_export_options {
+      ip_ranges = ["70.0.0.1/24"]
+      network   = google_compute_network.psc_network.name
+    }
+  }
+
+  networks {
+    network      = google_compute_network.psc_network.name
+    modes        = ["MODE_IPV4"]
+    connect_mode = "PRIVATE_SERVICE_CONNECT"
+    psc_config {
+      endpoint_project = data.google_client_config.current.project
+    }
+  }
+}
+`
+
 {{- end }}
