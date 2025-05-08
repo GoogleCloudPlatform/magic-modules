@@ -1624,7 +1624,6 @@ func testAccCloudRunV2Service_cloudrunv2ServiceWithTagsAndDeletionProtection(con
     name     = "tf-test-cloudrun-tags-service%{random_suffix}"
     location = "us-central1"
     deletion_protection = %{deletion_protection}
-    ingress = "INGRESS_TRAFFIC_ALL"
     tags = {
     	"%{org}/%{tagKey}" = "%{tagValue}"
     }
