@@ -4,12 +4,18 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
+	"time"
 
+	"github.com/google/go-licenses/licenses"
 	"github.com/spf13/cobra"
 )
 
 const rootCmdDesc = "Utilities for license check."
+const licenseConfidence = 0.9
+
+var copyrightRegex = regexp.MustCompile(`(?i)copyright (\d{4}) google`)
 
 type rootOptions struct {
 	fileList []string
@@ -37,21 +43,22 @@ func (o *rootOptions) run() error {
 	}
 	foundErr := false
 	for _, file := range o.fileList {
-		b, err := os.ReadFile(file)
-		if err != nil {
-			return err
-		}
 		ext := filepath.Ext(file)
-		if ext != ".tmpl" && ext != ".go" && ext != ".yaml" {
+		if ext != ".tmpl" && ext != ".go" && ext != ".yaml" && ext != ".yml" {
 			continue
 		}
-		if !strings.Contains(string(b), `Licensed under the Apache License, Version 2.0 (the "License");`) {
-			fmt.Fprintf(os.Stderr, "File %s does not contain Apache License.\n", file)
+
+		if err := checkLicenseType(file); err != nil {
+			fmt.Fprintf(os.Stderr, "File %s failed: %s.\n", file, err)
+			foundErr = true
+		}
+		if err := checkCopyright(file, time.Now().Year()); err != nil {
+			fmt.Fprintf(os.Stderr, "File %s failed: %s.\n", file, err)
 			foundErr = true
 		}
 	}
 	if foundErr {
-		return fmt.Errorf("found file missing license")
+		return fmt.Errorf("found file failing license check")
 	}
 	return nil
 }
@@ -71,4 +78,36 @@ func Execute() {
 		fmt.Println(err.Error())
 		os.Exit(1)
 	}
+}
+
+func checkLicenseType(filePath string) error {
+	classifier, err := licenses.NewClassifier(licenseConfidence)
+	if err != nil {
+		return fmt.Errorf("failed to create license classifier: %w", err)
+	}
+	licenseName, _, err := classifier.Identify(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to identify license for %s: %w", filePath, err)
+	}
+	if !strings.Contains(licenseName, "Apache") {
+		return fmt.Errorf("found license type %s, expect Apache", licenseName)
+	}
+	return nil
+}
+
+func checkCopyright(filePath string, year int) error {
+	b, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+
+	if !copyrightRegex.MatchString(string(b)) {
+		return fmt.Errorf("expected copyright string not found")
+	}
+
+	foundYears := copyrightRegex.FindStringSubmatch(string(b))
+	if foundYears[1] != fmt.Sprintf("%d", year) {
+		return fmt.Errorf("copyright year is not the latest year")
+	}
+	return nil
 }
