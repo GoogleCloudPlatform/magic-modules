@@ -33,6 +33,7 @@ examples:
     primary_resource_id: bucketlifecycle
     vars:
       bucket_name: 'my-bucket'
+#docs:
 custom_code:
 import_format:
   - '{{%name}}'
@@ -135,12 +136,12 @@ properties:
                     Relevant only for versioned objects. This condition is
                     satisfied when an object has been noncurrent for more than
                     the specified number of days.
-                - name: 'isLive'
+                - name: 'withState'
                   type: Boolean
                   description: |
-                    Relevant only for versioned objects.  If the value is
-                    true, this condition matches live objects; if the value
-                    is false, it matches archived objects.
+                    Match to live and/or archived objects.
+                    Unversioned buckets have only live objects.
+                    Supported values include: "LIVE", "ARCHIVED", "ANY".
                 - name: 'matchesStorageClass'
                   type: Array
                   description: |
@@ -180,3 +181,32 @@ properties:
                     this condition is satisfied when there are at least N
                     versions (including the live version) newer than this
                     version of the object.
+                - name: 'sendAgeIfZero'
+                  type: Boolean
+                  description: |
+                    While set true, age value will be sent in the request
+                    even for zero value of the field. This field is only
+                    useful for setting 0 value to the age field.
+                    It can be used alone or together with age.
+                - name: 'sendDaysSinceNoncurrentTimeIfZero'
+                  type: Boolean
+                  description: |
+                    While set true, days_since_noncurrent_time value will be sent
+                    in the request even for zero value of the field. This field is
+                    only useful for setting 0 value to the days_since_noncurrent_time field.
+                    It can be used alone or together with days_since_noncurrent_time.
+                - name: 'sendDaysSinceCustomTimeIfZero'
+                  type: Boolean
+                  description: |
+                    While set true, days_since_custom_time value will be sent
+                    in the request even for zero value of the field. This field
+                    is only useful for setting 0 value to the days_since_custom_time field.
+                    It can be used alone or together with days_since_custom_time.
+                - name: 'sendNumNewerVersionsIfZero'
+                  type: Boolean
+                  description: |
+                    While set true, num_newer_versions value will be sent
+                    in the request even for zero value of the field.
+                    This field is only useful for setting 0 value to the
+                    num_newer_versions field. It can be used alone or
+                    together with num_newer_versions.       
