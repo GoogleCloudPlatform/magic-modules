@@ -58,154 +58,145 @@ properties:
       The timestamp at which this folder was most recently updated.
     output: true
   - name: 'lifecycleRule'
-    type: NestedObject
-    properties:
-      - name: 'rule'
-        type: Array
-        max_size: 100
-        min_size: 1
-        required: true
-        description: |
-          A lifecycle management rule, which is made of an action to take
-          and the condition(s) under which the action will be taken.
-        item_type:
+    type: Array
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'action'
           type: NestedObject
+          is_set: true
+          min_size: 1
+          max_size: 1
+          required: true
+          description: 'The action to take.'
           properties:
-            - name: 'action'
-              type: NestedObject
-              is_set: true
-              min_size: 1
-              max_size: 1
-              required: true
-              description: 'The action to take.'
-              properties:
-                - name: 'storageClass'
-                  type: String
-                  description: |
-                    Target storage class. Required if the type of the
-                    action is SetStorageClass.
-                - name: 'type'
-                  type: Enum
-                  required: true
-                  description: |
-                    Type of the action. Currently, only Delete and
-                    SetStorageClass are supported.
-                  enum_values:
-                    - 'Delete'
-                    - 'SetStorageClass'
-            - name: 'condition'
-              type: NestedObject
-              is_set: true
-              min_size: 1
-              max_size: 1
+            - name: 'storageClass'
+              type: String
+              description: |
+                Target storage class. Required if the type of the
+                action is SetStorageClass.
+            - name: 'type'
+              type: Enum
               required: true
               description: |
-                The condition(s) under which the action will be taken.
-              properties:
-                - name: 'age'
-                  type: Integer
-                  description: |
-                    Age of an object (in days). This condition is satisfied
-                    when an object reaches the specified age.
-                  api_name: age
-                - name: 'createdBefore'
-                  type: Time
-                  description: |
-                    A date in RFC 3339 format with only the date part (for
-                    instance, "2013-01-15"). This condition is satisfied
-                    when an object is created before midnight of the
-                    specified date in UTC.
-                - name: 'customTimeBefore'
-                  type: Time
-                  description: |
-                    A date in the RFC 3339 format YYYY-MM-DD. This condition
-                    is satisfied when the customTime metadata for the object
-                    is set to an earlier date than the date used in
-                    this lifecycle condition.
-                - name: 'daysSinceCustomTime'
-                  type: Integer
-                  description: |
-                    Days since the date set in the customTime metadata for the
-                    object. This condition is satisfied when the current date
-                    and time is at least the specified number of days after
-                    the customTime.
-                - name: 'daysSinceNoncurrentTime'
-                  type: Integer
-                  description: |
-                    Relevant only for versioned objects. This condition is
-                    satisfied when an object has been noncurrent for more than
-                    the specified number of days.
-                - name: 'withState'
-                  type: Boolean
-                  description: |
-                    Match to live and/or archived objects.
-                    Unversioned buckets have only live objects.
-                    Supported values include: "LIVE", "ARCHIVED", "ANY".
-                - name: 'matchesStorageClass'
-                  type: Array
-                  description: |
-                    Objects having any of the storage classes specified by
-                    this condition will be matched. Values include
-                    MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, ARCHIVE,
-                    STANDARD, and DURABLE_REDUCED_AVAILABILITY.
-                  item_type:
-                    type: String
-                - name: 'matchesSuffix'
-                  type: Array
-                  description: |
-                    The suffix of an object. This condition is
-                    satisfied when the end of an object's
-                    name is an exact case-sensitive match with the suffix.
-                  item_type:
-                    type: String
-                - name: 'matchesPrefix'
-                  type: Array
-                  description: |
-                    The prefix of an object. This condition
-                    is satisfied when the beginning of an object's name
-                    is an exact case-sensitive match with the prefix.
-                  item_type:
-                    type: String
-                - name: 'noncurrentTimeBefore'
-                  type: Time
-                  description: |
-                    Relevant only for versioned objects. A date in the
-                    RFC 3339 format YYYY-MM-DD. This condition is satisfied
-                    for objects that became noncurrent on a date prior to the
-                    one specified in this condition.
-                - name: 'numNewerVersions'
-                  type: Integer
-                  description: |
-                    Relevant only for versioned objects. If the value is N,
-                    this condition is satisfied when there are at least N
-                    versions (including the live version) newer than this
-                    version of the object.
-                - name: 'sendAgeIfZero'
-                  type: Boolean
-                  description: |
-                    While set true, age value will be sent in the request
-                    even for zero value of the field. This field is only
-                    useful for setting 0 value to the age field.
-                    It can be used alone or together with age.
-                - name: 'sendDaysSinceNoncurrentTimeIfZero'
-                  type: Boolean
-                  description: |
-                    While set true, days_since_noncurrent_time value will be sent
-                    in the request even for zero value of the field. This field is
-                    only useful for setting 0 value to the days_since_noncurrent_time field.
-                    It can be used alone or together with days_since_noncurrent_time.
-                - name: 'sendDaysSinceCustomTimeIfZero'
-                  type: Boolean
-                  description: |
-                    While set true, days_since_custom_time value will be sent
-                    in the request even for zero value of the field. This field
-                    is only useful for setting 0 value to the days_since_custom_time field.
-                    It can be used alone or together with days_since_custom_time.
-                - name: 'sendNumNewerVersionsIfZero'
-                  type: Boolean
-                  description: |
-                    While set true, num_newer_versions value will be sent
-                    in the request even for zero value of the field.
-                    This field is only useful for setting 0 value to the
-                    num_newer_versions field. It can be used alone or
-                    together with num_newer_versions.
+                Type of the action. Currently, only Delete and
+                SetStorageClass are supported.
+              enum_values:
+                - 'Delete'
+                - 'SetStorageClass'
+        - name: 'condition'
+          type: NestedObject
+          is_set: true
+          min_size: 1
+          max_size: 1
+          required: true
+          description: |
+            The condition(s) under which the action will be taken.
+          properties:
+            - name: 'age'
+              type: Integer
+              description: |
+                Age of an object (in days). This condition is satisfied
+                when an object reaches the specified age.
+              api_name: age
+            - name: 'createdBefore'
+              type: Time
+              description: |
+                A date in RFC 3339 format with only the date part (for
+                instance, "2013-01-15"). This condition is satisfied
+                when an object is created before midnight of the
+                specified date in UTC.
+            - name: 'customTimeBefore'
+              type: Time
+              description: |
+                A date in the RFC 3339 format YYYY-MM-DD. This condition
+                is satisfied when the customTime metadata for the object
+                is set to an earlier date than the date used in
+                this lifecycle condition.
+            - name: 'daysSinceCustomTime'
+              type: Integer
+              description: |
+                Days since the date set in the customTime metadata for the
+                object. This condition is satisfied when the current date
+                and time is at least the specified number of days after
+                the customTime.
+            - name: 'daysSinceNoncurrentTime'
+              type: Integer
+              description: |
+                Relevant only for versioned objects. This condition is
+                satisfied when an object has been noncurrent for more than
+                the specified number of days.
+            - name: 'withState'
+              type: Boolean
+              description: |
+                Match to live and/or archived objects.
+                Unversioned buckets have only live objects.
+                Supported values include: "LIVE", "ARCHIVED", "ANY".
+            - name: 'matchesStorageClass'
+              type: Array
+              description: |
+                Objects having any of the storage classes specified by
+                this condition will be matched. Values include
+                MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, ARCHIVE,
+                STANDARD, and DURABLE_REDUCED_AVAILABILITY.
+              item_type:
+                type: String
+            - name: 'matchesSuffix'
+              type: Array
+              description: |
+                The suffix of an object. This condition is
+                satisfied when the end of an object's
+                name is an exact case-sensitive match with the suffix.
+              item_type:
+                type: String
+            - name: 'matchesPrefix'
+              type: Array
+              description: |
+                The prefix of an object. This condition
+                is satisfied when the beginning of an object's name
+                is an exact case-sensitive match with the prefix.
+              item_type:
+                type: String
+            - name: 'noncurrentTimeBefore'
+              type: Time
+              description: |
+                Relevant only for versioned objects. A date in the
+                RFC 3339 format YYYY-MM-DD. This condition is satisfied
+                for objects that became noncurrent on a date prior to the
+                one specified in this condition.
+            - name: 'numNewerVersions'
+              type: Integer
+              description: |
+                Relevant only for versioned objects. If the value is N,
+                this condition is satisfied when there are at least N
+                versions (including the live version) newer than this
+                version of the object.
+            - name: 'sendAgeIfZero'
+              type: Boolean
+              description: |
+                While set true, age value will be sent in the request
+                even for zero value of the field. This field is only
+                useful for setting 0 value to the age field.
+                It can be used alone or together with age.
+            - name: 'sendDaysSinceNoncurrentTimeIfZero'
+              type: Boolean
+              description: |
+                While set true, days_since_noncurrent_time value will be sent
+                in the request even for zero value of the field. This field is
+                only useful for setting 0 value to the days_since_noncurrent_time field.
+                It can be used alone or together with days_since_noncurrent_time.
+            - name: 'sendDaysSinceCustomTimeIfZero'
+              type: Boolean
+              description: |
+                While set true, days_since_custom_time value will be sent
+                in the request even for zero value of the field. This field
+                is only useful for setting 0 value to the days_since_custom_time field.
+                It can be used alone or together with days_since_custom_time.
+            - name: 'sendNumNewerVersionsIfZero'
+              type: Boolean
+              description: |
+                While set true, num_newer_versions value will be sent
+                in the request even for zero value of the field.
+                This field is only useful for setting 0 value to the
+                num_newer_versions field. It can be used alone or
+                together with num_newer_versions.
