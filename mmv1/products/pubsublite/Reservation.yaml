@@ -15,7 +15,6 @@
 name: 'Reservation'
 description: |
   A named resource representing a shared pool of capacity.
-plugin_framework: true
 references:
   guides:
     'Managing Reservations': 'https://cloud.google.com/pubsub/lite/docs/reservations'
