@@ -36,6 +36,7 @@ custom_code:
   constants: templates/terraform/constants/dataplex_entry.go.tmpl
   decoder: templates/terraform/decoders/dataplex_entry.go.tmpl
   encoder: templates/terraform/encoders/dataplex_entry.go.tmpl
+  custom_import: templates/terraform/custom_import/dataplex_entry.go.tmpl
   pre_read: templates/terraform/pre_read/dataplex_entry.go.tmpl
   pre_update: templates/terraform/pre_update/dataplex_entry.go.tmpl
 
@@ -49,7 +50,7 @@ examples:
     primary_resource_id: 'test_basic'
     primary_resource_name: 'fmt.Sprintf("tf-test-entry%s", context["random_suffix"])'
     vars:
-      entry_id: 'entry-basic'
+      entry_id: 'entry-basic/has/slashes'
       entry_group_name: 'entry-group-basic'
       aspect_type_name: "aspect-type-basic"
       entry_type_name: "entry-type-basic"
