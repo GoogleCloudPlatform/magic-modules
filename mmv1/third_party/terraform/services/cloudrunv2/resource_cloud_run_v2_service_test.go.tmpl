@@ -1620,7 +1620,6 @@ func TestAccCloudRunV2Service_cloudrunv2ServiceWithTags(t *testing.T) {
 func testAccCloudRunV2Service_cloudrunv2ServiceWithTagsAndDeletionProtection(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	  resource "google_cloud_run_v2_service" "default" {
-    provider = google-beta
     name     = "tf-test-cloudrun-tags-service%{random_suffix}"
     location = "us-central1"
     deletion_protection = %{deletion_protection}

@@ -535,7 +535,6 @@ func TestAccCloudRunV2Job_cloudrunv2JobWithTags(t *testing.T) {
 func testAccCloudRunV2Job_cloudrunv2JobWithTagsAndDeletionProtection(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	  resource "google_cloud_run_v2_job" "default" {
-    provider = google-beta
     name     = "tf-test-cloudrun-tags-job%{random_suffix}"
     location = "us-central1"
     deletion_protection = %{deletion_protection}
