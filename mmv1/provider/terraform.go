@@ -801,5 +801,6 @@ func (t Terraform) SupportedProviderVersions() []string {
 
 type ProviderWithProducts struct {
 	Terraform
+	Compiler string
 	Products []*api.Product
 }
