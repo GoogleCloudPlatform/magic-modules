@@ -71,6 +71,9 @@ func testAccNetworkServicesEdgeCacheOrigin_update_1(name string) string {
 			response_timeout = "29s"
 			read_timeout = "13s"
 		}
+		flex_shielding {
+			flex_shielding_regions = ["ME_CENTRAL1"]
+		}
 	}
 `, name)
 }
