@@ -12,6 +12,7 @@
 # limitations under the License.
 
 name: 'Glossary'
+min_version: beta
 description: |
   Represents a collection of categories and terms defined by the user. Glossary is a top level resource and is the GCP parent resource of all the categories and terms within it.
 docs:
@@ -43,6 +44,7 @@ iam_policy:
 custom_code:
 examples:
   - name: 'dataplex_glossary_basic'
+    min_version: beta
     primary_resource_id: 'glossary_test_id'
     primary_resource_name: 'fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
     vars:
@@ -50,6 +52,7 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
   - name: 'dataplex_glossary_full'
+    min_version: beta
     primary_resource_id: 'glossary_test_id_full'
     primary_resource_name: 'fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
     vars:
