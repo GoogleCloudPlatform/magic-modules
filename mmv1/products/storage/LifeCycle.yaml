@@ -33,7 +33,6 @@ examples:
     primary_resource_id: bucketlifecycle
     vars:
       bucket_name: 'my-bucket'
-#docs:
 custom_code:
 import_format:
   - '{{%name}}'
@@ -209,4 +208,4 @@ properties:
                     in the request even for zero value of the field.
                     This field is only useful for setting 0 value to the
                     num_newer_versions field. It can be used alone or
-                    together with num_newer_versions.       
+                    together with num_newer_versions.

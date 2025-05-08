@@ -177,7 +177,7 @@ The following arguments are supported:
 
 * `updated` -  (Computed) The time at which the bucket's metadata or IAM policy was last updated, in RFC 3339 format.
 
-<a name="nested_lifecycle_rule"></a>The `lifecycle_rule` block supports:
+<a name="nested_lifecycle_rule"></a>The `lifecycle_rule` block supports (Deprecated):
 
 * `action` - (Required) The Lifecycle Rule's action configuration. A single block of this type is supported. Structure is [documented below](#nested_action).
 
