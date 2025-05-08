@@ -41,12 +41,38 @@ var (
 		"transfer_spec.0.transfer_options.0.delete_objects_unique_in_sink",
 		"transfer_spec.0.transfer_options.0.delete_objects_from_source_after_transfer",
 		"transfer_spec.0.transfer_options.0.overwrite_when",
+		"transfer_spec.0.transfer_options.0.metadata_options",
 	}
 	replicationSpecTransferOptionsKeys = []string{
 		"replication_spec.0.transfer_options.0.overwrite_objects_already_existing_in_sink",
 		"replication_spec.0.transfer_options.0.delete_objects_unique_in_sink",
 		"replication_spec.0.transfer_options.0.delete_objects_from_source_after_transfer",
 		"replication_spec.0.transfer_options.0.overwrite_when",
+		"replication_spec.0.transfer_options.0.metadata_options",
+	}
+
+	transferSpecMetadataOptionsKeys = []string{
+		"transfer_spec.0.transfer_options.0.metadata_options.0.time_created",
+		"transfer_spec.0.transfer_options.0.metadata_options.0.symlink",
+		"transfer_spec.0.transfer_options.0.metadata_options.0.mode",
+		"transfer_spec.0.transfer_options.0.metadata_options.0.gid",
+		"transfer_spec.0.transfer_options.0.metadata_options.0.uid",
+		"transfer_spec.0.transfer_options.0.metadata_options.0.acl",
+		"transfer_spec.0.transfer_options.0.metadata_options.0.storage_class",
+		"transfer_spec.0.transfer_options.0.metadata_options.0.temporary_hold",
+		"transfer_spec.0.transfer_options.0.metadata_options.0.kms_key",
+	}
+
+	replicationSpecMetadataOptionsKeys = []string{
+		"replication_spec.0.transfer_options.0.metadata_options.0.symlink",
+		"replication_spec.0.transfer_options.0.metadata_options.0.mode",
+		"replication_spec.0.transfer_options.0.metadata_options.0.gid",
+		"replication_spec.0.transfer_options.0.metadata_options.0.uid",
+		"replication_spec.0.transfer_options.0.metadata_options.0.acl",
+		"replication_spec.0.transfer_options.0.metadata_options.0.storage_class",
+		"replication_spec.0.transfer_options.0.metadata_options.0.temporary_hold",
+		"replication_spec.0.transfer_options.0.metadata_options.0.kms_key",
+		"replication_spec.0.transfer_options.0.metadata_options.0.time_created",
 	}
 
 	transferSpecDataSourceKeys = []string{
@@ -152,7 +178,7 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"object_conditions": objectConditionsSchema(replicationSpecObjectConditionsKeys),
-						"transfer_options":  transferOptionsSchema(replicationSpecTransferOptionsKeys),
+						"transfer_options":  transferOptionsSchema(replicationSpecTransferOptionsKeys, replicationSpecMetadataOptionsKeys),
 						"gcs_data_sink": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -182,7 +208,7 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"object_conditions": objectConditionsSchema(transferSpecObjectConditionsKeys),
-						"transfer_options":  transferOptionsSchema(transferSpecTransferOptionsKeys),
+						"transfer_options":  transferOptionsSchema(transferSpecTransferOptionsKeys, transferSpecMetadataOptionsKeys),
 						"source_agent_pool_name": {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -294,6 +320,42 @@ func ResourceStorageTransferJob() *schema.Resource {
 					},
 				},
 				Description: `Notification configuration.`,
+			},
+			"logging_config": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"log_actions": {
+							Type:     schema.TypeList,
+							Optional: true,
+							AtLeastOneOf: []string{"logging_config.0.enable_on_prem_gcs_transfer_logs", "logging_config.0.log_actions", "logging_config.0.log_action_states"},
+							Elem: &schema.Schema{
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"FIND", "DELETE", "COPY"}, false),
+							},
+							Description: `Specifies the actions to be logged. Not supported for transfers with PosifxFilesystem data sources; use enable_on_prem_gcs_transfer_logs instead.`,
+						},
+						"log_action_states": {
+							Type:     schema.TypeList,
+							Optional: true,
+							AtLeastOneOf: []string{"logging_config.0.enable_on_prem_gcs_transfer_logs", "logging_config.0.log_actions", "logging_config.0.log_action_states"},
+							Elem: &schema.Schema{
+								Type:         schema.TypeString,
+								ValidateFunc: validation.StringInSlice([]string{"SUCCEEDED", "FAILED"}, false),
+							},
+							Description: `States in which logActions are logged. Not supported for transfers with PosifxFilesystem data sources; use enable_on_prem_gcs_transfer_logs instead.`,
+						},
+						"enable_on_prem_gcs_transfer_logs": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							AtLeastOneOf: []string{"logging_config.0.enable_on_prem_gcs_transfer_logs", "logging_config.0.log_actions", "logging_config.0.log_action_states"},
+							Description:   `For transfers with a PosixFilesystem source, this option enables the Cloud Storage transfer logs for this transfer.`,
+						},
+					},
+				},
+				Description: `Logging configuration.`,
 			},
 			"schedule": {
 				Type:          schema.TypeList,
@@ -423,7 +485,7 @@ func objectConditionsSchema(objectConditionsKeys []string) *schema.Schema {
 	}
 }
 
-func transferOptionsSchema(transferOptionsKeys []string) *schema.Schema {
+func transferOptionsSchema(transferOptionsKeys []string, metadataOptionsKeys []string) *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeList,
 		Optional: true,
@@ -457,9 +519,111 @@ func transferOptionsSchema(transferOptionsKeys []string) *schema.Schema {
 					ValidateFunc: validation.StringInSlice([]string{"DIFFERENT", "NEVER", "ALWAYS"}, false),
 					Description:  `When to overwrite objects that already exist in the sink. If not set, overwrite behavior is determined by overwriteObjectsAlreadyExistingInSink.`,
 				},
+				"metadata_options": {
+					Type:         schema.TypeList,
+					Optional:     true,
+					MaxItems:     1,
+					AtLeastOneOf: transferOptionsKeys,
+					Elem:         metadataOptionsSchema(metadataOptionsKeys),
+					Description:  `Specifies the metadata options for running a transfer`,
+				},
 			},
 		},
 		Description: `Characteristics of how to treat files from datasource and sink during job. If the option delete_objects_unique_in_sink is true, object conditions based on objects' last_modification_time are ignored and do not exclude objects in a data source or a data sink.`,
+	}
+}
+
+func metadataOptionsSchema(metadataOptionsKeys []string) *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"symlink": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Specifies how symlinks should be handled by the transfer.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"SYMLINK_UNSPECIFIED", "SYMLINK_SKIP", "SYMLINK_PRESERVE",
+				}, false),
+				AtLeastOneOf: metadataOptionsKeys,
+			},
+			"mode": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Specifies how each file's mode attribute should be handled by the transfer.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"MODE_UNSPECIFIED", "MODE_SKIP", "MODE_PRESERVE",
+				}, false),
+				AtLeastOneOf: metadataOptionsKeys,
+			},
+			"gid": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Specifies how each file's POSIX group ID (GID) attribute should be handled by the transfer.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"GID_UNSPECIFIED", "GID_SKIP", "GID_NUMBER",
+				}, false),
+				AtLeastOneOf: metadataOptionsKeys,
+			},
+			"uid": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Specifies how each file's POSIX user ID (UID) attribute should be handled by the transfer.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"UID_UNSPECIFIED", "UID_SKIP", "UID_NUMBER",
+				}, false),
+				AtLeastOneOf: metadataOptionsKeys,
+			},
+			"acl": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Specifies how each object's ACLs should be preserved for transfers between Google Cloud Storage buckets",
+				ValidateFunc: validation.StringInSlice([]string{
+					"ACL_UNSPECIFIED", "ACL_DESTINATION_BUCKET_DEFAULT", "ACL_PRESERVE",
+				}, false),
+				AtLeastOneOf: metadataOptionsKeys,
+			},
+			"storage_class": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Specifies the storage class to set on objects being transferred to Google Cloud Storage buckets",
+				ValidateFunc: validation.StringInSlice([]string{
+					"STORAGE_CLASS_UNSPECIFIED",
+					"STORAGE_CLASS_DESTINATION_BUCKET_DEFAULT",
+					"STORAGE_CLASS_PRESERVE",
+					"STORAGE_CLASS_STANDARD",
+					"STORAGE_CLASS_NEARLINE",
+					"STORAGE_CLASS_COLDLINE",
+					"STORAGE_CLASS_ARCHIVE",
+				}, false),
+				AtLeastOneOf: metadataOptionsKeys,
+			},
+			"temporary_hold": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "SSpecifies how each object's temporary hold status should be preserved for transfers between Google Cloud Storage buckets",
+				ValidateFunc: validation.StringInSlice([]string{
+					"TEMPORARY_HOLD_UNSPECIFIED", "TEMPORARY_HOLD_SKIP", "TEMPORARY_HOLD_PRESERVE",
+				}, false),
+				AtLeastOneOf: metadataOptionsKeys,
+			},
+			"kms_key": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Specifies how each object's Cloud KMS customer-managed encryption key (CMEK) is preserved for transfers between Google Cloud Storage buckets",
+				ValidateFunc: validation.StringInSlice([]string{
+					"KMS_KEY_UNSPECIFIED", "KMS_KEY_DESTINATION_BUCKET_DEFAULT", "KMS_KEY_PRESERVE",
+				}, false),
+				AtLeastOneOf: metadataOptionsKeys,
+			},
+			"time_created": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Specifies how each object's timeCreated metadata is preserved for transfers.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"TIME_CREATED_UNSPECIFIED", "TIME_CREATED_SKIP", "TIME_CREATED_PRESERVE_AS_CUSTOM_TIME",
+				}, false),
+				AtLeastOneOf: metadataOptionsKeys,
+			},
+		},
 	}
 }
 
@@ -581,6 +745,11 @@ func awsS3DataSchema() *schema.Resource {
 				ExactlyOneOf: awsS3AuthKeys,
 				Description:  `The Amazon Resource Name (ARN) of the role to support temporary credentials via 'AssumeRoleWithWebIdentity'. For more information about ARNs, see [IAM ARNs](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns). When a role ARN is provided, Transfer Service fetches temporary credentials for the session using a 'AssumeRoleWithWebIdentity' call for the provided role using the [GoogleServiceAccount][] for this project.`,
 			},
+			"managed_private_network": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `Egress bytes over a Google-managed private network. This network is shared between other users of Storage Transfer Service.`,
+			},
 		},
 	}
 }
@@ -698,6 +867,7 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 		EventStream:        expandEventStream(d.Get("event_stream").([]interface{})),
 		TransferSpec:       expandTransferSpecs(d.Get("transfer_spec").([]interface{})),
 		ReplicationSpec:    expandReplicationSpecs(d.Get("replication_spec").([]interface{})),
+		LoggingConfig:      expandTransferJobLoggingConfig(d.Get("logging_config").([]interface{})),
 		NotificationConfig: expandTransferJobNotificationConfig(d.Get("notification_config").([]interface{})),
 	}
 
@@ -792,6 +962,11 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 		return err
 	}
 
+	err = d.Set("logging_config", flattenTransferJobLoggingConfig(res.LoggingConfig))
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -858,6 +1033,15 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 			transferJob.NotificationConfig = expandTransferJobNotificationConfig(v.([]interface{}))
 		} else {
 			transferJob.NotificationConfig = nil
+		}
+	}
+
+	if d.HasChange("logging_config") {
+		fieldMask = append(fieldMask, "logging_config")
+		if v, ok := d.GetOk("logging_config"); ok {
+			transferJob.LoggingConfig = expandTransferJobLoggingConfig(v.([]interface{}))
+		} else {
+			transferJob.LoggingConfig = nil
 		}
 	}
 
@@ -1136,12 +1320,18 @@ func expandAwsS3Data(awsS3Datas []interface{}) *storagetransfer.AwsS3Data {
 	}
 
 	awsS3Data := awsS3Datas[0].(map[string]interface{})
-	return &storagetransfer.AwsS3Data{
+	result := &storagetransfer.AwsS3Data{
 		BucketName:   awsS3Data["bucket_name"].(string),
 		AwsAccessKey: expandAwsAccessKeys(awsS3Data["aws_access_key"].([]interface{})),
 		RoleArn:      awsS3Data["role_arn"].(string),
 		Path:         awsS3Data["path"].(string),
 	}
+
+	if v, ok := awsS3Data["managed_private_network"]; ok {
+		result.ManagedPrivateNetwork = v.(bool)
+	}
+
+	return result
 }
 
 func flattenAwsS3Data(awsS3Data *storagetransfer.AwsS3Data, d *schema.ResourceData) []map[string]interface{} {
@@ -1153,6 +1343,11 @@ func flattenAwsS3Data(awsS3Data *storagetransfer.AwsS3Data, d *schema.ResourceDa
 	if _, exist := d.GetOk("transfer_spec.0.aws_s3_data_source.0.aws_access_key"); exist{
 		data["aws_access_key"] = flattenAwsAccessKeys(d)
 	}
+	
+	if awsS3Data.ManagedPrivateNetwork {
+		data["managed_private_network"] = awsS3Data.ManagedPrivateNetwork
+	}
+	
 	return []map[string]interface{}{data}
 }
 
@@ -1308,6 +1503,26 @@ func expandTransferOptions(options []interface{}) *storagetransfer.TransferOptio
 		DeleteObjectsUniqueInSink:             option["delete_objects_unique_in_sink"].(bool),
 		OverwriteObjectsAlreadyExistingInSink: option["overwrite_objects_already_existing_in_sink"].(bool),
 		OverwriteWhen:                         option["overwrite_when"].(string),
+		MetadataOptions:                       expandMetadataOptions(option["metadata_options"].([]interface{})),
+	}
+}
+
+func expandMetadataOptions(options []interface{}) *storagetransfer.MetadataOptions {
+	if len(options) == 0 || options == nil {
+		return nil
+	}
+
+	option := options[0].(map[string]interface{})
+	return &storagetransfer.MetadataOptions{
+		Symlink:       option["symlink"].(string),
+		Uid:           option["uid"].(string),
+		Gid:           option["gid"].(string),
+		Mode:          option["mode"].(string),
+		Acl:           option["acl"].(string),
+		StorageClass:  option["storage_class"].(string),
+		TemporaryHold: option["temporary_hold"].(string),
+		KmsKey:        option["kms_key"].(string),
+		TimeCreated:   option["time_created"].(string),
 	}
 }
 
@@ -1317,8 +1532,27 @@ func flattenTransferOption(option *storagetransfer.TransferOptions) []map[string
 		"delete_objects_unique_in_sink":              option.DeleteObjectsUniqueInSink,
 		"overwrite_objects_already_existing_in_sink": option.OverwriteObjectsAlreadyExistingInSink,
 		"overwrite_when":                             option.OverwriteWhen,
+		"metadata_options":                           flattenMetadataOptions(option.MetadataOptions),
 	}
 
+	return []map[string]interface{}{data}
+}
+
+func flattenMetadataOptions(options *storagetransfer.MetadataOptions) []map[string]interface{} {
+	if options == nil {
+		return nil
+	}
+	data := map[string]interface{}{
+		"symlink":        options.Symlink,
+		"uid":            options.Uid,
+		"mode":           options.Mode,
+		"gid":            options.Gid,
+		"acl":            options.Acl,
+		"storage_class":  options.StorageClass,
+		"temporary_hold": options.TemporaryHold,
+		"kms_key":        options.KmsKey,
+		"time_created":   options.TimeCreated,
+	}
 	return []map[string]interface{}{data}
 }
 
@@ -1464,5 +1698,34 @@ func flattenReplicationSpec(replicationSpec *storagetransfer.ReplicationSpec) []
 	if replicationSpec.TransferOptions != nil {
 		data["transfer_options"] = flattenTransferOption(replicationSpec.TransferOptions)
 	}
+	return []map[string]interface{}{data}
+}
+
+func expandTransferJobLoggingConfig(loggingConfigs []interface{}) *storagetransfer.LoggingConfig {
+	if len(loggingConfigs) == 0 || loggingConfigs[0] == nil {
+		return nil
+	}
+
+	loggingConfig := loggingConfigs[0].(map[string]interface{})
+	var apiData = &storagetransfer.LoggingConfig{
+		LogActions:                  tpgresource.ConvertStringArr(loggingConfig["log_actions"].([]interface{})),
+		LogActionStates:             tpgresource.ConvertStringArr(loggingConfig["log_action_states"].([]interface{})),
+		EnableOnpremGcsTransferLogs: loggingConfig["enable_on_prem_gcs_transfer_logs"].(bool),
+	}
+
+	return apiData
+}
+
+func flattenTransferJobLoggingConfig(loggingConfig *storagetransfer.LoggingConfig) []map[string]interface{} {
+	if loggingConfig == nil {
+		return nil
+	}
+
+	data := map[string]interface{}{
+		"log_actions":                      loggingConfig.LogActions,
+		"log_action_states":                loggingConfig.LogActionStates,
+		"enable_on_prem_gcs_transfer_logs": loggingConfig.EnableOnpremGcsTransferLogs,
+	}
+
 	return []map[string]interface{}{data}
 }

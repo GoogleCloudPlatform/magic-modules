@@ -58,7 +58,7 @@ if res != nil {
     enabledValue, enabledExists:= res["enabled"]
     if enabledExists {
         enabled:= flattenChronicleRuleDeploymentEnabled(enabledValue, d, config)
-        if!reflect.DeepEqual(enabledProp, enabled) {
+        if !reflect.DeepEqual(enabledProp, enabled) {
             obj["enabled"] = enabledProp
             updateMask = append(updateMask, "enabled")
         }
@@ -73,7 +73,7 @@ if res != nil {
     alertingValue, alertingExists:= res["alerting"]
     if alertingExists {
         alerting:= flattenChronicleRuleDeploymentAlerting(alertingValue, d, config)
-        if!reflect.DeepEqual(alertingProp, alerting) {
+        if !reflect.DeepEqual(alertingProp, alerting) {
             obj["alerting"] = alertingProp
             updateMask = append(updateMask, "alerting")
         }
@@ -88,7 +88,7 @@ if res != nil {
     archivedValue, archivedExists:= res["archived"]
     if archivedExists {
         archived:= flattenChronicleRuleDeploymentArchived(archivedValue, d, config)
-        if!reflect.DeepEqual(archivedProp, archived) {
+        if !reflect.DeepEqual(archivedProp, archived) {
             obj["archived"] = archivedProp
             updateMask = append(updateMask, "archived")
         }
@@ -103,7 +103,8 @@ if res != nil {
     runFrequencyValue, runFrequencyExists:= res["runFrequency"]
     if runFrequencyExists {
         runFrequency:= flattenChronicleRuleDeploymentRunFrequency(runFrequencyValue, d, config)
-        if!reflect.DeepEqual(runFrequencyProp, runFrequency) {
+        _, ok := d.GetOkExists("run_frequency")
+        if !reflect.DeepEqual(runFrequencyProp, runFrequency) && ok {
             obj["runFrequency"] = runFrequencyProp
             updateMask = append(updateMask, "runFrequency")
         }

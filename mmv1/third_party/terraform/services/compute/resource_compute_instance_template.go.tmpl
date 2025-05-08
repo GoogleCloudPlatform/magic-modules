@@ -37,6 +37,7 @@ var (
 		"scheduling.0.availability_domain",
 		"scheduling.0.max_run_duration",
 		"scheduling.0.on_instance_stop_action",
+		"scheduling.0.termination_time",
 {{- if ne $.TargetVersionName "ga" }}
 		"scheduling.0.maintenance_interval",
 		"scheduling.0.host_error_timeout_seconds",
@@ -149,14 +150,6 @@ func ResourceComputeInstanceTemplate() *schema.Resource {
 							Description: `Name of the disk. When not provided, this defaults to the name of the instance.`,
 						},
 
-						"architecture": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							ForceNew:    true,
-							Computed:    true,
-							Description: `The architecture of the image. Allowed values are ARM64 or X86_64.`,
-						},
-
 						"disk_size_gb": {
 							Type:        schema.TypeInt,
 							Optional:    true,
@@ -206,16 +199,6 @@ func ResourceComputeInstanceTemplate() *schema.Resource {
 							Elem:         &schema.Schema{Type: schema.TypeString},
 							Set:          schema.HashString,
 							Description:  `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
-						},
-
-						"guest_os_features": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							ForceNew:    true,
-							Description: `A list of features to enable on the guest operating system. Applicable only for bootable images.`,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
 						},
 
 						"source_image": {
@@ -370,7 +353,7 @@ Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key m
 									},
 									"kms_key_self_link": {
 										Type:             schema.TypeString,
-										Optional:         true,
+										Optional: 		  true,
 										ForceNew:         true,
 										DiffSuppressFunc: tpgresource.CompareSelfLinkRelativePaths,
 										Description:      `The self link of the encryption key that is stored in Google Cloud KMS.`,
@@ -829,6 +812,15 @@ be from 0 to 999,999,999 inclusive.`,
 									},
 								},
 							},
+						},
+						"termination_time": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							AtLeastOneOf: schedulingKeys,
+							Description: `Specifies the timestamp, when the instance will be terminated,
+in RFC3339 text format. If specified, the instance termination action
+will be performed at the termination time.`,
 						},
 {{- if ne $.TargetVersionName "ga" }}
 						"host_error_timeout_seconds": {
@@ -1431,17 +1423,17 @@ func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*comput
 
 			if _, ok := d.GetOk(prefix + ".source_image_encryption_key"); ok {
 				disk.InitializeParams.SourceImageEncryptionKey = &compute.CustomerEncryptionKey{}
-				if v, ok := d.GetOk(prefix + ".source_image_encryption_key.0.kms_key_self_link"); ok {
-					disk.InitializeParams.SourceImageEncryptionKey.KmsKeyName = v.(string)
-				}
-				if v, ok := d.GetOk(prefix + ".source_image_encryption_key.0.kms_key_service_account"); ok {
-					disk.InitializeParams.SourceImageEncryptionKey.KmsKeyServiceAccount = v.(string)
-				}
 				if v, ok := d.GetOk(prefix + ".source_image_encryption_key.0.raw_key"); ok {
 					disk.InitializeParams.SourceImageEncryptionKey.RawKey = v.(string)
 				}
 				if v, ok := d.GetOk(prefix + ".source_image_encryption_key.0.rsa_encrypted_key"); ok {
 					disk.InitializeParams.SourceImageEncryptionKey.RsaEncryptedKey = v.(string)
+				}
+				if v, ok := d.GetOk(prefix + ".source_image_encryption_key.0.kms_key_self_link"); ok {
+					disk.InitializeParams.SourceImageEncryptionKey.KmsKeyName = v.(string)
+				}
+				if v, ok := d.GetOk(prefix + ".source_image_encryption_key.0.kms_key_service_account"); ok {
+					disk.InitializeParams.SourceImageEncryptionKey.KmsKeyServiceAccount = v.(string)
 				}
 			}
 
@@ -1451,17 +1443,17 @@ func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*comput
 
 			if _, ok := d.GetOk(prefix + ".source_snapshot_encryption_key"); ok {
 				disk.InitializeParams.SourceSnapshotEncryptionKey = &compute.CustomerEncryptionKey{}
-				if v, ok := d.GetOk(prefix + ".source_snapshot_encryption_key.0.kms_key_self_link"); ok {
-					disk.InitializeParams.SourceSnapshotEncryptionKey.KmsKeyName = v.(string)
-				}
-				if v, ok := d.GetOk(prefix + ".source_snapshot_encryption_key.0.kms_key_service_account"); ok {
-					disk.InitializeParams.SourceSnapshotEncryptionKey.KmsKeyServiceAccount = v.(string)
-				}
 				if v, ok := d.GetOk(prefix + ".source_snapshot_encryption_key.0.raw_key"); ok {
 					disk.InitializeParams.SourceSnapshotEncryptionKey.RawKey = v.(string)
 				}
 				if v, ok := d.GetOk(prefix + ".source_snapshot_encryption_key.0.rsa_encrypted_key"); ok {
 					disk.InitializeParams.SourceSnapshotEncryptionKey.RsaEncryptedKey = v.(string)
+				}
+				if v, ok := d.GetOk(prefix + ".source_snapshot_encryption_key.0.kms_key_self_link"); ok {
+					disk.InitializeParams.SourceSnapshotEncryptionKey.KmsKeyName = v.(string)
+				}
+				if v, ok := d.GetOk(prefix + ".source_snapshot_encryption_key.0.kms_key_service_account"); ok {
+					disk.InitializeParams.SourceSnapshotEncryptionKey.KmsKeyServiceAccount = v.(string)
 				}
 			}
 
@@ -1481,14 +1473,6 @@ func buildDisks(d *schema.ResourceData, config *transport_tpg.Config) ([]*comput
 
 		if v, ok := d.GetOk(prefix + ".type"); ok {
 			disk.Type = v.(string)
-		}
-
-		if v, ok := d.GetOk(prefix + ".guest_os_features"); ok {
-			disk.GuestOsFeatures = expandComputeInstanceGuestOsFeatures(v.([]interface{}))
-		}
-
-		if v, ok := d.GetOk(prefix + ".architecture"); ok {
-			disk.Architecture = v.(string)
 		}
 
 		disks = append(disks, &disk)
@@ -1768,8 +1752,6 @@ func flattenDisk(disk *compute.AttachedDisk, configDisk map[string]any, defaultP
 	diskMap["source"] = tpgresource.ConvertSelfLinkToV1(disk.Source)
 	diskMap["mode"] = disk.Mode
 	diskMap["type"] = disk.Type
-	diskMap["guest_os_features"] = flattenComputeInstanceGuestOsFeatures(disk.GuestOsFeatures)
-	diskMap["architecture"] = configDisk["architecture"]
 
 	return diskMap, nil
 }

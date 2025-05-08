@@ -304,7 +304,7 @@ func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
 		if strings.TrimSpace(description) == "" {
 			description = "No description"
 		}
-		paramObj.Description = trimSpacesFromDescription(description)
+		paramObj.Description = trimDescription(description)
 
 		if param.Value.Name == "requestId" || param.Value.Name == "validateOnly" || paramObj.Name == "" {
 			continue
@@ -410,7 +410,7 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		description = "No description"
 	}
 
-	field.Description = trimSpacesFromDescription(description)
+	field.Description = trimDescription(description)
 
 	if urlParam {
 		field.UrlParamOnly = true
@@ -451,7 +451,12 @@ func buildProperties(props openapi3.Schemas, required []string) []*api.Type {
 
 // Trims whitespace from the ends of lines in a description to force multiline
 // formatting for strings with newlines present
-func trimSpacesFromDescription(description string) string {
+// Also trim "Output only." and "Required." from descriptions as this gets duplicated
+func trimDescription(description string) string {
+	description, _ = strings.CutPrefix(description, "Optional. ")
+	description, _ = strings.CutPrefix(description, "Output only. ")
+	description, _ = strings.CutPrefix(description, "Required. ")
+	description, _ = strings.CutPrefix(description, "Immutable. ")
 	lines := strings.Split(description, "\n")
 	var trimmedDescription []string
 	for _, line := range lines {
