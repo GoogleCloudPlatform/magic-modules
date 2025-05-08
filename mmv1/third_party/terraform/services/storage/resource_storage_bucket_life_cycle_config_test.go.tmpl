@@ -1,0 +1,492 @@
+package storage_test
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"google.golang.org/api/storage/v1"
+)
+
+func TestAccStorageBucketLifeCycleConfig_Rules(t *testing.T) {
+	t.Parallel()
+
+	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_lifecycleRules(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket_life_cycle_config.bucketlfcg",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"lifecycle_rule.0.condition.0.send_age_if_zero", "lifecycle_rule.1.condition.0.send_age_if_zero", "lifecycle_rule.2.condition.0.send_age_if_zero", "lifecycle_rule.3.condition.0.send_age_if_zero", "lifecycle_rule.4.condition.0.send_age_if_zero", "lifecycle_rule.5.condition.0.send_age_if_zero", "lifecycle_rule.6.condition.0.send_age_if_zero", "lifecycle_rule.7.condition.0.send_age_if_zero", "lifecycle_rule.8.condition.0.send_age_if_zero", "lifecycle_rule.9.condition.0.send_age_if_zero"},
+			},
+			{
+				Config: testAccStorageBucket_lifecycleRules_update(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket_life_cycle_config.bucketlfcg",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"lifecycle_rule.0.condition.0.send_age_if_zero", "lifecycle_rule.1.condition.0.send_age_if_zero", "lifecycle_rule.2.condition.0.send_age_if_zero", "lifecycle_rule.3.condition.0.send_age_if_zero", "lifecycle_rule.4.condition.0.send_age_if_zero", "lifecycle_rule.5.condition.0.send_age_if_zero", "lifecycle_rule.6.condition.0.send_age_if_zero", "lifecycle_rule.7.condition.0.send_age_if_zero", "lifecycle_rule.8.condition.0.send_age_if_zero", "lifecycle_rule.9.condition.0.send_age_if_zero"},
+			},
+		},
+	})
+}
+
+func TestAccStorageBucketLifeCycleConfig_bucketLifecycleRuleUpdate(t *testing.T) {
+	t.Parallel()
+	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", acctest.RandInt(t))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_bucketLifecycleRules(bucketName),
+			},
+			{
+				Config: testAccStorageBucket_bucketLifecycleRulesUpdate(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket_life_cycle_config.bucketlfcg",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"lifecycle_rule.0.condition.0.send_age_if_zero", "lifecycle_rule.1.condition.0.send_age_if_zero", "lifecycle_rule.2.condition.0.send_age_if_zero", "lifecycle_rule.3.condition.0.send_age_if_zero", "lifecycle_rule.4.condition.0.send_age_if_zero", "lifecycle_rule.5.condition.0.send_age_if_zero", "lifecycle_rule.6.condition.0.send_age_if_zero", "lifecycle_rule.7.condition.0.send_age_if_zero", "lifecycle_rule.8.condition.0.send_age_if_zero", "lifecycle_rule.9.condition.0.send_age_if_zero"},
+			},
+		},
+	})
+}
+
+func TestAccStorageBucketLifeCycleConfig_WithStateLive(t *testing.T) {
+	t.Parallel()
+
+	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_lifecycleRuleWithStateLive(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket_life_cycle_config.bucketlfcg",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"lifecycle_rule.0.condition.0.send_age_if_zero", "lifecycle_rule.1.condition.0.send_age_if_zero"},
+			},
+		},
+	})
+}
+
+func TestAccStorageBucketLifeCycleConfig_lifecycleRuleAnyState(t *testing.T) {
+	t.Parallel()
+
+	bucketName := fmt.Sprintf("tf-test-acc-bucket-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccStorageBucket_lifecycleRuleWithStateArchived(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket_life_cycle_config.bucketlfcg",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"lifecycle_rule.0.condition.0.send_age_if_zero"},
+			},
+			{
+				Config: testAccStorageBucket_lifecycleRuleWithStateLive(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket_life_cycle_config.bucketlfcg",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"lifecycle_rule.0.condition.0.send_age_if_zero", "lifecycle_rule.1.condition.0.send_age_if_zero"},
+			},
+			{
+				Config: testAccStorageBucket_lifecycleRuleWithStateAny(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket_life_cycle_config.bucketlfcg",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"lifecycle_rule.0.condition.0.send_age_if_zero"},
+			},
+			{
+				Config: testAccStorageBucket_lifecycleRuleWithStateArchived(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket_life_cycle_config.bucketlfcg",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"lifecycle_rule.0.condition.0.send_age_if_zero"},
+			},
+		},
+	})
+}
+
+func testAccStorageBucket_lifecycleRuleWithStateArchived(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+resource "google_storage_bucket_life_cycle_config" "bucketlfcg" {
+  depends_on = [google_storage_bucket.bucket]
+  bucket     = google_storage_bucket.bucket.name  
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+      age        = 10
+      with_state = "ARCHIVED"
+    }
+  }
+}
+`, bucketName)
+}
+
+func testAccStorageBucket_lifecycleRuleWithStateAny(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+resource "google_storage_bucket_life_cycle_config" "bucketlfcg" {
+  depends_on = [google_storage_bucket.bucket]
+  bucket     = google_storage_bucket.bucket.name
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+      age        = 10
+      with_state = "ANY"
+    }
+  }
+}
+`, bucketName)
+}
+
+func testAccCheckStorageBucketLifecycleRuleConditionState(expected *bool, b *storage.Bucket) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		actual := b.Lifecycle.Rule[0].Condition.IsLive
+		if expected == nil && b.Lifecycle.Rule[0].Condition.IsLive == nil {
+			return nil
+		}
+		if expected == nil {
+			return fmt.Errorf("expected condition isLive to be unset, instead got %t", *actual)
+		}
+		if actual == nil {
+			return fmt.Errorf("expected condition isLive to be %t, instead got nil (unset)", *expected)
+		}
+		if *expected != *actual {
+			return fmt.Errorf("expected condition isLive to be %t, instead got %t", *expected, *actual)
+		}
+		return nil
+	}
+}
+
+func testAccStorageBucket_lifecycleRuleWithStateLive(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+resource "google_storage_bucket_life_cycle_config" "bucketlfcg" {
+  depends_on = [google_storage_bucket.bucket]
+  bucket     = google_storage_bucket.bucket.name   
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+      age        = 10
+      with_state = "LIVE"
+	  days_since_noncurrent_time = 5
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+
+    condition {
+      age        = 2
+	  noncurrent_time_before = "2019-01-01"
+    }
+  }
+}
+`, bucketName)
+}
+
+func testAccStorageBucket_bucketLifecycleRules(bucketName string) string {
+	return fmt.Sprintf(`
+	resource "google_storage_bucket" "bucket" {
+	  name          = "%s"
+	  location      = "US"
+	  force_destroy = true
+	  uniform_bucket_level_access = true
+	  lifecycle_rule {
+		action {
+		  type          = "SetStorageClass"
+		  storage_class = "NEARLINE"
+		}
+		condition {
+		  matches_storage_class = ["COLDLINE"]
+		  age                   = 2
+		}
+	  }
+	}
+	`, bucketName)
+}
+
+func testAccStorageBucket_bucketLifecycleRulesUpdate(bucketName string) string {
+	return fmt.Sprintf(`
+	resource "google_storage_bucket" "bucket" {
+	  name          = "%s"
+	  location      = "US"
+	  force_destroy = true
+	  uniform_bucket_level_access = true
+	}
+	resource "google_storage_bucket_life_cycle_config" "bucketlfcg" {
+	  depends_on = [google_storage_bucket.bucket]
+	  bucket     = google_storage_bucket.bucket.name   
+	  lifecycle_rule {
+		action {
+		  type          = "SetStorageClass"
+		  storage_class = "NEARLINE"
+		}
+		condition {
+		  matches_storage_class = ["COLDLINE"]
+		  age                   = 2
+		}
+	  }
+	}
+	`, bucketName)
+}
+
+func testAccStorageBucket_lifecycleRules(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_life_cycle_config" "bucketlfcg" {
+  depends_on = [google_storage_bucket.bucket]
+  bucket     = google_storage_bucket.bucket.name
+  lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+      matches_storage_class = ["COLDLINE"]
+      age                   = 2
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      matches_storage_class = []
+      age = 10
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      custom_time_before = "2019-01-01"
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      noncurrent_time_before = "2019-01-01"
+    }
+  }
+  lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+      created_before = "2019-01-01"
+      days_since_custom_time = 3
+    }
+  }
+  lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+      num_newer_versions = 10
+    }
+  }
+  lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "ARCHIVE"
+    }
+    condition {
+      with_state = "ARCHIVED"
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      matches_prefix = ["test"]
+      age            = 2
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      matches_suffix = ["test"]
+      age            = 2
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "AbortIncompleteMultipartUpload"
+    }
+    condition {
+      age = 1
+    }
+  }
+}
+`, bucketName)
+}
+
+func testAccStorageBucket_lifecycleRules_update(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_life_cycle_config" "bucketlfcg" {
+  depends_on = [google_storage_bucket.bucket]
+  bucket     = google_storage_bucket.bucket.name
+  lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+      matches_storage_class = ["COLDLINE"]
+      age                   = 2
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      matches_storage_class = []
+      age = 10
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      custom_time_before = "2019-01-12"
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      noncurrent_time_before = "2019-01-12"
+    }
+  }
+  lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+      created_before = "2019-01-01"
+      days_since_custom_time = 5
+    }
+  }
+  lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "NEARLINE"
+    }
+    condition {
+      num_newer_versions = 10
+    }
+  }
+  lifecycle_rule {
+    action {
+      type          = "SetStorageClass"
+      storage_class = "ARCHIVE"
+    }
+    condition {
+      with_state = "ARCHIVED"
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      matches_prefix = ["test"]
+      age            = 2
+    }
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      matches_suffix = ["test"]
+      age            = 2
+    }
+  }
+}
+`, bucketName)
+}

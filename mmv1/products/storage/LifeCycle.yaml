@@ -1,0 +1,182 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+name: 'BucketLifeCycleConfig'
+kind: 'storage#bucketlifecycleconfig'
+base_url: 'b/{{bucket}}'
+self_link: 'b/{{bucket}}'
+id_format: '{{bucket}}'
+delete_url: 'b/{{bucket}}'
+create_url: 'b/{{bucket}}'
+update_verb: 'PATCH'
+create_verb: 'PATCH'
+delete_verb: 'PATCH'
+has_self_link: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+exclude_sweeper: true
+examples:
+  - name: 'storage_bucket_lifecycle_config'
+    config_path: 'templates/terraform/examples/storage_bucket_lifecycle_config.tf.tmpl'
+    primary_resource_id: bucketlifecycle
+    vars:
+      bucket_name: 'my-bucket'
+custom_code:
+import_format:
+  - '{{%name}}'
+description: |
+  A Google Cloud Storage Bucket Objects Lifecycle.
+parameters:
+  - name: 'bucket'
+    resource: 'Bucket'
+    imports: 'name'
+    description: 'The name of the bucket that contains the folder.'
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - name: createTime
+    type: String
+    description: |
+      The timestamp at which this folder was created.
+    output: true
+  - name: updateTime
+    type: String
+    description: |
+      The timestamp at which this folder was most recently updated.
+    output: true
+  - name: 'lifecycleRules'
+    type: NestedObject
+    properties:
+    - name: 'rule'
+      type: Array
+      max_size: 100
+      min_size: 1
+      required: true
+      description: |
+        A lifecycle management rule, which is made of an action to take
+        and the condition(s) under which the action will be taken.
+      item_type:
+        type: NestedObject
+        properties:
+          - name: 'action'
+            type: NestedObject
+            is_set: true
+            min_size: 1
+            max_size: 1
+            required: true
+            description: 'The action to take.'
+            properties:
+              - name: 'storageClass'
+                type: String
+                description: |
+                  Target storage class. Required if the type of the
+                  action is SetStorageClass.
+              - name: 'type'
+                type: Enum
+                required: true
+                description: |
+                  Type of the action. Currently, only Delete and
+                  SetStorageClass are supported.
+                enum_values:
+                  - 'Delete'
+                  - 'SetStorageClass'
+          - name: 'condition'
+            type: NestedObject
+            is_set: true
+            min_size: 1
+            max_size: 1
+            required: true
+            description: |
+              The condition(s) under which the action will be taken.
+            properties:
+              - name: 'age'
+                type: Integer
+                description: |
+                  Age of an object (in days). This condition is satisfied
+                  when an object reaches the specified age.
+                api_name: age
+              - name: 'createdBefore'
+                type: Time
+                description: |
+                  A date in RFC 3339 format with only the date part (for
+                  instance, "2013-01-15"). This condition is satisfied
+                  when an object is created before midnight of the
+                  specified date in UTC.
+              - name: 'customTimeBefore'
+                type: Time
+                description: |
+                  A date in the RFC 3339 format YYYY-MM-DD. This condition
+                  is satisfied when the customTime metadata for the object
+                  is set to an earlier date than the date used in
+                  this lifecycle condition.
+              - name: 'daysSinceCustomTime'
+                type: Integer
+                description: |
+                  Days since the date set in the customTime metadata for the
+                  object. This condition is satisfied when the current date
+                  and time is at least the specified number of days after
+                  the customTime.
+              - name: 'daysSinceNoncurrentTime'
+                type: Integer
+                description: |
+                  Relevant only for versioned objects. This condition is
+                  satisfied when an object has been noncurrent for more than
+                  the specified number of days.
+              - name: 'isLive'
+                type: Boolean
+                description: |
+                  Relevant only for versioned objects.  If the value is
+                  true, this condition matches live objects; if the value
+                  is false, it matches archived objects.
+              - name: 'matchesStorageClass'
+                type: Array
+                description: |
+                  Objects having any of the storage classes specified by
+                  this condition will be matched. Values include
+                  MULTI_REGIONAL, REGIONAL, NEARLINE, COLDLINE, ARCHIVE,
+                  STANDARD, and DURABLE_REDUCED_AVAILABILITY.
+                item_type:
+                  type: String
+              - name: 'matchesSuffix'
+                type: Array
+                description: |
+                  The suffix of an object. This condition is
+                  satisfied when the end of an object's
+                  name is an exact case-sensitive match with the suffix.
+                item_type:
+                  type: String
+              - name: 'matchesPrefix'
+                type: Array
+                description: |
+                  The prefix of an object. This condition
+                  is satisfied when the beginning of an object's name
+                  is an exact case-sensitive match with the prefix.
+                item_type:
+                  type: String        
+              - name: 'noncurrentTimeBefore'
+                type: Time
+                description: |
+                  Relevant only for versioned objects. A date in the
+                  RFC 3339 format YYYY-MM-DD. This condition is satisfied
+                  for objects that became noncurrent on a date prior to the
+                  one specified in this condition.
+              - name: 'numNewerVersions'
+                type: Integer
+                description: |
+                  Relevant only for versioned objects. If the value is N,
+                  this condition is satisfied when there are at least N
+                  versions (including the live version) newer than this
+                  version of the object.

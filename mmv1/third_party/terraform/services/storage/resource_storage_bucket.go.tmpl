@@ -1536,6 +1536,14 @@ func flattenBucketAutoclass(bucketAutoclass *storage.BucketAutoclass) []map[stri
 }
 
 func flattenBucketLifecycle(d *schema.ResourceData, lifecycle *storage.BucketLifecycle) []map[string]interface{} {
+	
+	// if lifecycle_rule is not configured donot set in state file even if API returns
+	lifecycle_rules := d.Get("lifecycle_rule")
+
+	if lifecycle_rules == nil || len(lifecycle_rules.([]interface{})) == 0 {
+		return []map[string]interface{}{}
+	}
+	
 	if lifecycle == nil || lifecycle.Rule == nil {
 		return []map[string]interface{}{}
 	}
