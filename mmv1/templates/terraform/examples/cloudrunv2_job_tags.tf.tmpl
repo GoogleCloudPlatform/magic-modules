@@ -2,7 +2,9 @@ resource "google_cloud_run_v2_job" "{{$.PrimaryResourceId}}" {
   name     = "{{index $.Vars "cloud_run_job_name"}}"
   location = "us-central1"
   deletion_protection = false
-
+  tags = {
+    "tagKeys/1234" = "tagValues/5678"
+  }
   template {
     template {
       containers {
