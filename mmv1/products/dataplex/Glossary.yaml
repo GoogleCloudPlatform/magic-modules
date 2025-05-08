@@ -94,11 +94,6 @@ properties:
     description: |
       User-defined labels for the Glossary.
     required: false
-  - name: 'etag'
-    type: String
-    description: |
-      Needed for resource freshness validation. This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding.
-    required: false
   - name: 'uid'
     type: String
     description: |
@@ -119,8 +114,10 @@ properties:
     description: |
       The number of terms in the glossary.
     required: false
+    output: true
   - name: 'categoryCount'
     type: Integer
     description: |
       The number of categories in the glossary.
     required: false
+    output: true
