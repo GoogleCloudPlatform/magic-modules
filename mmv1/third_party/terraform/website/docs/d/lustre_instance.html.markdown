@@ -23,7 +23,7 @@ The following arguments are supported:
 
 * `instance_id` - (Required) The instance id of the Lustre instance.
 
-* `location` - (Optional) The ID of the zone in which the resource belongs. If it is not provided, the provider region is used.
+* `zone` - (Optional) The ID of the zone in which the resource belongs. If it is not provided, the provider zone is used.
 
 * `project` - (Optional) The ID of the project in which the resource belongs. If it is not provided, the provider project is used.
 

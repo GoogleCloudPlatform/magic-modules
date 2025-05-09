@@ -75,7 +75,7 @@ resource "google_service_networking_connection" "service_con" {
 
 data "google_lustre_instance" "default" {
   instance_id             = google_lustre_instance.instance.instance_id
-  location                = "us-central1-a"
+  zone                    = "us-central1-a"
 }
 `, context)
 }

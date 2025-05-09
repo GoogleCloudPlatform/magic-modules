@@ -18,7 +18,6 @@ references:
   guides:
     'Official Documentation': 'https://cloud.google.com/managed-lustre/docs/create-instance'
   api: 'https://cloud.google.com/managed-lustre/docs/reference/rest/v1/projects.locations.instances'
-docs:
 base_url: projects/{{project}}/locations/{{location}}/instances
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}

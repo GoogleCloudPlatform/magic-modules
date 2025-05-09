@@ -11,25 +11,38 @@ import (
 )
 
 func DataSourceLustreInstance() *schema.Resource {
+
 	// Generate datasource schema from resource
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceLustreInstance().Schema)
+
+	dsScema_zone := map[string]*schema.Schema{
+		"zone": {
+			Type:     schema.TypeString,
+			Optional: true,
+			Description: `The ID of the zone in which the resource belongs. If it is not provided, the provider zone is used.,
+`,
+		},
+	}
 
 	// Set 'Required' schema elements from resource
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "instance_id")
 
-	// Set 'Required' schema elements from resource
-	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project", "location")
+	// Set 'Optional' schema elements from resource
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
+
+	// Set 'Required' schema elements
+	dsSchema_m := tpgresource.MergeSchemas(dsScema_zone, dsSchema)
 
 	return &schema.Resource{
 		Read:   dataSourceLustreInstanceRead,
-		Schema: dsSchema,
+		Schema: dsSchema_m,
 	}
 }
 
 func dataSourceLustreInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	location, err := tpgresource.GetLocation(d, config)
+	location, err := tpgresource.GetZone(d, config)
 	if err != nil {
 		return err
 	}
@@ -41,7 +54,7 @@ func dataSourceLustreInstanceRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	d.SetId(id)
 
-	// // Setting location field
+	// Setting location field for url_param_only field
 	d.Set("location", location)
 
 	err = resourceLustreInstanceRead(d, meta)
