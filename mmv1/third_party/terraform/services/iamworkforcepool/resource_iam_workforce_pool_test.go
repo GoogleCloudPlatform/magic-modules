@@ -1,17 +1,10 @@
 package iamworkforcepool_test
 
 import (
-	"fmt"
-	"strings"
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-
+	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccIAMWorkforcePoolWorkforcePool_full(t *testing.T) {
@@ -78,44 +71,6 @@ func TestAccIAMWorkforcePoolWorkforcePool_minimal(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccCheckIAMWorkforcePoolWorkforcePoolDestroyProducer(t *testing.T) func(s *terraform.State) error {
-	return func(s *terraform.State) error {
-		for name, rs := range s.RootModule().Resources {
-			if rs.Type != "google_iam_workforce_pool" {
-				continue
-			}
-			if strings.HasPrefix(name, "data.") {
-				continue
-			}
-
-			config := acctest.GoogleProviderConfig(t)
-
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}IAMWorkforcePoolBasePath{{"}}"}}locations/{{"{{"}}location{{"}}"}}/workforcePools/{{"{{"}}workforce_pool_id{{"}}"}}")
-			if err != nil {
-				return err
-			}
-
-			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-				Config:    config,
-				Method:    "GET",
-				RawURL:    url,
-				UserAgent: config.UserAgent,
-			})
-			if err != nil {
-				return nil
-			}
-
-			if v := res["state"]; v == "DELETED" {
-				return nil
-			}
-
-			return fmt.Errorf("IAMWorkforcePool still exists at %s", url)
-		}
-
-		return nil
-	}
 }
 
 func testAccIAMWorkforcePoolWorkforcePool_full(context map[string]interface{}) string {
