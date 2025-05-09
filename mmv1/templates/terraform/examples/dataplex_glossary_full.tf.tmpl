@@ -1,5 +1,4 @@
 resource "google_dataplex_glossary" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   glossary_id = "{{index $.Vars "glossary_name"}}"
   location     = "us-central1"
 

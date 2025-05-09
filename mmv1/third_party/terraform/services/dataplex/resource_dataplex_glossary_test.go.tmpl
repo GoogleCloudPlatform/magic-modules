@@ -54,7 +54,6 @@ func testAccDataplexGlossary_update(context map[string]interface{}) string {
 	resource "google_dataplex_glossary" "glossary_test_id" {
   		glossary_id = "tf-test-glossary-basic%{random_suffix}"
   		location     = "us-central1"
-  		provider = google-beta
 	}
 `, context)
 }
@@ -64,7 +63,6 @@ func testAccDataplexGlossary_full(context map[string]interface{}) string {
 	resource "google_dataplex_glossary" "glossary_test_id_full" {
 	glossary_id = "tf-test-glossary-full%{random_suffix}"
 	location     = "us-central1"
-	provider = google-beta
 	labels = { "tag": "test-tf" }
 	display_name = "terraform glossary"
 	description = "glossary created by Terraform"
