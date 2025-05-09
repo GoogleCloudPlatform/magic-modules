@@ -46,7 +46,6 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 						"dimension": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Required:    true,
 							Description: `The dimension a rule belongs to. Supported dimensions are "COMPLETENESS", "ACCURACY", "CONSISTENCY", "VALIDITY", "UNIQUENESS", "FRESHNESS", "VOLUME"`,
 						},
 						"threshold": {
@@ -130,7 +129,6 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 									"values": {
 										Type:        schema.TypeList,
 										Computed:    true,
-										Required:    true,
 										Elem:        &schema.Schema{Type: schema.TypeString},
 										Description: `Expected values for the column value.`,
 									},
@@ -139,19 +137,32 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 							Description: `Row-level rule which evaluates whether each column value is contained by a specified set.`,
 						},
 						"regex_expectation": {
+							// Type:     schema.TypeList,
+							// Optional: true,
+							// MaxItems: 1,
+							// Elem: &schema.Resource{
+							// 	Schema: map[string]*schema.Schema{
+							// 		"regex": {
+							// 			Type:        schema.TypeString,
+							// 			Required:    true,
+							// 			Description: `A regular expression the column value is expected to match.`,
+							// 		},
+							// 	},
+							// },
 							Type:     schema.TypeList,
 							Computed: true,
 							Optional: true,
+							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"regex": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Required:    true,
 										Description: `A regular expression the column value is expected to match.`,
 									},
 								},
 							},
+
 							Description: `Row-level rule which evaluates whether each column value matches a specified regex.`,
 						},
 						"uniqueness_expectation": {
@@ -174,7 +185,6 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 									"statistic": {
 										Type:         schema.TypeString,
 										Computed:     true,
-										Required:     true,
 										ValidateFunc: verify.ValidateEnum([]string{"STATISTIC_UNDEFINED", "MEAN", "MIN", "MAX"}),
 										Description: `The list of aggregate metrics a rule can be evaluated against. 
 																	Possible values: ["STATISTIC_UNDEFINED", "MEAN", "MIN", "MAX"]`,
@@ -216,7 +226,6 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 									"sql_expression": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Required:    true,
 										Description: `The SQL expression.`,
 									},
 								},
@@ -232,7 +241,6 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 									"sql_expression": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Required:    true,
 										Description: `The SQL expression.`,
 									},
 								},
@@ -248,7 +256,6 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 									"sql_statement": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Required:    true,
 										Description: `The SQL expression.`,
 									},
 								},
