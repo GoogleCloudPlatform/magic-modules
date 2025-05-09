@@ -75,26 +75,6 @@ func testAccDialogflowCXAgent_full(context map[string]interface{}) string {
 		uniform_bucket_level_access = true
 	}
 
-	resource "google_discovery_engine_data_store" "data_store" {
-		location                    = "global"
-		data_store_id               = "tf-test-dialogflowcx-data-store%{random_suffix}"
-		display_name                = "DialogflowCX Terraform datastore"
-		industry_vertical           = "GENERIC"
-		content_config              = "NO_CONTENT"
-		solution_types              = ["SOLUTION_TYPE_CHAT"]
-	}
-
-	resource "google_discovery_engine_chat_engine" "engine" {
-		engine_id = "tf-test-dialogflowcx-engine%{random_suffix}"
-		collection_id = "default_collection"
-		location = google_discovery_engine_data_store.data_store.location
-		display_name = "DialogflowCX Terraform engine"
-		data_store_ids = [google_discovery_engine_data_store.data_store.data_store_id]
-		chat_engine_config {
-			dialogflow_agent_to_link = google_dialogflow_cx_agent.foobar.id
-		}
-	}
-
 	resource "google_dialogflow_cx_agent" "foobar" {
 		display_name = "tf-test-%{random_suffix}update"
 		location = "global"
@@ -150,9 +130,6 @@ func testAccDialogflowCXAgent_full(context map[string]interface{}) string {
 					}
 				}
 			})
-		}
-		gen_app_builder_settings {
-			engine = google_discovery_engine_chat_engine.engine.id
 		}
 	}
 	  `, context)
