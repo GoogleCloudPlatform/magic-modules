@@ -216,8 +216,8 @@ func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target 
 
 	// replace google to google-beta
 	gaImportPath := ImportPathFromVersion("ga")
-	sourceByte = bytes.Replace(sourceByte, []byte(gaImportPath), []byte(TERRAFORM_PROVIDER_BETA+"/"+RESOURCE_DIRECTORY_BETA), -1)
-	sourceByte = bytes.Replace(sourceByte, []byte(TERRAFORM_PROVIDER_GA+"/version"), []byte(TERRAFORM_PROVIDER_BETA+"/version"), -1)
+	sourceByte = bytes.Replace(sourceByte, []byte(gaImportPath), []byte(TGC_PROVIDER+"/"+RESOURCE_DIRECTORY_TGC), -1)
+	sourceByte = bytes.Replace(sourceByte, []byte(TERRAFORM_PROVIDER_GA+"/version"), []byte(TGC_PROVIDER+"/"+RESOURCE_DIRECTORY_TGC+"/version"), -1)
 
 	err = os.WriteFile(targetFile, sourceByte, 0644)
 	if err != nil {

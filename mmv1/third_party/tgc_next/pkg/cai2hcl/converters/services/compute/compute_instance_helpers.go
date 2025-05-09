@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
 
 	compute "google.golang.org/api/compute/v0.beta"
 )
