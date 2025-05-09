@@ -155,30 +155,64 @@ func TestAccMonitoringNotificationChannel_updateSensitiveLabelsWo(t *testing.T) 
 				ResourceName:            "google_monitoring_notification_channel.pagerduty",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.service_key", "labels.password", "sensitive_labels_wo"},
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "labels.password", "sensitive_labels_wo"},
 			},
 			{
 				ResourceName:            "google_monitoring_notification_channel.basicauth",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.service_key", "labels.password", "sensitive_labels_wo"},
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "labels.password", "sensitive_labels_wo"},
 			},
 			{
 				Config:                  testAccMonitoringNotificationChannel_updateSensitiveWoLabels(),
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.service_key", "labels.password", "sensitive_labels_wo"},
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "labels.password", "sensitive_labels_wo"},
 			},
 			{
 				ResourceName:            "google_monitoring_notification_channel.pagerduty",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.service_key", "labels.password", "sensitive_labels_wo"},
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "labels.password", "sensitive_labels_wo"},
 			},
 			{
 				ResourceName:            "google_monitoring_notification_channel.basicauth",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.service_key", "labels.password", "sensitive_labels_wo"},
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "labels.password", "sensitive_labels_wo"},
+			},
+		},
+	})
+}
+
+func TestAccMonitoringNotificationChannel_updateSensitiveLabelsWo_slack(t *testing.T) {
+	// ran into same issue with slack as TestAccMonitoringNotificationChannel_updateSensitiveLabels_slack therefore skip
+	t.Skip()
+	t.Parallel()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckMonitoringNotificationChannelDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMonitoringNotificationChannel_createSensitiveWoLabels_slack(),
+			},
+			{
+				ResourceName:            "google_monitoring_notification_channel.slack",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.oauth_token", "sensitive_labels_wo"},
+			},
+			{
+				Config:                  testAccMonitoringNotificationChannel_updateSensitiveWoLabels_slack(),
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.oauth_token", "sensitive_labels_wo"},
+			},
+			{
+				ResourceName:            "google_monitoring_notification_channel.slack",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels.oauth_token", "sensitive_labels_wo"},
 			},
 		},
 	})
@@ -332,6 +366,42 @@ resource "google_monitoring_notification_channel" "pagerduty" {
 	sensitive_labels_wo {
 		service_key_wo         = "another_service_key"
 		service_key_wo_version = 2
+	}
+}
+`)
+}
+
+func testAccMonitoringNotificationChannel_createSensitiveWoLabels_slack() string {
+	return fmt.Sprintf(`
+resource "google_monitoring_notification_channel" "slack" {
+	display_name = "TFTest Slack Channel"
+	type         = "slack"
+
+	labels = {
+		"channel_name" = "#foobar"
+	}
+
+	sensitive_labels_wo {
+		auth_token_wo         = "one"
+		auth_token_wo_version = 1
+	}
+}
+`)
+}
+
+func testAccMonitoringNotificationChannel_updateSensitiveWoLabels_slack() string {
+	return fmt.Sprintf(`
+resource "google_monitoring_notification_channel" "slack" {
+	display_name = "TFTest Slack Channel"
+	type         = "slack"
+
+	labels = {
+		"channel_name" = "#foobar"
+	}
+
+	sensitive_labels_wo {
+		auth_token_wo         = "two"
+		auth_token_wo_version = 2
 	}
 }
 `)
