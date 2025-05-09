@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,7 +15,6 @@ name: 'Glossary'
 min_version: beta
 description: |
   Represents a collection of categories and terms defined by the user. Glossary is a top level resource and is the GCP parent resource of all the categories and terms within it.
-docs:
 base_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/glossaries?glossary_id={{glossary_id}}'
@@ -33,7 +32,6 @@ async:
   operation:
     base_url: '{{op_id}}'
 iam_policy:
-  exclude_import_test: true
   method_name_separator: ':'
   parent_resource_attribute: 'glossary_id'
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
@@ -44,19 +42,15 @@ examples:
   - name: 'dataplex_glossary_basic'
     min_version: beta
     primary_resource_id: 'glossary_test_id'
-    primary_resource_name: 'fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-glossary-basic%s", context["random_suffix"])'
     vars:
       glossary_name: 'glossary-basic'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
   - name: 'dataplex_glossary_full'
     min_version: beta
     primary_resource_id: 'glossary_test_id_full'
-    primary_resource_name: 'fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-glossary-full%s", context["random_suffix"])'
     vars:
       glossary_name: 'glossary-full'
-    test_env_vars:
-      project_name: 'PROJECT_NAME'
 parameters:
   - name: 'location'
     type: String
@@ -70,6 +64,7 @@ parameters:
     description: |
       The glossary id for creation.
     url_param_only: true
+    required: true
     immutable: true
 properties:
   - name: 'name'

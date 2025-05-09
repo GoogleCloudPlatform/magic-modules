@@ -15,7 +15,6 @@ func TestAccDataplexGlossary_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project_name":  envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -34,6 +33,11 @@ func TestAccDataplexGlossary_update(t *testing.T) {
 			},
 			{
 				Config: testAccDataplexGlossary_full(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataplex_glossary.glossary_test_id", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_dataplex_glossary.glossary_test_id_full",
@@ -47,14 +51,9 @@ func TestAccDataplexGlossary_update(t *testing.T) {
 
 func testAccDataplexGlossary_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	data "google_project" "project" {
-    	provider = google-beta
-	}
-
 	resource "google_dataplex_glossary" "glossary_test_id" {
   		glossary_id = "tf-test-glossary-basic%{random_suffix}"
   		location     = "us-central1"
-  		project      = "%{project_name}"
   		provider = google-beta
 	}
 `, context)
@@ -62,20 +61,14 @@ func testAccDataplexGlossary_update(context map[string]interface{}) string {
 
 func testAccDataplexGlossary_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-
-data "google_project" "project" {
-    provider = google-beta
-}
-
-resource "google_dataplex_glossary" "glossary_test_id_full" {
-  glossary_id = "tf-test-glossary-full%{random_suffix}"
-  location     = "us-central1"
-  project      = "%{project_name}"
-  provider = google-beta
-  labels = { "tag": "test-tf" }
-  display_name = "terraform glossary"
-  description = "glossary created by Terraform"
-}
+	resource "google_dataplex_glossary" "glossary_test_id_full" {
+	glossary_id = "tf-test-glossary-full%{random_suffix}"
+	location     = "us-central1"
+	provider = google-beta
+	labels = { "tag": "test-tf" }
+	display_name = "terraform glossary"
+	description = "glossary created by Terraform"
+	}
 `, context)
 }
 
