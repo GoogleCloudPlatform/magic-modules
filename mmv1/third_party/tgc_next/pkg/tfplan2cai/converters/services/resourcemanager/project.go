@@ -11,9 +11,9 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/cai"
 
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/verify"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/verify"
 
 	"google.golang.org/api/cloudbilling/v1"
 	"google.golang.org/api/cloudresourcemanager/v1"
