@@ -1,0 +1,17 @@
+resource "google_storage_bucket" "bucket" {
+  name     = "{{index $.Vars "bucket_name"}}"
+  location = "US"
+}
+
+resource "google_storage_bucket_life_cycle_config" "{{$.PrimaryResourceId}}" {
+    depends_on = [google_storage_bucket.bucket]
+    bucket = google_storage_bucket.bucket.name
+    lifecycle_rule {
+        action {
+          type = "Delete"
+        }
+        condition {
+          age        = 10
+        }
+    }
+}
