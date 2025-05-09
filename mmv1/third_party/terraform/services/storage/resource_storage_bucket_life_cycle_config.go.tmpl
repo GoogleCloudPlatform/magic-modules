@@ -305,7 +305,7 @@ func resourceStorageBucketLifeCycleConfigDelete(d *schema.ResourceData, meta int
 	bucket := d.Get("bucket").(string)
 
 	sb := &storage.Bucket{}
-	sb.Lifecycle = &storage.BucketLifecycle{}
+	sb.Lifecycle = &storage.BucketLifecycle{ForceSendFields: []string{"Rule"}}
 
 	log.Printf("[DEBUG] Deleting BucketLifeCycleConfig %q: %#v", d.Id(), sb)
 
