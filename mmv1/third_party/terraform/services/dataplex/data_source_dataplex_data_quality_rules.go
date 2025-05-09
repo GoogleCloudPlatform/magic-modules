@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-provider-google/google/verify"
 )
 
 func DataSourceDataplexDataQualityRules() *schema.Resource {
@@ -183,9 +182,8 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"statistic": {
-										Type:         schema.TypeString,
-										Computed:     true,
-										ValidateFunc: verify.ValidateEnum([]string{"STATISTIC_UNDEFINED", "MEAN", "MIN", "MAX"}),
+										Type:     schema.TypeString,
+										Computed: true,
 										Description: `The list of aggregate metrics a rule can be evaluated against. 
 																	Possible values: ["STATISTIC_UNDEFINED", "MEAN", "MIN", "MAX"]`,
 									},
