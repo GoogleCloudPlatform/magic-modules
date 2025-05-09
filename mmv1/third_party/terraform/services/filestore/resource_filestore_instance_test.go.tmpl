@@ -646,7 +646,7 @@ func executeTemplate(tmplString string, data any) (string, error) {
 
 const pscInstanceConfigTemplate = `
 data "google_client_config" "current" {
-  provider = "google-beta"	
+  provider = google-beta
 }
 
 resource "google_compute_network" "psc_network" {
