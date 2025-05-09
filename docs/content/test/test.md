@@ -143,6 +143,8 @@ This section assumes you've used the [Add a resource]({{< ref "/develop/add-reso
    - If beta-only fields are being tested, do the following:
      - Change the file suffix to `.go.tmpl`
      - Wrap each beta-only test in a separate version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`
+     - In each beta-only test, ensure that the TestCase sets `ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t)`
+     - In each beta-only test, ensure that all Terraform resources in all configs have `provider = google-beta` set
 {{< /tab >}}
 {{< /tabs >}}
 
