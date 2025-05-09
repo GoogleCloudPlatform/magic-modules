@@ -501,6 +501,12 @@ properties:
                     custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
                     validation:
                       function: 'validation.StringIsJSON'
+            - name: 'enableGenerativeFallback'
+              type: Boolean
+              description: |
+                If the flag is true, the agent will utilize LLM to generate a text response.
+                If LLM generation fails, the defined responses in the fulfillment will be respected.
+                This flag is only useful for fulfillments associated with no-match event handlers.
         - name: 'targetPage'
           type: String
           description: |
