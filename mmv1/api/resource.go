@@ -304,6 +304,9 @@ type Resource struct {
 	// control if a resource is continuously generated from public OpenAPI docs
 	AutogenStatus string `yaml:"autogen_status"`
 
+	// If true, this resource generates with the new plugin framework resource template
+	FrameworkResource bool `yaml:"plugin_framework,omitempty"`
+
 	// The three groups of []*Type fields are expected to be strictly ordered within a yaml file
 	// in the sequence of Virtual Fields -> Parameters -> Properties
 
