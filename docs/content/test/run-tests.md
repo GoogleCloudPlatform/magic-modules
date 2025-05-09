@@ -147,6 +147,32 @@ This indicates that after an apply to create or update a resource, the resource 
 - The URL for reads was built incorrectly. The exact fix will depend on why this is happening. Run the test with the `TF_LOG=DEBUG` environment variable and check whether the read URL matches what you expect.
 - There is a call to unset the resource's id (`d.SetId("")`) somewhere it shouldn't be. The fix is to remove that extraneous call. This is rare.
 
+### Error: Inconsistent dependency lock file
+
+Tests require all of the providers they use (except the one actually being tested) to be explicitly stated. This error generally means one of a few things:
+
+- This is a beta-only test and one of the `google_*` resources in the test doesn't have `provider = google-beta` set
+  - ```hcl
+    resource "google_compute_instance" "beta-instance" {
+      provider = google-beta
+      # ...
+    }
+    ```
+
+- This is a GA+beta test and one of the `google_*` resources has `provider = google-beta` set
+  - `provider = google-beta` can't be set unless the test is beta-only.
+- The test relies on an external provider, such as `time`, and that is not explicitly declared
+  - For MMv1 example-based tests, use [`examples.external_providers`](https://googlecloudplatform.github.io/magic-modules/reference/resource/#examples).
+  - For Handwritten tests, use TestCase.ExternalProviders:
+    ```go
+    acctest.VcrTest(t, resource.TestCase{
+      ExternalProviders: map[string]resource.ExternalProvider{
+        "time": {},
+      },
+      // ...
+    }
+    ```
+
 ## Optional: Test with different `terraform` versions
 
 Tests will use whatever version of the `terraform` binary is found on your `PATH`. If you are testing a change that you know only impacts certain `terraform` versions, follow these steps:
