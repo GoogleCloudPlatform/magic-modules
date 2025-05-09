@@ -632,18 +632,6 @@ func TestAccFilestoreInstance_psc(t *testing.T) {
 	})
 }
 
-func executeTemplate(tmplString string, data any) (string, error) {
-	tmpl, err := template.New("tmpl").Delims("[[", "]]").Parse(tmplString)
-	if err != nil {
-		return "", err
-	}
-	var b bytes.Buffer
-	if err := tmpl.Execute(&b, data); err != nil {
-		return "", err
-	}
-	return b.String(), nil
-}
-
 const pscInstanceConfigTemplate = `
 data "google_client_config" "current" {
   provider = google-beta
@@ -707,3 +695,15 @@ resource "google_filestore_instance" "instance" {
 `
 
 {{- end }}
+
+func executeTemplate(tmplString string, data any) (string, error) {
+	tmpl, err := template.New("tmpl").Delims("[[", "]]").Parse(tmplString)
+	if err != nil {
+		return "", err
+	}
+	var b bytes.Buffer
+	if err := tmpl.Execute(&b, data); err != nil {
+		return "", err
+	}
+	return b.String(), nil
+}
