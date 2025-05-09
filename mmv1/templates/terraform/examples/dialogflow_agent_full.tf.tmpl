@@ -10,7 +10,4 @@ resource "google_dialogflow_agent" "{{$.PrimaryResourceId}}" {
   classification_threshold = 0.3
   api_version = "API_VERSION_V2_BETA_1"
   tier = "TIER_STANDARD"
-  gen_app_builder_settings {
-    engine = "projects/-/locations/-/collections/-/engines/-"
-  }
 }
