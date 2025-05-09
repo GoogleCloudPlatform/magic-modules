@@ -131,6 +131,9 @@ func testAccDialogflowCXAgent_full(context map[string]interface{}) string {
 				}
 			})
 		}
+		gen_app_builder_settings {
+			engine = "projects/-/locations/-/collections/-/engines/-"
+		}
 	}
 	  `, context)
 }
