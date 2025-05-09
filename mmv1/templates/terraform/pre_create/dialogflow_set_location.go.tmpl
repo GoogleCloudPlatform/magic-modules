@@ -11,4 +11,7 @@ if parts := regexp.MustCompile(`locations\/([^\/]*)\/`).FindStringSubmatch(d.Get
 	)
 }
 
-url = strings.Replace(url, "-dialogflow", fmt.Sprintf("%s-dialogflow", location), 1)
+// only insert location into url if the base_url in products/dialogflowcx/product.yaml is used
+if strings.HasPrefix(url, "https://-dialogflow.googleapis.com/v3/") {
+	url = strings.Replace(url, "-dialogflow", fmt.Sprintf("%s-dialogflow", location), 1)
+}

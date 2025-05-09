@@ -54,6 +54,11 @@ examples:
     vars:
       agent_name: 'dialogflowcx-agent'
     exclude_docs: true
+  - name: 'dialogflowcx_flow_custom_endpoint'
+    primary_resource_id: 'custom_endpoint_flow'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+    exclude_docs: true
 virtual_fields:
   - name: 'is_default_start_flow'
     description: |
