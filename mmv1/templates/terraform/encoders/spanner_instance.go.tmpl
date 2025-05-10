@@ -1,6 +1,6 @@
 if obj["instanceType"] == nil ||  obj["instanceType"] == "PROVISIONED" {
 	// when provisioning a PROVISIONED instance, or instance_type is not set at all
-	// exactly one of the following fields must be specified (cannot use exatcly_one_of because of the FREE_INSTANCE case):
+	// exactly one of the following fields must be specified (cannot use exactly_one_of because of the FREE_INSTANCE case):
 	count := 0
 	if obj["autoscalingConfig"] != nil {
 		count++
@@ -33,9 +33,9 @@ if obj["name"] == nil {
 }
 if obj["instanceType"] != nil && obj["instanceType"] == "FREE_INSTANCE" {
 	// when provisioning a FREE_INSTANCE, the following fields cannot be specified
-	delete(obj, "nodeCount")
-	delete(obj, "processingUnits")
-	delete(obj, "autoscalingConfig")
+	if obj["nodeCount"] != nil || obj["processingUnits"] != nil || obj["autoscalingConfig"] != nil {
+		return nil, fmt.Errorf("`num_nodes`, `processing_units`, and `autoscaling_config` cannot be specified when instance_type is FREE_INSTANCE")
+	}
 }
 delete(obj, "name")
 return newObj, nil
