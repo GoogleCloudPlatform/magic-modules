@@ -68,6 +68,7 @@ examples:
       database_name: 'my-database'
     ignore_read_extra:
       - 'deletion_protection'
+      - 'default_time_zone'
       # Randomness due to spanner instance
     skip_vcr: true
 virtual_fields:
