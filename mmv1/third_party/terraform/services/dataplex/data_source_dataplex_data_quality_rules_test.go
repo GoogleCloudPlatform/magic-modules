@@ -34,7 +34,7 @@ func TestAccDataplexDataQualityRules(t *testing.T) {
 func testAccDataplexDataQualityRules_config(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 		data "google_dataplex_data_quality_rules" "generated_dq_rules" {
-			project		 = "%{proejct}"
+			project		 = "%{project}"
 			location	 = "%{location}"
 			data_scan_id = "%{data_scan_id}"
 		}`, context)
