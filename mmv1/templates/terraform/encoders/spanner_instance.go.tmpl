@@ -1,4 +1,4 @@
-if obj["instanceType"] == nil || obj["instanceType"] != nil && obj["instanceType"] == "PROVISIONED" {
+if obj["instanceType"] == nil ||  obj["instanceType"] == "PROVISIONED" {
 	// when provisioning a PROVISIONED instance, or instance_type is not set at all
 	// exactly one of the following fields must be specified (cannot use exatcly_one_of because of the FREE_INSTANCE case):
 	count := 0
