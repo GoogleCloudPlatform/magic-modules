@@ -56,6 +56,7 @@ func ResourceBigtableInstance() *schema.Resource {
 			tpgresource.DefaultProviderProject,
 			resourceBigtableInstanceClusterReorderTypeList,
 			resourceBigtableInstanceUniqueClusterID,
+			resourceBigtableInstanceIgnoreNodeScalingFactorNullFromRecreate,
 			tpgresource.SetLabelsDiff,
 		),
 
@@ -692,6 +693,21 @@ func resourceBigtableInstanceUniqueClusterID(_ context.Context, diff *schema.Res
 			return fmt.Errorf("duplicated cluster_id: %q", clusterID)
 		}
 		clusters[clusterID] = true
+	}
+
+	return nil
+}
+
+func resourceBigtableInstanceIgnoreNodeScalingFactorNullFromRecreate(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	oldCount, _ := diff.GetChange("cluster.#")
+
+	for i := 0; i < oldCount.(int); i++ {
+		oldNodeScalingFactor, newNodeScalingFactor := diff.GetChange(fmt.Sprintf("cluster.%d.node_scaling_factor", i))
+		if oldNodeScalingFactor == "" && newNodeScalingFactor == "NodeScalingFactor1X" {
+			if err := diff.SetNew(fmt.Sprintf("cluster.%d.node_scaling_factor", i), oldNodeScalingFactor); err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil
