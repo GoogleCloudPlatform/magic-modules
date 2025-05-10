@@ -1,0 +1,9 @@
+if d.HasChange("enable_dns64_all_queries"){
+  if val, ok := d.Get("enable_dns64_all_queries").(bool); ok {
+  	dns64Config := make(map[string]interface{})
+  	scope := make(map[string]interface{})
+  	scope["allQueries"] = val
+  	dns64Config["scope"] = scope
+  	obj["dns64Config"] = dns64Config
+  }
+}
