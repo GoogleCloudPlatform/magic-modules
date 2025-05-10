@@ -1,5 +1,4 @@
 package networksecurity_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -19,7 +18,7 @@ func TestAccNetworkSecurityInterceptDeployment_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkSecurityInterceptDeployment_basic(context),
@@ -51,13 +50,11 @@ func TestAccNetworkSecurityInterceptDeployment_update(t *testing.T) {
 func testAccNetworkSecurityInterceptDeployment_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "network" {
-  provider                = google-beta
   name                    = "tf-test-example-network%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "subnetwork" {
-  provider      = google-beta
   name          = "tf-test-example-subnet%{random_suffix}"
   region        = "us-central1"
   ip_cidr_range = "10.1.0.0/16"
@@ -65,16 +62,14 @@ resource "google_compute_subnetwork" "subnetwork" {
 }
 
 resource "google_compute_region_health_check" "health_check" {
-  provider = google-beta
-  name     = "tf-test-example-hc%{random_suffix}"
-  region   = "us-central1"
+  name   = "tf-test-example-hc%{random_suffix}"
+  region = "us-central1"
   http_health_check {
     port = 80
   }
 }
 
 resource "google_compute_region_backend_service" "backend_service" {
-  provider              = google-beta
   name                  = "tf-test-example-bs%{random_suffix}"
   region                = "us-central1"
   health_checks         = [google_compute_region_health_check.health_check.id]
@@ -83,26 +78,23 @@ resource "google_compute_region_backend_service" "backend_service" {
 }
 
 resource "google_compute_forwarding_rule" "forwarding_rule" {
-  provider               = google-beta
-  name                   = "tf-test-example-fwr%{random_suffix}"
-  region                 = "us-central1"
-  network                = google_compute_network.network.name
-  subnetwork             = google_compute_subnetwork.subnetwork.name
-  backend_service        = google_compute_region_backend_service.backend_service.id
-  load_balancing_scheme  = "INTERNAL"
-  ports                  = [6081]
-  ip_protocol            = "UDP"
+  name                  = "tf-test-example-fwr%{random_suffix}"
+  region                = "us-central1"
+  network               = google_compute_network.network.name
+  subnetwork            = google_compute_subnetwork.subnetwork.name
+  backend_service       = google_compute_region_backend_service.backend_service.id
+  load_balancing_scheme = "INTERNAL"
+  ports                 = [6081]
+  ip_protocol           = "UDP"
 }
 
 resource "google_network_security_intercept_deployment_group" "deployment_group" {
-  provider                      = google-beta
   intercept_deployment_group_id = "tf-test-example-dg%{random_suffix}"
   location                      = "global"
   network                       = google_compute_network.network.id
 }
 
 resource "google_network_security_intercept_deployment" "default" {
-  provider                   = google-beta
   intercept_deployment_id    = "tf-test-example-deployment%{random_suffix}"
   location                   = "us-central1-a"
   forwarding_rule            = google_compute_forwarding_rule.forwarding_rule.id
@@ -118,13 +110,11 @@ resource "google_network_security_intercept_deployment" "default" {
 func testAccNetworkSecurityInterceptDeployment_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "network" {
-  provider                = google-beta
   name                    = "tf-test-example-network%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "subnetwork" {
-  provider      = google-beta
   name          = "tf-test-example-subnet%{random_suffix}"
   region        = "us-central1"
   ip_cidr_range = "10.1.0.0/16"
@@ -132,16 +122,14 @@ resource "google_compute_subnetwork" "subnetwork" {
 }
 
 resource "google_compute_region_health_check" "health_check" {
-  provider = google-beta
-  name     = "tf-test-example-hc%{random_suffix}"
-  region   = "us-central1"
+  name   = "tf-test-example-hc%{random_suffix}"
+  region = "us-central1"
   http_health_check {
     port = 80
   }
 }
 
 resource "google_compute_region_backend_service" "backend_service" {
-  provider              = google-beta
   name                  = "tf-test-example-bs%{random_suffix}"
   region                = "us-central1"
   health_checks         = [google_compute_region_health_check.health_check.id]
@@ -150,26 +138,23 @@ resource "google_compute_region_backend_service" "backend_service" {
 }
 
 resource "google_compute_forwarding_rule" "forwarding_rule" {
-  provider               = google-beta
-  name                   = "tf-test-example-fwr%{random_suffix}"
-  region                 = "us-central1"
-  network                = google_compute_network.network.name
-  subnetwork             = google_compute_subnetwork.subnetwork.name
-  backend_service        = google_compute_region_backend_service.backend_service.id
-  load_balancing_scheme  = "INTERNAL"
-  ports                  = [6081]
-  ip_protocol            = "UDP"
+  name                  = "tf-test-example-fwr%{random_suffix}"
+  region                = "us-central1"
+  network               = google_compute_network.network.name
+  subnetwork            = google_compute_subnetwork.subnetwork.name
+  backend_service       = google_compute_region_backend_service.backend_service.id
+  load_balancing_scheme = "INTERNAL"
+  ports                 = [6081]
+  ip_protocol           = "UDP"
 }
 
 resource "google_network_security_intercept_deployment_group" "deployment_group" {
-  provider                      = google-beta
   intercept_deployment_group_id = "tf-test-example-dg%{random_suffix}"
   location                      = "global"
   network                       = google_compute_network.network.id
 }
 
 resource "google_network_security_intercept_deployment" "default" {
-  provider                   = google-beta
   intercept_deployment_id    = "tf-test-example-deployment%{random_suffix}"
   location                   = "us-central1-a"
   forwarding_rule            = google_compute_forwarding_rule.forwarding_rule.id
@@ -181,5 +166,3 @@ resource "google_network_security_intercept_deployment" "default" {
 }
 `, context)
 }
-
-{{ end }}
