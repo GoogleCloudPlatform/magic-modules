@@ -234,6 +234,8 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
             },
           ])
         }
+
+        enable_generative_fallback = true
       }
     }
 
