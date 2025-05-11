@@ -2,7 +2,9 @@ package compute_test
 
 import (
 	"fmt"
+{{ if ne $.TargetVersionName `ga` -}}
 	"regexp"
+{{- end }}
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
