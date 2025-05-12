@@ -143,3 +143,9 @@ properties:
     description: |
       The default port used if the port number is not specified in the
       network endpoint.
+  - name: 'identifier'
+    type: Integer
+    api_name: 'id'
+    output: true
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
