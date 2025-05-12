@@ -1345,6 +1345,14 @@ func TestAccAlloydbCluster_withMaintenanceWindows(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccAlloydbCluster_removeMaintenanceWindows(context),
+			},
+			{
+				ResourceName:      "google_alloydb_cluster.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 		},
 	})
 }
@@ -1367,6 +1375,22 @@ resource "google_alloydb_cluster" "default" {
         nanos = 0
       }
     }
+  }
+}
+data "google_project" "project" {}
+resource "google_compute_network" "default" {
+  name = "tf-test-alloydb-cluster%{random_suffix}"
+}
+`, context)
+}
+
+func testAccAlloydbCluster_removeMaintenanceWindows(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_alloydb_cluster" "default" {
+  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
+  location   = "us-central1"
+  network_config {
+		network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
 }
 data "google_project" "project" {}
