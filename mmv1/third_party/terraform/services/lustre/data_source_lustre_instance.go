@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package lustre
 
 import (
@@ -17,10 +15,9 @@ func DataSourceLustreInstance() *schema.Resource {
 
 	dsScema_zone := map[string]*schema.Schema{
 		"zone": {
-			Type:     schema.TypeString,
-			Optional: true,
-			Description: `The ID of the zone in which the resource belongs. If it is not provided, the provider zone is used.,
-`,
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: `Zone of Lustre instance`,
 		},
 	}
 
@@ -30,7 +27,7 @@ func DataSourceLustreInstance() *schema.Resource {
 	// Set 'Optional' schema elements from resource
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 
-	// Set 'Required' schema elements
+	// Merge schema elements
 	dsSchema_m := tpgresource.MergeSchemas(dsScema_zone, dsSchema)
 
 	return &schema.Resource{
@@ -42,20 +39,25 @@ func DataSourceLustreInstance() *schema.Resource {
 func dataSourceLustreInstanceRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	location, err := tpgresource.GetZone(d, config)
+	//  Get required fields for ID
+	instance_id := d.Get("instance_id").(string)
+
+	zone, err := tpgresource.GetZone(d, config)
+	if err != nil {
+		return err
+	}
+
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
 
 	// Set the ID
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/instances/{{instance_id}}")
-	if err != nil {
-		return fmt.Errorf("Error constructing id: %s", err)
-	}
+	id := fmt.Sprintf("projects/%s/locations/%s/instances/%s", project, zone, instance_id)
 	d.SetId(id)
 
 	// Setting location field for url_param_only field
-	d.Set("location", location)
+	d.Set("location", zone)
 
 	err = resourceLustreInstanceRead(d, meta)
 	if err != nil {
