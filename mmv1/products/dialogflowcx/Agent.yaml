@@ -267,3 +267,14 @@ properties:
         custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
         validation:
           function: 'validation.StringIsJSON'
+  - name: 'genAppBuilderSettings'
+    type: NestedObject
+    description: |
+      Gen App Builder-related agent-level settings.
+    properties:
+      - name: 'engine'
+        type: String
+        required: true
+        description: |
+          The full name of the Gen App Builder engine related to this agent if there is one.
+          Format: projects/{Project ID}/locations/{Location ID}/collections/{Collection ID}/engines/{Engine ID}
