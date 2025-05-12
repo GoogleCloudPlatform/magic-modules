@@ -150,6 +150,7 @@ func GetTestUniverseDomainFromEnv(t *testing.T) string {
 	return transport_tpg.MultiEnvSearch(UniverseDomainEnvVars)
 }
 
+// Project Prefix of different universes
 func GetProjectPrefixFromEnv() string {
 	return transport_tpg.MultiEnvSearch(ProjectPrefixEnvVars)
 }
