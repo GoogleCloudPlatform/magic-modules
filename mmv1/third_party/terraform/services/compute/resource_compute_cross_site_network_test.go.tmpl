@@ -1,0 +1,75 @@
+package compute_test
+{{ if ne $.TargetVersionName `ga` -}}
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+)
+
+func TestAccComputeCrossSiteNetwork_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeCrossSiteNetworkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeCrossSiteNetwork_basic(context),
+			},
+			{
+				ResourceName:      "google_compute_cross_site_network.example-cross-site-network",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeCrossSiteNetwork_update(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_cross_site_network.example-cross-site-network", "description", "Example cross site network updated"+context["random_suffix"].(string)),
+				),
+			},
+			{
+				ResourceName:      "google_compute_cross_site_network.example-cross-site-network",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeCrossSiteNetwork_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_compute_cross_site_network" "example-cross-site-network" {
+  name       = "tf-test-test-cross-site-network%{random_suffix}"
+  description         = "Example cross site network%{random_suffix}"
+  provider = google-beta
+}
+`, context)
+}
+
+func testAccComputeCrossSiteNetwork_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_compute_cross_site_network" "example-cross-site-network" {
+name       = "tf-test-test-cross-site-network%{random_suffix}"
+description         = "Example cross site network updated%{random_suffix}"
+  provider = google-beta
+}
+`, context)
+}
+{{- end }}
