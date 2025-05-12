@@ -1,4 +1,4 @@
-package gkehub2_test
+package gkehub_test
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ import (
 func TestAccDataSourceGoogleGkeHubMembership_basic(t *testing.T) {
 	t.Parallel()
 
-	project := envvar.GetTestProjectFromEnv(t)
+	project := envvar.GetTestProjectFromEnv()
 	gkeClusterRegion := "us-central1"
 	gkeClusterZone := "us-central1-a"
 	membershipLocation := "global"
@@ -121,7 +121,20 @@ func testAccCheckGoogleGkeHubMembershipDestroyProducer(t *testing.T) func(s *ter
 				return fmt.Errorf("Error constructing URL for GKE Hub Membership: %s", err)
 			}
 
-			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{Config: config, Method: "GET", RawURL: url, UserAgent: config.UserAgent, BillingProject: config.BillingProject})
+			billingProject := ""
+
+			if config.BillingProject != "" {
+				billingProject = config.BillingProject
+			}
+
+			_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+				Project:   billingProject,
+			})
+
 			if err == nil {
 				return fmt.Errorf("GKEHubMembership still exists at %s", url)
 			}

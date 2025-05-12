@@ -1,4 +1,4 @@
-package gkehub2
+package gkehub
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 )
 
 func DataSourceGoogleGkeHubMembership() *schema.Resource {
-	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceGKEHub2Membership().Schema)
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceGKEHubMembership().Schema)
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "membership_id")
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "location")
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
@@ -29,7 +29,7 @@ func dataSourceGoogleGkeHubMembershipRead(d *schema.ResourceData, meta interface
 	}
 	d.SetId(id)
 
-	err = resourceGKEHub2MembershipRead(d, meta)
+	err = resourceGKEHubMembershipRead(d, meta)
 	if err != nil {
 		return err
 	}
