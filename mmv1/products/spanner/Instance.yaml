@@ -108,8 +108,8 @@ properties:
   - name: 'num_nodes'
     type: Integer
     description: |
-      The number of nodes allocated to this instance. Exactly one of either node_count or processing_units
-      must be present in terraform.
+      The number of nodes allocated to this instance. Exactly one of either num_nodes, processing_units or
+      autoscaling_config must be present in terraform except when instance_type = FREE_INSTANCE.
     api_name: nodeCount
     default_from_api: true
     conflicts:
@@ -118,8 +118,8 @@ properties:
   - name: 'processingUnits'
     type: Integer
     description: |
-      The number of processing units allocated to this instance. Exactly one of processing_units
-      or node_count must be present in terraform.
+      The number of processing units allocated to this instance. Exactly one of either num_nodes,
+      processing_units or autoscaling_config must be present in terraform except when instance_type = FREE_INSTANCE.
     default_from_api: true
     conflicts:
       - 'num_nodes'
@@ -141,6 +141,8 @@ properties:
     type: NestedObject
     description: |
       The autoscaling configuration. Autoscaling is enabled if this field is set.
+      Exactly one of either num_nodes, processing_units or autoscaling_config must be
+      present in terraform except when instance_type = FREE_INSTANCE.
       When autoscaling is enabled, num_nodes and processing_units are treated as,
       OUTPUT_ONLY fields and reflect the current compute capacity allocated to
       the instance.

@@ -1,26 +1,15 @@
-if obj["instanceType"] == nil ||  obj["instanceType"] == "PROVISIONED" {
-	// when provisioning a PROVISIONED instance, or instance_type is not set at all
-	// exactly one of the following fields must be specified (cannot use exactly_one_of because of the FREE_INSTANCE case):
-	count := 0
-	if obj["autoscalingConfig"] != nil {
-		count++
+if obj["instanceType"] == "FREE_INSTANCE" {
+	// when provisioning a FREE_INSTANCE, the following fields cannot be specified
+	if obj["nodeCount"] != nil || obj["processingUnits"] != nil || obj["autoscalingConfig"] != nil {
+		return nil, fmt.Errorf("`num_nodes`, `processing_units`, and `autoscaling_config` cannot be specified when instance_type is FREE_INSTANCE")
 	}
-	if obj["nodeCount"] != nil {
-		count++
-	}
-	if obj["processingUnits"] != nil {
-		count++
-	}
-
-	if count != 1 {
-		return nil, fmt.Errorf("Exactly one of `autoscaling_config`, `num_nodes`, or `processing_units` must be specified")
+} else {
+	// Temp Logic to accommodate autoscaling_config, processing_units and num_nodes
+	if obj["processingUnits"] == nil && obj["nodeCount"] == nil && obj["autoscalingConfig"] == nil && obj["instanceType"] != "FREE_INSTANCE" {
+		obj["nodeCount"] = 1
 	}
 }
 
-// Temp Logic to accommodate autoscaling_config, processing_units and num_nodes
-if obj["processingUnits"] == nil && obj["nodeCount"] == nil && obj["autoscalingConfig"] == nil {
-	obj["nodeCount"] = 1
-}
 newObj := make(map[string]interface{})
 newObj["instance"] = obj
 if obj["name"] == nil {
@@ -30,12 +19,6 @@ if obj["name"] == nil {
 	newObj["instanceId"] = d.Get("name").(string)
 } else {
 	newObj["instanceId"] = obj["name"]
-}
-if obj["instanceType"] != nil && obj["instanceType"] == "FREE_INSTANCE" {
-	// when provisioning a FREE_INSTANCE, the following fields cannot be specified
-	if obj["nodeCount"] != nil || obj["processingUnits"] != nil || obj["autoscalingConfig"] != nil {
-		return nil, fmt.Errorf("`num_nodes`, `processing_units`, and `autoscaling_config` cannot be specified when instance_type is FREE_INSTANCE")
-	}
 }
 delete(obj, "name")
 return newObj, nil
