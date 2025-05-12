@@ -383,11 +383,11 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 	updateMask := []string{}
 {{- end}}
     {{/* Update old/new checks */}}
-	//if !plan.<fieldname>.Equal(state.<fieldname>) {
+	//if !plan.<fieldname>.Equal(state.<fieldname>) 
 	//obj["<fieldname>"] = plan.<fieldname>
-	//{{ if $.UpdateMask -}}
+	//  if $.UpdateMask -
 	//	updateMask = append(updateMask, "throughputCapacity")
-	//{{- end}}
+	//  - end
 	//}
 
     url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, d.providerConfig, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.CreateUri}}")
