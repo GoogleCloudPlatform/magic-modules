@@ -31,6 +31,11 @@ timeouts:
   update_minutes: 40
   delete_minutes: 20
 custom_code:
+  # An engine resource https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.engines
+  # will be automatically created when we specify dataStoreConnections in Flow, Page, or Tool resources associated with the Agent.
+  # We need to delete the engine before deleting the Agent. Otherwise, terraform wouldn't be able to delete the DataStore resource
+  # created in acceptance tests and would fail the tests.
+  pre_delete: 'templates/terraform/pre_delete/dialogflowcx_agent.go.tmpl'
 exclude_sweeper: true
 examples:
   - name: 'dialogflowcx_agent_full'
