@@ -63,7 +63,7 @@ func testAccDataSourceComputeNetworkEndpointGroupCheck(data_source_name string, 
 		}
 
 		if v, ok := ds_attr["identifier"]; !ok || v == "" {
-			return fmt.Errorf("identifier is not set, this is likely a bug in the provider")
+			return fmt.Errorf("identifier is not set")
 		}
 
 		return nil
