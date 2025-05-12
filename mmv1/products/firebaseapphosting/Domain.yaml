@@ -1,0 +1,421 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Domain
+description: A domain name that is associated with a backend.
+base_url: projects/{{project}}/locations/{{location}}/backends/{{backend}}/domains
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/backends/{{backend}}/domains/{{domain_id}}
+create_url: projects/{{project}}/locations/{{location}}/backends/{{backend}}/domains?domainId={{domain_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/backends/{{backend}}/domains/{{domain_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/backends/{{backend}}/domains/{{domain_id}}
+  - "{{project}}/{{location}}/{{backend}}/{{domain_id}}"
+  - "{{location}}/{{backend}}/{{domain_id}}"
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: "{{op_id}}"
+  actions:
+    - update
+    - delete
+  type: PollAsync
+  include_project: false
+  check_response_func_existence: 'transport_tpg.PollCheckForExistence'
+  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  # Errors are on the Domain resource itself
+  suppress_error: true
+examples:
+  - name: firebase_app_hosting_domain_minimal
+    primary_resource_id: example
+    vars:
+      backend_id: 'domain-mini'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      domain_id: '"my-domain-m.com"'
+      # prevent tests from colliding with each other
+      service_act_id: '"tf-test-domain-m"'
+  - name: firebase_app_hosting_domain_full
+    primary_resource_id: example
+    vars:
+      backend_id: 'domain-full'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      domain_id: '"my-domain.com"'
+      # prevent tests from colliding with each other
+      service_act_id: '"tf-test-domain"'
+autogen_status: RG9tYWlu
+parameters:
+  - name: location
+    type: String
+    description: The location of the Backend that this Domain is associated with
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: backend
+    type: String
+    description: The ID of the Backend that this Domain is associated with
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: domainId
+    type: String
+    description: |-
+      Id of the domain to create.
+      Must be a valid domain name, such as "foo.com"
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: customDomainStatus
+    type: NestedObject
+    description: The status of a custom domain's linkage to the Backend.
+    output: true
+    properties:
+      - name: certState
+        type: String
+        output: true
+        description: |-
+          Possible values:
+          CERT_PREPARING
+          CERT_VALIDATING
+          CERT_PROPAGATING
+          CERT_ACTIVE
+          CERT_EXPIRING_SOON
+          CERT_EXPIRED
+      - name: requiredDnsUpdates
+        type: Array
+        description: |-
+          Lists the records that must added or removed to a custom domain's DNS
+          in order to finish setup and start serving content.
+          Field is present during onboarding. Also present after onboarding if one
+          or more of the above states is not *_ACTIVE, indicating the domain's DNS
+          records are in a bad state.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: domainName
+              type: String
+              description: The domain name the DNS updates pertain to.
+              output: true
+            - name: discovered
+              type: Array
+              description: The set of DNS records App Hosting discovered when inspecting a domain.
+              output: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: domainName
+                    type: String
+                    description: The domain name the record set pertains to.
+                    output: true
+                  - name: checkError
+                    type: NestedObject
+                    output: true
+                    description: |-
+                      The `Status` type defines a logical error model that is suitable for
+                      different programming environments, including REST APIs and RPC APIs. It is
+                      used by [gRPC](https://github.com/grpc). Each `Status` message contains
+                      three pieces of data: error code, error message, and error details.
+
+                      You can find out more about this error model and how to work with it in the
+                      [API Design Guide](https://cloud.google.com/apis/design/errors).
+                    properties:
+                      - name: code
+                        type: Integer
+                        description: The status code, which should be an enum value of google.rpc.Code.
+                        output: true
+                      - name: message
+                        type: String
+                        output: true
+                        description: |-
+                          A developer-facing error message, which should be in English. Any
+                          user-facing error message should be localized and sent in the
+                          google.rpc.Status.details field, or localized by the client.
+                      - name: details
+                        type: String
+                        output: true
+                        description: |
+                          A list of messages that carry the error details.
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                        validation:
+                          function: 'validation.StringIsJSON'
+                  - name: records
+                    type: Array
+                    description: Records on the domain.
+                    output: true
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: domainName
+                          type: String
+                          description: The domain the record pertains to, e.g. `foo.bar.com.`.
+                          output: true
+                        - name: type
+                          type: String
+                          description: |-
+                            The record's type, which determines what data the record contains.
+                            Possible values:
+                            A
+                            CNAME
+                            TXT
+                            AAAA
+                            CAA
+                          output: true
+                        - name: rdata
+                          type: String
+                          description: |-
+                            The data of the record. The meaning of the value depends on record type:
+                            - A and AAAA: IP addresses for the domain.
+                            - CNAME: Another domain to check for records.
+                            - TXT: Arbitrary text strings associated with the domain. App Hosting
+                            uses TXT records to determine which Firebase projects have
+                            permission to act on the domain's behalf.
+                            - CAA: The record's flags, tag, and value, e.g. `0 issue "pki.goog"`.
+                          output: true
+                        - name: requiredAction
+                          type: String
+                          description: |-
+                            An enum that indicates the a required action for this record. Populated
+                            when the record is part of a required change in a  `DnsUpdates`
+                            `discovered` or `desired` record set.
+                            Possible values:
+                            NONE
+                            ADD
+                            REMOVE
+                          output: true
+                        - name: relevantState
+                          type: Array
+                          description: |-
+                            An enum that indicates which state(s) this DNS record applies to. Populated
+                            for all records with an `ADD` or `REMOVE` required action.
+                          output: true
+                          item_type:
+                            type: String
+            - name: desired
+              type: Array
+              description: |-
+                The set of DNS records App Hosting needs in order to be able to serve
+                secure content on the domain.
+              output: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: domainName
+                    type: String
+                    description: The domain name the record set pertains to.
+                    output: true
+                  - name: checkError
+                    type: NestedObject
+                    output: true
+                    description: |-
+                      The `Status` type defines a logical error model that is suitable for
+                      different programming environments, including REST APIs and RPC APIs. It is
+                      used by [gRPC](https://github.com/grpc). Each `Status` message contains
+                      three pieces of data: error code, error message, and error details.
+
+                      You can find out more about this error model and how to work with it in the
+                      [API Design Guide](https://cloud.google.com/apis/design/errors).
+                    properties:
+                      - name: code
+                        type: Integer
+                        output: true
+                        description: The status code, which should be an enum value of google.rpc.Code.
+                      - name: message
+                        type: String
+                        output: true
+                        description: |-
+                          A developer-facing error message, which should be in English. Any
+                          user-facing error message should be localized and sent in the
+                          google.rpc.Status.details field, or localized by the client.
+                      - name: details
+                        type: String
+                        output: true
+                        description: |
+                          A list of messages that carry the error details.
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                        validation:
+                          function: 'validation.StringIsJSON'
+                  - name: records
+                    type: Array
+                    description: Records on the domain.
+                    output: true
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: requiredAction
+                          type: String
+                          description: |-
+                            An enum that indicates the a required action for this record. Populated
+                            when the record is part of a required change in a  `DnsUpdates`
+                            `discovered` or `desired` record set.
+                            Possible values:
+                            NONE
+                            ADD
+                            REMOVE
+                          output: true
+                        - name: relevantState
+                          type: Array
+                          description: |-
+                            An enum that indicates which state(s) this DNS record applies to. Populated
+                            for all records with an `ADD` or `REMOVE` required action.
+                          output: true
+                          item_type:
+                            type: String
+                        - name: domainName
+                          type: String
+                          description: The domain the record pertains to, e.g. `foo.bar.com.`.
+                          output: true
+                        - name: type
+                          type: String
+                          description: |-
+                            The record's type, which determines what data the record contains.
+                            Possible values:
+                            A
+                            CNAME
+                            TXT
+                            AAAA
+                            CAA
+                          output: true
+                        - name: rdata
+                          type: String
+                          description: |-
+                            The data of the record. The meaning of the value depends on record type:
+                            - A and AAAA: IP addresses for the domain.
+                            - CNAME: Another domain to check for records.
+                            - TXT: Arbitrary text strings associated with the domain. App Hosting
+                            uses TXT records to determine which Firebase projects have
+                            permission to act on the domain's behalf.
+                            - CAA: The record's flags, tag, and value, e.g. `0 issue "pki.goog"`.
+                          output: true
+            - name: checkTime
+              type: String
+              description: The last time App Hosting checked your custom domain's DNS records.
+              output: true
+      - name: issues
+        type: Array
+        description: |-
+          A list of issues with domain configuration. Allows users to self-correct
+          problems with DNS records.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: code
+              type: Integer
+              output: true
+              description: The status code, which should be an enum value of google.rpc.Code.
+            - name: message
+              type: String
+              output: true
+              description: |-
+                A developer-facing error message, which should be in English. Any
+                user-facing error message should be localized and sent in the
+                google.rpc.Status.details field, or localized by the client.
+            - name: details
+              type: String
+              output: true
+              description: |
+                A list of messages that carry the error details.
+              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+              validation:
+                function: 'validation.StringIsJSON'
+      - name: hostState
+        type: String
+        output: true
+        description: |-
+          Possible values:
+          HOST_UNHOSTED
+          HOST_UNREACHABLE
+          HOST_NON_FAH
+          HOST_CONFLICT
+          HOST_WRONG_SHARD
+          HOST_ACTIVE
+      - name: ownershipState
+        type: String
+        output: true
+        description: |-
+          Possible values:
+          OWNERSHIP_MISSING
+          OWNERSHIP_UNREACHABLE
+          OWNERSHIP_MISMATCH
+          OWNERSHIP_CONFLICT
+          OWNERSHIP_PENDING
+          OWNERSHIP_ACTIVE
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name of the domain, e.g.
+      `projects/{project}/locations/{locationId}/backends/{backendId}/domains/{domainId}`
+    output: true
+  - name: uid
+    type: String
+    description: System-assigned, unique identifier.
+    output: true
+  - name: etag
+    type: String
+    description: |-
+      Server-computed checksum based on other values; may be sent
+      on update or delete to ensure operation is done on expected resource.
+    output: true
+  - name: serve
+    type: NestedObject
+    description: |-
+      The serving behavior of the domain. If specified, the domain will
+      serve content other than its Backend's live content.
+    properties:
+      - name: redirect
+        type: NestedObject
+        description: Specifies redirect behavior for a domain.
+        properties:
+          - name: uri
+            type: String
+            description: |-
+              The URI of the redirect's intended destination. This URI will be
+              prepended to the original request path. URI without a scheme are
+              assumed to be HTTPS.
+            required: true
+          - name: status
+            type: String
+            description: |-
+              The status code to use in a redirect response. Must be a valid HTTP 3XX
+              status code. Defaults to 302 if not present.
+  - name: updateTime
+    type: String
+    description: Time at which the domain was last updated.
+    output: true
+  - name: purgeTime
+    type: String
+    description: |-
+      Time at which a soft-deleted domain will be purged, rendering in
+      permanently deleted.
+    output: true
+  - name: deleteTime
+    type: String
+    description: Time at which the domain was deleted.
+    output: true
+  - name: createTime
+    type: String
+    description: Time at which the domain was created.
+    output: true
