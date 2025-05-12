@@ -55,7 +55,7 @@ func TestAccDataSourceGoogleBeyondcorpSecurityGateway_full(t *testing.T) {
 func testAccDataSourceGoogleBeyondcorpSecurityGateway_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_beyondcorp_security_gateway" "foo" {
-  security_gateway_id = "default-%{random_suffix}"
+  security_gateway_id = "default-foo-sg-basic-%{random_suffix}"
   display_name = "My Security Gateway resource"
   hubs { region = "us-central1" }
 }
@@ -69,7 +69,7 @@ data "google_beyondcorp_security_gateway" "foo" {
 func testAccDataSourceGoogleBeyondcorpSecurityGateway_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_beyondcorp_security_gateway" "foo" {
-  security_gateway_id = "default-%{random_suffix}"
+  security_gateway_id = "default-foo-sg-full-%{random_suffix}"
   display_name = "My Security Gateway resource"
   hubs { region = "us-central1" }
 }
