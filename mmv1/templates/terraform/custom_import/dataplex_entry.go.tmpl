@@ -9,14 +9,13 @@
 
         // Double curly braces are the templating language's special marker.
         // We need them literally here, so apply a simple trick to force it.
-        template := "projects/{project}/locations/{location}/entryGroups/{entry_group_id}/entries/{entry_id}"
-        rightReplacedString := strings.ReplaceAll(template, "}", "}" + "}")
-        leftReplacedString := strings.ReplaceAll(rightReplacedString, "{", "{" + "{")
+        template := "projects/{" + "{project}" + "}/locations/{" + "{location}" + 
+	            "}/entryGroups/{" + "{entry_group_id}" + "}/entries/{" + "{entry_id}"
+
 	// Replace import id for the resource id
-	id, err := tpgresource.ReplaceVars(d, config, leftReplacedString)
+	id, err := tpgresource.ReplaceVars(d, config, template)
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)
 	}
 	d.SetId(id)
-
 	return []*schema.ResourceData{d}, nil
