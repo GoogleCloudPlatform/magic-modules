@@ -36,6 +36,7 @@ iam_policy:
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}'
+    - '{{glossary_id}}'
 custom_code:
 examples:
   - name: 'dataplex_glossary_basic'
