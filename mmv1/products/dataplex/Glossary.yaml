@@ -33,11 +33,9 @@ async:
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'glossary_id'
-  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}'
     - '{{glossary_id}}'
-custom_code:
 examples:
   - name: 'dataplex_glossary_basic'
     primary_resource_id: 'glossary_test_id'
