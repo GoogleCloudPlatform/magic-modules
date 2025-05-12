@@ -116,9 +116,12 @@ func TransformAspects(obj map[string]interface{}) {
 		aspectMap := item.(map[string]interface{})
 
 		key := aspectMap["aspectKey"].(string)
-		value := aspectMap["aspectValue"].(map[string]interface{})
-
-		newMap[key] = value
+		value, ok := aspectMap["aspectValue"].(map[string]interface{})
+		if ok {
+			newMap[key] = value
+		} else {
+			newMap[key] = map[string]interface{}{"data": map[string]interface{}{}}
+		}
 	}
 	obj["aspects"] = newMap
 }

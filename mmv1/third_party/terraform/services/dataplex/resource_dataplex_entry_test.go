@@ -355,14 +355,13 @@ func TestTransformAspects(t *testing.T) {
 		{"aspects is nil", map[string]interface{}{"otherKey": "value"}, nil, true, false},
 		{"aspects is empty slice", map[string]interface{}{"aspects": []interface{}{}}, map[string]interface{}{}, false, false},
 		{"aspects with one item", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value1"}}}}, map[string]interface{}{"key1": map[string]interface{}{"data": "value1"}}, false, false},
+		{"aspects with one item that has no aspectValue", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1"}}}, map[string]interface{}{"key1": map[string]interface{}{"data": map[string]interface{}{}}}, false, false},
 		{"aspects with multiple items", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value1"}}, map[string]interface{}{"aspectKey": "key2", "aspectValue": map[string]interface{}{"data": "value2"}}}}, map[string]interface{}{"key1": map[string]interface{}{"data": "value1"}, "key2": map[string]interface{}{"data": "value2"}}, false, false},
 		{"aspects with duplicate aspectKey", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value_first"}}, map[string]interface{}{"aspectKey": "key2", "aspectValue": map[string]interface{}{"data": "value2"}}, map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value_last"}}}}, map[string]interface{}{"key1": map[string]interface{}{"data": "value_last"}, "key2": map[string]interface{}{"data": "value2"}}, false, false},
 		{"aspects is wrong type (not slice)", map[string]interface{}{"aspects": "not a slice"}, nil, false, true},
 		{"item in slice is not a map", map[string]interface{}{"aspects": []interface{}{"not a map"}}, nil, false, true},
 		{"item map missing aspectKey", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"wrongKey": "k1", "aspectValue": map[string]interface{}{}}}}, nil, false, true},
 		{"aspectKey is not a string", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": 123, "aspectValue": map[string]interface{}{}}}}, nil, false, true},
-		{"item map missing aspectValue", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1"}}}, nil, false, true},
-		{"aspectValue is not a map", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": "not a map"}}}, nil, false, true},
 	}
 
 	for _, tc := range testCases {

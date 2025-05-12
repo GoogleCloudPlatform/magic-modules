@@ -36,6 +36,7 @@ custom_code:
   constants: templates/terraform/constants/dataplex_entry.go.tmpl
   decoder: templates/terraform/decoders/dataplex_entry.go.tmpl
   encoder: templates/terraform/encoders/dataplex_entry.go.tmpl
+  custom_import: templates/terraform/custom_import/dataplex_entry.go.tmpl
   pre_read: templates/terraform/pre_read/dataplex_entry.go.tmpl
   pre_update: templates/terraform/pre_update/dataplex_entry.go.tmpl
 
@@ -61,7 +62,7 @@ examples:
     ignore_read_extra:
       - 'aspects'
     vars:
-      entry_id: 'entry-full'
+      entry_id: 'entry-full/has/slashes'
       entry_group_name: 'entry-group-full'
       aspect_type_name: "aspect-type-full"
       entry_type_name: "entry-type-full"
@@ -180,11 +181,13 @@ properties:
   - name: 'parentEntry'
     type: String
     immutable: true
+    default_from_api: true
     description: |
       The resource name of the parent entry, in the format projects/{project_number}/locations/{locationId}/entryGroups/{entryGroupId}/entries/{entryId}.
 
   - name: "fullyQualifiedName"
     type: String
+    default_from_api: true
     description: |
       A name for the entry that can be referenced by an external system. For more information, see https://cloud.google.com/dataplex/docs/fully-qualified-names.
       The maximum size of the field is 4000 characters.
