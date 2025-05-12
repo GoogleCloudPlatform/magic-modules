@@ -50,7 +50,7 @@ func TestAccBeyondcorpSecurityGatewayApplication_beyondcorpSecurityGatewayApplic
 func testAccBeyondcorpSecurityGatewayApplication_beyondcorpSecurityGatewayApplicationBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_beyondcorp_security_gateway" "default" {
-  security_gateway_id = "default%{random_suffix}"
+  security_gateway_id = "default-sg%{random_suffix}"
   display_name = "My Security Gateway resource"
   hubs { region = "us-central1" }
 }
@@ -68,7 +68,7 @@ resource "google_beyondcorp_security_gateway_application" "example" {
 func testAccBeyondcorpSecurityGatewayApplication_beyondcorpSecurityGatewayApplicationBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_beyondcorp_security_gateway" "default" {
-  security_gateway_id = "default%{random_suffix}"
+  security_gateway_id = "default-sg%{random_suffix}"
   display_name = "My Security Gateway resource"
   hubs { region = "us-central1" }
 }
