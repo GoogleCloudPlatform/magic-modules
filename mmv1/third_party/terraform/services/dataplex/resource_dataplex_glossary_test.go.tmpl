@@ -26,7 +26,7 @@ func TestAccDataplexGlossary_update(t *testing.T) {
 				Config: testAccDataplexGlossary_update(context),
 			},
 			{
-				ResourceName:            "google_dataplex_glossary.glossary_test_id",
+				ResourceName:            "google_dataplex_glossary.glossary_test_id_full",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"glossary_id", "labels", "location", "terraform_labels"},
@@ -35,7 +35,7 @@ func TestAccDataplexGlossary_update(t *testing.T) {
 				Config: testAccDataplexGlossary_full(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_dataplex_glossary.glossary_test_id", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_dataplex_glossary.glossary_test_id_full", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
@@ -54,9 +54,6 @@ func testAccDataplexGlossary_update(context map[string]interface{}) string {
 	resource "google_dataplex_glossary" "glossary_test_id_full" {
   		glossary_id = "tf-test-glossary-full%{random_suffix}"
   		location     = "us-central1"
-		labels = { "tag": "test-tf" }
-		display_name = "terraform glossary"
-		description = "glossary updated by Terraform"
 	}
 `, context)
 }
