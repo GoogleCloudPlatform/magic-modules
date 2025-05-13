@@ -234,8 +234,6 @@ func validateRegexForContents(r *regexp.Regexp, contents string, configPath stri
 	}
 }
 
-
-
 func (e *Examples) ValidateExternalProviders() {
 	// Official providers supported by HashiCorp
 	// https://registry.terraform.io/search/providers?namespace=hashicorp&tier=official
