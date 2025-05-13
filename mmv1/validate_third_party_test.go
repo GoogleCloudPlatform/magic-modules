@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"strings"
 	"testing"
 )
 
@@ -43,7 +42,7 @@ func TestTemplatesStillNeedToBeTemplates(t *testing.T) {
 		}
 
 		// Only check .go.tmpl files
-		if filepath.Ext(path) != ".tmpl" || !strings.HasSuffix(path, ".go.tmpl") {
+		if filepath.Ext(path) != ".tmpl" {
 			return nil
 		}
 
@@ -73,7 +72,7 @@ func TestTemplatesStillNeedToBeTemplates(t *testing.T) {
 
 	// Output results at the end
 	if len(unnecessaryTemplates) > 0 {
-		t.Errorf("\nThe following %d .go.tmpl files in third_party directory don't contain any template syntax "+
+		t.Errorf("\nThe following %d .tmpl files in third_party directory don't contain any template syntax "+
 			"and no longer need to be templates:\n", len(unnecessaryTemplates))
 
 		for _, file := range unnecessaryTemplates {
@@ -82,6 +81,6 @@ func TestTemplatesStillNeedToBeTemplates(t *testing.T) {
 
 		t.Errorf("\nConsider removing the .tmpl extension from these files.")
 	} else {
-		t.Logf("All .go.tmpl files in third_party directory properly contain template syntax.")
+		t.Logf("All .tmpl files in third_party directory properly contain template syntax.")
 	}
 }
