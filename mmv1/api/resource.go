@@ -59,7 +59,9 @@ type Resource struct {
 	// Common Configuration
 	// ====================
 	//
-	// [Optional] The minimum API version this resource is in. Defaults to ga.
+	// [Optional] The highest API version this resource is in. Defaults to ga.
+	LaunchStage string `yaml:"launch_stage,omitempty"`
+	// Deprecated: MinVersion is deprecated. Use LaunchStage instead, mapping to 'launch_stage'.
 	MinVersion string `yaml:"min_version,omitempty"`
 
 	// [Optional] If set to true, don't generate the resource.
@@ -362,6 +364,15 @@ func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
 		return err
 	}
 
+	if r.MinVersion != "" {
+		if r.LaunchStage == "" {
+			r.LaunchStage = r.MinVersion
+			log.Printf("WARNING: The 'min_version' is deprecated for resources. Please update your YAML for resource %s to use 'launch_stage' instead.", r.Name)
+		} else {
+			log.Printf("WARNING: Both 'min_version' and 'launch_stage' found for resource %s. Using 'launch_stage'. Please update your YAML.", r.Name)
+		}
+	}
+
 	return nil
 }
 
@@ -403,7 +414,7 @@ func (r *Resource) SetDefault(product *Product) {
 		vf.SetDefault(r)
 	}
 	if r.IamPolicy != nil && r.IamPolicy.MinVersion == "" {
-		r.IamPolicy.MinVersion = r.MinVersion
+		r.IamPolicy.MinVersion = r.LaunchStage
 	}
 	if r.Timeouts == nil {
 		r.Timeouts = NewTimeouts()
@@ -855,8 +866,8 @@ func (r Resource) StateMigrationFile() string {
 // Version-related methods
 // ====================
 func (r Resource) MinVersionObj() *product.Version {
-	if r.MinVersion != "" {
-		return r.ProductMetadata.versionObj(r.MinVersion)
+	if r.LaunchStage != "" {
+		return r.ProductMetadata.versionObj(r.LaunchStage)
 	} else {
 		return r.ProductMetadata.lowestVersion()
 	}
@@ -1728,10 +1739,10 @@ func (r Resource) VersionedProvider(exampleVersion string) bool {
 	var vp string
 	if exampleVersion != "" {
 		vp = exampleVersion
-	} else if r.MinVersion == "" {
+	} else if r.LaunchStage == "" {
 		vp = r.ProductMetadata.lowestVersion().Name
 	} else {
-		vp = r.MinVersion
+		vp = r.LaunchStage
 	}
 	return vp != "" && vp != "ga"
 }

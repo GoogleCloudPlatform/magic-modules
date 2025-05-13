@@ -16,7 +16,7 @@ name: 'OrganizationSecurityPolicyAssociation'
 api_resource_type_kind: SecurityPolicy
 description: |
   An association for the OrganizationSecurityPolicy.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Associating a policy with the organization or folder': 'https://cloud.google.com/vpc/docs/using-firewall-policies#associate'

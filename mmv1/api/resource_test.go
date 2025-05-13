@@ -36,19 +36,19 @@ func TestResourceMinVersionObj(t *testing.T) {
 		expected    string
 	}{
 		{
-			description: "resource minVersion is empty",
+			description: "resource LaunchStage is empty",
 			obj: Resource{
 				Name:            "test",
-				MinVersion:      "",
+				LaunchStage:      "",
 				ProductMetadata: &p,
 			},
 			expected: "ga",
 		},
 		{
-			description: "resource minVersion is not empty",
+			description: "resource LaunchStage is not empty",
 			obj: Resource{
 				Name:            "test",
-				MinVersion:      "beta",
+				LaunchStage:      "beta",
 				ProductMetadata: &p,
 			},
 			expected: "beta",
@@ -97,10 +97,10 @@ func TestResourceNotInVersion(t *testing.T) {
 		expected    bool
 	}{
 		{
-			description: "ga is in version if MinVersion is empty",
+			description: "ga is in version if LaunchStage is empty",
 			obj: Resource{
 				Name:            "test",
-				MinVersion:      "",
+				LaunchStage:      "",
 				ProductMetadata: &p,
 			},
 			input: &product.Version{
@@ -109,10 +109,10 @@ func TestResourceNotInVersion(t *testing.T) {
 			expected: false,
 		},
 		{
-			description: "ga is not in version if MinVersion is beta",
+			description: "ga is not in version if LaunchStage is beta",
 			obj: Resource{
 				Name:            "test",
-				MinVersion:      "beta",
+				LaunchStage:      "beta",
 				ProductMetadata: &p,
 			},
 			input: &product.Version{

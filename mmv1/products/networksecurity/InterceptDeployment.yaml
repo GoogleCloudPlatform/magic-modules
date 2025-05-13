@@ -18,7 +18,7 @@ description: |-
   GENEVE-encapsulated traffic, e.g. a zonal instance group fronted by an
   internal passthrough load balancer. Deployments are always part of a
   global deployment group which represents a global intercept service.
-min_version: 'beta'
+launch_stage: 'beta'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/interceptDeployments/{{intercept_deployment_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/interceptDeployments'

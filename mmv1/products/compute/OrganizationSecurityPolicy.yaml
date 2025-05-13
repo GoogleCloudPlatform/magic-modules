@@ -16,7 +16,7 @@ name: 'OrganizationSecurityPolicy'
 api_resource_type_kind: SecurityPolicy
 description: |
   Organization security policies are used to control incoming/outgoing traffic.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Creating a firewall policy': 'https://cloud.google.com/vpc/docs/using-firewall-policies#create-policy'

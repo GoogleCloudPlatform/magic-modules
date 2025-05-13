@@ -16,7 +16,7 @@ name: 'RepositoryReleaseConfig'
 api_resource_type_kind: ReleaseConfig
 description: |-
   A resource represents a Dataform release configuration
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dataform/docs/release-configurations'

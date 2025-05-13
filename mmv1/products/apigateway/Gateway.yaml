@@ -15,7 +15,7 @@
 name: 'Gateway'
 description: |
   A consumable API that can be used by multiple Gateways.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/api-gateway/docs/quickstart'

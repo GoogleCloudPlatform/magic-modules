@@ -1,6 +1,6 @@
 {{ "" }}
 * `{{ underscore $.Name }}` -
-  {{- if and (eq $.MinVersion "beta") (not (eq $.ResourceMetadata.MinVersion "beta")) }}
+  {{- if and (eq $.MinVersion "beta") (not (eq $.ResourceMetadata.LaunchStage "beta")) }}
     {{- if $.Required }}
   (Required, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html){{ if $.DeprecationMessage }}, Deprecated{{ end }})
     {{- else if not $.Output }}

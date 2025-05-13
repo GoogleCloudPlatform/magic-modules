@@ -14,7 +14,7 @@
 ---
 name: 'ConnectCluster'
 description: A Managed Service for Kafka Connect cluster.
-min_version: 'beta'
+launch_stage: 'beta'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/connectClusters'

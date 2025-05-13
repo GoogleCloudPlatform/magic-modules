@@ -22,7 +22,7 @@ description: |
   An OS Config resource representing a guest configuration policy. These policies represent
   the desired state for VM instance guest environments including packages to install or remove,
   package repository configurations, and software to install.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/compute/docs/os-config-management'

@@ -15,7 +15,7 @@
 name: 'Release'
 description: |
   A Release is a particular collection of configurations that is set to be public at a particular time.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://firebase.google.com/docs/hosting'

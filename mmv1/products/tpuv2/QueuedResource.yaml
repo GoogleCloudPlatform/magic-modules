@@ -15,7 +15,7 @@
 name: 'QueuedResource'
 description: |
   A Cloud TPU Queued Resource.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/tpu/docs/'

@@ -16,7 +16,7 @@ name: 'RepositoryWorkflowConfig'
 api_resource_type_kind: WorkflowConfig
 description: |-
   A resource represents a Dataform workflow configuration
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dataform/docs/workflow-configurations'

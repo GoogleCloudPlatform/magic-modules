@@ -15,7 +15,7 @@
 name: 'Instance'
 api_resource_type_kind: DatabaseInstance
 description: A Firebase Realtime Database instance.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://firebase.google.com/products/realtime-database'

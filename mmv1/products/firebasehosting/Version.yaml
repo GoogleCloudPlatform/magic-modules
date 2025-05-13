@@ -15,7 +15,7 @@
 name: 'Version'
 description: |
   A `Version` is a configuration which determine how a site is displayed. Static files are not supported at the moment.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://firebase.google.com/docs/hosting'

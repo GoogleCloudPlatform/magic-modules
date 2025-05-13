@@ -16,7 +16,7 @@ name: 'NetworkEdgeSecurityService'
 kind: 'compute#networkEdgeSecurityService'
 description: |
   Google Cloud Armor network edge security service resource.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/armor/docs/advanced-network-ddos'

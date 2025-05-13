@@ -17,7 +17,7 @@ description: |-
   A deployment group aggregates many zonal intercept backends (deployments)
   into a single global intercept service. Consumers can connect this service
   using an endpoint group.
-min_version: 'beta'
+launch_stage: 'beta'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/interceptDeploymentGroups/{{intercept_deployment_group_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/interceptDeploymentGroups'

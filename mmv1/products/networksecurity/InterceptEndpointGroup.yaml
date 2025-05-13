@@ -19,7 +19,7 @@ description: |-
   - An association between their network and the endpoint group.
   - A security profile that points to the endpoint group.
   - A firewall rule that references the security profile (group).
-min_version: 'beta'
+launch_stage: 'beta'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/interceptEndpointGroups/{{intercept_endpoint_group_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/interceptEndpointGroups'

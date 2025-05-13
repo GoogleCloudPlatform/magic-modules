@@ -16,7 +16,7 @@ name: 'Config'
 description: |
   A RuntimeConfig resource is the primary resource in the Cloud RuntimeConfig service.
   A RuntimeConfig resource consists of metadata and a hierarchy of variables.
-min_version: 'beta'
+launch_stage: 'beta'
 exclude_resource: true
 docs:
 base_url: 'projects/{{project}}/configs'

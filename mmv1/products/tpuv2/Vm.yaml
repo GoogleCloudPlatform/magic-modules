@@ -16,7 +16,7 @@ name: 'Vm'
 api_resource_type_kind: Node
 description: |
   A Cloud TPU VM instance.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/tpu/docs/'

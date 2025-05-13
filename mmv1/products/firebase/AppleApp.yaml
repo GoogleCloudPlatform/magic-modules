@@ -16,7 +16,7 @@ name: 'AppleApp'
 api_resource_type_kind: IosApp
 description: |
   A Google Cloud Firebase Apple application instance
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://firebase.google.com/docs/ios/setup'

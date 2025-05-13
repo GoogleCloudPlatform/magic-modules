@@ -14,7 +14,7 @@
 ---
 name: 'Site'
 description: 'A `Site` represents a Firebase Hosting site.'
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://firebase.google.com/docs/hosting'

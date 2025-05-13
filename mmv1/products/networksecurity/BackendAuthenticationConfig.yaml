@@ -24,7 +24,7 @@ create_url: 'projects/{{project}}/locations/{{location}}/backendAuthenticationCo
 update_verb: 'PATCH'
 update_mask: true
 autogen_async: true
-min_version: 'beta'
+launch_stage: 'beta'
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'

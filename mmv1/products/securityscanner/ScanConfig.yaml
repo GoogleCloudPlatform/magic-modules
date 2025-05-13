@@ -15,7 +15,7 @@
 name: 'ScanConfig'
 description: |
   A ScanConfig resource contains the configurations to launch a scan.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Using Cloud Security Scanner': 'https://cloud.google.com/security-scanner/docs/scanning'

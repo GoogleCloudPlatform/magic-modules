@@ -15,7 +15,7 @@
 name: 'WebApp'
 description: |
   A Google Cloud Firebase web application instance
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://firebase.google.com/'

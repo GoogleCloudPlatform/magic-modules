@@ -15,7 +15,7 @@
 name: 'ApiConfig'
 description: |
   An API Configuration is an association of an API Controller Config and a Gateway Config
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/api-gateway/docs/creating-api-config'

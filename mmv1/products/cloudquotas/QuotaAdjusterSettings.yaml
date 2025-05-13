@@ -15,7 +15,7 @@
 name: 'QuotaAdjusterSettings'
 description: |
   QuotaAdjusterSettings resource represents your quota adjuster settings for a particular project. When enabled, the quota adjuster monitors your usage for the specified resources and issues quota adjustment requests when resource usage approaches its quota value.
-min_version: beta
+launch_stage: beta
 references:
   guides:
     'Cloud Quotas Overview': 'https://cloud.google.com/docs/quotas/overview'

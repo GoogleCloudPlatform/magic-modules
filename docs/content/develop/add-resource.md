@@ -79,7 +79,7 @@ For more information about types of resources and the generation process overall
      api: 'API_REFERENCE_URL'
    # Marks the resource as beta-only. Ensure a beta version block is present in
    # provider.yaml.
-   # min_version: beta
+   # launch_stage: beta
 
    # URL for the resource's standard List method. https://google.aip.dev/132
    # Terraform field names enclosed in double curly braces are replaced with

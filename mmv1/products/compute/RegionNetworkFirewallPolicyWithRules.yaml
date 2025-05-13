@@ -15,7 +15,7 @@
 name: 'RegionNetworkFirewallPolicyWithRules'
 api_resource_type_kind: FirewallPolicy
 description: "The Compute NetworkFirewallPolicy with rules resource"
-min_version: 'beta'
+launch_stage: 'beta'
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/firewallPolicies'
 self_link: 'projects/{{project}}/regions/{{region}}/firewallPolicies/{{name}}'

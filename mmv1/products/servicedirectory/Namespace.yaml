@@ -16,7 +16,7 @@ name: 'Namespace'
 description: |
   A container for `services`. Namespaces allow administrators to group services
   together and define permissions for a collection of services.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Configuring a namespace': 'https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_a_namespace'

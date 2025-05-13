@@ -14,7 +14,7 @@
 ---
 name: 'WorkstationCluster'
 description: "A grouping of workstation configurations and the associated workstations in that region."
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Workstations': 'https://cloud.google.com/workstations/docs/'

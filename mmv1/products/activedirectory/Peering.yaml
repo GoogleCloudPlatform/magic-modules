@@ -15,7 +15,7 @@
 name: 'Peering'
 kind: 'activedirectory#peering'
 description: Creates a Peering for Managed AD instance.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Active Directory Domain Peering': 'https://cloud.google.com/managed-microsoft-ad/docs/domain-peering'

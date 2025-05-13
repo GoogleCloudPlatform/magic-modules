@@ -15,7 +15,7 @@
 name: 'Repository'
 description: |-
   A resource represents a Dataform Git repository
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dataform/docs/'

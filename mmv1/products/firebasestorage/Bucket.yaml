@@ -16,7 +16,7 @@ name: 'Bucket'
 description: |
   An association between a Firebase project and a Google Cloud Storage bucket.
   This association enables integration of Cloud Storage buckets with Firebase such as Firebase SDKS, Authentication, and Security Rules.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://firebase.google.com/docs/storage/'

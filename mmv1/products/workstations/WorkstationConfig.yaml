@@ -17,7 +17,7 @@ description:
   'A set of configuration options describing how a workstation will be run.
   Workstation configurations are intended to be shared across multiple
   workstations.'
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Workstations': 'https://cloud.google.com/workstations/docs/'

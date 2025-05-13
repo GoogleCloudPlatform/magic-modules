@@ -19,7 +19,7 @@ description: |
   Since a FirebaseProject is actually also a GCP Project, a FirebaseProject uses underlying GCP
   identifiers (most importantly, the projectId) as its own for easy interop with GCP APIs.
   Once Firebase has been added to a Google Project it cannot be removed.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://firebase.google.com/docs/projects/terraform/get-started'

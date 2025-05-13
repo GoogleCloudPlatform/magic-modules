@@ -15,7 +15,7 @@
 name: 'Workstation'
 description:
   'A single instance of a developer workstation with its own persistent storage.'
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Workstations': 'https://cloud.google.com/workstations/docs/'

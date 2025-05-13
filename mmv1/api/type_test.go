@@ -40,7 +40,7 @@ func TestTypeMinVersionObj(t *testing.T) {
 				MinVersion: "",
 				ResourceMetadata: &Resource{
 					Name:            "test",
-					MinVersion:      "",
+					LaunchStage:      "",
 					ProductMetadata: &p,
 				},
 			},
@@ -53,7 +53,7 @@ func TestTypeMinVersionObj(t *testing.T) {
 				MinVersion: "",
 				ResourceMetadata: &Resource{
 					Name:            "test",
-					MinVersion:      "beta",
+					LaunchStage:      "beta",
 					ProductMetadata: &p,
 				},
 			},
@@ -66,7 +66,7 @@ func TestTypeMinVersionObj(t *testing.T) {
 				MinVersion: "beta",
 				ResourceMetadata: &Resource{
 					Name:            "test",
-					MinVersion:      "",
+					LaunchStage:      "",
 					ProductMetadata: &p,
 				},
 			},
@@ -124,7 +124,7 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 				MinVersion: "",
 				ResourceMetadata: &Resource{
 					Name:            "test",
-					MinVersion:      "",
+					LaunchStage:      "",
 					ProductMetadata: &p,
 				},
 			},
@@ -142,7 +142,7 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 				ExactVersion: "beta",
 				ResourceMetadata: &Resource{
 					Name:            "test",
-					MinVersion:      "beta",
+					LaunchStage:      "beta",
 					ProductMetadata: &p,
 				},
 			},
@@ -160,7 +160,7 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 				ExactVersion: "",
 				ResourceMetadata: &Resource{
 					Name:            "test",
-					MinVersion:      "",
+					LaunchStage:      "",
 					ProductMetadata: &p,
 				},
 			},

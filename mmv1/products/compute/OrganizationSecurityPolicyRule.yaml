@@ -16,7 +16,7 @@ name: 'OrganizationSecurityPolicyRule'
 api_resource_type_kind: SecurityPolicy
 description: |
   A rule for the OrganizationSecurityPolicy.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Creating firewall rules': 'https://cloud.google.com/vpc/docs/using-firewall-policies#create-rules'

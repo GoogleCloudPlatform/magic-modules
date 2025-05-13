@@ -14,7 +14,7 @@
 ---
 name: 'RegionResizeRequest'
 api_resource_type_kind: InstanceGroupManagerResizeRequest
-min_version: beta
+launch_stage: beta
 description: |
   Represents a Regional Managed Instance Group Resize Request
 

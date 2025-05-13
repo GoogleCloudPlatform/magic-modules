@@ -48,7 +48,7 @@ references:
   api: 'https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups'
 ```
 
-### `min_version: beta`
+### `launch_stage: beta`
 Marks the field (and any subfields) as beta-only. Ensure a beta version block
 is present in provider.yaml.
 

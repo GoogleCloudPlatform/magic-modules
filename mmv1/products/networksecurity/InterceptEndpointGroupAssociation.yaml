@@ -21,7 +21,7 @@ description: |-
   network to the endpoint group, but does not enable intercept by itself.
   To enable intercept, the user must also create a network firewall policy
   containing intercept rules and associate it with the network.
-min_version: 'beta'
+launch_stage: 'beta'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/interceptEndpointGroupAssociations/{{intercept_endpoint_group_association_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/interceptEndpointGroupAssociations'

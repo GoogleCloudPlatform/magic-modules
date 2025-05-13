@@ -15,7 +15,7 @@
 name: 'NetworkFirewallPolicyPacketMirroringRule'
 api_resource_type_kind: FirewallPolicy
 kind: 'compute#packetMirroringRule'
-min_version: 'beta'
+launch_stage: 'beta'
 description: |
   Represents a packet mirroring rule that describes one or more match conditions along with the action to be taken when traffic matches this condition (mirror or do_not_mirror).
 references:

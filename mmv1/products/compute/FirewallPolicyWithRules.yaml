@@ -17,7 +17,7 @@ api_resource_type_kind: FirewallPolicy
 description: |
   The Compute FirewallPolicy with rules resource. It declaratively manges all
   rules in the firewall policy.
-min_version: 'beta'
+launch_stage: 'beta'
 docs:
 id_format: 'locations/global/firewallPolicies/{{policy_id}}'
 base_url: 'locations/global/firewallPolicies?parentId={{parent}}'

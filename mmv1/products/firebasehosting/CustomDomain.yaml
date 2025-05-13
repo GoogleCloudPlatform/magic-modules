@@ -17,7 +17,7 @@ description: |
   Manages Custom Domains for Firebase Hosting. Custom Domains link your
   domain names with Firebase Hosting sites, allowing Hosting to serve content
   on those domain names.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://firebase.google.com/docs/hosting'

@@ -13,7 +13,7 @@
 
 ---
 name: "VmwareAdminCluster"
-min_version: beta
+launch_stage: beta
 base_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters"
 create_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters?vmware_admin_cluster_id={{name}}"
 update_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"

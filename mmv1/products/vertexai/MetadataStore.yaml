@@ -15,7 +15,7 @@
 name: 'MetadataStore'
 description: |-
   Instance of a metadata store. Contains a set of metadata that can be queried.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'

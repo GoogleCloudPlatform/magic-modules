@@ -21,7 +21,7 @@ description: |
   ~> **Note:** KeyHandles cannot be deleted from Google Cloud Platform.
   Destroying a Terraform-managed KeyHandle will remove it from state but
   *will not delete the resource from the project.*
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Cloud KMS with Autokey': 'https://cloud.google.com/kms/docs/kms-with-autokey'

@@ -15,7 +15,7 @@
 name: 'Service'
 description: |
   An individual service. A service contains a name and optional metadata.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Configuring a service': 'https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_a_service'

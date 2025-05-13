@@ -15,7 +15,7 @@
 name: 'Endpoint'
 description: |
   An individual endpoint that provides a service.
-min_version: 'beta'
+launch_stage: 'beta'
 references:
   guides:
     'Configuring an endpoint': 'https://cloud.google.com/service-directory/docs/configuring-service-directory#configuring_an_endpoint'
