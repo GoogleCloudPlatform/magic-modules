@@ -3,8 +3,8 @@ resource "google_dataplex_glossary" "{{$.PrimaryResourceId}}" {
   location    = "us-central1"
 }
 
-resource "google_dataplex_category" "{{$.PrimaryResourceId}}" {
-  parent = "projects/${google_dataplex_glossary.term_test_id_full.project}/locations/us-central1/glossaries/${google_dataplex_glossary.category_test_id_full.glossary_id}"
+resource "google_dataplex_term" "{{$.PrimaryResourceId}}" {
+  parent = "projects/${google_dataplex_glossary.term_test_id_full.project}/locations/us-central1/glossaries/${google_dataplex_glossary.term_test_id_full.glossary_id}"
   glossary_id = google_dataplex_glossary.term_test_id_full.glossary_id
   location = "us-central1"
   term_id = "tf-test-term-full%{random_suffix}"
