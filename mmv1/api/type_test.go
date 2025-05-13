@@ -13,15 +13,15 @@ func TestTypeMinVersionObj(t *testing.T) {
 	p := Product{
 		Name: "test",
 		Versions: []*product.Version{
-			&product.Version{
+			{
 				Name:    "beta",
 				BaseUrl: "beta_url",
 			},
-			&product.Version{
+			{
 				Name:    "ga",
 				BaseUrl: "ga_url",
 			},
-			&product.Version{
+			{
 				Name:    "alpha",
 				BaseUrl: "alpha_url",
 			},
@@ -40,7 +40,7 @@ func TestTypeMinVersionObj(t *testing.T) {
 				MinVersion: "",
 				ResourceMetadata: &Resource{
 					Name:            "test",
-					LaunchStage:      "",
+					LaunchStage:     "",
 					ProductMetadata: &p,
 				},
 			},
@@ -53,7 +53,7 @@ func TestTypeMinVersionObj(t *testing.T) {
 				MinVersion: "",
 				ResourceMetadata: &Resource{
 					Name:            "test",
-					LaunchStage:      "beta",
+					LaunchStage:     "beta",
 					ProductMetadata: &p,
 				},
 			},
@@ -66,7 +66,7 @@ func TestTypeMinVersionObj(t *testing.T) {
 				MinVersion: "beta",
 				ResourceMetadata: &Resource{
 					Name:            "test",
-					LaunchStage:      "",
+					LaunchStage:     "",
 					ProductMetadata: &p,
 				},
 			},
@@ -95,15 +95,15 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 	p := Product{
 		Name: "test",
 		Versions: []*product.Version{
-			&product.Version{
+			{
 				Name:    "beta",
 				BaseUrl: "beta_url",
 			},
-			&product.Version{
+			{
 				Name:    "ga",
 				BaseUrl: "ga_url",
 			},
-			&product.Version{
+			{
 				Name:    "alpha",
 				BaseUrl: "alpha_url",
 			},
@@ -124,7 +124,7 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 				MinVersion: "",
 				ResourceMetadata: &Resource{
 					Name:            "test",
-					LaunchStage:      "",
+					LaunchStage:     "",
 					ProductMetadata: &p,
 				},
 			},
@@ -142,7 +142,7 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 				ExactVersion: "beta",
 				ResourceMetadata: &Resource{
 					Name:            "test",
-					LaunchStage:      "beta",
+					LaunchStage:     "beta",
 					ProductMetadata: &p,
 				},
 			},
@@ -160,7 +160,7 @@ func TestTypeExcludeIfNotInVersion(t *testing.T) {
 				ExactVersion: "",
 				ResourceMetadata: &Resource{
 					Name:            "test",
-					LaunchStage:      "",
+					LaunchStage:     "",
 					ProductMetadata: &p,
 				},
 			},

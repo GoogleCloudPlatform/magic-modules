@@ -15,15 +15,15 @@ func TestResourceMinVersionObj(t *testing.T) {
 	p := Product{
 		Name: "test",
 		Versions: []*product.Version{
-			&product.Version{
+			{
 				Name:    "beta",
 				BaseUrl: "beta_url",
 			},
-			&product.Version{
+			{
 				Name:    "ga",
 				BaseUrl: "ga_url",
 			},
-			&product.Version{
+			{
 				Name:    "alpha",
 				BaseUrl: "alpha_url",
 			},
@@ -39,7 +39,7 @@ func TestResourceMinVersionObj(t *testing.T) {
 			description: "resource LaunchStage is empty",
 			obj: Resource{
 				Name:            "test",
-				LaunchStage:      "",
+				LaunchStage:     "",
 				ProductMetadata: &p,
 			},
 			expected: "ga",
@@ -48,7 +48,7 @@ func TestResourceMinVersionObj(t *testing.T) {
 			description: "resource LaunchStage is not empty",
 			obj: Resource{
 				Name:            "test",
-				LaunchStage:      "beta",
+				LaunchStage:     "beta",
 				ProductMetadata: &p,
 			},
 			expected: "beta",
@@ -75,15 +75,15 @@ func TestResourceNotInVersion(t *testing.T) {
 	p := Product{
 		Name: "test",
 		Versions: []*product.Version{
-			&product.Version{
+			{
 				Name:    "beta",
 				BaseUrl: "beta_url",
 			},
-			&product.Version{
+			{
 				Name:    "ga",
 				BaseUrl: "ga_url",
 			},
-			&product.Version{
+			{
 				Name:    "alpha",
 				BaseUrl: "alpha_url",
 			},
@@ -100,7 +100,7 @@ func TestResourceNotInVersion(t *testing.T) {
 			description: "ga is in version if LaunchStage is empty",
 			obj: Resource{
 				Name:            "test",
-				LaunchStage:      "",
+				LaunchStage:     "",
 				ProductMetadata: &p,
 			},
 			input: &product.Version{
@@ -112,7 +112,7 @@ func TestResourceNotInVersion(t *testing.T) {
 			description: "ga is not in version if LaunchStage is beta",
 			obj: Resource{
 				Name:            "test",
-				LaunchStage:      "beta",
+				LaunchStage:     "beta",
 				ProductMetadata: &p,
 			},
 			input: &product.Version{
