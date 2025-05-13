@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -198,8 +199,42 @@ func (e *Examples) Validate(rName string) {
 	if e.Name == "" {
 		log.Fatalf("Missing `name` for one example in resource %s", rName)
 	}
+	e.ValidateVariables()
 	e.ValidateExternalProviders()
 }
+
+func (e *Examples) ValidateVariables() {
+	// Read file as raw text to pull variables
+	content, err := os.ReadFile(e.ConfigPath)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	fileContentString := string(content)
+	
+	envVarRegex := regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
+	validateRegexForContents(envVarRegex, fileContentString, e.ConfigPath, "test_env_vars", e.TestEnvVars)
+	varRegex := regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
+	validateRegexForContents(varRegex, fileContentString, e.ConfigPath, "vars", e.Vars)
+}
+
+func validateRegexForContents(r *regexp.Regexp, contents string, configPath string, objName string, vars map[string]string) {
+	matches := r.FindAllStringSubmatch(contents, -1)
+	for _, v := range matches {
+		found := false
+		for k, _ := range vars {
+			if k == v[1] {
+				found = true
+				break
+			}
+		}
+		if !found {
+			log.Fatalf("Failed to find %s environment variable defined in YAML file when validating the file %s. Please define this in %s", v[1], configPath, objName)
+		}
+	}
+}
+
+
 
 func (e *Examples) ValidateExternalProviders() {
 	// Official providers supported by HashiCorp
