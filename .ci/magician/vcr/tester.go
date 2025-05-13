@@ -66,6 +66,8 @@ const replayingTimeout = "240m"
 
 var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (TestAcc\w+))`)
 
+var subtestResultsExpression = regexp.MustCompile(`(?m:^    --- (PASS|FAIL|SKIP): (TestAcc\w+)/(\w+))`)
+
 var testPanicExpression = regexp.MustCompile(`^panic: .*`)
 
 var safeToLog = map[string]bool{
@@ -602,6 +604,21 @@ func collectResult(output string) Result {
 			resultSets[submatches[1]] = make(map[string]struct{})
 		}
 		resultSets[submatches[1]][submatches[2]] = struct{}{}
+	}
+	matches = subtestResultsExpression.FindAllStringSubmatch(output, -1)
+	for _, submatches := range matches {
+		if len(submatches) != 4 {
+			fmt.Printf("Warning: unexpected regex match found in test output: %v", submatches)
+			continue
+		}
+		// Remove the compound test from all result sets.
+		for _, kind := range []string{"PASS", "FAIL", "SKIP"} {
+			delete(resultSets[kind], submatches[2])
+		}
+		if _, ok := resultSets[submatches[1]]; !ok {
+			resultSets[submatches[1]] = make(map[string]struct{})
+		}
+		resultSets[submatches[1]][fmt.Sprintf("%s__%s", submatches[2], submatches[3])] = struct{}{}
 	}
 	results := make(map[string][]string, 4)
 	results["PANIC"] = testPanicExpression.FindAllString(output, -1)
