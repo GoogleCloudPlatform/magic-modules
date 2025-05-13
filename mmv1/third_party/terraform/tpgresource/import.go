@@ -113,6 +113,11 @@ func setDefaultValues(idRegex string, identity *schema.IdentityData, d Terraform
 		if err := d.Set("project", project); err != nil {
 			return fmt.Errorf("Error setting project: %s", err)
 		}
+		if identity != nil {
+			if err := identity.Set("project", project); err != nil {
+				return fmt.Errorf("Error setting project: %s", err)
+			}
+		}
 	}
 	if _, ok := d.GetOk("region"); !ok && strings.Contains(idRegex, "?P<region>") {
 		region, err := GetRegion(d, config)
@@ -122,6 +127,11 @@ func setDefaultValues(idRegex string, identity *schema.IdentityData, d Terraform
 		if err := d.Set("region", region); err != nil {
 			return fmt.Errorf("Error setting region: %s", err)
 		}
+		if identity != nil {
+			if err := identity.Set("region", region); err != nil {
+				return fmt.Errorf("Error setting region: %s", err)
+			}
+		}
 	}
 	if _, ok := d.GetOk("zone"); !ok && strings.Contains(idRegex, "?P<zone>") {
 		zone, err := GetZone(d, config)
@@ -130,6 +140,11 @@ func setDefaultValues(idRegex string, identity *schema.IdentityData, d Terraform
 		}
 		if err := d.Set("zone", zone); err != nil {
 			return fmt.Errorf("Error setting zone: %s", err)
+		}
+		if identity != nil {
+			if err := identity.Set("zone", zone); err != nil {
+				return fmt.Errorf("Error setting zone: %s", err)
+			}
 		}
 	}
 	return nil
