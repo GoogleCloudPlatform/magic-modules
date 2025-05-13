@@ -1,0 +1,13 @@
+resource "google_dataplex_glossary" "{{$.PrimaryResourceId}}" {
+  name        = "tf-test-glossary%{random_suffix}"
+  location    = "{{$.Vars.location}}"
+  project     = "{{index $.TestEnvVars "project_name"}}"
+}
+
+resource "google_dataplex_category" "{{$.PrimaryResourceId}}" {
+  parent         = "projects/{{index $.TestEnvVars "project_name"}}/locations/{{$.Vars.location}}/glossaries/${google_dataplex_glossary.glossary.name}"
+  glossary_id     = google_dataplex_glossary.{{$.PrimaryResourceId}}.name
+  location    = "{{$.Vars.location}}"
+  project     = "{{index $.TestEnvVars "project_name"}}"
+  category_id = "tf-test-category-basic%{random_suffix}"
+}
