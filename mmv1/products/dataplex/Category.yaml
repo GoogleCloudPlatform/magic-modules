@@ -22,9 +22,9 @@ update_verb: 'PATCH'
 update_mask: true
 delete_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories/{{category_id}}'
 timeouts:
-  insert_minutes: 5
-  update_minutes: 5
-  delete_minutes: 5
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
 import_format: ['projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories/{{category_id}}']
 async:
