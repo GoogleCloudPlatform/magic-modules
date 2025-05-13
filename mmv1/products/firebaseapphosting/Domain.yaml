@@ -46,7 +46,7 @@ examples:
     vars:
       backend_id: 'domain-mini'
       service_act_id: 'sa-id'
-      domain_id: 'my-domain.com'
+      domain_id: example.com
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
@@ -58,7 +58,7 @@ examples:
     vars:
       backend_id: 'domain-full'
       service_act_id: 'sa-id'
-      domain_id: 'my-domain.com'
+      domain_id: example.com
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
