@@ -81,10 +81,6 @@ func (toics TerraformOiCS) GenerateResource(object api.Resource, templateData Te
 	}
 
 	for _, example := range object.TestExamples() {
-		if len(example.TestEnvVars) > 0 {
-			continue
-		}
-
 		example.SetOiCSHCLText()
 
 		targetFolder := path.Join(outputFolder, example.Name)
