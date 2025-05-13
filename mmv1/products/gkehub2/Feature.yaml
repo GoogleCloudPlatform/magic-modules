@@ -500,6 +500,15 @@ properties:
                           description: 'The set of namespaces to be exempted from the bundle.'
                           item_type:
                             type: String
+      - name: 'rbacrolebindingactuation'
+        type: NestedObject
+        description: RBACRolebinding Actuation feature spec.
+        properties:
+          - name: 'allowedCustomRoles'
+            type: Array
+            description: 'The list of allowed custom roles (ClusterRoles). If a custom role is not part of this list, it cannot be used in a fleet scope RBACRoleBinding. If a custom role in this list is in use, it cannot be removed from the list until the scope RBACRolebindings using it are deleted.'
+            item_type:
+              type: String
   - name: 'state'
     type: NestedObject
     description: Output only. The Hub-wide Feature state
