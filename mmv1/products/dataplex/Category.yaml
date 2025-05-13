@@ -39,6 +39,7 @@ iam_policy:
     [
       'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories/{{category_id}}',
       '{{category_id}}',
+      '{{glossary_id}}',
     ]
 examples:
   - name: 'dataplex_category_basic'
