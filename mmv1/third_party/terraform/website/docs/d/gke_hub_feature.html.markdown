@@ -27,17 +27,4 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-In addition to the arguments listed above, the following computed attributes are exported:
-
-* `labels` - GCP labels for this Feature.
-* `resource_state` - State of the Feature resource itself.
-  * `state` - The current state of the Feature resource in the Hub API.
-* `spec` - The Hub-wide configuration of the feature.
-  * `multiclusteringress` - Multicluster Ingress-specific spec.
-  * `configmanagement` - Config Management-specific spec.
-  * `servicemesh` - Service Mesh-specific spec.
-  * `policycontroller` - Policy Controller-specific spec.
-  * `clusterupgrade` - Cluster Upgrade-specific spec.
-* `state` - The Hub-wide Feature state.
-  * `state` - The current state of the Feature in the Hub API.
-  * `servicemesh` - Service Mesh-specific state.
+See [google_gke_hub_feature](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/gke_hub_feature) resource for details of the available attributes.
