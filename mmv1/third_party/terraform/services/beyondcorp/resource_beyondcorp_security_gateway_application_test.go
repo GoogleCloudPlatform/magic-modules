@@ -57,7 +57,7 @@ resource "google_beyondcorp_security_gateway" "default" {
 
 resource "google_beyondcorp_security_gateway_application" "example" {
   security_gateways_id = google_beyondcorp_security_gateway.default.security_gateway_id
-  application_id = "google%{random_suffix}"
+  application_id = "google-sga%{random_suffix}"
   endpoint_matchers {
     hostname = "google.com"
   }
@@ -76,7 +76,7 @@ resource "google_beyondcorp_security_gateway" "default" {
 resource "google_beyondcorp_security_gateway_application" "example" {
   security_gateways_id = google_beyondcorp_security_gateway.default.security_gateway_id
   display_name = "Updated Name"
-  application_id = "google%{random_suffix}"
+  application_id = "google-sga%{random_suffix}"
   endpoint_matchers {
     hostname = "google.com"
   }
