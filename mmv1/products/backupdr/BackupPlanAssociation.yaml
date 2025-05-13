@@ -73,7 +73,8 @@ properties:
   - name: 'resourceType'
     type: String
     description: |
-      The resource type of workload on which backupplan is applied
+      The resource type of workload on which backupplan is applied.
+      Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", and "compute.googleapis.com/RegionDisk"
     required: true
   - name: 'createTime'
     type: String
