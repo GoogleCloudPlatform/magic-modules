@@ -368,7 +368,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 
 	// Check if multiple resources were added.
 	multipleResourcesState := "success"
-	if len(uniqueAddedResources) > 0 {
+	if len(uniqueAddedResources) > 1 {
 		multipleResourcesState = "failure"
 		for _, label := range pullRequest.Labels {
 			if label.Name == allowMultipleResourcesLabel {
@@ -378,8 +378,8 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		}
 	}
 	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildId, buildStep, projectId)
-	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "multiple-resources", multipleResourcesState, targetURL, commitSha); err != nil {
-		fmt.Printf("Error posting multiple-resources build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
+	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-multiple-resources", multipleResourcesState, targetURL, commitSha); err != nil {
+		fmt.Printf("Error posting terraform-provider-multiple-resources build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
 		errors["Other"] = append(errors["Other"], "Failed to update missing-service-labels status check with state: "+multipleResourcesState)
 	}
 	data.AddedResources = maps.Keys(uniqueAddedResources)
