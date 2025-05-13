@@ -14,17 +14,17 @@
 ---
 name: 'Entry'
 description: |
-  An entry represents a data asset for which you capture metadata, such as a BigQuery table. 
-  The primary constituents of an entry are aspects, which provide thematically coherent information. 
+  An entry represents a data asset for which you capture metadata, such as a BigQuery table.
+  The primary constituents of an entry are aspects, which provide thematically coherent information.
   Examples include a table's schema, sensitive data protection profile, data quality information, or a simple tag.
 
   **Important Considerations:**
-  
-  * There is a limit of 99 aspects per entry. 
-  * The entry resource has to use project numbers and not project IDs. Therefore, if 
-    a dependency was already provisioned using project ID, it needs to be referenced explicitly as a resource name 
+
+  * There is a limit of 99 aspects per entry.
+  * The entry resource has to use project numbers and not project IDs. Therefore, if
+    a dependency was already provisioned using project ID, it needs to be referenced explicitly as a resource name
     containing the project number.
-    
+
 references:
   guides:
     'Manage entries and ingest custom sources': 'https://cloud.google.com/dataplex/docs/ingest-custom-sources'
