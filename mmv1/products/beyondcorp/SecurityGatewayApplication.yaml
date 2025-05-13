@@ -33,13 +33,13 @@ iam_policy:
 examples:
   - name: beyondcorp_security_gateway_application_basic
     primary_resource_id: example
-    primary_resource_name: 'fmt.Sprintf("default%s", context["random_suffix"]), fmt.Sprintf("google%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("default-sg%s", context["random_suffix"]), fmt.Sprintf("google-sga%s", context["random_suffix"])'
     vars:
       security_gateway_name: default
       application_name: google
   - name: beyondcorp_security_gateway_application_vpc
     primary_resource_id: example
-    primary_resource_name: 'fmt.Sprintf("default%s", context["random_suffix"]), fmt.Sprintf("google%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("default-sg%s", context["random_suffix"]), fmt.Sprintf("google-sga%s", context["random_suffix"])'
     vars:
       security_gateway_name: default
       application_name: my-vm-service
