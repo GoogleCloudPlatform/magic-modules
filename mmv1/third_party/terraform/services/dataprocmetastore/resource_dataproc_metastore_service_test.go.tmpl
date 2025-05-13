@@ -258,6 +258,10 @@ func TestAccMetastoreService_tags(t *testing.T) {
 				// Expect an error indicating policy violation
 				ExpectError: regexp.MustCompile(`(?i)(CONSTRAINT_VIOLATION|policy violation|denied by a policy)`),
 			},
+			// Step 4: Delete the Organization Policy (added step)
+			{
+				Config: testAccOrgPolicyDelete(contextData),
+			},
 		},
 	})
 }
@@ -334,6 +338,17 @@ resource "google_dataproc_metastore_service" "disallowed_service" {
   tags = {
 	"%{org}/%{tagKey}" = "%{disallowedTagValue}" # Using the disallowed tag value
   }
+}
+`, context)
+}
+
+// Configuration to delete the Organization Policy
+func testAccOrgPolicyDelete(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_organization_policy" "allow_specific_tag" {
+  org_id = "%{org_id}"
+  constraint = "serviceuser.services"
+  policy_type = "unset"
 }
 `, context)
 }
