@@ -10,6 +10,9 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
+
+{{/* THIS TEMPLATE IS DEPRECATED, DO NOT USE FOR NEW FIELDS */}}
+
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	if v == nil || !v.(bool) {
         return nil, nil
