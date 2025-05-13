@@ -62,7 +62,7 @@ func testAccDataSourceComputeNetworkEndpointGroupCheck(data_source_name string, 
 			}
 		}
 
-		if v, ok := ds_attr["identifier"]; !ok || v == "" {
+		if v, ok := ds_attr["generated_id"]; !ok || v == "" {
 			return fmt.Errorf("identifier is not set")
 		}
 
