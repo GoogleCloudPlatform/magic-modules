@@ -41,7 +41,7 @@ func TestTemplatesStillNeedToBeTemplates(t *testing.T) {
 			return nil
 		}
 
-		// Only check .go.tmpl files
+		// Only check .tmpl files
 		if filepath.Ext(path) != ".tmpl" {
 			return nil
 		}
