@@ -149,14 +149,17 @@ func TestAccComputeBackendService_withBackendAndIAP(t *testing.T) {
 func TestAccComputeBackendService_withBackendAndPreference(t *testing.T) {
 	t.Parallel()
 
-	randomSuffix := acctest.RandString(t, 10)
+	im_suffix := fmt.Sprintf("im-%s", acctest.RandString(t, 10))
+	ism_suffix := fmt.Sprintf("ism-%s", acctest.RandString(t, 10))
+	em_suffix := fmt.Sprintf("em-%s", acctest.RandString(t, 10))
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeBackendService_withBackendAndPreference(randomSuffix, "INTERNAL_MANAGED", "DEFAULT", 10),
+				Config: testAccComputeBackendService_withBackendAndPreference(im_suffix, "INTERNAL_MANAGED", "DEFAULT", 10),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.lipsum",
@@ -164,7 +167,7 @@ func TestAccComputeBackendService_withBackendAndPreference(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeBackendService_withBackendAndPreference(randomSuffix, "INTERNAL_MANAGED", "PREFERRED", 20),
+				Config: testAccComputeBackendService_withBackendAndPreference(im_suffix, "INTERNAL_MANAGED", "PREFERRED", 20),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.lipsum",
@@ -172,7 +175,7 @@ func TestAccComputeBackendService_withBackendAndPreference(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeBackendService_withBackendAndPreference(randomSuffix, "INTERNAL_SELF_MANAGED", "DEFAULT", 10),
+				Config: testAccComputeBackendService_withBackendAndPreference(ism_suffix, "INTERNAL_SELF_MANAGED", "DEFAULT", 10),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.lipsum",
@@ -180,7 +183,7 @@ func TestAccComputeBackendService_withBackendAndPreference(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeBackendService_withBackendAndPreference(randomSuffix, "INTERNAL_SELF_MANAGED", "PREFERRED", 20),
+				Config: testAccComputeBackendService_withBackendAndPreference(ism_suffix, "INTERNAL_SELF_MANAGED", "PREFERRED", 20),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.lipsum",
@@ -188,7 +191,7 @@ func TestAccComputeBackendService_withBackendAndPreference(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeBackendService_withBackendAndPreference(randomSuffix, "EXTERNAL_MANAGED", "DEFAULT", 10),
+				Config: testAccComputeBackendService_withBackendAndPreference(em_suffix, "EXTERNAL_MANAGED", "DEFAULT", 10),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.lipsum",
@@ -196,7 +199,7 @@ func TestAccComputeBackendService_withBackendAndPreference(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeBackendService_withBackendAndPreference(randomSuffix, "EXTERNAL_MANAGED", "PREFERRED", 20),
+				Config: testAccComputeBackendService_withBackendAndPreference(em_suffix, "EXTERNAL_MANAGED", "PREFERRED", 20),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.lipsum",
@@ -736,6 +739,9 @@ func TestAccComputeBackendService_withLogConfig(t *testing.T) {
 	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
+	serviceName2 := fmt.Sprintf("%s-2",serviceName)
+	checkName2 := fmt.Sprintf("%s-2", checkName)
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -790,7 +796,7 @@ func TestAccComputeBackendService_withLogConfig(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeBackendService_withLogConfig3(serviceName, checkName, "INCLUDE_ALL_OPTIONAL", true),
+				Config: testAccComputeBackendService_withLogConfig3(serviceName2, checkName2, "INCLUDE_ALL_OPTIONAL", true),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.foobar",
@@ -798,7 +804,7 @@ func TestAccComputeBackendService_withLogConfig(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeBackendService_withLogConfig3(serviceName, checkName, "EXCLUDE_ALL_OPTIONAL", true),
+				Config: testAccComputeBackendService_withLogConfig3(serviceName2, checkName2, "EXCLUDE_ALL_OPTIONAL", true),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.foobar",
