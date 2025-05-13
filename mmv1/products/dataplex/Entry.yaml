@@ -14,11 +14,17 @@
 ---
 name: 'Entry'
 description: |
-  An entry represents a data asset that you capture metadata for. Every entry is an instance of an entry type.
-  Each operation on aspects for an entry needs to comply with the required aspects of its entry type.
-  For example, when you create an entry, you must provide values for all the aspect types defined by the entry type.
-  You can't delete those aspects for an entry that are marked as required in the entry type.
+  An entry represents a data asset for which you capture metadata, such as a BigQuery table. 
+  The primary constituents of an entry are aspects, which provide thematically coherent information. 
+  Examples include a table's schema, sensitive data protection profile, data quality information, or a simple tag.
 
+  **Important Considerations:**
+  
+  * There is a limit of 99 aspects per entry. 
+  * The entry resource has to use project numbers and not project IDs. Therefore, if 
+    a dependency was already provisioned using project ID, it needs to be referenced explicitly as a resource name 
+    containing the project number.
+    
 references:
   guides:
     'Manage entries and ingest custom sources': 'https://cloud.google.com/dataplex/docs/ingest-custom-sources'
@@ -142,6 +148,7 @@ properties:
 
         - name: "aspectValue"
           type: NestedObject
+          required: true
           properties:
             - name: "aspectType"
               type: String

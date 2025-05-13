@@ -10,7 +10,7 @@
         // Double curly braces are the templating language's special marker.
         // We need them literally here, so apply a simple trick to force it.
         template := "projects/{" + "{project}" + "}/locations/{" + "{location}" + 
-	            "}/entryGroups/{" + "{entry_group_id}" + "}/entries/{" + "{entry_id}"
+	            "}/entryGroups/{" + "{entry_group_id}" + "}/entries/{" + "{entry_id}" + "}"
 
 	// Replace import id for the resource id
 	id, err := tpgresource.ReplaceVars(d, config, template)
