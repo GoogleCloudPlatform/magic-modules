@@ -1,0 +1,25 @@
+resource "google_storage_bucket" "bucket" {
+  name     = "{{index $.Vars "bucket_name"}}"
+  location = "us-central1"
+  force_destroy = true
+}
+
+resource "google_storage_batch_operations_job" "{{$.PrimaryResourceId}}" {
+	job_id     = "{{index $.Vars "job_id"}}"
+	bucket_list {
+		buckets  {
+			bucket = google_storage_bucket.bucket.name
+			prefix_list {
+				included_object_prefixes = [
+					"bkt"
+				]
+			}
+		}
+	}
+	put_metadata {
+		custom_metadata = {
+			"key"="value"
+		}
+	}
+	delete_protection = false
+}

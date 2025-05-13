@@ -170,11 +170,13 @@ func TestFakeResourceData_getOkTypeObject(t *testing.T) {
 		"allow_stopping_for_update": nil,
 		"attached_disk": []interface{}{
 			map[string]interface{}{
-				"device_name":             "test-device_name",
-				"disk_encryption_key_raw": nil,
-				"kms_key_self_link":       "test-kms_key_self_link",
-				"mode":                    "READ_ONLY",
-				"source":                  "test-source",
+				"device_name":                     "test-device_name",
+				"disk_encryption_key_raw":         nil,
+				"disk_encryption_key_rsa":         nil,
+				"kms_key_self_link":               "test-kms_key_self_link",
+				"disk_encryption_service_account": nil,
+				"mode":                            "READ_ONLY",
+				"source":                          "test-source",
 			},
 			map[string]interface{}{
 				"disk_encryption_key_raw": nil,
@@ -242,8 +244,8 @@ func TestFakeResourceData_getOkTypeObject(t *testing.T) {
 	assert.Equal(t, map[string]interface{}{
 		"device_name":                     "test-device_name",
 		"disk_encryption_key_raw":         "",
-		"disk_encryption_key_rsa":         "",
 		"disk_encryption_key_sha256":      "",
+		"disk_encryption_key_rsa":         "",
 		"disk_encryption_service_account": "",
 		"kms_key_self_link":               "test-kms_key_self_link",
 		"mode":                            "READ_ONLY",
@@ -319,8 +321,8 @@ func TestFakeResourceData_getOknsetTypeObject(t *testing.T) {
 	assert.Equal(t, map[string]interface{}{
 		"device_name":                     "",
 		"disk_encryption_key_raw":         "",
-		"disk_encryption_key_rsa":         "",
 		"disk_encryption_key_sha256":      "",
+		"disk_encryption_key_rsa":         "",
 		"disk_encryption_service_account": "",
 		"kms_key_self_link":               "",
 		"mode":                            "",

@@ -36,6 +36,43 @@ func TestAccSpannerInstance_basic(t *testing.T) {
 	})
 }
 
+func TestAccSpannerInstance_basicUpdateWithProviderDefaultLabels(t *testing.T) {
+	t.Parallel()
+
+	idName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerInstance_basicWithProviderLabel(idName, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
+				),
+			},
+			{
+				ResourceName:            "google_spanner_instance.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccSpannerInstance_basicWithProviderLabel(idName, true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
+				),
+			},
+			{
+				ResourceName:            "google_spanner_instance.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
 func TestAccSpannerInstance_noNodeCountSpecified(t *testing.T) {
 	t.Parallel()
 
@@ -313,6 +350,80 @@ func TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfigUpdate(t *testing
 	})
 }
 
+func TestAccSpannerInstance_basicWithAutoscalingUsingNodeConfigUpdateDisableAutoscaling(t *testing.T) {
+	t.Parallel()
+
+	displayName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingNodesAsConfigsUpdate(displayName, 1, 2, 65, 95),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
+				),
+			},
+			{
+				ResourceName:            "google_spanner_instance.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccSpannerInstance_basicWithNodes(displayName, 1),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
+				),
+			},
+			{
+				ResourceName:            "google_spanner_instance.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccSpannerInstance_basicWithAutoscalingUsingPrecessingUnitsConfigUpdateDisableAutoscaling(t *testing.T) {
+	t.Parallel()
+
+	displayName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerInstance_basicWithAutoscalerConfigUsingProcessingUnitsAsConfigs(displayName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
+				),
+			},
+			{
+				ResourceName:            "google_spanner_instance.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccSpannerInstance_basicWithProcessingUnits(displayName, 1000),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_spanner_instance.basic", "state"),
+				),
+			},
+			{
+				ResourceName:            "google_spanner_instance.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
 func TestAccSpannerInstance_basicWithAsymmetricAutoscalingConfigsUpdate(t *testing.T) {
 	displayName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
@@ -398,6 +509,62 @@ resource "google_spanner_instance" "basic" {
   default_backup_schedule_type = "NONE"
 }
 `, name, name)
+}
+
+func testAccSpannerInstance_basicWithNodes(name string, nodes int) string {
+	return fmt.Sprintf(`
+resource "google_spanner_instance" "basic" {
+  name         = "%s"
+  config       = "regional-us-central1"
+  display_name = "%s-dname"
+
+  num_nodes                    = %d
+  edition                      = "ENTERPRISE"
+  default_backup_schedule_type = "NONE"
+}
+`, name, name, nodes)
+}
+
+func testAccSpannerInstance_basicWithProcessingUnits(name string, processingUnits int) string {
+	return fmt.Sprintf(`
+resource "google_spanner_instance" "basic" {
+  name         = "%s"
+  config       = "regional-us-central1"
+  display_name = "%s-dname"
+
+  processing_units             = %d
+  edition                      = "ENTERPRISE"
+  default_backup_schedule_type = "NONE"
+}
+`, name, name, processingUnits)
+}
+
+func testAccSpannerInstance_basicWithProviderLabel(name string, addLabel bool) string {
+	extraLabel := ""
+	if addLabel {
+		extraLabel = "\"key2\" = \"value2\""
+	}
+	return fmt.Sprintf(`
+provider "google" {
+  alias          = "with-labels"
+  default_labels = {
+    %s
+  }
+}
+
+resource "google_spanner_instance" "basic" {
+  provider     = google.with-labels
+  config       = "regional-us-central1"
+  name         = "%s"
+  display_name = "%s"
+
+  processing_units = 100
+
+  labels = {
+    "key1" = "value1"
+  }
+}
+`, extraLabel, name, name)
 }
 
 func testAccSpannerInstance_noNodeCountSpecified(name string) string {
@@ -602,6 +769,7 @@ resource "google_spanner_instance" "main" {
 func testAccSpannerInstance_spannerInstanceWithAutoscaling(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_spanner_instance" "example" {
+  name         = "tf-test-spanner-instance-%{random_suffix}"
   config       = "regional-us-central1"
   display_name = "Test Spanner Instance"
   autoscaling_config {

@@ -271,7 +271,6 @@ required except for local SSD.`,
 										Description: `Specifies a 256-bit customer-supplied encryption key, encoded in RFC 4648 base64 to either encrypt or decrypt this resource. Only one of kms_key_self_link, rsa_encrypted_key and raw_key may be set.`,
 										Sensitive: true,
 									},
-
 									"rsa_encrypted_key": {
 										Type:     schema.TypeString,
 										Optional: true,
@@ -735,6 +734,15 @@ Google Cloud KMS. Only one of kms_key_self_link, rsa_encrypted_key and raw_key m
 							ForceNew:     true,
 							AtLeastOneOf: schedulingInstTemplateKeys,
 							Description:  `Specifies the action GCE should take when SPOT VM is preempted.`,
+						},
+						"termination_time": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ForceNew:     true,
+							AtLeastOneOf: schedulingKeys,
+							Description: `Specifies the timestamp, when the instance will be terminated,
+in RFC3339 text format. If specified, the instance termination action
+will be performed at the termination time.`,
 						},
 						"availability_domain": {
 							Type:          schema.TypeInt,

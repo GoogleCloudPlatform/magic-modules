@@ -293,6 +293,9 @@ region are guaranteed to support the same version.
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is [documented below](#nested_pod_security_policy_config).
 
+* `pod_autoscaling` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
+    Structure is [documented below](#nested_pod_autoscaling).
+
 * `secret_manager_config` - (Optional) Configuration for the
     [SecretManagerConfig](https://cloud.google.com/secret-manager/docs/secret-manager-managed-csi-component) feature.
     Structure is [documented below](#nested_secret_manager_config).
@@ -369,6 +372,9 @@ subnetwork in which the cluster's instances are launched.
 * `enable_l4_ilb_subsetting` - (Optional)
     Whether L4ILB Subsetting is enabled for this cluster.
 
+* `disable_l4_lb_firewall_reconciliation` - (Optional)
+    Disable L4 load balancer VPC firewalls to enable firewall policies.
+
 * `enable_multi_networking` - (Optional)
     Whether multi-networking is enabled for this cluster.
 
@@ -380,6 +386,9 @@ subnetwork in which the cluster's instances are launched.
 
 * `datapath_provider` - (Optional)
     The desired datapath provider for this cluster. This is set to `LEGACY_DATAPATH` by default, which uses the IPTables-based kube-proxy implementation. Set to `ADVANCED_DATAPATH` to enable Dataplane v2.
+
+* `in_transit_encryption_config` - (Optional)
+    Defines the config of in-transit encryption. Valid values are `IN_TRANSIT_ENCRYPTION_DISABLED` and `IN_TRANSIT_ENCRYPTION_INTER_NODE_TRANSPARENT`.
 
 * `enable_cilium_clusterwide_network_policy` - (Optional)
     Whether CiliumClusterWideNetworkPolicy is enabled on this cluster. Defaults to false.
@@ -565,8 +574,8 @@ in addition to node auto-provisioning. Structure is [documented below](#nested_r
 GKE Autopilot clusters.
 Structure is [documented below](#nested_auto_provisioning_defaults).
 
-* `auto_provisioning_locations` - (Optional) The list of Google Compute Engine 
-[zones](https://cloud.google.com/compute/docs/zones#available) in which the 
+* `auto_provisioning_locations` - (Optional) The list of Google Compute Engine
+[zones](https://cloud.google.com/compute/docs/zones#available) in which the
 NodePool's nodes can be created by NAP.
 
 * `autoscaling_profile` - (Optional) Configuration
@@ -654,7 +663,7 @@ This block also contains several computed attributes, documented below.
 
 <a name="nested_monitoring_config"></a>The `monitoring_config` block supports:
 
-*  `enable_components` - (Optional) The GKE components exposing metrics. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `SCHEDULER`, `CONTROLLER_MANAGER`, `STORAGE`, `HPA`, `POD`, `DAEMONSET`, `DEPLOYMENT`, `STATEFULSET`, `KUBELET`, `CADVISOR` and `DCGM`. In beta provider, `WORKLOADS` is supported on top of those 12 values. (`WORKLOADS` is deprecated and removed in GKE 1.24.) `KUBELET` and `CADVISOR` are only supported in GKE 1.29.3-gke.1093000 and above.
+*  `enable_components` - (Optional) The GKE components exposing metrics. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `SCHEDULER`, `CONTROLLER_MANAGER`, `STORAGE`, `HPA`, `POD`, `DAEMONSET`, `DEPLOYMENT`, `STATEFULSET`, `KUBELET`, `CADVISOR`, `DCGM` and `JOBSET`. In beta provider, `WORKLOADS` is supported on top of those 12 values. (`WORKLOADS` is deprecated and removed in GKE 1.24.) `KUBELET` and `CADVISOR` are only supported in GKE 1.29.3-gke.1093000 and above. `JOBSET` is only supported in GKE 1.32.1-gke.1357001 and above.
 
 *  `managed_prometheus` - (Optional) Configuration for Managed Service for Prometheus. Structure is [documented below](#nested_managed_prometheus).
 
@@ -663,11 +672,11 @@ This block also contains several computed attributes, documented below.
 <a name="nested_managed_prometheus"></a>The `managed_prometheus` block supports:
 
 * `enabled` - (Required) Whether or not the managed collection is enabled.
-* `auto_monitoring_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration options for GKE Auto-Monitoring.
+* `auto_monitoring_config` - (Optional) Configuration options for GKE Auto-Monitoring.
 
 <a name="auto_monitoring_config"></a>The `auto_monitoring_config` block supports:
 
-* `scope` - (Required) Whether or not to enable GKE Auto-Monitoring. Supported values include: `ALL`, `NONE`.  
+* `scope` - (Required) Whether or not to enable GKE Auto-Monitoring. Supported values include: `ALL`, `NONE`.
 
 <a name="nested_advanced_datapath_observability_config"></a>The `advanced_datapath_observability_config` block supports:
 
@@ -909,7 +918,7 @@ gvnic {
 
 * `guest_accelerator` - (Optional) List of the type and count of accelerator cards attached to the instance.
     Structure [documented below](#nested_guest_accelerator).
-    **Note**: As of 6.0.0, [argument syntax](https://developer.hashicorp.com/terraform/language/syntax/configuration#arguments) 
+    **Note**: As of 6.0.0, [argument syntax](https://developer.hashicorp.com/terraform/language/syntax/configuration#arguments)
     is no longer supported for this field in favor of [block syntax](https://developer.hashicorp.com/terraform/language/syntax/configuration#blocks).
     To dynamically set a list of guest accelerators, use [dynamic blocks](https://developer.hashicorp.com/terraform/language/expressions/dynamic-blocks).
     To set an empty list, use a single `guest_accelerator` block with `count = 0`.
@@ -924,6 +933,8 @@ gvnic {
     for how these labels are applied to clusters, node pools and nodes.
 
 * `max_run_duration` - (Optional) The runtime of each node in the node pool in seconds, terminated by 's'. Example: "3600s".
+
+* `flex_start` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))) Enables Flex Start provisioning model for the node pool.
 
 * `local_ssd_count` - (Optional) The amount of local SSD disks that will be
     attached to each cluster node. Defaults to 0.
@@ -1003,6 +1014,15 @@ kubelet_config {
 
 * `linux_node_config` - (Optional) Parameters that can be configured on Linux nodes. Structure is [documented below](#nested_linux_node_config).
 
+* `windows_node_config` - (Optional)
+Windows node configuration, currently supporting OSVersion [attribute](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/NodeConfig#osversion). The value must be one of [OS_VERSION_UNSPECIFIED, OS_VERSION_LTSC2019, OS_VERSION_LTSC2022]. For example:
+
+```hcl
+windows_node_config {
+  osversion = "OS_VERSION_LTSC2019"
+}
+```
+
 * `containerd_config` - (Optional) Parameters to customize containerd runtime. Structure is [documented below](#nested_containerd_config).
 
 * `node_group` - (Optional) Setting this field will assign instances of this pool to run on the specified node group. This is useful for running workloads on [sole tenant nodes](https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes).
@@ -1050,6 +1070,8 @@ sole_tenant_config {
 
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
 
+* `data_cache_count` (Optional) - Number of raw-block local NVMe SSD disks to be attached to the node utilized for GKE Data Cache. If zero, then GKE Data Cache will not be enabled in the nodes.
+
 <a name="nasted_fast_socket"></a>The `fast_socket` block supports:
 
 * `enabled` (Required) - Whether or not the NCCL Fast Socket is enabled
@@ -1089,7 +1111,7 @@ sole_tenant_config {
 
 * `gpu_driver_version` (Required) - Mode for how the GPU driver is installed.
     Accepted values are:
-    * `"GPU_DRIVER_VERSION_UNSPECIFIED"`: Default value is to not install any GPU driver.
+    * `"GPU_DRIVER_VERSION_UNSPECIFIED"`: Default value is to install the "Default" GPU driver. Before GKE `1.30.1-gke.1156000`, the default value is to not install any GPU driver.
     * `"INSTALLATION_DISABLED"`: Disable GPU driver auto installation and needs manual installation.
     * `"DEFAULT"`: "Default" GPU driver in COS and Ubuntu.
     * `"LATEST"`: "Latest" GPU driver in COS.
@@ -1174,7 +1196,7 @@ notification_config {
 
 <a name="nested_notification_filter"></a> The `filter` block supports:
 
-* `event_type` (Optional) - Can be used to filter what notifications are sent. Accepted values are `UPGRADE_AVAILABLE_EVENT`, `UPGRADE_EVENT` and `SECURITY_BULLETIN_EVENT`. See [Filtering notifications](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-notifications#filtering) for more details.
+* `event_type` (Optional) - Can be used to filter what notifications are sent. Accepted values are `UPGRADE_AVAILABLE_EVENT`, `UPGRADE_EVENT`, `SECURITY_BULLETIN_EVENT` and `UPGRADE_INFO_EVENT`. See [Filtering notifications](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-notifications#filtering) for more details.
 
 <a name="nested_confidential_nodes"></a> The `confidential_nodes` block supports:
 
@@ -1186,6 +1208,14 @@ notification_config {
 * `enabled` (Required) - Enable the PodSecurityPolicy controller for this cluster.
     If enabled, pods must be valid under a PodSecurityPolicy to be created.
 
+<a name="nested_pod_autoscaling"></a>The `pod_autoscaling` block supports:
+
+* `hpa_profile` (Required) - Enable the Horizontal Pod Autoscaling profile for this cluster.
+    Acceptable values are:
+    * `"NONE"`: Customers explicitly opt-out of HPA profiles.
+    * `"PERFORMANCE"`: PERFORMANCE is used when customers opt-in to the performance HPA profile. In this profile we support a higher number of HPAs per cluster and faster metrics collection for workload autoscaling.
+    See [HPAProfile](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#hpaprofile) for more details.
+
 <a name="nested_secret_manager_config"></a>The `secret_manager_config` block supports:
 
 * `enabled` (Required) - Enable the Secret Manager add-on for this cluster.
@@ -1193,12 +1223,17 @@ notification_config {
 <a name="nested_control_plane_endpoints_config"></a>The `control_plane_endpoints_config` block supports:
 
 * `dns_endpoint_config` - (Optional) DNS endpoint configuration.
+* `ip_endpoints_config` - (Optional) IP endpoint configuration.
 
 The `control_plane_endpoints_config.dns_endpoint_config` block supports:
 
 * `endpoint` - (Output) The cluster's DNS endpoint.
 
 * `allow_external_traffic` - (Optional) Controls whether user traffic is allowed over this endpoint. Note that GCP-managed services may still use the endpoint even if this is false.
+
+The `control_plane_endpoints_config.ip_endpoints_config` block supports:
+
+* `enabled` - (Optional) Controls whether to allow direct IP access. Defaults to `true`.
 
 <a name="nested_private_cluster_config"></a>The `private_cluster_config` block supports:
 
@@ -1334,7 +1369,7 @@ Enables monitoring and attestation of the boot integrity of the instance. The at
 * `cpu_manager_policy` - (Optional) The CPU management policy on the node. See
 [K8S CPU Management Policies](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/).
 One of `"none"` or `"static"`. If unset (or set to the empty string `""`), the API will treat the field as if set to "none".
-Prior to the 6.4.0 this field was marked as required. The workaround for the required field 
+Prior to the 6.4.0 this field was marked as required. The workaround for the required field
 is setting the empty string `""`, which will function identically to not setting this field.
 
 * `cpu_cfs_quota` - (Optional) If true, enables CPU CFS quota enforcement for
@@ -1403,7 +1438,7 @@ linux_node_config {
 
   * `enabled` (Required) - Enables private registry config. If set to false, all other fields in this object must not be set.
 
-  * `certificate_authority_domain_config` (Optional) - List of configuration objects for CA and domains. Each object identifies a certificate and its assigned domains. See [how to configure for private container registries](https://cloud.google.com/kubernetes-engine/docs/how-to/access-private-registries-private-certificates) for more detail. Example: 
+  * `certificate_authority_domain_config` (Optional) - List of configuration objects for CA and domains. Each object identifies a certificate and its assigned domains. See [how to configure for private container registries](https://cloud.google.com/kubernetes-engine/docs/how-to/access-private-registries-private-certificates) for more detail. Example:
   ```hcl
   certificate_authority_domain_config {
     fqdns = [
@@ -1427,7 +1462,7 @@ linux_node_config {
 
 * `cluster_dns` - (Optional) Which in-cluster DNS provider should be used. `PROVIDER_UNSPECIFIED` (default) or `PLATFORM_DEFAULT` or `CLOUD_DNS`.
 
-* `cluster_dns_scope` - (Optional) The scope of access to cluster DNS records. `DNS_SCOPE_UNSPECIFIED` (default) or `CLUSTER_SCOPE` or `VPC_SCOPE`.
+* `cluster_dns_scope` - (Optional) The scope of access to cluster DNS records. `DNS_SCOPE_UNSPECIFIED` or `CLUSTER_SCOPE` or `VPC_SCOPE`. If the `cluster_dns` field is set to `CLOUD_DNS`, `DNS_SCOPE_UNSPECIFIED` and empty/null behave like `CLUSTER_SCOPE`.
 
 * `cluster_dns_domain` - (Optional) The suffix used for all cluster service records.
 
@@ -1447,7 +1482,7 @@ linux_node_config {
 
 <a name="nested_security_posture_config"></a>The `security_posture_config` block supports:
 
-**Note:** `ENTERPRISE` and `VULNERABILITY_ENTERPRISE` are only available for [GKE Enterprise](http://cloud/kubernetes-engine/enterprise/docs/concepts/overview) projects.  
+**Note:** `ENTERPRISE` and `VULNERABILITY_ENTERPRISE` are only available for [GKE Enterprise](http://cloud/kubernetes-engine/enterprise/docs/concepts/overview) projects.
 
 * `mode` - (Optional) Sets the mode of the Kubernetes security posture API's off-cluster features. Available options include `DISABLED`, `BASIC`, and `ENTERPRISE`.
 
