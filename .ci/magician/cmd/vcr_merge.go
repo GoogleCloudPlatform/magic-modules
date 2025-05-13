@@ -7,6 +7,7 @@ import (
 	"magician/source"
 	"os"
 
+	ghi "github.com/google/go-github/v68/github"
 	"github.com/spf13/cobra"
 )
 
@@ -58,8 +59,8 @@ func execVCRMerge(gh GithubClient, sha string, baseBranch string, runner source.
 		return nil
 	}
 
-	mergeCassettes("gs://ci-vcr-cassettes", baseBranch, fmt.Sprintf("refs/heads/auto-pr-%d", pr.Number), runner)
-	mergeCassettes("gs://ci-vcr-cassettes/beta", baseBranch, fmt.Sprintf("refs/heads/auto-pr-%d", pr.Number), runner)
+	mergeCassettes("gs://ci-vcr-cassettes", baseBranch, fmt.Sprintf("refs/heads/auto-pr-%d", pr.GetNumber()), runner)
+	mergeCassettes("gs://ci-vcr-cassettes/beta", baseBranch, fmt.Sprintf("refs/heads/auto-pr-%d", pr.GetNumber()), runner)
 	return nil
 }
 
@@ -126,10 +127,10 @@ func rmCassettes(dest string, runner source.Runner) {
 	}
 }
 
-func findPRBySHA(sha string, arr []github.PullRequest) *github.PullRequest {
+func findPRBySHA(sha string, arr []*ghi.PullRequest) *ghi.PullRequest {
 	for _, pr := range arr {
-		if pr.MergeCommitSha == sha {
-			return &pr
+		if pr.GetMergeCommitSHA() == sha {
+			return pr
 		}
 	}
 	return nil

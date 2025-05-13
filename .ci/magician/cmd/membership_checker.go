@@ -67,7 +67,7 @@ func execMembershipChecker(prNumber, commitSha string, gh GithubClient, cb Cloud
 		return err
 	}
 
-	author := pullRequest.User.Login
+	author := pullRequest.User.GetLogin()
 	authorUserType := gh.GetUserType(author)
 	trusted := authorUserType == github.CoreContributorUserType || authorUserType == github.GooglerUserType
 

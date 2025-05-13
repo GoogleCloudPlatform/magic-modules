@@ -23,12 +23,16 @@ import (
 
 	"magician/source"
 
+	ghi "github.com/google/go-github/v68/github"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestExecGenerateComment(t *testing.T) {
 	mr := NewMockRunner()
 	gh := &mockGithub{
+		pullRequest: &ghi.PullRequest{
+			Number: ghi.Ptr(123456),
+		},
 		calledMethods: make(map[string][][]any),
 	}
 	ctlr := source.NewController("/mock/dir/go", "modular-magician", "*******", mr)

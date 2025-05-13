@@ -18,17 +18,19 @@ package cmd
 import (
 	"magician/github"
 	"magician/teamcity"
+
+	ghi "github.com/google/go-github/v68/github"
 )
 
 type GithubClient interface {
-	GetPullRequest(prNumber string) (github.PullRequest, error)
-	GetPullRequests(state, base, sort, direction string) ([]github.PullRequest, error)
-	GetPullRequestRequestedReviewers(prNumber string) ([]github.User, error)
-	GetPullRequestPreviousReviewers(prNumber string) ([]github.User, error)
-	GetPullRequestComments(prNumber string) ([]github.PullRequestComment, error)
+	GetPullRequest(prNumber string) (*ghi.PullRequest, error)
+	GetPullRequests(state, base, sort, direction string) ([]*ghi.PullRequest, error)
+	GetPullRequestRequestedReviewers(prNumber string) ([]*ghi.User, error)
+	GetPullRequestPreviousReviewers(prNumber string) ([]*ghi.User, error)
+	GetPullRequestComments(prNumber string) ([]*ghi.IssueComment, error)
 	GetCommitMessage(owner, repo, sha string) (string, error)
 	GetUserType(user string) github.UserType
-	GetTeamMembers(organization, team string) ([]github.User, error)
+	GetTeamMembers(organization, team string) ([]*ghi.User, error)
 	MergePullRequest(owner, repo, prNumber, commitSha string) error
 	PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error
 	PostComment(prNumber, comment string) error

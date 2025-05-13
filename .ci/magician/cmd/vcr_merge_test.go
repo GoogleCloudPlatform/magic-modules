@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"magician/github"
 	"os"
 	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	ghi "github.com/google/go-github/v68/github"
 )
 
 func TestExecVCRMerge(t *testing.T) {
@@ -61,12 +61,13 @@ func TestExecVCRMerge(t *testing.T) {
 	}
 
 	githubClient := &mockGithub{
-		pullRequest: github.PullRequest{
-			Number:         123,
-			MergeCommitSha: "sha",
+		pullRequest: &ghi.PullRequest{
+			Number:         ghi.Ptr(123),
+			MergeCommitSHA: ghi.Ptr("sha"),
 		},
 		calledMethods: make(map[string][][]any),
 	}
+
 	for _, test := range testCases {
 		t.Run(test.name, func(t *testing.T) {
 			runner := &mockRunner{

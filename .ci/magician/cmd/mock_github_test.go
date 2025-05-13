@@ -19,27 +19,29 @@ import (
 	"errors"
 
 	"magician/github"
+
+	ghi "github.com/google/go-github/v68/github"
 )
 
 type mockGithub struct {
-	pullRequest         github.PullRequest
+	pullRequest         *ghi.PullRequest
 	userType            github.UserType
-	requestedReviewers  []github.User
-	previousReviewers   []github.User
-	pullRequestComments []github.PullRequestComment
-	teamMembers         map[string][]github.User
+	requestedReviewers  []*ghi.User
+	previousReviewers   []*ghi.User
+	pullRequestComments []*ghi.IssueComment
+	teamMembers         map[string][]*ghi.User
 	calledMethods       map[string][][]any
 	commitMessage       string
 }
 
-func (m *mockGithub) GetPullRequest(prNumber string) (github.PullRequest, error) {
+func (m *mockGithub) GetPullRequest(prNumber string) (*ghi.PullRequest, error) {
 	m.calledMethods["GetPullRequest"] = append(m.calledMethods["GetPullRequest"], []any{prNumber})
 	return m.pullRequest, nil
 }
 
-func (m *mockGithub) GetPullRequests(state, base, sort, direction string) ([]github.PullRequest, error) {
+func (m *mockGithub) GetPullRequests(state, base, sort, direction string) ([]*ghi.PullRequest, error) {
 	m.calledMethods["GetPullRequests"] = append(m.calledMethods["GetPullRequests"], []any{state, base, sort, direction})
-	return []github.PullRequest{m.pullRequest}, nil
+	return []*ghi.PullRequest{m.pullRequest}, nil
 }
 
 func (m *mockGithub) GetUserType(user string) github.UserType {
@@ -47,17 +49,17 @@ func (m *mockGithub) GetUserType(user string) github.UserType {
 	return m.userType
 }
 
-func (m *mockGithub) GetPullRequestRequestedReviewers(prNumber string) ([]github.User, error) {
+func (m *mockGithub) GetPullRequestRequestedReviewers(prNumber string) ([]*ghi.User, error) {
 	m.calledMethods["GetPullRequestRequestedReviewers"] = append(m.calledMethods["GetPullRequestRequestedReviewers"], []any{prNumber})
 	return m.requestedReviewers, nil
 }
 
-func (m *mockGithub) GetPullRequestPreviousReviewers(prNumber string) ([]github.User, error) {
+func (m *mockGithub) GetPullRequestPreviousReviewers(prNumber string) ([]*ghi.User, error) {
 	m.calledMethods["GetPullRequestPreviousReviewers"] = append(m.calledMethods["GetPullRequestPreviousReviewers"], []any{prNumber})
 	return m.previousReviewers, nil
 }
 
-func (m *mockGithub) GetPullRequestComments(prNumber string) ([]github.PullRequestComment, error) {
+func (m *mockGithub) GetPullRequestComments(prNumber string) ([]*ghi.IssueComment, error) {
 	m.calledMethods["GetPullRequestComments"] = append(m.calledMethods["GetPullRequestComments"], []any{prNumber})
 	return m.pullRequestComments, nil
 }
@@ -67,7 +69,7 @@ func (m *mockGithub) GetCommitMessage(owner, repo, sha string) (string, error) {
 	return m.commitMessage, nil
 }
 
-func (m *mockGithub) GetTeamMembers(organization, team string) ([]github.User, error) {
+func (m *mockGithub) GetTeamMembers(organization, team string) ([]*ghi.User, error) {
 	m.calledMethods["GetTeamMembers"] = append(m.calledMethods["GetTeamMembers"], []any{organization, team})
 	if team == "" {
 		return nil, errors.New("No team members set")

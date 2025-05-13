@@ -142,14 +142,14 @@ func execManageTestFailureTicket(now time.Time, gh *github.Client, gcs Cloudstor
 	for _, ticketNumber := range shouldCloseTickets {
 		fmt.Println("Closing ticket ", ticketNumber)
 		issueComment := &github.IssueComment{
-			Body: github.String(comment),
+			Body: github.Ptr(comment),
 		}
 		_, _, err = gh.Issues.CreateComment(ctx, GithubOwner, GithubRepo, ticketNumber, issueComment)
 		if err != nil {
 			return fmt.Errorf("error posting comment to issue %d: %w", ticketNumber, err)
 		}
 		issueRquest := &github.IssueRequest{
-			State: github.String("closed"),
+			State: github.Ptr("closed"),
 		}
 		_, _, err = gh.Issues.Edit(ctx, GithubOwner, GithubRepo, ticketNumber, issueRquest)
 		if err != nil {

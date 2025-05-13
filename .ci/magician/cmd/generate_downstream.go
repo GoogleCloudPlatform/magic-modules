@@ -27,6 +27,8 @@ import (
 	"strings"
 	"time"
 
+	ghi "github.com/google/go-github/v68/github"
+
 	"github.com/spf13/cobra"
 )
 
@@ -159,7 +161,7 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 		return fmt.Errorf("error running make: %w", err)
 	}
 
-	var pullRequest *github.PullRequest
+	var pullRequest *ghi.PullRequest
 	if command == "downstream" {
 		pullRequest, err = getPullRequest(baseBranch, ref, gh)
 		if err != nil {
@@ -312,14 +314,14 @@ func runMake(downstreamRepo *source.Repo, command string, rnr ExecRunner) error 
 	return nil
 }
 
-func getPullRequest(baseBranch, ref string, gh GithubClient) (*github.PullRequest, error) {
+func getPullRequest(baseBranch, ref string, gh GithubClient) (*ghi.PullRequest, error) {
 	prs, err := gh.GetPullRequests("closed", baseBranch, "updated", "desc")
 	if err != nil {
 		return nil, err
 	}
 	for _, pr := range prs {
-		if pr.MergeCommitSha == ref {
-			return &pr, nil
+		if pr.GetMergeCommitSHA() == ref {
+			return pr, nil
 		}
 	}
 	return nil, fmt.Errorf("no pr found with merge commit sha %s and base branch %s", ref, baseBranch)
@@ -372,21 +374,22 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 	return commitSha, commitErr
 }
 
-func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequest, rnr ExecRunner) error {
+func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *ghi.PullRequest, rnr ExecRunner) error {
 	if err := rnr.PushDir(downstreamRepo.Path); err != nil {
 		return err
 	}
 	rnr.Mkdir(".changelog")
-	matches := changelogExp.FindStringSubmatch(pullRequest.Body)
+	prBody := pullRequest.GetBody()
+	matches := changelogExp.FindStringSubmatch(prBody)
 	if matches != nil && matches[1] != "none" {
-		if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
+		if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(prBody, -1), "\n")); err != nil {
 			return err
 		}
 	}
 	return rnr.PopDir()
 }
 
-func mergePullRequest(downstreamRepo, scratchRepo *source.Repo, scratchRepoSha string, pullRequest *github.PullRequest, rnr ExecRunner, gh GithubClient) error {
+func mergePullRequest(downstreamRepo, scratchRepo *source.Repo, scratchRepoSha string, pullRequest *ghi.PullRequest, rnr ExecRunner, gh GithubClient) error {
 	fmt.Printf(`Base: %s:%s
 Head: %s:%s
 `, downstreamRepo.Owner, downstreamRepo.Branch, scratchRepo.Owner, scratchRepo.Branch)
@@ -401,11 +404,11 @@ Head: %s:%s
 			scratchRepo.Owner,
 			scratchRepo.Branch),
 		"-m",
-		pullRequest.Title,
+		pullRequest.GetTitle(),
 		"-m",
-		pullRequest.Body,
+		pullRequest.GetBody(),
 		"-m",
-		"Derived from " + pullRequest.HTMLUrl,
+		"Derived from " + pullRequest.GetHTMLURL(),
 	}, nil)
 	if err != nil {
 		return err

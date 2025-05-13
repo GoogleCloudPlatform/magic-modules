@@ -397,7 +397,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		// short-circuit if service labels have already been added to the PR
 		hasServiceLabels := false
 		for _, label := range pullRequest.Labels {
-			if strings.HasPrefix(label.Name, "service/") {
+			if strings.HasPrefix(label.GetName(), "service/") {
 				hasServiceLabels = true
 			}
 		}
@@ -414,14 +414,13 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 		}
 	}
-
 	// Update breaking changes status on PR
 	breakingState := "success"
 	if len(uniqueBreakingChanges) > 0 {
 		breakingState = "failure"
 		// If fetching the PR failed, Labels will be empty
 		for _, label := range pullRequest.Labels {
-			if label.Name == allowBreakingChangesLabel {
+			if label.GetName() == allowBreakingChangesLabel {
 				breakingState = "success"
 				break
 			}
@@ -452,7 +451,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		if len(missingServiceLabels) > 0 {
 			missingServiceLabelsState = "failure"
 			for _, label := range pullRequest.Labels {
-				if label.Name == allowMissingServiceLabelsLabel {
+				if label.GetName() == allowMissingServiceLabelsLabel {
 					missingServiceLabelsState = "success"
 					break
 				}

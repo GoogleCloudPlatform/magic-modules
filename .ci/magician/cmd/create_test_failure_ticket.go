@@ -424,12 +424,12 @@ func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailu
 	ticketLabels = append(ticketLabels, labels...)
 
 	issueRquest := &github.IssueRequest{
-		Title:  github.String(issueTitle),
-		Body:   github.String(issueBody),
+		Title:  github.Ptr(issueTitle),
+		Body:   github.Ptr(issueBody),
 		Labels: &ticketLabels,
 		// Milestone: Near-Term Goals
 		// https://github.com/hashicorp/terraform-provider-google/milestone/11
-		Milestone: github.Int(11),
+		Milestone: github.Ptr(11),
 	}
 
 	_, _, err = gh.Issues.Create(ctx, GithubOwner, GithubRepo, issueRquest)

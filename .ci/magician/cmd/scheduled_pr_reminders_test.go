@@ -6,7 +6,7 @@ import (
 
 	membership "magician/github"
 
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v68/github"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,7 +24,7 @@ func TestNotificationState(t *testing.T) {
 		// expectState: waitingForReviewerAssignment
 		"no review requests, and no reviews": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			expectState: waitingForReviewerAssignment,
@@ -32,17 +32,17 @@ func TestNotificationState(t *testing.T) {
 		},
 		"request for non-core reviewer, and no reviews": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 				RequestedReviewers: []*github.User{
-					&github.User{Login: github.String("reviewer")},
+					&github.User{Login: github.Ptr("reviewer")},
 				},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String("reviewer")},
+					RequestedReviewer: &github.User{Login: github.Ptr("reviewer")},
 				},
 			},
 			expectState: waitingForReviewerAssignment,
@@ -50,17 +50,17 @@ func TestNotificationState(t *testing.T) {
 		},
 		"request for team reviewer, and no reviews": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 				RequestedTeams: []*github.Team{
-					&github.Team{Name: github.String("terraform-team")},
+					&github.Team{Name: github.Ptr("terraform-team")},
 				},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:         github.String("review_requested"),
+					Event:         github.Ptr("review_requested"),
 					CreatedAt:     &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedTeam: &github.Team{Name: github.String("terraform-team")},
+					RequestedTeam: &github.Team{Name: github.Ptr("terraform-team")},
 				},
 			},
 			expectState: waitingForReviewerAssignment,
@@ -68,22 +68,22 @@ func TestNotificationState(t *testing.T) {
 		},
 		"request for team reviewer which was later removed, and no reviews": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 				RequestedTeams: []*github.Team{
-					&github.Team{Name: github.String("terraform-team")},
+					&github.Team{Name: github.Ptr("terraform-team")},
 				},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_request_removed"),
+					Event:             github.Ptr("review_request_removed"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			expectState: waitingForReviewerAssignment,
@@ -93,14 +93,14 @@ func TestNotificationState(t *testing.T) {
 		// expectState: waitingForReview
 		"no reviews": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			expectState: waitingForReview,
@@ -108,24 +108,24 @@ func TestNotificationState(t *testing.T) {
 		},
 		"review requested, removed, and rerequested, with no reviews": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_request_removed"),
+					Event:             github.Ptr("review_request_removed"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			expectState: waitingForReview,
@@ -133,45 +133,45 @@ func TestNotificationState(t *testing.T) {
 		},
 		"no reviews since latest review request": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(secondCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(firstCoreReviewer)},
-					State:       github.String("APPROVED"),
+					User:        &github.User{Login: github.Ptr(firstCoreReviewer)},
+					State:       github.Ptr("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(firstCoreReviewer)},
-					State:       github.String("CHANGES_REQUESTED"),
+					User:        &github.User{Login: github.Ptr(firstCoreReviewer)},
+					State:       github.Ptr("CHANGES_REQUESTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(firstCoreReviewer)},
-					State:       github.String("COMMENTED"),
+					User:        &github.User{Login: github.Ptr(firstCoreReviewer)},
+					State:       github.Ptr("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 5, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(firstCoreReviewer)},
-					State:       github.String("DISMISSED"),
+					User:        &github.User{Login: github.Ptr(firstCoreReviewer)},
+					State:       github.Ptr("DISMISSED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 6, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -180,20 +180,20 @@ func TestNotificationState(t *testing.T) {
 		},
 		"ignore reviews from deleted accounts": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
 					User:        nil,
-					State:       github.String("APPROVED"),
+					State:       github.Ptr("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -204,35 +204,35 @@ func TestNotificationState(t *testing.T) {
 		// waitingForContributor
 		"change request followed by comment review from same reviewer": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(secondCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(secondCoreReviewer)},
-					State:       github.String("APPROVED"),
+					User:        &github.User{Login: github.Ptr(secondCoreReviewer)},
+					State:       github.Ptr("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(secondCoreReviewer)},
-					State:       github.String("CHANGES_REQUESTED"),
+					User:        &github.User{Login: github.Ptr(secondCoreReviewer)},
+					State:       github.Ptr("CHANGES_REQUESTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(secondCoreReviewer)},
-					State:       github.String("COMMENTED"),
+					User:        &github.User{Login: github.Ptr(secondCoreReviewer)},
+					State:       github.Ptr("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 3, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -241,30 +241,30 @@ func TestNotificationState(t *testing.T) {
 		},
 		"approved review with a change request review": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(secondCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(firstCoreReviewer)},
-					State:       github.String("APPROVED"),
+					User:        &github.User{Login: github.Ptr(firstCoreReviewer)},
+					State:       github.Ptr("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(secondCoreReviewer)},
-					State:       github.String("CHANGES_REQUESTED"),
+					User:        &github.User{Login: github.Ptr(secondCoreReviewer)},
+					State:       github.Ptr("CHANGES_REQUESTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -273,30 +273,30 @@ func TestNotificationState(t *testing.T) {
 		},
 		"approved review followed by change request review from same user": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(secondCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(secondCoreReviewer)},
-					State:       github.String("APPROVED"),
+					User:        &github.User{Login: github.Ptr(secondCoreReviewer)},
+					State:       github.Ptr("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(secondCoreReviewer)},
-					State:       github.String("CHANGES_REQUESTED"),
+					User:        &github.User{Login: github.Ptr(secondCoreReviewer)},
+					State:       github.Ptr("CHANGES_REQUESTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -307,35 +307,35 @@ func TestNotificationState(t *testing.T) {
 		// expectState: waitingForMerge
 		"approved review on its own": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(secondCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(secondCoreReviewer)},
-					State:       github.String("APPROVED"),
+					User:        &github.User{Login: github.Ptr(secondCoreReviewer)},
+					State:       github.Ptr("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 3, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(secondCoreReviewer)},
-					State:       github.String("COMMENTED"),
+					User:        &github.User{Login: github.Ptr(secondCoreReviewer)},
+					State:       github.Ptr("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(secondCoreReviewer)},
-					State:       github.String("CHANGES_REQUESTED"),
+					User:        &github.User{Login: github.Ptr(secondCoreReviewer)},
+					State:       github.Ptr("CHANGES_REQUESTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -344,30 +344,30 @@ func TestNotificationState(t *testing.T) {
 		},
 		"approved review with a comment review": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(secondCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(firstCoreReviewer)},
-					State:       github.String("APPROVED"),
+					User:        &github.User{Login: github.Ptr(firstCoreReviewer)},
+					State:       github.Ptr("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(secondCoreReviewer)},
-					State:       github.String("COMMENTED"),
+					User:        &github.User{Login: github.Ptr(secondCoreReviewer)},
+					State:       github.Ptr("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -376,30 +376,30 @@ func TestNotificationState(t *testing.T) {
 		},
 		"approved review followed by comment review from same user": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(secondCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(secondCoreReviewer)},
-					State:       github.String("APPROVED"),
+					User:        &github.User{Login: github.Ptr(secondCoreReviewer)},
+					State:       github.Ptr("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(secondCoreReviewer)},
-					State:       github.String("COMMENTED"),
+					User:        &github.User{Login: github.Ptr(secondCoreReviewer)},
+					State:       github.Ptr("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -408,35 +408,35 @@ func TestNotificationState(t *testing.T) {
 		},
 		"approved review followed by dismissed review from same user": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(secondCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(secondCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(firstCoreReviewer)},
-					State:       github.String("APPROVED"),
+					User:        &github.User{Login: github.Ptr(firstCoreReviewer)},
+					State:       github.Ptr("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(firstCoreReviewer)},
-					State:       github.String("DISMISSED"),
+					User:        &github.User{Login: github.Ptr(firstCoreReviewer)},
+					State:       github.Ptr("DISMISSED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 2, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(secondCoreReviewer)},
-					State:       github.String("COMMENTED"),
+					User:        &github.User{Login: github.Ptr(secondCoreReviewer)},
+					State:       github.Ptr("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 2, 3, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -445,17 +445,17 @@ func TestNotificationState(t *testing.T) {
 		},
 		"ready_for_review event after creation": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:     github.String("ready_for_review"),
+					Event:     github.Ptr("ready_for_review"),
 					CreatedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -465,18 +465,18 @@ func TestNotificationState(t *testing.T) {
 
 		"ready_for_review event before review request": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:     github.String("ready_for_review"),
+					Event:     github.Ptr("ready_for_review"),
 					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			expectState: waitingForReview,
@@ -485,24 +485,24 @@ func TestNotificationState(t *testing.T) {
 
 		"review after ready_for_review": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:     github.String("ready_for_review"),
+					Event:     github.Ptr("ready_for_review"),
 					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(firstCoreReviewer)},
-					State:       github.String("APPROVED"),
+					User:        &github.User{Login: github.Ptr(firstCoreReviewer)},
+					State:       github.Ptr("APPROVED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -511,24 +511,24 @@ func TestNotificationState(t *testing.T) {
 		},
 		"changes_requested after ready_for_review": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)}, // Earlier request
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:     github.String("ready_for_review"),
+					Event:     github.Ptr("ready_for_review"),
 					CreatedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(firstCoreReviewer)},
-					State:       github.String("CHANGES_REQUESTED"),
+					User:        &github.User{Login: github.Ptr(firstCoreReviewer)},
+					State:       github.Ptr("CHANGES_REQUESTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)}, // Early changes requested
 				},
 			},
@@ -538,24 +538,24 @@ func TestNotificationState(t *testing.T) {
 
 		"changes_requested before ready_for_review": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:     github.String("ready_for_review"),
+					Event:     github.Ptr("ready_for_review"),
 					CreatedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)}, // Earlier ready
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(firstCoreReviewer)},
-					State:       github.String("CHANGES_REQUESTED"),
+					User:        &github.User{Login: github.Ptr(firstCoreReviewer)},
+					State:       github.Ptr("CHANGES_REQUESTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -565,24 +565,24 @@ func TestNotificationState(t *testing.T) {
 
 		"comment review after ready_for_review": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:     github.String("ready_for_review"),
+					Event:     github.Ptr("ready_for_review"),
 					CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(firstCoreReviewer)},
-					State:       github.String("COMMENTED"),
+					User:        &github.User{Login: github.Ptr(firstCoreReviewer)},
+					State:       github.Ptr("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -592,28 +592,28 @@ func TestNotificationState(t *testing.T) {
 
 		"multiple ready_for_review events": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				&github.IssueEvent{
-					Event:     github.String("ready_for_review"),
+					Event:     github.Ptr("ready_for_review"),
 					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
 				},
 				&github.IssueEvent{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 				&github.IssueEvent{
-					Event:     github.String("ready_for_review"),
+					Event:     github.Ptr("ready_for_review"),
 					CreatedAt: &github.Timestamp{time.Date(2024, 1, 5, 0, 0, 0, 0, time.UTC)}, // Later ready_for_review
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				&github.PullRequestReview{
-					User:        &github.User{Login: github.String(firstCoreReviewer)},
-					State:       github.String("CHANGES_REQUESTED"),
+					User:        &github.User{Login: github.Ptr(firstCoreReviewer)},
+					State:       github.Ptr("CHANGES_REQUESTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -622,25 +622,25 @@ func TestNotificationState(t *testing.T) {
 		},
 		"ignore reviews from PR author": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				{
-					User:        &github.User{Login: github.String("author")}, // PR author's review
-					State:       github.String("COMMENTED"),
+					User:        &github.User{Login: github.Ptr("author")}, // PR author's review
+					State:       github.Ptr("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
 				},
 				{
-					User:        &github.User{Login: github.String("author")}, // PR author's review
-					State:       github.String("CHANGES_REQUESTED"),
+					User:        &github.User{Login: github.Ptr("author")}, // PR author's review
+					State:       github.Ptr("CHANGES_REQUESTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -651,25 +651,25 @@ func TestNotificationState(t *testing.T) {
 		// Add case where both author and reviewer comment
 		"reviews from both author and reviewer": {
 			pullRequest: &github.PullRequest{
-				User:      &github.User{Login: github.String("author")},
+				User:      &github.User{Login: github.Ptr("author")},
 				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
 			},
 			issueEvents: []*github.IssueEvent{
 				{
-					Event:             github.String("review_requested"),
+					Event:             github.Ptr("review_requested"),
 					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
-					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+					RequestedReviewer: &github.User{Login: github.Ptr(firstCoreReviewer)},
 				},
 			},
 			reviews: []*github.PullRequestReview{
 				{
-					User:        &github.User{Login: github.String("author")}, // PR author's review
-					State:       github.String("COMMENTED"),
+					User:        &github.User{Login: github.Ptr("author")}, // PR author's review
+					State:       github.Ptr("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
 				},
 				{
-					User:        &github.User{Login: github.String(firstCoreReviewer)}, // Reviewer's comment
-					State:       github.String("COMMENTED"),
+					User:        &github.User{Login: github.Ptr(firstCoreReviewer)}, // Reviewer's comment
+					State:       github.Ptr("COMMENTED"),
 					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
 				},
 			},
@@ -881,7 +881,7 @@ func TestShouldNotify(t *testing.T) {
 		},
 		"waitingForMerge skip with label": {
 			pullRequest: &github.PullRequest{
-				Labels: []*github.Label{{Name: github.String("disable-review-reminders")}},
+				Labels: []*github.Label{{Name: github.Ptr("disable-review-reminders")}},
 			},
 			state:     waitingForMerge,
 			sinceDays: 5,
@@ -889,7 +889,7 @@ func TestShouldNotify(t *testing.T) {
 		},
 		"waitingForMerge ignore disable-automatic-closure": {
 			pullRequest: &github.PullRequest{
-				Labels: []*github.Label{{Name: github.String("disable-automatic-closure")}},
+				Labels: []*github.Label{{Name: github.Ptr("disable-automatic-closure")}},
 			},
 			state:     waitingForMerge,
 			sinceDays: 10,
@@ -935,7 +935,7 @@ func TestShouldNotify(t *testing.T) {
 		},
 		"waitingForReview skip with label": {
 			pullRequest: &github.PullRequest{
-				Labels: []*github.Label{{Name: github.String("disable-review-reminders")}},
+				Labels: []*github.Label{{Name: github.Ptr("disable-review-reminders")}},
 			},
 			state:     waitingForReview,
 			sinceDays: 5,
@@ -943,7 +943,7 @@ func TestShouldNotify(t *testing.T) {
 		},
 		"waitingForReview ignore disable-automatic-closure": {
 			pullRequest: &github.PullRequest{
-				Labels: []*github.Label{{Name: github.String("disable-automatic-closure")}},
+				Labels: []*github.Label{{Name: github.Ptr("disable-automatic-closure")}},
 			},
 			state:     waitingForReview,
 			sinceDays: 10,
@@ -995,7 +995,7 @@ func TestShouldNotify(t *testing.T) {
 		},
 		"waitingForContributor skip with label": {
 			pullRequest: &github.PullRequest{
-				Labels: []*github.Label{{Name: github.String("disable-automatic-closure")}},
+				Labels: []*github.Label{{Name: github.Ptr("disable-automatic-closure")}},
 			},
 			state:     waitingForContributor,
 			sinceDays: 10,
@@ -1003,7 +1003,7 @@ func TestShouldNotify(t *testing.T) {
 		},
 		"waitingForContributor ignore disable-review-reminders": {
 			pullRequest: &github.PullRequest{
-				Labels: []*github.Label{{Name: github.String("disable-review-reminders")}},
+				Labels: []*github.Label{{Name: github.Ptr("disable-review-reminders")}},
 			},
 			state:     waitingForContributor,
 			sinceDays: 10,
@@ -1034,11 +1034,11 @@ func TestFormatReminderComment(t *testing.T) {
 		// waitingForMerge
 		"waitingForMerge one week": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("pr-author")},
+				User: &github.User{Login: github.Ptr("pr-author")},
 				RequestedReviewers: []*github.User{
-					&github.User{Login: github.String(firstCoreReviewer)},
-					&github.User{Login: github.String(secondCoreReviewer)},
-					&github.User{Login: github.String("other-reviewer")},
+					&github.User{Login: github.Ptr(firstCoreReviewer)},
+					&github.User{Login: github.Ptr(secondCoreReviewer)},
+					&github.User{Login: github.Ptr("other-reviewer")},
 				},
 			},
 			state:     waitingForMerge,
@@ -1056,11 +1056,11 @@ func TestFormatReminderComment(t *testing.T) {
 		},
 		"waitingForMerge two weeks": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("pr-author")},
+				User: &github.User{Login: github.Ptr("pr-author")},
 				RequestedReviewers: []*github.User{
-					&github.User{Login: github.String(firstCoreReviewer)},
-					&github.User{Login: github.String(secondCoreReviewer)},
-					&github.User{Login: github.String("other-reviewer")},
+					&github.User{Login: github.Ptr(firstCoreReviewer)},
+					&github.User{Login: github.Ptr(secondCoreReviewer)},
+					&github.User{Login: github.Ptr("other-reviewer")},
 				},
 			},
 			state:     waitingForMerge,
@@ -1078,11 +1078,11 @@ func TestFormatReminderComment(t *testing.T) {
 		},
 		"waitingForMerge many weeks": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("pr-author")},
+				User: &github.User{Login: github.Ptr("pr-author")},
 				RequestedReviewers: []*github.User{
-					&github.User{Login: github.String(firstCoreReviewer)},
-					&github.User{Login: github.String(secondCoreReviewer)},
-					&github.User{Login: github.String("other-reviewer")},
+					&github.User{Login: github.Ptr(firstCoreReviewer)},
+					&github.User{Login: github.Ptr(secondCoreReviewer)},
+					&github.User{Login: github.Ptr("other-reviewer")},
 				},
 			},
 			state:     waitingForMerge,
@@ -1102,11 +1102,11 @@ func TestFormatReminderComment(t *testing.T) {
 		// waitingForReview
 		"waitingForReview three days": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("pr-author")},
+				User: &github.User{Login: github.Ptr("pr-author")},
 				RequestedReviewers: []*github.User{
-					&github.User{Login: github.String(firstCoreReviewer)},
-					&github.User{Login: github.String(secondCoreReviewer)},
-					&github.User{Login: github.String("other-reviewer")},
+					&github.User{Login: github.Ptr(firstCoreReviewer)},
+					&github.User{Login: github.Ptr(secondCoreReviewer)},
+					&github.User{Login: github.Ptr("other-reviewer")},
 				},
 			},
 			state:     waitingForReview,
@@ -1125,11 +1125,11 @@ func TestFormatReminderComment(t *testing.T) {
 		},
 		"waitingForReview one week": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("pr-author")},
+				User: &github.User{Login: github.Ptr("pr-author")},
 				RequestedReviewers: []*github.User{
-					&github.User{Login: github.String(firstCoreReviewer)},
-					&github.User{Login: github.String(secondCoreReviewer)},
-					&github.User{Login: github.String("other-reviewer")},
+					&github.User{Login: github.Ptr(firstCoreReviewer)},
+					&github.User{Login: github.Ptr(secondCoreReviewer)},
+					&github.User{Login: github.Ptr("other-reviewer")},
 				},
 			},
 			state:     waitingForReview,
@@ -1148,11 +1148,11 @@ func TestFormatReminderComment(t *testing.T) {
 		},
 		"waitingForReview two weeks": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("pr-author")},
+				User: &github.User{Login: github.Ptr("pr-author")},
 				RequestedReviewers: []*github.User{
-					&github.User{Login: github.String(firstCoreReviewer)},
-					&github.User{Login: github.String(secondCoreReviewer)},
-					&github.User{Login: github.String("other-reviewer")},
+					&github.User{Login: github.Ptr(firstCoreReviewer)},
+					&github.User{Login: github.Ptr(secondCoreReviewer)},
+					&github.User{Login: github.Ptr("other-reviewer")},
 				},
 			},
 			state:     waitingForReview,
@@ -1171,11 +1171,11 @@ func TestFormatReminderComment(t *testing.T) {
 		},
 		"waitingForReview three days with current reviewer": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("pr-author")},
+				User: &github.User{Login: github.Ptr("pr-author")},
 				RequestedReviewers: []*github.User{
-					&github.User{Login: github.String(firstCoreReviewer)},
-					&github.User{Login: github.String(secondCoreReviewer)},
-					&github.User{Login: github.String("other-reviewer")},
+					&github.User{Login: github.Ptr(firstCoreReviewer)},
+					&github.User{Login: github.Ptr(secondCoreReviewer)},
+					&github.User{Login: github.Ptr("other-reviewer")},
 				},
 			},
 			state:     waitingForReview,
@@ -1197,11 +1197,11 @@ func TestFormatReminderComment(t *testing.T) {
 		// waitingForContributor
 		"waitingForContributor two weeks": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("pr-author")},
+				User: &github.User{Login: github.Ptr("pr-author")},
 				RequestedReviewers: []*github.User{
-					&github.User{Login: github.String(firstCoreReviewer)},
-					&github.User{Login: github.String(secondCoreReviewer)},
-					&github.User{Login: github.String("other-reviewer")},
+					&github.User{Login: github.Ptr(firstCoreReviewer)},
+					&github.User{Login: github.Ptr(secondCoreReviewer)},
+					&github.User{Login: github.Ptr("other-reviewer")},
 				},
 			},
 			state:     waitingForContributor,
@@ -1219,11 +1219,11 @@ func TestFormatReminderComment(t *testing.T) {
 		},
 		"waitingForContributor four weeks": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("pr-author")},
+				User: &github.User{Login: github.Ptr("pr-author")},
 				RequestedReviewers: []*github.User{
-					&github.User{Login: github.String(firstCoreReviewer)},
-					&github.User{Login: github.String(secondCoreReviewer)},
-					&github.User{Login: github.String("other-reviewer")},
+					&github.User{Login: github.Ptr(firstCoreReviewer)},
+					&github.User{Login: github.Ptr(secondCoreReviewer)},
+					&github.User{Login: github.Ptr("other-reviewer")},
 				},
 			},
 			state:     waitingForContributor,
@@ -1241,11 +1241,11 @@ func TestFormatReminderComment(t *testing.T) {
 		},
 		"waitingForContributor 28 days": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("pr-author")},
+				User: &github.User{Login: github.Ptr("pr-author")},
 				RequestedReviewers: []*github.User{
-					&github.User{Login: github.String(firstCoreReviewer)},
-					&github.User{Login: github.String(secondCoreReviewer)},
-					&github.User{Login: github.String("other-reviewer")},
+					&github.User{Login: github.Ptr(firstCoreReviewer)},
+					&github.User{Login: github.Ptr(secondCoreReviewer)},
+					&github.User{Login: github.Ptr("other-reviewer")},
 				},
 			},
 			state:     waitingForContributor,
@@ -1263,11 +1263,11 @@ func TestFormatReminderComment(t *testing.T) {
 		},
 		"waitingForContributor six weeks": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("pr-author")},
+				User: &github.User{Login: github.Ptr("pr-author")},
 				RequestedReviewers: []*github.User{
-					&github.User{Login: github.String(firstCoreReviewer)},
-					&github.User{Login: github.String(secondCoreReviewer)},
-					&github.User{Login: github.String("other-reviewer")},
+					&github.User{Login: github.Ptr(firstCoreReviewer)},
+					&github.User{Login: github.Ptr(secondCoreReviewer)},
+					&github.User{Login: github.Ptr("other-reviewer")},
 				},
 			},
 			state:           waitingForContributor,
@@ -1283,11 +1283,11 @@ func TestFormatReminderComment(t *testing.T) {
 		},
 		"waitingForContributor seven weeks": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String("pr-author")},
+				User: &github.User{Login: github.Ptr("pr-author")},
 				RequestedReviewers: []*github.User{
-					&github.User{Login: github.String(firstCoreReviewer)},
-					&github.User{Login: github.String(secondCoreReviewer)},
-					&github.User{Login: github.String("other-reviewer")},
+					&github.User{Login: github.Ptr(firstCoreReviewer)},
+					&github.User{Login: github.Ptr(secondCoreReviewer)},
+					&github.User{Login: github.Ptr("other-reviewer")},
 				},
 			},
 			state:           waitingForContributor,
@@ -1303,11 +1303,11 @@ func TestFormatReminderComment(t *testing.T) {
 		},
 		"waitingForReview with author as core reviewer": {
 			pullRequest: &github.PullRequest{
-				User: &github.User{Login: github.String(firstCoreReviewer)}, // PR author is a core reviewer
+				User: &github.User{Login: github.Ptr(firstCoreReviewer)}, // PR author is a core reviewer
 				RequestedReviewers: []*github.User{
-					&github.User{Login: github.String(firstCoreReviewer)},  // Review requested from author
-					&github.User{Login: github.String(secondCoreReviewer)}, // Review requested from another core reviewer
-					&github.User{Login: github.String("other-reviewer")},   // Non-core reviewer
+					&github.User{Login: github.Ptr(firstCoreReviewer)},  // Review requested from author
+					&github.User{Login: github.Ptr(secondCoreReviewer)}, // Review requested from another core reviewer
+					&github.User{Login: github.Ptr("other-reviewer")},   // Non-core reviewer
 				},
 			},
 			state:     waitingForReview,
@@ -1396,7 +1396,7 @@ func TestShouldClose(t *testing.T) {
 		},
 		"waitingForContributor skip with label": {
 			pullRequest: &github.PullRequest{
-				Labels: []*github.Label{{Name: github.String("disable-automatic-closure")}},
+				Labels: []*github.Label{{Name: github.Ptr("disable-automatic-closure")}},
 			},
 			state:     waitingForContributor,
 			sinceDays: 30,
@@ -1404,7 +1404,7 @@ func TestShouldClose(t *testing.T) {
 		},
 		"waitingForContributor ignore disable-review-reminders": {
 			pullRequest: &github.PullRequest{
-				Labels: []*github.Label{{Name: github.String("disable-review-reminders")}},
+				Labels: []*github.Label{{Name: github.Ptr("disable-review-reminders")}},
 			},
 			state:     waitingForContributor,
 			sinceDays: 30,

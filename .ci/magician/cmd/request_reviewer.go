@@ -58,7 +58,7 @@ func execRequestReviewer(prNumber string, gh GithubClient) error {
 		return err
 	}
 
-	author := pullRequest.User.Login
+	author := pullRequest.User.GetLogin()
 	if !github.IsCoreContributor(author) {
 		fmt.Println("Not core contributor - assigning reviewer")
 

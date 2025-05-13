@@ -5,7 +5,7 @@
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
 *
-*     http://www.apache.org/licenses/LICENSE-2.0
+* http://www.apache.org/licenses/LICENSE-2.0
 *
 * Unless required by applicable law or agreed to in writing, software
 * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,54 +19,66 @@ import (
 	"magician/github"
 	"reflect"
 	"testing"
+
+	ghi "github.com/google/go-github/v68/github"
 )
 
 func TestExecMembershipChecker_CoreContributorFlow(t *testing.T) {
-	gh := &mockGithub{
-		pullRequest: github.PullRequest{
-			User: github.User{
-				Login: "core_author",
+	mockGH := &mockGithub{
+		pullRequest: &ghi.PullRequest{
+			User: &ghi.User{
+				Login: ghi.Ptr("core_author"),
 			},
 		},
 		userType:      github.CoreContributorUserType,
 		calledMethods: make(map[string][][]any),
 	}
+
 	cb := &mockCloudBuild{
 		calledMethods: make(map[string][][]any),
 	}
 
-	execMembershipChecker("pr1", "sha1", gh, cb)
+	execMembershipChecker("pr1", "sha1", mockGH, cb)
 
 	method := "ApproveDownstreamGenAndTest"
 	expected := [][]any{{"pr1", "sha1"}}
+
 	if calls, ok := cb.calledMethods[method]; !ok {
 		t.Fatal("Community checker not approved for core author")
 	} else if !reflect.DeepEqual(calls, expected) {
 		t.Fatalf("Wrong calls for %s, got %v, expected %v", method, calls, expected)
 	}
-
 }
 
 func TestExecMembershipChecker_GooglerFlow(t *testing.T) {
-	gh := &mockGithub{
-		pullRequest: github.PullRequest{
-			User: github.User{
-				Login: "googler_author",
+	randomReviewer := github.GetRandomReviewer(nil)
+
+	mockGH := &mockGithub{
+		pullRequest: &ghi.PullRequest{
+			User: &ghi.User{
+				Login: ghi.Ptr("googler_author"),
 			},
 		},
-		userType:           github.GooglerUserType,
-		calledMethods:      make(map[string][][]any),
-		requestedReviewers: []github.User{github.User{Login: "reviewer1"}},
-		previousReviewers:  []github.User{github.User{Login: github.GetRandomReviewer(nil)}, github.User{Login: "reviewer3"}},
+		userType:      github.GooglerUserType,
+		calledMethods: make(map[string][][]any),
+		requestedReviewers: []*ghi.User{
+			{Login: ghi.Ptr("reviewer1")},
+		},
+		previousReviewers: []*ghi.User{
+			{Login: ghi.Ptr(randomReviewer)},
+			{Login: ghi.Ptr("reviewer3")},
+		},
 	}
+
 	cb := &mockCloudBuild{
 		calledMethods: make(map[string][][]any),
 	}
 
-	execMembershipChecker("pr1", "sha1", gh, cb)
+	execMembershipChecker("pr1", "sha1", mockGH, cb)
 
 	method := "ApproveDownstreamGenAndTest"
 	expected := [][]any{{"pr1", "sha1"}}
+
 	if calls, ok := cb.calledMethods[method]; !ok {
 		t.Fatal("Community checker not approved for googler")
 	} else if !reflect.DeepEqual(calls, expected) {
@@ -75,51 +87,63 @@ func TestExecMembershipChecker_GooglerFlow(t *testing.T) {
 }
 
 func TestExecMembershipChecker_AmbiguousUserFlow(t *testing.T) {
-	gh := &mockGithub{
-		pullRequest: github.PullRequest{
-			User: github.User{
-				Login: "ambiguous_author",
+	randomReviewer := github.GetRandomReviewer(nil)
+
+	mockGH := &mockGithub{
+		pullRequest: &ghi.PullRequest{
+			User: &ghi.User{
+				Login: ghi.Ptr("ambiguous_author"),
 			},
 		},
-		userType:           github.CommunityUserType,
-		calledMethods:      make(map[string][][]any),
-		requestedReviewers: []github.User{github.User{Login: github.GetRandomReviewer(nil)}},
-		previousReviewers:  []github.User{github.User{Login: github.GetRandomReviewer(nil)}, github.User{Login: "reviewer3"}},
+		userType:      github.CommunityUserType,
+		calledMethods: make(map[string][][]any),
+		requestedReviewers: []*ghi.User{
+			{Login: ghi.Ptr(randomReviewer)},
+		},
+		previousReviewers: []*ghi.User{
+			{Login: ghi.Ptr(randomReviewer)},
+			{Login: ghi.Ptr("reviewer3")},
+		},
 	}
+
 	cb := &mockCloudBuild{
 		calledMethods: make(map[string][][]any),
 	}
 
-	execMembershipChecker("pr1", "sha1", gh, cb)
+	execMembershipChecker("pr1", "sha1", mockGH, cb)
 
 	method := "AddLabels"
 	expected := [][]any{{"pr1", []string{"awaiting-approval"}}}
-	if calls, ok := gh.calledMethods[method]; !ok {
+
+	if calls, ok := mockGH.calledMethods[method]; !ok {
 		t.Fatal("Label wasn't posted to pull request")
 	} else if !reflect.DeepEqual(calls, expected) {
 		t.Fatalf("Wrong calls for %s, got %v, expected %v", method, calls, expected)
 	}
 
-	if _, ok := gh.calledMethods["ApproveDownstreamGenAndTest"]; ok {
+	if _, ok := mockGH.calledMethods["ApproveDownstreamGenAndTest"]; ok {
 		t.Fatal("Incorrectly approved community checker for ambiguous user")
 	}
 }
 
 func TestExecMembershipChecker_CommentForNewPrimaryReviewer(t *testing.T) {
-	gh := &mockGithub{
-		pullRequest: github.PullRequest{
-			User: github.User{
-				Login: "googler_author",
+	mockGH := &mockGithub{
+		pullRequest: &ghi.PullRequest{
+			User: &ghi.User{
+				Login: ghi.Ptr("googler_author"),
 			},
 		},
 		userType:           github.GooglerUserType,
 		calledMethods:      make(map[string][][]any),
-		requestedReviewers: []github.User{},
-		previousReviewers:  []github.User{github.User{Login: "reviewer3"}},
+		requestedReviewers: []*ghi.User{},
+		previousReviewers: []*ghi.User{
+			{Login: ghi.Ptr("reviewer3")},
+		},
 	}
+
 	cb := &mockCloudBuild{
 		calledMethods: make(map[string][][]any),
 	}
 
-	execMembershipChecker("pr1", "sha1", gh, cb)
+	execMembershipChecker("pr1", "sha1", mockGH, cb)
 }

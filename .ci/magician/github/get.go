@@ -17,156 +17,117 @@ package github
 
 import (
 	"fmt"
-	utils "magician/utility"
-	"time"
+	"magician/utility"
+
+	gh "github.com/google/go-github/v68/github"
 )
 
-type User struct {
-	Login string `json:"login"`
+const (
+	defaultOwner = "GoogleCloudPlatform"
+	defaultRepo  = "magic-modules"
+)
+
+// GetPullRequest fetches a single pull request
+func (c *Client) GetPullRequest(prNumber string) (*gh.PullRequest, error) {
+	num := utility.ParseInt(prNumber)
+	pr, _, err := c.gh.PullRequests.Get(c.ctx, defaultOwner, defaultRepo, num)
+	return pr, err
 }
 
-type Label struct {
-	Name string `json:"name"`
-}
-
-type PullRequest struct {
-	HTMLUrl        string  `json:"html_url"`
-	Number         int     `json:"number"`
-	Title          string  `json:"title"`
-	User           User    `json:"user"`
-	Body           string  `json:"body"`
-	Labels         []Label `json:"labels"`
-	MergeCommitSha string  `json:"merge_commit_sha"`
-	Merged         bool    `json:"merged"`
-}
-
-type PullRequestComment struct {
-	User      User      `json:"user"`
-	Body      string    `json:"body"`
-	ID        int       `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-func (gh *Client) GetPullRequest(prNumber string) (PullRequest, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s", prNumber)
-
-	var pullRequest PullRequest
-
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, &pullRequest, nil)
-
-	return pullRequest, err
-}
-
-func (gh *Client) GetPullRequests(state, base, sort, direction string) ([]PullRequest, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=%s&base=%s&sort=%s&direction=%s", state, base, sort, direction)
-
-	var pullRequests []PullRequest
-
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, &pullRequests, nil)
-
-	return pullRequests, err
-}
-
-func (gh *Client) GetPullRequestRequestedReviewers(prNumber string) ([]User, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
-
-	var requestedReviewers struct {
-		Users []User `json:"users"`
+// GetPullRequests fetches multiple pull requests
+func (c *Client) GetPullRequests(state, base, sort, direction string) ([]*gh.PullRequest, error) {
+	opts := &gh.PullRequestListOptions{
+		State:     state,
+		Base:      base,
+		Sort:      sort,
+		Direction: direction,
 	}
 
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, &requestedReviewers, nil)
+	prs, _, err := c.gh.PullRequests.List(c.ctx, defaultOwner, defaultRepo, opts)
+	return prs, err
+}
+
+// GetPullRequestRequestedReviewers gets requested reviewers for a PR
+func (c *Client) GetPullRequestRequestedReviewers(prNumber string) ([]*gh.User, error) {
+	num := utility.ParseInt(prNumber)
+	reviewers, _, err := c.gh.PullRequests.ListReviewers(c.ctx, defaultOwner, defaultRepo, num, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return requestedReviewers.Users, nil
+	return reviewers.Users, nil
 }
 
-func (gh *Client) GetPullRequestPreviousReviewers(prNumber string) ([]User, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/reviews", prNumber)
-
-	var reviews []struct {
-		User User `json:"user"`
-	}
-
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, &reviews, nil)
+// GetPullRequestPreviousReviewers gets previous reviewers for a PR
+func (c *Client) GetPullRequestPreviousReviewers(prNumber string) ([]*gh.User, error) {
+	num := utility.ParseInt(prNumber)
+	reviews, _, err := c.gh.PullRequests.ListReviews(c.ctx, defaultOwner, defaultRepo, num, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	previousAssignedReviewers := map[string]User{}
+	// Use a map to deduplicate reviewers
+	reviewerMap := make(map[string]*gh.User)
+
 	for _, review := range reviews {
-		previousAssignedReviewers[review.User.Login] = review.User
+		if review.User != nil && review.User.Login != nil {
+			login := review.User.GetLogin()
+			reviewerMap[login] = review.User
+		}
 	}
 
-	result := []User{}
-	for _, user := range previousAssignedReviewers {
-		result = append(result, user)
+	// Convert map to slice
+	reviewers := make([]*gh.User, 0, len(reviewerMap))
+	for _, user := range reviewerMap {
+		reviewers = append(reviewers, user)
 	}
 
-	return result, nil
+	return reviewers, nil
 }
 
-func (gh *Client) GetCommitMessage(owner, repo, sha string) (string, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/commits/%s", owner, repo, sha)
-
-	var commit struct {
-		Commit struct {
-			Message string `json:"message"`
-		} `json:"commit"`
-	}
-
-	err := utils.RequestCall(url, "GET", gh.token, &commit, nil)
+// GetCommitMessage gets a commit message
+func (c *Client) GetCommitMessage(owner, repo, sha string) (string, error) {
+	commit, _, err := c.gh.Repositories.GetCommit(c.ctx, owner, repo, sha, nil)
 	if err != nil {
 		return "", err
 	}
 
-	return commit.Commit.Message, nil
-}
-
-func (gh *Client) GetPullRequestComments(prNumber string) ([]PullRequestComment, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/comments", prNumber)
-
-	var comments []PullRequestComment
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, &comments, nil)
-	if err != nil {
-		return nil, err
-	}
-	return comments, nil
-}
-
-func (gh *Client) GetTeamMembers(organization, team string) ([]User, error) {
-	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/members", organization, team)
-
-	var members []User
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, &members, nil)
-	if err != nil {
-		return nil, err
-	}
-	return members, nil
-}
-
-func (gh *Client) IsOrgMember(author, org string) bool {
-	url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, author)
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, nil, nil)
-	return err == nil
-}
-
-func (gh *Client) IsTeamMember(organization, teamSlug, username string) bool {
-	type TeamMembership struct {
-		URL   string `json:"url"`
-		Role  string `json:"role"`
-		State string `json:"state"`
+	if commit.Commit != nil && commit.Commit.Message != nil {
+		return *commit.Commit.Message, nil
 	}
 
-	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/memberships/%s", organization, teamSlug, username)
-	var membership TeamMembership
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, &membership, nil)
+	return "", fmt.Errorf("no commit message found")
+}
 
+// GetPullRequestComments gets comments on a PR
+func (c *Client) GetPullRequestComments(prNumber string) ([]*gh.IssueComment, error) {
+	num := utility.ParseInt(prNumber)
+	comments, _, err := c.gh.Issues.ListComments(c.ctx, defaultOwner, defaultRepo, num, nil)
+	return comments, err
+}
+
+// GetTeamMembers gets members of a team
+func (c *Client) GetTeamMembers(organization, team string) ([]*gh.User, error) {
+	members, _, err := c.gh.Teams.ListTeamMembersBySlug(c.ctx, organization, team, nil)
+	return members, err
+}
+
+// IsOrgMember checks if a user is a member of an organization
+func (c *Client) IsOrgMember(username, org string) bool {
+	isMember, _, err := c.gh.Organizations.IsMember(c.ctx, org, username)
 	if err != nil {
 		return false
 	}
 
-	// User is considered a member if state is "active"
-	return membership.State == "active"
+	return isMember
+}
+
+// IsTeamMember checks if a user is a member of a team
+func (c *Client) IsTeamMember(organization, teamSlug, username string) bool {
+	membership, _, err := c.gh.Teams.GetTeamMembershipBySlug(c.ctx, organization, teamSlug, username)
+	if err != nil {
+		return false
+	}
+
+	return membership != nil && membership.State != nil && *membership.State == "active"
 }

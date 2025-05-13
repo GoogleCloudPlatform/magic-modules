@@ -26,7 +26,7 @@ import (
 
 	membership "magician/github"
 
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v68/github"
 	"github.com/spf13/cobra"
 
 	"golang.org/x/exp/slices"
@@ -193,7 +193,7 @@ func execScheduledPrReminders(gh *github.Client, mgh GithubClient) error {
 					"magic-modules",
 					*pr.Number,
 					&github.IssueComment{
-						Body: github.String(reminderComment),
+						Body: github.Ptr(reminderComment),
 					},
 				)
 				if err != nil {
@@ -212,7 +212,7 @@ func execScheduledPrReminders(gh *github.Client, mgh GithubClient) error {
 					"magic-modules",
 					*pr.Number,
 					&github.IssueRequest{
-						State: github.String("closed"),
+						State: github.Ptr("closed"),
 					},
 				)
 				if err != nil {
@@ -324,14 +324,14 @@ func notificationState(pr *github.PullRequest, issueEventsDesc []*github.IssueEv
 			continue
 		}
 		// Ignore reviews by non-core reviewers
-		if !membership.IsCoreReviewer(*review.User.Login) {
+		if !membership.IsCoreReviewer(review.User.GetLogin()) {
 			continue
 		}
 		// Ignore reviews by the PR author
-		if *review.User.Login == *pr.User.Login {
+		if review.User.GetLogin() == pr.User.GetLogin() {
 			continue
 		}
-		reviewer := *review.User.Login
+		reviewer := review.User.GetLogin()
 
 		// ignore any reviews by reviewers who had a later approval
 		if _, ok := ignoreBy[reviewer]; ok {
@@ -463,7 +463,7 @@ func businessDaysDiff(from, to time.Time) int {
 func shouldNotify(pr *github.PullRequest, state pullRequestReviewState, sinceDays int) bool {
 	labels := map[string]struct{}{}
 	for _, label := range pr.Labels {
-		labels[*label.Name] = struct{}{}
+		labels[label.GetName()] = struct{}{}
 	}
 	switch state {
 	case waitingForMerge:
@@ -511,8 +511,8 @@ func formatReminderComment(pullRequest *github.PullRequest, state pullRequestRev
 	if currentReviewer == "" {
 		// A core reviewer that isn't the author
 		for _, reviewer := range pullRequest.RequestedReviewers {
-			if membership.IsCoreReviewer(*reviewer.Login) && *reviewer.Login != *pullRequest.User.Login {
-				coreReviewers = append(coreReviewers, *reviewer.Login)
+			if membership.IsCoreReviewer(reviewer.GetLogin()) && reviewer.GetLogin() != pullRequest.User.GetLogin() {
+				coreReviewers = append(coreReviewers, reviewer.GetLogin())
 			}
 		}
 	} else {
@@ -520,7 +520,7 @@ func formatReminderComment(pullRequest *github.PullRequest, state pullRequestRev
 	}
 
 	data := reminderCommentData{
-		User:          *pullRequest.User.Login,
+		User:          pullRequest.User.GetLogin(),
 		SinceDays:     sinceDays,
 		CoreReviewers: coreReviewers,
 	}

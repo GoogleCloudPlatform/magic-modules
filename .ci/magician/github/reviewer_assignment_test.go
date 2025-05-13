@@ -21,6 +21,7 @@ import (
 	"testing"
 	"time"
 
+	gh "github.com/google/go-github/v68/github"
 	"golang.org/x/exp/slices"
 )
 
@@ -30,49 +31,50 @@ func TestChooseCoreReviewers(t *testing.T) {
 	}
 	firstCoreReviewer := AvailableReviewers(nil)[0]
 	secondCoreReviewer := AvailableReviewers(nil)[1]
+
 	cases := map[string]struct {
-		RequestedReviewers                               []User
-		PreviousReviewers                                []User
+		RequestedReviewers                               []*gh.User
+		PreviousReviewers                                []*gh.User
 		ExpectReviewersFromList, ExpectSpecificReviewers []string
 		ExpectPrimaryReviewer                            bool
 	}{
 		"no previous review requests assigns new reviewer from team": {
-			RequestedReviewers:      []User{},
-			PreviousReviewers:       []User{},
+			RequestedReviewers:      []*gh.User{},
+			PreviousReviewers:       []*gh.User{},
 			ExpectReviewersFromList: AvailableReviewers(nil),
 			ExpectPrimaryReviewer:   true,
 		},
 		"requested reviewer from team means that primary reviewer was already selected": {
-			RequestedReviewers:    []User{User{Login: firstCoreReviewer}},
-			PreviousReviewers:     []User{},
+			RequestedReviewers:    []*gh.User{ghUser(firstCoreReviewer)},
+			PreviousReviewers:     []*gh.User{},
 			ExpectPrimaryReviewer: false,
 		},
 		"requested off-team reviewer does not mean that primary reviewer was already selected": {
-			RequestedReviewers:    []User{User{Login: "foobar"}},
-			PreviousReviewers:     []User{},
+			RequestedReviewers:    []*gh.User{ghUser("foobar")},
+			PreviousReviewers:     []*gh.User{},
 			ExpectPrimaryReviewer: true,
 		},
 		"previously involved team member reviewers should have review requested and mean that primary reviewer was already selected": {
-			RequestedReviewers:      []User{},
-			PreviousReviewers:       []User{User{Login: firstCoreReviewer}},
+			RequestedReviewers:      []*gh.User{},
+			PreviousReviewers:       []*gh.User{ghUser(firstCoreReviewer)},
 			ExpectSpecificReviewers: []string{firstCoreReviewer},
 			ExpectPrimaryReviewer:   false,
 		},
 		"previously involved reviewers that are not team members are ignored": {
-			RequestedReviewers:      []User{},
-			PreviousReviewers:       []User{User{Login: "foobar"}},
+			RequestedReviewers:      []*gh.User{},
+			PreviousReviewers:       []*gh.User{ghUser("foobar")},
 			ExpectReviewersFromList: AvailableReviewers(nil),
 			ExpectPrimaryReviewer:   true,
 		},
 		"only previously involved team member reviewers will have review requested": {
-			RequestedReviewers:      []User{},
-			PreviousReviewers:       []User{User{Login: firstCoreReviewer}, User{Login: "foobar"}, User{Login: secondCoreReviewer}},
+			RequestedReviewers:      []*gh.User{},
+			PreviousReviewers:       []*gh.User{ghUser(firstCoreReviewer), ghUser("foobar"), ghUser(secondCoreReviewer)},
 			ExpectSpecificReviewers: []string{firstCoreReviewer, secondCoreReviewer},
 			ExpectPrimaryReviewer:   false,
 		},
 		"primary reviewer will not have review requested even if other team members previously reviewed": {
-			RequestedReviewers:      []User{User{Login: secondCoreReviewer}},
-			PreviousReviewers:       []User{User{Login: firstCoreReviewer}},
+			RequestedReviewers:      []*gh.User{ghUser(secondCoreReviewer)},
+			PreviousReviewers:       []*gh.User{ghUser(firstCoreReviewer)},
 			ExpectSpecificReviewers: []string{firstCoreReviewer},
 			ExpectPrimaryReviewer:   false,
 		},
@@ -103,6 +105,11 @@ func TestChooseCoreReviewers(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Helper function to create a github User struct
+func ghUser(login string) *gh.User {
+	return &gh.User{Login: gh.Ptr(login)}
 }
 
 func TestFormatReviewerComment(t *testing.T) {
@@ -141,51 +148,52 @@ func TestFormatReviewerComment(t *testing.T) {
 				t.Errorf("wanted comment to say tests will require approval; does not")
 			}
 		})
-
 	}
 }
 
 func TestFindReviewerComment(t *testing.T) {
+	now := time.Now()
+
 	cases := map[string]struct {
-		Comments        []PullRequestComment
+		Comments        []*gh.IssueComment
 		ExpectReviewer  string
-		ExpectCommentID int
+		ExpectCommentID int64
 	}{
 		"no reviewer comment": {
-			Comments: []PullRequestComment{
+			Comments: []*gh.IssueComment{
 				{
-					Body: "this is not a reviewer comment",
+					Body: gh.Ptr("this is not a reviewer comment"),
 				},
 			},
 			ExpectReviewer:  "",
 			ExpectCommentID: 0,
 		},
 		"reviewer comment": {
-			Comments: []PullRequestComment{
+			Comments: []*gh.IssueComment{
 				{
-					Body: FormatReviewerComment("trodge"),
-					ID:   1234,
+					Body: gh.Ptr(FormatReviewerComment("trodge")),
+					ID:   gh.Int64(1234),
 				},
 			},
 			ExpectReviewer:  "trodge",
 			ExpectCommentID: 1234,
 		},
 		"multiple reviewer comments": {
-			Comments: []PullRequestComment{
+			Comments: []*gh.IssueComment{
 				{
-					Body:      FormatReviewerComment("trodge"),
-					ID:        1234,
-					CreatedAt: time.Date(2023, 12, 1, 0, 0, 0, 0, time.UTC),
+					Body:      gh.Ptr(FormatReviewerComment("trodge")),
+					ID:        gh.Int64(1234),
+					CreatedAt: &gh.Timestamp{Time: now.Add(-48 * time.Hour)}, // 2 days ago
 				},
 				{
-					Body:      FormatReviewerComment("c2thorn"),
-					ID:        5678,
-					CreatedAt: time.Date(2023, 12, 3, 0, 0, 0, 0, time.UTC),
+					Body:      gh.Ptr(FormatReviewerComment("c2thorn")),
+					ID:        gh.Int64(5678),
+					CreatedAt: &gh.Timestamp{Time: now.Add(-24 * time.Hour)}, // 1 day ago
 				},
 				{
-					Body:      FormatReviewerComment("melinath"),
-					ID:        91011,
-					CreatedAt: time.Date(2023, 12, 2, 0, 0, 0, 0, time.UTC),
+					Body:      gh.Ptr(FormatReviewerComment("melinath")),
+					ID:        gh.Int64(91011),
+					CreatedAt: &gh.Timestamp{Time: now.Add(-36 * time.Hour)}, // 1.5 days ago
 				},
 			},
 			ExpectReviewer:  "c2thorn",
@@ -201,8 +209,13 @@ func TestFindReviewerComment(t *testing.T) {
 			if reviewer != tc.ExpectReviewer {
 				t.Errorf("wanted reviewer to be %s; got %s", tc.ExpectReviewer, reviewer)
 			}
-			if comment.ID != tc.ExpectCommentID {
-				t.Errorf("wanted comment ID to be %d; got %d", tc.ExpectCommentID, comment.ID)
+			if (comment == nil && tc.ExpectCommentID != 0) ||
+				(comment != nil && *comment.ID != tc.ExpectCommentID) {
+				var actualID int64
+				if comment != nil {
+					actualID = *comment.ID
+				}
+				t.Errorf("wanted comment ID to be %d; got %d", tc.ExpectCommentID, actualID)
 			}
 		})
 	}

@@ -76,7 +76,8 @@ func execReassignReviewer(prNumber, newPrimaryReviewer string, gh GithubClient) 
 
 	reviewerComment, currentReviewer := github.FindReviewerComment(comments)
 	if newPrimaryReviewer == "" {
-		newPrimaryReviewer = github.GetRandomReviewer([]string{currentReviewer, pullRequest.User.Login})
+		userLogin := pullRequest.User.GetLogin()
+		newPrimaryReviewer = github.GetRandomReviewer([]string{currentReviewer, userLogin})
 	}
 
 	if newPrimaryReviewer == "" {
@@ -100,7 +101,8 @@ func execReassignReviewer(prNumber, newPrimaryReviewer string, gh GithubClient) 
 			fmt.Printf("Failed to remove reviewer %s from pull request: %s\n", currentReviewer, err)
 		}
 		fmt.Println("Updating reviewer comment")
-		err := gh.UpdateComment(prNumber, comment, reviewerComment.ID)
+		reviewerComment := int(reviewerComment.GetID())
+		err := gh.UpdateComment(prNumber, comment, reviewerComment)
 		if err != nil {
 			return err
 		}

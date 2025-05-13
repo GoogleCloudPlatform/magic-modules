@@ -22,6 +22,8 @@ import (
 	"text/template"
 
 	_ "embed"
+
+	gh "github.com/google/go-github/v68/github"
 )
 
 var (
@@ -30,21 +32,21 @@ var (
 )
 
 // Returns a list of users to request review from, as well as a new primary reviewer if this is the first run.
-func ChooseCoreReviewers(requestedReviewers, previousReviewers []User) (reviewersToRequest []string, newPrimaryReviewer string) {
+func ChooseCoreReviewers(requestedReviewers, previousReviewers []*gh.User) (reviewersToRequest []string, newPrimaryReviewer string) {
 	hasPrimaryReviewer := false
 	newPrimaryReviewer = ""
 
 	for _, reviewer := range requestedReviewers {
-		if IsCoreReviewer(reviewer.Login) {
+		if IsCoreReviewer(reviewer.GetLogin()) {
 			hasPrimaryReviewer = true
 			break
 		}
 	}
 
 	for _, reviewer := range previousReviewers {
-		if IsCoreReviewer(reviewer.Login) {
+		if IsCoreReviewer(reviewer.GetLogin()) {
 			hasPrimaryReviewer = true
-			reviewersToRequest = append(reviewersToRequest, reviewer.Login)
+			reviewersToRequest = append(reviewersToRequest, *reviewer.Login)
 		}
 	}
 
@@ -73,16 +75,16 @@ var reviewerCommentRegex = regexp.MustCompile("@(?P<reviewer>[^,]*), a repositor
 // FindReviewerComment returns the comment which mentions the current primary reviewer and the reviewer's login,
 // or an empty comment and empty string if no such comment is found.
 // comments should only include comments by the magician in the current PR.
-func FindReviewerComment(comments []PullRequestComment) (PullRequestComment, string) {
-	var newestComment PullRequestComment
+func FindReviewerComment(comments []*gh.IssueComment) (*gh.IssueComment, string) {
+	var newestComment *gh.IssueComment
 	var currentReviewer string
 	for _, comment := range comments {
-		if !newestComment.CreatedAt.IsZero() && comment.CreatedAt.Before(newestComment.CreatedAt) {
+		if !newestComment.GetCreatedAt().IsZero() && comment.GetCreatedAt().Before(newestComment.CreatedAt.Time) {
 			// Skip comments older than the newest comment.
 			continue
 		}
 		names := reviewerCommentRegex.SubexpNames()
-		matches := reviewerCommentRegex.FindStringSubmatch(comment.Body)
+		matches := reviewerCommentRegex.FindStringSubmatch(comment.GetBody())
 		if len(matches) < len(names) {
 			// Skip comments that don't match regex.
 			continue

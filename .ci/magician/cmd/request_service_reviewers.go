@@ -79,11 +79,12 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 	githubTeamsSet := make(map[string]struct{})
 	teamCount := 0
 	for _, label := range pullRequest.Labels {
-		if !strings.HasPrefix(label.Name, "service/") || label.Name == "service/terraform" {
+		labelName := label.GetName()
+		if !strings.HasPrefix(labelName, "service/") || labelName == "service/terraform" {
 			continue
 		}
 		teamCount += 1
-		if labelData, ok := enrolledTeams[label.Name]; ok && labelData.Team != "" {
+		if labelData, ok := enrolledTeams[labelName]; ok && labelData.Team != "" {
 			githubTeamsSet[labelData.Team] = struct{}{}
 		}
 	}
@@ -98,12 +99,12 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 	reviewersToRequest := []string{}
 	requestedReviewersSet := make(map[string]struct{})
 	for _, reviewer := range requestedReviewers {
-		requestedReviewersSet[reviewer.Login] = struct{}{}
+		requestedReviewersSet[reviewer.GetLogin()] = struct{}{}
 	}
 
 	previousReviewersSet := make(map[string]struct{})
 	for _, reviewer := range previousReviewers {
-		previousReviewersSet[reviewer.Login] = struct{}{}
+		previousReviewersSet[reviewer.GetLogin()] = struct{}{}
 	}
 
 	exitCode := 0
@@ -118,18 +119,18 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 		reviewerPool := []string{}
 		for _, member := range members {
 			// Skip PR author
-			if member.Login == pullRequest.User.Login {
+			if member.GetLogin() == pullRequest.User.GetLogin() {
 				continue
 			}
 
-			reviewerPool = append(reviewerPool, member.Login)
+			reviewerPool = append(reviewerPool, member.GetLogin())
 			// Don't re-request review if there's an active review request
-			if _, ok := requestedReviewersSet[member.Login]; ok {
+			if _, ok := requestedReviewersSet[member.GetLogin()]; ok {
 				hasReviewer = true
 			}
-			if _, ok := previousReviewersSet[member.Login]; ok {
+			if _, ok := previousReviewersSet[member.GetLogin()]; ok {
 				hasReviewer = true
-				reviewersToRequest = append(reviewersToRequest, member.Login)
+				reviewersToRequest = append(reviewersToRequest, member.GetLogin())
 			}
 		}
 
