@@ -151,17 +151,29 @@ This indicates that after an apply to create or update a resource, the resource 
 
 Tests require all of the providers they use (except the one actually being tested) to be explicitly stated. This error generally means one of a few things:
 
-- This is a beta-only test and one of the `google_*` resources in the test doesn't have `provider = google-beta` set
-  - ```hcl
-    resource "google_compute_instance" "beta-instance" {
-      provider = google-beta
-      # ...
-    }
-    ```
-
-- This is a GA+beta test and one of the `google_*` resources has `provider = google-beta` set
-  - `provider = google-beta` can't be set unless the test is beta-only.
-- The test relies on an external provider, such as `time`, and that is not explicitly declared
+- If the error mentions `provider registry.terraform.io/hashicorp/google`:
+  - Beta-only test: This indicates that one of the `google_*` resources in the test doesn't have `provider = google-beta` set
+    - ```hcl
+      resource "google_compute_instance" "beta-instance" {
+        provider = google-beta
+        # ...
+      }
+      ```
+  - GA+beta test: This indicates that the wrong setting is being used for `ProtoV5ProviderFactories` on a handwritten test case. Should be:
+    - ```go
+      acctest.VcrTest(t, resource.TestCase{
+		    // ...
+		    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+      ```
+- If the error mentions `provider registry.terraform.io/hashicorp/google-beta`:
+  - Beta-only test: This indicates that the wrong setting is being used for `ProtoV5ProviderFactories` on a handwritten test case. Should be:
+    - ```go
+      acctest.VcrTest(t, resource.TestCase{
+		    // ...
+		    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+      ```
+  - GA+beta test: This indicates that one of the `google_*` resources in the test has `provider = google-beta` set. `provider = google-beta` can't be set unless the test is beta-only.
+- If the error mentions some other provider: The test relies on an external provider, such as `time`, and that is not explicitly declared
   - For MMv1 example-based tests, use [`examples.external_providers`](https://googlecloudplatform.github.io/magic-modules/reference/resource/#examples).
   - For Handwritten tests, use TestCase.ExternalProviders:
     ```go
