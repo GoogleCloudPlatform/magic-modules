@@ -211,7 +211,7 @@ func (e *Examples) ValidateVariables() {
 	}
 
 	fileContentString := string(content)
-	
+
 	envVarRegex := regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
 	validateRegexForContents(envVarRegex, fileContentString, e.ConfigPath, "test_env_vars", e.TestEnvVars)
 	varRegex := regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
