@@ -1,13 +1,33 @@
-name: mmv1-lint-product-yaml
+name: mmv1
 
 permissions: read-all
 
 on:
   pull_request:
     paths:
-      - 'mmv1/products/**'
+      - 'mmv1/**'
 
 jobs:
+  version-guard-check:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        with:
+          path: repo
+          fetch-depth: 0
+      - name: Merge base branch
+        id: pull_request
+        run: |
+          cd repo
+          git config user.name "modular-magician"
+          git config user.email "magic-modules@google.com"
+          git fetch origin ${{ github.base_ref }} # Fetch the base branch
+          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
+      - name: Check for invalid version guards
+        run: |
+          cd repo/tools/template-check
+          git diff --name-only --diff-filter=d origin/${{ github.base_ref }} ../../*.tmpl | sed 's=^=../../=g' | go run main.go
   lint-yaml:
     runs-on: ubuntu-22.04
     steps:
@@ -34,3 +54,16 @@ jobs:
       - name: Lint YAML files
         if: ${{ !failure() && steps.pull_request.outputs.yamlfiles != '' }}
         run: yamllint -c repo/.yamllint ${{steps.pull_request.outputs.yamlfiles}}
+  unit-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+      - name: Set up Go
+        uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
+        with:
+          go-version: '^1.23'
+      - name: Run mmv1 unit tests
+        run: |
+          cd mmv1
+          go test ./... -v
+
