@@ -91,9 +91,9 @@ func TestAccComputeRouter_advertisedIpRangesOrder(t *testing.T) {
 				Config: testAccComputeRouterAdvertisedIpRangesOrder(routerName),
 			},
 			{
-				ResourceName:      "google_compute_router.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_router.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"bgp.0.advertised_ip_ranges.0.range", "bgp.0.advertised_ip_ranges.1.range"},
 			},
 		},

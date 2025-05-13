@@ -18,9 +18,9 @@ func TestAccBackupDRBackupVault_fullUpdate(t *testing.T) {
 	referenceTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 0, 0, 0, 0, time.UTC)
 
 	context := map[string]interface{}{
-		"project":                   envvar.GetTestProjectFromEnv(),
+		"project":        envvar.GetTestProjectFromEnv(),
 		"effective_time": referenceTime.Add(24 * time.Hour).Format(time.RFC3339),
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":  acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

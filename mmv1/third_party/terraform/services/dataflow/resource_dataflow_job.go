@@ -68,17 +68,16 @@ func ResourceDataflowJobTemplateGcsPathDiffSuppress(k, old, new string, d *schem
 	return isRegionSuffixedPathMatch(old, new)
 }
 
-
 func isRegionSuffixedPathMatch(old, new string) bool {
-    re := regexp.MustCompile(`gs://([a-z0-9\-]+)-[a-z0-9]+-[a-z0-9]+(/.*)?`)
-    matches := re.FindStringSubmatch(old)
-    
-    if len(matches) == 3 && matches[2] != "" {
-        modifiedOld := "gs://" + matches[1] + matches[2]
-        return modifiedOld == new
-    }
+	re := regexp.MustCompile(`gs://([a-z0-9\-]+)-[a-z0-9]+-[a-z0-9]+(/.*)?`)
+	matches := re.FindStringSubmatch(old)
 
-    return false
+	if len(matches) == 3 && matches[2] != "" {
+		modifiedOld := "gs://" + matches[1] + matches[2]
+		return modifiedOld == new
+	}
+
+	return false
 }
 
 func ResourceDataflowJob() *schema.Resource {
@@ -115,10 +114,10 @@ func ResourceDataflowJob() *schema.Resource {
 			},
 
 			"template_gcs_path": {
-				Type:        schema.TypeString,
-				Required:    true,
+				Type:             schema.TypeString,
+				Required:         true,
 				DiffSuppressFunc: ResourceDataflowJobTemplateGcsPathDiffSuppress,
-				Description: `The Google Cloud Storage path to the Dataflow job template.`,
+				Description:      `The Google Cloud Storage path to the Dataflow job template.`,
 			},
 
 			"temp_gcs_location": {
@@ -158,9 +157,9 @@ func ResourceDataflowJob() *schema.Resource {
 			},
 
 			"labels": {
-				Type:             schema.TypeMap,
-				Optional:         true,
-				Description:      `User labels to be specified for the job. Keys and values should follow the restrictions specified in the labeling restrictions page. NOTE: This field is non-authoritative, and will only manage the labels present in your configuration.
+				Type:     schema.TypeMap,
+				Optional: true,
+				Description: `User labels to be specified for the job. Keys and values should follow the restrictions specified in the labeling restrictions page. NOTE: This field is non-authoritative, and will only manage the labels present in your configuration.
 				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
 			},
 
@@ -322,7 +321,7 @@ func shouldStopDataflowJobDeleteQuery(state string, skipWait bool) bool {
 
 func resourceDataflowJobCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -362,7 +361,7 @@ func resourceDataflowJobCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDataflowJobRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -457,7 +456,7 @@ func resourceDataflowJobUpdateByReplacement(d *schema.ResourceData, meta interfa
 
 	if jobHasUpdate(d, ResourceDataflowJob().Schema) {
 		config := meta.(*transport_tpg.Config)
-		userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+		userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 		if err != nil {
 			return err
 		}
@@ -494,7 +493,7 @@ func resourceDataflowJobUpdateByReplacement(d *schema.ResourceData, meta interfa
 				response, updateErr = resourceDataflowJobLaunchTemplate(config, project, region, userAgent, d.Get("template_gcs_path").(string), &request)
 				return updateErr
 			},
-			Timeout: time.Minute*time.Duration(5),
+			Timeout:              time.Minute * time.Duration(5),
 			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsDataflowJobUpdateRetryableError},
 		})
 		if err != nil {
@@ -512,7 +511,7 @@ func resourceDataflowJobUpdateByReplacement(d *schema.ResourceData, meta interfa
 
 func resourceDataflowJobDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -570,7 +569,7 @@ func resourceDataflowJobDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Wait for state to reach terminal state (canceled/drained/done plus cancelling/draining if skipWait)
-  skipWait := d.Get("skip_wait_on_job_termination").(bool)
+	skipWait := d.Get("skip_wait_on_job_termination").(bool)
 	ok := shouldStopDataflowJobDeleteQuery(d.Get("state").(string), skipWait)
 	for !ok {
 		log.Printf("[DEBUG] Waiting for job with job state %q to terminate...", d.Get("state").(string))

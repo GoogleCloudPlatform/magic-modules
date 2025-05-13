@@ -198,7 +198,7 @@ func TestAccDataSourceParameterManagerParameterVersion_withKmsKey(t *testing.T) 
 	})
 
 	context := map[string]interface{}{
-		"kms_key":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-parameter-manager-managed-1").CryptoKey.Name,
+		"kms_key":       acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-parameter-manager-managed-1").CryptoKey.Name,
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

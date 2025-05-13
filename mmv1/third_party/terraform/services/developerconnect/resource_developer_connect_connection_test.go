@@ -1,13 +1,11 @@
-
 package developerconnect_test
 
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
-
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccDeveloperConnectConnection_developerConnectConnectionGithubUpdate(t *testing.T) {
@@ -43,9 +41,8 @@ func TestAccDeveloperConnectConnection_developerConnectConnectionGithubUpdate(t 
 	})
 }
 
-
 func testAccDeveloperConnectConnection_Github(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_developer_connect_connection" "my-connection" {
   location = "us-central1"
   connection_id = "tf-test-tf-test-connection%{random_suffix}"
@@ -60,7 +57,6 @@ resource "google_developer_connect_connection" "my-connection" {
 }
 `, context)
 }
-
 
 func testAccDeveloperConnectConnection_GithubUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -85,7 +81,6 @@ resource "google_developer_connect_connection" "my-connection" {
 }
 `, context)
 }
-
 
 func TestAccDeveloperConnectConnection_developerConnectConnectionGithubEnterpriseUpdate(t *testing.T) {
 	t.Parallel()
@@ -120,9 +115,8 @@ func TestAccDeveloperConnectConnection_developerConnectConnectionGithubEnterpris
 	})
 }
 
-
 func testAccDeveloperConnectConnection_GithubEnterprise(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_developer_connect_connection" "my-connection" {
   location = "us-central1"
   connection_id = "tf-test-tf-test-connection%{random_suffix}"
@@ -136,7 +130,6 @@ resource "google_developer_connect_connection" "my-connection" {
 }
 `, context)
 }
-
 
 func testAccDeveloperConnectConnection_GithubEnterpriseUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -160,7 +153,6 @@ resource "google_developer_connect_connection" "my-connection" {
 }
 `, context)
 }
-
 
 func TestAccDeveloperConnectConnection_GhePrivConnection(t *testing.T) {
 	t.Parallel()
@@ -186,9 +178,8 @@ func TestAccDeveloperConnectConnection_GhePrivConnection(t *testing.T) {
 	})
 }
 
-
 func testAccDeveloperConnectConnection_GhePrivConnection(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_developer_connect_connection" "my-connection" {
   location = "us-central1"
   connection_id = "tf-test-tf-test-connection%{random_suffix}"
@@ -212,7 +203,6 @@ resource "google_developer_connect_connection" "my-connection" {
 }
 `, context)
 }
-
 
 func TestAccDeveloperConnectConnection_developerConnectConnectionGitlabUpdate(t *testing.T) {
 	t.Parallel()
@@ -247,9 +237,8 @@ func TestAccDeveloperConnectConnection_developerConnectConnectionGitlabUpdate(t 
 	})
 }
 
-
 func testAccDeveloperConnectConnection_Gitlab(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_developer_connect_connection" "my-connection" {
   location = "us-central1"
   connection_id = "tf-test-tf-test-connection%{random_suffix}"
@@ -268,7 +257,6 @@ resource "google_developer_connect_connection" "my-connection" {
 }
 `, context)
 }
-
 
 func testAccDeveloperConnectConnection_GitlabUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -321,9 +309,8 @@ func TestAccDeveloperConnectConnection_GlePrivConnection(t *testing.T) {
 	})
 }
 
-
 func testAccDeveloperConnectConnection_GlePrivConnection(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_developer_connect_connection" "my-connection" {
   location = "us-central1"
   connection_id = "tf-test-tf-test-connection%{random_suffix}"
@@ -354,7 +341,6 @@ resource "google_developer_connect_connection" "my-connection" {
 }
 `, context)
 }
-
 
 func TestAccDeveloperConnectConnection_developerConnectConnectionGitlabEnterpriseUpdate(t *testing.T) {
 	t.Parallel()
@@ -389,9 +375,8 @@ func TestAccDeveloperConnectConnection_developerConnectConnectionGitlabEnterpris
 	})
 }
 
-
 func testAccDeveloperConnectConnection_GitlabEnterprise(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_developer_connect_connection" "my-connection" {
   location = "us-central1"
   connection_id = "tf-test-tf-test-connection%{random_suffix}"
@@ -412,7 +397,6 @@ resource "google_developer_connect_connection" "my-connection" {
 }
 `, context)
 }
-
 
 func testAccDeveloperConnectConnection_GitlabEnterpriseUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -443,48 +427,46 @@ resource "google_developer_connect_connection" "my-connection" {
 `, context)
 }
 
-
 func TestAccDeveloperConnectConnection_developerConnectConnectionBitbucketCloudUpdate(t *testing.T) {
-        t.Parallel()
+	t.Parallel()
 
-        context := map[string]interface{}{
-                "random_suffix": acctest.RandString(t, 10),
-        }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-        acctest.VcrTest(t, resource.TestCase{
-                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-                Steps: []resource.TestStep{
-                        {
-                                Config: testAccDeveloperConnectConnection_BitbucketCloud(context),
-                        },
-                        {
-                                ResourceName:            "google_developer_connect_connection.my-connection",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
-                        },
-                        {
-                                Config: testAccDeveloperConnectConnection_BitbucketCloudUpdate(context),
-                                ConfigPlanChecks: resource.ConfigPlanChecks{
-                                        PreApply: []plancheck.PlanCheck{
-                                                plancheck.ExpectResourceAction("google_developer_connect_connection.my-connection", plancheck.ResourceActionUpdate),
-                                        },
-                                },
-                        },
-                        {
-                                ResourceName:            "google_developer_connect_connection.my-connection",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
-                        },
-                },
-        })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDeveloperConnectConnection_BitbucketCloud(context),
+			},
+			{
+				ResourceName:            "google_developer_connect_connection.my-connection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
+			},
+			{
+				Config: testAccDeveloperConnectConnection_BitbucketCloudUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_developer_connect_connection.my-connection", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_developer_connect_connection.my-connection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
+			},
+		},
+	})
 }
 
-
 func testAccDeveloperConnectConnection_BitbucketCloud(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_developer_connect_connection" "my-connection" {
   location = "us-central1"
   connection_id = "tf-test-tf-test-connection%{random_suffix}"
@@ -506,9 +488,8 @@ resource "google_developer_connect_connection" "my-connection" {
 `, context)
 }
 
-
 func testAccDeveloperConnectConnection_BitbucketCloudUpdate(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_developer_connect_connection" "my-connection" {
   location = "us-central1"
   connection_id = "tf-test-tf-test-connection%{random_suffix}"
@@ -536,48 +517,46 @@ resource "google_developer_connect_connection" "my-connection" {
 `, context)
 }
 
-
 func TestAccDeveloperConnectConnection_developerConnectConnectionBitbucketDataCenterUpdate(t *testing.T) {
-        t.Parallel()
+	t.Parallel()
 
-        context := map[string]interface{}{
-                "random_suffix": acctest.RandString(t, 10),
-        }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-        acctest.VcrTest(t, resource.TestCase{
-                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-                Steps: []resource.TestStep{
-                        {
-                                Config: testAccDeveloperConnectConnection_BitbucketDataCenter(context),
-                        },
-                        {
-                                ResourceName:            "google_developer_connect_connection.my-connection",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
-                        },
-                        {
-                                Config: testAccDeveloperConnectConnection_BitbucketDataCenterUpdate(context),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDeveloperConnectConnection_BitbucketDataCenter(context),
+			},
+			{
+				ResourceName:            "google_developer_connect_connection.my-connection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
+			},
+			{
+				Config: testAccDeveloperConnectConnection_BitbucketDataCenterUpdate(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
-                                	PreApply: []plancheck.PlanCheck{
-                                        	plancheck.ExpectResourceAction("google_developer_connect_connection.my-connection", plancheck.ResourceActionUpdate),
-                                        },
-                                },
-                        },
-                        {
-                                ResourceName:            "google_developer_connect_connection.my-connection",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
-                        },
-                },
-        })
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_developer_connect_connection.my-connection", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_developer_connect_connection.my-connection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
+			},
+		},
+	})
 }
 
-
 func testAccDeveloperConnectConnection_BitbucketDataCenter(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_developer_connect_connection" "my-connection" {
   location = "us-central1"
   connection_id = "tf-test-tf-test-connection%{random_suffix}"
@@ -599,9 +578,8 @@ resource "google_developer_connect_connection" "my-connection" {
 `, context)
 }
 
-
 func testAccDeveloperConnectConnection_BitbucketDataCenterUpdate(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_developer_connect_connection" "my-connection" {
   location = "us-central1"
   connection_id = "tf-test-tf-test-connection%{random_suffix}"
@@ -630,32 +608,31 @@ resource "google_developer_connect_connection" "my-connection" {
 }
 
 func TestAccDeveloperConnectConnection_BbdcPrivConnection(t *testing.T) {
-        t.Parallel()
+	t.Parallel()
 
-        context := map[string]interface{}{
-                "random_suffix": acctest.RandString(t, 10),
-        }               
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-        acctest.VcrTest(t, resource.TestCase{            
-                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-                Steps: []resource.TestStep{
-                        {
-                                Config: testAccDeveloperConnectConnection_BbdcPrivConnection(context),
-                        },
-                        {
-                                ResourceName:            "google_developer_connect_connection.my-connection",
-                                ImportState:             true,
-                                ImportStateVerify:       true,
-                                ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
-                        },
-                },
-        })
-} 
-
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDeveloperConnectConnection_BbdcPrivConnection(context),
+			},
+			{
+				ResourceName:            "google_developer_connect_connection.my-connection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_id", "location", "terraform_labels"},
+			},
+		},
+	})
+}
 
 func testAccDeveloperConnectConnection_BbdcPrivConnection(context map[string]interface{}) string {
-        return acctest.Nprintf(` 
+	return acctest.Nprintf(` 
 resource "google_developer_connect_connection" "my-connection" {
   location = "us-central1"
   connection_id = "tf-test-tf-test-connection%{random_suffix}"

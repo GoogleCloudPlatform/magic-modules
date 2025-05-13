@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-  "github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
 func TestAccComputeRegionNetworkFirewallPolicyRule_update(t *testing.T) {
@@ -35,7 +35,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_update(t *testing.T) {
 			},
 			{
 				Config: testAccComputeRegionNetworkFirewallPolicyRule_update(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_region_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
 					},
@@ -50,7 +50,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_update(t *testing.T) {
 			},
 			{
 				Config: testAccComputeRegionNetworkFirewallPolicyRule_removeConfigs(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_region_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
 					},
@@ -65,7 +65,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_update(t *testing.T) {
 			},
 			{
 				Config: testAccComputeRegionNetworkFirewallPolicyRule_start(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_region_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
 					},
@@ -114,7 +114,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_multipleRules(t *testing.T) {
 			},
 			{
 				Config: testAccComputeRegionNetworkFirewallPolicyRule_multipleAdd(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_region_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
 					},
@@ -129,7 +129,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_multipleRules(t *testing.T) {
 			},
 			{
 				Config: testAccComputeRegionNetworkFirewallPolicyRule_multipleRemove(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_region_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
 						plancheck.ExpectResourceAction("google_compute_region_network_firewall_policy_rule.fw_policy_rule2", plancheck.ResourceActionDestroy),
@@ -164,12 +164,12 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_secureTags(t *testing.T) {
 				ResourceName:      "google_compute_region_network_firewall_policy_rule.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-        // Referencing using ID causes import to fail
+				// Referencing using ID causes import to fail
 				ImportStateVerifyIgnore: []string{"firewall_policy", "project"},
 			},
 			{
 				Config: testAccComputeRegionNetworkFirewallPolicyRule_secureTagsUpdate(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_region_network_firewall_policy_rule.primary", plancheck.ResourceActionUpdate),
 					},
@@ -179,7 +179,7 @@ func TestAccComputeRegionNetworkFirewallPolicyRule_secureTags(t *testing.T) {
 				ResourceName:      "google_compute_region_network_firewall_policy_rule.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-        // Referencing using ID causes import to fail
+				// Referencing using ID causes import to fail
 				ImportStateVerifyIgnore: []string{"firewall_policy", "project"},
 			},
 		},

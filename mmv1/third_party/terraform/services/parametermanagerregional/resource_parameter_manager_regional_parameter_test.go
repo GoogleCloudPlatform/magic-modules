@@ -3,8 +3,8 @@ package parametermanagerregional_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -160,8 +160,8 @@ func TestAccParameterManagerRegionalRegionalParameter_kmskeyUpdate(t *testing.T)
 	})
 
 	context := map[string]interface{}{
-		"kms_key":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-parameter-manager-managed-central-key1").CryptoKey.Name,
-		"kms_key_other":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-parameter-manager-managed-central-key2").CryptoKey.Name,
+		"kms_key":       acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-parameter-manager-managed-central-key1").CryptoKey.Name,
+		"kms_key_other": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-parameter-manager-managed-central-key2").CryptoKey.Name,
 		"random_suffix": acctest.RandString(t, 10),
 	}
 

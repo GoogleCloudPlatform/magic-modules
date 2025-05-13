@@ -3,17 +3,17 @@ package redis_test
 import (
 	"fmt"
 	"log"
+	"strings"
 	"testing"
 	"time"
-	"strings"
-
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	"github.com/hashicorp/terraform-provider-google/google/services/redis"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/services/redis"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
+
 func TestAccRedisCluster_createUpdateClusterWithNodeType(t *testing.T) {
 
 	t.Parallel()
@@ -446,7 +446,7 @@ func testAccCheckRedisClusterOnDemandBackup(t *testing.T, resourceName string, b
 		if err != nil {
 			return fmt.Errorf("Error creating on-demand backup for Redis cluster %s: %s", name, err)
 		}
-	    
+
 		// Wait for the operation to complete
 		err = redis.RedisOperationWaitTime(
 			config, res, project, "Creating Redis Cluster Backup", config.UserAgent,

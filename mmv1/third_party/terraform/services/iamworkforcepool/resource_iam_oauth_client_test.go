@@ -30,7 +30,7 @@ func TestAccIAMWorkforcePoolOauthClient_full(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"location", "oauth_client_id"},
 			},
-            {
+			{
 				Config: testAccIAMWorkforcePoolOauthClient_full_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{

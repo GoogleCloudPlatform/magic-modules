@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-  "github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
 func TestAccComputeNetworkFirewallPolicyRule_update(t *testing.T) {
@@ -34,7 +34,7 @@ func TestAccComputeNetworkFirewallPolicyRule_update(t *testing.T) {
 			},
 			{
 				Config: testAccComputeNetworkFirewallPolicyRule_update(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
 					},
@@ -49,7 +49,7 @@ func TestAccComputeNetworkFirewallPolicyRule_update(t *testing.T) {
 			},
 			{
 				Config: testAccComputeNetworkFirewallPolicyRule_removeConfigs(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
 					},
@@ -64,7 +64,7 @@ func TestAccComputeNetworkFirewallPolicyRule_update(t *testing.T) {
 			},
 			{
 				Config: testAccComputeNetworkFirewallPolicyRule_start(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
 					},
@@ -82,139 +82,139 @@ func TestAccComputeNetworkFirewallPolicyRule_update(t *testing.T) {
 }
 
 func TestAccComputeNetworkFirewallPolicyRule_multipleRules(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": acctest.RandString(t, 10),
-    "project_name":  envvar.GetTestProjectFromEnv(),
-    "org_name":      fmt.Sprintf("organizations/%s", envvar.GetTestOrgFromEnv(t)),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"project_name":  envvar.GetTestProjectFromEnv(),
+		"org_name":      fmt.Sprintf("organizations/%s", envvar.GetTestOrgFromEnv(t)),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccComputeNetworkFirewallPolicyRule_multiple(context),
-      },
-      {
-        ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule1",
-        ImportState:       true,
-        ImportStateVerify: true,
-        // Referencing using ID causes import to fail
-        ImportStateVerifyIgnore: []string{"firewall_policy"},
-      },
-      {
-        ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule2",
-        ImportState:       true,
-        ImportStateVerify: true,
-        // Referencing using ID causes import to fail
-        ImportStateVerifyIgnore: []string{"firewall_policy"},
-      },
-      {
-        Config: testAccComputeNetworkFirewallPolicyRule_multipleAdd(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetworkFirewallPolicyRule_multiple(context),
+			},
+			{
+				ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule1",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
+			},
+			{
+				ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule2",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
+			},
+			{
+				Config: testAccComputeNetworkFirewallPolicyRule_multipleAdd(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
 					},
 				},
-      },
-      {
-        ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule3",
-        ImportState:       true,
-        ImportStateVerify: true,
-        // Referencing using ID causes import to fail
-        ImportStateVerifyIgnore: []string{"firewall_policy"},
-      },
-      {
-        Config: testAccComputeNetworkFirewallPolicyRule_multipleRemove(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+			},
+			{
+				ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule3",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
+			},
+			{
+				Config: testAccComputeNetworkFirewallPolicyRule_multipleRemove(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
 						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule2", plancheck.ResourceActionDestroy),
 						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule3", plancheck.ResourceActionUpdate),
 					},
 				},
-      },
-    },
-  })
+			},
+		},
+	})
 }
 
 func TestAccComputeNetworkFirewallPolicyRule_addressGroupOrder(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix": acctest.RandString(t, 10),
-    "project":  envvar.GetTestProjectFromEnv(),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccComputeNetworkFirewallPolicyRule_addressGroupOrder(context),
-      },
-      {
-        ResourceName:      "google_compute_network_firewall_policy_rule.src_test",
-        ImportState:       true,
-        ImportStateVerify: true,
-        // Referencing using ID causes import to fail
-        // Client-side reordering doesn't work with no state, so ignore on import
-        ImportStateVerifyIgnore: []string{"firewall_policy", "match.0.src_address_groups"},
-      },
-      {
-        ResourceName:      "google_compute_network_firewall_policy_rule.dest_test",
-        ImportState:       true,
-        ImportStateVerify: true,
-        // Referencing using ID causes import to fail
-        // Client-side reordering doesn't work with no state, so ignore on import
-        ImportStateVerifyIgnore: []string{"firewall_policy", "match.0.dest_address_groups"},
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetworkFirewallPolicyRule_addressGroupOrder(context),
+			},
+			{
+				ResourceName:      "google_compute_network_firewall_policy_rule.src_test",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				// Client-side reordering doesn't work with no state, so ignore on import
+				ImportStateVerifyIgnore: []string{"firewall_policy", "match.0.src_address_groups"},
+			},
+			{
+				ResourceName:      "google_compute_network_firewall_policy_rule.dest_test",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				// Client-side reordering doesn't work with no state, so ignore on import
+				ImportStateVerifyIgnore: []string{"firewall_policy", "match.0.dest_address_groups"},
+			},
+		},
+	})
 }
 
 func TestAccComputeNetworkFirewallPolicyRule_securityProfileGroup_update(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "random_suffix":                 acctest.RandString(t, 10),
-    "org_name":                      fmt.Sprintf("organizations/%s", envvar.GetTestOrgFromEnv(t)),
-    "security_profile_group_prefix": "//",
-  }
+	context := map[string]interface{}{
+		"random_suffix":                 acctest.RandString(t, 10),
+		"org_name":                      fmt.Sprintf("organizations/%s", envvar.GetTestOrgFromEnv(t)),
+		"security_profile_group_prefix": "//",
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccComputeNetworkFirewallPolicyRule_securityProfileGroup_basic(context),
-      },
-      {
-        ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule1",
-        ImportState:       true,
-        ImportStateVerify: true,
-        // Referencing using ID causes import to fail
-        ImportStateVerifyIgnore: []string{"firewall_policy"},
-      },
-      {
-        Config: testAccComputeNetworkFirewallPolicyRule_securityProfileGroup_update(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetworkFirewallPolicyRule_securityProfileGroup_basic(context),
+			},
+			{
+				ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule1",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
+			},
+			{
+				Config: testAccComputeNetworkFirewallPolicyRule_securityProfileGroup_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.fw_policy_rule1", plancheck.ResourceActionUpdate),
 					},
 				},
-      },
-      {
-        ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule1",
-        ImportState:       true,
-        ImportStateVerify: true,
-        // Referencing using ID causes import to fail
-        ImportStateVerifyIgnore: []string{"firewall_policy"},
-      },
-    },
-  })
+			},
+			{
+				ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule1",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
+				ImportStateVerifyIgnore: []string{"firewall_policy"},
+			},
+		},
+	})
 }
 
 func TestAccComputeNetworkFirewallPolicyRule_secureTags(t *testing.T) {
@@ -239,12 +239,12 @@ func TestAccComputeNetworkFirewallPolicyRule_secureTags(t *testing.T) {
 				ResourceName:      "google_compute_network_firewall_policy_rule.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-        // Referencing using ID causes import to fail
+				// Referencing using ID causes import to fail
 				ImportStateVerifyIgnore: []string{"firewall_policy", "project"},
 			},
 			{
 				Config: testAccComputeNetworkFirewallPolicyRule_secureTagsUpdate(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
+				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_network_firewall_policy_rule.primary", plancheck.ResourceActionUpdate),
 					},
@@ -254,42 +254,39 @@ func TestAccComputeNetworkFirewallPolicyRule_secureTags(t *testing.T) {
 				ResourceName:      "google_compute_network_firewall_policy_rule.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-        // Referencing using ID causes import to fail
+				// Referencing using ID causes import to fail
 				ImportStateVerifyIgnore: []string{"firewall_policy", "project"},
 			},
 		},
 	})
 }
 
-
 func TestAccComputeNetworkFirewallSecurityProfileGroupDiffsuppress(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-    context := map[string]interface{}{
-    "random_suffix":                acctest.RandString(t, 10),
-    "org_name":                     fmt.Sprintf("organizations/%s", envvar.GetTestOrgFromEnv(t)),
-    "security_profile_group_prefix": "/",
-  }
+	context := map[string]interface{}{
+		"random_suffix":                 acctest.RandString(t, 10),
+		"org_name":                      fmt.Sprintf("organizations/%s", envvar.GetTestOrgFromEnv(t)),
+		"security_profile_group_prefix": "/",
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccComputeNetworkFirewallPolicyRule_securityProfileGroup_update(context),
-      },
-      {
-        ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule1",
-        ImportState:       true,
-        ImportStateVerify: true,
-        // Referencing using ID causes import to fail
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetworkFirewallPolicyRule_securityProfileGroup_update(context),
+			},
+			{
+				ResourceName:      "google_compute_network_firewall_policy_rule.fw_policy_rule1",
+				ImportState:       true,
+				ImportStateVerify: true,
+				// Referencing using ID causes import to fail
 				ImportStateVerifyIgnore: []string{"firewall_policy"},
-      },
-    },
-  })
+			},
+		},
+	})
 }
-
-
 
 func testAccComputeNetworkFirewallPolicyRule_secureTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -434,7 +431,7 @@ resource "google_tags_tag_value" "basic_value" {
 }
 
 func testAccComputeNetworkFirewallPolicyRule_securityProfileGroup_basic(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_network" "network1" {
   name                    = "tf-test-%{random_suffix}"
   auto_create_subnetworks = false
@@ -487,7 +484,7 @@ resource "google_compute_network_firewall_policy_rule" "fw_policy_rule1" {
 }
 
 func testAccComputeNetworkFirewallPolicyRule_securityProfileGroup_update(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_network_security_security_profile" "security_profile" {
     name     = "tf-test-my-sp%{random_suffix}"
     type     = "THREAT_PREVENTION"
@@ -963,9 +960,8 @@ resource "google_compute_network_firewall_policy_rule" "fw_policy_rule3" {
 `, context)
 }
 
-
 func testAccComputeNetworkFirewallPolicyRule_addressGroupOrder(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_compute_network_firewall_policy" "policy" {
   name = "tf-test-policy-%{random_suffix}"
   description = "Resource created for Terraform acceptance testing"

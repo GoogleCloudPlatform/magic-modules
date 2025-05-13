@@ -21,7 +21,7 @@ func TestAccIAM3OrganizationsPolicyBinding_iam3OrganizationsPolicyBindingExample
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckIAM3OrganizationsPolicyBindingDestroyProducer(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
+		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
 		Steps: []resource.TestStep{

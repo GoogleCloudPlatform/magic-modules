@@ -21,7 +21,7 @@ func TestAccIAM3FoldersPolicyBinding_iamFoldersPolicyBindingExample_update(t *te
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
-				   "time": {},
+			"time": {},
 		},
 		CheckDestroy: testAccCheckIAM3FoldersPolicyBindingDestroyProducer(t),
 		Steps: []resource.TestStep{

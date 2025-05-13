@@ -24,9 +24,9 @@ func TestAccSecretManagerRegionalRegionalSecret_import(t *testing.T) {
 				Config: testAccSecretManagerRegionalSecret_basic(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_regional_secret.regional-secret-basic",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_regional_secret.regional-secret-basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "secret_id", "terraform_labels"},
 			},
 		},
@@ -49,36 +49,36 @@ func TestAccSecretManagerRegionalRegionalSecret_labelsUpdate(t *testing.T) {
 				Config: testAccSecretManagerRegionalSecret_withoutLabels(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_regional_secret.regional-secret-with-labels",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_regional_secret.regional-secret-with-labels",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "secret_id", "terraform_labels"},
 			},
 			{
 				Config: testAccSecretManagerRegionalSecret_labelsUpdate(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_regional_secret.regional-secret-with-labels",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_regional_secret.regional-secret-with-labels",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "secret_id", "terraform_labels"},
 			},
 			{
 				Config: testAccSecretManagerRegionalSecret_labelsUpdateOther(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_regional_secret.regional-secret-with-labels",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_regional_secret.regional-secret-with-labels",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "secret_id", "terraform_labels"},
 			},
 			{
 				Config: testAccSecretManagerRegionalSecret_withoutLabels(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_regional_secret.regional-secret-with-labels",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_regional_secret.regional-secret-with-labels",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "secret_id", "terraform_labels"},
 			},
 		},
@@ -101,36 +101,36 @@ func TestAccSecretManagerRegionalRegionalSecret_annotationsUpdate(t *testing.T) 
 				Config: testAccSecretManagerRegionalSecret_withoutAnnotations(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_regional_secret.regional-secret-with-annotations",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_regional_secret.regional-secret-with-annotations",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "secret_id", "terraform_labels"},
 			},
 			{
 				Config: testAccSecretManagerRegionalSecret_annotationsUpdate(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_regional_secret.regional-secret-with-annotations",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_regional_secret.regional-secret-with-annotations",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "secret_id", "terraform_labels"},
 			},
 			{
 				Config: testAccSecretManagerRegionalSecret_annotationsUpdateOther(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_regional_secret.regional-secret-with-annotations",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_regional_secret.regional-secret-with-annotations",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "secret_id", "terraform_labels"},
 			},
 			{
 				Config: testAccSecretManagerRegionalSecret_withoutAnnotations(context),
 			},
 			{
-				ResourceName:      "google_secret_manager_regional_secret.regional-secret-with-annotations",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_secret_manager_regional_secret.regional-secret-with-annotations",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "secret_id", "terraform_labels"},
 			},
 		},
@@ -141,9 +141,9 @@ func TestAccSecretManagerRegionalRegionalSecret_cmekUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-secret-manager-managed-central-key3").CryptoKey.Name,
-		"kms_key_name_other":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-secret-manager-managed-central-key4").CryptoKey.Name,
-		"random_suffix": acctest.RandString(t, 10),
+		"kms_key_name":       acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-secret-manager-managed-central-key3").CryptoKey.Name,
+		"kms_key_name_other": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-secret-manager-managed-central-key4").CryptoKey.Name,
+		"random_suffix":      acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

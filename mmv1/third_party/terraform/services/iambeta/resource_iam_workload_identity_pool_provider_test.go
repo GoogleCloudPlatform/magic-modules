@@ -1,8 +1,8 @@
 package iambeta_test
 
 import (
-	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -259,7 +259,7 @@ func TestAccIAMBetaWorkloadIdentityPoolProvider_x509(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"workload_identity_pool_id", "workload_identity_pool_provider_id"},
 			},
-      {
+			{
 				Config: testAccIAMBetaWorkloadIdentityPoolProvider_x509_update(context),
 			},
 			{

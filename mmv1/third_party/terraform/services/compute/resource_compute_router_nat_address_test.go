@@ -113,7 +113,7 @@ func TestAccComputeRouterNatAddress_withAddressRemoved(t *testing.T) {
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"random": {},
 		},
-		CheckDestroy:             testAccCheckComputeRouterNatAddressDestroyProducer(t),
+		CheckDestroy: testAccCheckComputeRouterNatAddressDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRouterNatAddressWithNatIps(routerName),

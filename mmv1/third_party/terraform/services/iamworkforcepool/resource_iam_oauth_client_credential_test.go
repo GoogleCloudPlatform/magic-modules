@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-
 func TestAccIAMWorkforcePoolOauthClientCredential_full(t *testing.T) {
 	t.Parallel()
 

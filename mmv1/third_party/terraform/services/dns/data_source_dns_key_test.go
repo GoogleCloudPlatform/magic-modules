@@ -33,7 +33,6 @@ func TestAccDataSourceDNSKeys_basic(t *testing.T) {
 	})
 }
 
-
 func TestAccDataSourceDNSKeys_noDnsSec(t *testing.T) {
 	t.Parallel()
 

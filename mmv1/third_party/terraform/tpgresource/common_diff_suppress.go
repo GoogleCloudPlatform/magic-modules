@@ -136,7 +136,7 @@ func CidrOrSizeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 }
 
 // Base64DiffSuppress compares two Base64 strings, ignoring differences
-// between standard encoding and web safe URL encoding, padding, and 
+// between standard encoding and web safe URL encoding, padding, and
 // embedded line endings.
 func Base64DiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 	r := strings.NewReplacer("\r", "", "\n", "", "+", "-", "/", "_", "=", "")

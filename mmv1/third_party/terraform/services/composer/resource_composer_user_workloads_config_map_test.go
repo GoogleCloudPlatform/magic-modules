@@ -33,9 +33,9 @@ func TestAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicEx
 			},
 			{
 				Config: testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_update(context),
-				Check:  resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr("google_composer_user_workloads_config_map.config_map", "data.db_host", "dbhost:5432"),
-						resource.TestCheckNoResourceAttr("google_composer_user_workloads_config_map.config_map", "data.api_host"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_composer_user_workloads_config_map.config_map", "data.db_host", "dbhost:5432"),
+					resource.TestCheckNoResourceAttr("google_composer_user_workloads_config_map.config_map", "data.api_host"),
 				),
 			},
 			{
@@ -69,8 +69,8 @@ func TestAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicEx
 			},
 			{
 				Config: testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_delete(context),
-				Check:  resource.ComposeTestCheckFunc(
-						testAccComposerUserWorkloadsConfigMapDestroyed(t),
+				Check: resource.ComposeTestCheckFunc(
+					testAccComposerUserWorkloadsConfigMapDestroyed(t),
 				),
 			},
 		},

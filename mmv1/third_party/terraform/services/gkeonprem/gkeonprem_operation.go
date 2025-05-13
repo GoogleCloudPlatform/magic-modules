@@ -99,10 +99,10 @@ func (w *gkeonpremOperationWaiter) QueryOp() (interface{}, error) {
 	url := fmt.Sprintf("%s%s", w.Config.GkeonpremBasePath, w.Op.Name)
 
 	return transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config: w.Config,
-		Method: "GET",
-		Project: w.Project,
-		RawURL: url,
+		Config:    w.Config,
+		Method:    "GET",
+		Project:   w.Project,
+		RawURL:    url,
 		UserAgent: w.UserAgent,
 	})
 }

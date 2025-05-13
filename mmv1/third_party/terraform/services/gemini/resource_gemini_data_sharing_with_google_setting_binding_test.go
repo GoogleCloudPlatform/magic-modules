@@ -1,7 +1,7 @@
 package gemini_test
 
 import (
-    "fmt"
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -15,7 +15,7 @@ func TestAccGeminiDataSharingWithGoogleSettingBinding_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"data_sharing_with_google_setting_id": fmt.Sprintf("tf-test-ls-%s", acctest.RandString(t, 10)),
-		"setting_binding_id": fmt.Sprintf("tf-test-lsb-%s", acctest.RandString(t, 10)),
+		"setting_binding_id":                  fmt.Sprintf("tf-test-lsb-%s", acctest.RandString(t, 10)),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

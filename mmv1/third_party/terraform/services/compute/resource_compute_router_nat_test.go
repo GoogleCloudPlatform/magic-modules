@@ -31,7 +31,7 @@ func TestAccComputeRouterNat_basic(t *testing.T) {
 			},
 			{
 				// implicitly full ImportStateId
-				ResourceName: "google_compute_router_nat.foobar",
+				ResourceName:      "google_compute_router_nat.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -171,7 +171,7 @@ func TestAccComputeRouterNat_withPortAllocationMethods(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterNatDestroyProducer(t),
 		Steps: []resource.TestStep{
-      {
+			{
 				Config: testAccComputeRouterNatWithAllocationMethod(routerName, false, true),
 			},
 			{
@@ -271,7 +271,6 @@ func TestAccComputeRouterNat_withNatIpsAndDrainNatIps(t *testing.T) {
 	})
 }
 
-
 func TestAccComputeRouterNat_withNatRules(t *testing.T) {
 	t.Parallel()
 
@@ -291,7 +290,7 @@ func TestAccComputeRouterNat_withNatRules(t *testing.T) {
 				Config: testAccComputeRouterNatRulesBasic_omitRules(routerName),
 			},
 			{
-				ResourceName: "google_compute_router_nat.foobar",
+				ResourceName:      "google_compute_router_nat.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -363,7 +362,7 @@ func TestAccComputeRouterNat_withNatRules(t *testing.T) {
 				Config: testAccComputeRouterNatRulesBasic_omitAction(routerName, 100, ruleDescriptionUpdate, matchUpdate),
 			},
 			{
-				ResourceName: "google_compute_router_nat.foobar",
+				ResourceName:      "google_compute_router_nat.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -371,7 +370,7 @@ func TestAccComputeRouterNat_withNatRules(t *testing.T) {
 				Config: testAccComputeRouterNatRulesBasic_omitDescription(routerName, 100, matchUpdate),
 			},
 			{
-				ResourceName: "google_compute_router_nat.foobar",
+				ResourceName:      "google_compute_router_nat.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -387,7 +386,7 @@ func TestAccComputeRouterNat_withNatRules(t *testing.T) {
 				Config: testAccComputeRouterNatRulesBasic_omitRules(routerName),
 			},
 			{
-				ResourceName: "google_compute_router_nat.foobar",
+				ResourceName:      "google_compute_router_nat.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
@@ -468,10 +467,10 @@ func TestAccComputeRouterNat_AutoNetworkTier(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeRouterNatDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:            testAccComputeRouterNatWitAutoNetworkTier(routerName, hubName),
+				Config: testAccComputeRouterNatWitAutoNetworkTier(routerName, hubName),
 			},
 			{
-				 // implicitly full ImportStateId
+				// implicitly full ImportStateId
 				ResourceName:      "google_compute_router_nat.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,

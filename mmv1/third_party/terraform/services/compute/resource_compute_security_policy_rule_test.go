@@ -1,10 +1,10 @@
 package compute_test
 
 import (
-  "fmt"
-  "regexp"
-	"testing"
+	"fmt"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"regexp"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -94,7 +94,7 @@ func TestAccComputeSecurityPolicyRule_extendedUpdate(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeSecurityPolicyRule_extPosUpdateSamePriority(context),
+				Config:      testAccComputeSecurityPolicyRule_extPosUpdateSamePriority(context),
 				ExpectError: regexp.MustCompile("Cannot have rules with the same priorities."),
 			},
 			{
@@ -130,9 +130,9 @@ func TestAccComputeSecurityPolicyRule_withPreconfiguredWafConfig(t *testing.T) {
 				Config: testAccComputeSecurityPolicyRule_withPreconfiguredWafConfig_create(context),
 			},
 			{
-			  ResourceName:      "google_compute_security_policy_rule.policy_rule",
-			  ImportState:       true,
-			  ImportStateVerify: true,
+				ResourceName:      "google_compute_security_policy_rule.policy_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccComputeSecurityPolicyRule_withPreconfiguredWafConfig_update(context),
@@ -172,21 +172,21 @@ func TestAccComputeSecurityPolicyRule_withRateLimitOptions(t *testing.T) {
 			{
 				Config: testAccComputeSecurityPolicyRule_withRateLimitOptionsCreate(context),
 			},
-      {
-        ResourceName:      "google_compute_security_policy_rule.policy_rule",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccComputeSecurityPolicyRule_withRateLimitOptionsUpdate(context),
-      },
-      {
-        ResourceName:      "google_compute_security_policy_rule.policy_rule",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-    },
-  })
+			{
+				ResourceName:      "google_compute_security_policy_rule.policy_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeSecurityPolicyRule_withRateLimitOptionsUpdate(context),
+			},
+			{
+				ResourceName:      "google_compute_security_policy_rule.policy_rule",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
 func TestAccComputeSecurityPolicyRule_withRateLimit_withEnforceOnKeyConfigs(t *testing.T) {
@@ -240,7 +240,6 @@ func TestAccComputeSecurityPolicyRule_withRateLimitOption_withMultipleEnforceOnK
 		},
 	})
 }
-
 
 func TestAccComputeSecurityPolicyRule_EnforceOnKeyUpdates(t *testing.T) {
 	t.Parallel()

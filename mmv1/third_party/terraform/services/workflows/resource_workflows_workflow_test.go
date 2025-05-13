@@ -141,7 +141,7 @@ func TestAccWorkflowsWorkflow_UpdateDeletionProtectionFalseToTrue(t *testing.T) 
 			{
 				Config: testAccWorkflowsWorkflow_Basic_DeletionProtectionTrue(workflowName),
 			},
-            {
+			{
 				Config: testAccWorkflowsWorkflow_Basic_DeletionProtectionFalse(workflowName),
 			},
 		},
@@ -297,7 +297,7 @@ func TestAccWorkflowsWorkflow_CMEK(t *testing.T) {
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@gcp-sa-workflows.iam.gserviceaccount.com",
-			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
 		},
 	})
 
@@ -351,4 +351,3 @@ EOF
 }
 `, workflowName, kmsKeyName)
 }
-

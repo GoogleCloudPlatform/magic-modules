@@ -22,9 +22,9 @@ func TestAccWorkbenchInstance_update(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -32,12 +32,12 @@ func TestAccWorkbenchInstance_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
 			},
-      		{
+			{
 				Config: testAccWorkbenchInstance_update(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -114,9 +114,9 @@ func TestAccWorkbenchInstance_updateGpu(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_basicGpu(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -124,12 +124,12 @@ func TestAccWorkbenchInstance_updateGpu(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
 			},
-      		{
+			{
 				Config: testAccWorkbenchInstance_updateGpu(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -202,9 +202,9 @@ func TestAccWorkbenchInstance_removeGpu(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_Gpu(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -212,12 +212,12 @@ func TestAccWorkbenchInstance_removeGpu(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
 			},
-      		{
+			{
 				Config: testAccWorkbenchInstance_removeGpu(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -275,9 +275,9 @@ func TestAccWorkbenchInstance_updateMetadata(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -285,12 +285,12 @@ func TestAccWorkbenchInstance_updateMetadata(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
 			},
-      		{
+			{
 				Config: testAccWorkbenchInstance_updateMetadata(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -301,9 +301,9 @@ func TestAccWorkbenchInstance_updateMetadata(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -329,9 +329,9 @@ func TestAccWorkbenchInstance_updateMetadataKey(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_updateMetadata(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -339,12 +339,12 @@ func TestAccWorkbenchInstance_updateMetadataKey(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
 			},
-      		{
+			{
 				Config: testAccWorkbenchInstance_updateMetadataKey(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -355,9 +355,9 @@ func TestAccWorkbenchInstance_updateMetadataKey(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_updateMetadata(context),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -427,9 +427,9 @@ func TestAccWorkbenchInstance_updateState(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -437,12 +437,12 @@ func TestAccWorkbenchInstance_updateState(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
 			},
-      		{
+			{
 				Config: testAccWorkbenchInstance_updateState(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "STOPPED"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "STOPPED"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -450,12 +450,12 @@ func TestAccWorkbenchInstance_updateState(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
 			},
-      		{
+			{
 				Config: testAccWorkbenchInstance_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -493,22 +493,9 @@ func TestAccWorkbenchInstance_empty_accelerator(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
-			},
-			{
-				ResourceName:            "google_workbench_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
-			},
-      		{
-				Config: testAccWorkbenchInstance_empty_accelerator(context),
-				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -519,9 +506,22 @@ func TestAccWorkbenchInstance_empty_accelerator(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_empty_accelerator(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
+			},
+			{
+				ResourceName:            "google_workbench_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
+			},
+			{
+				Config: testAccWorkbenchInstance_empty_accelerator(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -561,9 +561,9 @@ func TestAccWorkbenchInstance_updateBootDisk(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -571,12 +571,12 @@ func TestAccWorkbenchInstance_updateBootDisk(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
 			},
-      		{
+			{
 				Config: testAccWorkbenchInstance_updateBootDisk(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -602,9 +602,9 @@ func TestAccWorkbenchInstance_updateDataDisk(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -612,12 +612,12 @@ func TestAccWorkbenchInstance_updateDataDisk(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
 			},
-      		{
+			{
 				Config: testAccWorkbenchInstance_updateDataDisk(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
-                ),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
 			},
 			{
 				ResourceName:            "google_workbench_instance.instance",
@@ -643,8 +643,8 @@ func TestAccWorkbenchInstance_updateBothDisks(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
 				),
 			},
 			{
@@ -653,11 +653,11 @@ func TestAccWorkbenchInstance_updateBothDisks(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
 			},
-      		{
+			{
 				Config: testAccWorkbenchInstance_updateBothDisks(context),
 				Check: resource.ComposeTestCheckFunc(
-                    	resource.TestCheckResourceAttr(
-                        		"google_workbench_instance.instance", "state", "ACTIVE"),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
 				),
 			},
 			{
@@ -730,8 +730,8 @@ func TestAccWorkbenchInstance_updatelabels(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_label(context),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(
-							"google_workbench_instance.instance", "state", "ACTIVE"),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
 				),
 			},
 			{
@@ -743,8 +743,8 @@ func TestAccWorkbenchInstance_updatelabels(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(
-							"google_workbench_instance.instance", "state", "ACTIVE"),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
 				),
 			},
 			{
@@ -756,8 +756,8 @@ func TestAccWorkbenchInstance_updatelabels(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_label(context),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(
-							"google_workbench_instance.instance", "state", "ACTIVE"),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
 				),
 			},
 			{
@@ -782,7 +782,6 @@ resource "google_workbench_instance" "instance" {
 `, context)
 }
 
-
 func TestAccWorkbenchInstance_updateCustomContainers(t *testing.T) {
 	t.Parallel()
 
@@ -797,8 +796,8 @@ func TestAccWorkbenchInstance_updateCustomContainers(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_customcontainer(context),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(
-							"google_workbench_instance.instance", "state", "ACTIVE"),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
 				),
 			},
 			{
@@ -810,8 +809,8 @@ func TestAccWorkbenchInstance_updateCustomContainers(t *testing.T) {
 			{
 				Config: testAccWorkbenchInstance_updatedcustomcontainer(context),
 				Check: resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttr(
-							"google_workbench_instance.instance", "state", "ACTIVE"),
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
 				),
 			},
 			{

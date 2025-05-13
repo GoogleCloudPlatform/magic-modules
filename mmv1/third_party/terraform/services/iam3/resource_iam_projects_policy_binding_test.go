@@ -13,14 +13,14 @@ func TestAccIAM3ProjectsPolicyBinding_iamProjectsPolicyBindingExample_update(t *
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"random_suffix":   acctest.RandString(t, 10),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckIAM3ProjectsPolicyBindingDestroyProducer(t),
+		CheckDestroy:             testAccCheckIAM3ProjectsPolicyBindingDestroyProducer(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
@@ -52,7 +52,6 @@ func TestAccIAM3ProjectsPolicyBinding_iamProjectsPolicyBindingExample_update(t *
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"annotations", "location", "policy_binding_id"},
 			},
-
 		},
 	})
 }

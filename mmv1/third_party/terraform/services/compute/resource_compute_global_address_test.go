@@ -2,8 +2,8 @@ package compute_test
 
 import (
 	"fmt"
-	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
@@ -25,9 +25,9 @@ func TestAccComputeGlobalAddress_update(t *testing.T) {
 				Config: testAccComputeGlobalAddress_update1(context),
 			},
 			{
-				ResourceName:      "google_compute_global_address.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_global_address.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
@@ -39,9 +39,9 @@ func TestAccComputeGlobalAddress_update(t *testing.T) {
 				},
 			},
 			{
-				ResourceName:      "google_compute_global_address.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_global_address.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},

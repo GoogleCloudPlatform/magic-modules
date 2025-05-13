@@ -54,7 +54,7 @@ func checkSecretDataSourceMatchesResource() resource.TestCheckFunc {
 			}
 			// ignore diff if it's due to secrets being masked.
 			if strings.HasPrefix(k, "data.") {
-				if _, ok := dsAttr[k]; !ok{
+				if _, ok := dsAttr[k]; !ok {
 					errMsg += fmt.Sprintf("%s is defined in resource and not in datasource\n", k)
 				}
 				if dsAttr[k] == "**********" {

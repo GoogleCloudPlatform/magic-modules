@@ -2,8 +2,8 @@ package composer_test
 
 import (
 	"fmt"
-	"testing"
 	"strings"
+	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -22,20 +22,20 @@ func TestAccComposerUserWorkloadsSecret_basic(t *testing.T) {
 	secretName := fmt.Sprintf("%s-%d", testComposerUserWorkloadsSecretPrefix, acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:		                func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories:   acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:               testAccComposerEnvironmentDestroyProducer(t),
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:    testAccComposerUserWorkloadsSecret_basic(envName, secretName, envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv()),
-				Check:     resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttrSet("google_composer_user_workloads_secret.test", "data.username"),
-						resource.TestCheckResourceAttrSet("google_composer_user_workloads_secret.test", "data.password"),
+				Config: testAccComposerUserWorkloadsSecret_basic(envName, secretName, envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv()),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_composer_user_workloads_secret.test", "data.username"),
+					resource.TestCheckResourceAttrSet("google_composer_user_workloads_secret.test", "data.password"),
 				),
 			},
 			{
-				ResourceName:			"google_composer_user_workloads_secret.test",
-				ImportState:			 true,
+				ResourceName: "google_composer_user_workloads_secret.test",
+				ImportState:  true,
 			},
 		},
 	})
@@ -48,19 +48,19 @@ func TestAccComposerUserWorkloadsSecret_update(t *testing.T) {
 	secretName := fmt.Sprintf("%s-%d", testComposerUserWorkloadsSecretPrefix, acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:		                func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories:   acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:               testAccComposerEnvironmentDestroyProducer(t),
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:    testAccComposerUserWorkloadsSecret_basic(envName, secretName, envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv()),
+				Config: testAccComposerUserWorkloadsSecret_basic(envName, secretName, envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv()),
 			},
 			{
-				Config:    testAccComposerUserWorkloadsSecret_update(envName, secretName),
-				Check:     resource.ComposeTestCheckFunc(
-						resource.TestCheckResourceAttrSet("google_composer_user_workloads_secret.test", "data.email"),
-						resource.TestCheckResourceAttrSet("google_composer_user_workloads_secret.test", "data.password"),
-						resource.TestCheckNoResourceAttr("google_composer_user_workloads_secret.test", "data.username"),
+				Config: testAccComposerUserWorkloadsSecret_update(envName, secretName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_composer_user_workloads_secret.test", "data.email"),
+					resource.TestCheckResourceAttrSet("google_composer_user_workloads_secret.test", "data.password"),
+					resource.TestCheckNoResourceAttr("google_composer_user_workloads_secret.test", "data.username"),
 				),
 			},
 		},
@@ -74,17 +74,17 @@ func TestAccComposerUserWorkloadsSecret_delete(t *testing.T) {
 	secretName := fmt.Sprintf("%s-%d", testComposerUserWorkloadsSecretPrefix, acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:		                func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories:   acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:               testAccComposerEnvironmentDestroyProducer(t),
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:    testAccComposerUserWorkloadsSecret_basic(envName, secretName, envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv()),
+				Config: testAccComposerUserWorkloadsSecret_basic(envName, secretName, envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv()),
 			},
 			{
-				Config:    testAccComposerUserWorkloadsSecret_delete(envName),
-				Check:     resource.ComposeTestCheckFunc(
-						testAccComposerUserWorkloadsSecretDestroyed(t),
+				Config: testAccComposerUserWorkloadsSecret_delete(envName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccComposerUserWorkloadsSecretDestroyed(t),
 				),
 			},
 		},
@@ -162,8 +162,8 @@ func testAccComposerUserWorkloadsSecretDestroyed(t *testing.T) func(s *terraform
 				return fmt.Errorf("Invalid ID %q, expected format projects/{project}/regions/{region}/environments/{environment}/userWorkloadsSecrets/{name}", rs.Primary.ID)
 			}
 			secretName := &composer.UserWorkloadsSecretName{
-				Project:		 idTokens[1],
-				Region:			 idTokens[3],
+				Project:     idTokens[1],
+				Region:      idTokens[3],
 				Environment: idTokens[5],
 				Secret:      idTokens[7],
 			}

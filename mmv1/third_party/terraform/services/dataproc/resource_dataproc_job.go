@@ -148,13 +148,13 @@ func ResourceDataprocJob() *schema.Resource {
 			},
 
 			"labels": {
-				Type:        schema.TypeMap,
+				Type: schema.TypeMap,
 				Description: `Optional. The labels to associate with this job.
 
 				**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
 				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
-				Optional:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 
 			"terraform_labels": {
@@ -219,7 +219,7 @@ func resourceDataprocJobUpdate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -311,7 +311,7 @@ func resourceDataprocJobCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -406,7 +406,7 @@ func resourceDataprocJobRead(d *schema.ResourceData, meta interface{}) error {
 
 func resourceDataprocJobDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}

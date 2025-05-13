@@ -9,41 +9,41 @@ import (
 )
 
 func TestAccNetworkManagementVpcFlowLogsConfig_updateInterconnect(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-          "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-          PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-          ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-          CheckDestroy:             testAccCheckNetworkManagementVpcFlowLogsConfigDestroyProducer(t),
-          Steps: []resource.TestStep{
-            {
-              Config: testAccNetworkManagementVpcFlowLogsConfig_fullInterconnect(context),
-            },
-            {
-              ResourceName:            "google_network_management_vpc_flow_logs_config.interconnect-test",
-              ImportState:             true,
-              ImportStateVerify:       true,
-              ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels", "vpc_flow_logs_config_id"},
-            },
-            {
-              Config: testAccNetworkManagementVpcFlowLogsConfig_updateInterconnect(context),
-            },
-            {
-              ResourceName:            "google_network_management_vpc_flow_logs_config.interconnect-test",
-              ImportState:             true,
-              ImportStateVerify:       true,
-              ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels", "vpc_flow_logs_config_id"},
-            },
-          },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckNetworkManagementVpcFlowLogsConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkManagementVpcFlowLogsConfig_fullInterconnect(context),
+			},
+			{
+				ResourceName:            "google_network_management_vpc_flow_logs_config.interconnect-test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels", "vpc_flow_logs_config_id"},
+			},
+			{
+				Config: testAccNetworkManagementVpcFlowLogsConfig_updateInterconnect(context),
+			},
+			{
+				ResourceName:            "google_network_management_vpc_flow_logs_config.interconnect-test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels", "vpc_flow_logs_config_id"},
+			},
+		},
+	})
 }
 
 func testAccNetworkManagementVpcFlowLogsConfig_fullInterconnect(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
 }
 
@@ -77,7 +77,7 @@ resource "google_compute_interconnect_attachment" "attachment" {
 }
 
 func testAccNetworkManagementVpcFlowLogsConfig_updateInterconnect(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
 }
 
@@ -136,7 +136,7 @@ func TestAccNetworkManagementVpcFlowLogsConfig_updateVpn(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels", "vpc_flow_logs_config_id"},
 			},
-      {
+			{
 				Config: testAccNetworkManagementVpcFlowLogsConfig_updateVpn(context),
 			},
 			{
@@ -160,7 +160,7 @@ resource "google_network_management_vpc_flow_logs_config" "example" {
   vpn_tunnel              = "projects/${data.google_project.project.number}/regions/us-central1/vpnTunnels/${google_compute_vpn_tunnel.tunnel.name}"
 }
 `, context)
-  return fmt.Sprintf("%s\n\n%s\n\n", vpcFlowLogsCfg, testAccNetworkManagementVpcFlowLogsConfig_baseResources(context))
+	return fmt.Sprintf("%s\n\n%s\n\n", vpcFlowLogsCfg, testAccNetworkManagementVpcFlowLogsConfig_baseResources(context))
 }
 
 func testAccNetworkManagementVpcFlowLogsConfig_updateVpn(context map[string]interface{}) string {
@@ -179,7 +179,7 @@ resource "google_network_management_vpc_flow_logs_config" "example" {
   metadata                = "EXCLUDE_ALL_METADATA"
 }
 `, context)
-  return fmt.Sprintf("%s\n\n%s\n\n", vpcFlowLogsCfg, testAccNetworkManagementVpcFlowLogsConfig_baseResources(context))
+	return fmt.Sprintf("%s\n\n%s\n\n", vpcFlowLogsCfg, testAccNetworkManagementVpcFlowLogsConfig_baseResources(context))
 }
 
 func testAccNetworkManagementVpcFlowLogsConfig_baseResources(context map[string]interface{}) string {
@@ -242,4 +242,3 @@ resource "google_compute_route" "route" {
 }
 `, context)
 }
-

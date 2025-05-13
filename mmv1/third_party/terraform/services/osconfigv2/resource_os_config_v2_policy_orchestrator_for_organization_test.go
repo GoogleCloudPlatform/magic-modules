@@ -24,11 +24,10 @@ func TestAccOSConfigV2PolicyOrchestratorForOrganization_basic(t *testing.T) {
 		},
 	})
 
-
 	context := map[string]interface{}{
-		"org_id":         envvar.GetTestOrgTargetFromEnv(t),
-		"zone":           envvar.GetTestZoneFromEnv(),
-		"random_suffix":  acctest.RandString(t, 10),
+		"org_id":        envvar.GetTestOrgTargetFromEnv(t),
+		"zone":          envvar.GetTestZoneFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

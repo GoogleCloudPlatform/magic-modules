@@ -2,8 +2,8 @@ package cloudtasks_test
 
 import (
 	"fmt"
-	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -127,17 +127,17 @@ func TestAccCloudTasksQueue_HttpTargetOIDC_update(t *testing.T) {
 				Config: testAccCloudTasksQueue_HttpTargetOIDC(name, serviceAccountID),
 			},
 			{
-				ResourceName:            "google_cloud_tasks_queue.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_cloud_tasks_queue.default",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccCloudTasksQueue_basic(name),
 			},
 			{
-				ResourceName:            "google_cloud_tasks_queue.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_cloud_tasks_queue.default",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -157,17 +157,17 @@ func TestAccCloudTasksQueue_HttpTargetOAuth_update(t *testing.T) {
 				Config: testAccCloudTasksQueue_HttpTargetOAuth(name, serviceAccountID),
 			},
 			{
-				ResourceName:            "google_cloud_tasks_queue.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_cloud_tasks_queue.default",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccCloudTasksQueue_basic(name),
 			},
 			{
-				ResourceName:            "google_cloud_tasks_queue.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_cloud_tasks_queue.default",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -331,7 +331,6 @@ resource "google_service_account" "test" {
 
 `, name, serviceAccountID)
 }
-
 
 func testAccCloudTasksQueue_HttpTargetOAuth(name, serviceAccountID string) string {
 	return fmt.Sprintf(`

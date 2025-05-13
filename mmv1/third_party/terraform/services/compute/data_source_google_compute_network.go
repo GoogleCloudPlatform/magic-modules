@@ -31,8 +31,8 @@ func DataSourceGoogleComputeNetwork() *schema.Resource {
 
 			// Deprecated in favor of network_id
 			"numeric_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:       schema.TypeString,
+				Computed:   true,
 				Deprecated: "`numeric_id` is deprecated and will be removed in a future major release. Use `network_id` instead.",
 			},
 

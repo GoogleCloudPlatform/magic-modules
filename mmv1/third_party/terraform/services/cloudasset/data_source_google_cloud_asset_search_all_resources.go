@@ -115,7 +115,7 @@ func DataSourceGoogleCloudAssetSearchAllResources() *schema.Resource {
 
 func datasourceGoogleCloudAssetSearchAllResourcesRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -147,10 +147,10 @@ func datasourceGoogleCloudAssetSearchAllResourcesRead(d *schema.ResourceData, me
 		}
 
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config: config,
-			Project: project,
-			Method: "GET",
-			RawURL: url,
+			Config:    config,
+			Project:   project,
+			Method:    "GET",
+			RawURL:    url,
 			UserAgent: userAgent,
 		})
 		if err != nil {
@@ -195,7 +195,7 @@ func flattenDatasourceGoogleCloudAssetSearchAllResources(v interface{}) []map[st
 	for _, raw := range ls {
 		p := raw.(map[string]interface{})
 
-		var mName, mAssetType, mProject, mFolders, mOrganization,  mDisplayName, mDescription, mLocation, mLabels, mNetworkTags, mKmsKeys, mCreateTime, mUpdateTime, mState, mParentFullResourceName, mParentAssetType interface{}
+		var mName, mAssetType, mProject, mFolders, mOrganization, mDisplayName, mDescription, mLocation, mLabels, mNetworkTags, mKmsKeys, mCreateTime, mUpdateTime, mState, mParentFullResourceName, mParentAssetType interface{}
 		if pName, ok := p["name"]; ok {
 			mName = pName
 		}
@@ -266,4 +266,3 @@ func flattenDatasourceGoogleCloudAssetSearchAllResources(v interface{}) []map[st
 
 	return results
 }
-

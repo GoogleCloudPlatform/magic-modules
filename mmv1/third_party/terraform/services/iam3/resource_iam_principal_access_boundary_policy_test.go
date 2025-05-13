@@ -1,4 +1,5 @@
 package iam3_test
+
 import (
 	"testing"
 
