@@ -371,7 +371,7 @@ func TestUnitComputeGlobalForwardingRule_InternalIpDiffSuppress(t *testing.T) {
 func TestAccComputeGlobalForwardingRule_updateCanaryMigration(t *testing.T) {
 	t.Parallel()
 
-  fr := fmt.Sprintf("fr-canary-mgiration-%s", acctest.RandString(t, 10))
+	fr := fmt.Sprintf("fr-canary-mgiration-%s", acctest.RandString(t, 10))
 	proxy := fmt.Sprintf("pr-canary-mgiration-%s", acctest.RandString(t, 10))
 	urlmap := fmt.Sprintf("um-canary-mgiration-%s", acctest.RandString(t, 10))
 	backendservice := fmt.Sprintf("bs-canary-mgiration-%s", acctest.RandString(t, 10))
@@ -419,7 +419,7 @@ func TestAccComputeGlobalForwardingRule_updateCanaryMigration(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-      {
+			{
 				Config: testAccComputeGlobalForwardingRule_withCanaryMigration(fr, "TEST_ALL_TRAFFIC", proxy, urlmap, backendservice, address),
         ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
