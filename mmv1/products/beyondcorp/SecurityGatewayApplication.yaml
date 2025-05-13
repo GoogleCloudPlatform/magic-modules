@@ -35,14 +35,14 @@ examples:
     primary_resource_id: example
     primary_resource_name: 'fmt.Sprintf("default-sg%s", context["random_suffix"]), fmt.Sprintf("google-sga%s", context["random_suffix"])'
     vars:
-      security_gateway_name: default
-      application_name: google
+      security_gateway_name: default-sg
+      application_name: google-sga
   - name: beyondcorp_security_gateway_application_vpc
     primary_resource_id: example
     primary_resource_name: 'fmt.Sprintf("default-sg%s", context["random_suffix"]), fmt.Sprintf("google-sga%s", context["random_suffix"])'
     vars:
-      security_gateway_name: default
-      application_name: my-vm-service
+      security_gateway_name: default-sg
+      application_name: my-vm-service2
 autogen_async: true
 async:
   operation:
