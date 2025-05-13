@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+  "github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
   "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
@@ -394,6 +395,11 @@ func TestAccComputeGlobalForwardingRule_updateCanaryMigration(t *testing.T) {
 			},
 			{
 				Config: testAccComputeGlobalForwardingRule_withCanaryMigration(fr, "PREPARE", proxy, urlmap, backendservice, address),
+        ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_global_forwarding_rule.forwarding_rule", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_global_forwarding_rule.forwarding_rule",
@@ -402,6 +408,11 @@ func TestAccComputeGlobalForwardingRule_updateCanaryMigration(t *testing.T) {
 			},
       {
         Config: testAccComputeGlobalForwardingRule_withCanaryMigrationPercentage(fr, proxy, urlmap, backendservice, address, 50),
+        ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_global_forwarding_rule.forwarding_rule", plancheck.ResourceActionUpdate),
+					},
+				},
       },
       {
 				ResourceName:      "google_compute_global_forwarding_rule.forwarding_rule",
@@ -410,6 +421,11 @@ func TestAccComputeGlobalForwardingRule_updateCanaryMigration(t *testing.T) {
 			},
       {
 				Config: testAccComputeGlobalForwardingRule_withCanaryMigration(fr, "TEST_ALL_TRAFFIC", proxy, urlmap, backendservice, address),
+        ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_global_forwarding_rule.forwarding_rule", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:      "google_compute_global_forwarding_rule.forwarding_rule",
