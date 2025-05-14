@@ -61,16 +61,16 @@ async:
   include_project: false
 autogen_status: QXBwbGljYXRpb24=
 parameters:
-  - name: securityGatewaysId
+  - name: securityGatewayId
     type: String
-    description: Part of `parent`. See documentation of `projectsId`.
+    description: ID of the Security Gateway resource this belongs to.
     immutable: true
     url_param_only: true
     required: true
   - name: applicationId
     type: String
     description: |-
-      Optional. User-settable Application resource ID.
+      User-settable Application resource ID.
       * Must start with a letter.
       * Must contain between 4-63 characters from `/a-z-/`.
       * Must end with a number or letter.

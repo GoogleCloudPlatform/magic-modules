@@ -27,7 +27,7 @@ func TestAccBeyondcorpSecurityGatewayApplication_beyondcorpSecurityGatewayApplic
 				ResourceName:            "google_beyondcorp_security_gateway_application.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"application_id", "security_gateways_id"},
+				ImportStateVerifyIgnore: []string{"application_id", "security_gateway_id"},
 			},
 			{
 				Config: testAccBeyondcorpSecurityGatewayApplication_beyondcorpSecurityGatewayApplicationBasicExample_update(context),
@@ -41,7 +41,7 @@ func TestAccBeyondcorpSecurityGatewayApplication_beyondcorpSecurityGatewayApplic
 				ResourceName:            "google_beyondcorp_security_gateway_application.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"application_id", "security_gateways_id"},
+				ImportStateVerifyIgnore: []string{"application_id", "security_gateway_id"},
 			},
 		},
 	})
@@ -56,7 +56,7 @@ resource "google_beyondcorp_security_gateway" "default" {
 }
 
 resource "google_beyondcorp_security_gateway_application" "example" {
-  security_gateways_id = google_beyondcorp_security_gateway.default.security_gateway_id
+  security_gateway_id = google_beyondcorp_security_gateway.default.security_gateway_id
   application_id = "google-sga%{random_suffix}"
   endpoint_matchers {
     hostname = "google.com"
@@ -74,7 +74,7 @@ resource "google_beyondcorp_security_gateway" "default" {
 }
 
 resource "google_beyondcorp_security_gateway_application" "example" {
-  security_gateways_id = google_beyondcorp_security_gateway.default.security_gateway_id
+  security_gateway_id = google_beyondcorp_security_gateway.default.security_gateway_id
   display_name = "Updated Name"
   application_id = "google-sga%{random_suffix}"
   endpoint_matchers {
