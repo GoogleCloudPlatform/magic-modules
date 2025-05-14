@@ -40,6 +40,12 @@ func GoogleProviderConfig(t *testing.T) *transport_tpg.Config {
 
 	sdkProvider := provider.Provider()
 	rc := terraform.ResourceConfig{}
+
+	universeDomain := envvar.GetTestUniverseDomainFromEnv(t)
+	if universeDomain != "" && universeDomain != "googleapis.com" {
+		rc.Config = make(map[string]interface{})
+		rc.Config["universe_domain"] = universeDomain
+	}
 	sdkProvider.Configure(context.Background(), &rc)
 	return sdkProvider.Meta().(*transport_tpg.Config)
 }
