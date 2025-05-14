@@ -141,25 +141,20 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 	for s := range services {
 		servicesArr = append(servicesArr, s)
 	}
-	analyticsData := analytics{
-		ReplayingResult:  replayingResult,
+	postReplayData := postReplay{
 		RunFullVCR:       runFullVCR,
 		AffectedServices: sort.StringSlice(servicesArr),
-	}
-	testsAnalyticsComment, err := formatTestsAnalytics(analyticsData)
-	if err != nil {
-		return fmt.Errorf("error formatting test_analytics comment: %w", err)
+		ReplayingResult:  replayingResult,
+		ReplayingErr:     replayingErr,
+		LogBucket:        "ci-vcr-logs",
+		Version:          provider.Private.String(),
+		Head:             head,
 	}
 	if len(replayingResult.FailedTests) > 0 {
-		withReplayFailedTestsData := withReplayFailedTests{
-			ReplayingResult: replayingResult,
-		}
-
-		withReplayFailedTestsComment, err := formatWithReplayFailedTests(withReplayFailedTestsData)
+		comment, err := formatPostReplay(postReplayData)
 		if err != nil {
-			return fmt.Errorf("error formatting action taken comment: %w", err)
+			return fmt.Errorf("error formatting post replay comment: %w", err)
 		}
-		comment := strings.Join([]string{testsAnalyticsComment, withReplayFailedTestsComment}, "\n")
 		if err := postGerritComment(kokoroArtifactsDir, modifiedFilePath, comment, rnr); err != nil {
 			return fmt.Errorf("error posting comment: %w", err)
 		}
@@ -223,14 +218,10 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 			return fmt.Errorf("error posting comment: %w", err)
 		}
 	} else { //  len(replayingResult.FailedTests) == 0
-		withoutReplayFailedTestsData := withoutReplayFailedTests{
-			ReplayingErr: replayingErr,
-		}
-		withoutReplayFailedTestsComment, err := formatWithoutReplayFailedTests(withoutReplayFailedTestsData)
+		comment, err := formatPostReplay(postReplayData)
 		if err != nil {
-			return fmt.Errorf("error formatting action taken comment: %w", err)
+			return fmt.Errorf("error formatting post replay comment: %w", err)
 		}
-		comment := strings.Join([]string{testsAnalyticsComment, withoutReplayFailedTestsComment}, "\n")
 		if err := postGerritComment(kokoroArtifactsDir, modifiedFilePath, comment, rnr); err != nil {
 			return fmt.Errorf("error posting comment: %w", err)
 		}
