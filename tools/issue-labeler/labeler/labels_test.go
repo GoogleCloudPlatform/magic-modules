@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v68/github"
 	"golang.org/x/exp/slices"
 )
 
@@ -225,9 +225,9 @@ func TestComputeLabelChanges(t *testing.T) {
 		{
 			name: "existing labels with correct color",
 			existingLabels: []*github.Label{
-				{Name: github.String("xyz"), Color: github.String("FF0000")},
-				{Name: github.String("bug"), Color: github.String("FF0000")},
-				{Name: github.String("enhancement"), Color: github.String("FF0000")},
+				{Name: github.Ptr("xyz"), Color: github.Ptr("FF0000")},
+				{Name: github.Ptr("bug"), Color: github.Ptr("FF0000")},
+				{Name: github.Ptr("enhancement"), Color: github.Ptr("FF0000")},
 			},
 			desiredLabels: []string{"bug", "enhancement"},
 			desiredColor:  "FF0000",
@@ -239,8 +239,8 @@ func TestComputeLabelChanges(t *testing.T) {
 		{
 			name: "existing labels with wrong color",
 			existingLabels: []*github.Label{
-				{Name: github.String("bug"), Color: github.String("00FF00")},
-				{Name: github.String("enhancement"), Color: github.String("00FF00")},
+				{Name: github.Ptr("bug"), Color: github.Ptr("00FF00")},
+				{Name: github.Ptr("enhancement"), Color: github.Ptr("00FF00")},
 			},
 			desiredLabels: []string{"bug", "enhancement"},
 			desiredColor:  "FF0000",
@@ -252,7 +252,7 @@ func TestComputeLabelChanges(t *testing.T) {
 		{
 			name: "mixed existing and new labels",
 			existingLabels: []*github.Label{
-				{Name: github.String("bug"), Color: github.String("FF0000")},
+				{Name: github.Ptr("bug"), Color: github.Ptr("FF0000")},
 			},
 			desiredLabels: []string{"bug", "enhancement"},
 			desiredColor:  "FF0000",
@@ -264,7 +264,7 @@ func TestComputeLabelChanges(t *testing.T) {
 		{
 			name: "case insensitive color comparison",
 			existingLabels: []*github.Label{
-				{Name: github.String("bug"), Color: github.String("ff0000")},
+				{Name: github.Ptr("bug"), Color: github.Ptr("ff0000")},
 			},
 			desiredLabels: []string{"bug"},
 			desiredColor:  "FF0000",
