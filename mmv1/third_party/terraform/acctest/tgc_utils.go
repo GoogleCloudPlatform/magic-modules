@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package acctest
 
 import (
@@ -61,4 +63,92 @@ func GetTestMetadataForTgc(service, address, rawConfig string) resource.TestChec
 		log.Printf("[DEBUG]TGC raw_config starts %sEnd of TGC raw_config", rawConfig)
 		return nil
 	}
+}
+
+// parseResources extracts all resources from a Terraform configuration string
+func parseResources(config string) []string {
+	// This regex matches resource blocks in Terraform configurations
+	resourceRegex := regexp.MustCompile(`resource\s+"([^"]+)"\s+"([^"]+)"`)
+	matches := resourceRegex.FindAllStringSubmatch(config, -1)
+
+	var resources []string
+	for _, match := range matches {
+		if len(match) >= 3 {
+			// Combine resource type and name to form the address
+			resources = append(resources, fmt.Sprintf("%s.%s", match[1], match[2]))
+		}
+	}
+
+	return resources
+}
+
+// getServicePackage determines the service package for a resource type
+func getServicePackage(resourceType string) string {
+	var ServicePackages = map[string]string{
+		"google_compute_":   "compute",
+		"google_storage_":   "storage",
+		"google_sql_":       "sql",
+		"google_container_": "container",
+		"google_bigquery_":  "bigquery",
+		"google_project":    "resourcemanager",
+		"google_cloud_run_": "cloudrun",
+	}
+
+	// Check for exact matches first
+	if service, ok := ServicePackages[resourceType]; ok {
+		return service
+	}
+
+	// Check for prefix matches
+	for prefix, service := range ServicePackages {
+		if strings.HasPrefix(resourceType, prefix) {
+			return service
+		}
+	}
+
+	// Default to "unknown" if no match found
+	return "unknown"
+}
+
+// extendWithTGCData adds TGC metadata check functions to each TestStep
+func extendWithTGCData(c resource.TestCase) resource.TestCase {
+	var updatedSteps []resource.TestStep
+
+	for _, step := range c.Steps {
+		if step.Config != "" {
+			// Parse resources from the config
+			resources := parseResources(step.Config)
+
+			// Create TGC metadata checks for each resource
+			var tgcChecks []resource.TestCheckFunc
+			for _, res := range resources {
+				parts := strings.Split(res, ".")
+				if len(parts) >= 2 {
+					resourceType := parts[0]
+					service := getServicePackage(resourceType)
+					tgcChecks = append(tgcChecks, GetTestMetadataForTgc(service, res, step.Config))
+				}
+			}
+
+			// If there are TGC checks to add
+			if len(tgcChecks) > 0 {
+				// If there's an existing check function, wrap it with ours
+				if step.Check != nil {
+					existingCheck := step.Check
+					step.Check = resource.ComposeTestCheckFunc(
+						existingCheck,
+						resource.ComposeTestCheckFunc(tgcChecks...),
+					)
+				} else {
+					// Otherwise, just use our TGC checks
+					step.Check = resource.ComposeTestCheckFunc(tgcChecks...)
+				}
+			}
+		}
+
+		updatedSteps = append(updatedSteps, step)
+	}
+
+	c.Steps = updatedSteps
+	return c
 }
