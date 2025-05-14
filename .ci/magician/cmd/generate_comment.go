@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -84,6 +85,7 @@ type diffCommentData struct {
 	MissingServiceLabels []string
 	MissingTests         map[string]*MissingTestInfo
 	MissingDocs          *MissingDocsSummary
+	AddedResources       []string
 	Errors               []Errors
 }
 
@@ -93,6 +95,7 @@ type simpleSchemaDiff struct {
 
 const allowBreakingChangesLabel = "override-breaking-change"
 const allowMissingServiceLabelsLabel = "override-missing-service-labels"
+const allowMultipleResourcesLabel = "override-multiple-resources"
 
 var gcEnvironmentVariables = [...]string{
 	"BUILD_ID",
@@ -363,6 +366,25 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	})
 	data.BreakingChanges = breakingChangesSlice
 
+	// Check if multiple resources were added.
+	multipleResourcesState := "success"
+	if len(uniqueAddedResources) > 1 {
+		multipleResourcesState = "failure"
+		for _, label := range pullRequest.Labels {
+			if label.Name == allowMultipleResourcesLabel {
+				multipleResourcesState = "success"
+				break
+			}
+		}
+	}
+	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildId, buildStep, projectId)
+	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-multiple-resources", multipleResourcesState, targetURL, commitSha); err != nil {
+		fmt.Printf("Error posting terraform-provider-multiple-resources build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
+		errors["Other"] = append(errors["Other"], "Failed to update missing-service-labels status check with state: "+multipleResourcesState)
+	}
+	data.AddedResources = maps.Keys(uniqueAddedResources)
+	slices.Sort(data.AddedResources)
+
 	// Compute affected resources based on changed files
 	changedFilesAffectedResources := map[string]struct{}{}
 	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
@@ -427,7 +449,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 		}
 	}
-	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildId, buildStep, projectId)
 	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-breaking-change-test", breakingState, targetURL, commitSha); err != nil {
 		fmt.Printf("Error posting terraform-provider-breaking-change-test build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
 		errors["Other"] = append(errors["Other"], "Failed to update breaking-change status check with state: "+breakingState)
