@@ -1,5 +1,4 @@
 package networksecurity_test
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"testing"
@@ -19,7 +18,7 @@ func TestAccNetworkSecurityInterceptEndpointGroupAssociation_update(t *testing.T
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkSecurityInterceptEndpointGroupAssociation_basic(context),
@@ -51,33 +50,28 @@ func TestAccNetworkSecurityInterceptEndpointGroupAssociation_update(t *testing.T
 func testAccNetworkSecurityInterceptEndpointGroupAssociation_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "producer_network" {
-  provider                = google-beta
   name                    = "tf-test-example-prod-network%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_network" "consumer_network" {
-  provider                = google-beta
   name                    = "tf-test-example-cons-network%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_network_security_intercept_deployment_group" "deployment_group" {
-  provider                      = google-beta
   intercept_deployment_group_id = "tf-test-example-dg%{random_suffix}"
   location                      = "global"
   network                       = google_compute_network.producer_network.id
 }
 
 resource "google_network_security_intercept_endpoint_group" "endpoint_group" {
-  provider                      = google-beta
-  intercept_endpoint_group_id   = "tf-test-example-eg%{random_suffix}"
-  location                      = "global"
-  intercept_deployment_group    = google_network_security_intercept_deployment_group.deployment_group.id
+  intercept_endpoint_group_id = "tf-test-example-eg%{random_suffix}"
+  location                    = "global"
+  intercept_deployment_group  = google_network_security_intercept_deployment_group.deployment_group.id
 }
 
 resource "google_network_security_intercept_endpoint_group_association" "default" {
-  provider                                = google-beta
   intercept_endpoint_group_association_id = "tf-test-example-ega%{random_suffix}"
   location                                = "global"
   network                                 = google_compute_network.consumer_network.id
@@ -92,33 +86,28 @@ resource "google_network_security_intercept_endpoint_group_association" "default
 func testAccNetworkSecurityInterceptEndpointGroupAssociation_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "producer_network" {
-  provider                = google-beta
   name                    = "tf-test-example-prod-network%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_network" "consumer_network" {
-  provider                = google-beta
   name                    = "tf-test-example-cons-network%{random_suffix}"
   auto_create_subnetworks = false
 }
 
 resource "google_network_security_intercept_deployment_group" "deployment_group" {
-  provider                      = google-beta
   intercept_deployment_group_id = "tf-test-example-dg%{random_suffix}"
   location                      = "global"
   network                       = google_compute_network.producer_network.id
 }
 
 resource "google_network_security_intercept_endpoint_group" "endpoint_group" {
-  provider                      = google-beta
-  intercept_endpoint_group_id   = "tf-test-example-eg%{random_suffix}"
-  location                      = "global"
-  intercept_deployment_group    = google_network_security_intercept_deployment_group.deployment_group.id
+  intercept_endpoint_group_id = "tf-test-example-eg%{random_suffix}"
+  location                    = "global"
+  intercept_deployment_group  = google_network_security_intercept_deployment_group.deployment_group.id
 }
 
 resource "google_network_security_intercept_endpoint_group_association" "default" {
-  provider                                = google-beta
   intercept_endpoint_group_association_id = "tf-test-example-ega%{random_suffix}"
   location                                = "global"
   network                                 = google_compute_network.consumer_network.id
@@ -129,5 +118,3 @@ resource "google_network_security_intercept_endpoint_group_association" "default
 }
 `, context)
 }
-
-{{ end }}
