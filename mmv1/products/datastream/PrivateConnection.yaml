@@ -116,7 +116,9 @@ properties:
     description: |
       The VPC Peering configuration is used to create VPC peering
       between Datastream and the consumer's VPC.
-    required: true
+    exactly_one_of:
+      - 'vpc_peering_config'
+      - 'psc_interface_config'
     properties:
       - name: 'vpc'
         type: String
@@ -128,4 +130,19 @@ properties:
         type: String
         description: |
           A free subnet for peering. (CIDR of /29)
+        required: true
+  - name: 'pscInterfaceConfig'
+    type: NestedObject
+    description: |
+      The PSC Interface configuration is used to create PSC Interface
+      between Datastream and the consumer's PSC.
+    exactly_one_of:
+      - 'vpc_peering_config'
+      - 'psc_interface_config'
+    properties:
+      - name: 'networkAttachment'
+        type: String
+        description: |
+          Fully qualified name of the network attachment that Datastream will connect to.
+          Format: projects/{project}/regions/{region}/networkAttachments/{name}
         required: true
