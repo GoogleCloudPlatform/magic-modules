@@ -20,6 +20,7 @@ references:
 base_url: projects/{{project}}/locations/{{location}}/views
 self_link: projects/{{project}}/locations/{{location}}/views/{{view}}
 create_url: projects/{{project}}/locations/{{location}}/views
+delete_url: projects/{{project}}/locations/{{location}}/views/{{view}}
 update_verb: PATCH
 update_mask: true
 id_format: projects/{{project}}/locations/{{location}}/views/{{view}}
