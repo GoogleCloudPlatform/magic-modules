@@ -33,6 +33,7 @@ examples:
     primary_resource_id: example
     vars:
       backend_id: 'dd-mini'
+      service_act_id: 'service-account'
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
@@ -42,6 +43,7 @@ examples:
     primary_resource_id: example
     vars:
       backend_id: 'dd-full'
+      service_act_id: 'service-account'
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
@@ -51,6 +53,7 @@ examples:
     primary_resource_id: example
     vars:
       backend_id: 'dd-disabled'
+      service_act_id: 'service-account'
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
