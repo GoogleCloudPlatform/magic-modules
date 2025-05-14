@@ -416,6 +416,13 @@ func ProviderConfigure(ctx context.Context, d *schema.ResourceData, p *schema.Pr
 		return nil, diag.FromErr(err)
 	}
 
+	// Bypass checkDestroyer failure with universe domain set
+	if _, ok := d.GetOk("universe_domain"); !ok {
+		if config.UniverseDomain != "" && config.UniverseDomain != "googleapis.com" {
+			d.Set("universe_domain", config.UniverseDomain)
+		}
+	}
+	
 	// Verify that universe domains match between credentials and configuration
 	if v, ok := d.GetOk("universe_domain"); ok {
 		if config.UniverseDomain == "" && v.(string) != "googleapis.com" { // v can't be "", as it wouldn't pass `ok` above

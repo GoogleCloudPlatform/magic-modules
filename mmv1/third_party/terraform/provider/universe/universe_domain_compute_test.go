@@ -34,8 +34,6 @@ func TestAccUniverseDomainDisk(t *testing.T) {
 }
 
 func TestAccUniverseDomainDiskImage(t *testing.T) {
-	// Skip this test in all env since this can only run in specific test project.
-	// t.Skip()
 
 	universeDomain := envvar.GetTestUniverseDomainFromEnv(t)
 	zone := envvar.GetTestZoneFromEnv()
