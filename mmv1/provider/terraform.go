@@ -344,7 +344,7 @@ func (t Terraform) getCommonCopyFiles(versionName string, generateCode, generate
 		"go.sum":                           "third_party/terraform/go.sum",
 		"go.mod":                           "third_party/terraform/go.mod",
 		".go-version":                      "third_party/terraform/.go-version",
-		"terraform-registry-manifest.json": "third_party/terraform/terraform-registry-manifest.json.tmpl",
+		"terraform-registry-manifest.json": "third_party/terraform/terraform-registry-manifest.json",
 	}
 	maps.Copy(commonCopyFiles, singleFiles)
 
