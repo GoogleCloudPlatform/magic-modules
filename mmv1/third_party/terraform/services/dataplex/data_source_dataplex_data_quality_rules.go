@@ -121,7 +121,6 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{},
 							},
-							// Elem: &schema.Schema{},
 						},
 						"set_expectation": {
 							Type:     schema.TypeList,
@@ -165,7 +164,6 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{},
 							},
-							// Elem: &schema.Schema{},
 						},
 						"statistic_range_expectation": {
 							Type:     schema.TypeList,
