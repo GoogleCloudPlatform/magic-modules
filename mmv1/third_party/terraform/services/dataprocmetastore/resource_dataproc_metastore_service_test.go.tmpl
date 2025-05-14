@@ -2,8 +2,11 @@ package dataprocmetastore_test
 
 import (
 	"fmt"
-	"testing"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"regexp"
+	"strings"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -164,6 +167,188 @@ resource "google_dataproc_metastore_service" "backup" {
 resource "google_storage_bucket" "bucket" {
   name     = "tf-test-backup%{random_suffix}"
   location = "us-central1"
+}
+`, context)
+}
+
+func TestAccMetastoreService_tags(t *testing.T) {
+	t.Parallel()
+
+	// Bootstrap the new Tag Key and two distinct Tag Values
+	tagKeyURI := acctest.BootstrapSharedTestTagKey(t, "metastore-org-policy-tagkey")
+	allowedTagValueURI := acctest.BootstrapSharedTestTagValue(t, "metastore-org-policy-allowed-value", tagKeyURI)
+	disallowedTagValueURI := acctest.BootstrapSharedTestTagValue(t, "metastore-org-policy-disallowed-value", tagKeyURI)
+
+	allowedTagValueCanonicalName := strings.TrimPrefix(allowedTagValueURI, "//cloudresourcemanager.googleapis.com/")
+
+	contextData := map[string]interface{}{
+		"random_suffix":                acctest.RandString(t, 10),
+		"org":                          envvar.GetTestOrgFromEnv(t),
+		"org_id":                       "735183260412",
+		"project":                      "tags-blr-test-ap",
+		"location":                     "us-central1",
+		"tagKey":                       tagKeyURI,
+		"allowedTagValue":              allowedTagValueURI,
+		"disallowedTagValue":           disallowedTagValueURI,
+		"allowedTagValueCanonicalName": allowedTagValueCanonicalName,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: resource.ComposeTestCheckFunc(
+			testAccCheckDataprocMetastoreServiceDestroyProducer(t),
+		),
+		Steps: []resource.TestStep{
+			// Step 1: Create the Organization Policy
+			{
+				Config: testAccOrgPolicyAllowSpecificTagValue(contextData),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_organization_policy.allow_specific_tag",
+						"constraint",
+						"serviceuser.services",
+					),
+					resource.TestCheckResourceAttr(
+						"google_organization_policy.allow_specific_tag",
+						"list_policy.0.allow.0.values.0",
+						contextData["allowedTagValueCanonicalName"].(string),
+					),
+					resource.TestCheckResourceAttr(
+						"google_organization_policy.allow_specific_tag",
+						"list_policy.0.deny.0.all",
+						"true",
+					),
+				),
+			},
+			// Step 2: Create a Metastore Service with the ALLOWED tag (should succeed)
+			{
+				Config: testAccMetastoreServiceTags(map[string]interface{}{
+					"random_suffix": contextData["random_suffix"],
+					"org":           contextData["org"],
+					"tagKey":        contextData["tagKey"],
+					"tagValue":      contextData["allowedTagValue"], // Use the allowed tag
+					"location":      contextData["location"],
+					"project":       contextData["project"],
+				}),
+				Check: resource.ComposeTestCheckFunc(
+					// Verify the tag is present in the Terraform state
+					resource.TestCheckResourceAttr(
+						"google_dataproc_metastore_service.default",
+						"tags.%",
+						"1",
+					),
+					resource.TestCheckResourceAttr(
+						"google_dataproc_metastore_service.default",
+						"tags."+contextData["org"].(string)+"/"+contextData["tagKey"].(string),
+						contextData["allowedTagValue"].(string),
+					),
+				),
+			},
+			// Step 3: Attempt to create a Metastore Service with the DISALLOWED tag (should fail)
+			{
+				Config: testAccMetastoreServiceTagsDisallowed(map[string]interface{}{
+					"random_suffix":      acctest.RandString(t, 10) + "-disallowed", // Ensure a unique service_id for this failed attempt
+					"org":                contextData["org"],
+					"tagKey":             contextData["tagKey"],
+					"disallowedTagValue": contextData["disallowedTagValue"], // Use the disallowed tag
+					"location":           contextData["location"],
+					"project":            contextData["project"],
+				}),
+				// Expect an error indicating policy violation
+				ExpectError: regexp.MustCompile(`(?i)(CONSTRAINT_VIOLATION|policy violation|denied by a policy)`),
+			},
+			// Step 4: Delete the Organization Policy (added step)
+			{
+				Config: testAccOrgPolicyDelete(contextData),
+			},
+		},
+	})
+}
+func testAccMetastoreServiceTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataproc_metastore_service" "default" {
+  service_id   = "tf-test-my-service-%{random_suffix}"
+  location   = "us-central1"
+  port       = 9080
+  tier       = "DEVELOPER"
+
+  maintenance_window {
+    hour_of_day = 2
+    day_of_week = "SUNDAY"
+   }
+
+  hive_metastore_config {
+    version = "2.3.6"
+  }
+
+  labels = {
+    env = "test"
+  }
+  tags = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
+}
+
+// Organization Policy to allow only a specific tag value
+func testAccOrgPolicyAllowSpecificTagValue(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_organization_policy" "allow_specific_tag" {
+  org_id = "735183260412"
+
+  constraint   = "serviceuser.services"
+
+  list_policy {
+    allow {
+      values = [
+        "%{allowedTagValueCanonicalName}",
+      ]
+    }
+  }
+}
+`, context)
+}
+
+// Metastore service with a disallowed tag value (for negative test)
+func testAccMetastoreServiceTagsDisallowed(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataproc_metastore_service" "disallowed_service" {
+  service_id   = "tf-test-disallowed-%{random_suffix}" # Unique ID for this
+  location   = "%{location}"
+  port       = 9080
+  tier       = "DEVELOPER"
+
+
+  maintenance_window {
+    hour_of_day = 2
+    day_of_week = "SUNDAY"
+   }
+
+
+  hive_metastore_config {
+    version = "2.3.6"
+  }
+
+
+  labels = {
+    env = "test"
+  }
+  tags = {
+	"%{org}/%{tagKey}" = "%{disallowedTagValue}" # Using the disallowed tag value
+  }
+}
+`, context)
+}
+
+// Configuration to delete the Organization Policy
+func testAccOrgPolicyDelete(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_organization_policy" "allow_specific_tag" {
+  org_id = "%{org_id}"
+  constraint = "serviceuser.services"
+  policy_type = "unset"
 }
 `, context)
 }
