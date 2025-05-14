@@ -196,7 +196,7 @@ func TestAccAlloydbInstance_stopstart(t *testing.T) {
 	})
 }
 
-func testAccAlloydbInstance_updateActivationPoliycy(context map[string]interface{}) string {
+func testAccAlloydbInstance_updateActivationPolicy(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_alloydb_instance" "default" {
   cluster       = google_alloydb_cluster.default.name
