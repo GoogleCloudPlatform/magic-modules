@@ -30,7 +30,7 @@ func TestAccBeyondcorpSecurityGatewayApplication_beyondcorpSecurityGatewayApplic
 				ImportStateVerifyIgnore: []string{"application_id", "security_gateways_id"},
 			},
 			{
-				Config: testAccBeyondcorpApplication_beyondcorpSecurityGatewayApplicationBasicExample_update(context),
+				Config: testAccBeyondcorpSecurityGatewayApplication_beyondcorpSecurityGatewayApplicationBasicExample_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_beyondcorp_security_gateway_application.example", plancheck.ResourceActionUpdate),
