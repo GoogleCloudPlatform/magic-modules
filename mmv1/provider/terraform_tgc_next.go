@@ -74,9 +74,9 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		// common
 		"pkg/transport/config.go":                        "third_party/terraform/transport/config.go.tmpl",
 		"pkg/transport/provider_handwritten_endpoint.go": "third_party/terraform/transport/provider_handwritten_endpoint.go.tmpl",
-		"pkg/tpgresource/common_diff_suppress.go":        "third_party/terraform/tpgresource/common_diff_suppress.go.tmpl",
+		"pkg/tpgresource/common_diff_suppress.go":        "third_party/terraform/tpgresource/common_diff_suppress.go",
 		"pkg/provider/provider.go":                       "third_party/terraform/provider/provider.go.tmpl",
-		"pkg/provider/provider_validators.go":            "third_party/terraform/provider/provider_validators.go.tmpl",
+		"pkg/provider/provider_validators.go":            "third_party/terraform/provider/provider_validators.go",
 
 		// tfplan2cai
 		"pkg/tfplan2cai/converters/resource_converters.go":                       "templates/tgc_next/tfplan2cai/resource_converters.go.tmpl",
