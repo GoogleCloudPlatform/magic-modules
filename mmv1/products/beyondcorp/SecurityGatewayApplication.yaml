@@ -14,21 +14,21 @@
 ---
 name: SecurityGatewayApplication
 description: Specifies application endpoint(s) to protect behind a Security Gateway.
-base_url: projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications
+base_url: projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications
 update_mask: true
-self_link: projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications/{{application_id}}
-create_url: projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications?applicationId={{application_id}}
+self_link: projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications/{{application_id}}
+create_url: projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications?applicationId={{application_id}}
 update_verb: PATCH
-id_format: projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications/{{application_id}}
+id_format: projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications/{{application_id}}
 import_format:
-  - projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications/{{application_id}}
+  - projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications/{{application_id}}
 iam_policy:
   method_name_separator: ':'
   iam_conditions_request_type: 'QUERY_PARAM_NESTED'
   allowed_iam_role: 'roles/beyondcorp.securityGatewayUser'
   parent_resource_attribute: 'application_id'
   import_format:
-    - 'projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications/{{application_id}}'
+    - 'projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications/{{application_id}}'
     - '{{application_id}}'
 examples:
   - name: beyondcorp_security_gateway_application_basic
