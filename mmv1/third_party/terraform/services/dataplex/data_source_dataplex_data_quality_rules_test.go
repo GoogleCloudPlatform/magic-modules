@@ -10,7 +10,6 @@ import (
 func TestAccDataplexDataQualityRules(t *testing.T) {
 	t.Parallel()
 
-	// projects/dataplex-back-end-dev-project/locations/us-central1/dataScans/a111
 	context := map[string]interface{}{
 		"project":      "dataplex-back-end-dev-project",
 		"location":     "us-central1",
@@ -24,7 +23,6 @@ func TestAccDataplexDataQualityRules(t *testing.T) {
 			{
 				Config: testAccDataplexDataQualityRules_config(context),
 				Check: resource.ComposeTestCheckFunc(
-					// resource.TestCheckResourceAttrSet("data.google_dataplex_data_quality_rules.generated_dq_rules", "rule"),
 					resource.TestCheckResourceAttr("data.google_dataplex_data_quality_rules.generated_dq_rules", "rule.#", "17"),
 				),
 			},
