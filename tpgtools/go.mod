@@ -1,12 +1,11 @@
 module github.com/GoogleCloudPlatform/magic-modules/tpgtools
 
-go 1.23
+go 1.23.0
 
 require (
 	bitbucket.org/creachadair/stringset v0.0.11
 	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.79.0
 	github.com/golang/glog v1.1.2
-	github.com/hashicorp/hcl v1.0.0
 	github.com/kylelemons/godebug v1.1.0
 	github.com/nasa9084/go-openapi v0.0.0-20210722142352-4a81d737faf6
 	gopkg.in/yaml.v2 v2.4.0
@@ -25,11 +24,11 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	go.opencensus.io v0.24.0 // indirect
-	golang.org/x/crypto v0.13.0 // indirect
-	golang.org/x/net v0.15.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/oauth2 v0.12.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	google.golang.org/api v0.138.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d // indirect
