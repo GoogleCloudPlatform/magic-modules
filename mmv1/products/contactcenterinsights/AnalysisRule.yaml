@@ -41,6 +41,10 @@ examples:
     primary_resource_id: 'basic_analysis_full'
     vars:
       resource_name: 'full_analysis_rule'
+  - name: 'contact_center_insights_analysis_rule_profile'
+    primary_resource_id: 'basic_analysis_profile'
+    vars:
+      resource_name: 'profile_analysis_rule'
 parameters:
   - name: location
     type: String
