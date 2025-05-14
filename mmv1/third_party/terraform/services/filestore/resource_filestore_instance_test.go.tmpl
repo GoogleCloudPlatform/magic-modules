@@ -1,13 +1,11 @@
 package filestore_test
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"reflect"
 	"regexp"
 	"testing"
-	"text/template"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -601,14 +599,10 @@ resource "google_filestore_instance" "instance" {
 func TestAccFilestoreInstance_psc(t *testing.T) {
 	t.Parallel()
 
-	data := map[string]string{
-		"Name": fmt.Sprintf("tf-test-%d", acctest.RandInt(t)),
-		"Location": "us-central1",
-		"Tier": "REGIONAL",
-	}
-	config, err := executeTemplate(pscInstanceConfigTemplate, data)
-	if err != nil {
-		t.Fatalf("Failed to execute config template: %v", err)
+	context := map[string]interface{}{
+		"name":     fmt.Sprintf("tf-test-%d", acctest.RandInt(t)),
+		"location": "us-central1",
+		"tier":     "REGIONAL",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -617,8 +611,8 @@ func TestAccFilestoreInstance_psc(t *testing.T) {
 		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: config,
-				Check: resource.ComposeTestCheckFunc(
+				Config: testAccFilestoreInstance_psc(context),
+				Check:  resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_filestore_instance.instance", "networks.0.connect_mode", "PRIVATE_SERVICE_CONNECT"),
 				),
 			},
@@ -632,29 +626,30 @@ func TestAccFilestoreInstance_psc(t *testing.T) {
 	})
 }
 
-const pscInstanceConfigTemplate = `
+func testAccFilestoreInstance_psc(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 data "google_client_config" "current" {
   provider = google-beta
 }
 
 resource "google_compute_network" "psc_network" {
   provider                = google-beta
-  name                    = "[[.Name]]"
+  name                    = "%{name}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "psc_subnet" {
   provider      = google-beta
-  name          = "[[.Name]]"
+  name          = "%{name}"
   ip_cidr_range = "10.2.0.0/16"
-  region        = "[[.Location]]"
+  region        = "%{location}"
   network       = google_compute_network.psc_network.id
 }
 
 resource "google_network_connectivity_service_connection_policy" "default" {
   provider      = google-beta
-  name          = "[[.Name]]"
-  location      = "[[.Location]]"
+  name          = "%{name}"
+  location      = "%{location}"
   service_class = "google-cloud-filestore"
   network       = google_compute_network.psc_network.id
   psc_config {
@@ -667,9 +662,9 @@ resource "google_filestore_instance" "instance" {
   depends_on = [
     google_network_connectivity_service_connection_policy.default
   ]
-  name        = "[[.Name]]"
-  location    = "[[.Location]]"
-  tier        = "[[.Tier]]"
+  name        = "%{name}"
+  location    = "%{location}"
+  tier        = "%{tier}"
   description = "An instance created during testing."
   protocol    = "NFS_V4_1"
 
@@ -695,15 +690,3 @@ resource "google_filestore_instance" "instance" {
 `
 
 {{- end }}
-
-func executeTemplate(tmplString string, data any) (string, error) {
-	tmpl, err := template.New("tmpl").Delims("[[", "]]").Parse(tmplString)
-	if err != nil {
-		return "", err
-	}
-	var b bytes.Buffer
-	if err := tmpl.Execute(&b, data); err != nil {
-		return "", err
-	}
-	return b.String(), nil
-}
