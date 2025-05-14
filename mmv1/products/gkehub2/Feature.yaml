@@ -38,12 +38,12 @@ timeouts:
   delete_minutes: 20
 autogen_async: true
 async:
-  actions: ['update']
+  actions: []
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
   result:
-    resource_inside_response: true
+    resource_inside_response: false
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
