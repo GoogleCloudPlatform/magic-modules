@@ -737,3 +737,41 @@ properties:
           description:
             "Output only. Ports of the exposed endpoint."
           output: true
+  - name: 'gcsSource'
+    type: NestedObject
+    description: "GCS source for the instance."
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - managedBackupSource
+    properties:
+      - name: 'uris'
+        type: Array
+        is_set: true
+        description: |
+          URIs of the GCS objects to import.
+          Example: gs://bucket1/object1, gs//bucket2/folder2/object2
+        immutable: true
+        required: true
+        item_type:
+          type: String
+  - name: 'managedBackupSource'
+    type: NestedObject
+    description: "Managed backup source for the instance."
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - gcsSource
+    properties:
+      - name: 'backup'
+        type: String
+        description: |
+          Example: //memorystore.googleapis.com/projects/{project}/locations/{location}/backups/{backupId}. In this case, it assumes the backup is under memorystore.googleapis.com.
+        immutable: true
+        required: true
+  - name: 'backupCollection'
+    type: String
+    description: |
+      The backup collection full resource name.
+      Example: projects/{project}/locations/{location}/backupCollections/{collection}
+    output: true

@@ -113,6 +113,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_snapshot":                          compute.DataSourceGoogleComputeSnapshot(),
 	"google_compute_ssl_certificate":                   compute.DataSourceGoogleComputeSslCertificate(),
 	"google_compute_ssl_policy":                        compute.DataSourceGoogleComputeSslPolicy(),
+	"google_compute_storage_pool_types":                compute.DataSourceGoogleComputeStoragePoolTypes(),
 	"google_compute_subnetwork":                        compute.DataSourceGoogleComputeSubnetwork(),
 	"google_compute_subnetworks":                       compute.DataSourceGoogleComputeSubnetworks(),
 	"google_compute_vpn_gateway":                       compute.DataSourceGoogleComputeVpnGateway(),
@@ -169,6 +170,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_logging_project_cmek_settings":             logging.DataSourceGoogleLoggingProjectCmekSettings(),
 	"google_logging_project_settings":                  logging.DataSourceGoogleLoggingProjectSettings(),
 	"google_logging_sink":                              logging.DataSourceGoogleLoggingSink(),
+	"google_lustre_instance":                           lustre.DataSourceLustreInstance(),
 	"google_monitoring_notification_channel":           monitoring.DataSourceMonitoringNotificationChannel(),
 	"google_monitoring_cluster_istio_service":          monitoring.DataSourceMonitoringServiceClusterIstio(),
 	"google_monitoring_istio_canonical_service":        monitoring.DataSourceMonitoringIstioCanonicalService(),
@@ -260,6 +262,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	{{- end }}
 	"google_vpc_access_connector":                      vpcaccess.DataSourceVPCAccessConnector(),
 	"google_memorystore_instance":						memorystore.DataSourceMemorystoreInstance(),
+	"google_memcache_instance":							memcache.DataSourceMemcacheInstance(),
 	"google_redis_instance":                            redis.DataSourceGoogleRedisInstance(),
 	"google_vertex_ai_index":                           vertexai.DataSourceVertexAIIndex(),
 	"google_vmwareengine_cluster":                      vmwareengine.DataSourceVmwareengineCluster(),
