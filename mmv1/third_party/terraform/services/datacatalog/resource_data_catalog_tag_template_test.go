@@ -62,6 +62,8 @@ resource "google_data_catalog_tag_template" "basic_tag_template" {
   tag_template_id = "tf_test_my_template%{random_suffix}"
   region = "us-central1"
   display_name = "Demo Tag Template Test Update"
+  is_publicly_readable = false
+  dataplex_transfer_status = 'DATAPLEX_TRANSFER_STATUS_UNSPECIFIED'
 
   fields {
     field_id = "source"
@@ -101,6 +103,8 @@ resource "google_data_catalog_tag_template" "basic_tag_template" {
   tag_template_id = "tf_test_my_template%{random_suffix}"
   region = "us-central1"
   display_name = "Demo Tag Template Test Update"
+  is_publicly_readable = false
+  dataplex_transfer_status = 'DATAPLEX_TRANSFER_STATUS_UNSPECIFIED'
 
   fields {
     field_id = "source"
@@ -140,6 +144,8 @@ resource "google_data_catalog_tag_template" "basic_tag_template" {
   tag_template_id = "tf_test_my_template%{random_suffix}"
   region = "us-central1"
   display_name = "Demo Tag Template Test Update"
+  is_publicly_readable = true
+  dataplex_transfer_status = 'TRANSFERRED'
 
   fields {
     field_id = "source"
