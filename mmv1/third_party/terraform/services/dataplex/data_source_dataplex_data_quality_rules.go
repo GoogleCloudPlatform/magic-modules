@@ -2,7 +2,7 @@ package dataplex
 
 import (
 	"fmt"
-	"log"
+	"regexp"
 	"strings"
 	"unicode"
 
@@ -275,21 +275,36 @@ func camelToSnake(s string) string {
 	return result.String()
 }
 
-func parseRulesResponse(res map[string]interface{}) ([]map[string]interface{}, error) {
-	rulesToSet := make([]map[string]interface{}, 0)
+func flattenDataSourceDataplexDataQualityRulesExpectation(expectation interface{}) []interface{} {
+	expectationsToSet := make(map[string]interface{})
 
-	// if response doesn't include rule
-	if _, ok := res["rule"].([]map[string]interface{}); !ok {
-		return rulesToSet, nil
+	if expectation == nil {
+		return []interface{}{expectationsToSet}
 	}
 
-	for _, apiRuleRaw := range res["rule"].([]map[string]interface{}) {
-		newRuleMap := make(map[string]interface{})
-		for k, v := range apiRuleRaw {
-			snakeCaseKey := camelToSnake(k)
+	originalExpectation := expectation.(map[string]interface{})
+	for k, v := range originalExpectation {
+		snakeCaseKey := camelToSnake(k)
+		expectationsToSet[snakeCaseKey] = v
+	}
+	return []interface{}{expectationsToSet}
+}
 
-			if k == "nonNullExpectation" || k == "uniquenessExpectation" {
-				newRuleMap[snakeCaseKey] = []interface{}{}
+func flattenDataSourceDataplexDataQualityRulesRules(rules interface{}) []interface{} {
+	rulesToSet := make([]interface{}, 0)
+
+	originalRules := rules.([]interface{})
+
+	for _, rule := range originalRules {
+
+		newRuleMap := make(map[string]interface{})
+		ruleMap := rule.(map[string]interface{})
+
+		for k, v := range ruleMap {
+			snakeCaseKey := camelToSnake(k)
+			if regexp.MustCompile(`.Expectation`).MatchString(k) {
+				// For expectation fields, need extra flatten
+				newRuleMap[snakeCaseKey] = flattenDataSourceDataplexDataQualityRulesExpectation(v)
 			} else {
 				// For other fields (column, dimension, threshold, etc.), directly assign
 				newRuleMap[snakeCaseKey] = v
@@ -298,7 +313,7 @@ func parseRulesResponse(res map[string]interface{}) ([]map[string]interface{}, e
 		rulesToSet = append(rulesToSet, newRuleMap)
 	}
 
-	return rulesToSet, nil
+	return rulesToSet
 }
 
 func dataSourceDataplexDataQualityRulesRead(d *schema.ResourceData, meta interface{}) error {
@@ -341,16 +356,7 @@ func dataSourceDataplexDataQualityRulesRead(d *schema.ResourceData, meta interfa
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("DataQualityRules %q", d.Id()), url)
 	}
 
-	log.Printf("[jimmyxjc debug] res: %s", res)
-
-	rules, err := parseRulesResponse(res)
-	if err != nil {
-		return fmt.Errorf("Error parsing rules: %s", err)
-	}
-
-	log.Printf("[jimmyxjc debug] rules: %s", rules)
-
-	if err := d.Set("rule", rules); err != nil {
+	if err := d.Set("rule", flattenDataSourceDataplexDataQualityRulesRules(res["rule"])); err != nil {
 		return fmt.Errorf("Error setting rule: %s", err)
 	}
 
