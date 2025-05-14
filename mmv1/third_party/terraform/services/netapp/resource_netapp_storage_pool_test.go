@@ -3,8 +3,9 @@ package netapp_test
 import (
 	"testing"
 	"time"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -93,7 +94,6 @@ resource "google_netapp_storage_pool" "test_pool" {
 }
 `, context)
 }
-
 
 func TestAccNetappStoragePool_autoTieredStoragePoolCreateExample_update(t *testing.T) {
 	context := map[string]interface{}{
