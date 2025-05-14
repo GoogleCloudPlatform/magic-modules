@@ -1078,7 +1078,7 @@ func (t Type) NamespaceProperty() string {
 }
 
 func (t Type) CustomTemplate(templatePath string, appendNewline bool) string {
-	return resource.ExecuteTemplate(&t, templatePath, appendNewline)
+	return ExecuteTemplate(&t, templatePath, appendNewline)
 }
 
 func (t *Type) GetIdFormat() string {
