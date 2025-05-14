@@ -21,7 +21,7 @@ import (
 	"io"
 	"net/http"
 
-	utils "magician/utility" // Your utility package
+	utils "magician/utility"
 
 	gh "github.com/google/go-github/v68/github"
 )
@@ -75,7 +75,6 @@ func (rt *retryTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		req.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 	}
 
-	// Use our utility function with retry logic
 	resp, respBody, err := utils.RequestCallWithRetryRaw(urlStr, method, rt.token, bodyBytes)
 	if err != nil {
 		return nil, err
