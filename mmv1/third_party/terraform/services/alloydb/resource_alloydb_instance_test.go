@@ -143,13 +143,13 @@ func TestAccAlloydbInstance_stopstart(t *testing.T) {
 	contextStop := map[string]interface{}{
 		"random_suffix": suffix,
 		"network_name":  networkName,
-		"activation_policy": "NEVER"
+		"activation_policy": "NEVER",
 	}
 
 	contextStart := map[string]interface{}{
 		"random_suffix": suffix,
 		"network_name":  networkName,
-		"activation_policy": "ALWAYS"
+		"activation_policy": "ALWAYS",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
