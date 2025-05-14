@@ -230,9 +230,3 @@ func ReadFromJson(data interface{}, path string) error {
 	}
 	return nil
 }
-
-func ParseInt(s string) int {
-	var num int
-	fmt.Sscanf(s, "%d", &num)
-	return num
-}
