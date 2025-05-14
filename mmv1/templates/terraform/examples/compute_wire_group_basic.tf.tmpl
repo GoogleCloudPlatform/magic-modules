@@ -1,0 +1,15 @@
+data "google_project" "project" {
+}
+
+resource "google_compute_cross_site_network" "example-cross-site-network" {
+  name        = "tf-test-cross-site-network{{index $.Vars "random_suffix"}}"
+  description = "Example cross site network{{index $.Vars "random_suffix"}}"
+  provider    = google-beta
+}
+
+resource "google_compute_wire_group" "{{$.PrimaryResourceId}}" {
+  name               = "{{index $.Vars "name"}}"
+  description        = "{{index $.Vars "description"}}"
+  cross_site_network = "${google_compute_cross_site_network.example-cross-site-network.name}"
+  provider           = google-beta
+}
