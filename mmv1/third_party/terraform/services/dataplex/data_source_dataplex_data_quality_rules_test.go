@@ -24,7 +24,8 @@ func TestAccDataplexDataQualityRules(t *testing.T) {
 			{
 				Config: testAccDataplexDataQualityRules_config(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("data.google_dataplex_data_quality_rules", "rule"),
+					// resource.TestCheckResourceAttrSet("data.google_dataplex_data_quality_rules.generated_dq_rules", "rule"),
+					resource.TestCheckResourceAttr("data.google_dataplex_data_quality_rules.generated_dq_rules", "rule.#", "17"),
 				),
 			},
 		},

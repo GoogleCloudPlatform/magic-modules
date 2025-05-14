@@ -2,6 +2,9 @@ package dataplex
 
 import (
 	"fmt"
+	"log"
+	"strings"
+	"unicode"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -118,6 +121,7 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{},
 							},
+							// Elem: &schema.Schema{},
 						},
 						"set_expectation": {
 							Type:     schema.TypeList,
@@ -136,18 +140,6 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 							Description: `Row-level rule which evaluates whether each column value is contained by a specified set.`,
 						},
 						"regex_expectation": {
-							// Type:     schema.TypeList,
-							// Optional: true,
-							// MaxItems: 1,
-							// Elem: &schema.Resource{
-							// 	Schema: map[string]*schema.Schema{
-							// 		"regex": {
-							// 			Type:        schema.TypeString,
-							// 			Required:    true,
-							// 			Description: `A regular expression the column value is expected to match.`,
-							// 		},
-							// 	},
-							// },
 							Type:     schema.TypeList,
 							Computed: true,
 							Optional: true,
@@ -173,6 +165,7 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{},
 							},
+							// Elem: &schema.Schema{},
 						},
 						"statistic_range_expectation": {
 							Type:     schema.TypeList,
@@ -267,6 +260,47 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 	}
 }
 
+func camelToSnake(s string) string {
+	var result strings.Builder
+	for i, ch := range s {
+		if unicode.IsUpper(ch) {
+			if i > 0 {
+				result.WriteByte('_')
+			}
+			result.WriteRune(unicode.ToLower(ch))
+		} else {
+			result.WriteRune(ch)
+		}
+	}
+	return result.String()
+}
+
+func parseRulesResponse(res map[string]interface{}) ([]map[string]interface{}, error) {
+	rulesToSet := make([]map[string]interface{}, 0)
+
+	// if response doesn't include rule
+	if _, ok := res["rule"].([]map[string]interface{}); !ok {
+		return rulesToSet, nil
+	}
+
+	for _, apiRuleRaw := range res["rule"].([]map[string]interface{}) {
+		newRuleMap := make(map[string]interface{})
+		for k, v := range apiRuleRaw {
+			snakeCaseKey := camelToSnake(k)
+
+			if k == "nonNullExpectation" || k == "uniquenessExpectation" {
+				newRuleMap[snakeCaseKey] = []interface{}{}
+			} else {
+				// For other fields (column, dimension, threshold, etc.), directly assign
+				newRuleMap[snakeCaseKey] = v
+			}
+		}
+		rulesToSet = append(rulesToSet, newRuleMap)
+	}
+
+	return rulesToSet, nil
+}
+
 func dataSourceDataplexDataQualityRulesRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -307,7 +341,16 @@ func dataSourceDataplexDataQualityRulesRead(d *schema.ResourceData, meta interfa
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("DataQualityRules %q", d.Id()), url)
 	}
 
-	if err := d.Set("rule", res["rule"]); err != nil {
+	log.Printf("[jimmyxjc debug] res: %s", res)
+
+	rules, err := parseRulesResponse(res)
+	if err != nil {
+		return fmt.Errorf("Error parsing rules: %s", err)
+	}
+
+	log.Printf("[jimmyxjc debug] rules: %s", rules)
+
+	if err := d.Set("rule", rules); err != nil {
 		return fmt.Errorf("Error setting rule: %s", err)
 	}
 
