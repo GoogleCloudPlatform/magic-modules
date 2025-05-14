@@ -103,6 +103,10 @@ examples:
     primary_resource_id: 'feature'
     primary_resource_name: 'fmt.Sprint("clusterupgrade")'
     exclude_test: true
+  - name: 'gkehub_feature_rbacrolebinding_actuation'
+    primary_resource_id: 'feature'
+    primary_resource_name: 'fmt.Sprint("rbacrolebindingactuation")'
+    exclude_test: true
 parameters:
   - name: 'location'
     type: String
