@@ -132,20 +132,23 @@ func TestAccAlloydbInstance_createInstanceWithMandatoryFields(t *testing.T) {
 func TestAccAlloydbInstance_stopstart(t *testing.T) {
 	t.Parallel()
 
+	suffix := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-clientconnectionconfig")
+
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-mandatory-1"),
+		"random_suffix": suffix,
+		"network_name":  networkName,
 	}
 
 	contextStop := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-mandatory-1"),
+		"random_suffix": suffix,
+		"network_name":  networkName,
 		"activation_policy": "NEVER"
 	}
 
 	contextStart := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-mandatory-1"),
+		"random_suffix": suffix,
+		"network_name":  networkName,
 		"activation_policy": "ALWAYS"
 	}
 
