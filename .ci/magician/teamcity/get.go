@@ -55,7 +55,7 @@ type FirstFailed struct {
 }
 
 func (tc *Client) GetBuilds(project, finishCut, startCut string) (Builds, error) {
-	url := fmt.Sprintf("https://hashicorp.teamcity.com/app/rest/builds?locator=count:500,tag:cron-trigger,project:%s,branch:refs/heads/nightly-test,finishDate:(date:%s,condition:before),startDate:(date:%s,condition:after)&fields=build(id,buildTypeId,buildConfName,webUrl,number,queuedDate,startDate,finishDate)", project, finishCut, startCut)
+	url := fmt.Sprintf("https://hashicorp.teamcity.com/app/rest/builds?locator=count:500,tag:cron-trigger,project:%s,branch:refs/heads/nightly-test,queuedDate:(date:%s,condition:before),queuedDate:(date:%s,condition:after)&fields=build(id,buildTypeId,buildConfName,webUrl,number,queuedDate,startDate,finishDate)", project, finishCut, startCut)
 
 	var builds Builds
 
