@@ -167,7 +167,7 @@ func TestAccAlloydbInstance_stopstart(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
 			},
 			{
-				Config: testAccAlloydbInstance_updateActivationPoliycy(contextStop),
+				Config: testAccAlloydbInstance_updateActivationPolicy(contextStop),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "activation_policy", "NEVER"),
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "state", "STOPPED"),
@@ -180,7 +180,7 @@ func TestAccAlloydbInstance_stopstart(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccAlloydbInstance_updateActivationPoliycy(contextStart),
+				Config: testAccAlloydbInstance_updateActivationPolicy(contextStart),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "activation_policy", "ALWAYS"),
 					resource.TestCheckResourceAttr("google_alloydb_instance.default", "state", "READY"),
