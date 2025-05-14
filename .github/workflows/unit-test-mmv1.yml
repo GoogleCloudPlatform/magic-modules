@@ -65,5 +65,5 @@ jobs:
       - name: Run mmv1 unit tests
         run: |
           cd mmv1
-          go test ./... -v
+          go test ./...
 
