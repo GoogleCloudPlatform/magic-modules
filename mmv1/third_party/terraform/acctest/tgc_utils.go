@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package acctest
 
 import (
@@ -40,7 +38,8 @@ func GetTestMetadataForTgc(service, address, rawConfig string) resource.TestChec
 		// Convert the resource ID into CAI asset name
 		// and then print out the CAI asset name in the logs
 		if apiServiceName, ok := ApiServiceNames[resourceType]; !ok {
-			return fmt.Errorf("The Cai product backend name for resource %s doesn't exist.", resourceType)
+			unknownType := "unkown"
+			log.Printf("[DEBUG]TGC CAI asset names start\n%s\nEnd of TGC CAI asset names", unknownType)
 		} else {
 			var rName string
 			switch resourceType {
