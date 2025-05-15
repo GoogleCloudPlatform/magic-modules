@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -64,18 +65,46 @@ func ParseImportId(idRegexes []string, d TerraformResourceData, config *transpor
 			}
 
 			// The first id format is applied first and contains all the fields.
-			err := setDefaultValues(idRegexes[0], d, config)
+			err := setDefaultValues(idRegexes[0], nil, d, config)
 			if err != nil {
 				return err
 			}
 
 			return nil
+		} else if d.Id() == "" {
+			identity, err := d.Identity()
+			if err != nil {
+				return err
+			}
+			if err := identityImport(re, identity, idFormat, d); err != nil {
+				return err
+			}
+			err = setDefaultValues(idRegexes[0], identity, d, config)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return fmt.Errorf("Import id %q doesn't match any of the accepted formats: %v", d.Id(), idRegexes)
 }
 
-func setDefaultValues(idRegex string, d TerraformResourceData, config *transport_tpg.Config) error {
+func identityImport(re *regexp.Regexp, identity *schema.IdentityData, idFormat string, d TerraformResourceData) error {
+	log.Print("[DEBUG] Using IdentitySchema to import resource")
+	namedGroups := re.SubexpNames()
+
+	for _, group := range namedGroups {
+		if identityValue, identityExists := identity.GetOk(group); identityExists {
+			log.Printf("[DEBUG] Importing %s = %s", group, identityValue)
+			d.Set(group, identityValue)
+		} else {
+			return fmt.Errorf("No value was found for %s during import", group)
+		}
+	}
+
+	return nil
+}
+
+func setDefaultValues(idRegex string, identity *schema.IdentityData, d TerraformResourceData, config *transport_tpg.Config) error {
 	if _, ok := d.GetOk("project"); !ok && strings.Contains(idRegex, "?P<project>") {
 		project, err := GetProject(d, config)
 		if err != nil {
@@ -83,6 +112,11 @@ func setDefaultValues(idRegex string, d TerraformResourceData, config *transport
 		}
 		if err := d.Set("project", project); err != nil {
 			return fmt.Errorf("Error setting project: %s", err)
+		}
+		if identity != nil {
+			if err := identity.Set("project", project); err != nil {
+				return fmt.Errorf("Error setting project: %s", err)
+			}
 		}
 	}
 	if _, ok := d.GetOk("region"); !ok && strings.Contains(idRegex, "?P<region>") {
@@ -93,6 +127,11 @@ func setDefaultValues(idRegex string, d TerraformResourceData, config *transport
 		if err := d.Set("region", region); err != nil {
 			return fmt.Errorf("Error setting region: %s", err)
 		}
+		if identity != nil {
+			if err := identity.Set("region", region); err != nil {
+				return fmt.Errorf("Error setting region: %s", err)
+			}
+		}
 	}
 	if _, ok := d.GetOk("zone"); !ok && strings.Contains(idRegex, "?P<zone>") {
 		zone, err := GetZone(d, config)
@@ -101,6 +140,11 @@ func setDefaultValues(idRegex string, d TerraformResourceData, config *transport
 		}
 		if err := d.Set("zone", zone); err != nil {
 			return fmt.Errorf("Error setting zone: %s", err)
+		}
+		if identity != nil {
+			if err := identity.Set("zone", zone); err != nil {
+				return fmt.Errorf("Error setting zone: %s", err)
+			}
 		}
 	}
 	return nil
