@@ -1,6 +1,7 @@
 resource "google_compute_url_map" "{{$.PrimaryResourceId}}" {
   name        = "{{index $.Vars "url_map_name"}}"
-  description = "a description"
+  description = "Test for path rule route action mirror percent"
+
   default_service = google_compute_backend_service.home.id
 
   host_rule {
@@ -9,28 +10,19 @@ resource "google_compute_url_map" "{{$.PrimaryResourceId}}" {
   }
 
   path_matcher {
-    name = "allpaths"
+    name            = "allpaths"
     default_service = google_compute_backend_service.home.id
 
-    route_rules {
-      priority = 1
+    path_rule {
+      paths   = ["/home"]
       service = google_compute_backend_service.home.id
-      match_rules {
-        prefix_match = "/home"
-      }
       route_action {
         request_mirror_policy {
           backend_service = google_compute_backend_service.mirror.id
-          mirror_percent = 100.0
+          mirror_percent = 25.0
         }
       }
     }
-  }
-
-  test {
-    service = google_compute_backend_service.home.id
-    host    = "hi.com"
-    path    = "/home"
   }
 }
 
@@ -39,9 +31,9 @@ resource "google_compute_backend_service" "home" {
   port_name   = "http"
   protocol    = "HTTP"
   timeout_sec = 10
+  load_balancing_scheme = "EXTERNAL_MANAGED"
 
   health_checks = [google_compute_health_check.default.id]
-  load_balancing_scheme = "EXTERNAL_MANAGED"
 }
 
 resource "google_compute_backend_service" "mirror" {
@@ -49,9 +41,9 @@ resource "google_compute_backend_service" "mirror" {
   port_name   = "http"
   protocol    = "HTTP"
   timeout_sec = 10
+  load_balancing_scheme = "EXTERNAL_MANAGED"
 
   health_checks = [google_compute_health_check.default.id]
-  load_balancing_scheme = "EXTERNAL_MANAGED"
 }
 
 resource "google_compute_health_check" "default" {
@@ -59,4 +51,4 @@ resource "google_compute_health_check" "default" {
   http_health_check {
     port = 80
   }
-} 
+}
