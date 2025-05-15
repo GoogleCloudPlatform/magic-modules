@@ -129,6 +129,7 @@ func TestExecGenerateComment(t *testing.T) {
 
 	for method, expectedCalls := range map[string][][]any{
 		"PostBuildStatus": {
+			{"123456", "terraform-provider-multiple-resources", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
 			{"123456", "terraform-provider-breaking-change-test", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
 			{"123456", "terraform-provider-missing-service-labels", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
 		},
@@ -240,6 +241,25 @@ func TestFormatDiffComment(t *testing.T) {
 				"generated some diffs",
 				"## Errors",
 				"## Missing test report",
+			},
+		},
+		"multiple resources are displayed": {
+			data: diffCommentData{
+				AddedResources: []string{"google_redis_instance", "google_alloydb_cluster"},
+			},
+			expectedStrings: []string{
+				"## Diff report",
+				"## Multiple resources added",
+				"`override-multiple-resources`",
+				"split it into multiple PRs",
+				"`google_redis_instance`, `google_alloydb_cluster`.",
+			},
+			notExpectedStrings: []string{
+				"generated some diffs",
+				"## Errors",
+				"## Missing test report",
+				"## Missing doc report",
+				"## Breaking Change(s) Detected",
 			},
 		},
 		"missing tests are displayed": {
