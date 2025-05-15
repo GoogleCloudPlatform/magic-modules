@@ -1,14 +1,37 @@
 package acctest
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
+
+type ResourceMetadata struct {
+	CaiAssetName    string         `json:"cai_asset_name"`
+	ResourceType    string         `json:"resource_type"`
+	ResourceAddress string         `json:"resource_address"`
+	ImportMetadata  ImportMetadata `json:"import_metadata,omitempty"`
+	Service         string         `json:"service"`
+}
+
+type ImportMetadata struct {
+	Id            string   `json:"id,omitempty"`
+	IgnoredFields []string `json:"ignored_fields,omitempty"`
+}
+
+type TgcMetadataPayload struct {
+	TestName         string                      `json:"test_name"`
+	RawConfig        string                      `json:"raw_config"`
+	ResourceMetadata map[string]ResourceMetadata `json:"resource_metadata"`
+	PrimaryResource  string                      `json:"primary_resource"`
+}
 
 // Hardcode the Terraform resource name -> API service name mapping temporarily.
 // TODO: [tgc] read the mapping from the resource metadata files.
@@ -17,49 +40,73 @@ var ApiServiceNames = map[string]string{
 	"google_project":          "cloudresourcemanager.googleapis.com",
 }
 
-// Gets the test metadata for tgc:
-//   - test config
-//   - cai asset name
-//     For example: //compute.googleapis.com/projects/ci-test-188019/zones/us-central1-a/instances/tf-test-mi3fqaucf8
-func GetTestMetadataForTgc(service, address, rawConfig string) resource.TestCheckFunc {
+// encodeToBase64JSON converts a struct to base64-encoded JSON
+func encodeToBase64JSON(data interface{}) (string, error) {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return "", fmt.Errorf("error marshalling data to JSON: %v", err)
+	}
+
+	return base64.StdEncoding.EncodeToString(jsonData), nil
+}
+
+// CollectAllTgcMetadata collects metadata for all resources in a test step
+func CollectAllTgcMetadata(config string, resourceMetadata map[string]ResourceMetadata) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		splits := strings.Split(address, ".")
-		if splits == nil || len(splits) < 2 {
-			return fmt.Errorf("The resource address %s is invalid.", address)
-		}
-		resourceType := splits[0]
-		resourceName := splits[1]
+		// Get the name of the test that invoked this function
+		testName := getCallerInfo()
 
-		rState := s.RootModule().Resources[address]
-		if rState == nil || rState.Primary == nil {
-			return fmt.Errorf("The resource state is unavailable. Please check if the address %s.%s is correct.", resourceType, resourceName)
+		// Create the consolidated TGC payload
+		tgcPayload := TgcMetadataPayload{
+			TestName:         testName,
+			RawConfig:        config,
+			ResourceMetadata: resourceMetadata,
 		}
 
-		// Convert the resource ID into CAI asset name
-		// and then print out the CAI asset name in the logs
-		if apiServiceName, ok := ApiServiceNames[resourceType]; !ok {
-			unknownType := "unkown"
-			log.Printf("[DEBUG]TGC CAI asset names start\n%s\nEnd of TGC CAI asset names", unknownType)
-		} else {
-			var rName string
-			switch resourceType {
-			case "google_project":
-				rName = fmt.Sprintf("projects/%s", rState.Primary.Attributes["number"])
-			default:
-				rName = rState.Primary.ID
+		// Process each resource to get CAI asset names and resolve auto IDs
+		for address, metadata := range tgcPayload.ResourceMetadata {
+			// If there is import metadata update our primary resource
+			if metadata.ImportMetadata.Id != "" {
+				tgcPayload.PrimaryResource = address
 			}
-			caiAssetName := fmt.Sprintf("//%s/%s", apiServiceName, rName)
-			log.Printf("[DEBUG]TGC CAI asset names start\n%s\nEnd of TGC CAI asset names", caiAssetName)
+
+			rState := s.RootModule().Resources[address]
+			if rState == nil || rState.Primary == nil {
+				log.Printf("[DEBUG]TGC Terraform error: resource state unavailable for %s, skipping", address)
+				continue
+			}
+
+			// Resolve the CAI asset name
+			if apiServiceName, ok := ApiServiceNames[metadata.ResourceType]; ok {
+				var rName string
+				switch metadata.ResourceType {
+				case "google_project":
+					rName = fmt.Sprintf("projects/%s", rState.Primary.Attributes["number"])
+				default:
+					rName = rState.Primary.ID
+				}
+				metadata.CaiAssetName = fmt.Sprintf("//%s/%s", apiServiceName, rName)
+			} else {
+				metadata.CaiAssetName = "unknown"
+			}
+
+			// Resolve auto IDs in import metadata
+			if metadata.ImportMetadata.Id != "" {
+				metadata.ImportMetadata.Id = strings.Replace(metadata.ImportMetadata.Id, "<AUTO_ID>", rState.Primary.ID, 1)
+			}
+
+			// Update the metadata in the map
+			tgcPayload.ResourceMetadata[address] = metadata
 		}
 
-		// The acceptance tests names will be also used for the tgc tests.
-		// "service" is logged and will be used to put the tgc tests into specific service packages.
-		log.Printf("[DEBUG]TGC Terraform service: %s", service)
-		log.Printf("[DEBUG]TGC Terraform resource: %s", address)
+		// Encode the entire payload to base64 JSON
+		encodedData, err := encodeToBase64JSON(tgcPayload)
+		if err != nil {
+			log.Printf("[DEBUG]TGC Terraform error: %v", err)
+		} else {
+			log.Printf("[DEBUG]TGC Terraform metadata: %s", encodedData)
+		}
 
-		re := regexp.MustCompile(`\"(tf[-_]?test[-_]?.*?)([a-z0-9]+)\"`)
-		rawConfig = re.ReplaceAllString(rawConfig, `"${1}tgc"`)
-		log.Printf("[DEBUG]TGC raw_config starts %sEnd of TGC raw_config", rawConfig)
 		return nil
 	}
 }
@@ -109,39 +156,117 @@ func getServicePackage(resourceType string) string {
 	return "unknown"
 }
 
-// extendWithTGCData adds TGC metadata check functions to each TestStep
+// determineImportMetadata checks if the next step is an import step and extracts all import metadata
+func determineImportMetadata(steps []resource.TestStep, currentStepIndex int, resourceName string) ImportMetadata {
+	var metadata ImportMetadata
+
+	// Check if there's a next step and if it's an import step
+	if currentStepIndex+1 < len(steps) {
+		nextStep := steps[currentStepIndex+1]
+
+		// Check if it's an import step for our resource
+		if nextStep.ImportState && (nextStep.ResourceName == resourceName ||
+			strings.HasSuffix(nextStep.ResourceName, "."+strings.Split(resourceName, ".")[1])) {
+			// Capture ignored fields if present
+			if nextStep.ImportStateVerify && len(nextStep.ImportStateVerifyIgnore) > 0 {
+				metadata.IgnoredFields = nextStep.ImportStateVerifyIgnore
+			}
+
+			// If ImportStateId is explicitly set, use that
+			if nextStep.ImportStateId != "" {
+				metadata.Id = nextStep.ImportStateId
+				return metadata
+			}
+
+			// If ImportStateIdPrefix is set, note it
+			if nextStep.ImportStateIdPrefix != "" {
+				metadata.Id = fmt.Sprintf("%s<AUTO_ID>", nextStep.ImportStateIdPrefix)
+				return metadata
+			}
+
+			// If ImportStateIdFunc is set, get function info
+			if nextStep.ImportStateIdFunc != nil {
+				metadata.Id = "<DYNAMIC_IMPORT_ID>"
+				return metadata
+			}
+
+			// Default case - the ID will be automatically determined
+			metadata.Id = "<AUTO_ID>"
+			return metadata
+		}
+	}
+
+	return metadata
+}
+
+// extendWithTGCData adds TGC metadata check function to the last non-plan config entry
 func extendWithTGCData(c resource.TestCase) resource.TestCase {
 	var updatedSteps []resource.TestStep
 
-	for _, step := range c.Steps {
-		if step.Config != "" {
+	// Find the last non-plan config step
+	lastNonPlanConfigStep := -1
+	for i := len(c.Steps) - 1; i >= 0; i-- {
+		step := c.Steps[i]
+		if step.Config != "" && !step.PlanOnly {
+			lastNonPlanConfigStep = i
+			break
+		}
+	}
+
+	// Process all steps
+	for i, step := range c.Steps {
+		// If this is the last non-plan config step, add our TGC check
+		if i == lastNonPlanConfigStep {
 			// Parse resources from the config
 			resources := parseResources(step.Config)
 
-			// Create TGC metadata checks for each resource
-			var tgcChecks []resource.TestCheckFunc
+			// Skip if no resources found
+			if len(resources) == 0 {
+				updatedSteps = append(updatedSteps, step)
+				continue
+			}
+
+			// Determine the service package from the first resource
+			firstResource := resources[0]
+			parts := strings.Split(firstResource, ".")
+			if len(parts) < 2 {
+				updatedSteps = append(updatedSteps, step)
+				continue
+			}
+
+			// Collect metadata for all resources
+			resourceMetadata := make(map[string]ResourceMetadata)
 			for _, res := range resources {
 				parts := strings.Split(res, ".")
 				if len(parts) >= 2 {
 					resourceType := parts[0]
-					service := getServicePackage(resourceType)
-					tgcChecks = append(tgcChecks, GetTestMetadataForTgc(service, res, step.Config))
+
+					// Determine import metadata if the next step is an import step
+					importMeta := determineImportMetadata(c.Steps, i, res)
+
+					// Create metadata for this resource
+					resourceMetadata[res] = ResourceMetadata{
+						ResourceType:    resourceType,
+						ResourceAddress: res,
+						ImportMetadata:  importMeta,
+						// CaiAssetName will be populated at runtime in the check function
+					}
 				}
 			}
 
-			// If there are TGC checks to add
-			if len(tgcChecks) > 0 {
-				// If there's an existing check function, wrap it with ours
-				if step.Check != nil {
-					existingCheck := step.Check
-					step.Check = resource.ComposeTestCheckFunc(
-						existingCheck,
-						resource.ComposeTestCheckFunc(tgcChecks...),
-					)
-				} else {
-					// Otherwise, just use our TGC checks
-					step.Check = resource.ComposeTestCheckFunc(tgcChecks...)
-				}
+			// Add a single consolidated TGC check for all resources
+			tgcCheck := CollectAllTgcMetadata(step.Config, resourceMetadata)
+
+			// If there's an existing check function, wrap it with our consolidated check
+			if step.Check != nil {
+				existingCheck := step.Check
+				step.Check = resource.ComposeTestCheckFunc(
+					existingCheck,
+					tgcCheck,
+				)
+			} else {
+				// Otherwise, just use our consolidated check
+				step.Check = tgcCheck
 			}
 		}
 
@@ -150,4 +275,33 @@ func extendWithTGCData(c resource.TestCase) resource.TestCase {
 
 	c.Steps = updatedSteps
 	return c
+}
+
+// getCallerInfo returns information about the calling function
+func getCallerInfo() string {
+	for i := 1; i < 10; i++ {
+		pc, _, _, ok := runtime.Caller(i)
+		if !ok {
+			break
+		}
+
+		fn := runtime.FuncForPC(pc)
+		if fn == nil {
+			continue
+		}
+
+		name := fn.Name()
+
+		// Check if this looks like a test function name (contains "Test" and doesn't contain our package name)
+		if strings.Contains(name, "TestAcc") {
+			// Extract just the function name without the package path
+			parts := strings.Split(name, ".")
+			if len(parts) > 0 {
+				return parts[len(parts)-1]
+			}
+			return name
+		}
+	}
+
+	return "unknown"
 }
