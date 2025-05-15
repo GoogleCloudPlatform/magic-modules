@@ -1400,13 +1400,27 @@ func (r Resource) IamSelfLinkIdentifiers() []string {
 	return r.ExtractIdentifiers(selfLink)
 }
 
-// Returns the resource properties that are idenfifires in the selflink url
-func (r Resource) IamSelfLinkProperties() []*Type {
-	params := r.IamSelfLinkIdentifiers()
+// Returns the resource properties that are idenfifires in Iam resource when generating the docs.
+// The "project" and "organization" properties are excluded, as they are handled seperated in the docs.
+func (r Resource) IamResourceProperties() []*Type {
+	urlProperties := make([]*Type, 0)
+	for _, param := range r.IamResourceParams() {
+		if param == "project" || param == "organization" {
+			continue
+		}
 
-	urlProperties := google.Select(r.AllUserProperties(), func(p *Type) bool {
-		return slices.Contains(params, p.Name)
-	})
+		found := false
+		for _, p := range r.AllUserProperties() {
+			if param == google.Underscore(p.Name) {
+				urlProperties = append(urlProperties, p)
+				found = true
+				break
+			}
+		}
+		if !found {
+			urlProperties = append(urlProperties, &Type{Name: param})
+		}
+	}
 
 	return urlProperties
 }
