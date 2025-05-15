@@ -84,7 +84,7 @@ func TestAccSpannerInstance_noNodeCountSpecified(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccSpannerInstance_noNodeCountSpecified(idName),
-				ExpectError: regexp.MustCompile(".*one of `autoscaling_config,num_nodes,processing_units,instance_type`\nmust be specified.*"),
+				ExpectError: regexp.MustCompile(".*one of\n`autoscaling_config,instance_type,num_nodes,processing_units` must be\nspecified.*"),
 			},
 		},
 	})
