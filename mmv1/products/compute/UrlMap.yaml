@@ -303,6 +303,7 @@ properties:
           #   - path_matchers.0.default_service
           #   - path_matchers.0.default_url_redirect
           #   - path_matchers.0.default_route_action.0.weighted_backend_services
+          required: true
           custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
           resource: 'BackendService'
           imports: 'selfLink'
