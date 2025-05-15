@@ -164,14 +164,32 @@ func (c *Client) GetPullRequestComments(prNumber string) ([]PullRequestComment, 
 	return convertGHComments(comments), nil
 }
 
-// GetTeamMembers gets members of a team
+// GetTeamMembers gets all members of a team
 func (c *Client) GetTeamMembers(organization, team string) ([]User, error) {
-	members, _, err := c.gh.Teams.ListTeamMembersBySlug(c.ctx, organization, team, nil)
-	if err != nil {
-		return nil, err
+	var allMembers []*gh.User
+	opts := &gh.TeamListTeamMembersOptions{
+		ListOptions: gh.ListOptions{
+			PerPage: 100,
+		},
 	}
 
-	return convertGHUsers(members), nil
+	for {
+		members, resp, err := c.gh.Teams.ListTeamMembersBySlug(c.ctx, organization, team, opts)
+		if err != nil {
+			return nil, err
+		}
+
+		allMembers = append(allMembers, members...)
+
+		if resp.NextPage == 0 {
+			break // No more pages
+		}
+
+		// Set up for the next page
+		opts.Page = resp.NextPage
+	}
+
+	return convertGHUsers(allMembers), nil
 }
 
 // IsOrgMember checks if a user is a member of an organization

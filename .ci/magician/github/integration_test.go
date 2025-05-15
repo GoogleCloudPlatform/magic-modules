@@ -34,13 +34,16 @@ import (
 
 // https://github.com/GoogleCloudPlatform/magic-modules
 const (
-	testRepo         = "magic-modules"
-	testOwner        = "GoogleCloudPlatform"
-	testPRNumber     = "1"  //
-	testCommitSha    = "--" // You might need to replace this with an actual SHA
-	testOrg          = "GoogleCloudPlatform"
-	testTeam         = "terraform"    // Replace with an actual team name
-	workflowFileName = "test-tpg.yml" // Replace with an actual workflow file name
+	testNonMember     = "bananaman5000"
+	testRepo          = "magic-modules"
+	testOwner         = "GoogleCloudPlatform"
+	testPRNumber      = "13969"                                    // replace this with an actual PR Number
+	testPRCommitSha   = "4a8409686810551655eea2533e939cc5344e83e2" // replace this with an actual SHA
+	testMainCommitSha = "fd910977cf24595d2c04e3f0a369a82c79fdb8f8" // replace this with an actual SHA
+	testLabel         = "terraform-3.0"
+	testOrg           = "GoogleCloudPlatform"
+	testTeam          = "terraform"
+	workflowFileName  = "test-tpg.yml"
 )
 
 func skipIfNoToken(t *testing.T) *Client {
@@ -84,11 +87,11 @@ func TestIntegrationGetCommitMessage(t *testing.T) {
 	client := skipIfNoToken(t)
 
 	// You'll need a valid commit SHA for this test
-	if testCommitSha == "HEAD" {
+	if testMainCommitSha == "HEAD" {
 		t.Skip("Skipping GetCommitMessage test: need a valid commit SHA")
 	}
 
-	message, err := client.GetCommitMessage(testOwner, testRepo, testCommitSha)
+	message, err := client.GetCommitMessage(testOwner, testRepo, testMainCommitSha)
 	if err != nil {
 		t.Fatalf("GetCommitMessage failed: %v", err)
 	}
@@ -131,11 +134,18 @@ func TestIntegrationGetTeamMembers(t *testing.T) {
 func TestIntegrationIsOrgMember(t *testing.T) {
 	client := skipIfNoToken(t)
 
-	isMember := client.IsOrgMember(testOwner, testOrg) // Testing if the owner is a member of their own org
+	isMember := client.IsOrgMember(testOwner, testOrg)
 	t.Logf("Is %s a member of %s: %v", testOwner, testOrg, isMember)
 
 	if !isMember {
-		t.Logf("Note: Expected %s to be a member of %s, but they're not", testOwner, testOrg)
+		t.Errorf("Note: Expected %s to be a member of %s, but they're not", testOwner, testOrg)
+	}
+
+	isMember = client.IsOrgMember(testNonMember, testOrg)
+	if isMember {
+		t.Errorf("Expected %s to not be a member of %s, but they are", testNonMember, testOrg)
+	} else {
+		t.Logf("Is %s not a member of %s: %v", testNonMember, testOrg, isMember)
 	}
 }
 
@@ -143,7 +153,18 @@ func TestIntegrationIsTeamMember(t *testing.T) {
 	client := skipIfNoToken(t)
 
 	isMember := client.IsTeamMember(testOrg, testTeam, testOwner)
-	t.Logf("Is %s a member of team %s in org %s: %v", testOwner, testTeam, testOrg, isMember)
+	if !isMember {
+		t.Errorf("Expected %s to be a member of team %s in org %s, but they're not", testOwner, testTeam, testOrg)
+	} else {
+		t.Logf("Is %s a member of team %s in org %s: %v", testOwner, testTeam, testOrg, isMember)
+	}
+
+	isMember = client.IsTeamMember(testOrg, testTeam, testNonMember)
+	if isMember {
+		t.Errorf("Expected %s to not be a member of team %s in org %s, but they are", testNonMember, testTeam, testOrg)
+	} else {
+		t.Logf("Is %s not a member of team %s in org %s: %v", testNonMember, testTeam, testOrg, isMember)
+	}
 }
 
 func TestIntegrationPostAndUpdateComment(t *testing.T) {
@@ -187,8 +208,6 @@ func TestIntegrationPostAndUpdateComment(t *testing.T) {
 func TestIntegrationAddAndRemoveLabels(t *testing.T) {
 	client := skipIfNoToken(t)
 
-	// First add a label
-	testLabel := "integration-test"
 	err := client.AddLabels(testPRNumber, []string{testLabel})
 	if err != nil {
 		t.Fatalf("AddLabels failed: %v", err)
@@ -207,7 +226,7 @@ func TestIntegrationPostBuildStatus(t *testing.T) {
 	client := skipIfNoToken(t)
 
 	// You'll need a valid commit SHA for this test
-	if testCommitSha == "HEAD" {
+	if testPRCommitSha == "HEAD" {
 		t.Skip("Skipping PostBuildStatus test: need a valid commit SHA")
 	}
 
@@ -216,10 +235,21 @@ func TestIntegrationPostBuildStatus(t *testing.T) {
 		"integration-test",
 		"success",
 		"https://example.com/integration-test",
-		testCommitSha,
+		testPRCommitSha,
 	)
 	if err != nil {
-		t.Fatalf("PostBuildStatus failed: %v", err)
+		t.Errorf("PostBuildStatus failed: %v", err)
+	}
+
+	err = client.PostBuildStatus(
+		testPRNumber,
+		"integration-test-failed",
+		"failure",
+		"https://example.com/integration-test-fail",
+		testPRCommitSha,
+	)
+	if err != nil {
+		t.Errorf("PostBuildStatus failed: %v", err)
 	}
 
 	t.Logf("Successfully posted build status")
@@ -233,14 +263,14 @@ func TestIntegrationCreateWorkflowDispatchEvent(t *testing.T) {
 		t.Skip("Skipping workflow dispatch test: set RUN_WORKFLOW_DISPATCH_TEST=true to run")
 	}
 
-	if err := gh.CreateWorkflowDispatchEvent("test-tpg.yml", map[string]any{
+	if err := client.CreateWorkflowDispatchEvent("test-tpg.yml", map[string]any{
 		"owner":     "modular-magician",
 		"repo":      testRepo,
 		"branch":    "main",
 		"pr-number": testPRNumber,
-		"sha":       testCommitSha,
+		"sha":       testPRCommitSha,
 	}); err != nil {
-		return fmt.Errorf("error creating workflow dispatch event: %w", err)
+		t.Errorf("error creating workflow dispatch event: %v", err)
 	}
 
 	t.Logf("Successfully triggered workflow dispatch event")
@@ -258,11 +288,11 @@ func TestIntegrationCreateWorkflowDispatchEvent(t *testing.T) {
 	 }
 
 	 // You'll need a valid commit SHA for this test
-	 if testCommitSha == "HEAD" {
+	 if testPRCommitSha == "HEAD" {
 		 t.Skip("Skipping MergePullRequest test: need a valid commit SHA")
 	 }
 
-	 err := client.MergePullRequest(testOwner, testRepo, testPRNumber, testCommitSha)
+	 err := client.MergePullRequest(testOwner, testRepo, testPRNumber, testPRCommitSha)
 	 if err != nil {
 		 t.Fatalf("MergePullRequest failed: %v", err)
 	 }
