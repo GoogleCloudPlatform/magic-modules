@@ -397,8 +397,6 @@ properties:
       resource never expires.  The minimum allowed value for expirationPolicy.ttl
       is 1 day.
     default_from_api: true
-    send_empty_value: true
-    allow_empty_object: true
     properties:
       - name: 'ttl'
         type: String
