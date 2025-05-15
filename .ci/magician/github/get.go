@@ -149,22 +149,40 @@ func (c *Client) GetCommitMessage(owner, repo, sha string) (string, error) {
 	return "", fmt.Errorf("no commit message found")
 }
 
-// GetPullRequestComments gets comments on a PR
+// GetPullRequestComments gets all comments on a PR, handling pagination
 func (c *Client) GetPullRequestComments(prNumber string) ([]PullRequestComment, error) {
 	num, err := strconv.Atoi(prNumber)
 	if err != nil {
 		return nil, err
 	}
 
-	comments, _, err := c.gh.Issues.ListComments(c.ctx, defaultOwner, defaultRepo, num, nil)
-	if err != nil {
-		return nil, err
+	var allComments []*gh.IssueComment
+	opts := &gh.IssueListCommentsOptions{
+		ListOptions: gh.ListOptions{
+			PerPage: 100,
+		},
 	}
 
-	return convertGHComments(comments), nil
+	for {
+		comments, resp, err := c.gh.Issues.ListComments(c.ctx, defaultOwner, defaultRepo, num, opts)
+		if err != nil {
+			return nil, err
+		}
+
+		allComments = append(allComments, comments...)
+
+		if resp.NextPage == 0 {
+			break // No more pages
+		}
+
+		// Set up for the next page
+		opts.Page = resp.NextPage
+	}
+
+	return convertGHComments(allComments), nil
 }
 
-// GetTeamMembers gets all members of a team
+// GetTeamMembers gets all members of a team, handling pagination
 func (c *Client) GetTeamMembers(organization, team string) ([]User, error) {
 	var allMembers []*gh.User
 	opts := &gh.TeamListTeamMembersOptions{
