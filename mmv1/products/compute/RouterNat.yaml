@@ -268,7 +268,6 @@ properties:
     enum_values:
       - 'ALL_IPV6_SUBNETWORKS'
       - 'LIST_OF_IPV6_SUBNETWORKS'
-    min_version: 'beta'
   - name: 'nat64Subnetwork'
     type: Array
     description: |
@@ -278,7 +277,6 @@ properties:
     is_set: true
     send_empty_value: true
     set_hash_func: computeRouterNatSubnetworkHash
-    min_version: 'beta'
     item_type:
       type: NestedObject
       properties:

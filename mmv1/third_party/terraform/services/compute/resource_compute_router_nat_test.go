@@ -797,7 +797,6 @@ func testAccCheckComputeRouterNatDelete(t *testing.T, n string) resource.TestChe
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeRouterNat_withNat64Configuration(t *testing.T) {
 	t.Parallel()
 
@@ -818,7 +817,7 @@ func TestAccComputeRouterNat_withNat64Configuration(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-      {
+			{
 				Config: testAccComputeRouterNatWithNat64ConfigurationUpdate(context),
 			},
 			{
@@ -829,7 +828,6 @@ func TestAccComputeRouterNat_withNat64Configuration(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func testAccComputeRouterNatBasic(routerName string) string {
 	return fmt.Sprintf(`
@@ -2082,7 +2080,6 @@ resource "google_compute_router_nat" "foobar" {
 `, testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName), routerName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeRouterNatWithNat64Configuration(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dns_policy" "foobar" {
@@ -2215,4 +2212,3 @@ resource "google_compute_router_nat" "foobar" {
 }
 `, context)
 }
-{{- end }}
