@@ -2,8 +2,9 @@ package dns_test
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -91,7 +92,7 @@ func TestAccDNSPolicy_dnsPolicyDns64(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-      {
+			{
 				Config: testAccDNSPolicy_dnsPolicyDns64Update(context),
 			},
 			{
