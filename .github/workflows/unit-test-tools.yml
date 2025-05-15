@@ -29,7 +29,7 @@ jobs:
       - name: Test diff-processor with TPG
         run: |
           cd tools/diff-processor
-          go test -v ./...
+          go test ./...
         env:
           SERVICES_DIR: tools/diff-processor/new/google/services
 
@@ -42,7 +42,7 @@ jobs:
       - name: Test diff-processor with TPGB
         run: |
           cd tools/diff-processor
-          go test -v ./...
+          go test ./...
         env:
           SERVICES_DIR: tools/diff-processor/new/google/services
 
@@ -64,7 +64,7 @@ jobs:
       - name: Test go-changelog
         run: |
           cd tools/go-changelog
-          go test -v ./...
+          go test ./...
 
   issue-labeler:
     runs-on: ubuntu-22.04
@@ -84,7 +84,7 @@ jobs:
       - name: Test issue-labeler
         run: |
           cd tools/issue-labeler
-          go test -v ./...
+          go test ./...
 
   template-check:
     runs-on: ubuntu-22.04
@@ -104,7 +104,7 @@ jobs:
       - name: Test template-check
         run: |
           cd tools/template-check
-          go test -v ./...
+          go test ./...
 
   test-reader:
     runs-on: ubuntu-22.04
@@ -124,4 +124,4 @@ jobs:
       - name: Test test-reader
         run: |
           cd tools/test-reader
-          go test -v ./...
+          go test ./...
