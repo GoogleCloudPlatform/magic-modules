@@ -24,40 +24,29 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Check PR size
+        shell: bash
         run: |
           # Get PR details
-          pr_data=$(curl --get -Ss -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                    -H "Accept: application/vnd.github.v3+json" \
-                    "https://api.github.com/repos/${{ github.repository }}/pulls/${{github.event.pull_request.number}}")
+          pr_data=$(curl --get -Ss -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/pulls/${{github.event.pull_request.number}}")
           
           # Get list of files in the PR
-          pr_files=$(curl --get -Ss -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                    -H "Accept: application/vnd.github.v3+json" \
-                    "https://api.github.com/repos/${{ github.repository }}/pulls/${{github.event.pull_request.number}}/files")
+          pr_files=$(curl --get -Ss -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/pulls/${{github.event.pull_request.number}}/files")
           
           # Calculate additions and deletions excluding test files
           total_additions=0
           total_deletions=0
           
-          for file in $(echo "$pr_files" | jq -c '.[]'); do
-            filename=$(echo $file | jq -r '.filename')
-            
-            # Skip _test.go files
-            if [[ $filename != *_test.go ]]; then
-              additions=$(echo $file | jq -r '.additions')
-              deletions=$(echo $file | jq -r '.deletions')
-              
-              total_additions=$((total_additions + additions))
-              total_deletions=$((total_deletions + deletions))
-            fi
-          done
+          # Use jq to filter out _test.go files and calculate totals
+          filtered_stats=$(echo "$pr_files" | jq '[.[] | select(.filename | endswith("_test.go") | not) | {additions: .additions, deletions: .deletions}] | reduce .[] as $item ({"additions": 0, "deletions": 0}; .additions += $item.additions | .deletions += $item.deletions)')
           
+          total_additions=$(echo "$filtered_stats" | jq -r '.additions')
+          total_deletions=$(echo "$filtered_stats" | jq -r '.deletions')
           total=$((total_additions + total_deletions))
           
           echo "Excluding *_test.go files:"
           echo "$total_additions lines added; $total_deletions lines deleted"
           
-          if (( $total > 500 )); then
+          if (( total > 500 )); then
             echo "This PR changed $total lines of code (excluding test files), which is above the recommended limit of 500. Your reviewer may ask you to break it into multiple PRs."
             exit 1
           else
