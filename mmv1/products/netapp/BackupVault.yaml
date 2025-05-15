@@ -119,7 +119,7 @@ properties:
   - name: 'backupRetentionPolicy'
     type: NestedObject
     description: |
-      Backup retention policy defining the retention of backups.
+      Backup retention policy defining the retention of the backups.
     properties:
       - name: 'backupMinimumEnforcedRetentionDays'
         type: Integer
