@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: 'Term'
+name: 'GlossaryTerm'
 description: |
   Represents a collection of terms within a Glossary that are related to each other.
 base_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/terms/{{term_id}}'
