@@ -2,6 +2,7 @@ package spanner_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -67,6 +68,23 @@ func TestAccSpannerInstance_basicUpdateWithProviderDefaultLabels(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccSpannerInstance_noNodeCountSpecified(t *testing.T) {
+	t.Parallel()
+
+	idName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccSpannerInstance_noNodeCountSpecified(idName),
+				ExpectError: regexp.MustCompile(".*one of `autoscaling_config,num_nodes,processing_units,instance_type`\nmust be specified.*"),
 			},
 		},
 	})
@@ -582,6 +600,16 @@ resource "google_spanner_instance" "basic" {
   }
 }
 `, extraLabel, name, name)
+}
+
+func testAccSpannerInstance_noNodeCountSpecified(name string) string {
+	return fmt.Sprintf(`
+resource "google_spanner_instance" "basic" {
+  name         = "%s"
+  config       = "regional-us-central1"
+  display_name = "%s-dname"
+}
+`, name, name)
 }
 
 func testAccSpannerInstance_basicWithAutogenName(name string) string {
