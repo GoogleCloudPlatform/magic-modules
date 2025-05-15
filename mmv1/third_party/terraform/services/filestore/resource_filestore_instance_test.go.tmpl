@@ -705,6 +705,7 @@ func TestAccFilestoreInstance_nfsExportOptionsNetwork_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFilestoreInstance_nfsExportOptionsNetwork_update(name, location, tier, ""),
+				Check:  resource.TestCheckResourceAttr("google_filestore_instance.instance", "file_shares.0.nfs_export_options.0.network", ""),
 			},
 			{
 				ResourceName:            "google_filestore_instance.instance",
@@ -714,6 +715,7 @@ func TestAccFilestoreInstance_nfsExportOptionsNetwork_update(t *testing.T) {
 			},
 			{
 				Config: testAccFilestoreInstance_nfsExportOptionsNetwork_update(name, location, tier, "default"),
+				Check:  resource.TestCheckResourceAttr("google_filestore_instance.instance", "file_shares.0.nfs_export_options.0.network", "default"),
 			},
 			{
 				ResourceName:            "google_filestore_instance.instance",
