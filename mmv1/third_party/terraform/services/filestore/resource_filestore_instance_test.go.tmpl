@@ -690,4 +690,65 @@ resource "google_filestore_instance" "instance" {
 `, context)
 }
 
+func TestAccFilestoreInstance_nfsExportOptionsNetwork_update(t *testing.T) {
+	t.Parallel()
+
+	name := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+	location := "us-central1-a"
+	tier := "ZONAL"
+
+	// Currently, we can only alternate between an empty network and the instance network of non-PSC instances.
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFilestoreInstance_nfsExportOptionsNetwork_update(name, location, tier, ""),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+			{
+				Config: testAccFilestoreInstance_nfsExportOptionsNetwork_update(name, location, tier, "default"),
+			},
+			{
+				ResourceName:            "google_filestore_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"zone"},
+			},
+		},
+	})
+}
+
+func testAccFilestoreInstance_nfsExportOptionsNetwork_update(name, location, tier, network string) string {
+	return fmt.Sprintf(`
+resource "google_filestore_instance" "instance" {
+  name        = "%s"
+  zone        = "%s"
+  tier        = "%s"
+  description = "An instance created during testing."
+
+  file_shares {
+    capacity_gb = 1024
+    name        = "share"
+
+	nfs_export_options {
+      ip_ranges = ["70.0.0.1/24"]
+      network   = "%s"
+    }
+  }
+
+  networks {
+    network = "default"
+	modes   = ["MODE_IPV4"]
+  }
+}
+`, name, location, tier, network)
+}
+
 {{- end }}
