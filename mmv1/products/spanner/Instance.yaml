@@ -108,23 +108,31 @@ properties:
   - name: 'num_nodes'
     type: Integer
     description: |
-      The number of nodes allocated to this instance. Exactly one of either node_count or processing_units
-      must be present in terraform.
+      The number of nodes allocated to this instance. Exactly one of either num_nodes, processing_units or
+      autoscaling_config must be present in terraform except when instance_type = FREE_INSTANCE.
     api_name: nodeCount
     default_from_api: true
-    exactly_one_of:
+    at_least_one_of:
       - 'num_nodes'
+      - 'processing_units'
+      - 'autoscaling_config'
+      - 'instance_type'
+    conflicts:
       - 'processing_units'
       - 'autoscaling_config'
   - name: 'processingUnits'
     type: Integer
     description: |
-      The number of processing units allocated to this instance. Exactly one of processing_units
-      or node_count must be present in terraform.
+      The number of processing units allocated to this instance. Exactly one of either num_nodes,
+      processing_units or autoscaling_config must be present in terraform except when instance_type = FREE_INSTANCE.
     default_from_api: true
-    exactly_one_of:
+    at_least_one_of:
       - 'num_nodes'
       - 'processing_units'
+      - 'autoscaling_config'
+      - 'instance_type'
+    conflicts:
+      - 'num_nodes'
       - 'autoscaling_config'
   - name: 'labels'
     type: KeyValueLabels
@@ -143,13 +151,19 @@ properties:
     type: NestedObject
     description: |
       The autoscaling configuration. Autoscaling is enabled if this field is set.
+      Exactly one of either num_nodes, processing_units or autoscaling_config must be
+      present in terraform except when instance_type = FREE_INSTANCE.
       When autoscaling is enabled, num_nodes and processing_units are treated as,
       OUTPUT_ONLY fields and reflect the current compute capacity allocated to
       the instance.
-    exactly_one_of:
+    at_least_one_of:
       - 'num_nodes'
       - 'processing_units'
       - 'autoscaling_config'
+      - 'instance_type'
+    conflicts:
+      - 'num_nodes'
+      - 'processing_units'
     properties:
       - name: 'autoscalingLimits'
         type: NestedObject
@@ -261,6 +275,21 @@ properties:
       - 'STANDARD'
       - 'ENTERPRISE'
       - 'ENTERPRISE_PLUS'
+  - name: 'instanceType'
+    type: Enum
+    description: |
+      The type of this instance. The type can be used to distinguish product variants, that can affect aspects like:
+      usage restrictions, quotas and billing. Currently this is used to distinguish FREE_INSTANCE vs PROVISIONED instances.
+      When configured as FREE_INSTANCE, the field `edition` should not be configured.
+    default_from_api: true
+    at_least_one_of:
+      - 'num_nodes'
+      - 'processing_units'
+      - 'autoscaling_config'
+      - 'instance_type'
+    enum_values:
+      - 'PROVISIONED'
+      - 'FREE_INSTANCE'
   - name: 'defaultBackupScheduleType'
     type: Enum
     description: |
