@@ -42,6 +42,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+  encoder: 'templates/terraform/encoders/network_services_edge_cache_service.go.tmpl'
 examples:
   - name: 'network_services_edge_cache_service_basic'
     primary_resource_id: 'instance'
@@ -492,6 +493,7 @@ properties:
                               When the cache mode is set to "USE_ORIGIN_HEADERS" or "BYPASS_CACHE", you must omit this field.
 
                               A duration in seconds terminated by 's'. Example: "3s".
+                            default_from_api: true
  # defalt from api
                           - name: 'maxTtl'
                             type: String
@@ -510,6 +512,7 @@ properties:
                               When the cache mode is set to "USE_ORIGIN_HEADERS", "FORCE_CACHE_ALL", or "BYPASS_CACHE", you must omit this field.
 
                               A duration in seconds terminated by 's'. Example: "3s".
+                            default_from_api: true
                           - name: 'cacheKeyPolicy'
                             type: NestedObject
                             description: |
