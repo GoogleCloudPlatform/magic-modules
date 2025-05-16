@@ -3502,6 +3502,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
 				DesiredRbacBindingConfig: expandRBACBindingConfig(d.Get("rbac_binding_config")),
+				ForceSendFields:          []string{"DesiredRbacBindingConfig"},
 			}}
 
 		updateF := updateFunc(req, "updating GKE cluster RBAC binding config")
@@ -6150,6 +6151,7 @@ func expandRBACBindingConfig(configured interface{}) *container.RBACBindingConfi
 	return &container.RBACBindingConfig{
 		EnableInsecureBindingSystemUnauthenticated: config["enable_insecure_binding_system_unauthenticated"].(bool),
 		EnableInsecureBindingSystemAuthenticated:   config["enable_insecure_binding_system_authenticated"].(bool),
+		ForceSendFields:                            []string{"EnableInsecureBindingSystemUnauthenticated", "EnableInsecureBindingSystemAuthenticated"},
 	}
 }	
 
