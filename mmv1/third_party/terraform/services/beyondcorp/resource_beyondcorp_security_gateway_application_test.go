@@ -49,6 +49,8 @@ func TestAccBeyondcorpSecurityGatewayApplication_beyondcorpSecurityGatewayApplic
 
 func testAccBeyondcorpSecurityGatewayApplication_beyondcorpSecurityGatewayApplicationBasicExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
 resource "google_beyondcorp_security_gateway" "default" {
   security_gateway_id = "default-sg%{random_suffix}"
   display_name = "My Security Gateway resource"
@@ -67,6 +69,8 @@ resource "google_beyondcorp_security_gateway_application" "example" {
 
 func testAccBeyondcorpSecurityGatewayApplication_beyondcorpSecurityGatewayApplicationBasicExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
 resource "google_beyondcorp_security_gateway" "default" {
   security_gateway_id = "default-sg%{random_suffix}"
   display_name = "My Security Gateway resource"
@@ -78,7 +82,20 @@ resource "google_beyondcorp_security_gateway_application" "example" {
   display_name = "Updated Name"
   application_id = "google-sga%{random_suffix}"
   endpoint_matchers {
-    hostname = "google.com"
+    hostname = "*.google.com"
+  }
+  endpoint_matchers {
+	hostname = "google.com"
+  }
+  upstreams {
+	network {
+	  name = "projects/${data.google_project.project.project_id}/global/networks/default"
+	}
+  }
+  upstreams {
+	network {
+	  name = "projects/${data.google_project.project.project_id}/global/networks/abc"
+	}
   }
 }
 `, context)
