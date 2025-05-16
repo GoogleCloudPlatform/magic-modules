@@ -61,6 +61,7 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 	}
 
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
+	t.Product.SetCompiler(ProviderName(t))
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
 		r.ImportPath = ImportPathFromVersion(versionName)
@@ -77,6 +78,7 @@ func (t Terraform) Generate(outputFolder, productPath, resourceToGenerate string
 	t.GenerateObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
 
 	if generateCode {
+		t.GenerateProduct(outputFolder)
 		t.GenerateOperation(outputFolder)
 	}
 }
@@ -184,6 +186,20 @@ func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData Te
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_sweeper.go", t.ResourceGoFilename(object)))
 	templateData.GenerateSweeperFile(targetFilePath, object)
+}
+
+// GenerateProduct creates the product.go file for a given service directory.
+// This will be used to seed the directory and add a package-level comment
+// specific to the product.
+func (t *Terraform) GenerateProduct(outputFolder string) {
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", t.Product.ApiName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+
+	targetFilePath := path.Join(targetFolder, "product.go")
+	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
+	templateData.GenerateProductFile(targetFilePath, *t.Product)
 }
 
 func (t *Terraform) GenerateOperation(outputFolder string) {
