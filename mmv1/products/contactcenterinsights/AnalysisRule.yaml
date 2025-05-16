@@ -26,6 +26,7 @@ references:
 base_url: projects/{{project}}/locations/{{location}}/analysisRules
 self_link: projects/{{project}}/locations/{{location}}/analysisRules/{{analysis_rule}}
 create_url: projects/{{project}}/locations/{{location}}/analysisRules
+delete_url: projects/{{project}}/locations/{{location}}/analysisRules/{{analysis_rule}}
 update_verb: 'PATCH'
 update_mask: true
 id_format: projects/{{project}}/locations/{{location}}/analysisRules/{{analysis_rule}}
