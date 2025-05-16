@@ -23,6 +23,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"golang.org/x/exp/slices"
@@ -51,21 +52,37 @@ func defaultRetryConfig() retryConfig {
 // makeHTTPRequest performs the actual HTTP request and returns the response
 func makeHTTPRequest(url, method, credentials string, body any) (*http.Response, []byte, error) {
 	client := &http.Client{}
-	jsonBody, err := json.Marshal(body)
-	if err != nil {
-		return nil, nil, fmt.Errorf("error marshaling JSON: %s", err)
-	}
-	req, err := http.NewRequest(method, url, bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return nil, nil, fmt.Errorf("error creating request: %s", err)
-	}
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", credentials))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
 
 	fmt.Println("")
 	fmt.Println("request url: ", url)
-	fmt.Println("request body: ", string(jsonBody))
+
+	var reqBody io.Reader
+	if body != nil {
+		switch v := body.(type) {
+		case []byte:
+			// Body is already serialized, use directly
+			reqBody = bytes.NewBuffer(v)
+			rbString := strings.TrimSpace(string(v))
+			fmt.Println("request body (raw bytes): ", rbString)
+		default:
+			// Body needs serialization
+			jsonBody, err := json.Marshal(body)
+			if err != nil {
+				return nil, nil, fmt.Errorf("error marshaling JSON: %s", err)
+			}
+			reqBody = bytes.NewBuffer(jsonBody)
+			fmt.Println("request body (serialized): ", string(jsonBody))
+		}
+	}
+
+	req, err := http.NewRequest(method, url, reqBody)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error creating request: %s", err)
+	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", credentials))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
 	fmt.Println("")
 
 	resp, err := client.Do(req)
