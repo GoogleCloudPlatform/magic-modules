@@ -1,53 +1,15 @@
 package dataplex_test
 
-{{- if ne $.TargetVersionName "ga" }}
-
 import (
 	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
 func TestAccDataplexGlossaryCategory_update(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataplexGlossaryCategory_update(context),
-			},
-			{
-				ResourceName:            "google_dataplex_glossary_category.category_test_id",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"category_id", "glossary_id", "labels", "location", "terraform_labels"},
-			},
-		},
-	})
-}
-
-func testAccDataplexGlossaryCategory_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_dataplex_glossary" "category_test_id" {
-  glossary_id = "tf-test-glossary%{random_suffix}"
-  location = "us-central1"
-}
-resource "google_dataplex_glossary_category" "category_test_id" {
-  parent = "projects/${google_dataplex_glossary.category_test_id.project}/locations/us-central1/glossaries/${google_dataplex_glossary.category_test_id.glossary_id}"
-  glossary_id = google_dataplex_glossary.category_test_id.glossary_id 
-  location = "us-central1"
-  category_id = "tf-test-category-basic%{random_suffix}"
-}
-`, context)
-}
-
-func TestAccDataplexGlossaryCategory_dataplexGlossaryCategoryFull(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -67,8 +29,36 @@ func TestAccDataplexGlossaryCategory_dataplexGlossaryCategoryFull(t *testing.T) 
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"category_id", "glossary_id", "labels", "location", "terraform_labels"},
 			},
+			{
+				Config: testAccDataplexGlossaryCategory_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_dataplex_glossary_category.category_test_id_full", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_dataplex_glossary_category.category_test_id_full",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"category_id", "glossary_id", "labels", "location", "terraform_labels"},
+			},
 		},
 	})
+
+func testAccDataplexGlossaryCategory_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataplex_glossary" "category_test_id_full" {
+  glossary_id = "tf-test-glossary%{random_suffix}"
+  location = "us-central1"
+}
+resource "google_dataplex_glossary_category" "category_test_id_full" {
+  parent = "projects/${google_dataplex_glossary.category_test_id_full.project}/locations/us-central1/glossaries/${google_dataplex_glossary.category_test_id_full.glossary_id}"
+  glossary_id = google_dataplex_glossary.category_test_id_full.glossary_id 
+  location = "us-central1"
+  category_id = "tf-test-category-basic%{random_suffix}"
+}
+`, context)
 }
 
 func testAccDataplexGlossaryCategory_dataplexGlossaryCategoryFull(context map[string]interface{}) string {
@@ -88,5 +78,3 @@ resource "google_dataplex_glossary_category" "category_test_id_full" {
 }
 `, context)
 }
-
-{{- end }}
