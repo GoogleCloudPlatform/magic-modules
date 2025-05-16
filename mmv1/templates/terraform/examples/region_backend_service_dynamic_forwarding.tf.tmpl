@@ -1,0 +1,11 @@
+resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
+  provider                        = google-beta
+  name                            = "{{index $.Vars "region_backend_service_name"}}"
+  region                          = "us-central1"
+  load_balancing_scheme           = "EXTERNAL_MANAGED"
+  dynamic_forwarding {
+    ip_port_selection {
+      enabled = true
+    }
+  }
+}
