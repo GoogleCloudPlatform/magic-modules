@@ -418,5 +418,6 @@ properties:
       URLs of InterconnectGroups that include this Interconnect.
       Order is arbitrary and items are unique.
     output: true
+    is_set: true
     item_type:
       type: String

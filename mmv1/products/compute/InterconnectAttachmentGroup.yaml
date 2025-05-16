@@ -75,7 +75,7 @@ properties:
       format for resource links as keys.
       Note that there are add-members and remove-members methods in gcloud.
       The size of this map is limited by an "Attachments per group" quota.
-    key_name: 'key_attachment'
+    key_name: 'name'
     key_description: |
       Resource name
     value_type:
@@ -84,7 +84,7 @@ properties:
       properties:
         - name: 'attachment'
           type: String
-  - name: 'InterconnectGroup'
+  - name: 'interconnectGroup'
     type: String
     description: |
       The URL of an InterconnectGroup that groups these Attachments'
