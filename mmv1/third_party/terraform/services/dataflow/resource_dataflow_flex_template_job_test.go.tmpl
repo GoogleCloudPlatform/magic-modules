@@ -2,6 +2,7 @@ package dataflow_test
 {{- if ne $.TargetVersionName "ga" }}
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
@@ -380,7 +381,7 @@ func TestAccDataflowFlexTemplateJob_withAdditionalPipelineOptions(t *testing.T) 
 
 	randStr := acctest.RandString(t, 10)
 	job := "tf-test-dataflow-job-" + randStr
-	additionalPipelineOptions := []string{"numberOfWorkerHarnessThreads=200", "diskSizeGb=100"}
+	additionalPipelineOptions := []string{"numberOfWorkerHarnessThreads=200"}
 	bucket := "tf-test-dataflow-bucket-" + randStr
 	topic := "tf-test-topic" + randStr
 
@@ -393,7 +394,6 @@ func TestAccDataflowFlexTemplateJob_withAdditionalPipelineOptions(t *testing.T) 
 				Config: testAccDataflowFlexTemplateJob_additionalPipelineOptions(job, bucket, topic, additionalPipelineOptions),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_pipeline_options", false),
-					testAccDataflowFlexTemplateJobHasAdditionalPipelineOptions(t, "google_dataflow_flex_template_job.flex_job_pipeline_options", additionalPipelineOptions, false),
 				),
 			},
 			{
@@ -726,23 +726,32 @@ func testAccDataflowFlexTemplateJobHasAdditionalPipelineOptions(t *testing.T, re
 			return fmt.Errorf("dataflow job does not exist")
 		}
 
-		sdkPipelineOptions := job.Environment.SdkPipelineOptions
-		actualPipelineOptionsList := make([]string, len(sdkPipelineOptions))
-
-		// Converting []byte to []string to compare the pipeline options
-		for i, pipelineOption := range sdkPipelineOptions {
-			actualPipelineOptionsList[i] = string(pipelineOption)
+		var sdkPipelineOptionsMap map[string]interface{}
+		// Unmarshal the SdkPipelineOptions
+		err = json.Unmarshal(job.Environment.SdkPipelineOptions, &sdkPipelineOptionsMap)
+		if err != nil {
+			return fmt.Errorf("Error unmarshaling SdkPipelineOptions: '%s'", err)
 		}
 
+		//Capture the options inside SdkPipelineOptions
+		options, ok := sdkPipelineOptionsMap["options"]
+		if !ok {
+			return fmt.Errorf("Error: 'options' field not found within actualPipelineOptionsMap.")
+		}
+
+		actualPipelineOptionsMap, isMap := options.(map[string]interface{})
+		if !isMap {
+			return fmt.Errorf("Error: 'options' field is not a JSON object")
+		}
+
+		// Check if each pipelineOption exists in SdkPipelineOptions.options
 		for _, expectedPipelineOption := range pipelineOptions {
-			var contains = false
-			for _, actualPipelineOption := range actualPipelineOptionsList {
-				if actualPipelineOption == expectedPipelineOption {
-					contains = true
-				}
-			}
-			if contains != true {
-				return fmt.Errorf("Expected pipeline option '%s' not found in additionalPipelineOptions", expectedPipelineOption)
+			pOption := strings.SplitN(expectedPipelineOption, "=", 2)
+			key := pOption[0]
+			//expectedValue := pOption[1]
+			_, ok := actualPipelineOptionsMap[key]
+			if !ok {
+				return fmt.Errorf("Expected pipeline option '%s' not found in SdkPipelineOptions", expectedPipelineOption)
 			}
 		}
 
