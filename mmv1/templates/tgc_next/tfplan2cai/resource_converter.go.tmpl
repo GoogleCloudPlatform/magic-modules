@@ -33,10 +33,11 @@ import (
   "google.golang.org/api/bigtableadmin/v2"
   "google.golang.org/api/googleapi"
 
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/cai"
-  "github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
-  transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
-  "github.com/hashicorp/terraform-provider-google-beta/google-beta/verify"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/cai"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
+  transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/verify"
 )
 
 {{- $caiProductBaseUrl := $.CaiProductBaseUrl }}
@@ -49,23 +50,57 @@ import (
 
 const {{ $.ResourceName -}}AssetType string = "{{ $productBackendName }}.googleapis.com/{{ $.Name -}}"
 
+func Resource{{ $.ResourceName -}}() *schema.Resource {
+    return &schema.Resource{
+        Schema: map[string]*schema.Schema{
+			{{- range $prop := $.OrderProperties $.AllUserProperties }}
+{{template "SchemaFields" $prop -}}
+			{{- end }}
+            {{- range $prop := $.VirtualFields }}
+{{template "SchemaFields" $prop -}}
+            {{- end }}
+{{- if $.CustomCode.ExtraSchemaEntry }} 
+    {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
+{{- end}}
+{{ if $.HasProject -}}
+            "project": {
+                Type:     schema.TypeString,
+                Optional: true,
+                Computed: true,
+                ForceNew: true,
+            },
+{{- end}}
+{{- if $.HasSelfLink }}
+            "self_link": {
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+{{- end}}
+        },
+        UseJSONNumber: true,
+    }
+}
+
+{{- range $prop := $.AllUserProperties }}
+{{template "SchemaSubResource" $prop}}
+{{- end}}
+
 func ResourceConverter{{ $.ResourceName -}}() cai.ResourceConverter {
     return cai.ResourceConverter{
-        AssetType: {{ $.ResourceName -}}AssetType,
         Convert: Get{{ $.ResourceName -}}CaiObject,
     }
 }
 
-func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]cai.Asset, error) {
+func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
     name, err := cai.AssetName(d, config, "{{ $.CaiAssetNameTemplate $productBackendName }}")
     if err != nil {
-        return []cai.Asset{}, err
+        return []caiasset.Asset{}, err
     }
     if obj, err := Get{{ $.ResourceName -}}ApiObject(d, config); err == nil {
-        return []cai.Asset{{"{{"}}
+        return []caiasset.Asset{{"{{"}}
             Name: name,
             Type: {{ $.ResourceName -}}AssetType,
-            Resource: &cai.AssetResource{
+            Resource: &caiasset.AssetResource{
                 Version: "{{ $apiVersion }}",
                 DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/{{ $productBackendName }}/{{ $apiVersion }}/rest",
                 DiscoveryName: "{{ $.Name }}",
@@ -73,7 +108,7 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
             },
         {{"}}"}}, nil
     } else {
-        return []cai.Asset{}, err
+        return []caiasset.Asset{}, err
     }
 }
 
