@@ -24,7 +24,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
@@ -92,6 +91,14 @@ func (td *TemplateData) GenerateMetadataFile(filePath string, resource api.Resou
 		templatePath,
 	}
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
+func (td *TemplateData) GenerateProductFile(filePath string, product api.Product) {
+	templatePath := "templates/terraform/product.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, product, true, templates...)
 }
 
 func (td *TemplateData) GenerateOperationFile(filePath string, resource api.Resource) {
