@@ -10,7 +10,7 @@ func convertGHPullRequest(pr *gh.PullRequest) PullRequest {
 		return PullRequest{}
 	}
 
-	labels := make([]Label, 0)
+	var labels []Label
 	if pr.Labels != nil {
 		for _, l := range pr.Labels {
 			if l.Name != nil {
@@ -65,20 +65,6 @@ func convertGHComments(comments []*gh.IssueComment) []PullRequestComment {
 	result := make([]PullRequestComment, len(comments))
 	for i, c := range comments {
 		result[i] = convertGHComment(c)
-	}
-	return result
-}
-
-// helper to convert our User type to github User
-func convertToGHUser(user User) *gh.User {
-	return &gh.User{Login: gh.Ptr(user.Login)}
-}
-
-// Helper to convert slice of our User type to github Users
-func convertToGHUsers(users []User) []*gh.User {
-	result := make([]*gh.User, len(users))
-	for i, u := range users {
-		result[i] = convertToGHUser(u)
 	}
 	return result
 }
