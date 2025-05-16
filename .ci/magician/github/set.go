@@ -17,61 +17,64 @@ package github
 
 import (
 	"fmt"
-	utils "magician/utility"
+	"strconv"
 	"strings"
 	"time"
+
+	utils "magician/utility"
+
+	gh "github.com/google/go-github/v68/github"
 )
 
-func (gh *Client) PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/%s", commitSha)
-
-	postBody := map[string]string{
-		"context":    title,
-		"state":      state,
-		"target_url": targetURL,
+// PostBuildStatus creates a commit status for a specific SHA
+func (c *Client) PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error {
+	repoStatus := &gh.RepoStatus{
+		Context:   gh.Ptr(title),
+		State:     gh.Ptr(state),
+		TargetURL: gh.Ptr(targetURL),
 	}
 
-	err := utils.RequestCallWithRetry(url, "POST", gh.token, nil, postBody)
+	_, _, err := c.gh.Repositories.CreateStatus(c.ctx, defaultOwner, defaultRepo, commitSha, repoStatus)
 	if err != nil {
 		return err
 	}
 
 	fmt.Printf("Successfully posted build status to pull request %s\n", prNumber)
-
 	return nil
 }
 
-func (gh *Client) PostComment(prNumber, comment string) error {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/comments", prNumber)
-
-	body := map[string]string{
-		"body": comment,
+// PostComment adds a comment to a pull request
+func (c *Client) PostComment(prNumber, comment string) error {
+	num, err := strconv.Atoi(prNumber)
+	if err != nil {
+		return err
 	}
 
-	err := utils.RequestCallWithRetry(url, "POST", gh.token, nil, body)
+	issueComment := &gh.IssueComment{
+		Body: gh.Ptr(comment),
+	}
+
+	_, _, err = c.gh.Issues.CreateComment(c.ctx, defaultOwner, defaultRepo, num, issueComment)
 	if err != nil {
 		return err
 	}
 
 	fmt.Printf("Successfully posted comment to pull request %s\n", prNumber)
-
 	return nil
 }
 
-func (gh *Client) UpdateComment(prNumber, comment string, id int) error {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/comments/%d", id)
-
-	body := map[string]string{
-		"body": comment,
+// UpdateComment updates an existing comment
+func (c *Client) UpdateComment(prNumber, comment string, id int) error {
+	issueComment := &gh.IssueComment{
+		Body: gh.Ptr(comment),
 	}
 
-	err := utils.RequestCallWithRetry(url, "PATCH", gh.token, nil, body)
+	_, _, err := c.gh.Issues.EditComment(c.ctx, defaultOwner, defaultRepo, int64(id), issueComment)
 	if err != nil {
 		return err
 	}
 
 	fmt.Printf("Successfully updated comment %d in pull request %s\n", id, prNumber)
-
 	return nil
 }
 
@@ -111,26 +114,29 @@ func (gh *Client) RemovePullRequestReviewers(prNumber string, reviewers []string
 	return nil
 }
 
-func (gh *Client) AddLabels(prNumber string, labels []string) error {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/labels", prNumber)
-
-	body := map[string][]string{
-		"labels": labels,
+// AddLabels adds labels to an issue or pull request
+func (c *Client) AddLabels(prNumber string, labels []string) error {
+	num, err := strconv.Atoi(prNumber)
+	if err != nil {
+		return err
 	}
-	err := utils.RequestCallWithRetry(url, "POST", gh.token, nil, body)
 
+	_, _, err = c.gh.Issues.AddLabelsToIssue(c.ctx, defaultOwner, defaultRepo, num, labels)
 	if err != nil {
 		return fmt.Errorf("failed to add %q labels: %s", labels, err)
 	}
 
 	return nil
-
 }
 
-func (gh *Client) RemoveLabel(prNumber, label string) error {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/labels/%s", prNumber, label)
-	err := utils.RequestCallWithRetry(url, "DELETE", gh.token, nil, nil)
+// RemoveLabel removes a label from an issue or pull request
+func (c *Client) RemoveLabel(prNumber, label string) error {
+	num, err := strconv.Atoi(prNumber)
+	if err != nil {
+		return err
+	}
 
+	_, err = c.gh.Issues.RemoveLabelForIssue(c.ctx, defaultOwner, defaultRepo, num, label)
 	if err != nil {
 		return fmt.Errorf("failed to remove %s label: %s", label, err)
 	}
@@ -138,19 +144,24 @@ func (gh *Client) RemoveLabel(prNumber, label string) error {
 	return nil
 }
 
-func (gh *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/actions/workflows/%s/dispatches", workflowFileName)
-	err := utils.RequestCallWithRetry(url, "POST", gh.token, nil, map[string]any{
-		"ref":    "main",
-		"inputs": inputs,
-	})
+// CreateWorkflowDispatchEvent triggers a workflow run
+func (c *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
+	stringInputs := make(map[string]interface{})
+	for k, v := range inputs {
+		stringInputs[k] = v
+	}
 
+	event := gh.CreateWorkflowDispatchEventRequest{
+		Ref:    "main",
+		Inputs: stringInputs,
+	}
+
+	_, err := c.gh.Actions.CreateWorkflowDispatchEventByFileName(c.ctx, defaultOwner, defaultRepo, workflowFileName, event)
 	if err != nil {
 		return fmt.Errorf("failed to create workflow dispatch event: %s", err)
 	}
 
 	fmt.Printf("Successfully created workflow dispatch event for %s with inputs %v\n", workflowFileName, inputs)
-
 	return nil
 }
 
