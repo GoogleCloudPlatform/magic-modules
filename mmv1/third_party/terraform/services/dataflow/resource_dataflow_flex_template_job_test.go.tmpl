@@ -748,7 +748,6 @@ func testAccDataflowFlexTemplateJobHasAdditionalPipelineOptions(t *testing.T, re
 		for _, expectedPipelineOption := range pipelineOptions {
 			pOption := strings.SplitN(expectedPipelineOption, "=", 2)
 			key := pOption[0]
-			//expectedValue := pOption[1]
 			_, ok := actualPipelineOptionsMap[key]
 			if !ok {
 				return fmt.Errorf("Expected pipeline option '%s' not found in SdkPipelineOptions", expectedPipelineOption)
