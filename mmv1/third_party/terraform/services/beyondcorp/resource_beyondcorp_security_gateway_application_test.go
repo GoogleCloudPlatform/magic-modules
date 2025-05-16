@@ -86,6 +86,7 @@ resource "google_beyondcorp_security_gateway_application" "example" {
   }
   endpoint_matchers {
 	hostname = "google.com"
+	ports = [443, 80]
   }
   upstreams {
 	network {
