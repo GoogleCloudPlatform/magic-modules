@@ -50,7 +50,6 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/firestore_index.go.tmpl'
   encoder: 'templates/terraform/encoders/index.go.tmpl'
-  post_create: 'templates/terraform/post_create/index.go.tmpl'
   custom_import: 'templates/terraform/custom_import/index_self_link_as_name_set_project.go.tmpl'
 error_retry_predicates:
 
