@@ -35,6 +35,23 @@ func TestAccComputeInterconnectGroup_basic(t *testing.T) {
 
 func testAccComputeInterconnectGroup_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_compute_interconnect" "example-interconnect" {
+  name                 = "tf-test-example-interconnect%{random_suffix}"
+  customer_name        = "internal_customer" # Special customer only available for Google testing.
+  interconnect_type    = "DEDICATED"
+  link_type            = "LINK_TYPE_ETHERNET_100G_LR"
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/global/interconnectLocations/z2z-us-central1-zone1-tzcbfa-z" # Special location only available for Google testing.
+  requested_link_count = 1
+  admin_enabled        = true
+  description          = "example description"
+  noc_contact_email    = "user@example.com"
+  labels = {
+	mykey = "myvalue"
+  }
+}
+
 resource "google_compute_interconnect_group" "example-interconnect-group" {
   name   = "tf-test-example-interconnect-group%{random_suffix}"
   intent {
@@ -84,12 +101,33 @@ func TestAccComputeInterconnectGroup_update(t *testing.T) {
 
 func testAccComputeInterconnectGroup_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_compute_interconnect" "example-interconnect" {
+  name                 = "tf-test-example-interconnect%{random_suffix}"
+  customer_name        = "internal_customer" # Special customer only available for Google testing.
+  interconnect_type    = "DEDICATED"
+  link_type            = "LINK_TYPE_ETHERNET_100G_LR"
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/global/interconnectLocations/z2z-us-central1-zone1-tzcbfa-z" # Special location only available for Google testing.
+  requested_link_count = 1
+  admin_enabled        = true
+  description          = "example description"
+  noc_contact_email    = "user@example.com"
+  labels = {
+	mykey = "myvalue"
+  }
+}
+	  
 resource "google_compute_interconnect_group" "example-interconnect-group" {
   name   	  = "tf-test-example-interconnect-group%{random_suffix}"
   intent {
     topology_capability = "NO_SLA"
   }
   description = "New description"
+  interconnects {
+	name = "my-interconnect"
+	interconnect = google_compute_interconnect.example-interconnect.name
+  }
 }
 `, context)
 }
