@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 	"regexp"
-	"runtime"
 	"strings"
+	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
@@ -51,18 +51,8 @@ func encodeToBase64JSON(data interface{}) (string, error) {
 }
 
 // CollectAllTgcMetadata collects metadata for all resources in a test step
-func CollectAllTgcMetadata(config string, resourceMetadata map[string]ResourceMetadata) resource.TestCheckFunc {
+func CollectAllTgcMetadata(tgcPayload TgcMetadataPayload) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		// Get the name of the test that invoked this function
-		testName := getCallerInfo()
-
-		// Create the consolidated TGC payload
-		tgcPayload := TgcMetadataPayload{
-			TestName:         testName,
-			RawConfig:        config,
-			ResourceMetadata: resourceMetadata,
-		}
-
 		// Process each resource to get CAI asset names and resolve auto IDs
 		for address, metadata := range tgcPayload.ResourceMetadata {
 			// If there is import metadata update our primary resource
@@ -200,7 +190,7 @@ func determineImportMetadata(steps []resource.TestStep, currentStepIndex int, re
 }
 
 // extendWithTGCData adds TGC metadata check function to the last non-plan config entry
-func extendWithTGCData(c resource.TestCase) resource.TestCase {
+func extendWithTGCData(t *testing.T, c resource.TestCase) resource.TestCase {
 	var updatedSteps []resource.TestStep
 
 	// Find the last non-plan config step
@@ -236,6 +226,14 @@ func extendWithTGCData(c resource.TestCase) resource.TestCase {
 
 			// Collect metadata for all resources
 			resourceMetadata := make(map[string]ResourceMetadata)
+
+			// Create the consolidated TGC payload
+			tgcPayload := TgcMetadataPayload{
+				TestName:         t.Name(),
+				RawConfig:        step.Config,
+				ResourceMetadata: resourceMetadata,
+			}
+
 			for _, res := range resources {
 				parts := strings.Split(res, ".")
 				if len(parts) >= 2 {
@@ -255,7 +253,7 @@ func extendWithTGCData(c resource.TestCase) resource.TestCase {
 			}
 
 			// Add a single consolidated TGC check for all resources
-			tgcCheck := CollectAllTgcMetadata(step.Config, resourceMetadata)
+			tgcCheck := CollectAllTgcMetadata(tgcPayload)
 
 			// If there's an existing check function, wrap it with our consolidated check
 			if step.Check != nil {
@@ -275,33 +273,4 @@ func extendWithTGCData(c resource.TestCase) resource.TestCase {
 
 	c.Steps = updatedSteps
 	return c
-}
-
-// getCallerInfo returns information about the calling function
-func getCallerInfo() string {
-	for i := 1; i < 10; i++ {
-		pc, _, _, ok := runtime.Caller(i)
-		if !ok {
-			break
-		}
-
-		fn := runtime.FuncForPC(pc)
-		if fn == nil {
-			continue
-		}
-
-		name := fn.Name()
-
-		// Check if this looks like a test function name (contains "Test" and doesn't contain our package name)
-		if strings.Contains(name, "TestAcc") {
-			// Extract just the function name without the package path
-			parts := strings.Split(name, ".")
-			if len(parts) > 0 {
-				return parts[len(parts)-1]
-			}
-			return name
-		}
-	}
-
-	return "unknown"
 }
