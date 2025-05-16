@@ -1521,7 +1521,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 
 	for i := 0; i < attachedDisksCount; i++ {
 		diskConfig := d.Get(fmt.Sprintf("attached_disk.%d", i)).(map[string]interface{})
-		disk, err := expandAttachedDiskTgc(diskConfig, d, config)
+		disk, err := expandAttachedDisk(diskConfig, d, config)
 		if err != nil {
 			return nil, err
 		}
@@ -1601,7 +1601,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	}, nil
 }
 
-func expandAttachedDiskTgc(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
+func expandAttachedDisk(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
 	config := meta.(*transport_tpg.Config)
 
 	s := diskConfig["source"].(string)
