@@ -17,10 +17,10 @@ func TestAccDataSourceGoogleCloudBackupDRDataSource_basic(t *testing.T) {
 
 
 	{{ if ne $.TargetVersionName "ga" -}}
-  data_source_id = "ds-test"
-  {{ else -}}
-  data_source_id = "56b93b14529b77d764b21b2251e1ea8f0006e8dd"
-  {{- end }}
+	data_source_id = "ds-test"
+	{{ else -}}
+	data_source_id = "56b93b14529b77d764b21b2251e1ea8f0006e8dd"
+	{{- end }}
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"data_source_id": data_source_id,
@@ -59,7 +59,6 @@ data "google_backup_dr_data_source" "foo" {
   location      = "us-central1"
   backup_vault_id = "bv-test"
   data_source_id = ""%{data_source_id}""
-  
 }
 `, context)
 }
