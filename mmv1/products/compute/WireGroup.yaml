@@ -27,7 +27,7 @@ id_format: 'projects/{{project}}/global/crossSiteNetworks/{{cross_site_network}}
 base_url: 'projects/{{project}}/global/crossSiteNetworks/{{cross_site_network}}/wireGroups'
 self_link: 'projects/{{project}}/global/crossSiteNetworks/{{cross_site_network}}/wireGroups/{{name}}'
 update_verb: 'PATCH'
-import_format: 
+import_format:
   - 'projects/{{project}}/global/crossSiteNetworks/{{cross_site_network}}/wireGroups/{{name}}'
 timeouts:
   insert_minutes: 20
@@ -114,7 +114,7 @@ properties:
         description: |
           Type of wire group (enum).
           WIRE: a single pseudowire over two Interconnect connections   with no redundancy.
-          REDUNDANT: two pseudowires over four Interconnect connections, with two connections in one metro and two connections in another metro. 
+          REDUNDANT: two pseudowires over four Interconnect connections, with two connections in one metro and two connections in another metro.
           BOX_AND_CROSS: four pseudowires over four Interconnect connections, with two connections in one metro and two connections in another metro.
         enum_values:
           - 'WIRE'
