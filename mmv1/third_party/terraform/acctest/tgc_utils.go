@@ -247,6 +247,7 @@ func extendWithTGCData(t *testing.T, c resource.TestCase) resource.TestCase {
 						ResourceType:    resourceType,
 						ResourceAddress: res,
 						ImportMetadata:  importMeta,
+						Service:         getServicePackage(resourceType),
 						// CaiAssetName will be populated at runtime in the check function
 					}
 				}
