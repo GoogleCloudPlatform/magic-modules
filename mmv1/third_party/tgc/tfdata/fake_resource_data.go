@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/go-cty/cty"
 )
 
 // Must be set to the same value as the internal typeObject const
@@ -44,11 +45,16 @@ type FakeResourceData struct {
 	reader schema.FieldReader
 	kind   string
 	schema map[string]*schema.Schema
+	identity *schema.IdentityData
 }
 
 // Kind returns the type of resource (i.e. "google_storage_bucket").
 func (d *FakeResourceData) Kind() string {
 	return d.kind
+}
+
+func (d *FakeResourceData) Identity() (*schema.IdentityData, error) {
+	return d.identity, nil
 }
 
 // Id returns the ID of the resource from state.
@@ -90,6 +96,10 @@ func (d *FakeResourceData) get(addr []string) getResult {
 func (d *FakeResourceData) Get(name string) interface{} {
 	val, _ := d.GetOk(name)
 	return val
+}
+
+func (d *FakeResourceData) GetRawConfig() cty.Value {
+	return d.GetRawConfig()
 }
 
 // Get reads a single field by key and returns a boolean indicating
