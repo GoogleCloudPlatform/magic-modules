@@ -1,4 +1,4 @@
-name: "Basic PR checks"
+name: "pull-request"
 permissions: read-all
 
 on:
@@ -23,16 +23,47 @@ jobs:
   disallow-large-prs:
     runs-on: ubuntu-22.04
     steps:
-    - name: Check PR size
-      run: |
-        response=$(curl --get -Ss -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/pulls/${{github.event.pull_request.number}}")
-        additions=$(echo "$response" | jq -r '.additions')
-        deletions=$(echo "$response" | jq -r '.deletions')
-        total=$(( $additions + $deletions ))
-        echo "$additions lines added; $deletions lines deleted"
-        if (( $total > 500 )); then
-          echo "This PR changed $total lines of code, which is above the recommended limit of 500. Your reviewer may ask you to break it into multiple PRs."
-          exit 1
-        else
-          echo "This PR changed $total lines of code, which meets the recommended limit of 500."
-        fi
+      - name: Check PR size
+        shell: bash
+        run: |
+          # Get PR details
+          pr_data=$(curl --get -Ss -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/pulls/${{github.event.pull_request.number}}")
+          
+          # Get list of files in the PR
+          pr_files=$(curl --get -Ss -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -H "Accept: application/vnd.github.v3+json" "https://api.github.com/repos/${{ github.repository }}/pulls/${{github.event.pull_request.number}}/files")
+          
+          # Calculate additions and deletions excluding test files
+          total_additions=0
+          total_deletions=0
+          
+          # Use jq to filter out test and documentation files and calculate totals
+          filtered_stats=$(echo "$pr_files" | jq '[
+            .[] | 
+            select(
+              (.filename | endswith("_test.go") | not) and
+              (.filename | endswith("test.go.tmpl") | not) and
+              (.filename | endswith(".md") | not) and
+              (.filename | endswith(".md.tmpl") | not) and
+              (.filename | endswith(".html.markdown") | not)
+            ) | 
+            {additions: .additions, deletions: .deletions}
+          ] | 
+          reduce .[] as $item (
+            {"additions": 0, "deletions": 0}; 
+            .additions += $item.additions | 
+            .deletions += $item.deletions
+          )')
+          
+          total_additions=$(echo "$filtered_stats" | jq -r '.additions')
+          total_deletions=$(echo "$filtered_stats" | jq -r '.deletions')
+          total=$((total_additions + total_deletions))
+          
+          echo "Excluding test and documentation files:"
+          echo "$total_additions lines added; $total_deletions lines deleted"
+          
+          if (( total > 500 )); then
+            echo "This PR changed $total lines of code (excluding test and documentation files), which is above the recommended limit of 500. Your reviewer may ask you to break it into multiple PRs."
+            exit 1
+          else
+            echo "This PR changed $total lines of code (excluding test and documentation files), which meets the recommended limit of 500."
+          fi
