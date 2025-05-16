@@ -583,3 +583,58 @@ resource "google_pubsub_topic" "foo" {
 }
 `, topic)
 }
+func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+
+	functionName := "some_function_name"
+	code := "some_code_here"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Initial transform
+			{
+				Config: testAccPubsubTopic_javascriptUdfSettings(topic, functionName, code),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Bare transform
+			{
+				Config: testAccPubsubTopic_javascriptUdfSettings(topic, "", ""),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Destroy transform
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccPubsubTopic_javascriptUdfSettings(topic, functionName, code string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+	name = "%s"
+
+	message_transforms {
+		javascript_udf {
+			function_name = "%s"
+			code = "%s"
+		}
+	}
+}
+	`, topic, functionName, code)
+}
