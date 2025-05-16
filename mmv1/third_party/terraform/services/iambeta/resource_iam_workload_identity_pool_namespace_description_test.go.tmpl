@@ -1,0 +1,30 @@
+{{- if ne $.TargetVersionName "ga" -}}
+package iambeta_test
+
+import (
+	"strings"
+	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/services/iambeta"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
+)
+
+func TestValidateWorkloadIdentityPoolNamespaceDescription(t *testing.T) {
+	x := []verify.StringValidationTestCase{
+		// No errors
+		{TestName: "basic", Value: "foobar"},
+		{TestName: "with numbers", Value: "foobar123"},
+		{TestName: "short", Value: "foos"},
+		{TestName: "long", Value: "12345678901234567890123456789012"},
+		{TestName: "has a hyphen", Value: "foo-bar"},
+
+		// With errors
+		{TestName: "too long", Value: strings.Repeat("f", 257), ExpectError: true},
+	}
+
+	es := verify.TestStringValidationCases(x, iambeta.ValidateWorkloadIdentityPoolNamespaceDescription)
+	if len(es) > 0 {
+		t.Errorf("Failed to validate WorkloadIdentityPool Namespace descriptions: %v", es)
+	}
+}
+{{- end -}}
