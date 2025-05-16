@@ -18,7 +18,6 @@
 package compute_test
 
 import (
-
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -49,11 +48,11 @@ func TestAccComputeWireGroup_update(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"cross_site_network"},
 			},
-                        {
+			{
 				Config: testAccComputeWireGroup_update(context),
-                                Check: resource.ComposeTestCheckFunc(
-                                        resource.TestCheckResourceAttr("google_compute_wire_group.example-test-wire-group", "description", "Example Wire Group Updated"+context["random_suffix"].(string)),
-                                ),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_wire_group.example-test-wire-group", "description", "Example Wire Group Updated"+context["random_suffix"].(string)),
+				),
 			},
 			{
 				ResourceName:            "google_compute_wire_group.example-test-wire-group",
@@ -94,7 +93,6 @@ resource "google_compute_wire_group" "example-test-wire-group" {
 `, context)
 }
 
-
 func testAccComputeWireGroup_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
@@ -123,4 +121,3 @@ resource "google_compute_wire_group" "example-test-wire-group" {
 }
 `, context)
 }
-
