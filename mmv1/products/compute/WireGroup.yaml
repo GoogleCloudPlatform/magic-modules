@@ -23,12 +23,12 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/rest/beta/wireGroups'
 min_version: beta
 docs:
-id_format: 'projects/{{project}}/global/crossSiteNetworks/{{crossSiteNetwork}}/wireGroups/{{name}}'
-base_url: 'projects/{{project}}/global/crossSiteNetworks/{{crossSiteNetwork}}/wireGroups'
-self_link: 'projects/{{project}}/global/crossSiteNetworks/{{crossSiteNetwork}}/wireGroups/{{name}}'
+id_format: 'projects/{{project}}/global/crossSiteNetworks/{{cross_site_network}}/wireGroups/{{name}}'
+base_url: 'projects/{{project}}/global/crossSiteNetworks/{{cross_site_network}}/wireGroups'
+self_link: 'projects/{{project}}/global/crossSiteNetworks/{{cross_site_network}}/wireGroups/{{name}}'
 update_verb: 'PATCH'
 import_format: 
-  - 'projects/{{project}}/global/crossSiteNetworks/{{crossSiteNetwork}}/wireGroups/{{name}}'
+  - 'projects/{{project}}/global/crossSiteNetworks/{{cross_site_network}}/wireGroups/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -46,10 +46,10 @@ examples:
     vars:
       name: 'test-wire-group'
       description: 'Example Wire Group'
+      cross_site_network: 'test-cross-site-network'
     min_version: 'beta'
     test_env_vars:
       project: 'PROJECT_NAME'
-      cross_site_network: 'test-cross-site-network'
 parameters:
   - name: 'crossSiteNetwork'
     type: ResourceRef
@@ -95,13 +95,17 @@ properties:
           - name: interconnect
             type: string
           - name: vlan_tags
-            type: integer
+            type: Array
+            description: |
+              VLAN tags for the interconnect.
+            item_type:
+              type: integer
   - name: admin_enabled
     type: boolean
     description: |
       Indicates whether the wire group is administratively enabled.
   - name: wire_group_properties
-    type: object
+    type: NestedObject
     description: |
       Properties specific to the wire group.
     properties:
@@ -117,12 +121,12 @@ properties:
           - 'REDUNDANT'
           - 'BOX_AND_CROSS'
   - name: wire_properties
-    type: object
+    type: NestedObject
     description: |
       Default properties for wires within the group.
     properties:
       - name: bandwidth_unmetered
-        type: string
+        type: String
         description: |
           The unmetered bandwidth setting.
       - name: fault_response
@@ -138,6 +142,7 @@ properties:
     type: NestedObject
     description: |
       The single/redundant wire(s) managed by the wire group.
+    output: true
     properties:
       - name: label
         type: string
@@ -151,11 +156,11 @@ properties:
           - name: vlan_tag
             type: integer
       - name: wire_properties
-        type: object
+        type: NestedObject
         output: true
         properties:
           - name: bandwidth_unmetered
-            type: string
+            type: Integer
           - name: fault_response
             type: enum
             description: 'Abc'
@@ -168,6 +173,7 @@ properties:
     type: NestedObject
     description: |
       Topology details for the wire group configuration.
+    output: true
     properties:
       - name: endpoints
         type: NestedObject

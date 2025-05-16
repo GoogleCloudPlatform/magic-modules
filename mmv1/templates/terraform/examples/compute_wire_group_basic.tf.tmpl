@@ -10,6 +10,15 @@ resource "google_compute_cross_site_network" "example-cross-site-network" {
 resource "google_compute_wire_group" "{{$.PrimaryResourceId}}" {
   name               = "{{index $.Vars "name"}}"
   description        = "{{index $.Vars "description"}}"
-  cross_site_network = "${google_compute_cross_site_network.example-cross-site-network.name}"
+  cross_site_network = google_compute_cross_site_network.example-cross-site-network.name
   provider           = google-beta
+  depends_on = [
+    google_compute_cross_site_network.example-cross-site-test-1
+  ]
+  wire_properties {
+    bandwidth_unmetered = 1000
+  }
+  wire_group_properties {
+    type = "REDUNDANT"
+  }
 }
