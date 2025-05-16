@@ -36,13 +36,12 @@ jobs:
           total_additions=0
           total_deletions=0
           
-          # Use jq to filter out _test.go files and calculate totals
-          filtered_stats=$(echo "$pr_files" | jq '
-          [
+          # Use jq to filter out test and documentation files and calculate totals
+          filtered_stats=$(echo "$pr_files" | jq '[
             .[] | 
             select(
               (.filename | endswith("_test.go") | not) and
-              (.filename | endswith("_test.go.tmpl") | not) and
+              (.filename | endswith("test.go.tmpl") | not) and
               (.filename | endswith(".md") | not) and
               (.filename | endswith(".md.tmpl") | not) and
               (.filename | endswith(".html.markdown") | not)
@@ -53,7 +52,8 @@ jobs:
             {"additions": 0, "deletions": 0}; 
             .additions += $item.additions | 
             .deletions += $item.deletions
-          )'
+          )')
+          
           total_additions=$(echo "$filtered_stats" | jq -r '.additions')
           total_deletions=$(echo "$filtered_stats" | jq -r '.deletions')
           total=$((total_additions + total_deletions))
