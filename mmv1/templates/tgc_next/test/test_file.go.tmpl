@@ -1,0 +1,23 @@
+package {{$.Product}}_test
+
+import (
+	"testing"
+
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/test"
+)
+
+{{- range $t := $.Tests }}
+func {{$t.Name}}(t *testing.T) {
+	test.AssertTestFile(
+		t,
+		"../../data/services/{{$.Product}}",
+		"{{$t.Name}}",
+		"{{$.Resource}}",
+		[]string{
+{{- range $field := $t.ExcludedFields }}
+	"{{ $field }}",
+{{- end }}
+		},
+	)
+}
+{{- end }}
