@@ -869,7 +869,6 @@ func TestUnitContainerCluster_Rfc3339TimeDiffSuppress(t *testing.T) {
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withPodAutoscaling(t *testing.T) {
 	t.Parallel()
 
@@ -927,8 +926,6 @@ resource "google_container_cluster" "pod_autoscaling_config" {
 }
 `, clusterName, networkName, subnetworkName, hpaProfile)
 }
-{{- end }}
-
 
 func testAccContainerCluster_enableMultiNetworking(clusterName string) string {
 	return fmt.Sprintf(`
