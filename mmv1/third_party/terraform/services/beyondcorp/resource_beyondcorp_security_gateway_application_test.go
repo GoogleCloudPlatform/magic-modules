@@ -92,11 +92,6 @@ resource "google_beyondcorp_security_gateway_application" "example" {
 	  name = "projects/${data.google_project.project.project_id}/global/networks/default"
 	}
   }
-  upstreams {
-	network {
-	  name = "projects/${data.google_project.project.project_id}/global/networks/abc"
-	}
-  }
 }
 `, context)
 }
