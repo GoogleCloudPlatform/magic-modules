@@ -521,3 +521,9 @@ properties:
         enum_values:
           - 'ENABLED'
           - 'PAUSED'
+      - name: 'hotTierBypassModeEnabled'
+        type: Boolean
+        description: |
+          Optional. Flag indicating that the hot tier bypass mode is enabled. Default is false.
+          Only applicable to Flex service level.
+        min_version: 'beta'
