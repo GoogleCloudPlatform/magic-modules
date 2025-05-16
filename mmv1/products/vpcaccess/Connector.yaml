@@ -136,7 +136,7 @@ properties:
   - name: 'maxInstances'
     type: Integer
     description: |
-      Required. Maximum value of instances in autoscaling group underlying the connector. Value must be between 3 and 10, inclusive. Must be
+      Maximum value of instances in autoscaling group underlying the connector. Value must be between 3 and 10, inclusive. Must be
       higher than the value specified by min_instances. Required alongside `min_instances` if not using `min_throughput`/`max_throughput`.
     default_from_api: true
     conflicts:
