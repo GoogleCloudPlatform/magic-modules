@@ -1549,7 +1549,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating partner metadata: %s", err)
 	}
 
-	networkInterfaces, err := expandInstanceNetworkInterfaces(d, config)
+	networkInterfaces, err := expandNetworkInterfacesTgc(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
 	}
@@ -1908,7 +1908,7 @@ func GetComputeDiskData(d tpgresource.TerraformResourceData, config *transport_t
 	return diskDetails, nil
 }
 
-func expandInstanceNetworkInterfaces(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*compute.NetworkInterface, error) {
+func expandNetworkInterfacesTgc(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*compute.NetworkInterface, error) {
 	configs := d.Get("network_interface").([]interface{})
 	ifaces := make([]*compute.NetworkInterface, len(configs))
 	for i, raw := range configs {
