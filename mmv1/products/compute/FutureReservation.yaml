@@ -53,6 +53,10 @@ examples:
     primary_resource_id: 'gce_future_reservation'
     vars:
       future_reservation_name: 'gce-future-reservation'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
   - name: 'shared_future_reservation'
     primary_resource_id: 'gce_future_reservation'
     vars:
