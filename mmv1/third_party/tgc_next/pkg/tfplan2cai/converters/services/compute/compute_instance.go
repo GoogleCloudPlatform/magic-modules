@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"google.golang.org/api/googleapi"
-
 	compute "google.golang.org/api/compute/v0.beta"
+	"google.golang.org/api/googleapi"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -1501,7 +1500,6 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	}
 
 	// Build up the list of disks
-
 	disks := []*compute.AttachedDisk{}
 	if _, hasBootDisk := d.GetOk("boot_disk"); hasBootDisk {
 		bootDisk, err := expandBootDisk(d, config, project)
@@ -1531,23 +1529,9 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		disks = append(disks, disk)
 	}
 
-	sch := d.Get("scheduling").([]interface{})
-	var scheduling *compute.Scheduling
-	if len(sch) == 0 {
-		// TF doesn't do anything about defaults inside of nested objects, so if
-		// scheduling hasn't been set, then send it with its default values.
-		scheduling = &compute.Scheduling{
-			AutomaticRestart: googleapi.Bool(true),
-		}
-	} else {
-		prefix := "scheduling.0"
-		scheduling = &compute.Scheduling{
-			AutomaticRestart:  googleapi.Bool(d.Get(prefix + ".automatic_restart").(bool)),
-			Preemptible:       d.Get(prefix + ".preemptible").(bool),
-			OnHostMaintenance: d.Get(prefix + ".on_host_maintenance").(string),
-			ProvisioningModel: d.Get(prefix + ".provisioning_model").(string),
-			ForceSendFields:   []string{"AutomaticRestart", "Preemptible"},
-		}
+	scheduling, err := expandSchedulingTgc(d.Get("scheduling"))
+	if err != nil {
+		return nil, fmt.Errorf("error creating scheduling: %s", err)
 	}
 
 	params, err := expandParams(d)
@@ -1560,12 +1544,12 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		return nil, fmt.Errorf("Error creating metadata: %s", err)
 	}
 
-	PartnerMetadata, err := resourceInstancePartnerMetadata(d)
+	partnerMetadata, err := resourceInstancePartnerMetadata(d)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating partner metadata: %s", err)
 	}
 
-	networkInterfaces, err := expandNetworkInterfaces(d, config)
+	networkInterfaces, err := expandNetworkInterfacesTgc(d, config)
 	if err != nil {
 		return nil, fmt.Errorf("Error creating network interfaces: %s", err)
 	}
@@ -1592,7 +1576,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Disks:                      disks,
 		MachineType:                machineTypeUrl,
 		Metadata:                   metadata,
-		PartnerMetadata:            PartnerMetadata,
+		PartnerMetadata:            partnerMetadata,
 		Name:                       d.Get("name").(string),
 		Zone:                       d.Get("zone").(string),
 		NetworkInterfaces:          networkInterfaces,
@@ -1606,7 +1590,6 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		Scheduling:                 scheduling,
 		DeletionProtection:         d.Get("deletion_protection").(bool),
 		Hostname:                   d.Get("hostname").(string),
-		ForceSendFields:            []string{"CanIpForward", "DeletionProtection"},
 		ConfidentialInstanceConfig: expandConfidentialInstanceConfig(d),
 		AdvancedMachineFeatures:    expandAdvancedMachineFeatures(d),
 		ShieldedInstanceConfig:     expandShieldedVmConfigs(d),
@@ -1614,6 +1597,7 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 		ResourcePolicies:           tpgresource.ConvertStringArr(d.Get("resource_policies").([]interface{})),
 		ReservationAffinity:        reservationAffinity,
 		KeyRevocationActionType:    d.Get("key_revocation_action_type").(string),
+		InstanceEncryptionKey:      expandComputeInstanceEncryptionKey(d),
 	}, nil
 }
 
@@ -1637,7 +1621,7 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d tpgresource.Terrafo
 	}
 
 	disk := &compute.AttachedDisk{
-		Source: sourceLink,
+		Source: fmt.Sprintf("https://www.googleapis.com/compute/v1/%s", sourceLink),
 	}
 
 	if v, ok := diskConfig["mode"]; ok {
@@ -1657,6 +1641,15 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d tpgresource.Terrafo
 		}
 	}
 
+	keyValue, keyOk = diskConfig["disk_encryption_key_rsa"]
+	if keyOk {
+		if keyValue != "" {
+			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
+				RsaEncryptedKey: keyValue.(string),
+			}
+		}
+	}
+
 	kmsValue, kmsOk := diskConfig["kms_key_self_link"]
 	if kmsOk {
 		if keyOk && keyValue != "" && kmsValue != "" {
@@ -1666,6 +1659,18 @@ func expandAttachedDisk(diskConfig map[string]interface{}, d tpgresource.Terrafo
 			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
 				KmsKeyName: kmsValue.(string),
 			}
+		}
+	}
+
+	kmsServiceAccount, kmsServiceAccountOk := diskConfig["disk_encryption_service_account"]
+	if kmsServiceAccountOk {
+		if kmsServiceAccount != "" {
+			if disk.DiskEncryptionKey == nil {
+				disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
+					KmsKeyServiceAccount: kmsServiceAccount.(string),
+				}
+			}
+			disk.DiskEncryptionKey.KmsKeyServiceAccount = kmsServiceAccount.(string)
 		}
 	}
 	return disk, nil
@@ -1719,10 +1724,26 @@ func expandBootDisk(d tpgresource.TerraformResourceData, config *transport_tpg.C
 		disk.DeviceName = v.(string)
 	}
 
+	if v, ok := d.GetOk("boot_disk.0.interface"); ok {
+		disk.Interface = v.(string)
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.guest_os_features"); ok {
+		disk.GuestOsFeatures = expandComputeInstanceGuestOsFeatures(v)
+	}
+
 	if v, ok := d.GetOk("boot_disk.0.disk_encryption_key_raw"); ok {
 		if v != "" {
 			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
 				RawKey: v.(string),
+			}
+		}
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.disk_encryption_key_rsa"); ok {
+		if v != "" {
+			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
+				RsaEncryptedKey: v.(string),
 			}
 		}
 	}
@@ -1735,18 +1756,38 @@ func expandBootDisk(d tpgresource.TerraformResourceData, config *transport_tpg.C
 		}
 	}
 
+	if v, ok := d.GetOk("boot_disk.0.disk_encryption_service_account"); ok {
+		if v != "" {
+			disk.DiskEncryptionKey.KmsKeyServiceAccount = v.(string)
+		}
+	}
+
+	// disk_encryption_key_sha256 is computed, so it is not converted.
+
 	if v, ok := d.GetOk("boot_disk.0.source"); ok {
-		source, err := tpgresource.ParseDiskFieldValue(v.(string), d, config)
+		var err error
+		var source interface {
+			RelativeLink() string
+		}
+		if strings.Contains(v.(string), "regions/") {
+			source, err = tpgresource.ParseRegionDiskFieldValue(v.(string), d, config)
+		} else {
+			source, err = tpgresource.ParseDiskFieldValue(v.(string), d, config)
+		}
 		if err != nil {
 			return nil, err
 		}
-		disk.Source = source.RelativeLink()
+		disk.Source = fmt.Sprintf("https://www.googleapis.com/compute/v1/%s", source.RelativeLink())
 	}
 
 	if _, ok := d.GetOk("boot_disk.0.initialize_params"); ok {
 		if v, ok := d.GetOk("boot_disk.0.initialize_params.0.size"); ok {
 			disk.DiskSizeGb = int64(v.(int))
 		}
+	}
+
+	if v, ok := d.GetOk("boot_disk.0.initialize_params.0.architecture"); ok {
+		disk.Architecture = v.(string)
 	}
 
 	if v, ok := d.GetOk("boot_disk.0.mode"); ok {
@@ -1769,6 +1810,8 @@ func expandScratchDisks(d tpgresource.TerraformResourceData, config *transport_t
 			AutoDelete: true,
 			Type:       "SCRATCH",
 			Interface:  d.Get(fmt.Sprintf("scratch_disk.%d.interface", i)).(string),
+			DeviceName: d.Get(fmt.Sprintf("scratch_disk.%d.device_name", i)).(string),
+			DiskSizeGb: int64(d.Get(fmt.Sprintf("scratch_disk.%d.size", i)).(int)),
 			InitializeParams: &compute.AttachedDiskInitializeParams{
 				DiskType: diskType.RelativeLink(),
 			},
@@ -1863,4 +1906,159 @@ func GetComputeDiskData(d tpgresource.TerraformResourceData, config *transport_t
 	}
 
 	return diskDetails, nil
+}
+
+func expandNetworkInterfacesTgc(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*compute.NetworkInterface, error) {
+	configs := d.Get("network_interface").([]interface{})
+	ifaces := make([]*compute.NetworkInterface, len(configs))
+	for i, raw := range configs {
+		data := raw.(map[string]interface{})
+
+		var networkAttachment = ""
+		network := data["network"].(string)
+		subnetwork := data["subnetwork"].(string)
+		if networkAttachmentObj, ok := data["network_attachment"]; ok {
+			networkAttachment = networkAttachmentObj.(string)
+		}
+		// Checks if networkAttachment is not specified in resource, network or subnetwork have to be specified.
+		if networkAttachment == "" && network == "" && subnetwork == "" {
+			return nil, fmt.Errorf("exactly one of network, subnetwork, or network_attachment must be provided")
+		}
+
+		ifaces[i] = &compute.NetworkInterface{
+			NetworkIP:                data["network_ip"].(string),
+			Network:                  network,
+			NetworkAttachment:        networkAttachment,
+			Subnetwork:               subnetwork,
+			AccessConfigs:            expandAccessConfigs(data["access_config"].([]interface{})),
+			AliasIpRanges:            expandAliasIpRanges(data["alias_ip_range"].([]interface{})),
+			NicType:                  data["nic_type"].(string),
+			StackType:                data["stack_type"].(string),
+			QueueCount:               int64(data["queue_count"].(int)),
+			Ipv6AccessConfigs:        expandIpv6AccessConfigs(data["ipv6_access_config"].([]interface{})),
+			Ipv6Address:              data["ipv6_address"].(string),
+			InternalIpv6PrefixLength: int64(data["internal_ipv6_prefix_length"].(int)),
+		}
+	}
+	return ifaces, nil
+}
+
+func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
+	if v == nil {
+		// We can't set default values for lists.
+		return &compute.Scheduling{
+			AutomaticRestart: googleapi.Bool(true),
+		}, nil
+	}
+
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		// We can't set default values for lists
+		return &compute.Scheduling{
+			AutomaticRestart: googleapi.Bool(true),
+		}, nil
+	}
+
+	if len(ls) > 1 || ls[0] == nil {
+		return nil, fmt.Errorf("expected exactly one scheduling block")
+	}
+
+	original := ls[0].(map[string]interface{})
+	scheduling := &compute.Scheduling{
+		ForceSendFields: make([]string, 0, 4),
+	}
+
+	if v, ok := original["automatic_restart"]; ok {
+		scheduling.AutomaticRestart = googleapi.Bool(v.(bool))
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "AutomaticRestart")
+	}
+
+	if v, ok := original["preemptible"]; ok {
+		scheduling.Preemptible = v.(bool)
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "Preemptible")
+	}
+
+	if v, ok := original["on_host_maintenance"]; ok {
+		scheduling.OnHostMaintenance = v.(string)
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "OnHostMaintenance")
+	}
+
+	if v, ok := original["node_affinities"]; ok && v != nil {
+		naSet := v.(*schema.Set).List()
+		scheduling.NodeAffinities = make([]*compute.SchedulingNodeAffinity, 0)
+		for _, nodeAffRaw := range naSet {
+			if nodeAffRaw == nil {
+				continue
+			}
+			nodeAff := nodeAffRaw.(map[string]interface{})
+			transformed := &compute.SchedulingNodeAffinity{
+				Key:      nodeAff["key"].(string),
+				Operator: nodeAff["operator"].(string),
+				Values:   tpgresource.ConvertStringArr(nodeAff["values"].(*schema.Set).List()),
+			}
+			scheduling.NodeAffinities = append(scheduling.NodeAffinities, transformed)
+		}
+	}
+
+	if v, ok := original["min_node_cpus"]; ok {
+		scheduling.MinNodeCpus = int64(v.(int))
+	}
+	if v, ok := original["provisioning_model"]; ok {
+		scheduling.ProvisioningModel = v.(string)
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "ProvisioningModel")
+	}
+	if v, ok := original["instance_termination_action"]; ok {
+		scheduling.InstanceTerminationAction = v.(string)
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "InstanceTerminationAction")
+	}
+	if v, ok := original["availability_domain"]; ok && v != nil {
+		scheduling.AvailabilityDomain = int64(v.(int))
+	}
+	if v, ok := original["max_run_duration"]; ok {
+		transformedMaxRunDuration, err := expandComputeMaxRunDuration(v)
+		if err != nil {
+			return nil, err
+		}
+		scheduling.MaxRunDuration = transformedMaxRunDuration
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "MaxRunDuration")
+	}
+
+	if v, ok := original["on_instance_stop_action"]; ok {
+		transformedOnInstanceStopAction, err := expandComputeOnInstanceStopAction(v)
+		if err != nil {
+			return nil, err
+		}
+		scheduling.OnInstanceStopAction = transformedOnInstanceStopAction
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "OnInstanceStopAction")
+	}
+	if v, ok := original["host_error_timeout_seconds"]; ok {
+		if v != nil && v != 0 {
+			scheduling.HostErrorTimeoutSeconds = int64(v.(int))
+		}
+	}
+
+	if v, ok := original["maintenance_interval"]; ok {
+		scheduling.MaintenanceInterval = v.(string)
+	}
+
+	if v, ok := original["graceful_shutdown"]; ok {
+		transformedGracefulShutdown, err := expandGracefulShutdown(v)
+		if err != nil {
+			return nil, err
+		}
+		scheduling.GracefulShutdown = transformedGracefulShutdown
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "GracefulShutdown")
+	}
+	if v, ok := original["local_ssd_recovery_timeout"]; ok {
+		transformedLocalSsdRecoveryTimeout, err := expandComputeLocalSsdRecoveryTimeout(v)
+		if err != nil {
+			return nil, err
+		}
+		scheduling.LocalSsdRecoveryTimeout = transformedLocalSsdRecoveryTimeout
+		scheduling.ForceSendFields = append(scheduling.ForceSendFields, "LocalSsdRecoveryTimeout")
+	}
+	if v, ok := original["termination_time"]; ok {
+		scheduling.TerminationTime = v.(string)
+	}
+	return scheduling, nil
 }
