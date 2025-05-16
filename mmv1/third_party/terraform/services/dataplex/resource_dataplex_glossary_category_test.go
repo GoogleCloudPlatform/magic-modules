@@ -57,7 +57,9 @@ resource "google_dataplex_glossary_category" "category_test_id_full" {
   parent = "projects/${google_dataplex_glossary.category_test_id_full.project}/locations/us-central1/glossaries/${google_dataplex_glossary.category_test_id_full.glossary_id}"
   glossary_id = google_dataplex_glossary.category_test_id_full.glossary_id 
   location = "us-central1"
-  category_id = "tf-test-category-basic%{random_suffix}"
+  category_id = "tf-test-category-full%{random_suffix}"
+  display_name = "terraform category updated"
+  description = "category updated by Terraform"
 }
 `, context)
 }
