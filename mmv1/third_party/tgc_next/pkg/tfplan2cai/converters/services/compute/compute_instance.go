@@ -1601,6 +1601,81 @@ func expandComputeInstance(project string, d tpgresource.TerraformResourceData, 
 	}, nil
 }
 
+func expandAttachedDiskTgc(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
+	config := meta.(*transport_tpg.Config)
+
+	s := diskConfig["source"].(string)
+	var sourceLink string
+	if strings.Contains(s, "regions/") {
+		source, err := tpgresource.ParseRegionDiskFieldValue(s, d, config)
+		if err != nil {
+			return nil, err
+		}
+		sourceLink = source.RelativeLink()
+	} else {
+		source, err := tpgresource.ParseDiskFieldValue(s, d, config)
+		if err != nil {
+			return nil, err
+		}
+		sourceLink = source.RelativeLink()
+	}
+
+	disk := &compute.AttachedDisk{
+		Source: fmt.Sprintf("https://www.googleapis.com/compute/v1/%s", sourceLink),
+	}
+
+	if v, ok := diskConfig["mode"]; ok {
+		disk.Mode = v.(string)
+	}
+
+	if v, ok := diskConfig["device_name"]; ok {
+		disk.DeviceName = v.(string)
+	}
+
+	keyValue, keyOk := diskConfig["disk_encryption_key_raw"]
+	if keyOk {
+		if keyValue != "" {
+			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
+				RawKey: keyValue.(string),
+			}
+		}
+	}
+
+	keyValue, keyOk = diskConfig["disk_encryption_key_rsa"]
+	if keyOk {
+		if keyValue != "" {
+			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
+				RsaEncryptedKey: keyValue.(string),
+			}
+		}
+	}
+
+	kmsValue, kmsOk := diskConfig["kms_key_self_link"]
+	if kmsOk {
+		if keyOk && keyValue != "" && kmsValue != "" {
+			return nil, errors.New("Only one of kms_key_self_link and disk_encryption_key_raw can be set")
+		}
+		if kmsValue != "" {
+			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
+				KmsKeyName: kmsValue.(string),
+			}
+		}
+	}
+
+	kmsServiceAccount, kmsServiceAccountOk := diskConfig["disk_encryption_service_account"]
+	if kmsServiceAccountOk {
+		if kmsServiceAccount != "" {
+			if disk.DiskEncryptionKey == nil {
+				disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
+					KmsKeyServiceAccount: kmsServiceAccount.(string),
+				}
+			}
+			disk.DiskEncryptionKey.KmsKeyServiceAccount = kmsServiceAccount.(string)
+		}
+	}
+	return disk, nil
+}
+
 // See comment on expandInstanceTemplateGuestAccelerators regarding why this
 // code is duplicated.
 func expandInstanceGuestAccelerators(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*compute.AcceleratorConfig, error) {
@@ -1986,79 +2061,4 @@ func expandSchedulingTgc(v interface{}) (*compute.Scheduling, error) {
 		scheduling.TerminationTime = v.(string)
 	}
 	return scheduling, nil
-}
-
-func expandAttachedDiskTgc(diskConfig map[string]interface{}, d tpgresource.TerraformResourceData, meta interface{}) (*compute.AttachedDisk, error) {
-	config := meta.(*transport_tpg.Config)
-
-	s := diskConfig["source"].(string)
-	var sourceLink string
-	if strings.Contains(s, "regions/") {
-		source, err := tpgresource.ParseRegionDiskFieldValue(s, d, config)
-		if err != nil {
-			return nil, err
-		}
-		sourceLink = source.RelativeLink()
-	} else {
-		source, err := tpgresource.ParseDiskFieldValue(s, d, config)
-		if err != nil {
-			return nil, err
-		}
-		sourceLink = source.RelativeLink()
-	}
-
-	disk := &compute.AttachedDisk{
-		Source: fmt.Sprintf("https://www.googleapis.com/compute/v1/%s", sourceLink),
-	}
-
-	if v, ok := diskConfig["mode"]; ok {
-		disk.Mode = v.(string)
-	}
-
-	if v, ok := diskConfig["device_name"]; ok {
-		disk.DeviceName = v.(string)
-	}
-
-	keyValue, keyOk := diskConfig["disk_encryption_key_raw"]
-	if keyOk {
-		if keyValue != "" {
-			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
-				RawKey: keyValue.(string),
-			}
-		}
-	}
-
-	keyValue, keyOk = diskConfig["disk_encryption_key_rsa"]
-	if keyOk {
-		if keyValue != "" {
-			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
-				RsaEncryptedKey: keyValue.(string),
-			}
-		}
-	}
-
-	kmsValue, kmsOk := diskConfig["kms_key_self_link"]
-	if kmsOk {
-		if keyOk && keyValue != "" && kmsValue != "" {
-			return nil, errors.New("Only one of kms_key_self_link and disk_encryption_key_raw can be set")
-		}
-		if kmsValue != "" {
-			disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
-				KmsKeyName: kmsValue.(string),
-			}
-		}
-	}
-
-	kmsServiceAccount, kmsServiceAccountOk := diskConfig["disk_encryption_service_account"]
-	if kmsServiceAccountOk {
-		if kmsServiceAccount != "" {
-			if disk.DiskEncryptionKey == nil {
-				disk.DiskEncryptionKey = &compute.CustomerEncryptionKey{
-					KmsKeyServiceAccount: kmsServiceAccount.(string),
-				}
-			}
-			disk.DiskEncryptionKey.KmsKeyServiceAccount = kmsServiceAccount.(string)
-		}
-	}
-	return disk, nil
 }
