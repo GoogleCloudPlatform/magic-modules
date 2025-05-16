@@ -150,15 +150,14 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 		Version:          provider.Private.String(),
 		Head:             head,
 	}
+	comment, err := formatPostReplay(postReplayData)
+	if err != nil {
+		return fmt.Errorf("error formatting post replay comment: %w", err)
+	}
+	if err := postGerritComment(kokoroArtifactsDir, modifiedFilePath, comment, rnr); err != nil {
+		return fmt.Errorf("error posting comment: %w", err)
+	}
 	if len(replayingResult.FailedTests) > 0 {
-		comment, err := formatPostReplay(postReplayData)
-		if err != nil {
-			return fmt.Errorf("error formatting post replay comment: %w", err)
-		}
-		if err := postGerritComment(kokoroArtifactsDir, modifiedFilePath, comment, rnr); err != nil {
-			return fmt.Errorf("error posting comment: %w", err)
-		}
-
 		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
 			Mode:     vcr.Recording,
 			Version:  provider.Private,
@@ -215,14 +214,6 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 			return fmt.Errorf("error formatting record replay comment: %w", err)
 		}
 		if err := postGerritComment(kokoroArtifactsDir, modifiedFilePath, recordReplayComment, rnr); err != nil {
-			return fmt.Errorf("error posting comment: %w", err)
-		}
-	} else { //  len(replayingResult.FailedTests) == 0
-		comment, err := formatPostReplay(postReplayData)
-		if err != nil {
-			return fmt.Errorf("error formatting post replay comment: %w", err)
-		}
-		if err := postGerritComment(kokoroArtifactsDir, modifiedFilePath, comment, rnr); err != nil {
 			return fmt.Errorf("error posting comment: %w", err)
 		}
 	}

@@ -248,15 +248,14 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		BuildID:          buildID,
 	}
 
+	comment, err := formatPostReplay(postReplayData)
+	if err != nil {
+		return fmt.Errorf("error formatting post replay comment: %w", err)
+	}
+	if err := gh.PostComment(prNumber, comment); err != nil {
+		return fmt.Errorf("error posting comment: %w", err)
+	}
 	if len(replayingResult.FailedTests) > 0 {
-		comment, err := formatPostReplay(postReplayData)
-		if err != nil {
-			return fmt.Errorf("error formatting post replay comment: %w", err)
-		}
-		if err := gh.PostComment(prNumber, comment); err != nil {
-			return fmt.Errorf("error posting comment: %w", err)
-		}
-
 		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
 			Mode:     vcr.Recording,
 			Version:  provider.Beta,
@@ -334,15 +333,6 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			return fmt.Errorf("error formatting record replay comment: %w", err)
 		}
 		if err := gh.PostComment(prNumber, recordReplayComment); err != nil {
-			return fmt.Errorf("error posting comment: %w", err)
-		}
-
-	} else { //  len(replayingResult.FailedTests) == 0
-		comment, err := formatPostReplay(postReplayData)
-		if err != nil {
-			return fmt.Errorf("error formatting post replay comment: %w", err)
-		}
-		if err := gh.PostComment(prNumber, comment); err != nil {
 			return fmt.Errorf("error posting comment: %w", err)
 		}
 	}
