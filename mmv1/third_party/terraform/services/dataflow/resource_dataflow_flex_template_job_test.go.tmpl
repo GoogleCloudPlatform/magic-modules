@@ -394,6 +394,7 @@ func TestAccDataflowFlexTemplateJob_withAdditionalPipelineOptions(t *testing.T) 
 				Config: testAccDataflowFlexTemplateJob_additionalPipelineOptions(job, bucket, topic, additionalPipelineOptions),
 				Check: resource.ComposeTestCheckFunc(
 					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_pipeline_options", false),
+					testAccDataflowFlexTemplateJobHasAdditionalPipelineOptions(t, "google_dataflow_flex_template_job.flex_job_pipeline_options", additionalPipelineOptions, false),
 				),
 			},
 			{
