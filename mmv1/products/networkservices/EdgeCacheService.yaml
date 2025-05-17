@@ -845,6 +845,10 @@ properties:
                         enum_values:
                           - 'DISABLED'
                           - 'AUTOMATIC'
+                      - name: 'wasmAction'
+                        type: String
+                        description: |
+                          The wasmAction resource that is executed on this route.
                   - name: 'origin'
                     type: String
                     description: |

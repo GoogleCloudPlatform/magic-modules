@@ -150,6 +150,7 @@ resource "google_network_services_edge_cache_service" "{{$.PrimaryResourceId}}" 
             allow_headers = ["dev"]
             expose_headers = ["prod"]
           }
+          wasm_action = "projects/{project_number}/locations/global/wasmActions/fruit-action"
         }
       }
       route_rule {
