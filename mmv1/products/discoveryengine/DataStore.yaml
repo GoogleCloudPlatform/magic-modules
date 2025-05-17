@@ -57,6 +57,11 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: 'data-store-id'
+  - name: 'discoveryengine_datastore_starting_schema'
+    primary_resource_id: 'starting_schema'
+    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: 'data-store-id'
   - name: 'discoveryengine_datastore_document_processing_config'
     primary_resource_id: 'document_processing_config'
     primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
@@ -333,3 +338,31 @@ properties:
     description: |
       Timestamp when the DataStore was created.
     output: true
+  - name: 'startingSchema'
+    type: NestedObject
+    description: |
+      The start schema to use for this DataStore when provisioning it. If unset,
+      a default vertical specialized schema will be used.
+      This field is only used by DataStoreService.CreateDataStore API, and will
+      be ignored if used in other APIs. This field will be omitted from all API
+      responses including DataStoreService.CreateDataStore API. To retrieve a
+      schema of a DataStore, use SchemaService.GetSchema API instead.
+      The provided schema will be validated against certain rules on schema.
+      Learn more from: https://cloud.google.com/generative-ai-app-builder/docs/provide-schema.
+    immutable: true
+    properties:
+      - name: 'name'
+        type: String
+        description: |
+          The unique full resource name of the schema. Values are of the format
+          `projects/{project}/locations/{location}/collections/{collection_id}/dataStores/{data_store_id}/schemas/{schema_id}`.
+          This field must be a UTF-8 encoded string with a length limit of 1024
+          characters.
+        output: true
+      - name: 'jsonSchema'
+        type: String
+        description: |
+          The JSON representation of the schema.
+        immutable: true
+        exactly_one_of:
+          - 'json_schema'
