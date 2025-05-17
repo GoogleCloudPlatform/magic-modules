@@ -10,6 +10,8 @@ import (
 )
 
 func TestAccNetworkSecurityAuthzPolicy_networkServicesAuthzPolicyHttpRules(t *testing.T) {
+	// Skip this test until principal field is available
+	t.Skip()
 	t.Parallel()
 
 	context := map[string]interface{}{
