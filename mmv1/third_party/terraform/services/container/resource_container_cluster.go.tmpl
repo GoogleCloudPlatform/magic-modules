@@ -3426,7 +3426,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		if stackType, ok := d.GetOk("ip_allocation_policy.0.stack_type"); ok {
 			req := &container.UpdateClusterRequest{
 				Update: &container.ClusterUpdate{
-					DesiredNodePoolAutoConfigStackType: expandStackType(stackType),
+					DesiredStackType: stackType.(string),
 				},
 			}
 
