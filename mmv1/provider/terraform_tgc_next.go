@@ -21,11 +21,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/otiai10/copy"
 )
 
@@ -60,11 +62,51 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 }
 
 func (tgc TerraformGoogleConversionNext) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
-	tgc.GenerateTfToCaiObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
-	tgc.GenerateCaiToHclObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
+	for _, object := range tgc.Product.Objects {
+		object.ExcludeIfNotInVersion(&tgc.Version)
+
+		if resourceToGenerate != "" && object.Name != resourceToGenerate {
+			log.Printf("Excluding %s per user request", object.Name)
+			continue
+		}
+
+		tgc.GenerateObject(*object, outputFolder, tgc.TargetVersionName, generateCode, generateDocs)
+	}
 }
 
-func (tgc TerraformGoogleConversionNext) GenerateTfToCaiObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
+	if object.ExcludeTgc {
+		log.Printf("Skipping fine-grained resource %s", object.Name)
+		return
+	}
+
+	// TODO: remove it after supporting most of resources.
+	supportList := map[string]bool{
+		"ComputeAddress": true,
+	}
+
+	if ok := supportList[object.ResourceName()]; !ok {
+		return
+	}
+
+	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
+
+	if !object.IsExcluded() {
+		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs, "tfplan2cai")
+	}
+}
+
+func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool, converter string) {
+	productName := tgc.Product.ApiName
+	conveterFolder := fmt.Sprintf("pkg/%s/converters/services", converter)
+	targetFolder := path.Join(outputFolder, conveterFolder, productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+
+	templatePath := fmt.Sprintf("templates/tgc_next/%s/resource_converter.go.tmpl", converter)
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name)))
+	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
