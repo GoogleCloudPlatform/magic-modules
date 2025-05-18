@@ -10,7 +10,7 @@ import (
 
 func DataSourceGoogleGkeHubMembership() *schema.Resource {
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceGKEHubMembership().Schema)
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "membership_id")
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "location")
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 
@@ -23,7 +23,7 @@ func DataSourceGoogleGkeHubMembership() *schema.Resource {
 func dataSourceGoogleGkeHubMembershipRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/memberships/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}

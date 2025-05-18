@@ -14,7 +14,7 @@ Retrieves the details of a specific GKE Hub Membership. Use this data source to 
 data "google_gke_hub_membership" "example" {
   project       = "my-project-id"
   location      = "global"
-  name          = "my-membership-id" # GKE Cluster's name
+  membership_id = "my-membership-id" # GKE Cluster's name
 }
 ```
 
@@ -22,7 +22,7 @@ data "google_gke_hub_membership" "example" {
 
 The following arguments are supported:
 
-* `name` - (Required) The GKE Cluster name of the GKE Hub Membership id.
+* `membership_id` - (Required) The GKE Hub Membership id or GKE Cluster's name.
 
 * `location` - (Required) The location for the GKE Hub Membership.
     Currently only `global` is supported.

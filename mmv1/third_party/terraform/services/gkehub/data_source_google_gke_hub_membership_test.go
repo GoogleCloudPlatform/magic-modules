@@ -100,7 +100,7 @@ resource "google_gke_hub_membership" "example" {
 data "google_gke_hub_membership" "example" {
   project       = google_gke_hub_membership.example.project
   location      = google_gke_hub_membership.example.location
-  name          = google_gke_hub_membership.example.membership_id
+  membership_id = google_gke_hub_membership.example.membership_id
 }
 `, context)
 }
@@ -116,7 +116,7 @@ func testAccCheckGoogleGkeHubMembershipDestroyProducer(t *testing.T) func(s *ter
 			}
 
 			config := acctest.GoogleProviderConfig(t)
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{GKEHub2BasePath}}projects/{{project}}/locations/{{location}}/memberships/{{name}}")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{GKEHub2BasePath}}projects/{{project}}/locations/{{location}}/memberships/{{membership_id}}")
 			if err != nil {
 				return fmt.Errorf("Error constructing URL for GKE Hub Membership: %s", err)
 			}
