@@ -8,6 +8,7 @@ resource "google_apigee_organization" "org" {
   description                = "Terraform-provisioned basic Apigee Org under European Union hosting jurisdiction."
   project_id                 = data.google_client_config.current.project
   api_consumer_data_location = "europe-west1"
+  billing_type               = "SUBSCRIPTION"
   disable_vpc_peering        = true
 }
 
