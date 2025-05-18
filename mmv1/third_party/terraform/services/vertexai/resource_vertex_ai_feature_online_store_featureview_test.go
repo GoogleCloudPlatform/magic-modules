@@ -274,18 +274,6 @@ func testAccVertexAIFeatureOnlineStoreFeatureview_vertexAiFeatureonlinestoreFeat
         "name": "feature_id_updated",
         "type": "STRING",
         "mode": "NULLABLE"
-    },
-      {
-        "name": "entity_id",
-        "mode": "NULLABLE",
-        "type": "STRING",
-        "description": "Test default entity_id"
-      },
-        {
-        "name": "test_entity_column",
-        "mode": "NULLABLE",
-        "type": "STRING",
-        "description": "test secondary entity column"
       },
       {
         "name": "feature_timestamp",
@@ -401,18 +389,6 @@ func testAccVertexAIFeatureOnlineStoreFeatureview_vertexAiFeatureonlinestoreFeat
         "name": "feature_id_updated",
         "type": "STRING",
         "mode": "NULLABLE"
-    },
-      {
-        "name": "entity_id",
-        "mode": "NULLABLE",
-        "type": "STRING",
-        "description": "Test default entity_id"
-      },
-        {
-        "name": "test_entity_column",
-        "mode": "NULLABLE",
-        "type": "STRING",
-        "description": "test secondary entity column"
       },
       {
         "name": "feature_timestamp",
