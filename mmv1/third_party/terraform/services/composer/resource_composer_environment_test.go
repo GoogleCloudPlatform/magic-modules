@@ -2065,13 +2065,6 @@ resource "google_project_iam_member" "composer-worker" {
   member = "serviceAccount:${google_service_account.test.email}"
 }
 
-resource "google_project_iam_member" "custom_service_account" {
-  project  = "example-project"
-  member   = format("serviceAccount:%s", google_service_account.custom_service_account.email)
-  // Role for Public IP environments
-  role     = "roles/composer.worker"
-}
-
 resource "google_composer_environment" "test" {
   name   = "%s"
   region = "us-east1"
