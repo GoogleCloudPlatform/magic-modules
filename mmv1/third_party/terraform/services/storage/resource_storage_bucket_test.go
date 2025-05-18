@@ -1596,7 +1596,7 @@ func TestAccStorageBucket_IPFilter(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testAccStorageBucket_IPFilter_disable(bucketName, nwSuffix),
+				Config: testAccStorageBucket_IPFilter_disable(bucketName, nwSuffix, project, serviceAccount),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageBucketExists(
 						t, "google_storage_bucket.bucket", bucketName, &disabled),
@@ -2825,7 +2825,7 @@ resource "google_storage_bucket" "bucket" {
 `, nwSuffix, nwSuffix, nwSuffix, project, project, serviceAccount, bucketName)
 }
 
-func testAccStorageBucket_IPFilter_disable(bucketName string, nwSuffix string) string {
+func testAccStorageBucket_IPFilter_disable(bucketName string, nwSuffix string, project string, serviceAccount string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "vpc_gcs_ipfilter1" {
   name = "tf-test-storage-ipfilter1-%s"
@@ -2851,6 +2851,19 @@ resource "google_compute_subnetwork" "ipfilter_2" {
   network       = google_compute_network.vpc_gcs_ipfilter2.id
 }
 
+resource "google_project_iam_custom_role" "ipfilter_exempt_role" {
+  role_id     = "_%s"
+  title       = "IP Filter Exempt Role"
+  description = "A custom role to bypass IP Filtering on GCS bucket."
+  permissions = ["storage.buckets.exemptFromIpFilter"]
+}
+
+resource "google_project_iam_member" "primary" {
+  project = "%s"
+  role    = "projects/%s/roles/${google_project_iam_custom_role.ipfilter_exempt_role.role_id}"
+  member  = "serviceAccount:%s"
+}
+
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "us-central1"
@@ -2871,7 +2884,7 @@ resource "google_storage_bucket" "bucket" {
     }
   }
 }
-`, nwSuffix, nwSuffix, nwSuffix, nwSuffix, bucketName)
+`, nwSuffix, nwSuffix, nwSuffix, nwSuffix, nwSuffix, project, project, serviceAccount, bucketName)
 }
 
 func testAccStorageBucket_withoutIPFilter(bucketName string) string {
