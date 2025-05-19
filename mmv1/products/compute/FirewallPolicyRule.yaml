@@ -53,14 +53,21 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
       service_acct: 'SERVICE_ACCT'
+  - name: 'firewall_policy_rule_tags'
+    primary_resource_id: 'primary'
+    vars:
+      folder: 'folder'
+      fw_policy: 'fw-policy'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
+    test_env_vars:
+      org_id: 'ORG_ID'
   - name: 'firewall_policy_rule_network_scope'
     primary_resource_id: 'primary'
     vars:
       folder: 'folder'
       fw_policy: 'fw-policy'
       network: 'network'
-      tag_key: 'tag-key'
-      tag_value: 'tag-value'
     test_env_vars:
       org_id: 'ORG_ID'
     min_version: beta
