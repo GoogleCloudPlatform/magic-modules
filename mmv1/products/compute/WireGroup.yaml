@@ -126,7 +126,7 @@ properties:
       Default properties for wires within the group.
     properties:
       - name: bandwidth_unmetered
-        type: String
+        type: Integer
         description: |
           The unmetered bandwidth setting.
       - name: fault_response
@@ -163,7 +163,6 @@ properties:
             type: Integer
           - name: fault_response
             type: enum
-            description: 'Abc'
             enum_values:
               - 'NONE'
               - 'DISABLE_PORT'
