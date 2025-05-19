@@ -78,39 +78,46 @@ func (c *Client) UpdateComment(prNumber, comment string, id int) error {
 	return nil
 }
 
-func (gh *Client) RequestPullRequestReviewers(prNumber string, reviewers []string) error {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
-
-	body := map[string][]string{
-		"reviewers":      reviewers,
-		"team_reviewers": {},
+// RequestPullRequestReviewers adds reviewers to a pull request
+func (c *Client) RequestPullRequestReviewers(prNumber string, reviewers []string) error {
+	num, err := strconv.Atoi(prNumber)
+	if err != nil {
+		return err
 	}
 
-	err := utils.RequestCallWithRetry(url, "POST", gh.token, nil, body)
+	// Create the reviewers request
+	reviewersRequest := gh.ReviewersRequest{
+		Reviewers:     reviewers,
+		TeamReviewers: nil,
+	}
+
+	_, _, err = c.gh.PullRequests.RequestReviewers(c.ctx, defaultOwner, defaultRepo, num, reviewersRequest)
 	if err != nil {
 		return err
 	}
 
 	fmt.Printf("Successfully added reviewers %v to pull request %s\n", reviewers, prNumber)
-
 	return nil
 }
 
-func (gh *Client) RemovePullRequestReviewers(prNumber string, reviewers []string) error {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
-
-	body := map[string][]string{
-		"reviewers":      reviewers,
-		"team_reviewers": {},
-	}
-
-	err := utils.RequestCall(url, "DELETE", gh.token, nil, body)
+// RemovePullRequestReviewers removes reviewers from a pull request
+func (c *Client) RemovePullRequestReviewers(prNumber string, reviewers []string) error {
+	num, err := strconv.Atoi(prNumber)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Successfully removed reviewers %v to pull request %s\n", reviewers, prNumber)
+	reviewersRequest := gh.ReviewersRequest{
+		Reviewers:     reviewers,
+		TeamReviewers: nil,
+	}
 
+	_, err = c.gh.PullRequests.RemoveReviewers(c.ctx, defaultOwner, defaultRepo, num, reviewersRequest)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Successfully removed reviewers %v from pull request %s\n", reviewers, prNumber)
 	return nil
 }
 
