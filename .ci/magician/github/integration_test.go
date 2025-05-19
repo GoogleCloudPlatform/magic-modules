@@ -37,7 +37,9 @@ const (
 	testNonMember     = "bananaman5000"
 	testRepo          = "magic-modules"
 	testOwner         = "GoogleCloudPlatform"
-	testPRNumber      = "13969"                                    // replace this with an actual PR Number
+	testReviewer      = "melinath"
+	testPRNumber      = "14031"
+	testOldPRNumber   = "13969"                                    // replace this with an actual PR Number
 	testPRCommitSha   = "4a8409686810551655eea2533e939cc5344e83e2" // replace this with an actual SHA
 	testMainCommitSha = "fd910977cf24595d2c04e3f0a369a82c79fdb8f8" // replace this with an actual SHA
 	testLabel         = "terraform-3.0"
@@ -81,20 +83,6 @@ func TestIntegrationGetPullRequests(t *testing.T) {
 	}
 
 	t.Logf("Found %d PRs", len(prs))
-}
-
-func TestIntegrationGetPullRequestPreviousReviewers(t *testing.T) {
-	client := skipIfNoToken(t)
-
-	reviewers, err := client.GetPullRequestPreviousReviewers(testPRNumber)
-	if err != nil {
-		t.Fatalf("GetPullRequestPreviousReviewers failed: %v", err)
-	}
-
-	t.Logf("Found %d previous reviewers", len(reviewers))
-	for i, reviewer := range reviewers {
-		t.Logf("Previous reviewer %d: %s", i+1, reviewer.Login)
-	}
 }
 
 func TestIntegrationGetCommitMessage(t *testing.T) {
@@ -294,7 +282,7 @@ func TestIntegrationRequestAndRemovePullRequestReviewers(t *testing.T) {
 	client := skipIfNoToken(t)
 
 	// Request a reviewer
-	reviewers := []string{testOwner} // Request the owner to review their own PR
+	reviewers := []string{testReviewer} // Request the owner to review their own PR
 	err := client.RequestPullRequestReviewers(testPRNumber, reviewers)
 	if err != nil {
 		t.Fatalf("RequestPullRequestReviewers failed: %v", err)
@@ -320,6 +308,20 @@ func TestIntegrationGetPullRequestRequestedReviewers(t *testing.T) {
 	t.Logf("Found %d requested reviewers", len(reviewers))
 	for i, reviewer := range reviewers {
 		t.Logf("Reviewer %d: %s", i+1, reviewer.Login)
+	}
+}
+
+func TestIntegrationGetPullRequestPreviousReviewers(t *testing.T) {
+	client := skipIfNoToken(t)
+
+	reviewers, err := client.GetPullRequestPreviousReviewers(testOldPRNumber)
+	if err != nil {
+		t.Fatalf("GetPullRequestPreviousReviewers failed: %v", err)
+	}
+
+	t.Logf("Found %d previous reviewers", len(reviewers))
+	for i, reviewer := range reviewers {
+		t.Logf("Previous reviewer %d: %s", i+1, reviewer.Login)
 	}
 }
 
