@@ -178,38 +178,64 @@ func TestFilterAspects(t *testing.T) {
 		aspectKeySet    map[string]struct{}
 		resInput        map[string]interface{}
 		expectedAspects map[string]interface{}
+		expectError     bool
+		errorMsg        string
 	}{
-		{"aspects is nil",
-			map[string]struct{}{"keep": {}},
-			map[string]interface{}{"otherKey": "value"},
-			nil},
-		{"empty aspectKeySet", map[string]struct{}{}, map[string]interface{}{"aspects": map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}}}, map[string]interface{}{}},
-		{"keep all aspects", map[string]struct{}{"one": {}, "two": {}}, map[string]interface{}{"aspects": map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}}}, map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}}},
-		{"keep some aspects", map[string]struct{}{"two": {}, "three_not_present": {}}, map[string]interface{}{"aspects": map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}}}, map[string]interface{}{"two": map[string]interface{}{"data": 2}}},
-		{"input aspects map is empty", map[string]struct{}{"keep": {}}, map[string]interface{}{"aspects": map[string]interface{}{}}, map[string]interface{}{}},
+		{"aspects key is absent", map[string]struct{}{"keep": {}}, map[string]interface{}{"otherKey": "value"}, nil, false, ""},
+		{"aspects value is nil", map[string]struct{}{"keep": {}}, map[string]interface{}{"aspects": nil}, nil, false, ""},
+		{"empty aspectKeySet", map[string]struct{}{}, map[string]interface{}{"aspects": map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}}}, map[string]interface{}{}, false, ""},
+		{"keep all aspects", map[string]struct{}{"one": {}, "two": {}}, map[string]interface{}{"aspects": map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}}}, map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}}, false, ""},
+		{"keep some aspects", map[string]struct{}{"two": {}, "three_not_present": {}}, map[string]interface{}{"aspects": map[string]interface{}{"one": map[string]interface{}{"data": 1}, "two": map[string]interface{}{"data": 2}}}, map[string]interface{}{"two": map[string]interface{}{"data": 2}}, false, ""},
+		{"input aspects map is empty", map[string]struct{}{"keep": {}}, map[string]interface{}{"aspects": map[string]interface{}{}}, map[string]interface{}{}, false, ""},
+		{"aspects is wrong type", map[string]struct{}{"keep": {}}, map[string]interface{}{"aspects": "not a map"}, nil, true, "FilterAspects: 'aspects' field is not a map[string]interface{}, got string"},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			resCopy := deepCopyMap(tc.resInput)
-			dataplex.FilterAspects(tc.aspectKeySet, resCopy)
+			originalAspectsBeforeCall := deepCopyValue(resCopy["aspects"])
+
+			err := dataplex.FilterAspects(tc.aspectKeySet, resCopy)
+
+			if tc.expectError {
+				if err == nil {
+					t.Fatalf("%s: Expected an error, but got nil", tc.name)
+				}
+				if tc.errorMsg != "" && !strings.Contains(err.Error(), tc.errorMsg) {
+					t.Errorf("%s: Expected error message containing %q, got %q", tc.name, tc.errorMsg, err.Error())
+				}
+				if !reflect.DeepEqual(resCopy["aspects"], originalAspectsBeforeCall) {
+					t.Errorf("%s: resCopy['aspects'] was modified during error case.\nBefore: %#v\nAfter: %#v", tc.name, originalAspectsBeforeCall, resCopy["aspects"])
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("%s: Did not expect an error, but got: %v", tc.name, err)
+			}
 
 			actualAspectsRaw, aspectsKeyExists := resCopy["aspects"]
 
 			if tc.expectedAspects == nil {
 				if aspectsKeyExists && actualAspectsRaw != nil {
-					t.Errorf("%s: Expected 'aspects' to be nil or absent, but got: %v", tc.name, actualAspectsRaw)
+					if tc.name == "aspects key is absent" {
+						if aspectsKeyExists {
+							t.Errorf("%s: Expected 'aspects' key to be absent, but it exists with value: %v", tc.name, actualAspectsRaw)
+						}
+					} else {
+						t.Errorf("%s: Expected 'aspects' value to be nil, but got: %v", tc.name, actualAspectsRaw)
+					}
 				}
 				return
 			}
 
 			if !aspectsKeyExists {
-				t.Fatalf("%s: Expected 'aspects' key to exist, but it was absent", tc.name)
+				t.Fatalf("%s: Expected 'aspects' key to exist, but it was absent. Expected value: %#v", tc.name, tc.expectedAspects)
 			}
 
 			actualAspects, ok := actualAspectsRaw.(map[string]interface{})
 			if !ok {
-				t.Fatalf("%s: Expected 'aspects' to be a map[string]interface{}, but got %T", tc.name, actualAspectsRaw)
+				t.Fatalf("%s: Expected 'aspects' to be a map[string]interface{}, but got %T. Value: %#v", tc.name, actualAspectsRaw, actualAspectsRaw)
 			}
 
 			if !reflect.DeepEqual(actualAspects, tc.expectedAspects) {
@@ -225,17 +251,18 @@ func TestAddAspectsToSet(t *testing.T) {
 		initialSet   map[string]struct{}
 		aspectsInput interface{}
 		expectedSet  map[string]struct{}
-		expectPanic  bool
+		expectError  bool
+		errorMsg     string
 	}{
-		{"add to empty set", map[string]struct{}{}, []interface{}{map[string]interface{}{"aspect_key": "key1"}, map[string]interface{}{"aspect_key": "key2"}}, map[string]struct{}{"key1": {}, "key2": {}}, false},
-		{"add to existing set", map[string]struct{}{"existing": {}}, []interface{}{map[string]interface{}{"aspect_key": "key1"}}, map[string]struct{}{"existing": {}, "key1": {}}, false},
-		{"add duplicate keys", map[string]struct{}{}, []interface{}{map[string]interface{}{"aspect_key": "key1"}, map[string]interface{}{"aspect_key": "key1"}, map[string]interface{}{"aspect_key": "key2"}}, map[string]struct{}{"key1": {}, "key2": {}}, false},
-		{"input aspects is empty slice", map[string]struct{}{"existing": {}}, []interface{}{}, map[string]struct{}{"existing": {}}, false},
-		{"input aspects is nil", map[string]struct{}{}, nil, map[string]struct{}{}, true},
-		{"input aspects is wrong type", map[string]struct{}{}, "not a slice", map[string]struct{}{}, true},
-		{"item in slice is not a map", map[string]struct{}{}, []interface{}{"not a map"}, map[string]struct{}{}, true},
-		{"item map missing aspect_key", map[string]struct{}{}, []interface{}{map[string]interface{}{"wrong_key": "key1"}}, map[string]struct{}{}, true},
-		{"aspect_key is not a string", map[string]struct{}{}, []interface{}{map[string]interface{}{"aspect_key": 123}}, map[string]struct{}{}, true},
+		{"add to empty set", map[string]struct{}{}, []interface{}{map[string]interface{}{"aspect_key": "key1"}, map[string]interface{}{"aspect_key": "key2"}}, map[string]struct{}{"key1": {}, "key2": {}}, false, ""},
+		{"add to existing set", map[string]struct{}{"existing": {}}, []interface{}{map[string]interface{}{"aspect_key": "key1"}}, map[string]struct{}{"existing": {}, "key1": {}}, false, ""},
+		{"add duplicate keys", map[string]struct{}{}, []interface{}{map[string]interface{}{"aspect_key": "key1"}, map[string]interface{}{"aspect_key": "key1"}, map[string]interface{}{"aspect_key": "key2"}}, map[string]struct{}{"key1": {}, "key2": {}}, false, ""},
+		{"input aspects is empty slice", map[string]struct{}{"existing": {}}, []interface{}{}, map[string]struct{}{"existing": {}}, false, ""},
+		{"input aspects is nil", map[string]struct{}{"original": {}}, nil, map[string]struct{}{"original": {}}, false, ""},
+		{"input aspects is wrong type", map[string]struct{}{}, "not a slice", map[string]struct{}{}, true, "AddAspectsToSet: input 'aspects' is not a []interface{}, got string"},
+		{"item in slice is not a map", map[string]struct{}{}, []interface{}{"not a map"}, map[string]struct{}{}, true, "AddAspectsToSet: item at index 0 is not a map[string]interface{}, got string"},
+		{"item map missing aspect_key", map[string]struct{}{}, []interface{}{map[string]interface{}{"wrong_key": "key1"}}, map[string]struct{}{}, true, "AddAspectsToSet: 'aspect_key' not found in aspect item at index 0"},
+		{"aspect_key is not a string", map[string]struct{}{}, []interface{}{map[string]interface{}{"aspect_key": 123}}, map[string]struct{}{}, true, "AddAspectsToSet: 'aspect_key' in item at index 0 is not a string, got int"},
 	}
 
 	for _, tc := range testCases {
@@ -245,42 +272,25 @@ func TestAddAspectsToSet(t *testing.T) {
 				currentSet[k] = v
 			}
 
-			defer func() {
-				r := recover()
-				if tc.expectPanic && r == nil {
-					t.Errorf("%s: Expected a panic, but AddAspectsToSet did not panic", tc.name)
-				} else if !tc.expectPanic && r != nil {
-					t.Errorf("%s: AddAspectsToSet panicked unexpectedly: %v", tc.name, r)
-				}
+			err := dataplex.AddAspectsToSet(currentSet, tc.aspectsInput)
 
-				if !tc.expectPanic {
-					if !reflect.DeepEqual(currentSet, tc.expectedSet) {
-						t.Errorf("%s: AddAspectsToSet() result mismatch:\ngot:  %v\nwant: %v", tc.name, currentSet, tc.expectedSet)
-					}
+			if tc.expectError {
+				if err == nil {
+					t.Fatalf("%s: Expected an error, but got nil", tc.name)
 				}
-			}()
-
-			dataplex.AddAspectsToSet(currentSet, tc.aspectsInput)
+				if tc.errorMsg != "" && !strings.Contains(err.Error(), tc.errorMsg) {
+					t.Errorf("%s: Expected error message containing %q, got %q", tc.name, tc.errorMsg, err.Error())
+				}
+			} else {
+				if err != nil {
+					t.Fatalf("%s: Did not expect an error, but got: %v", tc.name, err)
+				}
+				if !reflect.DeepEqual(currentSet, tc.expectedSet) {
+					t.Errorf("%s: AddAspectsToSet() result mismatch:\ngot:  %v\nwant: %v", tc.name, currentSet, tc.expectedSet)
+				}
+			}
 		})
 	}
-}
-
-func sortAspectSlice(slice []interface{}) {
-	sort.SliceStable(slice, func(i, j int) bool {
-		mapI, okI := slice[i].(map[string]interface{})
-		mapJ, okJ := slice[j].(map[string]interface{})
-		if !okI || !okJ {
-			return false
-		} // Should not happen in valid tests
-
-		keyI, okI := mapI["aspectKey"].(string)
-		keyJ, okJ := mapJ["aspectKey"].(string)
-		if !okI || !okJ {
-			return false
-		} // Should not happen in valid tests
-
-		return keyI < keyJ
-	})
 }
 
 func TestInverseTransformAspects(t *testing.T) {
@@ -289,57 +299,75 @@ func TestInverseTransformAspects(t *testing.T) {
 		resInput         map[string]interface{}
 		expectedAspects  []interface{}
 		expectNilAspects bool
-		expectPanic      bool
+		expectError      bool
+		errorMsg         string
 	}{
-		{"aspects is nil", map[string]interface{}{"otherKey": "value"}, nil, true, false},
-		{"aspects is empty map", map[string]interface{}{"aspects": map[string]interface{}{}}, []interface{}{}, false, false},
-		{"aspects with one entry", map[string]interface{}{"aspects": map[string]interface{}{"key1": map[string]interface{}{"data": "value1"}}}, []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value1"}}}, false, false},
-		{"aspects with multiple entries", map[string]interface{}{"aspects": map[string]interface{}{"key2": map[string]interface{}{"data": "value2"}, "key1": map[string]interface{}{"data": "value1"}}}, []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value1"}}, map[string]interface{}{"aspectKey": "key2", "aspectValue": map[string]interface{}{"data": "value2"}}}, false, false},
-		{"aspects is wrong type (not map)", map[string]interface{}{"aspects": "not a map"}, nil, false, true},
-		{"aspect value is not a map", map[string]interface{}{"aspects": map[string]interface{}{"key1": "not a map"}}, nil, false, true},
+		{"aspects key is absent", map[string]interface{}{"otherKey": "value"}, nil, true, false, ""},
+		{"aspects value is nil", map[string]interface{}{"aspects": nil}, nil, true, false, ""},
+		{"aspects is empty map", map[string]interface{}{"aspects": map[string]interface{}{}}, []interface{}{}, false, false, ""},
+		{"aspects with one entry", map[string]interface{}{"aspects": map[string]interface{}{"key1": map[string]interface{}{"data": "value1"}}}, []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value1"}}}, false, false, ""},
+		{"aspects with multiple entries", map[string]interface{}{"aspects": map[string]interface{}{"key2": map[string]interface{}{"data": "value2"}, "key1": map[string]interface{}{"data": "value1"}}}, []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value1"}}, map[string]interface{}{"aspectKey": "key2", "aspectValue": map[string]interface{}{"data": "value2"}}}, false, false, ""},
+		{"aspects is wrong type (not map)", map[string]interface{}{"aspects": "not a map"}, nil, false, true, "InverseTransformAspects: 'aspects' field is not a map[string]interface{}, got string"},
+		{"aspect value is not a map", map[string]interface{}{"aspects": map[string]interface{}{"key1": "not a map value"}}, nil, false, true, "InverseTransformAspects: value for key 'key1' is not a map[string]interface{}, got string"},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			resCopy := deepCopyMap(tc.resInput)
+			originalAspectsBeforeCall := deepCopyValue(resCopy["aspects"])
 
-			defer func() {
-				r := recover()
-				if tc.expectPanic && r == nil {
-					t.Errorf("%s: Expected a panic, but InverseTransformAspects did not panic", tc.name)
-				} else if !tc.expectPanic && r != nil {
-					t.Errorf("%s: InverseTransformAspects panicked unexpectedly: %v", tc.name, r)
+			err := dataplex.InverseTransformAspects(resCopy)
+
+			if tc.expectError {
+				if err == nil {
+					t.Fatalf("%s: Expected an error, but got nil", tc.name)
 				}
-
-				if !tc.expectPanic {
-					actualAspectsRaw, aspectsKeyExists := resCopy["aspects"]
-
-					if tc.expectNilAspects {
-						if aspectsKeyExists && actualAspectsRaw != nil {
-							t.Errorf("%s: Expected 'aspects' to be nil or absent, but got: %v", tc.name, actualAspectsRaw)
-						}
-						return
-					}
-
-					if !aspectsKeyExists && !tc.expectNilAspects { // Should exist if not expecting nil
-						t.Fatalf("%s: Expected 'aspects' key in result map, but it was missing", tc.name)
-					}
-
-					actualAspects, ok := actualAspectsRaw.([]interface{})
-					if !ok && !tc.expectNilAspects { // Type check only if we didn't expect nil and key exists
-						t.Fatalf("%s: Expected 'aspects' to be []interface{}, but got %T", tc.name, actualAspectsRaw)
-					}
-
-					sortAspectSlice(actualAspects)
-					sortAspectSlice(tc.expectedAspects) // Ensure expected is sorted if non-nil
-
-					if !reflect.DeepEqual(actualAspects, tc.expectedAspects) {
-						t.Errorf("%s: InverseTransformAspects() result mismatch:\ngot:  %#v\nwant: %#v", tc.name, actualAspects, tc.expectedAspects)
-					}
+				if tc.errorMsg != "" && !strings.Contains(err.Error(), tc.errorMsg) {
+					t.Errorf("%s: Expected error message containing %q, got %q", tc.name, tc.errorMsg, err.Error())
 				}
-			}()
+				if !reflect.DeepEqual(resCopy["aspects"], originalAspectsBeforeCall) {
+					t.Errorf("%s: resCopy['aspects'] was modified during error case.\nBefore: %#v\nAfter: %#v", tc.name, originalAspectsBeforeCall, resCopy["aspects"])
+				}
+				return
+			}
 
-			dataplex.InverseTransformAspects(resCopy)
+			if err != nil {
+				t.Fatalf("%s: Did not expect an error, but got: %v", tc.name, err)
+			}
+
+			actualAspectsRaw, aspectsKeyExists := resCopy["aspects"]
+
+			if tc.expectNilAspects {
+				if aspectsKeyExists && actualAspectsRaw != nil {
+					t.Errorf("%s: Expected 'aspects' to be nil or absent, but got: %#v", tc.name, actualAspectsRaw)
+				}
+				return
+			}
+
+			if !aspectsKeyExists {
+				t.Fatalf("%s: Expected 'aspects' key in result map, but it was missing. Expected value: %#v", tc.name, tc.expectedAspects)
+			}
+			if actualAspectsRaw == nil && tc.expectedAspects != nil {
+				t.Fatalf("%s: Expected 'aspects' to be non-nil, but got nil. Expected value: %#v", tc.name, tc.expectedAspects)
+			}
+
+			actualAspectsSlice, ok := actualAspectsRaw.([]interface{})
+			if !ok {
+				if tc.expectedAspects != nil || actualAspectsRaw != nil {
+					t.Fatalf("%s: Expected 'aspects' to be []interface{}, but got %T. Value: %#v", tc.name, actualAspectsRaw, actualAspectsRaw)
+				}
+			}
+
+			if actualAspectsSlice != nil {
+				sortAspectSlice(actualAspectsSlice)
+			}
+			if tc.expectedAspects != nil {
+				sortAspectSlice(tc.expectedAspects)
+			}
+
+			if !reflect.DeepEqual(actualAspectsSlice, tc.expectedAspects) {
+				t.Errorf("%s: InverseTransformAspects() result mismatch:\ngot:  %#v\nwant: %#v", tc.name, actualAspectsSlice, tc.expectedAspects)
+			}
 		})
 	}
 }
@@ -350,58 +378,73 @@ func TestTransformAspects(t *testing.T) {
 		objInput         map[string]interface{}
 		expectedAspects  map[string]interface{}
 		expectNilAspects bool
-		expectPanic      bool
+		expectError      bool
+		errorMsg         string
 	}{
-		{"aspects is nil", map[string]interface{}{"otherKey": "value"}, nil, true, false},
-		{"aspects is empty slice", map[string]interface{}{"aspects": []interface{}{}}, map[string]interface{}{}, false, false},
-		{"aspects with one item", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value1"}}}}, map[string]interface{}{"key1": map[string]interface{}{"data": "value1"}}, false, false},
-		{"aspects with one item that has no aspectValue", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1"}}}, map[string]interface{}{"key1": map[string]interface{}{"data": map[string]interface{}{}}}, false, false},
-		{"aspects with multiple items", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value1"}}, map[string]interface{}{"aspectKey": "key2", "aspectValue": map[string]interface{}{"data": "value2"}}}}, map[string]interface{}{"key1": map[string]interface{}{"data": "value1"}, "key2": map[string]interface{}{"data": "value2"}}, false, false},
-		{"aspects with duplicate aspectKey", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value_first"}}, map[string]interface{}{"aspectKey": "key2", "aspectValue": map[string]interface{}{"data": "value2"}}, map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value_last"}}}}, map[string]interface{}{"key1": map[string]interface{}{"data": "value_last"}, "key2": map[string]interface{}{"data": "value2"}}, false, false},
-		{"aspects is wrong type (not slice)", map[string]interface{}{"aspects": "not a slice"}, nil, false, true},
-		{"item in slice is not a map", map[string]interface{}{"aspects": []interface{}{"not a map"}}, nil, false, true},
-		{"item map missing aspectKey", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"wrongKey": "k1", "aspectValue": map[string]interface{}{}}}}, nil, false, true},
-		{"aspectKey is not a string", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": 123, "aspectValue": map[string]interface{}{}}}}, nil, false, true},
+		{"aspects key is absent", map[string]interface{}{"otherKey": "value"}, nil, true, false, ""},
+		{"aspects value is nil", map[string]interface{}{"aspects": nil}, nil, true, false, ""},
+		{"aspects is empty slice", map[string]interface{}{"aspects": []interface{}{}}, map[string]interface{}{}, false, false, ""},
+		{"aspects with one item", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value1"}}}}, map[string]interface{}{"key1": map[string]interface{}{"data": "value1"}}, false, false, ""},
+		{"aspects with one item that has no aspectValue", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1"}}}, map[string]interface{}{"key1": map[string]interface{}{"data": map[string]interface{}{}}}, false, false, ""},
+		{"aspects with multiple items", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value1"}}, map[string]interface{}{"aspectKey": "key2", "aspectValue": map[string]interface{}{"data": "value2"}}}}, map[string]interface{}{"key1": map[string]interface{}{"data": "value1"}, "key2": map[string]interface{}{"data": "value2"}}, false, false, ""},
+		{"aspects with duplicate aspectKey", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value_first"}}, map[string]interface{}{"aspectKey": "key2", "aspectValue": map[string]interface{}{"data": "value2"}}, map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value_last"}}}}, map[string]interface{}{"key1": map[string]interface{}{"data": "value_last"}, "key2": map[string]interface{}{"data": "value2"}}, false, false, ""},
+		{"aspects is wrong type (not slice)", map[string]interface{}{"aspects": "not a slice"}, nil, false, true, "TransformAspects: 'aspects' field is not a []interface{}, got string"},
+		{"item in slice is not a map", map[string]interface{}{"aspects": []interface{}{"not a map"}}, nil, false, true, "TransformAspects: item in 'aspects' slice at index 0 is not a map[string]interface{}, got string"},
+		{"item map missing aspectKey", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"wrongKey": "k1", "aspectValue": map[string]interface{}{}}}}, nil, false, true, "TransformAspects: 'aspectKey' not found in aspect item at index 0"},
+		{"aspectKey is not a string", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": 123, "aspectValue": map[string]interface{}{}}}}, nil, false, true, "TransformAspects: 'aspectKey' in item at index 0 is not a string, got int"},
+		{"aspectValue is present but wrong type", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": "not a map"}}}, map[string]interface{}{"key1": map[string]interface{}{"data": map[string]interface{}{}}}, false, false, ""},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			objCopy := deepCopyMap(tc.objInput)
+			originalAspectsBeforeCall := deepCopyValue(objCopy["aspects"])
 
-			defer func() {
-				r := recover()
-				if tc.expectPanic && r == nil {
-					t.Errorf("%s: Expected a panic, but TransformAspects did not panic", tc.name)
-				} else if !tc.expectPanic && r != nil {
-					t.Errorf("%s: TransformAspects panicked unexpectedly: %v", tc.name, r)
+			err := dataplex.TransformAspects(objCopy)
+
+			if tc.expectError {
+				if err == nil {
+					t.Fatalf("%s: Expected an error, but got nil", tc.name)
 				}
-
-				if !tc.expectPanic {
-					actualAspectsRaw, aspectsKeyExists := objCopy["aspects"]
-
-					if tc.expectNilAspects {
-						if aspectsKeyExists && actualAspectsRaw != nil {
-							t.Errorf("%s: Expected 'aspects' to be nil or absent, but got: %v", tc.name, actualAspectsRaw)
-						}
-						return
-					}
-
-					if !aspectsKeyExists && !tc.expectNilAspects {
-						t.Fatalf("%s: Expected 'aspects' key in result map, but it was missing", tc.name)
-					}
-
-					actualAspects, ok := actualAspectsRaw.(map[string]interface{})
-					if !ok && !tc.expectNilAspects {
-						t.Fatalf("%s: Expected 'aspects' to be map[string]interface{}, but got %T", tc.name, actualAspectsRaw)
-					}
-
-					if !reflect.DeepEqual(actualAspects, tc.expectedAspects) {
-						t.Errorf("%s: TransformAspects() result mismatch:\ngot:  %#v\nwant: %#v", tc.name, actualAspects, tc.expectedAspects)
-					}
+				if tc.errorMsg != "" && !strings.Contains(err.Error(), tc.errorMsg) {
+					t.Errorf("%s: Expected error message containing %q, got %q", tc.name, tc.errorMsg, err.Error())
 				}
-			}()
+				if !reflect.DeepEqual(objCopy["aspects"], originalAspectsBeforeCall) {
+					t.Errorf("%s: objCopy['aspects'] was modified during error case.\nBefore: %#v\nAfter: %#v", tc.name, originalAspectsBeforeCall, objCopy["aspects"])
+				}
+				return
+			}
 
-			dataplex.TransformAspects(objCopy)
+			if err != nil {
+				t.Fatalf("%s: Did not expect an error, but got: %v", tc.name, err)
+			}
+
+			actualAspectsRaw, aspectsKeyExists := objCopy["aspects"]
+
+			if tc.expectNilAspects {
+				if aspectsKeyExists && actualAspectsRaw != nil {
+					t.Errorf("%s: Expected 'aspects' to be nil or absent, but got: %#v", tc.name, actualAspectsRaw)
+				}
+				return
+			}
+
+			if !aspectsKeyExists {
+				t.Fatalf("%s: Expected 'aspects' key in result map, but it was missing. Expected value: %#v", tc.name, tc.expectedAspects)
+			}
+			if actualAspectsRaw == nil && tc.expectedAspects != nil {
+				t.Fatalf("%s: Expected 'aspects' to be non-nil, but got nil. Expected value: %#v", tc.name, tc.expectedAspects)
+			}
+
+			actualAspectsMap, ok := actualAspectsRaw.(map[string]interface{})
+			if !ok {
+				if tc.expectedAspects != nil || actualAspectsRaw != nil {
+					t.Fatalf("%s: Expected 'aspects' to be map[string]interface{}, but got %T. Value: %#v", tc.name, actualAspectsRaw, actualAspectsRaw)
+				}
+			}
+
+			if !reflect.DeepEqual(actualAspectsMap, tc.expectedAspects) {
+				t.Errorf("%s: TransformAspects() result mismatch:\ngot:  %#v\nwant: %#v", tc.name, actualAspectsMap, tc.expectedAspects)
+			}
 		})
 	}
 }
@@ -440,6 +483,33 @@ func deepCopyValue(value interface{}) interface{} {
 	default:
 		return v
 	}
+}
+
+func sortAspectSlice(slice []interface{}) {
+	if slice == nil {
+		return
+	}
+	sort.SliceStable(slice, func(i, j int) bool {
+		mapI, okI := slice[i].(map[string]interface{})
+		mapJ, okJ := slice[j].(map[string]interface{})
+		if !okI || !okJ {
+			return false
+		}
+
+		keyIRaw, keyIExists := mapI["aspectKey"]
+		keyJRaw, keyJExists := mapJ["aspectKey"]
+
+		if !keyIExists || !keyJExists {
+			return false
+		}
+
+		keyI, okI := keyIRaw.(string)
+		keyJ, okJ := keyJRaw.(string)
+		if !okI || !okJ {
+			return false
+		}
+		return keyI < keyJ
+	})
 }
 
 func TestAccDataplexEntry_dataplexEntryUpdate(t *testing.T) {
