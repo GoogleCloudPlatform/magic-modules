@@ -75,6 +75,7 @@ resource "google_managed_kafka_acl" "example" {
       operation = "WRITE"
       host = "*"
     }
+  etag = "W/will-be-overwritten-by-api"
 }
 
 data "google_project" "project" {
