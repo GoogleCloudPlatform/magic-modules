@@ -181,6 +181,7 @@ properties:
     output: true
   - name: 'diskEncryptionKey'
     type: NestedObject
+    flatten_object: true
     description: |
       Encrypts the disk using a customer-supplied encryption key.
 
@@ -201,7 +202,7 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
-        immutable: true
+        immutable: true 
         custom_flatten: 'templates/terraform/custom_flatten/compute_key_flatten.go.tmpl'
         conflicts:
           - 'disk_encryption_key.0.rawKeyWo'
@@ -209,19 +210,16 @@ properties:
         type: Integer
         description: |
           Triggers update of write-only rawKey
-        immutable: true
-        default_value: 0
+        computed: true
         ignore_read: true
       - name: 'rawKeyWo'
         type: String
-        immutable: true
-        diff_suppress_func: suppressEncryptionKeyDiff
         description: |
           A write-only field representing a 256-bit customer-supplied 
           encryption key, encoded in RFC 4648 base64 to either encrypt 
           or decrypt this resource. This value can only be provided during
           disk creation. Changing this field forces the disk to be 
-          recreated. This field is writ-only and not returned by the API.
+          recreated. This field is write-only and not returned by the API.
         write_only: true
         required_with:
           - 'disk_encryption_key.0.rawKeyWoVersion'
@@ -231,8 +229,7 @@ properties:
         type: Integer
         description: |
           Triggers update of write-only rsaEncryptedKey
-        immutable: true
-        default_value: 0
+        computed: true
         ignore_read: true
       - name: 'rsaEncryptedKey'
         type: String
@@ -247,14 +244,12 @@ properties:
           - 'disk_encryption_key.0.rsaEncryptedKeyWo'
       - name: 'rsaEncryptedKeyWo'
         type: String
-        immutable: true
-        diff_suppress_func: suppressEncryptionKeyDiff
         description: |
           A write-only field representing a 256-bit customer-supplied 
           encryption key, encoded in RFC 4648 base64 to either encrypt 
           or decrypt this resource. This value can only be provided during
           disk creation. Changing this field forces the disk to be 
-          recreated. This field is writ-only and not returned by the API.
+          recreated. This field is write-only and not returned by the API.
         write_only: true
         required_with:
           - 'disk_encryption_key.0.rsaEncryptedKeyWoVersion'

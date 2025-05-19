@@ -1,0 +1,18 @@
+make mmv1
+# Chaining these with "&&" is critical so this will exit non-0 if the first
+# command fails, since we're not forcing bash and errexit / pipefail here.
+cd mmv1;\
+		if [ "ga" = "ga" ]; then \
+			go run . --output /Users/sagar.malhotra/go/src/github.com/hashicorp/terraform-provider-google --version ga --no-docs --product compute \
+			&& go run . --output /Users/sagar.malhotra/go/src/github.com/hashicorp/terraform-provider-google --version beta --no-code --product compute; \
+		else \
+			go run . --output /Users/sagar.malhotra/go/src/github.com/hashicorp/terraform-provider-google --version ga --product compute; \
+		fi
+make tpgtools
+make serialize
+cd tpgtools;\
+		cp -f serialization.go.base serialization.go &&\
+		go run . --path "api" --overrides "overrides" --mode "serialization" > temp.serial &&\
+		mv -f temp.serial serialization.go
+cd tpgtools;\
+		go run . --output /Users/sagar.malhotra/go/src/github.com/hashicorp/terraform-provider-google --version ga --service compute --path "api" --overrides "overrides"

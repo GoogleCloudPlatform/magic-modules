@@ -5,6 +5,29 @@ if v, ok := res["diskEncryptionKey"]; ok {
   transformed["rawKey"] = d.Get("disk_encryption_key.0.raw_key")
   transformed["rsaEncryptedKey"] = d.Get("disk_encryption_key.0.rsa_encrypted_key")
   transformed["sha256"] = original["sha256"]
+  
+  if rawKey, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("raw_key_wo"));
+   !diags.HasError() && rawKey.IsKnown() && !rawKey.IsNull() {
+   transformed["rawKeyWo"] = rawKey.AsString()
+  }
+
+  if rsaKey, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("rsa_encrypted_key_wo"));
+   !diags.HasError() && rsaKey.IsKnown() && !rsaKey.IsNull() {
+   transformed["rsaEncryptedKeyWo"] = rsaKey.AsString()
+  }
+  
+  if val, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("raw_key_wo_version"));
+   !diags.HasError() && val.IsKnown() && !val.IsNull() {
+    intVal, _ := val.AsBigFloat().Int64()
+    transformed["rawKeyWoVersion"] = intVal
+  }
+
+  if val, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("rsa_encrypted_key_wo_version"));
+   !diags.HasError() && val.IsKnown() && !val.IsNull() {
+    intVal1, _ := val.AsBigFloat().Int64()
+    transformed["rsaEncryptedKeyWoVersion"] = intVal1
+  }
+
 
   if kmsKeyName, ok := original["kmsKeyName"]; ok {
     // The response for crypto keys often includes the version of the key which needs to be removed

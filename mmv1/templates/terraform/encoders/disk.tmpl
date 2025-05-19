@@ -51,17 +51,38 @@ if v, ok := d.GetOk("image"); ok {
 	log.Printf("[DEBUG] Image name resolved to: %s", imageUrl)
 }
 {{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
+encryptionBlock := map[string]interface{}{}
+shouldSetBlock := false
 if rawKey, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("raw_key_wo")); !diags.HasError() && rawKey.IsKnown() && !rawKey.IsNull() {
-	obj["diskEncryptionKey"] = map[string]interface{}{
-		"rawKey": rawKey.AsString(),
-	}
+	encryptionBlock["rawKey"] = rawKey.AsString()
+	shouldSetBlock = true
+}
+if rsaKey, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("rsa_encrypted_key_wo")); !diags.HasError() && rsaKey.IsKnown() && !rsaKey.IsNull() {
+	encryptionBlock["rsaEncryptedKey"] = rsaKey.AsString()
+	shouldSetBlock = true
 }
 
-if rsaEncryptedKey, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("rsa_encrypted_key_wo")); !diags.HasError() && rsaEncryptedKey.IsKnown() && !rsaEncryptedKey.IsNull() {
-	obj["diskEncryptionKey"] = map[string]interface{}{
-		"rsaEncryptedKey": rsaEncryptedKey.AsString(),
-	}
+
+versionBlock := map[string]interface{}{}
+hasVersion := false
+if val, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("raw_key_wo_version")); !diags.HasError() && val.IsKnown() && !val.IsNull() {
+  intVal, _ := val.AsBigFloat().Int64()
+  versionBlock["rawKeyWoVersion"] = intVal
+  hasVersion = true
 }
+if val, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("rsa_encrypted_key_wo_version")); !diags.HasError() && val.IsKnown() && !val.IsNull() {
+  intVal, _ := val.AsBigFloat().Int64()
+  versionBlock["rsaEncryptedKeyWoVersion"] = intVal
+  hasVersion = true
+}
+
+if shouldSetBlock || hasVersion {
+  for k, v := range versionBlock {
+    encryptionBlock[k] = v
+  }
+  obj["diskEncryptionKey"] = encryptionBlock
+} 
+
 {{- end }}
 
 return obj, nil
