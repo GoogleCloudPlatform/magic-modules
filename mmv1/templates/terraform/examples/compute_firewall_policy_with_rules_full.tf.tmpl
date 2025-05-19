@@ -68,6 +68,65 @@ resource "google_compute_firewall_policy_with_rules" "{{$.PrimaryResourceId}}" {
       }
     }
   }
+
+  rule {
+    description    = "network scope rule 1"
+    rule_name      = "network scope 1"
+    priority       = 4000
+    enable_logging = false
+    action         = "allow"
+    direction      = "INGRESS"
+    match {
+      src_ip_ranges     = ["11.100.0.1/32"]
+      src_network_scope = "VPC_NETWORKS"
+      src_networks      = [google_compute_network.network.id]
+
+      layer4_config {
+        ip_protocol = "tcp"
+        ports       = [8080]
+      }
+    }
+  }
+
+  rule {
+    description    = "network scope rule 2"
+    rule_name      = "network scope 2"
+    priority       = 5000
+    enable_logging = false
+    action         = "allow"
+    direction      = "EGRESS"
+    match {
+      dest_ip_ranges     = ["0.0.0.0/0"]
+      dest_network_scope = "INTERNET"
+
+      layer4_config {
+        ip_protocol = "tcp"
+        ports       = [8080]
+      }
+    }
+  }
+
+  rule {
+    description    = "src target tags"
+    rule_name      = "src target tags"
+    priority       = 6000
+    enable_logging = false
+    action         = "allow"
+    direction      = "EGRESS"
+    target_secure_tags {
+      name = google_tags_tag_value.basic_value.id
+    }
+    match {
+      dest_ip_ranges            = ["11.100.0.1/32"]
+      layer4_configs {
+        ip_protocol = "tcp"
+        ports       = [8080]
+      }
+      src_secure_tags {
+        name = google_tags_tag_value.basic_value.id
+      }
+    }
+  }
 }
 
 resource "google_network_security_address_group" "address_group_1" {
@@ -97,4 +156,21 @@ resource "google_network_security_security_profile" "security_profile_1" {
 resource "google_compute_network" "network" {
   name                    = "{{index $.Vars "network"}}"
   auto_create_subnetworks = false
+}
+
+resource "google_tags_tag_key" "basic_key" {
+  description = "For keyname resources."
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  purpose     = "GCE_FIREWALL"
+  short_name  = "{{index $.Vars "tag_key"}}"
+
+  purpose_data = {
+    organization = "auto"
+  }
+}
+
+resource "google_tags_tag_value" "basic_value" {
+  description = "For valuename resources."
+  parent      = google_tags_tag_key.basic_key.id
+  short_name  = "{{index $.Vars "tag_value"}}"
 }
