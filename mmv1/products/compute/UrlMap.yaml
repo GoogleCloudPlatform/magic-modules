@@ -714,7 +714,7 @@ properties:
                         resource: 'BackendService'
                         imports: 'selfLink'
                       - name: 'mirrorPercent'
-                        min_version: beta 
+                        min_version: beta
                         type: Double
                         description: |
                           The percentage of requests to be mirrored to backendService.
@@ -1474,7 +1474,7 @@ properties:
                         resource: 'BackendService'
                         imports: 'selfLink'
                       - name: 'mirrorPercent'
-                        min_version: beta 
+                        min_version: beta
                         type: Double
                         description: |
                           The percentage of requests to be mirrored to backendService.
@@ -2150,7 +2150,7 @@ properties:
                   resource: 'BackendService'
                   imports: 'selfLink'
                 - name: 'mirrorPercent'
-                  min_version: beta 
+                  min_version: beta
                   type: Double
                   description: |
                     The percentage of requests to be mirrored to backendService.
@@ -2749,7 +2749,7 @@ properties:
             resource: 'BackendService'
             imports: 'selfLink'
           - name: 'mirrorPercent'
-            min_version: beta 
+            min_version: beta
             type: Double
             description: |
               The percentage of requests to be mirrored to backendService.
