@@ -68,8 +68,3 @@ func convertGHComments(comments []*gh.IssueComment) []PullRequestComment {
 	}
 	return result
 }
-
-// helper to convert our User type to github User
-func convertToGHUser(user User) *gh.User {
-	return &gh.User{Login: gh.Ptr(user.Login)}
-}

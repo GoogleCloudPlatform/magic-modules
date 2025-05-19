@@ -328,26 +328,22 @@ func TestIntegrationGetPullRequestPreviousReviewers(t *testing.T) {
 // TestIntegrationMergePullRequest is commented out as it has permanent effects
 // Uncomment and run only if you're sure you want to merge the PR
 /*
-	func TestIntegrationMergePullRequest(t *testing.T) {
-		client := skipIfNoToken(t)
-
-		// Skip this test by default as it has permanent effects
-		if os.Getenv("RUN_MERGE_PR_TEST") != "true" {
-			t.Skip("Skipping merge PR test: set RUN_MERGE_PR_TEST=true to run")
-		}
-
-		// You'll need a valid commit SHA for this test
-		if testCommitSha == "HEAD" {
-			t.Skip("Skipping MergePullRequest test: need a valid commit SHA")
-		}
-
-		err := client.MergePullRequest(testOwner, testRepo, testPRNumber, testCommitSha)
-		if err != nil {
-			t.Fatalf("MergePullRequest failed: %v", err)
-		}
-
-		t.Logf("Successfully merged pull request")
-	}
+ func TestIntegrationMergePullRequest(t *testing.T) {
+	 client := skipIfNoToken(t)
+	 // Skip this test by default as it has permanent effects
+	 if os.Getenv("RUN_MERGE_PR_TEST") != "true" {
+		 t.Skip("Skipping merge PR test: set RUN_MERGE_PR_TEST=true to run")
+	 }
+	 // You'll need a valid commit SHA for this test
+	 if testPRCommitSha == "HEAD" {
+		 t.Skip("Skipping MergePullRequest test: need a valid commit SHA")
+	 }
+	 err := client.MergePullRequest(testOwner, testRepo, testPRNumber, testPRCommitSha)
+	 if err != nil {
+		 t.Fatalf("MergePullRequest failed: %v", err)
+	 }
+	 t.Logf("Successfully merged pull request")
+ }
 */
 
 // Helper function to get minimum of two integers
