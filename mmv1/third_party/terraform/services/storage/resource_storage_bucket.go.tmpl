@@ -1093,6 +1093,7 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 	bucket := d.Get("name").(string)
 
 	var listError, deleteObjectError error
+	var emptyBucket bool
 	for deleteObjectError == nil {
 		res, err := config.NewStorageClient(userAgent).Objects.List(bucket).Versions(true).Do()
 		if err != nil {
@@ -1111,20 +1112,6 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 
 		if len(res.Items) == 0 && len(cacheList) == 0 {
 			break // 0 items and no caches, bucket empty
-		}
-
-		if d.Get("retention_policy.0.is_locked").(bool) {
-			for _, item := range res.Items {
-				expiration, err := time.Parse(time.RFC3339, item.RetentionExpirationTime)
-				if err != nil {
-					return err
-				}
-				if expiration.After(time.Now()) {
-					deleteErr := errors.New("Bucket '" + d.Get("name").(string) + "' contains objects that have not met the retention period yet and cannot be deleted.")
-					log.Printf("Error! %s : %s\n\n", bucket, deleteErr)
-					return deleteErr
-				}
-			}
 		}
 
 		if !d.Get("force_destroy").(bool) {
@@ -1177,6 +1164,18 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 				log.Printf("[DEBUG] Found %s", object.Name)
 				object := object
 
+				if d.Get("retention_policy.0.is_locked").(bool) {
+					expiration, err := time.Parse(time.RFC3339, object.RetentionExpirationTime)
+					if err != nil {
+						return err
+					}
+					if expiration.After(time.Now()) {
+						deleteErr := errors.New("Bucket '" + d.Get("name").(string) + "' contains objects that have not met the retention period yet and cannot be deleted.")
+						log.Printf("Error! %s : %s\n\n", bucket, deleteErr)
+						return deleteErr
+					}
+				}
+
 				wp.Submit(func() {
 					log.Printf("[TRACE] Attempting to delete %s", object.Name)
 					if err := config.NewStorageClient(userAgent).Objects.Delete(bucket, object.Name).Generation(object.Generation).Do(); err != nil {
@@ -1191,6 +1190,9 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 			if pageToken == "" {
 				break
 			}
+		}
+		if listError != nil {
+			break
 		}
 
 		// Wait for everything to finish.
