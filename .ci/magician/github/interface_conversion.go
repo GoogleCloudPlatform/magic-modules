@@ -73,22 +73,3 @@ func convertGHComments(comments []*gh.IssueComment) []PullRequestComment {
 func convertToGHUser(user User) *gh.User {
 	return &gh.User{Login: gh.Ptr(user.Login)}
 }
-
-// Helper to convert slice of our User type to github Users
-func convertToGHUsers(users []User) []*gh.User {
-	result := make([]*gh.User, len(users))
-	for i, u := range users {
-		result[i] = convertToGHUser(u)
-	}
-	return result
-}
-
-// Helper to convert from github IssueComment to our PullRequestComment
-func convertFromGHIssueComment(comment *gh.IssueComment) PullRequestComment {
-	return PullRequestComment{
-		User:      User{Login: comment.User.GetLogin()},
-		Body:      comment.GetBody(),
-		ID:        int(comment.GetID()),
-		CreatedAt: comment.GetCreatedAt().Time,
-	}
-}
