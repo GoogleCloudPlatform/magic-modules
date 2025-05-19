@@ -349,7 +349,6 @@ properties:
     description: |
       Replication configuration, once set, this cannot be updated.
       Addtionally this should be specified on the replica instance only, indicating the active as the peer_instance
-    url_param_only: true
     immutable: true
     properties:
       - name: 'role'
