@@ -20,9 +20,9 @@ create_url: 'projects/{{project}}/locations/{{location}}/glossaries?glossary_id=
 update_verb: 'PATCH'
 update_mask: true
 timeouts:
-  insert_minutes: 5
-  update_minutes: 5
-  delete_minutes: 5
+  insert_minutes: 15
+  update_minutes: 15
+  delete_minutes: 15
 autogen_async: true
 import_format: ['projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}']
 async:

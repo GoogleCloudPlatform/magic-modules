@@ -18,9 +18,18 @@ package github
 import (
 	"fmt"
 	utils "magician/utility"
+	"strconv"
 	"time"
+
+	gh "github.com/google/go-github/v68/github"
 )
 
+const (
+	defaultOwner = "GoogleCloudPlatform"
+	defaultRepo  = "magic-modules"
+)
+
+// Types for external interface compatibility
 type User struct {
 	Login string `json:"login"`
 }
@@ -47,26 +56,44 @@ type PullRequestComment struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-func (gh *Client) GetPullRequest(prNumber string) (PullRequest, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s", prNumber)
+// GetPullRequest fetches a single pull request
+func (c *Client) GetPullRequest(prNumber string) (PullRequest, error) {
+	num, err := strconv.Atoi(prNumber)
+	if err != nil {
+		return PullRequest{}, err
+	}
 
-	var pullRequest PullRequest
+	pr, _, err := c.gh.PullRequests.Get(c.ctx, defaultOwner, defaultRepo, num)
+	if err != nil {
+		return PullRequest{}, err
+	}
 
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, &pullRequest, nil)
-
-	return pullRequest, err
+	return convertGHPullRequest(pr), nil
 }
 
-func (gh *Client) GetPullRequests(state, base, sort, direction string) ([]PullRequest, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls?state=%s&base=%s&sort=%s&direction=%s", state, base, sort, direction)
+// GetPullRequests fetches multiple pull requests
+func (c *Client) GetPullRequests(state, base, sort, direction string) ([]PullRequest, error) {
+	opts := &gh.PullRequestListOptions{
+		State:     state,
+		Base:      base,
+		Sort:      sort,
+		Direction: direction,
+	}
 
-	var pullRequests []PullRequest
+	prs, _, err := c.gh.PullRequests.List(c.ctx, defaultOwner, defaultRepo, opts)
+	if err != nil {
+		return nil, err
+	}
 
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, &pullRequests, nil)
+	result := make([]PullRequest, len(prs))
+	for i, pr := range prs {
+		result[i] = convertGHPullRequest(pr)
+	}
 
-	return pullRequests, err
+	return result, nil
 }
 
+// GetPullRequestRequestedReviewers gets requested reviewers for a PR
 func (gh *Client) GetPullRequestRequestedReviewers(prNumber string) ([]User, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
 
@@ -82,6 +109,7 @@ func (gh *Client) GetPullRequestRequestedReviewers(prNumber string) ([]User, err
 	return requestedReviewers.Users, nil
 }
 
+// GetPullRequestPreviousReviewers gets previous reviewers for a PR
 func (gh *Client) GetPullRequestPreviousReviewers(prNumber string) ([]User, error) {
 	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/reviews", prNumber)
 
@@ -107,66 +135,97 @@ func (gh *Client) GetPullRequestPreviousReviewers(prNumber string) ([]User, erro
 	return result, nil
 }
 
-func (gh *Client) GetCommitMessage(owner, repo, sha string) (string, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/commits/%s", owner, repo, sha)
-
-	var commit struct {
-		Commit struct {
-			Message string `json:"message"`
-		} `json:"commit"`
-	}
-
-	err := utils.RequestCall(url, "GET", gh.token, &commit, nil)
+// GetCommitMessage gets a commit message
+func (c *Client) GetCommitMessage(owner, repo, sha string) (string, error) {
+	commit, _, err := c.gh.Repositories.GetCommit(c.ctx, owner, repo, sha, nil)
 	if err != nil {
 		return "", err
 	}
 
-	return commit.Commit.Message, nil
+	if commit.Commit != nil && commit.Commit.Message != nil {
+		return *commit.Commit.Message, nil
+	}
+
+	return "", fmt.Errorf("no commit message found")
 }
 
-func (gh *Client) GetPullRequestComments(prNumber string) ([]PullRequestComment, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/comments", prNumber)
-
-	var comments []PullRequestComment
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, &comments, nil)
+// GetPullRequestComments gets all comments on a PR, handling pagination
+func (c *Client) GetPullRequestComments(prNumber string) ([]PullRequestComment, error) {
+	num, err := strconv.Atoi(prNumber)
 	if err != nil {
 		return nil, err
 	}
-	return comments, nil
-}
 
-func (gh *Client) GetTeamMembers(organization, team string) ([]User, error) {
-	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/members", organization, team)
-
-	var members []User
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, &members, nil)
-	if err != nil {
-		return nil, err
-	}
-	return members, nil
-}
-
-func (gh *Client) IsOrgMember(author, org string) bool {
-	url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, author)
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, nil, nil)
-	return err == nil
-}
-
-func (gh *Client) IsTeamMember(organization, teamSlug, username string) bool {
-	type TeamMembership struct {
-		URL   string `json:"url"`
-		Role  string `json:"role"`
-		State string `json:"state"`
+	var allComments []*gh.IssueComment
+	opts := &gh.IssueListCommentsOptions{
+		ListOptions: gh.ListOptions{
+			PerPage: 100,
+		},
 	}
 
-	url := fmt.Sprintf("https://api.github.com/orgs/%s/teams/%s/memberships/%s", organization, teamSlug, username)
-	var membership TeamMembership
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, &membership, nil)
+	for {
+		comments, resp, err := c.gh.Issues.ListComments(c.ctx, defaultOwner, defaultRepo, num, opts)
+		if err != nil {
+			return nil, err
+		}
 
+		allComments = append(allComments, comments...)
+
+		if resp.NextPage == 0 {
+			break // No more pages
+		}
+
+		// Set up for the next page
+		opts.Page = resp.NextPage
+	}
+
+	return convertGHComments(allComments), nil
+}
+
+// GetTeamMembers gets all members of a team, handling pagination
+func (c *Client) GetTeamMembers(organization, team string) ([]User, error) {
+	var allMembers []*gh.User
+	opts := &gh.TeamListTeamMembersOptions{
+		ListOptions: gh.ListOptions{
+			PerPage: 100,
+		},
+	}
+
+	for {
+		members, resp, err := c.gh.Teams.ListTeamMembersBySlug(c.ctx, organization, team, opts)
+		if err != nil {
+			return nil, err
+		}
+
+		allMembers = append(allMembers, members...)
+
+		if resp.NextPage == 0 {
+			break // No more pages
+		}
+
+		// Set up for the next page
+		opts.Page = resp.NextPage
+	}
+
+	return convertGHUsers(allMembers), nil
+}
+
+// IsOrgMember checks if a user is a member of an organization
+func (c *Client) IsOrgMember(username, org string) bool {
+	isMember, _, err := c.gh.Organizations.IsMember(c.ctx, org, username)
 	if err != nil {
 		return false
 	}
 
-	// User is considered a member if state is "active"
-	return membership.State == "active"
+	return isMember
+}
+
+// IsTeamMember checks if a user is a member of a team
+func (c *Client) IsTeamMember(organization, teamSlug, username string) bool {
+	membership, _, err := c.gh.Teams.GetTeamMembershipBySlug(c.ctx, organization, teamSlug, username)
+	if err != nil {
+		return false
+	}
+
+	return membership != nil && membership.State != nil && *membership.State == "active"
 }
