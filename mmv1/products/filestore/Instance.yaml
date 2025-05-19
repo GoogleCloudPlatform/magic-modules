@@ -348,7 +348,7 @@ properties:
     type: NestedObject
     description: |
       Replication configuration, once set, this cannot be updated.
-      Addtionally this should be specified on the replica instance only, indicating the active as the peer_instance
+      Additionally this should be specified on the replica instance only, indicating the active as the peer_instance
     immutable: true
     properties:
       - name: 'role'
