@@ -1093,7 +1093,6 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 	bucket := d.Get("name").(string)
 
 	var listError, deleteObjectError error
-	var emptyBucket bool
 	for deleteObjectError == nil {
 		res, err := config.NewStorageClient(userAgent).Objects.List(bucket).Versions(true).Do()
 		if err != nil {
