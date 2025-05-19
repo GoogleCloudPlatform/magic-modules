@@ -271,6 +271,7 @@ properties:
     type: NestedObject
     description: |
       Gen App Builder-related agent-level settings.
+    default_from_api: true
     properties:
       - name: 'engine'
         type: String
