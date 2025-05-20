@@ -1,0 +1,99 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: 'GlossaryCategory'
+description: |
+  Represents a collection of categories and terms within a Glossary that are related to each other.
+base_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories/{{category_id}}'
+self_link: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories/{{category_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories?category_id={{category_id}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 15
+  update_minutes: 15
+  delete_minutes: 15
+autogen_async: true
+import_format: ['projects/{{project}}/locations/{{location}}/glossaries/{{glossary_id}}/categories/{{category_id}}']
+examples:
+  - name: 'dataplex_glossary_category_basic'
+    primary_resource_id: 'category_test_id'
+    primary_resource_name: 'fmt.Sprintf("tf-test-category-basic%s", context["random_suffix"]), fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
+    vars:
+      category_name: 'category-basic'
+  - name: 'dataplex_glossary_category_full'
+    primary_resource_id: 'category_test_id_full'
+    primary_resource_name: 'fmt.Sprintf("tf-test-category-full%s", context["random_suffix"]), fmt.Sprintf("tf-test-glossary%s", context["random_suffix"])'
+    vars:
+      category_name: 'category-full'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location where the glossary category should reside.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'glossaryId'
+    type: String
+    description: |
+      The glossary id for creation.
+    url_param_only: true
+    immutable: true
+  - name: 'categoryId'
+    type: String
+    description: |
+      The category id for creation.
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the GlossaryCategory. Format: projects/{projectId}/locations/{locationId}/glossaries/{glossaryId}/categories/{categoryId}
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      User friendly display name of the GlossaryCategory. This is user-mutable. This will be same as the categoryId, if not specified.
+    required: false
+  - name: 'description'
+    type: String
+    description: |
+      The user-mutable description of the GlossaryCategory.
+    required: false
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      User-defined labels for the GlossaryCategory.
+    required: false
+  - name: 'uid'
+    type: String
+    description: |
+      System generated unique id for the GlossaryCategory. This ID will be different if the GlossaryCategory is deleted and re-created with the same name.
+    output: true
+  - name: 'createTime'
+    type: Timestamp
+    description: |
+      The time at which the GlossaryCategory was created.
+    output: true
+  - name: 'updateTime'
+    type: Timestamp
+    description: |
+      The time at which the GlossaryCategory was last updated.
+    output: true
+  - name: 'parent'
+    type: String
+    description: |
+      The immediate parent of the GlossaryCategory in the resource-hierarchy. It can either be a Glossary or a Category. Format: projects/{projectId}/locations/{locationId}/glossaries/{glossaryId} OR projects/{projectId}/locations/{locationId}/glossaries/{glossaryId}/categories/{categoryId}
+    required: true
