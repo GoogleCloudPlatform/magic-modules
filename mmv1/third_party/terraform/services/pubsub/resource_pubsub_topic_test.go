@@ -588,15 +588,8 @@ func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
 
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 
-	functionName := "redactSSN"
-	code := `
-	function redactSSN(message, metadata) {
-  	const data = JSON.parse(message.data);
-  	delete data['ssn'];
-   	message.data = JSON.stringify(data);
-   	return message;
-	}
-	`
+	functionName := "my_func"
+	code := "function my_func(message, metadata) {return null;}"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
