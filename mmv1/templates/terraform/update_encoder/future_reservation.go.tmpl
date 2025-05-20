@@ -10,12 +10,8 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-// The operation for this resource contains the generated name that we need
-// in order to perform a READ.
-metadata := res["metadata"].(map[string]interface{})
-name := metadata["index"].(string)
-log.Printf("[DEBUG] Setting Index name, id to %s", name)
-if err := d.Set("name", name); err != nil {
-	return fmt.Errorf("Error setting name: %s", err)
+nameProp := d.Get("name")
+if v, ok := d.GetOkExists("name"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, nameProp)) {
+    obj["name"] = nameProp
 }
-d.SetId(name)
+return obj, nil
