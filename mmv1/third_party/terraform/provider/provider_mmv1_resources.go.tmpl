@@ -42,6 +42,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_beyondcorp_app_connection":                 beyondcorp.DataSourceGoogleBeyondcorpAppConnection(),
 	"google_beyondcorp_app_connector":                  beyondcorp.DataSourceGoogleBeyondcorpAppConnector(),
 	"google_beyondcorp_app_gateway":                    beyondcorp.DataSourceGoogleBeyondcorpAppGateway(),
+	"google_beyondcorp_security_gateway":               beyondcorp.DataSourceGoogleBeyondcorpSecurityGateway(),
 	"google_billing_account":                           billing.DataSourceGoogleBillingAccount(),
 	"google_bigquery_tables":          								  bigquery.DataSourceGoogleBigQueryTables(),
 	"google_bigquery_dataset":          								bigquery.DataSourceGoogleBigqueryDataset(),
@@ -506,4 +507,15 @@ var handwrittenIAMResources = map[string]*schema.Resource{
 	"google_service_account_iam_member":            tpgiamresource.ResourceIamMember(resourcemanager.IamServiceAccountSchema, resourcemanager.NewServiceAccountIamUpdater, resourcemanager.ServiceAccountIdParseFunc),
 	"google_service_account_iam_policy":            tpgiamresource.ResourceIamPolicy(resourcemanager.IamServiceAccountSchema, resourcemanager.NewServiceAccountIamUpdater, resourcemanager.ServiceAccountIdParseFunc),
 	// ####### END non-generated IAM resources ###########
+}
+
+// UseGeneratedProducts uses every generated product to avoid "imported and not used" errors.
+// This allows developers to define a product without any resources, datasources, or other files.
+//
+// This avoids goimports which takes a very long time, or needing to know if there are any other
+// files in a given package when generating this file (which is done in parallel)
+func UseGeneratedProducts() {
+	{{- range $service := $.GetMmv1ServicesInVersion $.Products }}
+	  var _ = {{$service}}.ProductName
+	{{- end }}
 }
