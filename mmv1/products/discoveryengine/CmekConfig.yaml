@@ -52,7 +52,8 @@ examples:
     vars:
       cmek_config_id: 'cmek-config-id'
       kms_key_name: 'kms-key-name'
-      kms_key_ring_name: 'kms-key-ring-name'
+    test_vars_overrides:
+      kms_key_name: 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us").CryptoKey.Name'
     ignore_read_extra:
       - 'project'
 parameters:

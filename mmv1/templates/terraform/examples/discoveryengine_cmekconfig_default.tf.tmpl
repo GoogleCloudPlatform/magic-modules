@@ -4,31 +4,7 @@ data "google_project" "project" {
 resource "google_discovery_engine_cmek_config" "default" {
   location            = "us"
   cmek_config_id      = "{{index $.Vars "cmek_config_id"}}"
-  kms_key             = "projects/${data.google_project.project.project_id}/locations/us/keyRings/{{index $.Vars "kms_key_ring_name"}}/cryptoKeys/{{index $.Vars "kms_key_name"}}-1"
-  kms_key_version     = "projects/${data.google_project.project.project_id}/locations/us/keyRings/{{index $.Vars "kms_key_ring_name"}}/cryptoKeys/{{index $.Vars "kms_key_name"}}-1/cryptoKeyVersions/1"
+  kms_key             = "{{index $.Vars "kms_key_name"}}"
+  kms_key_version     = "{{index $.Vars "kms_key_name"}}/cryptoKeyVersions/1"
   set_default         = true
-
-  depends_on = [
-    google_kms_crypto_key_iam_binding.discoveryengine_cmek_keyuser
-  ]
-}
-
-resource "google_kms_key_ring" "key_ring" {
-  name     = "{{index $.Vars "kms_key_ring_name"}}"
-  location = "us"
-}
-
-resource "google_kms_crypto_key" "crypto_key" {
-  name     = "{{index $.Vars "kms_key_name"}}-1"
-  key_ring = google_kms_key_ring.key_ring.id
-  purpose  = "ENCRYPT_DECRYPT"
-}
-
-resource "google_kms_crypto_key_iam_binding" "discoveryengine_cmek_keyuser" {
-  crypto_key_id = google_kms_crypto_key.crypto_key.id
-  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-
-  members = [
-    "serviceAccount:service-${data.google_project.project.number}@gcp-sa-discoveryengine.iam.gserviceaccount.com",
-  ]
 }
