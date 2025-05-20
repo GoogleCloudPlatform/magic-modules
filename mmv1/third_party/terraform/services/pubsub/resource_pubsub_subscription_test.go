@@ -544,8 +544,15 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
-	functionName := "some_function_name"
-	code := "some_code_here"
+	functionName := "redactSSN"
+	code := `
+	function redactSSN(message, metadata) {
+  	const data = JSON.parse(message.data);
+  	delete data['ssn'];
+   	message.data = JSON.stringify(data);
+   	return message;
+	}
+	`
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
