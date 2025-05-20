@@ -92,11 +92,11 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
   conversation_filter = "agent_id = \"1\""
   annotator_selector {
     run_interruption_annotator = true
-    issue_models    = ["projects/*/locations/us-central1/issueModels/some_issue_model_id"]
-    phrase_matchers = ["projects/*/locations/us-central1/phraseMatchers/some_phrase_matcher_id"]
+    issue_models    = ["projects/123456789/locations/us-central1/issueModels/some_issue_model_id"]
+    phrase_matchers = ["projects/123456789/locations/us-central1/phraseMatchers/123"]
     qa_config {
       scorecard_list {
-        qa_scorecard_revisions = ["projects/*/locations/us-central1/qaScorecards/*/revisions/some_scorecard_revision_id"]
+        qa_scorecard_revisions = ["projects/123456789/locations/us-central1/qaScorecards/*/revisions/some_scorecard_revision_id"]
       }
     }
     run_entity_annotator         = true
@@ -128,11 +128,11 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
   conversation_filter = "agent_id = \"1\""
   annotator_selector {
     run_interruption_annotator = false
-	issue_models    = ["projects/*/locations/us-central1/issueModels/alt_issue_model_id"]
-    phrase_matchers = ["projects/*/locations/us-central1/phraseMatchers/alt_phrase_matcher_id"]
+	issue_models    = ["projects/123456789/locations/us-central1/issueModels/alt_issue_model_id"]
+    phrase_matchers = ["projects/123456789/locations/us-central1/phraseMatchers/123"]
     qa_config {
       scorecard_list {
-        qa_scorecard_revisions = ["projects/*/locations/us-central1/qaScorecards/*/revisions/alt_scorecard_revision_id"]
+        qa_scorecard_revisions = ["projects/123456789/locations/us-central1/qaScorecards/*/revisions/alt_scorecard_revision_id"]
       }
     }
     run_entity_annotator         = false
