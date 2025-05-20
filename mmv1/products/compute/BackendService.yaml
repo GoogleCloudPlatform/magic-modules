@@ -142,6 +142,11 @@ examples:
     vars:
       url_map_name: 'url_map'
     exclude_test: true
+  - name: 'backend_service_dynamic_forwarding'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      backend_service_name: 'backend-service'
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
@@ -1618,3 +1623,52 @@ properties:
           Span of time that's a fraction of a second at nanosecond resolution.
           Durations less than one second are represented with a 0 seconds field and a positive nanos field.
           Must be from 0 to 999,999,999 inclusive.
+  - name: 'networkPassThroughLbTrafficPolicy'
+    type: NestedObject
+    description: |
+      Configures traffic steering properties of internal passthrough Network Load Balancers.
+    min_version: beta
+    properties:
+      - name: 'zonalAffinity'
+        type: NestedObject
+        description: |
+          When configured, new connections are load balanced across healthy backend endpoints in the local zone.
+        properties:
+          - name: 'spillover'
+            type: Enum
+            description: |
+              This field indicates whether zonal affinity is enabled or not.
+            enum_values:
+              - 'ZONAL_AFFINITY_DISABLED'
+              - 'ZONAL_AFFINITY_SPILL_CROSS_ZONE'
+              - 'ZONAL_AFFINITY_STAY_WITHIN_ZONE'
+            default_value: 'ZONAL_AFFINITY_DISABLED'
+            min_version: beta
+          - name: 'spilloverRatio'
+            type: Double
+            description: |
+              The value of the field must be in [0, 1]. When the ratio of the count of healthy backend endpoints in a zone
+              to the count of backend endpoints in that same zone is equal to or above this threshold, the load balancer
+              distributes new connections to all healthy endpoints in the local zone only. When the ratio of the count
+              of healthy backend endpoints in a zone to the count of backend endpoints in that same zone is below this
+              threshold, the load balancer distributes all new connections to all healthy endpoints across all zones.
+            min_version: beta
+  - name: 'dynamicForwarding'
+    type: NestedObject
+    description: |
+      Dynamic forwarding configuration. This field is used to configure the backend service with dynamic forwarding
+      feature which together with Service Extension allows customized and complex routing logic.
+    min_version: beta
+    properties:
+      - name: 'ipPortSelection'
+        type: NestedObject
+        description: |
+          IP:PORT based dynamic forwarding configuration.
+        min_version: beta
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            min_version: beta
+            description: |
+              A boolean flag enabling IP:PORT based dynamic forwarding.
+            immutable: true
