@@ -2059,19 +2059,29 @@ func BootstrapSharedCodeRepositoryIndex(t *testing.T, codeRepositoryIndexId, loc
 }
 
 const sharedTagKeyPrefix = "tf-bootstrap-tagkey"
+const sharedTagKeyParentErr = "Parent %q is not valid. Should be in format: 'organizations/123' OR 'projects/123'."
 
 func BootstrapSharedTestProjectTagKey(t *testing.T, testId string, obj map[string]interface{}) string {
 	pid := envvar.GetTestProjectFromEnv()
-	return BootstrapSharedTestTagKey(t, testId, pid, "projects/"+pid, obj)
+	return bootstrapSharedTestTagKey(t, testId, "projects/"+pid, obj)
 }
 
 func BootstrapSharedTestOrganizationTagKey(t *testing.T, testId string, obj map[string]interface{}) string {
 	org := envvar.GetTestOrgFromEnv(t)
-	return BootstrapSharedTestTagKey(t, testId, org, "organizations/"+org, obj)
+	return bootstrapSharedTestTagKey(t, testId, "organizations/"+org, obj)
 }
 
-func BootstrapSharedTestTagKey(t *testing.T, testId, parentId, parent string, obj map[string]interface{}) string {
+// parent should be in format: {"organization" OR "projects"}/{id}
+func bootstrapSharedTestTagKey(t *testing.T, testId, parent string, obj map[string]interface{}) string {
 	sharedTagKey := fmt.Sprintf("%s-%s", sharedTagKeyPrefix, testId)
+
+	parentSplit := strings.Split(parent, "/")
+	if len(parentSplit) < 2 || (parentSplit[0] != "organizations" && parentSplit[0] != "projects") {
+		parentErr := fmt.Sprintf(sharedTagKeyParentErr, parent)
+		t.Fatalf("Error bootstrapping shared tag key %q: %s", sharedTagKey, parentErr)
+	}
+
+	parentId := parentSplit[1]
 	tagKeyName := fmt.Sprintf("%s/%s", parentId, sharedTagKey)
 
 	config := BootstrapConfig(t)
