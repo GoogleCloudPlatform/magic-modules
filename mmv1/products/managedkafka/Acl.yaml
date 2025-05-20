@@ -135,7 +135,7 @@ properties:
 
       A terminal 'T' character in the etag indicates that the AclEntries were
       truncated due to repeated field limits.
-    output: true
+    default_from_api: true
   - name: 'resourceType'
     type: String
     description: |
