@@ -2,6 +2,9 @@ package compute_test
 
 import (
 	"fmt"
+{{ if ne $.TargetVersionName `ga` -}}
+	"regexp"
+{{- end }}
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -1115,6 +1118,50 @@ func TestAccComputeBackendService_backendServiceMaxDuration(t *testing.T) {
 		},
 	})
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccComputeBackendService_withNetworkPassThroughLbTrafficPolicy(t *testing.T) {
+	t.Parallel()
+
+	namePrefix := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeBackendService_withNetworkPassThroughLbTrafficPolicy(namePrefix, "ZONAL_AFFINITY_DISABLED", 0.5),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.nptlbtp",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeBackendService_withNetworkPassThroughLbTrafficPolicy(namePrefix, "ZONAL_AFFINITY_SPILL_CROSS_ZONE", 0.6),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.nptlbtp",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeBackendService_withNetworkPassThroughLbTrafficPolicy(namePrefix, "ZONAL_AFFINITY_STAY_WITHIN_ZONE", 0.2),
+			},
+			{
+				ResourceName:      "google_compute_backend_service.nptlbtp",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config:      testAccComputeBackendService_withNetworkPassThroughLbTrafficPolicy(namePrefix, "ZONAL_AFFINITY_STAY_WITHIN_ZONE", 1.001),
+				ExpectError: regexp.MustCompile("Must be less than or equal to 1.0"),
+			},
+		},
+	})
+}
+{{- end }}
 
 func testAccComputeBackendService_trafficDirectorBasic(serviceName, checkName string) string {
 	return fmt.Sprintf(`
@@ -2867,3 +2914,61 @@ resource "google_compute_http_health_check" "zero" {
 }
 `, serviceName, description, percentage, checkName)
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccComputeBackendService_withNetworkPassThroughLbTrafficPolicy(namePrefix, spillover string, ratio float64) string {
+	return fmt.Sprintf(`
+resource "google_compute_backend_service" "nptlbtp" {
+  provider      = google-beta
+  name          = "%s-backend"
+  description   = "Hello World 1234"
+  protocol      = "TCP"
+  health_checks = [google_compute_health_check.default.self_link]
+
+  backend {
+    group                        = google_compute_network_endpoint_group.lb-neg.self_link
+    balancing_mode               = "CONNECTION"
+	max_connections_per_endpoint = 1000
+  }
+
+  network_pass_through_lb_traffic_policy {
+	zonal_affinity {
+		spillover 	    = "%s"
+		spillover_ratio = %f
+	}
+  }
+}
+
+resource "google_compute_network_endpoint_group" "lb-neg" {
+  provider     = google-beta
+  name         = "%s-neg"
+  network      = google_compute_network.default.self_link
+  subnetwork   = google_compute_subnetwork.default.self_link
+  default_port = "90"
+  zone         = "us-central1-a"
+}
+
+resource "google_compute_network" "default" {
+  provider                = google-beta
+  name                    = "%s-network"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  provider      = google-beta
+  name          = "%s-subnetwork"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.default.self_link
+}
+
+resource "google_compute_health_check" "default" {
+  provider = google-beta
+  name     = "%s-health-check"
+  tcp_health_check {
+    port = "110"
+  }
+}
+`, namePrefix, spillover, ratio, namePrefix, namePrefix, namePrefix, namePrefix)
+}
+{{- end }}
