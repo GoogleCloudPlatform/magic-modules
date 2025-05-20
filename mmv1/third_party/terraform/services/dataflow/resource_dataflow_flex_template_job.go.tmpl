@@ -222,6 +222,15 @@ func ResourceDataflowFlexTemplateJob() *schema.Resource {
 				},
 			},
 
+			"additional_pipeline_options": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: `List of pipeline options that should be used by the job. An example value is ["numberOfWorkerHarnessThreads=20"].`,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+
 			"enable_streaming_engine": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -313,6 +322,8 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 
 	additionalExperiments := tpgresource.ConvertStringSet(d.Get("additional_experiments").(*schema.Set))
 
+	additionalPipelineOptions := tpgresource.ConvertStringSet(d.Get("additional_pipeline_options").(*schema.Set))
+
 	var autoscalingAlgorithm string
 	autoscalingAlgorithm, updatedParameters = dataflowFlexJobTypeTransferVar("autoscaling_algorithm", "autoscalingAlgorithm", updatedParameters, d)
 
@@ -383,22 +394,23 @@ func resourceDataflowFlexJobSetupEnv(d *schema.ResourceData, config *transport_t
 	launcherMachineType, updatedParameters := dataflowFlexJobTypeTransferVar("launcher_machine_type", "launcherMachineType", updatedParameters, d)
 
 	env := dataflow.FlexTemplateRuntimeEnvironment{
-		AdditionalUserLabels:  tpgresource.ExpandStringMap(d, "effective_labels"),
-		AutoscalingAlgorithm:  autoscalingAlgorithm,
-		NumWorkers:            int64(numWorkers),
-		MaxWorkers:            int64(maxNumWorkers),
-		Network:               network,
-		ServiceAccountEmail:   serviceAccountEmail,
-		Subnetwork:            subnetwork,
-		TempLocation:          tempLocation,
-		StagingLocation:       stagingLocation,
-		MachineType:           machineType,
-		KmsKeyName:            kmsKeyName,
-		IpConfiguration:       ipConfiguration,
-		EnableStreamingEngine: enableStreamingEngine,
-		AdditionalExperiments: additionalExperiments,
-		SdkContainerImage:     sdkContainerImage,
-		LauncherMachineType:   launcherMachineType,
+		AdditionalUserLabels:      tpgresource.ExpandStringMap(d, "effective_labels"),
+		AutoscalingAlgorithm:      autoscalingAlgorithm,
+		NumWorkers:                int64(numWorkers),
+		MaxWorkers:                int64(maxNumWorkers),
+		Network:                   network,
+		ServiceAccountEmail:       serviceAccountEmail,
+		Subnetwork:                subnetwork,
+		TempLocation:              tempLocation,
+		StagingLocation:           stagingLocation,
+		MachineType:               machineType,
+		KmsKeyName:                kmsKeyName,
+		IpConfiguration:           ipConfiguration,
+		EnableStreamingEngine:     enableStreamingEngine,
+		AdditionalExperiments:     additionalExperiments,
+		AdditionalPipelineOptions: additionalPipelineOptions,
+		SdkContainerImage:         sdkContainerImage,
+		LauncherMachineType:       launcherMachineType,
 	}
 	return env, updatedParameters, nil
 }
