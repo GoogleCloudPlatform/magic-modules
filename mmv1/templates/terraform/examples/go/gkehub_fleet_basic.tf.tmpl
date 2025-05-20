@@ -1,9 +1,0 @@
-resource "google_gke_hub_fleet" "default" {
-  display_name = "my production fleet"
-  default_cluster_config {
-    security_posture_config {
-      mode = "DISABLED"
-      vulnerability_mode = "VULNERABILITY_DISABLED"
-    }
-  }
-}

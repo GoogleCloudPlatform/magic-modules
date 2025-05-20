@@ -1,8 +1,0 @@
-resource "google_network_security_client_tls_policy" "<%= ctx[:primary_resource_id] %>" {
-  name                   = "<%= ctx[:vars]['resource_name'] %>"
-  labels                 = {
-    foo = "bar"
-  }
-  description            = "my description"
-  sni                    = "secure.example.com"
-}

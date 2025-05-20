@@ -94,7 +94,7 @@ func TestUnitBigtable_getInstanceFromResponse(t *testing.T) {
 			wantInstanceName: "",
 			wantId:           originalId,
 		},
-		"unavailble error": {
+		"unavailable error": {
 			instanceNames:      []string{"wrong", "also_wrong"},
 			listInstancesError: bigtable.ErrPartiallyUnavailable{[]string{"some", "location"}},
 
@@ -160,31 +160,35 @@ func TestUnitBigtable_flattenBigtableCluster(t *testing.T) {
 				"kms_key_name": "KMS",
 				"state":        "CREATING",
 				"autoscaling_config": []map[string]interface{}{
-					map[string]interface{}{
+					{
 						"min_nodes":      3,
 						"max_nodes":      7,
 						"cpu_target":     50,
 						"storage_target": 60,
 					},
 				},
+				// unspecified node scaling factor in input will default to 1X
+				"node_scaling_factor": "NodeScalingFactor1X",
 			},
 		},
 		"HDD manual scaling": {
 			clusterInfo: &bigtable.ClusterInfo{
-				StorageType: bigtable.HDD,
-				Zone:        "zone2",
-				ServeNodes:  7,
-				Name:        "hdd-cluster",
-				KMSKeyName:  "KMS",
-				State:       "READY",
+				StorageType:       bigtable.HDD,
+				Zone:              "zone2",
+				ServeNodes:        7,
+				Name:              "hdd-cluster",
+				KMSKeyName:        "KMS",
+				State:             "READY",
+				NodeScalingFactor: bigtable.NodeScalingFactor2X,
 			},
 			want: map[string]interface{}{
-				"zone":         "zone2",
-				"num_nodes":    7,
-				"cluster_id":   "hdd-cluster",
-				"storage_type": "HDD",
-				"kms_key_name": "KMS",
-				"state":        "READY",
+				"zone":                "zone2",
+				"num_nodes":           7,
+				"cluster_id":          "hdd-cluster",
+				"storage_type":        "HDD",
+				"kms_key_name":        "KMS",
+				"state":               "READY",
+				"node_scaling_factor": "NodeScalingFactor2X",
 			},
 		},
 	}

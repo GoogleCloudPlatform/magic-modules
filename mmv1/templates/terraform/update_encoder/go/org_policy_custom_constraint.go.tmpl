@@ -1,7 +1,0 @@
-// need to send resource_types in all PATCH requests
-resourceTypesProp := d.Get("resource_types")
-if v, ok := d.GetOkExists("resource_types"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, resourceTypesProp)) {
-	obj["resourceTypes"] = resourceTypesProp
-}
-
-return obj, nil

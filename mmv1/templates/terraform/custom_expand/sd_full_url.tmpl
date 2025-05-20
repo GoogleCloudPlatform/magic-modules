@@ -1,0 +1,14 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+  if v == nil || v.(string) == "" {
+    return "", nil
+  } else if strings.HasPrefix(v.(string), "https://") {
+    return v, nil
+  }
+  url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ServiceDirectoryBasePath{{"}}"}}" + v.(string))
+  if err != nil {
+    return "", err
+  }
+
+  // v1 is the only version in use, replace the first occurrence of v1beta with v1 in the URL
+  return strings.Replace(url, "/v1beta1/", "/v1/", 1), nil
+}

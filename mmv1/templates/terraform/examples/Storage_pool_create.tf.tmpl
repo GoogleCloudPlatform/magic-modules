@@ -1,0 +1,14 @@
+data "google_compute_network" "default" {
+  name = "{{index $.Vars "network_name"}}"
+}
+
+# Create a storage pool
+# Create this resource in the project which is expected to own the volumes
+resource "google_netapp_storage_pool" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "pool_name"}}"
+  # project = <your_project>
+  location = "us-central1"
+  service_level = "PREMIUM"
+  capacity_gib = "2048"
+  network = data.google_compute_network.default.id
+}

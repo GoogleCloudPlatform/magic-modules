@@ -11,55 +11,59 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
-base_url: projects/{{project}}/locations/{{location}}/instances
-create_url: projects/{{project}}/locations/{{location}}/instances?instanceId={{instance_id}}
-self_link: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
-id_format: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
-import_format:
-  - projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
-name: Instance
+---
+name: 'Instance'
 description: A Parallelstore Instance.
-update_verb: :PATCH
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/instances'
+self_link: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/instances?instanceId={{instance_id}}'
+update_verb: 'PATCH'
 update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
-async: !ruby/object:Api::OpAsync
-  operation: !ruby/object:Api::OpAsync::Operation
-    path: name
-    base_url: "{{op_id}}"
-    wait_ms: 1000
-    timeouts:
-  result: !ruby/object:Api::OpAsync::Result
-    path: response
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
     resource_inside_response: true
-  status: !ruby/object:Api::OpAsync::Status
-    path: done
-    complete: true
-    allowed:
-      - true
-      - false
-  error: !ruby/object:Api::OpAsync::Error
-    path: error
-    message: message
+autogen_status: SW5zdGFuY2U=
+custom_code:
+sweeper:
+  url_substitutions:
+    - region: "us-central1-a"
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'parallelstore_instance_basic'
+  - name: 'parallelstore_instance_basic_beta'
     primary_resource_id: 'instance'
     min_version: 'beta'
     vars:
       name: 'instance'
       network_name: 'network'
       address_name: 'address'
+  - name: 'parallelstore_instance_basic'
+    primary_resource_id: 'instance'
+    vars:
+      name: 'instance'
+      network_name: 'network'
+      address_name: 'address'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: location
+  - name: 'location'
+    type: String
     description: |
       Part of `parent`. See documentation of `projectsId`.
     url_param_only: true
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: instanceId
+  - name: 'instanceId'
+    type: String
     description: |
       The logical name of the Parallelstore instance in the user project with the following restrictions:
         * Must contain only lowercase letters, numbers, and hyphens.
@@ -71,18 +75,18 @@ parameters:
     required: true
     immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       Identifier. The resource name of the instance, in the format
       `projects/{project}/locations/{location}/instances/{instance_id}`
     output: true
-  - !ruby/object:Api::Type::String
-    name: description
+  - name: 'description'
+    type: String
     description: |
       The description of the instance. 2048 characters or less.
-  - !ruby/object:Api::Type::String
-    name: state
+  - name: 'state'
+    type: String
     description: |
       The instance state.
         Possible values:
@@ -93,20 +97,18 @@ properties:
         FAILED
         UPGRADING
     output: true
-  - !ruby/object:Api::Type::String
-    name: createTime
+  - name: 'createTime'
+    type: String
     description: |
       The time when the instance was created.
     output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
+  - name: 'updateTime'
+    type: String
     description: |
       The time when the instance was updated.
     output: true
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: labels
-    output:
-    api_name:
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       Cloud Labels are a flexible and lightweight mechanism for
       organizing cloud resources into groups that reflect a customer's organizational
@@ -129,40 +131,41 @@ properties:
       specific characters being disallowed.  For example, representing labels
       as the string:  `name + "_" + value` would prove problematic if we were to
       allow `"_"` in a future release. "
-  - !ruby/object:Api::Type::String
-    name: capacityGib
+  - name: 'capacityGib'
+    type: String
     description: |
       Required. Immutable. Storage capacity of Parallelstore instance in Gibibytes (GiB).
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: daosVersion
+  - name: 'daosVersion'
+    type: String
     description: |
       The version of DAOS software running in the instance.
     output: true
-  - !ruby/object:Api::Type::Array
-    name: accessPoints
-    item_type: Api::Type::String
+  - name: 'accessPoints'
+    type: Array
     description: |
       Output only. List of access_points.
       Contains a list of IPv4 addresses used for client side configuration.
     output: true
-  - !ruby/object:Api::Type::String
-    name: network
+    item_type:
+      type: String
+  - name: 'network'
+    type: String
     description: |
       Immutable. The name of the Google Compute Engine [VPC network](https://cloud.google.com/vpc/docs/vpc)
       to which the instance is connected.
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: reservedIpRange
+  - name: 'reservedIpRange'
+    type: String
     description: |
       Immutable. Contains the id of the allocated IP address range
       associated with the private service access connection for example, \"test-default\"
       associated with IP range 10.0.0.0/29. If no range id is provided all ranges will
       be considered.
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: effectiveReservedIpRange
+  - name: 'effectiveReservedIpRange'
+    type: String
     description: |
       Immutable. Contains the id of the allocated IP address
       range associated with the private service access connection for example, \"test-default\"
@@ -170,8 +173,8 @@ properties:
       and contains the value currently used by the service.
     immutable: true
     output: true
-  - !ruby/object:Api::Type::String
-    name: fileStripeLevel
+  - name: 'fileStripeLevel'
+    type: String
     description: |
       Stripe level for files.
       MIN better suited for small size files.
@@ -181,8 +184,8 @@ properties:
         FILE_STRIPE_LEVEL_MIN
         FILE_STRIPE_LEVEL_BALANCED
         FILE_STRIPE_LEVEL_MAX
-  - !ruby/object:Api::Type::String
-    name: directoryStripeLevel
+  - name: 'directoryStripeLevel'
+    type: String
     description: |
       Stripe level for directories.
       MIN when directory has a small number of files.
@@ -192,3 +195,11 @@ properties:
         DIRECTORY_STRIPE_LEVEL_MIN
         DIRECTORY_STRIPE_LEVEL_BALANCED
         DIRECTORY_STRIPE_LEVEL_MAX
+  - name: deploymentType
+    type: String
+    description: |
+      Parallelstore Instance deployment type.
+        Possible values:
+        DEPLOYMENT_TYPE_UNSPECIFIED
+        SCRATCH
+        PERSISTENT

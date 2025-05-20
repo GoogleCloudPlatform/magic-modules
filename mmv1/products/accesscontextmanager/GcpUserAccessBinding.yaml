@@ -1,4 +1,4 @@
-# Copyright 2018 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,63 +11,184 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'GcpUserAccessBinding'
-base_url: 'organizations/{{organization_id}}/gcpUserAccessBindings'
-self_link: '{{name}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   Restricts access to Cloud Console and Google Cloud APIs for a set of users using Context-Aware Access.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
+  guides:
   api: 'https://cloud.google.com/access-context-manager/docs/reference/rest/v1/organizations.gcpUserAccessBindings'
+docs:
 id_format: '{{name}}'
-import_format: ['{{name}}']
+base_url: 'organizations/{{organization_id}}/gcpUserAccessBindings'
+self_link: '{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+  custom_import: 'templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl'
 exclude_tgc: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'access_context_manager_gcp_user_access_binding_basic'
-    # Has a handwritten test due to AccessPolicy-related tests needing to run synchronously
-    skip_test: true
+  - name: 'access_context_manager_gcp_user_access_binding_basic'
     primary_resource_id: 'gcp_user_access_binding'
     vars:
       group_id: 'my-identity-group'
       access_level_id: 'access_level_id_for_user_access_binding'
       access_level_name: 'chromeos_no_lock'
     test_env_vars:
-      org_id: :ORG_ID
-      org_domain: :ORG_DOMAIN
-      cust_id: :CUST_ID
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/set_id_name_with_slashes.go.erb
+      org_id: 'ORG_ID'
+      org_domain: 'ORG_DOMAIN'
+      cust_id: 'CUST_ID'
+    # Has a handwritten test due to AccessPolicy-related tests needing to run synchronously
+    exclude_test: true
 parameters:
   # Parent is a path parameter that _cannot_ be read or sent in the request at all.
   # This must be done at the provider level.
-  - !ruby/object:Api::Type::String
-    name: organizationId
-    immutable: true
-    required: true
-    url_param_only: true
+  - name: 'organizationId'
+    type: String
     description: |
       Required. ID of the parent organization.
-properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
-    description: |
-      Immutable. Assigned by the server during creation. The last segment has an arbitrary length and has only URI unreserved characters (as defined by RFC 3986 Section 2.3). Should not be specified by the client during creation. Example: "organizations/256/gcpUserAccessBindings/b3-BhcX_Ud5N"
-  - !ruby/object:Api::Type::String
-    name: 'groupKey'
+    url_param_only: true
     required: true
     immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Immutable. Assigned by the server during creation. The last segment has an arbitrary length and has only URI unreserved characters (as defined by RFC 3986 Section 2.3). Should not be specified by the client during creation. Example: "organizations/256/gcpUserAccessBindings/b3-BhcX_Ud5N"
+    output: true
+  - name: 'groupKey'
+    type: String
     description: |
       Required. Immutable. Google Group id whose members are subject to this binding's restrictions. See "id" in the G Suite Directory API's Groups resource. If a group's email address/alias is changed, this resource will continue to point at the changed group. This field does not accept group email addresses or aliases. Example: "01d520gv4vjcrht"
-  - !ruby/object:Api::Type::Array
-    name: 'accessLevels'
-    item_type: Api::Type::String
     required: true
+    immutable: true
+  - name: 'accessLevels'
+    type: Array
+    description: |
+      Optional. Access level that a user must have to be granted access. Only one access level is supported, not multiple. This repeated field must have exactly one element. Example: "accessPolicies/9522/accessLevels/device_trusted"
+    item_type:
+      type: String
     min_size: 1
     max_size: 1
+  - name: 'sessionSettings'
+    type: NestedObject
     description: |
-      Required. Access level that a user must have to be granted access. Only one access level is supported, not multiple. This repeated field must have exactly one element. Example: "accessPolicies/9522/accessLevels/device_trusted"
+      Optional. The Google Cloud session length (GCSL) policy for the group key.
+    properties:
+      - name: 'sessionReauthMethod'
+        description: |
+          Optional. The session challenges proposed to users when the Google Cloud session length is up.
+        type: Enum
+        enum_values:
+          - 'LOGIN'
+          - 'SECURITY_KEY'
+          - 'PASSWORD'
+      - name: 'sessionLength'
+        description: |
+          Optional. The session length. Setting this field to zero is equal to disabling session. Also can set infinite session by flipping the enabled bit to false below. If useOidcMaxAge is true, for OIDC apps, the session length will be the minimum of this field and OIDC max_age param.
+        type: String
+      - name: 'maxInactivity'
+        description: |
+          Optional. How long a user is allowed to take between actions before a new access token must be issued. Only set for Google Cloud apps.
+        type: String
+      - name: 'useOidcMaxAge'
+        description: |
+          Optional. Only useful for OIDC apps. When false, the OIDC max_age param, if passed in the authentication request will be ignored. When true, the re-auth period will be the minimum of the sessionLength field and the max_age OIDC param.
+        type: Boolean
+      - name: 'sessionLengthEnabled'
+        type: Boolean
+        description: |
+          Optional. This field enables or disables Google Cloud session length. When false, all fields set above will be disregarded and the session length is basically infinite.
+  - name: 'scopedAccessSettings'
+    type: Array
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'scope'
+          type: NestedObject
+          description: |
+            Optional. Application, etc. to which the access settings will be applied to. Implicitly, this is the scoped access settings key; as such, it must be unique and non-empty.
+          properties:
+            - name: 'clientScope'
+              type: NestedObject
+              description: |
+                Optional. Client scope for this access scope.
+              properties:
+                - name: restrictedClientApplication
+                  type: NestedObject
+                  description: |
+                    Optional. The application that is subject to this binding's scope.
+                  properties:
+                    - name: clientId
+                      type: String
+                      description: |
+                        The OAuth client ID of the application.
+        - name: 'activeSettings'
+          type: NestedObject
+          description: |
+            Optional. Access settings for this scoped access settings. This field may be empty if dryRunSettings is set.
+          properties:
+            - name: accessLevels
+              type: Array
+              item_type:
+                type: String
+              description: |
+                Optional. Access level that a user must have to be granted access. Only one access level is supported, not multiple. This repeated field must have exactly one element. Example: "accessPolicies/9522/accessLevels/device_trusted"
+            - name: sessionSettings
+              type: NestedObject
+              description: |
+                Optional. Session settings applied to user access on a given AccessScope.
+              properties:
+                - name: 'sessionReauthMethod'
+                  description: |
+                    Optional. The session challenges proposed to users when the Google Cloud session length is up.
+                  type: Enum
+                  enum_values:
+                    - 'LOGIN'
+                    - 'SECURITY_KEY'
+                    - 'PASSWORD'
+                - name: 'sessionLength'
+                  description: |
+                    Optional. The session length. Setting this field to zero is equal to disabling session. Also can set infinite session by flipping the enabled bit to false below. If useOidcMaxAge is true, for OIDC apps, the session length will be the minimum of this field and OIDC max_age param.
+                  type: String
+                - name: 'maxInactivity'
+                  description: |
+                    Optional. How long a user is allowed to take between actions before a new access token must be issued. Only set for Google Cloud apps.
+                  type: String
+                - name: 'useOidcMaxAge'
+                  description: |
+                    Optional. Only useful for OIDC apps. When false, the OIDC max_age param, if passed in the authentication request will be ignored. When true, the re-auth period will be the minimum of the sessionLength field and the max_age OIDC param.
+                  type: Boolean
+                - name: 'sessionLengthEnabled'
+                  type: Boolean
+                  description: |
+                    Optional. This field enables or disables Google Cloud session length. When false, all fields set above will be disregarded and the session length is basically infinite.
+        - name: 'dryRunSettings'
+          type: NestedObject
+          description: |
+            Optional. Dry-run access settings for this scoped access settings. This field may be empty if activeSettings is set. Cannot contain session settings.
+          properties:
+            - name: accessLevels
+              type: Array
+              item_type:
+                type: String
+              description: |
+                Optional. Access level that a user must have to be granted access. Only one access level is supported, not multiple. This repeated field must have exactly one element. Example: "accessPolicies/9522/accessLevels/device_trusted"
+              min_size: 1
+              max_size: 1
+    description: |
+      Optional. A list of scoped access settings that set this binding's restrictions on a subset of applications.

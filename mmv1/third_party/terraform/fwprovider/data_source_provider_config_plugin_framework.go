@@ -4,20 +4,19 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
-	"github.com/hashicorp/terraform-provider-google/google/fwresource"
-	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 // Ensure the data source satisfies the expected interfaces.
 var (
 	_ datasource.DataSource              = &GoogleProviderConfigPluginFrameworkDataSource{}
 	_ datasource.DataSourceWithConfigure = &GoogleProviderConfigPluginFrameworkDataSource{}
-	_ fwresource.LocationDescriber       = &GoogleProviderConfigPluginFrameworkModel{}
 )
 
 func NewGoogleProviderConfigPluginFrameworkDataSource() datasource.DataSource {
@@ -25,15 +24,17 @@ func NewGoogleProviderConfigPluginFrameworkDataSource() datasource.DataSource {
 }
 
 type GoogleProviderConfigPluginFrameworkDataSource struct {
-	providerConfig *fwtransport.FrameworkProviderConfig
+	providerConfig *transport_tpg.Config
 }
 
+// GoogleProviderConfigPluginFrameworkModel describes the data source and matches the schema. Its fields match those in a Config struct (google/transport/config.go) but uses a different type system.
+//   - In the original Config struct old SDK/Go primitives types are used, e.g. `string`
+//   - Here in the GoogleProviderConfigPluginFrameworkModel struct we need to use  the terraform-plugin-framework/types type system, e.g. `types.String`
+//   - This is needed because the PF type system is 'baked into' how we define schemas. The schema will expect a nullable type.
+//   - See terraform-plugin-framework/datasource/schema#StringAttribute's CustomType: https://pkg.go.dev/github.com/hashicorp/terraform-plugin-framework@v1.7.0/datasource/schema#StringAttribute
+//   - Due to the different type systems of Config versus GoogleProviderConfigPluginFrameworkModel struct, we need to convert from primitive types to terraform-plugin-framework/types when we populate
+//     GoogleProviderConfigPluginFrameworkModel structs with data in this data source's Read method.
 type GoogleProviderConfigPluginFrameworkModel struct {
-	// Currently this reflects the FrameworkProviderConfig struct and ProviderModel in google/fwmodels/provider_model.go
-	// which means it uses the plugin-framework type system where values can be explicitly Null or Unknown.
-	//
-	// As part of future muxing fixes/refactoring we'll change this struct to reflect structs used in the SDK code, and will move to
-	// using the SDK type system.
 	Credentials                        types.String `tfsdk:"credentials"`
 	AccessToken                        types.String `tfsdk:"access_token"`
 	ImpersonateServiceAccount          types.String `tfsdk:"impersonate_service_account"`
@@ -51,15 +52,6 @@ type GoogleProviderConfigPluginFrameworkModel struct {
 	DefaultLabels                             types.Map    `tfsdk:"default_labels"`
 	AddTerraformAttributionLabel              types.Bool   `tfsdk:"add_terraform_attribution_label"`
 	TerraformAttributionLabelAdditionStrategy types.String `tfsdk:"terraform_attribution_label_addition_strategy"`
-}
-
-func (m *GoogleProviderConfigPluginFrameworkModel) GetLocationDescription(providerConfig *fwtransport.FrameworkProviderConfig) fwresource.LocationDescription {
-	return fwresource.LocationDescription{
-		RegionSchemaField: types.StringValue("region"),
-		ZoneSchemaField:   types.StringValue("zone"),
-		ProviderRegion:    providerConfig.Region,
-		ProviderZone:      providerConfig.Zone,
-	}
 }
 
 func (d *GoogleProviderConfigPluginFrameworkDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
@@ -172,11 +164,11 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Configure(ctx context.Co
 		return
 	}
 
-	p, ok := req.ProviderData.(*fwtransport.FrameworkProviderConfig)
+	p, ok := req.ProviderData.(*transport_tpg.Config)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *fwtransport.FrameworkProviderConfig, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			fmt.Sprintf("Expected *transport_tpg.Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 		return
 	}
@@ -202,23 +194,54 @@ func (d *GoogleProviderConfigPluginFrameworkDataSource) Read(ctx context.Context
 	}
 
 	// Copy all values from the provider config into this data source
+	//    - The 'meta' from the provider configuration process uses Go primitive types (e.g. `string`) but this data source needs to use the plugin-framework type system due to being PF-implemented
+	//    - As a result we have to make conversions between type systems in the value assignments below
+	data.Credentials = types.StringValue(d.providerConfig.Credentials)
+	data.AccessToken = types.StringValue(d.providerConfig.AccessToken)
+	data.ImpersonateServiceAccount = types.StringValue(d.providerConfig.ImpersonateServiceAccount)
 
-	data.Credentials = d.providerConfig.Credentials
-	// TODO(SarahFrench) - access_token
-	// TODO(SarahFrench) - impersonate_service_account
-	// TODO(SarahFrench) - impersonate_service_account_delegates
-	data.Project = d.providerConfig.Project
-	data.Region = d.providerConfig.Region
-	data.BillingProject = d.providerConfig.BillingProject
-	data.Zone = d.providerConfig.Zone
-	data.UniverseDomain = d.providerConfig.UniverseDomain
-	data.Scopes = d.providerConfig.Scopes
-	data.UserProjectOverride = d.providerConfig.UserProjectOverride
-	// TODO(SarahFrench) - request_reason
-	// TODO(SarahFrench) - request_timeout
-	data.DefaultLabels = d.providerConfig.DefaultLabels
-	// TODO(SarahFrench) - add_terraform_attribution_label
-	// TODO(SarahFrench) - terraform_attribution_label_addition_strategy
+	delegateAttrs := make([]attr.Value, len(d.providerConfig.ImpersonateServiceAccountDelegates))
+	for i, delegate := range d.providerConfig.ImpersonateServiceAccountDelegates {
+		delegateAttrs[i] = types.StringValue(delegate)
+	}
+	delegates, di := types.ListValue(types.StringType, delegateAttrs)
+	if di.HasError() {
+		resp.Diagnostics.Append(di...)
+	}
+	data.ImpersonateServiceAccountDelegates = delegates
+
+	data.Project = types.StringValue(d.providerConfig.Project)
+	data.Region = types.StringValue(d.providerConfig.Region)
+	data.BillingProject = types.StringValue(d.providerConfig.BillingProject)
+	data.Zone = types.StringValue(d.providerConfig.Zone)
+	data.UniverseDomain = types.StringValue(d.providerConfig.UniverseDomain)
+
+	scopeAttrs := make([]attr.Value, len(d.providerConfig.Scopes))
+	for i, scope := range d.providerConfig.Scopes {
+		scopeAttrs[i] = types.StringValue(scope)
+	}
+	scopes, di := types.ListValue(types.StringType, scopeAttrs)
+	if di.HasError() {
+		resp.Diagnostics.Append(di...)
+	}
+	data.Scopes = scopes
+
+	data.UserProjectOverride = types.BoolValue(d.providerConfig.UserProjectOverride)
+	data.RequestReason = types.StringValue(d.providerConfig.RequestReason)
+	data.RequestTimeout = types.StringValue(d.providerConfig.RequestTimeout.String())
+
+	lbs := make(map[string]attr.Value, len(d.providerConfig.DefaultLabels))
+	for k, v := range d.providerConfig.DefaultLabels {
+		lbs[k] = types.StringValue(v)
+	}
+	labels, di := types.MapValueFrom(ctx, types.StringType, lbs)
+	if di.HasError() {
+		resp.Diagnostics.Append(di...)
+	}
+	data.DefaultLabels = labels
+
+	data.AddTerraformAttributionLabel = types.BoolValue(d.providerConfig.AddTerraformAttributionLabel)
+	data.TerraformAttributionLabelAdditionStrategy = types.StringValue(d.providerConfig.TerraformAttributionLabelAdditionStrategy)
 
 	// Warn users against using this data source
 	resp.Diagnostics.Append(diag.NewWarningDiagnostic(

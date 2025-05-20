@@ -15,7 +15,7 @@ import (
 	_ "embed"
 )
 
-var vcuEnvironmentVariables = [...]string{
+var vcuRequiredEnvironmentVariables = [...]string{
 	"GOCACHE",
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
@@ -38,10 +38,15 @@ var vcuEnvironmentVariables = [...]string{
 	"GITHUB_TOKEN_CLASSIC",
 }
 
+var vcuOptionalEnvironmentVariables = [...]string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
+	"GOOGLE_VMWAREENGINE_PROJECT",
+}
+
 var (
-	//go:embed vcr_cassettes_update_replaying.tmpl
+	//go:embed templates/vcr/vcr_cassettes_update_replaying.tmpl
 	replayingTmplText string
-	//go:embed vcr_cassettes_update_recording.tmpl
+	//go:embed templates/vcr/vcr_cassettes_update_recording.tmpl
 	recordingTmplText string
 )
 
@@ -73,13 +78,21 @@ var vcrCassetteUpdateCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		env := make(map[string]string, len(vcuEnvironmentVariables))
-		for _, ev := range vcuEnvironmentVariables {
+		env := make(map[string]string)
+		for _, ev := range vcuRequiredEnvironmentVariables {
 			val, ok := os.LookupEnv(ev)
 			if !ok {
 				return fmt.Errorf("did not provide %s environment variable", ev)
 			}
 			env[ev] = val
+		}
+		for _, ev := range vcuOptionalEnvironmentVariables {
+			val, ok := os.LookupEnv(ev)
+			if ok {
+				env[ev] = val
+			} else {
+				fmt.Printf("🟡 Did not provide %s environment variable\n", ev)
+			}
 		}
 
 		buildID := args[0]
@@ -90,7 +103,7 @@ var vcrCassetteUpdateCmd = &cobra.Command{
 		}
 		ctlr := source.NewController(env["GOPATH"], "hashicorp", env["GITHUB_TOKEN_CLASSIC"], rnr)
 
-		vt, err := vcr.NewTester(env, rnr)
+		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "", rnr)
 		if err != nil {
 			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
@@ -133,12 +146,12 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 	// upload replay build and test logs
 	buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", vcr.Replaying.Lower()))
 	if _, err := uploadLogsToGCS(buildLogPath, bucketPrefix+"/logs/replaying/", rnr); err != nil {
-		return fmt.Errorf("error uploading replaying test log: %w", err)
+		fmt.Printf("Warning: error uploading replaying test log: %s\n", err)
 	}
 
 	testLogPath := vt.LogPath(vcr.Replaying, provider.Beta)
 	if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
-		return fmt.Errorf("error uploading replaying build log: %w", err)
+		fmt.Printf("Warning: error uploading replaying build log: %s\n", err)
 	}
 
 	replayingData := vcrCassetteUpdateReplayingResult{
@@ -169,17 +182,19 @@ func execVCRCassetteUpdate(buildID, today string, rnr ExecRunner, ctlr *source.C
 		// uploading cassettes failed because recording not work
 		buildLogPath := filepath.Join(rnr.GetCWD(), "testlogs", fmt.Sprintf("%s_test.log", vcr.Recording.Lower()))
 		if _, err := uploadLogsToGCS(buildLogPath, bucketPrefix+"/logs/recording/", rnr); err != nil {
-			return fmt.Errorf("error uploading recording test log: %w", err)
+			fmt.Printf("Warning: error uploading recording test log: %s\n", err)
 		}
 
 		testLogPath := vt.LogPath(vcr.Recording, provider.Beta)
 		if _, err := uploadLogsToGCS(filepath.Join(testLogPath, "*"), bucketPrefix+"/logs/build-log/", rnr); err != nil {
-			return fmt.Errorf("error uploading recording build log: %w", err)
+			fmt.Printf("Warning: error uploading recording build log: %s\n", err)
 		}
+
 		if len(recordingResult.PassedTests) > 0 {
 			cassettesPath := vt.CassettePath(provider.Beta)
-			if _, err := uploadCassettesToGCS(cassettesPath, "gs://ci-vcr-cassettes/beta/fixtures/", rnr); err != nil {
-				return fmt.Errorf("error uploading cassettes: %w", err)
+			if _, err := uploadCassettesToGCS(cassettesPath+"/*", "gs://ci-vcr-cassettes/beta/fixtures/", rnr); err != nil {
+				// There could be cases that the tests do not generate any cassettes.
+				fmt.Printf("Warning: error uploading cassettes: %s\n", err)
 			}
 		} else {
 			fmt.Println("No tests passed in recording mode, not uploading cassettes.")

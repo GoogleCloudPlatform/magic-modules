@@ -46,6 +46,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Apigee",
         "path" to "./google/services/apigee"
     ),
+    "apihub" to mapOf(
+        "name" to "apihub",
+        "displayName" to "Apihub",
+        "path" to "./google/services/apihub"
+    ),
     "apikeys" to mapOf(
         "name" to "apikeys",
         "displayName" to "Apikeys",
@@ -141,6 +146,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Certificatemanager",
         "path" to "./google/services/certificatemanager"
     ),
+    "chronicle" to mapOf(
+        "name" to "chronicle",
+        "displayName" to "Chronicle",
+        "path" to "./google/services/chronicle"
+    ),
     "cloudasset" to mapOf(
         "name" to "cloudasset",
         "displayName" to "Cloudasset",
@@ -210,6 +220,11 @@ var ServicesListGa = mapOf(
         "name" to "cloudtasks",
         "displayName" to "Cloudtasks",
         "path" to "./google/services/cloudtasks"
+    ),
+    "colab" to mapOf(
+        "name" to "colab",
+        "displayName" to "Colab",
+        "path" to "./google/services/colab"
     ),
     "composer" to mapOf(
         "name" to "composer",
@@ -296,6 +311,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Dataproc",
         "path" to "./google/services/dataproc"
     ),
+    "dataprocgdc" to mapOf(
+        "name" to "dataprocgdc",
+        "displayName" to "Dataproc on GDC",
+        "path" to "./google/services/dataprocgdc"
+    ),
     "dataprocmetastore" to mapOf(
         "name" to "dataprocmetastore",
         "displayName" to "Dataprocmetastore",
@@ -310,6 +330,11 @@ var ServicesListGa = mapOf(
         "name" to "deploymentmanager",
         "displayName" to "Deploymentmanager",
         "path" to "./google/services/deploymentmanager"
+    ),
+    "developerconnect" to mapOf(
+        "name" to "developerconnect",
+        "displayName" to "Developerconnect",
+        "path" to "./google/services/developerconnect"
     ),
     "dialogflow" to mapOf(
         "name" to "dialogflow",
@@ -376,10 +401,20 @@ var ServicesListGa = mapOf(
         "displayName" to "Firebaseappcheck",
         "path" to "./google/services/firebaseappcheck"
     ),
+    "firebaseapphosting" to mapOf(
+        "name" to "firebaseapphosting",
+        "displayName" to "Firebase App Hosting",
+        "path" to "./google/services/firebaseapphosting"
+    ),
     "firebasedatabase" to mapOf(
         "name" to "firebasedatabase",
         "displayName" to "Firebasedatabase",
         "path" to "./google/services/firebasedatabase"
+    ),
+    "firebasedataconnect" to mapOf(
+        "name" to "firebasedataconnect",
+        "displayName" to "Firebasedataconnect",
+        "path" to "./google/services/firebasedataconnect"
     ),
     "firebaseextensions" to mapOf(
         "name" to "firebaseextensions",
@@ -400,6 +435,11 @@ var ServicesListGa = mapOf(
         "name" to "firestore",
         "displayName" to "Firestore",
         "path" to "./google/services/firestore"
+    ),
+    "gemini" to mapOf(
+        "name" to "gemini",
+        "displayName" to "Gemini",
+        "path" to "./google/services/gemini"
     ),
     "gkebackup" to mapOf(
         "name" to "gkebackup",
@@ -430,6 +470,11 @@ var ServicesListGa = mapOf(
         "name" to "iam2",
         "displayName" to "Iam2",
         "path" to "./google/services/iam2"
+    ),
+    "iam3" to mapOf(
+        "name" to "iam3",
+        "displayName" to "Iam3",
+        "path" to "./google/services/iam3"
     ),
     "iambeta" to mapOf(
         "name" to "iambeta",
@@ -475,6 +520,11 @@ var ServicesListGa = mapOf(
         "name" to "looker",
         "displayName" to "Looker",
         "path" to "./google/services/looker"
+    ),
+    "lustre" to mapOf(
+        "name" to "lustre",
+        "displayName" to "GoogleCloudManagedLustre",
+        "path" to "./google/services/lustre"
     ),
     "managedkafka" to mapOf(
         "name" to "managedkafka",
@@ -536,6 +586,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Notebooks",
         "path" to "./google/services/notebooks"
     ),
+    "oracledatabase" to mapOf(
+        "name" to "oracledatabase",
+        "displayName" to "OracleDatabase",
+        "path" to "./google/services/oracledatabase"
+    ),
     "orgpolicy" to mapOf(
         "name" to "orgpolicy",
         "displayName" to "Orgpolicy",
@@ -546,6 +601,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Osconfig",
         "path" to "./google/services/osconfig"
     ),
+    "osconfigv2" to mapOf(
+        "name" to "osconfigv2",
+        "displayName" to "Osconfigv2",
+        "path" to "./google/services/osconfigv2"
+    ),
     "oslogin" to mapOf(
         "name" to "oslogin",
         "displayName" to "Oslogin",
@@ -555,6 +615,16 @@ var ServicesListGa = mapOf(
         "name" to "parallelstore",
         "displayName" to "Parallelstore",
         "path" to "./google/services/parallelstore"
+    ),
+    "parametermanager" to mapOf(
+        "name" to "parametermanager",
+        "displayName" to "Parametermanager",
+        "path" to "./google/services/parametermanager"
+    ),
+    "parametermanagerregional" to mapOf(
+        "name" to "parametermanagerregional",
+        "displayName" to "Parametermanagerregional",
+        "path" to "./google/services/parametermanagerregional"
     ),
     "privateca" to mapOf(
         "name" to "privateca",
@@ -596,6 +666,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Resourcemanager",
         "path" to "./google/services/resourcemanager"
     ),
+    "resourcemanager3" to mapOf(
+        "name" to "resourcemanager3",
+        "displayName" to "Resourcemanager3",
+        "path" to "./google/services/resourcemanager3"
+    ),
     "runtimeconfig" to mapOf(
         "name" to "runtimeconfig",
         "displayName" to "Runtimeconfig",
@@ -605,6 +680,11 @@ var ServicesListGa = mapOf(
         "name" to "secretmanager",
         "displayName" to "Secretmanager",
         "path" to "./google/services/secretmanager"
+    ),
+    "secretmanagerregional" to mapOf(
+        "name" to "secretmanagerregional",
+        "displayName" to "Secretmanagerregional",
+        "path" to "./google/services/secretmanagerregional"
     ),
     "securesourcemanager" to mapOf(
         "name" to "securesourcemanager",
@@ -686,6 +766,16 @@ var ServicesListGa = mapOf(
         "displayName" to "Storage",
         "path" to "./google/services/storage"
     ),
+    "storagebatchoperations" to mapOf(
+        "name" to "storagebatchoperations",
+        "displayName" to "StorageBatchOperations",
+        "path" to "./google/services/storagebatchoperations"
+    ),
+    "storagecontrol" to mapOf(
+        "name" to "storagecontrol",
+        "displayName" to "Storagecontrol",
+        "path" to "./google/services/storagecontrol"
+    ),
     "storageinsights" to mapOf(
         "name" to "storageinsights",
         "displayName" to "Storageinsights",
@@ -710,6 +800,11 @@ var ServicesListGa = mapOf(
         "name" to "tpuv2",
         "displayName" to "Tpuv2",
         "path" to "./google/services/tpuv2"
+    ),
+    "transcoder" to mapOf(
+        "name" to "transcoder",
+        "displayName" to "Transcoder",
+        "path" to "./google/services/transcoder"
     ),
     "vertexai" to mapOf(
         "name" to "vertexai",

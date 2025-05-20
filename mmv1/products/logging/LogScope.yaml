@@ -1,0 +1,90 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'LogScope'
+description: 'Describes a group of resources to read log entries from'
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/logging/docs/apis'
+  api: 'https://cloud.google.com/logging/docs/reference/v2/rest/v2/projects.locations.logScopes'
+docs:
+base_url: '{{parent}}/locations/{{location}}/logScopes'
+self_link: '{{parent}}/locations/{{location}}/logScopes/{{name}}'
+create_url: '{{parent}}/locations/{{location}}/logScopes?logScopeId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%parent}}/locations/{{location}}/logScopes/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  encoder: 'templates/terraform/encoders/logging_log_scope.go.tmpl'
+examples:
+  - name: 'logging_log_scope_basic'
+    primary_resource_id: 'logging_log_scope'
+    vars:
+      log_scope_name: 'my-log-scope'
+      log_view_name_1: 'view1'
+      log_view_name_2: 'view2'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+parameters:
+  - name: 'parent'
+    type: String
+    description: The parent of the resource.
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+  - name: 'location'
+    type: String
+    description:
+      'The location of the resource. The only supported location is global so far.'
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - name: 'name'
+    type: String
+    description:
+      'The resource name of the log scope. For example:
+      \`projects/my-project/locations/global/logScopes/my-log-scope\`'
+    required: true
+    immutable: true
+    ignore_read: true
+    diff_suppress_func: 'tpgresource.CompareResourceNames'
+    # This has to be camelCase, even though it's snakeCase in proto definiation.
+  - name: 'resourceNames'
+    type: Array
+    description:
+      'Names of one or more parent resources : *  \`projects/[PROJECT_ID]\`
+      May alternatively be one or more views :
+      * \`projects/[PROJECT_ID]/locations/[LOCATION_ID]/buckets/[BUCKET_ID]/views/[VIEW_ID]\`
+      A log scope can include a maximum of 50 projects and a maximum of 100 resources in total.'
+    required: true
+    item_type:
+      type: String
+  - name: 'description'
+    type: String
+    description: Describes this log scopes.
+  - name: 'createTime'
+    type: String
+    description: Output only. The creation timestamp of the log scopes.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: Output only. The last update timestamp of the log scopes.
+    output: true

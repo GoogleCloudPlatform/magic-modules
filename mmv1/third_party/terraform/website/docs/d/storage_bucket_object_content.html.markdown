@@ -12,7 +12,7 @@ See [the official documentation](https://cloud.google.com/storage/docs/key-terms
 and
 [API](https://cloud.google.com/storage/docs/json_api/v1/objects).
 
-~> **Warning:** The object content will be saved in the state, and visiable to everyone who has access to the state file.
+~> **Warning:** The object content will be saved in the state, and visible to everyone who has access to the state file.
 
 ## Example Usage
 
@@ -41,4 +41,12 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `content` - (Computed) [Content-Language](https://tools.ietf.org/html/rfc7231#section-3.1.3.2) of the object content.
+* `content` - (Computed) The content of the object.
+
+* `content_base64` - (Computed) Base64 encoded version of the object content.
+  Use this when dealing with binary data.
+
+* `content_hexsha512` - (Computed) Hex encoded SHA512 checksum of file content.
+
+* `content_base64sha512` - (Computed) Base64 encoded SHA512 checksum of file content.
+

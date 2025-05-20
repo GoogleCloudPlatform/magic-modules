@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,38 +11,48 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'FirewallRule'
 description: |
   A single firewall rule that is evaluated against incoming traffic
   and provides an action to take on matched requests.
-base_url: 'apps/{{project}}/firewall/ingressRules'
-self_link: 'apps/{{project}}/firewall/ingressRules/{{priority}}'
-update_verb: :PATCH
-update_mask: true
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/appengine/docs/standard/python/creating-firewalls#creating_firewall_rules'
   api: 'https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.firewall.ingressRules'
-collection_url_key: 'ingressRules'
-import_format: ['apps/{{project}}/firewall/ingressRules/{{priority}}']
+docs:
+base_url: 'apps/{{project}}/firewall/ingressRules'
+self_link: 'apps/{{project}}/firewall/ingressRules/{{priority}}'
+update_verb: 'PATCH'
+update_mask: true
 mutex: 'apps/{{project}}'
-async: !ruby/object:Provider::Terraform::PollAsync
-  check_response_func_existence: transport_tpg.PollCheckForExistence
+import_format:
+  - 'apps/{{project}}/firewall/ingressRules/{{priority}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+async:
+  type: 'PollAsync'
+  check_response_func_existence: 'transport_tpg.PollCheckForExistence'
+  check_response_func_absence: 'transport_tpg.PollCheckForAbsence'
+  suppress_error: false
+  target_occurrences: 1
   actions: ['create']
-skip_sweeper: true
+collection_url_key: 'ingressRules'
+custom_code:
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'app_engine_firewall_rule_basic'
+  - name: 'app_engine_firewall_rule_basic'
     primary_resource_id: 'rule'
     vars:
       project_id: 'ae-project'
     test_env_vars:
-      org_id: :ORG_ID
-      billing_account: :BILLING_ACCT
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
 parameters:
-  - !ruby/object:Api::Type::Integer
-    name: 'priority'
+  - name: 'priority'
+    type: Integer
     description: |
       A positive integer that defines the order of rule evaluation.
       Rules with the lowest priority are evaluated first.
@@ -51,22 +61,22 @@ parameters:
       IPv6 traffic when no previous rule matches. Only the action of
       this rule can be modified by the user.
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'description'
+  - name: 'description'
+    type: String
     description: |
       An optional string description of this rule.
     required: false
-  - !ruby/object:Api::Type::String
-    name: 'sourceRange'
+  - name: 'sourceRange'
+    type: String
     description: |
       IP address or range, defined using CIDR notation, of requests that this rule applies to.
     required: true
-  - !ruby/object:Api::Type::Enum
-    name: 'action'
+  - name: 'action'
+    type: Enum
     description: |
       The action to take if this rule matches.
     required: true
-    values:
-      - UNSPECIFIED_ACTION
-      - ALLOW
-      - DENY
+    enum_values:
+      - 'UNSPECIFIED_ACTION'
+      - 'ALLOW'
+      - 'DENY'

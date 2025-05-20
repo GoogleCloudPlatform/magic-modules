@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,70 +11,76 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Policy'
-base_url: projects/{{project}}/policy
-self_link: projects/{{project}}/policy
 description: |
   A policy for container image binary authorization.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/binary-authorization/'
   api: 'https://cloud.google.com/binary-authorization/docs/reference/rest/'
-create_verb: :PUT
-delete_verb: :PUT
+docs:
 id_format: 'projects/{{project}}'
-import_format: ['projects/{{project}}']
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  constants: 'templates/terraform/constants/binaryauthorization_policy.erb'
-  pre_delete: 'templates/terraform/pre_delete/restore_default_binaryauthorization_policy.erb'
+base_url: 'projects/{{project}}/policy'
+self_link: 'projects/{{project}}/policy'
+create_verb: 'PUT'
+delete_verb: 'PUT'
+import_format:
+  - 'projects/{{project}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/binaryauthorization_policy.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/restore_default_binaryauthorization_policy.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'binary_authorization_policy_basic'
+  - name: 'binary_authorization_policy_basic'
     primary_resource_id: 'policy'
-    skip_test: true
     vars:
       attestor_name: 'test-attestor'
       note_name: 'test-attestor-note'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'binary_authorization_policy_global_evaluation'
+    exclude_test: true
+  - name: 'binary_authorization_policy_global_evaluation'
     primary_resource_id: 'policy'
-    skip_test: true
     vars:
       attestor_name: 'test-attestor'
       note_name: 'test-attestor-note'
+    exclude_test: true
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: description
+  - name: 'description'
+    type: String
     description: A descriptive comment.
-  - !ruby/object:Api::Type::Enum
-    name: globalPolicyEvaluationMode
+  - name: 'globalPolicyEvaluationMode'
+    type: Enum
     description: |
       Controls the evaluation of a Google-maintained global admission policy
       for common system-level images. Images not covered by the global
       policy will be subject to the project admission policy.
-    values:
-      - :ENABLE
-      - :DISABLE
     default_from_api: true
-  - !ruby/object:Api::Type::Array
-    name: admissionWhitelistPatterns
+    enum_values:
+      - 'ENABLE'
+      - 'DISABLE'
+  - name: 'admissionWhitelistPatterns'
+    type: Array
     description: |
       A whitelist of image patterns to exclude from admission rules. If an
       image's name matches a whitelist pattern, the image's admission
       requests will always be permitted regardless of your admission rules.
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: namePattern
-          required: true
+        - name: 'namePattern'
+          type: String
           description: |
             An image name pattern to whitelist, in the form
             `registry/path/to/image`. This supports a trailing * as a
             wildcard, but this is allowed only in text after the registry/
             part.
-  - !ruby/object:Api::Type::Map
-    name: clusterAdmissionRules
+          required: true
+  - name: 'clusterAdmissionRules'
+    type: Map
     description: |
       Per-cluster admission rules. An admission rule specifies either that
       all container images used in a pod creation request must be attested
@@ -86,7 +92,6 @@ properties:
       Identifier format: `{{location}}.{{clusterId}}`.
       A location is either a compute zone (e.g. `us-central1-a`) or a region
       (e.g. `us-central1`).
-    key_name: cluster
     is_set: true
     set_hash_func: |-
       func(v interface{}) int {
@@ -112,19 +117,21 @@ properties:
         schema.SerializeResourceForHash(&buf, copy, ResourceBinaryAuthorizationPolicy().Schema["cluster_admission_rules"].Elem.(*schema.Resource))
         return tpgresource.Hashcode(buf.String())
       }
-    value_type: !ruby/object:Api::Type::NestedObject
+    key_name: 'cluster'
+    value_type:
       name: clusterAdmissionRule
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::Enum
-          name: evaluationMode
-          required: true
+        - name: 'evaluationMode'
+          type: Enum
           description: How this admission rule will be evaluated.
-          values:
-            - :ALWAYS_ALLOW
-            - :REQUIRE_ATTESTATION
-            - :ALWAYS_DENY
-        - !ruby/object:Api::Type::Array
-          name: requireAttestationsBy
+          required: true
+          enum_values:
+            - 'ALWAYS_ALLOW'
+            - 'REQUIRE_ATTESTATION'
+            - 'ALWAYS_DENY'
+        - name: 'requireAttestationsBy'
+          type: Array
           description: |
             The resource names of the attestors that must attest to a
             container image. If the attestor is in a different project from the
@@ -136,35 +143,36 @@ properties:
             Note: this field must be non-empty when the evaluation_mode field
             specifies REQUIRE_ATTESTATION, otherwise it must be empty.
           is_set: true
-          set_hash_func: tpgresource.SelfLinkNameHash
-          custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.erb'
           diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-          item_type: Api::Type::String
-        - !ruby/object:Api::Type::Enum
-          name: enforcementMode
-          required: true
+          set_hash_func: tpgresource.SelfLinkNameHash
+          custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.tmpl'
+          item_type:
+            type: String
+        - name: 'enforcementMode'
+          type: Enum
           description: |
             The action when a pod creation is denied by the admission rule.
-          values:
-            - :ENFORCED_BLOCK_AND_AUDIT_LOG
-            - :DRYRUN_AUDIT_LOG_ONLY
-  - !ruby/object:Api::Type::NestedObject
-    name: defaultAdmissionRule
+          required: true
+          enum_values:
+            - 'ENFORCED_BLOCK_AND_AUDIT_LOG'
+            - 'DRYRUN_AUDIT_LOG_ONLY'
+  - name: 'defaultAdmissionRule'
+    type: NestedObject
     description: |
       Default admission rule for a cluster without a per-cluster admission
       rule.
     required: true
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: evaluationMode
+      - name: 'evaluationMode'
+        type: Enum
         description: How this admission rule will be evaluated.
         required: true
-        values:
-          - :ALWAYS_ALLOW
-          - :REQUIRE_ATTESTATION
-          - :ALWAYS_DENY
-      - !ruby/object:Api::Type::Array
-        name: requireAttestationsBy
+        enum_values:
+          - 'ALWAYS_ALLOW'
+          - 'REQUIRE_ATTESTATION'
+          - 'ALWAYS_DENY'
+      - name: 'requireAttestationsBy'
+        type: Array
         description: |
           The resource names of the attestors that must attest to a
           container image. If the attestor is in a different project from the
@@ -176,15 +184,16 @@ properties:
           Note: this field must be non-empty when the evaluation_mode field
           specifies REQUIRE_ATTESTATION, otherwise it must be empty.
         is_set: true
-        set_hash_func: tpgresource.SelfLinkNameHash
-        custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.erb'
         diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-        item_type: Api::Type::String
-      - !ruby/object:Api::Type::Enum
-        name: enforcementMode
-        required: true
+        set_hash_func: tpgresource.SelfLinkNameHash
+        custom_expand: 'templates/terraform/custom_expand/binaryauthorization_attestors.tmpl'
+        item_type:
+          type: String
+      - name: 'enforcementMode'
+        type: Enum
         description: |
           The action when a pod creation is denied by the admission rule.
-        values:
-          - :ENFORCED_BLOCK_AND_AUDIT_LOG
-          - :DRYRUN_AUDIT_LOG_ONLY
+        required: true
+        enum_values:
+          - 'ENFORCED_BLOCK_AND_AUDIT_LOG'
+          - 'DRYRUN_AUDIT_LOG_ONLY'

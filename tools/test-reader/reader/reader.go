@@ -329,6 +329,10 @@ func readConfigStr(configStr string) (Step, error) {
 				LabelNames: []string{"name"},
 			},
 			{
+				Type:       "provider",
+				LabelNames: []string{"name"},
+			},
+			{
 				Type: "locals",
 			},
 		},

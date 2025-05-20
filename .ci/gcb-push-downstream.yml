@@ -191,6 +191,7 @@ steps:
       secretEnv:
         - "GITHUB_TOKEN_DOWNSTREAMS"
         - "GOOGLE_BILLING_ACCOUNT"
+        - "GOOGLE_CHRONICLE_INSTANCE_ID"
         - "GOOGLE_CUST_ID"
         - "GOOGLE_IDENTITY_USER"
         - "GOOGLE_MASTER_BILLING_ACCOUNT"
@@ -202,12 +203,25 @@ steps:
         - "GOOGLE_SERVICE_ACCOUNT"
         - "SA_KEY"
         - "GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION"
+        - "GOOGLE_VMWAREENGINE_PROJECT"
       env:
         - "COMMIT_SHA=$COMMIT_SHA"
         - "GOOGLE_REGION=us-central1"
         - "GOOGLE_ZONE=us-central1-a"
       args:
         - "check-cassettes"
+
+    - name: 'gcr.io/graphite-docker-images/go-plus'
+      id: magician-delete-branches
+      waitFor: ["vcr-merge"]
+      entrypoint: '/workspace/.ci/scripts/go-plus/magician/exec.sh'
+      secretEnv:
+        - "GITHUB_TOKEN_CLASSIC"
+      args:
+        - "delete-branches"
+        - $COMMIT_SHA
+        - $BRANCH_NAME
+
 
 # set extremely long 1 day timeout, in order to ensure that any jams / backlogs can be cleared.
 timeout: 86400s
@@ -224,6 +238,8 @@ availableSecrets:
       env: GITHUB_TOKEN_DOWNSTREAMS
     - versionName: projects/673497134629/secrets/ci-test-billing-account/versions/latest
       env: GOOGLE_BILLING_ACCOUNT
+    - versionName: projects/673497134629/secrets/ci-test-chronicle-instance-id/versions/latest
+      env: GOOGLE_CHRONICLE_INSTANCE_ID
     - versionName: projects/673497134629/secrets/ci-test-cust-id/versions/latest
       env: GOOGLE_CUST_ID
     - versionName: projects/673497134629/secrets/ci-test-identity-user/versions/latest
@@ -246,3 +262,5 @@ availableSecrets:
       env: SA_KEY
     - versionName: projects/673497134629/secrets/ci-test-public-advertised-prefix-description/versions/latest
       env: GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION
+    - versionName: projects/673497134629/secrets/ci-test-vmwareengine-project/versions/latest
+      env: GOOGLE_VMWAREENGINE_PROJECT

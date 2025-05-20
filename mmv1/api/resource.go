@@ -13,62 +13,77 @@
 package api
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"maps"
+	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
+	"text/template"
+
+	"github.com/golang/glog"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"golang.org/x/exp/slices"
 )
+
+const RELATIVE_MAGICIAN_LOCATION = "mmv1/"
+const GITHUB_BASE_URL = "https://github.com/GoogleCloudPlatform/magic-modules/tree/main/" + RELATIVE_MAGICIAN_LOCATION
 
 type Resource struct {
 	Name string
 
 	// original value of :name before the provider override happens
 	// same as :name if not overridden in provider
-	ApiName string `yaml:"api_name"`
+	ApiName string `yaml:"api_name,omitempty"`
 
 	// [Required] A description of the resource that's surfaced in provider
 	// documentation.
 	Description string
 
-	// [Required] (Api::Resource::ReferenceLinks) Reference links provided in
-	// downstream documentation.
-	References resource.ReferenceLinks
+	// [Required] Reference links provided in
+	// downstream documentation. Expected to follow the format as follows:
+	//
+	//	references:
+	//  	guides:
+	//			'Guide name': 'official_documentation_url'
+	//		api: 'rest_api_reference_url/version'
+	//
+	References resource.ReferenceLinks `yaml:"references,omitempty"`
 
 	// [Required] The GCP "relative URI" of a resource, relative to the product
 	// base URL. It can often be inferred from the `create` path.
-	BaseUrl string `yaml:"base_url"`
+	BaseUrl string `yaml:"base_url,omitempty"`
 
 	// ====================
 	// Common Configuration
 	// ====================
 	//
 	// [Optional] The minimum API version this resource is in. Defaults to ga.
-	MinVersion string `yaml:"min_version"`
+	MinVersion string `yaml:"min_version,omitempty"`
 
 	// [Optional] If set to true, don't generate the resource.
-	Exclude bool
+	Exclude bool `yaml:"exclude,omitempty"`
 
 	// [Optional] If set to true, the resource is not able to be updated.
-	Immutable bool
+	Immutable bool `yaml:"immutable,omitempty"`
 
 	// [Optional] If set to true, this resource uses an update mask to perform
 	// updates. This is typical of newer GCP APIs.
-	UpdateMask bool `yaml:"update_mask"`
+	UpdateMask bool `yaml:"update_mask,omitempty"`
 
 	// [Optional] If set to true, the object has a `self_link` field. This is
 	// typical of older GCP APIs.
-	HasSelfLink bool `yaml:"has_self_link"`
+	HasSelfLink bool `yaml:"has_self_link,omitempty"`
 
 	// [Optional] The validator "relative URI" of a resource, relative to the product
 	// base URL. Specific to defining the resource as a CAI asset.
-	CaiBaseUrl string `yaml:"cai_base_url"`
+	CaiBaseUrl string `yaml:"cai_base_url,omitempty"`
 
 	// ====================
 	// URL / HTTP Configuration
@@ -77,34 +92,34 @@ type Resource struct {
 	// [Optional] The "identity" URL of the resource. Defaults to:
 	// * base_url when the create_verb is POST
 	// * self_link when the create_verb is PUT  or PATCH
-	SelfLink string `yaml:"self_link"`
+	SelfLink string `yaml:"self_link,omitempty"`
 
 	// [Optional] The URL used to creating the resource. Defaults to:
 	// * collection url when the create_verb is POST
 	// * self_link when the create_verb is PUT or PATCH
-	CreateUrl string `yaml:"create_url"`
+	CreateUrl string `yaml:"create_url,omitempty"`
 
 	// [Optional] The URL used to delete the resource. Defaults to the self
 	// link.
-	DeleteUrl string `yaml:"delete_url"`
+	DeleteUrl string `yaml:"delete_url,omitempty"`
 
 	// [Optional] The URL used to update the resource. Defaults to the self
 	// link.
-	UpdateUrl string `yaml:"update_url"`
+	UpdateUrl string `yaml:"update_url,omitempty"`
 	// [Optional] The HTTP verb used during create. Defaults to POST.
-	CreateVerb string `yaml:"create_verb"`
+	CreateVerb string `yaml:"create_verb,omitempty"`
 
 	// [Optional] The HTTP verb used during read. Defaults to GET.
-	ReadVerb string `yaml:"read_verb"`
+	ReadVerb string `yaml:"read_verb,omitempty"`
 
 	// [Optional] The HTTP verb used during update. Defaults to PUT.
-	UpdateVerb string `yaml:"update_verb"`
+	UpdateVerb string `yaml:"update_verb,omitempty"`
 
 	// [Optional] The HTTP verb used during delete. Defaults to DELETE.
-	DeleteVerb string `yaml:"delete_verb"`
+	DeleteVerb string `yaml:"delete_verb,omitempty"`
 
 	// [Optional] Additional Query Parameters to append to GET. Defaults to ""
-	ReadQueryParams string `yaml:"read_query_params"`
+	ReadQueryParams string `yaml:"read_query_params,omitempty"`
 
 	// ====================
 	// Collection / Identity URL Configuration
@@ -113,7 +128,7 @@ type Resource struct {
 	// [Optional] This is the name of the list of items
 	// within the collection (list) json. Will default to the
 	// camelcase plural name of the resource.
-	CollectionUrlKey string `yaml:"collection_url_key"`
+	CollectionUrlKey string `yaml:"collection_url_key,omitempty"`
 
 	// [Optional] An ordered list of names of parameters that uniquely identify
 	// the resource.
@@ -122,14 +137,14 @@ type Resource struct {
 	// and is identified by some non-name value, such as an ip+port pair.
 	// If you're writing a fine-grained resource (eg with nested_query) a value
 	// must be set.
-	Identity []string
+	Identity []string `yaml:"identity,omitempty"`
 
 	// [Optional] (Api::Resource::NestedQuery) This is useful in case you need
 	// to change the query made for GET requests only. In particular, this is
 	// often used to extract an object from a parent object or a collection.
 	// Note that if both nested_query and custom_code.decoder are provided,
 	// the decoder will be included within the code handling the nested query.
-	NestedQuery *resource.NestedQuery `yaml:"nested_query"`
+	NestedQuery *resource.NestedQuery `yaml:"nested_query,omitempty"`
 
 	// ====================
 	// IAM Configuration
@@ -137,19 +152,19 @@ type Resource struct {
 	//
 	// [Optional] (Api::Resource::IamPolicy) Configuration of a resource's
 	// resource-specific IAM Policy.
-	IamPolicy *resource.IamPolicy `yaml:"iam_policy"`
+	IamPolicy *resource.IamPolicy `yaml:"iam_policy,omitempty"`
 
 	// [Optional] If set to true, don't generate the resource itself; only
 	// generate the IAM policy.
 	// TODO rewrite: rename?
-	ExcludeResource bool `yaml:"exclude_resource"`
+	ExcludeResource bool `yaml:"exclude_resource,omitempty"`
 
 	// [Optional] GCP kind, e.g. `compute//disk`
-	Kind string
+	Kind string `yaml:"kind,omitempty"`
 
 	// [Optional] If set to true, indicates that a resource is not configurable
 	// such as GCP regions.
-	Readonly bool
+	Readonly bool `yaml:"readonly,omitempty"`
 
 	// ====================
 	// Terraform Overrides
@@ -157,7 +172,7 @@ type Resource struct {
 	// [Optional] If non-empty, overrides the full filename prefix
 	// i.e. google/resource_product_{{resource_filename_override}}.go
 	// i.e. google/resource_product_{{resource_filename_override}}_test.go
-	FilenameOverride string `yaml:"filename_override"`
+	FilenameOverride string `yaml:"filename_override,omitempty"`
 
 	// If non-empty, overrides the full given resource name.
 	// i.e. 'google_project' for resourcemanager.Project
@@ -167,11 +182,11 @@ type Resource struct {
 	// This was added to handle preexisting handwritten resources that
 	// don't match the natural generated name exactly, and to support
 	// services with a mix of handwritten and generated resources.
-	LegacyName string `yaml:"legacy_name"`
+	LegacyName string `yaml:"legacy_name,omitempty"`
 
 	// The Terraform resource id format used when calling //setId(...).
 	// For instance, `{{name}}` means the id will be the resource name.
-	IdFormat string `yaml:"id_format"`
+	IdFormat string `yaml:"id_format,omitempty"`
 
 	// Override attribute used to handwrite the formats for generating regex strings
 	// that match templated values to a self_link when importing, only necessary when
@@ -179,24 +194,123 @@ type Resource struct {
 	// Leading a token with `%`
 	// i.e. {{%parent}}/resource/{{resource}}
 	// will allow that token to hold multiple /'s.
-	ImportFormat []string `yaml:"import_format"`
+	//
+	// Expected to be formatted as follows:
+	//
+	//	import_format:
+	//		- example_import_one
+	//		- example_import_two
+	//
+	ImportFormat []string `yaml:"import_format,omitempty"`
 
-	CustomCode resource.CustomCode `yaml:"custom_code"`
+	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
 
-	Docs resource.Docs
+	Docs resource.Docs `yaml:"docs,omitempty"`
 
 	// This block inserts entries into the customdiff.All() block in the
 	// resource schema -- the code for these custom diff functions must
 	// be included in the resource constants or come from tpgresource
-	CustomDiff []string `yaml:"custom_diff"`
+	CustomDiff []string `yaml:"custom_diff,omitempty"`
 
 	// Lock name for a mutex to prevent concurrent API calls for a given
 	// resource.
-	Mutex string
+	Mutex string `yaml:"mutex,omitempty"`
 
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
 	Examples []resource.Examples
+
+	// If true, generates product operation handling logic.
+	AutogenAsync bool `yaml:"autogen_async,omitempty"`
+
+	// If true, resource is not importable
+	ExcludeImport bool `yaml:"exclude_import,omitempty"`
+
+	// If true, exclude resource from Terraform Validator
+	// (i.e. terraform-provider-conversion)
+	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
+
+	// If true, skip sweeper generation for this resource
+	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
+
+	// Override sweeper settings
+	Sweeper resource.Sweeper `yaml:"sweeper,omitempty"`
+
+	Timeouts *Timeouts `yaml:"timeouts,omitempty"`
+
+	// An array of function names that determine whether an error is retryable.
+	ErrorRetryPredicates []string `yaml:"error_retry_predicates,omitempty"`
+
+	// An array of function names that determine whether an error is not retryable.
+	ErrorAbortPredicates []string `yaml:"error_abort_predicates,omitempty"`
+
+	// Optional attributes for declaring a resource's current version and generating
+	// state_upgrader code to the output .go file from files stored at
+	// mmv1/templates/terraform/state_migrations/
+	// used for maintaining state stability with resources first provisioned on older api versions.
+	SchemaVersion int `yaml:"schema_version,omitempty"`
+
+	// From this schema version on, state_upgrader code is generated for the resource.
+	// When unset, state_upgrade_base_schema_version defauts to 0.
+	// Normally, it is not needed to be set.
+	StateUpgradeBaseSchemaVersion int `yaml:"state_upgrade_base_schema_version,omitempty"`
+
+	StateUpgraders bool `yaml:"state_upgraders,omitempty"`
+
+	// Do not apply the default attribution label
+	ExcludeAttributionLabel bool `yaml:"exclude_attribution_label,omitempty"`
+
+	// This block inserts the named function and its attribute into the
+	// resource schema -- the code for the migrate_state function must
+	// be included in the resource constants or come from tpgresource
+	// included for backwards compatibility as an older state migration method
+	// and should not be used for new resources.
+	MigrateState string `yaml:"migrate_state,omitempty"`
+
+	// Set to true for resources that are unable to be deleted, such as KMS keyrings or project
+	// level resources such as firebase project
+	ExcludeDelete bool `yaml:"exclude_delete,omitempty"`
+
+	// Set to true for resources that are unable to be read from the API, such as
+	// public ca external account keys
+	ExcludeRead bool `yaml:"exclude_read,omitempty"`
+
+	// Set to true for resources that wish to disable automatic generation of default provider
+	// value customdiff functions
+	// TODO rewrite: 1 instance used
+	ExcludeDefaultCdiff bool `yaml:"exclude_default_cdiff,omitempty"`
+
+	// This enables resources that get their project via a reference to a different resource
+	// instead of a project field to use User Project Overrides
+	SupportsIndirectUserProjectOverride bool `yaml:"supports_indirect_user_project_override,omitempty"`
+
+	// If true, the resource's project field can be specified as either the short form project
+	// id or the long form projects/project-id. The extra projects/ string will be removed from
+	// urls and ids. This should only be used for resources that previously supported long form
+	// project ids for backwards compatibility.
+	LegacyLongFormProject bool `yaml:"legacy_long_form_project,omitempty"`
+
+	// Function to transform a read error so that handleNotFound recognises
+	// it as a 404. This should be added as a handwritten fn that takes in
+	// an error and returns one.
+	ReadErrorTransform string `yaml:"read_error_transform,omitempty"`
+
+	// If true, resources that failed creation will be marked as tainted. As a consequence
+	// these resources will be deleted and recreated on the next apply call. This pattern
+	// is preferred over deleting the resource directly in post_create_failure hooks.
+	TaintResourceOnFailedCreate bool `yaml:"taint_resource_on_failed_create,omitempty"`
+
+	// Add a deprecation message for a resource that's been deprecated in the API.
+	DeprecationMessage string `yaml:"deprecation_message,omitempty"`
+
+	Async *Async
+
+	// Tag autogen resources so that we can track them. In the future this will
+	// control if a resource is continuously generated from public OpenAPI docs
+	AutogenStatus string `yaml:"autogen_status"`
+
+	// The three groups of []*Type fields are expected to be strictly ordered within a yaml file
+	// in the sequence of Virtual Fields -> Parameters -> Properties
 
 	// Virtual fields are Terraform-only fields that control Terraform's
 	// behaviour. They don't map to underlying API fields (although they
@@ -212,120 +326,62 @@ type Resource struct {
 	// Both are resource level fields and do not make sense, and are also not
 	// supported, for nested fields. Nested fields that shouldn't be included
 	// in API payloads are better handled with custom expand/encoder logic.
-	VirtualFields []*Type `yaml:"virtual_fields"`
-
-	// If true, generates product operation handling logic.
-	AutogenAsync bool `yaml:"autogen_async"`
-
-	// If true, resource is not importable
-	ExcludeImport bool `yaml:"exclude_import"`
-
-	// If true, exclude resource from Terraform Validator
-	// (i.e. terraform-provider-conversion)
-	ExcludeTgc bool `yaml:"exclude_tgc"`
-
-	// If true, skip sweeper generation for this resource
-	SkipSweeper bool `yaml:"skip_sweeper"`
-
-	// Override sweeper settings
-	Sweeper resource.Sweeper
-
-	Timeouts *Timeouts
-
-	// An array of function names that determine whether an error is retryable.
-	ErrorRetryPredicates []string `yaml:"error_retry_predicates"`
-
-	// An array of function names that determine whether an error is not retryable.
-	ErrorAbortPredicates []string `yaml:"error_abort_predicates"`
-
-	// Optional attributes for declaring a resource's current version and generating
-	// state_upgrader code to the output .go file from files stored at
-	// mmv1/templates/terraform/state_migrations/
-	// used for maintaining state stability with resources first provisioned on older api versions.
-	SchemaVersion int `yaml:"schema_version"`
-
-	// From this schema version on, state_upgrader code is generated for the resource.
-	// When unset, state_upgrade_base_schema_version defauts to 0.
-	// Normally, it is not needed to be set.
-	StateUpgradeBaseSchemaVersion int `yaml:"state_upgrade_base_schema_version"`
-
-	StateUpgraders bool `yaml:"state_upgraders"`
-
-	// Do not apply the default attribution label
-	SkipAttributionLabel bool `yaml:"skip_attribution_label"`
-
-	// This block inserts the named function and its attribute into the
-	// resource schema -- the code for the migrate_state function must
-	// be included in the resource constants or come from tpgresource
-	// included for backwards compatibility as an older state migration method
-	// and should not be used for new resources.
-	MigrateState string `yaml:"migrate_state"`
-
-	// Set to true for resources that are unable to be deleted, such as KMS keyrings or project
-	// level resources such as firebase project
-	SkipDelete bool `yaml:"skip_delete"`
-
-	// Set to true for resources that are unable to be read from the API, such as
-	// public ca external account keys
-	SkipRead bool `yaml:"skip_read"`
-
-	// Set to true for resources that wish to disable automatic generation of default provider
-	// value customdiff functions
-	// TODO rewrite: 1 instance used
-	SkipDefaultCdiff bool `yaml:"skip_default_cdiff"`
-
-	// This enables resources that get their project via a reference to a different resource
-	// instead of a project field to use User Project Overrides
-	SupportsIndirectUserProjectOverride bool `yaml:"supports_indirect_user_project_override"`
-
-	// If true, the resource's project field can be specified as either the short form project
-	// id or the long form projects/project-id. The extra projects/ string will be removed from
-	// urls and ids. This should only be used for resources that previously supported long form
-	// project ids for backwards compatibility.
-	LegacyLongFormProject bool `yaml:"legacy_long_form_project"`
-
-	// Function to transform a read error so that handleNotFound recognises
-	// it as a 404. This should be added as a handwritten fn that takes in
-	// an error and returns one.
-	ReadErrorTransform string `yaml:"read_error_transform"`
-
-	// If true, resources that failed creation will be marked as tainted. As a consequence
-	// these resources will be deleted and recreated on the next apply call. This pattern
-	// is preferred over deleting the resource directly in post_create_failure hooks.
-	TaintResourceOnFailedCreate bool `yaml:"taint_resource_on_failed_create"`
-
-	// Add a deprecation message for a resource that's been deprecated in the API.
-	DeprecationMessage string `yaml:"deprecation_message"`
-
-	Async *Async
-
-	Properties []*Type
+	VirtualFields []*Type `yaml:"virtual_fields,omitempty"`
 
 	Parameters []*Type
 
-	ProductMetadata *Product
+	Properties []*Type
+
+	ProductMetadata *Product `yaml:"-"`
 
 	// The version name provided by the user through CI
-	TargetVersionName string
+	TargetVersionName string `yaml:"-"`
 
 	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
-	Compiler string
+	Compiler string `yaml:"-"`
 
-	ImportPath string
+	// The API "resource type kind" used for this resource e.g., "Function".
+	// If this is not set, then :name is used instead, which is strongly
+	// preferred wherever possible. Its main purpose is for supporting
+	// fine-grained resources and legacy resources.
+	ApiResourceTypeKind string `yaml:"api_resource_type_kind,omitempty"`
+
+	// The API URL patterns used by this resource that represent variants e.g.,
+	// "folders/{folder}/feeds/{feed}". Each pattern must match the value
+	// defined in the API exactly. The use of `api_variant_patterns` is only
+	// meaningful when the resource type has multiple parent types available.
+	// This is commonly used for resources that have a project, folder, and
+	// organization variant, however most resources do not need it.
+	ApiVariantPatterns []string `yaml:"api_variant_patterns,omitempty"`
+
+	ImportPath     string `yaml:"-"`
+	SourceYamlFile string `yaml:"-"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
-	r.CreateVerb = "POST"
-	r.ReadVerb = "GET"
-	r.DeleteVerb = "DELETE"
-	r.UpdateVerb = "PUT"
-
 	type resourceAlias Resource
 	aliasObj := (*resourceAlias)(r)
 
 	err := unmarshal(aliasObj)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (r *Resource) SetDefault(product *Product) {
+	if r.CreateVerb == "" {
+		r.CreateVerb = "POST"
+	}
+	if r.ReadVerb == "" {
+		r.ReadVerb = "GET"
+	}
+	if r.DeleteVerb == "" {
+		r.DeleteVerb = "DELETE"
+	}
+	if r.UpdateVerb == "" {
+		r.UpdateVerb = "PUT"
 	}
 
 	if r.ApiName == "" {
@@ -344,17 +400,20 @@ func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
 		}
 	}
 
-	return nil
-}
-
-func (r *Resource) SetDefault(product *Product) {
 	r.ProductMetadata = product
 	for _, property := range r.AllProperties() {
 		property.SetDefault(r)
 	}
+	for _, vf := range r.VirtualFields {
+		vf.SetDefault(r)
+	}
 	if r.IamPolicy != nil && r.IamPolicy.MinVersion == "" {
 		r.IamPolicy.MinVersion = r.MinVersion
 	}
+	if r.Timeouts == nil {
+		r.Timeouts = NewTimeouts()
+	}
+
 }
 
 func (r *Resource) Validate() {
@@ -459,6 +518,32 @@ func (r Resource) UserParameters() []*Type {
 	})
 }
 
+func (r Resource) UserVirtualFields() []*Type {
+	return google.Reject(r.VirtualFields, func(p *Type) bool {
+		return p.Exclude
+	})
+}
+
+func (r Resource) ServiceVersion() string {
+	if r.CaiBaseUrl != "" {
+		return extractVersionFromBaseUrl(r.CaiBaseUrl)
+	}
+	return extractVersionFromBaseUrl(r.BaseUrl)
+}
+
+func extractVersionFromBaseUrl(baseUrl string) string {
+	parts := strings.Split(baseUrl, "/")
+	// starts with v...
+	if parts[0] != "" && parts[0][0] == 'v' {
+		return parts[0]
+	}
+	// starts with /v...
+	if parts[0] == "" && parts[1][0] == 'v' {
+		return parts[1]
+	}
+	return ""
+}
+
 // Return the user-facing properties in client tools; this ends up meaning
 // both properties and parameters but without any that are excluded due to
 // version mismatches or manual exclusion
@@ -490,10 +575,27 @@ func (r Resource) SensitiveProps() []*Type {
 	})
 }
 
+func (r Resource) WriteOnlyProps() []*Type {
+	props := r.AllNestedProperties(r.RootProperties())
+	return google.Select(props, func(p *Type) bool {
+		return p.WriteOnly
+	})
+}
+
 func (r Resource) SensitivePropsToString() string {
 	var props []string
 
 	for _, prop := range r.SensitiveProps() {
+		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+	}
+
+	return strings.Join(props, ", ")
+}
+
+func (r Resource) WriteOnlyPropsToString() string {
+	var props []string
+
+	for _, prop := range r.WriteOnlyProps() {
 		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
 	}
 
@@ -554,6 +656,28 @@ func (r Resource) RootProperties() []*Type {
 	return props
 }
 
+// Returns a sorted list of all "leaf" properties, meaning properties that have
+// no children.
+func (r Resource) LeafProperties() []*Type {
+	types := r.AllNestedProperties(google.Concat(r.RootProperties(), r.UserVirtualFields()))
+
+	// Remove types that have children, because we only want "leaf" fields
+	types = slices.DeleteFunc(types, func(t *Type) bool {
+		nestedProperties := t.NestedProperties()
+		return len(nestedProperties) > 0
+	})
+
+	// Sort types by lineage
+	slices.SortFunc(types, func(a, b *Type) int {
+		if a.MetadataLineage() < b.MetadataLineage() {
+			return -1
+		}
+		return 1
+	})
+
+	return types
+}
+
 // Return the product-level async object, or the resource-specific one
 // if one exists.
 func (r Resource) GetAsync() *Async {
@@ -601,7 +725,7 @@ func (r *Resource) AddLabelsRelatedFields(props []*Type, parent *Type) []*Type {
 
 func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []*Type {
 	if parent == nil || parent.FlattenObject {
-		if r.SkipAttributionLabel {
+		if r.ExcludeAttributionLabel {
 			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetLabelsDiffWithoutAttributionLabel")
 		} else {
 			r.CustomDiff = append(r.CustomDiff, "tpgresource.SetLabelsDiff")
@@ -729,7 +853,7 @@ func getLabelsFieldNote(title string) string {
 }
 
 func (r Resource) StateMigrationFile() string {
-	return fmt.Sprintf("templates/terraform/state_migrations/go/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
+	return fmt.Sprintf("templates/terraform/state_migrations/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
 }
 
 // ====================
@@ -950,11 +1074,6 @@ func (r Resource) TerraformName() string {
 }
 
 func (r Resource) ImportIdFormatsFromResource() []string {
-
-	var ids []string
-	for _, id := range r.GetIdentity() {
-		ids = append(ids, google.Underscore(id.Name))
-	}
 	return ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)
 }
 
@@ -1097,6 +1216,30 @@ func (r Resource) GetIdFormat() string {
 	return idFormat
 }
 
+// Returns true if the Type is in the ID format and false otherwise.
+func (r Resource) InIdFormat(prop Type) bool {
+	fields := r.ExtractIdentifiers(r.GetIdFormat())
+	return slices.Contains(fields, google.Underscore(prop.Name))
+}
+
+// Returns true if at least one of the fields in the ID format is computed
+func (r Resource) HasComputedIdFormatFields() bool {
+	idFormatFields := map[string]struct{}{}
+	for _, f := range r.ExtractIdentifiers(r.GetIdFormat()) {
+		idFormatFields[f] = struct{}{}
+	}
+	for _, p := range r.GettableProperties() {
+		// Skip fields not in the id format
+		if _, ok := idFormatFields[google.Underscore(p.Name)]; !ok {
+			continue
+		}
+		if (p.Output || p.DefaultFromApi) && !p.IgnoreRead {
+			return true
+		}
+	}
+	return false
+}
+
 // ====================
 // Template Methods
 // ====================
@@ -1189,8 +1332,7 @@ func (r Resource) ExtractIdentifiers(url string) []string {
 	return result
 }
 
-// For example, "projects/{{project}}/schemas/{{name}}", "{{project}}/{{name}}", "{{name}}"
-func (r Resource) RawImportIdFormatsFromIam() []string {
+func (r Resource) IamImportFormats() []string {
 	var importFormat []string
 
 	if r.IamPolicy != nil {
@@ -1199,8 +1341,12 @@ func (r Resource) RawImportIdFormatsFromIam() []string {
 	if len(importFormat) == 0 {
 		importFormat = r.ImportFormat
 	}
+	return importFormat
+}
 
-	return ImportIdFormats(importFormat, r.Identity, r.BaseUrl)
+// For example, "projects/{{project}}/schemas/{{name}}", "{{project}}/{{name}}", "{{name}}"
+func (r Resource) RawImportIdFormatsFromIam() []string {
+	return ImportIdFormats(r.IamImportFormats(), r.Identity, r.BaseUrl)
 }
 
 // For example, projects/(?P<project>[^/]+)/schemas/(?P<schema>[^/]+)", "(?P<project>[^/]+)/(?P<schema>[^/]+)", "(?P<schema>[^/]+)
@@ -1254,13 +1400,27 @@ func (r Resource) IamSelfLinkIdentifiers() []string {
 	return r.ExtractIdentifiers(selfLink)
 }
 
-// Returns the resource properties that are idenfifires in the selflink url
-func (r Resource) IamSelfLinkProperties() []*Type {
-	params := r.IamSelfLinkIdentifiers()
+// Returns the resource properties that are idenfifires in Iam resource when generating the docs.
+// The "project" and "organization" properties are excluded, as they are handled seperated in the docs.
+func (r Resource) IamResourceProperties() []*Type {
+	urlProperties := make([]*Type, 0)
+	for _, param := range r.IamResourceParams() {
+		if param == "project" || param == "organization" {
+			continue
+		}
 
-	urlProperties := google.Select(r.AllUserProperties(), func(p *Type) bool {
-		return slices.Contains(params, p.Name)
-	})
+		found := false
+		for _, p := range r.AllUserProperties() {
+			if param == google.Underscore(p.Name) {
+				urlProperties = append(urlProperties, p)
+				found = true
+				break
+			}
+		}
+		if !found {
+			urlProperties = append(urlProperties, &Type{Name: param})
+		}
+	}
 
 	return urlProperties
 }
@@ -1288,7 +1448,7 @@ func (r Resource) IamAttributes() []string {
 // we can reuse that config to create a resource to test IAM resources with.
 func (r Resource) FirstTestExample() resource.Examples {
 	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
-		return e.SkipTest
+		return e.ExcludeTest
 	})
 	examples = google.Reject(examples, func(e resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
@@ -1299,7 +1459,7 @@ func (r Resource) FirstTestExample() resource.Examples {
 
 func (r Resource) ExamplePrimaryResourceId() string {
 	examples := google.Reject(r.Examples, func(e resource.Examples) bool {
-		return e.SkipTest
+		return e.ExcludeTest
 	})
 	examples = google.Reject(examples, func(e resource.Examples) bool {
 		return (r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName).CompareTo(r.ProductMetadata.VersionObjOrClosest(e.MinVersion)) < 0)
@@ -1449,11 +1609,43 @@ func (r Resource) FormatDocDescription(desc string, indent bool) string {
 }
 
 func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
-	output := resource.ExecuteTemplate(&r, templatePath, appendNewline)
+	output := ExecuteTemplate(&r, templatePath, appendNewline)
 	if !appendNewline {
 		output = strings.TrimSuffix(output, "\n")
 	}
 	return output
+}
+
+func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
+	templates := []string{
+		templatePath,
+		"templates/terraform/expand_resource_ref.tmpl",
+		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
+		"templates/terraform/flatten_property_method.go.tmpl",
+		"templates/terraform/expand_property_method.go.tmpl",
+		"templates/terraform/update_mask.go.tmpl",
+		"templates/terraform/nested_query.go.tmpl",
+		"templates/terraform/unordered_list_customize_diff.go.tmpl",
+	}
+	templateFileName := filepath.Base(templatePath)
+
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	contents := bytes.Buffer{}
+	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
+		glog.Exit(err)
+	}
+
+	rs := contents.String()
+
+	if !strings.HasSuffix(rs, "\n") && appendNewline {
+		rs = fmt.Sprintf("%s\n", rs)
+	}
+
+	return rs
 }
 
 // Returns the key of the list of resources in the List API response
@@ -1577,16 +1769,20 @@ func (r Resource) IsExcluded() bool {
 
 func (r Resource) TestExamples() []resource.Examples {
 	return google.Reject(google.Reject(r.Examples, func(e resource.Examples) bool {
-		return e.SkipTest
+		return e.ExcludeTest
 	}), func(e resource.Examples) bool {
 		return e.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, e.MinVersion)
 	})
 }
 
 func (r Resource) VersionedProvider(exampleVersion string) bool {
-	vp := r.MinVersion
+	var vp string
 	if exampleVersion != "" {
 		vp = exampleVersion
+	} else if r.MinVersion == "" {
+		vp = r.ProductMetadata.lowestVersion().Name
+	} else {
+		vp = r.MinVersion
 	}
 	return vp != "" && vp != "ga"
 }
@@ -1597,4 +1793,176 @@ func (r Resource) StateUpgradersCount() []int {
 		nums = append(nums, i)
 	}
 	return nums
+}
+
+func (r Resource) CaiProductBaseUrl() string {
+	version := r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName)
+	baseUrl := version.CaiBaseUrl
+	if baseUrl == "" {
+		baseUrl = version.BaseUrl
+	}
+	return baseUrl
+}
+
+// Returns the Cai product backend name from the version base url
+// base_url: https://accessapproval.googleapis.com/v1/ -> accessapproval
+func (r Resource) CaiProductBackendName(caiProductBaseUrl string) string {
+	backendUrl := strings.Split(strings.Split(caiProductBaseUrl, "://")[1], ".googleapis.com")[0]
+	return strings.ToLower(backendUrl)
+}
+
+// Gets the Cai asset name template, which could include version
+// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
+func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
+	caiBaseUrl := ""
+	if r.CaiBaseUrl != "" {
+		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.CaiBaseUrl)
+	}
+	if caiBaseUrl == "" {
+		caiBaseUrl = r.SelfLink
+	}
+	if caiBaseUrl == "" {
+		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.BaseUrl)
+	}
+	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, caiBaseUrl)
+}
+
+// Gets the Cai asset name template, which doesn't include version
+// For example: //monitoring.googleapis.com/projects/{{project}}/services/{{service_id}}
+func (r Resource) CaiAssetNameTemplate(productBackendName string) string {
+	template := r.rawCaiAssetNameTemplate(productBackendName)
+	versionRegex, err := regexp.Compile(`\/(v\d[^\/]*)\/`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+
+	return versionRegex.ReplaceAllString(template, "/")
+}
+
+// Gets the Cai API version
+func (r Resource) CaiApiVersion(productBackendName, caiProductBaseUrl string) string {
+	template := r.rawCaiAssetNameTemplate(productBackendName)
+
+	versionRegex, err := regexp.Compile(`\/(v\d[^\/]*)\/`)
+	if err != nil {
+		log.Fatalf("Cannot compile the regular expression: %v", err)
+	}
+
+	apiVersion := strings.ReplaceAll(versionRegex.FindString(template), "/", "")
+	if apiVersion != "" {
+		return apiVersion
+	}
+
+	splits := strings.Split(caiProductBaseUrl, "/")
+	for i := 0; i < len(splits); i++ {
+		if splits[len(splits)-1-i] != "" {
+			return splits[len(splits)-1-i]
+		}
+	}
+	return ""
+}
+
+// For example: the uri "projects/{{project}}/schemas/{{name}}"
+// The paramerter is "schema" as "project" is not returned.
+func (r Resource) CaiIamResourceParams() []string {
+	resourceUri := strings.ReplaceAll(r.IamResourceUri(), "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
+
+	return google.Reject(r.ExtractIdentifiers(resourceUri), func(param string) bool {
+		return param == "project"
+	})
+}
+
+// Gets the Cai IAM asset name template
+// For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
+func (r Resource) CaiIamAssetNameTemplate(productBackendName string) string {
+	iamImportFormat := r.IamImportFormats()
+	if len(iamImportFormat) > 0 {
+		name := strings.ReplaceAll(iamImportFormat[0], "{{name}}", fmt.Sprintf("{{%s}}", r.IamParentResourceName()))
+		name = strings.ReplaceAll(name, "%", "")
+		return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, name)
+	}
+
+	caiBaseUrl := r.CaiBaseUrl
+
+	if caiBaseUrl == "" {
+		caiBaseUrl = r.SelfLink
+	}
+	if caiBaseUrl == "" {
+		caiBaseUrl = r.BaseUrl
+	}
+	return fmt.Sprintf("//%s.googleapis.com/%s/{{%s}}", productBackendName, caiBaseUrl, r.IamParentResourceName())
+}
+
+func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {
+	// Create regex to match anything between {{ and }}
+	re := regexp.MustCompile(`{{\s*([^}]+)\s*}}`)
+
+	// Find all matches in the template URL
+	matches := re.FindAllStringSubmatch(templateURL, -1)
+
+	// Create a map of allowed keys for O(1) lookup
+	allowedKeysMap := make(map[string]bool)
+	for _, key := range allowedKeys {
+		allowedKeysMap[key] = true
+	}
+
+	// Check each found key against the allowed keys
+	for _, match := range matches {
+		if len(match) < 2 {
+			continue
+		}
+
+		// Trim spaces from the key
+		key := strings.TrimSpace(match[1])
+
+		// If the key isn't in our allowed list, return false
+		if !allowedKeysMap[key] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (r Resource) ShouldGenerateSweepers() bool {
+	if !r.ExcludeSweeper && !utils.IsEmpty(r.Sweeper) {
+		return true
+	}
+
+	allowedKeys := []string{"project", "region", "location", "zone", "billing_account"}
+	if !urlContainsOnlyAllowedKeys(r.ListUrlTemplate(), allowedKeys) {
+		return false
+	}
+	if r.ExcludeSweeper || r.CustomCode.CustomDelete != "" || r.CustomCode.PreDelete != "" || r.CustomCode.PostDelete != "" || r.ExcludeDelete {
+		return false
+	}
+	return true
+}
+
+func (r Resource) GithubURL() string {
+	return GITHUB_BASE_URL + r.SourceYamlFile
+}
+
+func (r Resource) CodeHeader(templatePath string) string {
+	templateUrl := GITHUB_BASE_URL + templatePath
+
+	return fmt.Sprintf(`// ----------------------------------------------------------------------------
+//
+//     ***     AUTO GENERATED CODE    ***    Type: MMv1     ***
+//
+// ----------------------------------------------------------------------------
+//
+//     This code is generated by Magic Modules using the following:
+//
+//     Configuration: %s
+//     Template:      %s
+//
+//     DO NOT EDIT this file directly. Any changes made to this file will be
+//     overwritten during the next generation cycle.
+//
+// ----------------------------------------------------------------------------`, r.GithubURL(), templateUrl)
+}
+
+func (r Resource) MarkdownHeader(templatePath string) string {
+	return strings.Replace(r.CodeHeader(templatePath), "//", "#", -1)
 }

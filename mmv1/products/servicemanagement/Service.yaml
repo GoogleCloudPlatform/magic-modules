@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,33 +11,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Service'
-base_url: services
-self_link: services/{{service_name}}
+legacy_name: 'google_endpoints_service'
 description: |
   A service that is managed by Google Service Management
-legacy_name: google_endpoints_service
-id_format: 'services/{{service_name}}'
-import_format: ['services/{{service_name}}']
 exclude_resource: true
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  parent_resource_attribute: 'service_name'
+docs:
+id_format: 'services/{{service_name}}'
+base_url: 'services'
+self_link: 'services/{{service_name}}'
+import_format:
+  - 'services/{{service_name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
   method_name_separator: ':'
-  fetch_iam_policy_verb: :POST
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'service_name'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'endpoints_iam'
+  - name: 'endpoints_iam'
     primary_resource_id: 'endpoints_service'
-    primary_resource_name: "fmt.Sprintf(\"endpoint%s.endpoints.%s.cloud.goog\",
-      context[\"\
-      random_suffix\"], context[\"project_name\"])"
+    primary_resource_name: 'fmt.Sprintf("endpoint%s.endpoints.%s.cloud.goog", context["random_suffix"], context["project_name"])'
     vars:
       name: 'endpoint'
     test_env_vars:
-      project_name: :PROJECT_NAME
+      project_name: 'PROJECT_NAME'
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'serviceName'
+  - name: 'serviceName'
+    type: String
     description: The name of the service.
     required: true

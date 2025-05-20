@@ -1,0 +1,185 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'InterceptEndpointGroupAssociation'
+description: |-
+  An endpoint group association represents a link between a network and an
+  endpoint group in the organization.
+
+  Creating an association creates the networking infrastructure linking the
+  network to the endpoint group, but does not enable intercept by itself.
+  To enable intercept, the user must also create a network firewall policy
+  containing intercept rules and associate it with the network.
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/interceptEndpointGroupAssociations/{{intercept_endpoint_group_association_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/interceptEndpointGroupAssociations'
+self_link: 'projects/{{project}}/locations/{{location}}/interceptEndpointGroupAssociations/{{intercept_endpoint_group_association_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/interceptEndpointGroupAssociations?interceptEndpointGroupAssociationId={{intercept_endpoint_group_association_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/interceptEndpointGroupAssociations/{{intercept_endpoint_group_association_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+sweeper:
+  url_substitutions:
+    - region: "global"
+examples:
+  - name: 'network_security_intercept_endpoint_group_association_basic'
+    config_path: 'templates/terraform/examples/network_security_intercept_endpoint_group_association_basic.tf.tmpl'
+    primary_resource_id: 'default'
+    vars:
+      producer_network_name: 'example-prod-network'
+      consumer_network_name: 'example-cons-network'
+      deployment_group_id: 'example-dg'
+      endpoint_group_id: 'example-eg'
+      endpoint_group_association_id: 'example-ega'
+parameters:
+  - name: 'location'
+    type: String
+    description: |-
+      The cloud location of the association, currently restricted to `global`.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'interceptEndpointGroupAssociationId'
+    type: String
+    description: |-
+      The ID to use for the new association, which will become the final
+      component of the endpoint group's resource name. If not provided, the
+      server will generate a unique ID.
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      The resource name of this endpoint group association, for example:
+      `projects/123456789/locations/global/interceptEndpointGroupAssociations/my-eg-association`.
+      See https://google.aip.dev/122 for more details.
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |-
+      The timestamp when the resource was created.
+      See https://google.aip.dev/148#timestamps.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |-
+      The timestamp when the resource was most recently updated.
+      See https://google.aip.dev/148#timestamps.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |-
+      Labels are key/value pairs that help to organize and filter resources.
+  - name: 'interceptEndpointGroup'
+    type: String
+    description: |-
+      The endpoint group that this association is connected to, for example:
+      `projects/123456789/locations/global/interceptEndpointGroups/my-eg`.
+      See https://google.aip.dev/124.
+    required: true
+    immutable: true
+  - name: 'network'
+    type: String
+    description: |-
+      The VPC network that is associated. for example:
+      `projects/123456789/global/networks/my-network`.
+      See https://google.aip.dev/124.
+    required: true
+    immutable: true
+  - name: 'locationsDetails'
+    type: Array
+    description: |-
+      The list of locations where the association is present. This information
+      is retrieved from the linked endpoint group, and not configured as part
+      of the association itself.
+    deprecation_message: |-
+      `locationsDetails` is deprecated and will be removed in a future major release. Use `locations` instead.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'location'
+          type: String
+          description: |-
+            The cloud location, e.g. `us-central1-a` or `asia-south1`.
+          output: true
+        - name: 'state'
+          type: String
+          description: |-
+            The current state of the association in this location.
+            Possible values:
+            STATE_UNSPECIFIED
+            ACTIVE
+            OUT_OF_SYNC
+          output: true
+  - name: 'state'
+    type: String
+    description: |-
+      Current state of the endpoint group association.
+      Possible values:
+      STATE_UNSPECIFIED
+      ACTIVE
+      CREATING
+      DELETING
+      CLOSED
+      OUT_OF_SYNC
+      DELETE_FAILED
+    output: true
+  - name: 'reconciling'
+    type: Boolean
+    description: |-
+      The current state of the resource does not match the user's intended state,
+      and the system is working to reconcile them. This part of the normal
+      operation (e.g. adding a new location to the target deployment group).
+      See https://google.aip.dev/128.
+    output: true
+  - name: locations
+    type: Array
+    is_set: true
+    description: |-
+      The list of locations where the association is configured. This information
+      is retrieved from the linked endpoint group.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: location
+          type: String
+          description: |-
+            The cloud location, e.g. `us-central1-a` or `asia-south1-b`.
+          output: true
+        - name: state
+          type: String
+          description: |-
+            The current state of the association in this location.
+            Possible values:
+            STATE_UNSPECIFIED
+            ACTIVE
+            OUT_OF_SYNC
+          output: true

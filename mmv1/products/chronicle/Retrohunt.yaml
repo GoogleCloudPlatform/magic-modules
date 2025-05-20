@@ -1,0 +1,147 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Retrohunt
+description: Retrohunt is an execution of a Rule over a time range in the past.
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.rules.retrohunts'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts/{{retrohunt}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts/{{retrohunt}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule}}/retrohunts/{{retrohunt}}
+exclude_delete: true
+autogen_status: UmV0cm9odW50
+
+custom_code:
+  post_create: 'templates/terraform/post_create/chronicle_retrohunt_id.go.tmpl'
+examples:
+  - name: 'chronicle_retrohunt_basic'
+    primary_resource_id: example
+    exclude_import_test: true
+    skip_vcr: true
+    vars:
+      start_time: '2025-01-01T00:00:00Z'
+      end_time: '2025-01-01T12:00:00Z'
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+    test_vars_overrides:
+      start_time: 'time.Now().Add(time.Hour * (-12)).Format(time.RFC3339)'
+      end_time: 'time.Now().Add(time.Hour * (-1)).Format(time.RFC3339)'
+
+async:
+  actions: [create]
+  type: OpAsync
+  operation:
+    full_url: 'https://{{location}}-chronicle.googleapis.com/v1/{{op_id}}'
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+exclude_sweeper: true
+parameters:
+  - name: location
+    type: String
+    description: The location of the resource. This is the geographical region where the Chronicle instance resides, such as "us" or "europe-west2".
+    url_param_only: true
+    required: true
+  - name: instance
+    type: String
+    description: The unique identifier for the Chronicle instance, which is the same as the customer ID.
+    url_param_only: true
+    required: true
+  - name: rule
+    type: String
+    description: The Rule ID of the rule.
+    url_param_only: true
+    required: true
+  - name: retrohunt
+    type: String
+    description: The retrohunt ID of the Retrohunt. A retrohunt is an execution of a Rule over a time range in the past.
+    default_from_api: true
+    custom_flatten: "templates/terraform/custom_flatten/id_from_name.tmpl"
+properties:
+  - name: progressPercentage
+    type: Double
+    description: Output only. Percent progress of the retrohunt towards completion, from 0.00 to 100.00.
+    output: true
+  - name: name
+    type: String
+    description: |-
+      The resource name of the retrohunt.
+      Retrohunt is the child of a rule revision. {rule} in the format below is
+      structured as {rule_id@revision_id}.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/rules/{rule}/retrohunts/{retrohunt}
+    output: true
+  - name: processInterval
+    type: NestedObject
+    description: |-
+      Represents a time interval, encoded as a Timestamp start (inclusive) and a
+      Timestamp end (exclusive).
+
+      The start must be less than or equal to the end.
+      When the start equals the end, the interval is empty (matches no time).
+      When both start and end are unspecified, the interval matches any time.
+    required: true
+    properties:
+      - name: startTime
+        type: String
+        required: true
+        description: |-
+          Inclusive start of the interval.
+      - name: endTime
+        type: String
+        required: true
+        description: |-
+          Exclusive end of the interval.
+  - name: executionInterval
+    type: NestedObject
+    description: |-
+      Represents a time interval, encoded as a Timestamp start (inclusive) and a
+      Timestamp end (exclusive).
+
+      The start must be less than or equal to the end.
+      When the start equals the end, the interval is empty (matches no time).
+      When both start and end are unspecified, the interval matches any time.
+    output: true
+    properties:
+      - name: endTime
+        type: String
+        description: |-
+          Optional. Exclusive end of the interval.
+
+          If specified, a Timestamp matching this interval will have to be before the
+          end.
+      - name: startTime
+        type: String
+        description: |-
+          Optional. Inclusive start of the interval.
+
+          If specified, a Timestamp matching this interval will have to be the same
+          or after the start.
+  - name: state
+    type: String
+    description: |-
+      Output only. The state of the retrohunt.
+      Possible values:
+      RUNNING
+      DONE
+      CANCELLED
+      FAILED
+    output: true

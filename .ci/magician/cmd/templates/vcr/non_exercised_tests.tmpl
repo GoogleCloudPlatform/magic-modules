@@ -1,0 +1,13 @@
+{{- if or (gt (len .NotRunBetaTests) 0) (gt (len .NotRunGATests) 0)}}
+#### Non-exercised tests
+
+{{if gt (len .NotRunBetaTests) 0 -}}
+{{color "red" "Tests were added that are skipped in VCR:"}}
+{{range .NotRunBetaTests}}{{. | printf "- %s\n"}}{{end}}
+{{end}}
+
+{{if gt (len .NotRunGATests) 0 -}}
+{{color "red" "Tests were added that are GA-only additions and require manual runs:"}}
+{{range .NotRunGATests}}{{. | printf "- %s\n"}}{{end}}
+{{end}}
+{{end}}

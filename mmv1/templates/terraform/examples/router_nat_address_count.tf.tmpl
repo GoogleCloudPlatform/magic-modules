@@ -1,0 +1,48 @@
+resource "google_compute_network" "net" {
+  name = "{{index $.Vars "network_name"}}"
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  name          = "{{index $.Vars "subnet_name"}}"
+  network       = google_compute_network.net.id
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+}
+
+resource "google_compute_router" "router" {
+  name    = "{{index $.Vars "router_name"}}"
+  region  = google_compute_subnetwork.subnet.region
+  network = google_compute_network.net.id
+}
+
+resource "google_compute_address" "address" {
+  count  = 3
+  name   = "{{index $.Vars "address_name"}}-${count.index}"
+  region = google_compute_subnetwork.subnet.region
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "google_compute_router_nat_address" "{{$.PrimaryResourceId}}" {
+  nat_ips = google_compute_address.address.*.self_link
+  router = google_compute_router.router.name
+  router_nat = google_compute_router_nat.router_nat.name
+  region = google_compute_router_nat.router_nat.region
+}
+
+resource "google_compute_router_nat" "router_nat" {
+  name   = "{{index $.Vars "nat_name"}}"
+  router = google_compute_router.router.name
+  region = google_compute_router.router.region
+
+  nat_ip_allocate_option = "MANUAL_ONLY"
+  initial_nat_ips = [google_compute_address.address[0].self_link]
+
+  source_subnetwork_ip_ranges_to_nat = "LIST_OF_SUBNETWORKS"
+  subnetwork {
+    name                    = google_compute_subnetwork.subnet.id
+    source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+  }
+}

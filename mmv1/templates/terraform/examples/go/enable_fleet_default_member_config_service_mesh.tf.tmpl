@@ -1,9 +1,0 @@
-resource "google_gke_hub_feature" "feature" {
-  name = "servicemesh"
-  location = "global"
-  fleet_default_member_config {
-    mesh {
-      management = "MANAGEMENT_AUTOMATIC"
-    }
-  }
-}

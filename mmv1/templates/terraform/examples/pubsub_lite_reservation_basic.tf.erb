@@ -1,8 +1,0 @@
-resource "google_pubsub_lite_reservation" "<%= ctx[:primary_resource_id] %>" {
-  name = "<%= ctx[:vars]['reservation_name'] %>"
-  project = data.google_project.project.number
-  throughput_capacity = 2
-}
-
-data "google_project" "project" {
-}

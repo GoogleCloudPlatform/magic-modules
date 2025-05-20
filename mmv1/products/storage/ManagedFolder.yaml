@@ -11,15 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'ManagedFolder'
 kind: 'storage#managedFolder'
-base_url: 'b/{{bucket}}/managedFolders'
-self_link: 'b/{{bucket}}/managedFolders/{{%name}}'
-id_format: '{{bucket}}/{{name}}'
-delete_url: 'b/{{bucket}}/managedFolders/{{%name}}?allowNonEmpty={{force_destroy}}'
-has_self_link: true
-skip_sweeper: true  # Skipping sweeper since this is a child resource.
 description: |
   A Google Cloud Storage Managed Folder.
 
@@ -32,43 +26,54 @@ description: |
 
   Managed folders can only be created in buckets that have uniform
   bucket-level access enabled.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/storage/docs/managed-folders'
   api: 'https://cloud.google.com/storage/docs/json_api/v1/managedFolder'
+docs:
+id_format: '{{bucket}}/{{name}}'
+base_url: 'b/{{bucket}}/managedFolders'
+self_link: 'b/{{bucket}}/managedFolders/{{%name}}'
+has_self_link: true
+delete_url: 'b/{{bucket}}/managedFolders/{{%name}}?allowNonEmpty={{force_destroy}}'
 # iam_policy: handwritten in mmv1/third_party/terraform/services/storage/iam_storage_managed_folder.go
 import_format:
   - '{{bucket}}/managedFolders/{{%name}}'
   - '{{bucket}}/{{%name}}'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_update: templates/terraform/custom_update/storage_managed_folder.go.erb
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  custom_update: 'templates/terraform/custom_update/storage_managed_folder.go.tmpl'
+ # Skipping sweeper since this is a child resource.
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'storage_managed_folder_basic'
+  - name: 'storage_managed_folder_basic'
     primary_resource_id: 'folder'
     vars:
       bucket_name: 'my-bucket'
     ignore_read_extra:
       - 'force_destroy'
 virtual_fields:
-  - !ruby/object:Api::Type::Boolean
-    name: 'force_destroy'
-    default_value: false
+  - name: 'force_destroy'
     description: |
       Allows the deletion of a managed folder even if contains
       objects. If a non-empty managed folder is deleted, any objects
       within the folder will remain in a simulated folder with the
       same name.
+    type: Boolean
+    default_value: false
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'bucket'
-    resource: 'Bucket'
-    imports: 'name'
+  - name: 'bucket'
+    type: ResourceRef
     description: 'The name of the bucket that contains the managed folder.'
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
+    resource: 'Bucket'
+    imports: 'name'
+  - name: 'name'
+    type: String
     description: |
       The name of the managed folder expressed as a path. Must include
       trailing '/'. For example, `example_dir/example_dir2/`.
@@ -77,21 +82,21 @@ parameters:
     # The API returns values with trailing slashes, even if not
     # provided. Enforcing trailing slashes prevents diffs and ensures
     # consistent output.
-    validation: !ruby/object:Provider::Terraform::Validation
+    validation:
       regex: '/$'
 properties:
-  - !ruby/object:Api::Type::String
-    name: createTime
+  - name: 'createTime'
+    type: String
     description: |
       The timestamp at which this managed folder was created.
     output: true
-  - !ruby/object:Api::Type::String
-    name: updateTime
+  - name: 'updateTime'
+    type: String
     description: |
       The timestamp at which this managed folder was most recently updated.
     output: true
-  - !ruby/object:Api::Type::String
-    name: metageneration
+  - name: 'metageneration'
+    type: String
     description: |
       The metadata generation of the managed folder.
     output: true

@@ -2,6 +2,7 @@ package compute
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -23,6 +24,18 @@ func DataSourceGoogleComputeNetwork() *schema.Resource {
 				Computed: true,
 			},
 
+			"network_id": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
+
+			// Deprecated in favor of network_id
+			"numeric_id": {
+				Type:       schema.TypeString,
+				Computed:   true,
+				Deprecated: "`numeric_id` is deprecated and will be removed in a future major release. Use `network_id` instead.",
+			},
+
 			"gateway_ipv4": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -31,6 +44,11 @@ func DataSourceGoogleComputeNetwork() *schema.Resource {
 			"internal_ipv6_range": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+
+			"network_profile": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 
 			"self_link": {
@@ -77,11 +95,20 @@ func dataSourceGoogleComputeNetworkRead(d *schema.ResourceData, meta interface{}
 	if err := d.Set("internal_ipv6_range", network.InternalIpv6Range); err != nil {
 		return fmt.Errorf("Error setting internal_ipv6_range: %s", err)
 	}
+	if err := d.Set("network_profile", network.NetworkProfile); err != nil {
+		return fmt.Errorf("Error setting network_profile: %s", err)
+	}
 	if err := d.Set("self_link", network.SelfLink); err != nil {
 		return fmt.Errorf("Error setting self_link: %s", err)
 	}
 	if err := d.Set("description", network.Description); err != nil {
 		return fmt.Errorf("Error setting description: %s", err)
+	}
+	if err := d.Set("network_id", network.Id); err != nil {
+		return fmt.Errorf("Error setting network_id: %s", err)
+	}
+	if err := d.Set("numeric_id", strconv.Itoa(int(network.Id))); err != nil {
+		return fmt.Errorf("Error setting numeric_id: %s", err)
 	}
 	if err := d.Set("subnetworks_self_links", network.Subnetworks); err != nil {
 		return fmt.Errorf("Error setting subnetworks_self_links: %s", err)

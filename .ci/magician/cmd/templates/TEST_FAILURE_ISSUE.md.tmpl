@@ -1,0 +1,37 @@
+### Impacted tests
+
+{{.TestName}}
+
+
+### Affected Resource(s)
+
+{{.AffectedResource}}
+
+### Failure rates
+
+{{ range $providerVersion, $failureRate := .FailureRates }}
+
+- {{ $providerVersion }}: {{ $failureRate }}
+
+{{ end }}
+
+### Message(s)
+
+{{ range $providerVersion, $errorMessageLink := .ErrorMessageLinks }}
+
+{{ if $errorMessageLink }}
+- [{{ $providerVersion }} error message]({{ $errorMessageLink }})
+{{ end }}
+
+{{ end }}
+
+
+### Test Debug Log
+
+{{ range $providerVersion, $debugLogLink := .DebugLogLinks }}
+
+{{ if $debugLogLink }}
+- [{{ $providerVersion }} debug log]({{ $debugLogLink }})
+{{ end }}
+
+{{ end }}

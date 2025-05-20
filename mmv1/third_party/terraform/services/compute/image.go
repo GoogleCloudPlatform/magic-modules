@@ -37,16 +37,17 @@ var (
 // built-in projects to look for images/families containing the string
 // on the left in
 var ImageMap = map[string]string{
-	"centos":      "centos-cloud",
-	"coreos":      "coreos-cloud",
-	"debian":      "debian-cloud",
-	"opensuse":    "opensuse-cloud",
-	"rhel":        "rhel-cloud",
-	"rocky-linux": "rocky-linux-cloud",
-	"sles":        "suse-cloud",
-	"ubuntu":      "ubuntu-os-cloud",
-	"windows":     "windows-cloud",
-	"windows-sql": "windows-sql-cloud",
+	"centos":        "centos-cloud",
+	"coreos":        "coreos-cloud",
+	"debian":        "debian-cloud",
+	"fedora-coreos": "fedora-coreos-cloud",
+	"opensuse":      "opensuse-cloud",
+	"rhel":          "rhel-cloud",
+	"rocky-linux":   "rocky-linux-cloud",
+	"sles":          "suse-cloud",
+	"ubuntu":        "ubuntu-os-cloud",
+	"windows":       "windows-cloud",
+	"windows-sql":   "windows-sql-cloud",
 }
 
 func resolveImageImageExists(c *transport_tpg.Config, project, name, userAgent string) (bool, error) {
@@ -99,8 +100,14 @@ func ResolveImage(c *transport_tpg.Config, project, name, userAgent string) (str
 	for k, v := range ImageMap {
 		if strings.Contains(name, k) {
 			builtInProject = v
+			if builtInProject == "coreos-cloud" && strings.Contains(name, "fedora") {
+				builtInProject = ImageMap["fedora-coreos"]
+			}
 			break
 		}
+	}
+	if c.UniverseDomain != "" && c.UniverseDomain != "googleapis.com" {
+		resolveImageLink = regexp.MustCompile(fmt.Sprintf("^https://compute.%s/compute/[a-z0-9]+/projects/(%s)/global/images/(%s)", c.UniverseDomain, verify.ProjectRegex, resolveImageImageRegex))
 	}
 	switch {
 	case resolveImageLink.MatchString(name): // https://www.googleapis.com/compute/v1/projects/xyz/global/images/xyz

@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,108 +11,112 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'BackupSchedule'
-base_url: projects/{{project}}/databases/{{database}}/backupSchedules
-self_link: 'projects/{{project}}/databases/{{database}}/backupSchedules/{{name}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   A backup schedule for a Cloud Firestore Database.
   This resource is owned by the database it is backing up, and is deleted along with the database.
   The actual backups are not though.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/firestore/docs/backups'
   api: 'https://cloud.google.com/firestore/docs/reference/rest/v1/projects.databases.backupSchedules'
-skip_sweeper: true
-id_format: 'projects/{{project}}/databases/{{database}}/backupSchedules/{{name}}'
-import_format:
-  - 'projects/{{project}}/databases/{{database}}/backupSchedules/{{name}}'
-  - '{{project}}/{{database}}/{{name}}'
-  - '{{database}}/{{name}}'
-docs: !ruby/object:Provider::Terraform::Docs
+docs:
   warning: |
     This resource creates a Firestore Backup Schedule on a project that already has
     a Firestore database.
     This resource is owned by the database it is backing up, and is deleted along
     with the database. The actual backups are not though.
+id_format: 'projects/{{project}}/databases/{{database}}/backupSchedules/{{name}}'
+base_url: 'projects/{{project}}/databases/{{database}}/backupSchedules'
+self_link: 'projects/{{project}}/databases/{{database}}/backupSchedules/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/databases/{{database}}/backupSchedules/{{name}}'
+  - '{{project}}/{{database}}/{{name}}'
+  - '{{database}}/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firestore_backup_schedule_daily'
+  - name: 'firestore_backup_schedule_daily'
     primary_resource_id: 'daily-backup'
     vars:
       database_id: 'database-id'
-      delete_protection_state: "DELETE_PROTECTION_ENABLED"
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
     test_env_vars:
-      project_id: :PROJECT_NAME
+      project_id: 'PROJECT_NAME'
     test_vars_overrides:
-      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'firestore_backup_schedule_weekly'
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+  - name: 'firestore_backup_schedule_weekly'
     primary_resource_id: 'weekly-backup'
     vars:
       database_id: 'database-id'
-      delete_protection_state: "DELETE_PROTECTION_ENABLED"
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
     test_env_vars:
-      project_id: :PROJECT_NAME
+      project_id: 'PROJECT_NAME'
     test_vars_overrides:
-      delete_protection_state: '"DELETE_PROTECTION_DISABLED"'
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: database
+  - name: 'database'
+    type: String
     description: |
       The Firestore database id. Defaults to `"(default)"`.
-    default_value: '(default)'
-    immutable: true
     url_param_only: true
+    immutable: true
+    default_value: "(default)"
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The unique backup schedule identifier across all locations and databases for the given project. Format:
       `projects/{{project}}/databases/{{database}}/backupSchedules/{{backupSchedule}}`
     immutable: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: retention
-    required: true
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'retention'
+    type: String
     description: |
       At what relative time in the future, compared to its creation time, the backup should be deleted, e.g. keep backups for 7 days.
       A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
 
       You can set this to a value up to 14 weeks.
-  - !ruby/object:Api::Type::NestedObject
-    name: dailyRecurrence
+    required: true
+  - name: 'dailyRecurrence'
+    type: NestedObject
     description: |
       For a schedule that runs daily.
-    exactly_one_of:
-      - daily_recurrence
-      - weekly_recurrence
+    immutable: true
     send_empty_value: true
     allow_empty_object: true
-    immutable: true
-    properties: []
-  - !ruby/object:Api::Type::NestedObject
-    name: weeklyRecurrence
+    exactly_one_of:
+      - 'daily_recurrence'
+      - 'weekly_recurrence'
+    properties:
+      []
+  - name: 'weeklyRecurrence'
+    type: NestedObject
     description: |
       For a schedule that runs weekly on a specific day.
     immutable: true
     exactly_one_of:
-      - weekly_recurrence
-      - daily_recurrence
+      - 'weekly_recurrence'
+      - 'daily_recurrence'
     properties:
-      - !ruby/object:Api::Type::Enum
-        name: day
+      - name: 'day'
+        type: Enum
         description: |
           The day of week to run.
-        values:
-          - :DAY_OF_WEEK_UNSPECIFIED
-          - :MONDAY
-          - :TUESDAY
-          - :WEDNESDAY
-          - :THURSDAY
-          - :FRIDAY
-          - :SATURDAY
-          - :SUNDAY
+        enum_values:
+          - 'DAY_OF_WEEK_UNSPECIFIED'
+          - 'MONDAY'
+          - 'TUESDAY'
+          - 'WEDNESDAY'
+          - 'THURSDAY'
+          - 'FRIDAY'
+          - 'SATURDAY'
+          - 'SUNDAY'

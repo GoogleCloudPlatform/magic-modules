@@ -111,6 +111,8 @@ The following arguments are supported:
 
 * `confidential_instance_config` - Enable [Confidential Mode](https://cloud.google.com/compute/confidential-vm/docs/about-cvm) on this VM. Structure is [documented below](#nested_confidential_instance_config)
 
+* `key_revocation_action_type` - Action to be taken when a customer's encryption key is revoked.
+
 <a name="nested_disk"></a>The `disk` block supports:
 
 * `auto_delete` - Whether or not the disk should be auto-deleted.
@@ -260,7 +262,9 @@ The `disk_encryption_key` block supports:
    groups will use as host systems. Read more on sole-tenant node creation
    [here](https://cloud.google.com/compute/docs/nodes/create-nodes).
    Structure [documented below](#nested_node_affinities).
-   
+
+* `host_error_timeout_seconds` - [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Time in seconds for host error detection.
+
 * `provisioning_model` - Describe the type of preemptible VM. 
 
 * `instance_termination_action` - Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
@@ -299,6 +303,8 @@ The `disk_encryption_key` block supports:
 ---
 
 * `id` - an identifier for the resource with format `projects/{{project}}/regions/{{region}}/instanceTemplates/{{name}}`
+
+* `creation_timestamp` - Creation timestamp in RFC3339 text format.
 
 * `metadata_fingerprint` - The unique fingerprint of the metadata.
 

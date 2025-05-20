@@ -1,0 +1,13 @@
+resource: 'google_compute_disk_async_replication'
+generation_type: 'handwritten'
+api_service_name: 'compute.googleapis.com'
+{{- if ne $.TargetVersionName "ga" }}
+api_version: 'beta'
+{{- else }}
+api_version: 'v1'
+{{- end }}
+api_resource_type_kind: 'Disk'
+fields:
+  - field: 'primary_disk'
+  - field: 'secondary_disk.disk'
+  - field: 'secondary_disk.state'

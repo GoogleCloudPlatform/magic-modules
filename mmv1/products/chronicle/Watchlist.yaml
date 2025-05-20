@@ -1,0 +1,141 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Watchlist
+description: A watchlist is a list of entities that allows for bulk operations over the included entities.
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.watchlists'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists/{{watchlist_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists?watchlistId={{watchlist_id}}
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists/{{watchlist_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists/{{watchlist_id}}
+update_verb: PATCH
+update_mask: true
+autogen_status: V2F0Y2hsaXN0
+custom_code:
+  encoder: 'templates/terraform/encoders/chronicle_watchlist.go.tmpl'
+examples:
+  - name: 'chronicle_watchlist_basic'
+    primary_resource_id: 'example'
+    vars:
+      name: watchlist_name
+      watchlist_id: watchlist-id
+      description: watchlist-description
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+  - name: 'chronicle_watchlist_without_id'
+    primary_resource_id: 'example'
+    vars:
+      name: watchlist-name
+      description: watchlist-description
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+    # The watchlist_id is an optional field. If watchlist_id is not provided, the system will generate one.
+    # See AIP-133 for details: https://google.aip.dev/133#user-specified-ids
+    exclude_import_test: true
+
+parameters:
+  - name: location
+    type: String
+    description: The location of the resource. This is the geographical region where the Chronicle instance resides, such as "us" or "europe-west2".
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: instance
+    type: String
+    description: The unique identifier for the Chronicle instance, which is the same as the customer ID.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: watchlistId
+    type: String
+    description: |-
+      Optional. The ID to use for the watchlist,
+      which will become the final component of the watchlist's resource name.
+      This value should be 4-63 characters, and valid characters
+      are /a-z-/.
+    required: false
+    immutable: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+properties:
+  - name: name
+    type: String
+    description: |-
+      Identifier. Resource name of the watchlist. This unique identifier is generated using values provided for the URL parameters.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/watchlists/{watchlist}
+    output: true
+  - name: multiplyingFactor
+    type: Double
+    description: |-
+      Optional. Weight applied to the risk score for entities
+      in this watchlist.
+      The default is 1.0 if it is not specified.
+  - name: createTime
+    type: String
+    description: Output only. Time the watchlist was created.
+    output: true
+  - name: updateTime
+    type: String
+    description: Output only. Time the watchlist was last updated.
+    output: true
+  - name: displayName
+    type: String
+    description: |-
+      Required. Display name of the watchlist.
+      Note that it must be at least one character and less than 63 characters
+      (https://google.aip.dev/148).
+    required: true
+  - name: description
+    type: String
+    description: Optional. Description of the watchlist.
+  - name: entityPopulationMechanism
+    type: NestedObject
+    description: Mechanism to populate entities in the watchlist.
+    required: true
+    properties:
+      - name: manual
+        type: NestedObject
+        description: Entities are added manually.
+        default_from_api: true
+        allow_empty_object: true
+        send_empty_value: true
+        properties:
+          []   # Meant to be an empty object with no properties.
+  - name: entityCount
+    type: NestedObject
+    description: Count of different types of entities in the watchlist.
+    output: true
+    properties:
+      - name: user
+        type: Integer
+        description: Output only. Count of user type entities in the watchlist.
+        output: true
+      - name: asset
+        type: Integer
+        description: Output only. Count of asset type entities in the watchlist.
+        output: true
+  - name: watchlistUserPreferences
+    type: NestedObject
+    description: A collection of user preferences for watchlist UI configuration.
+    default_from_api: true
+    properties:
+      - name: pinned
+        type: Boolean
+        description: Optional. Whether the watchlist is pinned on the dashboard.
