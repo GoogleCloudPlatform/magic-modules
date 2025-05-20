@@ -97,6 +97,7 @@ properties:
   - name: 'aclEntries'
     type: Array
     is_set: true
+    required: true
     description: "The acl entries that apply to the resource pattern. The maximum number of allowed
       entries is 100."
     item_type:
