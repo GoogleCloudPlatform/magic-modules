@@ -22,8 +22,9 @@ references:
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/features'
-self_link: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
+self_link: 'projects/{{project}}/locations/{{location}}/features/{{name}}?return_partial_success=true'
 create_url: 'projects/{{project}}/locations/{{location}}/features?featureId={{name}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
 update_url: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
@@ -39,18 +40,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'gkehub2#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error/errors'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
+  base_url: 'projects/{{project}}/locations/{{location}}/features/{{name}}'
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
   import_format:
     - 'projects/{{project}}/locations/{{location}}/features/{{name}}'
