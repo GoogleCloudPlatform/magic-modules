@@ -815,7 +815,7 @@ resource "google_netapp_volume" "test_volume" {
     tiering_policy {
         cooling_threshold_days = 31
         tier_action = "ENABLED"
-        hot_tier_bypass_mode_enabled = false,
+        hot_tier_bypass_mode_enabled = false
     }
 }
 data "google_compute_network" "default" {
@@ -850,7 +850,7 @@ resource "google_netapp_volume" "test_volume" {
     tiering_policy {
         cooling_threshold_days = 20
         tier_action = "ENABLED"
-        hot_tier_bypass_mode_enabled = true,
+        hot_tier_bypass_mode_enabled = true
     }
 }
 data "google_compute_network" "default" {
