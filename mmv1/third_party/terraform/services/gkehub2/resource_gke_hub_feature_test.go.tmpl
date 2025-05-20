@@ -1029,6 +1029,8 @@ resource "google_gke_hub_feature" "feature" {
   depends_on = [google_project_service.anthos, google_project_service.gkehub]
   project = google_project.project.project_id
 }
+`, context)
+}
 
 func testAccGKEHubFeature_RbacrolebindingactuationUpdate(context map[string]interface{}) string {
   return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
@@ -1042,6 +1044,8 @@ resource "google_gke_hub_feature" "feature" {
   }
   depends_on = [google_project_service.anthos, google_project_service.gkehub]
   project = google_project.project.project_id
+}
+`, context)
 }
 
 func gkeHubFeatureProjectSetupForGA(context map[string]interface{}) string {
