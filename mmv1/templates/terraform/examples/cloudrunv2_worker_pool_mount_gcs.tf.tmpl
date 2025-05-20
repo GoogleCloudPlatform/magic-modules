@@ -1,0 +1,31 @@
+resource "google_cloud_run_v2_worker_pool" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "cloud_run_worker_pool_name"}}"
+
+  location     = "us-central1"
+  deletion_protection = false
+  launch_stage = "ALPHA"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/worker-pool"
+      volume_mounts {
+        name       = "bucket"
+        mount_path = "/var/www"
+      }
+    }
+
+    volumes {
+      name = "bucket"
+      gcs {
+        bucket    = google_storage_bucket.{{$.PrimaryResourceId}}.name
+        read_only = false
+      }
+    }
+  }
+}
+
+resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
+    name     = "{{index $.Vars "cloud_run_worker_pool_name"}}"
+    location = "US"
+    uniform_bucket_level_access = true
+}
