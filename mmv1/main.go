@@ -158,8 +158,7 @@ func main() {
 	})
 
 	// In order to only copy/compile files once per provider this must be called outside
-	// of the products loop. This will get called with the provider from the final iteration
-	// of the loop
+	// of the products loop. Create an MMv1 provider with an arbitrary product (the first loaded).
 	providerToGenerate := newProvider(*forceProvider, *version, productsForVersion[0], startTime)
 	providerToGenerate.CopyCommonFiles(*outputPath, generateCode, generateDocs)
 
@@ -300,8 +299,8 @@ func GenerateProduct(productName string, productsForVersionChannel chan *api.Pro
 	providerToGenerate.Generate(*outputPath, productName, resourceToGenerate, generateCode, generateDocs)
 }
 
-func newProvider(name, version string, productApi *api.Product, startTime time.Time) provider.Provider {
-	switch name {
+func newProvider(providerName, version string, productApi *api.Product, startTime time.Time) provider.Provider {
+	switch providerName {
 	case "tgc":
 		return provider.NewTerraformGoogleConversion(productApi, version, startTime)
 	case "tgc_cai2hcl":
