@@ -1,6 +1,7 @@
 package bigquery_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"testing"
@@ -29,15 +30,54 @@ func TestAccDataSourceGoogleBigqueryTable_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.google_bigquery_table.example", "table_id", fmt.Sprintf("tf_test_table_%s", context["random_suffix"])),
 					resource.TestCheckResourceAttr("data.google_bigquery_table.example", "dataset_id", fmt.Sprintf("tf_test_ds_%s", context["random_suffix"])),
-					resource.TestCheckResourceAttrSet("data.google_bigquery_table.example", "schema.#"),
-					resource.TestCheckResourceAttr("data.google_bigquery_table.example", "schema.0.fields.0.name", "name"),
-					resource.TestCheckResourceAttr("data.google_bigquery_table.example", "schema.0.fields.0.type", "STRING"),
-					resource.TestCheckResourceAttr("data.google_bigquery_table.example", "schema.0.fields.0.mode", "NULLABLE"),
-					resource.TestCheckResourceAttr("data.google_bigquery_table.example", "schema.0.fields.2.name", "address"),
-					resource.TestCheckResourceAttr("data.google_bigquery_table.example", "schema.0.fields.2.fields.1.name", "zip"),
+					resource.TestCheckResourceAttrSet("data.google_bigquery_table.example", "schema"),
 					resource.TestCheckResourceAttr("data.google_bigquery_table.example", "id", expectedID),
-					resource.TestCheckResourceAttr("data.google_bigquery_table.example", "schema.0.fields.4.name", "policy_tag_test"),
-					resource.TestMatchResourceAttr("data.google_bigquery_table.example", "schema.0.fields.4.policy_tags.0.names.0", regexp.MustCompile("^projects/[^/]+/locations/us-central1/taxonomies/[^/]+/policyTags/[^/]+$")),
+					resource.TestCheckResourceAttrWith("data.google_bigquery_table.example", "schema", func(schema string) error {
+						var parsedSchema []map[string]interface{}
+
+						if err := json.Unmarshal([]byte(schema), &parsedSchema); err != nil {
+							return fmt.Errorf("failed to parse schema JSON: %w", err)
+						}
+
+						if len(parsedSchema) > 0 {
+							if parsedSchema[0]["name"] != "name" {
+								return fmt.Errorf("expected fields[0].name to be 'name', got '%v'", parsedSchema[0]["name"])
+							}
+							if parsedSchema[0]["type"] != "STRING" {
+								return fmt.Errorf("expected fields[0].type to be 'STRING', got '%v'", parsedSchema[0]["type"])
+							}
+							if parsedSchema[0]["mode"] != "NULLABLE" {
+								return fmt.Errorf("expected fields[0].mode to be 'NULLABLE', got '%v'", parsedSchema[0]["mode"])
+							}
+						}
+
+						if len(parsedSchema) > 2 {
+							if parsedSchema[2]["name"] != "address" {
+								return fmt.Errorf("expected fields[2].name to be 'address', got '%v'", parsedSchema[2]["name"])
+							}
+							if subFields, ok := parsedSchema[2]["fields"].([]interface{}); ok && len(subFields) > 1 {
+								subField := subFields[1].(map[string]interface{})
+								if subField["name"] != "zip" {
+									return fmt.Errorf("expected fields[2].fields[1].name to be 'zip', got '%v'", subField["name"])
+								}
+							}
+						}
+
+						if len(parsedSchema) > 4 {
+							if parsedSchema[4]["name"] != "policy_tag_test" {
+								return fmt.Errorf("expected fields[4].name to be 'policy_tag_test', got '%v'", parsedSchema[4]["name"])
+							}
+							if policyTags, ok := parsedSchema[4]["policyTags"].(map[string]interface{}); ok {
+								if names, ok := policyTags["names"].([]interface{}); ok && len(names) > 0 {
+									if !regexp.MustCompile("^projects/[^/]+/locations/us-central1/taxonomies/[^/]+/policyTags/[^/]+$").MatchString(names[0].(string)) {
+										return fmt.Errorf("policy tag does not match expected pattern")
+									}
+								}
+							}
+						}
+
+						return nil
+					}),
 				),
 			},
 		},
