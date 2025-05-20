@@ -16,5 +16,10 @@ _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 if err == nil {
 	// Fleet feature already exists
 	log.Printf("[DEBUG] Fleet feature already exists %s", d.Get("name"))
+	id, err := tpgresource.ReplaceVars(d, config, "{{$.GetIdFormat}}")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
 	return resourceGKEHub2FeatureUpdate(d, meta)
 }
