@@ -802,7 +802,9 @@ resource "google_netapp_storage_pool" "default" {
     allow_auto_tiering = true
     custom_performance_enabled = true
     total_throughput_mibps = "64"
+    total_iops = "1024"
     hot_tier_size_gib = "1024"
+    enable_hot_tier_auto_resize = true
 }
 resource "google_netapp_volume" "test_volume" {
     provider = google-beta
@@ -837,7 +839,9 @@ resource "google_netapp_storage_pool" "default" {
     allow_auto_tiering = true
     custom_performance_enabled = true
     total_throughput_mibps = "64"
+    total_iops = "1024"
     hot_tier_size_gib = "1024"
+    enable_hot_tier_auto_resize = true
 }
 resource "google_netapp_volume" "test_volume" {
     provider = google-beta
