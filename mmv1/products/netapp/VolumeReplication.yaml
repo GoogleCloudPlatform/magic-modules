@@ -318,11 +318,6 @@ properties:
         description: |
           Optional. Copy-paste-able commands to be used on user's ONTAP to accept peering requests.
         output: true
-      - name: 'command'
-        type: String
-        description: |
-          Cumulative time taken across all transfers for the replication relationship.
-        output: true
       - name: 'commandExpiryTime'
         type: String
         description: |
