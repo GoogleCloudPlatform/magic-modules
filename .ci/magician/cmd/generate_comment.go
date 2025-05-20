@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -45,9 +46,11 @@ var (
 )
 
 type Diff struct {
-	Title     string
-	Repo      string
-	ShortStat string
+	Title        string
+	Repo         string
+	ShortStat    string
+	CommitSHA    string
+	OldCommitSHA string
 }
 
 type BreakingChange struct {
@@ -77,12 +80,12 @@ type Errors struct {
 }
 
 type diffCommentData struct {
-	PrNumber             int
 	Diffs                []Diff
 	BreakingChanges      []BreakingChange
 	MissingServiceLabels []string
 	MissingTests         map[string]*MissingTestInfo
 	MissingDocs          *MissingDocsSummary
+	AddedResources       []string
 	Errors               []Errors
 }
 
@@ -92,6 +95,7 @@ type simpleSchemaDiff struct {
 
 const allowBreakingChangesLabel = "override-breaking-change"
 const allowMissingServiceLabelsLabel = "override-missing-service-labels"
+const allowMultipleResourcesLabel = "override-multiple-resources"
 
 var gcEnvironmentVariables = [...]string{
 	"BUILD_ID",
@@ -214,9 +218,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	}
 
 	// Initialize repos
-	data := diffCommentData{
-		PrNumber: prNumber,
-	}
+	data := diffCommentData{}
 	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
 		errors[repo.Title] = []string{}
 		repo.Branch = newBranch
@@ -262,10 +264,24 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo diff shortstats")
 		}
 		if shortStat != "" {
+			variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo.Name)
+			oldVariablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo.Name)
+			commitSHA, err := rnr.ReadFile(variablePath)
+			if err != nil {
+				errors[repo.Title] = append(errors[repo.Title], "Failed to read commit sha from file")
+				continue
+			}
+			oldCommitSHA, err := rnr.ReadFile(oldVariablePath)
+			if err != nil {
+				errors[repo.Title] = append(errors[repo.Title], "Failed to read old commit sha from file")
+				continue
+			}
 			diffs = append(diffs, Diff{
-				Title:     repo.Title,
-				Repo:      repo.Name,
-				ShortStat: shortStat,
+				Title:        repo.Title,
+				Repo:         repo.Name,
+				ShortStat:    shortStat,
+				CommitSHA:    commitSHA,
+				OldCommitSHA: oldCommitSHA,
 			})
 			repo.ChangedFiles, err = ctlr.DiffNameOnly(repo, oldBranch, newBranch)
 			if err != nil {
@@ -350,6 +366,25 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	})
 	data.BreakingChanges = breakingChangesSlice
 
+	// Check if multiple resources were added.
+	multipleResourcesState := "success"
+	if len(uniqueAddedResources) > 1 {
+		multipleResourcesState = "failure"
+		for _, label := range pullRequest.Labels {
+			if label.Name == allowMultipleResourcesLabel {
+				multipleResourcesState = "success"
+				break
+			}
+		}
+	}
+	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildId, buildStep, projectId)
+	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-multiple-resources", multipleResourcesState, targetURL, commitSha); err != nil {
+		fmt.Printf("Error posting terraform-provider-multiple-resources build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
+		errors["Other"] = append(errors["Other"], "Failed to update missing-service-labels status check with state: "+multipleResourcesState)
+	}
+	data.AddedResources = maps.Keys(uniqueAddedResources)
+	slices.Sort(data.AddedResources)
+
 	// Compute affected resources based on changed files
 	changedFilesAffectedResources := map[string]struct{}{}
 	for _, repo := range []source.Repo{tpgRepo, tpgbRepo} {
@@ -414,7 +449,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 		}
 	}
-	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildId, buildStep, projectId)
 	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-breaking-change-test", breakingState, targetURL, commitSha); err != nil {
 		fmt.Printf("Error posting terraform-provider-breaking-change-test build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
 		errors["Other"] = append(errors["Other"], "Failed to update breaking-change status check with state: "+breakingState)
