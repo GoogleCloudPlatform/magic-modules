@@ -477,6 +477,10 @@ properties:
                     The SQL statement.
                   required: true
         min_size: 1
+      - name: 'catalogPublishingEnabled'
+        type: Boolean
+        description: |
+          If set, the latest DataScan job result will be published to Dataplex Catalog.
   - name: 'dataProfileSpec'
     type: NestedObject
     description: |
