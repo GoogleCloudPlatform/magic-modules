@@ -72,6 +72,7 @@ func CollectAllTgcMetadata(tgcPayload TgcMetadataPayload) resource.TestCheckFunc
 			apiServiceName := GetAPIServiceNameForResource(metadata.ResourceType)
 			if apiServiceName == "unknown" {
 				log.Printf("[DEBUG]TGC Terraform error: unknown resource type %s", metadata.ResourceType)
+				metadata.CaiAssetName = "unknown"
 			} else {
 				var rName string
 				switch metadata.ResourceType {
