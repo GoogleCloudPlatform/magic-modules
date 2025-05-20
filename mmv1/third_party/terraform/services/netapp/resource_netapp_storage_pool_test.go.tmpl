@@ -205,7 +205,7 @@ resource "google_netapp_storage_pool" "test_pool" {
     key= "test"
     value= "pool"
   }
-  ldap_enabled          = false
+  ldap_enabled = false
   allow_auto_tiering = true
   custom_performance_enabled = true
   total_throughput_mibps = "64"
