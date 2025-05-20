@@ -507,6 +507,7 @@ properties:
     update_mask_fields:
       - 'tiering_policy.cooling_threshold_days'
       - 'tiering_policy.tier_action'
+      - 'tiering_policy.hot_tier_bypass_mode_enabled'
     properties:
       - name: 'coolingThresholdDays'
         type: Integer
