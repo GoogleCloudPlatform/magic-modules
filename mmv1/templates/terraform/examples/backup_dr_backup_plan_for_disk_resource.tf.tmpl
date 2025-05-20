@@ -16,7 +16,7 @@ resource "google_backup_dr_backup_plan" "{{$.PrimaryResourceId}}" {
 
     standard_schedule {
       recurrence_type     = "HOURLY"
-      hourly_frequency    = 6
+      hourly_frequency    = 1
       time_zone           = "UTC"
 
       backup_window {
