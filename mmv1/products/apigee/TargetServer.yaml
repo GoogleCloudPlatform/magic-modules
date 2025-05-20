@@ -142,10 +142,6 @@ properties:
             type: Boolean
             description: |
               Indicates whether the cert should be matched against as a wildcard cert.
-      - name: 'enforce'
-        type: Boolean
-        description: |
-          If true, TLS is strictly enforced.
 
   - name: 'protocol'
     type: Enum

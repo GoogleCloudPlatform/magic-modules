@@ -264,7 +264,7 @@ examples:
       project: 'my-project-name'
  # this example file will cause IAM conflicts between tests if used to make a test
     exclude_test: true
-  - name: 'cloudfunctions2_automatic_base_image_update'
+  - name: 'cloudfunctions2_abiu'
     primary_resource_id: 'function'
     min_version: 'beta'
     vars:
@@ -283,7 +283,7 @@ examples:
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
-  - name: 'cloudfunctions2_on_deploy_base_image_update'
+  - name: 'cloudfunctions2_abiu_on_deploy'
     primary_resource_id: 'function'
     min_version: 'beta'
     vars:
