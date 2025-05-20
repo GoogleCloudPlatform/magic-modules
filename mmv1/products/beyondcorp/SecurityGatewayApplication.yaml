@@ -12,38 +12,37 @@
 # limitations under the License.
 
 ---
-name: Application
-deprecation_message: '`google_beyondcorp_application` is deprecated. Use `google_beyondcorp_security_gateway_application` instead.'
+name: SecurityGatewayApplication
 description: Specifies application endpoint(s) to protect behind a Security Gateway.
-base_url: projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications
+base_url: projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications
 update_mask: true
-self_link: projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications/{{application_id}}
-create_url: projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications?applicationId={{application_id}}
+self_link: projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications/{{application_id}}
+create_url: projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications?applicationId={{application_id}}
 update_verb: PATCH
-id_format: projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications/{{application_id}}
+id_format: projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications/{{application_id}}
 import_format:
-  - projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications/{{application_id}}
+  - projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications/{{application_id}}
 iam_policy:
   method_name_separator: ':'
   iam_conditions_request_type: 'QUERY_PARAM_NESTED'
   allowed_iam_role: 'roles/beyondcorp.securityGatewayUser'
   parent_resource_attribute: 'application_id'
   import_format:
-    - 'projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications/{{application_id}}'
+    - 'projects/{{project}}/locations/global/securityGateways/{{security_gateway_id}}/applications/{{application_id}}'
     - '{{application_id}}'
 examples:
-  - name: beyondcorp_application_basic
+  - name: beyondcorp_security_gateway_application_basic
     primary_resource_id: example
-    primary_resource_name: 'fmt.Sprintf("default%s", context["random_suffix"]), fmt.Sprintf("google%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-default-sg%s", context["random_suffix"]), fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])'
     vars:
-      security_gateway_name: default
-      application_name: google
-  - name: beyondcorp_application_vpc
+      security_gateway_name: default-sg
+      application_name: google-sga
+  - name: beyondcorp_security_gateway_application_vpc
     primary_resource_id: example
-    primary_resource_name: 'fmt.Sprintf("default%s", context["random_suffix"]), fmt.Sprintf("google%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-default-sg%s", context["random_suffix"]), fmt.Sprintf("tf-test-google-sga%s", context["random_suffix"])'
     vars:
-      security_gateway_name: default
-      application_name: my-vm-service
+      security_gateway_name: default-sg
+      application_name: my-vm-service2
 autogen_async: true
 async:
   operation:
@@ -62,16 +61,16 @@ async:
   include_project: false
 autogen_status: QXBwbGljYXRpb24=
 parameters:
-  - name: securityGatewaysId
+  - name: securityGatewayId
     type: String
-    description: Part of `parent`. See documentation of `projectsId`.
+    description: ID of the Security Gateway resource this belongs to.
     immutable: true
     url_param_only: true
     required: true
   - name: applicationId
     type: String
     description: |-
-      Optional. User-settable Application resource ID.
+      User-settable Application resource ID.
       * Must start with a letter.
       * Must contain between 4-63 characters from `/a-z-/`.
       * Must end with a number or letter.
