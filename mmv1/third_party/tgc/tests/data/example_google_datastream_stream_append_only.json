@@ -42,6 +42,7 @@
                         "binaryLogEnabled": true,
                         "enabled": true
                     },
+                    "dataDiskType": "PD_SSD",
                     "ipConfiguration": {
                         "authorizedNetworks": [
                             {

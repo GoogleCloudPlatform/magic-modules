@@ -17,12 +17,10 @@ type Provider interface {
 
 const TERRAFORM_PROVIDER_GA = "github.com/hashicorp/terraform-provider-google"
 const TERRAFORM_PROVIDER_BETA = "github.com/hashicorp/terraform-provider-google-beta"
-const TGC_PROVIDER = "github.com/GoogleCloudPlatform/terraform-google-conversion/v6"
 const TERRAFORM_PROVIDER_PRIVATE = "internal/terraform-next"
 const RESOURCE_DIRECTORY_GA = "google"
 const RESOURCE_DIRECTORY_BETA = "google-beta"
 const RESOURCE_DIRECTORY_PRIVATE = "google-private"
-const RESOURCE_DIRECTORY_TGC = "pkg"
 
 // # TODO(nelsonjr): Review all object interfaces and move to private methods
 // # that should not be exposed outside the object hierarchy.

@@ -68,11 +68,6 @@ func TestAcc{{$.PathType}}_{{$s.TestSlug}}(t *testing.T) {
 	{{- else }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 	{{- end }}
-	{{- range $external_p := $s.ExternalProviders }}
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"{{ $external_p }}": {},
-		},
-	{{- end }}
 	{{ if true -}}
 		CheckDestroy: testAccCheck{{$.PathType}}DestroyProducer(t),
 	{{- end }}

@@ -157,21 +157,18 @@ properties:
         type: Integer
         description: |
           Specifies the default TTL for cached content served by this origin for responses
-          that do not have an existing valid TTL (max-age or s-max-age). When the `cache_mode`
-          is set to "USE_ORIGIN_HEADERS", you must omit this field.
+          that do not have an existing valid TTL (max-age or s-max-age).
         default_from_api: true
         send_empty_value: true
       - name: 'maxTtl'
         type: Integer
         description: |
-          Specifies the maximum allowed TTL for cached content served by this origin. When the
-          `cache_mode` is set to "USE_ORIGIN_HEADERS", you must omit this field.
+          Specifies the maximum allowed TTL for cached content served by this origin.
         default_from_api: true
       - name: 'clientTtl'
         type: Integer
         description: |
-          Specifies the maximum allowed TTL for cached content served by this origin. When the
-          `cache_mode` is set to "USE_ORIGIN_HEADERS", you must omit this field.
+          Specifies the maximum allowed TTL for cached content served by this origin.
         default_from_api: true
         send_empty_value: true
       - name: 'negativeCaching'

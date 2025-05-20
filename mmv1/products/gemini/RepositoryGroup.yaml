@@ -28,12 +28,18 @@ mutex: 'projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code
 examples:
   - name: "gemini_repository_group_basic"
     primary_resource_id: "example"
+    primary_resource_name: 'acctest.BootstrapSharedCodeRepositoryIndex(t, "basic-rg-gen-example", "us-central1", "", map[string]string{"ccfe_debug_note":"terraform_e2e_do_not_delete"}), fmt.Sprintf("tf-test-gen-repository-group-%s", context["random_suffix"])'
     vars:
       repository_group_id: "example-repository-group"
       git_repository_link_id: 'example-git-repository-link-id'
       cri_id: "cri-example"
       repository_resource: "projects/example-project/locations/us-central1/connections/example-connection/gitRepositoryLinks/example-repo"
       connection_id: "example-connection-id"
+    test_vars_overrides:
+      git_repository_link_id: 'acctest.BootstrapGitRepository(t, "basic", "us-central1", "https://github.com/CC-R-github-robot/tf-test.git", acctest.BootstrapDeveloperConnection(t, "basic", "us-central1", "projects/502367051001/secrets/tf-test-cloudaicompanion-github-oauthtoken-c42e5c/versions/1", 54180648))'
+      cri_id: 'acctest.BootstrapSharedCodeRepositoryIndex(t, "basic-rg-gen-example", "us-central1", "", map[string]string{"ccfe_debug_note":"terraform_e2e_do_not_delete"})'
+      repository_resource: '"projects/"+envvar.GetTestProjectFromEnv()+"/locations/us-central1/connections/"+acctest.BootstrapDeveloperConnection(t, "basic", "us-central1", "projects/502367051001/secrets/tf-test-cloudaicompanion-github-oauthtoken-c42e5c/versions/1", 54180648)+"/gitRepositoryLinks/"+acctest.BootstrapGitRepository(t, "basic", "us-central1", "https://github.com/CC-R-github-robot/tf-test.git", acctest.BootstrapDeveloperConnection(t, "basic", "us-central1", "projects/502367051001/secrets/tf-test-cloudaicompanion-github-oauthtoken-c42e5c/versions/1", 54180648))'
+      connection_id: 'acctest.BootstrapDeveloperConnection(t, "basic", "us-central1", "projects/502367051001/secrets/tf-test-cloudaicompanion-github-oauthtoken-c42e5c/versions/1", 54180648)'
     exclude_test: true
 timeouts:
   insert_minutes: 30

@@ -5,14 +5,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	tpg_provider "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/provider"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	tpg_provider "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 	"github.com/zclconf/go-cty/cty"
 )
 
 func TestSubsetOfFieldsMapsToCtyValue(t *testing.T) {
-	schema := createSchema("google_compute_instance")
+	schema := createSchema("google_compute_forwarding_rule")
 
 	outputMap := map[string]interface{}{
 		"name": "forwarding-rule-1",
@@ -25,7 +25,7 @@ func TestSubsetOfFieldsMapsToCtyValue(t *testing.T) {
 }
 
 func TestWrongFieldTypeBreaksConversion(t *testing.T) {
-	resourceSchema := createSchema("google_compute_instance")
+	resourceSchema := createSchema("google_compute_backend_service")
 	outputMap := map[string]interface{}{
 		"name":        "fr-1",
 		"description": []string{"unknownValue"}, // string is required, not array.
@@ -38,7 +38,7 @@ func TestWrongFieldTypeBreaksConversion(t *testing.T) {
 }
 
 func TestNilValue(t *testing.T) {
-	resourceSchema := createSchema("google_compute_instance")
+	resourceSchema := createSchema("google_compute_forwarding_rule")
 	outputMap := map[string]interface{}{
 		"name":        "fr-1",
 		"description": nil,
@@ -52,7 +52,7 @@ func TestNilValue(t *testing.T) {
 }
 
 func TestNilValueInRequiredField(t *testing.T) {
-	resourceSchema := createSchema("google_compute_instance")
+	resourceSchema := createSchema("google_compute_forwarding_rule")
 	outputMap := map[string]interface{}{
 		"name": nil,
 	}
@@ -65,21 +65,21 @@ func TestNilValueInRequiredField(t *testing.T) {
 }
 
 func TestFieldsWithTypeSlice(t *testing.T) {
-	resourceSchema := createSchema("google_compute_instance")
+	resourceSchema := createSchema("google_compute_forwarding_rule")
 	outputMap := map[string]interface{}{
-		"name":              "fr-1",
-		"resource_policies": []string{"test"},
+		"name":  "fr-1",
+		"ports": []string{"80"},
 	}
 
 	val, err := MapToCtyValWithSchema(outputMap, resourceSchema)
 
 	assert.Nil(t, err)
 
-	assert.Equal(t, []cty.Value{cty.StringVal("test")}, val.GetAttr("resource_policies").AsValueSlice())
+	assert.Equal(t, []cty.Value{cty.StringVal("80")}, val.GetAttr("ports").AsValueSlice())
 }
 
 func TestMissingFieldDoesNotBreakConversionConversion(t *testing.T) {
-	resourceSchema := createSchema("google_compute_instance")
+	resourceSchema := createSchema("google_compute_forwarding_rule")
 	outputMap := map[string]interface{}{
 		"name":         "fr-1",
 		"unknownField": "unknownValue",
@@ -94,16 +94,16 @@ func TestMissingFieldDoesNotBreakConversionConversion(t *testing.T) {
 }
 
 func TestFieldWithTypeSchemaSet(t *testing.T) {
-	resourceSchema := createSchema("google_compute_instance")
+	resourceSchema := createSchema("google_compute_forwarding_rule")
 	outputMap := map[string]interface{}{
-		"name":              "fr-1",
-		"resource_policies": schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface([]string{"test"})),
+		"name":  "fr-1",
+		"ports": schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface([]string{"80"})),
 	}
 
 	val, err := MapToCtyValWithSchema(outputMap, resourceSchema)
 
 	assert.Nil(t, err)
-	assert.Equal(t, []cty.Value{cty.StringVal("test")}, val.GetAttr("resource_policies").AsValueSlice())
+	assert.Equal(t, []cty.Value{cty.StringVal("80")}, val.GetAttr("ports").AsValueSlice())
 }
 
 func TestFieldWithTypeSchemaListAndNestedObject(t *testing.T) {

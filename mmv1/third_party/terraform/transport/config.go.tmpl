@@ -231,9 +231,7 @@ func ExpandExternalCredentialsConfig(v interface{}) (*ExternalCredentials, error
 // Config is the configuration structure used to instantiate the Google
 // provider.
 type Config struct {
-{{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
 	DCLConfig
-{{- end }}
 	AccessToken                               string
 	Credentials                               string
 	ExternalCredentials                       *ExternalCredentials
