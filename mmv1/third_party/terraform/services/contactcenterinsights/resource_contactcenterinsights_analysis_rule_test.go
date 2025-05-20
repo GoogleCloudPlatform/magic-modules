@@ -16,6 +16,7 @@ func TestInsightsAnalysisRule(t *testing.T) {
 		"org_id":          envvar.GetTestOrgFromEnv(t),
 		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 		"random_suffix":   acctest.RandString(t, 10),
+		"project_name":    envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -74,7 +75,7 @@ func testAccInsightsAnalysisRule(context map[string]interface{}) string {
 		conversation_filter = "test-filter"
 		analysis_percentage = 0.5
 		summarization_config {
-		  conversation_profile = "some_conversation_profile"
+          conversation_profile = "projects/%{project_name}/locations/us-central1/conversationProfiles/some_conversation_profile"
 		}
 		active = true
 	}
@@ -92,11 +93,11 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
   conversation_filter = "agent_id = \"1\""
   annotator_selector {
     run_interruption_annotator = true
-    issue_models    = ["projects/123456789/locations/us-central1/issueModels/some_issue_model_id"]
-    phrase_matchers = ["projects/123456789/locations/us-central1/phraseMatchers/123"]
+    issue_models    = ["projects/%{project_name}/locations/us-central1/issueModels/some_issue_model_id"]
+    phrase_matchers = ["projects/%{project_name}/locations/us-central1/phraseMatchers/123"]
     qa_config {
       scorecard_list {
-        qa_scorecard_revisions = ["projects/123456789/locations/us-central1/qaScorecards/*/revisions/some_scorecard_revision_id"]
+        qa_scorecard_revisions = ["projects/%{project_name}/locations/us-central1/qaScorecards/*/revisions/some_scorecard_revision_id"]
       }
     }
     run_entity_annotator         = true
@@ -128,11 +129,11 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
   conversation_filter = "agent_id = \"1\""
   annotator_selector {
     run_interruption_annotator = false
-	issue_models    = ["projects/123456789/locations/us-central1/issueModels/alt_issue_model_id"]
-    phrase_matchers = ["projects/123456789/locations/us-central1/phraseMatchers/123"]
+	issue_models    = ["projects/%{project_name}/locations/us-central1/issueModels/alt_issue_model_id"]
+    phrase_matchers = ["projects/%{project_name}/locations/us-central1/phraseMatchers/123"]
     qa_config {
       scorecard_list {
-        qa_scorecard_revisions = ["projects/123456789/locations/us-central1/qaScorecards/*/revisions/alt_scorecard_revision_id"]
+        qa_scorecard_revisions = ["projects/%{project_name}/locations/us-central1/qaScorecards/*/revisions/alt_scorecard_revision_id"]
       }
     }
     run_entity_annotator         = false

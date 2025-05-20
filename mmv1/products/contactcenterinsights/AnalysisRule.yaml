@@ -38,14 +38,20 @@ examples:
     primary_resource_id: 'basic_analysis_rule'
     vars:
       analysis_rule: 'basic_analysis_rule'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
   - name: 'contact_center_insights_analysis_rule_full'
     primary_resource_id: 'basic_analysis_full'
     vars:
       analysis_rule: 'full_analysis_rule'
+    test_env_vars:s
+      project_name: 'PROJECT_NAME'
   - name: 'contact_center_insights_analysis_rule_profile'
     primary_resource_id: 'basic_analysis_profile'
     vars:
       analysis_rule: 'profile_analysis_rule'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
 parameters:
   - name: location
     type: String
@@ -61,6 +67,7 @@ properties:
       Format:
       projects/{project}/locations/{location}/analysisRules/{analysis_rule}
     output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: createTime
     type: String
     description: Output only. The time at which this analysis rule was created.
