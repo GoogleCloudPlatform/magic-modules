@@ -63,8 +63,6 @@ examples:
       network_attachment_name: 'my-network-attachment'
       network_name: 'my-network'
       subnetwork_name: 'my-subnetwork'
-      rejected_producer_project_name: 'prj-rejected'
-      accepted_producer_project_name: 'prj-accepted'
 parameters:
   - name: 'privateConnectionId'
     type: String
