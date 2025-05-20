@@ -139,6 +139,11 @@ examples:
       instance_group_name: 'instance_group'
       network_name: 'network'
     exclude_test: true
+  - name: 'region_backend_service_dynamic_forwarding'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      region_backend_service_name: 'region-service'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -1438,3 +1443,32 @@ properties:
         required: true
         enum_values:
           - 'CONSISTENT_HASH_SUBSETTING'
+      - name: 'subsetSize'
+        type: Integer
+        description: |
+          The number of backends per backend group assigned to each proxy instance or each service mesh client.
+          An input parameter to the CONSISTENT_HASH_SUBSETTING algorithm. Can only be set if policy is set to
+          CONSISTENT_HASH_SUBSETTING. Can only be set if load balancing scheme is INTERNAL_MANAGED or INTERNAL_SELF_MANAGED.
+          subsetSize is optional for Internal HTTP(S) load balancing and required for Traffic Director.
+          If you do not provide this value, Cloud Load Balancing will calculate it dynamically to optimize the number
+          of proxies/clients visible to each backend and vice versa.
+          Must be greater than 0. If subsetSize is larger than the number of backends/endpoints, then subsetting is disabled.
+  - name: 'dynamicForwarding'
+    type: NestedObject
+    description: |
+      Dynamic forwarding configuration. This field is used to configure the backend service with dynamic forwarding
+      feature which together with Service Extension allows customized and complex routing logic.
+    min_version: beta
+    properties:
+      - name: 'ipPortSelection'
+        type: NestedObject
+        description: |
+          IP:PORT based dynamic forwarding configuration.
+        min_version: beta
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            min_version: beta
+            description: |
+              A boolean flag enabling IP:PORT based dynamic forwarding.
+            immutable: true
