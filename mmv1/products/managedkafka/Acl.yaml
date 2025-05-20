@@ -107,6 +107,7 @@ properties:
           description: 'The principal. Specified as Google Cloud account, with the Kafka
             StandardAuthorizer prefix User:". For example: "User:test-kafka-client@test-project.iam.gserviceaccount.com".
             Can be the wildcard "User:*" to refer to all users.'
+          required: true
         - name: 'permissionType'
           type: String
           default_value: "ALLOW"
@@ -118,6 +119,7 @@ properties:
             WRITE, CREATE, DELETE, ALTER, DESCRIBE, CLUSTER_ACTION, DESCRIBE_CONFIGS,
             ALTER_CONFIGS, and IDEMPOTENT_WRITE. See https://kafka.apache.org/documentation/#operations_resources_and_protocols
             for valid combinations of resource_type and operation for different Kafka API requests.
+          required: true
         - name: 'host'
           type: String
           default_value: "*"
@@ -132,7 +134,7 @@ properties:
 
       A terminal 'T' character in the etag indicates that the AclEntries were
       truncated due to repeated field limits.
-    default_from_api: true
+    output: true
   - name: 'resourceType'
     type: String
     description: |
