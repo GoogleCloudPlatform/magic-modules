@@ -224,6 +224,13 @@ func ResourceComputeInstance() *schema.Resource {
 		// template. Please attempt to maintain consistency with the
 		// resource_compute_instance_template schema when updating this one.
 		Schema: map[string]*schema.Schema{
+			"debug_test_new_optional_with_default": {
+				Type:         schema.TypeBool,
+				Optional:     true,
+				Default:      true,
+				Description:  `debug test`,
+			},
+
 			"boot_disk": {
 				Type:        schema.TypeList,
 				Required:    true,
@@ -232,12 +239,6 @@ func ResourceComputeInstance() *schema.Resource {
 				Description: `The boot disk for the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"debug_test_new_optional_with_default": {
-							Type:         schema.TypeBool,
-							Optional:     true,
-							Default:      true,
-							Description:  `debug test`,
-						},
 						"auto_delete": {
 							Type:         schema.TypeBool,
 							Optional:     true,
