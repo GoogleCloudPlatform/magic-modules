@@ -27,7 +27,19 @@ func ParseImportId(idRegexes []string, d TerraformResourceData, config *transpor
 			return fmt.Errorf("Import is not supported. Invalid regex formats.")
 		}
 
-		if fieldValues := re.FindStringSubmatch(d.Id()); fieldValues != nil {
+		if d.Id() == "" {
+			identity, err := d.Identity()
+			if err != nil {
+				return err
+			}
+			if err := identityImport(re, identity, idFormat, d); err != nil {
+				return err
+			}
+			err = setDefaultValues(idRegexes[0], identity, d, config)
+			if err != nil {
+				return err
+			}
+		} else if fieldValues := re.FindStringSubmatch(d.Id()); fieldValues != nil {
 			log.Printf("[DEBUG] matching ID %s to regex %s.", d.Id(), idFormat)
 			// Starting at index 1, the first match is the full string.
 			for i := 1; i < len(fieldValues); i++ {
@@ -71,18 +83,6 @@ func ParseImportId(idRegexes []string, d TerraformResourceData, config *transpor
 			}
 
 			return nil
-		} else if d.Id() == "" {
-			identity, err := d.Identity()
-			if err != nil {
-				return err
-			}
-			if err := identityImport(re, identity, idFormat, d); err != nil {
-				return err
-			}
-			err = setDefaultValues(idRegexes[0], identity, d, config)
-			if err != nil {
-				return err
-			}
 		}
 	}
 	return fmt.Errorf("Import id %q doesn't match any of the accepted formats: %v", d.Id(), idRegexes)
