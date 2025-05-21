@@ -83,6 +83,7 @@ For more information, see
     Default changes in the provider are comparable in impact to default changes in an API,
     and modifying examples and modules may achieve the intended effect with a smaller blast radius.
 * <a name="no-new-optional-default"></a>Adding a new top-level optional field with a default value to a pre-existing resource
+  * This can be allowed if there is a confirmed API-level default that matches the schema default
 * <a name="field-changing-data-format"></a> Modifying how field data is stored in state
   * For example, changing the case of a value returned by the API in a flattener or decorder
 * <a name="field-removing-diff-suppress"></a> Removing diff suppression from a field.

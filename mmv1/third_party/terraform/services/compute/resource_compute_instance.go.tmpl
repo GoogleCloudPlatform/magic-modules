@@ -229,6 +229,7 @@ func ResourceComputeInstance() *schema.Resource {
 				Optional:     true,
 				Default:      true,
 				Description:  `debug test`,
+				ForceNew:	    true,
 			},
 
 			"boot_disk": {
@@ -320,10 +321,9 @@ func ResourceComputeInstance() *schema.Resource {
 							},
 						},
 
-						"initialize_params": {
+						"new_obj": {
 							Type:         schema.TypeList,
 							Optional:     true,
-							AtLeastOneOf: bootDiskKeys,
 							Computed:     true,
 							ForceNew:     true,
 							MaxItems:     1,
@@ -335,12 +335,38 @@ func ResourceComputeInstance() *schema.Resource {
 										Required:     true,
 										Description:  `debug test`,
 									},
-
-									"debug_test_new_required": {
+									"debug_test_new_nested_optional_with_default_nested_ignore":{
 											Type:         schema.TypeBool,
 											Optional:     true,
 											Default:      true,
 											Description:  `debug test`,
+											ForceNew:	    true,
+									},
+								},
+							},
+						},
+						"initialize_params": {
+							Type:         schema.TypeList,
+							Optional:     true,
+							AtLeastOneOf: bootDiskKeys,
+							Computed:     true,
+							ForceNew:     true,
+							MaxItems:     1,
+							Description:  `Parameters with which a disk was created alongside the instance.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"debug_test_new_required_nested": {
+										Type:         schema.TypeBool,
+										Required:     true,
+										Description:  `debug test`,
+									},
+
+									"debug_test_new_nested_optional_with_default_nested":{
+											Type:         schema.TypeBool,
+											Optional:     true,
+											Default:      true,
+											Description:  `debug test`,
+											ForceNew:	    true,
 									},
 
 									"size": {

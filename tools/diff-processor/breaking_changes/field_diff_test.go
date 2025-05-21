@@ -9,12 +9,12 @@ import (
 )
 
 type fieldTestCase struct {
-	name                 string
-	oldField             *schema.Schema
-	newField             *schema.Schema
-	isPrexistingResource bool
-	expectedViolation    bool
-	messageRegex         string // Optional regex to validate the message content
+	name              string
+	oldField          *schema.Schema
+	newField          *schema.Schema
+	schemaDiff        diff.SchemaDiffInterface
+	expectedViolation bool
+	messageRegex      string // Optional regex to validate the message content
 }
 
 func TestFieldBecomingRequired(t *testing.T) {
@@ -109,8 +109,8 @@ var FieldNewRequiredTestCases = []fieldTestCase{
 			Description: "beep",
 			Required:    true,
 		},
-		expectedViolation:    true,
-		isPrexistingResource: true,
+		schemaDiff:        existingResourceSchemaDiff,
+		expectedViolation: true,
 	},
 	{
 		name:     "new resource - field added as required but is new resource",
@@ -119,8 +119,18 @@ var FieldNewRequiredTestCases = []fieldTestCase{
 			Description: "beep",
 			Required:    true,
 		},
-		expectedViolation:    false,
-		isPrexistingResource: false,
+		schemaDiff:        newResourceSchemaDiff,
+		expectedViolation: false,
+	},
+	{
+		name:     "field in new nested structure - field added as required",
+		oldField: nil,
+		newField: &schema.Schema{
+			Description: "beep",
+			Required:    true,
+		},
+		schemaDiff:        fieldInNewStructureSchemaDiff,
+		expectedViolation: false,
 	},
 }
 
@@ -132,6 +142,30 @@ func TestFieldNewOptionalWithDefault(t *testing.T) {
 
 var FieldNewOptionalWithDefaultTestCases = []fieldTestCase{
 	{
+		name:     "existing resource - new field added as optional with default and forcenew",
+		oldField: nil,
+		newField: &schema.Schema{
+			Description: "beep",
+			Optional:    true,
+			Default:     "abc",
+			ForceNew:    true,
+		},
+		schemaDiff:        existingResourceSchemaDiff,
+		expectedViolation: true,
+	},
+	{
+		name:     "existing resource - new field added as optional with falsey default and forcenew",
+		oldField: nil,
+		newField: &schema.Schema{
+			Description: "beep",
+			Optional:    true,
+			Default:     false,
+			ForceNew:    true,
+		},
+		schemaDiff:        existingResourceSchemaDiff,
+		expectedViolation: true,
+	},
+	{
 		name:     "existing resource - new field added as optional with default",
 		oldField: nil,
 		newField: &schema.Schema{
@@ -139,8 +173,8 @@ var FieldNewOptionalWithDefaultTestCases = []fieldTestCase{
 			Optional:    true,
 			Default:     "abc",
 		},
-		expectedViolation:    true,
-		isPrexistingResource: true,
+		schemaDiff:        existingResourceSchemaDiff,
+		expectedViolation: false,
 	},
 	{
 		name:     "existing resource - new field added as optional with falsey default",
@@ -150,8 +184,8 @@ var FieldNewOptionalWithDefaultTestCases = []fieldTestCase{
 			Optional:    true,
 			Default:     false,
 		},
-		expectedViolation:    true,
-		isPrexistingResource: true,
+		schemaDiff:        existingResourceSchemaDiff,
+		expectedViolation: false,
 	},
 	{
 		name:     "new resource - new field added as optional with default",
@@ -161,8 +195,8 @@ var FieldNewOptionalWithDefaultTestCases = []fieldTestCase{
 			Optional:    true,
 			Default:     "abc",
 		},
-		expectedViolation:    false,
-		isPrexistingResource: false,
+		schemaDiff:        newResourceSchemaDiff,
+		expectedViolation: false,
 	},
 	{
 		name:     "new resource - new field added as optional with falsey default",
@@ -172,8 +206,20 @@ var FieldNewOptionalWithDefaultTestCases = []fieldTestCase{
 			Optional:    true,
 			Default:     false,
 		},
-		expectedViolation:    false,
-		isPrexistingResource: false,
+		schemaDiff:        newResourceSchemaDiff,
+		expectedViolation: false,
+	},
+	{
+		name:     "field in new nested structure - new field added as optional with default and forcenew",
+		oldField: nil,
+		newField: &schema.Schema{
+			Description: "beep",
+			Optional:    true,
+			Default:     "abc",
+			ForceNew:    true,
+		},
+		schemaDiff:        fieldInNewStructureSchemaDiff,
+		expectedViolation: false,
 	},
 }
 
@@ -674,7 +720,7 @@ var FieldShrinkingMaxTestCases = []fieldTestCase{
 
 // Extended check method that also validates message content when expected
 func (tc *fieldTestCase) check(rule FieldDiffRule, t *testing.T) {
-	messages := rule.Messages("resource", "field", diff.FieldDiff{Old: tc.oldField, New: tc.newField}, tc.isPrexistingResource)
+	messages := rule.Messages("resource", "field", diff.FieldDiff{Old: tc.oldField, New: tc.newField}, tc.schemaDiff)
 	violation := len(messages) > 0
 
 	// Check violation expectation

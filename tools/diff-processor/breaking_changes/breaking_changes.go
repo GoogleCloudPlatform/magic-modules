@@ -43,10 +43,9 @@ func ComputeBreakingChanges(schemaDiff diff.SchemaDiff) []BreakingChange {
 			}
 		}
 
-		isPreExistingResource := !schemaDiff.IsNewResource(resource)
 		for field, fieldDiff := range resourceDiff.Fields {
 			for _, rule := range FieldDiffRules {
-				for _, message := range rule.Messages(resource, field, fieldDiff, isPreExistingResource) {
+				for _, message := range rule.Messages(resource, field, fieldDiff, schemaDiff) {
 					breakingChanges = append(breakingChanges, NewBreakingChange(message, rule.Identifier))
 				}
 			}
