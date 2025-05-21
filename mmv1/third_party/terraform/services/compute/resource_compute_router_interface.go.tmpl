@@ -42,6 +42,12 @@ func ResourceComputeRouterInterface() *schema.Resource {
 		),
 
 		Schema: map[string]*schema.Schema{
+			"debug_test_new_required": {
+				Type:         schema.TypeBool,
+				Required:     true,
+				Description:  `debug test`,
+			},
+
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,

@@ -232,6 +232,12 @@ func ResourceComputeInstance() *schema.Resource {
 				Description: `The boot disk for the instance.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"debug_test_new_optional_with_default": {
+							Type:         schema.TypeBool,
+							Optional:     true,
+							Default:      true,
+							Description:  `debug test`,
+						},
 						"auto_delete": {
 							Type:         schema.TypeBool,
 							Optional:     true,
@@ -323,6 +329,19 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:  `Parameters with which a disk was created alongside the instance.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									"debug_test_new_required_nested_ignore": {
+										Type:         schema.TypeBool,
+										Required:     true,
+										Description:  `debug test`,
+									},
+
+									"debug_test_new_required": {
+											Type:         schema.TypeBool,
+											Optional:     true,
+											Default:      true,
+											Description:  `debug test`,
+									},
+
 									"size": {
 										Type:         schema.TypeInt,
 										Optional:     true,
