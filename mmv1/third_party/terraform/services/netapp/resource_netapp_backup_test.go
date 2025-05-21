@@ -375,8 +375,16 @@ resource "google_netapp_storage_pool" "default" {
     ignore_changes = all
   }
 }
-resource "google_netapp_volume" "default" {
+data "google_netapp_storage_pool" "pool_ready" {
+  name     = google_netapp_storage_pool.default.name
+  location = google_netapp_storage_pool.default.location
+  timeouts {
+    read = "300s"
+  }
   depends_on = [google_netapp_storage_pool.default]
+}
+resource "google_netapp_volume" "default" {
+  depends_on = [data.google_netapp_storage_pool.pool_ready]
   name = "tf-test-backup-volume%{random_suffix}"
   location = google_netapp_storage_pool.default.location
   capacity_gib = "100"
