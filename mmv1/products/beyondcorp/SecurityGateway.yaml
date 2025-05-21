@@ -108,11 +108,11 @@ properties:
       name: Hub
       type: NestedObject
       properties:
-        - name: internet_gateway
+        - name: internetGateway
           type: NestedObject
           description: Internet Gateway configuration.
           properties:
-            - name: assigned_ips
+            - name: assignedIps
               type: Array
               description: Output only. List of IP addresses assigned to the Cloud NAT.
               output: true
