@@ -1111,7 +1111,7 @@ func TestAccStorageBucket_logging(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "custom_headers",
+				ImportStateVerifyIgnore: []string{"force_destroy", "custom_headers"},
 			},
 		},
 	})
