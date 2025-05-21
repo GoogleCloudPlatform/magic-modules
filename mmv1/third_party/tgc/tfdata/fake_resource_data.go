@@ -98,26 +98,6 @@ func (d *FakeResourceData) Get(name string) interface{} {
 	return val
 }
 
-// GetRawConfig returns the cty.Value that Terraform sent the SDK for the
-// config. If no value was sent, or if a null value was sent, the value will be
-// a null value of the resource's type.
-//
-// GetRawConfig is considered experimental and advanced functionality, and
-// familiarity with the Terraform protocol is suggested when using it.
-func (d *FakeResourceData) GetRawConfig() cty.Value {
-	// These methods follow the field readers preference order.
-	if d.diff != nil && !d.diff.RawConfig.IsNull() {
-		return d.diff.RawConfig
-	}
-	if d.config != nil && !d.config.CtyValue.IsNull() {
-		return d.config.CtyValue
-	}
-	if d.state != nil && !d.state.RawConfig.IsNull() {
-		return d.state.RawConfig
-	}
-	return cty.NullVal(schemaMap(d.schema).CoreConfigSchema().ImpliedType())
-}
-
 // Get reads a single field by key and returns a boolean indicating
 // whether the field exists.
 func (d *FakeResourceData) GetOk(name string) (interface{}, bool) {
@@ -152,6 +132,7 @@ func (d *FakeResourceData) Set(string, interface{}) error     { return nil }
 func (d *FakeResourceData) SetId(string)                      {}
 func (d *FakeResourceData) GetProviderMeta(interface{}) error { return nil }
 func (d *FakeResourceData) Timeout(key string) time.Duration  { return time.Duration(1) }
+func (d *FakeResourceData) GetRawConfig() cty.Value           { return cty.NullVal(cty.String) }
 
 func NewFakeResourceData(kind string, resourceSchema map[string]*schema.Schema, values map[string]interface{}) *FakeResourceData {
 	state := map[string]string{}
