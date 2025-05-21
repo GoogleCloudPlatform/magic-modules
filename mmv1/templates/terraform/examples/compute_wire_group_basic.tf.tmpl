@@ -3,7 +3,7 @@ provider = google-beta
 }
 
 resource "google_compute_cross_site_network" "example-cross-site-network" {
-  name        = "tf-test-cross-site-network"
+  name        = "{{index $.Vars "cross_site_network"}}"
   description = "Example cross site network"
   provider    = google-beta
 }
