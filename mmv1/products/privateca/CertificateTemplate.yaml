@@ -186,6 +186,7 @@ properties:
           - name: 'isCa'
             type: Boolean
             description: Optional. When true, the "CA" in Basic Constraints extension will be set to true.
+            send_empty_value: true
           - name: 'nonCa'
             type: Boolean
             description: |
