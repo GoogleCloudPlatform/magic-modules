@@ -70,7 +70,7 @@ func CollectAllTgcMetadata(tgcPayload TgcMetadataPayload) resource.TestCheckFunc
 			apiServiceName := GetAPIServiceNameForResource(metadata.ResourceType)
 			if apiServiceName == "unknown" || apiServiceName == "failed_to_populate_metadata_cache" {
 				log.Printf("[DEBUG]TGC Terraform error: unknown resource type %s", metadata.ResourceType)
-				metadata.CaiAssetName = "unknown"
+				metadata.CaiAssetName = apiServiceName
 			} else {
 				var rName string
 				switch metadata.ResourceType {
