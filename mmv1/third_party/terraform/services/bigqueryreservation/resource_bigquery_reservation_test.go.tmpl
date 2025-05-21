@@ -119,6 +119,7 @@ resource "google_bigquery_reservation" "reservation" {
 func testAccBigqueryReservation_withScalingMode_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigquery_reservation" "reservation" {
+  provider       = google-beta
   name           = "tf-test-reservation-%{random_suffix}"
   location       = "us-west2"
 
@@ -137,6 +138,7 @@ resource "google_bigquery_reservation" "reservation" {
 func testAccBigqueryReservation_withScalingMode_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigquery_reservation" "reservation" {
+  provider       = google-beta
   name           = "tf-test-reservation-%{random_suffix}"
   location       = "us-west2"
 
