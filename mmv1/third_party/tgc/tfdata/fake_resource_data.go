@@ -98,8 +98,24 @@ func (d *FakeResourceData) Get(name string) interface{} {
 	return val
 }
 
+// GetRawConfig returns the cty.Value that Terraform sent the SDK for the
+// config. If no value was sent, or if a null value was sent, the value will be
+// a null value of the resource's type.
+//
+// GetRawConfig is considered experimental and advanced functionality, and
+// familiarity with the Terraform protocol is suggested when using it.
 func (d *FakeResourceData) GetRawConfig() cty.Value {
-	return d.GetRawConfig()
+	// These methods follow the field readers preference order.
+	if d.diff != nil && !d.diff.RawConfig.IsNull() {
+		return d.diff.RawConfig
+	}
+	if d.config != nil && !d.config.CtyValue.IsNull() {
+		return d.config.CtyValue
+	}
+	if d.state != nil && !d.state.RawConfig.IsNull() {
+		return d.state.RawConfig
+	}
+	return cty.NullVal(schemaMap(d.schema).CoreConfigSchema().ImpliedType())
 }
 
 // Get reads a single field by key and returns a boolean indicating

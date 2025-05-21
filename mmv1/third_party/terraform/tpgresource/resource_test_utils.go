@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -35,10 +34,6 @@ func (d *ResourceDataMock) HasChange(key string) bool {
 func (d *ResourceDataMock) Get(key string) interface{} {
 	v, _ := d.GetOk(key)
 	return v
-}
-
-func (d *ResourceDataMock) GetRawConfig() cty.Value {
-	return d.GetRawConfig()
 }
 
 func (d *ResourceDataMock) GetOk(key string) (interface{}, bool) {
