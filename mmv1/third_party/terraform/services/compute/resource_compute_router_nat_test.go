@@ -479,6 +479,56 @@ func TestAccComputeRouterNat_AutoNetworkTier(t *testing.T) {
 	})
 }
 
+func TestAccComputeRouterNat_withPrivateNatNetworkTierStandard(t *testing.T) {
+	t.Parallel()
+
+	project := envvar.GetTestProjectFromEnv()
+	region := envvar.GetTestRegionFromEnv()
+
+	testId := acctest.RandString(t, 10)
+	routerName := fmt.Sprintf("tf-test-router-nat-%s", testId)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterNatDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRouterNatPrivateTypeNetworkTierStandard(routerName),
+			},
+			{
+				// implicitly full ImportStateId
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportStateId:     fmt.Sprintf("%s/%s/%s/%s", project, region, routerName, routerName),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportStateId:     fmt.Sprintf("%s/%s/%s", region, routerName, routerName),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				ResourceName:      "google_compute_router_nat.foobar",
+				ImportStateId:     fmt.Sprintf("%s/%s", routerName, routerName),
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRouterNatKeepRouter(routerName),
+				Check: testAccCheckComputeRouterNatDelete(
+					t, "google_compute_router_nat.foobar"),
+			},
+		},
+	})
+}
+
 func TestAccComputeRouterNat_withPrivateNat(t *testing.T) {
 	t.Parallel()
 
@@ -2046,4 +2096,44 @@ resource "google_compute_router_nat" "foobar" {
   auto_network_tier                  = "PREMIUM"
 }
 `, testAccComputeRouterNatBaseResourcesWithPrivateNatSubnetworks(routerName, hubName), routerName)
+}
+
+func testAccComputeRouterNatPrivateTypeNetworkTierStandard(routerName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%s-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "foobar" {
+  name          = "%s-subnet"
+  network       = google_compute_network.foobar.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+  purpose          = "PRIVATE_NAT"
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "%s"
+  region  = google_compute_subnetwork.foobar.region
+  network = google_compute_network.foobar.self_link
+}
+
+resource "google_compute_router_nat" "foobar" {
+  name                                = "%s"
+  router                              = google_compute_router.foobar.name
+  region                              = google_compute_router.foobar.region
+  source_subnetwork_ip_ranges_to_nat  = "LIST_OF_SUBNETWORKS"
+  type                                = "PRIVATE"
+  enable_dynamic_port_allocation      = false
+  enable_endpoint_independent_mapping = false
+  auto_network_tier                   = "STANDARD"
+  min_ports_per_vm                    = 32
+
+  subnetwork {
+    name                    = google_compute_subnetwork.foobar.id
+    source_ip_ranges_to_nat = ["ALL_IP_RANGES"]
+  }
+}
+`, routerName, routerName, routerName, routerName)
 }
