@@ -370,8 +370,13 @@ resource "google_netapp_storage_pool" "default" {
   service_level = "PREMIUM"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
+  lifecycle {
+    create_before_destroy = true
+    ignore_changes = all
+  }
 }
 resource "google_netapp_volume" "default" {
+  depends_on = [google_netapp_storage_pool.default]
   name = "tf-test-backup-volume%{random_suffix}"
   location = google_netapp_storage_pool.default.location
   capacity_gib = "100"
