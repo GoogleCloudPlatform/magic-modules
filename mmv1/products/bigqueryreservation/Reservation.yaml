@@ -156,3 +156,12 @@ properties:
           replicated to the secondary.
         output: true
     output: true
+  - name: 'scalingMode'
+    type: Enum
+    default_from_api: true
+    description: |
+      The scaling mode for the reservation. This enum determines how the reservation scales up and down.
+    enum_values:
+      - 'AUTOSCALE_ONLY'
+      - 'IDLE_SLOTS_ONLY'
+      - 'ALL_SLOTS'
