@@ -61,6 +61,7 @@ For more information, see
   * Changing the field type between primitive and complex data
     types is not possible. For this scenario, field renames are preferred.
 * <a name="field-optional-to-required"></a> Making an optional field required or adding a new required field
+* <a name="no-new-required"></a>Adding a new top-level required field to a pre-existing resource
 * <a name="resource-schema-field-addition-of-exactly-one-of"></a>Adding an "ExactlyOneOf" constraint that causes one or more previously-optional fields to be required or conflict with each other
 * <a name="field-becoming-computed"></a> Making a settable field read-only
   * For MMv1 resources, adding `output: true` to an existing field.
@@ -81,12 +82,14 @@ For more information, see
     if the change will destroy and recreate the resource due to changing an immutable value.
     Default changes in the provider are comparable in impact to default changes in an API,
     and modifying examples and modules may achieve the intended effect with a smaller blast radius.
+* <a name="no-new-optional-default"></a>Adding a new top-level optional field with a default value to a pre-existing resource
 * <a name="field-changing-data-format"></a> Modifying how field data is stored in state
   * For example, changing the case of a value returned by the API in a flattener or decorder
 * <a name="field-removing-diff-suppress"></a> Removing diff suppression from a field.
   * For MMv1 resources, removing `diff_suppress_func` from a field.
   * For handwritten resources, removing `DiffSuppressFunc` from a field.
 * Removing update support from a field.
+
 
 ### Making validation more strict
 

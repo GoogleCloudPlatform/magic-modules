@@ -9,11 +9,12 @@ import (
 )
 
 type fieldTestCase struct {
-	name              string
-	oldField          *schema.Schema
-	newField          *schema.Schema
-	expectedViolation bool
-	messageRegex      string // Optional regex to validate the message content
+	name                 string
+	oldField             *schema.Schema
+	newField             *schema.Schema
+	isPrexistingResource bool
+	expectedViolation    bool
+	messageRegex         string // Optional regex to validate the message content
 }
 
 func TestFieldBecomingRequired(t *testing.T) {
@@ -94,8 +95,87 @@ var FieldBecomingRequiredTestCases = []fieldTestCase{
 	},
 }
 
-// !! min max ?
-// isRuleBreak: FieldOptionalComputedToOptional_func,
+func TestFieldNewRequired(t *testing.T) {
+	for _, tc := range FieldNewRequiredTestCases {
+		tc.check(FieldNewRequired, t)
+	}
+}
+
+var FieldNewRequiredTestCases = []fieldTestCase{
+	{
+		name:     "existing resource - field added as required",
+		oldField: nil,
+		newField: &schema.Schema{
+			Description: "beep",
+			Required:    true,
+		},
+		expectedViolation:    true,
+		isPrexistingResource: true,
+	},
+	{
+		name:     "new resource - field added as required but is new resource",
+		oldField: nil,
+		newField: &schema.Schema{
+			Description: "beep",
+			Required:    true,
+		},
+		expectedViolation:    false,
+		isPrexistingResource: false,
+	},
+}
+
+func TestFieldNewOptionalWithDefault(t *testing.T) {
+	for _, tc := range FieldNewOptionalWithDefaultTestCases {
+		tc.check(FieldNewOptionalFieldWithDefault, t)
+	}
+}
+
+var FieldNewOptionalWithDefaultTestCases = []fieldTestCase{
+	{
+		name:     "existing resource - new field added as optional with default",
+		oldField: nil,
+		newField: &schema.Schema{
+			Description: "beep",
+			Optional:    true,
+			Default:     "abc",
+		},
+		expectedViolation:    true,
+		isPrexistingResource: true,
+	},
+	{
+		name:     "existing resource - new field added as optional with falsey default",
+		oldField: nil,
+		newField: &schema.Schema{
+			Description: "beep",
+			Optional:    true,
+			Default:     false,
+		},
+		expectedViolation:    true,
+		isPrexistingResource: true,
+	},
+	{
+		name:     "new resource - new field added as optional with default",
+		oldField: nil,
+		newField: &schema.Schema{
+			Description: "beep",
+			Optional:    true,
+			Default:     "abc",
+		},
+		expectedViolation:    false,
+		isPrexistingResource: false,
+	},
+	{
+		name:     "new resource - new field added as optional with falsey default",
+		oldField: nil,
+		newField: &schema.Schema{
+			Description: "beep",
+			Optional:    true,
+			Default:     false,
+		},
+		expectedViolation:    false,
+		isPrexistingResource: false,
+	},
+}
 
 func TestFieldChangingType(t *testing.T) {
 	for _, tc := range FieldChangingTypeTestCases {
@@ -594,7 +674,7 @@ var FieldShrinkingMaxTestCases = []fieldTestCase{
 
 // Extended check method that also validates message content when expected
 func (tc *fieldTestCase) check(rule FieldDiffRule, t *testing.T) {
-	messages := rule.Messages("resource", "field", diff.FieldDiff{Old: tc.oldField, New: tc.newField})
+	messages := rule.Messages("resource", "field", diff.FieldDiff{Old: tc.oldField, New: tc.newField}, tc.isPrexistingResource)
 	violation := len(messages) > 0
 
 	// Check violation expectation

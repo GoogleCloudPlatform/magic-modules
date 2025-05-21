@@ -313,3 +313,14 @@ func setKey(set FieldSet) string {
 	slice := setToSortedSlice(set)
 	return strings.Join(slice, ",")
 }
+
+func (sd *SchemaDiff) IsNewResource(resource string) bool {
+	var rcd ResourceConfigDiff
+	if rd, ok := (*sd)[resource]; ok {
+		rcd = rd.ResourceConfig
+	}
+	if rcd.Old == nil && rcd.New != nil {
+		return true
+	}
+	return false
+}
