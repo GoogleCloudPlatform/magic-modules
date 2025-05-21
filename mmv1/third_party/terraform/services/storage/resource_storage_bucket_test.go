@@ -50,14 +50,14 @@ func TestAccStorageBucket_basic(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "custom_headers"},
 			},
 			{
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportStateId:           fmt.Sprintf("%s/%s", envvar.GetTestProjectFromEnv(), bucketName),
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "custom_headers"},
 			},
 		},
 	})
@@ -1801,6 +1801,10 @@ func testAccStorageBucket_basic(bucketName string) string {
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
+  custom_headers = {
+    "X-goog-custom-audit-metauser"= "user"
+    "X-goog-custom-audit-customerId"= "customer_id"
+  }
 }
 `, bucketName)
 }
