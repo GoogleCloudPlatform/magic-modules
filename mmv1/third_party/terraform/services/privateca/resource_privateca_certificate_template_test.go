@@ -90,10 +90,10 @@ func TestAccPrivatecaCertificateTemplate_updateCaOption(t *testing.T) {
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	vcrTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckPrivatecaCertificateTemplateDestroyProducer(t),
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPrivatecaCertificateTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccPrivatecaCertificateTemplate_CertificateTemplateCaOptionIsCaIsTrueAndMaxPathIsPositive(context),
@@ -482,7 +482,7 @@ resource "google_privateca_certificate_template" "primary" {
   location         = "%{region}"
   name             = "tf-test-template%{random_suffix}"
   maximum_lifetime = "86400s"
-  description      = "An updated sample certificate template"
+  description      = "A sample certificate template"
 
   identity_constraints {
     allow_subject_alt_names_passthrough = true
@@ -658,7 +658,7 @@ resource "google_privateca_certificate_template" "primary" {
   location         = "%{region}"
   name             = "tf-test-template%{random_suffix}"
   maximum_lifetime = "86400s"
-  description      = "An updated sample certificate template"
+  description      = "Another updated sample certificate template"
 
   identity_constraints {
     allow_subject_alt_names_passthrough = true
