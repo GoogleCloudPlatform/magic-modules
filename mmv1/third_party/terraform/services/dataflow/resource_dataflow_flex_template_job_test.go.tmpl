@@ -2110,15 +2110,15 @@ resource "google_storage_bucket_object" "schema" {
   bucket = google_storage_bucket.bucket.name
   content = <<EOF
 {
-	"eventId": "{{uuid()}}",
-	"eventTimestamp": {{timestamp()}},
-	"ipv4": "{{ipv4()}}",
-	"ipv6": "{{ipv6()}}",
-	"country": "{{country()}}",
-	"username": "{{username()}}",
-	"quest": "{{random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road")}}",
-	"score": {{integer(100, 10000)}},
-	"completed": {{bool()}}
+	"eventId": "{{"{{"}}uuid(){{"}}"}}",
+	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
+	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
+	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
+	"country": "{{"{{"}}country(){{"}}"}}",
+	"username": "{{"{{"}}username(){{"}}"}}",
+	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
+	"score": {{"{{"}}integer(100, 10000){{"}}"}},
+	"completed": {{"{{"}}bool(){{"}}"}}
 }
 EOF
 }
