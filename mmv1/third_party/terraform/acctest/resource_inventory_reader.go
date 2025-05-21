@@ -154,9 +154,7 @@ func GetServicePackageForResourceType(resourceType string) string {
 }
 
 // getServicesDir returns the path to the services directory
-// If projectRoot is provided, it will use that as the base
-// Otherwise, it will attempt to find the project root, and if that fails,
-// it will use environment variables or fall back to the current directory
+// It will attempt to find the project root relative to cwd
 func getServicesDir() (string, error) {
 	// Try to find project root
 	root, err := findProjectRoot()
