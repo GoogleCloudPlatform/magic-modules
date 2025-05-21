@@ -339,15 +339,15 @@ func TestAccNetappBackup_NetappImmutableBackup(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetappBackup_ImmutableBackup(context),
-        ExpectError: func(err error) bool {
-          if err != nil &&  strings.Contains(err.Error(), "bad request error") {
-              fmt.Println("Retrying...")
-              return true
-          }
-          return false
-      },
-        RetryableErrorTimeout: 10 * time.Minute,
-        DelayBetweenRetries: 30 * time.Second,
+				ExpectError: func(err error) bool {
+					if err != nil && strings.Contains(err.Error(), "bad request error") {
+						fmt.Println("Retrying...")
+						return true
+					}
+					return false
+				},
+				RetryableErrorTimeout: 10 * time.Minute,
+				DelayBetweenRetries:   30 * time.Second,
 			},
 			{
 				ResourceName:            "google_netapp_backup.test_backup",
