@@ -438,7 +438,7 @@ properties:
       - name: 'metadata'
         type: KeyValuePairs
         description: |
-          Optional. Custom metadata to apply to this instance. The `serial-port-logging-enable` is not updatable.
+          Optional. Custom metadata to apply to this instance. Note that the `serial-port-logging-enable` can be set but is not updatable.
         default_from_api: true
         diff_suppress_func: 'WorkbenchInstanceMetadataDiffSuppress'
       - name: 'enableIpForwarding'
