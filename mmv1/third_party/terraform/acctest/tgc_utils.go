@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package acctest
 
 import (
@@ -70,7 +68,7 @@ func CollectAllTgcMetadata(tgcPayload TgcMetadataPayload) resource.TestCheckFunc
 
 			// Resolve the CAI asset name
 			apiServiceName := GetAPIServiceNameForResource(metadata.ResourceType)
-			if apiServiceName == "unknown" {
+			if apiServiceName == "unknown" || apiServiceName == "failed_to_populate_metadata_cache" {
 				log.Printf("[DEBUG]TGC Terraform error: unknown resource type %s", metadata.ResourceType)
 				metadata.CaiAssetName = "unknown"
 			} else {
