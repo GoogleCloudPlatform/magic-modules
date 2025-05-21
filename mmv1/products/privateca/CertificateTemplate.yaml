@@ -52,6 +52,11 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])'
     vars:
       name: 'my-template'
+  - name: 'privateca_template_zero_max_issuer_path_length'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])'
+    vars:
+      name: 'my-template'
 parameters:
 properties:
   - name: 'name'
@@ -181,7 +186,6 @@ properties:
           - name: 'isCa'
             type: Boolean
             description: Optional. When true, the "CA" in Basic Constraints extension will be set to true.
-            send_empty_value: true
           - name: 'nonCa'
             type: Boolean
             description: |
