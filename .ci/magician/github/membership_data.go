@@ -117,7 +117,12 @@ var (
 			},
 		},
 		"slevenick": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 5, 22),
+					endDate:   newDate(2025, 6, 7),
+				},
+			},
 		},
 		"trodge": {
 			vacations: []Vacation{},
