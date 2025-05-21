@@ -250,8 +250,8 @@ func FieldNewOptionalFieldWithDefaultMessages(resource, field string, fieldDiff 
 	// This rule applies to newly added fields (Old == nil).
 	if fieldDiff.Old == nil {
 		if fieldDiff.New.Optional && fieldDiff.New.Default != nil && fieldDiff.New.ForceNew {
-			tmpl := "Field `%s` added as optional with a default value on pre-existing resource `%s`. " +
-				"This can be allowed if there is a confirmed API-level default that matches the schema default."
+			tmpl := "Field `%s` added as optional with a default value and force new on pre-existing resource `%s`. " +
+				"This can be allowed if there is a confirmed API-level default that matches the schema default"
 			return []string{fmt.Sprintf(tmpl, field, resource)}
 		}
 	}
