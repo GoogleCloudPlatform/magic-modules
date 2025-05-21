@@ -339,15 +339,6 @@ func TestAccNetappBackup_NetappImmutableBackup(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetappBackup_ImmutableBackup(context),
-				ExpectError: func(err error) bool {
-					if err != nil && strings.Contains(err.Error(), "bad request error") {
-						fmt.Println("Retrying...")
-						return true
-					}
-					return false
-				},
-				RetryableErrorTimeout: 10 * time.Minute,
-				DelayBetweenRetries:   30 * time.Second,
 			},
 			{
 				ResourceName:            "google_netapp_backup.test_backup",
@@ -355,7 +346,7 @@ func TestAccNetappBackup_NetappImmutableBackup(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
 			},
-			{
+      {
 				Config: testAccNetappBackup_ImmutableBackup_update(context),
 			},
 			{
@@ -379,20 +370,8 @@ resource "google_netapp_storage_pool" "default" {
   service_level = "PREMIUM"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
-  lifecycle {
-    create_before_destroy = true
-    ignore_changes = all
-  }
-}
-resource "time_sleep" "wait_for_pool" {
-  depends_on = [google_netapp_storage_pool.default]
-  create_duration = "300s"
-    provisioner "local-exec" {
-        command = "echo 'Waiting for storage pool to be ready...'"
-    }
 }
 resource "google_netapp_volume" "default" {
-  depends_on = [time_sleep.wait_for_pool]
   name = "tf-test-backup-volume%{random_suffix}"
   location = google_netapp_storage_pool.default.location
   capacity_gib = "100"
