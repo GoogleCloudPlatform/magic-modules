@@ -8,8 +8,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -189,6 +191,10 @@ func ReplaceVarsForTest(config *transport_tpg.Config, rs *terraform.ResourceStat
 
 	return re.ReplaceAllStringFunc(linkTmpl, replaceFunc), nil
 }
+
+// These methods are required by some mappers but we don't actually have (or need)
+// implementations for them.
+func (d *ResourceDataMock) GetRawConfig() cty.Value { return cty.NullVal(cty.String) }
 
 // Used to create populated schema.ResourceData structs in tests.
 // Pass in a schema and a config map containing the fields and values you wish to set
