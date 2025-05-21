@@ -126,7 +126,8 @@ properties:
           default_value: "*"
           description: 'The host. Must be set to "*" for Managed Service for Apache Kafka.'
   - name: 'etag'
-    type: String
+    type: Fingerprint
+    output: true
     description: |
       `etag` is used for concurrency control. An `etag` is returned in the
       response to `GetAcl` and `CreateAcl`. Callers are required to put that etag
@@ -135,7 +136,6 @@ properties:
 
       A terminal 'T' character in the etag indicates that the AclEntries were
       truncated due to repeated field limits.
-    default_from_api: true
   - name: 'resourceType'
     type: String
     description: |
