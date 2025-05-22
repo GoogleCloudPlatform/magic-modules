@@ -75,7 +75,7 @@ examples:
       pool_name: 'test-pool'
       network_name: 'test-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-2", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
     exclude_docs: true
   - name: 'Storage_pool_create_doc'
     primary_resource_id: 'test_pool'
