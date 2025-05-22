@@ -87,6 +87,9 @@ type Resource struct {
 	// Properties are the fields of a resource. Properties may be nested.
 	Properties []Property
 
+	// Identities is the list of resource properties that are used to identify the resource.
+	Identities []Property
+
 	// InsertTimeoutMinutes is the timeout value in minutes for the resource
 	// create operation
 	InsertTimeoutMinutes int
@@ -330,6 +333,11 @@ func (r Resource) SchemaProperties() (props []Property) {
 	return collapsedProperties(r.Properties)
 }
 
+// IdentityProperties is the list of resource properties that are used to identify the resource.
+func (r Resource) IdentityProperties() (props []Property) {
+	return r.Identities
+}
+
 // Enum arrays are not arrays of strings in the DCL and require special
 // conversion
 func (r Resource) EnumArrays() (props []Property) {
@@ -484,10 +492,11 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		res.title = SnakeCaseTerraformResourceName(crname.Title)
 	}
 
-	id, customID, err := findResourceID(schema, overrides, location)
+	identities, id, customID, err := findResourceID(schema, overrides, location)
 	if err != nil {
 		return nil, err
 	}
+	res.Identities = identities
 	res.ID = id
 	res.UseTerraformID = customID
 
@@ -539,6 +548,7 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	}
 
 	res.Properties = props
+	res.Identities = props
 
 	onlyLongFormFormat := shouldAllowForwardSlashInFormat(res.ID, res.Properties)
 	// Resource Override: Import formats
