@@ -84,7 +84,7 @@ For more information, see
     and modifying examples and modules may achieve the intended effect with a smaller blast radius.
 * <a name="no-new-optional-default"></a> Adding an optional field with a default value and force new to a pre-existing resource at any level of nesting, unless it is being added at the same time as an optional ancestor
   * This can be allowed if there is a confirmed API-level default that matches the schema default
-  * Please work with your reviewer and ensure this scenario is debuged carefully
+  * Please work with your reviewer and ensure this scenario is debugged carefully to avoid a destructive permadiff
 * <a name="field-changing-data-format"></a> Modifying how field data is stored in state
   * For example, changing the case of a value returned by the API in a flattener or decorder
 * <a name="field-removing-diff-suppress"></a> Removing diff suppression from a field.
