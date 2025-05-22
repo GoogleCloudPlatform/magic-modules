@@ -98,6 +98,11 @@ resource "google_bigquery_dataset" "baz" {
 
 data "google_bigquery_datasets" "example" {
   project = google_project.project.project_id
+  depends_on = [
+	google_bigquery_dataset.foo,
+	google_bigquery_dataset.bar,
+	google_bigquery_dataset.baz,
+  ]
 }
 `, context)
 }
