@@ -17,7 +17,6 @@ package github
 
 import (
 	"fmt"
-	utils "magician/utility"
 	"strconv"
 	"time"
 
@@ -94,45 +93,48 @@ func (c *Client) GetPullRequests(state, base, sort, direction string) ([]PullReq
 }
 
 // GetPullRequestRequestedReviewers gets requested reviewers for a PR
-func (gh *Client) GetPullRequestRequestedReviewers(prNumber string) ([]User, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
-
-	var requestedReviewers struct {
-		Users []User `json:"users"`
-	}
-
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, &requestedReviewers, nil)
+func (c *Client) GetPullRequestRequestedReviewers(prNumber string) ([]User, error) {
+	num, err := strconv.Atoi(prNumber)
 	if err != nil {
 		return nil, err
 	}
 
-	return requestedReviewers.Users, nil
+	reviewers, _, err := c.gh.PullRequests.ListReviewers(c.ctx, defaultOwner, defaultRepo, num, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return convertGHUsers(reviewers.Users), nil
 }
 
 // GetPullRequestPreviousReviewers gets previous reviewers for a PR
-func (gh *Client) GetPullRequestPreviousReviewers(prNumber string) ([]User, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/reviews", prNumber)
-
-	var reviews []struct {
-		User User `json:"user"`
+func (c *Client) GetPullRequestPreviousReviewers(prNumber string) ([]User, error) {
+	num, err := strconv.Atoi(prNumber)
+	if err != nil {
+		return nil, err
 	}
-
-	err := utils.RequestCallWithRetry(url, "GET", gh.token, &reviews, nil)
+	reviews, _, err := c.gh.PullRequests.ListReviews(c.ctx, defaultOwner, defaultRepo, num, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	previousAssignedReviewers := map[string]User{}
+	// Use a map to deduplicate reviewers
+	reviewerMap := make(map[string]*gh.User)
+
 	for _, review := range reviews {
-		previousAssignedReviewers[review.User.Login] = review.User
+		if review.User != nil && review.User.Login != nil {
+			login := review.User.GetLogin()
+			reviewerMap[login] = review.User
+		}
 	}
 
-	result := []User{}
-	for _, user := range previousAssignedReviewers {
-		result = append(result, user)
+	// Convert map to slice
+	reviewers := make([]*gh.User, 0, len(reviewerMap))
+	for _, user := range reviewerMap {
+		reviewers = append(reviewers, user)
 	}
 
-	return result, nil
+	return convertGHUsers(reviewers), nil
 }
 
 // GetCommitMessage gets a commit message
