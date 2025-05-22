@@ -8,7 +8,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceGoogleBigQueryDatasets() *schema.Resource {
+func DataSourceGoogleBigqueryDatasets() *schema.Resource {
 	dsSchema := map[string]*schema.Schema{
 		"project": {
 			Type:        schema.TypeString,
