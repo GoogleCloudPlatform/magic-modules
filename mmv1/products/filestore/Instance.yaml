@@ -372,7 +372,7 @@ properties:
       Replication configuration, once set, this cannot be updated.
       Additionally this should be specified on the replica instance only, indicating the active as the peer_instance
     immutable: true
-    write_only: true
+    ignore_read: true
     properties:
       - name: 'role'
         type: Enum
@@ -402,6 +402,16 @@ properties:
     description: |
        Output only fields for replication configuration.
     properties:
+      - name: 'role'
+        type: Enum
+        description: |
+          The replication role.
+        output: true
+        default_from_api: true
+        enum_values:
+          - 'ROLE_UNSPECIFIED'
+          - 'ACTIVE'
+          - 'STANDBY'
       - name: 'replicas'
         type: Array
         description: |
@@ -409,6 +419,11 @@ properties:
         item_type:
           type: NestedObject
           properties:
+            - name: 'peerInstance'
+              type: String
+              description: |
+                The peer instance.
+              output: true
             - name: 'state'
               type: Enum
               description: |
