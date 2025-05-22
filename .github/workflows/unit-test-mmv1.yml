@@ -3,9 +3,18 @@ name: mmv1
 permissions: read-all
 
 on:
+  push:
+    branches:
+      - main
+      - 'FEATURE-BRANCH-*'
+  merge_group:
+    types: [checks_requested]
   pull_request:
-    paths:
-      - 'mmv1/**'
+
+concurrency:
+  group: ${{ github.event_name == 'merge_group' && format('mmv1-merge-group-{0}', github.event.merge_group.head_sha) || github.event_name == 'pull_request' && format('mmv1-pr-{0}', github.event.pull_request.number) || format('mmv1-commit-{0}', github.sha) }}
+  cancel-in-progress: true
+
 
 jobs:
   version-guard-check:
@@ -17,9 +26,9 @@ jobs:
           path: repo
           fetch-depth: 0
       - name: Merge base branch
-        id: pull_request
+        if: github.event_name == 'pull_request'
         run: |
-          cd repo
+          cd repo 
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
           git fetch origin ${{ github.base_ref }} # Fetch the base branch
@@ -36,34 +45,43 @@ jobs:
         with:
           path: repo
           fetch-depth: 0
-      - name: Check for mmv1 product file changes
-        id: pull_request
+      - name: Merge base branch
+        if: github.event_name == 'pull_request'
+        run: |
+          cd repo
+          git config user.name "modular-magician"
+          git config user.email "magic-modules@google.com"
+          git fetch origin ${{ github.base_ref }}
+          git merge --no-ff origin/${{ github.base_ref }}
+      - name: Install yamllint
+        run: pip install yamllint==1.32.0 pyyaml==6.0.1 pathspec==0.12.1 --no-deps
+      - name: Lint all YAML files
+        run: |
+          cd repo
+          find mmv1/products -name "*.yaml" -o -name "*.yml" | xargs yamllint -c .yamllint
+  unit-tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        with:
+          path: repo
+          fetch-depth: 0
+      - name: Merge base branch
+        if: github.event_name == 'pull_request'
         run: |
           cd repo
           git config user.name "modular-magician"
           git config user.email "magic-modules@google.com"
           git fetch origin ${{ github.base_ref }} # Fetch the base branch
           git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
-          yamlfiles=$(git diff --name-only origin/${{ github.base_ref }} -- mmv1/products) # Compare with the base branch
-          if [ ! -z "$yamlfiles" ]; then
-            echo "yamlfiles=repo/${yamlfiles//$'\n'/ repo/}" >> $GITHUB_OUTPUT
-          fi
-      - name: Install yamllint
-        if: ${{ !failure() && steps.pull_request.outputs.yamlfiles != '' }}
-        run: pip install yamllint==1.32.0 pyyaml==6.0.1 pathspec==0.12.1 --no-deps
-      - name: Lint YAML files
-        if: ${{ !failure() && steps.pull_request.outputs.yamlfiles != '' }}
-        run: yamllint -c repo/.yamllint ${{steps.pull_request.outputs.yamlfiles}}
-  unit-tests:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
       - name: Set up Go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version: '^1.23'
       - name: Run mmv1 unit tests
         run: |
+          cd repo
           cd mmv1
           go test ./...
 
