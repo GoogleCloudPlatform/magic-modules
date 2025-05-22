@@ -6,8 +6,19 @@ if d.HasChange("aspects") {
 
 	aspectKeysOfInterest := make(map[string]struct{})
 	currentAspects, futureAspects := d.GetChange("aspects")
-	AddAspectsToSet(aspectKeysOfInterest, currentAspects)
-	AddAspectsToSet(aspectKeysOfInterest, futureAspects)
+	
+	err = AddAspectsToSet(aspectKeysOfInterest, currentAspects)
+	
+	if err != nil {
+		return err
+	}
+	
+	err = AddAspectsToSet(aspectKeysOfInterest, futureAspects)
+	
+	if err != nil {
+		return err
+	}      
+
 	aspectKeysArray := make([]string, 0, len(aspectKeysOfInterest))
 	
 	for key := range aspectKeysOfInterest {
