@@ -82,7 +82,7 @@ For more information, see
     if the change will destroy and recreate the resource due to changing an immutable value.
     Default changes in the provider are comparable in impact to default changes in an API,
     and modifying examples and modules may achieve the intended effect with a smaller blast radius.
-* <a name="no-new-optional-default"></a> Adding an optional field with a default value and force new to a pre-existing resource or object
+* <a name="no-new-optional-default"></a> Adding an optional field with a default value and force new to a pre-existing resource at any level of nesting, unless it is being added at the same time as an optional ancestor
   * This can be allowed if there is a confirmed API-level default that matches the schema default
   * Please work with your reviewer and ensure this scenario is debuged carefully
 * <a name="field-changing-data-format"></a> Modifying how field data is stored in state
