@@ -387,6 +387,9 @@ subnetwork in which the cluster's instances are launched.
 * `datapath_provider` - (Optional)
     The desired datapath provider for this cluster. This is set to `LEGACY_DATAPATH` by default, which uses the IPTables-based kube-proxy implementation. Set to `ADVANCED_DATAPATH` to enable Dataplane v2.
 
+* `in_transit_encryption_config` - (Optional)
+    Defines the config of in-transit encryption. Valid values are `IN_TRANSIT_ENCRYPTION_DISABLED` and `IN_TRANSIT_ENCRYPTION_INTER_NODE_TRANSPARENT`.
+
 * `enable_cilium_clusterwide_network_policy` - (Optional)
     Whether CiliumClusterWideNetworkPolicy is enabled on this cluster. Defaults to false.
 
@@ -1012,7 +1015,7 @@ kubelet_config {
 * `linux_node_config` - (Optional) Parameters that can be configured on Linux nodes. Structure is [documented below](#nested_linux_node_config).
 
 * `windows_node_config` - (Optional)
-Windows node configuration, currently supporting OSVersion [attribute](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/NodeConfig#osversion). The value must be one of [OS_VERSION_UNSPECIFIED, OS_VERSION_LTSC2019, OS_VERSION_LTSC2019]. For example:
+Windows node configuration, currently supporting OSVersion [attribute](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/NodeConfig#osversion). The value must be one of [OS_VERSION_UNSPECIFIED, OS_VERSION_LTSC2019, OS_VERSION_LTSC2022]. For example:
 
 ```hcl
 windows_node_config {
