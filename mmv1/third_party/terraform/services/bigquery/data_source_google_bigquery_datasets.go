@@ -13,7 +13,7 @@ func DataSourceGoogleBigQueryDatasets() *schema.Resource {
 		"project": {
 			Type:        schema.TypeString,
 			Optional:    true,
-			Description: "The ID of the project in which the dataset is located. If it is not provided, the provider project is used.",
+			Description: "The ID of the project in which the datasets are located. If it is not provided, the provider project is used.",
 		},
 		"datasets": {
 			Type:     schema.TypeList,
@@ -26,6 +26,7 @@ func DataSourceGoogleBigQueryDatasets() *schema.Resource {
 						Elem: &schema.Schema{
 							Type: schema.TypeString,
 						},
+						Description: "The labels associated with this dataset. You can use these to organize and group your datasets.",
 					},
 					"friendly_name": {
 						Type:        schema.TypeString,
