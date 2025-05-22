@@ -526,7 +526,7 @@ func TestAccDataplexEntry_dataplexEntryUpdate(t *testing.T) {
 		CheckDestroy:             testAccCheckDataplexEntryDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataplexEntry_dataplexEntryFullUpdatePreapre(context),
+				Config: testAccDataplexEntry_dataplexEntryFullUpdatePrepare(context),
 			},
 			{
 				ResourceName:            "google_dataplex_entry.test_entry_full",
@@ -552,9 +552,9 @@ func TestAccDataplexEntry_dataplexEntryUpdate(t *testing.T) {
 	})
 }
 
-func testAccDataplexEntry_dataplexEntryFullUpdatePreapre(context map[string]interface{}) string {
+func testAccDataplexEntry_dataplexEntryFullUpdatePrepare(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_dataplex_aspect_type" "tf-test-aspect-type-full%{random_suffix}-one" {
+resource "google_dataplex_aspect_type" "tf-test-aspect-type-full-one" {
   aspect_type_id         = "tf-test-aspect-type-full%{random_suffix}-one"
   location     = "us-central1"
   project      = "%{project_number}"
@@ -587,7 +587,7 @@ resource "google_dataplex_aspect_type" "tf-test-aspect-type-full%{random_suffix}
 EOF
 }
 
-resource "google_dataplex_aspect_type" "tf-test-aspect-type-full%{random_suffix}-two" {
+resource "google_dataplex_aspect_type" "tf-test-aspect-type-full-two" {
   aspect_type_id         = "tf-test-aspect-type-full%{random_suffix}-two"
   location     = "us-central1"
   project      = "%{project_number}"
@@ -624,28 +624,28 @@ resource "google_dataplex_aspect_type" "tf-test-aspect-type-full%{random_suffix}
 EOF
 }
 
-resource "google_dataplex_entry_group" "tf-test-entry-group-full%{random_suffix}" {
+resource "google_dataplex_entry_group" "tf-test-entry-group-full" {
   entry_group_id = "tf-test-entry-group-full%{random_suffix}"
   project = "%{project_number}"
   location = "us-central1"
 }
 
-resource "google_dataplex_entry_type" "tf-test-entry-type-full%{random_suffix}" {
+resource "google_dataplex_entry_type" "tf-test-entry-type-full" {
   entry_type_id = "tf-test-entry-type-full%{random_suffix}"
   project = "%{project_number}"
   location = "us-central1"
 
   required_aspects {
-    type = google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-one.name
+    type = google_dataplex_aspect_type.tf-test-aspect-type-full-one.name
   }
 }
 
 resource "google_dataplex_entry" "test_entry_full" {
-  entry_group_id = google_dataplex_entry_group.tf-test-entry-group-full%{random_suffix}.entry_group_id
+  entry_group_id = google_dataplex_entry_group.tf-test-entry-group-full.entry_group_id
   project = "%{project_number}"
   location = "us-central1"
   entry_id = "tf-test-entry-full%{random_suffix}"
-  entry_type = google_dataplex_entry_type.tf-test-entry-type-full%{random_suffix}.name
+  entry_type = google_dataplex_entry_type.tf-test-entry-type-full.name
   fully_qualified_name = "bigquery:%{project_number}.test-dataset"
   parent_entry = "projects/%{project_number}/locations/us-central1/entryGroups/tf-test-entry-group-full%{random_suffix}/entries/some-other-entry"
   entry_source {
@@ -690,14 +690,14 @@ resource "google_dataplex_entry" "test_entry_full" {
         EOF
     }
   }
- depends_on = [google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-two, google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-two]
+ depends_on = [google_dataplex_aspect_type.tf-test-aspect-type-full-two, google_dataplex_aspect_type.tf-test-aspect-type-full-one]
 }
 `, context)
 }
 
 func testAccDataplexEntry_dataplexEntryUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_dataplex_aspect_type" "tf-test-aspect-type-full%{random_suffix}-one" {
+resource "google_dataplex_aspect_type" "tf-test-aspect-type-full-one" {
   aspect_type_id         = "tf-test-aspect-type-full%{random_suffix}-one"
   location     = "us-central1"
   project      = "%{project_number}"
@@ -730,7 +730,7 @@ resource "google_dataplex_aspect_type" "tf-test-aspect-type-full%{random_suffix}
 EOF
 }
 
-resource "google_dataplex_aspect_type" "tf-test-aspect-type-full%{random_suffix}-two" {
+resource "google_dataplex_aspect_type" "tf-test-aspect-type-full-two" {
   aspect_type_id         = "tf-test-aspect-type-full%{random_suffix}-two"
   location     = "us-central1"
   project      = "%{project_number}"
@@ -767,13 +767,13 @@ resource "google_dataplex_aspect_type" "tf-test-aspect-type-full%{random_suffix}
 EOF
 }
 
-resource "google_dataplex_entry_group" "tf-test-entry-group-full%{random_suffix}" {
+resource "google_dataplex_entry_group" "tf-test-entry-group-full" {
   entry_group_id = "tf-test-entry-group-full%{random_suffix}"
   project = "%{project_number}"
   location = "us-central1"
 }
 
-resource "google_dataplex_entry_type" "tf-test-entry-type-full%{random_suffix}" {
+resource "google_dataplex_entry_type" "tf-test-entry-type-full" {
   entry_type_id = "tf-test-entry-type-full%{random_suffix}"
   project = "%{project_number}"
   location = "us-central1"
@@ -787,16 +787,16 @@ resource "google_dataplex_entry_type" "tf-test-entry-type-full%{random_suffix}" 
   system = "CloudSQL"
 
   required_aspects {
-    type = google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-one.name
+    type = google_dataplex_aspect_type.tf-test-aspect-type-full-one.name
   }
 }
 
 resource "google_dataplex_entry" "test_entry_full" {
-  entry_group_id = google_dataplex_entry_group.tf-test-entry-group-full%{random_suffix}.entry_group_id
+  entry_group_id = google_dataplex_entry_group.tf-test-entry-group-full.entry_group_id
   project = "%{project_number}"
   location = "us-central1"
   entry_id = "tf-test-entry-full%{random_suffix}"
-  entry_type = google_dataplex_entry_type.tf-test-entry-type-full%{random_suffix}.name
+  entry_type = google_dataplex_entry_type.tf-test-entry-type-full.name
   fully_qualified_name = "bigquery:%{project_number}.test-dataset-modified"
   parent_entry = "projects/%{project_number}/locations/us-central1/entryGroups/tf-test-entry-group-full%{random_suffix}/entries/some-other-entry"
   entry_source {
@@ -832,7 +832,7 @@ resource "google_dataplex_entry" "test_entry_full" {
         EOF
     }
   }
- depends_on = [google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-two, google_dataplex_aspect_type.tf-test-aspect-type-full%{random_suffix}-two]
+ depends_on = [google_dataplex_aspect_type.tf-test-aspect-type-full-two, google_dataplex_aspect_type.tf-test-aspect-type-full-one]
 }
 `, context)
 }
