@@ -235,12 +235,13 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 
 	notRunBeta, notRunGa := notRunTests(tpgRepo.UnifiedZeroDiff, tpgbRepo.UnifiedZeroDiff, replayingResult)
+
 	postReplayData := postReplay{
 		RunFullVCR:       runFullVCR,
 		AffectedServices: sort.StringSlice(servicesArr),
 		NotRunBetaTests:  notRunBeta,
 		NotRunGATests:    notRunGa,
-		ReplayingResult:  replayingResult,
+		ReplayingResult:  subtestResult(replayingResult),
 		ReplayingErr:     replayingErr,
 		LogBucket:        "ci-vcr-logs",
 		Version:          provider.Beta.String(),
@@ -384,6 +385,35 @@ func notRunTests(gaDiff, betaDiff string, result vcr.Result) ([]string, []string
 	sort.Strings(notRunBeta)
 	sort.Strings(notRunGa)
 	return notRunBeta, notRunGa
+}
+
+func subtestResult(original vcr.Result) vcr.Result {
+	return vcr.Result{
+		PassedTests:  excludeCompoundTests(original.PassedTests, original.PassedSubtests),
+		FailedTests:  excludeCompoundTests(original.FailedTests, original.FailedSubtests),
+		SkippedTests: excludeCompoundTests(original.SkippedTests, original.SkippedSubtests),
+		Panics:       original.Panics,
+	}
+}
+
+func excludeCompoundTests(allTests, subtests []string) []string {
+	res := make([]string, 0, len(allTests)+len(subtests))
+	compoundTests := make(map[string]struct{}, len(subtests))
+	for _, subtest := range subtests {
+		parts := strings.Split(subtest, "__")
+		if len(parts) != 2 {
+			continue
+		}
+		compoundTests[parts[0]] = struct{}{}
+		res = append(res, parts[1])
+	}
+	for _, test := range allTests {
+		if _, ok := compoundTests[test]; !ok {
+			res = append(res, test)
+		}
+	}
+	sort.Strings(res)
+	return res
 }
 
 func modifiedPackages(changedFiles []string, version provider.Version) (map[string]struct{}, bool) {
