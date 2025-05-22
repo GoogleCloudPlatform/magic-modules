@@ -243,5 +243,3 @@ resource "google_network_security_security_profile" "security_profile_1" {
 }
 `, context)
 }
-
- 

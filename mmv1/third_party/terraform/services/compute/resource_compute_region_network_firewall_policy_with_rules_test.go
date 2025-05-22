@@ -198,4 +198,3 @@ resource "google_tags_tag_value" "secure_tag_value_1" {
 }
 `, context)
 }
-
