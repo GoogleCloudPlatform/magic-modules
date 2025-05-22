@@ -228,14 +228,6 @@ func ResourceComputeInstance() *schema.Resource {
 		// template. Please attempt to maintain consistency with the
 		// resource_compute_instance_template schema when updating this one.
 		Schema: map[string]*schema.Schema{
-			"debug_test_new_optional_with_default": {
-				Type:         schema.TypeBool,
-				Optional:     true,
-				Default:      true,
-				Description:  `debug test`,
-				ForceNew:	    true,
-			},
-
 			"boot_disk": {
 				Type:        schema.TypeList,
 				Required:    true,
@@ -325,30 +317,6 @@ func ResourceComputeInstance() *schema.Resource {
 							},
 						},
 
-						"new_obj": {
-							Type:         schema.TypeList,
-							Optional:     true,
-							Computed:     true,
-							ForceNew:     true,
-							MaxItems:     1,
-							Description:  `Parameters with which a disk was created alongside the instance.`,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"debug_test_new_required_nested_ignore": {
-										Type:         schema.TypeBool,
-										Required:     true,
-										Description:  `debug test`,
-									},
-									"debug_test_new_nested_optional_with_default_nested_ignore":{
-											Type:         schema.TypeBool,
-											Optional:     true,
-											Default:      true,
-											Description:  `debug test`,
-											ForceNew:	    true,
-									},
-								},
-							},
-						},
 						"initialize_params": {
 							Type:         schema.TypeList,
 							Optional:     true,
@@ -359,20 +327,6 @@ func ResourceComputeInstance() *schema.Resource {
 							Description:  `Parameters with which a disk was created alongside the instance.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"debug_test_new_required_nested": {
-										Type:         schema.TypeBool,
-										Required:     true,
-										Description:  `debug test`,
-									},
-
-									"debug_test_new_nested_optional_with_default_nested":{
-											Type:         schema.TypeBool,
-											Optional:     true,
-											Default:      true,
-											Description:  `debug test`,
-											ForceNew:	    true,
-									},
-
 									"size": {
 										Type:         schema.TypeInt,
 										Optional:     true,
