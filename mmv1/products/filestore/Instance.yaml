@@ -407,11 +407,6 @@ properties:
         description: |
           The replication role.
         output: true
-        default_from_api: true
-        enum_values:
-          - 'ROLE_UNSPECIFIED'
-          - 'ACTIVE'
-          - 'STANDBY'
       - name: 'replicas'
         type: Array
         description: |
