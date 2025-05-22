@@ -12,7 +12,7 @@ type fieldTestCase struct {
 	name              string
 	oldField          *schema.Schema
 	newField          *schema.Schema
-	schemaDiff        diff.SchemaDiffInterface
+	resourceDiff      diff.ResourceDiffInterface
 	expectedViolation bool
 	messageRegex      string // Optional regex to validate the message content
 }
@@ -109,7 +109,7 @@ var FieldNewRequiredTestCases = []fieldTestCase{
 			Description: "beep",
 			Required:    true,
 		},
-		schemaDiff:        existingResourceSchemaDiff,
+		resourceDiff:      existingResourceSchemaDiff,
 		expectedViolation: true,
 	},
 	{
@@ -119,7 +119,7 @@ var FieldNewRequiredTestCases = []fieldTestCase{
 			Description: "beep",
 			Required:    true,
 		},
-		schemaDiff:        newResourceSchemaDiff,
+		resourceDiff:      newResourceSchemaDiff,
 		expectedViolation: false,
 	},
 	{
@@ -129,7 +129,7 @@ var FieldNewRequiredTestCases = []fieldTestCase{
 			Description: "beep",
 			Required:    true,
 		},
-		schemaDiff:        fieldInNewStructureSchemaDiff,
+		resourceDiff:      fieldInNewStructureSchemaDiff,
 		expectedViolation: false,
 	},
 }
@@ -150,7 +150,7 @@ var FieldNewOptionalWithDefaultTestCases = []fieldTestCase{
 			Default:     "abc",
 			ForceNew:    true,
 		},
-		schemaDiff:        existingResourceSchemaDiff,
+		resourceDiff:      existingResourceSchemaDiff,
 		expectedViolation: true,
 	},
 	{
@@ -162,7 +162,7 @@ var FieldNewOptionalWithDefaultTestCases = []fieldTestCase{
 			Default:     false,
 			ForceNew:    true,
 		},
-		schemaDiff:        existingResourceSchemaDiff,
+		resourceDiff:      existingResourceSchemaDiff,
 		expectedViolation: true,
 	},
 	{
@@ -173,7 +173,7 @@ var FieldNewOptionalWithDefaultTestCases = []fieldTestCase{
 			Optional:    true,
 			Default:     "abc",
 		},
-		schemaDiff:        existingResourceSchemaDiff,
+		resourceDiff:      existingResourceSchemaDiff,
 		expectedViolation: false,
 	},
 	{
@@ -184,7 +184,7 @@ var FieldNewOptionalWithDefaultTestCases = []fieldTestCase{
 			Optional:    true,
 			Default:     false,
 		},
-		schemaDiff:        existingResourceSchemaDiff,
+		resourceDiff:      existingResourceSchemaDiff,
 		expectedViolation: false,
 	},
 	{
@@ -195,7 +195,7 @@ var FieldNewOptionalWithDefaultTestCases = []fieldTestCase{
 			Optional:    true,
 			Default:     "abc",
 		},
-		schemaDiff:        newResourceSchemaDiff,
+		resourceDiff:      newResourceSchemaDiff,
 		expectedViolation: false,
 	},
 	{
@@ -206,7 +206,7 @@ var FieldNewOptionalWithDefaultTestCases = []fieldTestCase{
 			Optional:    true,
 			Default:     false,
 		},
-		schemaDiff:        newResourceSchemaDiff,
+		resourceDiff:      newResourceSchemaDiff,
 		expectedViolation: false,
 	},
 	{
@@ -218,7 +218,7 @@ var FieldNewOptionalWithDefaultTestCases = []fieldTestCase{
 			Default:     "abc",
 			ForceNew:    true,
 		},
-		schemaDiff:        fieldInNewStructureSchemaDiff,
+		resourceDiff:      fieldInNewStructureSchemaDiff,
 		expectedViolation: false,
 	},
 }
@@ -720,7 +720,7 @@ var FieldShrinkingMaxTestCases = []fieldTestCase{
 
 // Extended check method that also validates message content when expected
 func (tc *fieldTestCase) check(rule FieldDiffRule, t *testing.T) {
-	messages := rule.Messages("resource", "field", diff.FieldDiff{Old: tc.oldField, New: tc.newField}, tc.schemaDiff)
+	messages := rule.Messages("resource", "field", diff.FieldDiff{Old: tc.oldField, New: tc.newField}, tc.resourceDiff)
 	violation := len(messages) > 0
 
 	// Check violation expectation

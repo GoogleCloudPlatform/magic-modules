@@ -11,7 +11,7 @@ import (
 // SchemaDiff is a nested map with resource names as top-level keys.
 type SchemaDiff map[string]ResourceDiff
 
-type SchemaDiffInterface interface {
+type ResourceDiffInterface interface {
 	IsNewResource(resource string) bool
 	IsFieldInNewNestedStructure(resourceName, fieldPath string) bool
 }
@@ -327,11 +327,8 @@ func setKey(set FieldSet) string {
 	return strings.Join(slice, ",")
 }
 
-func (sd SchemaDiff) IsNewResource(resource string) bool {
-	var rcd ResourceConfigDiff
-	if rd, ok := (sd)[resource]; ok {
-		rcd = rd.ResourceConfig
-	}
+func (rd ResourceDiff) IsNewResource(resource string) bool {
+	rcd := rd.ResourceConfig
 	if rcd.Old == nil && rcd.New != nil {
 		return true
 	}
@@ -339,14 +336,8 @@ func (sd SchemaDiff) IsNewResource(resource string) bool {
 }
 
 // IsFieldInNewNestedStructure determines if a field is part of a completely new nested structure
-func (sd SchemaDiff) IsFieldInNewNestedStructure(resourceName, fieldPath string) bool {
-	rd, ok := (sd)[resourceName]
-	if !ok {
-		return false // Resource not in diff
-	}
-
-	// If the entire resource is new, all fields are in new structures
-	if rd.ResourceConfig.Old == nil && rd.ResourceConfig.New != nil {
+func (rd ResourceDiff) IsFieldInNewNestedStructure(resourceName, fieldPath string) bool {
+	if rd.IsNewResource(resourceName) {
 		return true
 	}
 

@@ -1169,6 +1169,46 @@ func TestComputeSchemaDiff(t *testing.T) {
 						Old: &schema.Resource{},
 						New: &schema.Resource{},
 					},
+					FlattenedSchema: FlattenedSchemaRaw{
+						Old: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+							"field_two": {
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"field_three": {Type: schema.TypeString},
+									},
+								},
+							},
+							"field_two.field_three": {Type: schema.TypeString},
+						},
+						New: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+							"field_two": {
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"field_three": {
+											Type:          schema.TypeString,
+											ConflictsWith: []string{"field_two.0.field_four"},
+										},
+										"field_four": {
+											Type:          schema.TypeInt,
+											ConflictsWith: []string{"field_two.0.field_three"},
+										},
+									},
+								},
+							},
+							"field_two.field_three": {
+								Type:          schema.TypeString,
+								ConflictsWith: []string{"field_two.0.field_four"},
+							},
+							"field_two.field_four": {
+								Type:          schema.TypeInt,
+								ConflictsWith: []string{"field_two.0.field_three"},
+							},
+						},
+					},
 					Fields: map[string]FieldDiff{
 						"field_two.field_three": FieldDiff{
 							Old: &schema.Schema{
@@ -1290,6 +1330,34 @@ func TestComputeSchemaDiff(t *testing.T) {
 						Old: &schema.Resource{},
 						New: &schema.Resource{},
 					},
+					FlattenedSchema: FlattenedSchemaRaw{
+						Old: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+							"field_two": {
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"field_three": {Type: schema.TypeString},
+									},
+								},
+							},
+							"field_two.field_three": {Type: schema.TypeString},
+						},
+						New: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+							"field_two": {
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"field_three": {Type: schema.TypeString},
+										"field_four":  {Type: schema.TypeInt},
+									},
+								},
+							},
+							"field_two.field_three": {Type: schema.TypeString},
+							"field_two.field_four":  {Type: schema.TypeInt},
+						},
+					},
 					Fields: map[string]FieldDiff{
 						"field_two.field_four": FieldDiff{
 							Old: nil,
@@ -1301,6 +1369,34 @@ func TestComputeSchemaDiff(t *testing.T) {
 					ResourceConfig: ResourceConfigDiff{
 						Old: &schema.Resource{},
 						New: &schema.Resource{},
+					},
+					FlattenedSchema: FlattenedSchemaRaw{
+						Old: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+							"field_two": {
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"field_three": {Type: schema.TypeString},
+									},
+								},
+							},
+							"field_two.field_three": {Type: schema.TypeString},
+						},
+						New: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+							"field_two": {
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"field_three": {Type: schema.TypeString},
+										"field_four":  {Type: schema.TypeInt},
+									},
+								},
+							},
+							"field_two.field_three": {Type: schema.TypeString},
+							"field_two.field_four":  {Type: schema.TypeInt},
+						},
 					},
 					Fields: map[string]FieldDiff{
 						"field_two.field_four": FieldDiff{
@@ -1332,6 +1428,12 @@ func TestComputeSchemaDiff(t *testing.T) {
 						Old: &schema.Resource{},
 						New: &schema.Resource{},
 					},
+					FlattenedSchema: FlattenedSchemaRaw{
+						Old: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+						},
+						New: map[string]*schema.Schema{},
+					},
 					Fields: map[string]FieldDiff{
 						"field_one": FieldDiff{
 							Old: &schema.Schema{Type: schema.TypeString},
@@ -1355,6 +1457,12 @@ func TestComputeSchemaDiff(t *testing.T) {
 				"google_service_one_resource_one": ResourceDiff{
 					ResourceConfig: ResourceConfigDiff{
 						Old: &schema.Resource{},
+						New: nil,
+					},
+					FlattenedSchema: FlattenedSchemaRaw{
+						Old: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+						},
 						New: nil,
 					},
 					Fields: map[string]FieldDiff{
@@ -1381,6 +1489,12 @@ func TestComputeSchemaDiff(t *testing.T) {
 					ResourceConfig: ResourceConfigDiff{
 						Old: nil,
 						New: &schema.Resource{},
+					},
+					FlattenedSchema: FlattenedSchemaRaw{
+						Old: nil,
+						New: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+						},
 					},
 					Fields: map[string]FieldDiff{
 						"field_one": FieldDiff{
@@ -1452,7 +1566,8 @@ func TestIsNewResource(t *testing.T) {
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
 			schemaDiff := ComputeSchemaDiff(tc.oldResourceMap, tc.newResourceMap)
-			result := schemaDiff.IsNewResource(tc.resourceName)
+			resourceConfig, _ := schemaDiff[tc.resourceName]
+			result := resourceConfig.IsNewResource(tc.resourceName)
 			if result != tc.expected {
 				t.Errorf("IsNewResource(%q) = %v, want %v", tc.resourceName, result, tc.expected)
 			}
@@ -1642,7 +1757,8 @@ func TestIsFieldInNewNestedStructure(t *testing.T) {
 			}
 
 			// Now test the actual method
-			result := schemaDiff.IsFieldInNewNestedStructure(tc.resourceName, tc.fieldPath)
+			resourceConfig := schemaDiff[tc.resourceName]
+			result := resourceConfig.IsFieldInNewNestedStructure(tc.resourceName, tc.fieldPath)
 			if result != tc.expected {
 				t.Errorf("IsFieldInNewNestedStructure(%q, %q) = %v, want %v",
 					tc.resourceName, tc.fieldPath, result, tc.expected)
