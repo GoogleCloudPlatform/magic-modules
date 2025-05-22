@@ -90,10 +90,6 @@ resource "google_compute_interconnect_group" "example-interconnect-group" {
     topology_capability = "NO_SLA"
   }
   description = "New description"
-  interconnects {
-	name = "my-interconnect"
-	interconnect = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.project_id}/global/interconnects/${google_compute_interconnect.example-interconnect.name}"
-  }
 }
 `, context)
 }
