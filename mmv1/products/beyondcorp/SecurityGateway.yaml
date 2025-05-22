@@ -138,5 +138,5 @@ properties:
   - name: delegatingServiceAccount
     type: String
     description: |-
-      Output only. Service account used for operations that involve resources in consumer projects.
+      Service account used for operations that involve resources in consumer projects.
     output: true
