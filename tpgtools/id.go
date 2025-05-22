@@ -48,17 +48,17 @@ func PatternToRegex(s string, allowForwardSlash bool) string {
 }
 
 // Finds the correct resource id based on the schema and any overrides. Returns whether a custom ID override was used.
-func findResourceID(schema *openapi.Schema, overrides Overrides, location string) (string, bool, error) {
+func findResourceID(schema *openapi.Schema, overrides Overrides, location string) (identities []Property, id string, customID bool, err error) {
 	id, ok := schema.Extension["x-dcl-id"].(string)
 	if !ok {
-		return "", false, fmt.Errorf("Malformed or missing x-dcl-id: %v", schema.Extension["x-dcl-id"])
+		return nil, "", false, fmt.Errorf("Malformed or missing x-dcl-id: %v", schema.Extension["x-dcl-id"])
 	}
 
 	// Resource Override: Custom ID
 	cid := CustomIDDetails{}
 	cidOk, err := overrides.ResourceOverrideWithDetails(CustomID, &cid, location)
 	if err != nil {
-		return "", false, fmt.Errorf("failed to decode custom id details: %v", err)
+		return nil, "", false, fmt.Errorf("failed to decode custom id details: %v", err)
 	}
 
 	if cidOk {
@@ -69,10 +69,13 @@ func findResourceID(schema *openapi.Schema, overrides Overrides, location string
 		if override.Type == CustomName {
 			if strings.Contains(id, fmt.Sprintf("{{%s}}", *override.Field)) {
 				id = strings.Replace(id, fmt.Sprintf("{{%s}}", *override.Field), fmt.Sprintf("{{%s}}", override.Details.(map[interface{}]interface{})["name"].(string)), 1)
+				identities = append(identities, Property{
+					PackageName: override.Details.(map[interface{}]interface{})["name"].(string),
+				})
 			}
 		}
 	}
-	return id, cidOk, nil
+	return identities, id, cidOk, nil
 }
 
 // Finds all import formats for a given id. This can include short forms and

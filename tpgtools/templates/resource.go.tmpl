@@ -98,6 +98,19 @@ func Resource{{$.PathType}}() *schema.Resource {
 		},
 {{- end }}
 
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+			return map[string]*schema.Schema{
+{{- range $p := $.IdentityProperties }}
+					"{{$p.Name}}": {
+						Type:     schema.TypeString,
+					},
+{{- end }}
+				}
+			},
+		},
+
 		Schema: map[string]*schema.Schema{
 {{- range $p := $.SchemaProperties }}
 			"{{$p.Name}}": {
