@@ -71,7 +71,7 @@ examples:
       destination_volume: 'destination-volume'
       network_name: 'test-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-2", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
     ignore_read_extra:
       - 'delete_destination_volume'
       - 'replication_enabled'
