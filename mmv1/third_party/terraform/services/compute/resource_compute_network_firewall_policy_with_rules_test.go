@@ -1,11 +1,11 @@
 package compute_test
+
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-
 )
 
 func TestAccComputeNetworkFirewallPolicyWithRules_update(t *testing.T) {
@@ -13,7 +13,7 @@ func TestAccComputeNetworkFirewallPolicyWithRules_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-	  "org_id": envvar.GetTestOrgFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -243,5 +243,3 @@ resource "google_network_security_security_profile" "security_profile_1" {
 }
 `, context)
 }
-
- 
