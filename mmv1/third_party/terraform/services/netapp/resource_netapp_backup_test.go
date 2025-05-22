@@ -366,7 +366,7 @@ data "google_compute_network" "default" {
 }
 resource "google_netapp_storage_pool" "default" {
   name = "tf-test-backup-pool%{random_suffix}"
-  location = "us-east4"
+  location = "us-south-1"
   service_level = "PREMIUM"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
@@ -427,7 +427,7 @@ data "google_compute_network" "default" {
 }
 resource "google_netapp_storage_pool" "default" {
   name = "tf-test-backup-pool%{random_suffix}"
-  location = "us-east4"
+  location = "us-south-1"
   service_level = "PREMIUM"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
