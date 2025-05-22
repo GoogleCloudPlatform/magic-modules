@@ -13,9 +13,8 @@ func TestAccDataSourceGoogleBigqueryDatasets_basic(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix":   acctest.RandString(t, 10),
-		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+		"project_id":    envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -44,60 +43,32 @@ func TestAccDataSourceGoogleBigqueryDatasets_basic(t *testing.T) {
 
 func testAccDataSourceGoogleBigqueryDatasets_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_project" "project" {
-  project_id      = "tf-test%{random_suffix}"
-  name            = "tf-test%{random_suffix}"
-  org_id          = "%{org_id}"
-  billing_account = "%{billing_account}"
-  deletion_policy = "DELETE"
-}
-
-resource "google_project_service" "bigquery" {
-  project = google_project.project.project_id
-  service = "bigquery.googleapis.com"
-}
-
 resource "google_bigquery_dataset" "foo" {
-  project 				      = google_project.project.project_id
   dataset_id                  = "tf_test_foo_%{random_suffix}"
   friendly_name               = "Foo"
   description                 = "This is a test description"
   location                    = "US"
   default_table_expiration_ms = 3600000
-
-  depends_on = [
-	google_project_service.bigquery,
-  ]
 }
 
 resource "google_bigquery_dataset" "bar" {
-  project 				      = google_project.project.project_id
   dataset_id                  = "tf_test_bar_%{random_suffix}"
   friendly_name               = "BaR"
   description                 = "This is a test description"
   location                    = "EU"
   default_table_expiration_ms = 3600000
-
-  depends_on = [
-	google_project_service.bigquery,
-  ]
 }
 
 resource "google_bigquery_dataset" "baz" {
-  project 				      = google_project.project.project_id
   dataset_id                  = "tf_test_baz_%{random_suffix}"
   friendly_name               = "BaZ"
   description                 = "This is a test description"
   location                    = "US"
   default_table_expiration_ms = 3600000
-
-  depends_on = [
-	google_project_service.bigquery,
-  ]
 }
 
 data "google_bigquery_datasets" "example" {
-  project = google_project.project.project_id
+  project = "%{project_id}"
   depends_on = [
 	google_bigquery_dataset.foo,
 	google_bigquery_dataset.bar,
