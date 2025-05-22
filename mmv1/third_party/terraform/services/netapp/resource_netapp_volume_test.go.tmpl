@@ -858,6 +858,7 @@ resource "google_netapp_volume" "test_volume" {
     }
 }
 data "google_compute_network" "default" {
+    provider = google-beta
     name = "%{network_name}"
 }
 `, context)
