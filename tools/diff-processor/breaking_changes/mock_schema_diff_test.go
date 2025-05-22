@@ -6,11 +6,11 @@ type MockSchemaDiff struct {
 	fieldsInNewStructure map[string]bool // Maps field names to whether they're in a new structure
 }
 
-func (sd MockSchemaDiff) IsNewResource(resource string) bool {
+func (sd MockSchemaDiff) IsNewResource() bool {
 	return sd.isNewResource
 }
 
-func (sd MockSchemaDiff) IsFieldInNewNestedStructure(resource, field string) bool {
+func (sd MockSchemaDiff) IsFieldInNewNestedStructure(field string) bool {
 	return sd.fieldsInNewStructure[field]
 }
 

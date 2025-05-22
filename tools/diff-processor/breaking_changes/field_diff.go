@@ -223,7 +223,7 @@ var FieldNewRequired = FieldDiffRule{
 }
 
 func FieldNewRequiredMessages(resource, field string, fieldDiff diff.FieldDiff, resourceDiff diff.ResourceDiffInterface) []string {
-	if resourceDiff.IsNewResource(resource) || resourceDiff.IsFieldInNewNestedStructure(resource, field) {
+	if resourceDiff.IsNewResource() || resourceDiff.IsFieldInNewNestedStructure(field) {
 		return nil
 	}
 
@@ -243,7 +243,7 @@ var FieldNewOptionalFieldWithDefault = FieldDiffRule{
 }
 
 func FieldNewOptionalFieldWithDefaultMessages(resource, field string, fieldDiff diff.FieldDiff, resourceDiff diff.ResourceDiffInterface) []string {
-	if resourceDiff.IsNewResource(resource) || resourceDiff.IsFieldInNewNestedStructure(resource, field) {
+	if resourceDiff.IsNewResource() || resourceDiff.IsFieldInNewNestedStructure(field) {
 		return nil
 	}
 

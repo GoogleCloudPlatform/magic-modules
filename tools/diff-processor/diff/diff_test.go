@@ -1567,7 +1567,7 @@ func TestIsNewResource(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			schemaDiff := ComputeSchemaDiff(tc.oldResourceMap, tc.newResourceMap)
 			resourceConfig, _ := schemaDiff[tc.resourceName]
-			result := resourceConfig.IsNewResource(tc.resourceName)
+			result := resourceConfig.IsNewResource()
 			if result != tc.expected {
 				t.Errorf("IsNewResource(%q) = %v, want %v", tc.resourceName, result, tc.expected)
 			}
@@ -1758,7 +1758,7 @@ func TestIsFieldInNewNestedStructure(t *testing.T) {
 
 			// Now test the actual method
 			resourceConfig := schemaDiff[tc.resourceName]
-			result := resourceConfig.IsFieldInNewNestedStructure(tc.resourceName, tc.fieldPath)
+			result := resourceConfig.IsFieldInNewNestedStructure(tc.fieldPath)
 			if result != tc.expected {
 				t.Errorf("IsFieldInNewNestedStructure(%q, %q) = %v, want %v",
 					tc.resourceName, tc.fieldPath, result, tc.expected)

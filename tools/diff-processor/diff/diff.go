@@ -12,8 +12,8 @@ import (
 type SchemaDiff map[string]ResourceDiff
 
 type ResourceDiffInterface interface {
-	IsNewResource(resource string) bool
-	IsFieldInNewNestedStructure(resourceName, fieldPath string) bool
+	IsNewResource() bool
+	IsFieldInNewNestedStructure(fieldPath string) bool
 }
 
 type ResourceDiff struct {
@@ -327,7 +327,7 @@ func setKey(set FieldSet) string {
 	return strings.Join(slice, ",")
 }
 
-func (rd ResourceDiff) IsNewResource(resource string) bool {
+func (rd ResourceDiff) IsNewResource() bool {
 	rcd := rd.ResourceConfig
 	if rcd.Old == nil && rcd.New != nil {
 		return true
@@ -336,8 +336,8 @@ func (rd ResourceDiff) IsNewResource(resource string) bool {
 }
 
 // IsFieldInNewNestedStructure determines if a field is part of a completely new nested structure
-func (rd ResourceDiff) IsFieldInNewNestedStructure(resourceName, fieldPath string) bool {
-	if rd.IsNewResource(resourceName) {
+func (rd ResourceDiff) IsFieldInNewNestedStructure(fieldPath string) bool {
+	if rd.IsNewResource() {
 		return true
 	}
 
