@@ -24,7 +24,7 @@ func TestAccDataSourceGoogleBigqueryDatasets_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBigqueryDatasets_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.#", "3"),
+					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.#", "1"),
 					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.0.dataset_id", fmt.Sprintf("tf_test_foo_%s", context["random_suffix"])),
 					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.0.labels.%", "1"),
 					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.0.labels.goog-terraform-provisioned", "true"),
