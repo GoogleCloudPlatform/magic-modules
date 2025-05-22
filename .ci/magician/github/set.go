@@ -80,6 +80,10 @@ func (c *Client) UpdateComment(prNumber, comment string, id int) error {
 
 // RequestPullRequestReviewers adds reviewers to a pull request
 func (c *Client) RequestPullRequestReviewers(prNumber string, reviewers []string) error {
+	if len(reviewers) == 0 {
+		return nil
+	}
+
 	num, err := strconv.Atoi(prNumber)
 	if err != nil {
 		return err
@@ -87,8 +91,7 @@ func (c *Client) RequestPullRequestReviewers(prNumber string, reviewers []string
 
 	// Create the reviewers request
 	reviewersRequest := gh.ReviewersRequest{
-		Reviewers:     reviewers,
-		TeamReviewers: nil,
+		Reviewers: reviewers,
 	}
 
 	_, _, err = c.gh.PullRequests.RequestReviewers(c.ctx, defaultOwner, defaultRepo, num, reviewersRequest)
@@ -102,14 +105,17 @@ func (c *Client) RequestPullRequestReviewers(prNumber string, reviewers []string
 
 // RemovePullRequestReviewers removes reviewers from a pull request
 func (c *Client) RemovePullRequestReviewers(prNumber string, reviewers []string) error {
+	if len(reviewers) == 0 {
+		return nil
+	}
+
 	num, err := strconv.Atoi(prNumber)
 	if err != nil {
 		return err
 	}
 
 	reviewersRequest := gh.ReviewersRequest{
-		Reviewers:     reviewers,
-		TeamReviewers: nil,
+		Reviewers: reviewers,
 	}
 
 	_, err = c.gh.PullRequests.RemoveReviewers(c.ctx, defaultOwner, defaultRepo, num, reviewersRequest)
