@@ -114,7 +114,7 @@ func (d *FakeResourceData) GetOk(name string) (interface{}, bool) {
 }
 
 func (d *FakeResourceData) GetRawConfig() cty.Value {
-	return d.GetRawConfig()
+	return cty.NullVal(cty.String)
 }
 
 func (d *FakeResourceData) GetOkExists(key string) (interface{}, bool) {
