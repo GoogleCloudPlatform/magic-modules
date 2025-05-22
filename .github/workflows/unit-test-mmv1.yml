@@ -3,9 +3,18 @@ name: mmv1
 permissions: read-all
 
 on:
+  push:
+    branches:
+      - main
+      - 'FEATURE-BRANCH-*'
+  merge_group:
+    types: [checks_requested]
   pull_request:
-    paths:
-      - 'mmv1/**'
+
+concurrency:
+  group: ${{ github.event_name == 'merge_group' && format('mmv1-merge-group-{0}', github.event.merge_group.head_sha) || github.event_name == 'pull_request' && format('mmv1-pr-{0}', github.event.pull_request.number) || format('mmv1-commit-{0}', github.sha) }}
+  cancel-in-progress: true
+
 
 jobs:
   version-guard-check:
@@ -16,6 +25,14 @@ jobs:
         with:
           path: repo
           fetch-depth: 0
+      - name: Merge base branch
+        if: github.event_name == 'pull_request'
+        run: |
+          cd repo 
+          git config user.name "modular-magician"
+          git config user.email "magic-modules@google.com"
+          git fetch origin ${{ github.base_ref }} # Fetch the base branch
+          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
       - name: Merge base branch
         id: pull_request
         run: |
@@ -36,6 +53,14 @@ jobs:
         with:
           path: repo
           fetch-depth: 0
+      - name: Merge base branch
+        if: github.event_name == 'pull_request'
+        run: |
+          cd repo 
+          git config user.name "modular-magician"
+          git config user.email "magic-modules@google.com"
+          git fetch origin ${{ github.base_ref }} # Fetch the base branch
+          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
       - name: Check for mmv1 product file changes
         id: pull_request
         run: |
@@ -57,13 +82,26 @@ jobs:
   unit-tests:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        with:
+          path: repo
+          fetch-depth: 0
+      - name: Merge base branch
+        if: github.event_name == 'pull_request'
+        run: |
+          cd repo
+          git config user.name "modular-magician"
+          git config user.email "magic-modules@google.com"
+          git fetch origin ${{ github.base_ref }} # Fetch the base branch
+          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
       - name: Set up Go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version: '^1.23'
       - name: Run mmv1 unit tests
         run: |
+          cd repo
           cd mmv1
           go test ./...
 
