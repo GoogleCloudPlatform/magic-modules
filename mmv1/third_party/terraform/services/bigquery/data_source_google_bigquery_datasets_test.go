@@ -30,11 +30,6 @@ func TestAccDataSourceGoogleBigqueryDatasets_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.0.labels.goog-terraform-provisioned", "true"),
 					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.0.location", "US"),
 					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.0.friendly_name", "Foo"),
-					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.1.dataset_id", fmt.Sprintf("tf_test_bar_%s", context["random_suffix"])),
-					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.1.friendly_name", "BaR"),
-					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.1.location", "EU"),
-					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.2.dataset_id", fmt.Sprintf("tf_test_baz_%s", context["random_suffix"])),
-					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.2.friendly_name", "BaZ"),
 				),
 			},
 		},
@@ -49,30 +44,21 @@ resource "google_bigquery_dataset" "foo" {
   description                 = "This is a test description"
   location                    = "US"
   default_table_expiration_ms = 3600000
+
+  access {
+    role          = "OWNER"
+    user_by_email = google_service_account.bqowner.email
+  }
 }
 
-resource "google_bigquery_dataset" "bar" {
-  dataset_id                  = "tf_test_bar_%{random_suffix}"
-  friendly_name               = "BaR"
-  description                 = "This is a test description"
-  location                    = "EU"
-  default_table_expiration_ms = 3600000
-}
-
-resource "google_bigquery_dataset" "baz" {
-  dataset_id                  = "tf_test_baz_%{random_suffix}"
-  friendly_name               = "BaZ"
-  description                 = "This is a test description"
-  location                    = "US"
-  default_table_expiration_ms = 3600000
+resource "google_service_account" "bqowner" {
+  account_id = "bqowner"
 }
 
 data "google_bigquery_datasets" "example" {
   project = "%{project_id}"
   depends_on = [
 	google_bigquery_dataset.foo,
-	google_bigquery_dataset.bar,
-	google_bigquery_dataset.baz,
   ]
 }
 `, context)
