@@ -52,7 +52,7 @@ resource "google_bigquery_dataset" "foo" {
 }
 
 resource "google_service_account" "bqowner" {
-  account_id = "bqowner"
+  account_id = "tf-test-%{random_suffix}"
 }
 
 data "google_bigquery_datasets" "example" {
