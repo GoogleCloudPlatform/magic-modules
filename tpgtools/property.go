@@ -147,6 +147,13 @@ type IdentityGetter struct {
 	FunctionCall string
 }
 
+type IdentityProperty struct {
+	Title       string
+	Required    bool
+	Optional    bool
+	Description string
+}
+
 // Name is the shortname of a field. For example, "machine_type".
 func (p Property) Name() string {
 	if len(p.customName) > 0 {
@@ -514,8 +521,9 @@ func (c ConflictsWith) String() string {
 }
 
 // Builds a list of properties from an OpenAPI schema.
-func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides Overrides, resource *Resource, parent *Property, location string) (props []Property, err error) {
+func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher, overrides Overrides, resource *Resource, parent *Property, location string) (identities []IdentityProperty, props []Property, err error) {
 	identityFields := []string{} // always empty if parent != nil
+	identityProperties := []IdentityProperty{}
 	if parent == nil {
 		identityFields = idParts(resource.ID)
 	}
@@ -536,7 +544,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			ref = v.Ref
 			v, err = typeFetcher.ResolveSchema(v.Ref)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			ref = typeFetcher.PackagePathForReference(ref, v.Extension["x-dcl-go-type"].(string))
 		}
@@ -567,7 +575,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		do := CustomDefaultDetails{}
 		doOk, err := overrides.PropertyOverrideWithDetails(CustomDefault, p, &do, location)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode custom list size details")
+			return nil, nil, fmt.Errorf("failed to decode custom list size details")
 		}
 
 		if v.Default != "" || doOk {
@@ -577,7 +585,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			}
 			d, err := renderDefault(p.Type, def)
 			if err != nil {
-				return nil, fmt.Errorf("failed to render default: %v", err)
+				return nil, nil, fmt.Errorf("failed to render default: %v", err)
 			}
 			p.Default = &d
 		}
@@ -585,7 +593,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		cn := CustomNameDetails{}
 		cnOk, err := overrides.PropertyOverrideWithDetails(CustomName, p, &cn, location)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode custom name details: %v", err)
+			return nil, nil, fmt.Errorf("failed to decode custom name details: %v", err)
 		}
 		if cnOk {
 			p.customName = cn.Name
@@ -628,14 +636,18 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			}
 		}
 
+		if stringInSlice(p.Name(), identityFields) {
+			identityProperties = append(identityProperties, createIdentityProperty(p))
+		}
+
 		p.Parameter, _ = v.Extension["x-dcl-parameter"].(bool)
 		p.HasLongForm, _ = v.Extension["x-dcl-has-long-form"].(bool)
 
 		// Handle object properties
 		if len(v.Properties) > 0 {
-			props, err := createPropertiesFromSchema(v, typeFetcher, overrides, resource, &p, location)
+			_, props, err := createPropertiesFromSchema(v, typeFetcher, overrides, resource, &p, location)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 
 			p.Properties = props
@@ -654,7 +666,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			ls := CustomListSizeConstraintDetails{}
 			lsOk, err := overrides.PropertyOverrideWithDetails(CustomListSize, p, &ls, location)
 			if err != nil {
-				return nil, fmt.Errorf("failed to decode custom list size details")
+				return nil, nil, fmt.Errorf("failed to decode custom list size details")
 			}
 			if lsOk {
 				if ls.Max > 0 {
@@ -668,9 +680,9 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			// We end up handling arrays of objects very similarly to nested objects
 			// themselves
 			if len(v.Items.Properties) > 0 {
-				props, err := createPropertiesFromSchema(v.Items, typeFetcher, overrides, resource, &p, location)
+				_, props, err := createPropertiesFromSchema(v.Items, typeFetcher, overrides, resource, &p, location)
 				if err != nil {
-					return nil, err
+					return nil, nil, err
 				}
 
 				p.Properties = props
@@ -691,17 +703,17 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		// Use AdditionalProperties instead, and add an additional `name` field
 		// that represents the key in the map
 		if p.Type.IsComplexMap() {
-			props, err := createPropertiesFromSchema(p.Type.typ.AdditionalProperties, typeFetcher, overrides, resource, &p, location)
+			_, props, err := createPropertiesFromSchema(p.Type.typ.AdditionalProperties, typeFetcher, overrides, resource, &p, location)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			cm := ComplexMapKeyDetails{}
 			cmOk, err := overrides.PropertyOverrideWithDetails(ComplexMapKey, p, &cm, location)
 			if err != nil {
-				return nil, fmt.Errorf("failed to decode complex map key name details")
+				return nil, nil, fmt.Errorf("failed to decode complex map key name details")
 			}
 			if !cmOk {
-				return nil, fmt.Errorf("failed to find complex map key name for map named: %s", p.Name())
+				return nil, nil, fmt.Errorf("failed to find complex map key name for map named: %s", p.Name())
 			}
 			keyProp := Property{
 				title:       cm.KeyName,
@@ -730,7 +742,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		cr := CustomSchemaValuesDetails{}
 		crOk, err := overrides.PropertyOverrideWithDetails(CustomSchemaValues, p, &cr, location)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode custom required details")
+			return nil, nil, fmt.Errorf("failed to decode custom required details")
 		}
 		if crOk {
 			p.Required = cr.Required
@@ -774,7 +786,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				cig := &CustomIdentityGetterDetails{}
 				cigOk, err := overrides.PropertyOverrideWithDetails(CustomIdentityGetter, p, cig, location)
 				if err != nil {
-					return nil, fmt.Errorf("failed to decode custom identity getter details")
+					return nil, nil, fmt.Errorf("failed to decode custom identity getter details")
 				}
 
 				propertyName := p.title
@@ -803,7 +815,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		css := CustomStateSetterDetails{}
 		cssOk, err := overrides.PropertyOverrideWithDetails(CustomStateSetter, p, &css, location)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode custom stateSetter func: %v", err)
+			return nil, nil, fmt.Errorf("failed to decode custom stateSetter func: %v", err)
 		}
 
 		if cssOk {
@@ -818,7 +830,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		cd := CustomDescriptionDetails{}
 		cdOk, err := overrides.PropertyOverrideWithDetails(CustomDescription, p, &cd, location)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode custom description details: %v", err)
+			return nil, nil, fmt.Errorf("failed to decode custom description details: %v", err)
 		}
 
 		if cdOk {
@@ -828,7 +840,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		dsf := CustomDiffSuppressFuncDetails{}
 		dsfOk, err := overrides.PropertyOverrideWithDetails(DiffSuppressFunc, p, &dsf, location)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode custom diff suppress func: %v", err)
+			return nil, nil, fmt.Errorf("failed to decode custom diff suppress func: %v", err)
 		}
 
 		if dsfOk {
@@ -840,7 +852,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		vf := CustomValidationDetails{}
 		vfOk, err := overrides.PropertyOverrideWithDetails(CustomValidation, p, &vf, location)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode custom validation func: %v", err)
+			return nil, nil, fmt.Errorf("failed to decode custom validation func: %v", err)
 		}
 
 		if vfOk {
@@ -851,7 +863,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			shf := SetHashFuncDetails{}
 			shfOk, err := overrides.PropertyOverrideWithDetails(SetHashFunc, p, &shf, location)
 			if err != nil {
-				return nil, fmt.Errorf("failed to decode set hash func: %v", err)
+				return nil, nil, fmt.Errorf("failed to decode set hash func: %v", err)
 			}
 
 			if shfOk {
@@ -864,7 +876,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		cm := CustomConfigModeDetails{}
 		cmOk, err := overrides.PropertyOverrideWithDetails(CustomConfigMode, p, &cm, location)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode custom config mode func: %v", err)
+			return nil, nil, fmt.Errorf("failed to decode custom config mode func: %v", err)
 		}
 		if cmOk {
 			p.ConfigMode = &cm.Mode
@@ -873,7 +885,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		rd := &RemovedDetails{}
 		rdOk, err := overrides.PropertyOverrideWithDetails(Removed, p, rd, location)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode removed details")
+			return nil, nil, fmt.Errorf("failed to decode removed details")
 		}
 		if rdOk {
 			p.Removed = &rd.Message
@@ -882,7 +894,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		dd := &DeprecatedDetails{}
 		ddOk, err := overrides.PropertyOverrideWithDetails(Deprecated, p, dd, location)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode deprecated details")
+			return nil, nil, fmt.Errorf("failed to decode deprecated details")
 		}
 		if ddOk {
 			p.Deprecated = &dd.Message
@@ -906,7 +918,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 		csgd := CustomStateGetterDetails{}
 		csgdOk, err := overrides.PropertyOverrideWithDetails(CustomStateGetter, p, &csgd, location)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode custom state getter details with err %v", err)
+			return nil, nil, fmt.Errorf("failed to decode custom state getter details with err %v", err)
 		}
 		if csgdOk {
 			p.StateGetter = &csgd.Function
@@ -989,7 +1001,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				if val, ok := conflictsMap[cf]; ok {
 					p.ConflictsWith = append(p.ConflictsWith, val)
 				} else {
-					return nil, fmt.Errorf("Error generating conflict fields. %s is not labeled as a conflict field in DCL", cf)
+					return nil, nil, fmt.Errorf("Error generating conflict fields. %s is not labeled as a conflict field in DCL", cf)
 				}
 
 			}
@@ -999,7 +1011,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 	// sort the properties so they're in a nice order
 	sort.SliceStable(props, propComparator(props))
 
-	return props, nil
+	return identityProperties, props, nil
 }
 
 func build_effective_labels_field(p Property, resource *Resource, parent *Property) Property {
