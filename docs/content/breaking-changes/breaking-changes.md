@@ -61,7 +61,7 @@ For more information, see
   * Changing the field type between primitive and complex data
     types is not possible. For this scenario, field renames are preferred.
 * <a name="field-optional-to-required"></a> Making an optional field required
-* <a name="no-new-required"></a> Adding a required field to a pre-existing resource or object
+* <a name="no-new-required"></a> Adding a required field to a pre-existing resource at any level of nesting, unless it is being added at the same time as an optional ancestor
 * <a name="resource-schema-field-addition-of-exactly-one-of"></a>Adding an "ExactlyOneOf" constraint that causes one or more previously-optional fields to be required or conflict with each other
 * <a name="field-becoming-computed"></a> Making a settable field read-only
   * For MMv1 resources, adding `output: true` to an existing field.
