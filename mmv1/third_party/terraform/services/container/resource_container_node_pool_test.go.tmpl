@@ -1059,7 +1059,15 @@ func TestAccContainerNodePool_withGPU(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withGPU(cluster, np, networkName, subnetworkName),
+				Config: testAccContainerNodePool_withGPU(cluster, np, networkName, subnetworkName, "LATEST"),
+			},
+			{
+				ResourceName:      "google_container_node_pool.np_with_gpu",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccContainerNodePool_withGPU(cluster, np, networkName, subnetworkName, "DEFAULT"),
 			},
 			{
 				ResourceName:      "google_container_node_pool.np_with_gpu",
@@ -4041,7 +4049,7 @@ resource "google_container_node_pool" "with_upgrade_settings" {
 `, clusterName, networkName, subnetworkName, nodePoolName, makeUpgradeSettings(maxSurge, maxUnavailable, strategy, nodePoolSoakDuration, batchNodeCount, batchPercentage, batchSoakDuration))
 }
 
-func testAccContainerNodePool_withGPU(cluster, np, networkName, subnetworkName string) string {
+func testAccContainerNodePool_withGPU(cluster, np, networkName, subnetworkName, version string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "central1c" {
   location = "us-central1-c"
@@ -4086,7 +4094,7 @@ resource "google_container_node_pool" "np_with_gpu" {
       gpu_partition_size = "1g.5gb"
       count              = 1
       gpu_driver_installation_config {
-        gpu_driver_version = "LATEST"
+        gpu_driver_version = "%s"
       }
       gpu_sharing_config {
         gpu_sharing_strategy       = "TIME_SHARING"
@@ -4095,7 +4103,7 @@ resource "google_container_node_pool" "np_with_gpu" {
     }
   }
 }
-`, cluster, networkName, subnetworkName, np)
+`, cluster, networkName, subnetworkName, np, version)
 }
 
 func testAccContainerNodePool_withNodeConfigScopeAlias(cluster, np, networkName, subnetworkName string) string {
