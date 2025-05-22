@@ -70,11 +70,9 @@ jobs:
               echo "yamlfiles=$yamlfiles" >> $GITHUB_OUTPUT
             fi
           fi
-      
       - name: Install yamllint
         if: ${{ !failure() && steps.yaml_files.outputs.yamlfiles != '' }}
         run: pip install yamllint==1.32.0 pyyaml==6.0.1 pathspec==0.12.1 --no-deps
-      
       - name: Lint YAML files
         if: ${{ !failure() && steps.yaml_files.outputs.yamlfiles != '' }}
         run: yamllint -c repo/.yamllint ${{ steps.yaml_files.outputs.yamlfiles }}  
