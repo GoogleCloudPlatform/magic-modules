@@ -350,7 +350,7 @@ properties:
       Replication configuration, once set, this cannot be updated.
       Additionally this should be specified on the replica instance only, indicating the active as the peer_instance
     immutable: true
-    ignore_read: true
+    write_only: true
     properties:
       - name: 'role'
         type: Enum
