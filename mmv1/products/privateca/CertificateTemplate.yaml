@@ -185,7 +185,8 @@ properties:
             type: Boolean
             description: |
               Optional. When true, the "CA" in Basic Constraints extension will be set to null and omitted from the CA certificate.
-              If both `is_ca` and `non_ca` are unset, the "CA" in Basic Constraints extension will be set to false. Note that the behavior when `is_ca = false` for this resource is different from the behavior in the Certificate Authority, Certificate and CaPool resources.
+              If both `is_ca` and `null_ca` are unset, the "CA" in Basic Constraints extension will be set to false.
+              Note that the behavior when `is_ca = false` for this resource is different from the behavior in the Certificate Authority, Certificate and CaPool resources.
             url_param_only: true
           - name: 'maxIssuerPathLength'
             type: Integer
