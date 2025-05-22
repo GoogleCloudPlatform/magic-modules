@@ -146,7 +146,7 @@ properties:
               If the aspect is attached directly to the entry: {project_number}.{locationId}.{aspectTypeId}
               If the aspect is attached to an entry's path: {project_number}.{locationId}.{aspectTypeId}@{path}
 
-        - name: 'aspectValue'
+        - name: 'aspect'
           type: NestedObject
           required: true
           properties:

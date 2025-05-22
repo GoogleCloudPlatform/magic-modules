@@ -305,8 +305,8 @@ func TestInverseTransformAspects(t *testing.T) {
 		{"aspects key is absent", map[string]interface{}{"otherKey": "value"}, nil, true, false, ""},
 		{"aspects value is nil", map[string]interface{}{"aspects": nil}, nil, true, false, ""},
 		{"aspects is empty map", map[string]interface{}{"aspects": map[string]interface{}{}}, []interface{}{}, false, false, ""},
-		{"aspects with one entry", map[string]interface{}{"aspects": map[string]interface{}{"key1": map[string]interface{}{"data": "value1"}}}, []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value1"}}}, false, false, ""},
-		{"aspects with multiple entries", map[string]interface{}{"aspects": map[string]interface{}{"key2": map[string]interface{}{"data": "value2"}, "key1": map[string]interface{}{"data": "value1"}}}, []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value1"}}, map[string]interface{}{"aspectKey": "key2", "aspectValue": map[string]interface{}{"data": "value2"}}}, false, false, ""},
+		{"aspects with one entry", map[string]interface{}{"aspects": map[string]interface{}{"key1": map[string]interface{}{"data": "value1"}}}, []interface{}{map[string]interface{}{"aspectKey": "key1", "aspect": map[string]interface{}{"data": "value1"}}}, false, false, ""},
+		{"aspects with multiple entries", map[string]interface{}{"aspects": map[string]interface{}{"key2": map[string]interface{}{"data": "value2"}, "key1": map[string]interface{}{"data": "value1"}}}, []interface{}{map[string]interface{}{"aspectKey": "key1", "aspect": map[string]interface{}{"data": "value1"}}, map[string]interface{}{"aspectKey": "key2", "aspect": map[string]interface{}{"data": "value2"}}}, false, false, ""},
 		{"aspects is wrong type (not map)", map[string]interface{}{"aspects": "not a map"}, nil, false, true, "InverseTransformAspects: 'aspects' field is not a map[string]interface{}, got string"},
 		{"aspect value is not a map", map[string]interface{}{"aspects": map[string]interface{}{"key1": "not a map value"}}, nil, false, true, "InverseTransformAspects: value for key 'key1' is not a map[string]interface{}, got string"},
 	}
@@ -384,15 +384,15 @@ func TestTransformAspects(t *testing.T) {
 		{"aspects key is absent", map[string]interface{}{"otherKey": "value"}, nil, true, false, ""},
 		{"aspects value is nil", map[string]interface{}{"aspects": nil}, nil, true, false, ""},
 		{"aspects is empty slice", map[string]interface{}{"aspects": []interface{}{}}, map[string]interface{}{}, false, false, ""},
-		{"aspects with one item", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value1"}}}}, map[string]interface{}{"key1": map[string]interface{}{"data": "value1"}}, false, false, ""},
-		{"aspects with one item that has no aspectValue", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1"}}}, map[string]interface{}{"key1": map[string]interface{}{"data": map[string]interface{}{}}}, false, false, ""},
-		{"aspects with multiple items", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value1"}}, map[string]interface{}{"aspectKey": "key2", "aspectValue": map[string]interface{}{"data": "value2"}}}}, map[string]interface{}{"key1": map[string]interface{}{"data": "value1"}, "key2": map[string]interface{}{"data": "value2"}}, false, false, ""},
-		{"aspects with duplicate aspectKey", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value_first"}}, map[string]interface{}{"aspectKey": "key2", "aspectValue": map[string]interface{}{"data": "value2"}}, map[string]interface{}{"aspectKey": "key1", "aspectValue": map[string]interface{}{"data": "value_last"}}}}, map[string]interface{}{"key1": map[string]interface{}{"data": "value_last"}, "key2": map[string]interface{}{"data": "value2"}}, false, false, ""},
+		{"aspects with one item", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspect": map[string]interface{}{"data": "value1"}}}}, map[string]interface{}{"key1": map[string]interface{}{"data": "value1"}}, false, false, ""},
+		{"aspects with one item that has no aspect", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1"}}}, map[string]interface{}{"key1": map[string]interface{}{"data": map[string]interface{}{}}}, false, false, ""},
+		{"aspects with multiple items", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspect": map[string]interface{}{"data": "value1"}}, map[string]interface{}{"aspectKey": "key2", "aspect": map[string]interface{}{"data": "value2"}}}}, map[string]interface{}{"key1": map[string]interface{}{"data": "value1"}, "key2": map[string]interface{}{"data": "value2"}}, false, false, ""},
+		{"aspects with duplicate aspectKey", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspect": map[string]interface{}{"data": "value_first"}}, map[string]interface{}{"aspectKey": "key2", "aspect": map[string]interface{}{"data": "value2"}}, map[string]interface{}{"aspectKey": "key1", "aspect": map[string]interface{}{"data": "value_last"}}}}, map[string]interface{}{"key1": map[string]interface{}{"data": "value_last"}, "key2": map[string]interface{}{"data": "value2"}}, false, false, ""},
 		{"aspects is wrong type (not slice)", map[string]interface{}{"aspects": "not a slice"}, nil, false, true, "TransformAspects: 'aspects' field is not a []interface{}, got string"},
 		{"item in slice is not a map", map[string]interface{}{"aspects": []interface{}{"not a map"}}, nil, false, true, "TransformAspects: item in 'aspects' slice at index 0 is not a map[string]interface{}, got string"},
-		{"item map missing aspectKey", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"wrongKey": "k1", "aspectValue": map[string]interface{}{}}}}, nil, false, true, "TransformAspects: 'aspectKey' not found in aspect item at index 0"},
-		{"aspectKey is not a string", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": 123, "aspectValue": map[string]interface{}{}}}}, nil, false, true, "TransformAspects: 'aspectKey' in item at index 0 is not a string, got int"},
-		{"aspectValue is present but wrong type", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspectValue": "not a map"}}}, map[string]interface{}{"key1": map[string]interface{}{"data": map[string]interface{}{}}}, false, false, ""},
+		{"item map missing aspectKey", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"wrongKey": "k1", "aspect": map[string]interface{}{}}}}, nil, false, true, "TransformAspects: 'aspectKey' not found in aspect item at index 0"},
+		{"aspectKey is not a string", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": 123, "aspect": map[string]interface{}{}}}}, nil, false, true, "TransformAspects: 'aspectKey' in item at index 0 is not a string, got int"},
+		{"aspect is present but wrong type", map[string]interface{}{"aspects": []interface{}{map[string]interface{}{"aspectKey": "key1", "aspect": "not a map"}}}, map[string]interface{}{"key1": map[string]interface{}{"data": map[string]interface{}{}}}, false, false, ""},
 	}
 
 	for _, tc := range testCases {
@@ -675,7 +675,7 @@ resource "google_dataplex_entry" "test_entry_full" {
 
   aspects {
     aspect_key = "%{project_number}.us-central1.tf-test-aspect-type-full%{random_suffix}-one"
-    aspect_value {
+    aspect {
       data = <<EOF
           {"type": "VIEW"    }
         EOF
@@ -684,7 +684,7 @@ resource "google_dataplex_entry" "test_entry_full" {
 
   aspects {
     aspect_key = "%{project_number}.us-central1.tf-test-aspect-type-full%{random_suffix}-two"
-    aspect_value {
+    aspect {
       data = <<EOF
           {"story": "SEQUENCE"    }
         EOF
@@ -826,7 +826,7 @@ resource "google_dataplex_entry" "test_entry_full" {
 
   aspects {
     aspect_key = "%{project_number}.us-central1.tf-test-aspect-type-full%{random_suffix}-one"
-    aspect_value {
+    aspect {
       data = <<EOF
      {"type": "VIEW"    }
         EOF
