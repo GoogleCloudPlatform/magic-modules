@@ -366,14 +366,18 @@ data "google_compute_network" "default" {
 }
 resource "google_netapp_storage_pool" "default" {
   name = "tf-test-backup-pool%{random_suffix}"
-  location = "us-south-1"
+  location = "us-west4"
   service_level = "PREMIUM"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
 }
+resource "time_sleep" "wait_3_minutes" {
+    depends_on = [google_netapp_storage_pool.default]
+    create_duration = "3m"
+}
 resource "google_netapp_volume" "default" {
   name = "tf-test-backup-volume%{random_suffix}"
-  location = google_netapp_storage_pool.default.location
+  location = "us-west4"
   capacity_gib = "100"
   share_name = "tf-test-backup-volume%{random_suffix}"
   storage_pool = google_netapp_storage_pool.default.name
@@ -427,14 +431,18 @@ data "google_compute_network" "default" {
 }
 resource "google_netapp_storage_pool" "default" {
   name = "tf-test-backup-pool%{random_suffix}"
-  location = "us-south-1"
+  location = "us-west4"
   service_level = "PREMIUM"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
 }
+resource "time_sleep" "wait_3_minutes" {
+    depends_on = [google_netapp_storage_pool.default]
+    create_duration = "3m"
+}
 resource "google_netapp_volume" "default" {
   name = "tf-test-backup-volume%{random_suffix}"
-  location = google_netapp_storage_pool.default.location
+  location = "us-west4"
   capacity_gib = "100"
   share_name = "tf-test-backup-volume%{random_suffix}"
   storage_pool = google_netapp_storage_pool.default.name
