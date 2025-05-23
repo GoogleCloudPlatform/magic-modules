@@ -86,6 +86,38 @@ examples:
       service_a_backend_service_name: 'service-a'
       service_b_backend_service_name: 'service-b'
       health_check_name: 'health-check'
+  - name: 'url_map_default_mirror_percent'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    vars:
+      url_map_name: 'urlmap'
+      home_backend_service_name: 'home'
+      mirror_backend_service_name: 'mirror'
+      health_check_name: 'health-check'
+  - name: 'url_map_path_matcher_default_mirror_percent'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    vars:
+      url_map_name: 'urlmap'
+      home_backend_service_name: 'home'
+      mirror_backend_service_name: 'mirror'
+      health_check_name: 'health-check'
+  - name: 'url_map_path_rule_mirror_percent'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    vars:
+      url_map_name: 'urlmap'
+      home_backend_service_name: 'home'
+      mirror_backend_service_name: 'mirror'
+      health_check_name: 'health-check'
+  - name: 'url_map_route_rule_mirror_percent'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    vars:
+      url_map_name: 'urlmap'
+      home_backend_service_name: 'home'
+      mirror_backend_service_name: 'mirror'
+      health_check_name: 'health-check'
   - name: 'external_http_lb_mig_backend'
     primary_resource_id: 'default'
     vars:
@@ -681,6 +713,14 @@ properties:
                         custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
                         resource: 'BackendService'
                         imports: 'selfLink'
+                      - name: 'mirrorPercent'
+                        min_version: beta
+                        type: Double
+                        description: |
+                          The percentage of requests to be mirrored to backendService.
+                          The value must be between 0.0 and 100.0 inclusive.
+                        validation:
+                          function: 'validation.FloatBetween(0, 100)'
                   - name: 'retryPolicy'
                     type: NestedObject
                     description: |
@@ -1433,6 +1473,14 @@ properties:
                         custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
                         resource: 'BackendService'
                         imports: 'selfLink'
+                      - name: 'mirrorPercent'
+                        min_version: beta
+                        type: Double
+                        description: |
+                          The percentage of requests to be mirrored to backendService.
+                          The value must be between 0.0 and 100.0 inclusive.
+                        validation:
+                          function: 'validation.FloatBetween(0, 100)'
                   - name: 'retryPolicy'
                     type: NestedObject
                     description: |
@@ -2101,6 +2149,14 @@ properties:
                   custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
                   resource: 'BackendService'
                   imports: 'selfLink'
+                - name: 'mirrorPercent'
+                  min_version: beta
+                  type: Double
+                  description: |
+                    The percentage of requests to be mirrored to backendService.
+                    The value must be between 0.0 and 100.0 inclusive.
+                  validation:
+                    function: 'validation.FloatBetween(0, 100)'
             - name: 'corsPolicy'
               type: NestedObject
               description: |
@@ -2692,6 +2748,14 @@ properties:
             custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
             resource: 'BackendService'
             imports: 'selfLink'
+          - name: 'mirrorPercent'
+            min_version: beta
+            type: Double
+            description: |
+              The percentage of requests to be mirrored to backendService.
+              The value must be between 0.0 and 100.0 inclusive.
+            validation:
+              function: 'validation.FloatBetween(0, 100)'
       - name: 'corsPolicy'
         type: NestedObject
         description: |

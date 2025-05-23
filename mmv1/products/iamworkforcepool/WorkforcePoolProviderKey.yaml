@@ -1,0 +1,158 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'WorkforcePoolProviderKey'
+description: |
+  Represents a public key configuration for a Workforce Pool Provider. The key can be configured in your identity provider to encrypt SAML assertions.
+  Google holds the corresponding private key, which it uses to decrypt encrypted tokens.
+references:
+  guides:
+    'Workforce Identity Federation Overview': 'https://cloud.google.com/iam/docs/workforce-identity-federation'
+    'Configure a provider within the workforce pool': 'https://cloud.google.com/iam/docs/manage-workforce-identity-pools-providers#configure_a_provider_within_the_workforce_pool'
+  api: 'https://cloud.google.com/iam/docs/reference/rest/v1/locations.workforcePools.providers.keys'
+base_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/keys'
+self_link: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/keys/{{key_id}}'
+create_url: 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/keys?workforcePoolProviderKeyId={{key_id}}'
+immutable: true
+import_format:
+  - 'locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{provider_id}}/keys/{{key_id}}'
+timeouts:
+  insert_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+  constants: 'templates/terraform/constants/iam_workforce_pool_provider_key.go.tmpl'
+examples:
+  - name: 'iam_workforce_pool_provider_saml_key_basic'
+    primary_resource_id: "example"
+    vars:
+      workforce_pool_id: 'example-pool'
+      provider_id: 'example-prvdr'
+      key_id: 'example-key'
+    test_env_vars:
+      org_id: 'ORG_ID'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The location for the resource.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'workforcePoolId'
+    type: String
+    description: |
+      The ID of the workforce pool.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'providerId'
+    type: String
+    description: |
+      The ID of the provider.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'keyId'
+    type: String
+    description: |
+      The ID to use for the key, which becomes the final component of the resource name. This value must be 4-32 characters, and may contain the characters [a-z0-9-].
+    url_param_only: true
+    required: true
+    immutable: true
+    validation:
+      function: 'ValidateWorkforcePoolProviderKeyId'
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Identifier. The resource name of the key.
+      Format: `locations/{location}/workforcePools/{workforcePoolId}/providers/{providerId}/keys/{keyId}`
+    output: true
+  - name: 'keyData'
+    type: 'NestedObject'
+    description: |
+      Immutable. Public half of the asymmetric key.
+    required: true
+    properties:
+      - name: 'format'
+        type: Enum
+        description: |
+          The format of the key.
+        output: true
+        enum_values:
+          - 'RSA_X509_PEM'
+      - name: 'notBeforeTime'
+        type: String
+        description: |
+          Earliest timestamp when this key is valid. Attempts to use this key before this time will fail.
+          Only present if the key data represents a X.509 certificate.
+
+          Uses RFC 3339, where generated output will always be Z-normalized and uses 0, 3, 6 or 9 fractional digits.
+          Offsets other than "Z" are also accepted.
+          Examples: "2014-10-02T15:01:23Z", "2014-10-02T15:01:23.045123456Z" or "2014-10-02T15:01:23+05:30".
+        output: true
+      - name: 'notAfterTime'
+        type: String
+        description: |
+          Latest timestamp when this key is valid. Attempts to use this key after this time will fail.
+          Only present if the key data represents a X.509 certificate.
+
+          Uses RFC 3339, where generated output will always be Z-normalized and uses 0, 3, 6 or 9 fractional digits.
+          Offsets other than "Z" are also accepted.
+          Examples: "2014-10-02T15:01:23Z", "2014-10-02T15:01:23.045123456Z" or "2014-10-02T15:01:23+05:30".
+        output: true
+      - name: 'key'
+        type: String
+        description: |
+          The key data. The format of the key is represented by the format field.
+        output: true
+      - name: 'keySpec'
+        type: Enum
+        description: |
+          The specifications for the key.
+        required: true
+        enum_values:
+          - 'RSA_2048'
+          - 'RSA_3072'
+          - 'RSA_4096'
+  - name: 'state'
+    type: Enum
+    description: |
+      The state of the key.
+    output: true
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'ACTIVE'
+      - 'DELETED'
+  - name: 'use'
+    type: Enum
+    description: |
+      The purpose of the key.
+    required: true
+    enum_values:
+      - 'ENCRYPTION'
+  - name: 'expireTime'
+    type: String
+    description: |
+      The time after which the key will be permanently deleted and cannot be recovered.
+      Note that the key may get purged before this time if the total limit of keys per provider is exceeded.
+    output: true
