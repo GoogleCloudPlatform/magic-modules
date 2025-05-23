@@ -2,10 +2,6 @@ package cloudtrace_test
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"testing"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func testAccCloudTraceTraceSink_basic(name string) string {
