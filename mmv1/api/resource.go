@@ -1156,18 +1156,16 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 
 	// short id: {{project}}/{{zone}}/{{name}}
 	fieldMarkers := regexp.MustCompile(`{{[[:word:]]+}}`).FindAllString(idFormats[0], -1)
-	log.Printf("[%s] Using Import format: %v", baseUrl, fieldMarkers)
 	shortIdFormat := strings.Join(fieldMarkers, "/")
-	log.Printf("[%s] fieldMarkers: %v", baseUrl, fieldMarkers)
 	// short ids without fields with provider-level defaults:
 
 	// without project
-	// fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{project}}" })
+	fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{project}}" })
 	shortIdDefaultProjectFormat := strings.Join(fieldMarkers, "/")
 
 	// without project or location
-	// fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{region}}" })
-	// fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{zone}}" })
+	fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{region}}" })
+	fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{zone}}" })
 	shortIdDefaultFormat := strings.Join(fieldMarkers, "/")
 
 	// If the id format can include `/` characters we cannot allow short forms such as:
@@ -1204,7 +1202,6 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	uniq = google.Reject(slices.Compact(uniq), func(i string) bool {
 		return i == ""
 	})
-	log.Printf("[%s] uniq format: %v", baseUrl, uniq)
 
 	return uniq
 }
