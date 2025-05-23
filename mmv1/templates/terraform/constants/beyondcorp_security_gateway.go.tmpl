@@ -11,7 +11,7 @@
 	limitations under the License.
 */ -}}
 func beyondcorpSecurityGatewayHubsHash(v interface{}) int {
-        if v == nil {
+	if v == nil {
 		return 0
 	}
 
@@ -20,5 +20,5 @@ func beyondcorpSecurityGatewayHubsHash(v interface{}) int {
 
 	buf.WriteString(fmt.Sprintf("%s-", m["region"].(string)))
 
-	return hashcode(buf.String())
+	return tpgresource.Hashcode(buf.String())
 }
