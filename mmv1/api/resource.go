@@ -589,12 +589,36 @@ func idParts(id string) (parts []string) {
 // set to true have been collapsed
 func (r Resource) IdentityProperties() []*Type {
 	props := make([]*Type, 0)
-	importFormat := idParts(r.SelfLinkUrl())
+	var importFormat []string
+	if r.IdFormat != "" {
+		importFormat = idParts(r.IdFormat)
+		if r.Name == "IndexEndpointDeployedIndex" {
+			log.Printf("[%s] Using Id format: %v", r.Name, importFormat)
+		}
+	} else {
+		importFormat = idParts(r.ImportIdFormatsFromResource()[0])
+		if r.Name == "IndexEndpointDeployedIndex" {
+			log.Printf("[%s] Using Import format: %v", r.Name, importFormat)
+		}
+	}
+
 	for _, p := range r.AllProperties() {
-		if slices.Contains(importFormat, p.Name) {
+		log.Printf("[%s] Id format: %v is being checked for %s", r.Name, importFormat, google.Underscore(p.Name))
+		if slices.Contains(importFormat, google.Underscore(p.Name)) {
 			props = append(props, p)
 		}
 	}
+
+	if slices.Contains(importFormat, "project") {
+		props = append(props, &Type{Name: "project", Type: "string"})
+	}
+	if slices.Contains(importFormat, "zone") {
+		props = append(props, &Type{Name: "zone", Type: "string"})
+	}
+	if slices.Contains(importFormat, "region") {
+		props = append(props, &Type{Name: "region", Type: "string"})
+	}
+
 	return props
 }
 
