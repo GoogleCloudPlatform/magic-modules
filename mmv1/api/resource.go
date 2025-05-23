@@ -590,7 +590,7 @@ func idParts(id string) (parts []string) {
 func (r Resource) IdentityProperties() []*Type {
 	props := make([]*Type, 0)
 	importFormat := idParts(r.SelfLinkUrl())
-	for _, p := range r.RootProperties() {
+	for _, p := range r.AllProperties() {
 		if slices.Contains(importFormat, p.Name) {
 			props = append(props, p)
 		}
