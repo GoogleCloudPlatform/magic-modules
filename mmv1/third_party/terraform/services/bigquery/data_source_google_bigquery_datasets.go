@@ -43,11 +43,6 @@ func DataSourceGoogleBigqueryDatasets() *schema.Resource {
 						Computed:    true,
 						Description: "The geographic location where the dataset resides.",
 					},
-					"full_id": {
-						Type:        schema.TypeString,
-						Computed:    true,
-						Description: "The fully qualified name of the dataset, in the format `{project_id}:{dataset_id}`.",
-					},
 				},
 			},
 		},
@@ -133,7 +128,6 @@ func flattenDataSourceGoogleBigQueryDatasetsList(res interface{}) []map[string]i
 		var mDatasetID string
 		var mFriendlyName string
 		var mLocation string
-		var mFullID string
 
 		if oLabels, ok := output["labels"].(map[string]interface{}); ok {
 			mLabels = oLabels
@@ -155,16 +149,11 @@ func flattenDataSourceGoogleBigQueryDatasetsList(res interface{}) []map[string]i
 			mLocation = oLocation
 		}
 
-		if oFullID, ok := output["fullId"].(string); ok {
-			mFullID = oFullID
-		}
-
 		datasets = append(datasets, map[string]interface{}{
 			"labels":        mLabels,
 			"friendly_name": mFriendlyName,
 			"dataset_id":    mDatasetID,
 			"location":      mLocation,
-			"full_id":       mFullID,
 		})
 	}
 

@@ -37,4 +37,3 @@ The following attributes are exported:
 * `friendly_name` - The friendly name of the dataset.
 * `dataset_id` - The id of the dataset.
 * `location` - The geographic location of the dataset.
-* `full_id` - The full id of the dataset, in the format `{project_id}:{dataset_id}`.
