@@ -475,20 +475,6 @@ func TestAccFilestoreInstance_replication(t *testing.T) {
 			{
 				Config: testAccFilestoreInstance_replication(context),
 				Check: resource.ComposeTestCheckFunc(
-/*
-at this time the effective_replication is not available in the API, I think reason being it first creates the source_instance and then fetches the result
-then it creates the replica_instance and fetches the result for the replica_instance, but doesn't re-fetch and update state of the source_instance that now has an effective_replication
-					resource.TestCheckResourceAttr(
-						"google_filestore_instance.source_instance",
-						"effective_replication.0.replicas.0.peer_instance",
-						"projects/" + context["project"].(string) + "/locations/us-east1/instances/tf-test-replica-instance" + context["random_suffix"].(string),
-					),
-					resource.TestCheckResourceAttr(
-						"google_filestore_instance.source_instance",
-						"effective_replication.0.role",
-						"ACTIVE",
-					),
-*/
 					resource.TestCheckResourceAttr(
 						"google_filestore_instance.replica_instance",
 						"effective_replication.0.replicas.0.peer_instance",
