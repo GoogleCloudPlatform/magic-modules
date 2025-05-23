@@ -20,7 +20,7 @@ references:
   guides:
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.indexEndpoints#DeployedIndex'
 docs:
-id_format: 'projects/{{project}}/locations/{{region}}/indexEndpoints/{{index_endpoint}}/deployedIndex/{{deployed_index_id}}'
+id_format: '{{index_endpoint}}/deployedIndex/{{deployed_index_id}}'
 base_url: '{{index_endpoint}}'
 self_link: '{{index_endpoint}}'
 create_url: '{{index_endpoint}}:deployIndex'

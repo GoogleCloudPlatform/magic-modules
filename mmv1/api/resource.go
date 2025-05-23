@@ -592,18 +592,11 @@ func (r Resource) IdentityProperties() []*Type {
 	var importFormat []string
 	if r.IdFormat != "" {
 		importFormat = idParts(r.IdFormat)
-		if r.Name == "IndexEndpointDeployedIndex" {
-			log.Printf("[%s] Using Id format: %v", r.Name, importFormat)
-		}
 	} else {
 		importFormat = idParts(r.ImportIdFormatsFromResource()[0])
-		if r.Name == "IndexEndpointDeployedIndex" {
-			log.Printf("[%s] Using Import format: %v", r.Name, importFormat)
-		}
 	}
 
 	for _, p := range r.AllProperties() {
-		log.Printf("[%s] Id format: %v is being checked for %s", r.Name, importFormat, google.Underscore(p.Name))
 		if slices.Contains(importFormat, google.Underscore(p.Name)) {
 			props = append(props, p)
 		}
