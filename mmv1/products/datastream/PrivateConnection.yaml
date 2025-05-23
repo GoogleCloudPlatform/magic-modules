@@ -111,12 +111,16 @@ properties:
         type: KeyValuePairs
         description: |
           A list of messages that carry the error details.
+    # Added oneof to ensure either vpcPeeringConfig OR psciConfig is present, but not both.
   - name: 'vpcPeeringConfig'
     type: NestedObject
+    exactly_one_of:
+    - 'vpc_peering_config'
+    - 'psc_interface_config'
     description: |
       The VPC Peering configuration is used to create VPC peering
       between Datastream and the consumer's VPC.
-    required: true
+    required: false
     properties:
       - name: 'vpc'
         type: String
@@ -128,4 +132,24 @@ properties:
         type: String
         description: |
           A free subnet for peering. (CIDR of /29)
-        required: true
+          required: true
+  - name: 'pscInterfaceConfig'
+    type: NestedObject
+    exactly_one_of:
+    - 'vpc_peering_config'
+    - 'psc_interface_config'
+    description: |
+        The PSCI (Private Service Connect Interface) configuration.
+        # Mark as required: false here as the 'oneof' at the parent level handles the mutual exclusivity
+    required: false
+    properties:
+    - name: 'network_attachment'
+      type: String
+      description: |
+            The full resource name of the Network Attachment to use for PSCI.
+            Format: projects/{project}/regions/{region}/networkAttachments/{networkAttachmentId}
+            To get Datastream project for the accepted list:
+            `gcloud datastream private-connections create [PC ID] --location=[LOCATION] --network-attachment=[NA URI] --validate-only --display-name=[ANY STRING]`        
+            Add Datastream project to the attachment accepted list:
+            `gcloud compute network-attachments update [NA URI] --region=[NA region] --producer-accept-list=[TP from prev command]`
+      required: true
