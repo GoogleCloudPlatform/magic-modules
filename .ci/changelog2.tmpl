@@ -1,3 +1,10 @@
+{{- if .NotesByType.unknown -}}
+UNKNOWN CHANGELOG TYPE:
+{{range .NotesByType.unknown -}}
+* {{ template "note" .}}
+{{ end -}}
+{{- end -}}
+
 {{- if .NotesByType.note -}}
 NOTES:
 {{range .NotesByType.note -}}
