@@ -177,6 +177,8 @@ type Resource struct {
 	// Guides point to non-rest useful context for the resource.
 	Guides []Link
 
+	// The version of the identity schema for the resource.
+	IdentitySchemaVersion int
 	// The current schema version
 	SchemaVersion int
 	// The schema versions from 0 to the current schema version
@@ -450,16 +452,17 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	resourceTitle := strings.Split(info.Title, "/")[1]
 
 	res := Resource{
-		title:                SnakeCaseTerraformResourceName(jsonToSnakeCase(resourceTitle).snakecase()),
-		dclStructName:        TitleCaseResourceName(schema.Title),
-		dclTitle:             TitleCaseResourceName(resourceTitle),
-		productMetadata:      product,
-		versionMetadata:      version,
-		Description:          info.Description,
-		location:             location,
-		InsertTimeoutMinutes: 20,
-		UpdateTimeoutMinutes: 20,
-		DeleteTimeoutMinutes: 20,
+		title:                 SnakeCaseTerraformResourceName(jsonToSnakeCase(resourceTitle).snakecase()),
+		dclStructName:         TitleCaseResourceName(schema.Title),
+		dclTitle:              TitleCaseResourceName(resourceTitle),
+		productMetadata:       product,
+		versionMetadata:       version,
+		Description:           info.Description,
+		location:              location,
+		InsertTimeoutMinutes:  20,
+		UpdateTimeoutMinutes:  20,
+		DeleteTimeoutMinutes:  20,
+		IdentitySchemaVersion: 1,
 	}
 
 	// Since the resource's "info" extension field can't be accessed, the relevant
@@ -720,6 +723,16 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		for i := range res.SchemaVersions {
 			res.SchemaVersions[i] = i
 		}
+	}
+
+	// Resource Override: Identity Schema Version
+	identitySchema := IdentitySchemaDetails{}
+	identitySchemaOk, err := overrides.ResourceOverrideWithDetails(IdentityVersion, &identitySchema, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode custom timeout details: %v", err)
+	}
+	if identitySchemaOk {
+		res.IdentitySchemaVersion = identitySchema.Version
 	}
 
 	if overrides.ResourceOverride(GenerateLongFormTests, location) {

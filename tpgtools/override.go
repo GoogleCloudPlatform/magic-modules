@@ -55,6 +55,7 @@ const (
 	TerraformProductName               = "CUSTOM_TERRAFORM_PRODUCT_NAME"
 	CustomTimeout                      = "CUSTOM_TIMEOUT"
 	StateUpgrade                       = "STATE_UPGRADE"
+	IdentityVersion                    = "IDENTITY_VERSION"
 	GenerateLongFormTests              = "GENERATE_LONG_FORM_TESTS"
 )
 
