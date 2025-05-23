@@ -590,20 +590,21 @@ func idParts(id string) (parts []string) {
 func (r Resource) IdentityProperties() []*Type {
 	props := make([]*Type, 0)
 	importFormat := idParts(ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)[0])
-
+	optionalValues := map[string]bool{"project": false, "zone": false, "region": false}
 	for _, p := range r.AllProperties() {
 		if slices.Contains(importFormat, google.Underscore(p.Name)) {
 			props = append(props, p)
+			optionalValues[p.Name] = true
 		}
 	}
 
-	if slices.Contains(importFormat, "project") {
+	if slices.Contains(importFormat, "project") && !optionalValues["project"] {
 		props = append(props, &Type{Name: "project", Type: "string"})
 	}
-	if slices.Contains(importFormat, "zone") {
+	if slices.Contains(importFormat, "zone") && !optionalValues["zone"] {
 		props = append(props, &Type{Name: "zone", Type: "string"})
 	}
-	if slices.Contains(importFormat, "region") {
+	if slices.Contains(importFormat, "region") && !optionalValues["region"] {
 		props = append(props, &Type{Name: "region", Type: "string"})
 	}
 
