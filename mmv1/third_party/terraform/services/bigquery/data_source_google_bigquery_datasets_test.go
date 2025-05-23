@@ -2,6 +2,7 @@ package bigquery_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -12,9 +13,36 @@ import (
 func TestAccDataSourceGoogleBigqueryDatasets_basic(t *testing.T) {
 	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+	projectID := envvar.GetTestProjectFromEnv()
+
+	expectedDatasetFoo := map[string]string{
+		"dataset_id":                        fmt.Sprintf("tf_test_foo_%s", randomSuffix),
+		"friendly_name":                     "Foo",
+		"location":                          "US",
+		"labels.%":                          "1",
+		"labels.goog-terraform-provisioned": "true",
+	}
+
+	expectedDatasetBar := map[string]string{
+		"dataset_id":                        fmt.Sprintf("tf_test_bar_%s", randomSuffix),
+		"friendly_name":                     "bar",
+		"location":                          "EU",
+		"labels.%":                          "1",
+		"labels.goog-terraform-provisioned": "true",
+	}
+
+	nonExpectedDataset := map[string]string{
+		"dataset_id":                        "non_existent_dataset",
+		"friendly_name":                     "I do not exist, and should throw an error",
+		"location":                          "NON_EXIST",
+		"labels.%":                          "8",
+		"labels.goog-terraform-provisioned": "Nah",
+	}
+
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"project_id":    envvar.GetTestProjectFromEnv(),
+		"random_suffix": randomSuffix,
+		"project_id":    projectID,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -24,13 +52,12 @@ func TestAccDataSourceGoogleBigqueryDatasets_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBigqueryDatasets_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.#", "1"),
-					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.0.dataset_id", fmt.Sprintf("tf_test_foo_%s", context["random_suffix"])),
-					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.0.labels.%", "1"),
-					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.0.labels.goog-terraform-provisioned", "true"),
-					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.0.location", "US"),
-					resource.TestCheckResourceAttr("data.google_bigquery_datasets.example", "datasets.0.friendly_name", "Foo"),
+					resource.TestCheckTypeSetElemNestedAttrs("data.google_bigquery_datasets.example", "datasets.*", expectedDatasetFoo),
+					resource.TestCheckTypeSetElemNestedAttrs("data.google_bigquery_datasets.example", "datasets.*", expectedDatasetBar),
+					// this check is intended to throw an error, see ExpectError below
+					resource.TestCheckTypeSetElemNestedAttrs("data.google_bigquery_datasets.example", "datasets.*", nonExpectedDataset),
 				),
+				ExpectError: regexp.MustCompile(".*no TypeSet element \"datasets.*\", with nested attrs.*non_existent_dataset.*I do not exist, and should throw an error.*"),
 			},
 		},
 	})
@@ -51,6 +78,19 @@ resource "google_bigquery_dataset" "foo" {
   }
 }
 
+resource "google_bigquery_dataset" "bar" {
+  dataset_id                  = "tf_test_bar_%{random_suffix}"
+  friendly_name               = "bar"
+  description                 = "This is a test description"
+  location                    = "EU"
+  default_table_expiration_ms = 3600000
+
+  access {
+    role          = "OWNER"
+    user_by_email = google_service_account.bqowner.email
+  }
+}
+
 resource "google_service_account" "bqowner" {
   account_id = "tf-test-%{random_suffix}"
 }
@@ -59,6 +99,7 @@ data "google_bigquery_datasets" "example" {
   project = "%{project_id}"
   depends_on = [
 	google_bigquery_dataset.foo,
+	google_bigquery_dataset.bar,
   ]
 }
 `, context)
