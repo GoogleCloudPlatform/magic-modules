@@ -589,12 +589,7 @@ func idParts(id string) (parts []string) {
 // set to true have been collapsed
 func (r Resource) IdentityProperties() []*Type {
 	props := make([]*Type, 0)
-	var importFormat []string
-	if r.IdFormat != "" {
-		importFormat = idParts(r.IdFormat)
-	} else {
-		importFormat = idParts(r.ImportIdFormatsFromResource()[0])
-	}
+	importFormat := idParts(ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)[0])
 
 	for _, p := range r.AllProperties() {
 		if slices.Contains(importFormat, google.Underscore(p.Name)) {
@@ -1161,17 +1156,18 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 
 	// short id: {{project}}/{{zone}}/{{name}}
 	fieldMarkers := regexp.MustCompile(`{{[[:word:]]+}}`).FindAllString(idFormats[0], -1)
+	log.Printf("[%s] Using Import format: %v", baseUrl, fieldMarkers)
 	shortIdFormat := strings.Join(fieldMarkers, "/")
-
+	log.Printf("[%s] fieldMarkers: %v", baseUrl, fieldMarkers)
 	// short ids without fields with provider-level defaults:
 
 	// without project
-	fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{project}}" })
+	// fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{project}}" })
 	shortIdDefaultProjectFormat := strings.Join(fieldMarkers, "/")
 
 	// without project or location
-	fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{region}}" })
-	fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{zone}}" })
+	// fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{region}}" })
+	// fieldMarkers = slices.DeleteFunc(fieldMarkers, func(s string) bool { return s == "{{zone}}" })
 	shortIdDefaultFormat := strings.Join(fieldMarkers, "/")
 
 	// If the id format can include `/` characters we cannot allow short forms such as:
@@ -1208,6 +1204,8 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	uniq = google.Reject(slices.Compact(uniq), func(i string) bool {
 		return i == ""
 	})
+	log.Printf("[%s] uniq format: %v", baseUrl, uniq)
+
 	return uniq
 }
 
