@@ -37,22 +37,6 @@ jobs:
         run: |
           cd repo/tools/template-check
           git diff --name-only --diff-filter=d origin/${{ github.base_ref }} ../../*.tmpl | sed 's=^=../../=g' | go run main.go
-  lint-yaml:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
-        with:
-          path: repo
-          fetch-depth: 0
-      - name: Merge base branch
-        if: github.event_name == 'pull_request'
-        run: |
-          cd repo
-          git config user.name "modular-magician"
-          git config user.email "magic-modules@google.com"
-          git fetch origin ${{ github.base_ref }}
-          git merge --no-ff origin/${{ github.base_ref }}
       - name: Find YAML files to lint
         id: yaml_files
         run: |
@@ -61,7 +45,7 @@ jobs:
             # For PRs, get only changed files
             yamlfiles=$(git diff --name-only origin/${{ github.base_ref }} -- mmv1/products)
             if [ ! -z "$yamlfiles" ]; then
-              echo "yamlfiles=repo/${yamlfiles//$'\n'/ repo/}" >> $GITHUB_OUTPUT
+              echo "yamlfiles=${yamlfiles//$'\n'/ }" >> $GITHUB_OUTPUT
             fi
           else
             # For other events, get all YAML files
@@ -69,13 +53,15 @@ jobs:
             if [ ! -z "$yamlfiles" ]; then
               echo "yamlfiles=$yamlfiles" >> $GITHUB_OUTPUT
             fi
-          fi
+          fi      
       - name: Install yamllint
         if: ${{ !failure() && steps.yaml_files.outputs.yamlfiles != '' }}
         run: pip install yamllint==1.32.0 pyyaml==6.0.1 pathspec==0.12.1 --no-deps
       - name: Lint YAML files
         if: ${{ !failure() && steps.yaml_files.outputs.yamlfiles != '' }}
-        run: yamllint -c repo/.yamllint ${{ steps.yaml_files.outputs.yamlfiles }}  
+        run: |
+          cd repo
+          yamllint -c repo/.yamllint ${{ steps.yaml_files.outputs.yamlfiles }}  
   unit-tests:
     runs-on: ubuntu-22.04
     steps:
