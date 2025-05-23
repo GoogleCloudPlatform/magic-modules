@@ -571,25 +571,9 @@ func (r Resource) AllNestedProperties(props []*Type) []*Type {
 	return nested
 }
 
-const PatternPart = "{{(\\w+)}}"
-
-func idParts(id string) (parts []string) {
-	r := regexp.MustCompile(PatternPart)
-
-	// returns [["{{field}}", "field"] ...]
-	idTmplAndParts := r.FindAllStringSubmatch(id, -1)
-	for _, v := range idTmplAndParts {
-		parts = append(parts, v[1])
-	}
-
-	return parts
-}
-
-// Returns the list of top-level properties once any nested objects with flatten_object
-// set to true have been collapsed
 func (r Resource) IdentityProperties() []*Type {
 	props := make([]*Type, 0)
-	importFormat := idParts(ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)[0])
+	importFormat := r.ExtractIdentifiers(ImportIdFormats(r.ImportFormat, r.Identity, r.BaseUrl)[0])
 	optionalValues := map[string]bool{"project": false, "zone": false, "region": false}
 	for _, p := range r.AllProperties() {
 		if slices.Contains(importFormat, google.Underscore(p.Name)) {
@@ -598,14 +582,10 @@ func (r Resource) IdentityProperties() []*Type {
 		}
 	}
 
-	if slices.Contains(importFormat, "project") && !optionalValues["project"] {
-		props = append(props, &Type{Name: "project", Type: "string"})
-	}
-	if slices.Contains(importFormat, "zone") && !optionalValues["zone"] {
-		props = append(props, &Type{Name: "zone", Type: "string"})
-	}
-	if slices.Contains(importFormat, "region") && !optionalValues["region"] {
-		props = append(props, &Type{Name: "region", Type: "string"})
+	for _, field := range []string{"project", "zone", "region"} { // prevents duplicates
+		if slices.Contains(importFormat, field) && !optionalValues[field] {
+			props = append(props, &Type{Name: field, Type: "string"})
+		}
 	}
 
 	return props
