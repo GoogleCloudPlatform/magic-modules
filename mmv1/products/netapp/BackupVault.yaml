@@ -146,4 +146,3 @@ properties:
         description: |
           Indicates if the manual backups are immutable. At least one of daily_backup_immutable, weekly_backup_immutable, monthly_backup_immutable and manual_backup_immutable must be true.
         required: false
-
