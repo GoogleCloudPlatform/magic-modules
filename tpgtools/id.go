@@ -39,20 +39,16 @@ func idParts(id string) (parts []string) {
 }
 
 func createIdentityProperty(p Property) IdentityProperty {
-	if p.Name() == "project" || p.Name() == "location" || p.Name() == "zone" {
-		return IdentityProperty{
-			Title:       p.Name(),
-			Required:    false,
-			Optional:    true,
-			Description: p.Description,
-		}
-	} else {
-		return IdentityProperty{
-			Title:       p.Name(),
-			Required:    true,
-			Optional:    false,
-			Description: p.Description,
-		}
+	requiredIdentity := true
+	if p.Name() == "project" || p.Name() == "region" || p.Name() == "zone" {
+		requiredIdentity = false
+	}
+
+	return IdentityProperty{
+		Name:        p.Name(),
+		Required:    requiredIdentity,
+		Optional:    !requiredIdentity,
+		Description: p.Description,
 	}
 }
 

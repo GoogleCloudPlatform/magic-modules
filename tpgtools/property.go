@@ -148,7 +148,7 @@ type IdentityGetter struct {
 }
 
 type IdentityProperty struct {
-	Title       string
+	Name        string
 	Required    bool
 	Optional    bool
 	Description string
