@@ -54,6 +54,8 @@ async:
     resource_inside_response: true
   include_project: false
 autogen_status: U2VjdXJpdHlHYXRld2F5
+custom_code:
+  constants: 'templates/terraform/constants/beyondcorp_security_gateway.go.tmpl'
 parameters:
   - name: location
     type: String
@@ -104,6 +106,7 @@ properties:
       as a key.
     key_name: region
     key_description: The region to deploy the hub in.
+    set_hash_func: 'beyondcorpSecurityGatewayHubsHash'
     value_type:
       name: Hub
       type: NestedObject
