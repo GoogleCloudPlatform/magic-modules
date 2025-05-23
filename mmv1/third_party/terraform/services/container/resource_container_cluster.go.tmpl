@@ -2333,7 +2333,6 @@ func ResourceContainerCluster() *schema.Resource {
 			"user_managed_keys_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				ForceNew:    true,
 				MaxItems:    1,
 				Description: `The custom keys configuration of the cluster.`,
 				Elem: &schema.Resource{
@@ -3448,6 +3447,24 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			}
 
 			updateF := updateFunc(req, "updating GKE cluster addons")
+			// Call update serially.
+			if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] GKE cluster %s addons have been updated", d.Id())
+		}
+	}
+
+	if d.HasChange("user_managed_keys_config") {
+		if umkc, ok := d.GetOk("user_managed_keys_config"); ok {
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					UserManagedKeysConfig: expandUserManagedKeysConfig(umkc),
+				},
+			}
+
+			updateF := updateFunc(req, "updating GKE cluster user managed keys")
 			// Call update serially.
 			if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
 				return err
