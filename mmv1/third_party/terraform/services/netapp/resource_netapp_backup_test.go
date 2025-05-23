@@ -373,7 +373,7 @@ resource "time_sleep" "wait_3_minutes" {
 }
 resource "google_netapp_volume" "default" {
   name = "tf-test-backup-volume%{random_suffix}"
-  location = "us-west4"
+  location = "us-central1"
   capacity_gib = "100"
   share_name = "tf-test-backup-volume%{random_suffix}"
   storage_pool = google_netapp_storage_pool.default.name
@@ -385,18 +385,18 @@ resource "google_netapp_volume" "default" {
 }
 resource "google_netapp_backup_vault" "default" {
   name = "tf-test-backup-vault%{random_suffix}"
-  location = google_netapp_storage_pool.default.location
+  location = "us-central1"
   backup_retention_policy {
-  backup_minimum_enforced_retention_days = 2
-  daily_backup_immutable = true
-  weekly_backup_immutable = false
-  monthly_backup_immutable = false
-  manual_backup_immutable = false
+    backup_minimum_enforced_retention_days = 2
+    daily_backup_immutable = true
+    weekly_backup_immutable = false
+    monthly_backup_immutable = false
+    manual_backup_immutable = false
   }
 }
 resource "google_netapp_volume_snapshot" "default" {
   depends_on = [google_netapp_volume.default]
-  location = google_netapp_volume.default.location
+  location = "us-central1"
   volume_name = google_netapp_volume.default.name
   description = "This is a test description"
   name = "testvolumesnap%{random_suffix}"
@@ -404,17 +404,17 @@ resource "google_netapp_volume_snapshot" "default" {
     key= "test"
     value= "snapshot"
   }
-  }
+}
 resource "google_netapp_backup" "test_backup" {
   name = "tf-test-test-backup%{random_suffix}"
   description = "This is a test immutable backup"
   source_volume = google_netapp_volume.default.id
-  location = google_netapp_backup_vault.default.location
+  location = "us-central1"
   vault_name = google_netapp_backup_vault.default.name
   source_snapshot = google_netapp_volume_snapshot.default.id
   labels = {
-  key= "test"
-  value= "backup"
+    key= "test"
+    value= "backup"
   }
 }
 `, context)
