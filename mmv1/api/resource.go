@@ -250,6 +250,9 @@ type Resource struct {
 	// used for maintaining state stability with resources first provisioned on older api versions.
 	SchemaVersion int `yaml:"schema_version,omitempty"`
 
+	// The version of the identity schema for the resource.
+	IdentitySchemaVersion int `yaml:"identity_schema_version,omitempty"`
+
 	// From this schema version on, state_upgrader code is generated for the resource.
 	// When unset, state_upgrade_base_schema_version defauts to 0.
 	// Normally, it is not needed to be set.
@@ -1820,6 +1823,13 @@ func (r Resource) StateUpgradersCount() []int {
 		nums = append(nums, i)
 	}
 	return nums
+}
+
+func (r Resource) GetIdentitySchemaVersion() int {
+	if r.IdentitySchemaVersion == 0 { // default to 1 if not set; a resource with no identity support has a version of 0
+		return 1
+	}
+	return r.IdentitySchemaVersion
 }
 
 func (r Resource) CaiProductBaseUrl() string {
