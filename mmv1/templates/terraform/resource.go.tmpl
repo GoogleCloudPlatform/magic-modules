@@ -145,12 +145,6 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
                 {{- end }}
               },
               {{- end }}
-              {{ if $.HasProject -}}
-            "project": {
-                Type:     schema.TypeString,
-                OptionalForImport: true,
-            },
-              {{- end}}
             }
           },
         },
