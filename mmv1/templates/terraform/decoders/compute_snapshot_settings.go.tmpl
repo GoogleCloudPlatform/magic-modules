@@ -1,0 +1,9 @@
+// storage locations keep existing in the API after changing from SPECIFIC_LOCATIONS to NEAREST_MULTI_REGION or LOCAL_REGION
+// However, they only are "active" when the policy is SPECIFIC_LOCATIONS
+if d.Get("storage_location.policy").(string) != "SPECIFIC_LOCATIONS" {
+    if storageLocation, ok := res["storageLocation"].(map[string]interface{}); ok && storageLocation != nil {
+        delete(storageLocation, "locations")
+    }
+}
+
+return res, nil
