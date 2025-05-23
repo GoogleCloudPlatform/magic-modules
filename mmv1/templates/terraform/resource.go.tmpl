@@ -131,6 +131,29 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
         DeprecationMessage: "{{ $.DeprecationMessage -}}",
 {{- end}}
 
+        Identity: &schema.ResourceIdentity{
+          Version: 1,
+          SchemaFunc: func() map[string]*schema.Schema {
+            return map[string]*schema.Schema{
+              {{- range $p := .IdentityProperties }}
+              "{{ underscore $p.Name}}": {
+                Type:     schema.TypeString,
+                {{- if $p.Required }}
+                RequiredForImport: true,
+                {{- else }}
+                OptionalForImport: true,
+                {{- end }}
+              },
+              {{- end }}
+              {{ if $.HasProject -}}
+            "project": {
+                Type:     schema.TypeString,
+                OptionalForImport: true,
+            },
+              {{- end}}
+            }
+          },
+        },
         Schema: map[string]*schema.Schema{
 			{{- range $prop := $.OrderProperties $.AllUserProperties }}
 {{template "SchemaFields" $prop -}}

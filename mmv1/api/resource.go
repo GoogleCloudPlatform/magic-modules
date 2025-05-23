@@ -568,6 +568,33 @@ func (r Resource) AllNestedProperties(props []*Type) []*Type {
 	return nested
 }
 
+const PatternPart = "{{(\\w+)}}"
+
+func idParts(id string) (parts []string) {
+	r := regexp.MustCompile(PatternPart)
+
+	// returns [["{{field}}", "field"] ...]
+	idTmplAndParts := r.FindAllStringSubmatch(id, -1)
+	for _, v := range idTmplAndParts {
+		parts = append(parts, v[1])
+	}
+
+	return parts
+}
+
+// Returns the list of top-level properties once any nested objects with flatten_object
+// set to true have been collapsed
+func (r Resource) IdentityProperties() []*Type {
+	props := make([]*Type, 0)
+	importFormat := idParts(r.SelfLinkUrl())
+	for _, p := range r.RootProperties() {
+		if slices.Contains(importFormat, p.Name) {
+			props = append(props, p)
+		}
+	}
+	return props
+}
+
 func (r Resource) SensitiveProps() []*Type {
 	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
