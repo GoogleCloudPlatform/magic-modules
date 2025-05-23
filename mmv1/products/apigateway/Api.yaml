@@ -97,7 +97,7 @@ properties:
     default_from_api: true
   - name: 'createTime'
     type: Time
-    description: Creation Timestamp in RFC3339 text format.
+    description: Creation timestamp in RFC3339 text format.
     min_version: 'beta'
     output: true
   - name: 'labels'
