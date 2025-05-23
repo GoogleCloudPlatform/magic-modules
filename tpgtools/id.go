@@ -38,6 +38,24 @@ func idParts(id string) (parts []string) {
 	return parts
 }
 
+func createIdentityProperty(p Property) IdentityProperty {
+	if p.Name() == "project" || p.Name() == "location" || p.Name() == "zone" {
+		return IdentityProperty{
+			Title:       p.Name(),
+			Required:    false,
+			Optional:    true,
+			Description: p.Description,
+		}
+	} else {
+		return IdentityProperty{
+			Title:       p.Name(),
+			Required:    true,
+			Optional:    false,
+			Description: p.Description,
+		}
+	}
+}
+
 // PatternToRegex formats a pattern string into a Python-compatible regex.
 func PatternToRegex(s string, allowForwardSlash bool) string {
 	re := regexp.MustCompile(PatternPart)
@@ -48,17 +66,17 @@ func PatternToRegex(s string, allowForwardSlash bool) string {
 }
 
 // Finds the correct resource id based on the schema and any overrides. Returns whether a custom ID override was used.
-func findResourceID(schema *openapi.Schema, overrides Overrides, location string) (identities []Property, id string, customID bool, err error) {
+func findResourceID(schema *openapi.Schema, overrides Overrides, location string) (id string, customID bool, err error) {
 	id, ok := schema.Extension["x-dcl-id"].(string)
 	if !ok {
-		return nil, "", false, fmt.Errorf("Malformed or missing x-dcl-id: %v", schema.Extension["x-dcl-id"])
+		return "", false, fmt.Errorf("Malformed or missing x-dcl-id: %v", schema.Extension["x-dcl-id"])
 	}
 
 	// Resource Override: Custom ID
 	cid := CustomIDDetails{}
 	cidOk, err := overrides.ResourceOverrideWithDetails(CustomID, &cid, location)
 	if err != nil {
-		return nil, "", false, fmt.Errorf("failed to decode custom id details: %v", err)
+		return "", false, fmt.Errorf("failed to decode custom id details: %v", err)
 	}
 
 	if cidOk {
@@ -69,13 +87,10 @@ func findResourceID(schema *openapi.Schema, overrides Overrides, location string
 		if override.Type == CustomName {
 			if strings.Contains(id, fmt.Sprintf("{{%s}}", *override.Field)) {
 				id = strings.Replace(id, fmt.Sprintf("{{%s}}", *override.Field), fmt.Sprintf("{{%s}}", override.Details.(map[interface{}]interface{})["name"].(string)), 1)
-				identities = append(identities, Property{
-					PackageName: override.Details.(map[interface{}]interface{})["name"].(string),
-				})
 			}
 		}
 	}
-	return identities, id, cidOk, nil
+	return id, cidOk, nil
 }
 
 // Finds all import formats for a given id. This can include short forms and
