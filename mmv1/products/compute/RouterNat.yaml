@@ -482,7 +482,7 @@ properties:
       The network tier to use when automatically reserving NAT IP addresses.
       Must be one of: PREMIUM, STANDARD. If not specified, then the current
       project-level default tier is used.
-    default_value: "STANDARD"
+    default_from_api: true
     enum_values:
       - 'PREMIUM'
       - 'STANDARD'
