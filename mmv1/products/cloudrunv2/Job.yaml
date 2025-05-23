@@ -483,10 +483,6 @@ properties:
                         TcpSocket specifies an action involving a TCP port.
                       send_empty_value: true
                       allow_empty_object: true
-                      exactly_one_of:
-                        - 'template.0.containers.0.startup_probe.0.tcp_socket'
-                        - 'template.0.containers.0.startup_probe.0.http_get'
-                        - 'template.0.containers.0.startup_probe.0.grpc'
                       properties:
                         - name: 'port'
                           type: Integer
@@ -500,10 +496,6 @@ properties:
                         HttpGet specifies the http request to perform.
                       send_empty_value: true
                       allow_empty_object: true
-                      exactly_one_of:
-                        - 'template.0.containers.0.startup_probe.0.tcp_socket'
-                        - 'template.0.containers.0.startup_probe.0.http_get'
-                        - 'template.0.containers.0.startup_probe.0.grpc'
                       properties:
                         - name: 'path'
                           type: String
@@ -540,10 +532,6 @@ properties:
                         GRPC specifies an action involving a GRPC port.
                       send_empty_value: true
                       allow_empty_object: true
-                      exactly_one_of:
-                        - 'template.0.containers.0.startup_probe.0.tcp_socket'
-                        - 'template.0.containers.0.startup_probe.0.http_get'
-                        - 'template.0.containers.0.startup_probe.0.grpc'
                       properties:
                         - name: 'port'
                           type: Integer
