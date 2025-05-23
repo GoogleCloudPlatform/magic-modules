@@ -328,7 +328,7 @@ resource "google_netapp_backup" "test_backup" {
 
 func TestAccNetappBackup_NetappImmutableBackup(t *testing.T) {
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-2", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -369,8 +369,8 @@ data "google_compute_network" "default" {
 }
 resource "google_netapp_storage_pool" "default" {
   name = "tf-test-backup-pool%{random_suffix}"
-  location = "us-west4"
-  service_level = "PREMIUM"
+  location = "us-central1"
+  service_level = "FLEX"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
 }
@@ -434,8 +434,8 @@ data "google_compute_network" "default" {
 }
 resource "google_netapp_storage_pool" "default" {
   name = "tf-test-backup-pool%{random_suffix}"
-  location = "us-west4"
-  service_level = "PREMIUM"
+  location = "us-central1"
+  service_level = "FLEX"
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
 }
