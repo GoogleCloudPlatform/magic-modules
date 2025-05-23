@@ -27,8 +27,8 @@ self_link: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_gr
 create_url: 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features?featureId={{name}}'
 update_verb: 'PATCH'
 update_mask: true
-# import_format:
-#   - 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features/{{name}}'
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/featureGroups/{{feature_group}}/features/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
