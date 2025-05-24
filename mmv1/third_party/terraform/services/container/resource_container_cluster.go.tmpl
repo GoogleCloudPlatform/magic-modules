@@ -2389,6 +2389,7 @@ func ResourceContainerCluster() *schema.Resource {
 			"rbac_binding_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				MaxItems:    1,
 				Description: `RBACBindingConfig allows user to restrict ClusterRoleBindings an RoleBindings that can be created.`,
 				Elem: &schema.Resource{
