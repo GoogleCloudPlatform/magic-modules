@@ -86,7 +86,7 @@ func testAccDialogflowCXTool_full_api_key(context map[string]interface{}) string
 	}
 
 	resource "google_dialogflow_cx_tool" "my_tool" {
-		parent       = google_dialogflow_cx_agent.agent.id
+		parent       = google_dialogflow_cx_agent.agent_tool.id
 		display_name = "Example Open API Tool with api_key_config"
 		description  = "Example Description"
 		open_api_spec {
@@ -165,7 +165,7 @@ func testAccDialogflowCXTool_full_service_agent_auth(context map[string]interfac
 	}
 
 	resource "google_dialogflow_cx_tool" "my_tool" {
-		parent       = google_dialogflow_cx_agent.agent.id
+		parent       = google_dialogflow_cx_agent.agent_tool.id
 		display_name = "Example Open API Tool with service_agent_auth_config"
 		description  = "Example Description"
 		open_api_spec {
@@ -241,67 +241,68 @@ func testAccDialogflowCXTool_full_bearer_token(context map[string]interface{}) s
 	}
 
 	resource "google_dialogflow_cx_tool" "my_tool" {
-  parent       = google_dialogflow_cx_agent.agent.id
-  display_name = "Example Open API Tool with bearer_token_config"
-  description  = "Example Description"
-  open_api_spec {
-    authentication {
-      bearer_token_config {
-        token = "example token"
-        secret_version_for_token = "projects/-/secrets/-/versions/-"
-      }
-    }
-    tls_config {
-      ca_certs {
-        display_name = "example ca cert name"
-        cert = base64encode("example cert")
-      }
-    }
-    service_directory_config {
-      service = "projects/-/locations/-/namespaces/-/services/-"
-    }
-    text_schema = <<EOF
-    {
-      "openapi": "3.0.0",
-      "info": {
-        "title": "Time API",
-        "version": "1.0.0",
-        "description": "A simple API to get the current time."
-      },
-      "servers": [
-        {
-          "url": "https://example-api-endpoint.com"
-        }
-      ],
-      "paths": {
-        "/time": {
-          "get": {
-            "operationId": "getCurrentTime",
-            "summary": "Gets the current server time.",
-            "responses": {
-              "200": {
-                "description": "Successful response with the current time.",
-                "content": {
-                  "application/json": {
-                    "schema": {
-                      "type": "object",
-                      "properties": {
-                        "currentTime": {
-                          "type": "string",
-                          "format": "date-time",
-                          "description": "The current time in ISO 8601 format."
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    EOF
+		parent       = google_dialogflow_cx_agent.agent_tool.id
+		display_name = "Example Open API Tool with bearer_token_config"
+		description  = "Example Description"
+		open_api_spec {
+			authentication {
+				bearer_token_config {
+					token = "example token"
+					secret_version_for_token = "projects/-/secrets/-/versions/-"
+				}
+			}
+			tls_config {
+				ca_certs {
+					display_name = "example ca cert name"
+					cert = base64encode("example cert")
+				}
+			}
+			service_directory_config {
+				service = "projects/-/locations/-/namespaces/-/services/-"
+			}
+			text_schema = <<EOF
+			{
+				"openapi": "3.0.0",
+				"info": {
+					"title": "Time API",
+					"version": "1.0.0",
+					"description": "A simple API to get the current time."
+				},
+				"servers": [
+					{
+						"url": "https://example-api-endpoint.com"
+					}
+				],
+				"paths": {
+					"/time": {
+						"get": {
+							"operationId": "getCurrentTime",
+							"summary": "Gets the current server time.",
+							"responses": {
+								"200": {
+									"description": "Successful response with the current time.",
+									"content": {
+										"application/json": {
+											"schema": {
+												"type": "object",
+												"properties": {
+													"currentTime": {
+														"type": "string",
+														"format": "date-time",
+														"description": "The current time in ISO 8601 format."
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			EOF
+		}
   }
 	`, context)
 }
