@@ -11,37 +11,71 @@ resource "google_dialogflow_cx_agent" "agent" {
   speech_to_text_settings {
     enable_speech_adaptation = true
   }
-  depends_on = [
-    google_discovery_engine_data_store.my_datastore
-  ]
 }
 
 resource "google_dialogflow_cx_tool" "{{$.PrimaryResourceId}}" {
   parent       = google_dialogflow_cx_agent.agent.id
   display_name = "Example"
   description  = "Example Description"
-  data_store_spec {
-    data_store_connections {
-      data_store_type = "UNSTRUCTURED"
-      data_store = "projects/${data.google_project.project.number}/locations/global/collections/default_collection/dataStores/${google_discovery_engine_data_store.my_datastore.data_store_id}"
-      document_processing_mode = "DOCUMENTS"
+  open_api_spec {
+    authentication {
+      api_key_config {
+        key_name = "example key name"
+        api_key = "example key"
+        secret_version_for_api_key = "projects/-/secrets/-/versions/-"
+        request_location = "HEADER"
+      }
     }
-    fallback_prompt {} 
+    tls_config {
+      ca_certs {
+        display_name = "example ca cert name"
+        cert = base64encode("example cert")
+      }
+    }
+    service_directory_config {
+      service = "projects/-/locations/-/namespaces/-/services/-"
+    }
+    text_schema = <<EOF
+    {
+      "openapi": "3.0.0",
+      "info": {
+        "title": "Time API",
+        "version": "1.0.0",
+        "description": "A simple API to get the current time."
+      },
+      "servers": [
+        {
+          "url": "https://example-api-endpoint.com"
+        }
+      ],
+      "paths": {
+        "/time": {
+          "get": {
+            "operationId": "getCurrentTime",
+            "summary": "Gets the current server time.",
+            "responses": {
+              "200": {
+                "description": "Successful response with the current time.",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "currentTime": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The current time in ISO 8601 format."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    EOF
   }
-  depends_on = [
-    google_discovery_engine_data_store.my_datastore,
-    google_dialogflow_cx_agent.agent
-  ]
-}
-
-resource "google_discovery_engine_data_store" "my_datastore" {
-  location          = "global"
-  data_store_id     = "datastore-tool-full-test"
-  display_name      = "datastore-tool-full-test"
-  industry_vertical = "GENERIC"
-  content_config    = "NO_CONTENT"
-  solution_types    = ["SOLUTION_TYPE_CHAT"]
-}
-
-data "google_project" "project" {
 }
