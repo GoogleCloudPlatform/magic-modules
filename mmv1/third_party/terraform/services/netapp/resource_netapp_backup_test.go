@@ -350,7 +350,7 @@ func TestAccNetappBackup_NetappImmutableBackup(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
 			},
 			{
-				Config: testAccNetappBackup_ImmutableBackup_update(context),
+				Config: testAccNetappBackup_ImmutableBackups_update(context),
 			},
 			{
 				ResourceName:            "google_netapp_backup.test_backup",
@@ -429,7 +429,7 @@ resource "google_netapp_backup" "test_backup" {
 `, context)
 }
 
-func testAccNetappBackup_ImmutableBackup_update(context map[string]interface{}) string {
+func testAccNetappBackup_ImmutableBackups_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
@@ -470,12 +470,24 @@ resource "google_netapp_backup_vault" "default" {
     manual_backup_immutable = false
   }
 }
+resource "google_netapp_volume_snapshot" "default" {
+  depends_on = [google_netapp_volume.default]
+  location = "us-central1"
+  volume_name = google_netapp_volume.default.name
+  description = "This is a test description"
+  name = "testvolumesnap%{random_suffix}"
+  labels = {
+    key= "test"
+    value= "snapshot"
+  }
+}
 resource "google_netapp_backup" "test_backup" {
   name = "tf-test-test-backup%{random_suffix}"
   description = "This is a test immutable backup"
   source_volume = google_netapp_volume.default.id
   location = "us-central1"
   vault_name = google_netapp_backup_vault.default.name
+  source_snapshot = google_netapp_volume_snapshot.default.id
   labels = {
     key= "test"
     value= "backup"
