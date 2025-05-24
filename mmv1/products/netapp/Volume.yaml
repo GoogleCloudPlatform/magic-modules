@@ -507,6 +507,7 @@ properties:
     update_mask_fields:
       - 'tiering_policy.cooling_threshold_days'
       - 'tiering_policy.tier_action'
+      - 'tiering_policy.hot_tier_bypass_mode_enabled'
     properties:
       - name: 'coolingThresholdDays'
         type: Integer
@@ -521,6 +522,13 @@ properties:
         enum_values:
           - 'ENABLED'
           - 'PAUSED'
+      - name: 'hotTierBypassModeEnabled'
+        type: Boolean
+        description: |
+          Optional. Flag indicating that the hot tier bypass mode is enabled. Default is false.
+          Only applicable to Flex service level.
+        default_value: false
+        min_version: 'beta'
   - name: 'hybridReplicationParameters'
     type: NestedObject
     description: |-
