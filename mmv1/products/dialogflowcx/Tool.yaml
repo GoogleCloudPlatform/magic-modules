@@ -38,10 +38,18 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/dialogflowcx_tool.go.tmpl'
 exclude_sweeper: true
 examples:
-  - name: 'dialogflowcx_tool_full'
-    primary_resource_id: 'basic_tool'
+  - name: 'dialogflowcx_tool_open_api'
+    primary_resource_id: 'open_api_tool'
     vars:
-      agent_name: 'dialogflowcx-agent'
+      agent_name: 'dialogflowcx-agent-open-api'
+  - name: 'dialogflowcx_tool_data_store'
+    primary_resource_id: 'data_store_tool'
+    vars:
+      agent_name: 'dialogflowcx-agent-data-store'
+  - name: 'dialogflowcx_tool_function'
+    primary_resource_id: 'function_tool'
+    vars:
+      agent_name: 'dialogflowcx-agent-fucntion'
 parameters:
   - name: 'parent'
     type: String
@@ -148,6 +156,8 @@ properties:
                 type: String
                 description: |
                   Optional. The client secret from the OAuth provider. If the `secretVersionForClientSecret` field is set, this field will be ignored.
+                sensitive: true
+                ignore_read: true
               - name: 'secretVersionForClientSecret'
                 type: String
                 description: |
@@ -192,6 +202,8 @@ properties:
                 description: |
                   Optional. The text token appended to the text Bearer to the request Authorization header.
                   [Session parameters reference](https://cloud.google.com/dialogflow/cx/docs/concept/parameter#session-ref) can be used to pass the token dynamically, e.g. `$session.params.parameter-id`.
+                sensitive: true
+                ignore_read: true
               - name: 'secretVersionForToken'
                 type: String
                 description: |

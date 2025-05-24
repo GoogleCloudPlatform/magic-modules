@@ -30,7 +30,23 @@ func TestAccDialogflowCXTool_update(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccDialogflowCXTool_full(context),
+				Config: testAccDialogflowCXTool_full_api_key(context),
+			},
+			{
+				ResourceName:      "google_dialogflow_cx_tool.my_tool",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDialogflowCXTool_full_service_agent_auth(context),
+			},
+			{
+				ResourceName:      "google_dialogflow_cx_tool.my_tool",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDialogflowCXTool_full_bearer_token(context),
 			},
 			{
 				ResourceName:      "google_dialogflow_cx_tool.my_tool",
@@ -50,62 +66,242 @@ func testAccDialogflowCXTool_basic(context map[string]interface{}) string {
 		time_zone                = "America/New_York"
 		description              = "ageng for tool test"
 	}
+
 	resource "google_dialogflow_cx_tool" "my_tool" {
 		parent       = google_dialogflow_cx_agent.agent_tool.id
 		display_name = "Example"
 		description  = "Example Description"
 	}
-`, context)
+	`, context)
 }
 
-func testAccDialogflowCXTool_full(context map[string]interface{}) string {
+func testAccDialogflowCXTool_full_api_key(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	resource "google_dialogflow_cx_agent" "agent" {
-		display_name = "{{index $.Vars "agent_name"}}"
-		location = "global"
-		default_language_code = "en"
-		supported_language_codes = ["fr","de","es"]
-		time_zone = "America/New_York"
-		description = "Example description."
-		avatar_uri = "https://cloud.google.com/_static/images/cloud/icons/favicons/onecloud/super_cloud.png"
-		enable_stackdriver_logging = true
-		enable_spell_correction    = true
-		speech_to_text_settings {
-			enable_speech_adaptation = true
-		}
-		depends_on = [
-			google_discovery_engine_data_store.my_datastore
-		]
+	resource "google_dialogflow_cx_agent" "agent_tool" {
+		display_name             = "tf-test-%{random_suffix}"
+		location                 = "global"
+		default_language_code    = "en"
+		time_zone                = "America/New_York"
+		description              = "ageng for tool test"
 	}
 
-	resource "google_dialogflow_cx_tool" "{{$.PrimaryResourceId}}" {
+	resource "google_dialogflow_cx_tool" "my_tool" {
 		parent       = google_dialogflow_cx_agent.agent.id
-		display_name = "Example"
+		display_name = "Example Open API Tool with api_key_config"
 		description  = "Example Description"
-		data_store_spec {
-			data_store_connections {
-				data_store_type = "UNSTRUCTURED"
-				data_store = "projects/${data.google_project.project.number}/locations/global/collections/default_collection/dataStores/${google_discovery_engine_data_store.my_datastore.data_store_id}"
-				document_processing_mode = "DOCUMENTS"
+		open_api_spec {
+			authentication {
+				api_key_config {
+					key_name = "example key name"
+					api_key = "example key"
+					secret_version_for_api_key = "projects/-/secrets/-/versions/-"
+					request_location = "HEADER"
+				}
 			}
-			fallback_prompt {} 
+			tls_config {
+				ca_certs {
+					display_name = "example ca cert name"
+					cert = base64encode("example cert")
+				}
+			}
+			service_directory_config {
+				service = "projects/-/locations/-/namespaces/-/services/-"
+			}
+			text_schema = <<EOF
+			{
+				"openapi": "3.0.0",
+				"info": {
+					"title": "Time API",
+					"version": "1.0.0",
+					"description": "A simple API to get the current time."
+				},
+				"servers": [
+					{
+						"url": "https://example-api-endpoint.com"
+					}
+				],
+				"paths": {
+					"/time": {
+						"get": {
+							"operationId": "getCurrentTime",
+							"summary": "Gets the current server time.",
+							"responses": {
+								"200": {
+									"description": "Successful response with the current time.",
+									"content": {
+										"application/json": {
+											"schema": {
+												"type": "object",
+												"properties": {
+													"currentTime": {
+														"type": "string",
+														"format": "date-time",
+														"description": "The current time in ISO 8601 format."
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			EOF
 		}
-		depends_on = [
-			google_discovery_engine_data_store.my_datastore,
-			google_dialogflow_cx_agent.agent
-		]
+	}
+	`, context)
+}
+
+func testAccDialogflowCXTool_full_service_agent_auth(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_dialogflow_cx_agent" "agent_tool" {
+		display_name             = "tf-test-%{random_suffix}"
+		location                 = "global"
+		default_language_code    = "en"
+		time_zone                = "America/New_York"
+		description              = "ageng for tool test"
 	}
 
-	resource "google_discovery_engine_data_store" "my_datastore" {
-		location          = "global"
-		data_store_id     = "datastore-tool-full-test"
-		display_name      = "datastore-tool-full-test"
-		industry_vertical = "GENERIC"
-		content_config    = "NO_CONTENT"
-		solution_types    = ["SOLUTION_TYPE_CHAT"]
+	resource "google_dialogflow_cx_tool" "my_tool" {
+		parent       = google_dialogflow_cx_agent.agent.id
+		display_name = "Example Open API Tool with service_agent_auth_config"
+		description  = "Example Description"
+		open_api_spec {
+			authentication {
+				service_agent_auth_config {
+					service_agent_auth = "ID_TOKEN"
+				}
+			}
+			tls_config {
+				ca_certs {
+					display_name = "example ca cert name"
+					cert = base64encode("example cert")
+				}
+			}
+			service_directory_config {
+				service = "projects/-/locations/-/namespaces/-/services/-"
+			}
+			text_schema = <<EOF
+			{
+				"openapi": "3.0.0",
+				"info": {
+					"title": "Time API",
+					"version": "1.0.0",
+					"description": "A simple API to get the current time."
+				},
+				"servers": [
+					{
+						"url": "https://example-api-endpoint.com"
+					}
+				],
+				"paths": {
+					"/time": {
+						"get": {
+							"operationId": "getCurrentTime",
+							"summary": "Gets the current server time.",
+							"responses": {
+								"200": {
+									"description": "Successful response with the current time.",
+									"content": {
+										"application/json": {
+											"schema": {
+												"type": "object",
+												"properties": {
+													"currentTime": {
+														"type": "string",
+														"format": "date-time",
+														"description": "The current time in ISO 8601 format."
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			EOF
+		}
+	}
+	`, context)
+}
+
+func testAccDialogflowCXTool_full_bearer_token(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_dialogflow_cx_agent" "agent_tool" {
+		display_name             = "tf-test-%{random_suffix}"
+		location                 = "global"
+		default_language_code    = "en"
+		time_zone                = "America/New_York"
+		description              = "ageng for tool test"
 	}
 
-	data "google_project" "project" {
-	}
-`, context)
+	resource "google_dialogflow_cx_tool" "my_tool" {
+  parent       = google_dialogflow_cx_agent.agent.id
+  display_name = "Example Open API Tool with bearer_token_config"
+  description  = "Example Description"
+  open_api_spec {
+    authentication {
+      bearer_token_config {
+        token = "example token"
+        secret_version_for_token = "projects/-/secrets/-/versions/-"
+      }
+    }
+    tls_config {
+      ca_certs {
+        display_name = "example ca cert name"
+        cert = base64encode("example cert")
+      }
+    }
+    service_directory_config {
+      service = "projects/-/locations/-/namespaces/-/services/-"
+    }
+    text_schema = <<EOF
+    {
+      "openapi": "3.0.0",
+      "info": {
+        "title": "Time API",
+        "version": "1.0.0",
+        "description": "A simple API to get the current time."
+      },
+      "servers": [
+        {
+          "url": "https://example-api-endpoint.com"
+        }
+      ],
+      "paths": {
+        "/time": {
+          "get": {
+            "operationId": "getCurrentTime",
+            "summary": "Gets the current server time.",
+            "responses": {
+              "200": {
+                "description": "Successful response with the current time.",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "object",
+                      "properties": {
+                        "currentTime": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "The current time in ISO 8601 format."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    EOF
+  }
+	`, context)
 }

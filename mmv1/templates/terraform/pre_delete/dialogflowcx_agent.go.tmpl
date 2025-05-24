@@ -19,20 +19,31 @@ if !ok {
 	return fmt.Errorf("Can convert engine ID %s to string", engineIntf)
 }
 
-// delete the engine
-log.Printf("[DEBUG] Deleting engine %v", engineID)
-
+// check the engine exist
 baseUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}DiscoveryEngineBasePath{{"}}"}}")
 if err != nil {
 	return err
 }
-engineDeleteUrl := baseUrl + engineID
+engineUrl := baseUrl + engineID
+_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   project,
+	RawURL:    engineUrl,
+	UserAgent: userAgent,
+})
+if err != nil {
+	log.Printf("[DEBUG] engine %s doesn't exist. No need to delete", engineID)
+	return nil
+}
 
+// delete the engine
+log.Printf("[DEBUG] Deleting engine %v", engineID)
 _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	Config:    config,
 	Method:    "DELETE",
 	Project:   project,
-	RawURL:    engineDeleteUrl,
+	RawURL:    engineUrl,
 	UserAgent: userAgent,
 })
 if err != nil {
