@@ -1,0 +1,21 @@
+resource "google_tags_tag_key" "key" {
+  parent      = "projects/{{index $.TestEnvVars "project_id"}}"
+  short_name  = "{{index $.Vars "key_short_name"}}"
+  description = "For {{index $.Vars "key_short_name"}} resources."
+}
+
+resource "google_tags_tag_value" "value" {
+  parent      = google_tags_tag_key.key.id
+  short_name  = "{{index $.Vars "value_short_name"}}"
+  description = "For {{index $.Vars "value_short_name"}} resources."
+}
+
+resource "google_firestore_database" "{{$.PrimaryResourceId}}" {
+  project                           = "{{index $.TestEnvVars "project_id"}}"
+  name                              = "{{index $.Vars "database_id"}}"
+  location_id                       = "nam5"
+  type                              = "FIRESTORE_NATIVE"
+  delete_protection_state           = "{{index $.Vars "delete_protection_state"}}"
+  deletion_policy                   = "DELETE"
+  tags                              = google_tags_tag_key.key.id: google_tags_tag_value.value.id
+}
