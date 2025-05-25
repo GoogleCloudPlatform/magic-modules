@@ -33,9 +33,10 @@ func TestAccDialogflowCXTool_update(t *testing.T) {
 				Config: testAccDialogflowCXTool_full_api_key(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_cx_tool.my_tool",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_dialogflow_cx_tool.my_tool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"open_api_spec.0.authentication.0.api_key_config.0.api_key"},
 			},
 			{
 				Config: testAccDialogflowCXTool_full_service_agent_auth(context),
@@ -49,9 +50,10 @@ func TestAccDialogflowCXTool_update(t *testing.T) {
 				Config: testAccDialogflowCXTool_full_bearer_token(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_cx_tool.my_tool",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_dialogflow_cx_tool.my_tool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"open_api_spec.0.authentication.0.bearer_token_config.0.token"},
 			},
 		},
 	})
