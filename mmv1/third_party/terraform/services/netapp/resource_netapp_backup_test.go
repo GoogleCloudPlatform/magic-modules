@@ -349,6 +349,15 @@ func TestAccNetappBackup_NetappImmutableBackup(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
 			},
+			{
+				Config: testAccNetappBackup_ImmutableBackups_update(context),
+			},
+			{
+				ResourceName:            "google_netapp_backup.test_backup",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "name", "terraform_labels", "vault_name"},
+			},
 		},
 	})
 }
