@@ -1849,8 +1849,8 @@ properties:
               - name: 'httpFilterConfigs'
                 type: Array
                 description: |
-                  Outbound route specific configuration for networkservices.HttpFilter resources enabled by Traffic Director. 
-                  httpFilterConfigs only applies for load balancers with loadBalancingScheme set to INTERNAL_SELF_MANAGED. 
+                  Outbound route specific configuration for networkservices.HttpFilter resources enabled by Traffic Director.
+                  httpFilterConfigs only applies for load balancers with loadBalancingScheme set to INTERNAL_SELF_MANAGED.
                   See ForwardingRule for more details.
 
                   Not supported when the URL map is bound to a target gRPC proxy that has validateForProxyless field set to true.
@@ -1860,23 +1860,23 @@ properties:
                     - name: 'filterName'
                       type: String
                       description: |
-                        Name of the networkservices.HttpFilter resource this configuration belongs to. 
+                        Name of the networkservices.HttpFilter resource this configuration belongs to.
                         This name must be known to the xDS client. Example: envoy.wasm
                     - name: 'configTypeUrl'
                       type: String
                       description: |
-                        The fully qualified versioned proto3 type url of the protobuf that the filter expects for its contextual settings, 
+                        The fully qualified versioned proto3 type url of the protobuf that the filter expects for its contextual settings,
                         for example: type.googleapis.com/google.protobuf.Struct
                     - name: 'config'
                       type: String
                       description: |
-                        The configuration needed to enable the networkservices.HttpFilter resource. 
+                        The configuration needed to enable the networkservices.HttpFilter resource.
                         The configuration must be YAML formatted and only contain fields defined in the protobuf identified in configTypeUrl
               - name: 'httpFilterMetadata'
                 type: Array
                 description: |
-                  Outbound route specific metadata supplied to networkservices.HttpFilter resources enabled by Traffic Director. 
-                  httpFilterMetadata only applies for load balancers with loadBalancingScheme set to INTERNAL_SELF_MANAGED. 
+                  Outbound route specific metadata supplied to networkservices.HttpFilter resources enabled by Traffic Director.
+                  httpFilterMetadata only applies for load balancers with loadBalancingScheme set to INTERNAL_SELF_MANAGED.
                   See ForwardingRule for more details.
 
                   Not supported when the URL map is bound to a target gRPC proxy that has validateForProxyless field set to true.
@@ -1886,17 +1886,17 @@ properties:
                     - name: 'filterName'
                       type: String
                       description: |
-                        Name of the networkservices.HttpFilter resource this configuration belongs to. 
+                        Name of the networkservices.HttpFilter resource this configuration belongs to.
                         This name must be known to the xDS client. Example: envoy.wasm
                     - name: 'configTypeUrl'
                       type: String
                       description: |
-                        The fully qualified versioned proto3 type url of the protobuf that the filter expects for its contextual settings, 
+                        The fully qualified versioned proto3 type url of the protobuf that the filter expects for its contextual settings,
                         for example: type.googleapis.com/google.protobuf.Struct
                     - name: 'config'
                       type: String
                       description: |
-                        The configuration needed to enable the networkservices.HttpFilter resource. 
+                        The configuration needed to enable the networkservices.HttpFilter resource.
                         The configuration must be YAML formatted and only contain fields defined in the protobuf identified in configTypeUrl
         - name: 'defaultUrlRedirect'
           type: NestedObject
