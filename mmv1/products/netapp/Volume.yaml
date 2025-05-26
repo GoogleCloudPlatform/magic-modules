@@ -527,7 +527,6 @@ properties:
         description: |
           Optional. Flag indicating that the hot tier bypass mode is enabled. Default is false.
           Only applicable to Flex service level.
-        default_value: false
         min_version: 'beta'
   - name: 'hybridReplicationParameters'
     type: NestedObject
