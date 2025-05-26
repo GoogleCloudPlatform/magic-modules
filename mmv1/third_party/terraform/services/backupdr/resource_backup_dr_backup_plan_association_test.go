@@ -13,7 +13,7 @@ func TestAccBackupDRBackupPlanAssociation_fullUpdate(t *testing.T) {
 	acctest.SkipIfVcr(t)
 
 	t.Parallel()
-
+  
 	timeNow := time.Now().UTC()
 	referenceTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 0, 0, 0, 0, time.UTC)
 
