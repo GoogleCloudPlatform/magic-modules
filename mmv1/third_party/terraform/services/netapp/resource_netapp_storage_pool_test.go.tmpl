@@ -185,10 +185,10 @@ func TestAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_update(t *tes
 }
 
 func testAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_full(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 data "google_compute_network" "default" {
-	provider = google-beta
-    name = "%{network_name}"
+  provider = google-beta
+  name = "%{network_name}"
 }
 
 resource "google_netapp_storage_pool" "test_pool" {
@@ -211,16 +211,15 @@ resource "google_netapp_storage_pool" "test_pool" {
   total_throughput_mibps = "64"
   total_iops = "1024"
   hot_tier_size_gib = "1024"
-  enable_hot_tier_auto_resize = true
 }
 `, context)
 }
 
 func testAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 data "google_compute_network" "default" {
-	provider = google-beta
-    name = "%{network_name}"
+  provider = google-beta
+  name = "%{network_name}"
 }
 
 resource "google_netapp_storage_pool" "test_pool" {
