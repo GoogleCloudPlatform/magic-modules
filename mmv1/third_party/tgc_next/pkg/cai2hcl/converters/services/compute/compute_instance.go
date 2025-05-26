@@ -8,8 +8,8 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/models"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
@@ -36,10 +36,7 @@ func NewComputeInstanceConverter(provider *schema.Provider) models.Converter {
 }
 
 // Convert converts asset to HCL resource blocks.
-func (c *ComputeInstanceConverter) Convert(asset *caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
-	if asset == nil || asset.Resource == nil && asset.Resource.Data == nil {
-		return nil, nil
-	}
+func (c *ComputeInstanceConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
 	var blocks []*models.TerraformResourceBlock
 	block, err := c.convertResourceData(asset)
 	if err != nil {
@@ -49,8 +46,8 @@ func (c *ComputeInstanceConverter) Convert(asset *caiasset.Asset) ([]*models.Ter
 	return blocks, nil
 }
 
-func (c *ComputeInstanceConverter) convertResourceData(asset *caiasset.Asset) (*models.TerraformResourceBlock, error) {
-	if asset == nil || asset.Resource == nil || asset.Resource.Data == nil {
+func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
 
@@ -70,7 +67,7 @@ func (c *ComputeInstanceConverter) convertResourceData(asset *caiasset.Asset) (*
 	hclData["network_performance_config"] = flattenNetworkPerformanceConfig(instance.NetworkPerformanceConfig)
 
 	// Set the networks
-	networkInterfaces, _, _, err := flattenNetworkInterfaces(instance.NetworkInterfaces, project)
+	networkInterfaces, _, _, err := flattenNetworkInterfacesTgc(instance.NetworkInterfaces, project)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +78,7 @@ func (c *ComputeInstanceConverter) convertResourceData(asset *caiasset.Asset) (*
 	}
 
 	hclData["labels"] = utils.RemoveTerraformAttributionLabel(instance.Labels)
-	hclData["service_account"] = flattenServiceAccounts(instance.ServiceAccounts)
+	hclData["service_account"] = flattenServiceAccountsTgc(instance.ServiceAccounts)
 	hclData["resource_policies"] = instance.ResourcePolicies
 
 	bootDisk, ads, scratchDisks := flattenDisks(instance.Disks, instance.Name)
@@ -89,8 +86,8 @@ func (c *ComputeInstanceConverter) convertResourceData(asset *caiasset.Asset) (*
 	hclData["attached_disk"] = ads
 	hclData["scratch_disk"] = scratchDisks
 
-	hclData["scheduling"] = flattenScheduling(instance.Scheduling)
-	hclData["guest_accelerator"] = flattenGuestAccelerators(instance.GuestAccelerators)
+	hclData["scheduling"] = flattenSchedulingTgc(instance.Scheduling)
+	hclData["guest_accelerator"] = flattenGuestAcceleratorsTgc(instance.GuestAccelerators)
 	hclData["shielded_instance_config"] = flattenShieldedVmConfig(instance.ShieldedInstanceConfig)
 	hclData["enable_display"] = flattenEnableDisplay(instance.DisplayDevice)
 	hclData["min_cpu_platform"] = instance.MinCpuPlatform
@@ -105,7 +102,7 @@ func (c *ComputeInstanceConverter) convertResourceData(asset *caiasset.Asset) (*
 	hclData["hostname"] = instance.Hostname
 	hclData["confidential_instance_config"] = flattenConfidentialInstanceConfig(instance.ConfidentialInstanceConfig)
 	hclData["advanced_machine_features"] = flattenAdvancedMachineFeatures(instance.AdvancedMachineFeatures)
-	hclData["reservation_affinity"] = flattenReservationAffinity(instance.ReservationAffinity)
+	hclData["reservation_affinity"] = flattenReservationAffinityTgc(instance.ReservationAffinity)
 	hclData["key_revocation_action_type"] = instance.KeyRevocationActionType
 
 	// TODO: convert details from the boot disk assets (separate disk assets) into initialize_params in cai2hcl?

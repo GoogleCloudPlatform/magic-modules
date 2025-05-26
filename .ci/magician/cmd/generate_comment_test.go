@@ -16,6 +16,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
@@ -37,6 +38,22 @@ func TestExecGenerateComment(t *testing.T) {
 		"PATH":    os.Getenv("PATH"),
 		"GOPATH":  os.Getenv("GOPATH"),
 		"HOME":    os.Getenv("HOME"),
+	}
+	for _, repo := range []string{
+		"terraform-provider-google",
+		"terraform-provider-google-beta",
+		"terraform-google-conversion",
+	} {
+		variablePathOld := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo)
+		variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo)
+		err := mr.WriteFile(variablePathOld, "1a2a3a4a")
+		if err != nil {
+			t.Errorf("Error writing file: %s", err)
+		}
+		err = mr.WriteFile(variablePath, "1a2a3a4b")
+		if err != nil {
+			t.Errorf("Error writing file: %s", err)
+		}
 	}
 	execGenerateComment(
 		123456,
@@ -112,10 +129,11 @@ func TestExecGenerateComment(t *testing.T) {
 
 	for method, expectedCalls := range map[string][][]any{
 		"PostBuildStatus": {
+			{"123456", "terraform-provider-multiple-resources", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
 			{"123456", "terraform-provider-breaking-change-test", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
 			{"123456", "terraform-provider-missing-service-labels", "success", "https://console.cloud.google.com/cloud-build/builds;region=global/build1;step=17?project=project1", "sha1"},
 		},
-		"PostComment": {{"123456", "Hi there, I'm the Modular magician. I've detected the following information about your changes:\n\n## Diff report\n\nYour PR generated some diffs in downstreams - here they are.\n\n`google` provider: [Diff](https://github.com/modular-magician/terraform-provider-google/compare/auto-pr-123456-old..auto-pr-123456) ( 2 files changed, 40 insertions(+))\n`google-beta` provider: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/auto-pr-123456-old..auto-pr-123456) ( 2 files changed, 40 insertions(+))\n`terraform-google-conversion`: [Diff](https://github.com/modular-magician/terraform-google-conversion/compare/auto-pr-123456-old..auto-pr-123456) ( 1 file changed, 10 insertions(+))\n\n\n\n## Missing test report\nYour PR includes resource fields which are not covered by any test.\n\nResource: `google_folder_access_approval_settings` (3 total tests)\nPlease add an acceptance test which includes these fields. The test should include the following:\n\n```hcl\nresource \"google_folder_access_approval_settings\" \"primary\" {\n  uncovered_field = # value needed\n}\n\n```\n\n\n"}},
+		"PostComment": {{"123456", "Hi there, I'm the Modular magician. I've detected the following information about your changes:\n\n## Diff report\n\nYour PR generated some diffs in downstreams - here they are.\n\n`google` provider: [Diff](https://github.com/modular-magician/terraform-provider-google/compare/1a2a3a4a..1a2a3a4b) ( 2 files changed, 40 insertions(+))\n`google-beta` provider: [Diff](https://github.com/modular-magician/terraform-provider-google-beta/compare/1a2a3a4a..1a2a3a4b) ( 2 files changed, 40 insertions(+))\n`terraform-google-conversion`: [Diff](https://github.com/modular-magician/terraform-google-conversion/compare/1a2a3a4a..1a2a3a4b) ( 1 file changed, 10 insertions(+))\n\n\n\n## Missing test report\nYour PR includes resource fields which are not covered by any test.\n\nResource: `google_folder_access_approval_settings` (3 total tests)\nPlease add an acceptance test which includes these fields. The test should include the following:\n\n```hcl\nresource \"google_folder_access_approval_settings\" \"primary\" {\n  uncovered_field = # value needed\n}\n\n```\n\n\n"}},
 		"AddLabels":   {{"123456", []string{"service/alloydb"}}},
 	} {
 		if actualCalls, ok := gh.calledMethods[method]; !ok {
@@ -170,24 +188,27 @@ func TestFormatDiffComment(t *testing.T) {
 		},
 		"diffs are displayed": {
 			data: diffCommentData{
-				PrNumber: 1234567890,
 				Diffs: []Diff{
 					{
-						Title:     "Repo 1",
-						Repo:      "repo-1",
-						ShortStat: "+1 added, -1 removed",
+						Title:        "Repo 1",
+						Repo:         "repo-1",
+						ShortStat:    "+1 added, -1 removed",
+						CommitSHA:    "1a2a3a4b",
+						OldCommitSHA: "1a2a3a4a",
 					},
 					{
-						Title:     "Repo 2",
-						Repo:      "repo-2",
-						ShortStat: "+2 added, -2 removed",
+						Title:        "Repo 2",
+						Repo:         "repo-2",
+						ShortStat:    "+2 added, -2 removed",
+						CommitSHA:    "1a2a3a4d",
+						OldCommitSHA: "1a2a3a4c",
 					},
 				},
 			},
 			expectedStrings: []string{
 				"## Diff report",
 				"generated some diffs",
-				"Repo 1: [Diff](https://github.com/modular-magician/repo-1/compare/auto-pr-1234567890-old..auto-pr-1234567890) (+1 added, -1 removed)\nRepo 2: [Diff](https://github.com/modular-magician/repo-2/compare/auto-pr-1234567890-old..auto-pr-1234567890) (+2 added, -2 removed)",
+				"Repo 1: [Diff](https://github.com/modular-magician/repo-1/compare/1a2a3a4a..1a2a3a4b) (+1 added, -1 removed)\nRepo 2: [Diff](https://github.com/modular-magician/repo-2/compare/1a2a3a4c..1a2a3a4d) (+2 added, -2 removed)",
 			},
 			notExpectedStrings: []string{
 				"hasn't generated any diffs",
@@ -220,6 +241,25 @@ func TestFormatDiffComment(t *testing.T) {
 				"generated some diffs",
 				"## Errors",
 				"## Missing test report",
+			},
+		},
+		"multiple resources are displayed": {
+			data: diffCommentData{
+				AddedResources: []string{"google_redis_instance", "google_alloydb_cluster"},
+			},
+			expectedStrings: []string{
+				"## Diff report",
+				"## Multiple resources added",
+				"`override-multiple-resources`",
+				"split it into multiple PRs",
+				"`google_redis_instance`, `google_alloydb_cluster`.",
+			},
+			notExpectedStrings: []string{
+				"generated some diffs",
+				"## Errors",
+				"## Missing test report",
+				"## Missing doc report",
+				"## Breaking Change(s) Detected",
 			},
 		},
 		"missing tests are displayed": {
