@@ -207,10 +207,18 @@ resource "google_storage_folder" "folder" {
   bucket        = google_storage_bucket.bucket.name
   name          = "folder/"
   force_destroy = %t
+  custom_headers = {
+    "X-goog-custom-audit-meta-user"= "user"
+    "X-goog-custom-audit-meta-object"= "object"
+  }
 }
 resource "google_storage_folder" "subfolder" {
   bucket        = google_storage_bucket.bucket.name
   name          = "${google_storage_folder.folder.name}subfolder/"
+  custom_headers = {
+    "X-goog-custom-audit-meta-user"= "user"
+    "X-goog-custom-audit-meta-object"= "object"
+  }
 } 
 `, bucketName, forceDestroy)
 }
