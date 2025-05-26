@@ -109,13 +109,24 @@ resource "google_gke_hub_feature_membership" "feature_member_1" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
   configmanagement {
-    version = "1.18.2"
+    version = "1.21.0"
     config_sync {
       enabled = true
       source_format = "hierarchy"
       git {
         sync_repo   = "https://github.com/GoogleCloudPlatform/magic-modules"
         secret_type = "none"
+      }
+      deployment_overrides {
+        deployment_name       = "reconciler-manager"
+        deployment_namespace = "config-management-system"
+        containers {
+          container_name = "reconciler-manager"
+          cpu_request    = "1"
+          memory_request = "4Gi"
+          cpu_limit      = "2"
+          memory_limit   = "8Gi"
+        }
       }
     }
   }
@@ -127,7 +138,7 @@ resource "google_gke_hub_feature_membership" "feature_member_2" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership_second.membership_id
   configmanagement {
-    version = "1.18.2"
+    version = "1.21.0"
     config_sync {
       enabled = true
       source_format = "hierarchy"
@@ -168,8 +179,36 @@ resource "google_gke_hub_feature_membership" "feature_member_1" {
         sync_repo   = "https://github.com/GoogleCloudPlatform/magic-modules"
         secret_type = "none"
       }
+      deployment_overrides {
+        deployment_name       = "reconciler-manager"
+        deployment_namespace = "config-management-system"
+        containers {
+          container_name = "reconciler-manager"
+          cpu_request    = "2"
+          memory_request = "5Gi"
+          cpu_limit      = "3"
+          memory_limit   = "9Gi"
+        }
+      }
+      deployment_overrides {
+        deployment_name = "resource-group-controller-manager"
+        deployment_namespace = "resource-group-system"
+        containers {
+          container_name = "manager"
+          cpu_request    = "1"
+          memory_request = "4Gi"
+          cpu_limit      = "2"
+          memory_limit   = "8Gi"
+        }
+        containers {
+          container_name = "otel-agent"
+          cpu_request    = "1"
+          memory_request = "4Gi"
+          cpu_limit      = "2"
+          memory_limit   = "8Gi"
+        }
+      }
     }
-    management = "MANAGEMENT_AUTOMATIC"
   }
 }
 
@@ -179,7 +218,7 @@ resource "google_gke_hub_feature_membership" "feature_member_2" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership_second.membership_id
   configmanagement {
-    version = "1.18.2"
+    version = "1.21.0"
     config_sync {
       enabled = true
       source_format = "hierarchy"
@@ -212,7 +251,7 @@ resource "google_gke_hub_feature_membership" "feature_member_2" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership_second.membership_id
   configmanagement {
-    version = "1.18.2"
+    version = "1.21.0"
     config_sync {
       enabled = true
       source_format = "unstructured"
@@ -235,7 +274,7 @@ resource "google_gke_hub_feature_membership" "feature_member_3" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership_third.membership_id
   configmanagement {
-    version = "1.18.2"
+    version = "1.21.0"
     config_sync {
       enabled = true
       source_format = "hierarchy"
@@ -258,7 +297,7 @@ resource "google_gke_hub_feature_membership" "feature_member_4" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership_fourth.membership_id
   configmanagement {
-    version = "1.18.2"
+    version = "1.21.0"
   }
 }
 `, context)
@@ -283,7 +322,7 @@ resource "google_gke_hub_feature_membership" "feature_member_3" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership_third.membership_id
   configmanagement {
-    version = "1.18.2"
+    version = "1.21.0"
   }
 }
 `, context)
@@ -375,9 +414,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -397,7 +433,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
   configmanagement {
-    version = "1.18.2"
+    version = "1.20.1"
     config_sync {
       enabled = true
       git {
@@ -435,9 +471,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -457,7 +490,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
   configmanagement {
-    version = "1.18.2"
+    version = "1.21.0"
     config_sync {
       enabled = true
       git {
@@ -495,9 +528,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -522,7 +552,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership.membership_id
   configmanagement {
-    version = "1.18.2"
+    version = "1.21.0"
     config_sync {
       enabled = true
       git {
@@ -615,7 +645,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership_acmoci.membership_id
   configmanagement {
-    version = "1.18.2"
+    version = "1.21.0"
     config_sync {
       enabled = true
       source_format = "unstructured"
@@ -657,7 +687,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership_acmoci.membership_id
   configmanagement {
-    version = "1.18.2"
+    version = "1.21.0"
     config_sync {
       enabled = true
       source_format = "hierarchy"
@@ -699,7 +729,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
   feature = google_gke_hub_feature.feature.name
   membership = google_gke_hub_membership.membership_acmoci.membership_id
   configmanagement {
-    version = "1.18.2"
+    version = "1.21.0"
   }
 }
 `, context)
@@ -780,9 +810,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -833,9 +860,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -885,9 +909,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -1065,7 +1086,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
         }
       }
     }
-    version = "1.17.0"
+    version = "1.20.0"
   }
 }
 `, context)
@@ -1115,7 +1136,7 @@ resource "google_gke_hub_feature_membership" "feature_member" {
         }
       }
     }
-    version = "1.17.0"
+    version = "1.20.0"
   }
 }
 `, context)
@@ -1168,9 +1189,6 @@ resource "google_gke_hub_membership" "membership" {
       resource_link = "//container.googleapis.com/${google_container_cluster.primary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_membership" "membership_second" {
@@ -1181,9 +1199,6 @@ resource "google_gke_hub_membership" "membership_second" {
       resource_link = "//container.googleapis.com/${google_container_cluster.secondary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_membership" "membership_third" {
@@ -1194,9 +1209,6 @@ resource "google_gke_hub_membership" "membership_third" {
       resource_link = "//container.googleapis.com/${google_container_cluster.tertiary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 
 resource "google_gke_hub_membership" "membership_fourth" {
@@ -1207,9 +1219,6 @@ resource "google_gke_hub_membership" "membership_fourth" {
       resource_link = "//container.googleapis.com/${google_container_cluster.quarternary.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 `, context)
 }
@@ -1242,9 +1251,6 @@ resource "google_gke_hub_membership" "membership_acmoci" {
       resource_link = "//container.googleapis.com/${google_container_cluster.container_acmoci.id}"
     }
   }
-{{- if ne $.TargetVersionName "ga" }}
-  description = "test resource."
-{{- end }}
 }
 `, context)
 }

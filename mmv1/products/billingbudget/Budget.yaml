@@ -42,6 +42,7 @@ custom_code:
   constants: 'templates/terraform/constants/billing_budget.tmpl'
 schema_version: 1
 state_upgraders: true
+exclude_sweeper: true
 examples:
   - name: 'billing_budget_basic'
     primary_resource_id: 'budget'
@@ -411,7 +412,8 @@ properties:
           - 'amount.0.specified_amount'
           - 'amount.0.last_period_amount'
         custom_flatten: 'templates/terraform/custom_flatten/object_to_bool.go.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/bool_to_object.go.tmpl'
+        # THIS TEMPLATE IS DEPRECATED, DO NOT USE FOR NEW FIELDS
+        custom_expand: 'templates/terraform/custom_expand/deprecated_bool_to_object.go.tmpl'
   - name: 'thresholdRules'
     type: Array
     description: |

@@ -60,6 +60,7 @@ func NewTerraformGoogleConversion(product *api.Product, versionName string, star
 	}
 
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
+	t.Product.SetCompiler(ProviderName(t))
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
 		r.ImportPath = ImportPathFromVersion(versionName)
@@ -123,8 +124,9 @@ func (tgc TerraformGoogleConversion) GenerateResource(object api.Resource, templ
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
 
+	templatePath := "templates/tgc/resource_converter.go.tmpl"
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name)))
-	templateData.GenerateTGCResourceFile(targetFilePath, object)
+	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
 }
 
 // Generate the IAM policy for this object. This is used to query and test
@@ -414,6 +416,8 @@ func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, genera
 		"ancestrymanager/ancestryutil_test.go":                                                  "third_party/tgc/ancestrymanager/ancestryutil_test.go",
 		"converters/google/convert.go":                                                          "third_party/tgc/convert.go",
 		"converters/google/convert_test.go":                                                     "third_party/tgc/convert_test.go",
+		"tfdata/fake_resource_data.go":                                                          "third_party/tgc/tfdata/fake_resource_data.go",
+		"tfdata/fake_resource_data_test.go":                                                     "third_party/tgc/tfdata/fake_resource_data_test.go",
 		"converters/google/resources/services/compute/compute_instance_group.go":                "third_party/tgc/services/compute/compute_instance_group.go",
 		"converters/google/resources/services/dataflow/job.go":                                  "third_party/tgc/services/dataflow/job.go",
 		"converters/google/resources/services/resourcemanager/service_account_key.go":           "third_party/tgc/services/resourcemanager/service_account_key.go",

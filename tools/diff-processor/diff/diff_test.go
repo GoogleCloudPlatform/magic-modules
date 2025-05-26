@@ -1,6 +1,7 @@
 package diff
 
 import (
+	"strings"
 	"testing"
 
 	newProvider "google/provider/new/google/provider"
@@ -1168,6 +1169,46 @@ func TestComputeSchemaDiff(t *testing.T) {
 						Old: &schema.Resource{},
 						New: &schema.Resource{},
 					},
+					FlattenedSchema: FlattenedSchemaRaw{
+						Old: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+							"field_two": {
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"field_three": {Type: schema.TypeString},
+									},
+								},
+							},
+							"field_two.field_three": {Type: schema.TypeString},
+						},
+						New: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+							"field_two": {
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"field_three": {
+											Type:          schema.TypeString,
+											ConflictsWith: []string{"field_two.0.field_four"},
+										},
+										"field_four": {
+											Type:          schema.TypeInt,
+											ConflictsWith: []string{"field_two.0.field_three"},
+										},
+									},
+								},
+							},
+							"field_two.field_three": {
+								Type:          schema.TypeString,
+								ConflictsWith: []string{"field_two.0.field_four"},
+							},
+							"field_two.field_four": {
+								Type:          schema.TypeInt,
+								ConflictsWith: []string{"field_two.0.field_three"},
+							},
+						},
+					},
 					Fields: map[string]FieldDiff{
 						"field_two.field_three": FieldDiff{
 							Old: &schema.Schema{
@@ -1193,8 +1234,8 @@ func TestComputeSchemaDiff(t *testing.T) {
 					FieldSets: ResourceFieldSetsDiff{
 						Old: ResourceFieldSets{},
 						New: ResourceFieldSets{
-							ConflictsWith: []FieldSet{
-								{
+							ConflictsWith: map[string]FieldSet{
+								"field_two.field_four,field_two.field_three": FieldSet{
 									"field_two.field_three": {},
 									"field_two.field_four":  {},
 								},
@@ -1289,6 +1330,34 @@ func TestComputeSchemaDiff(t *testing.T) {
 						Old: &schema.Resource{},
 						New: &schema.Resource{},
 					},
+					FlattenedSchema: FlattenedSchemaRaw{
+						Old: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+							"field_two": {
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"field_three": {Type: schema.TypeString},
+									},
+								},
+							},
+							"field_two.field_three": {Type: schema.TypeString},
+						},
+						New: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+							"field_two": {
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"field_three": {Type: schema.TypeString},
+										"field_four":  {Type: schema.TypeInt},
+									},
+								},
+							},
+							"field_two.field_three": {Type: schema.TypeString},
+							"field_two.field_four":  {Type: schema.TypeInt},
+						},
+					},
 					Fields: map[string]FieldDiff{
 						"field_two.field_four": FieldDiff{
 							Old: nil,
@@ -1300,6 +1369,34 @@ func TestComputeSchemaDiff(t *testing.T) {
 					ResourceConfig: ResourceConfigDiff{
 						Old: &schema.Resource{},
 						New: &schema.Resource{},
+					},
+					FlattenedSchema: FlattenedSchemaRaw{
+						Old: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+							"field_two": {
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"field_three": {Type: schema.TypeString},
+									},
+								},
+							},
+							"field_two.field_three": {Type: schema.TypeString},
+						},
+						New: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+							"field_two": {
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										"field_three": {Type: schema.TypeString},
+										"field_four":  {Type: schema.TypeInt},
+									},
+								},
+							},
+							"field_two.field_three": {Type: schema.TypeString},
+							"field_two.field_four":  {Type: schema.TypeInt},
+						},
 					},
 					Fields: map[string]FieldDiff{
 						"field_two.field_four": FieldDiff{
@@ -1331,6 +1428,12 @@ func TestComputeSchemaDiff(t *testing.T) {
 						Old: &schema.Resource{},
 						New: &schema.Resource{},
 					},
+					FlattenedSchema: FlattenedSchemaRaw{
+						Old: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+						},
+						New: map[string]*schema.Schema{},
+					},
 					Fields: map[string]FieldDiff{
 						"field_one": FieldDiff{
 							Old: &schema.Schema{Type: schema.TypeString},
@@ -1354,6 +1457,12 @@ func TestComputeSchemaDiff(t *testing.T) {
 				"google_service_one_resource_one": ResourceDiff{
 					ResourceConfig: ResourceConfigDiff{
 						Old: &schema.Resource{},
+						New: nil,
+					},
+					FlattenedSchema: FlattenedSchemaRaw{
+						Old: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+						},
 						New: nil,
 					},
 					Fields: map[string]FieldDiff{
@@ -1381,6 +1490,12 @@ func TestComputeSchemaDiff(t *testing.T) {
 						Old: nil,
 						New: &schema.Resource{},
 					},
+					FlattenedSchema: FlattenedSchemaRaw{
+						Old: nil,
+						New: map[string]*schema.Schema{
+							"field_one": {Type: schema.TypeString},
+						},
+					},
 					Fields: map[string]FieldDiff{
 						"field_one": FieldDiff{
 							Old: nil,
@@ -1398,6 +1513,255 @@ func TestComputeSchemaDiff(t *testing.T) {
 			schemaDiff := ComputeSchemaDiff(tc.oldResourceMap, tc.newResourceMap)
 			if diff := cmp.Diff(tc.expectedSchemaDiff, schemaDiff); diff != "" {
 				t.Errorf("schema diff not equal (-want, +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestIsNewResource(t *testing.T) {
+	cases := map[string]struct {
+		oldResourceMap map[string]*schema.Resource
+		newResourceMap map[string]*schema.Resource
+		resourceName   string
+		expected       bool
+	}{
+		"resource exists in both maps": {
+			oldResourceMap: map[string]*schema.Resource{
+				"google_resource": {Schema: map[string]*schema.Schema{}},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google_resource": {Schema: map[string]*schema.Schema{}},
+			},
+			resourceName: "google_resource",
+			expected:     false,
+		},
+		"resource only in new map": {
+			oldResourceMap: map[string]*schema.Resource{},
+			newResourceMap: map[string]*schema.Resource{
+				"google_resource": {Schema: map[string]*schema.Schema{}},
+			},
+			resourceName: "google_resource",
+			expected:     true,
+		},
+		"resource only in old map": {
+			oldResourceMap: map[string]*schema.Resource{
+				"google_resource": {Schema: map[string]*schema.Schema{}},
+			},
+			newResourceMap: map[string]*schema.Resource{},
+			resourceName:   "google_resource",
+			expected:       false, // ResourceConfig.New would be nil
+		},
+		"resource not in diff because it has no changes": {
+			oldResourceMap: map[string]*schema.Resource{
+				"google_resource": {Schema: map[string]*schema.Schema{}},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google_resource": {Schema: map[string]*schema.Schema{}},
+			},
+			resourceName: "non_existent_resource",
+			expected:     false, // Resource isn't in the diff at all
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			schemaDiff := ComputeSchemaDiff(tc.oldResourceMap, tc.newResourceMap)
+			resourceConfig, _ := schemaDiff[tc.resourceName]
+			result := resourceConfig.IsNewResource()
+			if result != tc.expected {
+				t.Errorf("IsNewResource(%q) = %v, want %v", tc.resourceName, result, tc.expected)
+			}
+		})
+	}
+}
+
+func TestIsFieldInNewNestedStructure(t *testing.T) {
+	cases := map[string]struct {
+		oldResourceMap map[string]*schema.Resource
+		newResourceMap map[string]*schema.Resource
+		resourceName   string
+		fieldPath      string
+		expected       bool
+	}{
+		"top-level field in existing resource": {
+			oldResourceMap: map[string]*schema.Resource{
+				"google_resource": {
+					Schema: map[string]*schema.Schema{
+						"old_field": {Type: schema.TypeString},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google_resource": {
+					Schema: map[string]*schema.Schema{
+						"old_field": {Type: schema.TypeString},
+						"new_field": {Type: schema.TypeString},
+					},
+				},
+			},
+			resourceName: "google_resource",
+			fieldPath:    "new_field",
+			expected:     false, // Top-level field, not in a nested structure
+		},
+		"field in existing nested structure": {
+			oldResourceMap: map[string]*schema.Resource{
+				"google_resource": {
+					Schema: map[string]*schema.Schema{
+						"nested": {
+							Type: schema.TypeList,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"existing_field": {Type: schema.TypeString},
+								},
+							},
+						},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google_resource": {
+					Schema: map[string]*schema.Schema{
+						"nested": {
+							Type: schema.TypeList,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"existing_field": {Type: schema.TypeString},
+									"new_field":      {Type: schema.TypeString},
+								},
+							},
+						},
+					},
+				},
+			},
+			resourceName: "google_resource",
+			fieldPath:    "nested.new_field",
+			expected:     false, // Parent "nested" exists in old schema
+		},
+		"field in new nested structure": {
+			oldResourceMap: map[string]*schema.Resource{
+				"google_resource": {
+					Schema: map[string]*schema.Schema{
+						"old_field": {Type: schema.TypeString},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google_resource": {
+					Schema: map[string]*schema.Schema{
+						"old_field": {Type: schema.TypeString},
+						"new_nested": {
+							Type: schema.TypeList,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"new_field": {Type: schema.TypeString},
+								},
+							},
+						},
+					},
+				},
+			},
+			resourceName: "google_resource",
+			fieldPath:    "new_nested.new_field",
+			expected:     true, // Parent "new_nested" doesn't exist in old schema
+		},
+		"field in new deeply nested structure": {
+			oldResourceMap: map[string]*schema.Resource{
+				"google_resource": {
+					Schema: map[string]*schema.Schema{
+						"existing_nested": {
+							Type: schema.TypeList,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"existing_field": {Type: schema.TypeString},
+								},
+							},
+						},
+					},
+				},
+			},
+			newResourceMap: map[string]*schema.Resource{
+				"google_resource": {
+					Schema: map[string]*schema.Schema{
+						"existing_nested": {
+							Type: schema.TypeList,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"existing_field": {Type: schema.TypeString},
+									"new_nested": {
+										Type: schema.TypeList,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"new_field": {Type: schema.TypeString},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			resourceName: "google_resource",
+			fieldPath:    "existing_nested.new_nested.new_field",
+			expected:     true, // Parent "existing_nested.new_nested" doesn't exist in old schema
+		},
+		"field in new resource": {
+			oldResourceMap: map[string]*schema.Resource{},
+			newResourceMap: map[string]*schema.Resource{
+				"google_resource": {
+					Schema: map[string]*schema.Schema{
+						"nested": {
+							Type: schema.TypeList,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"field": {Type: schema.TypeString},
+								},
+							},
+						},
+					},
+				},
+			},
+			resourceName: "google_resource",
+			fieldPath:    "nested.field",
+			expected:     true, // New resource, so all fields are in new structures
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			schemaDiff := ComputeSchemaDiff(tc.oldResourceMap, tc.newResourceMap)
+
+			// Verify that FlattenedSchema was properly populated
+			if rd, ok := schemaDiff[tc.resourceName]; ok {
+				// Debug information for test verification
+				if tc.expected {
+					// If we expect the field to be in a new nested structure
+					// The parent path should not exist in the old schema but should exist in the new schema
+					lastDotIndex := strings.LastIndex(tc.fieldPath, ".")
+					if lastDotIndex != -1 {
+						parentPath := tc.fieldPath[:lastDotIndex]
+						_, parentInOld := rd.FlattenedSchema.Old[parentPath]
+						_, parentInNew := rd.FlattenedSchema.New[parentPath]
+
+						// Log the verification for debugging
+						t.Logf("For %s: Parent path '%s' exists in old schema: %v, exists in new schema: %v",
+							tc.fieldPath, parentPath, parentInOld, parentInNew)
+
+						// This should match our expectation
+						if parentInOld || !parentInNew {
+							t.Errorf("For field %s: Expected parent path %s to not exist in old schema and exist in new schema, but got old: %v, new: %v",
+								tc.fieldPath, parentPath, parentInOld, parentInNew)
+						}
+					}
+				}
+			}
+
+			// Now test the actual method
+			resourceConfig := schemaDiff[tc.resourceName]
+			result := resourceConfig.IsFieldInNewNestedStructure(tc.fieldPath)
+			if result != tc.expected {
+				t.Errorf("IsFieldInNewNestedStructure(%q, %q) = %v, want %v",
+					tc.resourceName, tc.fieldPath, result, tc.expected)
 			}
 		})
 	}

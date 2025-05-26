@@ -401,6 +401,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Firebaseappcheck",
         "path" to "./google-beta/services/firebaseappcheck"
     ),
+    "firebaseapphosting" to mapOf(
+        "name" to "firebaseapphosting",
+        "displayName" to "Firebase App Hosting",
+        "path" to "./google-beta/services/firebaseapphosting"
+    ),
     "firebasedatabase" to mapOf(
         "name" to "firebasedatabase",
         "displayName" to "Firebasedatabase",
@@ -521,6 +526,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Looker",
         "path" to "./google-beta/services/looker"
     ),
+    "lustre" to mapOf(
+        "name" to "lustre",
+        "displayName" to "GoogleCloudManagedLustre",
+        "path" to "./google-beta/services/lustre"
+    ),
     "managedkafka" to mapOf(
         "name" to "managedkafka",
         "displayName" to "Managedkafka",
@@ -596,6 +606,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Osconfig",
         "path" to "./google-beta/services/osconfig"
     ),
+    "osconfigv2" to mapOf(
+        "name" to "osconfigv2",
+        "displayName" to "Osconfigv2",
+        "path" to "./google-beta/services/osconfigv2"
+    ),
     "oslogin" to mapOf(
         "name" to "oslogin",
         "displayName" to "Oslogin",
@@ -655,6 +670,11 @@ var ServicesListBeta = mapOf(
         "name" to "resourcemanager",
         "displayName" to "Resourcemanager",
         "path" to "./google-beta/services/resourcemanager"
+    ),
+    "resourcemanager3" to mapOf(
+        "name" to "resourcemanager3",
+        "displayName" to "Resourcemanager3",
+        "path" to "./google-beta/services/resourcemanager3"
     ),
     "runtimeconfig" to mapOf(
         "name" to "runtimeconfig",
@@ -750,6 +770,16 @@ var ServicesListBeta = mapOf(
         "name" to "storage",
         "displayName" to "Storage",
         "path" to "./google-beta/services/storage"
+    ),
+    "storagebatchoperations" to mapOf(
+        "name" to "storagebatchoperations",
+        "displayName" to "StorageBatchOperations",
+        "path" to "./google-beta/services/storagebatchoperations"
+    ),
+    "storagecontrol" to mapOf(
+        "name" to "storagecontrol",
+        "displayName" to "Storagecontrol",
+        "path" to "./google-beta/services/storagecontrol"
     ),
     "storageinsights" to mapOf(
         "name" to "storageinsights",

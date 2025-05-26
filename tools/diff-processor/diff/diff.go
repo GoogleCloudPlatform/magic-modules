@@ -1,9 +1,7 @@
 package diff
 
 import (
-	"maps"
 	"reflect"
-	"slices"
 	"strings"
 
 	"github.com/google/go-cmp/cmp"
@@ -13,10 +11,16 @@ import (
 // SchemaDiff is a nested map with resource names as top-level keys.
 type SchemaDiff map[string]ResourceDiff
 
+type ResourceDiffInterface interface {
+	IsNewResource() bool
+	IsFieldInNewNestedStructure(fieldPath string) bool
+}
+
 type ResourceDiff struct {
-	ResourceConfig ResourceConfigDiff
-	Fields         map[string]FieldDiff
-	FieldSets      ResourceFieldSetsDiff
+	ResourceConfig  ResourceConfigDiff
+	FlattenedSchema FlattenedSchemaRaw
+	Fields          map[string]FieldDiff
+	FieldSets       ResourceFieldSetsDiff
 }
 
 type ResourceFieldSetsDiff struct {
@@ -24,19 +28,7 @@ type ResourceFieldSetsDiff struct {
 	New ResourceFieldSets
 }
 
-type ResourceFieldSetsDiffWithKeys struct {
-	Old ResourceFieldSetsWithKeys
-	New ResourceFieldSetsWithKeys
-}
-
 type ResourceFieldSets struct {
-	ConflictsWith []FieldSet
-	ExactlyOneOf  []FieldSet
-	AtLeastOneOf  []FieldSet
-	RequiredWith  []FieldSet
-}
-
-type ResourceFieldSetsWithKeys struct {
 	ConflictsWith map[string]FieldSet
 	ExactlyOneOf  map[string]FieldSet
 	AtLeastOneOf  map[string]FieldSet
@@ -55,6 +47,11 @@ type FieldDiff struct {
 	New *schema.Schema
 }
 
+type FlattenedSchemaRaw struct {
+	Old map[string]*schema.Schema
+	New map[string]*schema.Schema
+}
+
 func ComputeSchemaDiff(oldResourceMap, newResourceMap map[string]*schema.Resource) SchemaDiff {
 	schemaDiff := make(SchemaDiff)
 	for resource := range union(oldResourceMap, newResourceMap) {
@@ -65,26 +62,26 @@ func ComputeSchemaDiff(oldResourceMap, newResourceMap map[string]*schema.Resourc
 		var flattenedOldSchema map[string]*schema.Schema
 		if oldResource, ok := oldResourceMap[resource]; ok {
 			flattenedOldSchema = flattenSchema("", oldResource.Schema)
+			resourceDiff.FlattenedSchema.Old = flattenedOldSchema
 			resourceDiff.ResourceConfig.Old = &schema.Resource{}
 		}
 
 		var flattenedNewSchema map[string]*schema.Schema
 		if newResource, ok := newResourceMap[resource]; ok {
 			flattenedNewSchema = flattenSchema("", newResource.Schema)
+			resourceDiff.FlattenedSchema.New = flattenedNewSchema
 			resourceDiff.ResourceConfig.New = &schema.Resource{}
 		}
 
 		resourceDiff.Fields = make(map[string]FieldDiff)
-		fieldSetsDiffWithKeys := ResourceFieldSetsDiffWithKeys{}
 		for key := range union(flattenedOldSchema, flattenedNewSchema) {
 			oldField := flattenedOldSchema[key]
 			newField := flattenedNewSchema[key]
 			if fieldDiff, fieldSetsDiff, changed := diffFields(oldField, newField, key); changed {
 				resourceDiff.Fields[key] = fieldDiff
-				fieldSetsDiffWithKeys = mergeFieldSetsDiff(fieldSetsDiffWithKeys, fieldSetsDiff)
+				resourceDiff.FieldSets = mergeFieldSetsDiff(resourceDiff.FieldSets, fieldSetsDiff)
 			}
 		}
-		resourceDiff.FieldSets = removeFieldSetsDiffKeys(fieldSetsDiffWithKeys)
 		if len(resourceDiff.Fields) > 0 || !cmp.Equal(resourceDiff.ResourceConfig.Old, resourceDiff.ResourceConfig.New) {
 			schemaDiff[resource] = resourceDiff
 		}
@@ -204,18 +201,30 @@ func fieldSets(field *schema.Schema, fieldName string) ResourceFieldSets {
 	if field == nil {
 		return ResourceFieldSets{}
 	}
-	var conflictsWith, exactlyOneOf, atLeastOneOf, requiredWith []FieldSet
+	var conflictsWith, exactlyOneOf, atLeastOneOf, requiredWith map[string]FieldSet
 	if len(field.ConflictsWith) > 0 {
-		conflictsWith = []FieldSet{sliceToSetRemoveZeroPadding(append(field.ConflictsWith, fieldName))}
+		set := sliceToSetRemoveZeroPadding(append(field.ConflictsWith, fieldName))
+		conflictsWith = map[string]FieldSet{
+			setKey(set): set,
+		}
 	}
 	if len(field.ExactlyOneOf) > 0 {
-		exactlyOneOf = []FieldSet{sliceToSetRemoveZeroPadding(append(field.ExactlyOneOf, fieldName))}
+		set := sliceToSetRemoveZeroPadding(append(field.ExactlyOneOf, fieldName))
+		exactlyOneOf = map[string]FieldSet{
+			setKey(set): set,
+		}
 	}
 	if len(field.AtLeastOneOf) > 0 {
-		atLeastOneOf = []FieldSet{sliceToSetRemoveZeroPadding(append(field.AtLeastOneOf, fieldName))}
+		set := sliceToSetRemoveZeroPadding(append(field.AtLeastOneOf, fieldName))
+		atLeastOneOf = map[string]FieldSet{
+			setKey(set): set,
+		}
 	}
 	if len(field.RequiredWith) > 0 {
-		requiredWith = []FieldSet{sliceToSetRemoveZeroPadding(append(field.RequiredWith, fieldName))}
+		set := sliceToSetRemoveZeroPadding(append(field.RequiredWith, fieldName))
+		requiredWith = map[string]FieldSet{
+			setKey(set): set,
+		}
 	}
 	return ResourceFieldSets{
 		ConflictsWith: conflictsWith,
@@ -286,13 +295,13 @@ func funcChanged(oldFunc, newFunc interface{}) bool {
 	return false
 }
 
-func mergeFieldSetsDiff(allFields ResourceFieldSetsDiffWithKeys, currentField ResourceFieldSetsDiff) ResourceFieldSetsDiffWithKeys {
+func mergeFieldSetsDiff(allFields ResourceFieldSetsDiff, currentField ResourceFieldSetsDiff) ResourceFieldSetsDiff {
 	allFields.Old = mergeResourceFieldSets(allFields.Old, currentField.Old)
 	allFields.New = mergeResourceFieldSets(allFields.New, currentField.New)
 	return allFields
 }
 
-func mergeResourceFieldSets(allFields ResourceFieldSetsWithKeys, currentField ResourceFieldSets) ResourceFieldSetsWithKeys {
+func mergeResourceFieldSets(allFields ResourceFieldSets, currentField ResourceFieldSets) ResourceFieldSets {
 	allFields.ConflictsWith = mergeFieldSets(allFields.ConflictsWith, currentField.ConflictsWith)
 	allFields.ExactlyOneOf = mergeFieldSets(allFields.ExactlyOneOf, currentField.ExactlyOneOf)
 	allFields.AtLeastOneOf = mergeFieldSets(allFields.AtLeastOneOf, currentField.AtLeastOneOf)
@@ -300,12 +309,15 @@ func mergeResourceFieldSets(allFields ResourceFieldSetsWithKeys, currentField Re
 	return allFields
 }
 
-func mergeFieldSets(allFields map[string]FieldSet, currentField []FieldSet) map[string]FieldSet {
+func mergeFieldSets(allFields, currentField map[string]FieldSet) map[string]FieldSet {
 	if allFields == nil {
 		allFields = make(map[string]FieldSet)
 	}
-	for _, fieldSet := range currentField {
-		allFields[setKey(fieldSet)] = fieldSet
+	for key, fieldSet := range currentField {
+		allFields[key] = fieldSet
+	}
+	if len(allFields) == 0 {
+		return nil
 	}
 	return allFields
 }
@@ -315,22 +327,32 @@ func setKey(set FieldSet) string {
 	return strings.Join(slice, ",")
 }
 
-func removeFieldSetsDiffKeys(fieldSets ResourceFieldSetsDiffWithKeys) ResourceFieldSetsDiff {
-	return ResourceFieldSetsDiff{
-		Old: removeFieldSetsKey(fieldSets.Old),
-		New: removeFieldSetsKey(fieldSets.New),
+func (rd ResourceDiff) IsNewResource() bool {
+	rcd := rd.ResourceConfig
+	if rcd.Old == nil && rcd.New != nil {
+		return true
 	}
+	return false
 }
 
-func removeFieldSetsKey(fieldSets ResourceFieldSetsWithKeys) ResourceFieldSets {
-	return ResourceFieldSets{
-		ConflictsWith: removeFieldSetKey(fieldSets.ConflictsWith),
-		ExactlyOneOf:  removeFieldSetKey(fieldSets.ExactlyOneOf),
-		AtLeastOneOf:  removeFieldSetKey(fieldSets.AtLeastOneOf),
-		RequiredWith:  removeFieldSetKey(fieldSets.RequiredWith),
+// IsFieldInNewNestedStructure determines if a field is part of a completely new nested structure
+func (rd ResourceDiff) IsFieldInNewNestedStructure(fieldPath string) bool {
+	if rd.IsNewResource() {
+		return true
 	}
-}
 
-func removeFieldSetKey(fieldSets map[string]FieldSet) []FieldSet {
-	return slices.Collect(maps.Values(fieldSets))
+	// Get the parent path (everything before the last dot)
+	lastDotIndex := strings.LastIndex(fieldPath, ".")
+	if lastDotIndex == -1 {
+		// No parent path (top-level field)
+		return false
+	}
+
+	parentPath := fieldPath[:lastDotIndex]
+
+	// Check if parent exists in new schema but not in old schema
+	_, parentExistsInOld := rd.FlattenedSchema.Old[parentPath]
+	_, parentExistsInNew := rd.FlattenedSchema.New[parentPath]
+
+	return !parentExistsInOld && parentExistsInNew
 }

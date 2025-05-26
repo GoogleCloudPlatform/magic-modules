@@ -253,6 +253,7 @@ is desired, you will need to modify your state file manually using
 * `key_revocation_action_type` - (optional) Action to be taken when a customer's encryption key is revoked. Supports `STOP` and `NONE`, with `NONE` being the default.
 
 * `instance_encryption_key` - (optional) Configuration for data encryption on the instance with encryption keys. Structure is [documented below](#nested_instance_encryption_key`).
+
 ---
 
 <a name="nested_boot_disk"></a>The `boot_disk` block supports:
@@ -266,7 +267,7 @@ is desired, you will need to modify your state file manually using
 * `mode` - (Optional) The mode in which to attach this disk, either `READ_WRITE`
   or `READ_ONLY`. If not specified, the default is to attach the disk in `READ_WRITE` mode.
 
-* `architecture` - (Optional) The architecture of the attached disk. Valid values are `ARM64` or `x86_64`.
+* `guest_os_features` - (optional) A list of features to enable on the guest operating system. Applicable only for bootable images. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
 
 * `disk_encryption_key_raw` - (Optional) A 256-bit [customer-supplied encryption key]
     (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption),
@@ -276,7 +277,6 @@ is desired, you will need to modify your state file manually using
 
 * `disk_encryption_key_rsa` - (Optional) Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit [customer-supplied encryption key]
     (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption) to encrypt this disk. Only one of `kms_key_self_link`, `disk_encryption_key_rsa` and `disk_encryption_key_raw`
-    may be set.
 
 * `kms_key_self_link` - (Optional) The self_link of the encryption key that is
     stored in Google Cloud KMS to encrypt this disk. Only one of `kms_key_self_link`,
@@ -293,7 +293,9 @@ is desired, you will need to modify your state file manually using
     `google_compute_disk`) or disk image. To create an instance from a snapshot, first create a
     `google_compute_disk` from a snapshot and reference it here.
 
-* `guest_os_features` - (optional) A list of features to enable on the guest operating system. Applicable only for bootable images. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
+* `force_attach` - (Optional) boolean field that determines whether to force attach the regional
+    disk even if it's currently attached to another instance. If you try to force attach a zonal
+    disk to an instance, you will receive an error. Setting this parameter cause VM recreation.
 
 <a name="nested_initialize_params"></a>The `initialize_params` block supports:
 
@@ -312,14 +314,16 @@ is desired, you will need to modify your state file manually using
     For instance, the image `centos-6-v20180104` includes its family name `centos-6`.
     These images can be referred by family name here.
 
+* `labels` - (Optional) A set of key/value label pairs assigned to the disk. This
+    field is only applicable for persistent disks.
+
 * `source_image_encryption_key` - (Optional) Encryption key used to decrypt the given image. Structure is [documented below](#nested_source_image_encryption_key).
 
 * `snapshot` - (Optional) The snapshot from which to initialize this disk. To create a disk with a snapshot that you created, specify the snapshot name in the following format: `global/snapshots/my-backup`
 
 * `source_snapshot_encryption_key` - (Optional) Encryption key used to decrypt the given snapshot. Structure is [documented below](#nested_source_snapshot_ecryption_key).
 
-* `labels` - (Optional) A set of key/value label pairs assigned to the disk. This
-    field is only applicable for persistent disks.
+* `architecture` - (Optional) The architecture of the attached disk. Valid values are `ARM64` or `x86_64`.
 
 * `resource_manager_tags` - (Optional) A tag is a key-value pair that can be attached to a Google Cloud resource. You can use tags to conditionally allow or deny policies based on whether a resource has a specific tag. This value is not returned by the API. In Terraform, this value cannot be updated and changing it will recreate the resource.
 
@@ -419,6 +423,10 @@ is desired, you will need to modify your state file manually using
 
 * `kms_key_service_account` - (Optional) The service account being used for the encryption request for the given KMS key. If absent, the Compute Engine default service account is used.
 
+* `force_attach` - (Optional) boolean field that determines whether to force attach the regional
+    disk even if it's currently attached to another instance. If you try to force attach a zonal
+    disk to an instance, you will receive an error. Setting this parameter cause VM recreation.
+
 <a name="nested_network_performance_config"></a>The `network_performance_config` block supports:
 
 * `total_egress_bandwidth_tier` - (Optional) The egress bandwidth tier to enable.
@@ -460,7 +468,7 @@ is desired, you will need to modify your state file manually using
 
 * `nic_type` - (Optional) The type of vNIC to be used on this interface. Possible values: GVNIC, VIRTIO_NET, IDPF, MRDMA, IRDMA.
 
-* `network_attachment` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
+* `network_attachment` - (Optional) The URL of the network attachment that this interface should connect to in the following format: `projects/{projectNumber}/regions/{region_name}/networkAttachments/{network_attachment_name}`.
 
 * `stack_type` - (Optional) The stack type for this network interface to identify whether the IPv6 feature is enabled or not. Values are IPV4_IPV6, IPV6_ONLY or IPV4_ONLY. If not specified, IPV4_ONLY will be used.
 
@@ -560,6 +568,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
     `SPOT`, read [here](https://cloud.google.com/compute/docs/instances/spot)
 
 * `instance_termination_action` - (Optional) Describe the type of termination action for VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot)
+
+* `termination_time` - (Optional) Specifies the timestamp, when the instance will be terminated, in RFC3339 text format. If specified, the instance termination action will be performed at the termination time.
 
 * `availability_domain` - (Optional) Specifies the availability domain to place the instance in. The value must be a number between 1 and the number of availability domains specified in the spread placement policy attached to the instance.
 

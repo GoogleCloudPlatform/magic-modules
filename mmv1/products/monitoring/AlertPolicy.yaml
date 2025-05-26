@@ -37,7 +37,6 @@ timeouts:
   delete_minutes: 20
 custom_code:
   constants: 'templates/terraform/constants/monitoring_alert_policy.go.tmpl'
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 error_retry_predicates:
 
@@ -66,6 +65,12 @@ examples:
     exclude_test: true
   # skipping tests because the API is full of race conditions
   - name: 'monitoring_alert_policy_promql_condition'
+    primary_resource_id: 'alert_policy'
+    vars:
+      alert_policy_display_name: 'My Alert Policy'
+    exclude_test: true
+  # skipping tests because the API is full of race conditions
+  - name: 'monitoring_alert_policy_sql_condition'
     primary_resource_id: 'alert_policy'
     vars:
       alert_policy_display_name: 'My Alert Policy'
@@ -1025,7 +1030,7 @@ properties:
             - name: 'rowCountTest'
               type: NestedObject
               description: |
-                Test the row count against a threshold.
+                A test that checks if the number of rows in the result set violates some threshold.
               properties:
                 - name: 'comparison'
                   type: Enum
@@ -1049,7 +1054,7 @@ properties:
                 - name: 'threshold'
                   type: Integer
                   description: |
-                    Test the boolean value in the indicated column.
+                    The value against which to compare the row count.
                   required: true
               exactly_one_of:
                 - 'rowCountTest'
@@ -1057,14 +1062,13 @@ properties:
             - name: 'booleanTest'
               type: NestedObject
               description: |
-                The start date and time of the query. If left unspecified, then the
-                query will start immediately.
+                A test that uses an alerting result in a boolean column produced by the SQL query.
               properties:
                 - name: 'column'
                   type: String
                   description: |
-                    The name of the column containing the boolean value. If the value
-                    in a row is NULL, that row is ignored.
+                    The name of the column containing the boolean value. If the value in a row is
+                    NULL, that row is ignored.
                   required: true
               exactly_one_of:
                 - 'rowCountTest'

@@ -27,10 +27,17 @@ is present in provider.yaml. Do not use if an ancestor field (or the overall
 resource) is already marked as beta-only.
 
 ### `immutable`
-If true, the field (and any subfields) are considered immutable - that is,
-only settable on create. If unset or false, the field is still considered
-immutable if any ancestor field (or the overall resource) is immutable,
-unless `update_url` is set.
+If true, the field is considered immutable - that is, only settable on create. If
+unset or false, the field is considered to support update-in-place.
+
+Immutability is not inherited from field to field: subfields are still considered to
+be updatable in place by default. However, if the overall resource has
+[`immutable`]({{< ref "/reference/resource#immutable" >}}) set to true, all its
+fields are considered immutable.  Individual fields can override this for themselves
+and their subfields with [`update_url`]({{< ref "/reference/field#update_url" >}})
+if they have a custom update method in the API.
+
+See [Best practices: Immutable fields]({{< ref "/best-practices/immutable-fields/" >}}) for more information.
 
 Example:
 
@@ -40,8 +47,10 @@ immutable: true
 
 ### `update_url`
 If set, changes to the field's value trigger a separate call to a specific
-API method for updating the field's value. The field is not considered
-immutable even if an ancestor field (or the overall resource) is immutable.
+API method for updating the field's value. Even if the overall resource is marked
+immutable, the field and its subfields are not considered immutable unless explicitly
+marked as such.
+
 Terraform field names enclosed in double curly braces are replaced with the
 field values from the resource at runtime.
 
@@ -96,6 +105,23 @@ Example:
 
 ```yaml
 sensitive: true
+```
+
+### `write_only`
+If true, the field is considered "write-only", which means that its value will
+be obscured in Terraform output as well as not be stored in state. This field is meant to replace `sensitive` as it doesn't store the value in state.
+See [Ephemerality in Resources - Use Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral/write-only)
+for more information.
+
+Write-only fields are only supported in Terraform v1.11+. Because the provider supports earlier Terraform versions, write only fields must be paired with (mutually exclusive) `sensitive` fields covering the same functionality for compatibility with those older versions.
+This field cannot be used in conjuction with `immutable` or `sensitive`.
+
+**Note**: Due to write-only not being read from the API, it is not possible to update the field directly unless a sidecar field is used. (e.g. `password` as a write-only field and `password_wo_version` as an immutable field meant for updating).
+
+Example:
+
+```yaml
+write_only: true
 ```
 
 ### `ignore_read`
@@ -299,6 +325,29 @@ Example: Regex
   type: String
   validation:
     regex: '^[a-zA-Z][a-zA-Z0-9_]*$'
+```
+
+### `is_set`
+If true, the field is a Set rather than an Array. Set fields represent an
+unordered set of unique elements. `set_hash_func` may be used to customize the
+hash function used to index elements in the set, otherwise the schema default
+function will be used. Adding this property to an existing field is usually a
+breaking change.
+
+```yaml
+- name: 'fieldOne'
+  type: Array
+  is_set: true
+```
+
+### `set_hash_func`
+Specifies a function for hashing elements in a Set field. If unspecified,
+`schema.HashString` will be used if the elements are strings, otherwise
+`schema.HashSchema`. The hash function should be defined in
+`custom_code.constants`.
+
+```yaml
+set_hash_func: functionName
 ```
 
 ### `api_name`

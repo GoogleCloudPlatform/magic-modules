@@ -15,6 +15,9 @@
 name: 'Location'
 kind: 'compute#zone'
 description: 'Represents a Location resource.'
+deprecation_message: >-
+  `google_notebooks_location` is deprecated and will be removed in a future major release.
+  This resource is not functional.
 readonly: true
 docs:
 base_url: 'projects/{{project}}/locations'

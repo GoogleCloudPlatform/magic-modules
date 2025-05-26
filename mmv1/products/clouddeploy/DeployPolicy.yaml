@@ -1,0 +1,293 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: "DeployPolicy"
+description: |
+  A `DeployPolicy` inhibits manual or DeployPolicy-driven actions within a Delivery Pipeline or Target.
+references:
+  guides:
+    "Restrict deploy behavior using policies": "https://cloud.google.com/deploy/docs/deploy-policy"
+  api: "https://cloud.google.com/deploy/docs/api/reference/rest/v1/projects.locations.deployPolicies"
+docs:
+id_format: "projects/{{project}}/locations/{{location}}/deployPolicies/{{name}}"
+base_url: "projects/{{project}}/locations/{{location}}/deployPolicies"
+self_link: "projects/{{project}}/locations/{{location}}/deployPolicies/{{name}}"
+create_url: "projects/{{project}}/locations/{{location}}/deployPolicies?deployPolicyId={{name}}"
+update_verb: "PATCH"
+update_mask: true
+import_format:
+  - "projects/{{project}}/locations/{{location}}/deployPolicies/{{name}}"
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ["create", "delete", "update"]
+  type: "OpAsync"
+  operation:
+    base_url: "{{op_id}}"
+  result:
+    resource_inside_response: false
+custom_code:
+examples:
+  - name: "clouddeploy_deploy_policy_basic"
+    primary_resource_id: "b-deploy-policy"
+    vars:
+      policy: "cd-policy"
+      delivery_pipeline: "cd-pipeline"
+  - name: "clouddeploy_deploy_policy_full"
+    primary_resource_id: "f-deploy-policy"
+    vars:
+      policy: "cd-policy"
+      delivery_pipeline: "cd-pipeline"
+parameters:
+  - name: "location"
+    type: String
+    description: "The location for the resource"
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: "name"
+    type: String
+    description: "Name of the `DeployPolicy`."
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: "uid"
+    type: String
+    description: "Output only. Unique identifier of the `DeployPolicy`."
+    output: true
+  - name: "description"
+    type: String
+    description: "Optional. Description of the `DeployPolicy`. Max length is 255 characters."
+  - name: "createTime"
+    type: String
+    description: "Output only. Time at which the DeployPolicy was created."
+    output: true
+  - name: "updateTime"
+    type: String
+    description: "Output only. Time at which the DeployPolicy was updated."
+    output: true
+  - name: "annotations"
+    type: KeyValueAnnotations
+    description: "Optional. User annotations. These attributes can only be set and used by the user, and not by Cloud Deploy. Annotations must meet the following constraints: * Annotations are key/value pairs. * Valid annotation keys have two segments: an optional prefix and name, separated by a slash (`/`). * The name segment is required and must be 63 characters or less, beginning and ending with an alphanumeric character (`[a-z0-9A-Z]`) with dashes (`-`), underscores (`_`), dots (`.`), and alphanumerics between. * The prefix is optional. If specified, the prefix must be a DNS subdomain: a series of DNS labels separated by dots(`.`), not longer than 253 characters in total, followed by a slash (`/`). See https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#syntax-and-character-set for more details."
+  - name: "labels"
+    type: KeyValueLabels
+    description: "Optional. Labels are attributes that can be set and used by both the user and by Cloud Deploy. Labels must meet the following constraints: * Keys and values can contain only lowercase letters, numeric characters, underscores, and dashes. * All characters must use UTF-8 encoding, and international characters are allowed. * Keys must start with a lowercase letter or international character. * Each resource is limited to a maximum of 64 labels. Both keys and values are additionally constrained to be <= 63 characters."
+  - name: "etag"
+    type: String
+    description: "Optional. The weak etag of the `DeployPolicy` resource. This checksum is computed by the server based on the value of other fields, and may be sent on update and delete requests to ensure the client has an up-to-date value before proceeding."
+    output: true
+  - name: "suspended"
+    type: Boolean
+    description: "Optional. When suspended, the policy will not prevent actions from occurring, even if the action violates the policy."
+    send_empty_value: true
+  - name: "selectors"
+    type: Array
+    description: "Required. Selected resources to which the policy will be applied. At least one selector is required. If one selector matches the resource the policy applies. For example, if there are two selectors and the action being attempted matches one of them, the policy will apply to that action."
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: "target"
+          type: NestedObject
+          description: "Contains attributes about a target."
+          properties:
+            - name: "id"
+              type: String
+              description: 'ID of the `Target`. The value of this field could be one of the following: * The last segment of a target name. It only needs the ID to determine which target is being referred to * "*", all targets in a location.'
+            - name: "labels"
+              type: KeyValuePairs
+              description: "Target labels."
+              default_from_api: true
+        - name: "deliveryPipeline"
+          type: NestedObject
+          description: "Contains attributes about a delivery pipeline."
+          properties:
+            - name: "id"
+              type: String
+              description: |-
+                Optional. ID of the DeliveryPipeline. The value of this field could be one of the following:
+                - The last segment of a pipeline name
+                - "*", all delivery pipelines in a location
+            - name: "labels"
+              type: KeyValuePairs
+              description: "DeliveryPipeline labels."
+              default_from_api: true
+  - name: "rules"
+    type: Array
+    description: "Required. Rules to apply. At least one rule must be present."
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: "rolloutRestriction"
+          type: NestedObject
+          description: "Optional. Rollout restrictions."
+          properties:
+            - name: "id"
+              type: String
+              description: "Required. ID of the rule. This id must be unique in the `DeployPolicy` resource to which this rule belongs. The format is `a-z{0,62}`."
+              required: true
+            - name: "invokers"
+              type: Array
+              description: "Optional. What invoked the action. If left empty, all invoker types will be restricted."
+              item_type:
+                type: Enum
+                enum_values:
+                  - "USER"
+                  - "DEPLOY_AUTOMATION"
+            - name: "actions"
+              type: Array
+              description: "Optional. Rollout actions to be restricted as part of the policy. If left empty, all actions will be restricted."
+              item_type:
+                type: Enum
+                enum_values:
+                  - "ADVANCE"
+                  - "APPROVE"
+                  - "CANCEL"
+                  - "CREATE"
+                  - "IGNORE_JOB"
+                  - "RETRY_JOB"
+                  - "ROLLBACK"
+                  - "TERMINATE_JOBRUN"
+            - name: "timeWindows"
+              type: NestedObject
+              description: "Required. Time window within which actions are restricted."
+              properties:
+                - name: "timeZone"
+                  type: String
+                  description: "Required. The time zone in IANA format IANA Time Zone Database (e.g. America/New_York)."
+                  required: true
+                - name: oneTimeWindows
+                  type: Array
+                  description: "Optional. One-time windows within which actions are restricted."
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: "startDate"
+                        type: NestedObject
+                        description: "Required. Start date."
+                        required: true
+                        properties:
+                          - name: "year"
+                            type: Integer
+                            description: "Year of the date. Must be from 1 to 9999, or 0 to specify a date without a year."
+                          - name: month
+                            type: Integer
+                            description: "Month of a year. Must be from 1 to 12, or 0 to specify a year without a month and day."
+                          - name: day
+                            type: Integer
+                            description: "Day of a month. Must be from 1 to 31 and valid for the year and month, or 0 to specify a year by itself or a year and month where the day isn't significant."
+                      - name: "endDate"
+                        type: NestedObject
+                        description: "Required. End date."
+                        required: true
+                        properties:
+                          - name: "year"
+                            type: Integer
+                            description: "Year of the date. Must be from 1 to 9999."
+                          - name: month
+                            type: Integer
+                            description: "Month of a year. Must be from 1 to 12."
+                          - name: day
+                            type: Integer
+                            description: "Day of a month. Must be from 1 to 31 and valid for the year and month."
+                      - name: "startTime"
+                        type: NestedObject
+                        description: "Required. Start time (inclusive). Use 00:00 for the beginning of the day."
+                        required: true
+                        properties:
+                          - name: "hours"
+                            type: Integer
+                            description: 'Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.'
+                          - name: minutes
+                            type: Integer
+                            description: "Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59."
+                          - name: seconds
+                            type: Integer
+                            description: "Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An API may allow the value 60 if it allows leap-seconds."
+                          - name: nanos
+                            type: Integer
+                            description: "Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to 999,999,999."
+                      - name: "endTime"
+                        type: NestedObject
+                        description: "Required. End time (exclusive). You may use 24:00 for the end of the day."
+                        required: true
+                        properties:
+                          - name: "hours"
+                            type: Integer
+                            description: 'Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.'
+                          - name: minutes
+                            type: Integer
+                            description: "Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59."
+                          - name: seconds
+                            type: Integer
+                            description: "Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An API may allow the value 60 if it allows leap-seconds."
+                          - name: nanos
+                            type: Integer
+                            description: "Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to 999,999,999."
+                - name: weeklyWindows
+                  type: Array
+                  description: "Optional. Recurring weekly windows within which actions are restricted."
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: "daysOfWeek"
+                        type: Array
+                        description: "Optional. Days of week. If left empty, all days of the week will be included."
+                        item_type:
+                          type: Enum
+                          enum_values:
+                            - "MONDAY"
+                            - "TUESDAY"
+                            - "WEDNESDAY"
+                            - "THURSDAY"
+                            - "FRIDAY"
+                            - "SATURDAY"
+                            - "SUNDAY"
+                      - name: "startTime"
+                        type: NestedObject
+                        description: "Optional. Start time (inclusive). Use 00:00 for the beginning of the day. If you specify startTime you must also specify endTime. If left empty, this will block for the entire day for the days specified in daysOfWeek."
+                        properties:
+                          - name: "hours"
+                            type: Integer
+                            description: 'Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.'
+                          - name: minutes
+                            type: Integer
+                            description: "Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59."
+                          - name: seconds
+                            type: Integer
+                            description: "Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An API may allow the value 60 if it allows leap-seconds."
+                          - name: nanos
+                            type: Integer
+                            description: "Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to 999,999,999."
+                      - name: "endTime"
+                        type: NestedObject
+                        description: "Optional. End time (exclusive). Use 24:00 to indicate midnight. If you specify endTime you must also specify startTime. If left empty, this will block for the entire day for the days specified in daysOfWeek."
+                        properties:
+                          - name: "hours"
+                            type: Integer
+                            description: 'Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.'
+                          - name: minutes
+                            type: Integer
+                            description: "Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59."
+                          - name: seconds
+                            type: Integer
+                            description: "Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An API may allow the value 60 if it allows leap-seconds."
+                          - name: nanos
+                            type: Integer
+                            description: "Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to 999,999,999."

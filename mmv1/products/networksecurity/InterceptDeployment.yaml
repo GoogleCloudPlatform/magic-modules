@@ -13,8 +13,11 @@
 
 ---
 name: 'InterceptDeployment'
-description: InterceptDeployment represents the collectors within a Zone and is associated with a deployment group.
-min_version: 'beta'
+description: |-
+  A deployment represents a zonal intercept backend ready to accept
+  GENEVE-encapsulated traffic, e.g. a zonal instance group fronted by an
+  internal passthrough load balancer. Deployments are always part of a
+  global deployment group which represents a global intercept service.
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/interceptDeployments/{{intercept_deployment_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/interceptDeployments'
@@ -55,64 +58,82 @@ examples:
 parameters:
   - name: 'location'
     type: String
-    description: 'Resource ID segment making up resource `name`. It identifies the resource
-    within its parent collection as described in https://google.aip.dev/122. See documentation
-    for resource type `networksecurity.googleapis.com/InterceptDeployment`. '
-    min_version: 'beta'
+    description: |-
+      The cloud location of the deployment, e.g. `us-central1-a` or `asia-south1-b`.
     url_param_only: true
     required: true
     immutable: true
   - name: 'interceptDeploymentId'
     type: String
-    description: "Id of the requesting object\nIf auto-generating Id server-side,
-    remove this field and\nintercept_deployment_id from the method_signature of Create
-    RPC "
-    min_version: 'beta'
+    description: |-
+      The ID to use for the new deployment, which will become the final
+      component of the deployment's resource name.
     url_param_only: true
     required: true
     immutable: true
 properties:
   - name: 'name'
     type: String
-    description: 'Identifier. The name of the InterceptDeployment. '
-    min_version: 'beta'
+    description: |-
+      The resource name of this deployment, for example:
+      `projects/123456789/locations/us-central1-a/interceptDeployments/my-dep`.
+      See https://google.aip.dev/122 for more details.
     output: true
   - name: 'createTime'
     type: String
-    description: 'Create time stamp '
-    min_version: 'beta'
+    description: |-
+      The timestamp when the resource was created.
+      See https://google.aip.dev/148#timestamps.
     output: true
   - name: 'updateTime'
     type: String
-    description: 'Update time stamp '
-    min_version: 'beta'
+    description: |-
+      The timestamp when the resource was most recently updated.
+      See https://google.aip.dev/148#timestamps.
     output: true
   - name: 'labels'
     type: KeyValueLabels
-    description: 'Optional. Labels as key value pairs '
-    min_version: 'beta'
+    description: |-
+      Labels are key/value pairs that help to organize and filter resources.
   - name: 'forwardingRule'
     type: String
-    description: "Immutable. The regional load balancer which the intercepted
-    traffic should be forwarded\nto. Format is:\nprojects/{project}/regions/{region}/forwardingRules/{forwardingRule} "
-    min_version: 'beta'
+    description: |-
+      The regional forwarding rule that fronts the interceptors, for example:
+      `projects/123456789/regions/us-central1/forwardingRules/my-rule`.
+      See https://google.aip.dev/124.
     required: true
     immutable: true
   - name: 'interceptDeploymentGroup'
     type: String
-    description: "Immutable. The Intercept Deployment Group that this resource
-    is part of. Format is:\n`projects/{project}/locations/global/interceptDeploymentGroups/{interceptDeploymentGroup}` "
-    min_version: 'beta'
+    description: |-
+      The deployment group that this deployment is a part of, for example:
+      `projects/123456789/locations/global/interceptDeploymentGroups/my-dg`.
+      See https://google.aip.dev/124.
     required: true
     immutable: true
   - name: 'state'
     type: String
-    description: "Current state of the deployment. \n Possible values:\n
-    STATE_UNSPECIFIED\nACTIVE\nCREATING\nDELETING\nOUT_OF_SYNC\nDELETE_FAILED"
-    min_version: 'beta'
+    description: |-
+      The current state of the deployment.
+      See https://google.aip.dev/216.
+      Possible values:
+      STATE_UNSPECIFIED
+      ACTIVE
+      CREATING
+      DELETING
+      OUT_OF_SYNC
+      DELETE_FAILED
     output: true
   - name: 'reconciling'
     type: Boolean
-    description: "Whether reconciling is in progress, recommended per\nhttps://google.aip.dev/128. "
-    min_version: 'beta'
+    description: |-
+      The current state of the resource does not match the user's intended state,
+      and the system is working to reconcile them. This part of the normal
+      operation (e.g. linking a new association to the parent group).
+      See https://google.aip.dev/128.
     output: true
+  - name: 'description'
+    type: String
+    description: |-
+      User-provided description of the deployment.
+      Used as additional context for the deployment.

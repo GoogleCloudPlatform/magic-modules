@@ -14,6 +14,8 @@
 ---
 name: 'OrganizationSccBigQueryExports'
 api_resource_type_kind: BigQueryExport
+api_variant_patterns:
+  - 'organizations/{organization}/locations/{location}/bigQueryExports/{bigQueryExport}'
 description: |
   A Cloud Security Command Center (Cloud SCC) Big Query Export Config.
   It represents exporting Security Command Center data, including assets, findings, and security marks
@@ -45,7 +47,7 @@ examples:
     primary_resource_id: 'custom_big_query_export_config'
     vars:
       big_query_export_id: 'my-export'
-      dataset: 'my-dataset'
+      dataset_id: 'my-dataset'
       name: 'my-export'
     test_env_vars:
       org_id: 'ORG_ID'
