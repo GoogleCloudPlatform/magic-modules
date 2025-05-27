@@ -487,6 +487,9 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	if _, ok := d.GetOk("machine_type"); !ok && optionsMap["workerMachineType"] == nil || optionsMap["workerMachineType"] == "" {
 		optionsMap["workerMachineType"] = job.Environment.WorkerPools[0].MachineType
 	}
+	if _, ok := d.GetOk("sdk_container_image"); !ok && optionsMap["sdkContainerImage"] == nil || optionsMap["sdkContainerImage"] == "" {
+		optionsMap["sdkContainerImage"] = job.Environment.WorkerPools[0].WorkerHarnessContainerImage
+	}
 
 
 	if err := d.Set("temp_location", optionsMap["tempLocation"]); err != nil {
