@@ -14,7 +14,7 @@ import (
 )
 
 type ResourceMetadata struct {
-	CaiAssetNames   []string       `json:"cai_asset_name"`
+	CaiAssetNames   []string       `json:"cai_asset_names"`
 	ResourceType    string         `json:"resource_type"`
 	ResourceAddress string         `json:"resource_address"`
 	ImportMetadata  ImportMetadata `json:"import_metadata,omitempty"`
