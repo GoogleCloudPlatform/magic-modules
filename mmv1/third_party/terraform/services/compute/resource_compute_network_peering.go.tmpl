@@ -219,9 +219,12 @@ func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{})
 	if err := d.Set("stack_type", flattenNetworkPeeringStackType(peering.StackType, d, config)); err != nil {
 		return fmt.Errorf("Error setting stack_type: %s", err)
 	}
+	
+	{{ if eq $.TargetVersionName `ga` }}
 	if err := d.Set("update_strategy", flattenNetworkPeeringUpdateStrategy(peering.UpdateStrategy, d, config)); err != nil {
 		return fmt.Errorf("Error setting update_strategy: %s", err)
 	}
+	{{ - end }}
 
 	return nil
 }
@@ -322,18 +325,33 @@ func findPeeringFromNetwork(network *compute.Network, peeringName string) *compu
 	return nil
 }
 func expandNetworkPeering(d *schema.ResourceData) *compute.NetworkPeering {
-	return &compute.NetworkPeering{
-		ExchangeSubnetRoutes:           true,
-		Name:                           d.Get("name").(string),
-		Network:                        d.Get("peer_network").(string),
-		ExportCustomRoutes:             d.Get("export_custom_routes").(bool),
-		ImportCustomRoutes:             d.Get("import_custom_routes").(bool),
-		ExportSubnetRoutesWithPublicIp: d.Get("export_subnet_routes_with_public_ip").(bool),
-		ImportSubnetRoutesWithPublicIp: d.Get("import_subnet_routes_with_public_ip").(bool),
-		StackType:                      d.Get("stack_type").(string),
-		UpdateStrategy:                 d.Get("update_strategy").(string),
-		ForceSendFields:                []string{"ExportSubnetRoutesWithPublicIp", "ImportCustomRoutes", "ExportCustomRoutes"},
-	}
+	{{ if eq $.TargetVersionName `ga` }} 
+		return &compute.NetworkPeering{
+			ExchangeSubnetRoutes:           true,
+			Name:                           d.Get("name").(string),
+			Network:                        d.Get("peer_network").(string),
+			ExportCustomRoutes:             d.Get("export_custom_routes").(bool),
+			ImportCustomRoutes:             d.Get("import_custom_routes").(bool),
+			ExportSubnetRoutesWithPublicIp: d.Get("export_subnet_routes_with_public_ip").(bool),
+			ImportSubnetRoutesWithPublicIp: d.Get("import_subnet_routes_with_public_ip").(bool),
+			StackType:                      d.Get("stack_type").(string),
+			ForceSendFields:                []string{"ExportSubnetRoutesWithPublicIp", "ImportCustomRoutes", "ExportCustomRoutes"},
+		}
+	{{- else }}
+		return &compute.NetworkPeering{
+			ExchangeSubnetRoutes:           true,
+			Name:                           d.Get("name").(string),
+			Network:                        d.Get("peer_network").(string),
+			ExportCustomRoutes:             d.Get("export_custom_routes").(bool),
+			ImportCustomRoutes:             d.Get("import_custom_routes").(bool),
+			ExportSubnetRoutesWithPublicIp: d.Get("export_subnet_routes_with_public_ip").(bool),
+			ImportSubnetRoutesWithPublicIp: d.Get("import_subnet_routes_with_public_ip").(bool),
+			StackType:                      d.Get("stack_type").(string),
+			UpdateStrategy:                 d.Get("update_strategy").(string),
+			ForceSendFields:                []string{"ExportSubnetRoutesWithPublicIp", "ImportCustomRoutes", "ExportCustomRoutes"},
+		}
+	{{- end }}
+	
 }
 
 func flattenNetworkPeeringStackType(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
