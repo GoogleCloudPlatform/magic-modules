@@ -224,7 +224,7 @@ func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{})
 	if err := d.Set("update_strategy", flattenNetworkPeeringUpdateStrategy(peering.UpdateStrategy, d, config)); err != nil {
 		return fmt.Errorf("Error setting update_strategy: %s", err)
 	}
-	{{ - end }}
+	{{- end }}
 
 	return nil
 }
