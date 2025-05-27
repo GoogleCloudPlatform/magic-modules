@@ -220,7 +220,7 @@ func resourceComputeNetworkPeeringRead(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error setting stack_type: %s", err)
 	}
 	
-	{{ if eq $.TargetVersionName `ga` }}
+	{{ if ne $.TargetVersionName `ga` }}
 	if err := d.Set("update_strategy", flattenNetworkPeeringUpdateStrategy(peering.UpdateStrategy, d, config)); err != nil {
 		return fmt.Errorf("Error setting update_strategy: %s", err)
 	}
