@@ -1,0 +1,20 @@
+[
+  {
+    "name": "//orgpolicy.googleapis.com/organizations/12345/customConstraints/custom.disableGkeAutoUpgrade",
+    "asset_type": "orgpolicy.googleapis.com/CustomConstraint",
+    "ancestry_path": "organizations/12345",
+    "resource": {
+      "version": "v2",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/orgpolicy/v2/rest",
+      "discovery_name": "CustomConstraint",
+      "parent": "//cloudresourcemanager.googleapis.com/organizations/12345",
+      "data": {
+        "name": "organizations/12345/customConstraints/custom.disableGkeAutoUpgrade",
+        "actionType": "ALLOW",
+        "condition": "resource.management.autoUpgrade == false",
+        "methodTypes": ["CREATE", "UPDATE"],
+        "resourceTypes": ["container.googleapis.com/NodePool"]
+      }
+    }
+  }
+]
