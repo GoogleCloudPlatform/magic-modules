@@ -13,14 +13,14 @@ func TestAccBackupDRBackupPlanAssociation_fullUpdate(t *testing.T) {
 	acctest.SkipIfVcr(t)
 
 	t.Parallel()
-  
+
 	timeNow := time.Now().UTC()
 	referenceTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 0, 0, 0, 0, time.UTC)
 
 	context := map[string]interface{}{
-		"project":                   envvar.GetTestProjectFromEnv(),
+		"project":        envvar.GetTestProjectFromEnv(),
 		"effective_time": referenceTime.Add(24 * time.Hour).Format(time.RFC3339),
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":  acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -31,24 +31,24 @@ func TestAccBackupDRBackupPlanAssociation_fullUpdate(t *testing.T) {
 				Config: testAccBackupDRBackupPlanAssociation_fullCreate(context),
 			},
 			{
-				ResourceName:            "google_backup_dr_backup_plan_association.bpa",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_backup_dr_backup_plan_association.bpa",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 			{
 				Config: testAccBackupDRBackupPlanAssociation_fullUpdate(context),
 			},
 			{
-				ResourceName:            "google_backup_dr_backup_vault.backup-vault-test",
-				ImportState:             true,
-				ImportStateVerify:       true,
+				ResourceName:      "google_backup_dr_backup_vault.backup-vault-test",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
 func testAccBackupDRBackupPlanAssociation_fullCreate(context map[string]interface{}) string {
-return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_service_account" "default" {
   account_id   = "tf-test-my-custom-%{random_suffix}"
   display_name = "Custom SA for VM Instance"
