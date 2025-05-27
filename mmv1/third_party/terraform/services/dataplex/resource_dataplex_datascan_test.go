@@ -16,6 +16,7 @@ func TestAccDataplexDatascanDataplexDatascanFullQuality_update(t *testing.T) {
 	context := map[string]interface{}{
 		"project_name":  envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
+		"backtick":      "`",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -62,7 +63,7 @@ resource "google_dataplex_datascan" "full_quality" {
   }
 
   data {
-    resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/austin_bikeshare/tables/bikeshare_stations"
+    resource = "//bigquery.googleapis.com/projects/dataplex-back-end-dev-project/datasets/austin_bikeshare/tables/bikeshare_stations"
   }
 
   execution_spec {
@@ -163,7 +164,7 @@ resource "google_dataplex_datascan" "full_quality" {
     rules {
       dimension = "VALIDITY"
       sql_assertion {
-        sql_statement = "select * from bigquery-public-data.austin_bikeshare.bikeshare_stations where station_id is null"
+        sql_statement = "select * from %{backtick}dataplex-back-end-dev-project.austin_bikeshare.bikeshare_stations%{backtick} where station_id is null"
       }
     }
   }
@@ -186,7 +187,7 @@ resource "google_dataplex_datascan" "full_quality" {
   }
 
   data {
-    resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/austin_bikeshare/tables/bikeshare_stations"
+    resource = "//bigquery.googleapis.com/projects/dataplex-back-end-dev-project/datasets/austin_bikeshare/tables/bikeshare_stations"
   }
 
   execution_spec {
@@ -288,7 +289,7 @@ resource "google_dataplex_datascan" "full_quality" {
     rules {
       dimension = "VALIDITY"
       sql_assertion {
-        sql_statement = "select * from bigquery-public-data.austin_bikeshare.bikeshare_stations where station_id is null"
+        sql_statement = "select * from %{backtick}dataplex-back-end-dev-project.austin_bikeshare.bikeshare_stations%{backtick} where station_id is null"
       }
     }
   }
