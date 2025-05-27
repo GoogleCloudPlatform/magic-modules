@@ -293,7 +293,7 @@ region are guaranteed to support the same version.
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is [documented below](#nested_pod_security_policy_config).
 
-* `pod_autoscaling` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
+* `pod_autoscaling` - (Optional) Configuration for the
     Structure is [documented below](#nested_pod_autoscaling).
 
 * `secret_manager_config` - (Optional) Configuration for the
@@ -303,6 +303,8 @@ region are guaranteed to support the same version.
 * `authenticator_groups_config` - (Optional) Configuration for the
     [Google Groups for GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#groups-setup-gsuite) feature.
     Structure is [documented below](#nested_authenticator_groups_config).
+
+* `user_managed_keys_config` - (Optional) The custom keys configuration of the cluster Structure is [documented below](#nested_control_plane_endpoints_config).
 
 * `control_plane_endpoints_config` - (Optional) Configuration for all of the cluster's control plane endpoints.
     Structure is [documented below](#nested_control_plane_endpoints_config).
@@ -604,7 +606,7 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 -> `monitoring.write` is always enabled regardless of user input.  `monitoring` and `logging.write` may also be enabled depending on the values for `monitoring_service` and `logging_service`.
 
-* `service_account` - (Optional) The Google Cloud Platform Service Account to be used by the node VMs created by GKE Autopilot or NAP.
+* `service_account` - (Optional) The `email` of the Google Cloud Platform Service Account to be used by the node VMs created by GKE Autopilot or NAP.
 
 * `boot_disk_kms_key` - (Optional) The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool. This should be of the form projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]. For more information about protecting resources with Cloud KMS Keys please see: https://cloud.google.com/compute/docs/disks/customer-managed-encryption
 
@@ -1219,6 +1221,17 @@ notification_config {
 <a name="nested_secret_manager_config"></a>The `secret_manager_config` block supports:
 
 * `enabled` (Required) - Enable the Secret Manager add-on for this cluster.
+
+<a name="nested_user_managed_keys_config"></a>The `user_managed_keys_config` block supports:
+
+* `cluster_ca` - (Optional) The Certificate Authority Service caPool to use for the cluster CA in this cluster.
+* `etcd_api_ca` - (Optional) The Certificate Authority Service caPool to use for the etcd API CA in this cluster.
+* `etcd_peer_ca` - (Optional) The Certificate Authority Service caPool to use for the etcd peer CA in this cluster.
+* `aggregation_ca` - (Optional) The Certificate Authority Service caPool to use for the aggreation CA in this cluster.
+* `service_account_signing_keys` - (Optional) The Cloud KMS cryptoKeyVersions to use for signing service account JWTs issued by this cluster.
+* `service_account_verification_keys` - (Optional) The Cloud KMS cryptoKeyVersions to use for verifying service account JWTs issued by this cluster.
+* `control_plane_disk_encryption_key` - (Optional) The Cloud KMS cryptoKey to use for Confidential Hyperdisk on the control plane nodes.
+* `gkeops_etcd_backup_encryption_key` - (Optional) Resource path of the Cloud KMS cryptoKey to use for encryption of internal etcd backups.
 
 <a name="nested_control_plane_endpoints_config"></a>The `control_plane_endpoints_config` block supports:
 
