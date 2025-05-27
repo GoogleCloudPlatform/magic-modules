@@ -70,3 +70,11 @@ func createTagTemplateField(d *schema.ResourceData, config *transport_tpg.Config
 
 	return nil
 }
+
+func suppressMissingDefault(k, old, new string, d *schema.ResourceData) bool {
+	if old == "" && new == "DATAPLEX_TRANSFER_STATUS_UNSPECIFIED" {
+		log.Printf("[INFO] API returned empty value for the default")
+		return true
+	}
+	return false
+}

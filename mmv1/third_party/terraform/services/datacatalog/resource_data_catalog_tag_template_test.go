@@ -52,6 +52,15 @@ func TestAccDataCatalogTagTemplate_dataCatalogTagTemplate_updateFields(t *testin
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"region", "tag_template_id", "force_delete"},
 			},
+			{
+				Config: testAccDataCatalogTagTemplate_dataCatalogTagTemplateUpdateTransferred(context),
+			},
+			{
+				ResourceName:            "google_data_catalog_tag_template.basic_tag_template",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region", "tag_template_id", "force_delete"},
+			},
 		},
 	})
 }
@@ -62,7 +71,8 @@ resource "google_data_catalog_tag_template" "basic_tag_template" {
   tag_template_id = "tf_test_my_template%{random_suffix}"
   region = "us-central1"
   display_name = "Demo Tag Template Test Update"
-  is_publicly_readable = false
+
+  is_publicly_readable = true
   dataplex_transfer_status = "DATAPLEX_TRANSFER_STATUS_UNSPECIFIED"
 
   fields {
@@ -103,7 +113,8 @@ resource "google_data_catalog_tag_template" "basic_tag_template" {
   tag_template_id = "tf_test_my_template%{random_suffix}"
   region = "us-central1"
   display_name = "Demo Tag Template Test Update"
-  is_publicly_readable = false
+
+  is_publicly_readable = true
   dataplex_transfer_status = "DATAPLEX_TRANSFER_STATUS_UNSPECIFIED"
 
   fields {
@@ -144,6 +155,48 @@ resource "google_data_catalog_tag_template" "basic_tag_template" {
   tag_template_id = "tf_test_my_template%{random_suffix}"
   region = "us-central1"
   display_name = "Demo Tag Template Test Update"
+
+  is_publicly_readable = true
+  dataplex_transfer_status = "DATAPLEX_TRANSFER_STATUS_UNSPECIFIED"
+
+  fields {
+    field_id = "source"
+    display_name = "Source of data asset test update"
+    type {
+      primitive_type = "DOUBLE"
+    }
+  }
+
+  fields {
+    field_id = "pii_type"
+    display_name = "PII type"
+    type {
+      enum_type {
+        allowed_values {
+          display_name = "EMAIL"
+        }
+        allowed_values {
+          display_name = "SOCIAL SECURITY NUMBER"
+        }
+        allowed_values {
+          display_name = "NONE"
+        }
+      }
+    }
+  }
+
+  force_delete = "%{force_delete}"
+}
+`, context)
+}
+
+func testAccDataCatalogTagTemplate_dataCatalogTagTemplateUpdateTransferred(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_data_catalog_tag_template" "basic_tag_template" {
+  tag_template_id = "tf_test_my_template%{random_suffix}"
+  region = "us-central1"
+  display_name = "Demo Tag Template Test Update"
+
   is_publicly_readable = true
   dataplex_transfer_status = "TRANSFERRED"
 

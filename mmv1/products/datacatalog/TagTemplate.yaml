@@ -100,6 +100,7 @@ properties:
       The display name for this template.
   - name: 'isPubliclyReadable'
     type: Boolean
+    default_value: false
     description: |
       Indicates whether tags created with this template are public. Public tags do not require tag template
       access to appear in ListTags API response.
@@ -108,6 +109,8 @@ properties:
       a tag: predicate.
   - name: 'dataplexTransferStatus'
     type: Enum
+    diff_suppress_func: suppressMissingDefault
+    default_value: 'DATAPLEX_TRANSFER_STATUS_UNSPECIFIED'
     enum_values:
       - 'DATAPLEX_TRANSFER_STATUS_UNSPECIFIED'
       - 'TRANSFERRED'
