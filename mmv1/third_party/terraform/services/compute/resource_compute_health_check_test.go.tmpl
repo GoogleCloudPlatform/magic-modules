@@ -192,6 +192,7 @@ func TestAccComputeHealthCheck_typeTransition(t *testing.T) {
 	})
 }
 
+{{ if eq $.TargetVersionName `ga` -}}
 func TestAccComputeHealthCheck_tcpAndSsl_shouldFail(t *testing.T) {
 	// No HTTP interactions, is a unit test
 	acctest.SkipIfVcr(t)
@@ -211,6 +212,30 @@ func TestAccComputeHealthCheck_tcpAndSsl_shouldFail(t *testing.T) {
 		},
 	})
 }
+{{ end }}
+
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccComputeHealthCheck_tcpAndSsl_shouldFail(t *testing.T) {
+	// No HTTP interactions, is a unit test
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	hckName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeHealthCheckDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeHealthCheck_tcpAndSsl_shouldFail(hckName),
+				ExpectError: regexp.MustCompile("only one of\n`grpc_health_check,grpc_tls_health_check,http2_health_check,http_health_check,https_health_check,ssl_health_check,tcp_health_check`\ncan be specified, but `ssl_health_check,tcp_health_check` were specified"),
+			},
+		},
+	})
+}
+{{ end }}
+
 
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeHealthCheck_logConfigDisabled(t *testing.T) {
