@@ -1597,7 +1597,7 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-
+{{- end }}
 			"pod_autoscaling": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1620,7 +1620,6 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-{{- end }}
 			"secret_manager_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -2572,8 +2571,8 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		IpAllocationPolicy:      ipAllocationBlock,
 {{- if ne $.TargetVersionName "ga" }}
 		PodSecurityPolicyConfig: expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")),
-		PodAutoscaling: expandPodAutoscaling(d.Get("pod_autoscaling")),
 {{- end }}
+		PodAutoscaling: expandPodAutoscaling(d.Get("pod_autoscaling")),
 		SecretManagerConfig: 	 expandSecretManagerConfig(d.Get("secret_manager_config")),
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
 		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization")),
@@ -3260,11 +3259,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("cluster_telemetry", flattenClusterTelemetry(cluster.ClusterTelemetry)); err != nil {
 		return err
 	}
-
+{{- end }}
 	if err := d.Set("pod_autoscaling", flattenPodAutoscaling(cluster.PodAutoscaling)); err != nil {
 		return err
 	}
-{{- end }}
 
 	if err := d.Set("secret_manager_config", flattenSecretManagerConfig(cluster.SecretManagerConfig)); err != nil {
 		return err
@@ -4329,6 +4327,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 		log.Printf("[INFO] GKE cluster %s pod security policy config has been updated", d.Id())
 	}
+{{- end }}
 
 	if d.HasChange("pod_autoscaling") {
 		c := d.Get("pod_autoscaling")
@@ -4356,8 +4355,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 		log.Printf("[INFO] GKE cluster %s horizontal pod autoscaling profile has been updated", d.Id())
 	}
-
-{{- end }}
 
 	if d.HasChange("secret_manager_config") {
 		c := d.Get("secret_manager_config")
@@ -5946,7 +5943,7 @@ func expandPodSecurityPolicyConfig(configured interface{}) *container.PodSecurit
 		ForceSendFields: []string{"Enabled"},
 	}
 }
-
+{{- end }}
 func expandPodAutoscaling(configured interface{}) *container.PodAutoscaling {
 	if configured == nil {
 		return nil
@@ -5968,7 +5965,6 @@ func expandPodAutoscaling(configured interface{}) *container.PodAutoscaling {
 
 	return podAutoscaling
 }
-{{- end }}
 
 func expandSecretManagerConfig(configured interface{}) *container.SecretManagerConfig {
 	l := configured.([]interface{})
@@ -6940,7 +6936,7 @@ func flattenPodSecurityPolicyConfig(c *container.PodSecurityPolicyConfig) []map[
 		},
 	}
 }
-
+{{ end }}
 func flattenPodAutoscaling(c *container.PodAutoscaling) []map[string]interface{} {
 	config := make([]map[string]interface{}, 0, 1)
 
@@ -6953,8 +6949,6 @@ func flattenPodAutoscaling(c *container.PodAutoscaling) []map[string]interface{}
 	})
 	return config
 }
-
-{{ end }}
 
 func flattenSecretManagerConfig(c *container.SecretManagerConfig) []map[string]interface{} {
 	if c == nil {
