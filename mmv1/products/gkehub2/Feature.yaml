@@ -52,6 +52,7 @@ iam_policy:
     - '{{name}}'
 custom_code:
   pre_create: templates/terraform/pre_create/gkehub_existing_feature.go.tmpl
+  pre_delete: templates/terraform/pre_delete/gkehub_existing_feature.go.tmpl
 # Skip sweeper gen since this is a child resource.
 exclude_sweeper: true
 legacy_long_form_project: true
