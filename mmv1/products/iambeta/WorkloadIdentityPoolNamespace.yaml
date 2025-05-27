@@ -31,7 +31,6 @@ import_format:
   - 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/namespaces/{{workload_identity_pool_namespace_id}}'
 autogen_async: true
 custom_code:
-  constants: 'templates/terraform/constants/iam_workload_identity_pool_namespace.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workload_identity_pool_namespace.go.tmpl'
 examples:
@@ -39,12 +38,12 @@ examples:
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_namespace_id: 'example-nmspc'
+      workload_identity_pool_namespace_id: 'example-namespace'
   - name: 'iam_workload_identity_pool_namespace_full'
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_namespace_id: 'example-nmspc'
+      workload_identity_pool_namespace_id: 'example-namespace'
 parameters:
   - name: 'workload_identity_pool_id'
     type: String
@@ -69,8 +68,6 @@ parameters:
 
 
       The prefix `gcp-` will be reserved for future uses.
-    validation:
-      function: 'ValidateWorkloadIdentityPoolNamespaceId'
 properties:
   - name: 'name'
     type: String

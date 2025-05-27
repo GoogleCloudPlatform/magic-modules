@@ -30,7 +30,6 @@ import_format:
   - 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/namespaces/{{workload_identity_pool_namespace_id}}/managedIdentities/{{workload_identity_pool_managed_identity_id}}'
 autogen_async: true
 custom_code:
-  constants: 'templates/terraform/constants/iam_workload_identity_pool_managed_identity.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workload_identity_pool_managed_identity.go.tmpl'
 examples:
