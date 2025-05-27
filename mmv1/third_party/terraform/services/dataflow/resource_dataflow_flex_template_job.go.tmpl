@@ -484,7 +484,7 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	if _, ok := d.GetOk("max_num_workers"); !ok && optionsMap["maxNumWorkers"] == nil || optionsMap["maxNumWorkers"] == 0 {
 		optionsMap["maxNumWorkers"] = job.Environment.WorkerPools[0].AutoscalingSettings.MaxNumWorkers
 	}
-	if _, ok := d.GetOk("machite_type"); !ok && optionsMap["workerMachineType"] == nil || optionsMap["workerMachineType"] == "" {
+	if _, ok := d.GetOk("machine_type"); !ok && optionsMap["workerMachineType"] == nil || optionsMap["workerMachineType"] == "" {
 		optionsMap["workerMachineType"] = job.Environment.WorkerPools[0].MachineType
 	}
 
