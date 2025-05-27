@@ -1,4 +1,5 @@
 data "google_project" "project" {
+  provider = google-beta
 }
 
 resource "google_compute_cross_site_network" "example-cross-site-network" {
@@ -11,13 +12,8 @@ resource "google_compute_interconnect" "{{$.PrimaryResourceId}}" {
   name                 = "{{index $.Vars "interconnect_name"}}"
   customer_name        = "{{index $.Vars "customer_name"}}"
   interconnect_type    = "DEDICATED"
-  requested_features = [google_compute_cross_site_network.example-cross-site-network.name]
-  cross_site_network   = google_compute_cross_site_network.example-cross-site-network.name
+  requested_features  = ["CROSS_SITE_NETWORK"]
   provider            = google-beta
-  depends_on = [
-    google_compute_cross_site_network.example-cross-site-network
-  ]
-  available_features = [google_compute_cross_site_network.example-cross-site-network.name]
   link_type            = "LINK_TYPE_ETHERNET_10G_LR"
   location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.id}/global/interconnectLocations/z2z-us-west8-zone2-tzphxd-z" # Special location only available for Google testing.
   requested_link_count = 1

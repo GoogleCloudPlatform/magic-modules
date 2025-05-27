@@ -60,8 +60,9 @@ examples:
       interconnect_name: 'example-interconnect-cross-site-network'
       description: 'Example Interconnect'
       customer_name: 'example_customer'
-      cross_site_network: 'example_cross_site_network'
+      cross_site_network: 'example-cross-site-network'
     exclude_docs: true
+    min_version: beta
 parameters:
 properties:
   - name: 'description'
