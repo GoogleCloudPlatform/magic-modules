@@ -147,6 +147,17 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
               {{- end }}
             }
           },
+{{- if $.IdentityUpgraders }}
+          IdentityUpgraders: []schema.IdentityUpgrader{
+{{- range $v := $.IdentityUpgradersCount }}
+              {
+                Type: resource{{ $.ResourceName }}ResourceV{{$v}}().CoreConfigSchema().ImpliedType(),
+                Upgrade: Resource{{ $.ResourceName }}UpgradeV{{$v}},
+                Version: {{$v}},
+              },
+{{- end }}
+          },
+{{- end }}
         },
         Schema: map[string]*schema.Schema{
 			{{- range $prop := $.OrderProperties $.AllUserProperties }}
