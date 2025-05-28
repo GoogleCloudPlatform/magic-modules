@@ -946,7 +946,6 @@ resource "google_bigtable_instance" "instance" {
     zone       = "us-central1-b"
   }
 
-  instance_type = "DEVELOPMENT"
   deletion_protection = false
 }
 
