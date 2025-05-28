@@ -53,7 +53,7 @@ properties:
   - name: writer_identity
     type: string
     description: |
-      Output only. A service account name for exporting the data. This field is set by sinks.create and sinks.update.
+      A service account name for exporting the data. This field is set by sinks.create and sinks.update.
       The service account will need to be granted write access to the destination specified in the output configuration.
       To create tables and to write data, this account needs the dataEditor role.
       E.g.: "service-00000001@00000002.iam.gserviceaccount.com"
