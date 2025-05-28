@@ -46,7 +46,7 @@ properties:
       - name: destination
         type: string
         description: |
-          Required. The destination for writing trace data.
+         The destination for writing trace data.
           Supported formats include: "bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET]"
         required: true
 
