@@ -195,7 +195,7 @@ func TestAccBigtableTable_testTableWithRowKeySchema(t *testing.T) {
 						"encoding": { "orderedCodeBytes": { } }
 					}
 				}`),
-				ExpectError: regexp.MustCompile(".*Some error here.*"),
+				ExpectError: regexp.MustCompile(".*Row key schema in-place modification is not allowed.*"),
 			},
 			{
 				// Removing the schema is ok
