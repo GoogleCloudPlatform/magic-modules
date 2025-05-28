@@ -309,7 +309,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 
 {{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
 {{  if ($.GetAsync.IsA "OpAsync") -}}
-{{    if and $.GetAsync.Result.ResourceInsideResponse (or $.GetIdentity $.HasComputedIdFormatFields) -}}
+{{    if and $.GetAsync.Result.ResourceInsideResponse $.HasComputedIdFormatFields -}}
     // Use the resource in the operation response to populate
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
@@ -378,17 +378,6 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     {{-     end }}
     {{-   end }}{{/* prop is potentially computed */}}
     {{- end }}{{/* range */}}
-    {{- else}}
-{{- /*
-    Temporarily keeping these resources the same - but setting properties here should be unnecessary because the impacted fields aren't expected to change as a result of the API request. Will remove in a separate step for clarity.
- */}}
-{{- range $prop := $.GettableProperties }}
-{{-  if $.IsInIdentity $prop }}
-    if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
-        return err
-    }
-{{- end}}
-{{- end}}
     {{- end}}
 
     // This may have caused the ID to update - update it if so.
