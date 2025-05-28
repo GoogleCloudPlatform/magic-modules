@@ -7,7 +7,7 @@ weight: 50
 
 There are a number of ways to add client-side validation to resources. The benefit of client-side validation is that errors can be surfaced at plan time, instead of partway through a (potentially very long) apply process, allowing for faster iteration. However, the tradeoff is that client-side validation can get out of sync with server-side validation, creating additional maintenance burden for the provider and preventing users from accessing the latest features without upgrading.
 
-Our policy is that client-side validation is not required. It has some benefit, but is only safe if the API requirements are likely to stay static over time. It is usually not worth the potential cost of breaking future-compatibility.
+Client-side validation is generally discouraged due to the low positive impact of an individual validation rule and outsized negative impact when client-side validation and API capabilities drift, requiring both provider changes and users to update. Client-side validation may be added in cases where it is extremely unlikely to change, covered below.
 
 In theory, APIs that have a validation endpoint could use it to ensure that client-side validation always matches server-side validation. However, this is not a well-lit path. Follow [hashicorp/terraform-provider-google#20713](https://github.com/hashicorp/terraform-provider-google/issues/20713) for more information.
 
@@ -25,7 +25,7 @@ Adding validation for the last part of the path (`resource_id`) is likely safe i
 
 ## Enum
 
-Enums are generally okay if they seem to cover the entire scope of possible values for a clearly defined domain. Otherwise, it is better to use a string field and add a link to the API documentation as a reference for the possible values.
+Enums are generally okay if they are exhaustive of all possible values for a clearly defined domain, i.e. where new values are extremely unlikely. Otherwise, it is better to use a string field and add a link to the API documentation as a reference for the possible values.
 
 ## Inter-field relationships
 
