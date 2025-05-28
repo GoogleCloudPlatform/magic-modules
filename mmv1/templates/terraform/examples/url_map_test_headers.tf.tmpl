@@ -1,0 +1,58 @@
+resource "google_compute_health_check" "{{$.Vars.health_check_name}}" {
+  name               = "{{index $.Vars "health_check_name"}}"
+  timeout_sec        = 1
+  check_interval_sec = 1
+
+  tcp_health_check {
+    port = "80"
+  }
+}
+
+resource "google_compute_backend_service" "{{$.Vars.backend_service_name}}" {
+  name        = "{{index $.Vars "backend_service_name"}}"
+  port_name   = "http"
+  protocol    = "HTTP"
+  timeout_sec = 10
+
+  health_checks = [google_compute_health_check.{{$.Vars.health_check_name}}.id]
+}
+
+resource "google_compute_url_map" "{{$.PrimaryResourceId}}" {
+  name            = "{{index $.Vars "url_map_name"}}"
+  description     = "URL map with test headers"
+  default_service = google_compute_backend_service.{{$.Vars.backend_service_name}}.id
+
+  test {
+    description = "Test with custom headers"
+    host        = "example.com"
+    path        = "/"
+    service     = google_compute_backend_service.{{$.Vars.backend_service_name}}.id
+    
+    headers {
+      name  = "User-Agent"
+      value = "TestBot/1.0"
+    }
+    
+    headers {
+      name  = "X-Custom-Header"
+      value = "test-value"
+    }
+  }
+
+  test {
+    description = "Test with authorization headers"
+    host        = "api.example.com"
+    path        = "/v1/test"
+    service     = google_compute_backend_service.{{$.Vars.backend_service_name}}.id
+    
+    headers {
+      name  = "Authorization"
+      value = "Bearer token123"
+    }
+    
+    headers {
+      name  = "Content-Type"
+      value = "application/json"
+    }
+  }
+} 
