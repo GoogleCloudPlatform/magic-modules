@@ -40,7 +40,7 @@ parameters:
 properties:
   - name: output_config
     type: object
-    description: Required. The export destination.
+    description: The export destination.
     required: true
     properties:
       - name: destination
