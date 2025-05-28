@@ -276,3 +276,11 @@ properties:
     immutable: true
     validation:
       regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
+  - name: 'loadBalancingScheme'
+    type: Enum
+    description: |
+      The value can only be INTERNAL_MANAGED for cross-region internal layer 7 load balancer.
+      If loadBalancingScheme is not specified, the backend bucket can be used by classic global external load balancers, or global application external load balancers, or both.
+    enum_values:
+      - 'INTERNAL_MANAGED'
+    send_empty_value: true
