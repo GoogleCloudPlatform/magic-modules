@@ -28,6 +28,15 @@ update_verb: 'PATCH'
 update_mask: true
 autogen_async: false
 
+examples:
+  - name: 'cloud_trace_sink_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloud-trace-trace-sink-test%s", context["random_suffix"])'
+    vars:
+      cloud_trace_sink_name: 'cloud-trace-trace-sink-test'
+      cloud_trace_sink_output_config_destination: 'fmt.Sprintf("bigquery.googleapis.com/projects/%s/datasets/traces", context["project_id"])'
+    min_version: beta
+
 parameters:
   - name: 'name'
     type: String
@@ -39,14 +48,14 @@ parameters:
 
 properties:
   - name: output_config
-    type: object
+    type: NestedObject
     description: The export destination.
     required: true
     properties:
       - name: destination
         type: string
         description: |
-         The destination for writing trace data.
+          The destination for writing trace data.
           Supported formats include: "bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET]"
         required: true
 
