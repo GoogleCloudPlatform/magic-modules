@@ -29,8 +29,9 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 create_verb: 'PATCH'
+update_verb: 'PATCH'
 custom_code:
-  decoder: 'templates/terraform/decoders/compute_snapshot_settings.go.tmpl'
+  encoder: 'templates/terraform/encoders/compute_snapshot_settings.go.tmpl'
 # there is only a GET and PATCH endpoint
 exclude_delete: true
 examples:
