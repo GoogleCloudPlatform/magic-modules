@@ -135,7 +135,7 @@ func ResourceStorageBucketObject() *schema.Resource {
 			"source_md5hash": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: `Used to trigger updates, Base 64 MD5 hash of the uploaded data.`,
+				Description: `User-provided md5hash, Base 64 MD5 hash of the object data.`,
 			},
 
 			// Detect changes to local file or changes made outside of Terraform to the file stored on the server.
