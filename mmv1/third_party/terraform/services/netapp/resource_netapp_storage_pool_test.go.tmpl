@@ -211,7 +211,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   total_throughput_mibps = "64"
   total_iops = "1024"
   hot_tier_size_gib = "1024"
-  enable_hot_tier_auto_resize = true
+  enable_hot_tier_auto_resize = false
 }
 `, context)
 }
