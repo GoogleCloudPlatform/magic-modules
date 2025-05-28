@@ -9,8 +9,6 @@ There are a number of ways to add client-side validation to resources. The benef
 
 Client-side validation is generally discouraged due to the low positive impact of an individual validation rule and outsized negative impact when client-side validation and API capabilities drift, requiring both provider changes and users to update. Client-side validation may be added in cases where it is extremely unlikely to change, covered below.
 
-In theory, APIs that have a validation endpoint could use it to ensure that client-side validation always matches server-side validation. However, this is not a well-lit path. Follow [hashicorp/terraform-provider-google#20713](https://github.com/hashicorp/terraform-provider-google/issues/20713) for more information.
-
 The following sections cover best practices for specific types of client-side validation.
 
 ## URL segments
@@ -21,11 +19,11 @@ If a resource URL looks like:
 projects/{project}/folders/{folder}/resource/{resource_id}
 ```
 
-Adding validation for the last part of the path (`resource_id`) is likely safe in most cases, especially for GCE resources.
+Adding validation for the last part of the path (`resource_id`) may be safe if there are specific restrictions that are not going to change. However, if the API was ever less restrictive (or becomes less restrictive later), resources created with other tools may not be possible to import into Terraform safely.
 
 ## Enum
 
-Enums are generally okay if they are exhaustive of all possible values for a clearly defined domain, i.e. where new values are extremely unlikely. Otherwise, it is better to use a string field and add a link to the API documentation as a reference for the possible values.
+Enums are generally okay if they are exhaustive of all possible values for a clearly defined domain where new values are extremely unlikely. Otherwise, it is better to use a string field and add a link to the API documentation as a reference for the possible values.
 
 ## Inter-field relationships
 
