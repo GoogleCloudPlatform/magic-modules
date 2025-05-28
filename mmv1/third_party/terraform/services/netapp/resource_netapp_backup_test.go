@@ -328,8 +328,9 @@ resource "google_netapp_backup" "test_backup" {
 
 func TestAccNetappBackup_NetappImmutableBackup(t *testing.T) {
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
-		"random_suffix": acctest.RandString(t, 10),
+		"network_name":    acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"random_suffix_1": acctest.RandString(t, 10),
+		"random_suffix_2": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -368,7 +369,7 @@ data "google_compute_network" "default" {
   name = "%{network_name}"
 }
 resource "google_netapp_storage_pool" "default" {
-  name = "tf-test-backup-pool%{random_suffix}"
+  name = "tf-test-backup-pool%{random_suffix_1}"
   location = "us-central1"
   service_level = "FLEX"
   capacity_gib = "2048"
@@ -381,19 +382,22 @@ resource "time_sleep" "wait_3_minutes" {
     create_duration = "3m"
 }
 resource "google_netapp_volume" "default" {
-  name = "tf-test-backup-volume%{random_suffix}"
+  name = "tf-test-backup-volume%{random_suffix_1}"
   location = "us-central1"
   capacity_gib = "100"
-  share_name = "tf-test-backup-volume%{random_suffix}"
+  share_name = "tf-test-backup-volume%{random_suffix_1}"
   storage_pool = google_netapp_storage_pool.default.name
   protocols = ["NFSV3"]
   deletion_policy = "FORCE"
   backup_config {
     backup_vault = google_netapp_backup_vault.default.id
   }
+   lifecycle {
+    ignore_changes = [backup_config]
+  }
 }
 resource "google_netapp_backup_vault" "default" {
-  name = "tf-test-backup-vault%{random_suffix}"
+  name = "tf-test-backup-vault%{random_suffix_1}"
   location = "us-central1"
   backup_retention_policy {
     backup_minimum_enforced_retention_days = 2
@@ -408,14 +412,14 @@ resource "google_netapp_volume_snapshot" "default" {
   location = "us-central1"
   volume_name = google_netapp_volume.default.name
   description = "This is a test description"
-  name = "testvolumesnap%{random_suffix}"
+  name = "testvolumesnap%{random_suffix_1}"
   labels = {
     key= "test"
     value= "snapshot"
   }
 }
 resource "google_netapp_backup" "test_backup" {
-  name = "tf-test-test-backup%{random_suffix}"
+  name = "tf-test-test-backup%{random_suffix_1}"
   description = "This is a test immutable backup"
   source_volume = google_netapp_volume.default.id
   location = "us-central1"
@@ -435,7 +439,7 @@ data "google_compute_network" "default" {
   name = "%{network_name}"
 }
 resource "google_netapp_storage_pool" "default" {
-  name = "tf-test-backup-pool%{random_suffix}"
+  name = "tf-test-backup-pool%{random_suffix_1}"
   location = "us-central1"
   service_level = "FLEX"
   capacity_gib = "2048"
@@ -448,17 +452,17 @@ resource "time_sleep" "wait_3_minutes" {
     create_duration = "3m"
 }
 resource "google_netapp_volume" "default" {
-  name = "tf-test-backup-volume%{random_suffix}"
+  name = "tf-test-backup-volume%{random_suffix_1}"
   location = "us-central1"
   capacity_gib = "100"
-  share_name = "tf-test-backup-volume%{random_suffix}"
+  share_name = "tf-test-backup-volume%{random_suffix_1}"
   storage_pool = google_netapp_storage_pool.default.name
   protocols = ["NFSV3"]
   deletion_policy = "FORCE"
 }
 // Create a NEW backup vault with the updated policy
 resource "google_netapp_backup_vault" "updated_vault" {
-  name = "tf-test-backup-vault-updated%{random_suffix}"
+  name = "tf-test-backup-vault%{random_suffix_2}"
   location = "us-central1"
   backup_retention_policy {
     backup_minimum_enforced_retention_days = 10
@@ -473,14 +477,14 @@ resource "google_netapp_volume_snapshot" "default" {
   location = "us-central1"
   volume_name = google_netapp_volume.default.name
   description = "This is a test description"
-  name = "testvolumesnap%{random_suffix}"
+  name = "testvolumesnap%{random_suffix_1}"
   labels = {
     key= "test"
     value= "snapshot"
   }
 }
 resource "google_netapp_backup" "test_backup" {
-  name = "tf-test-test-backup%{random_suffix}"
+  name = "tf-test-test-backup%{random_suffix_1}"
   description = "This is a test immutable backup"
   source_volume = google_netapp_volume.default.id
   location = "us-central1"
@@ -490,6 +494,7 @@ resource "google_netapp_backup" "test_backup" {
     key= "test"
     value= "backup"
   }
+    depends_on = [google_netapp_volume.default, google_netapp_backup_vault.updated_vault]
 }
 `, context)
 }
