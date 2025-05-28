@@ -38,15 +38,9 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250505200425-f936aa4a68b2
 	google.golang.org/grpc v1.72.1
 	google.golang.org/protobuf v1.36.6
-	gopkg.in/yaml.v2 v2.4.0
-)
-
-require (
-	bitbucket.org/creachadair/stringset v0.0.8 // indirect
 	cel.dev/expr v0.23.0 // indirect
 	cloud.google.com/go v0.121.0 // indirect
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
-	cloud.google.com/go/iam v1.5.2 // indirect
 	cloud.google.com/go/longrunning v0.6.7 // indirect
 	cloud.google.com/go/monitoring v1.24.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
