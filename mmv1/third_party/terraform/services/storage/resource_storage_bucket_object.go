@@ -140,7 +140,8 @@ func ResourceStorageBucketObject() *schema.Resource {
 
 			// Detect changes to local file or changes made outside of Terraform to the file stored on the server.
 			"detect_md5hash": {
-				Type: schema.TypeString,
+				Type:       schema.TypeString,
+				Deprecated: "`detect_md5hash` field will be deprecated in future release. Start using `source_md5hash` instead",
 				// This field is not Computed because it needs to trigger a diff.
 				Optional: true,
 				// Makes the diff message nicer:
