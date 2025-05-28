@@ -455,9 +455,6 @@ resource "google_netapp_volume" "default" {
   storage_pool = google_netapp_storage_pool.default.name
   protocols = ["NFSV3"]
   deletion_policy = "FORCE"
-    backup_config {
-        backup_vault = google_netapp_backup_vault.updated_vault.id
-    }
 }
 // Create a NEW backup vault with the updated policy
 resource "google_netapp_backup_vault" "updated_vault" {
