@@ -202,7 +202,6 @@ properties:
     min_version: 'beta'
   - name: 'enableHotTierAutoResize'
     type: Boolean
-    default_value: true
     send_empty_value: true
     description: |
       Flag indicating that the hot-tier threshold will be auto-increased by 10% of the hot-tier when it hits 100%. Default is true.
