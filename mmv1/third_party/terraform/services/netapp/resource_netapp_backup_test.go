@@ -455,19 +455,20 @@ resource "google_netapp_volume" "default" {
   storage_pool = google_netapp_storage_pool.default.name
   protocols = ["NFSV3"]
   deletion_policy = "FORCE"
-  backup_config {
-    backup_vault = google_netapp_backup_vault.default.id
-  }
+    backup_config {
+        backup_vault = google_netapp_backup_vault.updated_vault.id
+    }
 }
-resource "google_netapp_backup_vault" "default" {
-  name = "tf-test-backup-vault%{random_suffix}"
+// Create a NEW backup vault with the updated policy
+resource "google_netapp_backup_vault" "updated_vault" {
+  name = "tf-test-backup-vault-updated%{random_suffix_update}"
   location = "us-central1"
   backup_retention_policy {
     backup_minimum_enforced_retention_days = 10
-    daily_backup_immutable = true
-    weekly_backup_immutable = false
-    monthly_backup_immutable = false
-    manual_backup_immutable = false
+    daily_backup_immutable = false
+    weekly_backup_immutable = true
+    monthly_backup_immutable = true
+    manual_backup_immutable = true
   }
 }
 resource "google_netapp_volume_snapshot" "default" {
@@ -486,7 +487,7 @@ resource "google_netapp_backup" "test_backup" {
   description = "This is a test immutable backup"
   source_volume = google_netapp_volume.default.id
   location = "us-central1"
-  vault_name = google_netapp_backup_vault.default.name
+  vault_name = google_netapp_backup_vault.updated_vault.name
   source_snapshot = google_netapp_volume_snapshot.default.id
   labels = {
     key= "test"
