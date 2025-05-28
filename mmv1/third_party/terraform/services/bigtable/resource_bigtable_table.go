@@ -435,6 +435,9 @@ func resourceBigtableTableRead(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 		d.Set("row_key_schema", string(marshalledRowKey))
+	} else {
+		// String value is default to empty string, so need to set it to nil to specify that the row key schema is not set.
+		d.Set("row_key_schema", nil)
 	}
 
 	return nil

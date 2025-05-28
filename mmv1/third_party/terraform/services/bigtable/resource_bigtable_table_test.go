@@ -204,6 +204,36 @@ func TestAccBigtableTable_testTableWithRowKeySchema(t *testing.T) {
 					testAccBigtableRowKeySchemaExists(t, "google_bigtable_table.table", false),
 				),
 			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Set the schema to a new one is ok
+			{
+				Config: testAccBigtableTable_rowKeySchema(instanceName, tableName, family, `{
+					"structType": {
+						"fields": [
+						    {
+								"fieldName": "mystringfield",
+								"type": {
+									"stringType": { "encoding": { "utf8Bytes": { } } }
+								}
+							},
+							{
+								"fieldName": "myintfield",
+								"type": {
+									"int64Type": { "encoding": { "bigEndianBytes": { } } }
+								}
+							}
+						],
+						"encoding": { "delimitedBytes": { "delimiter": "Iw==" } }
+					}
+				}`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBigtableRowKeySchemaExists(t, "google_bigtable_table.table", true),
+				),
+			},
 		},
 	})
 }
@@ -946,6 +976,7 @@ resource "google_bigtable_instance" "instance" {
     zone       = "us-central1-b"
   }
 
+  instance_type = "DEVELOPMENT"
   deletion_protection = false
 }
 
