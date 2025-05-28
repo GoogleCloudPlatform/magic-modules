@@ -19,7 +19,7 @@ If a resource URL looks like:
 projects/{project}/folders/{folder}/resource/{resource_id}
 ```
 
-Adding validation for the last part of the path (`resource_id`) may be safe if there are specific restrictions that are not going to change. However, if the API was ever less restrictive (or becomes less restrictive later), resources created with other tools may not be possible to import into Terraform safely.
+Adding validation for the last part of the path (`resource_id`) may be safe if there are specific restrictions that are not going to change. However, if the API was ever less restrictive (or becomes less restrictive later), resources created with other tools and then imported into Terraform may be impossible to actually manage with Terraform (without deleting & recreating them) because the ID which was valid in the API violates the more restrictive validation in the provider.
 
 ## Enum
 
