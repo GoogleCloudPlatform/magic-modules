@@ -248,9 +248,8 @@ resource "google_netapp_backup" "test_backup" {
 
 func TestAccNetappBackup_NetappIntegratedBackup(t *testing.T) {
 	context := map[string]interface{}{
-		"network_name":         acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
-		"random_suffix":        acctest.RandString(t, 10),
-		"random_suffix_update": acctest.RandString(t, 10),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -462,7 +461,7 @@ resource "google_netapp_volume" "default" {
 }
 // Create a NEW backup vault with the updated policy
 resource "google_netapp_backup_vault" "updated_vault" {
-  name = "tf-test-backup-vault-updated%{random_suffix_update}"
+  name = "tf-test-backup-vault-updated%{random_suffix}"
   location = "us-central1"
   backup_retention_policy {
     backup_minimum_enforced_retention_days = 10
