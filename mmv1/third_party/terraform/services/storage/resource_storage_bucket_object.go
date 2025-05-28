@@ -132,6 +132,12 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Description:  `A path to the data you want to upload. Must be defined if content is not.`,
 			},
 
+			"source_md5hash": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `Used to trigger updates, Base 64 MD5 hash of the uploaded data.`,
+			},
+
 			// Detect changes to local file or changes made outside of Terraform to the file stored on the server.
 			"detect_md5hash": {
 				Type: schema.TypeString,
@@ -477,8 +483,17 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("md5hexhash", md5HexHash); err != nil {
 		return fmt.Errorf("Error setting md5hexhash: %s", err)
 	}
-	if err := d.Set("detect_md5hash", res.Md5Hash); err != nil {
-		return fmt.Errorf("Error setting detect_md5hash: %s", err)
+	if v, ok := d.GetOk("source_md5hash"); ok {
+		if err := d.Set("source_md5hash", v); err != nil {
+			return fmt.Errorf("Error setting source_md5hash: %s", err)
+		}
+		if err := d.Set("detect_md5hash", d.Get("detect_md5hash")); err != nil {
+			return fmt.Errorf("Error setting detect_md5hash: %s", err)
+		}
+	} else {
+		if err := d.Set("detect_md5hash", res.Md5Hash); err != nil {
+			return fmt.Errorf("Error setting detect_md5hash: %s", err)
+		}
 	}
 	if err := d.Set("generation", res.Generation); err != nil {
 		return fmt.Errorf("Error setting generation: %s", err)
