@@ -397,7 +397,7 @@ resource "google_netapp_backup_vault" "default" {
   location = "us-central1"
   backup_retention_policy {
     backup_minimum_enforced_retention_days = 2
-    daily_backup_immutable = false
+    daily_backup_immutable = true
     weekly_backup_immutable = false
     monthly_backup_immutable = false
     manual_backup_immutable = false
