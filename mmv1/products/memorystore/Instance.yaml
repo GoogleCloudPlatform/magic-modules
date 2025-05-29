@@ -777,7 +777,7 @@ properties:
         is_set: true
         description: |
           URIs of the GCS objects to import.
-          Example: gs://bucket1/object1, gs//bucket2/folder2/object2
+          Example: gs://bucket1/object1, gs://bucket2/folder2/object2
         immutable: true
         required: true
         item_type:
@@ -793,7 +793,7 @@ properties:
       - name: 'backup'
         type: String
         description: |
-          Example: //memorystore.googleapis.com/projects/{project}/locations/{location}/backups/{backupId}. In this case, it assumes the backup is under memorystore.googleapis.com.
+          Example: `projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backup}`.
         immutable: true
         required: true
   - name: 'backupCollection'
