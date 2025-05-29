@@ -66,7 +66,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
   transformed := make(map[string]interface{})
       {{- range $prop := $.NestedProperties }}
         {{- if not (and (hasPrefix $prop.Type "KeyValue") $prop.IgnoreWrite) }}
-  transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}({{ if $prop.FlattenObject }}nil{{ else }}d.Get("{{ underscore $prop.Name }}"), d, config)
+  transformed{{$prop.TitlelizeProperty}}, err := expand{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}({{ if $prop.FlattenObject }}nil{{ else if $prop.WriteOnly }}d.GetRawConfig().GetAttr("{{ underscore $prop.Name }}").AsString(){{ else }}d.Get("{{ underscore $prop.Name }}"), d, config)
   if err != nil {
     return nil, err
           {{- if $prop.SendEmptyValue }}
