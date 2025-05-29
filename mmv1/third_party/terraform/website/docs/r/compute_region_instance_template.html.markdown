@@ -757,6 +757,8 @@ exported:
 
 * `metadata_fingerprint` - The unique fingerprint of the metadata.
 
+* `numeric_id` - numeric identifier of the resource.
+
 * `self_link` - The URI of the created resource.
 
 * `tags_fingerprint` - The unique fingerprint of the tags.
