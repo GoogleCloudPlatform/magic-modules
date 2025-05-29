@@ -203,7 +203,7 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
-      immutable: true
+        immutable: true
         custom_flatten: 'templates/terraform/custom_flatten/compute_key_flatten.go.tmpl'
         conflicts:
           - 'disk_encryption_key.0.rawKeyWo'
