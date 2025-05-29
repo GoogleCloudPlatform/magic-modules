@@ -93,11 +93,21 @@ resource "google_project" "project" {
   deletion_policy = "DELETE"
 }
 
+resource "google_project_service" "compute" {
+  project = google_project.project.project_id
+  service = "compute.googleapis.com"
+}
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute]
+}
+
 resource "google_compute_snapshot_settings" "tf_test_snapshot_settings" {
     project   = google_project.project.project_id
     storage_location {
         policy    = "NEAREST_MULTI_REGION"
     }
+    depends_on = [time_sleep.wait_120_seconds]
 }
 `, context)
 }
