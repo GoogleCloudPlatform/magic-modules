@@ -52,8 +52,6 @@ examples:
     primary_resource_id: 'tf-test-snapshot-settings'
     vars:
       policy: 'SPECIFIC_LOCATIONS'
-    test_env_vars:
-      project: 'PROJECT_NAME'
 parameters:
 properties:
   - name: 'storageLocation'
