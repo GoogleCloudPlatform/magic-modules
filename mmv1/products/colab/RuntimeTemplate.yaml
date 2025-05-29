@@ -205,6 +205,7 @@ properties:
                             The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped
                             references will never be expanded, regardless of whether the variable exists or not.'
       - name: 'postStartupScriptConfig'
+        deprecation_message: '`post_startup_script_config` is deprecated and will be removed in a future major release. New resource creation with this field is unavailable at this time.'
         type: NestedObject
         description: 'Post startup script config.'
         properties:
