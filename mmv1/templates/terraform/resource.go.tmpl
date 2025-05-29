@@ -192,7 +192,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- if $prop.SendEmptyValue -}}
     } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop) {
 {{-      else if $prop.FlattenObject -}}
-    } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop{{if $prop.WriteOnly -}}Wo{{- end}})) {
+    } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop)) {
 {{-      else -}}
     } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop)) {
 {{- end}}
