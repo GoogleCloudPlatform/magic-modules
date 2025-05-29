@@ -28,8 +28,8 @@ if d.Get("name").(string) == "rbacrolebindingactuation" {
     rrbActuationFeature.([]interface{})[0].(map[string]interface{})["allowed_custom_roles"] = []string{}
     
     if err := d.Set("spec", spec); err != nil {
-			return err
-		}
+      return err
+    }
     return resourceGKEHub2FeatureUpdate(d, meta)
   }
 }
