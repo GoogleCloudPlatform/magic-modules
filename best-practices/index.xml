@@ -35,4 +35,8 @@
  &lt;a class="anchor" href="#singletons">#&lt;/a>
 &lt;/h2>
 &lt;p>Singletons are resources – often config or settings objects – that can only exist once. In some cases, it may be possible to create and delete the resource (but only one can exist at a time); in other cases the resource &lt;em>always&lt;/em> exists and can only be read and updated.&lt;/p>
-&lt;p>Implementing resources like this may require some or all of the following:&lt;/p></description></item></channel></rss>
+&lt;p>Implementing resources like this may require some or all of the following:&lt;/p></description></item><item><title>Validation</title><link>https://googlecloudplatform.github.io/magic-modules/best-practices/validation/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://googlecloudplatform.github.io/magic-modules/best-practices/validation/</guid><description>&lt;h1 id="validation">
+ Validation
+ &lt;a class="anchor" href="#validation">#&lt;/a>
+&lt;/h1>
+&lt;p>There are a number of ways to add client-side validation to resources. The benefit of client-side validation is that errors can be surfaced at plan time, instead of partway through a (potentially very long) apply process, allowing for faster iteration. However, the tradeoff is that client-side validation can get out of sync with server-side validation, creating additional maintenance burden for the provider and preventing users from accessing the latest features without upgrading.&lt;/p></description></item></channel></rss>
