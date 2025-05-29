@@ -59,7 +59,6 @@ resource "google_gemini_gemini_gcp_enablement_setting" "basic" {
     location = "global"
     labels = {"my_key": "my_value"}
     enable_customer_data_sharing = true
-	disable_web_grounding = true
 }
 
 resource "google_gemini_gemini_gcp_enablement_setting_binding" "basic_binding" {
@@ -81,7 +80,6 @@ resource "google_gemini_gemini_gcp_enablement_setting" "basic" {
     location = "global"
     labels = {"my_key" = "my_value"}
     enable_customer_data_sharing = false
-	disable_web_grounding = false
 }
 
 resource "google_gemini_gemini_gcp_enablement_setting_binding" "basic_binding" {
