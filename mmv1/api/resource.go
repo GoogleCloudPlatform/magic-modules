@@ -881,6 +881,10 @@ func (r Resource) StateMigrationFile() string {
 	return fmt.Sprintf("templates/terraform/state_migrations/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
 }
 
+func (r Resource) IdentityUpgraderFile() string {
+	return fmt.Sprintf("templates/terraform/identity_upgraders/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
+}
+
 // ====================
 // Version-related methods
 // ====================
