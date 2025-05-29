@@ -793,7 +793,7 @@ properties:
       - name: 'backup'
         type: String
         description: |
-          Example: /projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backup}.
+          Example: `projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backup}`.
         immutable: true
         required: true
   - name: 'backupCollection'
