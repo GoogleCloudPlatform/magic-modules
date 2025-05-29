@@ -3,7 +3,7 @@
 if d.Get("name").(string) == "rbacrolebindingactuation" {
   getUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}GKEHub2BasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/features/{{"{{"}}name{{"}}"}}")
   if err != nil {
-  	return err
+    return err
   }
   _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
   	Config:    config,
