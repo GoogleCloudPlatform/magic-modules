@@ -179,7 +179,6 @@ properties:
       It is not returned by the API.
     api_name: 'sharedSecret'
     write_only: true
-    ignore_read: true
     exactly_one_of:
       - 'shared_secret'
       - 'shared_secret_wo'
