@@ -159,3 +159,46 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 	}
 }
 {{- end }}
+
+func TestAcc{{ $.Res.ResourceName }}_ResourceIdentity(t *testing.T) {
+	t.Parallel()
+	{{- if gt (len $.Res.TestExamples) 0 }}
+	context := map[string]interface{}{
+	{{- template "EnvVarContext" dict "TestEnvVars" (index $.Res.TestExamples 0).TestEnvVars "HasNewLine" false}}
+	{{- range $varKey, $varVal := (index $.Res.TestExamples 0).TestVarsOverrides }}
+		"{{$varKey}}": {{$varVal}},
+	{{- end }}
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc{{ (index $.Res.TestExamples 0).TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectIdentity(
+						"{{ $.Res.TerraformName }}.test_identity",
+						map[string]knownvalue.Check{
+							{{- range $e := $.Res.IdentityProperties }}
+							"{{ $e.Name }}": knownvalue.StringExact(context["{{ $e.Name }}"].(string)),
+							{{- end }}
+						},
+					),
+				},
+			},
+			{
+				ResourceName:    "{{ $.Res.TerraformName }}.test_identity",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
+	{{- else }}
+	t.Skip("Skipping resource identity test as no test examples are defined.")
+	{{- end }}
+}
