@@ -14,10 +14,10 @@ func TestAccEventarcPipeline_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"service_account":         envvar.GetTestServiceAccountFromEnv(t),
-		"key_name":                acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key").CryptoKey.Name,
-		"key2_name":               acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key2").CryptoKey.Name,
-		"random_suffix":           acctest.RandString(t, 10),
+		"service_account": envvar.GetTestServiceAccountFromEnv(t),
+		"key_name":        acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key").CryptoKey.Name,
+		"key2_name":       acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key2").CryptoKey.Name,
+		"random_suffix":   acctest.RandString(t, 10),
 	}
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{
 		{

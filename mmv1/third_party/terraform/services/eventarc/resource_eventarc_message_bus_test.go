@@ -413,8 +413,8 @@ resource "google_eventarc_message_bus" "message_bus" {
 // concerned with testing the Pipeline resource, which depends on a singleton MessageBus.
 func testAccEventarcMessageBus_pipeline(t *testing.T) {
 	context := map[string]interface{}{
-		"region":                  envvar.GetTestRegionFromEnv(),
-		"random_suffix":           acctest.RandString(t, 10),
+		"region":        envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -456,8 +456,8 @@ resource "google_eventarc_message_bus" "primary" {
 // concerned with testing the Enrollment resource, which depends on a singleton MessageBus.
 func testAccEventarcMessageBus_enrollment(t *testing.T) {
 	context := map[string]interface{}{
-		"region":                  envvar.GetTestRegionFromEnv(),
-		"random_suffix":           acctest.RandString(t, 10),
+		"region":        envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -518,8 +518,8 @@ resource "google_eventarc_message_bus" "message_bus" {
 // concerned with testing the Enrollment resource, which depends on a singleton MessageBus.
 func testAccEventarcMessageBus_updateEnrollment(t *testing.T) {
 	context := map[string]interface{}{
-		"region":                  envvar.GetTestRegionFromEnv(),
-		"random_suffix":           acctest.RandString(t, 10),
+		"region":        envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
