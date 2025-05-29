@@ -77,7 +77,6 @@ properties:
   - name: 'customHeaders'
     type: KeyValuePairs
     description: user can set custom headers
-    ignore_read: true
     url_param_only: true
   - name: createTime
     type: String
