@@ -16,13 +16,20 @@ if d.Get("name").(string) == "rbacrolebindingactuation" {
   
   if err == nil {
     // Fleet feature exists as expected
-    log.Printf("[DEBUG] Fleet feature already exists %s", d.Get("name"))
+    log.Printf("[DEBUG] Fleet feature exists %s", d.Get("name"))
     id, err := tpgresource.ReplaceVars(d, config, "{{$.GetIdFormat}}")
     if err != nil {
       return fmt.Errorf("Error constructing id: %s", err)
     }
     d.SetId(id)
-    d.Set("spec", nil)
+    // Clear the allowed custom roles to reset the feature.
+    spec := d.Get("spec")
+    rrbActuationFeature := spec.([]interface{})[0].(map[string]interface{})["rbacrolebindingactuation"]
+    rrbActuationFeature.([]interface{})[0].(map[string]interface{})["allowed_custom_roles"] = []string{}
+    
+    if err := d.Set("spec", spec); err != nil {
+			return err
+		}
     return resourceGKEHub2FeatureUpdate(d, meta)
   }
 }
