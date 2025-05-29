@@ -154,6 +154,23 @@ examples:
       http_health_check_name: 'health-check'
       storage_bucket_name: 'static-asset-bucket'
       error_backend_bucket_name: 'error-backend-bucket'
+  - name: 'url_map_http_filter_configs'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    vars:
+      url_map_name: 'urlmap'
+      default_backend_service_name: 'default-backend'
+      service_a_backend_service_name: 'service-a-backend'
+      health_check_name: 'health-check'
+  - name: 'url_map_http_filter_metadata'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    vars:
+      url_map_name: 'urlmap'
+      default_backend_service_name: 'default-backend'
+      service_a_backend_service_name: 'service-a-backend'
+      service_b_backend_service_name: 'service-b-backend'
+      health_check_name: 'health-check'
 parameters:
 properties:
   - name: 'creationTimestamp'
@@ -1831,6 +1848,60 @@ properties:
                       If load balancer cannot reach the backendBucket, a simple Not Found Error will be returned, with the original response code (or overrideResponseCode if configured).
                     resource: 'BackendBucket'
                     imports: 'selfLink'
+              - name: 'httpFilterConfigs'
+                type: Array
+                min_version: 'beta'
+                description: |
+                  Outbound route specific configuration for networkservices.HttpFilter resources enabled by Traffic Director.
+                  httpFilterConfigs only applies for load balancers with loadBalancingScheme set to INTERNAL_SELF_MANAGED.
+                  See ForwardingRule for more details.
+
+                  Not supported when the URL map is bound to a target gRPC proxy that has validateForProxyless field set to true.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'filterName'
+                      type: String
+                      description: |
+                        Name of the networkservices.HttpFilter resource this configuration belongs to.
+                        This name must be known to the xDS client. Example: envoy.wasm
+                    - name: 'configTypeUrl'
+                      type: String
+                      description: |
+                        The fully qualified versioned proto3 type url of the protobuf that the filter expects for its contextual settings,
+                        for example: type.googleapis.com/google.protobuf.Struct
+                    - name: 'config'
+                      type: String
+                      description: |
+                        The configuration needed to enable the networkservices.HttpFilter resource.
+                        The configuration must be YAML formatted and only contain fields defined in the protobuf identified in configTypeUrl
+              - name: 'httpFilterMetadata'
+                type: Array
+                min_version: 'beta'
+                description: |
+                  Outbound route specific metadata supplied to networkservices.HttpFilter resources enabled by Traffic Director.
+                  httpFilterMetadata only applies for load balancers with loadBalancingScheme set to INTERNAL_SELF_MANAGED.
+                  See ForwardingRule for more details.
+
+                  Not supported when the URL map is bound to a target gRPC proxy that has validateForProxyless field set to true.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'filterName'
+                      type: String
+                      description: |
+                        Name of the networkservices.HttpFilter resource this configuration belongs to.
+                        This name must be known to the xDS client. Example: envoy.wasm
+                    - name: 'configTypeUrl'
+                      type: String
+                      description: |
+                        The fully qualified versioned proto3 type url of the protobuf that the filter expects for its contextual settings,
+                        for example: type.googleapis.com/google.protobuf.Struct
+                    - name: 'config'
+                      type: String
+                      description: |
+                        The configuration needed to enable the networkservices.HttpFilter resource.
+                        The configuration must be YAML formatted and only contain fields defined in the protobuf identified in configTypeUrl
         - name: 'defaultUrlRedirect'
           type: NestedObject
           # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
