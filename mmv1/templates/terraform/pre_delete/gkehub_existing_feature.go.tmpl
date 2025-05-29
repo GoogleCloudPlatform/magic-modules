@@ -16,8 +16,8 @@ if d.Get("name").(string) == "rbacrolebindingactuation" {
   
   if err == nil {
   	// Fleet feature exists as expected
-  	log.Printf("[DEBUG] Fleet feature already exists %s", d.Get("name"))
-  	id, err := tpgresource.ReplaceVars(d, config, "{{$.GetIdFormat}}")
+    log.Printf("[DEBUG] Fleet feature already exists %s", d.Get("name"))
+    id, err := tpgresource.ReplaceVars(d, config, "{{$.GetIdFormat}}")
     if err != nil {
       return fmt.Errorf("Error constructing id: %s", err)
     }
