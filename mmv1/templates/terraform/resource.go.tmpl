@@ -147,6 +147,17 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
               {{- end }}
             }
           },
+{{- if $.IdentityUpgraders }}
+          IdentityUpgraders: []schema.IdentityUpgrader{
+{{- range $v := $.IdentityUpgradersCount }}
+              {
+                Type: identity{{ $.ResourceName }}ResourceV{{$v}}(),
+                Upgrade: Identity{{ $.ResourceName }}UpgradeV{{$v}},
+                Version: {{$v}},
+              },
+{{- end }}
+          },
+{{- end }}
         },
         Schema: map[string]*schema.Schema{
 			{{- range $prop := $.OrderProperties $.AllUserProperties }}
@@ -1250,6 +1261,12 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
 
     {{ $.CustomTemplate $.StateMigrationFile false -}}
 {{- end }}
+
+{{- if and $.IdentitySchemaVersion $.IdentityUpgraders }}
+
+    {{ $.CustomTemplate $.IdentityUpgraderFile false -}}
+{{- end }}
+
 {{- if and $.HasComputedIdFormatFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
 func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.ResourceData, meta interface{}, res map[string]interface{}) error {
     config := meta.(*transport_tpg.Config)
