@@ -47,6 +47,7 @@ custom_code:
   custom_update: templates/terraform/custom_update/storage_folder_update.go.tmpl
   custom_delete: templates/terraform/custom_delete/storage_folder_delete.go.tmpl
   pre_create: templates/terraform/pre_create/storage_folder_create.go.tmpl
+  pre_read: templates/terraform/pre_read/storage_folder.go.tmpl
 virtual_fields:
   - name: 'force_destroy'
     description:
@@ -77,6 +78,7 @@ properties:
     type: KeyValuePairs
     description: user can set custom headers
     ignore_read: true
+    url_param_only: true
   - name: createTime
     type: String
     description: |
