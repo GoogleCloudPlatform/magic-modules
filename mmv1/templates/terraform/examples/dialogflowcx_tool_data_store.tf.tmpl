@@ -7,6 +7,7 @@ resource "google_dialogflow_cx_agent" "agent" {
   depends_on = [
     google_discovery_engine_data_store.my_datastore
   ]
+  delete_contents_on_destroy = true
 }
 
 resource "google_dialogflow_cx_tool" "{{$.PrimaryResourceId}}" {
