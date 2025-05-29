@@ -10,12 +10,13 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccComputeSnapshotSettings_snapshotSettings_basic(t *testing.T) {
+func TestAccComputeSnapshotSettings_snapshotSettings_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": acctest.RandString(t, 10),
+		"random_suffix":   acctest.RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -49,8 +50,16 @@ func TestAccComputeSnapshotSettings_snapshotSettings_basic(t *testing.T) {
 
 func testAccComputeSnapshotSettings_snapshotSettings_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_project" "project" {
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
 resource "google_compute_snapshot_settings" "tf_test_snapshot_settings" {
-    project   = "%{project}"
+    project   = google_project.project.project_id
     storage_location {
         policy    = "SPECIFIC_LOCATIONS"
         locations {
@@ -64,8 +73,16 @@ resource "google_compute_snapshot_settings" "tf_test_snapshot_settings" {
 
 func testAccComputeSnapshotSettings_snapshotSettings_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_project" "project" {
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
 resource "google_compute_snapshot_settings" "tf_test_snapshot_settings" {
-    project   = "%{project}"
+    project   = google_project.project.project_id
     storage_location {
         policy    = "NEAREST_MULTI_REGION"
     }

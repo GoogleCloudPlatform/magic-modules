@@ -32,10 +32,23 @@ create_verb: 'PATCH'
 update_verb: 'PATCH'
 custom_code:
   encoder: 'templates/terraform/encoders/compute_snapshot_settings.go.tmpl'
+autogen_async: true
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+  result:
+    resource_inside_response: false
 # there is only a GET and PATCH endpoint
 exclude_delete: true
 examples:
   - name: 'snapshot_settings_specific_locations'
+    exclude_test: true
     primary_resource_id: 'tf-test-snapshot-settings'
     vars:
       policy: 'SPECIFIC_LOCATIONS'
