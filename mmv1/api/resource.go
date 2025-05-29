@@ -1217,20 +1217,30 @@ func (r Resource) GetIdFormat() string {
 }
 
 // Returns true if the Type is in the ID format and false otherwise.
-func (r Resource) InIdFormat(prop Type) bool {
-	fields := r.ExtractIdentifiers(r.GetIdFormat())
-	return slices.Contains(fields, google.Underscore(prop.Name))
+func (r Resource) InPostCreateComputed(prop Type) bool {
+	fields := map[string]struct{}{}
+	for _, f := range r.ExtractIdentifiers(r.GetIdFormat()) {
+		fields[f] = struct{}{}
+	}
+	for _, f := range r.ExtractIdentifiers(r.SelfLinkUri()) {
+		fields[f] = struct{}{}
+	}
+	_, ok := fields[google.Underscore(prop.Name)]
+	return ok
 }
 
 // Returns true if at least one of the fields in the ID format is computed
-func (r Resource) HasComputedIdFormatFields() bool {
-	idFormatFields := map[string]struct{}{}
+func (r Resource) HasPostCreateComputedFields() bool {
+	fields := map[string]struct{}{}
 	for _, f := range r.ExtractIdentifiers(r.GetIdFormat()) {
-		idFormatFields[f] = struct{}{}
+		fields[f] = struct{}{}
+	}
+	for _, f := range r.ExtractIdentifiers(r.SelfLinkUri()) {
+		fields[f] = struct{}{}
 	}
 	for _, p := range r.GettableProperties() {
 		// Skip fields not in the id format
-		if _, ok := idFormatFields[google.Underscore(p.Name)]; !ok {
+		if _, ok := fields[google.Underscore(p.Name)]; !ok {
 			continue
 		}
 		if (p.Output || p.DefaultFromApi) && !p.IgnoreRead {
