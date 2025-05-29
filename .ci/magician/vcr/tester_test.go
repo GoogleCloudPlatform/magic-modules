@@ -37,12 +37,16 @@ func TestCollectResults(t *testing.T) {
 `,
 			expected: Result{
 				PassedTests: []string{
+					"TestAccServiceTwoResourceOne",
+					"TestAccServiceTwoResourceTwo",
+				},
+				FailedTests: []string{"TestAccServiceOneResourceOne", "TestAccServiceOneResourceTwo"},
+				PassedSubtests: []string{
 					"TestAccServiceOneResourceTwo__test_one",
 					"TestAccServiceTwoResourceOne__test_one",
 					"TestAccServiceTwoResourceOne__test_two",
-					"TestAccServiceTwoResourceTwo",
 				},
-				FailedTests: []string{"TestAccServiceOneResourceOne", "TestAccServiceOneResourceTwo__test_two"},
+				FailedSubtests: []string{"TestAccServiceOneResourceTwo__test_two"},
 			},
 		},
 	} {
