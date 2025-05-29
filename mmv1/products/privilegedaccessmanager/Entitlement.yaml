@@ -145,7 +145,7 @@ properties:
           - name: 'steps'
             type: Array
             description: |
-              List of approval steps in this workflow. These steps would be followed in the specified order sequentially.  1 step is supported for now.
+              List of approval steps in this workflow. These steps would be followed in the specified order sequentially.
             required: true
             item_type:
               type: NestedObject
@@ -185,6 +185,12 @@ properties:
                   is_set: true
                   item_type:
                     type: String
+                - name: 'id'
+                  type: String
+                  description: |
+                    Output Only. The ID of the approval step.
+                  min_version: beta
+                  output: true
   - name: 'privilegedAccess'
     type: NestedObject
     description: |
