@@ -30,6 +30,10 @@ import (
 {{- if not $.Res.ExcludeDelete }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 {{- end }}
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath  }}/envvar"
@@ -182,17 +186,23 @@ func TestAcc{{ $.Res.ResourceName }}_ResourceIdentity(t *testing.T) {
 				Config: testAcc{{ (index $.Res.TestExamples 0).TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectIdentity(
-						"{{ $.Res.TerraformName }}.test_identity",
+						"{{ $.Res.TerraformName }}.{{ (index $.Res.TestExamples 0).PrimaryResourceId }}",
 						map[string]knownvalue.Check{
 							{{- range $e := $.Res.IdentityProperties }}
 							"{{ $e.Name }}": knownvalue.StringExact(context["{{ $e.Name }}"].(string)),
 							{{- end }}
 						},
 					),
+					{{- range $e := $.Res.IdentityProperties }}
+					statecheck.ExpectKnownValue(
+						"{{ $.Res.TerraformName }}.{{ (index $.Res.TestExamples 0).PrimaryResourceId }}",
+						tfjsonpath.New("{{ $e.Name }}"),
+						knownvalue.StringExact(context["{{ $e.Name }}"].(string))),
+					{{- end }}
 				},
 			},
 			{
-				ResourceName:    "{{ $.Res.TerraformName }}.test_identity",
+				ResourceName:    "{{ $.Res.TerraformName }}.{{ (index $.Res.TestExamples 0).PrimaryResourceId }}",
 				ImportState:     true,
 				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},
