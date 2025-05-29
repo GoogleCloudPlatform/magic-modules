@@ -156,6 +156,7 @@ examples:
       error_backend_bucket_name: 'error-backend-bucket'
   - name: 'url_map_http_filter_configs'
     primary_resource_id: 'urlmap'
+    min_version: 'beta'
     vars:
       url_map_name: 'urlmap'
       default_backend_service_name: 'default-backend'
@@ -163,6 +164,7 @@ examples:
       health_check_name: 'health-check'
   - name: 'url_map_http_filter_metadata'
     primary_resource_id: 'urlmap'
+    min_version: 'beta'
     vars:
       url_map_name: 'urlmap'
       default_backend_service_name: 'default-backend'
@@ -1848,6 +1850,7 @@ properties:
                     imports: 'selfLink'
               - name: 'httpFilterConfigs'
                 type: Array
+                min_version: 'beta'
                 description: |
                   Outbound route specific configuration for networkservices.HttpFilter resources enabled by Traffic Director.
                   httpFilterConfigs only applies for load balancers with loadBalancingScheme set to INTERNAL_SELF_MANAGED.
@@ -1874,6 +1877,7 @@ properties:
                         The configuration must be YAML formatted and only contain fields defined in the protobuf identified in configTypeUrl
               - name: 'httpFilterMetadata'
                 type: Array
+                min_version: 'beta'
                 description: |
                   Outbound route specific metadata supplied to networkservices.HttpFilter resources enabled by Traffic Director.
                   httpFilterMetadata only applies for load balancers with loadBalancingScheme set to INTERNAL_SELF_MANAGED.

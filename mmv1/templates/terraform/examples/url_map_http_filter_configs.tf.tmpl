@@ -1,4 +1,5 @@
 resource "google_compute_url_map" "{{$.PrimaryResourceId}}" {
+  provider    = google-beta
   name        = "{{index $.Vars "url_map_name"}}"
   description = "Test for httpFilterConfigs in route rules"
   default_service = google_compute_backend_service.default.id
@@ -47,6 +48,7 @@ resource "google_compute_url_map" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_compute_backend_service" "default" {
+  provider    = google-beta
   name        = "{{index $.Vars "default_backend_service_name"}}"
   port_name   = "http"
   protocol    = "HTTP"
@@ -57,6 +59,7 @@ resource "google_compute_backend_service" "default" {
 }
 
 resource "google_compute_backend_service" "service-a" {
+  provider    = google-beta
   name        = "{{index $.Vars "service_a_backend_service_name"}}"
   port_name   = "http"
   protocol    = "HTTP"
@@ -67,6 +70,7 @@ resource "google_compute_backend_service" "service-a" {
 }
 
 resource "google_compute_health_check" "default" {
+  provider = google-beta
   name               = "{{index $.Vars "health_check_name"}}"
   http_health_check {
     port = 80
