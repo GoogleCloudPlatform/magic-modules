@@ -24,6 +24,15 @@ for _, sl := range sensitiveLabels {
 	}
 }
 
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
+	for _, sp := range sensitiveWoLabels {
+		if auth, _ := d.GetRawConfigAt(cty.GetAttrPath("sensitive_labels_wo").IndexInt(0).GetAttr(sp)); !auth.IsNull() && auth.Type().Equals(cty.String) {
+			sp = sp[:len(sp)-3] // _wo is convention for write-only labels and are removed here
+			labels[sp] = auth.AsString()
+		}
+	}
+{{- end }}
+
 obj["labels"] = labels
 
 return obj, nil
