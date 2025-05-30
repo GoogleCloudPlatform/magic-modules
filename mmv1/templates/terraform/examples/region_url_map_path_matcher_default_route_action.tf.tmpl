@@ -1,6 +1,5 @@
 resource "google_compute_region_url_map" "{{$.PrimaryResourceId}}" {
   region = "us-central1"
-  provider = google-beta
 
   name        = "{{index $.Vars "region_url_map_name"}}"
   description = "a description"
