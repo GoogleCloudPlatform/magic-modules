@@ -157,16 +157,6 @@ resource "google_gke_hub_scope" "scope" {
   scope_id = "tf-test-scope%{random_suffix}"
 }
 
-resource "google_gke_hub_feature" "rbacrolebindingactuation" {
-  name = "rbacrolebindingactuation"
-  location = "global"
-  spec {
-    rbacrolebindingactuation {
-      allowed_custom_roles = ["my-custom-role", "my-custom-role2"]
-    }
-  }
-}
-
 resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_binding" {
   scope_rbac_role_binding_id = "tf-test-scope-rbac-role-binding%{random_suffix}"
   scope_id = google_gke_hub_scope.scope.scope_id
@@ -177,7 +167,7 @@ resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_bindin
   labels = {
       key = "value" 
   }
-  depends_on = [google_gke_hub_scope.scope, google_gke_hub_feature.rbacrolebindingactuation]
+  depends_on = [google_gke_hub_scope.scope]
 }
 `, context)
 }
