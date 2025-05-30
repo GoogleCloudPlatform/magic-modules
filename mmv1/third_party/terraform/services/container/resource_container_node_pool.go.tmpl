@@ -5,6 +5,7 @@ import (
 	"log"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -25,6 +26,66 @@ import (
 )
 
 var clusterIdRegex = regexp.MustCompile("projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<name>[^/]+)")
+
+type nodePoolCache struct {
+  nodePools   map[string]*container.NodePool
+  ttl         time.Duration
+  mutex       sync.RWMutex
+	lastUpdated time.Time
+	valid       bool
+}
+
+func (nodePoolCache *nodePoolCache) get(nodePool string) (*container.NodePool, error) {
+  nodePoolCache.mutex.RLock()
+  defer nodePoolCache.mutex.RUnlock()
+  np, ok := nodePools[nodePool]
+  if !ok {
+    return nil, fmt.Errorf("NodePool %q was not found", nodePool)
+  }
+  return np, nil
+}
+
+func (nodePoolCache *nodePoolCache) refreshIfNeeded(d *schema.ResourceData, config *transport_tpg.Config, userAgent string, nodePoolInfo *NodePoolInformation) error {
+  if !nodePoolCache.needsRefresh() {
+    return nil
+  }
+
+  nodePoolCache.mutex.Lock()
+  defer nodePoolCache.mutex.Unlock()
+
+  parent := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", nodePoolInfo.project, nodePoolInfo.location, nodePoolInfo.cluster)
+  clusterNodePoolsListCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.List(parent)
+  if config.UserProjectOverride {
+    clusterNodePoolsListCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+  }
+  listNodePoolsResponse, err := clusterNodePoolsListCall.Do()
+  if err != nil {
+    return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("NodePools from cluster %q", nodePoolInfo.cluster))
+  }
+
+  for _, nodePool := range listNodePoolsResponse.NodePools {
+    nodePoolCache[nodePool.Name] = nodePool
+  }
+
+  nodePoolCache.valid = true
+  nodePoolCache.lastUpdated = time.Now()
+  return nil
+}
+
+func (nodePoolCache *nodePoolCache) needsRefresh() bool {
+  return time.Since(nodePoolCache.lastUpdated) > ttl || !valid
+}
+
+func (nodePoolCache *nodePoolCache) invalidate() {
+  nodePoolCache.mutex.Lock()
+  defer nodePoolCache.mutex.Unlock()
+  nodePoolCache.valid = false
+}
+
+var nodePools = &nodePoolCache{
+  nps: make(map[string]*container.NodePool),
+  ttl: 10 * time.Minute,
+}
 
 func ResourceContainerNodePool() *schema.Resource {
 	return &schema.Resource{
@@ -631,6 +692,8 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 		operation, nodePoolInfo.project,
 		nodePoolInfo.location, "creating GKE NodePool", userAgent, timeout)
 
+	nodePoolCache.invalidate()
+
 	if waitErr != nil {
 		// Check if the create operation failed because Terraform was prematurely terminated. If it was we can persist the
 		// operation id to state so that a subsequent refresh of this resource will wait until the operation has terminated
@@ -703,11 +766,8 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 
 	name := getNodePoolName(d.Id())
 
-	clusterNodePoolsGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
-	if config.UserProjectOverride {
-		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-	}
-	nodePool, err := clusterNodePoolsGetCall.Do()
+  nodePoolCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo)
+	nodePool, err := nodePoolCache.get(name)
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("NodePool %q from cluster %q", name, nodePoolInfo.cluster))
 	}
@@ -766,6 +826,8 @@ func resourceContainerNodePoolUpdate(d *schema.ResourceData, meta interface{}) e
 	if err != nil {
 		return err
 	}
+
+	nodePoolCache.invalidate()
 
 	return resourceContainerNodePoolRead(d, meta)
 }
@@ -846,6 +908,8 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 	log.Printf("[INFO] GKE NodePool %s has been deleted", d.Id())
 
 	d.SetId("")
+
+	nodePoolCache.invalidate()
 
 	return nil
 }
