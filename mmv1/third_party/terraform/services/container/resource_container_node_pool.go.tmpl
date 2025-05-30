@@ -928,7 +928,7 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 
 	name := getNodePoolName(d.Id())
 	npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo)
-  _, err := npCache.get(name)
+  _, err = npCache.get(name)
 
 	if err != nil {
 		if err = transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Container NodePool %s", name)); err == nil {
