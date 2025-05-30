@@ -72,12 +72,16 @@ examples:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-1")'
   - name: 'alloydb_cluster_after_upgrade'
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-1")'
   - name: 'alloydb_cluster_full'
     primary_resource_id: 'full'
     vars:
