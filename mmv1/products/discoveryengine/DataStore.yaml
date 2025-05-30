@@ -57,6 +57,13 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: 'data-store-id'
+  - name: 'discoveryengine_datastore_kms_key_name'
+    primary_resource_id: 'kms_key_name'
+    vars:
+      data_store_id: 'data-store-id'
+      kms_key_name: 'kms-key'
+    test_vars_overrides:
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "eu").CryptoKey.Name'
   - name: 'discoveryengine_datastore_document_processing_config'
     primary_resource_id: 'document_processing_config'
     primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
