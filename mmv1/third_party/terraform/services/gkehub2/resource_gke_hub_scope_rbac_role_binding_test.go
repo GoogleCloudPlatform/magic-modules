@@ -85,7 +85,7 @@ resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
 `, context)
 }
 
-func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample(t *testing.T) {
+func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample_update(t *testing.T) {
         t.Parallel()
 
         context := map[string]interface{}{
