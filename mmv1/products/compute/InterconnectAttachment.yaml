@@ -389,3 +389,8 @@ properties:
       interconnect attachment. Example: 2001:db8::2/125
     immutable: true
     min_version: beta
+  - name: 'attachmentGroup'
+    type: String
+    description: |
+      URL of the AttachmentGroup that includes this Attachment.
+    output: true
