@@ -50,3 +50,12 @@ url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": str
 if err != nil {
 	return err
 }
+
+// Primarily added to fix b/421406404
+// This field is immutable, so it should be safe to set it.
+dataSourceIdProp, err := expandBigqueryDataTransferConfigDataSourceId(d.Get("data_source_id"), d, config)
+if err != nil {
+    return err
+} else if v, ok := d.GetOkExists("data_source_id"); !tpgresource.IsEmptyValue(reflect.ValueOf(dataSourceIdProp)) && (ok || !reflect.DeepEqual(v, dataSourceIdProp)) {
+    obj["dataSourceId"] = dataSourceIdProp
+}
