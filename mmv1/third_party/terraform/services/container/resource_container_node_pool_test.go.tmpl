@@ -2510,8 +2510,8 @@ resource "google_container_cluster" "cluster" {
   node_config {
     machine_type = "c4-standard-4"
 	advanced_machine_features {
-		threads_per_core = 2
-		performance_monitoring_unit = "%s"
+	  threads_per_core = 2
+	  performance_monitoring_unit = "%s"
 	}
   }
 }
@@ -2525,8 +2525,8 @@ resource "google_container_node_pool" "np" {
   node_config {
     machine_type = "c4-standard-4"
 	advanced_machine_features {
-		threads_per_core = 2
-		performance_monitoring_unit = "%s"
+	  threads_per_core = 2
+	  performance_monitoring_unit = "%s"
 	}
   }
 }
