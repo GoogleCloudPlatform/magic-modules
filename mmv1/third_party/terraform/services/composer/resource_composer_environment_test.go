@@ -2499,15 +2499,13 @@ resource "google_composer_environment" "test" {
   name   = "%s"
   region = "us-central1"
   config {
-    node_config {
-      service_account  = google_service_account.test.name
-    }
     software_config {
       image_version = "composer-3-airflow-2"
     }
     node_config {
       network    = google_compute_network.test.id
       subnetwork = google_compute_subnetwork.test.id
+      service_account  = google_service_account.test.name
     }
   }
   depends_on = [google_project_iam_member.composer-worker]
@@ -2897,15 +2895,13 @@ resource "google_composer_environment" "test" {
   name   = "%s"
   region = "us-central1"
   config {
-    node_config {
-      service_account  = google_service_account.test.name
-    }
     software_config {
       image_version = "composer-3-airflow-2"
     }
     node_config {
       network    = google_compute_network.test.id
       subnetwork = google_compute_subnetwork.test.id
+      service_account  = google_service_account.test.name
     }
 	data_retention_config {
       airflow_metadata_retention_config {
