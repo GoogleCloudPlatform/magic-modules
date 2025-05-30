@@ -803,6 +803,7 @@ func TestAccComposerEnvironmentComposer3_withNetworkSubnetworkAndAttachment_expe
 	network := fmt.Sprintf("%s-%d", testComposerNetworkPrefix, acctest.RandInt(t))
 	subnetwork := network + "-1"
 	networkAttachment := fmt.Sprintf("%s-%d", testComposerNetworkAttachmentPrefix, acctest.RandInt(t))
+	serviceAccount := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -810,7 +811,7 @@ func TestAccComposerEnvironmentComposer3_withNetworkSubnetworkAndAttachment_expe
 		CheckDestroy:             testAccComposerEnvironmentDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:      testAccComposerEnvironmentComposer3_withNetworkSubnetworkAndAttachment_expectError(envName, networkAttachment, network, subnetwork),
+				Config:      testAccComposerEnvironmentComposer3_withNetworkSubnetworkAndAttachment_expectError(envName, networkAttachment, network, subnetwork, serviceAccount),
 				ExpectError: regexp.MustCompile("Conflicting configuration arguments"),
 			},
 			// This is a terrible clean-up step in order to get destroy to succeed,
@@ -819,7 +820,7 @@ func TestAccComposerEnvironmentComposer3_withNetworkSubnetworkAndAttachment_expe
 			{
 				PlanOnly:           true,
 				ExpectNonEmptyPlan: true,
-				Config:             testAccComposerEnvironmentComposer3_basic(envName, network, subnetwork),
+				Config:             testAccComposerEnvironmentComposer3_basic(envName, network, subnetwork, serviceAccount),
 				Check:              testAccCheckClearComposerEnvironmentFirewalls(t, network),
 			},
 		},
@@ -2161,8 +2162,20 @@ resource "google_project_iam_member" "composer-worker" {
 `, environment, network, subnetwork, serviceAccount)
 }
 
-func testAccComposerEnvironment_airflow2RecoveryCfg(name, network, subnetwork string) string {
+func testAccComposerEnvironment_airflow2RecoveryCfg(name, network, subnetwork, serviceAccount string) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+resource "google_service_account" "test" {
+  account_id   = "%s"
+  display_name = "Test Service Account for Composer Environment"
+}
+resource "google_project_iam_member" "composer-worker" {
+  project = data.google_project.project.project_id
+  role   = "roles/composer.worker"
+  member = "serviceAccount:${google_service_account.test.email}"
+}
+
 resource "google_composer_environment" "test" {
   name   = "%s"
   region = "us-central1"
@@ -2171,6 +2184,7 @@ resource "google_composer_environment" "test" {
     node_config {
       network          = google_compute_network.test.self_link
       subnetwork       = google_compute_subnetwork.test.self_link
+      service_account  = google_service_account.test.name
       ip_allocation_policy {
         cluster_ipv4_cidr_block = "10.0.0.0/16"
       }
@@ -2189,7 +2203,7 @@ resource "google_composer_environment" "test" {
       }
     }
   }
-
+  depends_on = [google_project_iam_member.composer-worker]
 }
 
 resource "google_compute_network" "test" {
@@ -2204,7 +2218,7 @@ resource "google_compute_subnetwork" "test" {
   network       = google_compute_network.test.self_link
   private_ip_google_access = true
 }
-`, name, network, subnetwork)
+`, serviceAccount, name, network, subnetwork)
 }
 
 func testAccComposerEnvironmentUpdate_airflow2RecoveryCfg(name, network, subnetwork, serviceAccount string) string {
@@ -2811,8 +2825,20 @@ resource "google_compute_subnetwork" "test" {
 `, serviceAccount, name, networkAttachment, network, subnetwork, network, subnetwork)
 }
 
-func testAccComposerEnvironmentComposer3_withNetworkSubnetworkAndAttachment_expectError(name, networkAttachment, network, subnetwork string) string {
+func testAccComposerEnvironmentComposer3_withNetworkSubnetworkAndAttachment_expectError(name, networkAttachment, network, subnetwork, serviceAccount string) string {
 	return fmt.Sprintf(`
+data "google_project" "project" {}
+
+resource "google_service_account" "test" {
+  account_id   = "%s"
+  display_name = "Test Service Account for Composer Environment"
+}
+resource "google_project_iam_member" "composer-worker" {
+  project = data.google_project.project.project_id
+  role   = "roles/composer.worker"
+  member = "serviceAccount:${google_service_account.test.email}"
+}
+
 resource "google_composer_environment" "test" {
   name   = "%s"
   region = "us-central1"
@@ -2821,11 +2847,13 @@ resource "google_composer_environment" "test" {
       network    = google_compute_network.test.id
       subnetwork = google_compute_subnetwork.test.id
 			composer_network_attachment = google_compute_network_attachment.test.id
+      service_account  = google_service_account.test.name
     }
     software_config {
       image_version = "composer-3-airflow-2"
     }
   }
+  depends_on = [google_project_iam_member.composer-worker]
 }
 
 resource "google_compute_network_attachment" "test" {
@@ -2848,7 +2876,7 @@ resource "google_compute_subnetwork" "test" {
   region        = "us-central1"
   network       = google_compute_network.test.self_link
 }
-`, name, networkAttachment, network, subnetwork)
+`, serviceAccount, name, networkAttachment, network, subnetwork)
 }
 
 func testAccComposerEnvironmentComposer3_databaseRetention(name, network, subnetwork, serviceAccount string) string {
