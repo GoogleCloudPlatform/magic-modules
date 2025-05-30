@@ -135,3 +135,8 @@ properties:
     type: String
     description: Identifier. Name of the resource.
     output: true
+  - name: delegatingServiceAccount
+    type: String
+    description: |-
+      Service account used for operations that involve resources in consumer projects.
+    output: true
