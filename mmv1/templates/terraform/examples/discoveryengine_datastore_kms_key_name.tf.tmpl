@@ -1,5 +1,5 @@
 resource "google_discovery_engine_data_store" "kms_key_name" {
-  location                     = "eu"
+  location                     = "us"
   data_store_id                = "{{index $.Vars "data_store_id"}}"
   display_name                 = "tf-test-structured-datastore"
   industry_vertical            = "GENERIC"
