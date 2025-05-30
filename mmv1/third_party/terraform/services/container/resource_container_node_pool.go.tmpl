@@ -38,7 +38,7 @@ type nodePoolCache struct {
 func (nodePoolCache *nodePoolCache) get(nodePool string) (*container.NodePool, error) {
   nodePoolCache.mutex.RLock()
   defer nodePoolCache.mutex.RUnlock()
-  np, ok := nodePools[nodePool]
+  np, ok := nodePoolCache.nodePools[nodePool]
   if !ok {
     return nil, fmt.Errorf("NodePool %q was not found", nodePool)
   }
@@ -64,7 +64,7 @@ func (nodePoolCache *nodePoolCache) refreshIfNeeded(d *schema.ResourceData, conf
   }
 
   for _, nodePool := range listNodePoolsResponse.NodePools {
-    nodePoolCache[nodePool.Name] = nodePool
+    nodePoolCache.nodePools[nodePool.Name] = nodePool
   }
 
   nodePoolCache.valid = true
@@ -73,7 +73,7 @@ func (nodePoolCache *nodePoolCache) refreshIfNeeded(d *schema.ResourceData, conf
 }
 
 func (nodePoolCache *nodePoolCache) needsRefresh() bool {
-  return time.Since(nodePoolCache.lastUpdated) > ttl || !valid
+  return time.Since(nodePoolCache.lastUpdated) > nodePoolCache.ttl || !nodePoolCache.valid
 }
 
 func (nodePoolCache *nodePoolCache) invalidate() {
@@ -82,9 +82,9 @@ func (nodePoolCache *nodePoolCache) invalidate() {
   nodePoolCache.valid = false
 }
 
-var nodePoolCache = &nodePoolCache{
-  nps: make(map[string]*container.NodePool),
-  ttl: 10 * time.Minute,
+var npCache = &nodePoolCache{
+  nodePools: make(map[string]*container.NodePool),
+  ttl:       10 * time.Minute,
 }
 
 func ResourceContainerNodePool() *schema.Resource {
@@ -692,7 +692,7 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 		operation, nodePoolInfo.project,
 		nodePoolInfo.location, "creating GKE NodePool", userAgent, timeout)
 
-	nodePoolCache.invalidate()
+	npCache.invalidate()
 
 	if waitErr != nil {
 		// Check if the create operation failed because Terraform was prematurely terminated. If it was we can persist the
@@ -766,8 +766,8 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 
 	name := getNodePoolName(d.Id())
 
-  nodePoolCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo)
-	nodePool, err := nodePoolCache.get(name)
+  npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo)
+	nodePool, err := npCache.get(name)
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("NodePool %q from cluster %q", name, nodePoolInfo.cluster))
 	}
@@ -827,7 +827,7 @@ func resourceContainerNodePoolUpdate(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	nodePoolCache.invalidate()
+	npCache.invalidate()
 
 	return resourceContainerNodePoolRead(d, meta)
 }
@@ -909,7 +909,7 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 
 	d.SetId("")
 
-	nodePoolCache.invalidate()
+	npCache.invalidate()
 
 	return nil
 }
@@ -927,11 +927,8 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 	}
 
 	name := getNodePoolName(d.Id())
-	clusterNodePoolsGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
-	if config.UserProjectOverride {
-		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-	}
-	_, err = clusterNodePoolsGetCall.Do()
+	npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo)
+  _, err := npCache.get(name)
 
 	if err != nil {
 		if err = transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Container NodePool %s", name)); err == nil {
