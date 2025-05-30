@@ -91,6 +91,7 @@ func CollectAllTgcMetadata(tgcPayload TgcMetadataPayload) resource.TestCheckFunc
 			tgcPayload.ResourceMetadata[address] = metadata
 		}
 
+		log.Printf("[DEBUG] tgcPayload %#v", tgcPayload)
 		// Encode the entire payload to base64 JSON
 		encodedData, err := encodeToBase64JSON(tgcPayload)
 		if err != nil {
