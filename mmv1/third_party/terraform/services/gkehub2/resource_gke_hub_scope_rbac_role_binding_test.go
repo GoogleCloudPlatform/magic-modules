@@ -84,3 +84,50 @@ resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
 }
 `, context)
 }
+
+func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample(t *testing.T) {
+        t.Parallel()
+
+        context := map[string]interface{}{
+                "project":       envvar.GetTestProjectFromEnv(),
+                "random_suffix": acctest.RandString(t, 10),
+        }
+
+        acctest.VcrTest(t, resource.TestCase{
+                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+                CheckDestroy:             testAccCheckGKEHub2ScopeRBACRoleBindingDestroyProducer(t),
+                Steps: []resource.TestStep{
+                        {
+                                Config: testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeCustomRbacRoleBindingBasicExample(context),
+                        },
+                        {
+                                ResourceName:            "google_gke_hub_scope_rbac_role_binding.scope_rbac_custom_role_binding",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"labels", "scope_id", "scope_rbac_role_binding_id", "terraform_labels"},
+                        },
+                },
+        })
+}
+
+func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample(context map[string]interface{}) string {
+        return acctest.Nprintf(`
+resource "google_gke_hub_scope" "scope" {
+  scope_id = "tf-test-scope%{random_suffix}"
+}
+
+resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_binding" {
+  scope_rbac_role_binding_id = "tf-test-scope-rbac-role-binding%{random_suffix}"
+  scope_id = google_gke_hub_scope.scope.scope_id
+  user = "test-email@gmail.com"
+  role {
+    custom_role = "my-custom-role"
+  }
+  labels = {
+      key = "value" 
+  }
+  depends_on = [google_gke_hub_scope.scope, google_gke_hub_feature.rbacrolebindingactuation]
+}
+`, context)
+}
