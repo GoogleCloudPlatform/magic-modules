@@ -8,7 +8,7 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
   }
 
   data {
-    resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/austin_bikeshare/tables/bikeshare_stations"
+    resource = "//bigquery.googleapis.com/projects/dataplex-back-end-dev-project/datasets/austin_bikeshare/tables/bikeshare_stations"
   }
 
   execution_spec {
@@ -23,6 +23,7 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
   data_quality_spec {
     sampling_percent = 5
     row_filter = "station_id > 1000"
+    catalog_publishing_enabled = true
     post_scan_actions {
       notification_report {
         recipients {
