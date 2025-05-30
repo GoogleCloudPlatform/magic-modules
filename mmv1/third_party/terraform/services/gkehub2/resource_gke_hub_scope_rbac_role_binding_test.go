@@ -99,7 +99,7 @@ func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExa
                 CheckDestroy:             testAccCheckGKEHub2ScopeRBACRoleBindingDestroyProducer(t),
                 Steps: []resource.TestStep{
                         {
-                                Config: testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeCustomRbacRoleBindingBasicExample(context),
+                                Config: testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeCustomRbacRoleBindingBasicExample_basic(context),
                         },
                         {
                                 ResourceName:            "google_gke_hub_scope_rbac_role_binding.scope_rbac_custom_role_binding",
@@ -107,14 +107,33 @@ func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExa
                                 ImportStateVerify:       true,
                                 ImportStateVerifyIgnore: []string{"labels", "scope_id", "scope_rbac_role_binding_id", "terraform_labels"},
                         },
+			{
+				Config: testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample_update(context),
+			},
+			{
+				ResourceName:            "google_gke_hub_scope_rbac_role_binding.scope_rbac_custom_role_binding",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"scope_rbac_role_binding_id", "scope_id", "labels", "terraform_labels"},
+			},
                 },
         })
 }
 
-func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample(context map[string]interface{}) string {
+func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample_basic(context map[string]interface{}) string {
         return acctest.Nprintf(`
 resource "google_gke_hub_scope" "scope" {
   scope_id = "tf-test-scope%{random_suffix}"
+}
+
+resource "google_gke_hub_feature" "rbacrolebindingactuation" {
+  name = "rbacrolebindingactuation"
+  location = "global"
+  spec {
+    rbacrolebindingactuation {
+      allowed_custom_roles = ["my-custom-role", "my-custom-role2"]
+    }
+  }
 }
 
 resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_binding" {
@@ -123,6 +142,37 @@ resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_bindin
   user = "test-email@gmail.com"
   role {
     custom_role = "my-custom-role"
+  }
+  labels = {
+      key = "value" 
+  }
+  depends_on = [google_gke_hub_scope.scope, google_gke_hub_feature.rbacrolebindingactuation]
+}
+`, context)
+}
+
+func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample_update(context map[string]interface{}) string {
+        return acctest.Nprintf(`
+resource "google_gke_hub_scope" "scope" {
+  scope_id = "tf-test-scope%{random_suffix}"
+}
+
+resource "google_gke_hub_feature" "rbacrolebindingactuation" {
+  name = "rbacrolebindingactuation"
+  location = "global"
+  spec {
+    rbacrolebindingactuation {
+      allowed_custom_roles = ["my-custom-role", "my-custom-role2"]
+    }
+  }
+}
+
+resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_binding" {
+  scope_rbac_role_binding_id = "tf-test-scope-rbac-role-binding%{random_suffix}"
+  scope_id = google_gke_hub_scope.scope.scope_id
+  user = "test-email@gmail.com"
+  role {
+    custom_role = "my-custom-role-2"
   }
   labels = {
       key = "value" 
