@@ -13867,16 +13867,6 @@ func TestAccContainerCluster_withAdvancedMachineFeaturesPMU(t *testing.T) {
 }
 
 func testAccContainerCluster_withAdvancedMachineFeaturesPMU(clusterName, networkName, subnetworkName, pmuLevel string) string {
-	nodeConfigBlock := fmt.Sprintf(`
-  node_config {
-    machine_type = "c4-standard-2"
-    advanced_machine_features {
-      threads_per_core = 2
-      performance_monitoring_unit = "%s"
-    }
-  }
-`, pmuLevel)
-
 	return fmt.Sprintf(`
 resource "google_compute_network" "default" {
   name                    = "%s"
@@ -13897,9 +13887,15 @@ resource "google_container_cluster" "primary" {
   network              = google_compute_network.default.name
   subnetwork           = google_compute_subnetwork.default.name
   deletion_protection  = false
-  %s
+  node_config {
+    machine_type = "c4-standard-2"
+    advanced_machine_features {
+      threads_per_core = 2
+      performance_monitoring_unit = "%s"
+    }
+  }
 }
-`, networkName, subnetworkName, clusterName, nodeConfigBlock)
+`, networkName, subnetworkName, clusterName, pmuLevel)
 }
 
 func testAccContainerCluster_inTransitEncryptionConfig(name, networkName, subnetworkName, config string) string {
