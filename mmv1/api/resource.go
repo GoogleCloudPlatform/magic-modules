@@ -1977,9 +1977,21 @@ func (r Resource) MarkdownHeader(templatePath string) string {
 	return strings.Replace(r.CodeHeader(templatePath), "//", "#", -1)
 }
 
+// TGC Methods
 // ====================
-// TGC
-// ====================
+func (r Resource) IgnoreTestPropertiesTgc(e resource.Examples) []string {
+	var props []string
+	for _, tp := range r.VirtualFields {
+		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp.Name)))
+	}
+	for _, tp := range e.IgnoreTestExtraTgc {
+		props = append(props, fmt.Sprintf("\"%s\"", tp))
+	}
+
+	slices.Sort(props)
+	return props
+}
+
 // Filters out computed properties during cai2hcl
 func (r Resource) ReadPropertiesForTgc() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
