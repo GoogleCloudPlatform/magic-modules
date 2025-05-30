@@ -1,0 +1,30 @@
+func sendMessageStoragePolicyIfEmptyDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	// on create, return immediately as we don't need to determine if the value is empty or not
+	if diff.Id() == "" {
+		return nil
+	}
+
+	sendZero := diff.Get("recompute_message_storage_policy").(bool)
+	if !sendZero {
+		return nil
+	}
+
+	configMessageStoragePolicy := diff.GetRawConfig().GetAttr("message_storage_policy")
+	if !configMessageStoragePolicy.IsKnown() {
+		return nil
+	}
+	configValueIsEmpty := configMessageStoragePolicy.IsNull() || configMessageStoragePolicy.LengthInt() == 0
+
+	stateMessageStoragePolicy := diff.GetRawState().GetAttr("message_storage_policy")
+	if !stateMessageStoragePolicy.IsKnown() {
+		return nil
+	}
+	stateValueIsEmpty := stateMessageStoragePolicy.IsNull() || stateMessageStoragePolicy.LengthInt() == 0
+
+	if configValueIsEmpty && !stateValueIsEmpty {
+		log.Printf("[DEBUG] setting message_storage_policy to newly empty")
+		diff.SetNew("message_storage_policy", make([]interface{}, 0))
+	}
+
+	return nil
+}
