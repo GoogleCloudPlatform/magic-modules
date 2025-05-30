@@ -24,7 +24,6 @@ if d.Get("name").(string) == "rbacrolebindingactuation" {
     d.SetId(id)
     // Clear the allowed custom roles to reset the feature.
     spec, specOk := d.GetOk("spec")
-    log.Printf("[DEBUG] spec: %+v, specOk: %t", spec, specOk)
     if specOk {
       if len(spec.([]interface{})) > 0 {
         rrbActuationFeature := spec.([]interface{})[0].(map[string]interface{})["rbacrolebindingactuation"]
