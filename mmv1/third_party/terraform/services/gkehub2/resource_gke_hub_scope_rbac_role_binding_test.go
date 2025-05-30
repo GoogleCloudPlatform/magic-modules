@@ -99,7 +99,7 @@ func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExa
                 CheckDestroy:             testAccCheckGKEHub2ScopeRBACRoleBindingDestroyProducer(t),
                 Steps: []resource.TestStep{
                         {
-                                Config: testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeCustomRbacRoleBindingBasicExample_basic(context),
+                                Config: testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample_basic(context),
                         },
                         {
                                 ResourceName:            "google_gke_hub_scope_rbac_role_binding.scope_rbac_custom_role_binding",
