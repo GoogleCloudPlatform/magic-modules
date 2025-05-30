@@ -55,10 +55,14 @@ func DiskImageDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
 
 	// 'old' is read from the API.
 	// It always has the format 'https://www.googleapis.com/compute/v1/projects/(%s)/global/images/(%s)'
+	// Except if the image is created in different universes
 	matches := resolveImageLink.FindStringSubmatch(old)
 	if matches == nil {
-		// Image read from the API doesn't have the expected format. In practice, it should never happen
-		return false
+		// Need to do an extra check if the image is created is in different universes
+		matches = resolveImageUniverseLink.FindStringSubmatch(old)
+		if matches == nil {
+			return false
+		}
 	}
 	oldProject := matches[1]
 	oldName := matches[2]
