@@ -208,6 +208,7 @@ properties:
         deprecation_message: '`post_startup_script_config` is deprecated and will be removed in a future major release. New resource creation with this field is unavailable at this time.'
         type: NestedObject
         description: 'Post startup script config.'
+        deprecation_message: 'The use of post-startup scripts is unavailable at this time. For feedback and questions about Preview features, contact Vertex AI.'
         properties:
           - name: 'postStartupScript'
             type: String
