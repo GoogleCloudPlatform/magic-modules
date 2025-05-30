@@ -52,6 +52,10 @@ iam_policy:
 custom_code:
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/pubsub_topic.tmpl'
+  constants: 'templates/terraform/constants/pubsub_topic.tmpl'
+  post_update: 'templates/terraform/post_update/pubsub_topic.go.tmpl'
+custom_diff:
+  - 'recomputeMessageStoragePolicy'
 error_retry_predicates:
 
   - 'transport_tpg.PubsubTopicProjectNotReady'
@@ -438,3 +442,14 @@ properties:
               The GCP service account to be used for Federated Identity authentication
               with Confluent Cloud.
             required: true
+virtual_fields:
+  - name: 'recompute_message_storage_policy'
+    type: Boolean
+    default_value: false
+    description: |
+      Controls the removal behavior of the message_storage_policy.
+      When false, removing the MessageStoragePolicy from config will not produce a diff as the
+      provider will default to the API's value.
+      When true, the provider will treat removing MessageStoragePolicy as requesting the
+      MessageStoragePolicy to be recomputed.
+      Defaults to false.

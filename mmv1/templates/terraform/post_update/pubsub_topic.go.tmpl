@@ -1,0 +1,61 @@
+if v, ok := d.GetOk("recompute_message_storage_policy"); ok && v.(bool) {
+   // if message_storage_policy was dropped, but existed in state, send an empty object
+  if rawCfg := d.GetRawConfig().GetAttr("message_storage_policy"); rawCfg.LengthInt() == 0 {
+    log.Printf("[DEBUG] Sending empty message_storage_policy in update")
+		obj := make(map[string]interface{})
+		obj["messageStoragePolicy"] = make([]interface{}, 0)
+
+		// The rest is the same as the secondary_ip_range generated update code
+		// without the messageStoragePolicyProp logic
+
+   labelsProp, err := expandPubsubTopicLabels(d.Get("labels"), d, config)
+    if err != nil {
+      return err
+    } else if v, ok := d.GetOkExists("labels"); !isEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
+      obj["labels"] = labelsProp
+    }
+
+    obj, err = resourcePubsubTopicUpdateEncoder(d, meta, obj)
+    if err != nil {
+      return err
+    }
+
+    url, err := replaceVars(d, config, "{{PubsubBasePath}}projects/{{project}}/topics/{{name}}")
+    if err != nil {
+      return err
+    }
+
+    log.Printf("[DEBUG] Updating Topic %q: %#v", d.Id(), obj)
+    updateMask := []string{}
+
+    if d.HasChange("labels") {
+      updateMask = append(updateMask, "labels")
+    }
+
+    if d.HasChange("message_storage_policy") {
+      updateMask = append(updateMask, "messageStoragePolicy")
+    }
+    // updateMask is a URL parameter but not present in the schema, so replaceVars
+    // won't set it
+    url, err = addQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+    
+    if err != nil {
+      return err
+    }
+
+    // err == nil indicates that the billing_project value was found
+    if bp, err := getBillingProject(d, config); err == nil {
+      billingProject = bp
+    }
+
+    res, err := sendRequestWithTimeout(config, "PATCH", billingProject, url, userAgent, obj, d.Timeout(schema.TimeoutUpdate), pubsubTopicProjectNotReady)
+
+    if err != nil {
+      return fmt.Errorf("Error updating Topic %q: %s", d.Id(), err)
+    } else {
+      log.Printf("[DEBUG] Finished updating Topic %q: %#v", d.Id(), res)
+    }
+
+    return resourcePubsubTopicRead(d, meta)
+  }
+}
