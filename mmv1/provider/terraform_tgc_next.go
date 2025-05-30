@@ -113,6 +113,29 @@ func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, t
 func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 }
 
+func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+	eligibleExample := false
+	for _, example := range object.Examples {
+		if !example.ExcludeTest {
+			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
+				eligibleExample = true
+				break
+			}
+		}
+	}
+	if !eligibleExample {
+		return
+	}
+
+	productName := tgc.Product.ApiName
+	targetFolder := path.Join(outputFolder, "test/services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", tgc.ResourceGoFilename(object)))
+	templateData.GenerateTestFile(targetFilePath, object)
+}
+
 func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
 	resourceConverters := map[string]string{
 		// common
