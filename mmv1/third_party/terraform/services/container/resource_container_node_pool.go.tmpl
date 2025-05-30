@@ -82,7 +82,7 @@ func (nodePoolCache *nodePoolCache) invalidate() {
   nodePoolCache.valid = false
 }
 
-var nodePools = &nodePoolCache{
+var nodePoolCache = &nodePoolCache{
   nps: make(map[string]*container.NodePool),
   ttl: 10 * time.Minute,
 }
