@@ -56,6 +56,7 @@ nested_query:
 custom_code:
   constants: 'templates/terraform/constants/router_nat.go.tmpl'
   encoder: 'templates/terraform/encoders/router_nat_set_initial_nat_ips.go.tmpl'
+  decoder: 'templates/terraform/decoders/router_nat_set_auto_network_tier.go.tmpl'
   pre_create: 'templates/terraform/constants/router_nat_validate_action_active_range.go.tmpl'
   pre_update: 'templates/terraform/constants/router_nat_validate_action_active_range.go.tmpl'
 custom_diff:
