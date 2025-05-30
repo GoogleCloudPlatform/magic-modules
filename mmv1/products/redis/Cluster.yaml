@@ -254,6 +254,44 @@ properties:
     description: |
       System assigned, unique identifier for the cluster.
     output: true
+  - name: 'gcsSource'
+    type: NestedObject
+    description: |
+     Backups stored in Cloud Storage buckets. The Cloud Storage buckets need to be the same region as the clusters.
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - managedBackupSource
+    properties:
+      - name: 'uris'
+        type: Array
+        is_set: true
+        description: |
+         URIs of the GCS objects to import. Example: gs://bucket1/object1, gs://bucket2/folder2/object2
+        required: true
+        immutable: true
+        item_type:
+          type: String
+  - name: 'managedBackupSource'
+    type: NestedObject
+    description: "Backups that generated and managed by memorystore."
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - gcsSource
+    properties:
+      - name: 'backup'
+        type: String
+        description: |
+         Example: `projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backup}`.
+        required: true
+        immutable: true
+  - name: 'backupCollection'
+    type: String
+    description: |
+     The backup collection full resource name.
+     Example: projects/{project}/locations/{location}/backupCollections/{collection}
+    output: true
   - name: 'automatedBackupConfig'
     type: NestedObject
     description: "The automated backup config for a instance."

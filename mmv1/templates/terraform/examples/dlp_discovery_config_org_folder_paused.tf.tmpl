@@ -1,6 +1,6 @@
 resource "google_data_loss_prevention_discovery_config" "{{$.PrimaryResourceId}}" {
-	parent = "organizations/{{index $.TestEnvVars "organization"}}/locations/us"
-    location = "us"
+	parent = "organizations/{{index $.TestEnvVars "organization"}}/locations/{{index $.TestEnvVars "location"}}"
+    location = "{{index $.TestEnvVars "location"}}"
 
     targets {
         big_query_target {

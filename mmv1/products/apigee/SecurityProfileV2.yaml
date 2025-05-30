@@ -1,0 +1,101 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'SecurityProfileV2'
+description: |
+  Security profile for risk assessment version 2 in Apigee.
+references:
+  guides:
+    'Creating a security profile': 'https://cloud.google.com/apigee/docs/api-security/security-scores#security-profiles-v2'
+  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityProfilesV2/create'
+docs:
+base_url: '{{org_id}}/securityProfilesV2'
+self_link: '{{org_id}}/securityProfilesV2/{{profile_id}}'
+create_url: '{{org_id}}/securityProfilesV2?security_profile_v2_id={{profile_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{org_id}}/securityProfilesV2/{{profile_id}}'
+  - '{{org_id}}/{{profile_id}}'
+custom_code:
+  custom_import: "templates/terraform/custom_import/apigee_security_profile_v2.go.tmpl"
+examples:
+  - name: 'apigee_security_profile_v2_basic'
+    vars:
+      security_profile_id: "my-profile"
+    exclude_test: true
+  - name: 'apigee_security_profile_v2_basic_test'
+    primary_resource_id: 'security_profile_v2'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+    skip_vcr: true
+    external_providers: ["time"]
+parameters:
+  - name: 'orgId'
+    type: String
+    description: |
+      The Apigee Organization associated with the Apigee Security Profile V2,
+      in the format `organizations/{{org_name}}`.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'profileId'
+    type: String
+    description: |
+      Resource ID of the security profile.
+    required: true
+    immutable: true
+    url_param_only: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the security profile v2 resource,
+      in the format `organizations/{{org_name}}/securityProfilesV2/{{profile_id}}`.
+    output: true
+  - name: 'description'
+    type: String
+    description: |
+      Description of the security profile.
+  - name: 'profileAssessmentConfigs'
+    type: Map
+    description: |
+      A map of the assessment name and the assessment config.
+    required: true
+    key_name: 'assessment'
+    value_type:
+      name: profileAssessmentConfig
+      type: NestedObject
+      properties:
+        - name: 'weight'
+          type: Enum
+          description: |
+            The weight of the assessment.
+          required: true
+          enum_values:
+            - 'MINOR'
+            - 'MODERATE'
+            - 'MAJOR'
+  - name: 'createTime'
+    type: String
+    description: |
+      The timestamp at which this profile was created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The timestamp at which this profile was most recently updated.
+    output: true

@@ -27,7 +27,6 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
 import_format:
   - projects/{{project}}/locations/global/policyOrchestrators/{{policy_orchestrator_id}}
-min_version: beta
 examples:
   - name: osconfigv2_policy_orchestrator_basic
     primary_resource_id: policy_orchestrator

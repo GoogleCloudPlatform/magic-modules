@@ -481,6 +481,10 @@ func (p Property) IsResourceAnnotations() bool {
 	return p.Name() == "annotations" && p.parent == nil
 }
 
+func (p Property) IsTopLevel() bool {
+	return p.parent == nil
+}
+
 func (p Property) ShouldShowUpInSamples() bool {
 	return (p.Settable && p.Name() != "effective_labels" && p.Name() != "effective_annotations") || p.IsResourceLabels() || p.IsResourceAnnotations()
 }

@@ -1,0 +1,22 @@
+resource "google_cloud_run_v2_worker_pool" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "cloud_run_worker_pool_name"}}"
+  location = "us-central1"
+  deletion_protection = false
+  launch_stage = "ALPHA"
+
+  template {
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/worker-pool"
+      resources {
+        limits = {
+          "cpu" = "4"
+          "memory" = "16Gi"
+          "nvidia.com/gpu" = "1"
+        }
+      }
+    }
+    node_selector {
+      accelerator = "nvidia-l4"
+    }
+  }
+}

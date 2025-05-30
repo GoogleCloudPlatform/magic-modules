@@ -1,3 +1,4 @@
+{{- if ne $.TargetVersionName "ga" -}}
 package resourcemanager_test
 
 import (
@@ -62,3 +63,4 @@ resource "google_folder_service_identity" "osconfig_sa" {
 }
 `, context)
 }
+{{- end }}

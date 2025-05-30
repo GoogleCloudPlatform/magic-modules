@@ -1,0 +1,9 @@
+func SecurityProfileGroupPrefixSlashes(_, old, new string, _ *schema.ResourceData) bool {
+	if strings.HasPrefix(old, "//") {
+        old = old[1:]
+	}
+	if strings.HasPrefix(new, "//") {
+		new = new[1:]
+	}
+	return old == new
+}

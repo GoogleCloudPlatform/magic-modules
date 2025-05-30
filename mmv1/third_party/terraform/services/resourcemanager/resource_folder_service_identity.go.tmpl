@@ -1,3 +1,4 @@
+{{- if ne $.TargetVersionName "ga" -}}
 package resourcemanager
 
 import (
@@ -130,3 +131,4 @@ func resourceFolderServiceIdentityRead(d *schema.ResourceData, meta interface{})
 func resourceFolderServiceIdentityDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
+{{- end }}

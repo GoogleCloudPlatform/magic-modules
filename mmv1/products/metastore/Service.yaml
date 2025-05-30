@@ -71,6 +71,8 @@ examples:
     primary_resource_id: 'default'
     vars:
       metastore_service_name: 'example-service'
+      kms_key_name: 'example-key'
+    test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-metastore-service-key1").CryptoKey.Name'
     exclude_docs: true
     skip_vcr: true

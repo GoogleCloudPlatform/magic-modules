@@ -27,6 +27,7 @@
 # IDEA files
 .idea/*
 *.iml
+**/.idea/*
 
 # OS generated files
 .DS_Store

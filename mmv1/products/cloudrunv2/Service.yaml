@@ -172,6 +172,14 @@ examples:
       'zip_path': '"./test-fixtures/function-source.zip"'
     ignore_read_extra:
       - 'deletion_protection'
+  - name: 'cloudrunv2_service_iap'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-iap-service%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      cloud_run_service_name: 'cloudrun-iap-service'
+    ignore_read_extra:
+      - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -332,6 +340,17 @@ properties:
         type: Integer
         description: |
           Minimum number of instances for the service, to be divided among all revisions receiving traffic.
+      - name: 'scalingMode'
+        type: Enum
+        description: |
+          The [scaling mode](https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.services#scalingmode) for the service.
+        enum_values:
+          - 'AUTOMATIC'
+          - 'MANUAL'
+      - name: 'manualInstanceCount'
+        type: Integer
+        description: |
+          Total instance count for the service in manual scaling mode. This number of instances is divided among all revisions with specified traffic based on the percent of traffic they are receiving.
   - name: 'defaultUriDisabled'
     type: Boolean
     description: |-
@@ -1214,3 +1233,8 @@ properties:
     description: |
       A system-generated fingerprint for this version of the resource. May be used to detect modification conflict during updates.
     output: true
+  - name: 'iapEnabled'
+    type: Boolean
+    description: |
+      Used to enable/disable IAP for the service.
+    min_version: 'beta'
