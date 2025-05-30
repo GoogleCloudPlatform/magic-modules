@@ -266,3 +266,4 @@ properties:
 
       If unspecified, the default propagated connection limit is 250.
     default_from_api: true
+    send_empty_value: true
