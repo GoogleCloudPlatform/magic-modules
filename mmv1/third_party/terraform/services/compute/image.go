@@ -108,11 +108,11 @@ func ResolveImage(c *transport_tpg.Config, project, name, userAgent string) (str
 			break
 		}
 	}
-	if c.UniverseDomain != "" && c.UniverseDomain != "googleapis.com" {
-		resolveImageLink = regexp.MustCompile(fmt.Sprintf("^https://compute.%s/compute/[a-z0-9]+/projects/(%s)/global/images/(%s)", c.UniverseDomain, verify.ProjectRegex, resolveImageImageRegex))
-	}
+
 	switch {
 	case resolveImageLink.MatchString(name): // https://www.googleapis.com/compute/v1/projects/xyz/global/images/xyz
+		return name, nil
+	case resolveImageUniverseLink.MatchString(name): // https://compute.xyz/compute/[a-z0-9]+/projects/xyz/global/images/xyz
 		return name, nil
 	case resolveImageProjectImage.MatchString(name): // projects/xyz/global/images/xyz
 		res := resolveImageProjectImage.FindStringSubmatch(name)
