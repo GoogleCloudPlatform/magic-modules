@@ -17,6 +17,7 @@ func TestAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicEx
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
+	serviceAccount := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -24,7 +25,7 @@ func TestAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicEx
 		CheckDestroy:             testAccCheckComposerUserWorkloadsConfigMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_basic(context),
+				Config: testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_basic(context, serviceAccount),
 			},
 			{
 				ResourceName:      "google_composer_user_workloads_config_map.config_map",
@@ -32,7 +33,7 @@ func TestAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicEx
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_update(context),
+				Config: testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_update(context, serviceAccount),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_composer_user_workloads_config_map.config_map", "data.db_host", "dbhost:5432"),
 					resource.TestCheckNoResourceAttr("google_composer_user_workloads_config_map.config_map", "data.api_host"),
@@ -53,6 +54,7 @@ func TestAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicEx
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
+	serviceAccount := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -60,7 +62,7 @@ func TestAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicEx
 		CheckDestroy:             testAccCheckComposerUserWorkloadsConfigMapDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_basic(context),
+				Config: testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_basic(context, serviceAccount),
 			},
 			{
 				ResourceName:      "google_composer_user_workloads_config_map.config_map",
@@ -68,7 +70,7 @@ func TestAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicEx
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_delete(context),
+				Config: testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_delete(context, serviceAccount),
 				Check: resource.ComposeTestCheckFunc(
 					testAccComposerUserWorkloadsConfigMapDestroyed(t),
 				),
@@ -77,16 +79,32 @@ func TestAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicEx
 	})
 }
 
-func testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_basic(context map[string]interface{}) string {
+func testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_basic(context map[string]interface{}, serviceAccount string) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_service_account" "test" {
+  account_id   = "%s"
+  display_name = "Test Service Account for Composer Environment"
+}
+resource "google_project_iam_member" "composer-worker" {
+  project = data.google_project.project.project_id
+  role   = "roles/composer.worker"
+  member = "serviceAccount:${google_service_account.test.email}"
+}
+
 resource "google_composer_environment" "environment" {
   name   = "tf-test-test-environment%{random_suffix}"
   region = "us-central1"
   config {
+    node_config {
+      service_account  = google_service_account.test.name
+    }
     software_config {
       image_version = "composer-3-airflow-2"
     }
   }
+  depends_on = [google_project_iam_member.composer-worker]
 }
 
 resource "google_composer_user_workloads_config_map" "config_map" {
@@ -97,19 +115,35 @@ resource "google_composer_user_workloads_config_map" "config_map" {
     api_host: "apihost:443",
   }
 }
-`, context)
+`, serviceAccount, context)
 }
 
-func testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_update(context map[string]interface{}) string {
+func testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_update(context map[string]interface{}, serviceAccount string) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_service_account" "test" {
+  account_id   = "%s"
+  display_name = "Test Service Account for Composer Environment"
+}
+resource "google_project_iam_member" "composer-worker" {
+  project = data.google_project.project.project_id
+  role   = "roles/composer.worker"
+  member = "serviceAccount:${google_service_account.test.email}"
+}
+
 resource "google_composer_environment" "environment" {
   name   = "tf-test-test-environment%{random_suffix}"
   region = "us-central1"
   config {
+    node_config {
+      service_account  = google_service_account.test.name
+    }
     software_config {
       image_version = "composer-3-airflow-2"
     }
   }
+  depends_on = [google_project_iam_member.composer-worker]
 }
 
 resource "google_composer_user_workloads_config_map" "config_map" {
@@ -120,21 +154,37 @@ resource "google_composer_user_workloads_config_map" "config_map" {
     db_host: "dbhost:5432",
   }
 }
-`, context)
+`, serviceAccount, context)
 }
 
-func testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_delete(context map[string]interface{}) string {
+func testAccComposerUserWorkloadsConfigMap_composerUserWorkloadsConfigMapBasicExample_delete(context map[string]interface{}, serviceAccount string) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_service_account" "test" {
+  account_id   = "%s"
+  display_name = "Test Service Account for Composer Environment"
+}
+resource "google_project_iam_member" "composer-worker" {
+  project = data.google_project.project.project_id
+  role   = "roles/composer.worker"
+  member = "serviceAccount:${google_service_account.test.email}"
+}
+
 resource "google_composer_environment" "environment" {
   name   = "tf-test-test-environment%{random_suffix}"
   region = "us-central1"
   config {
+    node_config {
+      service_account  = google_service_account.test.name
+    }
     software_config {
       image_version = "composer-3-airflow-2"
     }
   }
+  depends_on = [google_project_iam_member.composer-worker]
 }
-`, context)
+`, serviceAccount, context)
 }
 
 func testAccComposerUserWorkloadsConfigMapDestroyed(t *testing.T) func(s *terraform.State) error {
