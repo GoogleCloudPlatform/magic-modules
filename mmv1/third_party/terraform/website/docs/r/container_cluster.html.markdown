@@ -293,7 +293,7 @@ region are guaranteed to support the same version.
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is [documented below](#nested_pod_security_policy_config).
 
-* `pod_autoscaling` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Configuration for the
+* `pod_autoscaling` - (Optional) Configuration for the
     Structure is [documented below](#nested_pod_autoscaling).
 
 * `secret_manager_config` - (Optional) Configuration for the
@@ -857,7 +857,7 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
     in GB. The smallest allowed disk size is 10GB. Defaults to 100GB.
 
 * `disk_type` - (Optional) Type of the disk attached to each node
-    (e.g. 'pd-standard', 'pd-balanced' or 'pd-ssd'). If unspecified, the default disk type is 'pd-standard'
+    (e.g. 'pd-standard', 'pd-balanced' or 'pd-ssd'). If unspecified, the default disk type is 'pd-balanced'
 
 * `enable_confidential_storage` - (Optional) Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default.
 
@@ -936,7 +936,7 @@ gvnic {
 
 * `max_run_duration` - (Optional) The runtime of each node in the node pool in seconds, terminated by 's'. Example: "3600s".
 
-* `flex_start` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))) Enables Flex Start provisioning model for the node pool.
+* `flex_start` - (Optional) Enables Flex Start provisioning model for the node pool.
 
 * `local_ssd_count` - (Optional) The amount of local SSD disks that will be
     attached to each cluster node. Defaults to 0.
