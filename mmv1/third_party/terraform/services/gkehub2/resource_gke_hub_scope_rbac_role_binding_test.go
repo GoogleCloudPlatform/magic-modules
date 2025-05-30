@@ -131,7 +131,7 @@ resource "google_gke_hub_feature" "rbacrolebindingactuation" {
   location = "global"
   spec {
     rbacrolebindingactuation {
-      allowed_custom_roles = ["my-custom-role"]
+      allowed_custom_roles = ["my-custom-role", "my-custom-role-2"]
     }
   }
 }
