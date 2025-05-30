@@ -4668,7 +4668,6 @@ resource "google_container_node_pool" "np" {
 `, clusterName, networkName, subnetworkName, np)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerNodePool_withFlexStart(t *testing.T) {
 	t.Parallel()
 
@@ -4749,7 +4748,6 @@ resource "google_container_node_pool" "np" {
 }
 `, clusterName, networkName, subnetworkName, np)
 }
-{{- end }}
 
 func TestAccContainerNodePool_tpuTopology(t *testing.T) {
 	t.Parallel()
