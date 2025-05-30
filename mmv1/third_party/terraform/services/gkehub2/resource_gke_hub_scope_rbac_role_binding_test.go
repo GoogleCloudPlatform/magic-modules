@@ -131,7 +131,7 @@ resource "google_gke_hub_feature" "rbacrolebindingactuation" {
   location = "global"
   spec {
     rbacrolebindingactuation {
-      allowed_custom_roles = ["my-custom-role", "my-custom-role2"]
+      allowed_custom_roles = ["my-custom-role"]
     }
   }
 }
@@ -155,6 +155,16 @@ func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExa
         return acctest.Nprintf(`
 resource "google_gke_hub_scope" "scope" {
   scope_id = "tf-test-scope%{random_suffix}"
+}
+
+resource "google_gke_hub_feature" "rbacrolebindingactuation" {
+  name = "rbacrolebindingactuation"
+  location = "global"
+  spec {
+    rbacrolebindingactuation {
+      allowed_custom_roles = ["my-custom-role", "my-custom-role-2"]
+    }
+  }
 }
 
 resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_binding" {
