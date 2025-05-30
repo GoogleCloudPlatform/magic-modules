@@ -8,7 +8,7 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
   }
 
   data {
-    resource = "//bigquery.googleapis.com/projects/dataplex-back-end-dev-project/datasets/austin_bikeshare/tables/bikeshare_stations"
+    resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/austin_bikeshare/tables/bikeshare_stations"
   }
 
   execution_spec {

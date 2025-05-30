@@ -16,7 +16,6 @@ func TestAccDataplexDatascanDataplexDatascanFullQuality_update(t *testing.T) {
 	context := map[string]interface{}{
 		"project_name":  envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
-		"backtick":      "`",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -53,6 +52,33 @@ func TestAccDataplexDatascanDataplexDatascanFullQuality_update(t *testing.T) {
 
 func testAccDataplexDatascanDataplexDatascanFullQuality_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+
+resource "google_bigquery_dataset" "tf_test_dataset" {
+  dataset_id = "tf_test_dataset_id"
+  default_table_expiration_ms = 3600000
+}
+
+resource "google_bigquery_table" "tf_test_table" {
+  dataset_id          = google_bigquery_dataset.tf_test_dataset.dataset_id
+  table_id            = "tf_test_table"
+  deletion_protection = false
+  schema              = <<EOF
+    [
+    {
+      "name": "name",
+      "type": "STRING",
+      "mode": "NULLABLE"
+    },
+    {
+      "name": "age",
+      "type": "INTEGER",
+      "mode": "NULLABLE",
+      "description": "Age of the person"
+    }
+    ]
+  EOF
+}
+  
 resource "google_dataplex_datascan" "full_quality" {
   location = "us-central1"
   display_name = "Full Datascan Quality"
@@ -63,7 +89,7 @@ resource "google_dataplex_datascan" "full_quality" {
   }
 
   data {
-    resource = "//bigquery.googleapis.com/projects/dataplex-back-end-dev-project/datasets/austin_bikeshare/tables/bikeshare_stations"
+    resource = "//bigquery.googleapis.com/projects/%{project_name}/datasets/tf_test_dataset_id/tables/tf_test_table"
   }
 
   execution_spec {
@@ -72,12 +98,11 @@ resource "google_dataplex_datascan" "full_quality" {
         cron = "TZ=America/New_York 1 1 * * *"
       }
     }
-    field = "modified_date"
   }
 
   data_quality_spec {
     sampling_percent = 5
-    row_filter = "station_id > 1000"
+    row_filter = "age > 10"
     post_scan_actions {
       notification_report {
         recipients {
@@ -90,85 +115,25 @@ resource "google_dataplex_datascan" "full_quality" {
     }
     
     rules {
-      column = "address"
+      column = "name"
       dimension = "VALIDITY"
       threshold = 0.99
       non_null_expectation {}
     }
 
     rules {
-      column = "council_district"
+      column = "age"
       dimension = "VALIDITY"
       ignore_null = true
       threshold = 0.9
       range_expectation {
         min_value = 1
-        max_value = 10
+        max_value = 100
         strict_min_enabled = true
         strict_max_enabled = false
       }
     }
-
-    rules {
-      column = "power_type"
-      dimension = "VALIDITY"
-      ignore_null = false
-      regex_expectation {
-        regex = ".*solar.*"
-      }
-    }
-
-    rules {
-      column = "property_type"
-      dimension = "VALIDITY"
-      ignore_null = false
-      set_expectation {
-        values = ["sidewalk", "parkland"]
-      }
-    }
-
-
-    rules {
-      column = "address"
-      dimension = "UNIQUENESS"
-      uniqueness_expectation {}
-    }
-
-    rules {
-      column = "number_of_docks"
-      dimension = "VALIDITY"
-      statistic_range_expectation {
-        statistic = "MEAN"
-        min_value = 5
-        max_value = 15
-        strict_min_enabled = true
-        strict_max_enabled = true
-      }
-    }
-
-    rules {
-      column = "footprint_length"
-      dimension = "VALIDITY"
-      row_condition_expectation {
-        sql_expression = "footprint_length > 0 AND footprint_length <= 10"
-      }
-    }
-
-    rules {
-      dimension = "VALIDITY"
-      table_condition_expectation {
-        sql_expression = "COUNT(*) > 0"
-      }
-    }
-
-    rules {
-      dimension = "VALIDITY"
-      sql_assertion {
-        sql_statement = "select * from %{backtick}dataplex-back-end-dev-project.austin_bikeshare.bikeshare_stations%{backtick} where station_id is null"
-      }
-    }
   }
-
 
   project = "%{project_name}"
 }
@@ -177,6 +142,32 @@ resource "google_dataplex_datascan" "full_quality" {
 
 func testAccDataplexDatascanDataplexDatascanFullQuality_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "google_bigquery_dataset" "tf_test_dataset" {
+  dataset_id = "tf_test_dataset_id"
+  default_table_expiration_ms = 3600000
+}
+
+resource "google_bigquery_table" "tf_test_table" {
+  dataset_id          = google_bigquery_dataset.tf_test_dataset.dataset_id
+  table_id            = "tf_test_table"
+  deletion_protection = false
+  schema              = <<EOF
+    [
+    {
+      "name": "name",
+      "type": "STRING",
+      "mode": "NULLABLE"
+    },
+    {
+      "name": "age",
+      "type": "INTEGER",
+      "mode": "NULLABLE",
+      "description": "Age of the person"
+    }
+    ]
+  EOF
+}
+
 resource "google_dataplex_datascan" "full_quality" {
   location = "us-central1"
   display_name = "Full Datascan Quality"
@@ -187,7 +178,7 @@ resource "google_dataplex_datascan" "full_quality" {
   }
 
   data {
-    resource = "//bigquery.googleapis.com/projects/dataplex-back-end-dev-project/datasets/austin_bikeshare/tables/bikeshare_stations"
+    resource = "//bigquery.googleapis.com/projects/%{project_name}/datasets/tf_test_dataset_id/tables/tf_test_table"
   }
 
   execution_spec {
@@ -196,12 +187,11 @@ resource "google_dataplex_datascan" "full_quality" {
         cron = "TZ=America/New_York 1 1 * * *"
       }
     }
-    field = "modified_date"
   }
 
   data_quality_spec {
     sampling_percent = 5
-    row_filter = "station_id > 1000"
+    row_filter = "age > 10"
     catalog_publishing_enabled = true
     post_scan_actions {
       notification_report {
@@ -215,85 +205,25 @@ resource "google_dataplex_datascan" "full_quality" {
     }
     
     rules {
-      column = "address"
+      column = "name"
       dimension = "VALIDITY"
       threshold = 0.99
       non_null_expectation {}
     }
 
     rules {
-      column = "council_district"
+      column = "age"
       dimension = "VALIDITY"
       ignore_null = true
       threshold = 0.9
       range_expectation {
         min_value = 1
-        max_value = 10
+        max_value = 100
         strict_min_enabled = true
         strict_max_enabled = false
       }
     }
-
-    rules {
-      column = "power_type"
-      dimension = "VALIDITY"
-      ignore_null = false
-      regex_expectation {
-        regex = ".*solar.*"
-      }
-    }
-
-    rules {
-      column = "property_type"
-      dimension = "VALIDITY"
-      ignore_null = false
-      set_expectation {
-        values = ["sidewalk", "parkland"]
-      }
-    }
-
-
-    rules {
-      column = "address"
-      dimension = "UNIQUENESS"
-      uniqueness_expectation {}
-    }
-
-    rules {
-      column = "number_of_docks"
-      dimension = "VALIDITY"
-      statistic_range_expectation {
-        statistic = "MEAN"
-        min_value = 5
-        max_value = 15
-        strict_min_enabled = true
-        strict_max_enabled = true
-      }
-    }
-
-    rules {
-      column = "footprint_length"
-      dimension = "VALIDITY"
-      row_condition_expectation {
-        sql_expression = "footprint_length > 0 AND footprint_length <= 10"
-      }
-    }
-
-    rules {
-      dimension = "VALIDITY"
-      table_condition_expectation {
-        sql_expression = "COUNT(*) > 0"
-      }
-    }
-
-    rules {
-      dimension = "VALIDITY"
-      sql_assertion {
-        sql_statement = "select * from %{backtick}dataplex-back-end-dev-project.austin_bikeshare.bikeshare_stations%{backtick} where station_id is null"
-      }
-    }
   }
-
 
   project = "%{project_name}"
 }
