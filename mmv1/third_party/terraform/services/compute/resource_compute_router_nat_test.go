@@ -2168,6 +2168,7 @@ resource "google_compute_router_nat" "foobar" {
   }
 }
 `, routerName, routerName, routerName, routerName)
+}
 
 func testAccComputeRouterNatWithNat64Configuration(context map[string]interface{}) string {
 	return acctest.Nprintf(`
