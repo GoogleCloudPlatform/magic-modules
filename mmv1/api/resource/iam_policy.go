@@ -104,7 +104,7 @@ type IamPolicy struct {
 	SelfLink string `yaml:"self_link"`
 
 	// [Optional] Version number in the request payload.
-	// if set, it overrides the default IamPolicyVersion
+	// if set, it overrides the default IamPolicyVersion (version: 1)
 	IamPolicyVersion string `yaml:"iam_policy_version"`
 
 	// [Optional] Min version to make IAM resources available at
