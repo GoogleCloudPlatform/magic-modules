@@ -1,0 +1,41 @@
+[
+  {
+    "name": "//iam.googleapis.com/policies/cloudresourcemanager.googleapis.com%2Fprojects%2F{{.Provider.project}}/denypolicies/my-deny-policy",
+    "asset_type": "iam.googleapis.com/DenyPolicy",
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "resource": {
+      "version": "v2",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/iam/v2/rest",
+      "discovery_name": "DenyPolicy",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "displayName": "A deny rule",
+        "rules": [
+            {
+                "description": "First rule",
+                "denyRule": {
+                    "deniedPrincipals": ["principalSet://goog/public:all"],
+                    "deniedPermissions": ["cloudresourcemanager.googleapis.com/projects.update"],
+                    "denialCondition": {
+                        "title": "Some expr",
+                        "expression": "!resource.matchTag('12345678/env', 'test')"
+                    }
+                }
+            },
+            {
+                "description": "Second rule",
+                "denyRule": {
+                    "deniedPrincipals": ["principalSet://goog/public:all"],
+                    "exceptionPrincipals": ["principal://iam.googleapis.com/projects/-/serviceAccounts/some-sa@{{.Provider.project}}.iam.gserviceaccount.com"],
+                    "deniedPermissions": ["cloudresourcemanager.googleapis.com/projects.update"],
+                    "denialCondition": {
+                        "title": "Some expr",
+                        "expression": "!resource.matchTag('12345678/env', 'test')"
+                    }
+                }
+            }
+        ]
+      }
+    }
+  }
+]
