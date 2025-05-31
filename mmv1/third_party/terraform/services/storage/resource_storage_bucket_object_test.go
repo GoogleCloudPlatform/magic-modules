@@ -59,22 +59,23 @@ func TestAccStorageObject_recreate(t *testing.T) {
 
 	bucketName := acctest.TestBucketName(t)
 
-	writeFile := func(name string, data []byte) string {
+	writeFile := func(name string, data []byte) {
+		if err := ioutil.WriteFile(name, data, 0644); err != nil {
+			t.Errorf("error writing file: %v", err)
+		}
+	}
+	getMd5 := func(data []byte) string {
 		h := md5.New()
 		if _, err := h.Write(data); err != nil {
 			t.Errorf("error calculating md5: %v", err)
 		}
 		dataMd5 := base64.StdEncoding.EncodeToString(h.Sum(nil))
-
-		if err := ioutil.WriteFile(name, data, 0644); err != nil {
-			t.Errorf("error writing file: %v", err)
-		}
 		return dataMd5
 	}
 	testFile := getNewTmpTestFile(t, "tf-test")
-	dataMd5 := writeFile(testFile.Name(), []byte("data data data"))
-	updatedName := testFile.Name() + ".update"
-	updatedDataMd5 := writeFile(updatedName, []byte("datum"))
+	writeFile(testFile.Name(), []byte("data data data"))
+	dataMd5 := getMd5([]byte("data data data"))
+	updatedDataMd5 := getMd5([]byte("datum"))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -87,12 +88,9 @@ func TestAccStorageObject_recreate(t *testing.T) {
 			},
 			{
 				PreConfig: func() {
-					err := os.Rename(updatedName, testFile.Name())
-					if err != nil {
-						t.Errorf("Failed to rename %s to %s", updatedName, testFile.Name())
-					}
+					writeFile(testFile.Name(), []byte("datum"))
 				},
-				Config: testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
+				Config: testGoogleStorageBucketsObjectFileMd5(bucketName, testFile.Name()),
 				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, updatedDataMd5),
 			},
 		},
@@ -846,4 +844,20 @@ func getNewTmpTestFile(t *testing.T, prefix string) *os.File {
 		t.Fatalf("Cannot create temp file: %s", err)
 	}
 	return testFile
+}
+
+func testGoogleStorageBucketsObjectFileMd5(bucketName, sourceFilename string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "%s"
+  bucket = google_storage_bucket.bucket.name
+  source = "%s"
+  source_md5hash = filemd5("%s")
+}
+`, bucketName, objectName, sourceFilename, sourceFilename)
 }

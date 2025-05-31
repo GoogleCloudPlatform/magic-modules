@@ -87,6 +87,8 @@ One of the following is required:
 
 * `kms_key_name` - (Optional) The resource name of the Cloud KMS key that will be used to [encrypt](https://cloud.google.com/storage/docs/encryption/using-customer-managed-keys) the object.
 
+* `source_md5hash` - (Optional) User-provided md5hash, Base 64 MD5 hash of the object data.
+
 ---
 
 <a name="nested_customer_encryption"></a>The `customer_encryption` block supports:
