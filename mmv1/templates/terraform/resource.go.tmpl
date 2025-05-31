@@ -131,6 +131,9 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
         DeprecationMessage: "{{ $.DeprecationMessage -}}",
 {{- end}}
 
+{{ if $.CustomCode.CustomIdentitySchema }}
+    {{ $.CustomTemplate $.CustomCode.CustomIdentitySchema false -}}
+{{ else }}
         Identity: &schema.ResourceIdentity{
           Version: {{ $.GetIdentitySchemaVersion }},
           SchemaFunc: func() map[string]*schema.Schema {
@@ -148,6 +151,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
             }
           },
         },
+{{ end }}
         Schema: map[string]*schema.Schema{
 			{{- range $prop := $.OrderProperties $.AllUserProperties }}
 {{template "SchemaFields" $prop -}}
