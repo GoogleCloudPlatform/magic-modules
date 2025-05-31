@@ -1,53 +1,20 @@
+// Extract engine ID from the gen_app_builder_settings field of the Agent
 s := d.Get("gen_app_builder_settings")
 log.Printf("[DEBUG] gen_app_builder_settings: %v", s)
 settings, ok := s.([]interface{})
 if !ok {
 	return fmt.Errorf("Error converting gen_app_builder_settings %s to  []interface{}", s)
 }
-if len(settings) == 0 {
-    // no engine to delete
-    return nil
-}
 
-// get the engine ID
-engineIntf, ok := settings[0].(map[string]interface{})["engine"]
-if !ok {
-    return fmt.Errorf("Expected key 'engine' in map %+v", settings[0])
+engineID := ""
+if len(settings) > 0 {
+	// An engine is linked to the Agent. Delete it.
+	engineIDIntf, ok := settings[0].(map[string]interface{})["engine"]
+	if !ok {
+			return fmt.Errorf("Expected key 'engine' in map %+v", settings[0])
+	}
+	engineID, ok = engineIDIntf.(string)
+	if !ok {
+		return fmt.Errorf("Can convert engine ID %s to string", engineIDIntf)
+	}
 }
-engineID, ok := engineIntf.(string)
-if !ok {
-	return fmt.Errorf("Can convert engine ID %s to string", engineIntf)
-}
-
-// check the engine exist
-baseUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}DiscoveryEngineBasePath{{"}}"}}")
-if err != nil {
-	return err
-}
-engineUrl := baseUrl + engineID
-_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-	Config:    config,
-	Method:    "GET",
-	Project:   project,
-	RawURL:    engineUrl,
-	UserAgent: userAgent,
-})
-if err != nil {
-	log.Printf("[DEBUG] engine %s doesn't exist. No need to delete", engineID)
-	return nil
-}
-
-// delete the engine
-log.Printf("[DEBUG] Deleting engine %v", engineID)
-_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-	Config:    config,
-	Method:    "DELETE",
-	Project:   project,
-	RawURL:    engineUrl,
-	UserAgent: userAgent,
-})
-if err != nil {
-	return fmt.Errorf("Error deleting engine %s: %s", engineID, err)
-}
-
-log.Printf("[DEBUG] Finished deleting engine %s", engineID)
