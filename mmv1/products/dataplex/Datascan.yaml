@@ -365,6 +365,10 @@ properties:
                 The maximum length is 63 characters.
                 Must start with a letter.
                 Must end with a number or a letter.
+            - name: 'suspended'
+              type: Boolean
+              description: |
+                Whether the Rule is active or suspended. Default = false.
             - name: 'description'
               type: String
               description: |
