@@ -231,11 +231,6 @@ type StateUpgradeDetails struct {
 	SchemaVersion int
 }
 
-type IdentitySchemaDetails struct {
-	// The current schema version
-	Version int
-}
-
 type ComplexMapKeyDetails struct {
 	// The name of the key as exposed by Terraform
 	KeyName string
