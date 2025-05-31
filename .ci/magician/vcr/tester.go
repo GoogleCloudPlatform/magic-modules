@@ -243,7 +243,7 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 		"-run=TestAcc",
 		"-timeout",
 		replayingTimeout,
-		"-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc",
+		"-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc -X=github.com/hashicorp/terraform-plugin-testing/helper/resource.RefreshAfterApply=unlocked",
 		"-vet=off",
 	)
 	env := map[string]string{
@@ -390,7 +390,7 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 		"-run=" + test + "$",
 		"-timeout",
 		replayingTimeout,
-		"-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc",
+		"-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc -X=github.com/hashicorp/terraform-plugin-testing/helper/resource.RefreshAfterApply=unlocked",
 		"-vet=off",
 	}
 	env := map[string]string{
