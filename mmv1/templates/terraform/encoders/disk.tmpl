@@ -50,5 +50,17 @@ if v, ok := d.GetOk("image"); ok {
 	obj["sourceImage"] = imageUrl
 	log.Printf("[DEBUG] Image name resolved to: %s", imageUrl)
 }
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
+if rawKey, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("raw_key_wo")); !diags.HasError() && rawKey.IsKnown() && !rawKey.IsNull() {
+	obj["diskEncryptionKey"] = map[string]interface{}{
+		"rawKey": rawKey.AsString(),
+	}
+}
 
+if rsaEncryptedKey, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("rsa_encrypted_key_wo")); !diags.HasError() && rsaEncryptedKey.IsKnown() && !rsaEncryptedKey.IsNull() {
+	obj["diskEncryptionKey"] = map[string]interface{}{
+		"rsaEncryptedKey": rsaEncryptedKey.AsString(),
+	}
+}
+{{- end }}
 return obj, nil
