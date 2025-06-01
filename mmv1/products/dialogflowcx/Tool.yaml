@@ -117,14 +117,10 @@ properties:
                   If this field is set, the apiKey field will be ignored.
                   Format: projects/{project}/secrets/{secret}/versions/{version}
               - name: 'requestLocation'
-                type: Enum
+                type: String
                 description: |
                   Key location in the request.
-                  * HEADER: Represents the key in http header.
-                  * QUERY_STRING: Represents the key in http header.
-                enum_values:
-                  - 'HEADER'
-                  - 'QUERY_STRING'
+                  See [RequestLocation](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.tools#requestlocation) for valid values.
                 required: true
           - name: 'oauthConfig'
             type: NestedObject
@@ -133,12 +129,10 @@ properties:
               This field is part of a union field `auth_config`: Only one of `apiKeyConfig`, `oauthConfig`, `serviceAgentAuthConfig`, or `bearerTokenConfig` may be set.
             properties:
               - name: 'oauthGrantType'
-                type: Enum
+                type: String
                 description: |
                   OAuth grant types.
-                  * CLIENT_CREDENTIAL: Represents the [client credential flow](https://oauth.net/2/grant-types/client-credentials/)
-                enum_values:
-                  - 'CLIENT_CREDENTIAL'
+                  See [OauthGrantType](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.tools#oauthgranttype) for valid values
                 required: true
               - name: 'clientId'
                 type: String
@@ -175,15 +169,11 @@ properties:
               This field is part of a union field `auth_config`: Only one of `apiKeyConfig`, `oauthConfig`, `serviceAgentAuthConfig`, or `bearerTokenConfig` may be set.
             properties:
               - name: 'serviceAgentAuth'
-                type: Enum
+                type: String
                 description: |
                   Optional. Indicate the auth token type generated from the Diglogflow service agent.
                   The generated token is sent in the Authorization header.
-                  * ID_TOKEN: Use ID token generated from service agent. This can be used to access Cloud Function and Cloud Run after you grant Invoker role to `service-<PROJECT-NUMBER>@gcp-sa-dialogflow.iam.gserviceaccount.com`.
-                  * ACCESS_TOKEN: Use access token generated from service agent. This can be used to access other Google Cloud APIs after you grant required roles to `service-<PROJECT-NUMBER>@gcp-sa-dialogflow.iam.gserviceaccount.com`.
-                enum_values:
-                  - 'ID_TOKEN'
-                  - 'ACCESS_TOKEN'
+                  See [ServiceAgentAuth](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.tools#serviceagentauth) for valid values.
           - name: 'bearerTokenConfig'
             type: NestedObject
             description: |
@@ -267,29 +257,19 @@ properties:
           type: NestedObject
           properties:
             - name: 'dataStoreType'
-              type: Enum
+              type: String
               description: |
                 The type of the connected data store.
-                * PUBLIC_WEB: A data store that contains public web content.
-                * UNSTRUCTURED: A data store that contains unstructured private data.
-                * STRUCTURED: A data store that contains structured data (for example FAQ).
-              enum_values:
-                - 'PUBLIC_WEB'
-                - 'UNSTRUCTURED'
-                - 'STRUCTURED'
+                See [DataStoreType](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/DataStoreConnection#datastoretype) for valid values.
             - name: 'dataStore'
               type: String
               description: |
                 The full name of the referenced data store. Formats: projects/{project}/locations/{location}/collections/{collection}/dataStores/{dataStore} projects/{project}/locations/{location}/dataStores/{dataStore}
             - name: 'documentProcessingMode'
-              type: Enum
+              type: String
               description: |
                 The document processing mode for the data store connection. Should only be set for PUBLIC_WEB and UNSTRUCTURED data stores. If not set it is considered as DOCUMENTS, as this is the legacy mode.
-                * DOCUMENTS: Documents are processed as documents.
-                * CHUNKS: Documents are converted to chunks.
-              enum_values:
-                - 'DOCUMENTS'
-                - 'CHUNKS'
+                See [DocumentProcessingMode](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/DataStoreConnection#documentprocessingmode) for valid values.
       - name: 'fallbackPrompt'
         type: NestedObject
         description: |
