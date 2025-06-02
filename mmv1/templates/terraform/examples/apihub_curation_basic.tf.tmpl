@@ -1,7 +1,7 @@
 resource "google_apihub_curation" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
   curation_id = "{{index $.Vars "curation_id"}}"
-  project = "apihub-test"
+  project = "apihub-terraform"
   display_name = "Test Curation"
   description = "This is a sample curation resource managed by Terraform."
   endpoint {

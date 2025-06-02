@@ -29,6 +29,8 @@ examples:
     primary_resource_id: apihub_curation_basic
     vars:
       curation_id: 'test'
+    # API hub instance needs to be created before this, and end to end creation of that resource using Terraform is not yet supported.
+    exclude_test: true
     external_providers: ["time"]
 parameters:
   - name: location
