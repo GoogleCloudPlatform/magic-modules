@@ -15,8 +15,6 @@ import (
 // Since each test here is acting on the same organization and only one AccessPolicy
 // can exist, they need to be run serially
 func TestAccAccessContextManager(t *testing.T) {
-  t.Fatalf("test change, revert before merge")
-
 	testCases := map[string]func(t *testing.T){
 		"access_policy":				testAccAccessContextManagerAccessPolicy_basicTest,
 		"access_policy_scoped":				testAccAccessContextManagerAccessPolicy_scopedTest,
