@@ -405,7 +405,7 @@ func excludeCompoundTests(allTests, subtests []string) []string {
 			continue
 		}
 		compoundTests[parts[0]] = struct{}{}
-		res = append(res, parts[1])
+		res = append(res, subtest)
 	}
 	for _, test := range allTests {
 		if _, ok := compoundTests[test]; !ok {
