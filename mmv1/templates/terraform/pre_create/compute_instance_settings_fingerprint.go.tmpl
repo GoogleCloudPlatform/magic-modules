@@ -1,0 +1,21 @@
+
+fingerprintUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}ComputeBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/zones/{{"{{"}}zone{{"}}"}}/instanceSettings/{{"{{"}}name{{"}}"}}")
+if err != nil {
+        return err
+}
+
+fingerPrintRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+        Config:    config,
+        Method:    "GET",
+        Project:   project,
+        RawURL:    fingerprintUrl,
+        UserAgent: userAgent,
+})
+if err != nil {
+        return err
+}
+
+fingerprintProp = fingerPrintRes["fingerprint"]
+if v, ok := d.GetOkExists("fingerprint"); !tpgresource.IsEmptyValue(reflect.ValueOf(fingerprintProp)) && (ok || !reflect.DeepEqual(v, fingerprintProp)) {
+        obj["fingerprint"] = fingerprintProp
+}

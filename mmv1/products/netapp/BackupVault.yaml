@@ -116,3 +116,29 @@ properties:
     description: |
       Name of the Backup vault created in backup region.
     output: true
+  - name: 'backupRetentionPolicy'
+    type: NestedObject
+    description: |
+      Backup retention policy defining the retention of the backups.
+    properties:
+      - name: 'backupMinimumEnforcedRetentionDays'
+        type: Integer
+        description: |
+          Minimum retention duration in days for backups in the backup vault.
+        required: true
+      - name: 'dailyBackupImmutable'
+        type: Boolean
+        description: |
+          Indicates if the daily backups are immutable. At least one of daily_backup_immutable, weekly_backup_immutable, monthly_backup_immutable and manual_backup_immutable must be true.
+      - name: 'weeklyBackupImmutable'
+        type: Boolean
+        description: |
+          Indicates if the weekly backups are immutable. At least one of daily_backup_immutable, weekly_backup_immutable, monthly_backup_immutable and manual_backup_immutable must be true.
+      - name: 'monthlyBackupImmutable'
+        type: Boolean
+        description: |
+          Indicates if the monthly backups are immutable. At least one of daily_backup_immutable, weekly_backup_immutable, monthly_backup_immutable and manual_backup_immutable must be true.
+      - name: 'manualBackupImmutable'
+        type: Boolean
+        description: |
+          Indicates if the manual backups are immutable. At least one of daily_backup_immutable, weekly_backup_immutable, monthly_backup_immutable and manual_backup_immutable must be true.
