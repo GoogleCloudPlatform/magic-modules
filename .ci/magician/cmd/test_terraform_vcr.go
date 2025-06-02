@@ -319,8 +319,8 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		allRecordingPassed := len(recordingResult.FailedTests) == 0 && !hasTerminatedTests && recordingErr == nil
 
 		recordReplayData := recordReplay{
-			RecordingResult:               recordingResult,
-			ReplayingAfterRecordingResult: replayingAfterRecordingResult,
+			RecordingResult:               subtestResult(recordingResult),
+			ReplayingAfterRecordingResult: subtestResult(replayingAfterRecordingResult),
 			RecordingErr:                  recordingErr,
 			HasTerminatedTests:            hasTerminatedTests,
 			AllRecordingPassed:            allRecordingPassed,
