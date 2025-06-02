@@ -1,4 +1,4 @@
-func sendMessageStoragePolicyIfEmptyDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+func recomputeMessageStoragePolicy(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	// on create, return immediately as we don't need to determine if the value is empty or not
 	if diff.Id() == "" {
 		return nil
