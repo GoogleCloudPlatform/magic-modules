@@ -25,7 +25,7 @@ jobs:
           cache: false
       - name: Build magician
         run: |
-          cd .ci/magician
+          cd tools/magician
           go build .
       - name: Request reviewer
-        run: .ci/magician/magician scheduled-pr-reminders ${{ github.event.pull_request.number }}
+        run: tools/magician/magician scheduled-pr-reminders ${{ github.event.pull_request.number }}

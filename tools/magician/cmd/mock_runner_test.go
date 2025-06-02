@@ -65,10 +65,10 @@ func NewMockRunner() MockRunner {
 	return &mockRunner{
 		calledMethods: make(map[string][]ParameterList),
 		cmdResults: map[string]string{
-			"/mock/dir/magic-modules/.ci/magician git [clone -b auto-pr-123456 https://modular-magician:*******@github.com/modular-magician/docs-examples /mock/dir/tfoics] map[]":                "",
-			"/mock/dir/magic-modules/.ci/magician git [clone -b auto-pr-123456 https://modular-magician:*******@github.com/modular-magician/terraform-google-conversion /mock/dir/tgc] map[]":     "",
-			"/mock/dir/magic-modules/.ci/magician git [clone -b auto-pr-123456 https://modular-magician:*******@github.com/modular-magician/terraform-provider-google /mock/dir/tpg] map[]":       "",
-			"/mock/dir/magic-modules/.ci/magician git [clone -b auto-pr-123456 https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta /mock/dir/tpgb] map[]": "",
+			"/mock/dir/magic-modules/tools/magician git [clone -b auto-pr-123456 https://modular-magician:*******@github.com/modular-magician/docs-examples /mock/dir/tfoics] map[]":                "",
+			"/mock/dir/magic-modules/tools/magician git [clone -b auto-pr-123456 https://modular-magician:*******@github.com/modular-magician/terraform-google-conversion /mock/dir/tgc] map[]":     "",
+			"/mock/dir/magic-modules/tools/magician git [clone -b auto-pr-123456 https://modular-magician:*******@github.com/modular-magician/terraform-provider-google /mock/dir/tpg] map[]":       "",
+			"/mock/dir/magic-modules/tools/magician git [clone -b auto-pr-123456 https://modular-magician:*******@github.com/modular-magician/terraform-provider-google-beta /mock/dir/tpgb] map[]": "",
 			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [breaking-changes] map[]":                                                                                            "",
 			"/mock/dir/magic-modules/tools/diff-processor make [build] " + sortedEnvString(diffProcessorEnv):                                                                                      "",
 			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [schema-diff] map[]":                                                                                                 "{\"AddedResources\": [\"google_alloydb_instance\"]}",
@@ -90,7 +90,7 @@ func NewMockRunner() MockRunner {
 			"/mock/dir/tpgbold sed [-i.bak s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g go.mod] map[]":                                                             "",
 			"/mock/dir/tpgbold sed [-i.bak s|github.com/hashicorp/terraform-provider-google-beta|google/provider/old|g go.sum] map[]":                                                             "",
 		},
-		cwd:      "/mock/dir/magic-modules/.ci/magician",
+		cwd:      "/mock/dir/magic-modules/tools/magician",
 		dirStack: list.New(),
 	}
 }

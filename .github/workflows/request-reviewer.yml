@@ -34,8 +34,8 @@ jobs:
           cache: false
       - name: Build magician
         run: |
-          cd .ci/magician
+          cd tools/magician
           go build .
       - name: Request reviewer
-        run: .ci/magician/magician request-reviewer ${{ github.event.pull_request.number || github.event.issue.number }}
+        run: tools/magician/magician request-reviewer ${{ github.event.pull_request.number || github.event.issue.number }}
 

@@ -2,11 +2,11 @@
 
 set -e
 
-# Get the directory of the current script
+# Get the directory of the current script (.ci/scripts/go-plus/magician/exec.sh)
 DIR="$(dirname $(realpath $0))"
 
 # Construct the path to the Go program directory and binary
-GO_PROGRAM_DIR="$DIR/../../../magician"
+GO_PROGRAM_DIR="$DIR/../../../../tools/magician"
 GO_BINARY="$GO_PROGRAM_DIR/magician_binary"
 
 pushd $GO_PROGRAM_DIR

@@ -7,7 +7,7 @@ WORKDIR /app1
 # Add the source code and build
 ADD "https://github.com/GoogleCloudPlatform/magic-modules/archive/refs/heads/main.zip" source.zip
 RUN unzip source.zip && rm source.zip
-WORKDIR /app1/magic-modules-main/.ci/magician
+WORKDIR /app1/magic-modules-main/tools/magician
 # Build the binary (we won't use it in the final image, but it's cached)
 RUN go build -o /dev/null .
 
