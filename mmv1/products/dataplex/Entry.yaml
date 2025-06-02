@@ -14,10 +14,16 @@
 ---
 name: 'Entry'
 description: |
-  An entry represents a data asset that you capture metadata for. Every entry is an instance of an entry type.
-  Each operation on aspects for an entry needs to comply with the required aspects of its entry type.
-  For example, when you create an entry, you must provide values for all the aspect types defined by the entry type.
-  You can't delete those aspects for an entry that are marked as required in the entry type.
+  An entry represents a data asset for which you capture metadata, such as a BigQuery table.
+  The primary constituents of an entry are aspects, which provide thematically coherent information.
+  Examples include a table's schema, sensitive data protection profile, data quality information, or a simple tag.
+
+  **Important Considerations:**
+
+  * There is a limit of 99 aspects per entry.
+  * The entry resource has to use project numbers and not project IDs. Therefore, if
+    a dependency was already provisioned using project ID, it needs to be referenced explicitly as a resource name
+    containing the project number.
 
 references:
   guides:
@@ -36,6 +42,7 @@ custom_code:
   constants: templates/terraform/constants/dataplex_entry.go.tmpl
   decoder: templates/terraform/decoders/dataplex_entry.go.tmpl
   encoder: templates/terraform/encoders/dataplex_entry.go.tmpl
+  custom_import: templates/terraform/custom_import/dataplex_entry.go.tmpl
   pre_read: templates/terraform/pre_read/dataplex_entry.go.tmpl
   pre_update: templates/terraform/pre_update/dataplex_entry.go.tmpl
 
@@ -61,7 +68,7 @@ examples:
     ignore_read_extra:
       - 'aspects'
     vars:
-      entry_id: 'entry-full'
+      entry_id: 'entry-full/has/slashes'
       entry_group_name: 'entry-group-full'
       aspect_type_name: "aspect-type-full"
       entry_type_name: "entry-type-full"
@@ -128,7 +135,7 @@ properties:
     item_type:
       type: NestedObject
       properties:
-        - name: "aspectKey"
+        - name: 'aspectKey'
           type: String
           required: true
           validation:
@@ -139,34 +146,35 @@ properties:
               If the aspect is attached directly to the entry: {project_number}.{locationId}.{aspectTypeId}
               If the aspect is attached to an entry's path: {project_number}.{locationId}.{aspectTypeId}@{path}
 
-        - name: "aspectValue"
+        - name: 'aspect'
           type: NestedObject
+          required: true
           properties:
-            - name: "aspectType"
+            - name: 'aspectType'
               type: String
               output: true
               description: |
                 The resource name of the type used to create this Aspect.
 
-            - name: "path"
+            - name: 'path'
               type: String
               output: true
               description: |
                 The path in the entry under which the aspect is attached.
 
-            - name: "createTime"
+            - name: 'createTime'
               type: Time
               output: true
               description: |
                 The time when the Aspect was created.
 
-            - name: "updateTime"
+            - name: 'updateTime'
               type: Time
               output: true
               description: |
                 The time when the Aspect was last modified.
 
-            - name: "data"
+            - name: 'data'
               type: String
               required: true
               state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
@@ -183,59 +191,59 @@ properties:
     description: |
       The resource name of the parent entry, in the format projects/{project_number}/locations/{locationId}/entryGroups/{entryGroupId}/entries/{entryId}.
 
-  - name: "fullyQualifiedName"
+  - name: 'fullyQualifiedName'
     type: String
     description: |
       A name for the entry that can be referenced by an external system. For more information, see https://cloud.google.com/dataplex/docs/fully-qualified-names.
       The maximum size of the field is 4000 characters.
 
-  - name: "entrySource"
+  - name: 'entrySource'
     type: NestedObject
     default_from_api: true
     properties:
-      - name: "resource"
+      - name: 'resource'
         type: String
         description: |
           The name of the resource in the source system. Maximum length is 4,000 characters.
 
-      - name: "system"
+      - name: 'system'
         type: String
         description: |
           The name of the source system. Maximum length is 64 characters.
 
-      - name: "platform"
+      - name: 'platform'
         type: String
         description: |
           The platform containing the source system. Maximum length is 64 characters.
 
-      - name: "displayName"
+      - name: 'displayName'
         type: String
         description: |
           A user-friendly display name. Maximum length is 500 characters.
 
-      - name: "description"
+      - name: 'description'
         type: String
         description: |
           A description of the data resource. Maximum length is 2,000 characters.
 
-      - name: "labels"
+      - name: 'labels'
         type: KeyValuePairs
         description: |
           User-defined labels. The maximum size of keys and values is 128 characters each.
           An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
 
-      - name: "ancestors"
+      - name: 'ancestors'
         type: Array
         immutable: true
         item_type:
           type: NestedObject
           properties:
-            - name: "name"
+            - name: 'name'
               type: String
               description: |
                 The name of the ancestor resource.
 
-            - name: "type"
+            - name: 'type'
               type: String
               description: |
                 The type of the ancestor resource.

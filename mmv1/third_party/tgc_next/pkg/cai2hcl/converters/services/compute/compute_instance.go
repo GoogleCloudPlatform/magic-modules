@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -67,7 +68,7 @@ func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*m
 	hclData["network_performance_config"] = flattenNetworkPerformanceConfig(instance.NetworkPerformanceConfig)
 
 	// Set the networks
-	networkInterfaces, _, _, err := flattenNetworkInterfaces(instance.NetworkInterfaces, project)
+	networkInterfaces, _, _, err := flattenNetworkInterfacesTgc(instance.NetworkInterfaces, project)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +79,7 @@ func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*m
 	}
 
 	hclData["labels"] = utils.RemoveTerraformAttributionLabel(instance.Labels)
-	hclData["service_account"] = flattenServiceAccounts(instance.ServiceAccounts)
+	hclData["service_account"] = flattenServiceAccountsTgc(instance.ServiceAccounts)
 	hclData["resource_policies"] = instance.ResourcePolicies
 
 	bootDisk, ads, scratchDisks := flattenDisks(instance.Disks, instance.Name)
@@ -86,8 +87,8 @@ func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*m
 	hclData["attached_disk"] = ads
 	hclData["scratch_disk"] = scratchDisks
 
-	hclData["scheduling"] = flattenScheduling(instance.Scheduling)
-	hclData["guest_accelerator"] = flattenGuestAccelerators(instance.GuestAccelerators)
+	hclData["scheduling"] = flattenSchedulingTgc(instance.Scheduling)
+	hclData["guest_accelerator"] = flattenGuestAcceleratorsTgc(instance.GuestAccelerators)
 	hclData["shielded_instance_config"] = flattenShieldedVmConfig(instance.ShieldedInstanceConfig)
 	hclData["enable_display"] = flattenEnableDisplay(instance.DisplayDevice)
 	hclData["min_cpu_platform"] = instance.MinCpuPlatform
@@ -102,8 +103,15 @@ func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*m
 	hclData["hostname"] = instance.Hostname
 	hclData["confidential_instance_config"] = flattenConfidentialInstanceConfig(instance.ConfidentialInstanceConfig)
 	hclData["advanced_machine_features"] = flattenAdvancedMachineFeatures(instance.AdvancedMachineFeatures)
-	hclData["reservation_affinity"] = flattenReservationAffinity(instance.ReservationAffinity)
-	hclData["key_revocation_action_type"] = instance.KeyRevocationActionType
+	hclData["reservation_affinity"] = flattenReservationAffinityTgc(instance.ReservationAffinity)
+	hclData["key_revocation_action_type"] = strings.TrimSuffix(instance.KeyRevocationActionType, "_ON_KEY_REVOCATION")
+	hclData["instance_encryption_key"] = flattenComputeInstanceEncryptionKey(instance.InstanceEncryptionKey)
+
+	partnerMetadata, err := flattenPartnerMetadata(instance.PartnerMetadata)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing partner metadata: %s", err)
+	}
+	hclData["partner_metadata"] = partnerMetadata
 
 	// TODO: convert details from the boot disk assets (separate disk assets) into initialize_params in cai2hcl?
 	// It needs to integrate the disk assets into instance assets with the resolver.
@@ -140,6 +148,18 @@ func flattenDisks(disks []*compute.AttachedDisk, instanceName string) ([]map[str
 					// format: projects/<project>/locations/<region>/keyRings/<keyring>/cryptoKeys/<key>/cryptoKeyVersions/1
 					di["kms_key_self_link"] = strings.Split(disk.DiskEncryptionKey.KmsKeyName, "/cryptoKeyVersions")[0]
 				}
+
+				if key.RsaEncryptedKey != "" {
+					di["disk_encryption_key_rsa"] = key.RsaEncryptedKey
+				}
+
+				if key.RawKey != "" {
+					di["disk_encryption_key_raw"] = key.RawKey
+				}
+
+				if key.KmsKeyServiceAccount != "" {
+					di["disk_encryption_service_account"] = key.KmsKeyServiceAccount
+				}
 			}
 			attachedDisks = append(attachedDisks, di)
 		}
@@ -172,21 +192,33 @@ func flattenBootDisk(disk *compute.AttachedDisk, instanceName string) []map[stri
 	}
 
 	if disk.DiskEncryptionKey != nil {
+		// disk_encryption_key_sha256 is computed, so it is not converted.
+
 		if disk.DiskEncryptionKey.KmsKeyName != "" {
 			// The response for crypto keys often includes the version of the key which needs to be removed
 			// format: projects/<project>/locations/<region>/keyRings/<keyring>/cryptoKeys/<key>/cryptoKeyVersions/1
 			result["kms_key_self_link"] = strings.Split(disk.DiskEncryptionKey.KmsKeyName, "/cryptoKeyVersions")[0]
 		}
+
+		if disk.DiskEncryptionKey.KmsKeyServiceAccount != "" {
+			// The response for crypto keys often includes the version of the key which needs to be removed
+			// format: projects/<project>/locations/<region>/keyRings/<keyring>/cryptoKeys/<key>/cryptoKeyVersions/1
+			result["disk_encryption_service_account"] = disk.DiskEncryptionKey.KmsKeyServiceAccount
+		}
+
+		if disk.DiskEncryptionKey.RsaEncryptedKey != "" {
+			result["disk_encryption_key_rsa"] = disk.DiskEncryptionKey.RsaEncryptedKey
+		}
+
+		if disk.DiskEncryptionKey.RawKey != "" {
+			result["disk_encryption_key_raw"] = disk.DiskEncryptionKey.RawKey
+		}
 	}
 
-	// Don't convert the field with the default value
-	if disk.Interface != "SCSI" {
-		result["interface"] = disk.Interface
-	}
-
-	if !strings.HasSuffix(disk.Source, instanceName) {
-		result["source"] = tpgresource.ConvertSelfLinkToV1(disk.Source)
-	}
+	result["interface"] = disk.Interface
+	// "source" field is converted and "initialize_params" is not converted as these two fields conflict with each other.
+	result["source"] = tpgresource.ConvertSelfLinkToV1(disk.Source)
+	result["guest_os_features"] = flattenComputeInstanceGuestOsFeatures(disk.GuestOsFeatures)
 
 	if len(result) == 0 {
 		return nil
@@ -204,10 +236,23 @@ func flattenScratchDisk(disk *compute.AttachedDisk) map[string]interface{} {
 		result["device_name"] = disk.DeviceName
 	}
 
-	// Don't convert the field with the default value
-	if disk.Interface != "SCSI" {
-		result["interface"] = disk.Interface
-	}
+	result["interface"] = disk.Interface
 
 	return result
+}
+
+func flattenPartnerMetadata(partnerMetadata map[string]compute.StructuredEntries) (map[string]string, error) {
+	partnerMetadataMap := make(map[string]string)
+	for key, value := range partnerMetadata {
+
+		jsonString, err := json.Marshal(&value)
+		if err != nil {
+			return nil, err
+		}
+		if value.Entries != nil {
+			partnerMetadataMap[key] = string(jsonString)
+		}
+
+	}
+	return partnerMetadataMap, nil
 }

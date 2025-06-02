@@ -7,15 +7,35 @@ if aspects != nil {
 }
 
 aspectKeysOfInterest := make(map[string]struct{})
+var err error
+
 if d.HasChange("aspects") {
 	currentAspects, futureAspects := d.GetChange("aspects")
-	AddAspectsToSet(aspectKeysOfInterest, currentAspects)
-	AddAspectsToSet(aspectKeysOfInterest, futureAspects)
+	err = AddAspectsToSet(aspectKeysOfInterest, currentAspects)
+	if err != nil {
+		return nil, err
+	}
+	err = AddAspectsToSet(aspectKeysOfInterest, futureAspects)
+	if err != nil {
+		return nil, err
+	}
 } else {
-	AddAspectsToSet(aspectKeysOfInterest, d.Get("aspects"))
+	err = AddAspectsToSet(aspectKeysOfInterest, d.Get("aspects"))
+	if err != nil {
+		return nil, err
+	}
 }
 
-FilterAspects(aspectKeysOfInterest, res)
-InverseTransformAspects(res)
+err = FilterAspects(aspectKeysOfInterest, res)
+
+if err != nil {
+	return nil, err
+}
+
+err = InverseTransformAspects(res)
+
+if err != nil {
+	return nil, err
+}
 
 return res, nil

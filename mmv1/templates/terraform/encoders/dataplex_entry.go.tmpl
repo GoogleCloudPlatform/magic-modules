@@ -8,5 +8,10 @@ if aspects != nil {
 	}
 }
 
-TransformAspects(obj)
+err := TransformAspects(obj)
+
+if err != nil {
+	return nil, err
+}
+
 return obj, nil

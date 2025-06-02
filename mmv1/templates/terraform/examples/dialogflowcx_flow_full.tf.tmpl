@@ -164,6 +164,8 @@ resource "google_dialogflow_cx_flow" "{{$.PrimaryResourceId}}" {
           },
         ])
       }
+
+      enable_generative_fallback = true
     }
   }
 
