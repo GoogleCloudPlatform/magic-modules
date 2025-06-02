@@ -201,7 +201,6 @@ module "project-services" {
     "alloydb.googleapis.com",
     "analyticshub.googleapis.com",
     "apigateway.googleapis.com",
-    "apihub.googleapis.com",
     "apikeys.googleapis.com",
     "appengine.googleapis.com",
     "appengineflex.googleapis.com",
