@@ -22,7 +22,7 @@ The sync branches allow downstream generation for each downstream to wait until 
 Run the following command to verify what commits the sync branches are pointing to:
 
 ```
-`git fetch origin && git rev-parse origin/tpg-sync origin/tpgb-sync origin/tf-oics-sync origin/tgc-sync`
+git fetch origin && git rev-parse origin/tpg-sync origin/tpgb-sync origin/tf-oics-sync origin/tgc-sync
 ```
 
 ### Transient GitHub failures
