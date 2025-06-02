@@ -2,7 +2,6 @@ package dataplex
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 	"unicode"
 
@@ -36,7 +35,7 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Optional:    true,
-							Description: `The unnested column which this rule is evaluated against. e.g. `,
+							Description: `The unnested column which this rule is evaluated against.`,
 						},
 						"ignore_null": {
 							Type:     schema.TypeBool,
@@ -300,7 +299,7 @@ func flattenDataSourceDataplexDataQualityRulesRules(rules interface{}) []interfa
 
 		for k, v := range ruleMap {
 			snakeCaseKey := camelToSnake(k)
-			if regexp.MustCompile(`.Expectation`).MatchString(k) {
+			if strings.HasSuffix(k, "Expectation") {
 				// For expectation fields, need extra flatten
 				newRuleMap[snakeCaseKey] = flattenDataSourceDataplexDataQualityRulesExpectation(v)
 			} else {
@@ -329,9 +328,6 @@ func dataSourceDataplexDataQualityRulesRead(d *schema.ResourceData, meta interfa
 	location, err := tpgresource.GetLocation(d, config)
 	if err != nil {
 		return err
-	}
-	if len(location) == 0 {
-		return fmt.Errorf("Cannot determine location: set location in this data source or at provider-level")
 	}
 
 	data_scan_id := d.Get("data_scan_id").(string)
