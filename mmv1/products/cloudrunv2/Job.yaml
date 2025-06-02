@@ -118,6 +118,13 @@ examples:
       cloud_run_job_name: 'cloudrun-job'
     ignore_read_extra:
       - 'deletion_protection'
+  - name: 'cloudrunv2_job_multicontainer'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
+    vars:
+      cloud_run_job_name: 'cloudrun-job'
+    ignore_read_extra:
+      - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
