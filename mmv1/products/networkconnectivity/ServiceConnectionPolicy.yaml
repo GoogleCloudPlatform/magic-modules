@@ -140,7 +140,7 @@ properties:
           allowedGoogleProducersResourceHierarchyLevel value: 'projects/' or 'folders/' or 'organizations/' Eg.
           [projects/my-project-id, projects/567, folders/891, organizations/123]
         item_type:
-          String
+          type: String
       - name: 'limit'
         type: String
         description: |
