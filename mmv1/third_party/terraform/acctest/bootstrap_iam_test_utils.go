@@ -1,7 +1,5 @@
 package acctest
 
-// Global test change
-
 import (
 	"strconv"
 	"strings"
