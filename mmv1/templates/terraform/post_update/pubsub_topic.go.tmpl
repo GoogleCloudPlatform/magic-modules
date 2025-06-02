@@ -2,90 +2,90 @@ if v, ok := d.GetOk("recompute_message_storage_policy"); ok && v.(bool) {
    // if message_storage_policy was dropped, but existed in state, send an empty object
   if rawCfg := d.GetRawConfig().GetAttr("message_storage_policy"); rawCfg.LengthInt() == 0 {
     log.Printf("[DEBUG] Sending empty message_storage_policy in update")
+    updateMask := []string{}
 		obj := make(map[string]interface{})
-		obj["messageStoragePolicy"] = make([]interface{}, 0)
+    updateMask = append(updateMask, "messageStoragePolicy")
 
-		// The rest is the same as the secondary_ip_range generated update code
-		// without the messageStoragePolicyProp logic
+		// The rest is the same as the generated update code in
+    // google/services/pubsub/resource_pubsub_topic.go without the
+    // messageStoragePolicyProp logic
     config := meta.(*transport_tpg.Config)
     userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
     if err != nil {
-            return err
+      return err
     }
 
     billingProject := ""
 
     project, err := tpgresource.GetProject(d, config)
     if err != nil {
-            return fmt.Errorf("Error fetching project for Topic: %s", err)
+      return fmt.Errorf("Error fetching project for Topic: %s", err)
     }
     billingProject = project
 
     kmsKeyNameProp, err := expandPubsubTopicKmsKeyName(d.Get("kms_key_name"), d, config)
     if err != nil {
-            return err
+      return err
     } else if v, ok := d.GetOkExists("kms_key_name"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, kmsKeyNameProp)) {
-            obj["kmsKeyName"] = kmsKeyNameProp
+      obj["kmsKeyName"] = kmsKeyNameProp
     }
     schemaSettingsProp, err := expandPubsubTopicSchemaSettings(d.Get("schema_settings"), d, config)
     if err != nil {
-            return err
+      return err
     } else if v, ok := d.GetOkExists("schema_settings"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, schemaSettingsProp)) {
-            obj["schemaSettings"] = schemaSettingsProp
+      obj["schemaSettings"] = schemaSettingsProp
     }
     messageRetentionDurationProp, err := expandPubsubTopicMessageRetentionDuration(d.Get("message_retention_duration"), d, config)
     if err != nil {
-            return err
+      return err
     } else if v, ok := d.GetOkExists("message_retention_duration"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, messageRetentionDurationProp)) {
-            obj["messageRetentionDuration"] = messageRetentionDurationProp
+      obj["messageRetentionDuration"] = messageRetentionDurationProp
     }
     ingestionDataSourceSettingsProp, err := expandPubsubTopicIngestionDataSourceSettings(d.Get("ingestion_data_source_settings"), d, config)
     if err != nil {
-            return err
+      return err
     } else if v, ok := d.GetOkExists("ingestion_data_source_settings"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, ingestionDataSourceSettingsProp)) {
-            obj["ingestionDataSourceSettings"] = ingestionDataSourceSettingsProp
+      obj["ingestionDataSourceSettings"] = ingestionDataSourceSettingsProp
     }
     labelsProp, err := expandPubsubTopicEffectiveLabels(d.Get("effective_labels"), d, config)
     if err != nil {
-            return err
+      return err
     } else if v, ok := d.GetOkExists("effective_labels"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, labelsProp)) {
-            obj["labels"] = labelsProp
+      obj["labels"] = labelsProp
     }
 
     obj, err = resourcePubsubTopicUpdateEncoder(d, meta, obj)
     if err != nil {
-            return err
+      return err
     }
     url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}PubsubBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/topics/{{"{{"}}name{{"}}"}}")
     if err != nil {
-            return err
+      return err
     }
 
     log.Printf("[DEBUG] Updating Topic %q: %#v", d.Id(), obj)
     headers := make(http.Header)
-    updateMask := []string{}
-
     if d.HasChange("kms_key_name") {
-            updateMask = append(updateMask, "kmsKeyName")
+      updateMask = append(updateMask, "kmsKeyName")
     }
 
     if d.HasChange("message_storage_policy") {
-            updateMask = append(updateMask, "messageStoragePolicy")
+      updateMask = append(updateMask, "messageStoragePolicy")
     }
 
     if d.HasChange("schema_settings") {
-            updateMask = append(updateMask, "schemaSettings")
+      updateMask = append(updateMask, "schemaSettings")
     }
 
     if d.HasChange("message_retention_duration") {
-            updateMask = append(updateMask, "messageRetentionDuration")
+      updateMask = append(updateMask, "messageRetentionDuration")
     }
 
     if d.HasChange("ingestion_data_source_settings") {
-            updateMask = append(updateMask, "ingestionDataSourceSettings")
+      updateMask = append(updateMask, "ingestionDataSourceSettings")
     }
     if d.HasChange("effective_labels") {
-            updateMask = append(updateMask, "labels")
+      updateMask = append(updateMask, "labels")
     }
     // updateMask is a URL parameter but not present in the schema, so ReplaceVars
     // won't set it
@@ -96,28 +96,31 @@ if v, ok := d.GetOk("recompute_message_storage_policy"); ok && v.(bool) {
 
     // err == nil indicates that the billing_project value was found
     if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
-            billingProject = bp
+      billingProject = bp
     }
 
     // if updateMask is empty we are not updating anything so skip the post
     if len(updateMask) > 0 {
       res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-              Config:               config,
-              Method:               "PATCH",
-              Project:              billingProject,
-              RawURL:               url,
-              UserAgent:            userAgent,
-              Body:                 obj,
-              Timeout:              d.Timeout(schema.TimeoutUpdate),
-              Headers:              headers,
-              ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.PubsubTopicProjectNotReady},
+        Config:               config,
+        Method:               "PATCH",
+        Project:              billingProject,
+        RawURL:               url,
+        UserAgent:            userAgent,
+        Body:                 obj,
+        Timeout:              d.Timeout(schema.TimeoutUpdate),
+        Headers:              headers,
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.PubsubTopicProjectNotReady},
       })
 
       if err != nil {
-              return fmt.Errorf("Error updating Topic %q: %s", d.Id(), err)
+        return fmt.Errorf("Error updating Topic %q: %s", d.Id(), err)
       } else {
-              log.Printf("[DEBUG] Finished updating Topic %q: %#v", d.Id(), res)
+        log.Printf("[DEBUG] Finished updating Topic %q: %#v", d.Id(), res)
       }
-    }                                                                                 
+    } else {
+      log.Printf("[DEBUG] Not sending update request for updating Topic %q", d.Id())
+    }
+    return resourcePubsubTopicRead(d, meta)                                                                                 
   }
 }

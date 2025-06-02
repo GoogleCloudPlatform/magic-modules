@@ -239,6 +239,18 @@ resource "google_pubsub_topic" "foo" {
 `, topic, key, value, region)
 }
 
+func testAccPubsubTopic_removeMessageStoragePolicy(topic, key, value string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+  labels = {
+    %s = "%s"
+  }
+	recompute_message_storage_policy = true
+}
+`, topic, key, value)
+}
+
 func testAccPubsubTopic_cmek(topicName, kmsKey string) string {
 	return fmt.Sprintf(`
 resource "google_pubsub_topic" "topic" {
@@ -582,4 +594,38 @@ resource "google_pubsub_topic" "foo" {
   }
 }
 `, topic)
+}
+
+func TestAccPubsubTopic_removeMessageStoragePolicy(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubTopic_updateWithRegion(topic, "wibble", "wobble", "us-central1"),
+			},
+			{
+				ResourceName:            "google_pubsub_topic.foo",
+				ImportStateId:           topic,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccPubsubTopic_removeMessageStoragePolicy(topic, "wibble", "wobble"),
+			},
+			{
+				ResourceName:            "google_pubsub_topic.foo",
+				ImportStateId:           topic,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
 }
