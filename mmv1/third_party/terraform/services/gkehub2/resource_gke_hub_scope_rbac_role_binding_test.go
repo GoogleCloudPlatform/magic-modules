@@ -1,50 +1,50 @@
 package gkehub2_test
 
 import (
-	"testing"
+        "testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+        "github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
+        "github.com/hashicorp/terraform-provider-google/google/acctest"
+        "github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_update(t *testing.T) {
-	t.Parallel()
+        t.Parallel()
 
-	context := map[string]interface{}{
-		"project":       envvar.GetTestProjectFromEnv(),
-		"random_suffix": acctest.RandString(t, 10),
-	}
+        context := map[string]interface{}{
+                "project":       envvar.GetTestProjectFromEnv(),
+                "random_suffix": acctest.RandString(t, 10),
+        }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_basic(context),
-			},
-			{
-				ResourceName:            "google_gke_hub_scope_rbac_role_binding.scoperbacrolebinding",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"scope_rbac_role_binding_id", "scope_id", "labels", "terraform_labels"},
-			},
-			{
-				Config: testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_update(context),
-			},
-			{
-				ResourceName:            "google_gke_hub_scope_rbac_role_binding.scoperbacrolebinding",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"scope_rbac_role_binding_id", "scope_id", "labels", "terraform_labels"},
-			},
-		},
-	})
+        acctest.VcrTest(t, resource.TestCase{
+                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+                Steps: []resource.TestStep{
+                        {
+                                Config: testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_basic(context),
+                        },
+                        {
+                                ResourceName:            "google_gke_hub_scope_rbac_role_binding.scoperbacrolebinding",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"scope_rbac_role_binding_id", "scope_id", "labels", "terraform_labels"},
+                        },
+                        {
+                                Config: testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_update(context),
+                        },
+                        {
+                                ResourceName:            "google_gke_hub_scope_rbac_role_binding.scoperbacrolebinding",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"scope_rbac_role_binding_id", "scope_id", "labels", "terraform_labels"},
+                        },
+                },
+        })
 }
 
 func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_basic(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+        return acctest.Nprintf(`
 resource "google_gke_hub_scope" "scoperbacrolebinding" {
   scope_id = "tf-test-scope%{random_suffix}"
 }
@@ -65,7 +65,7 @@ resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
 }
 
 func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+        return acctest.Nprintf(`
 resource "google_gke_hub_scope" "scoperbacrolebinding" {
   scope_id = "tf-test-scope%{random_suffix}"
 }
@@ -89,10 +89,10 @@ func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExa
         t.Parallel()
 
         context := map[string]interface{}{
-                "project":       envvar.GetTestProjectFromEnv(),
-                "random_suffix": acctest.RandString(t, 10),
-		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+                "project":         envvar.GetTestProjectFromEnv(),
+                "random_suffix":   acctest.RandString(t, 10),
+                "org_id":          envvar.GetTestOrgFromEnv(t),
+                "billing_account": envvar.GetTestBillingAccountFromEnv(t),
         }
 
         acctest.VcrTest(t, resource.TestCase{
@@ -109,15 +109,15 @@ func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExa
                                 ImportStateVerify:       true,
                                 ImportStateVerifyIgnore: []string{"labels", "scope_id", "scope_rbac_role_binding_id", "terraform_labels"},
                         },
-			{
-				Config: testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample_update(context),
-			},
-			{
-				ResourceName:            "google_gke_hub_scope_rbac_role_binding.scope_rbac_custom_role_binding",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"scope_rbac_role_binding_id", "scope_id", "labels", "terraform_labels"},
-			},
+                        {
+                                Config: testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample_update(context),
+                        },
+                        {
+                                ResourceName:            "google_gke_hub_scope_rbac_role_binding.scope_rbac_custom_role_binding",
+                                ImportState:             true,
+                                ImportStateVerify:       true,
+                                ImportStateVerifyIgnore: []string{"scope_rbac_role_binding_id", "scope_id", "labels", "terraform_labels"},
+                        },
                 },
         })
 }
@@ -187,7 +187,7 @@ resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_bindin
 }
 
 func gkeHubRRBActuationProjectSetupForGA(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+        return acctest.Nprintf(`
 resource "google_project" "project" {
   name            = "tf-test-gkehub%{random_suffix}"
   project_id      = "tf-test-gkehub%{random_suffix}"
