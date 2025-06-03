@@ -1976,3 +1976,13 @@ func (r Resource) CodeHeader(templatePath string) string {
 func (r Resource) MarkdownHeader(templatePath string) string {
 	return strings.Replace(r.CodeHeader(templatePath), "//", "#", -1)
 }
+
+// ====================
+// TGC
+// ====================
+// Converts most properties during cai2hcl, exept for computed properties
+func (r Resource) ReadPropertiesForTgc() []*Type {
+	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
+		return v.Output
+	})
+}
