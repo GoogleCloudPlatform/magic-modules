@@ -119,6 +119,12 @@ func resourceGoogleFolderCreate(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
+	// if I do not add this locally, I get an error because config.ResourceManagerBasePath is not set:
+	// Error: Error creating folder 'tf-test-folder-a91bg4jvmy' in 'organizations/XXXXXXX':
+	// Error waiting for creating folder: error while retrieving operation: Get "operations/cf.6116480530026876052?alt=json": unsupported protocol scheme ""
+	// Will remove this in the actual PR, but want to discuss this because I face the error `unsupported protocol scheme ""` locally quite often when running acceptance tests
+	config.ResourceManagerBasePath = "https://cloudresourcemanager.googleapis.com/v3/"
+
 	err = ResourceManagerOperationWaitTime(config, opAsMap, "creating folder", userAgent, d.Timeout(schema.TimeoutCreate))
 	if err != nil {
 		return fmt.Errorf("Error creating folder '%s' in '%s': %s", displayName, parent, err)
