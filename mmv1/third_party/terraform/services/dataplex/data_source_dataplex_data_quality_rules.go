@@ -310,6 +310,9 @@ func dataSourceDataplexDataQualityRulesRead(d *schema.ResourceData, meta interfa
 		return err
 	}
 
+	id := fmt.Sprintf("projects/%s/locations/%s/dataScans/%s", project, location, data_scan_id)
+	d.SetId(id)
+
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:               config,
 		Method:               "POST",
@@ -326,9 +329,6 @@ func dataSourceDataplexDataQualityRulesRead(d *schema.ResourceData, meta interfa
 	if err := d.Set("rules", flattenDataSourceDataplexDataQualityRulesRules(res["rule"])); err != nil {
 		return fmt.Errorf("Error setting rule: %s", err)
 	}
-
-	id := fmt.Sprintf("projects/%s/locations/%s/dataScans/%s", project, location, data_scan_id)
-	d.SetId(id)
 
 	return nil
 }
