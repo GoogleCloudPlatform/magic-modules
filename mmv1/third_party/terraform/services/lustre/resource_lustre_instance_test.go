@@ -83,13 +83,14 @@ data "google_compute_network" "lustre-network" {
 func testAccLustreInstance_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_lustre_instance" "instance" {
-  instance_id         = "tf-test-my-instance%{random_suffix}"
-  location            = "us-central1-a"
-  filesystem          = "testfs"
-  capacity_gib        = 18000
-  network             = data.google_compute_network.lustre-network.id
-  description         = "test-description"
-  labels              = {
+  instance_id                 = "tf-test-my-instance%{random_suffix}"
+  location                    = "us-central1-a"
+  filesystem                  = "testfs"
+  capacity_gib                = 18000
+  network                     = data.google_compute_network.lustre-network.id
+  description                 = "test-description"
+  per_unit_storage_throughput = 1000
+  labels                      = {
     test = "test-label"
   }
   timeouts {
