@@ -186,6 +186,7 @@ properties:
         description: 'The Cloud KMS encryption key (customer-managed encryption key) used to protect the runtime.'
   - name: softwareConfig
     type: NestedObject
+    default_from_api: true
     description: 'The notebook software configuration of the notebook runtime.'
     properties:
       - name: 'env'
