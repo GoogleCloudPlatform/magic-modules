@@ -624,7 +624,57 @@ func TestAccPubsubTopic_removeMessageStoragePolicy(t *testing.T) {
 				ImportStateId:           topic,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "recompute_message_storage_policy"},
+			},
+		},
+	})
+}
+
+func TestAccPubsubTopic_noRemoveMessageStoragePolicy(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubTopic_updateWithRegion(topic, "wibble", "wobble", "us-central1"),
+			},
+			{
+				ResourceName:            "google_pubsub_topic.foo",
+				ImportStateId:           topic,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "recompute_message_storage_policy"},
+			},
+			{
+				// This step is to test that the recompute_message_storage_policy has no affect when there
+				// is a non-empty message_storage_policy.
+				Config: fmt.Sprintf(`
+					resource "google_pubsub_topic" "foo" {
+						name = "%s"
+						labels = {
+							wibble = "wobble"
+						}
+						message_storage_policy {
+							allowed_persistence_regions = [
+								"us-central1",
+							]
+							enforce_in_transit = false
+						}
+						recompute_message_storage_policy = true
+					}
+				`, topic),
+			},
+			{
+				ResourceName:            "google_pubsub_topic.foo",
+				ImportStateId:           topic,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "recompute_message_storage_policy"},
 			},
 		},
 	})
