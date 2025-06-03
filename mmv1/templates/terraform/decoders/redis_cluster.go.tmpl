@@ -81,8 +81,4 @@ if err := d.Set("managed_server_ca", flattenRedisClusterManagedServerCa(certific
     return nil, fmt.Errorf("Error reading Cluster: %s", err)
 }
 
-
 return res, nil
-
-
-
