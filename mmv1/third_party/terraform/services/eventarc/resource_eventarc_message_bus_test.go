@@ -413,10 +413,8 @@ resource "google_eventarc_message_bus" "message_bus" {
 // concerned with testing the Pipeline resource, which depends on a singleton MessageBus.
 func testAccEventarcMessageBus_pipeline(t *testing.T) {
 	context := map[string]interface{}{
-		"project_id":              envvar.GetTestProjectFromEnv(),
-		"region":                  envvar.GetTestRegionFromEnv(),
-		"random_suffix":           acctest.RandString(t, 10),
-		"network_attachment_name": acctest.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-messagebus-na", acctest.BootstrapSubnet(t, "tf-bootstrap-eventarc-messagebus-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-messagebus-network"))),
+		"region":        envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -444,9 +442,6 @@ resource "google_eventarc_pipeline" "primary" {
   pipeline_id = "tf-test-some-pipeline%{random_suffix}"
   destinations {
     message_bus = google_eventarc_message_bus.primary.id
-    network_config {
-      network_attachment = "projects/%{project_id}/regions/%{region}/networkAttachments/%{network_attachment_name}"
-    }
   }
 }
 
@@ -461,10 +456,8 @@ resource "google_eventarc_message_bus" "primary" {
 // concerned with testing the Enrollment resource, which depends on a singleton MessageBus.
 func testAccEventarcMessageBus_enrollment(t *testing.T) {
 	context := map[string]interface{}{
-		"project_id":              envvar.GetTestProjectFromEnv(),
-		"region":                  envvar.GetTestRegionFromEnv(),
-		"random_suffix":           acctest.RandString(t, 10),
-		"network_attachment_name": acctest.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-messagebus-na", acctest.BootstrapSubnet(t, "tf-bootstrap-eventarc-messagebus-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-messagebus-network"))),
+		"region":        envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -511,9 +504,6 @@ resource "google_eventarc_pipeline" "pipeline" {
   pipeline_id = "tf-test-pipeline%{random_suffix}"
   destinations {
     topic = google_pubsub_topic.pipeline_topic.id
-    network_config {
-      network_attachment = "projects/%{project_id}/regions/%{region}/networkAttachments/%{network_attachment_name}"
-    }
   }
 }
 
@@ -528,10 +518,8 @@ resource "google_eventarc_message_bus" "message_bus" {
 // concerned with testing the Enrollment resource, which depends on a singleton MessageBus.
 func testAccEventarcMessageBus_updateEnrollment(t *testing.T) {
 	context := map[string]interface{}{
-		"project_id":              envvar.GetTestProjectFromEnv(),
-		"region":                  envvar.GetTestRegionFromEnv(),
-		"random_suffix":           acctest.RandString(t, 10),
-		"network_attachment_name": acctest.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-messagebus-na", acctest.BootstrapSubnet(t, "tf-bootstrap-eventarc-messagebus-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-messagebus-network"))),
+		"region":        envvar.GetTestRegionFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -610,9 +598,6 @@ resource "google_eventarc_pipeline" "pipeline_update" {
   pipeline_id = "tf-test-pipeline2%{random_suffix}"
   destinations {
     topic = google_pubsub_topic.pipeline_update_topic.id
-    network_config {
-      network_attachment = "projects/%{project_id}/regions/%{region}/networkAttachments/%{network_attachment_name}"
-    }
   }
 }
 
@@ -625,9 +610,6 @@ resource "google_eventarc_pipeline" "pipeline" {
   pipeline_id = "tf-test-pipeline%{random_suffix}"
   destinations {
     topic = google_pubsub_topic.pipeline_topic.id
-    network_config {
-      network_attachment = "projects/%{project_id}/regions/%{region}/networkAttachments/%{network_attachment_name}"
-    }
   }
 }
 
@@ -657,9 +639,6 @@ resource "google_eventarc_pipeline" "pipeline_update" {
   pipeline_id = "tf-test-pipeline2%{random_suffix}"
   destinations {
     topic = google_pubsub_topic.pipeline_update_topic.id
-    network_config {
-      network_attachment = "projects/%{project_id}/regions/%{region}/networkAttachments/%{network_attachment_name}"
-    }
   }
 }
 
