@@ -1,7 +1,7 @@
 resource "google_gke_backup_backup_channel" "basic" {
   name = "{{index $.Vars "name"}}"
   location = "us-central1"
-  description = "{{index $.Vars "description"}}"
+  description = "Description"
   destination_project = "{{index $.Vars "destination_project"}}"
   labels = { "key": "some-value" }
 }

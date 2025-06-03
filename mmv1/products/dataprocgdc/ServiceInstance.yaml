@@ -57,6 +57,7 @@ examples:
       project: "my-project"
     test_vars_overrides:
       'project': '"gdce-cluster-monitoring"'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/21173
 properties:
   - name: gdceCluster
     type: NestedObject

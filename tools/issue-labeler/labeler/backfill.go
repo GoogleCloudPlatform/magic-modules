@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v68/github"
 )
 
 type Label struct {
