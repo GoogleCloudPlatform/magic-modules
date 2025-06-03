@@ -550,7 +550,7 @@ func TestAccFilestoreInstance_directoryServices(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckFilestoreInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -606,7 +606,6 @@ func TestAccFilestoreInstance_directoryServices(t *testing.T) {
 func testAccFilestoreInstance_nfs_v4(name, location, tier string) string {
 	return fmt.Sprintf(`
 resource "google_filestore_instance" "instance" {
-  provider    = google-beta
   name        = "%s"
   location    = "%s"
   tier        = "%s"
@@ -629,7 +628,6 @@ resource "google_filestore_instance" "instance" {
 func testAccFilestoreInstance_ldap(name, location, tier, domain string) string {
 	return fmt.Sprintf(`
 resource "google_filestore_instance" "instance" {
-  provider    = google-beta
   name        = "%s"
   location    = "%s"
   tier        = "%s"
@@ -644,7 +642,6 @@ resource "google_filestore_instance" "instance" {
   networks {
     network = "default"
 		modes   = ["MODE_IPV4"]
-		connect_mode = "PRIVATE_SERVICE_ACCESS"
   }
 
   directory_services {
