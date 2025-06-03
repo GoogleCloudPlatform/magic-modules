@@ -84,6 +84,12 @@ examples:
       datascan_name: 'dataquality-full'
     test_env_vars:
       project_name: 'PROJECT_NAME'
+  - name: 'dataplex_datascan_full_quality_publishing'
+    primary_resource_id: 'full_quality_publishing'
+    vars:
+      datascan_name: 'dataquality-full-publishing'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
 parameters:
   - name: 'location'
     type: String
