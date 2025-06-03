@@ -121,7 +121,7 @@ func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExa
 }
 
 func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample_basic(context map[string]interface{}) string {
-        return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+        return gkeHubRRBActuationProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_scope" "scope" {
   scope_id = "tf-test-scope%{random_suffix}"
 }
@@ -153,7 +153,7 @@ resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_bindin
 }
 
 func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample_update(context map[string]interface{}) string {
-        return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
+        return gkeHubRRBActuationProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_scope" "scope" {
   scope_id = "tf-test-scope%{random_suffix}"
 }
@@ -184,7 +184,7 @@ resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_bindin
 `, context)
 }
 
-func gkeHubFeatureProjectSetupForGA(context map[string]interface{}) string {
+func gkeHubRRBActuationProjectSetupForGA(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_project" "project" {
   name            = "tf-test-gkehub%{random_suffix}"
