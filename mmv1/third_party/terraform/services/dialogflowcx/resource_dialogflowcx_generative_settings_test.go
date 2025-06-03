@@ -110,6 +110,15 @@ func testAccDialogflowCXGenerativeSettings_update(context map[string]interface{}
       agent = "updated agent"
     }
 
+    fallback_settings {
+      selected_prompt = "example prompt"
+      prompt_templates {
+        display_name = "example prompt"
+        prompt_text = "example prompt text"
+        frozen = false
+      }
+    }
+
     language_code = "en"
   }
 `, context)
