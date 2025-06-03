@@ -28,7 +28,7 @@ func TestAccLustreInstance_update(t *testing.T) {
 				ResourceName:            "google_lustre_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance_id", "labels", "gke_support_enabled", "location", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"instance_id", "labels", "gke_support_enabled", "per_unit_storage_throughput", "location", "terraform_labels"},
 			},
 			{
 				Config: testAccLustreInstance_update(context),
@@ -45,7 +45,7 @@ func TestAccLustreInstance_update(t *testing.T) {
 				ResourceName:            "google_lustre_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"instance_id", "labels", "gke_support_enabled", "location", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"instance_id", "labels", "gke_support_enabled", "per_unit_storage_throughput", "location", "terraform_labels"},
 			},
 		},
 	})
@@ -54,15 +54,16 @@ func TestAccLustreInstance_update(t *testing.T) {
 func testAccLustreInstance_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_lustre_instance" "instance" {
-  instance_id         = "tf-test-my-instance%{random_suffix}"
-  location            = "us-central1-a"
-  filesystem          = "testfs"
-	network             = data.google_compute_network.lustre-network.id
-  gke_support_enabled = false
-  capacity_gib        = 18000
-	timeouts {
-		create = "120m"
-	}
+  instance_id                 = "tf-test-my-instance%{random_suffix}"
+  location                    = "us-central1-a"
+  filesystem                  = "testfs"
+  network                     = data.google_compute_network.lustre-network.id
+  gke_support_enabled         = false
+  capacity_gib                = 18000
+  per_unit_storage_throughput = 1000
+  timeouts {
+	create = "120m"
+  }
 }
 
 // This example assumes this network already exists.
