@@ -276,6 +276,7 @@ properties:
       type: String
   - name: 'disabled'
     type: Boolean
+    send_empty_value: true
     description: |
       Denotes whether the firewall policy rule is disabled.
       When set to true, the firewall policy rule is not enforced and traffic behaves as if it did not exist.
