@@ -93,7 +93,7 @@ resource "google_lustre_instance" "instance" {
     test = "test-label"
   }
   timeouts {
-		create = "120m"
+	create = "120m"
   }
 }
 
