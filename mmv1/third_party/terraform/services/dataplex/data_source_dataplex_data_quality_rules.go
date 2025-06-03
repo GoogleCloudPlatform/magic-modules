@@ -26,7 +26,7 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"rule": {
+			"rules": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem: &schema.Resource{
@@ -323,7 +323,7 @@ func dataSourceDataplexDataQualityRulesRead(d *schema.ResourceData, meta interfa
 		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("DataQualityRules %q", d.Id()), url)
 	}
 
-	if err := d.Set("rule", flattenDataSourceDataplexDataQualityRulesRules(res["rule"])); err != nil {
+	if err := d.Set("rules", flattenDataSourceDataplexDataQualityRulesRules(res["rule"])); err != nil {
 		return fmt.Errorf("Error setting rule: %s", err)
 	}
 
