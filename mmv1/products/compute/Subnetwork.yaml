@@ -463,7 +463,7 @@ properties:
     type: String
     description: |
       The internal IPv6 address range that is assigned to this subnetwork.
-    output: true
+    default_from_api: true
   - name: 'externalIpv6Prefix'
     type: String
     description: |
