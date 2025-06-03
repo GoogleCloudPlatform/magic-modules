@@ -327,10 +327,6 @@ func dataSourceDataplexDataQualityRulesRead(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("Error setting rule: %s", err)
 	}
 
-	if err := tpgresource.SetDataSourceLabels(d); err != nil {
-		return err
-	}
-
 	id := fmt.Sprintf("projects/%s/locations/%s/dataScans/%s", project, location, data_scan_id)
 	d.SetId(id)
 
