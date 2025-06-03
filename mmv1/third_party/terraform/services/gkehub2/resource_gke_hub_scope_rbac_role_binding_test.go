@@ -91,6 +91,8 @@ func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExa
         context := map[string]interface{}{
                 "project":       envvar.GetTestProjectFromEnv(),
                 "random_suffix": acctest.RandString(t, 10),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
         }
 
         acctest.VcrTest(t, resource.TestCase{
