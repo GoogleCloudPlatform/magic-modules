@@ -41,11 +41,8 @@ examples:
     vars:
       pipeline_name: some-pipeline
       topic_name: some-topic
-      network_attachment_name: some-network-attachment
     test_env_vars:
       project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
   - name: eventarc_pipeline_with_http_destination
     primary_resource_id: primary
     vars:
@@ -60,11 +57,8 @@ examples:
     vars:
       pipeline_name: some-pipeline
       workflow_name: some-workflow
-      network_attachment_name: some-network-attachment
     test_env_vars:
       project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
   - name: eventarc_pipeline_with_oidc_and_json_format
     primary_resource_id: primary
     vars:
@@ -316,9 +310,12 @@ properties:
               type: String
               description: |-
                 Name of the NetworkAttachment that allows access to the consumer VPC.
+
                 Format:
                 `projects/{PROJECT_ID}/regions/{REGION}/networkAttachments/{NETWORK_ATTACHMENT_NAME}`
-              required: true
+
+                Required for HTTP endpoint destinations. Must not be specified for
+                Workflows, MessageBus, or Topic destinations.
         - name: httpEndpoint
           type: NestedObject
           description: Represents a HTTP endpoint destination.
