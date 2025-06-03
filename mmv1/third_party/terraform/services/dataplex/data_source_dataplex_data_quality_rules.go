@@ -16,11 +16,11 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"project": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"location": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"data_scan_id": {
 				Type:     schema.TypeString,
