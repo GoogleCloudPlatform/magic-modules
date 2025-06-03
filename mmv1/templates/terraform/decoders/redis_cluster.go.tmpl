@@ -40,9 +40,6 @@ if err != nil {
     return nil, fmt.Errorf("Error reading certificateAuthority: %s", err)
 }
 
-// TODO: DO NOT SUBMIT without removing the comment
-log.Printf("[calvinliu] getting responses from GetCA %+v", certificateAuthority)
-
 flattenRedisClusterManagedServerCaCaCertsCertificates := func(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return v
 }
