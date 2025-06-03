@@ -5,6 +5,7 @@ go 1.23.0
 toolchain go1.23.5
 
 require (
+	cloud.google.com/go/storage v1.50.0
 	github.com/apparentlymart/go-cidr v1.1.0
 	github.com/google/go-cmp v0.7.0
 	github.com/hashicorp/errwrap v1.1.0
