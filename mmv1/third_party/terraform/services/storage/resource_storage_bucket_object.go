@@ -657,8 +657,7 @@ func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.Res
 	}
 
 	oldMd5Hash, ok := d.GetOkExists("md5hash")
-	_, okSourceHash := d.GetOkExists("source_md5hash")
-	if (okSourceHash || d.HasChange("source_md5hash")) || (ok && oldMd5Hash != localMd5Hash) {
+	if d.HasChange("source_md5hash") || (ok && oldMd5Hash != localMd5Hash) {
 		return diffChange(d)
 	}
 	return nil
