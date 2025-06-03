@@ -153,6 +153,9 @@ func ResourceStorageBucketObject() *schema.Resource {
 				// 2. Compare the computed md5 hash with the hash stored in Cloud Storage
 				// 3. Don't suppress the diff iff they don't match
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if d.HasChange("source_md5hash") {
+						return true
+					}
 					localMd5Hash := ""
 					if source, ok := d.GetOkExists("source"); ok {
 						localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
