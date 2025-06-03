@@ -49,14 +49,6 @@ examples:
       - 'git_integration_settings.0.github_settings.0.access_token'
       - 'enable_stackdriver_logging'
       - 'advanced_settings.0.logging_settings'
-virtual_fields:
-  - name: 'delete_contents_on_destroy'
-    description: |
-      If set to `true`, delete the resources linked to the agent (e.g., chat engine) when destroying the agent.
-      Otherwise, Terraform acceptance test `dialogflowcx_tool_data_store.tf.tmpl` would fail at deleting the data store resource because
-      the chat engine depending on the data store still exists.
-    type: Boolean
-    default_value: false
 parameters:
 properties:
   - name: 'name'
