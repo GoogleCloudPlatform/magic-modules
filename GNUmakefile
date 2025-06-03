@@ -67,8 +67,6 @@ terraform build provider: validate_environment clean-provider mmv1 tpgtools
 
 mmv1:
 	@echo "Executing mmv1 build for $(OUTPUT_PATH)"; 
-		# Chaining these with "&&" is critical so this will exit non-0 if the first
-		# command fails, since we're not forcing bash and errexit / pipefail here.
 	@cd mmv1;\
 		if [ "$(VERSION)" = "ga" ]; then \
 			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile) \
