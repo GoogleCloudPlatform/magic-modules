@@ -88,11 +88,11 @@ resource "google_lustre_instance" "instance" {
   filesystem          = "testfs"
   capacity_gib        = 18000
   network             = data.google_compute_network.lustre-network.id
-	description         = "test-description"
-	labels              = {
+  description         = "test-description"
+  labels              = {
     test = "test-label"
   }
-	timeouts {
+  timeouts {
 		create = "120m"
   }
 }
