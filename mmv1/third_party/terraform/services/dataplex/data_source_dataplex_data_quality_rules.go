@@ -34,13 +34,11 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 						"column": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Optional:    true,
 							Description: `The unnested column which this rule is evaluated against.`,
 						},
 						"ignore_null": {
 							Type:     schema.TypeBool,
 							Computed: true,
-							Optional: true,
 							Description: `Rows with null values will automatically fail a rule, unless ignoreNull is true. In that case, such null rows are trivially considered passing. 
 											This field is only valid for the following type of rules: RangeExpectation, RegexExpectation, SetExpectation, UniquenessExpectation`,
 						},
@@ -52,13 +50,11 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 						"threshold": {
 							Type:        schema.TypeFloat,
 							Computed:    true,
-							Optional:    true,
 							Description: `The minimum ratio of passing_rows / total_rows required to pass this rule, with a range of [0.0, 1.0]. 0 indicates default value (i.e. 1.0). This field is only valid for row-level type rules.`,
 						},
 						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
-							Optional: true,
 							Description: `A mutable name for the rule. 
 											The name must contain only letters (a-z, A-Z), numbers (0-9), or hyphens (-).
 											The maximum length is 63 characters.
@@ -68,43 +64,36 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 						"description": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Optional:    true,
 							Description: `Description of the rule. (The maximum length is 1,024 characters.)`,
 						},
 						"suspended": {
 							Type:        schema.TypeBool,
 							Computed:    true,
-							Optional:    true,
 							Description: `Whether the Rule is active or suspended. Default is false.`,
 						},
 						"range_expectation": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"min_value": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Optional:    true,
 										Description: `The minimum column value allowed for a row to pass this validation.`,
 									},
 									"max_value": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Optional:    true,
 										Description: `The maximum column value allowed for a row to pass this validation.`,
 									},
 									"strict_min_enabled": {
 										Type:        schema.TypeBool,
 										Computed:    true,
-										Optional:    true,
 										Description: `Whether each value needs to be strictly greater than ('>') the minimum, or if equality is allowed.`,
 									},
 									"strict_max_enabled": {
 										Type:        schema.TypeBool,
 										Computed:    true,
-										Optional:    true,
 										Description: ` Whether each value needs to be strictly lesser than ('<') the maximum, or if equality is allowed.`,
 									},
 								},
@@ -114,9 +103,7 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 						"non_null_expectation": {
 							Type:        schema.TypeList,
 							Computed:    true,
-							Optional:    true,
 							Description: `Row-level rule which evaluates whether each column value is null.`,
-							MaxItems:    1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{},
 							},
@@ -124,7 +111,6 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 						"set_expectation": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"values": {
@@ -140,8 +126,6 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 						"regex_expectation": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Optional: true,
-							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"regex": {
@@ -157,9 +141,7 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 						"uniqueness_expectation": {
 							Type:        schema.TypeList,
 							Computed:    true,
-							Optional:    true,
 							Description: `Row-level rule which evaluates whether each column value is unique.`,
-							MaxItems:    1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{},
 							},
@@ -167,8 +149,6 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 						"statistic_range_expectation": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Optional: true,
-							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"statistic": {
@@ -180,25 +160,21 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 									"min_value": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Optional:    true,
 										Description: `The minimum column value allowed for a row to pass this validation.`,
 									},
 									"max_value": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Optional:    true,
 										Description: `The maximum column value allowed for a row to pass this validation.`,
 									},
 									"strict_min_enabled": {
 										Type:        schema.TypeBool,
 										Computed:    true,
-										Optional:    true,
 										Description: `Whether each value needs to be strictly greater than ('>') the minimum, or if equality is allowed.`,
 									},
 									"strict_max_enabled": {
 										Type:        schema.TypeBool,
 										Computed:    true,
-										Optional:    true,
 										Description: ` Whether each value needs to be strictly lesser than ('<') the maximum, or if equality is allowed.`,
 									},
 								},
@@ -208,7 +184,6 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 						"row_condition_expectation": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"sql_expression": {
@@ -223,7 +198,6 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 						"table_condition_expectation": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"sql_expression": {
@@ -238,7 +212,6 @@ func DataSourceDataplexDataQualityRules() *schema.Resource {
 						"sql_assertion": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"sql_statement": {
