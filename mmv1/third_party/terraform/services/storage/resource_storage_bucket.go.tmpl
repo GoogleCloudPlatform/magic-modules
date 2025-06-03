@@ -1171,7 +1171,7 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 	// Get the bucket
 	bucket := d.Get("name").(string)
 
-	var listError, deleteObjectError error
+	var listError, deleteObjectError, deleteCacheError error
 	for deleteObjectError == nil {
 		res, err := config.NewStorageClient(userAgent).Objects.List(bucket).Versions(true).Do()
 		if err != nil {
@@ -1231,7 +1231,7 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 		wp.Submit(func() {
 			err = deleteAnywhereCacheIfAny(d, config)
 			if err != nil {
-				deleteObjectError = fmt.Errorf("error deleting the caches on the bucket %s : %w", bucket, err)
+				deleteCacheError = fmt.Errorf("error deleting the caches on the bucket %s : %w", bucket, err)
 			}
 		})
 
@@ -1270,6 +1270,9 @@ func resourceStorageBucketDelete(d *schema.ResourceData, meta interface{}) error
 	}
 	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 && strings.Contains(gerr.Message, "not empty") && deleteObjectError != nil {
 		return fmt.Errorf("could not delete non-empty bucket due to error when deleting contents: %v", deleteObjectError)
+	}
+	if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 409 && strings.Contains(gerr.Message, "Anywhere Caches") && deleteCacheError != nil {
+		return fmt.Errorf("could not delete bucket due to error when deleting anywhere caches on it: %v", deleteCacheError)
 	}
 	if err != nil {
 		log.Printf("Error deleting bucket %s: %v", bucket, err)
