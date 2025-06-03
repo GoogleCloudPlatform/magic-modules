@@ -28,7 +28,7 @@ var (
 	tmpDir     = os.TempDir()
 )
 
-func TestBidirectionalConversion(t *testing.T, ignoredFields []string) {
+func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 	resourceTestData, primaryResource, err := prepareTestData(t.Name())
 	if err != nil {
 		t.Fatalf("Error preparing the input data: %#v", err)
