@@ -121,7 +121,7 @@ func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExa
 }
 
 func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample_basic(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+        return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_scope" "scope" {
   scope_id = "tf-test-scope%{random_suffix}"
 }
@@ -134,6 +134,7 @@ resource "google_gke_hub_feature" "rbacrolebindingactuation" {
       allowed_custom_roles = ["my-custom-role", "my-custom-role-2"]
     }
   }
+  depends_on = [google_project_service.anthos, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_binding" {
@@ -152,7 +153,7 @@ resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_bindin
 }
 
 func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample_update(context map[string]interface{}) string {
-        return acctest.Nprintf(`
+        return gkeHubFeatureProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_scope" "scope" {
   scope_id = "tf-test-scope%{random_suffix}"
 }
@@ -165,6 +166,7 @@ resource "google_gke_hub_feature" "rbacrolebindingactuation" {
       allowed_custom_roles = ["my-custom-role", "my-custom-role-2"]
     }
   }
+  depends_on = [google_project_service.anthos, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_binding" {
@@ -178,6 +180,29 @@ resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_bindin
       key = "value" 
   }
   depends_on = [google_gke_hub_scope.scope, google_gke_hub_feature.rbacrolebindingactuation]
+}
+`, context)
+}
+
+func gkeHubFeatureProjectSetupForGA(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+  name            = "tf-test-gkehub%{random_suffix}"
+  project_id      = "tf-test-gkehub%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_service" "anthos" {
+  project = google_project.project.project_id
+  service = "anthos.googleapis.com"
+}
+
+resource "google_project_service" "gkehub" {
+  project = google_project.project.project_id
+  service = "gkehub.googleapis.com"
+  disable_on_destroy = false
 }
 `, context)
 }
