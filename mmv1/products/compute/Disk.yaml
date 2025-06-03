@@ -238,6 +238,7 @@ properties:
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
         sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/compute_rsa_key_flatten.go.tmpl'
         conflicts:
           - 'disk_encryption_key.0.rsaEncryptedKeyWo'
       - name: 'rsaEncryptedKeyWo'
@@ -253,7 +254,6 @@ properties:
       - name: 'sha256'
         type: String
         immutable: true
-        custom_flatten: 'templates/terraform/custom_flatten/compute_rsa_key_flatten.go.tmpl'
         description: |
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
@@ -568,6 +568,7 @@ properties:
     description: |
       A list of features to enable on the guest operating system.
       Applicable only for bootable disks.
+    immutable: true
     is_set: true
     default_from_api: true
     item_type:
