@@ -644,6 +644,7 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 }
 
 func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+
 	localMd5Hash := ""
 	if source, ok := d.GetOkExists("source"); ok {
 		localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
@@ -656,10 +657,15 @@ func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.Res
 	}
 
 	oldMd5Hash, ok := d.GetOkExists("md5hash")
-	if ok && oldMd5Hash == localMd5Hash {
-		return nil
+	_, okSourceHash := d.GetOkExists("source_md5hash")
+	if (okSourceHash || d.HasChange("source_md5hash")) || (ok && oldMd5Hash != localMd5Hash) {
+		return diffChange(d)
 	}
+	return nil
 
+}
+
+func diffChange(d *schema.ResourceDiff) error {
 	err := d.SetNewComputed("md5hash")
 	if err != nil {
 		return fmt.Errorf("Error re-setting md5hash: %s", err)
@@ -672,5 +678,6 @@ func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.Res
 	if err != nil {
 		return fmt.Errorf("Error re-setting generation: %s", err)
 	}
+
 	return nil
 }
