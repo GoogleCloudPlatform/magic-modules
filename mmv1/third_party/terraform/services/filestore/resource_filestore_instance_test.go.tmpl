@@ -654,6 +654,8 @@ resource "google_filestore_instance" "instance" {
 `, name, location, tier)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
+
 func TestAccFilestoreInstance_psc(t *testing.T) {
 	t.Parallel()
 
