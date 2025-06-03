@@ -104,10 +104,13 @@ func testAccDialogflowCXGenerativeSettings_update(context map[string]interface{}
 
   resource "google_dialogflow_cx_generative_settings" "my_generative_settings" {
     parent       = google_dialogflow_cx_agent.agent.id
+
     knowledge_connector_settings {
       business = "updated business"
       agent = "updated agent"
     }
+
+    language_code = "en"
   }
 `, context)
 }

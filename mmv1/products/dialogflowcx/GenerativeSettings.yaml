@@ -23,6 +23,7 @@ docs:
 base_url: '{{parent}}/generativeSettings'
 self_link: '{{parent}}/generativeSettings?languageCode={{lang_code}}'
 create_url: '{{parent}}/generativeSettings'
+update_url: '{{parent}}/generativeSettings'
 create_verb: 'PATCH'
 update_verb: 'PATCH'
 update_mask: true
