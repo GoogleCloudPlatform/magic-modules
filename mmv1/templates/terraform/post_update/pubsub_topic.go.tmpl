@@ -1,12 +1,13 @@
-if v, ok := d.GetOk("recompute_message_storage_policy"); ok && v.(bool) {
-   // if message_storage_policy was dropped, but existed in state, send an empty object
+
+old, new := d.GetChange("recompute_message_storage_policy")
+if (old == false && new == true) {
   if rawCfg := d.GetRawConfig().GetAttr("message_storage_policy"); rawCfg.LengthInt() == 0 {
     log.Printf("[DEBUG] Sending empty message_storage_policy in update")
     updateMask := []string{}
-		obj := make(map[string]interface{})
+    obj := make(map[string]interface{})
     updateMask = append(updateMask, "messageStoragePolicy")
 
-		// The rest is the same as the generated update code in
+    // The rest is the same as the generated update code in
     // google/services/pubsub/resource_pubsub_topic.go without the
     // messageStoragePolicyProp logic
     config := meta.(*transport_tpg.Config)

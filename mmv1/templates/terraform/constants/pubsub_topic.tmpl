@@ -3,26 +3,18 @@ func recomputeMessageStoragePolicy(_ context.Context, diff *schema.ResourceDiff,
 	if diff.Id() == "" {
 		return nil
 	}
-
-	sendZero := diff.Get("recompute_message_storage_policy").(bool)
-	if !sendZero {
+  // If recompute_message_storage_policy is not being changed from false to true, return immediately.
+	old, new := diff.GetChange("recompute_message_storage_policy")
+	if old != false || new != true {
 		return nil
 	}
-
 	configMessageStoragePolicy := diff.GetRawConfig().GetAttr("message_storage_policy")
 	if !configMessageStoragePolicy.IsKnown() {
 		return nil
 	}
 	configValueIsEmpty := configMessageStoragePolicy.IsNull() || configMessageStoragePolicy.LengthInt() == 0
-
-	stateMessageStoragePolicy := diff.GetRawState().GetAttr("message_storage_policy")
-	if !stateMessageStoragePolicy.IsKnown() {
-		return nil
-	}
-	stateValueIsEmpty := stateMessageStoragePolicy.IsNull() || stateMessageStoragePolicy.LengthInt() == 0
-
-	if configValueIsEmpty && !stateValueIsEmpty {
-		log.Printf("[DEBUG] setting message_storage_policy to newly empty")
+	if configValueIsEmpty {
+		log.Printf("[DEBUG] recalculating message storage policy as recompute_message_storage_policy is newly set to true and message_storage_policy is empty")
 		diff.SetNew("message_storage_policy", make([]interface{}, 0))
 	}
 
