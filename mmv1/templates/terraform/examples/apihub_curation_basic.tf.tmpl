@@ -1,0 +1,17 @@
+resource "google_apihub_curation" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+  curation_id = "{{index $.Vars "curation_id"}}"
+  project = "apihub-terraform"
+  display_name = "Test Curation"
+  description = "This is a sample curation resource managed by Terraform."
+  endpoint {
+    application_integration_endpoint_details {
+      trigger_id = "api_trigger/curation_API_1"
+      uri = "https://integrations.googleapis.com/v1/projects/1082615593856/locations/us-central1/integrations/curation:execute"
+    }
+  }
+
+}
+
+
+
