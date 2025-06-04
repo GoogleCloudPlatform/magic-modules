@@ -128,8 +128,6 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_container_attached_install_manifest":       containerattached.DataSourceGoogleContainerAttachedInstallManifest(),
 	"google_container_cluster":                         container.DataSourceGoogleContainerCluster(),
 	"google_container_engine_versions":                 container.DataSourceGoogleContainerEngineVersions(),
-	"google_container_registry_image":                  containeranalysis.DataSourceGoogleContainerImage(),
-	"google_container_registry_repository":             containeranalysis.DataSourceGoogleContainerRepo(),
 	"google_dataproc_metastore_service":                dataprocmetastore.DataSourceDataprocMetastoreService(),
 	"google_datastream_static_ips":                     datastream.DataSourceGoogleDatastreamStaticIps(),
 	"google_dns_keys":                                  dns.DataSourceDNSKeys(),
@@ -379,7 +377,6 @@ var handwrittenResources = map[string]*schema.Resource{
 	"google_compute_target_pool":                   compute.ResourceComputeTargetPool(),
 	"google_container_cluster":                     container.ResourceContainerCluster(),
 	"google_container_node_pool":                   container.ResourceContainerNodePool(),
-	"google_container_registry":                    containeranalysis.ResourceContainerRegistry(),
 	"google_dataflow_job":                          dataflow.ResourceDataflowJob(),
 	{{- if ne $.TargetVersionName "ga" }}
 	"google_dataflow_flex_template_job":            dataflow.ResourceDataflowFlexTemplateJob(),
