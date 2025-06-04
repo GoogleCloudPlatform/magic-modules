@@ -544,8 +544,8 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 
 	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
 	subscriptionShort := fmt.Sprintf("tf-test-sub-%s", acctest.RandString(t, 10))
-	functionName := "some_function_name"
-	code := "some_code_here"
+	functionName := "my_func"
+	code := "function my_func(message, metadata) {return null;}"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -591,7 +591,7 @@ resource "google_pubsub_subscription" "foo" {
   name  = "%s"
   topic = google_pubsub_topic.foo.id
   message_transforms {
-		disabled = true
+    disabled = true
     javascript_udf {
       function_name = "%s"
       code = "%s"
