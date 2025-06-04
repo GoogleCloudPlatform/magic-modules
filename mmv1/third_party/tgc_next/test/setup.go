@@ -237,3 +237,14 @@ func convertToConfigMap(resources []Resource) map[string]map[string]interface{} 
 
 	return configMap
 }
+
+// Converts the slice of assets to map with the asset name as the key
+func convertToAssetMap(assets []caiasset.Asset) map[string]caiasset.Asset {
+	assetMap := make(map[string]caiasset.Asset)
+
+	for _, asset := range assets {
+		asset.Resource.Data = nil
+		assetMap[asset.Type] = asset
+	}
+	return assetMap
+}
