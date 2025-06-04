@@ -5,7 +5,7 @@ import (
 	"log"
 	"regexp"
 	"strings"
-{{ if ne $.TargetVersionName `ga` }}
+{{- if ne $.TargetVersionName `ga` }}
 	"sync"
 {{- end }}
 	"time"
@@ -951,7 +951,7 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 	}
 
 	name := getNodePoolName(d.Id())
-{{ if eq $.TargetVersionName `ga` }}
+{{- if eq $.TargetVersionName `ga` }}
 	clusterNodePoolsGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
 	if config.UserProjectOverride {
 		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
