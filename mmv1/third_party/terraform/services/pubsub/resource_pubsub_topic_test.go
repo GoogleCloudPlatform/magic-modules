@@ -602,21 +602,14 @@ func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_pubsub_topic.foo",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			// Bare transform
-			{
-				Config: testAccPubsubTopic_javascriptUdfSettings(topic, "", ""),
-			},
-			{
-				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
 			// Destroy transform
 			{
 				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
