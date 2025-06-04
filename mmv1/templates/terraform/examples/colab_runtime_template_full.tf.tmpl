@@ -53,11 +53,4 @@ resource "google_colab_runtime_template" "{{$.PrimaryResourceId}}" {
   encryption_spec {
     kms_key_name = "{{index $.Vars "key_name"}}"
   }
-
-  software_config {
-    env {
-      name         = "TEST"
-      value   = 1
-    }
-  }
 }
