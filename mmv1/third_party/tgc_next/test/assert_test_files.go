@@ -31,7 +31,7 @@ var (
 func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 	resourceTestData, primaryResource, err := prepareTestData(t.Name())
 	if err != nil {
-		t.Fatalf("Error preparing the input data: %#v", err)
+		t.Fatal("Error preparing the input data:", err)
 	}
 
 	if resourceTestData == nil {
@@ -52,13 +52,13 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 	if primaryResource != "" {
 		err = testSingleResource(t, t.Name(), resourceTestData[primaryResource], tfDir, ignoredFields, logger)
 		if err != nil {
-			t.Fatalf("Test fails: %#v", err)
+			t.Fatal("Test fails:", err)
 		}
 	} else {
 		for _, testData := range resourceTestData {
 			err = testSingleResource(t, t.Name(), testData, tfDir, ignoredFields, logger)
 			if err != nil {
-				t.Fatalf("Test fails: %#v", err)
+				t.Fatal("Test fails: ", err)
 			}
 		}
 	}
@@ -101,7 +101,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	// exportTfFile := fmt.Sprintf("%s_export.tf", t.Name())
 	// err = os.WriteFile(exportTfFile, exportConfigData, 0644)
 	// if err != nil {
-	// 	log.Fatalf("error writing file %s", exportTfFile)
+	// 	return fmt.Errorf("error writing file", exportTfFile)
 	// }
 	// defer os.Remove(exportTfFile)
 
@@ -139,7 +139,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 
 	// Convert the export config to roundtrip assets and then convert the roundtrip assets back to roundtrip config
 	ancestryCache := getAncestryCache(assets)
-	roundtripConfigData, err := getRoundtripConfig(t, testName, tfDir, ancestryCache, logger)
+	roundtripAssets, roundtripConfigData, err := getRoundtripConfig(t, testName, tfDir, ancestryCache, logger)
 	if err != nil {
 		return fmt.Errorf("error when converting the round-trip config: %#v", err)
 	}
@@ -153,7 +153,24 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 
 	if diff := cmp.Diff(string(roundtripConfigData), string(exportConfigData)); diff != "" {
 		log.Printf("Roundtrip config is different from the export config.\nroundtrip config:\n%s\nexport config:\n%s", string(roundtripConfigData), string(exportConfigData))
-		return fmt.Errorf("Test %s got diff (-want +got): %s", testName, diff)
+		return fmt.Errorf("test %s got diff (-want +got): %s", testName, diff)
+	}
+
+	// Step 3
+	// Compare most fields between the exported asset and roundtrip asset, except for "data" field for resource
+	assetMap := convertToAssetMap(assets)
+	roundtripAssetMap := convertToAssetMap(roundtripAssets)
+	for assetType, asset := range assetMap {
+		if roundtripAsset, ok := roundtripAssetMap[assetType]; !ok {
+			return fmt.Errorf("roundtrip asset for type %s is missing", assetType)
+		} else {
+			if err := compareAssetName(asset.Name, roundtripAsset.Name); err != nil {
+				return err
+			}
+			if diff := cmp.Diff(asset.Resource, roundtripAsset.Resource); diff != "" {
+				return fmt.Errorf("differences found between exported asset and roundtrip asset (-want +got):\n%s", diff)
+			}
+		}
 	}
 
 	return nil
@@ -238,7 +255,7 @@ func compareHCLFields(map1, map2 map[string]interface{}, path string, ignoredFie
 }
 
 // Converts a tfplan to CAI asset, and then converts the CAI asset into HCL
-func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCache map[string]string, logger *zap.Logger) ([]byte, error) {
+func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCache map[string]string, logger *zap.Logger) ([]caiasset.Asset, []byte, error) {
 	fileName := fmt.Sprintf("%s_export", testName)
 
 	// Run terraform init and terraform apply to generate tfplan.json files
@@ -248,7 +265,7 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 	planfilePath := filepath.Join(tfDir, planFile)
 	jsonPlan, err := os.ReadFile(planfilePath)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	ctx := context.Background()
@@ -263,19 +280,40 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Uncomment these lines when debugging issues locally
 	// roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", t.Name())
 	// writeJSONFile(roundtripAssetFile, roundtripAssets)
 
-	data, err := cai2hcl.Convert(roundtripAssets, &cai2hcl.Options{
+	roundtripConfig, err := cai2hcl.Convert(roundtripAssets, &cai2hcl.Options{
 		ErrorLogger: logger,
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return data, nil
+	return roundtripAssets, roundtripConfig, nil
+}
+
+// Compares the asset name in export asset and roundtrip asset and ignores "null" in the name
+// Example: //cloudresourcemanager.googleapis.com/projects/123456
+func compareAssetName(want, got string) error {
+	parts1 := strings.Split(want, "/")
+	parts2 := strings.Split(got, "/")
+	if len(parts1) != len(parts2) {
+		return fmt.Errorf("differences found between two asset names: want %s, got %s", want, got)
+	}
+
+	for i, part := range parts1 {
+		if parts2[i] == "null" {
+			continue
+		}
+
+		if part != parts2[i] {
+			return fmt.Errorf("differences found between two asset names: want %s, got %s", want, got)
+		}
+	}
+	return nil
 }
