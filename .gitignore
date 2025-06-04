@@ -26,7 +26,6 @@
 
 # IDEA files
 .idea/*
-**/.idea/*
 *.iml
 **/.idea/*
 
