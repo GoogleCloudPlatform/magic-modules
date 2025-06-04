@@ -9,8 +9,12 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func testAccCloudTraceTraceSink_basic(name string,  datasetID string) string {
+func testAccCloudTraceTraceSink_basic(name string, datasetID string) string {
 	return fmt.Sprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
 resource "google_cloud_trace_trace_sink" "default" {
   name = "%s"
   output_config {
@@ -22,6 +26,10 @@ resource "google_cloud_trace_trace_sink" "default" {
 
 func testAccCloudTraceTraceSink_update(name string, datasetID string) string {
 	return fmt.Sprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
 resource "google_cloud_trace_trace_sink" "default" {
   name = "%s"
   output_config {
@@ -49,22 +57,22 @@ resource "google_bigquery_dataset" "test" {
 }
 
 func TestAccCloudTraceSink_update(t *testing.T) {
-  acctest.VcrTest(t, resource.TestCase{
-     Steps: []resource.TestStep{
-        {
-          Config: testAccBigQueryDataset("traces"),
-        },
-        {
-           Config: testAccCloudTraceTraceSink_basic("example", "traces"),
-        },
-        {
-           Config: testAccCloudTraceTraceSink_update("updated example", "traces"),
-           ConfigPlanChecks: resource.ConfigPlanChecks{
-              PreApply: []plancheck.PlanCheck{
-                 plancheck.ExpectResourceAction("google_cloud_trace_sink.name", plancheck.ResourceActionUpdate),
-              },
-           },
-        },
-     },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryDataset("traces"),
+			},
+			{
+				Config: testAccCloudTraceTraceSink_basic("example", "traces"),
+			},
+			{
+				Config: testAccCloudTraceTraceSink_update("updated example", "traces"),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_cloud_trace_sink.name", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+		},
+	})
 }
