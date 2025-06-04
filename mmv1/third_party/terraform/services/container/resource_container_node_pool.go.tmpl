@@ -28,7 +28,7 @@ import (
 var clusterIdRegex = regexp.MustCompile("projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<name>[^/]+)")
 
 {{ if ne $.TargetVersionName `ga` }}
-type nodePoolWithUpdateTime {
+type nodePoolWithUpdateTime struct {
 	nodePool   *container.NodePool
 	updateTime time.Time
 }
