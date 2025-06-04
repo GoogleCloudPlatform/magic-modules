@@ -9,10 +9,8 @@ func enableHotTierAutoResizeDiffSuppress(_, old, new string, d *schema.ResourceD
 			}
 		}
 	}
-    oldBool, errOld := strconv.ParseBool(old)
-	newBool, errNew := strconv.ParseBool(new)
-    if errOld != nil || errNew != nil {
-		return false
-	}
-	return oldBool == newBool
+    if old == "true" && new == "" {
+		return true
+    }
+   return false
 }
