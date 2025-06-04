@@ -158,20 +158,24 @@ properties:
     type: NestedObject
     default_from_api: true
     description: 'EUC configuration of the NotebookRuntimeTemplate.'
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - name: 'eucDisabled'
         type: Boolean
         default_from_api: true
         description: 'Disable end user credential access for the runtime.'
+        diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
   - name: shieldedVmConfig
     type: NestedObject
     default_from_api: true
     description: 'Runtime Shielded VM spec.'
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - name: 'enableSecureBoot'
         type: Boolean
         default_from_api: true
         description: 'Enables secure boot for the runtime.'
+        diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
   - name: 'networkTags'
     type: Array
     item_type:
