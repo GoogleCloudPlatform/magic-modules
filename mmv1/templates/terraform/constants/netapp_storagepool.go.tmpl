@@ -3,7 +3,7 @@ func enableHotTierAutoResizeDiffSuppress(_, old, new string, d *schema.ResourceD
     allowAutoTiering, ok := d.GetOk("allowAutoTiering")
     if ok {
 		if allowAutoTieringBool, isBool := allowAutoTiering.(bool); isBool {
-			if allowAutoTieringBool {
+			if !allowAutoTieringBool {
 				// If allowAutoTiering is true, suppress the diff for enableHotTierAutoResize.
 				return true
 			}
