@@ -10,6 +10,8 @@ import (
 )
 
 func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_update(t *testing.T) {
+	// VCR fails to handle batched project services
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -86,6 +88,8 @@ resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
 }
 
 func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExample_update(t *testing.T) {
+	// VCR fails to handle batched project services
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
