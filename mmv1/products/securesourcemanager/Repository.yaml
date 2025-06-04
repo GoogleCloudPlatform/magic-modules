@@ -21,7 +21,8 @@ references:
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
-immutable: true
+update_verb: 'PATCH'
+update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
   - '{{repository_id}}'
@@ -31,7 +32,7 @@ timeouts:
   delete_minutes: 20
 autogen_async: true
 async:
-  actions: ['create', 'delete']
+  actions: ['create', 'update', 'delete']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
