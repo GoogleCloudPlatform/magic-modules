@@ -1,0 +1,3 @@
+{{- define "note" -}}
+{{if eq "new-resource" .Type}}**New Resource:** {{else if eq "new-datasource" .Type}}**New Data Source:** {{else if eq "new-function" .Type}}**New Function:** {{else if eq "new-ephemeral" .Type}}**New Ephemeral Resource:** {{ end }}{{.Body}} ([#{{- .Issue -}}])
+{{- end -}}

@@ -21,6 +21,9 @@ description: |
   For managed internal load balancing, use a regional backend service instead.
 
   Currently self-managed internal load balancing is only available in beta.
+
+  ~> **Note:** Recreating a `google_compute_backend_service` that references other dependent resources like `google_compute_url_map` will give a `resourceInUseByAnotherResource` error, when modifying the number of other dependent resources.
+  Use `lifecycle.create_before_destroy` on the dependent resources to avoid this type of error as shown in the Dynamic Backends example.
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/compute/docs/load-balancing/http/backend-service'
@@ -134,6 +137,16 @@ examples:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
       authentication_name: 'authentication'
+  - name: 'backend_service_dynamic_backends'
+    primary_resource_id: 'default'
+    vars:
+      url_map_name: 'url_map'
+    exclude_test: true
+  - name: 'backend_service_dynamic_forwarding'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      backend_service_name: 'backend-service'
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
@@ -184,6 +197,18 @@ properties:
             0% of its available Capacity. Valid range is [0.0,1.0].
           send_empty_value: true
           default_value: 1.0
+        - name: 'preference'
+          type: Enum
+          description: |
+            This field indicates whether this backend should be fully utilized before sending traffic to backends
+            with default preference. This field cannot be set when loadBalancingScheme is set to 'EXTERNAL'. The possible values are:
+              - PREFERRED: Backends with this preference level will be filled up to their capacity limits first,
+                based on RTT.
+              - DEFAULT: If preferred backends don't have enough capacity, backends in this layer would be used and
+                traffic would be assigned based on the load balancing algorithm you use. This is the default
+          enum_values:
+            - 'PREFERRED'
+            - 'DEFAULT'
         - name: 'description'
           type: String
           description: |
@@ -503,6 +528,13 @@ properties:
     description: 'Cloud CDN configuration for this BackendService.'
     default_from_api: true
     properties:
+      - name: 'requestCoalescing'
+        type: Boolean
+        description: |
+          If true then Cloud CDN will combine multiple concurrent cache fill requests into a small number of requests
+          to the origin.
+        default_from_api: true
+        send_empty_value: true
       - name: 'cacheKeyPolicy'
         type: NestedObject
         description: 'The CacheKeyPolicy for this CdnPolicy.'
@@ -833,7 +865,6 @@ properties:
       external load balancing. A backend service created for one type of
       load balancing cannot be used with the other. For more information, refer to
       [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service).
-    immutable: true
     default_value: "EXTERNAL"
     # If you're modifying this value, it probably means Global ILB is now
     # an option. If that's the case, all of the documentation is based on
@@ -843,6 +874,38 @@ properties:
       - 'INTERNAL_SELF_MANAGED'
       - 'INTERNAL_MANAGED'
       - 'EXTERNAL_MANAGED'
+  - name: 'externalManagedMigrationState'
+    type: Enum
+    description: |
+      Specifies the canary migration state. Possible values are PREPARE, TEST_BY_PERCENTAGE, and
+      TEST_ALL_TRAFFIC.
+
+      To begin the migration from EXTERNAL to EXTERNAL_MANAGED, the state must be changed to
+      PREPARE. The state must be changed to TEST_ALL_TRAFFIC before the loadBalancingScheme can be
+      changed to EXTERNAL_MANAGED. Optionally, the TEST_BY_PERCENTAGE state can be used to migrate
+      traffic by percentage using externalManagedMigrationTestingPercentage.
+
+      Rolling back a migration requires the states to be set in reverse order. So changing the
+      scheme from EXTERNAL_MANAGED to EXTERNAL requires the state to be set to TEST_ALL_TRAFFIC at
+      the same time. Optionally, the TEST_BY_PERCENTAGE state can be used to migrate some traffic
+      back to EXTERNAL or PREPARE can be used to migrate all traffic back to EXTERNAL.
+    enum_values:
+      - 'PREPARE'
+      - 'TEST_BY_PERCENTAGE'
+      - 'TEST_ALL_TRAFFIC'
+  - name: 'externalManagedMigrationTestingPercentage'
+    type: Double
+    description: |
+      Determines the fraction of requests that should be processed by the Global external
+      Application Load Balancer.
+
+      The value of this field must be in the range [0, 100].
+
+      Session affinity options will slightly affect this routing behavior, for more details,
+      see: Session Affinity.
+
+      This value can only be set if the loadBalancingScheme in the backend service is set to
+      EXTERNAL (when using the Classic ALB) and the migration state is TEST_BY_PERCENTAGE.
   - name: 'localityLbPolicy'
     type: Enum
     description: |
@@ -896,7 +959,7 @@ properties:
 
       locality_lb_policy is applicable to either:
 
-      * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
+      * A regional backend service with the service_protocol set to HTTP, HTTPS, HTTP2 or H2C,
         and loadBalancingScheme set to INTERNAL_MANAGED.
       * A global backend service with the load_balancing_scheme set to INTERNAL_SELF_MANAGED.
       * A regional backend service with loadBalancingScheme set to EXTERNAL (External Network
@@ -1299,11 +1362,10 @@ properties:
     type: Enum
     description: |
       The protocol this BackendService uses to communicate with backends.
-      The default is HTTP. **NOTE**: HTTP2 is only valid for beta HTTP/2 load balancer
-      types and may result in errors if used with the GA API. **NOTE**: With protocol “UNSPECIFIED”,
-      the backend service can be used by Layer 4 Internal Load Balancing or Network Load Balancing
-      with TCP/UDP/L3_DEFAULT Forwarding Rule protocol.
-    # TODO: make a ResourceRef to Security Policy
+      The default is HTTP. Possible values are HTTP, HTTPS, HTTP2, H2C, TCP, SSL, UDP
+      or GRPC. Refer to the documentation for the load balancers or for Traffic Director
+      for more information. Must be set to GRPC when the backend service is referenced
+      by a URL map that is bound to target gRPC proxy.
     default_from_api: true
     enum_values:
       - 'HTTP'
@@ -1311,9 +1373,12 @@ properties:
       - 'HTTP2'
       - 'TCP'
       - 'SSL'
+      - 'UDP'
       - 'GRPC'
       - 'UNSPECIFIED'
+      - 'H2C'
   - name: 'securityPolicy'
+    # TODO: make a ResourceRef to Security Policy
     type: String
     description: |
       The security policy associated with this backend service.
@@ -1327,7 +1392,7 @@ properties:
     type: NestedObject
     description: |
       The security settings that apply to this backend service. This field is applicable to either
-      a regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2, and
+      a regional backend service with the service_protocol set to HTTP, HTTPS, HTTP2 or H2C, and
       load_balancing_scheme set to INTERNAL_MANAGED; or a global backend service with the
       load_balancing_scheme set to INTERNAL_SELF_MANAGED.
     properties:
@@ -1468,6 +1533,29 @@ properties:
           - 'log_config.0.sample_rate'
         diff_suppress_func: 'suppressWhenDisabled'
         default_value: 1.0
+      - name: 'optionalMode'
+        type: Enum
+        description: |
+          Specifies the optional logging mode for the load balancer traffic.
+          Supported values: INCLUDE_ALL_OPTIONAL, EXCLUDE_ALL_OPTIONAL, CUSTOM.
+        enum_values:
+          - 'INCLUDE_ALL_OPTIONAL'
+          - 'EXCLUDE_ALL_OPTIONAL'
+          - 'CUSTOM'
+        at_least_one_of:
+          - 'log_config.0.enable'
+          - 'log_config.0.sample_rate'
+          - 'log_config.0.optional_mode'
+        default_from_api: true
+      - name: 'optionalFields'
+        type: Array
+        description: |
+          This field can only be specified if logging is enabled for this backend service and "logConfig.optionalMode"
+          was set to CUSTOM. Contains a list of optional fields you want to include in the logs.
+          For example: serverInstance, serverGkeDetails.cluster, serverGkeDetails.pod.podNamespace
+          For example: orca_load_report, tls.protocol
+        item_type:
+          type: String
   - name: 'serviceLbPolicy'
     type: String
     description: |
@@ -1515,3 +1603,73 @@ properties:
           Reference to the BackendAuthenticationConfig resource from the networksecurity.googleapis.com namespace.
           Can be used in authenticating TLS connections to the backend, as specified by the authenticationMode field.
           Can only be specified if authenticationMode is not NONE.
+  - name: 'maxStreamDuration'
+    type: NestedObject
+    description: |
+      Specifies the default maximum duration (timeout) for streams to this service. Duration is computed from the
+      beginning of the stream until the response has been completely processed, including all retries. A stream that
+      does not complete in this duration is closed.
+      If not specified, there will be no timeout limit, i.e. the maximum duration is infinite.
+      This value can be overridden in the PathMatcher configuration of the UrlMap that references this backend service.
+      This field is only allowed when the loadBalancingScheme of the backend service is INTERNAL_SELF_MANAGED.
+    properties:
+      - name: 'seconds'
+        type: String
+        description: |
+          Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive. (int64 format)
+        required: true
+      - name: 'nanos'
+        type: Integer
+        description: |
+          Span of time that's a fraction of a second at nanosecond resolution.
+          Durations less than one second are represented with a 0 seconds field and a positive nanos field.
+          Must be from 0 to 999,999,999 inclusive.
+  - name: 'networkPassThroughLbTrafficPolicy'
+    type: NestedObject
+    description: |
+      Configures traffic steering properties of internal passthrough Network Load Balancers.
+    min_version: beta
+    properties:
+      - name: 'zonalAffinity'
+        type: NestedObject
+        description: |
+          When configured, new connections are load balanced across healthy backend endpoints in the local zone.
+        properties:
+          - name: 'spillover'
+            type: Enum
+            description: |
+              This field indicates whether zonal affinity is enabled or not.
+            enum_values:
+              - 'ZONAL_AFFINITY_DISABLED'
+              - 'ZONAL_AFFINITY_SPILL_CROSS_ZONE'
+              - 'ZONAL_AFFINITY_STAY_WITHIN_ZONE'
+            default_value: 'ZONAL_AFFINITY_DISABLED'
+            min_version: beta
+          - name: 'spilloverRatio'
+            type: Double
+            description: |
+              The value of the field must be in [0, 1]. When the ratio of the count of healthy backend endpoints in a zone
+              to the count of backend endpoints in that same zone is equal to or above this threshold, the load balancer
+              distributes new connections to all healthy endpoints in the local zone only. When the ratio of the count
+              of healthy backend endpoints in a zone to the count of backend endpoints in that same zone is below this
+              threshold, the load balancer distributes all new connections to all healthy endpoints across all zones.
+            min_version: beta
+  - name: 'dynamicForwarding'
+    type: NestedObject
+    description: |
+      Dynamic forwarding configuration. This field is used to configure the backend service with dynamic forwarding
+      feature which together with Service Extension allows customized and complex routing logic.
+    min_version: beta
+    properties:
+      - name: 'ipPortSelection'
+        type: NestedObject
+        description: |
+          IP:PORT based dynamic forwarding configuration.
+        min_version: beta
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            min_version: beta
+            description: |
+              A boolean flag enabling IP:PORT based dynamic forwarding.
+            immutable: true

@@ -32,6 +32,8 @@ async:
   type: 'OpAsync'
   operation:
     full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
+  result:
+    resource_inside_response: true
 iam_policy:
   parent_resource_attribute: 'runtime_template'
   method_name_separator: ':'
@@ -40,8 +42,6 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{runtime_template}}'
     - '{{runtime_template}}'
-custom_code:
-  post_create: 'templates/terraform/post_create/colab_runtime_template.go.tmpl'
 examples:
   - name: 'colab_runtime_template_basic'
     primary_resource_id: 'runtime-template'
@@ -143,6 +143,7 @@ properties:
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
   - name: 'labels'
     type: KeyValueLabels
+    default_from_api: true
     description: 'Labels to identify and group the runtime template.'
   - name: idleShutdownConfig
     type: NestedObject
@@ -155,18 +156,26 @@ properties:
         description: 'The duration after which the runtime is automatically shut down. An input of 0s disables the idle shutdown feature, and a valid range is [10m, 24h].'
   - name: eucConfig
     type: NestedObject
+    default_from_api: true
     description: 'EUC configuration of the NotebookRuntimeTemplate.'
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - name: 'eucDisabled'
         type: Boolean
+        default_from_api: true
         description: 'Disable end user credential access for the runtime.'
+        diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
   - name: shieldedVmConfig
     type: NestedObject
+    default_from_api: true
     description: 'Runtime Shielded VM spec.'
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
     properties:
       - name: 'enableSecureBoot'
         type: Boolean
+        default_from_api: true
         description: 'Enables secure boot for the runtime.'
+        diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
   - name: 'networkTags'
     type: Array
     item_type:
@@ -181,6 +190,7 @@ properties:
         description: 'The Cloud KMS encryption key (customer-managed encryption key) used to protect the runtime.'
   - name: softwareConfig
     type: NestedObject
+    default_from_api: true
     description: 'The notebook software configuration of the notebook runtime.'
     properties:
       - name: 'env'
@@ -200,6 +210,7 @@ properties:
                             The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped
                             references will never be expanded, regardless of whether the variable exists or not.'
       - name: 'postStartupScriptConfig'
+        deprecation_message: '`post_startup_script_config` is deprecated and will be removed in a future major release. New resource creation with this field is unavailable at this time.'
         type: NestedObject
         description: 'Post startup script config.'
         properties:
