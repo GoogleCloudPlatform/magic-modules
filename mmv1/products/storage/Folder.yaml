@@ -54,6 +54,9 @@ virtual_fields:
       If set to true, items within folder if any will be force destroyed.
     type: Boolean
     default_value: false
+  - name: 'customHeaders'
+    type: KeyValuePairs
+    description: Users can set custom headers send to API operations
 parameters:
   - name: 'bucket'
     resource: 'Bucket'
@@ -74,10 +77,6 @@ parameters:
     validation:
       regex: '/$'
 properties:
-  - name: 'customHeaders'
-    type: KeyValuePairs
-    description: user can set custom headers
-    url_param_only: true
   - name: createTime
     type: String
     description: |
