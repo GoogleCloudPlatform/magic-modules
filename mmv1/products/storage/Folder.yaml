@@ -56,7 +56,7 @@ virtual_fields:
     default_value: false
   - name: 'customHeaders'
     type: KeyValuePairs
-    description: 
+    description:
       Users can set custom headers send to API operations
 parameters:
   - name: 'bucket'
