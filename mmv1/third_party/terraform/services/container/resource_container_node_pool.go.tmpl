@@ -96,7 +96,7 @@ func (nodePoolCache *nodePoolCache) remove(nodePool string) {
 }
 
 var npCache = &nodePoolCache{
-	nodePools: make(map[string]*container.NodePool),
+	nodePools: make(map[string]*nodePoolWithUpdateTime),
 	ttl:       30 * time.Second,
 }
 {{- end }}
