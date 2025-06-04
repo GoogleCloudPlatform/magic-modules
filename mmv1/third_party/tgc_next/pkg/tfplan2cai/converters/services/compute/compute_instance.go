@@ -1833,6 +1833,7 @@ func GetComputeDiskCaiObject(d tpgresource.TerraformResourceData, config *transp
 		return caiasset.Asset{}, err
 	}
 	if data, err := GetComputeDiskData(d, config); err == nil {
+		location, _ := tpgresource.GetLocation(d, config)
 		return caiasset.Asset{
 			Name: name,
 			Type: ComputeDiskAssetType,
@@ -1841,6 +1842,7 @@ func GetComputeDiskCaiObject(d tpgresource.TerraformResourceData, config *transp
 				DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
 				DiscoveryName:        "Disk",
 				Data:                 data,
+				Location:             location,
 			},
 		}, nil
 	} else {

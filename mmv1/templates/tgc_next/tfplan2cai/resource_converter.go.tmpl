@@ -97,6 +97,7 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
         return []caiasset.Asset{}, err
     }
     if obj, err := Get{{ $.ResourceName -}}ApiObject(d, config); err == nil {
+        location, _ := tpgresource.GetLocation(d, config)
         return []caiasset.Asset{{"{{"}}
             Name: name,
             Type: {{ $.ResourceName -}}AssetType,
@@ -105,6 +106,7 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
                 DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/{{ $productBackendName }}/{{ $apiVersion }}/rest",
                 DiscoveryName: "{{ $.Name }}",
                 Data: obj,
+                Location:             location,
             },
         {{"}}"}}, nil
     } else {
