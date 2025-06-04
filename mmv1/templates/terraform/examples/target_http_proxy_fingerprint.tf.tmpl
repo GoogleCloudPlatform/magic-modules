@@ -42,4 +42,4 @@ resource "google_compute_http_health_check" "default" {
 output "target_http_proxy_fingerprint" {
   value       = google_compute_target_http_proxy.{{$.PrimaryResourceId}}.fingerprint
   description = "The fingerprint of the target HTTP proxy for optimistic locking"
-} 
+}

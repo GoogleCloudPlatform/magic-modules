@@ -126,6 +126,5 @@ properties:
       This field will be ignored when inserting a TargetHttpProxy. An up-to-date fingerprint must be provided in order to
       patch/update the TargetHttpProxy; otherwise, the request will fail with error 412 conditionNotMet.
       To see the latest fingerprint, make a get() request to retrieve the TargetHttpProxy.
-      
       A base64-encoded string.
     output: true
