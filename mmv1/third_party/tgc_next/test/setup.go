@@ -17,17 +17,16 @@ import (
 )
 
 type ResourceMetadata struct {
-	CaiAssetName    string         `json:"cai_asset_name"`
-	CaiAssetData    caiasset.Asset `json:"cai_asset_data"`
-	ResourceType    string         `json:"resource_type"`
-	ResourceAddress string         `json:"resource_address"`
-	ImportMetadata  ImportMetadata `json:"import_metadata,omitempty"`
-	Service         string         `json:"service"`
+	CaiAssetNames   []string            `json:"cai_asset_names"`
+	ResourceType    string              `json:"resource_type"`
+	ResourceAddress string              `json:"resource_address"`
+	Service         string              `json:"service"`
+	Cai             map[string]*CaiData `json:"cai_data,omitempty"` // Holds the fetched CAI assets data
 }
 
-type ImportMetadata struct {
-	Id            string   `json:"id,omitempty"`
-	IgnoredFields []string `json:"ignored_fields,omitempty"`
+// CaiData holds the fetched CAI asset and related error information.
+type CaiData struct {
+	CaiAsset caiasset.Asset `json:"cai_asset,omitempty"`
 }
 
 type TgcMetadataPayload struct {
