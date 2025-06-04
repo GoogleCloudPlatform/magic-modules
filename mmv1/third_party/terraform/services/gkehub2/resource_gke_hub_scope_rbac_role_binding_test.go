@@ -44,9 +44,10 @@ func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_u
 }
 
 func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_basic(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+	return gkeHubRRBActuationProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_scope" "scoperbacrolebinding" {
   scope_id = "tf-test-scope%{random_suffix}"
+  depends_on = [google_project_service.anthos, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
@@ -59,15 +60,15 @@ resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
   labels = {
       key = "value" 
   }
-  depends_on = [google_gke_hub_scope.scoperbacrolebinding]
 }
 `, context)
 }
 
 func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+	return gkeHubRRBActuationProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_scope" "scoperbacrolebinding" {
   scope_id = "tf-test-scope%{random_suffix}"
+  depends_on = [google_project_service.anthos, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
@@ -80,7 +81,6 @@ resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
   labels = {
       key = "updated_value" 
   }
-  depends_on = [google_gke_hub_scope.scoperbacrolebinding]
 }
 `, context)
 }
@@ -126,6 +126,7 @@ func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExa
 	return gkeHubRRBActuationProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_scope" "scope" {
   scope_id = "tf-test-scope%{random_suffix}"
+  depends_on = [google_project_service.anthos, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_feature" "rbacrolebindingactuation" {
@@ -149,7 +150,7 @@ resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_bindin
   labels = {
       key = "value" 
   }
-  depends_on = [google_gke_hub_scope.scope, google_gke_hub_feature.rbacrolebindingactuation]
+  depends_on = [google_gke_hub_feature.rbacrolebindingactuation]
 }
 `, context)
 }
@@ -158,6 +159,7 @@ func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExa
 	return gkeHubRRBActuationProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_scope" "scope" {
   scope_id = "tf-test-scope%{random_suffix}"
+  depends_on = [google_project_service.anthos, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_feature" "rbacrolebindingactuation" {
@@ -181,7 +183,7 @@ resource "google_gke_hub_scope_rbac_role_binding" "scope_rbac_custom_role_bindin
   labels = {
       key = "value" 
   }
-  depends_on = [google_gke_hub_scope.scope, google_gke_hub_feature.rbacrolebindingactuation]
+  depends_on = [google_gke_hub_feature.rbacrolebindingactuation]
 }
 `, context)
 }
