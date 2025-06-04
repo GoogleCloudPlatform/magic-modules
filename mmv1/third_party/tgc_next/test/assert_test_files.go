@@ -72,16 +72,18 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		return nil
 	}
 
-	assetType := testData.CaiAssetData.Type
-	if assetType == "" {
-		return fmt.Errorf("cai asset is unavailable for %s", testData.CaiAssetName)
+	assets := make([]caiasset.Asset, 0)
+	for assetName, assetData := range testData.Cai {
+		assets = append(assets, assetData.CaiAsset)
+		assetType := assetData.CaiAsset.Type
+		if assetType == "" {
+			return fmt.Errorf("cai asset is unavailable for %s", assetName)
+		}
+		if _, ok := cai2hclconverters.ConverterMap[assetType]; !ok {
+			log.Printf("Test for %s is skipped as it is not supported in cai2hcl conversion.", assetType)
+			return nil
+		}
 	}
-	if _, ok := cai2hclconverters.ConverterMap[assetType]; !ok {
-		log.Printf("Test for %s is skipped as it is not supported in cai2hcl conversion.", assetType)
-		return nil
-	}
-
-	assets := []caiasset.Asset{testData.CaiAssetData}
 
 	// Uncomment these lines when debugging issues locally
 	// assetFile := fmt.Sprintf("%s.json", t.Name())
@@ -117,7 +119,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if len(exportResources) == 0 {
-		return fmt.Errorf("missing hcl after cai2hcl conversion for CAI asset %s.", testData.CaiAssetName)
+		return fmt.Errorf("missing hcl after cai2hcl conversion for resource %s", testData.ResourceType)
 	}
 
 	ignoredFieldMap := make(map[string]bool, 0)
