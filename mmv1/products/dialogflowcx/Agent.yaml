@@ -33,9 +33,13 @@ timeouts:
 custom_code:
   # An engine resource https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.collections.engines
   # will be automatically created when we specify dataStoreConnections in Flow, Page, or Tool resources associated with the Agent.
-  # We need to extract the engine ID from the Agent, delete the Agent, and then delete the engine. Otherwise, Terraform wouldn't be
-  # able to delete the DataStore resource created in acceptance tests.
-  # TODO: remove pre_delete and post_delete after the API is updated to clean up the engine resource.
+  # When delete_chat_engine_on_destroy is set to true, we must
+  # 1. extract the engine ID from the agent in pre_delete.
+  # 2. delete the agent.
+  # 3. delete the engine in post_delete.
+  # We can't delete the chat engine first because the agent depends on the chat engine. Deleting chat engine then allows deleting the
+  # data store. The chain of dependency is agent -> engine -> data store.
+  # TODO: remove pre_delete and post_delete after the delete API is updated to clean up the engine resource.
   pre_delete: 'templates/terraform/pre_delete/dialogflowcx_agent.go.tmpl'
   post_delete: 'templates/terraform/post_delete/dialogflowcx_agent.go.tmpl'
 exclude_sweeper: true
@@ -49,6 +53,13 @@ examples:
       - 'git_integration_settings.0.github_settings.0.access_token'
       - 'enable_stackdriver_logging'
       - 'advanced_settings.0.logging_settings'
+virtual_fields:
+- name: 'delete_chat_engine_on_destroy'
+  description: |
+    If set to `true`, Terraform will delete the chat engine linked to the agent when destroying the agent.
+    Otherwise, Terraform will not delete the chat engine.
+  type: Boolean
+  default_value: false
 parameters:
 properties:
   - name: 'name'

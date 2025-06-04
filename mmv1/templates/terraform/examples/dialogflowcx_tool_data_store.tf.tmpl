@@ -4,6 +4,7 @@ resource "google_dialogflow_cx_agent" "agent" {
   default_language_code = "en"
   time_zone = "America/New_York"
   description = "Example description."
+  delete_chat_engine_on_destroy = true
   depends_on = [
     google_discovery_engine_data_store.my_datastore
   ]
