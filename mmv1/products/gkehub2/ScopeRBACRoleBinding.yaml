@@ -151,15 +151,15 @@ properties:
           - 'EDIT'
           - 'VIEW'
         exactly_one_of:
-          - 'predefinedRole'
-          - 'customRole'
+          - 'role.0.predefined_role'
+          - 'role.0.custom_role'
       - name: 'customRole'
         type: String
         description: |
-          Custom Role is the custom Kubernetes ClusterRole to be used. The custom role format must be allowlisted in the rbacrolebindingactuation feature and RFC 1123 compliant.
+          CustomRole is the custom Kubernetes ClusterRole to be used. The custom role format must be allowlisted in the rbacrolebindingactuation feature and RFC 1123 compliant.
         exactly_one_of:
-          - 'predefinedRole'
-          - 'customRole'
+          - 'role.0.predefined_role'
+          - 'role.0.custom_role'
   - name: 'labels'
     type: KeyValueLabels
     description: |
