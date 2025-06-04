@@ -565,15 +565,17 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 			{
 				// Remove non-required field
 				Config: testAccPubsubSubscription_javascriptUdfSettings_noEnabled(topic, subscriptionShort, functionName, code),
-				Check: resource.ComposeTestCheckFunc(
-					// Test schema
-					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", functionName),
-					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", code),
-				),
 			},
 			{
 				ResourceName:      "google_pubsub_subscription.foo",
 				ImportStateId:     subscriptionShort,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Destroy transform
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
