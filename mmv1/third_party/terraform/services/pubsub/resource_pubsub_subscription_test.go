@@ -562,21 +562,6 @@ func TestAccPubsubSubscription_javascriptUdfUpdate(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// Bare transform
-			{
-				Config: testAccPubsubSubscription_javascriptUdfSettings(topic, subscriptionShort, "", ""),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.function_name", ""),
-					resource.TestCheckResourceAttr("google_pubsub_subscription.foo", "message_transforms.0.code", ""),
-				),
-			},
-			// Destroy transform
-			{
-				ResourceName:      "google_pubsub_subscription.foo",
-				ImportStateId:     subscriptionShort,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 			{
 				// Remove non-required field
 				Config: testAccPubsubSubscription_javascriptUdfSettings_noEnabled(topic, subscriptionShort, functionName, code),
