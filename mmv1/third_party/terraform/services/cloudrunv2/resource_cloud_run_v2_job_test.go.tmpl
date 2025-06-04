@@ -3,12 +3,10 @@ package cloudrunv2_test
 import (
 	"fmt"
 	"testing"
-    "time"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
     "github.com/hashicorp/terraform-provider-google/google/envvar"
-    "github.com/hashicorp/terraform-provider-google/google/services/cloudrunv2"
 )
 
 func TestAccCloudRunV2Job_cloudrunv2JobFullUpdate(t *testing.T) {
@@ -569,7 +567,6 @@ func TestAccCloudRunV2Job_cloudrunv2JobGRPCProbesUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name", "location", "annotations", "deletion_protection"},
 			},
 			{
-				PreConfig:   testAccCheckCloudRunV2JobDestroyByNameProducer(t, jobName),
 				Config:      testAccCloudRunV2Job_cloudRunJobUpdateWithGRPCStartupProbe(context),
 			},
 			{
@@ -580,23 +577,6 @@ func TestAccCloudRunV2Job_cloudrunv2JobGRPCProbesUpdate(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccCheckCloudRunV2JobDestroyByNameProducer(t *testing.T, jobName string) func() {
-	return func() {
-		config := acctest.GoogleProviderConfig(t)
-		service := config.NewCloudRunV2Client(config.UserAgent).Projects.Locations.Jobs
-		qualifiedServiceName := fmt.Sprintf("projects/%s/locations/%s/jobs/%s", config.Project, config.Region, jobName)
-		op, err := service.Delete(qualifiedServiceName).Do()
-		if err != nil {
-			t.Errorf("Error while deleting the Cloud Run job: %s", err)
-			return
-		}
-		err = cloudrunv2.RunAdminV2OperationWaitTime(config, op, config.Project, "Waiting for Cloud Run job to be deleted", config.UserAgent, 5*time.Minute)
-		if err != nil {
-			t.Errorf("Error while waiting for Cloud Run job delete operation to complete: %s", err.Error())
-		}
-	}
 }
 
 func testAccCloudRunV2Job_cloudrunv2JobWithEmptyTCPStartupProbe(context map[string]interface{}) string {
