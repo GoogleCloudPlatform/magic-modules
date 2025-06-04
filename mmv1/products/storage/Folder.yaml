@@ -54,7 +54,7 @@ virtual_fields:
       If set to true, items within folder if any will be force destroyed.
     type: Boolean
     default_value: false
-  - name: 'customHeaders'
+  - name: 'custom_headers'
     type: KeyValuePairs
     description:
       Users can set custom headers send to API operations
