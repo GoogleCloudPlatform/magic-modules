@@ -54,12 +54,12 @@ examples:
       - 'enable_stackdriver_logging'
       - 'advanced_settings.0.logging_settings'
 virtual_fields:
-- name: 'delete_chat_engine_on_destroy'
-  description: |
-    If set to `true`, Terraform will delete the chat engine linked to the agent when destroying the agent.
-    Otherwise, Terraform will not delete the chat engine.
-  type: Boolean
-  default_value: false
+  - name: 'delete_chat_engine_on_destroy'
+    description: |
+      If set to `true`, Terraform will delete the chat engine linked to the agent when destroying the agent.
+      Otherwise, Terraform will not delete the chat engine.
+    type: Boolean
+    default_value: false
 parameters:
 properties:
   - name: 'name'
