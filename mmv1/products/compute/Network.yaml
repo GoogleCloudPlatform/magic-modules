@@ -244,3 +244,4 @@ properties:
       following are valid URLs:
       * https://www.googleapis.com/compute/v1/projects/{projectId}/global/networkProfiles/{network_profile_name}
       * projects/{projectId}/global/networkProfiles/{network_profile_name}
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
