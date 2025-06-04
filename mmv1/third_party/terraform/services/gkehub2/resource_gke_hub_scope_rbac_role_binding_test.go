@@ -256,4 +256,3 @@ func testAccCheckGKEHub2ScopeRBACRoleBindingDestroyProducer(t *testing.T) func(s
 		return nil
 	}
 }
-
