@@ -15,8 +15,6 @@ import (
 )
 
 func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_update(t *testing.T) {
-	// VCR fails to handle batched project services
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -54,10 +52,9 @@ func TestAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_u
 }
 
 func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_basic(context map[string]interface{}) string {
-	return gkeHubRRBActuationProjectSetupForGA(context) + acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_gke_hub_scope" "scoperbacrolebinding" {
   scope_id = "tf-test-scope%{random_suffix}"
-  depends_on = [google_project_service.anthos, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
@@ -75,10 +72,9 @@ resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
 }
 
 func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacRoleBindingBasicExample_update(context map[string]interface{}) string {
-	return gkeHubRRBActuationProjectSetupForGA(context) + acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_gke_hub_scope" "scoperbacrolebinding" {
   scope_id = "tf-test-scope%{random_suffix}"
-  depends_on = [google_project_service.anthos, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
@@ -171,7 +167,6 @@ func testAccGKEHub2ScopeRBACRoleBinding_gkehubScopeRbacCustomRoleBindingBasicExa
 	return gkeHubRRBActuationProjectSetupForGA(context) + acctest.Nprintf(`
 resource "google_gke_hub_scope" "scope" {
   scope_id = "tf-test-scope%{random_suffix}"
-  depends_on = [google_project_service.anthos, google_project_service.gkehub]
 }
 
 resource "google_gke_hub_feature" "rbacrolebindingactuation" {
