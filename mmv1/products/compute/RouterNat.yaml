@@ -56,7 +56,6 @@ nested_query:
 custom_code:
   constants: 'templates/terraform/constants/router_nat.go.tmpl'
   encoder: 'templates/terraform/encoders/router_nat_set_initial_nat_ips.go.tmpl'
-  decoder: 'templates/terraform/decoders/router_nat_set_auto_network_tier.go.tmpl'
   pre_create: 'templates/terraform/constants/router_nat_validate_action_active_range.go.tmpl'
   pre_update: 'templates/terraform/constants/router_nat_validate_action_active_range.go.tmpl'
 custom_diff:
@@ -513,6 +512,7 @@ properties:
       Must be one of: PREMIUM, STANDARD. If not specified, then the current
       project-level default tier is used.
     default_from_api: true
+    ignore_read: true
     enum_values:
       - 'PREMIUM'
       - 'STANDARD'

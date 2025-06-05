@@ -471,9 +471,10 @@ func TestAccComputeRouterNat_AutoNetworkTier(t *testing.T) {
 			},
 			{
 				// implicitly full ImportStateId
-				ResourceName:      "google_compute_router_nat.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_router_nat.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"auto_network_tier"},
 			},
 		},
 	})
