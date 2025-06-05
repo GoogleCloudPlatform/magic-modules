@@ -37,6 +37,7 @@ examples:
       project: :PROJECT_NAME
   - name: 'backup_dr_backup_plan_for_disk_resource'
     primary_resource_id: 'my-disk-backup-plan-1'
+    min_version: 'beta'
     vars:
       backup_vault_id: 'backup-vault-disk-test'
       backup_plan_id: 'backup-plan-disk-test'
