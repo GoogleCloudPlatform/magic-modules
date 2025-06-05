@@ -217,7 +217,3 @@ resource "google_project_service" "gkehub" {
 }
 `, context)
 }
-
-		return nil
-	}
-}
