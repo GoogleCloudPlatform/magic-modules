@@ -17,8 +17,7 @@ resource "google_network_connectivity_service_connection_policy" "default" {
   description   = "my basic service connection policy"
   network = google_compute_network.producer_net.id
   psc_config {
-    subnetworks                = [google_compute_subnetwork.producer_subnet.id]
-    producer_instance_location = "PRODUCER_INSTANCE_LOCATION_UNSPECIFIED"
-    limit                      = 2
+    subnetworks = [google_compute_subnetwork.producer_subnet.id]
+    limit = 2
   }
 }

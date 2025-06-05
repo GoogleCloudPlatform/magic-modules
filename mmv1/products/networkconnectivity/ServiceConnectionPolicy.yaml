@@ -123,7 +123,7 @@ properties:
         description: |
           ProducerInstanceLocation is used to specify which authorization mechanism to use to determine which projects
           the Producer instance can be within.
-        required: true
+        default_from_api: true
         enum_values:
           - 'PRODUCER_INSTANCE_LOCATION_UNSPECIFIED'
           - 'CUSTOM_RESOURCE_HIERARCHY_LEVELS'
