@@ -282,7 +282,7 @@ properties:
             this rule. If this field is left blank, all VMs
             within the organization will receive the rule.
           item_type:
-            type: String
+            type: ResourceRef
         - name: 'disabled'
           type: Boolean
           description: |
@@ -488,7 +488,7 @@ properties:
             within the organization will receive the rule.
           output: true
           item_type:
-            type: String
+            type: ResourceRef
         - name: 'disabled'
           type: Boolean
           description: |
