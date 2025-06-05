@@ -54,6 +54,15 @@ examples:
     vars:
       interconnect_name: 'example-interconnect'
     exclude_docs: true
+  - name: 'compute_interconnect_cross_site_network_test'
+    primary_resource_id: 'example-interconnect-cross-site-network'
+    vars:
+      interconnect_name: 'example-interconnect-cross-site-network'
+      description: 'Example Interconnect'
+      customer_name: 'example_customer'
+      cross_site_network: 'example-cross-site-network'
+    exclude_docs: true
+    min_version: beta
 parameters:
 properties:
   - name: 'description'
@@ -398,10 +407,11 @@ properties:
     item_type:
       type: Enum
       description: |
-        interconnects.list of features requested for this Interconnect connection
+        interconnects.list of features requested for this Interconnect connection.
       enum_values:
         - 'MACSEC'
         - 'IF_MACSEC'
+        - 'CROSS_SITE_NETWORK'
   - name: 'availableFeatures'
     type: Array
     description: |
@@ -410,6 +420,27 @@ properties:
       ports. If not present then the Interconnect connection is provisioned on non-MACsec capable
       ports and MACsec isn't supported and enabling MACsec fails).
     output: true
+    item_type:
+      type: Enum
+      description: interconnects.list of available features for this Interconnect connection.
+      enum_values:
+        - 'MACSEC'
+        - 'CROSS_SITE_NETWORK'
+  - name: 'wireGroups'
+    type: Array
+    min_version: beta
+    description: |
+      A list of the URLs of all CrossSiteNetwork WireGroups configured to use this Interconnect.[The Interconnect   cannot be deleted if this list is non-empty.]
+    output: true
+    item_type:
+      type: String
+  - name: 'interconnectGroups'
+    type: Array
+    description: |
+      URLs of InterconnectGroups that include this Interconnect.
+      Order is arbitrary and items are unique.
+    output: true
+    is_set: true
     item_type:
       type: String
   - name: 'interconnectGroups'
