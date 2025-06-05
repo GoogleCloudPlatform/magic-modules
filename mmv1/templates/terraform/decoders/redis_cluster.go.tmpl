@@ -1,3 +1,7 @@
+// Such custom code is necessary as the Cluster's certificate authority has to be retrieved via a dedicated 
+// getCertificateAuthority API.  
+// See https://cloud.google.com/memorystore/docs/cluster/reference/rest/v1/projects.locations.clusters/getCertificateAuthority#http-request
+// for details about this API.
 config := meta.(*transport_tpg.Config)
 
 userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
