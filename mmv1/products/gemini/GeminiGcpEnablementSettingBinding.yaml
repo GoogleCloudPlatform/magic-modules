@@ -86,7 +86,7 @@ properties:
     description: |-
       Product type of the setting binding.
     enum_values:
-      - 'GEMINI_IN_BIGQUERY'
+      - 'GEMINI_CLOUD_ASSIST'
     default_from_api: true
   - name: name
     type: String
