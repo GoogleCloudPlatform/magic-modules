@@ -660,6 +660,8 @@ performing filtering in a Terraform config.
 
 ~> **NOTE:** Users can upgrade a read replica instance to a stand-alone Cloud SQL instance with the help of `instance_type`. To promote, users have to set the `instance_type` property as `CLOUD_SQL_INSTANCE` and remove/unset `master_instance_name` and `replica_configuration` from instance configuration. This operation might cause your instance to restart.
 
+* `node_count` - For a read pool instance, the number of nodes in the read pool.
+
 * `settings.version` - Used to make sure changes to the `settings` block are
     atomic.
 
