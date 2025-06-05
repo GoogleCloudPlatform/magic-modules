@@ -86,64 +86,39 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 	if err != nil {
 		return fmt.Errorf("Error setting api endpoint")
 	}
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   billingProject,
-		RawURL:    url,
-		UserAgent: userAgent,
-	})
+
+	locations, err := transport_tpg.PluralDataSourceGet(d, config, billingProject, userAgent, url, nil, "locations")
 	if err != nil {
-		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Locations %q", d.Id()), url)
+		return err
 	}
-	var locations []map[string]interface{}
-	for {
-		fetchedLocations := res["locations"].([]interface{})
-		for _, loc := range fetchedLocations {
-			locationDetails := make(map[string]interface{})
-			l := loc.(map[string]interface{})
-			if l["name"] != nil {
-				locationDetails["name"] = l["name"].(string)
-			}
-			if l["locationId"] != nil {
-				locationDetails["location_id"] = l["locationId"].(string)
-			}
-			if l["displayName"] != nil {
-				locationDetails["display_id"] = l["displayName"].(string)
-			}
-			if l["labels"] != nil {
-				labels := make(map[string]string)
-				for k, v := range l["labels"].(map[string]interface{}) {
-					labels[k] = v.(string)
-				}
-				locationDetails["labels"] = labels
-			}
-			if l["metadata"] != nil {
-				metadata := make(map[string]string)
-				for k, v := range l["metadata"].(map[interface{}]interface{}) {
-					metadata[k.(string)] = v.(string)
-				}
-				locationDetails["metadata"] = metadata
-			}
-			locations = append(locations, locationDetails)
+
+	for _, loc := range locations {
+		locationDetails := make(map[string]interface{})
+		l := loc.(map[string]interface{})
+		if l["name"] != nil {
+			locationDetails["name"] = l["name"].(string)
 		}
-		if res["nextPageToken"] == nil || res["nextPageToken"].(string) == "" {
-			break
+		if l["locationId"] != nil {
+			locationDetails["location_id"] = l["locationId"].(string)
 		}
-		url, err = tpgresource.ReplaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations?pageToken="+res["nextPageToken"].(string))
-		if err != nil {
-			return fmt.Errorf("Error setting api endpoint")
+		if l["displayName"] != nil {
+			locationDetails["display_id"] = l["displayName"].(string)
 		}
-		res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			Project:   billingProject,
-			RawURL:    url,
-			UserAgent: userAgent,
-		})
-		if err != nil {
-			return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Locations %q", d.Id()), url)
+		if l["labels"] != nil {
+			labels := make(map[string]string)
+			for k, v := range l["labels"].(map[string]interface{}) {
+				labels[k] = v.(string)
+			}
+			locationDetails["labels"] = labels
 		}
+		if l["metadata"] != nil {
+			metadata := make(map[string]string)
+			for k, v := range l["metadata"].(map[interface{}]interface{}) {
+				metadata[k.(string)] = v.(string)
+			}
+			locationDetails["metadata"] = metadata
+		}
+		locations = append(locations, locationDetails)
 	}
 
 	if err := d.Set("locations", locations); err != nil {
