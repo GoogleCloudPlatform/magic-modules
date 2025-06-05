@@ -188,7 +188,7 @@ func TestAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_update(t *tes
 				ResourceName:            "google_netapp_storage_pool.test_pool",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"enable_hot_tier_auto_resize", "location", "name", "labels", "terraform_labels"},
 			},
 		},
 	})
