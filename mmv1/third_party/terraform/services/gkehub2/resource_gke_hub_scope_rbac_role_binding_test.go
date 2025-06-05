@@ -53,7 +53,7 @@ resource "google_gke_hub_scope" "scoperbacrolebinding" {
 
 resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
   scope_rbac_role_binding_id = "tf-test-scope-rbac-role-binding%{random_suffix}"
-  scope_id = "tf-test-scope%{random_suffix}"
+  scope_id = google_gke_hub_scope.scoperbacrolebinding.scope_id
   user = "test-email@gmail.com"
   role {
     predefined_role = "ADMIN"
@@ -73,7 +73,7 @@ resource "google_gke_hub_scope" "scoperbacrolebinding" {
 
 resource "google_gke_hub_scope_rbac_role_binding" "scoperbacrolebinding" {
   scope_rbac_role_binding_id = "tf-test-scope-rbac-role-binding%{random_suffix}"
-  scope_id = "tf-test-scope%{random_suffix}"
+  scope_id = google_gke_hub_scope.scoperbacrolebinding.scope_id
   group = "test-email2@gmail.com"
   role {
     predefined_role = "VIEW"
