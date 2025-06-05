@@ -18,14 +18,14 @@ description: |
 references:
   api: 'https://cloud.google.com/contact-center/insights/docs/reference/rest/v1/projects.locations.views'
 base_url: projects/{{project}}/locations/{{location}}/views
-self_link: projects/{{project}}/locations/{{location}}/views/{{view}}
+self_link: projects/{{project}}/locations/{{location}}/views/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/views
-delete_url: projects/{{project}}/locations/{{location}}/views/{{view}}
+delete_url: projects/{{project}}/locations/{{location}}/views/{{name}}
 update_verb: PATCH
 update_mask: true
-id_format: projects/{{project}}/locations/{{location}}/views/{{view}}
+id_format: projects/{{project}}/locations/{{location}}/views/{{name}}
 import_format:
-  - projects/{{project}}/locations/{{location}}/views/{{view}}
+  - projects/{{project}}/locations/{{location}}/views/{{name}}
 examples:
   - name: 'contact_center_insights_view_basic'
     primary_resource_id: 'basic_view'
