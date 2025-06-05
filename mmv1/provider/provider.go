@@ -15,6 +15,7 @@ type Provider interface {
 
 // Shared constants and functions among the providers
 
+const ANSIBLE_PROVIDER = "ansible"
 const TERRAFORM_PROVIDER_GA = "github.com/hashicorp/terraform-provider-google"
 const TERRAFORM_PROVIDER_BETA = "github.com/hashicorp/terraform-provider-google-beta"
 const TGC_PROVIDER = "github.com/GoogleCloudPlatform/terraform-google-conversion/v6"
