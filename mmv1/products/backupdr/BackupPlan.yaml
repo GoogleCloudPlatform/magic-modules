@@ -77,6 +77,7 @@ properties:
       The list of all resource types to which the `BackupPlan` can be applied.
     item_type:
       type: String
+    min_version: 'beta'
     output: true
   - name: 'resourceType'
     type: String
