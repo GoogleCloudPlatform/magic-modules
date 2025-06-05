@@ -37,7 +37,5 @@ func Convert(assets []caiasset.Asset, options *Options) ([]byte, error) {
 
 	t, err := models.HclWriteBlocks(allBlocks)
 
-	options.ErrorLogger.Debug(string(t))
-
 	return t, err
 }

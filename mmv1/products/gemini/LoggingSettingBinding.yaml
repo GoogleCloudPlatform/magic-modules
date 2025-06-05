@@ -91,6 +91,7 @@ properties:
       Product type of the setting binding.
     enum_values:
       - 'GEMINI_CODE_ASSIST'
+    default_from_api: true
   - name: name
     type: String
     description: |-

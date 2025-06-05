@@ -82,7 +82,7 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -96,7 +96,7 @@ examples:
       alloydb_secondary_instance_name: 'alloydb-secondary-instance'
       network_name: 'alloydb-secondary-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -200,6 +200,22 @@ properties:
       - 'AVAILABILITY_TYPE_UNSPECIFIED'
       - 'ZONAL'
       - 'REGIONAL'
+  - name: 'activationPolicy'
+    type: Enum
+    description: |
+      'Specifies whether an instance needs to spin up. Once the instance is
+      active, the activation policy can be updated to the `NEVER` to stop the
+      instance. Likewise, the activation policy can be updated to `ALWAYS` to
+      start the instance.
+      There are restrictions around when an instance can/cannot be activated (for
+      example, a read pool instance should be stopped before stopping primary
+      etc.). Please refer to the API documentation for more details.
+      Possible values are: `ACTIVATION_POLICY_UNSPECIFIED`, `ALWAYS`, `NEVER`.'
+    default_from_api: true
+    enum_values:
+      - 'ACTIVATION_POLICY_UNSPECIFIED'
+      - 'ALWAYS'
+      - 'NEVER'
   - name: 'instanceType'
     type: Enum
     description: |
@@ -361,6 +377,42 @@ properties:
                 The network attachment resource created in the consumer project to which the PSC interface will be linked.
                 This is of the format: "projects/${CONSUMER_PROJECT}/regions/${REGION}/networkAttachments/${NETWORK_ATTACHMENT_NAME}".
                 The network attachment must be in the same region as the instance.
+      - name: 'pscAutoConnections'
+        type: Array
+        description: |
+          Configurations for setting up PSC service automation.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'consumerProject'
+              type: String
+              description: |
+                The consumer project to which the PSC service automation endpoint will
+                be created. The API expects the consumer project to be the project ID(
+                and not the project number).
+            - name: 'consumerNetwork'
+              type: String
+              description: |
+                The consumer network for the PSC service automation, example:
+                "projects/vpc-host-project/global/networks/default".
+                The consumer network might be hosted a different project than the
+                consumer project. The API expects the consumer project specified to be
+                the project ID (and not the project number)
+            - name: 'ipAddress'
+              type: String
+              description: |
+                The IP address of the PSC service automation endpoint.
+              output: true
+            - name: 'status'
+              type: String
+              description: |
+                The status of the PSC service automation connection.
+              output: true
+            - name: 'consumerNetworkStatus'
+              type: String
+              description: |
+                The status of the service connection policy.
+              output: true
   - name: 'networkConfig'
     type: NestedObject
     default_from_api: true

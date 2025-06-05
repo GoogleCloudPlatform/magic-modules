@@ -97,8 +97,9 @@ self_link: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
 ### `immutable`
 
 If true, the resource and all its fields are considered immutable - that is,
-only creatable, not updatable. Individual fields can override this if they
-have a custom update method in the API.
+only creatable, not updatable. Individual fields can override this for themselves and
+their subfields with [`update_url`]({{< ref "/reference/field#update_url" >}})
+if they have a custom update method in the API.
 
 See [Best practices: Immutable fields]({{< ref "/best-practices/immutable-fields/" >}}) for more information.
 
