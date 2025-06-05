@@ -96,11 +96,11 @@ func ReadTestsDataFromGcs() (map[string]TgcMetadataPayload, error) {
 func prepareTestData(testName string) (map[string]ResourceTestData, string, error) {
 	var err error
 	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
 	TestsMetadata, err = ReadTestsDataFromGcs()
 	if err != nil {
 		return nil, "", err
 	}
-	cacheMutex.Unlock()
 
 	testMetadata := TestsMetadata[testName]
 	resourceMetadata := testMetadata.ResourceMetadata
