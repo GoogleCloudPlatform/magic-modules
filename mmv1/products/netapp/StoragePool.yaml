@@ -65,7 +65,6 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-  constants: 'templates/terraform/constants/netapp_storagepool.go.tmpl'
   pre_update: 'templates/terraform/pre_update/netapp_storagepool.go.tmpl'
 # Skipping the sweeper since we need to sweep multiple regions
 exclude_sweeper: true
@@ -204,7 +203,6 @@ properties:
   - name: 'enableHotTierAutoResize'
     type: Boolean
     send_empty_value: true
-    diff_suppress_func: 'enableHotTierAutoResizeDiffSuppress'
     description: |
       Flag indicating that the hot-tier threshold will be auto-increased by 10% of the hot-tier when it hits 100%. Default is true.
       The increment will kick in only if the new size after increment is still less than or equal to storage pool size.
