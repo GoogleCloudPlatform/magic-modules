@@ -194,3 +194,10 @@ properties:
         type: Boolean
         description:
           If true, restrict export of query result derived from restricted linked dataset table.
+  - name: 'logLinkedDatasetQueryUserEmail'
+    type: Boolean
+    description:
+      If true, subscriber email logging is enabled and all queries on the linked dataset will log the email address of the querying user.
+    default_value: false
+    immutable: true
+
