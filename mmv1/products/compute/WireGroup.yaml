@@ -27,6 +27,7 @@ id_format: 'projects/{{project}}/global/crossSiteNetworks/{{cross_site_network}}
 base_url: 'projects/{{project}}/global/crossSiteNetworks/{{cross_site_network}}/wireGroups'
 self_link: 'projects/{{project}}/global/crossSiteNetworks/{{cross_site_network}}/wireGroups/{{name}}'
 update_verb: 'PATCH'
+update_mask: true
 import_format:
   - 'projects/{{project}}/global/crossSiteNetworks/{{cross_site_network}}/wireGroups/{{name}}'
 timeouts:
@@ -40,6 +41,8 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+custom_code:
+  test_check_destroy: 'templates/terraform/custom_check_destroy/wire_group.go.tmpl'
 examples:
   - name: 'compute_wire_group_basic'
     primary_resource_id: 'example-test-wire-group'
@@ -61,6 +64,7 @@ parameters:
     imports: 'name'
     diff_suppress_func: 'tpgresource.CompareResourceNames'
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    min_version: beta
 properties:
   - name: 'description'
     type: String
@@ -80,7 +84,6 @@ properties:
       character must be a lowercase letter, and all following characters must be a dash,
       lowercase letter, or digit, except the last character, which cannot be a dash.
     required: true
-    immutable:
     validation:
       regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
   - name: endpoints
@@ -101,11 +104,11 @@ properties:
               VLAN tags for the interconnect.
             item_type:
               type: integer
-  - name: admin_enabled
+  - name: adminEnabled
     type: boolean
     description: |
       Indicates whether the wire group is administratively enabled.
-  - name: wire_group_properties
+  - name: wireGroupProperties
     type: NestedObject
     description: |
       Properties specific to the wire group.
@@ -121,16 +124,16 @@ properties:
           - 'WIRE'
           - 'REDUNDANT'
           - 'BOX_AND_CROSS'
-  - name: wire_properties
+  - name: wireProperties
     type: NestedObject
     description: |
       Default properties for wires within the group.
     properties:
-      - name: bandwidth_unmetered
+      - name: bandwidthUnmetered
         type: Integer
         description: |
           The unmetered bandwidth setting.
-      - name: fault_response
+      - name: faultResponse
         type: enum
         description: |
           Response when a fault is detected in a pseudowire:
@@ -140,35 +143,39 @@ properties:
           - 'NONE'
           - 'DISABLE_PORT'
   - name: wires
-    type: NestedObject
+    type: Array
     description: |
       The single/redundant wire(s) managed by the wire group.
     output: true
-    properties:
-      - name: label
-        type: string
-      - name: endpoints
-        type: NestedObject
-        description: |
-          'Wire endpoints are specific Interconnect connections.'
-        properties:
-          - name: interconnect
-            type: string
-          - name: vlan_tag
-            type: integer
-      - name: wire_properties
-        type: NestedObject
-        output: true
-        properties:
-          - name: bandwidth_unmetered
-            type: Integer
-          - name: fault_response
-            type: enum
-            enum_values:
-              - 'NONE'
-              - 'DISABLE_PORT'
-      - name: admin_enabled
-        type: boolean
+    item_type:
+      type: NestedObject
+      properties:
+        - name: label
+          type: string
+        - name: endpoints
+          type: Array
+          description: |
+            'Wire endpoints are specific Interconnect connections.'
+          item_type:
+            type: NestedObject
+            properties:
+              - name: interconnect
+                type: string
+              - name: vlanTag
+                type: integer
+        - name: wireProperties
+          type: NestedObject
+          output: true # This is redundant if the parent 'wires' is output: true, but harmless
+          properties:
+            - name: bandwidthUnmetered
+              type: Integer
+            - name: faultResponse
+              type: enum
+              enum_values:
+                - 'NONE'
+                - 'DISABLE_PORT'
+        - name: adminEnabled
+          type: boolean
   - name: topology
     type: NestedObject
     description: |
@@ -176,9 +183,11 @@ properties:
     output: true
     properties:
       - name: endpoints
-        type: NestedObject
-        properties:
-          - name: label
-            type: string
-          - name: city
-            type: string
+        type: Array
+        item_type:
+          type: NestedObject
+          properties:
+            - name: label
+              type: string
+            - name: city
+              type: string
