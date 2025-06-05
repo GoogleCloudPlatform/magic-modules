@@ -85,4 +85,8 @@ resource "google_gkeonprem_vmware_admin_cluster" "{{$.PrimaryResourceId}}" {
   platform_config {
     required_platform_version = "1.31.0"
   }
+  private_registry_config {
+    address = "test-address"
+    ca_cert = "test-ca-cert"
+  }
 }
