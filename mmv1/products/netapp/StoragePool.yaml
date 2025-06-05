@@ -203,6 +203,7 @@ properties:
   - name: 'enableHotTierAutoResize'
     type: Boolean
     send_empty_value: true
+    ignore_read: true
     description: |
       Flag indicating that the hot-tier threshold will be auto-increased by 10% of the hot-tier when it hits 100%. Default is true.
       The increment will kick in only if the new size after increment is still less than or equal to storage pool size.
