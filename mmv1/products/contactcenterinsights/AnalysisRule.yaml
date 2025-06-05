@@ -24,15 +24,15 @@ references:
     'Configure analysis rules using the API': 'https://cloud.google.com/contact-center/insights/docs/analysis-rule'
   api: 'https://cloud.google.com/contact-center/insights/docs/reference/rest/v1/projects.locations.analysisRules'
 base_url: projects/{{project}}/locations/{{location}}/analysisRules
-self_link: projects/{{project}}/locations/{{location}}/analysisRules/{{analysis_rule}}
+self_link: projects/{{project}}/locations/{{location}}/analysisRules/{{name}}
 create_url: projects/{{project}}/locations/{{location}}/analysisRules
-delete_url: projects/{{project}}/locations/{{location}}/analysisRules/{{analysis_rule}}
+delete_url: projects/{{project}}/locations/{{location}}/analysisRules/{{name}}
 update_verb: 'PATCH'
 update_mask: true
-id_format: projects/{{project}}/locations/{{location}}/analysisRules/{{analysis_rule}}
+id_format: projects/{{project}}/locations/{{location}}/analysisRules/{{name}}
 import_format:
-  - projects/{{project}}/locations/{{location}}/analysisRules/{{analysis_rule}}
-  - '{{analysis_rule}}'
+  - projects/{{project}}/locations/{{location}}/analysisRules/{{name}}
+  - '{{name}}'
 examples:
   - name: 'contact_center_insights_analysis_rule_basic'
     primary_resource_id: 'basic_analysis_rule'
