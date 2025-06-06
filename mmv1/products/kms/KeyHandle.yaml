@@ -21,7 +21,6 @@ description: |
   ~> **Note:** KeyHandles cannot be deleted from Google Cloud Platform.
   Destroying a Terraform-managed KeyHandle will remove it from state but
   *will not delete the resource from the project.*
-min_version: 'beta'
 references:
   guides:
     'Cloud KMS with Autokey': 'https://cloud.google.com/kms/docs/kms-with-autokey'
@@ -52,7 +51,6 @@ custom_code:
 examples:
   - name: 'kms_key_handle_basic'
     primary_resource_id: 'example-keyhandle'
-    min_version: 'beta'
     vars:
       folder_name: 'my-folder'
       key_project_name: 'key-proj'
@@ -67,7 +65,6 @@ parameters:
     description: |
       The location for the KeyHandle.
       A full list of valid locations can be found by running `gcloud kms locations list`.
-    min_version: 'beta'
     url_param_only: true
     required: true
 properties:
@@ -75,7 +72,6 @@ properties:
     type: String
     description: |
       The resource name for the KeyHandle.
-    min_version: 'beta'
     required: true
     immutable: true
   - name: 'kmsKey'
@@ -84,13 +80,11 @@ properties:
       A reference to a Cloud KMS CryptoKey that can be used for CMEK in the requested
       product/project/location, for example
       `projects/1/locations/us-east1/keyRings/foo/cryptoKeys/bar-ffffff`
-    min_version: 'beta'
     output: true
   - name: 'resourceTypeSelector'
     type: String
     description: |
       Selector of the resource type where we want to protect resources.
       For example, `storage.googleapis.com/Bucket`.
-    min_version: 'beta'
     required: true
     immutable: true
