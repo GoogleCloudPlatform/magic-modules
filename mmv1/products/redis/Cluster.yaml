@@ -20,6 +20,8 @@ references:
     'Official Documentation': 'https://cloud.google.com/memorystore/docs/cluster/'
   api: 'https://cloud.google.com/memorystore/docs/cluster/reference/rest/v1/projects.locations.clusters'
 docs:
+  attributes: |
+    * `managed_server_ca` - Cluster's Certificate Authority. This field will only be populated if Redis Cluster's transit_encryption_mode is TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION
   note: |
     For [Multiple VPC Networking](https://cloud.google.com/memorystore/docs/cluster/about-multiple-vpc-networking) if you want to use
     [User-registered PSC Connections](https://cloud.google.com/memorystore/docs/cluster/about-multiple-vpc-networking#psc_connection_types),
@@ -117,6 +119,8 @@ async:
     resource_inside_response: false
 custom_code:
   encoder: 'templates/terraform/encoders/redis_cluster.go.tmpl'
+  decoder: 'templates/terraform/decoders/redis_cluster.go.tmpl'
+  extra_schema_entry: templates/terraform/extra_schema_entry/redis_cluster.tmpl
 sweeper:
   ensure_value:
     field: deletionProtectionEnabled
@@ -208,6 +212,18 @@ examples:
     test_vars_overrides:
       'deletion_protection_enabled': 'false'
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
+  - name: "redis_cluster_tls_enabled"
+    primary_resource_id: 'cluster-tls'
+    vars:
+      cluster_name: 'tls-cluster'
+      policy_name: 'my-policy'
+      subnet_name: 'my-subnet'
+      network_name: 'my-network'
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
     oics_vars_overrides:
       'deletion_protection_enabled': 'false'
 parameters:
