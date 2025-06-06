@@ -1022,6 +1022,54 @@ resource "google_compute_security_policy_rule" "policy_rule" {
 `, spName)
 }
 
+func testAccComputeSecurityPolicyRule_withRateLimitOption_withMultipleEnforceOnKeyConfigs3(spName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_security_policy" "policy" {
+  name        = "%s"
+  description = "basic policy base"
+}
+
+resource "google_compute_security_policy_rule" "policy_rule" {
+  security_policy = google_compute_security_policy.policy.name
+  description     = "throttle rule withMultipleEnforceOnKeyConfigs3"
+  action          = "throttle"
+  priority        = "100"
+
+  match {
+    versioned_expr = "SRC_IPS_V1"
+    config {
+      src_ip_ranges = ["*"]
+    }
+  }
+
+  rate_limit_options {
+    conform_action = "allow"
+    exceed_action = "deny(429)"
+
+    rate_limit_threshold {
+      count = 10
+      interval_sec = 60
+    }
+
+    enforce_on_key = ""
+
+    enforce_on_key_configs {
+      enforce_on_key_type = "REGION_CODE"
+    }
+
+    enforce_on_key_configs {
+      enforce_on_key_type = "TLS_JA4_FINGERPRINT"
+    }
+
+    enforce_on_key_configs {
+      enforce_on_key_type = "USER_IP"
+    }
+  }
+}
+
+`, spName)
+}
+
 func testAccComputeSecurityPolicyRule_withRateLimitOptions_withoutRateLimitOptions(spName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_security_policy" "policy" {
