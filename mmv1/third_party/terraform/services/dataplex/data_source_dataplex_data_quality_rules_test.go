@@ -93,10 +93,6 @@ func testAccDataplexDataScanJobTriggerRunAndWaitUntilComplete(t *testing.T, reso
 			return fmt.Errorf("Resource not found: %s", resourceName)
 		}
 
-		t.Logf("DEBUG: Attributes for resource: %+v", rs.Primary.Attributes)
-		// t.Logf("DEBUG: resourceName: %s", resourceName)
-		// t.Logf("DEBUG: rr: %s", "google_dataplex_datascan.tf_test_datascan_profile.data_scan_id")
-
 		config := acctest.GoogleProviderConfig(t)
 		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{DataplexBasePath}}projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}:run")
 		if err != nil {
@@ -121,12 +117,8 @@ func testAccDataplexDataScanJobTriggerRunAndWaitUntilComplete(t *testing.T, reso
 			return fmt.Errorf("Request for triggering data scan run failed: %s", err)
 		}
 
-		t.Logf("res[\"job\"]: %s", res["job"])
-
 		dataScanJobId := extractDataScanJobId(res["job"])
-		t.Logf("data scan job id: %s", dataScanJobId)
 		dataScanJobState := extractDataScanJobState(res["job"])
-		t.Logf("data scan job state: %s", dataScanJobState)
 
 		for dataScanJobState != "SUCCEEDED" {
 			dataScanJobState, err = getDataScanJobState(t, rs, dataScanJobId)
@@ -136,18 +128,14 @@ func testAccDataplexDataScanJobTriggerRunAndWaitUntilComplete(t *testing.T, reso
 
 			switch dataScanJobState {
 			case "STATE_UNSPECIFIED", "RUNNING", "PENDING":
-				t.Logf("Data scan job stateeee: %s, waiting for the job to finish", dataScanJobState)
-				time.Sleep(10 * time.Second) // Pause for 10 seconds
+				time.Sleep(10 * time.Second) // Pause for 10 seconds to prevend making too many api calls
 			case "CANCELING", "CANCELLED", "FAILED":
 				return fmt.Errorf("Data scan job failed: Invalid state: %s", dataScanJobState)
 			case "SUCCEEDED":
-				t.Logf("Data scan job state SUCCEEDED: %s", dataScanJobState)
-				return nil
 			default:
 				return fmt.Errorf("Getting data scan job state failed: invalid state: %s", dataScanJobState)
 			}
 		}
-		time.Sleep(10 * time.Second) // Pause for 10 seconds
 
 		return nil
 	}
@@ -181,61 +169,12 @@ func testAccDataplexDataQualityRules_rules_config(context map[string]interface{}
 		}`, context)
 }
 
-/*
- Error: Error when reading or editing DataQualityRules "projects/google_dataplex_datascan.tf_test_datascan_profile.project/locations/google_dataplex_datascan.tf_test_datascan_profile.location/dataScans/google_dataplex_datascan.tf_test_datascan_profile.data_scan_id": googleapi: Error 403: Permission denied on resource project google_dataplex_datascan.tf_test_datascan_profile.project.
-        Details:
-        [
-          {
-            "@type": "type.googleapis.com/google.rpc.ErrorInfo",
-            "domain": "googleapis.com",
-            "metadata": {
-              "consumer": "projects/google_dataplex_datascan.tf_test_datascan_profile.project",
-              "containerInfo": "google_dataplex_datascan.tf_test_datascan_profile.project",
-              "service": "dataplex.googleapis.com"
-            },
-            "reason": "CONSUMER_INVALID"
-          },
-
-*/
-
-/*
-func testAccDataplexDataQualityRules_rules_config(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-		data "google_dataplex_data_quality_rules" "generated_dq_rules" {
-			project		 = "google_dataplex_datascan.tf_test_datascan_profile.project"
-			location	 = "google_dataplex_datascan.tf_test_datascan_profile.location"
-			data_scan_id = "google_dataplex_datascan.tf_test_datascan_profile.data_scan_id"
-		}`, context)
-}
-*/
-
-/*
-googleapi: Error 400: Provided DataScan 'projects/1044284642890/locations/us-central1/dataScans/tf-test-datascan-profile-id' does not exist.
-
-	Details:
-	[
-	  {
-	    "@type": "type.googleapis.com/google.rpc.DebugInfo",
-	    "detail": "generic::invalid_argument: Provided DataScan 'projects/1044284642890/locations/us-central1/dataScans/tf-test-datascan-profile-id' does not exist.",
-*/
-
-// func testAccDataplexDataQualityRules_rules_config(context map[string]interface{}) string {
-// 	return acctest.Nprintf(`
-// 		data "google_dataplex_data_quality_rules" "generated_dq_rules" {
-// 			project		 = "hvaidya-test-dataplex"
-// 			location	 = "%{location}"
-// 			data_scan_id = "%{data_scan_id}"
-// 		}`, context)
-// }
-
 func getDataScanJobState(t *testing.T, rs *terraform.ResourceState, dataScanJobId string) (string, error) {
 	config := acctest.GoogleProviderConfig(t)
-	// GET https://dataplex.googleapis.com/v1/{name=projects/*/locations/*/dataScans/*/jobs/*}
 	url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{DataplexBasePath}}projects/{{project}}/locations/{{location}}/dataScans/{{data_scan_id}}/jobs/"+dataScanJobId)
 	if err != nil {
 		return "", fmt.Errorf("Failed to generate URL for getting data scan job state: %s", err)
 	}
-	t.Logf("DEBUG: url: %s", url)
 
 	billingProject := ""
 
