@@ -1,6 +1,7 @@
 package test
 
 import (
+<<<<<<< HEAD
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -9,6 +10,11 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+=======
+	"encoding/json"
+	"fmt"
+	"os"
+>>>>>>> 9259e6c4e (tgc-revival: fetch tests data from GCS bucket (#14123))
 )
 
 // Writes the data into a JSON file
@@ -24,6 +30,7 @@ func writeJSONFile(filename string, data interface{}) error {
 	}
 	return nil
 }
+<<<<<<< HEAD
 
 const (
 	defaultOrganization = "529579013760"
@@ -102,3 +109,5 @@ func run(t *testing.T, cmd *exec.Cmd, wantError bool) ([]byte, []byte) {
 	}
 	return stdout.Bytes(), stderr.Bytes()
 }
+=======
+>>>>>>> 9259e6c4e (tgc-revival: fetch tests data from GCS bucket (#14123))

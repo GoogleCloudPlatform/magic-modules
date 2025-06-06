@@ -6,11 +6,15 @@ import (
 	"fmt"
 	"io"
 	"log"
+<<<<<<< HEAD
 	"os"
+=======
+>>>>>>> 9259e6c4e (tgc-revival: fetch tests data from GCS bucket (#14123))
 	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
+<<<<<<< HEAD
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
 	"github.com/hashicorp/hcl/v2/hclsyntax"
@@ -27,6 +31,22 @@ type ResourceMetadata struct {
 // CaiData holds the fetched CAI asset and related error information.
 type CaiData struct {
 	CaiAsset caiasset.Asset `json:"cai_asset,omitempty"`
+=======
+)
+
+type ResourceMetadata struct {
+	CaiAssetName    string         `json:"cai_asset_name"`
+	CaiAssetData    caiasset.Asset `json:"cai_asset_data"`
+	ResourceType    string         `json:"resource_type"`
+	ResourceAddress string         `json:"resource_address"`
+	ImportMetadata  ImportMetadata `json:"import_metadata,omitempty"`
+	Service         string         `json:"service"`
+}
+
+type ImportMetadata struct {
+	Id            string   `json:"id,omitempty"`
+	IgnoredFields []string `json:"ignored_fields,omitempty"`
+>>>>>>> 9259e6c4e (tgc-revival: fetch tests data from GCS bucket (#14123))
 }
 
 type TgcMetadataPayload struct {
@@ -36,11 +56,14 @@ type TgcMetadataPayload struct {
 	PrimaryResource  string                       `json:"primary_resource"`
 }
 
+<<<<<<< HEAD
 type ResourceTestData struct {
 	ParsedRawConfig  map[string]interface{} `json:"parsed_raw_config"`
 	ResourceMetadata `json:"resource_metadata"`
 }
 
+=======
+>>>>>>> 9259e6c4e (tgc-revival: fetch tests data from GCS bucket (#14123))
 var (
 	TestsMetadata = make(map[string]TgcMetadataPayload)
 	setupDone     = false
@@ -92,6 +115,7 @@ func ReadTestsDataFromGcs() (map[string]TgcMetadataPayload, error) {
 	}
 	return TestsMetadata, nil
 }
+<<<<<<< HEAD
 
 func prepareTestData(testName string) (map[string]ResourceTestData, string, error) {
 	var err error
@@ -247,3 +271,5 @@ func convertToAssetMap(assets []caiasset.Asset) map[string]caiasset.Asset {
 	}
 	return assetMap
 }
+=======
+>>>>>>> 9259e6c4e (tgc-revival: fetch tests data from GCS bucket (#14123))
