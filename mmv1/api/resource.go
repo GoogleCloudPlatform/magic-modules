@@ -1979,7 +1979,6 @@ func (r Resource) MarkdownHeader(templatePath string) string {
 
 // TGC Methods
 // ====================
-// Filters out computed properties during cai2hcl
 func (r Resource) IgnoreTestPropertiesTgc(e resource.Examples) []string {
 	var props []string
 	for _, tp := range r.VirtualFields {
@@ -1993,6 +1992,7 @@ func (r Resource) IgnoreTestPropertiesTgc(e resource.Examples) []string {
 	return props
 }
 
+// Filters out computed properties during cai2hcl
 func (r Resource) ReadPropertiesForTgc() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
 		return v.Output
