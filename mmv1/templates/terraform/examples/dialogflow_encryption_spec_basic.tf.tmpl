@@ -1,0 +1,4 @@
+resource "google_dialogflow_encryption_spec" "{{$.PrimaryResourceId}}" {
+  location              = "global"
+  encryptionSpec.kmsKey = "{{index $.Vars "kms_key_name"}}"
+}
