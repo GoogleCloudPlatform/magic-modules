@@ -46,7 +46,7 @@ func TestAccDialogflowCXGenerativeSettings_update(t *testing.T) {
 func testAccDialogflowCXGenerativeSettings_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
   resource "google_dialogflow_cx_agent" "agent" {
-      display_name               = "tf-test-%{random_suffix}update"
+    display_name               = "tf-test-%{random_suffix}update"
     location                   = "global"
     default_language_code      = "en"
     time_zone                  = "America/New_York"
