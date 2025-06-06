@@ -296,7 +296,6 @@ func GenerateProduct(productName string, productsForVersionChannel chan *api.Pro
 
 	log.Printf("%s: Generating files", productName)
 
-	
 	providerToGenerate.Generate(*outputPath, productName, resourceToGenerate, generateCode, generateDocs)
 }
 
