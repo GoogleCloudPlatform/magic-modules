@@ -54,7 +54,7 @@ parameters:
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
     url_param_only: true
     immutable: true
-  - name: 'lang_code'
+  - name: 'langCode'
     type: String
     default_value: 'en'
     description: |
