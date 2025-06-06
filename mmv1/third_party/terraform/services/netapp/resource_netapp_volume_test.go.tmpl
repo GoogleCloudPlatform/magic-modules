@@ -705,10 +705,6 @@ resource "google_netapp_storage_pool" "default" {
     network = data.google_compute_network.default.id
     allow_auto_tiering = true
 }
-resource "time_sleep" "wait_3_minutes" {
-    depends_on = [google_netapp_storage_pool.default]
-    create_duration = "3m"
-}
 resource "google_netapp_volume" "test_volume" {
     location = "us-west4"
     name = "tf-test-volume%{random_suffix}"
@@ -737,10 +733,7 @@ resource "google_netapp_storage_pool" "default" {
     network = data.google_compute_network.default.id
     allow_auto_tiering = true
 }
-resource "time_sleep" "wait_3_minutes" {
-    depends_on = [google_netapp_storage_pool.default]
-    create_duration = "3m"
-}
+
 resource "google_netapp_volume" "test_volume" {
     location = "us-west4"
     name = "tf-test-volume%{random_suffix}"
@@ -764,7 +757,7 @@ data "google_compute_network" "default" {
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccNetappVolume_flexAutoTierNetappVolume_update(t *testing.T) {
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-2", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
