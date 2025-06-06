@@ -265,4 +265,5 @@ properties:
       If the connection preference of the service attachment is ACCEPT_AUTOMATIC, the limit applies to each project that contains a connected endpoint.
 
       If unspecified, the default propagated connection limit is 250.
-    default_from_api: true
+    default_value: 250
+    send_empty_value: true
