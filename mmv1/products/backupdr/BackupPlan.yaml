@@ -75,6 +75,7 @@ properties:
     type: Array
     description: |
       The list of all resource types to which the `BackupPlan` can be applied.
+    min_version: beta
     item_type:
       type: String
     output: true
