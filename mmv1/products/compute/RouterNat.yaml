@@ -512,6 +512,7 @@ properties:
       Must be one of: PREMIUM, STANDARD. If not specified, then the current
       project-level default tier is used.
     default_from_api: true
+    ignore_read: true
     enum_values:
       - 'PREMIUM'
       - 'STANDARD'
