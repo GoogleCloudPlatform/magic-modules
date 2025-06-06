@@ -286,6 +286,7 @@ func GenerateProduct(productName string, productsForVersionChannel chan *api.Pro
 	productApi.Objects = resources
 	productApi.Validate()
 
+	providerToGenerate := newProvider(*forceProvider, *version, productApi, startTime)
 	productsForVersionChannel <- productApi
 
 	if !slices.Contains(productsToGenerate, productName) {
@@ -295,7 +296,7 @@ func GenerateProduct(productName string, productsForVersionChannel chan *api.Pro
 
 	log.Printf("%s: Generating files", productName)
 
-	providerToGenerate := newProvider(*forceProvider, *version, productApi, startTime)
+	
 	providerToGenerate.Generate(*outputPath, productName, resourceToGenerate, generateCode, generateDocs)
 }
 
