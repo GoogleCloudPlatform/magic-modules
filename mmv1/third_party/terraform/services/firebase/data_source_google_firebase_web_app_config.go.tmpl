@@ -184,7 +184,7 @@ func (d *GoogleFirebaseWebAppConfigDataSource) Read(ctx context.Context, req dat
 	appName := fmt.Sprintf("projects/%s/webApps/%s/config", data.Project.ValueString(), data.WebAppId.ValueString())
 	clientResp, err := service.GetConfig(appName).Do()
 	if err != nil {
-		fwtransport.HandleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceFirebaseWebAppConfig %q", data.WebAppId.ValueString()), &resp.Diagnostics)
+		fwtransport.HandleNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceFirebaseWebAppConfig %q", data.WebAppId.ValueString()), &resp.Diagnostics)
 		if resp.Diagnostics.HasError() {
 			return
 		}

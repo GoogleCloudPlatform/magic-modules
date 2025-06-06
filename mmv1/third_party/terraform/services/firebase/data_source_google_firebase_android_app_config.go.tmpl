@@ -139,7 +139,7 @@ func (d *GoogleFirebaseAndroidAppConfigDataSource) Read(ctx context.Context, req
 	appName := fmt.Sprintf("projects/%s/androidApps/%s/config", data.Project.ValueString(), data.AppId.ValueString())
 	clientResp, err := service.GetConfig(appName).Do()
 	if err != nil {
-		fwtransport.HandleDatasourceNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceFirebaseAndroidAppConfig %q", data.AppId.ValueString()), &resp.Diagnostics)
+		fwtransport.HandleNotFoundError(ctx, err, &resp.State, fmt.Sprintf("dataSourceFirebaseAndroidAppConfig %q", data.AppId.ValueString()), &resp.Diagnostics)
 		if resp.Diagnostics.HasError() {
 			return
 		}
