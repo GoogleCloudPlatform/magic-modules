@@ -116,6 +116,12 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Description: `Base 64 MD5 hash of the uploaded data.`,
 			},
 
+			"source_md5hash": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `Used to trigger updates, Base 64 MD5 hash of the uploaded data.`,
+			},
+
 			"md5hexhash": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -132,7 +138,6 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Description:  `A path to the data you want to upload. Must be defined if content is not.`,
 			},
 
-			// Detect changes to local file or changes made outside of Terraform to the file stored on the server.
 			"detect_md5hash": {
 				Type: schema.TypeString,
 				// This field is not Computed because it needs to trigger a diff.
@@ -468,6 +473,18 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("md5hash", res.Md5Hash); err != nil {
 		return fmt.Errorf("Error setting md5hash: %s", err)
 	}
+	if v, ok := d.GetOk("source_md5hash"); ok {
+		if err := d.Set("source_md5hash", v); err != nil {
+			return fmt.Errorf("Error setting source_md5hash: %s", err)
+		}
+		if err := d.Set("detect_md5hash", d.Get("detect_md5hash")); err != nil {
+			return fmt.Errorf("Error setting detect_md5hash: %s", err)
+		}
+	} else {
+		if err := d.Set("detect_md5hash", res.Md5Hash); err != nil {
+			return fmt.Errorf("Error setting detect_md5hash: %s", err)
+		}
+	}
 	hash, err := base64.StdEncoding.DecodeString(res.Md5Hash)
 	if err != nil {
 		return fmt.Errorf("Error decoding md5hash: %s", err)
@@ -477,9 +494,7 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("md5hexhash", md5HexHash); err != nil {
 		return fmt.Errorf("Error setting md5hexhash: %s", err)
 	}
-	if err := d.Set("detect_md5hash", res.Md5Hash); err != nil {
-		return fmt.Errorf("Error setting detect_md5hash: %s", err)
-	}
+
 	if err := d.Set("generation", res.Generation); err != nil {
 		return fmt.Errorf("Error setting generation: %s", err)
 	}
@@ -570,14 +585,6 @@ func setEncryptionHeaders(customerEncryption map[string]string, headers http.Hea
 	headers.Set("x-goog-encryption-algorithm", customerEncryption["encryption_algorithm"])
 	headers.Set("x-goog-encryption-key", customerEncryption["encryption_key"])
 	headers.Set("x-goog-encryption-key-sha256", base64.StdEncoding.EncodeToString(keyHash[:]))
-}
-
-func getFileMd5Hash(filename string) string {
-	return tpgresource.GetFileMd5Hash(filename)
-}
-
-func getContentMd5Hash(content []byte) string {
-	return tpgresource.GetContentMd5Hash(content)
 }
 
 func expandCustomerEncryption(input []interface{}) map[string]string {
