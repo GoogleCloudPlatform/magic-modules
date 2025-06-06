@@ -1980,7 +1980,7 @@ func (r Resource) MarkdownHeader(templatePath string) string {
 // ====================
 // TGC
 // ====================
-// Converts most properties during cai2hcl, exept for computed properties
+// Filters out computed properties during cai2hcl
 func (r Resource) ReadPropertiesForTgc() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
 		return v.Output
