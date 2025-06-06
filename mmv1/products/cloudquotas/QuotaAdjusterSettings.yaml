@@ -87,7 +87,7 @@ properties:
   - name: 'inherited_from'
     type: String
     description: |
-      Deprecated: The resource container from which the setting is inherited. This refers to the  nearest ancestor with enablement set (either ENABLED or DISABLED).
+      The resource container from which the setting is inherited. This refers to the  nearest ancestor with enablement set (either ENABLED or DISABLED).
       The value can be an organizations/{organization_id}, folders/{folder_id}, or can be 'default' if no ancestor exists with enablement set. The value will
       be empty when enablement is directly set on this container.
     output: true
