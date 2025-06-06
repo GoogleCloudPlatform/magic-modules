@@ -2,7 +2,7 @@ module magician
 
 go 1.23
 
-replace github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler => ../../tools/issue-labeler
+replace github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler => ../issue-labeler
 
 require (
 	github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler v0.0.0-00010101000000-000000000000
