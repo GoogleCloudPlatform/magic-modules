@@ -35,6 +35,14 @@ examples:
       backup_plan_id: 'backup-plan-simple-test'
     test_env_vars:
       project: :PROJECT_NAME
+  - name: 'backup_dr_backup_plan_for_disk_resource'
+    primary_resource_id: 'my-disk-backup-plan-1'
+    min_version: 'beta'
+    vars:
+      backup_vault_id: 'backup-vault-disk-test'
+      backup_plan_id: 'backup-plan-disk-test'
+    test_env_vars:
+      project: :PROJECT_NAME
 parameters:
   - name: 'location'
     type: String
@@ -82,7 +90,8 @@ properties:
   - name: 'resourceType'
     type: String
     description: |
-      The resource type to which the `BackupPlan` will be applied. Examples include, "compute.googleapis.com/Instance" and "storage.googleapis.com/Bucket".
+      The resource type to which the `BackupPlan` will be applied.
+      Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", and "storage.googleapis.com/Bucket".
     required: true
   - name: 'createTime'
     type: String
