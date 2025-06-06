@@ -54,7 +54,6 @@ parameters:
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
     url_param_only: true
     immutable: true
-  # not sure if this is the right way to specify a query parameter and it's value.
   - name: 'lang_code'
     type: String
     default_value: 'en'
