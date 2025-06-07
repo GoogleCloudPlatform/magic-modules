@@ -1,6 +1,6 @@
 resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
   name                        = "{{index $.Vars "bucket_name"}}"
-  location                    = "asia-east1"
+  location                    = "EU"
   storage_class               = "STANDARD"
   force_destroy               = true
   uniform_bucket_level_access = true
