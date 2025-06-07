@@ -54,6 +54,16 @@ examples:
     vars:
       interconnect_name: 'example-interconnect'
     exclude_docs: true
+  - name: 'compute_interconnect_cross_site_network_test'
+    min_version: beta
+    primary_resource_id: 'example-interconnect-cross-site-network'
+    vars:
+      interconnect_name: 'example-interconnect-cross-site-network'
+      description: 'Example Interconnect'
+      customer_name: 'example_customer'
+      cross_site_network: 'example-cross-site-network'
+    exclude_docs: true
+    exclude_test: true
 parameters:
 properties:
   - name: 'description'
