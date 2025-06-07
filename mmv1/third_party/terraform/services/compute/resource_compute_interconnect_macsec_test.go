@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
@@ -31,6 +32,11 @@ func TestAccComputeInterconnect_computeInterconnectMacsecTest(t *testing.T) {
 			},
 			{
 				Config: testAccComputeInterconnect_computeInterconnectEnableMacsec(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_interconnect.example-interconnect", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_compute_interconnect.example-interconnect",
@@ -51,7 +57,7 @@ resource "google_compute_interconnect" "example-interconnect" {
   customer_name        = "internal_customer" # Special customer only available for Google testing.
   interconnect_type    = "DEDICATED"
   link_type            = "LINK_TYPE_ETHERNET_100G_LR"
-  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/global/interconnectLocations/z2z-us-east4-zone1-lciadl-z" # Special location only available for Google testing.
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.id}/global/interconnectLocations/z2z-us-east4-zone1-lciadl-z" # Special location only available for Google testing.
   requested_link_count = 1
   admin_enabled        = true
   description          = "example description"
@@ -74,7 +80,7 @@ resource "google_compute_interconnect" "example-interconnect" {
   customer_name        = "internal_customer" # Special customer only available for Google testing.
   interconnect_type    = "DEDICATED"
   link_type            = "LINK_TYPE_ETHERNET_100G_LR"
-  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/global/interconnectLocations/z2z-us-east4-zone1-lciadl-z" # Special location only available for Google testing.
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.id}/global/interconnectLocations/z2z-us-east4-zone1-lciadl-z" # Special location only available for Google testing.
   requested_link_count = 1
   admin_enabled        = true
   description          = "example description"

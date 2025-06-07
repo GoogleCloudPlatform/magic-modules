@@ -5,6 +5,6 @@ resource "google_compute_interconnect" "{{$.PrimaryResourceId}}" {
   customer_name        = "{{index $.Vars "customer_name"}}"
   interconnect_type    = "DEDICATED"
   link_type            = "LINK_TYPE_ETHERNET_10G_LR"
-  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/global/interconnectLocations/iad-zone1-1"
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.id}/global/interconnectLocations/iad-zone1-1"
   requested_link_count = 1
 }
