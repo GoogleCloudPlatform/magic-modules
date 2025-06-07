@@ -19,6 +19,8 @@ description: |
   Describes an autoscaling policy for Dataproc cluster autoscaler.
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}'
+  note: |
+    Dataproc Autoscaling Policies are an integral part of the Dataproc service and, like other Dataproc components, may rely on internal or private Google Cloud APIs for their underlying operations. These internal APIs are not intended for direct customer management or enablement via Terraform. You do not need to explicitly manage or import any such internal APIs when using this resource; their functionality is handled automatically by Google Cloud. For a comprehensive explanation of how Terraform interacts with different types of Google Cloud APIs (public vs. private), please refer to the [Understanding Google Cloud APIs and Terraform Guide](../guides/understanding-apis-and-terraform.md).
 base_url: 'projects/{{project}}/locations/{{location}}/autoscalingPolicies'
 self_link: 'projects/{{project}}/locations/{{location}}/autoscalingPolicies/{{policy_id}}'
 import_format:
