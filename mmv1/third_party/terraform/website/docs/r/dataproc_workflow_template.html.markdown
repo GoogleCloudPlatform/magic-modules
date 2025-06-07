@@ -6,7 +6,30 @@ description: |-
 
 # google_dataproc_workflow_template
 
-A Workflow Template is a reusable workflow configuration. It defines a graph of jobs with information on where to run those jobs.
+A Workflow Template is a reusable workflow configuration. It defines a graph of
+jobs with information on where to run those jobs.
+
+## Important Considerations for Dataproc Workflow Template APIs
+
+Dataproc Workflow Templates, as a component of Google Cloud Dataproc, leverage
+internal or private APIs for their underlying operations and
+orchestration. These APIs are essential for the service's functionality but are
+**not intended for direct customer management or enablement via Terraform**.
+
+* **No Customer Action Required:** You do not need to explicitly enable or
+  attempt to import any internal Dataproc APIs (such as
+  `dataproc-control.googleapis.com`) when using Workflow Templates with
+  Terraform. Their necessary interactions are handled automatically by Google
+  Cloud.
+
+* **Focus on Public APIs:** When configuring `google_dataproc_workflow_template`
+  resources with Terraform, your focus should remain on the publicly documented
+  Dataproc APIs and the configurations available within this resource.
+
+For a comprehensive explanation of how Terraform interacts with different types
+of Google Cloud APIs (public versus private), please refer to the [Understanding
+Google Cloud APIs and Terraform
+Guide](../guides/understanding-apis-and-terraform.md).
 
 ## Example Usage
 
