@@ -5,4 +5,6 @@ if (d.HasChange("provisioned_iops") && strings.Contains(d.Get("type").(string), 
         obj["name"] = nameProp
     }
 }
+obj["name"]= d.Get("name").(string)
+
 return obj, nil
