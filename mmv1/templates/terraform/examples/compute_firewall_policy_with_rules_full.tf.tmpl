@@ -137,7 +137,7 @@ resource "google_compute_firewall_policy_with_rules" "{{$.PrimaryResourceId}}" {
     priority       = 7000
     enable_logging = false
     action         = "allow"
-    direction      = "EGRESS"
+    direction      = "INGRESS"
 
     target_secure_tags {
       name = google_tags_tag_value.basic_value.id
