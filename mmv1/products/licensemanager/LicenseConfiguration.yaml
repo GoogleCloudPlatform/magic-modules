@@ -12,9 +12,8 @@
 # limitations under the License.
 
 ---
-# API resource name
 name: 'LicenseConfiguration'
-# Resource description for the provider documentation.
+kind: 'licensemanager#licenseconfiguration'
 description: |
   A configuration to purchase licenses for a single third-party product. License Configurations are
   unique per project and region.
@@ -23,32 +22,14 @@ references:
     'About License Manager': 'https://cloud.google.com/compute/docs/instances/windows/license-manager'
     'Use License Manager for Microsoft Office': 'https://cloud.google.com/compute/docs/instances/windows/ms-office'
   api: 'https://cloud.google.com/licensemanager/docs/reference/rest/v1/projects.locations.configurations'
-# Marks the resource as beta-only. Ensure a beta version block is present in
-# provider.yaml.
-min_version: beta
-# URL for the resource's standard List method. https://google.aip.dev/132
+# min_version: beta
 base_url: 'projects/{{project}}/locations/{{location}}/configurations'
-# URL for the resource's standard Get method. https://google.aip.dev/131
 self_link: 'projects/{{project}}/locations/{{location}}/configurations/{{license_configuration_name}}'
-# If true, the resource and all its fields are considered immutable.
 immutable: false
 create_url: 'projects/{{project}}/locations/{{location}}/configurations?licenseConfigurationId={{license_configuration_id}}'
-
-# Overrides the URL for the resource's standard Update method. (If unset, the
-# self_link URL is used by default.) https://google.aip.dev/134
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-# update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
-# The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
 update_verb: 'PATCH'
-# If true, the resource sets an `updateMask` query parameter listing modified
-# fields when updating the resource. If false, it does not.
 update_mask: true
-
-# If true, code for handling long-running operations is generated along with
-# the resource. If false, that code is not generated.
 autogen_async: false
-
 parameters:
   - name: 'location'
     type: String

@@ -1,7 +1,7 @@
 data "google_project" "project" {
 }
 
-resource "google_license_configuration" "{{$.PrimaryResourceId}}" {
+resource "google_licensemanager_license_configuration" "{{$.PrimaryResourceId}}" {
     location = "us-central1"
     product = "Office2021ProfessionalPlus"
     project = data.google_project.project.project_id
