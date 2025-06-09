@@ -22,7 +22,7 @@ references:
     'About License Manager': 'https://cloud.google.com/compute/docs/instances/windows/license-manager'
     'Use License Manager for Microsoft Office': 'https://cloud.google.com/compute/docs/instances/windows/ms-office'
   api: 'https://cloud.google.com/licensemanager/docs/reference/rest/v1/projects.locations.configurations'
-# min_version: beta
+min_version: beta
 base_url: 'projects/{{project}}/locations/{{location}}/configurations'
 self_link: 'projects/{{project}}/locations/{{location}}/configurations/{{license_configuration_name}}'
 immutable: false
@@ -57,3 +57,12 @@ properties:
     required: true
     description: |
       The number of licenses to provision.
+
+examples:
+  - name: "licensemanager_license_configuration_basic"
+    # primary_resource_id will be used for the Terraform resource id in the configuration file.
+    primary_resource_id: "example"
+    vars:
+      network_name: "example-network"
+    # Set min_version: beta if the resource is not beta-only and any beta-only fields are being tested.
+    min_version: beta
