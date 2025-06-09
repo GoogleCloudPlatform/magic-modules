@@ -16,23 +16,28 @@ resource "google_compute_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
   priority                = 9000
   enable_logging          = true
   action                  = "allow"
-  direction               = "EGRESS"
+  direction               = "INGRESS"
   disabled                = false
+
   target_secure_tags {
     name = google_tags_tag_value.basic_value.id
   }
+
   match {
-    dest_ip_ranges            = ["11.100.0.1/32"]
+    src_ip_ranges = ["11.100.0.1/32"]
+
+    src_secure_tags {
+      name = google_tags_tag_value.basic_value.id
+    }
+
     layer4_configs {
       ip_protocol = "tcp"
       ports       = [8080]
     }
+
     layer4_configs {
       ip_protocol = "udp"
       ports       = [22]
-    }
-    src_secure_tags {
-      name = google_tags_tag_value.basic_value.id
     }
   }
 }
@@ -42,6 +47,7 @@ resource "google_tags_tag_key" "basic_key" {
   parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
   purpose     = "GCE_FIREWALL"
   short_name  = "{{index $.Vars "tag_key"}}"
+
   purpose_data = {
     organization = "auto"
   }

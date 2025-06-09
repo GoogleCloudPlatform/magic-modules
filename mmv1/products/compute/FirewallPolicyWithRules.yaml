@@ -208,7 +208,7 @@ properties:
                 The IPs in these lists will be matched against traffic destination.
               item_type:
                 type: String
-            - name: 'srcSecureTag'
+            - name: 'srcSecureTags'
               type: Array
               description: |
                 List of secure tag values, which should be matched at the source
@@ -216,7 +216,6 @@ properties:
                 For INGRESS rule, if all the <code>srcSecureTag</code> are INEFFECTIVE,
                 and there is no <code>srcIpRange</code>, this rule will be ignored.
                 Maximum number of source tag values allowed is 256.
-              api_name: srcSecureTags
               item_type:
                 type: NestedObject
                 properties:
@@ -264,7 +263,7 @@ properties:
                       ["12345-12349"].
                     item_type:
                       type: String
-        - name: 'targetSecureTag'
+        - name: 'targetSecureTags'
           type: Array
           description: |
             A list of secure tags that controls which instances the firewall rule
@@ -278,7 +277,6 @@ properties:
             <code>targetSecureTag</code> are specified, the firewall rule applies
             to all instances on the specified network.
             Maximum number of target label tags allowed is 256.
-          api_name: targetSecureTags
           item_type:
             type: NestedObject
             properties:
