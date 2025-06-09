@@ -1262,12 +1262,12 @@ func TestAccRedisCluster_redisClusterTlsEnabled(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		// CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
+		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRedisCluster_redisClusterTlsEnabled(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttrSet("google_redis_cluster.cluster-tls", "managedServerCa.caCerts.0.certificates.0"),
+					resource.TestCheckResourceAttrSet("google_redis_cluster.cluster-tls", "managed_server_ca.0.ca_certs.0.certificates.0"),
 				),
 			},
 			{
