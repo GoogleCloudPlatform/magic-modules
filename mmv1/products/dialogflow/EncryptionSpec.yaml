@@ -61,4 +61,4 @@ examples:
     vars:
       kms_key_name: 'kms-key'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
