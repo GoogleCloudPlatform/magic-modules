@@ -53,7 +53,6 @@ func testAccContactCenterInsightsView_full(context map[string]interface{}) strin
 	return acctest.Nprintf(`
 resource "google_contact_center_insights_view" "full_view" {
   project = "%{project_name}"
-  name = "tf-insights-view-{%random_suffix}"
   location = "%{region}"
   display_name = "view-display-name-%{random_suffix}"
   create_time = "2025-01-01T00:00:00Z"
@@ -67,7 +66,6 @@ func testAccContactCenterInsightsView_update(context map[string]interface{}) str
 	return acctest.Nprintf(`
 resource "google_contact_center_insights_view" "full_view" {
   project = "%{project_name}"
-  name = "tf-insights-view-{%random_suffix}"
   location = "%{region}"
   display_name = "view-display-name-%{random_suffix}-updated"
   create_time = "2025-01-02T00:00:00Z"

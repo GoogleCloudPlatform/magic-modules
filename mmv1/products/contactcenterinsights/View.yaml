@@ -50,7 +50,7 @@ properties:
       Format:
       projects/{project}/locations/{location}/views/{view}
     immutable: true
-    required: true
+    output: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: displayName
     type: String
