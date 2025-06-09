@@ -248,4 +248,4 @@ properties:
     type: String
     description: |-
       Indicates the custom error message set by the user to be returned to the
-      end user if the LLM response trips Model Armor filters.
+      end user if the LLM response trips Model Armor filters. 

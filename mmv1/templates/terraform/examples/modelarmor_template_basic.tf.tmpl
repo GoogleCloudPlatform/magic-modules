@@ -55,4 +55,4 @@ resource "google_model_armor_template" "basic" {
     custom_prompt_safety_error_message = "<%= ctx[:vars]["template_metadata_custom_prompt_safety_error_message"] %>"
     custom_llm_response_safety_error_code = <%= ctx[:vars]["template_metadata_custom_llm_response_safety_error_code"] %>
   }
-}
+} 

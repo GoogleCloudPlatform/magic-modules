@@ -19,4 +19,4 @@ scopes:
 versions:
 - base_url: https://modelarmor.us.rep.googleapis.com/v1/
   name: ga
-caibaseurl: ""
+caibaseurl: "" 
