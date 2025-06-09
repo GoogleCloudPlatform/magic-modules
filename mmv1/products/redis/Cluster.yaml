@@ -828,5 +828,5 @@ properties:
               type: Array
               output: true
               description: The certificates that form the CA chain, from leaf to root order
-              item_type: 
+              item_type:
                 type: String
