@@ -12,7 +12,7 @@
 //
 // ----------------------------------------------------------------------------
 
-package {{$.Product}}_test
+package {{$.PackageName}}_test
 
 import (
 	"testing"
@@ -20,14 +20,14 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/test"
 )
 
-{{ range $e := $.Res.TestExamples }}
-func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T) {
+{{ range $e := $.TestExamples }}
+func TestAcc{{ $e.TestSlug $.ProductMetadata.Name $.Name }}(t *testing.T) {
 	t.Parallel()
 
 	test.BidirectionalConversion(
 		t,
 		[]string{
-{{- range $field := $.Res.IgnoreTestPropertiesTGC }}
+{{- range $field := $e.IgnoreTestPropertiesTGC }}
 	"{{ $field }}",
 {{- end }}
 		},
