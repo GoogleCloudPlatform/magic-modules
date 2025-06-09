@@ -17,14 +17,11 @@ name: 'LicenseConfiguration'
 # Resource description for the provider documentation.
 description: |
   A configuration to purchase licenses for a single third-party product. License Configurations are
-  unique per project and region.  
+  unique per project and region.
 references:
   guides:
-   # Link to quickstart in the API's Guides section. For example:
-   # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
     'About License Manager': 'https://cloud.google.com/compute/docs/instances/windows/license-manager'
-    'Use License Manager for Microsoft Office' : 'https://cloud.google.com/compute/docs/instances/windows/ms-office'
-  # Link to the REST API reference for the resource.
+    'Use License Manager for Microsoft Office': 'https://cloud.google.com/compute/docs/instances/windows/ms-office'
   api: 'https://cloud.google.com/licensemanager/docs/reference/rest/v1/projects.locations.configurations'
 # Marks the resource as beta-only. Ensure a beta version block is present in
 # provider.yaml.
