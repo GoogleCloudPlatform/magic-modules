@@ -396,16 +396,24 @@ func subtestResult(original vcr.Result) vcr.Result {
 	}
 }
 
+// Returns the name of the compound test that the given subtest belongs to.
+func compoundTest(subtest string) string {
+	parts := strings.Split(subtest, "__")
+	if len(parts) != 2 {
+		return subtest
+	}
+	return parts[0]
+}
+
+// Returns subtests and tests that are not compound tests.
 func excludeCompoundTests(allTests, subtests []string) []string {
 	res := make([]string, 0, len(allTests)+len(subtests))
 	compoundTests := make(map[string]struct{}, len(subtests))
 	for _, subtest := range subtests {
-		parts := strings.Split(subtest, "__")
-		if len(parts) != 2 {
-			continue
+		if compound := compoundTest(subtest); compound != subtest {
+			compoundTests[compound] = struct{}{}
+			res = append(res, subtest)
 		}
-		compoundTests[parts[0]] = struct{}{}
-		res = append(res, subtest)
 	}
 	for _, test := range allTests {
 		if _, ok := compoundTests[test]; !ok {
@@ -498,9 +506,10 @@ func init() {
 
 func formatComment(fileName string, tmplText string, data any) (string, error) {
 	funcs := template.FuncMap{
-		"join":  strings.Join,
-		"add":   func(i, j int) int { return i + j },
-		"color": color,
+		"join":         strings.Join,
+		"add":          func(i, j int) int { return i + j },
+		"color":        color,
+		"compoundTest": compoundTest,
 	}
 	tmpl, err := template.New(fileName).Funcs(funcs).Parse(tmplText)
 	if err != nil {
