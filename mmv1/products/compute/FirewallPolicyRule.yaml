@@ -68,6 +68,8 @@ examples:
       folder: 'folder'
       fw_policy: 'fw-policy'
       network: 'network'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
     test_env_vars:
       org_id: 'ORG_ID'
     min_version: beta
