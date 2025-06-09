@@ -27,7 +27,7 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 	test.BidirectionalConversion(
 		t,
 		[]string{
-{{- range $field := $.Res.IgnoreTestPropertiesTgc }}
+{{- range $field := $.Res.IgnoreTestPropertiesTGC }}
 	"{{ $field }}",
 {{- end }}
 		},
