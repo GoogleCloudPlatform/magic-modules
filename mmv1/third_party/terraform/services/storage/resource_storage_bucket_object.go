@@ -154,6 +154,9 @@ func ResourceStorageBucketObject() *schema.Resource {
 				// 3. Don't suppress the diff iff they don't match
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					localMd5Hash := ""
+					if v, ok := d.GetOkExists("source_md5hash"); ok && v != "" {
+						return true
+					}
 					if source, ok := d.GetOkExists("source"); ok {
 						localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
 					}
@@ -484,17 +487,8 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("md5hexhash", md5HexHash); err != nil {
 		return fmt.Errorf("Error setting md5hexhash: %s", err)
 	}
-	if v, ok := d.GetOk("source_md5hash"); ok {
-		if err := d.Set("source_md5hash", v); err != nil {
-			return fmt.Errorf("Error setting source_md5hash: %s", err)
-		}
-		if err := d.Set("detect_md5hash", d.Get("detect_md5hash")); err != nil {
-			return fmt.Errorf("Error setting detect_md5hash: %s", err)
-		}
-	} else {
-		if err := d.Set("detect_md5hash", res.Md5Hash); err != nil {
-			return fmt.Errorf("Error setting detect_md5hash: %s", err)
-		}
+	if err := d.Set("source_md5hash", d.Get("source_md5hash")); err != nil {
+		return fmt.Errorf("Error setting source_md5hash: %s", err)
 	}
 	if err := d.Set("generation", res.Generation); err != nil {
 		return fmt.Errorf("Error setting generation: %s", err)
@@ -641,13 +635,23 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 }
 
 func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	if d.HasChange("source_md5hash") {
-		return showDiffChange(d)
-	}
-	return nil
-}
+	localMd5Hash := ""
 
-func showDiffChange(d *schema.ResourceDiff) error {
+	if source, ok := d.GetOkExists("source"); ok {
+		localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
+	}
+	if content, ok := d.GetOkExists("content"); ok {
+		localMd5Hash = tpgresource.GetContentMd5Hash([]byte(content.(string)))
+	}
+	if localMd5Hash == "" {
+		return nil
+	}
+
+	oldMd5Hash, ok := d.GetOkExists("md5hash")
+	if ok && oldMd5Hash == localMd5Hash {
+		return nil
+	}
+
 	err := d.SetNewComputed("md5hash")
 	if err != nil {
 		return fmt.Errorf("Error re-setting md5hash: %s", err)
