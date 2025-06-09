@@ -50,6 +50,8 @@ examples:
       address_group: 'address-group'
       folder: 'folder'
       fw_policy: 'fw-policy'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
     test_env_vars:
       org_id: 'ORG_ID'
       service_acct: 'SERVICE_ACCT'
