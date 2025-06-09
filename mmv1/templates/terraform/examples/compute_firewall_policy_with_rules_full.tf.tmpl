@@ -124,7 +124,7 @@ resource "google_compute_firewall_policy_with_rules" "{{$.PrimaryResourceId}}" {
     match {
       dest_ip_ranges = ["11.100.0.1/32"]
 
-      layer4_configs {
+      layer4_config {
         ip_protocol = "tcp"
         ports       = [8080]
       }
@@ -150,7 +150,7 @@ resource "google_compute_firewall_policy_with_rules" "{{$.PrimaryResourceId}}" {
         name = google_tags_tag_value.basic_value.id
       }
 
-      layer4_configs {
+      layer4_config {
         ip_protocol = "tcp"
         ports       = [8080]
       }
