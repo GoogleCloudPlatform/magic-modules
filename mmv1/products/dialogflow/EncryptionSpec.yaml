@@ -21,6 +21,8 @@ references:
     'Official CX Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
   api: 'https://cloud.google.com/dialogflow/es/docs/reference/rest/v2/projects.locations.encryptionSpec'
 
+base_url: 'projects/{{project}}/locations/{{location}}/encryptionSpec'
+
 create_url: 'projects/{{project}}/locations/{{location}}/encryptionSpec:initialize'
 
 immutable: true
