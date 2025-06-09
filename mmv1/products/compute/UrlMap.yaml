@@ -118,6 +118,24 @@ examples:
       home_backend_service_name: 'home'
       mirror_backend_service_name: 'mirror'
       health_check_name: 'health-check'
+  - name: 'url_map_test_headers'
+    primary_resource_id: 'urlmap'
+    vars:
+      url_map_name: 'urlmap'
+      backend_service_name: 'backend'
+      health_check_name: 'health-check'
+  - name: 'url_map_test_expected_output_url'
+    primary_resource_id: 'urlmap'
+    vars:
+      url_map_name: 'urlmap'
+      backend_service_name: 'backend'
+      health_check_name: 'health-check'
+  - name: 'url_map_test_redirect_response_code'
+    primary_resource_id: 'urlmap'
+    vars:
+      url_map_name: 'urlmap'
+      backend_service_name: 'backend'
+      health_check_name: 'health-check'
   - name: 'external_http_lb_mig_backend'
     primary_resource_id: 'default'
     vars:
@@ -2427,13 +2445,45 @@ properties:
           description: |
             Path portion of the URL.
           required: true
+        - name: 'headers'
+          type: Array
+          description: |
+            HTTP headers for this request.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'name'
+                type: String
+                description: |
+                  Header name.
+                required: true
+              - name: 'value'
+                type: String
+                description: |
+                  Header value.
+                required: true
         - name: 'service'
           type: ResourceRef
           description: The backend service or backend bucket link that should be matched by this test.
-          required: true
           custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
           resource: 'BackendService'
           imports: 'selfLink'
+        - name: 'expectedOutputUrl'
+          type: String
+          description: |
+            The expected output URL evaluated by the load balancer containing the scheme, host, path and query parameters.
+
+            For rules that forward requests to backends, the test passes only when expectedOutputUrl matches the request forwarded by the load balancer to backends. For rules with urlRewrite, the test verifies that the forwarded request matches hostRewrite and pathPrefixRewrite in the urlRewrite action. When service is specified, expectedOutputUrl`s scheme is ignored.
+
+            For rules with urlRedirect, the test passes only if expectedOutputUrl matches the URL in the load balancer's redirect response. If urlRedirect specifies httpsRedirect, the test passes only if the scheme in expectedOutputUrl is also set to HTTPS. If urlRedirect specifies stripQuery, the test passes only if expectedOutputUrl does not contain any query parameters.
+
+            expectedOutputUrl is optional when service is specified.
+        - name: 'expectedRedirectResponseCode'
+          type: Integer
+          description: |
+            For rules with urlRedirect, the test passes only if expectedRedirectResponseCode matches the HTTP status code in load balancer's redirect response.
+
+            expectedRedirectResponseCode cannot be set when service is set.
   - name: 'defaultUrlRedirect'
     type: NestedObject
     description: |
