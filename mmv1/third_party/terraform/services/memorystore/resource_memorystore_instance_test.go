@@ -14,7 +14,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-// Validate that replica count is updated for the instance
+// Validate that replica count is updated for the instance: 1->2->0
 func TestAccMemorystoreInstance_updateReplicaCount(t *testing.T) {
 	t.Parallel()
 
@@ -37,6 +37,15 @@ func TestAccMemorystoreInstance_updateReplicaCount(t *testing.T) {
 			{
 				// update replica count to 2
 				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 2, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
+			},
+			{
+				ResourceName:      "google_memorystore_instance.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// update replica count to 0
+				Config: createOrUpdateMemorystoreInstance(&InstanceParams{name: name, replicaCount: 0, shardCount: 3, preventDestroy: true, zoneDistributionMode: "MULTI_ZONE", deletionProtectionEnabled: false, maintenanceDay: "MONDAY", maintenanceHours: 1, maintenanceMinutes: 0, maintenanceSeconds: 0, maintenanceNanos: 0}),
 			},
 			{
 				ResourceName:      "google_memorystore_instance.test",
