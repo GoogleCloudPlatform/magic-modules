@@ -386,6 +386,8 @@ service/firebase:
   - google_firebase_storage.*
   - google_firebase_web.*
   - google_firebaserules_.*
+service/firebaseapphosting:
+  resources:
   - google_firebase_app_hosting.*
 service/firebasedataconnect:
   resources:

@@ -3,7 +3,6 @@ package models
 import (
 	"fmt"
 
-	"github.com/hashicorp/hcl/hcl/printer"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -20,12 +19,15 @@ func HclWriteBlocks(blocks []*TerraformResourceBlock) ([]byte, error) {
 
 	for _, resourceBlock := range blocks {
 		hclBlock := rootBody.AppendNewBlock("resource", resourceBlock.Labels)
+		resourceBody := hclBlock.Body()
+		resourceBody.SetAttributeRaw("provider", hclwrite.TokensForIdentifier("google-beta"))
+
 		if err := hclWriteBlock(resourceBlock.Value, hclBlock.Body()); err != nil {
 			return nil, err
 		}
 	}
 
-	return printer.Format(f.Bytes())
+	return hclwrite.Format(f.Bytes()), nil
 }
 
 func hclWriteBlock(val cty.Value, body *hclwrite.Body) error {
@@ -49,7 +51,7 @@ func hclWriteBlock(val cty.Value, body *hclwrite.Body) error {
 				return err
 			}
 		case objValType.IsCollectionType():
-			if objVal.LengthInt() == 0 {
+			if objVal.LengthInt() == 0 && !objValType.IsSetType() {
 				continue
 			}
 			// Presumes map should not contain object type.

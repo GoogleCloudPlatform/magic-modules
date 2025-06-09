@@ -503,7 +503,6 @@ func TestAccContainerCluster_withMaxRunDuration(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withFlexStart(t *testing.T) {
 	t.Parallel()
 
@@ -535,7 +534,6 @@ func TestAccContainerCluster_withFlexStart(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 func TestAccContainerCluster_withILBSubsetting(t *testing.T) {
 	t.Parallel()
@@ -675,6 +673,45 @@ func TestAccContainerCluster_inTransitEncryptionConfig(t *testing.T) {
 				Config: testAccContainerCluster_inTransitEncryptionConfig(clusterName, networkName, subnetworkName, "IN_TRANSIT_ENCRYPTION_DISABLED"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "in_transit_encryption_config", "IN_TRANSIT_ENCRYPTION_DISABLED"),
+				),
+			},
+			{
+				ResourceName:	   "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func TestAccContainerCluster_networkPerformanceConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_networkPerformanceConfig(clusterName, networkName, subnetworkName, "TIER_1"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "network_performance_config.0.total_egress_bandwidth_tier", "TIER_1"),
+				),
+			},
+			{
+				ResourceName:	   "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_networkPerformanceConfig(clusterName, networkName, subnetworkName, "TIER_UNSPECIFIED"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "network_performance_config.0.total_egress_bandwidth_tier", "TIER_UNSPECIFIED"),
 				),
 			},
 			{
@@ -869,7 +906,6 @@ func TestUnitContainerCluster_Rfc3339TimeDiffSuppress(t *testing.T) {
 	}
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withPodAutoscaling(t *testing.T) {
 	t.Parallel()
 
@@ -927,8 +963,6 @@ resource "google_container_cluster" "pod_autoscaling_config" {
 }
 `, clusterName, networkName, subnetworkName, hpaProfile)
 }
-{{- end }}
-
 
 func testAccContainerCluster_enableMultiNetworking(clusterName string) string {
 	return fmt.Sprintf(`
@@ -7206,7 +7240,6 @@ resource "google_container_cluster" "max_run_duration" {
 `, clusterName, npName, duration, networkName, subnetworkName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withFlexStart(clusterName, npName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 data "google_container_engine_versions" "uscentral1a" {
@@ -7256,7 +7289,6 @@ resource "google_container_cluster" "flex_start" {
 }
 `, clusterName, npName, networkName, subnetworkName)
 }
-{{- end }}
 
 func testAccContainerCluster_withILBSubSetting(clusterName, npName, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
@@ -13838,6 +13870,30 @@ resource "google_container_cluster" "primary" {
   datapath_provider            = "ADVANCED_DATAPATH"
   deletion_protection          = false
   in_transit_encryption_config = "%s"
+}
+`, name, networkName, subnetworkName, config)
+}
+
+func testAccContainerCluster_networkPerformanceConfig(name, networkName, subnetworkName, config string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "primary" {
+  name                         = "%s"
+  location                     = "us-central1-a"
+  initial_node_count           = 1
+  network                      = "%s"
+  subnetwork                   = "%s"
+  deletion_protection          = false
+
+  node_config {
+	machine_type = "n2-standard-32"
+	gvnic {
+      enabled = true
+	}
+  }
+  
+  network_performance_config {
+    total_egress_bandwidth_tier = "%s"
+  }
 }
 `, name, networkName, subnetworkName, config)
 }
