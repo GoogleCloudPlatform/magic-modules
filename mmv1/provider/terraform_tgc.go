@@ -124,8 +124,9 @@ func (tgc TerraformGoogleConversion) GenerateResource(object api.Resource, templ
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
 
+	templatePath := "templates/tgc/resource_converter.go.tmpl"
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name)))
-	templateData.GenerateTGCResourceFile(targetFilePath, object)
+	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
 }
 
 // Generate the IAM policy for this object. This is used to query and test

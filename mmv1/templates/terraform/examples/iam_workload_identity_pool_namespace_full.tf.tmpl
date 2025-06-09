@@ -1,0 +1,15 @@
+resource "google_iam_workload_identity_pool" "pool" {
+  provider = google-beta
+
+  workload_identity_pool_id = "{{index $.Vars "workload_identity_pool_id"}}"
+  mode                      = "TRUST_DOMAIN"
+}
+
+resource "google_iam_workload_identity_pool_namespace" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  workload_identity_pool_id           = google_iam_workload_identity_pool.pool.workload_identity_pool_id
+  workload_identity_pool_namespace_id = "{{index $.Vars "workload_identity_pool_namespace_id"}}"
+  description                         = "Example Namespace in a Workload Identity Pool"
+  disabled                            = true
+}

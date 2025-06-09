@@ -1,0 +1,20 @@
+	config := meta.(*transport_tpg.Config)
+        if err := tpgresource.ParseImportId([]string{
+		"^projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/entryGroups/(?P<entry_group_id>[^/]+)/entries/(?P<entry_id>.+)$",
+		"^(?P<project>[^/]+)/(?P<location>[^/]+)/(?P<entry_group_id>[^/]+)/(?P<entry_id>.+)$",
+		"^(?P<location>[^/]+)/(?P<entry_group_id>[^/]+)/(?P<entry_id>.+)$",
+	}, d, config); err != nil {
+		return nil, err
+	}
+
+        // Double curly braces are the templating language's special marker.
+        // We need them literally here, so apply a simple trick to force it.
+        template := "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/entryGroups/{{"{{"}}entry_group_id{{"}}"}}/entries/{{"{{"}}entry_id{{"}}"}}"
+
+	// Replace import id for the resource id
+	id, err := tpgresource.ReplaceVars(d, config, template)
+	if err != nil {
+		return nil, fmt.Errorf("Error constructing id: %s", err)
+	}
+	d.SetId(id)
+	return []*schema.ResourceData{d}, nil

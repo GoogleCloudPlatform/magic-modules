@@ -1,9 +1,7 @@
 data "google_project" "project" {
-  provider = google-beta
 }
 
 resource "google_compute_firewall_policy_with_rules" "{{$.PrimaryResourceId}}" {
-  provider    = google-beta
   short_name  = "{{index $.Vars "fw_policy"}}"
   description = "Terraform test"
   parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
@@ -14,7 +12,7 @@ resource "google_compute_firewall_policy_with_rules" "{{$.PrimaryResourceId}}" {
     enable_logging   = true
     action           = "allow"
     direction        = "EGRESS"
-    target_resources = ["https://www.googleapis.com/compute/beta/projects/${data.google_project.project.project_id}/global/networks/default"]
+    target_resources = [google_compute_network.network.self_link]
 
     match {
       dest_ip_ranges            = ["11.100.0.1/32"]
@@ -132,7 +130,6 @@ resource "google_compute_firewall_policy_with_rules" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_network_security_address_group" "address_group_1" {
-  provider    = google-beta
   name        = "{{index $.Vars "address_group"}}"
   parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
   description = "Global address group"
@@ -143,7 +140,6 @@ resource "google_network_security_address_group" "address_group_1" {
 }
 
 resource "google_network_security_security_profile_group" "security_profile_group_1" {
-  provider                  = google-beta
   name                      = "{{index $.Vars "security_profile_group"}}"
   parent                    = "organizations/{{index $.TestEnvVars "org_id"}}"
   description               = "my description"
@@ -151,7 +147,6 @@ resource "google_network_security_security_profile_group" "security_profile_grou
 }
 
 resource "google_network_security_security_profile" "security_profile_1" {
-  provider    = google-beta
   name        = "{{index $.Vars "security_profile"}}"
   type        = "THREAT_PREVENTION"
   parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
@@ -159,7 +154,6 @@ resource "google_network_security_security_profile" "security_profile_1" {
 }
 
 resource "google_compute_network" "network" {
-  provider                = google-beta
   name                    = "{{index $.Vars "network"}}"
   auto_create_subnetworks = false
 }
