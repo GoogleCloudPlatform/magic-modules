@@ -31,7 +31,7 @@ import (
 	"github.com/otiai10/copy"
 )
 
-// This proivder is for both tfplan2cai and cai2hcl conversions,
+// TerraformGoogleConversionNext is for both tfplan2cai and cai2hcl conversions
 // and copying other files, such as transport.go
 type TerraformGoogleConversionNext struct {
 	TargetVersionName string
@@ -117,7 +117,7 @@ func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resou
 	eligibleExample := false
 	for _, example := range object.Examples {
 		if !example.ExcludeTest {
-			if object.ProductMetadata.VersionObjOrClosest(t.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
+			if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
 				eligibleExample = true
 				break
 			}
@@ -132,8 +132,8 @@ func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resou
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", tgc.ResourceGoFilename(object)))
-	templateData.GenerateTestFile(targetFilePath, object)
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_generated_test.go", productName, google.Underscore(object.Name)))
+	templateData.GenerateTGCNextTestFile(targetFilePath, object)
 }
 
 func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {

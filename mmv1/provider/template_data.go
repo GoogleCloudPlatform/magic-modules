@@ -209,12 +209,12 @@ func (td *TemplateData) GenerateTGCIamResourceFile(filePath string, resource api
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
 
-func (td *TemplateData) GenerateTGCNextTestFile(filePath string, tests resourceTests) {
+func (td *TemplateData) GenerateTGCNextTestFile(filePath string, resource api.Resource) {
 	templatePath := "templates/tgc_next/test/test_file.go.tmpl"
 	templates := []string{
 		templatePath,
 	}
-	td.GenerateFile(filePath, templatePath, tests, true, templates...)
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
 
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {

@@ -1979,12 +1979,12 @@ func (r Resource) MarkdownHeader(templatePath string) string {
 
 // TGC Methods
 // ====================
-func (r Resource) IgnoreTestPropertiesTgc(e resource.Examples) []string {
+func (r Resource) IgnoreTestPropertiesTGC(e resource.Examples) []string {
 	var props []string
 	for _, tp := range r.VirtualFields {
 		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp.Name)))
 	}
-	for _, tp := range e.IgnoreTestExtraTgc {
+	for _, tp := range e.IgnoreTestPropertiesTGC {
 		props = append(props, fmt.Sprintf("\"%s\"", tp))
 	}
 
