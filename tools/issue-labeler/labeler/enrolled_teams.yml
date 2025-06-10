@@ -460,6 +460,9 @@ service/integrationconnectors:
 service/integrations:
   resources:
   - google_integrations_.*
+service/licensemanager:
+  resources:
+  - google_licensemanager_*
 service/logging:
   resources:
   - google_logging_.*

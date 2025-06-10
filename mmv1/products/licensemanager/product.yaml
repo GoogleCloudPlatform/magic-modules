@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ---
-name: 'LICENSEMANAGER'
+name: 'LicenseManager'
 legacy_name: 'licensemanager'
 display_name: 'Cloud License Manager'
 versions:
