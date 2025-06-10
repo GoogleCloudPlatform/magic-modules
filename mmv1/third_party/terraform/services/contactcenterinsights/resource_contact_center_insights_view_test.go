@@ -55,8 +55,6 @@ resource "google_contact_center_insights_view" "full_view" {
   project = "%{project_name}"
   location = "%{region}"
   display_name = "view-display-name-%{random_suffix}"
-  create_time = "2025-01-01T00:00:00Z"
-  update_time = "2025-01-01T00:00:00Z"
   value    = "medium=\"PHONE_CALL\""
 }
 `, context)
@@ -68,8 +66,6 @@ resource "google_contact_center_insights_view" "full_view" {
   project = "%{project_name}"
   location = "%{region}"
   display_name = "view-display-name-%{random_suffix}-updated"
-  create_time = "2025-01-02T00:00:00Z"
-  update_time = "2025-01-02T00:00:00Z"
   value    = "medium=\"CHAT\""
 }
 `, context)
