@@ -50,9 +50,7 @@ func TestAccComputeInterconnect_computeInterconnectMacsecTest(t *testing.T) {
 
 func testAccComputeInterconnect_computeInterconnectCreate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
-  provider = google-beta
-}
+data "google_project" "project" {}
 
 resource "google_compute_interconnect" "example-interconnect" {
   name                 = "tf-test-example-interconnect%{random_suffix}"
@@ -75,9 +73,7 @@ resource "google_compute_interconnect" "example-interconnect" {
 
 func testAccComputeInterconnect_computeInterconnectEnableMacsec(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
-  provider = google-beta
-}
+data "google_project" "project" {}
 
 resource "google_compute_interconnect" "example-interconnect" {
   name                 = "tf-test-example-interconnect%{random_suffix}"
