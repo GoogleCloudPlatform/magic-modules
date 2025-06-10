@@ -1184,7 +1184,7 @@ func resource{{ $.ResourceName }}Import(d *schema.ResourceData, meta interface{}
 }
 {{ end }}
 {{- range $prop := $.GettableProperties }}
-    {{- if not $prop.IgnoreRead }}
+    {{- if and (not $prop.IgnoreRead) (not $prop.WriteOnly) }}
         {{ template "flattenPropertyMethod" $prop -}}
     {{- end }}
 {{- end }}
