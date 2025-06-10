@@ -712,6 +712,21 @@ func (r Resource) GetIdentity() []*Type {
 
 func (r *Resource) AddWriteOnlyRelatedFields(props []*Type) []*Type {
 	// TODO add implementation for adding write-only related fields
+	for _, p := range props {
+		if p.WriteOnly {
+			props = append(props, p)
+		} else if p.IsA("NestedObject") && len(p.AllProperties()) > 0 {
+			p.Properties = r.AddWriteOnlyRelatedFields(p.AllProperties())
+		}
+	}
+	return props
+}
+
+func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type) []*Type {
+	// TODO generate the extra write-only related fields
+	writeOnlyField := nil
+	writeOnlyVersionField := nil
+	props = append(props, writeOnlyField, writeOnlyVersionField)
 	return props
 }
 
