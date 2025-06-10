@@ -1,0 +1,197 @@
+package compute_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccComputeInterconnect_computeInterconnectMacsecTest(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInterconnectDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInterconnect_computeInterconnectCreate(context),
+			},
+			{
+				ResourceName:            "google_compute_interconnect.example-interconnect",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
+			},
+			{
+				Config: testAccComputeInterconnect_computeInterconnectEnableMacsec(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_interconnect.example-interconnect", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_compute_interconnect.example-interconnect",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccComputeInterconnect_computeInterconnectCreate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_compute_interconnect" "example-interconnect" {
+  name                 = "tf-test-example-interconnect%{random_suffix}"
+  customer_name        = "internal_customer" # Special customer only available for Google testing.
+  interconnect_type    = "DEDICATED"
+  link_type            = "LINK_TYPE_ETHERNET_100G_LR"
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.id}/global/interconnectLocations/z2z-us-east4-zone1-lciadl-z" # Special location only available for Google testing.
+  requested_link_count = 1
+  admin_enabled        = true
+  description          = "example description"
+  macsec_enabled       = false
+  noc_contact_email    = "user@example.com"
+  requested_features   = ["IF_MACSEC"]
+  labels = {
+    mykey = "myvalue"
+  }
+}
+`, context)
+}
+
+func testAccComputeInterconnect_computeInterconnectEnableMacsec(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_compute_interconnect" "example-interconnect" {
+  name                 = "tf-test-example-interconnect%{random_suffix}"
+  customer_name        = "internal_customer" # Special customer only available for Google testing.
+  interconnect_type    = "DEDICATED"
+  link_type            = "LINK_TYPE_ETHERNET_100G_LR"
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.id}/global/interconnectLocations/z2z-us-east4-zone1-lciadl-z" # Special location only available for Google testing.
+  requested_link_count = 1
+  admin_enabled        = true
+  description          = "example description"
+  macsec_enabled       = true
+  noc_contact_email    = "user@example.com"
+  requested_features   = ["IF_MACSEC"]
+  macsec {
+    pre_shared_keys {
+      name = "test-key"
+      start_time = "2023-07-01T21:00:01.000Z"
+    }
+    fail_open = true
+  }
+  labels = {
+    mykey = "newvalue"
+  }
+}
+`, context)
+}
+
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccComputeInterconnect_computeInterconnectCrossSiteNetworkTestExample_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeInterconnectDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInterconnect_basic(context),
+			},
+			{
+				ResourceName:            "google_compute_interconnect.example-interconnect-cross-site-network",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
+			},
+			{
+				Config: testAccComputeInterconnect_modified(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_interconnect.example-interconnect-cross-site-network", "description", "Example Interconnect Updated"+context["random_suffix"].(string)),
+				),
+			},
+			{
+				ResourceName:            "google_compute_interconnect.example-interconnect-cross-site-network",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
+			},
+		},
+	})
+}
+{{- end }}
+
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccComputeInterconnect_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_compute_cross_site_network" "example-cross-site-network" {
+  name        = "tf-test-example-cross-site-network%{random_suffix}"
+  description = "Example cross site network"
+  provider    = google-beta
+}
+
+resource "google_compute_interconnect" "example-interconnect-cross-site-network" {
+  name                 = "tf-test-example-interconnect-cross-site-network%{random_suffix}"
+  customer_name        = "tf_test_example_customer%{random_suffix}"
+  interconnect_type    = "DEDICATED"
+  requested_features  = ["CROSS_SITE_NETWORK"]
+  provider            = google-beta
+  link_type            = "LINK_TYPE_ETHERNET_10G_LR"
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.id}/global/interconnectLocations/z2z-us-west8-zone2-tzphxd-z" # Special location only available for Google testing.
+  requested_link_count = 1
+  description          = "Example Interconnect%{random_suffix}"
+}
+`, context)
+}
+{{- end }}
+
+{{ if ne $.TargetVersionName `ga` -}}
+func testAccComputeInterconnect_modified(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_compute_cross_site_network" "example-cross-site-network" {
+  name        = "tf-test-example-cross-site-network%{random_suffix}"
+  description = "Example cross site network"
+  provider    = google-beta
+}
+
+resource "google_compute_interconnect" "example-interconnect-cross-site-network" {
+  name                 = "tf-test-example-interconnect-cross-site-network%{random_suffix}"
+  customer_name        = "tf_test_example_customer%{random_suffix}"
+  interconnect_type    = "DEDICATED"
+  requested_features  = ["CROSS_SITE_NETWORK"]
+  provider            = google-beta
+  link_type            = "LINK_TYPE_ETHERNET_10G_LR"
+  location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.id}/global/interconnectLocations/z2z-us-west8-zone2-tzphxd-z" # Special location only available for Google testing.
+  requested_link_count = 1
+  description          = "Example Interconnect Updated%{random_suffix}"
+}
+`, context)
+}
+{{- end }}
