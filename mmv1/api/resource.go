@@ -710,6 +710,11 @@ func (r Resource) GetIdentity() []*Type {
 	})
 }
 
+func (r *Resource) AddWriteOnlyRelatedFields(props []*Type) []*Type {
+	// TODO add implementation for adding write-only related fields
+	return props
+}
+
 func (r *Resource) AddLabelsRelatedFields(props []*Type, parent *Type) []*Type {
 	for _, p := range props {
 		if p.IsA("KeyValueLabels") {
