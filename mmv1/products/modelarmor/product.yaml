@@ -17,6 +17,6 @@ display_name: Model Armor
 scopes:
 - https://www.googleapis.com/auth/cloud-platform
 versions:
-- base_url: https://modelarmor.us.rep.googleapis.com/v1/
+- base_url: https://modelarmor.us-central1.rep.googleapis.com/v1/
   name: ga
-caibaseurl: ""
+caibaseurl: "" 
