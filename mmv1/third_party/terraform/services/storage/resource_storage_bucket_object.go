@@ -154,7 +154,11 @@ func ResourceStorageBucketObject() *schema.Resource {
 				// 3. Don't suppress the diff iff they don't match
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					localMd5Hash := ""
-					if v, ok := d.GetOkExists("source_md5hash"); ok && v != "" {
+					if d.GetRawConfig().GetAttr("source_md5hash") == cty.UnknownVal(cty.String) {
+						log.Printf("source md5hash is not present")
+						return true
+					}
+					if v, ok := d.GetOk("source_md5hash"); ok && v != "" {
 						return true
 					}
 					if source, ok := d.GetOkExists("source"); ok {
@@ -640,6 +644,10 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	localMd5Hash := ""
 
+	if (d.GetRawConfig().GetAttr("source_md5hash") == cty.UnknownVal(cty.String)) || d.HasChange("source_md5hash") {
+		return showDiff(d)
+	}
+
 	if source, ok := d.GetOkExists("source"); ok {
 		localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
 	}
@@ -654,7 +662,10 @@ func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.Res
 	if ok && oldMd5Hash == localMd5Hash {
 		return nil
 	}
+	return showDiff(d)
+}
 
+func showDiff(d *schema.ResourceDiff) error {
 	err := d.SetNewComputed("md5hash")
 	if err != nil {
 		return fmt.Errorf("Error re-setting md5hash: %s", err)
