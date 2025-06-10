@@ -66,14 +66,12 @@ properties:
   - name: 'effectiveContainer'
     type: String
     description: |
-      Deprecated: The resource container that determines if the quota adjuster is set for this project.
-      Expect this field to be empty currently.
+      The resource container that determines if the quota adjuster is set for this project.
     output: true
   - name: 'effectiveEnablement'
     type: Enum
     description: |
-      Deprecated: Based on the effective container`s setting above, determines Whether this resource container has the quota adjuster enabled.
-      Expect this field to be empty currently.
+      Based on the effective container`s setting above, determines Whether this resource container has the quota adjuster enabled.
     output: true
     enum_values:
       - 'DEFAULT'
@@ -88,6 +86,6 @@ properties:
     type: String
     description: |
       The resource container from which the setting is inherited. This refers to the  nearest ancestor with enablement set (either ENABLED or DISABLED).
-      The value can be an organizations/{organization_id}, folders/{folder_id}, or can be 'default' if no ancestor exists with enablement set. The value will
-      be empty when enablement is directly set on this container.
+      The value can be `organizations/{organization_id}`, `folders/{folder_id}`, or can be `'default'` if no ancestor exists with enablement set. The value will
+      be empty when enablement is explicitly specified on this container.
     output: true
