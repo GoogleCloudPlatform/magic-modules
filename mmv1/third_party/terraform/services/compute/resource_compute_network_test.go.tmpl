@@ -438,10 +438,15 @@ func TestAccComputeNetwork_resourceManagerTags(t *testing.T) {
 	var network compute.Network
 	pid := envvar.GetTestProjectFromEnv()
 	suffixName := acctest.RandString(t, 10)
+	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-networks-tagkey")
+	sharedTagkey,_ := tagKeyResult["shared_tag_key"].(string)
+	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-networks-tagvalue", sharedTagkey)
 	networkName := fmt.Sprintf("tf-test-network-resource-manager-tags-%s", suffixName)
 	context := map[string]interface{}{
 		"network_name": networkName,
 		"project_id":    pid,
+		"tag_key_id": tagKeyResult["name"],
+		"tag_value_id": tagValueResult["name"],
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -755,21 +760,12 @@ resource "google_compute_network" "acc_network_firewall_policy_enforcement_order
 
 func testAccComputeNetwork_resourceManagerTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_tags_tag_key" "tag_key" {
-  parent = "projects/%{project_id}"
-  short_name = "test"
-}
-
-resource "google_tags_tag_value" "tag_value" {
-  parent = "tagKeys/${google_tags_tag_key.tag_key.name}"
-  short_name = "name"
-}
 resource "google_compute_network" "acc_network_with_resource_manager_tags" {
   name                            = "%{network_name}"
   auto_create_subnetworks         = false
   params {
 	resource_manager_tags = {
-	  "${google_tags_tag_key.tag_key.id}" = "${google_tags_tag_value.tag_value.id}"
+	  "%{tag_key_id}" = "%{tag_value_id}"
   	}
   }
 }

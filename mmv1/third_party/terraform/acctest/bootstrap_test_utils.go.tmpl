@@ -2061,13 +2061,18 @@ func BootstrapSharedCodeRepositoryIndex(t *testing.T, codeRepositoryIndexId, loc
 const sharedTagKeyPrefix = "tf-bootstrap-tagkey"
 
 func BootstrapSharedTestTagKey(t *testing.T, testId string) string {
+	sharedTagKey,_ := BootstrapSharedTestTagKeyDetails(t, testId)["shared_tag_key"].(string)
+	return sharedTagKey
+}
+
+func BootstrapSharedTestTagKeyDetails(t *testing.T, testId string) map[string]interface{} {
 	org := envvar.GetTestOrgFromEnv(t)
 	sharedTagKey := fmt.Sprintf("%s-%s", sharedTagKeyPrefix, testId)
 	tagKeyName := fmt.Sprintf("%s/%s", org, sharedTagKey)
 
 	config := BootstrapConfig(t)
 	if config == nil {
-		return ""
+		return make(map[string]interface{})
 	}
 
 	log.Printf("[DEBUG] Getting shared test tag key %q", sharedTagKey)
@@ -2113,7 +2118,7 @@ func BootstrapSharedTestTagKey(t *testing.T, testId string) string {
 		}
 	}
 
-	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	createTagKeyResponse, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		Project:   config.Project,
@@ -2126,12 +2131,20 @@ func BootstrapSharedTestTagKey(t *testing.T, testId string) string {
 		t.Fatalf("Error getting shared tag key %q: %s", sharedTagKey, err)
 	}
 
-	return sharedTagKey
+	return map[string]interface{}{
+		"name": createTagKeyResponse["name"].(string),
+		"shared_tag_key":    sharedTagKey,
+	}
 }
 
 const sharedTagValuePrefix = "tf-bootstrap-tagvalue"
 
 func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey string) string {
+	sharedTagValue,_ := BootstrapSharedTestTagValueDetails(t, testId, tagKey)["shared_tag_value"].(string)
+	return sharedTagValue
+}
+
+func BootstrapSharedTestTagValueDetails(t *testing.T, testId string, tagKey string) map[string]interface{} {
 	org := envvar.GetTestOrgFromEnv(t)
 	sharedTagValue := fmt.Sprintf("%s-%s", sharedTagValuePrefix, testId)
 	tagKeyName := fmt.Sprintf("%s/%s", org, tagKey)
@@ -2139,7 +2152,7 @@ func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey string) str
 
 	config := BootstrapConfig(t)
 	if config == nil {
-		return ""
+		return make(map[string]interface{})
 	}
 
 	log.Printf("[DEBUG] Getting shared test tag value %q", sharedTagValue)
@@ -2198,8 +2211,7 @@ func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey string) str
 			t.Fatalf("Error waiting to create TagValue: %s", err)
 		}
 	}
-
-	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	createTagValueResponse, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		Project:   config.Project,
@@ -2212,7 +2224,10 @@ func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey string) str
 		t.Fatalf("Error getting shared tag value %q: %s", sharedTagValue, err)
 	}
 
-	return sharedTagValue
+    return map[string]interface{}{
+		"name": createTagValueResponse["name"].(string),
+		"shared_tag_value":    sharedTagValue,
+	}
 }
 
 type BootstrapClient struct {

@@ -245,13 +245,11 @@ properties:
     type: NestedObject
     ignore_read: true
     immutable: true
-    min_version: beta
     description: |
      Additional params passed with the request, but not persisted as part of resource payload
     properties:
       - name: 'resourceManagerTags'
         type: KeyValuePairs
-        min_version: beta
         description: |
           Resource manager tags to be bound to the network. Tag keys and values have the
           same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
