@@ -94,6 +94,7 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs, "tfplan2cai")
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs, "cai2hcl")
+		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
 }
 
@@ -128,7 +129,7 @@ func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resou
 	}
 
 	productName := tgc.Product.ApiName
-	targetFolder := path.Join(outputFolder, "test/services", productName)
+	targetFolder := path.Join(outputFolder, "test", "services", productName)
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
