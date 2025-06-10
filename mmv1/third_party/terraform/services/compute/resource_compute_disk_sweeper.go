@@ -40,7 +40,7 @@ func testSweepDisk(region string) error {
 				Config:    config,
 				Method:    "GET",
 				Project:   config.Project,
-				RawURL:    urlRequest,
+				RawURL:    listUrl,
 				UserAgent: config.UserAgent,
 			})
 			if err != nil {
