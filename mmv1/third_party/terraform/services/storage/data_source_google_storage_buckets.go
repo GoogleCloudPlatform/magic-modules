@@ -65,43 +65,29 @@ func datasourceGoogleStorageBucketsRead(d *schema.ResourceData, meta interface{}
 	params := make(map[string]string)
 	buckets := make([]map[string]interface{}, 0)
 
-	for {
-		url := "https://storage.googleapis.com/storage/v1/b"
+	url := "https://storage.googleapis.com/storage/v1/b"
 
-		params["project"], err = tpgresource.GetProject(d, config)
-		if err != nil {
-			return fmt.Errorf("Error fetching project for bucket: %s", err)
-		}
-
-		if v, ok := d.GetOk("prefix"); ok {
-			params["prefix"] = v.(string)
-		}
-
-		url, err = transport_tpg.AddQueryParams(url, params)
-		if err != nil {
-			return err
-		}
-
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			RawURL:    url,
-			UserAgent: userAgent,
-		})
-		if err != nil {
-			return fmt.Errorf("Error retrieving buckets: %s", err)
-		}
-
-		pageBuckets := flattenDatasourceGoogleBucketsList(res["items"])
-		buckets = append(buckets, pageBuckets...)
-
-		pToken, ok := res["nextPageToken"]
-		if ok && pToken != nil && pToken.(string) != "" {
-			params["pageToken"] = pToken.(string)
-		} else {
-			break
-		}
+	params["project"], err = tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project for bucket: %s", err)
 	}
+
+	if v, ok := d.GetOk("prefix"); ok {
+		params["prefix"] = v.(string)
+	}
+
+	url, err = transport_tpg.AddQueryParams(url, params)
+	if err != nil {
+		return err
+	}
+
+	res, err := transport_tpg.PluralDataSourceGet(d, config, nil, userAgent, url, params, "items")
+	if err != nil {
+		return fmt.Errorf("Error retrieving buckets: %s", err)
+	}
+
+	pageBuckets := flattenDatasourceGoogleBucketsList(res)
+	buckets = append(buckets, pageBuckets...)
 
 	if err := d.Set("buckets", buckets); err != nil {
 		return fmt.Errorf("Error retrieving buckets: %s", err)

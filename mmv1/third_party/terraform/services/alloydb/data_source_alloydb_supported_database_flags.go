@@ -139,91 +139,66 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 	if err != nil {
 		return fmt.Errorf("Error setting api endpoint")
 	}
-	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-		Config:    config,
-		Method:    "GET",
-		Project:   billingProject,
-		RawURL:    url,
-		UserAgent: userAgent,
-	})
+	result, err := transport_tpg.PluralDataSourceGet(d, config, &billingProject, userAgent, url, nil, "supportedDatabaseFlags")
 	if err != nil {
-		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("SupportedDatabaseFlags %q", d.Id()), url)
+		return err
 	}
-	var supportedDatabaseFlags []map[string]interface{}
-	for {
-		result := res["supportedDatabaseFlags"].([]interface{})
-		for _, dbFlag := range result {
-			supportedDatabaseFlag := make(map[string]interface{})
-			flag := dbFlag.(map[string]interface{})
-			if flag["name"] != nil {
-				supportedDatabaseFlag["name"] = flag["name"].(string)
+	supportedDatabaseFlags := make([]map[string]interface{}, 0)
+	for _, dbFlag := range result {
+		supportedDatabaseFlag := make(map[string]interface{})
+		flag := dbFlag.(map[string]interface{})
+		if flag["name"] != nil {
+			supportedDatabaseFlag["name"] = flag["name"].(string)
+		}
+		if flag["flagName"] != nil {
+			supportedDatabaseFlag["flag_name"] = flag["flagName"].(string)
+		}
+		if flag["valueType"] != nil {
+			supportedDatabaseFlag["value_type"] = flag["valueType"].(string)
+		}
+		if flag["acceptsMultipleValues"] != nil {
+			supportedDatabaseFlag["accepts_multiple_values"] = flag["acceptsMultipleValues"].(bool)
+		}
+		if flag["requiresDbRestart"] != nil {
+			supportedDatabaseFlag["requires_db_restart"] = flag["requiresDbRestart"].(bool)
+		}
+		if flag["supportedDbVersions"] != nil {
+			dbVersions := make([]string, 0, len(flag["supportedDbVersions"].([]interface{})))
+			for _, supDbVer := range flag["supportedDbVersions"].([]interface{}) {
+				dbVersions = append(dbVersions, supDbVer.(string))
 			}
-			if flag["flagName"] != nil {
-				supportedDatabaseFlag["flag_name"] = flag["flagName"].(string)
-			}
-			if flag["valueType"] != nil {
-				supportedDatabaseFlag["value_type"] = flag["valueType"].(string)
-			}
-			if flag["acceptsMultipleValues"] != nil {
-				supportedDatabaseFlag["accepts_multiple_values"] = flag["acceptsMultipleValues"].(bool)
-			}
-			if flag["requiresDbRestart"] != nil {
-				supportedDatabaseFlag["requires_db_restart"] = flag["requiresDbRestart"].(bool)
-			}
-			if flag["supportedDbVersions"] != nil {
-				dbVersions := make([]string, 0, len(flag["supportedDbVersions"].([]interface{})))
-				for _, supDbVer := range flag["supportedDbVersions"].([]interface{}) {
-					dbVersions = append(dbVersions, supDbVer.(string))
-				}
-				supportedDatabaseFlag["supported_db_versions"] = dbVersions
-			}
+			supportedDatabaseFlag["supported_db_versions"] = dbVersions
+		}
 
-			if flag["stringRestrictions"] != nil {
-				restrictions := make([]map[string][]string, 0, 1)
-				fetchedAllowedValues := flag["stringRestrictions"].(map[string]interface{})["allowedValues"]
-				if fetchedAllowedValues != nil {
-					allowedValues := make([]string, 0, len(fetchedAllowedValues.([]interface{})))
-					for _, val := range fetchedAllowedValues.([]interface{}) {
-						allowedValues = append(allowedValues, val.(string))
-					}
-					stringRestrictions := map[string][]string{
-						"allowed_values": allowedValues,
-					}
-					restrictions = append(restrictions, stringRestrictions)
-					supportedDatabaseFlag["string_restrictions"] = restrictions
+		if flag["stringRestrictions"] != nil {
+			restrictions := make([]map[string][]string, 0, 1)
+			fetchedAllowedValues := flag["stringRestrictions"].(map[string]interface{})["allowedValues"]
+			if fetchedAllowedValues != nil {
+				allowedValues := make([]string, 0, len(fetchedAllowedValues.([]interface{})))
+				for _, val := range fetchedAllowedValues.([]interface{}) {
+					allowedValues = append(allowedValues, val.(string))
 				}
-			}
-			if flag["integerRestrictions"] != nil {
-				restrictions := make([]map[string]string, 0, 1)
-				minValue := flag["integerRestrictions"].(map[string]interface{})["minValue"].(string)
-				maxValue := flag["integerRestrictions"].(map[string]interface{})["maxValue"].(string)
-				integerRestrictions := map[string]string{
-					"min_value": minValue,
-					"max_value": maxValue,
+				stringRestrictions := map[string][]string{
+					"allowed_values": allowedValues,
 				}
-				restrictions = append(restrictions, integerRestrictions)
-				supportedDatabaseFlag["integer_restrictions"] = restrictions
+				restrictions = append(restrictions, stringRestrictions)
+				supportedDatabaseFlag["string_restrictions"] = restrictions
 			}
-			supportedDatabaseFlags = append(supportedDatabaseFlags, supportedDatabaseFlag)
 		}
-		if res["pageToken"] == nil || res["pageToken"].(string) == "" {
-			break
+		if flag["integerRestrictions"] != nil {
+			restrictions := make([]map[string]string, 0, 1)
+			minValue := flag["integerRestrictions"].(map[string]interface{})["minValue"].(string)
+			maxValue := flag["integerRestrictions"].(map[string]interface{})["maxValue"].(string)
+			integerRestrictions := map[string]string{
+				"min_value": minValue,
+				"max_value": maxValue,
+			}
+			restrictions = append(restrictions, integerRestrictions)
+			supportedDatabaseFlag["integer_restrictions"] = restrictions
 		}
-		url, err = tpgresource.ReplaceVars(d, config, "{{AlloydbBasePath}}projects/{{project}}/locations/{{location}}/supportedDatabaseFlags?pageToken="+res["nextPageToken"].(string))
-		if err != nil {
-			return fmt.Errorf("Error setting api endpoint")
-		}
-		res, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			Project:   billingProject,
-			RawURL:    url,
-			UserAgent: userAgent,
-		})
-		if err != nil {
-			return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("SupportedDatabaseFlags %q", d.Id()), url)
-		}
+		supportedDatabaseFlags = append(supportedDatabaseFlags, supportedDatabaseFlag)
 	}
+
 	if err := d.Set("supported_database_flags", supportedDatabaseFlags); err != nil {
 		return fmt.Errorf("Error setting supported_database_flags: %s", err)
 	}
