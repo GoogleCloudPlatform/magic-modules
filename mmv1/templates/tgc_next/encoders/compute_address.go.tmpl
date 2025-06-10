@@ -1,0 +1,6 @@
+config := meta.(*transport_tpg.Config)
+
+obj["subnetwork"] = tgcresource.GetComputeSelfLink(config, obj["subnetwork"])
+obj["network"] = tgcresource.GetComputeSelfLink(config, obj["network"])
+
+return obj, nil

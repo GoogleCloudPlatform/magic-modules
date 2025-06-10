@@ -35,7 +35,9 @@ import (
 
   "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
   "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/cai"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tgcresource"
   "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
+  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
   transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
   "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/verify"
 )
@@ -134,7 +136,14 @@ func Get{{ $.ResourceName -}}ApiObject(d tpgresource.TerraformResourceData, conf
 {{- end}}
 
 {{ if $.CustomCode.Encoder -}}
-    return resource{{ $.ResourceName -}}Encoder(d, config, obj)
+    obj, err = resource{{ $.ResourceName -}}Encoder(d, config, obj)
+    if err != nil {
+        return nil, err
+    }
+{{- end }}
+
+{{- if $.CustomCode.TgcEncoder }}
+    return resource{{ $.ResourceName -}}TgcEncoder(d, config, obj)
 {{- else }}
     return obj, nil
 {{- end}}
@@ -143,6 +152,12 @@ func Get{{ $.ResourceName -}}ApiObject(d tpgresource.TerraformResourceData, conf
 {{if $.CustomCode.Encoder -}}
 func resource{{ $.ResourceName -}}Encoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
 {{ $.CustomTemplate $.CustomCode.Encoder false -}}
+}
+{{- end}}
+
+{{if $.CustomCode.TgcEncoder -}}
+func resource{{ $.ResourceName -}}TgcEncoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
+{{ $.CustomTemplate $.CustomCode.TgcEncoder false -}}
 }
 {{- end}}
 
