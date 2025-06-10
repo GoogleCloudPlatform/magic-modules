@@ -1,10 +1,11 @@
 package networksecurity_test
+
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
-  
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
