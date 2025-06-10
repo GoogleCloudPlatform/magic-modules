@@ -77,7 +77,6 @@ func testAccAccessContextManagerAccessPolicy_basicTest(t *testing.T) {
 			},
 		},
 	})
-	t.Fatalf("test change, revert before merge")
 }
 
 func testAccCheckAccessContextManagerAccessPolicyDestroyProducer(t *testing.T) func(s *terraform.State) error {
