@@ -62,6 +62,7 @@ examples:
 update_verb: PATCH
 update_mask: true
 autogen_async: false
+autogen_status: QXBwbGljYXRpb25FbnZpcm9ubWVudA==
 properties:
   - name: name
     type: String

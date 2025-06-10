@@ -20,6 +20,11 @@ description: |
 
   An Entry resource contains resource details, such as its schema. An Entry can also be used to attach
   flexible metadata, such as a Tag.
+deprecation_message: >-
+  `google_data_catalog_entry` is deprecated and will be removed in a future major release.
+  Data Catalog is deprecated and will be discontinued on January 30, 2026. For steps to transition
+  your Data Catalog users, workloads, and content to Dataplex Catalog, see
+  https://cloud.google.com/dataplex/docs/transition-to-dataplex-catalog.
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/data-catalog/docs'

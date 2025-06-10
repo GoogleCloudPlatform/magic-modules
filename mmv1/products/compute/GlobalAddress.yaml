@@ -13,6 +13,7 @@
 
 ---
 name: 'GlobalAddress'
+api_resource_type_kind: Address
 kind: 'compute#address'
 description: |
   Represents a Global Address resource. Global addresses are used for

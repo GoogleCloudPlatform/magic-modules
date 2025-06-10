@@ -64,13 +64,18 @@ var (
 		"BBBmau": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2024, 11, 1),
-					endDate:   newDate(2024, 11, 1),
+					startDate: newDate(2025, 4, 7),
+					endDate:   newDate(2025, 4, 11),
 				},
 			},
 		},
 		"c2thorn": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 4, 9),
+					endDate:   newDate(2025, 4, 15),
+				},
+			},
 		},
 		"hao-nan-li": {
 			vacations: []Vacation{},
@@ -82,7 +87,12 @@ var (
 			vacations: []Vacation{},
 		},
 		"rileykarson": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 2, 25),
+					endDate:   newDate(2025, 3, 10),
+				},
+			},
 		},
 		"roaks3": {
 			vacations: []Vacation{},
@@ -91,7 +101,12 @@ var (
 			vacations: []Vacation{},
 		},
 		"shuyama1": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 5, 23),
+					endDate:   newDate(2025, 5, 30),
+				},
+			},
 		},
 		"SirGitsalot": {
 			vacations: []Vacation{
@@ -102,7 +117,12 @@ var (
 			},
 		},
 		"slevenick": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 5, 22),
+					endDate:   newDate(2025, 6, 7),
+				},
+			},
 		},
 		"trodge": {
 			vacations: []Vacation{},
@@ -118,5 +138,9 @@ var (
 	}
 
 	// This is for new team members who are onboarding
-	trustedContributors = map[string]struct{}{}
+	trustedContributors = map[string]struct{}{
+		"bbasata":           struct{}{},
+		"jaylonmcshan03":    struct{}{},
+		"malhotrasagar2212": struct{}{},
+	}
 )

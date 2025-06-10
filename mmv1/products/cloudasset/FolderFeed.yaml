@@ -14,6 +14,8 @@
 ---
 name: 'FolderFeed'
 api_resource_type_kind: Feed
+api_variant_patterns:
+  - 'folders/{folder}/feeds/{feed}'
 description: |
   Describes a Cloud Asset Inventory feed used to to listen to asset updates.
 references:

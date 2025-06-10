@@ -13,6 +13,7 @@
 
 ---
 name: 'AccessBoundaryPolicy'
+api_resource_type_kind: Policy
 description: |
   Represents a collection of access boundary policies to apply to a given resource.
   **NOTE**: This is a private feature and users should contact GCP support

@@ -14,14 +14,10 @@
 ---
 name: 'ProjectNotificationConfig'
 api_resource_type_kind: NotificationConfig
-description: |
-  A Cloud Security Command Center (Cloud SCC) notification configs. A
-  notification config is a Cloud SCC resource that contains the
-  configuration to send notifications for create/update events of
-  findings, assets and etc.
-  ~> **Note:** In order to use Cloud SCC resources, your organization must be enrolled
-  in [SCC Standard/Premium](https://cloud.google.com/security-command-center/docs/quickstart-security-command-center).
-  Without doing so, you may run into errors during resource creation.
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/notificationConfigs/{notificationConfig}'
+description:
+  This is a continuous export that exports findings to a Pub/Sub topic.
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/security-command-center/docs'
@@ -39,11 +35,10 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
 sweeper:
-  regions:
-    - "global"
+  url_substitutions:
+    - region: "global"
 examples:
   - name: 'scc_v2_project_notification_config_basic'
     primary_resource_id: 'custom_notification_config'

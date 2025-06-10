@@ -50,9 +50,9 @@ custom_code:
 exclude_tgc: true
 legacy_long_form_project: true
 sweeper:
-  regions:
-    - "us-west1"
-    - "us-central1"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-west1"
 examples:
   - name: 'cloudbuildv2_connection'
     primary_resource_id: 'my-connection'

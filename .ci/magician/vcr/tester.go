@@ -482,8 +482,10 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 		fmt.Sprintf("%sbuild-log/%s_test%s.log", bucketPath, opts.Mode.Lower(), suffix),
 	}
 	fmt.Println("Uploading build log:\n", "gsutil", strings.Join(args, " "))
-	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+	if out, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 		fmt.Println("Error uploading build log: ", err)
+	} else {
+		fmt.Println("gsutil output: ", out)
 	}
 	if opts.Parallel {
 		args := []string{
@@ -512,9 +514,11 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 		fmt.Sprintf("%s%s%s/", bucketPath, opts.Mode.Lower(), suffix),
 	}
 	fmt.Println("Uploading logs:\n", "gsutil", strings.Join(args, " "))
-	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+	if out, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 		fmt.Println("Error uploading logs: ", err)
 		vt.printLogs(logPath)
+	} else {
+		fmt.Println("gsutil output: ", out)
 	}
 	return nil
 }

@@ -92,6 +92,7 @@ func testAccAccessContextManagerServicePerimeterEgressPolicy_basic(org, policyTi
 
 resource "google_access_context_manager_service_perimeter_egress_policy" "test-access1" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
+	title = "egress policy title"
 	egress_from {
 		identity_type = "ANY_USER_ACCOUNT"
 	}
@@ -103,7 +104,6 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 	    }
 	  }
 	}
-
 }
 
 resource "google_access_context_manager_access_level" "test-access" {
@@ -127,6 +127,10 @@ resource "google_access_context_manager_service_perimeter_egress_policy" "test-a
 			access_level = google_access_context_manager_access_level.test-access.name
 		}
 		source_restriction = "SOURCE_RESTRICTION_ENABLED"
+	}
+	egress_to {
+		resources = ["*"]
+		roles = ["roles/bigquery.admin"]
 	}
 }
 

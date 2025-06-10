@@ -57,10 +57,10 @@ custom_code:
   encoder: 'templates/terraform/encoders/cloudfunctions2_runtime_update_policy.go.tmpl'
 taint_resource_on_failed_create: true
 sweeper:
-  regions:
-    - "us-central1"
-    - "us-west1"
-    - "europe-west6"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west6"
+    - region: "us-west1"
 examples:
   - name: 'cloudfunctions2_basic'
     primary_resource_id: 'function'
@@ -264,7 +264,7 @@ examples:
       project: 'my-project-name'
  # this example file will cause IAM conflicts between tests if used to make a test
     exclude_test: true
-  - name: 'cloudfunctions2_abiu'
+  - name: 'cloudfunctions2_automatic_base_image_update'
     primary_resource_id: 'function'
     min_version: 'beta'
     vars:
@@ -283,7 +283,7 @@ examples:
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
-  - name: 'cloudfunctions2_abiu_on_deploy'
+  - name: 'cloudfunctions2_on_deploy_base_image_update'
     primary_resource_id: 'function'
     min_version: 'beta'
     vars:
@@ -653,6 +653,10 @@ properties:
                     description: |
                       Relative path of the file under the mount path where the secret value for this version will be fetched and made available. For example, setting the mountPath as '/etc/secrets' and path as secret_foo would mount the secret value file at /etc/secrets/secret_foo.
                     required: true
+      - name: 'binaryAuthorizationPolicy'
+        type: String
+        description: |
+          The binary authorization policy to be checked when deploying the Cloud Run service.
   - name: 'eventTrigger'
     type: NestedObject
     description: |

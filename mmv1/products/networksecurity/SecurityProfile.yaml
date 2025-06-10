@@ -40,6 +40,10 @@ async:
     resource_inside_response: false
   include_project: true
 custom_code:
+sweeper:
+  url_substitutions:
+    - parent: "organizations/${ORG_ID}"
+      region: "global"
 examples:
   - name: 'network_security_security_profile_basic'
     primary_resource_id: 'default'
@@ -188,6 +192,35 @@ properties:
                 - 'UNKNOWN'
                 - 'VULNERABILITY'
                 - 'SPYWARE'
+      - name: 'antivirusOverrides'
+        type: Array
+        is_set: true
+        description: |
+          Defines what action to take for antivirus threats per protocol.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'protocol'
+              type: Enum
+              description: Required protocol to match.
+              required: true
+              enum_values:
+                - 'SMTP'
+                - 'SMB'
+                - 'POP3'
+                - 'IMAP'
+                - 'HTTP2'
+                - 'HTTP'
+                - 'FTP'
+            - name: 'action'
+              type: Enum
+              description: Threat action override. For some threat types, only a subset of actions applies.
+              required: true
+              enum_values:
+                - 'ALERT'
+                - 'ALLOW'
+                - 'DEFAULT_ACTION'
+                - 'DENY'
     conflicts:
       - 'customMirroringProfile'
       - 'customInterceptProfile'

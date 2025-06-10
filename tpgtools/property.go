@@ -67,6 +67,7 @@ type Property struct {
 	Optional  bool
 	Computed  bool
 	Sensitive bool
+	WriteOnly bool
 
 	ForceNew    bool
 	Description string
@@ -478,6 +479,10 @@ func (p Property) IsResourceLabels() bool {
 
 func (p Property) IsResourceAnnotations() bool {
 	return p.Name() == "annotations" && p.parent == nil
+}
+
+func (p Property) IsTopLevel() bool {
+	return p.parent == nil
 }
 
 func (p Property) ShouldShowUpInSamples() bool {

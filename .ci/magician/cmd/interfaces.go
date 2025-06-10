@@ -26,6 +26,7 @@ type GithubClient interface {
 	GetPullRequestRequestedReviewers(prNumber string) ([]github.User, error)
 	GetPullRequestPreviousReviewers(prNumber string) ([]github.User, error)
 	GetPullRequestComments(prNumber string) ([]github.PullRequestComment, error)
+	GetCommitMessage(owner, repo, sha string) (string, error)
 	GetUserType(user string) github.UserType
 	GetTeamMembers(organization, team string) ([]github.User, error)
 	MergePullRequest(owner, repo, prNumber, commitSha string) error
@@ -33,6 +34,7 @@ type GithubClient interface {
 	PostComment(prNumber, comment string) error
 	UpdateComment(prNumber, comment string, id int) error
 	RequestPullRequestReviewers(prNumber string, reviewers []string) error
+	RemovePullRequestReviewers(prNumber string, reviewers []string) error
 	AddLabels(prNumber string, labels []string) error
 	RemoveLabel(prNumber, label string) error
 	CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error
@@ -44,6 +46,7 @@ type CloudbuildClient interface {
 
 type CloudstorageClient interface {
 	WriteToGCSBucket(bucketName, objectName, filePath string) error
+	DownloadFile(bucket, object, filePath string) error
 }
 
 type TeamcityClient interface {

@@ -40,6 +40,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+exclude_sweeper: true
 examples:
   - name: 'edgenetwork_network'
     primary_resource_id: 'example_network'

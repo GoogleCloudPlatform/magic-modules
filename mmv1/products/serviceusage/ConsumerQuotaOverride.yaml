@@ -13,6 +13,7 @@
 
 ---
 name: 'ConsumerQuotaOverride'
+api_resource_type_kind: QuotaOverride
 description: |
   A consumer override is applied to the consumer on its own authority to limit its own quota usage.
   Consumer overrides cannot be used to grant more quota than would be allowed by admin overrides,

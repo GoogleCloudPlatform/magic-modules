@@ -10,7 +10,7 @@ import (
 
 // This will sweep GCE Disk resources
 func init() {
-	sweeper.AddTestSweepers("ComputeDisk", testSweepDisk)
+	sweeper.AddTestSweepersLegacy("ComputeDisk", testSweepDisk)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
@@ -65,7 +65,10 @@ func testSweepDisk(region string) error {
 
 			id := obj["name"].(string)
 			// Increment count and skip if resource is not sweepable.
-			if !sweeper.IsSweepableTestResource(id) {
+			prefixes := []string{
+				"pvc-", // b/291168201
+			}
+			if !sweeper.IsSweepableTestResource(id) && !sweeper.HasAnyPrefix(id, prefixes) {
 				nonPrefixCount++
 				continue
 			}

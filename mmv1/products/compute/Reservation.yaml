@@ -13,6 +13,7 @@
 
 ---
 name: 'Reservation'
+api_resource_type_kind: Allocation
 description: |
   Represents a reservation resource. A reservation ensures that capacity is
   held in a specific zone even if the reserved VMs are not running.
@@ -47,6 +48,11 @@ collection_url_key: 'items'
 custom_code:
   update_encoder: 'templates/terraform/update_encoder/reservation.go.tmpl'
   pre_update: 'templates/terraform/pre_update/shared_reservation_update.go.tmpl'
+sweeper:
+  url_substitutions:
+    - zone: "us-central1-a"
+    - zone: "us-west1-a"
+    - zone: "us-central1-f"
 examples:
   - name: 'reservation_basic'
     primary_resource_id: 'gce_reservation'

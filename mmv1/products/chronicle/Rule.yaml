@@ -14,11 +14,10 @@
 ---
 name: Rule
 description: The Rule resource represents a user-created rule.
-min_version: beta
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.rules'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.rules'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules
@@ -27,11 +26,11 @@ import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule_id}}
 update_verb: PATCH
 update_mask: true
+autogen_status: UnVsZQ==
 
 examples:
   - name: 'chronicle_rule_basic'
     primary_resource_id: example
-    min_version: 'beta'
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
     ignore_read_extra:
@@ -39,7 +38,6 @@ examples:
     exclude_import_test: true
   - name: 'chronicle_rule_with_force_deletion'
     primary_resource_id: example
-    min_version: 'beta'
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
     ignore_read_extra:
@@ -47,7 +45,6 @@ examples:
     exclude_import_test: true
   - name: 'chronicle_rule_with_data_access_scope'
     primary_resource_id: example
-    min_version: 'beta'
     vars:
       data_access_scope_id: scope-name
     test_env_vars:
@@ -56,7 +53,6 @@ examples:
 
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/chronicle_rule.go.tmpl'
-  post_create: 'templates/terraform/post_create/chronicle_rule_id.go.tmpl'
 
 virtual_fields:
   - name: 'deletion_policy'

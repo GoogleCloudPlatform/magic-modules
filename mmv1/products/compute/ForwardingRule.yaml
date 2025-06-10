@@ -13,6 +13,8 @@
 
 ---
 name: 'ForwardingRule'
+api_variant_patterns:
+  - 'projects/{project}/regions/{region}/forwardingRules/{forwardingRule}'
 kind: 'compute#forwardingRule'
 description: |
   A ForwardingRule resource. A ForwardingRule resource specifies which pool
@@ -48,12 +50,14 @@ custom_diff:
   - 'forwardingRuleCustomizeDiff'
 legacy_long_form_project: true
 sweeper:
-  regions:
-    - "us-west2"
-    - "us-central1"
-    - "europe-west1"
-    - "europe-west4"
-    - "us-west1"
+  dependencies:
+    - "google_network_connectivity_service_connection_policy"
+  url_substitutions:
+    - region: "us-west2"
+    - region: "us-central1"
+    - region: "europe-west4"
+    - region: "europe-west1"
+    - region: "us-west1"
 examples:
   - name: 'internal_http_lb_with_mig_backend'
     primary_resource_id: 'google_compute_forwarding_rule'
@@ -365,6 +369,10 @@ properties:
     type: Enum
     description: |
       Specifies the forwarding rule type.
+
+      Note that an empty string value (`""`) is also supported for some use
+      cases, for example PSC (private service connection) regional forwarding
+      rules.
 
       For more information about forwarding rules, refer to
       [Forwarding rule concepts](https://cloud.google.com/load-balancing/docs/forwarding-rule-concepts).

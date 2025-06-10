@@ -14,11 +14,10 @@
 ---
 name: Watchlist
 description: A watchlist is a list of entities that allows for bulk operations over the included entities.
-min_version: beta
 references:
   guides:
     'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
-  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1alpha/projects.locations.instances.watchlists'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.watchlists'
 base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists
 self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists/{{watchlist_id}}
 create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists?watchlistId={{watchlist_id}}
@@ -27,13 +26,12 @@ import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance}}/watchlists/{{watchlist_id}}
 update_verb: PATCH
 update_mask: true
+autogen_status: V2F0Y2hsaXN0
 custom_code:
   encoder: 'templates/terraform/encoders/chronicle_watchlist.go.tmpl'
-  post_create: 'templates/terraform/post_create/chronicle_watchlist_id.go.tmpl'
 examples:
   - name: 'chronicle_watchlist_basic'
     primary_resource_id: 'example'
-    min_version: 'beta'
     vars:
       name: watchlist_name
       watchlist_id: watchlist-id
@@ -42,7 +40,6 @@ examples:
       chronicle_id: 'CHRONICLE_ID'
   - name: 'chronicle_watchlist_without_id'
     primary_resource_id: 'example'
-    min_version: 'beta'
     vars:
       name: watchlist-name
       description: watchlist-description

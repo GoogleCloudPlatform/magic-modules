@@ -30,7 +30,7 @@ func (gcs *Client) WriteToGCSBucket(bucket, object, filePath string) error {
 
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return fmt.Errorf("storage.NewClient: %v", err)
+		return fmt.Errorf("storage.NewClient: %w", err)
 	}
 	defer client.Close()
 
@@ -55,4 +55,40 @@ func (gcs *Client) WriteToGCSBucket(bucket, object, filePath string) error {
 
 	fmt.Printf("File uploaded to bucket %s as %s\n", bucket, object)
 	return nil
+}
+
+func (gcs *Client) DownloadFile(bucket, object, filePath string) error {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("storage.NewClient: %w", err)
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+
+	file, err := os.Create(filePath)
+	if err != nil {
+		return fmt.Errorf("os.Create: %w", err)
+	}
+
+	reader, err := client.Bucket(bucket).Object(object).NewReader(ctx)
+	if err != nil {
+		return fmt.Errorf("Object(%q).NewReader: %w", object, err)
+	}
+	defer reader.Close()
+
+	if _, err := io.Copy(file, reader); err != nil {
+		return fmt.Errorf("io.Copy: %w", err)
+	}
+
+	if err = file.Close(); err != nil {
+		return fmt.Errorf("file.Close: %w", err)
+	}
+
+	fmt.Printf("Obcject %s downloaded from bucket %s as %s\n", object, bucket, filePath)
+
+	return nil
+
 }

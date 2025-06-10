@@ -9,10 +9,6 @@ on:
         required: true
         type: string
 
-concurrency:
-  group: ${{ inputs.repo }}-${{ github.event_name == 'merge_group' && format('merge-group-{0}', github.event.merge_group.head_sha) || github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('commit-{0}', github.sha) }}
-  cancel-in-progress: true
-
 jobs:
   generate-repository:
     runs-on: ubuntu-22.04
@@ -48,6 +44,11 @@ jobs:
           # Set GOPATH to a directory the runner user has access to
           export GOPATH=~/go
 
+          # Clean up branch name if it starts with refs/heads/
+          if [[ $BASE_BRANCH == refs/heads/* ]]; then
+            BASE_BRANCH=${BASE_BRANCH#refs/heads/}
+          fi
+
           function clone_repo() {
             export OUTPUT_PATH=$GOPATH/src/github.com/$UPSTREAM_OWNER/$GH_REPO
             GITHUB_PATH=https://x-access-token:$GITHUB_TOKEN@github.com/$UPSTREAM_OWNER/$GH_REPO
@@ -70,7 +71,6 @@ jobs:
             else
               export VERSION=beta
             fi
-            make clean-provider
             make provider
           elif [ "$GH_REPO" == "terraform-google-conversion" ]; then
             UPSTREAM_OWNER=GoogleCloudPlatform

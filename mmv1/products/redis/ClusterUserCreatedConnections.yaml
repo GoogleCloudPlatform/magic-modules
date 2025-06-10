@@ -18,6 +18,8 @@ description: |
   Manages user created connections for Redis cluster
 docs:
   note: |
+    Please ensure your connections meet the requirements outlined at
+    https://cloud.devsite.corp.google.com/memorystore/docs/cluster/about-multiple-vpc-networking#application_connection_requirements.
     If you remove a connections item from the resource, the corresponding forwarding rule will no longer be functioning.
     If the corresponding forwarding rule is represented in your terraform configuration it is recommended to delete that
     `google_compute_forwarding_rule` resource at the same time.
@@ -93,6 +95,7 @@ properties:
   - name: 'clusterEndpoints'
     type: Array
     description: "A list of cluster endpoints"
+    custom_flatten: 'templates/terraform/custom_flatten/redis_cluster_user_created_connections.go.tmpl'
     item_type:
       type: NestedObject
       description: |

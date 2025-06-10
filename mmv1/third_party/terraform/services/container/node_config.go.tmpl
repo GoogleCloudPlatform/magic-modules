@@ -293,6 +293,13 @@ func schemaNodeConfig() *schema.Schema {
                 ValidateFunc: validation.IntAtLeast(0),
                 Description:  `Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD must be 375 or 3000 GB in size, and all local SSDs must share the same size.`,
               },
+              "data_cache_count": {
+                Type:         schema.TypeInt,
+				Optional:     true,
+                ForceNew:     true,
+                ValidateFunc: validation.IntAtLeast(0),
+                Description:  `Number of local SSDs to be utilized for GKE Data Cache. Uses NVMe interfaces.`,
+              },
             },
           },
         },
@@ -347,13 +354,11 @@ func schemaNodeConfig() *schema.Schema {
 					Optional: true,
 					MaxItems: 1,
 					Description: `Enable or disable gvnic in the node pool.`,
-					ForceNew: true,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"enabled": {
 								Type:        schema.TypeBool,
 								Required:    true,
-								ForceNew:    true,
 								Description: `Whether or not gvnic is enabled`,
 							},
 						},
@@ -465,7 +470,6 @@ func schemaNodeConfig() *schema.Schema {
 
 				"storage_pools": {
 					Type:     schema.TypeList,
-					ForceNew: true,
 					Optional: true,
 					Elem:     &schema.Schema{Type: schema.TypeString},
 					Description: `The list of Storage Pools where boot disks are provisioned.`,
@@ -624,10 +628,45 @@ func schemaNodeConfig() *schema.Schema {
 								Optional:    true,
 								Description: `Controls the maximum number of processes allowed to run in a pod.`,
 							},
+							"container_log_max_size": {
+                            	Type:        schema.TypeString,
+                            	Optional:    true,
+                            	Description: `Defines the maximum size of the container log file before it is rotated.`,
+                            },
+							"container_log_max_files": {
+                            	Type:        schema.TypeInt,
+                            	Optional:    true,
+                            	Description: `Defines the maximum number of container log files that can be present for a container.`,
+                            },
+							"image_gc_low_threshold_percent": {
+                            	Type:        schema.TypeInt,
+                            	Optional:    true,
+                            	Description: `Defines the percent of disk usage before which image garbage collection is never run. Lowest disk usage to garbage collect to.`,
+                            },
+							"image_gc_high_threshold_percent": {
+                            	Type:        schema.TypeInt,
+                            	Optional:    true,
+                            	Description: `Defines the percent of disk usage after which image garbage collection is always run.`,
+                            },
+							"image_minimum_gc_age": {
+                            	Type:        schema.TypeString,
+                            	Optional:    true,
+                            	Description: `Defines the minimum age for an unused image before it is garbage collected.`,
+                            },
+							"image_maximum_gc_age": {
+                            	Type:        schema.TypeString,
+                            	Optional:    true,
+                            	Description: `Defines the maximum age an image can be unused before it is garbage collected.`,
+                            },
+							"allowed_unsafe_sysctls": {
+                                Type:        schema.TypeList,
+                                Optional:    true,
+                                Description: `Defines a comma-separated allowlist of unsafe sysctls or sysctl patterns which can be set on the Pods.`,
+								Elem:        &schema.Schema{Type: schema.TypeString},
+                            },
 						},
 					},
 				},
-
 				"linux_node_config": {
 					Type:     schema.TypeList,
 					Optional: true,
@@ -672,6 +711,24 @@ func schemaNodeConfig() *schema.Schema {
 						},
 					},
 				},
+				"windows_node_config": {
+					Type:        schema.TypeList,
+					Optional:    true,
+					Computed:    true,
+					MaxItems:    1,
+					Description: `Parameters that can be configured on Windows nodes.`,
+					Elem: &schema.Resource{
+						Schema: map[string]*schema.Schema{
+							"osversion": {
+								Type:         schema.TypeString,
+								Optional:     true,
+								Default:      "OS_VERSION_UNSPECIFIED",
+								Description:  `The OS Version of the windows nodepool.Values are OS_VERSION_UNSPECIFIED,OS_VERSION_LTSC2019 and OS_VERSION_LTSC2022`,
+								ValidateFunc: validation.StringInSlice([]string{"OS_VERSION_UNSPECIFIED", "OS_VERSION_LTSC2019", "OS_VERSION_LTSC2022"}, false),
+							},
+						},
+					},
+				},
 				"node_group": {
 					Type:     schema.TypeString,
 					Optional: true,
@@ -689,8 +746,8 @@ func schemaNodeConfig() *schema.Schema {
 						Schema: map[string]*schema.Schema{
 							"threads_per_core": {
 								Type:        schema.TypeInt,
-                                                                Required:    true,
-                                                                ForceNew:    true,
+                                Required:    true,
+                                ForceNew:    true,
 								Description: `The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.`,
 							},
 							"enable_nested_virtualization": {
@@ -765,15 +822,13 @@ func schemaNodeConfig() *schema.Schema {
 					Type:        schema.TypeList,
 					Optional:    true,
 					Computed:    true,
-					ForceNew:    true,
 					MaxItems:    1,
-					Description: `Configuration for the confidential nodes feature, which makes nodes run on confidential VMs. Warning: This configuration can't be changed (or added/removed) after pool creation without deleting and recreating the entire pool.`,
+					Description: `Configuration for the confidential nodes feature, which makes nodes run on confidential VMs.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
 							"enabled": {
 								Type:        schema.TypeBool,
 								Required:    true,
-								ForceNew:    true,
 								Description: `Whether Confidential Nodes feature is enabled for all nodes in this pool.`,
 							},
 						},
@@ -800,10 +855,10 @@ func schemaNodeConfig() *schema.Schema {
 					Description: `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
 				},
 				"enable_confidential_storage": {
-						Type:     schema.TypeBool,
-						Optional: true,
-						ForceNew: true,
-						Description: `If enabled boot disks are configured with confidential mode.`,
+					Type:     schema.TypeBool,
+					Optional: true,
+					ForceNew: true,
+					Description: `If enabled boot disks are configured with confidential mode.`,
 				},
 				"local_ssd_encryption_mode": {
 					Type:             schema.TypeString,
@@ -817,6 +872,12 @@ func schemaNodeConfig() *schema.Schema {
 					Optional:    true,
 					ForceNew:    true,
 					Description: `The runtime of each node in the node pool in seconds, terminated by 's'. Example: "3600s".`,
+				},
+				"flex_start" : {
+					Type:        schema.TypeBool,
+					Optional:    true,
+					ForceNew:    true,
+					Description: `Enables Flex Start provisioning model for the node pool`,
 				},
 			},
 		},
@@ -990,6 +1051,11 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.EphemeralStorageLocalSsdConfig = &container.EphemeralStorageLocalSsdConfig{
 			LocalSsdCount: int64(conf["local_ssd_count"].(int)),
 		}
+		dataCacheCount, ok := conf["data_cache_count"]
+		if ok {
+			nc.EphemeralStorageLocalSsdConfig.DataCacheCount = int64(dataCacheCount.(int))
+		}
+
 	}
 
 	if v, ok := nodeConfig["secondary_boot_disks"]; ok && len(v.([]interface{})) > 0 {
@@ -1176,6 +1242,10 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.LinuxNodeConfig = expandLinuxNodeConfig(v)
 	}
 
+	if v, ok := nodeConfig["windows_node_config"]; ok {
+		nc.WindowsNodeConfig = expandWindowsNodeConfig(v)
+	}
+
 	if v, ok := nodeConfig["node_group"]; ok {
 		nc.NodeGroup = v.(string)
 	}
@@ -1202,6 +1272,10 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 
 	if v,ok := nodeConfig["max_run_duration"]; ok {
 		nc.MaxRunDuration = v.(string)
+	}
+
+	if v,ok := nodeConfig["flex_start"]; ok {
+		nc.FlexStart = v.(bool)
 	}
 
 	{{ if ne $.TargetVersionName `ga` -}}
@@ -1287,6 +1361,31 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 	if podPidsLimit, ok := cfg["pod_pids_limit"]; ok {
 		kConfig.PodPidsLimit = int64(podPidsLimit.(int))
 	}
+	if containerLogMaxSize, ok := cfg["container_log_max_size"]; ok {
+    	kConfig.ContainerLogMaxSize = containerLogMaxSize.(string)
+    }
+	if containerLogMaxFiles, ok := cfg["container_log_max_files"]; ok {
+    	kConfig.ContainerLogMaxFiles = int64(containerLogMaxFiles.(int))
+    }
+	if imageGcLowThresholdPercent, ok := cfg["image_gc_low_threshold_percent"]; ok {
+    	kConfig.ImageGcLowThresholdPercent = int64(imageGcLowThresholdPercent.(int))
+    }
+	if imageGcHighThresholdPercent, ok := cfg["image_gc_high_threshold_percent"]; ok {
+    	kConfig.ImageGcHighThresholdPercent = int64(imageGcHighThresholdPercent.(int))
+    }
+	if imageMinimumGcAge, ok := cfg["image_minimum_gc_age"]; ok {
+    	kConfig.ImageMinimumGcAge = imageMinimumGcAge.(string)
+    }
+	if imageMaximumGcAge, ok := cfg["image_maximum_gc_age"]; ok {
+    	kConfig.ImageMaximumGcAge = imageMaximumGcAge.(string)
+    }
+	if allowedUnsafeSysctls, ok := cfg["allowed_unsafe_sysctls"]; ok {
+	    sysctls := allowedUnsafeSysctls.([]interface{})
+		kConfig.AllowedUnsafeSysctls = make([]string, len(sysctls))
+		for i, s := range sysctls {
+		    kConfig.AllowedUnsafeSysctls[i] = s.(string)
+		}
+    }
 	return kConfig
 }
 
@@ -1318,6 +1417,24 @@ func expandLinuxNodeConfig(v interface{}) *container.LinuxNodeConfig {
 	}
 
 	return linuxNodeConfig
+}
+
+func expandWindowsNodeConfig(v interface{}) *container.WindowsNodeConfig {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	cfg := ls[0].(map[string]interface{})
+	osversionRaw, ok := cfg["osversion"]
+	if !ok {
+		return nil
+	}
+	return &container.WindowsNodeConfig{
+		OsVersion: osversionRaw.(string),
+	}
 }
 
 func expandSysctls(cfg map[string]interface{}) map[string]string {
@@ -1563,7 +1680,7 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"local_nvme_ssd_block_config": flattenLocalNvmeSsdBlockConfig(c.LocalNvmeSsdBlockConfig),
 		"ephemeral_storage_local_ssd_config": flattenEphemeralStorageLocalSsdConfig(c.EphemeralStorageLocalSsdConfig),
 		"gcfs_config":              flattenGcfsConfig(c.GcfsConfig),
-		"gvnic":										flattenGvnic(c.Gvnic),
+		"gvnic":					flattenGvnic(c.Gvnic),
 		"reservation_affinity":     flattenGKEReservationAffinity(c.ReservationAffinity),
 		"service_account":          c.ServiceAccount,
 		"metadata":                 c.Metadata,
@@ -1581,16 +1698,18 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"effective_taints":         flattenEffectiveTaints(c.Taints),
 		"workload_metadata_config": flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
 {{- if ne $.TargetVersionName "ga" }}
-		"sandbox_config": 			    flattenSandboxConfig(c.SandboxConfig),
+		"sandbox_config": 			flattenSandboxConfig(c.SandboxConfig),
 		"host_maintenance_policy":  flattenHostMaintenancePolicy(c.HostMaintenancePolicy),
 {{- end }}
 		"confidential_nodes":       flattenConfidentialNodes(c.ConfidentialNodes),
 		"boot_disk_kms_key":        c.BootDiskKmsKey,
 		"kubelet_config":           flattenKubeletConfig(c.KubeletConfig),
 		"linux_node_config":        flattenLinuxNodeConfig(c.LinuxNodeConfig),
+		"windows_node_config":      flattenWindowsNodeConfig(c.WindowsNodeConfig),
 		"node_group":               c.NodeGroup,
 		"advanced_machine_features": flattenAdvancedMachineFeaturesConfig(c.AdvancedMachineFeatures),
 		"max_run_duration": 		 c.MaxRunDuration,
+		"flex_start":				 c.FlexStart,
 		"sole_tenant_config":        flattenSoleTenantConfig(c.SoleTenantConfig),
 		"fast_socket":               flattenFastSocket(c.FastSocket),
 		"resource_manager_tags":     flattenResourceManagerTags(c.ResourceManagerTags),
@@ -1696,6 +1815,7 @@ func flattenEphemeralStorageLocalSsdConfig(c *container.EphemeralStorageLocalSsd
 	if c != nil {
 		result = append(result, map[string]interface{}{
 			"local_ssd_count": c.LocalSsdCount,
+			"data_cache_count": c.DataCacheCount,
 		})
 	}
 	return result
@@ -1892,6 +2012,13 @@ func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface
 			"cpu_manager_policy":                     c.CpuManagerPolicy,
 			"insecure_kubelet_readonly_port_enabled": flattenInsecureKubeletReadonlyPortEnabled(c),
 			"pod_pids_limit":                         c.PodPidsLimit,
+			"container_log_max_size":                 c.ContainerLogMaxSize,
+			"container_log_max_files":                c.ContainerLogMaxFiles,
+			"image_gc_low_threshold_percent":         c.ImageGcLowThresholdPercent,
+			"image_gc_high_threshold_percent":        c.ImageGcHighThresholdPercent,
+			"image_minimum_gc_age":                   c.ImageMinimumGcAge,
+			"image_maximum_gc_age":                   c.ImageMaximumGcAge,
+			"allowed_unsafe_sysctls":                 c.AllowedUnsafeSysctls,
 		})
 	}
 	return result
@@ -1914,6 +2041,16 @@ func flattenLinuxNodeConfig(c *container.LinuxNodeConfig) []map[string]interface
 			"sysctls":          c.Sysctls,
 			"cgroup_mode":      c.CgroupMode,
 			"hugepages_config": flattenHugepagesConfig(c.Hugepages),
+		})
+	}
+	return result
+}
+
+func flattenWindowsNodeConfig(c *container.WindowsNodeConfig) []map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"osversion": c.OsVersion,
 		})
 	}
 	return result
@@ -2134,6 +2271,42 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				}
 
 				log.Printf("[INFO] Updated containerd_config for node pool %s", name)
+			}
+		}
+
+		if d.HasChange(prefix + "node_config.0.confidential_nodes") {
+			if _, ok := d.GetOk(prefix + "node_config.0.confidential_nodes"); ok {
+				req := &container.UpdateNodePoolRequest{
+					Name: name,
+					ConfidentialNodes: expandConfidentialNodes(d.Get(prefix + "node_config.0.confidential_nodes")),
+				}
+				if req.ConfidentialNodes == nil {
+					req.ConfidentialNodes = &container.ConfidentialNodes{}
+					req.ForceSendFields = []string{"ConfidentialNodes"}
+				}
+				updateF := func() error {
+					clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+					if config.UserProjectOverride {
+						clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+					}
+					op, err := clusterNodePoolsUpdateCall.Do()
+					if err != nil {
+						return err
+					}
+
+					// Wait until it's updated
+					return ContainerOperationWait(config, op,
+						nodePoolInfo.project,
+						nodePoolInfo.location,
+						"updating GKE node pool confidential_nodes", userAgent,
+						timeout)
+				}
+
+				if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
+						return err
+				}
+
+				log.Printf("[INFO] Updated confidential_nodes for node pool %s", name)
 			}
 		}
 
@@ -2507,6 +2680,39 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			log.Printf("[INFO] Updated gcfs_config for node pool %s", name)
 		}
 
+		if d.HasChange(prefix + "node_config.0.gvnic") {
+			gvnicEnabled := bool(d.Get(prefix + "node_config.0.gvnic.0.enabled").(bool))
+			req := &container.UpdateNodePoolRequest{
+				NodePoolId: name,
+				Gvnic: &container.VirtualNIC{
+					Enabled: gvnicEnabled,
+				},
+			}
+			updateF := func() error {
+				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name),req)
+				if config.UserProjectOverride {
+					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+				}
+				op, err := clusterNodePoolsUpdateCall.Do()
+				if err != nil {
+					return err
+				}
+
+				// Wait until it's updated
+				return ContainerOperationWait(config, op,
+					nodePoolInfo.project,
+					nodePoolInfo.location,
+					"updating GKE node pool gvnic", userAgent,
+					timeout)
+			}
+
+			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
+					return err
+			}
+
+			log.Printf("[INFO] Updated gvnic for node pool %s", name)
+		}
+
 		if d.HasChange(prefix + "node_config.0.kubelet_config") {
 			req := &container.UpdateNodePoolRequest{
 				NodePoolId: name,
@@ -2574,6 +2780,40 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			}
 
 			log.Printf("[INFO] Updated linux_node_config for node pool %s", name)
+		}
+		if d.HasChange(prefix + "node_config.0.windows_node_config") {
+			req := &container.UpdateNodePoolRequest{
+				NodePoolId: name,
+				WindowsNodeConfig: expandWindowsNodeConfig(
+					d.Get(prefix + "node_config.0.windows_node_config")),
+			}
+			if req.WindowsNodeConfig == nil {
+				req.WindowsNodeConfig = &container.WindowsNodeConfig{}
+				req.ForceSendFields = []string{"WindowsNodeConfig"}
+			}
+			updateF := func() error {
+				clusterNodePoolsUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Update(nodePoolInfo.fullyQualifiedName(name), req)
+				if config.UserProjectOverride {
+					clusterNodePoolsUpdateCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
+				}
+				op, err := clusterNodePoolsUpdateCall.Do()
+				if err != nil {
+					return err
+				}
+
+				// Wait until it's updated
+				return ContainerOperationWait(config, op,
+					nodePoolInfo.project,
+					nodePoolInfo.location,
+					"updating GKE node pool windows_node_config", userAgent,
+					timeout)
+			}
+
+			if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] Updated windows_node_config for node pool %s", name)
 		}
 		if d.HasChange(prefix + "node_config.0.fast_socket") {
 			req := &container.UpdateNodePoolRequest{

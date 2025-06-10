@@ -1,6 +1,6 @@
 resource "google_gemini_release_channel_setting" "{{$.PrimaryResourceId}}" {
-    provider = google-beta
     release_channel_setting_id = "{{index $.Vars "release_channel_setting_id"}}"
     location = "global"
+    labels = {"my_key": "my_value"}
     release_channel = "EXPERIMENTAL"
 }

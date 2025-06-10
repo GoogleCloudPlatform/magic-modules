@@ -124,6 +124,17 @@ examples:
       - 'project'
       - 'etag'
       - 'deletion_policy'
+  - name: 'firestore_database_enterprise'
+    primary_resource_id: 'enterprise-db'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
 virtual_fields:
   - name: 'deletion_policy'
     description: |
@@ -134,6 +145,7 @@ virtual_fields:
       See also `delete_protection`.
     type: String
     default_value: "ABANDON"
+    deprecation_message: '`deletion_policy` is deprecated and will be removed in a future major release. Use `delete_protection_state` instead.'
 parameters:
 properties:
   - name: 'name'
@@ -166,6 +178,17 @@ properties:
     enum_values:
       - 'FIRESTORE_NATIVE'
       - 'DATASTORE_MODE'
+  - name: 'databaseEdition'
+    type: Enum
+    description: |
+      The database edition.
+    required: false
+    default_from_api: true
+    # Picking a database edition is an irreversible decision
+    immutable: true
+    enum_values:
+      - 'STANDARD'
+      - 'ENTERPRISE'
   - name: 'concurrencyMode'
     type: Enum
     description: |

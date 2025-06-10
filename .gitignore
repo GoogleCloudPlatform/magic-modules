@@ -27,6 +27,7 @@
 # IDEA files
 .idea/*
 *.iml
+**/.idea/*
 
 # OS generated files
 .DS_Store
@@ -50,7 +51,6 @@ mmv1/build/*
 
 # ignore serialization generation build data
 tpgtools/temp.serial
-
 tpgtools/serialization.go
 
 # ignore magician binary

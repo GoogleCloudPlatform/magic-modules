@@ -1,0 +1,34 @@
+if d.Get("delete_chat_engine_on_destroy").(bool) && engineID != "" {
+  // Check if the engine exist.
+  baseUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}DiscoveryEngineBasePath{{"}}"}}")
+  if err != nil {
+    return err
+  }
+  engineUrl := baseUrl + engineID
+  _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "GET",
+    Project:   project,
+    RawURL:    engineUrl,
+    UserAgent: userAgent,
+  })
+  if err != nil {
+    log.Printf("[DEBUG] engine %s doesn't exist. No need to delete", engineID)
+    return nil
+  }
+
+  // delete the engine
+  log.Printf("[DEBUG] Deleting engine %v", engineID)
+  _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "DELETE",
+    Project:   project,
+    RawURL:    engineUrl,
+    UserAgent: userAgent,
+    Timeout:   d.Timeout(schema.TimeoutDelete),
+  })
+  if err != nil {
+    return fmt.Errorf("Error deleting engine %s: %s", engineID, err)
+  }
+  log.Printf("[DEBUG] Finished deleting engine %s", engineID)
+}

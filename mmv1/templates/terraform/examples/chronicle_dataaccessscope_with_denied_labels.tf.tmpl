@@ -1,5 +1,4 @@
 resource "google_chronicle_data_access_label" "custom_data_access_label" {
-  provider = "google-beta"
   location = "us"
   instance = "{{index $.TestEnvVars "chronicle_id"}}"
   data_access_label_id = "{{index $.Vars "data_access_label_id"}}"
@@ -7,7 +6,6 @@ resource "google_chronicle_data_access_label" "custom_data_access_label" {
 }
 
 resource "google_chronicle_data_access_scope" "{{$.PrimaryResourceId}}" {
-  provider = "google-beta"
   location = "us"
   instance = "{{index $.TestEnvVars "chronicle_id"}}"
   data_access_scope_id = "{{index $.Vars "data_access_scope_id"}}"

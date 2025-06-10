@@ -18,7 +18,8 @@ description:
 references:
   guides:
     'About Service Connection Policies': 'https://cloud.google.com/vpc/docs/about-service-connection-policies#service-policies'
-  api: 'https://cloud.google.com/secure-web-proxy/docs/reference/networkconnectivity/rest/v1/projects.locations.networkConnectionPolicies'
+    'About Service Connectivity Automation': 'https://cloud.google.com/vpc/docs/about-service-connectivity-automation'
+  api: 'https://cloud.google.com/network-connectivity/docs/reference/networkconnectivity/rest/v1/projects.locations.serviceConnectionPolicies'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/serviceConnectionPolicies'
 self_link: 'projects/{{project}}/locations/{{location}}/serviceConnectionPolicies/{{name}}'
@@ -46,10 +47,12 @@ async:
 custom_code:
   update_encoder: 'templates/terraform/encoders/service_connection_policy.go.tmpl'
 sweeper:
-  regions:
-    - "us-central1"
-    - "us-east1"
-    - "europe-west1"
+  prefixes:
+    - "gcp-memorystore"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "europe-west1"
 examples:
   - name: 'network_connectivity_policy_basic'
     primary_resource_id: 'default'
