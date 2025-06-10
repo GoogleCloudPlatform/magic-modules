@@ -50,7 +50,7 @@ custom_code:
 exclude_sweeper: true
 examples:
   - name: 'iam_workforce_pool_basic'
-    primary_resource_name: 'fmt.Sprintf("tf-test-test-workforce-pool%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])'
     primary_resource_id: 'example'
     region_override: 'global'
     vars:
@@ -58,7 +58,7 @@ examples:
     test_env_vars:
       org_id: 'ORG_ID'
   - name: 'iam_workforce_pool_full'
-    primary_resource_name: 'fmt.Sprintf("tf-test-test-workforce-pool%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])'
     primary_resource_id: 'example'
     region_override: 'global'
     vars:
