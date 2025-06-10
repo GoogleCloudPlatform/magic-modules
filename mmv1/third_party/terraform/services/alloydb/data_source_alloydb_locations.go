@@ -87,12 +87,12 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error setting api endpoint")
 	}
 
-	locations, err := transport_tpg.PluralDataSourceGet(d, config, billingProject, userAgent, url, nil, "locations")
+	listedLocations, err := transport_tpg.PluralDataSourceGet(d, config, &billingProject, userAgent, url, nil, "locations")
 	if err != nil {
 		return err
 	}
-
-	for _, loc := range locations {
+	locations := make([]map[string]interface{}, 0)
+	for _, loc := range listedLocations {
 		locationDetails := make(map[string]interface{})
 		l := loc.(map[string]interface{})
 		if l["name"] != nil {

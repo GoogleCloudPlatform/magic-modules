@@ -190,7 +190,7 @@ func IsApiNotEnabledError(err error) bool {
 	return false
 }
 
-func PluralDataSourceGet(d *schema.ResourceData, config *Config, billingProject string, userAgent string, url string, params map[string]string, resourecToList string) ([]interface{}, error) {
+func PluralDataSourceGet(d *schema.ResourceData, config *Config, billingProject *string, userAgent string, url string, params map[string]string, resourecToList string) ([]interface{}, error) {
 	items := make([]interface{}, 0)
 	for {
 		// Depending on previous iterations, params might contain a pageToken param
@@ -203,7 +203,7 @@ func PluralDataSourceGet(d *schema.ResourceData, config *Config, billingProject 
 		res, err := SendRequest(SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
-			Project:   billingProject,
+			Project:   *billingProject,
 			RawURL:    url,
 			UserAgent: userAgent,
 			Headers:   headers,
