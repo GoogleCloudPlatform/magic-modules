@@ -39,12 +39,12 @@ examples:
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_namespace_id: 'example-nmspc'
+      workload_identity_pool_namespace_id: 'example-namespace'
   - name: 'iam_workload_identity_pool_namespace_full'
     primary_resource_id: 'example'
     vars:
       workload_identity_pool_id: 'example-pool'
-      workload_identity_pool_namespace_id: 'example-nmspc'
+      workload_identity_pool_namespace_id: 'example-namespace'
 parameters:
   - name: 'workload_identity_pool_id'
     type: String

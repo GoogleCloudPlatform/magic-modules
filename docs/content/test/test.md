@@ -277,7 +277,7 @@ An update test is an **acceptance test** that creates the target resource and th
 {{< /tab >}}
 {{< /tabs >}}
 
-## Bootstrapping API resources {#bootstrapping}
+## Bootstrap API resources {#bootstrapping}
 
 Most acceptance tests run in a the default org and default test project, which means that they can conflict for quota, resource namespaces, and control over shared resources. You can work around these limitations with "bootstrapped" resources.
 
@@ -444,6 +444,72 @@ func TestAccProductResource_update(t *testing.T) {
 ```
 {{< /tab >}}
 {{< /tabs >}}
+
+## Create test projects
+If [bootstrapping]({{< ref "#bootstrapping" >}}) doesn't work or isn't an option for some reason, you can also work around project quota issues or test project-global resources by creating a new test project. You will also need to enable any necessary APIs and wait for their enablement to propagate.
+
+```go
+import (
+  "testing"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
+)
+func TestAccProductResourceName_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+	}
+  acctest.VcrTest(t, resource.TestCase{
+    // ...
+    Steps: []resource.TestStep{
+      {
+        testAccProductResourceName_update1(context),
+      },
+      // ...
+    },
+  })
+}
+
+func testAccProductResourceName_update1(context map[string]interface{}) string {
+  return accest.Nprintf(`
+// Set up a test project
+resource "google_project" "project" {
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
+// Enable APIs in a deterministic order to avoid inconsistent VCR recordings
+resource "google_project_service" "servicenetworking" {
+  project = google_project.project.project_id
+  service = "servicenetworking.googleapis.com"
+}
+
+resource "google_project_service" "compute" {
+  project = google_project.project.project_id
+  service = "compute.googleapis.com"
+  depends_on = [google_project_service.servicenetworking]
+}
+
+// wait for API enablement
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute]
+}
+
+resource "google_product_resource" "example" {
+  // ...
+  depends_on = [time_sleep.wait_120_seconds]
+}
+
+`, context)
+}
+```
 
 ## Skip tests in VCR replaying mode {#skip-vcr}
 

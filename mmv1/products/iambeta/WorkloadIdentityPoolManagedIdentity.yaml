@@ -84,6 +84,8 @@ parameters:
 
 
       The prefix `gcp-` will be reserved for future uses.
+    validation:
+      function: 'ValidateWorkloadIdentityPoolManagedIdentityId'
 properties:
   - name: 'name'
     type: String
