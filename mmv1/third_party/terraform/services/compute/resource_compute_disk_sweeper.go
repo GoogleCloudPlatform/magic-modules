@@ -33,18 +33,19 @@ func testSweepDisk(region string) error {
 	zones := []string{"us-central1-a", "us-central1-b", "us-central1-c", "us-central1-f", "us-east1-b", "us-east1-c", "us-east1-d", "us-west1-a", "us-west1-b", "us-west1-c"}
 	for _, zone := range zones {
 		servicesUrl := "https://compute.googleapis.com/compute/v1/projects/" + config.Project + "/zones/" + zone + "/disks"
-		listUrl := servicesUrl
+		// Page zero's URL is the raw list URL. Successive pages will return the token for the next page.
+		pageUrl := servicesUrl
 		for {
 
 			res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 				Config:    config,
 				Method:    "GET",
 				Project:   config.Project,
-				RawURL:    listUrl,
+				RawURL:    pageUrl,
 				UserAgent: config.UserAgent,
 			})
 			if err != nil {
-				log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", listUrl, err)
+				log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", pageUrl, err)
 				return nil
 			}
 
@@ -99,7 +100,7 @@ func testSweepDisk(region string) error {
 			if res["nextPageToken"] == nil || res["nextPageToken"].(string) == "" {
 				break
 			}
-			listUrl, err = transport_tpg.AddQueryParams(servicesUrl, map[string]string{"pageToken": res["nextPageToken"].(string)})
+			pageUrl, err = transport_tpg.AddQueryParams(servicesUrl, map[string]string{"pageToken": res["nextPageToken"].(string)})
 		}
 
 	}
