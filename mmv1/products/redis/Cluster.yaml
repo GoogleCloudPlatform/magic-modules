@@ -117,6 +117,7 @@ async:
     resource_inside_response: false
 custom_code:
   encoder: 'templates/terraform/encoders/redis_cluster.go.tmpl'
+  decoder: 'templates/terraform/decoders/redis_cluster.go.tmpl'
 sweeper:
   ensure_value:
     field: deletionProtectionEnabled
@@ -811,3 +812,21 @@ properties:
   - name: 'kmsKey'
     type: String
     description: The KMS key used to encrypt the at-rest data of the cluster.
+  - name: 'managedServerCa'
+    type: NestedObject
+    output: true
+    description: Cluster's Certificate Authority. This field will only be populated if Redis Cluster's transit_encryption_mode is TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION
+    properties:
+      - name: 'caCerts'
+        type: Array
+        output: true
+        description: The PEM encoded CA certificate chains for redis managed server authentication
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'certificates'
+              type: Array
+              output: true
+              description: The certificates that form the CA chain, from leaf to root order
+              item_type:
+                type: String
