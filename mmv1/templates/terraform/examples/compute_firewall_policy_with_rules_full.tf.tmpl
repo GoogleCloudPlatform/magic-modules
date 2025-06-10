@@ -117,7 +117,7 @@ resource "google_compute_firewall_policy_with_rules" "{{$.PrimaryResourceId}}" {
     action         = "allow"
     direction      = "EGRESS"
 
-    target_secure_tags {
+    target_secure_tag {
       name = google_tags_tag_value.basic_value.id
     }
 
@@ -139,14 +139,14 @@ resource "google_compute_firewall_policy_with_rules" "{{$.PrimaryResourceId}}" {
     action         = "allow"
     direction      = "INGRESS"
 
-    target_secure_tags {
+    target_secure_tag {
       name = google_tags_tag_value.basic_value.id
     }
 
     match {
       src_ip_ranges = ["11.100.0.1/32"]
 
-      src_secure_tags {
+      src_secure_tag {
         name = google_tags_tag_value.basic_value.id
       }
 
