@@ -21,11 +21,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/otiai10/copy"
 )
 
@@ -50,6 +52,7 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 	}
 
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
+	t.Product.SetCompiler(ProviderName(t))
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
 		r.ImportPath = ImportPathFromVersion(versionName)
@@ -59,11 +62,52 @@ func NewTerraformGoogleConversionNext(product *api.Product, versionName string, 
 }
 
 func (tgc TerraformGoogleConversionNext) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
-	tgc.GenerateTfToCaiObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
-	tgc.GenerateCaiToHclObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
+	for _, object := range tgc.Product.Objects {
+		object.ExcludeIfNotInVersion(&tgc.Version)
+
+		if resourceToGenerate != "" && object.Name != resourceToGenerate {
+			log.Printf("Excluding %s per user request", object.Name)
+			continue
+		}
+
+		tgc.GenerateObject(*object, outputFolder, tgc.TargetVersionName, generateCode, generateDocs)
+	}
 }
 
-func (tgc TerraformGoogleConversionNext) GenerateTfToCaiObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
+func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
+	if object.ExcludeTgc {
+		log.Printf("Skipping fine-grained resource %s", object.Name)
+		return
+	}
+
+	// TODO: remove it after supporting most of resources.
+	supportList := map[string]bool{
+		"ComputeAddress": true,
+	}
+
+	if ok := supportList[object.ResourceName()]; !ok {
+		return
+	}
+
+	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
+
+	if !object.IsExcluded() {
+		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs, "tfplan2cai")
+		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs, "cai2hcl")
+	}
+}
+
+func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool, converter string) {
+	productName := tgc.Product.ApiName
+	conveterFolder := fmt.Sprintf("pkg/%s/converters/services", converter)
+	targetFolder := path.Join(outputFolder, conveterFolder, productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+
+	templatePath := fmt.Sprintf("templates/tgc_next/%s/resource_converter.go.tmpl", converter)
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name)))
+	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
@@ -74,9 +118,9 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		// common
 		"pkg/transport/config.go":                        "third_party/terraform/transport/config.go.tmpl",
 		"pkg/transport/provider_handwritten_endpoint.go": "third_party/terraform/transport/provider_handwritten_endpoint.go.tmpl",
-		"pkg/tpgresource/common_diff_suppress.go":        "third_party/terraform/tpgresource/common_diff_suppress.go.tmpl",
+		"pkg/tpgresource/common_diff_suppress.go":        "third_party/terraform/tpgresource/common_diff_suppress.go",
 		"pkg/provider/provider.go":                       "third_party/terraform/provider/provider.go.tmpl",
-		"pkg/provider/provider_validators.go":            "third_party/terraform/provider/provider_validators.go.tmpl",
+		"pkg/provider/provider_validators.go":            "third_party/terraform/provider/provider_validators.go",
 
 		// tfplan2cai
 		"pkg/tfplan2cai/converters/resource_converters.go":                       "templates/tgc_next/tfplan2cai/resource_converters.go.tmpl",
@@ -84,7 +128,8 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		"pkg/tfplan2cai/converters/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
 
 		// cai2hcl
-		"pkg/cai2hcl/converters/resource_converters.go": "templates/tgc_next/cai2hcl/resource_converters.go.tmpl",
+		"pkg/cai2hcl/converters/resource_converters.go":                       "templates/tgc_next/cai2hcl/resource_converters.go.tmpl",
+		"pkg/cai2hcl/converters/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
 	}
 
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)

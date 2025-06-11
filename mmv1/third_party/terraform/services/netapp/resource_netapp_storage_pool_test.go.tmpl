@@ -3,8 +3,9 @@ package netapp_test
 import (
 	"testing"
 	"time"
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -12,7 +13,7 @@ func TestAccNetappStoragePool_storagePoolCreateExample_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-2", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -94,10 +95,9 @@ resource "google_netapp_storage_pool" "test_pool" {
 `, context)
 }
 
-
 func TestAccNetappStoragePool_autoTieredStoragePoolCreateExample_update(t *testing.T) {
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-2", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -147,9 +147,152 @@ resource "google_netapp_storage_pool" "test_pool" {
 `, context)
 }
 
-func TestAccNetappStoragePool_FlexRegionalStoragePoolCreateExample_update(t *testing.T) {
+{{ if ne $.TargetVersionName `ga` -}}
+func TestAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_update(t *testing.T) {
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-2", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckNetappStoragePoolDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_full(context),
+			},
+			{
+				ResourceName:            "google_netapp_storage_pool.test_pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"enable_hot_tier_auto_resize", "location", "name", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_update(context),
+			},
+			{
+				ResourceName:            "google_netapp_storage_pool.test_pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"enable_hot_tier_auto_resize", "location", "name", "labels", "terraform_labels"},
+			},
+
+			{
+				Config: testAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_update_2(context),
+			},
+			{
+				ResourceName:            "google_netapp_storage_pool.test_pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"enable_hot_tier_auto_resize", "location", "name", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_full(context map[string]interface{}) string {
+  return acctest.Nprintf(`
+data "google_compute_network" "default" {
+  provider = google-beta
+  name = "%{network_name}"
+}
+
+resource "google_netapp_storage_pool" "test_pool" {
+  provider = google-beta
+  name = "tf-test-pool%{random_suffix}"
+  location = "us-south1-a"
+  service_level = "FLEX"
+  capacity_gib = "2048"
+  network = data.google_compute_network.default.id
+  active_directory      = ""
+  description           = "this is a test description"
+  kms_config            = ""
+  labels                = {
+    key= "test"
+    value= "pool"
+  }
+  ldap_enabled = false
+  allow_auto_tiering = true
+  custom_performance_enabled = true
+  total_throughput_mibps = "64"
+  total_iops = "1024"
+  hot_tier_size_gib = "1024"
+  enable_hot_tier_auto_resize = false
+}
+`, context)
+}
+
+func testAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_update(context map[string]interface{}) string {
+  return acctest.Nprintf(`
+data "google_compute_network" "default" {
+  provider = google-beta
+  name = "%{network_name}"
+}
+
+resource "google_netapp_storage_pool" "test_pool" {
+  provider = google-beta
+  name = "tf-test-pool%{random_suffix}"
+  location = "us-south1-a"
+  service_level = "FLEX"
+  capacity_gib = "2048"
+  network = data.google_compute_network.default.id
+  active_directory      = ""
+  description           = "this is a test description"
+  kms_config            = ""
+  labels                = {
+    key= "test"
+    value= "pool"
+  }
+  ldap_enabled          = false
+  allow_auto_tiering = true
+  custom_performance_enabled = true
+  total_throughput_mibps = "64"
+  total_iops = "1024"
+  hot_tier_size_gib = "1500"
+  enable_hot_tier_auto_resize = true
+}
+`, context)
+}
+
+func testAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_update_2(context map[string]interface{}) string {
+  return acctest.Nprintf(`
+data "google_compute_network" "default" {
+  provider = google-beta
+  name = "%{network_name}"
+}
+
+resource "google_netapp_storage_pool" "test_pool" {
+  provider = google-beta
+  name = "tf-test-pool%{random_suffix}"
+  location = "us-south1-a"
+  service_level = "FLEX"
+  capacity_gib = "2048"
+  network = data.google_compute_network.default.id
+  active_directory      = ""
+  description           = "this is a test description"
+  kms_config            = ""
+  labels                = {
+    key= "test"
+    value= "pool"
+  }
+  ldap_enabled          = false
+  allow_auto_tiering = true
+  custom_performance_enabled = true
+  total_throughput_mibps = "64"
+  total_iops = "1024"
+  hot_tier_size_gib = "1500"
+}
+`, context)
+}
+{{ end }}
+
+func TestAccNetappStoragePool_FlexRegionalStoragePoolCreateExample_update(t *testing.T) {
+	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -272,7 +415,7 @@ data "google_compute_network" "default" {
 
 func TestAccNetappStoragePool_FlexRegionalStoragePoolNoZone(t *testing.T) {
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-2", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -318,16 +461,15 @@ data "google_compute_network" "default" {
 `, context)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccNetappStoragePool_customPerformanceStoragePoolCreateExample_update(t *testing.T) {
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-2", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetappStoragePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -355,7 +497,6 @@ func TestAccNetappStoragePool_customPerformanceStoragePoolCreateExample_update(t
 func testAccNetappStoragePool_customPerformanceStoragePoolCreateExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "test_pool" {
-  provider = google-beta
   name = "tf-test-pool%{random_suffix}"
   location = "us-east4-a"
   service_level = "FLEX"
@@ -368,7 +509,6 @@ resource "google_netapp_storage_pool" "test_pool" {
 }
 
 data "google_compute_network" "default" {
-    provider = google-beta
     name = "%{network_name}"
 }
 `, context)
@@ -377,7 +517,6 @@ data "google_compute_network" "default" {
 func testAccNetappStoragePool_customPerformanceStoragePoolCreateExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "test_pool" {
-  provider = google-beta
   name = "tf-test-pool%{random_suffix}"
   location = "us-east4-a"
   service_level = "FLEX"
@@ -390,9 +529,7 @@ resource "google_netapp_storage_pool" "test_pool" {
 }
 
 data "google_compute_network" "default" {
-    provider = google-beta
     name = "%{network_name}"
 }
 `, context)
 }
-{{ end }}
