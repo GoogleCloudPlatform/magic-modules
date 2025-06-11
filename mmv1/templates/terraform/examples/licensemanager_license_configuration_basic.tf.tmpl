@@ -1,4 +1,5 @@
 data "google_project" "project" {
+    provider = google-beta
 }
 
 resource "google_licensemanager_license_configuration" "{{$.PrimaryResourceId}}" {
@@ -6,5 +7,12 @@ resource "google_licensemanager_license_configuration" "{{$.PrimaryResourceId}}"
     product = "Office2021ProfessionalPlus"
     project = data.google_project.project.project_id
     license_configuration_name = "lima_config"
-    licenses = 10
+    display_name = "lima-configdisplay-name"
+    current_billing_info {
+        user_count_billing { user_count = 10 }
+    }
+    next_billing_info {
+        user_count_billing { user_count = 10 }
+    }
+    provider = google-beta
 }

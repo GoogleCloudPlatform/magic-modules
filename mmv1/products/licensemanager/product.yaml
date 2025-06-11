@@ -16,6 +16,6 @@ legacy_name: 'licensemanager'
 display_name: 'Cloud License Manager'
 versions:
   - name: 'beta'
-    base_url: 'https://licensemanager.googleapis.com'
+    base_url: 'https://licensemanager.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/cloud-platform'
