@@ -114,7 +114,6 @@ properties:
         - name: internetGateway
           type: NestedObject
           description: Internet Gateway configuration.
-          default_from_api: true
           properties:
             - name: assignedIps
               type: Array
