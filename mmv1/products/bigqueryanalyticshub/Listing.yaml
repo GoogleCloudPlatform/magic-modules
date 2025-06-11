@@ -67,6 +67,15 @@ examples:
       data_exchange_id: 'dcr_data_exchange'
       listing_id: 'dcr_listing'
       desc: 'example dcr data exchange'
+  - name: 'bigquery_analyticshub_listing_log_linked_dataset_query_user'
+    primary_resource_id: 'listing'
+    primary_resource_name: 'fmt.Sprintf("tf_test_log_email_de%s", context["random_suffix"]),fmt.Sprintf("tf_test_log_email_listing%s", context["random_suffix"])'
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'tf_test_log_email_de'
+      listing_id: 'tf_test_log_email_listing'
+      dataset_id: 'tf_test_log_email_ds'
+      description: 'Example for log email test'
 parameters:
 properties:
   - name: 'name'
@@ -194,3 +203,8 @@ properties:
         type: Boolean
         description:
           If true, restrict export of query result derived from restricted linked dataset table.
+  - name: 'logLinkedDatasetQueryUserEmail'
+    type: Boolean
+    description:
+      If true, subscriber email logging is enabled and all queries on the linked dataset will log the email address of the querying user.
+    immutable: true
