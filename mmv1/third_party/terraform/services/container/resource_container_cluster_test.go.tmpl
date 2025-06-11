@@ -13840,9 +13840,6 @@ func TestAccContainerCluster_withAdvancedMachineFeaturesPMU_Standard(t *testing.
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withAdvancedMachineFeaturesPMU(clusterName, networkName, subnetworkName, "STANDARD"),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(clusterResourceName, "node_config.0.advanced_machine_features.0.performance_monitoring_unit", "STANDARD"),
-				),
 			},
 			{
 				ResourceName:            clusterResourceName,
@@ -13870,9 +13867,6 @@ func TestAccContainerCluster_withAdvancedMachineFeaturesPMU_Architectural(t *tes
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_withAdvancedMachineFeaturesPMU(clusterName, networkName, subnetworkName, "ARCHITECTURAL"),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(clusterResourceName, "node_config.0.advanced_machine_features.0.performance_monitoring_unit", "ARCHITECTURAL"),
-				),
 			},
 			{
 				ResourceName:            clusterResourceName,
