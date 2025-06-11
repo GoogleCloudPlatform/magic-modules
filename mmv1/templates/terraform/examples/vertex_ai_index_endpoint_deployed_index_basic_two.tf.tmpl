@@ -57,7 +57,7 @@ resource "google_vertex_ai_index_endpoint" "vertex_index_endpoint_deployed" {
   display_name = "sample-endpoint"
   description  = "A sample vertex endpoint"
   region       = "us-central1"
-  network      = data.google_compute_network.vertex_network.id
+  network      = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.vertex_network.name}"
   labels       = {
     label-one = "value-one"
   }
@@ -83,3 +83,5 @@ EOF
 data "google_compute_network" "vertex_network" {
   name = "{{index $.Vars "network_name"}}"
 }
+
+data "google_project" "project" {}
