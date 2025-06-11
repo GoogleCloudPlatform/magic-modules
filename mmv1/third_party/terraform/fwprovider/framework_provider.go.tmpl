@@ -21,7 +21,7 @@ import (
     "github.com/hashicorp/terraform-provider-google/google/functions"
     "github.com/hashicorp/terraform-provider-google/google/fwmodels"
     "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
-	"github.com/hashicorp/terraform-provider-google/version"
+    "github.com/hashicorp/terraform-provider-google/version"
     {{- if ne $.TargetVersionName "ga" }}
     "github.com/hashicorp/terraform-provider-google/google/services/firebase"
     {{- end }}
@@ -248,6 +248,30 @@ func (p *FrameworkProvider) Schema(_ context.Context, _ provider.SchemaRequest, 
                         },
                         "enable_batching": schema.BoolAttribute{
                             Optional: true,
+                        },
+                    },
+                },
+            },
+            "external_credentials": schema.ListNestedBlock{
+                NestedObject: schema.NestedBlockObject{
+                    Attributes: map[string]schema.Attribute{
+                        "audience": schema.StringAttribute{
+                            Required: true,
+                            Validators: []validator.String{
+                                fwvalidators.NonEmptyStringValidator(),
+                            },
+                        },
+                        "service_account_email": schema.StringAttribute{
+                            Required: true,
+                            Validators: []validator.String{
+                                fwvalidators.ServiceAccountEmailValidator{},
+                            },
+                        },
+                        "identity_token": schema.StringAttribute{
+                            Required: true,
+                            Validators: []validator.String{
+                                fwvalidators.JWTValidator(),
+                            },
                         },
                     },
                 },

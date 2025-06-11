@@ -1,0 +1,4 @@
+resource "google_eventarc_channel" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+  name     = "{{index $.Vars "channel_name"}}"
+}

@@ -33,6 +33,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+exclude_sweeper: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'

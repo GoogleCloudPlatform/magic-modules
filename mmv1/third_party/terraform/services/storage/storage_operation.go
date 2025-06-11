@@ -23,6 +23,16 @@ func (w *StorageOperationWaiter) QueryOp() (interface{}, error) {
 	if w == nil {
 		return nil, fmt.Errorf("Cannot query operation, it's unset or nil.")
 	}
+
+	if w.Config.Context != nil {
+		select {
+		case <-w.Config.Context.Done():
+			return nil, fmt.Errorf("Interrupt recieved, Polling stopped, exiting...")
+		default:
+			// Default case is intentionally left empty, as per original logic.
+		}
+	}
+
 	// Returns the proper get.
 	url := fmt.Sprintf(w.SelfLink)
 

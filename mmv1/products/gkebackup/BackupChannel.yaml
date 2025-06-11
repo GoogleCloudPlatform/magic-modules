@@ -1,0 +1,109 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'BackupChannel'
+description: |
+  A BackupChannel imposes constraints on where clusters can be backed up.
+  The BackupChannel should be in the same project and region
+  as the cluster being backed up.
+  The backup can be created only in destination_project.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke'
+  api: 'https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/reference/rest/v1/projects.locations.backupChannels'
+docs:
+base_url: 'projects/{{project}}/locations/{{location}}/backupChannels'
+create_url: 'projects/{{project}}/locations/{{location}}/backupChannels?backupChannelId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+timeouts:
+  insert_minutes: 5
+  update_minutes: 5
+  delete_minutes: 5
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+examples:
+  - name: 'gkebackup_backupchannel_basic'
+    primary_resource_id: 'basic'
+    primary_resource_name: 'fmt.Sprintf("tf-test-basic-channel%s", context["random_suffix"])'
+    vars:
+      name: 'basic-channel'
+      destination_project: 'projects/24240755850'
+    test_vars_overrides:
+      'destination_project': '"projects/24240755850"'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The region of the Backup Channel.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The full name of the BackupChannel Resource.
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
+  - name: 'uid'
+    type: String
+    description: |
+      Server generated, unique identifier of UUID format.
+    output: true
+  - name: 'destinationProject'
+    type: String
+    description: |
+      The project where Backups are allowed to be stored.
+      The format is `projects/{project}`.
+      {project} can be project number or project id.
+    required: true
+    immutable: true
+  - name: 'description'
+    type: String
+    description: |
+      User specified descriptive string for this BackupChannel.
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |
+      Description: A set of custom labels supplied by the user.
+      A list of key->value pairs.
+      Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+  - name: 'etag'
+    type: String
+    description: |
+      etag is used for optimistic concurrency control as a way to help prevent simultaneous
+      updates of a backup channel from overwriting each other. It is strongly suggested that
+      systems make use of the 'etag' in the read-modify-write cycle to perform BackupChannel updates
+      in order to avoid race conditions: An etag is returned in the response to backupChannels.get,
+      and systems are expected to put that etag in the request to backupChannels.patch or
+      backupChannels.delete to ensure that their change will be applied to the same version of the resource.
+    output: true
+  - name: 'destinationProjectId'
+    type: String
+    description: |
+      The project_id where Backups are allowed to be stored.
+      Example Project ID: "my-project-id".
+    output: true

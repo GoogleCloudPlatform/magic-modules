@@ -1,0 +1,129 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: MessageBus
+base_url: projects/{{project}}/locations/{{location}}/messageBuses
+self_link: projects/{{project}}/locations/{{location}}/messageBuses/{{message_bus_id}}
+create_url: projects/{{project}}/locations/{{location}}/messageBuses?messageBusId={{message_bus_id}}
+update_verb: PATCH
+update_mask: true
+id_format: projects/{{project}}/locations/{{location}}/messageBuses/{{message_bus_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/messageBuses/{{message_bus_id}}
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/eventarc/advanced/docs/publish-events/create-bus'
+  api: https://cloud.google.com/eventarc/docs/reference/rest/v1/projects.locations.messageBuses
+description: |
+  The Eventarc MessageBus resource
+async:
+  actions: ['create', 'update', 'delete']
+  operation:
+    base_url: '{{op_id}}'
+  type: OpAsync
+  result:
+    resource_inside_response: true
+autogen_async: true
+examples:
+  - name: eventarc_message_bus_with_cmek
+    primary_resource_id: primary
+    test_env_vars:
+      project_name: PROJECT_NAME
+    # We don't auto-generate tests since we can't support concurrent tests, as long as
+    # only one MessageBus is supported per project.
+    exclude_test: true
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: messageBusId
+    type: String
+    description: |-
+      Required. The user-provided ID to be assigned to the MessageBus. It should match the
+      format `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    description: |-
+      Identifier. Resource name of the form
+      projects/{project}/locations/{location}/messageBuses/{message_bus}
+    output: true
+  - name: loggingConfig
+    type: NestedObject
+    description: |-
+      The configuration for Platform Telemetry logging for Eventarc Advanced
+      resources.
+    default_from_api: true
+    properties:
+      - name: logSeverity
+        type: Enum
+        description: |-
+          Optional. The minimum severity of logs that will be sent to Stackdriver/Platform
+          Telemetry. Logs at severitiy ≥ this value will be sent, unless it is NONE.
+        default_from_api: true
+        enum_values:
+          - NONE
+          - DEBUG
+          - INFO
+          - NOTICE
+          - WARNING
+          - ERROR
+          - CRITICAL
+          - ALERT
+          - EMERGENCY
+  - name: updateTime
+    type: String
+    description: Output only. The last-modified time.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Optional. Resource labels.
+  - name: annotations
+    type: KeyValueAnnotations
+    description: Optional. Resource annotations.
+  - name: uid
+    type: String
+    description: |-
+      Output only. Server assigned unique identifier for the channel. The value is a UUID4
+      string and guaranteed to remain unchanged until the resource is deleted.
+    output: true
+  - name: etag
+    type: String
+    description: |-
+      Output only. This checksum is computed by the server based on the value of other
+      fields, and might be sent only on update and delete requests to ensure that
+      the client has an up-to-date value before proceeding.
+    output: true
+  - name: createTime
+    type: String
+    description: Output only. The creation time.
+    output: true
+  - name: displayName
+    type: String
+    description: Optional. Resource display name.
+  - name: cryptoKeyName
+    type: String
+    diff_suppress_func: tpgresource.CompareSelfLinkOrResourceName
+    description: |-
+      Optional. Resource name of a KMS crypto key (managed by the user) used to
+      encrypt/decrypt their event data.
+
+      It must match the pattern
+      `projects/*/locations/*/keyRings/*/cryptoKeys/*`.

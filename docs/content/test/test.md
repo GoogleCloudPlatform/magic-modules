@@ -38,9 +38,44 @@ For more information about testing, see the [official Terraform documentation](h
    git checkout main && git clean -f . && git checkout -- . && git pull
    ```
 
+## Add unit tests
+
+A unit test verifies functionality that is not related to interactions with the API, such as
+[diff suppress functions]({{<ref "/reference/field#diff_suppress_func" >}}),
+[validation functions]({{<ref "/reference/field#validation" >}}),
+CustomizeDiff functions, and so on.
+
+Unit tests should be added to the appropriate folder in [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services) in the file called `resource_PRODUCT_RESOURCE_test.go`. (You may need to create this file if it does not already exist. Replace PRODUCT with the product name and RESOURCE with the resource name; it should match the name of the generated resource file.)
+
+Unit tests should be named like `TestFunctionName` - for example, `TestDiskImageDiffSuppress` would contain tests for the `DiskImageDiffSuppress` function.
+
+Example:
+
+```go
+func TestSignatureAlgorithmDiffSuppress(t *testing.T) {
+   cases := map[string]struct {
+      Old, New           string
+      ExpectDiffSuppress bool
+   }{
+      "ECDSA_P256 equivalent": {
+         Old:                "ECDSA_P256_SHA256",
+         New:                "EC_SIGN_P256_SHA256",
+         ExpectDiffSuppress: true,
+      },
+      // Additional cases excluded for brevity
+   }
+
+   for tn, tc := range cases {
+      if signatureAlgorithmDiffSuppress("signature_algorithm", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+         t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+      }
+   }
+}
+```
+
 ## Add a create test
 
-A create test is a test that creates the target resource and immediately destroys it.
+A create test is an **acceptance test** that creates the target resource and immediately destroys it.
 
 > **Note:** All resources should have a "basic" create test, which uses the smallest possible number of fields. Additional create tests can be used to ensure all fields on the resource are used in at least one test.
 
@@ -108,12 +143,14 @@ This section assumes you've used the [Add a resource]({{< ref "/develop/add-reso
    - If beta-only fields are being tested, do the following:
      - Change the file suffix to `.go.tmpl`
      - Wrap each beta-only test in a separate version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`
+     - In each beta-only test, ensure that the TestCase sets `ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t)`
+     - In each beta-only test, ensure that all Terraform resources in all configs have `provider = google-beta` set
 {{< /tab >}}
 {{< /tabs >}}
 
 ## Add an update test
 
-An update test is a test that creates the target resource and then makes updates to fields that are updatable. Updatable fields are fields that can be updated without recreating the entire resource; that is, they are not marked `immutable` in MMv1 or `ForceNew` in handwritten code.
+An update test is an **acceptance test** that creates the target resource and then makes updates to fields that are updatable. Updatable fields are fields that can be updated without recreating the entire resource; that is, they are not marked `immutable` in MMv1 or `ForceNew` in handwritten code.
 
 > **Note:** All updatable fields must be covered by at least one update test. In most cases, only a single update test is needed to test all fields at once.
 
@@ -130,6 +167,8 @@ An update test is a test that creates the target resource and then makes updates
    - Add `ConfigPlanChecks` to the update step of the test to ensure the resource is updated in-place.
    - The resulting test function would look similar to this:
    ```go
+   import "github.com/hashicorp/terraform-plugin-testing/plancheck"
+
    func TestAccPubsubTopic_update(t *testing.T) {
       ...
       acctest.VcrTest(t, resource.TestCase{
@@ -190,6 +229,8 @@ An update test is a test that creates the target resource and then makes updates
    - Add `ConfigPlanChecks` to the update step of the test to ensure the resource is updated in-place.
    - The resulting test function would look similar to this:
    ```go
+   import "github.com/hashicorp/terraform-plugin-testing/plancheck"
+
    func TestAccPubsubTopic_update(t *testing.T) {
       ...
       acctest.VcrTest(t, resource.TestCase{
@@ -236,38 +277,237 @@ An update test is a test that creates the target resource and then makes updates
 {{< /tab >}}
 {{< /tabs >}}
 
-## Add unit tests
+## Bootstrap API resources {#bootstrapping}
 
-A unit test verifies functionality that is not related to interactions with the API, such as
-[diff suppress functions]({{<ref "/reference/field#diff_suppress_func" >}}),
-[validation functions]({{<ref "/reference/field#validation" >}}),
-CustomizeDiff functions, and so on.
+Most acceptance tests run in a the default org and default test project, which means that they can conflict for quota, resource namespaces, and control over shared resources. You can work around these limitations with "bootstrapped" resources.
 
-Unit tests should be added to the appropriate folder in [`magic-modules/mmv1/third_party/terraform/services`](https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/third_party/terraform/services) in the file called `resource_PRODUCT_RESOURCE_test.go`. (You may need to create this file if it does not already exist. Replace PRODUCT with the product name and RESOURCE with the resource name; it should match the name of the generated resource file.)
+### CryptoKeys
 
-Unit tests should be named like `TestFunctionName` - for example, `TestDiskImageDiffSuppress` would contain tests for the `DiskImageDiffSuppress` function.
+There are a few functions provided for bootstrapping CryptoKeys, depending on your needs.
 
-Example:
+- `BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, locationID, keyShortName string)`
+- `BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID string)`
+  - Uses a default key name based on the purpose.
+- `BootstrapKMSKeyWithPurpose(t *testing.T, purpose string)`
+  - Uses `global` location and a key name based on the purpose.
+- `BootstrapKMSKeyInLocation(t *testing.T, locationID string)`
+  - Uses `ENCRYPT_DECRYPT` for the purpose and the corresponding key name.
+- `BootstrapKMSKey(t *testing.T)`
+  - Uses `global` location, `ENCRYPT_DECRYPT` for the purpose, and the corresponding key name for that purpose. 
+
+Example usage:
+
+{{< tabs "bootstrap-cryptokeys" >}}
+{{< tab "MMv1" >}}
+```yaml
+examples:
+  - name: service_resource_basic
+    primary_resource_id: example
+    vars:
+      kms_key_name: 'kms-key'
+    test_vars_overrides:
+      kms_key_name: 'acctest.BootstrapKMSKey(t).CryptoKey.Name'
+```
+{{< /tab >}}
+{{< tab "Handwritten" >}}
+```go
+func TestAccProductResource_update(t *testing.T) {
+   t.Parallel()
+
+   context := map[string]interface{}{
+      "kms": acctest.BootstrapKMSKey(t).CryptoKey.Name,
+      // other variables
+   }
+   // rest of test
+}
+```
+{{< /tab >}}
+{{< /tabs >}}
+
+### IAM resources
+
+Specify member/role pairs that should always exist. `{project_number}` will be replaced with the default project's project number. `{organization_id}` will be replaced with the "target" test organization's ID – we don't modify IAM in the main test org to avoid accidentally locking ourselves out.
+
+Permissions attached to resources created _in_ a test should instead be provisioned with standard terraform resources.
+
+Example usage:
+
+{{< tabs "bootstrap-iam" >}}
+{{< tab "MMv1" >}}
+```yaml
+# Project-level IAM
+examples:
+  - name: service_resource_basic
+    primary_resource_id: example
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com"
+        role: "roles/bigquery.dataEditor"
+```
+
+```yaml
+# Org-level IAM
+examples:
+  - name: service_resource_basic
+    primary_resource_id: example
+    bootstrap_iam:
+      - member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com"
+        role: "roles/osconfig.serviceAgent"
+    test_env_vars:
+      org_id: ORG_TARGET
+```
+{{< /tab >}}
+{{< tab "Handwritten" >}}
+```go
+// Project-level IAM
+import (
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+)
+
+func TestAccProductResource_update(t *testing.T) {
+    t.Parallel()
+
+    acctest.BootstrapIamMembers(t, []acctest.IamMember{
+        {
+            Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
+            Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+        },
+    })
+    // rest of test
+}
+```
+```go
+// Org-level IAM
+import (
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
+)
+
+func TestAccProductResource_update(t *testing.T) {
+    t.Parallel()
+
+    acctest.BootstrapIamMembers(t, []acctest.IamMember{
+        {
+            Member: "serviceAccount:service-org-{organization_id}@gcp-sa-osconfig.iam.gserviceaccount.com",
+            Role:   "roles/osconfig.serviceAgent",
+        },
+    })
+    context := map[string]string{
+        "org_id": envvar.GetTestOrgTargetFromEnv(t),
+    }
+    // rest of test
+}
+```
+{{< /tab >}}
+{{< /tabs >}}
+
+### Networks
+
+Bootstrapping networks can be useful for two reasons:
+
+1. Resources like `google_service_networking_connection` use a consumer network and create a complementing tenant network which we don't control. These tenant networks never get cleaned up and they can accumulate to the point where a limit is reached for the organization. By reusing a consumer network across test runs, we can reduce the number of tenant networks that are needed. (Googlers: See b/146351146 for more context.)
+2. Bootstrap networks used in tests (gke clusters, dataproc clusters...) to limit traffic to the default network (preventing conflicts).
+
+When creating a bootstrapped network in a test, you can specify an identifier. Note that if the network is being used for a `google_service_networking_connection`, you should use an identifier unique to the test to avoid race conditions where multiple tests attempt to modify the connection at once.
+
+You can also bootstrap one or more subnetworks within a bootstrapped network if necessary, to avoid subnetwork-level quotas and race conditions.
+
+Example usage:
+
+{{< tabs "bootstrap-networks" >}}
+{{< tab "MMv1" >}}
+```yaml
+examples:
+  - name: service_resource_basic
+    primary_resource_id: example
+    vars:
+      network_name: 'default'
+      subnetwork_name: 'default'
+    test_vars_overrides:
+      network_name: 'acctest.BootstrapSharedTestNetwork(t, "network-identifier")'
+      subnetwork_name: 'acctest.BootstrapSubnet(t, "subnet-identifier", acctest.BootstrapSharedTestNetwork(t, "network-identifier"))'
+```
+{{< /tab >}}
+{{< tab "Handwritten" >}}
+```go
+func TestAccProductResource_update(t *testing.T) {
+   t.Parallel()
+
+   networkName := 
+   subnetName := 
+   context := map[string]interface{}{
+      "network_name": acctest.BootstrapSharedTestNetwork(t, "network-identifier"),
+      "subnetwork_name": acctest.BootstrapSubnet(t, "subnet-identifier", acctest.BootstrapSharedTestNetwork(t, "network-identifier")),
+      // other variables
+   }
+   // rest of test
+}
+```
+{{< /tab >}}
+{{< /tabs >}}
+
+## Create test projects
+If [bootstrapping]({{< ref "#bootstrapping" >}}) doesn't work or isn't an option for some reason, you can also work around project quota issues or test project-global resources by creating a new test project. You will also need to enable any necessary APIs and wait for their enablement to propagate.
 
 ```go
-func TestSignatureAlgorithmDiffSuppress(t *testing.T) {
-   cases := map[string]struct {
-      Old, New           string
-      ExpectDiffSuppress bool
-   }{
-      "ECDSA_P256 equivalent": {
-         Old:                "ECDSA_P256_SHA256",
-         New:                "EC_SIGN_P256_SHA256",
-         ExpectDiffSuppress: true,
-      },
-      // Additional cases excluded for brevity
-   }
+import (
+  "testing"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
+)
+func TestAccProductResourceName_update(t *testing.T) {
+	t.Parallel()
 
-   for tn, tc := range cases {
-      if signatureAlgorithmDiffSuppress("signature_algorithm", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-         t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-      }
-   }
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"org_id":          envvar.GetTestOrgFromEnv(t),
+	}
+  acctest.VcrTest(t, resource.TestCase{
+    // ...
+    Steps: []resource.TestStep{
+      {
+        testAccProductResourceName_update1(context),
+      },
+      // ...
+    },
+  })
+}
+
+func testAccProductResourceName_update1(context map[string]interface{}) string {
+  return accest.Nprintf(`
+// Set up a test project
+resource "google_project" "project" {
+  project_id      = "tf-test%{random_suffix}"
+  name            = "tf-test%{random_suffix}"
+  org_id          = "%{org_id}"
+  billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
+}
+
+// Enable APIs in a deterministic order to avoid inconsistent VCR recordings
+resource "google_project_service" "servicenetworking" {
+  project = google_project.project.project_id
+  service = "servicenetworking.googleapis.com"
+}
+
+resource "google_project_service" "compute" {
+  project = google_project.project.project_id
+  service = "compute.googleapis.com"
+  depends_on = [google_project_service.servicenetworking]
+}
+
+// wait for API enablement
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_project_service.compute]
+}
+
+resource "google_product_resource" "example" {
+  // ...
+  depends_on = [time_sleep.wait_120_seconds]
+}
+
+`, context)
 }
 ```
 
@@ -298,7 +538,7 @@ Acceptance tests are run in VCR replaying mode on PRs (using pre-recorded HTTP r
    ```go
    func TestAccPubsubTopic_update(t *testing.T) {
          acctest.SkipIfVcr(t) // See: https://github.com/hashicorp/terraform-provider-google/issues/9999
-         acctest.VcrTest(t, resource.TestCase{ ... }
+         acctest.VcrTest(t, resource.TestCase{ ... })
    }
    ```
 

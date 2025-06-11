@@ -117,6 +117,9 @@ func Resource{{$.PathType}}() *schema.Resource {
 	{{- if $p.Sensitive}}
 				Sensitive: true,
 	{{- end }}
+	{{- if $p.WriteOnly }}
+				WriteOnly: true,
+	{{- end }}
 	{{- if $p.DiffSuppressFunc }}
 				DiffSuppressFunc: {{$p.DiffSuppressFunc}},
 	{{- end }}
@@ -179,6 +182,9 @@ func {{$.PathType}}{{$v.PackagePath}}Schema() *schema.Resource {
 		{{- end }}
 		{{- if $p.Sensitive }}
 					Sensitive: true,
+		{{- end }}
+		{{- if $p.WriteOnly }}
+					WriteOnly: true,
 		{{- end }}
 		{{- if $p.DiffSuppressFunc }}
 					DiffSuppressFunc: {{$p.DiffSuppressFunc}},

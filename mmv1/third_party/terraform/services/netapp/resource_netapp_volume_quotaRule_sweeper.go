@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	sweeper.AddTestSweepers("NetappVolumeQuotaRule", testSweepNetappVolumeQuotaRule)
+	sweeper.AddTestSweepersLegacy("NetappVolumeQuotaRule", testSweepNetappVolumeQuotaRule)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region

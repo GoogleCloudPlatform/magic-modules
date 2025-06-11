@@ -168,6 +168,20 @@ properties:
           The service account being used for the encryption request for the
           given KMS key. If absent, the Compute Engine default service
           account is used.
+      - name: 'rawKey'
+        type: String
+        description: |
+          Specifies a 256-bit customer-supplied encryption key, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+        ignore_read: true
+        sensitive: true
+      - name: 'rsaEncryptedKey'
+        type: String
+        description: |
+          Specifies a 256-bit customer-supplied encryption key, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+        ignore_read: true
+        sensitive: true
   - name: 'labels'
     type: KeyValueLabels
     description: Labels to apply to this Image.
@@ -225,6 +239,7 @@ properties:
           An optional SHA1 checksum of the disk image before unpackaging.
           This is provided by the client when the disk image is created.
         api_name: sha1Checksum
+        diff_suppress_func: 'tpgresource.Base64DiffSuppress'
       # TODO(alexstephen): Figure out cross-module ResourceRefs
       - name: 'source'
         type: String
@@ -242,6 +257,43 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Disk'
     imports: 'selfLink'
+  - name: 'sourceDiskEncryptionKey'
+    type: NestedObject
+    ignore_read: true
+    description: |
+      The customer-supplied encryption key of the source disk. Required if
+      the source disk is protected by a customer-supplied encryption key.
+    properties:
+      - name: 'rawKey'
+        type: String
+        sensitive: true
+        description: |
+          Specifies a 256-bit customer-supplied encryption key, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+      - name: 'rsaEncryptedKey'
+        type: String
+        sensitive: true
+        description: |
+          Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
+          customer-supplied encryption key to either encrypt or decrypt
+          this resource. You can provide either the rawKey or the rsaEncryptedKey.
+      - name: 'kmsKeySelfLink'
+        type: String
+        api_name: kmsKeyName
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+        custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.tmpl'
+        description: |
+          The self link of the encryption key used to decrypt this resource. Also called KmsKeyName
+          in the cloud console. Your project's Compute Engine System service account
+          (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
+          `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
+          See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
+      - name: 'kmsKeyServiceAccount'
+        type: String
+        description: |
+          The service account being used for the encryption request for the
+          given KMS key. If absent, the Compute Engine default service
+          account is used.
   - name: 'sourceImage'
     type: ResourceRef
     description: |
@@ -255,6 +307,43 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Image'
     imports: 'selfLink'
+  - name: 'sourceImageEncryptionKey'
+    type: NestedObject
+    ignore_read: true
+    description: |
+      The customer-supplied encryption key of the source image. Required if
+      the source image is protected by a customer-supplied encryption key.
+    properties:
+      - name: 'rawKey'
+        type: String
+        sensitive: true
+        description: |
+          Specifies a 256-bit customer-supplied encryption key, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+      - name: 'rsaEncryptedKey'
+        type: String
+        sensitive: true
+        description: |
+          Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
+          customer-supplied encryption key to either encrypt or decrypt
+          this resource. You can provide either the rawKey or the rsaEncryptedKey.
+      - name: 'kmsKeySelfLink'
+        type: String
+        api_name: kmsKeyName
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+        custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.tmpl'
+        description: |
+          The self link of the encryption key used to decrypt this resource. Also called KmsKeyName
+          in the cloud console. Your project's Compute Engine System service account
+          (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
+          `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
+          See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
+      - name: 'kmsKeyServiceAccount'
+        type: String
+        description: |
+          The service account being used for the encryption request for the
+          given KMS key. If absent, the Compute Engine default service
+          account is used.
   - name: 'sourceSnapshot'
     type: ResourceRef
     description: |
@@ -270,3 +359,111 @@ properties:
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'Snapshot'
     imports: 'selfLink'
+  - name: 'shieldedInstanceInitialState'
+    type: NestedObject
+    description: Set the secure boot keys of shielded instance.
+    default_from_api: true
+    properties:
+      - name: 'pk'
+        type: NestedObject
+        description: The Platform Key (PK).
+        properties:
+          - name: 'content'
+            type: String
+            description: |
+              The raw content in the secure keys file.
+
+              A base64-encoded string.
+            required: true
+            diff_suppress_func: 'tpgresource.Base64DiffSuppress'
+          - name: 'fileType'
+            type: String
+            description: The file type of source file.
+      - name: 'keks'
+        type: Array
+        description: The Key Exchange Key (KEK).
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'content'
+              type: String
+              description: |
+                The raw content in the secure keys file.
+
+                A base64-encoded string.
+              required: true
+              diff_suppress_func: 'tpgresource.Base64DiffSuppress'
+            - name: 'fileType'
+              type: String
+              description: The file type of source file.
+      - name: 'dbs'
+        type: Array
+        description: The Key Database (db).
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'content'
+              type: String
+              description: |
+                The raw content in the secure keys file.
+
+                A base64-encoded string.
+              required: true
+              diff_suppress_func: 'tpgresource.Base64DiffSuppress'
+            - name: 'fileType'
+              type: String
+              description: The file type of source file.
+      - name: 'dbxs'
+        type: Array
+        description: The forbidden key database (dbx).
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'content'
+              type: String
+              description: |
+                The raw content in the secure keys file.
+
+                A base64-encoded string.
+              required: true
+              diff_suppress_func: 'tpgresource.Base64DiffSuppress'
+            - name: 'fileType'
+              type: String
+              description: The file type of source file.
+  - name: "sourceSnapshotEncryptionKey"
+    type: NestedObject
+    ignore_read: true
+    description: |
+      The customer-supplied encryption key of the source snapshot. Required if
+      the source snapshot is protected by a customer-supplied encryption key.
+    properties:
+      - name: 'rawKey'
+        type: String
+        sensitive: true
+        description: |
+          Specifies a 256-bit customer-supplied encryption key, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+      - name: 'rsaEncryptedKey'
+        type: String
+        sensitive: true
+        description: |
+          Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
+          customer-supplied encryption key to either encrypt or decrypt
+          this resource. You can provide either the rawKey or the rsaEncryptedKey.
+      - name: 'kmsKeySelfLink'
+        type: String
+        api_name: kmsKeyName
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+        custom_flatten: 'templates/terraform/custom_flatten/image_kms_key_name.go.tmpl'
+        description: |
+          The self link of the encryption key used to decrypt this resource. Also called KmsKeyName
+          in the cloud console. Your project's Compute Engine System service account
+          (`service-{{PROJECT_NUMBER}}@compute-system.iam.gserviceaccount.com`) must have
+          `roles/cloudkms.cryptoKeyEncrypterDecrypter` to use this feature.
+          See https://cloud.google.com/compute/docs/disks/customer-managed-encryption#encrypt_a_new_persistent_disk_with_your_own_keys
+      - name: 'kmsKeyServiceAccount'
+        type: String
+        description: |
+          The service account being used for the encryption request for the
+          given KMS key. If absent, the Compute Engine default service
+          account is used.

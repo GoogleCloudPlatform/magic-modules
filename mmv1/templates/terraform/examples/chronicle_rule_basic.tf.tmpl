@@ -1,5 +1,4 @@
 resource "google_chronicle_rule" "{{$.PrimaryResourceId}}" {
- provider = "google-beta"
  location = "us"
  instance = "{{index $.TestEnvVars "chronicle_id"}}"
  deletion_policy = "DEFAULT"

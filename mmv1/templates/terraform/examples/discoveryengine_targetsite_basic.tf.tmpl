@@ -1,7 +1,7 @@
 resource "google_discovery_engine_target_site" "basic" {
   location                    = google_discovery_engine_data_store.basic.location
   data_store_id               = google_discovery_engine_data_store.basic.data_store_id
-  provided_uri_pattern        = "http://cloud.google.com/docs/*"
+  provided_uri_pattern        = "cloud.google.com/docs/*"
   type                        = "INCLUDE"
   exact_match                 = false
 }

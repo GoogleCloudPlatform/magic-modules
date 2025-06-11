@@ -37,20 +37,7 @@ timeouts:
 custom_code:
   decoder: 'templates/terraform/decoders/integrations_client.go.tmpl'
   pre_create: 'templates/terraform/pre_create/integrations_client.go.tmpl'
-sweeper:
-  regions:
-    - "us-east1"
-    - "asia-east1"
-    - "southamerica-west1"
-    - "northamerica-northeast1"
-    - "us-central1"
-    - "us-south1"
-    - "southamerica-east1"
-    - "us-west2"
-    - "us-west4"
-    - "northamerica-northeast2"
-    - "us-west3"
-    - "asia-east2"
+exclude_sweeper: true
 examples:
   - name: 'integrations_client_basic'
     primary_resource_id: 'example'
@@ -58,8 +45,20 @@ examples:
     primary_resource_id: 'example'
     vars:
       key_ring_name: 'my-keyring'
-      service_account_id: 'service-acc'
+      crypto_key_name: 'my-crypto-key'
+    test_vars_overrides:
+      key_ring_name: '"tftest-shared-keyring-1"'
+      crypto_key_name: '"tftest-shared-key-1"'
+      kms_key: 'acctest.BootstrapKMSKeyInLocation(t, "us-east1")'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-integrations.iam.gserviceaccount.com"
+        role: "roles/cloudkmskacls.serviceAgent"
     skip_vcr: true
+  - name: 'integrations_client_service_account'
+    primary_resource_id: 'example'
+    vars:
+      service_account_id: 'service-acc'
+    exclude_docs: true
 parameters:
   - name: 'location'
     type: String
@@ -121,3 +120,4 @@ properties:
       User input run-as service account, if empty, will bring up a new default service account.
     immutable: true
     ignore_read: true
+    deprecation_message: '`run_as_service_account` is deprecated and will be removed in a future major release.'

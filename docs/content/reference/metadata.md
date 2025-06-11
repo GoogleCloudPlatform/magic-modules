@@ -31,6 +31,10 @@ The version of the API used for this resource e.g., "v2".
 
 The API "resource type kind" used for this resource e.g., "Function".
 
+### `api_variant_patterns`
+
+The API URL patterns used by this resource that represent variants e.g., "folders/{folder}/feeds/{feed}". Each pattern must match the value defined in the API exactly. The use of `api_variant_patterns` is only meaningful when the resource type has multiple parent types available.
+
 ### `fields`
 
 The list of fields used by this resource. Each field can contain the following attributes:

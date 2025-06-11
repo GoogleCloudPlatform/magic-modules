@@ -6,8 +6,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/common"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/cai2hcl/common"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/caiasset"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
@@ -307,5 +307,5 @@ func flattenComputeForwardingRuleRegion(v interface{}, d *schema.ResourceData, c
 	if v == nil {
 		return v
 	}
-	return tpgresource.NameFromSelfLinkStateFunc(v)
+	return tpgresource.GetResourceNameFromSelfLink(v.(string))
 }

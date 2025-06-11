@@ -3,6 +3,7 @@ package documentparser
 import (
 	"os"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -17,7 +18,8 @@ func TestParse(t *testing.T) {
 	if err := parser.Parse(b); err != nil {
 		t.Fatal(err)
 	}
-	wantArguments := []string{
+	want := []string{
+		// The below are from arguments section.
 		"boot_disk",
 		"boot_disk.auto_delete",
 		"boot_disk.device_name",
@@ -57,6 +59,8 @@ func TestParse(t *testing.T) {
 		"network_interface.queue_count",
 		"network_interface.security_policy",
 		"network_interface.stack_type",
+		"network_interface.subnetwork",
+		"network_interface.subnetwork_project",
 		"params",
 		// "params.resource_manager_tags", // params text does not include a nested tag
 		"zone",
@@ -65,8 +69,7 @@ func TestParse(t *testing.T) {
 		"traffic_port_selector",
 		"traffic_port_selector.ports",
 		"project",
-	}
-	wantAttributes := []string{
+		// The below are from attributes section.
 		"id",
 		"network_interface.access_config.nat_ip",
 		"workload_identity_config",
@@ -76,16 +79,13 @@ func TestParse(t *testing.T) {
 		"workload_identity_config.workload_pool",
 		"errors.message",
 	}
-	gotArguments := parser.Arguments()
-	gotAttributes := parser.Attributes()
-	for _, arr := range [][]string{gotArguments, wantArguments, gotAttributes, wantAttributes} {
+	got := parser.FlattenFields()
+	// gotAttributes := parser.Attributes()
+	for _, arr := range [][]string{got, want} {
 		sort.Strings(arr)
 	}
-	if diff := cmp.Diff(wantArguments, gotArguments); diff != "" {
+	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("Parse returned diff in arguments(-want, +got): %s", diff)
-	}
-	if diff := cmp.Diff(wantAttributes, gotAttributes); diff != "" {
-		t.Errorf("Parse returned diff in attributes(-want, +got): %s", diff)
 	}
 }
 
@@ -112,5 +112,26 @@ func TestTraverse(t *testing.T) {
 	}
 	if diff := cmp.Diff(wantPaths, paths); diff != "" {
 		t.Errorf("traverse returned diff(-want, +got): %s", diff)
+	}
+}
+
+func TestSplitWithRegexp(t *testing.T) {
+	paragraph := []string{
+		"Lorem ipsum",
+		"*   `name` - (Required) Resource name.",
+		"",
+		"* `os_policies` - (Required) List of OS policies to be applied to the VMs. Structure is [documented below](#nested_os_policies).	",
+		"-   `some_field` - (Required) Lorem ipsum.	",
+	}
+
+	got := splitWithRegexp(strings.Join(paragraph, "\n"), fieldNameRegex)
+	want := []string{
+		"Lorem ipsum\n",
+		"*   `name` - (Required) Resource name.\n\n",
+		"* `os_policies` - (Required) List of OS policies to be applied to the VMs. Structure is [documented below](#nested_os_policies).	\n",
+		"-   `some_field` - (Required) Lorem ipsum.	",
+	}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("splitWithRegexp returned diff(-want, +got): %s", diff)
 	}
 }

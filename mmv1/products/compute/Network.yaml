@@ -36,6 +36,11 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+sweeper:
+  dependencies:
+    # - "google_network_security_intercept_endpoint_group" (beta only)
+    # - "google_network_security_intercept_deployment_group" (beta only)
+    - "google_network_security_firewall_endpoint_association"
 custom_code:
   encoder: 'templates/terraform/encoders/compute_network.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/compute_network.go.tmpl'
@@ -199,8 +204,11 @@ properties:
       Note that packets larger than 1500 bytes (standard Ethernet) can be subject to TCP-MSS clamping or dropped
       with an ICMP `Fragmentation-Needed` message if the packets are routed to the Internet or other VPCs
       with varying MTUs.
-    immutable: true
     default_from_api: true
+    update_url: 'projects/{{project}}/global/networks/{{name}}'
+    update_verb: 'PATCH'
+    update_id: 'mtu'
+    fingerprint_name: 'fingerprint'
   - name: 'enableUlaInternalIpv6'
     type: Boolean
     description: |
@@ -236,3 +244,4 @@ properties:
       following are valid URLs:
       * https://www.googleapis.com/compute/v1/projects/{projectId}/global/networkProfiles/{network_profile_name}
       * projects/{projectId}/global/networkProfiles/{network_profile_name}
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'

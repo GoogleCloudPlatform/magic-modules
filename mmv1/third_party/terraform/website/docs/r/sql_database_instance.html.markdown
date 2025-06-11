@@ -173,6 +173,25 @@ resource "google_sql_database_instance" "main" {
 }
 ```
 
+### Cloud SQL Instance with MCP
+```hcl
+resource "google_sql_database_instance" "instance" {
+  name:            = "mcp-enabled-main-instance"
+  region           = "us-central1"
+  database_version = "POSTGRES_16"
+  settings {
+    tier = "db-perf-optimized-N-2"
+	  connection_pool_config {
+		  connection_pooling_enabled = true
+      flags {
+			  name = "max_client_connections"
+			  value = "1980"
+		  }
+	  }
+  }
+}
+```
+
 ### Cloud SQL Instance with PSC connectivity
 
 ```hcl
@@ -328,13 +347,19 @@ The `settings` block supports:
 
 * `disk_autoresize_limit` - (Optional) The maximum size to which storage capacity can be automatically increased. The default value is 0, which specifies that there is no limit.
 
-* `disk_size` - (Optional) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB. Note that this value will override the resizing from `disk_autoresize` if that feature is enabled. To avoid this, set `lifecycle.ignore_changes` on this field.
+* `disk_size` - (Optional) The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB for PD_SSD, PD_HDD and 20GB for HYPERDISK_BALANCED. Note that this value will override the resizing from `disk_autoresize` if that feature is enabled. To avoid this, set `lifecycle.ignore_changes` on this field.
 
-* `disk_type` - (Optional) The type of data disk: PD_SSD or PD_HDD. Defaults to `PD_SSD`.
+* `disk_type` - (Optional) The type of data disk: PD_SSD, PD_HDD, or HYPERDISK_BALANCED. Defaults to `PD_SSD`. HYPERDISK_BALANCED is preview.
+
+* `data_disk_provisioned_iops` - (Optional, Beta) Provisioned number of I/O operations per second for the data disk. This field is only used for `HYPERDISK_BALANCED` disk types.
+
+* `data_disk_provisioned_throughput` - (Optional, Beta) Provisioned throughput measured in MiB per second for the data disk. This field is only used for `HYPERDISK_BALANCED` disk types.
 
 * `pricing_plan` - (Optional) Pricing plan for this instance, can only be `PER_USE`.
 
 * `time_zone` - (Optional) The time_zone to be used by the database engine (supported only for SQL Server), in SQL Server timezone format.
+
+* `retain_backups_on_delete` - (Optional) When this parameter is set to true, Cloud SQL retains backups of the instance even after the instance is deleted. The `ON_DEMAND` backup will be retained until customer deletes the backup or the project. The `AUTOMATED` backup will be retained based on the backups retention setting.
 
 The optional `settings.advanced_machine_features` subblock supports:
 
@@ -380,11 +405,11 @@ The optional `settings.backup_configuration` subblock supports:
 
 * `start_time` - (Optional) `HH:MM` format time indicating when backup
     configuration starts.
-* `point_in_time_recovery_enabled` - (Optional) True if Point-in-time recovery is enabled. Will restart database if enabled after instance creation. Valid only for PostgreSQL and SQL Server instances.
+* `point_in_time_recovery_enabled` - (Optional) True if Point-in-time recovery is enabled. Will restart database if enabled after instance creation. Valid only for PostgreSQL and SQL Server instances. Enabled by default for PostgreSQL Enterprise Plus and SQL Server Enterprise Plus instances.
 
 * `location` - (Optional) The region where the backup will be stored
 
-* `transaction_log_retention_days` - (Optional) The number of days of transaction logs we retain for point in time restore, from 1-7. For PostgreSQL Enterprise Plus instances, the number of days of retained transaction logs can be set from 1 to 35.
+* `transaction_log_retention_days` - (Optional) The number of days of transaction logs we retain for point in time restore, from 1-7. For PostgreSQL Enterprise Plus and SQL Server Enterprise Plus instances, the number of days of retained transaction logs can be set from 1 to 35.
 
 * `backup_retention_settings` - (Optional) Backup retention settings. The configuration is detailed below.
 
@@ -412,6 +437,8 @@ This setting can be updated, but it cannot be removed after it is set.
 * `server_ca_mode` - (Optional) Specify how the server certificate's Certificate Authority is hosted. Supported values are `GOOGLE_MANAGED_INTERNAL_CA` and `GOOGLE_MANAGED_CAS_CA`.
 
 * `server_ca_pool` - (Optional) The resource name of the server CA pool for an instance with `CUSTOMER_MANAGED_CAS_CA` as the `server_ca_mode`.
+
+* `custom_subject_alternative_names` - (Optional) The custom subject alternative names for an instance with `CUSTOMER_MANAGED_CAS_CA` as the `server_ca_mode`.
 
 * `allocated_ip_range` - (Optional) The name of the allocated ip range for the private ip CloudSQL instance. For example: "google-managed-services-default". If set, the instance ip will be created in the allocated range. The range name must comply with [RFC 1035](https://datatracker.ietf.org/doc/html/rfc1035). Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
 
@@ -563,6 +590,16 @@ The optional, computed `replication_cluster` block represents a primary instance
 
 * `dr_replica`: Read-only field that indicates whether the replica is a DR replica.
 
+The optional `settings.connection_pool_config` subblock supports:
+
+* `connection_pooling_enabled`: (Optional) True if the manager connection pooling configuration is enabled.
+
+The optional `settings.connection_pool_config.flags` sublist supports:
+
+* `name` - (Required) Name of the flag.
+
+* `value` - (Required) Value of the flag.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
@@ -574,6 +611,16 @@ exported:
 connection strings. For example, when connecting with [Cloud SQL Proxy](https://cloud.google.com/sql/docs/mysql/connect-admin-proxy).
 
 * `dns_name` - The DNS name of the instance. See [Connect to an instance using Private Service Connect](https://cloud.google.com/sql/docs/mysql/configure-private-service-connect#view-summary-information-cloud-sql-instances-psc-enabled) for more details.
+
+* `dns_names` - The list of DNS names used by this instance. Different connection types for an instance may have different DNS names. DNS names can apply to an individual instance or a cluster of instances. 
+
+* `dns_names.0.name` - The DNS name.
+
+* `dns_names.0.connection_type` - The connection type of the DNS name. Can be either `PUBLIC`, `PRIVATE_SERVICES_ACCESS`, or `PRIVATE_SERVICE_CONNECT`.
+
+* `dns_names.0.dns_scope` - The scope that the DNS name applies to.
+
+  * An `INSTANCE` DNS name applies to an individual Cloud SQL instance.
 
 * `service_account_email_address` - The service account email address assigned to the
 instance.

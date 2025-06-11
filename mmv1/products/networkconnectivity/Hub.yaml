@@ -54,6 +54,11 @@ examples:
     primary_resource_id: 'primary'
     vars:
       resource_name: 'star'
+  - name: 'network_connectivity_hub_policy_mode'
+    primary_resource_id: 'primary'
+    vars:
+      resource_name: 'policy'
+
 parameters:
 properties:
   - name: 'name'
@@ -107,6 +112,14 @@ properties:
     enum_values:
       - 'MESH'
       - 'STAR'
+    default_from_api: true
+  - name: 'policyMode'
+    type: Enum
+    description: Optional. The policy mode of this hub. This field can be either PRESET or CUSTOM. If unspecified, the policyMode defaults to PRESET.
+    immutable: true
+    enum_values:
+      - 'CUSTOM'
+      - 'PRESET'
     default_from_api: true
   - name: 'exportPsc'
     type: Boolean

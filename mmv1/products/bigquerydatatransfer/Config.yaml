@@ -38,9 +38,9 @@ custom_code:
   constants: 'templates/terraform/constants/bigquery_data_transfer.go.tmpl'
   encoder: 'templates/terraform/encoders/bigquery_data_transfer.go.tmpl'
   decoder: 'templates/terraform/decoders/bigquery_data_transfer.go.tmpl'
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   pre_update: 'templates/terraform/pre_update/bigquerydatatransfer_config.tmpl'
   custom_import: 'templates/terraform/custom_import/bigquery_data_transfer_self_link_as_name_set_location.go.tmpl'
+  raw_resource_config_validation: 'templates/terraform/validation/bigquery_data_transfer_config.go.tmpl'
 custom_diff:
   - 'sensitiveParamCustomizeDiff'
   - 'paramsCustomizeDiff'
@@ -60,6 +60,7 @@ examples:
       dataset_id: 'example_dataset'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
+      display_name: 'display-name'
     exclude_test: true
   - name: 'bigquerydatatransfer_config_salesforce'
     primary_resource_id: 'salesforce_config'
@@ -222,10 +223,30 @@ properties:
       to a different credential configuration in the config will require an apply to update state.
     url_param_only: true
     properties:
+      - name: 'secretAccessKeyWoVersion'
+        type: Integer
+        url_param_only: true
+        required_with:
+          - 'sensitive_params.0.secretAccessKeyWo'
+        description: |
+          The version of the sensitive params - used to trigger updates of the write-only params. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
       - name: 'secretAccessKey'
         type: String
         description: |
           The Secret Access Key of the AWS account transferring data from.
-
-        required: true
         sensitive: true
+        at_least_one_of:
+          - 'sensitive_params.0.secretAccessKey'
+          - 'sensitive_params.0.secretAccessKeyWo'
+        conflicts:
+          - 'sensitive_params.0.secretAccessKeyWo'
+      - name: 'secretAccessKeyWo' # Wo is convention for write-only properties
+        type: String
+        description: |
+          The Secret Access Key of the AWS account transferring data from.
+        write_only: true
+        at_least_one_of:
+          - 'sensitive_params.0.secretAccessKeyWo'
+          - 'sensitive_params.0.secretAccessKey'
+        conflicts:
+          - 'sensitive_params.0.secretAccessKey'

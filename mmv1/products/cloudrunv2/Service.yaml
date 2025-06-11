@@ -98,7 +98,6 @@ examples:
   - name: 'cloudrunv2_service_gpu'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-service'
     ignore_read_extra:
@@ -171,6 +170,14 @@ examples:
       sa_name: 'build-sa'
     test_vars_overrides:
       'zip_path': '"./test-fixtures/function-source.zip"'
+    ignore_read_extra:
+      - 'deletion_protection'
+  - name: 'cloudrunv2_service_iap'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-iap-service%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      cloud_run_service_name: 'cloudrun-iap-service'
     ignore_read_extra:
       - 'deletion_protection'
 virtual_fields:
@@ -333,6 +340,17 @@ properties:
         type: Integer
         description: |
           Minimum number of instances for the service, to be divided among all revisions receiving traffic.
+      - name: 'scalingMode'
+        type: Enum
+        description: |
+          The [scaling mode](https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.services#scalingmode) for the service.
+        enum_values:
+          - 'AUTOMATIC'
+          - 'MANUAL'
+      - name: 'manualInstanceCount'
+        type: Integer
+        description: |
+          Total instance count for the service in manual scaling mode. This number of instances is divided among all revisions with specified traffic based on the percent of traffic they are receiving.
   - name: 'defaultUriDisabled'
     type: Boolean
     description: |-
@@ -481,6 +499,10 @@ properties:
                     required: true
                   - name: 'value'
                     type: String
+                    # env is a set.
+                    # The env.value has value "" in Terraform state, but it has value nil in Terraform plan,
+                    # which causes the diffs for unchanged env. default_value: "" is to suppress the diffs.
+                    default_value: ""
                     description: |-
                       Literal value of the environment variable. Defaults to "" and the maximum allowed length is 32768 characters. Variable references are not supported in Cloud Run.
                     # exactly_one_of:
@@ -956,13 +978,15 @@ properties:
       - name: 'nodeSelector'
         type: NestedObject
         description: Node Selector describes the hardware requirements of the resources.
-        min_version: 'beta'
         properties:
           - name: 'accelerator'
             type: String
             description:
               The GPU to attach to an instance. See https://cloud.google.com/run/docs/configuring/services/gpu for configuring GPU.
             required: true
+      - name: 'gpuZonalRedundancyDisabled'
+        type: Boolean
+        description: True if GPU zonal redundancy is disabled on this revision.
   - name: 'traffic'
     type: Array
     description: |-
@@ -994,7 +1018,7 @@ properties:
   - name: 'invokerIamDisabled'
     type: Boolean
     description: |
-      Disables IAM permission check for run.routes.invoke for callers of this service. This feature is available by invitation only. For more information, visit https://cloud.google.com/run/docs/securing/managing-access#invoker_check.
+      Disables IAM permission check for run.routes.invoke for callers of this service. For more information, visit https://cloud.google.com/run/docs/securing/managing-access#invoker_check.
   - name: 'observedGeneration'
     type: String
     description: |
@@ -1209,3 +1233,8 @@ properties:
     description: |
       A system-generated fingerprint for this version of the resource. May be used to detect modification conflict during updates.
     output: true
+  - name: 'iapEnabled'
+    type: Boolean
+    description: |
+      Used to enable/disable IAP for the service.
+    min_version: 'beta'

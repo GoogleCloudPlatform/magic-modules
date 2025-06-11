@@ -30,8 +30,8 @@ timeouts:
   delete_minutes: 20
 custom_code:
 sweeper:
-  regions:
-    - "US"
+  url_substitutions:
+    - region: "US"
 examples:
   - name: 'bigquery_biglake_catalog'
     primary_resource_id: 'default'

@@ -13,7 +13,7 @@ steps:
         - $BUILD_ID
 
 # Long timeout to enable waiting on VCR test
-timeout: 20000s
+timeout: 40000s
 options:
     machineType: 'N1_HIGHCPU_32'
 

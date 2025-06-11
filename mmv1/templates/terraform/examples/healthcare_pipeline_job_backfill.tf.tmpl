@@ -3,7 +3,7 @@ resource "google_healthcare_pipeline_job" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
   dataset = google_healthcare_dataset.dataset.id
   backfill_pipeline_job {
-    mapping_pipeline_job = "${google_healthcare_dataset.dataset.id}/pipelinejobs/{{index $.Vars "mapping_pipeline_name"}}"
+    mapping_pipeline_job = "${google_healthcare_dataset.dataset.id}/pipelineJobs/{{index $.Vars "mapping_pipeline_name"}}"
   }      
 }
 

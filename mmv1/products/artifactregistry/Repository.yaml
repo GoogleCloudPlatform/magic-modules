@@ -55,9 +55,9 @@ custom_code:
   encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
   pre_create: 'templates/terraform/pre_create/artifact_registry_remote_repository.go.tmpl'
 sweeper:
-  regions:
-    - "us-central1"
-    - "us"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us"
 examples:
   - name: 'artifact_registry_repository_basic'
     primary_resource_id: 'my-repo'
@@ -489,6 +489,7 @@ properties:
                 enum_values:
                   - 'DEBIAN'
                   - 'UBUNTU'
+                  - 'DEBIAN_SNAPSHOT'
               - name: 'repositoryPath'
                 type: String
                 description: |-

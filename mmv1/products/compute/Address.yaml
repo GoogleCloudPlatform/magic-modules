@@ -51,13 +51,14 @@ async:
 collection_url_key: 'items'
 custom_code:
   post_create: 'templates/terraform/post_create/labels.tmpl'
+  tgc_encoder: 'templates/tgc_next/encoders/compute_address.go.tmpl'
 sweeper:
-  regions:
-    - "us-west1"
-    - "us-west2"
-    - "us-central1"
-    - "us-east1"
-    - "europe-west1"
+  url_substitutions:
+    - region: "us-west2"
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "europe-west1"
+    - region: "us-west1"
 examples:
   - name: 'address_basic'
     primary_resource_id: 'ip_address'

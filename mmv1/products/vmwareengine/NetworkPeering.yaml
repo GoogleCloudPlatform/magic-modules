@@ -19,7 +19,7 @@ references:
   guides:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networks/addPeering'
 docs:
-base_url: 'projects/{{project}}/locations/global/networkPeering'
+base_url: 'projects/{{project}}/locations/global/networkPeerings'
 self_link: 'projects/{{project}}/locations/global/networkPeerings/{{name}}'
 create_url: 'projects/{{project}}/locations/global/networkPeerings?networkPeeringId={{name}}'
 update_verb: 'PATCH'

@@ -1,0 +1,103 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	l := v.([]interface{})
+	transformed := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+		original := raw.(map[string]interface{})
+		if len(original) < 1 {
+			// Do not include empty json objects coming back from the api
+			continue
+		}
+		connection := flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}Connections(original["connections"], d, config)
+		if len(connection.([]interface{})) == 0 {
+			continue
+		}
+		transformed = append(transformed, map[string]interface{}{
+			"connections": connection,
+		})
+	}
+	return transformed
+}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}Connections(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	l := v.([]interface{})
+	transformed := make([]interface{}, 0, len(l))
+	for _, raw := range l {
+		original := raw.(map[string]interface{})
+		if len(original) < 1 {
+			// Do not include empty json objects coming back from the api
+			continue
+		}
+		pscConnections := flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnection(original["pscConnection"], d, config)
+		if pscConnections == nil {
+			continue
+		}
+		transformed = append(transformed, map[string]interface{}{
+			"psc_connection": pscConnections,
+		})
+
+	}
+	return transformed
+}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnection(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["psc_connection_id"] =
+		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionPscConnectionId(original["pscConnectionId"], d, config)
+	transformed["address"] =
+		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionAddress(original["address"], d, config)
+	transformed["forwarding_rule"] =
+		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionForwardingRule(original["forwardingRule"], d, config)
+	transformed["project_id"] =
+		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionProjectId(original["projectId"], d, config)
+	transformed["network"] =
+		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionNetwork(original["network"], d, config)
+	transformed["service_attachment"] =
+		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionServiceAttachment(original["serviceAttachment"], d, config)
+	transformed["psc_connection_status"] =
+		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionPscConnectionStatus(original["pscConnectionStatus"], d, config)
+	transformed["connection_type"] =
+		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionConnectionType(original["connectionType"], d, config)
+	return []interface{}{transformed}
+}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionPscConnectionId(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionAddress(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionForwardingRule(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionProjectId(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionNetwork(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionServiceAttachment(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionPscConnectionStatus(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}ConnectionsPscConnectionConnectionType(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}

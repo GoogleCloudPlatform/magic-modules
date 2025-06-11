@@ -1,0 +1,35 @@
+resource "google_bigtable_instance" "instance" {
+  name = "{{index $.Vars "instance_name"}}"
+  cluster {
+    cluster_id   = "cluster-1"
+    zone         = "us-east1-b"
+    num_nodes    = 3
+    storage_type = "HDD"
+  }
+
+  deletion_protection  = {{index $.Vars "deletion_protection"}}
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "{{index $.Vars "table_name"}}"
+  instance_name = google_bigtable_instance.instance.name
+
+  column_family {
+	family = "CF"
+  }
+}
+
+resource "google_bigtable_materialized_view" "{{$.PrimaryResourceId}}" {
+  materialized_view_id = "{{index $.Vars "materialized_view_name"}}"
+  instance             = google_bigtable_instance.instance.name
+  deletion_protection  = false
+  query = <<EOT
+SELECT _key, COUNT(CF['col1']) as Count
+FROM ` + "`{{index $.Vars "table_name"}}`" + `
+GROUP BY _key
+EOT
+
+  depends_on = [
+    google_bigtable_table.table
+  ]
+}

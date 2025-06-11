@@ -13,6 +13,8 @@
 
 ---
 name: 'NotificationConfig'
+api_variant_patterns:
+  - 'organizations/{organization}/notificationConfigs/{notificationConfig}'
 description: |
   A Cloud Security Command Center (Cloud SCC) notification configs. A
   notification config is a Cloud SCC resource that contains the
@@ -38,7 +40,6 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/scc_source_self_link_as_name_set_organization.go.tmpl'
 examples:
   - name: 'scc_notification_config_basic'

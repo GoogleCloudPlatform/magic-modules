@@ -9,7 +9,14 @@ resource "google_assured_workloads_workload" "primary" {
     rotation_period = "864000s"
   }
   provisioned_resources_parent = google_folder.folder1.name
+  depends_on = [time_sleep.wait_120_seconds]
 }
+
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_folder.folder1]
+}
+
 
 resource "google_folder" "folder1" {
   display_name = "{{name}}"

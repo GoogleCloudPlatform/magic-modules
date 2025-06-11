@@ -13,18 +13,27 @@
 package api
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"maps"
+	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
+	"text/template"
+
+	"github.com/golang/glog"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"golang.org/x/exp/slices"
 )
+
+const RELATIVE_MAGICIAN_LOCATION = "mmv1/"
+const GITHUB_BASE_URL = "https://github.com/GoogleCloudPlatform/magic-modules/tree/main/" + RELATIVE_MAGICIAN_LOCATION
 
 type Resource struct {
 	Name string
@@ -337,6 +346,14 @@ type Resource struct {
 	// fine-grained resources and legacy resources.
 	ApiResourceTypeKind string `yaml:"api_resource_type_kind,omitempty"`
 
+	// The API URL patterns used by this resource that represent variants e.g.,
+	// "folders/{folder}/feeds/{feed}". Each pattern must match the value
+	// defined in the API exactly. The use of `api_variant_patterns` is only
+	// meaningful when the resource type has multiple parent types available.
+	// This is commonly used for resources that have a project, folder, and
+	// organization variant, however most resources do not need it.
+	ApiVariantPatterns []string `yaml:"api_variant_patterns,omitempty"`
+
 	ImportPath     string `yaml:"-"`
 	SourceYamlFile string `yaml:"-"`
 }
@@ -558,10 +575,27 @@ func (r Resource) SensitiveProps() []*Type {
 	})
 }
 
+func (r Resource) WriteOnlyProps() []*Type {
+	props := r.AllNestedProperties(r.RootProperties())
+	return google.Select(props, func(p *Type) bool {
+		return p.WriteOnly
+	})
+}
+
 func (r Resource) SensitivePropsToString() string {
 	var props []string
 
 	for _, prop := range r.SensitiveProps() {
+		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
+	}
+
+	return strings.Join(props, ", ")
+}
+
+func (r Resource) WriteOnlyPropsToString() string {
+	var props []string
+
+	for _, prop := range r.WriteOnlyProps() {
 		props = append(props, fmt.Sprintf("`%s`", prop.Lineage()))
 	}
 
@@ -1182,6 +1216,40 @@ func (r Resource) GetIdFormat() string {
 	return idFormat
 }
 
+// Returns true if the Type is in the ID format and false otherwise.
+func (r Resource) InPostCreateComputed(prop Type) bool {
+	fields := map[string]struct{}{}
+	for _, f := range r.ExtractIdentifiers(r.GetIdFormat()) {
+		fields[f] = struct{}{}
+	}
+	for _, f := range r.ExtractIdentifiers(r.SelfLinkUri()) {
+		fields[f] = struct{}{}
+	}
+	_, ok := fields[google.Underscore(prop.Name)]
+	return ok
+}
+
+// Returns true if at least one of the fields in the ID format is computed
+func (r Resource) HasPostCreateComputedFields() bool {
+	fields := map[string]struct{}{}
+	for _, f := range r.ExtractIdentifiers(r.GetIdFormat()) {
+		fields[f] = struct{}{}
+	}
+	for _, f := range r.ExtractIdentifiers(r.SelfLinkUri()) {
+		fields[f] = struct{}{}
+	}
+	for _, p := range r.GettableProperties() {
+		// Skip fields not in the id format
+		if _, ok := fields[google.Underscore(p.Name)]; !ok {
+			continue
+		}
+		if (p.Output || p.DefaultFromApi) && !p.IgnoreRead {
+			return true
+		}
+	}
+	return false
+}
+
 // ====================
 // Template Methods
 // ====================
@@ -1342,13 +1410,27 @@ func (r Resource) IamSelfLinkIdentifiers() []string {
 	return r.ExtractIdentifiers(selfLink)
 }
 
-// Returns the resource properties that are idenfifires in the selflink url
-func (r Resource) IamSelfLinkProperties() []*Type {
-	params := r.IamSelfLinkIdentifiers()
+// Returns the resource properties that are idenfifires in Iam resource when generating the docs.
+// The "project" and "organization" properties are excluded, as they are handled seperated in the docs.
+func (r Resource) IamResourceProperties() []*Type {
+	urlProperties := make([]*Type, 0)
+	for _, param := range r.IamResourceParams() {
+		if param == "project" || param == "organization" {
+			continue
+		}
 
-	urlProperties := google.Select(r.AllUserProperties(), func(p *Type) bool {
-		return slices.Contains(params, p.Name)
-	})
+		found := false
+		for _, p := range r.AllUserProperties() {
+			if param == google.Underscore(p.Name) {
+				urlProperties = append(urlProperties, p)
+				found = true
+				break
+			}
+		}
+		if !found {
+			urlProperties = append(urlProperties, &Type{Name: param})
+		}
+	}
 
 	return urlProperties
 }
@@ -1537,11 +1619,43 @@ func (r Resource) FormatDocDescription(desc string, indent bool) string {
 }
 
 func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
-	output := resource.ExecuteTemplate(&r, templatePath, appendNewline)
+	output := ExecuteTemplate(&r, templatePath, appendNewline)
 	if !appendNewline {
 		output = strings.TrimSuffix(output, "\n")
 	}
 	return output
+}
+
+func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
+	templates := []string{
+		templatePath,
+		"templates/terraform/expand_resource_ref.tmpl",
+		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
+		"templates/terraform/flatten_property_method.go.tmpl",
+		"templates/terraform/expand_property_method.go.tmpl",
+		"templates/terraform/update_mask.go.tmpl",
+		"templates/terraform/nested_query.go.tmpl",
+		"templates/terraform/unordered_list_customize_diff.go.tmpl",
+	}
+	templateFileName := filepath.Base(templatePath)
+
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	contents := bytes.Buffer{}
+	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
+		glog.Exit(err)
+	}
+
+	rs := contents.String()
+
+	if !strings.HasSuffix(rs, "\n") && appendNewline {
+		rs = fmt.Sprintf("%s\n", rs)
+	}
+
+	return rs
 }
 
 // Returns the key of the list of resources in the List API response
@@ -1821,6 +1935,10 @@ func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {
 }
 
 func (r Resource) ShouldGenerateSweepers() bool {
+	if !r.ExcludeSweeper && !utils.IsEmpty(r.Sweeper) {
+		return true
+	}
+
 	allowedKeys := []string{"project", "region", "location", "zone", "billing_account"}
 	if !urlContainsOnlyAllowedKeys(r.ListUrlTemplate(), allowedKeys) {
 		return false
@@ -1829,4 +1947,42 @@ func (r Resource) ShouldGenerateSweepers() bool {
 		return false
 	}
 	return true
+}
+
+func (r Resource) GithubURL() string {
+	return GITHUB_BASE_URL + r.SourceYamlFile
+}
+
+func (r Resource) CodeHeader(templatePath string) string {
+	templateUrl := GITHUB_BASE_URL + templatePath
+
+	return fmt.Sprintf(`// ----------------------------------------------------------------------------
+//
+//     ***     AUTO GENERATED CODE    ***    Type: MMv1     ***
+//
+// ----------------------------------------------------------------------------
+//
+//     This code is generated by Magic Modules using the following:
+//
+//     Configuration: %s
+//     Template:      %s
+//
+//     DO NOT EDIT this file directly. Any changes made to this file will be
+//     overwritten during the next generation cycle.
+//
+// ----------------------------------------------------------------------------`, r.GithubURL(), templateUrl)
+}
+
+func (r Resource) MarkdownHeader(templatePath string) string {
+	return strings.Replace(r.CodeHeader(templatePath), "//", "#", -1)
+}
+
+// ====================
+// TGC
+// ====================
+// Filters out computed properties during cai2hcl
+func (r Resource) ReadPropertiesForTgc() []*Type {
+	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
+		return v.Output
+	})
 }

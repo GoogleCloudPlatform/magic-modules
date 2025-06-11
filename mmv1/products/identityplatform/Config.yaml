@@ -208,6 +208,7 @@ properties:
         type: NestedObject
         description: |
           The user credentials to include in the JWT payload that is sent to the registered Blocking Functions.
+        custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_forward_inbound_credentials.go.tmpl'
         properties:
           - name: 'idToken'
             type: Boolean
@@ -380,6 +381,7 @@ properties:
     type: NestedObject
     description: |
       Configuration related to multi-tenant functionality.
+    custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_multi_tenant.go.tmpl'
     properties:
       - name: 'allowTenants'
         type: Boolean

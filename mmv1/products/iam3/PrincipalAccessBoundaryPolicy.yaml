@@ -13,7 +13,12 @@
 
 ---
 name: 'PrincipalAccessBoundaryPolicy'
-description: An IAM Principal Access Boundary Policy resource
+description: |
+  An IAM Principal Access Boundary Policy resource. This resource has no effect on accesses until is bound to a target through policy bindings.
+  You can see further documentation on policy bindings in:
+    - [Organizations](/providers/hashicorp/google/latest/docs/resources/iam_organizations_policy_binding)
+    - [Folders](/providers/hashicorp/google/latest/docs/resources/iam_folders_policy_binding)
+    - [Projects](/providers/hashicorp/google/latest/docs/resources/iam_projects_policy_binding)
 references:
   guides:
     'Create and apply Principal Access Boundaries': 'https://cloud.google.com/iam/docs/principal-access-boundary-policies-create'
@@ -41,12 +46,24 @@ async:
   include_project: true
 examples:
   - name: 'iam_principal_access_boundary_policy'
-    primary_resource_id: 'my-pab-policy'
+    primary_resource_id: 'pab-policy-for-org'
+    external_providers: ["time"]
     test_env_vars:
       org_id: 'ORG_ID'
     vars:
-      display_name: 'test pab policy'
-      pab_id: 'test-pab-policy'
+      display_name: 'PAB policy for Organization'
+      pab_id: 'pab-policy-for-org'
+  - name: 'iam_organizations_policy_binding'
+    primary_resource_id: 'my-pab-policy'
+    external_providers: ["time"]
+    test_env_vars:
+      org_id: 'ORG_ID'
+    vars:
+      pab_policy_id: 'my-pab-policy'
+      display_name: 'Binding for all principals in the Organization'
+      org_binding_id: 'binding-for-all-org-principals'
+    # This example is already used as a test in OrganizationsPolicyBinding
+    exclude_test: true
 parameters:
   - name: 'organization'
     type: String

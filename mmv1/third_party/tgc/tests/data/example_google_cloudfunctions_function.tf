@@ -21,7 +21,7 @@ resource "google_vpc_access_connector" "connector" {
 resource "google_cloudfunctions_function" "function" {
   name        = "my-cf"
   description = "My CloudFunction"
-  runtime     = "nodejs14"
+  runtime     = "nodejs20"
 
   available_memory_mb   = 128
   source_archive_bucket = "validator_bucket_local"

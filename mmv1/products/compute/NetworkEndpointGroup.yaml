@@ -51,6 +51,9 @@ async:
 collection_url_key: 'items'
 custom_code:
   constants: 'templates/terraform/constants/compute_network_endpoint_group.go.tmpl'
+sweeper:
+  url_substitutions:
+    - zone: "us-central1-a"
 examples:
   - name: 'network_endpoint_group'
     primary_resource_id: 'neg'
@@ -140,3 +143,9 @@ properties:
     description: |
       The default port used if the port number is not specified in the
       network endpoint.
+  - name: 'generated_id'
+    type: Integer
+    api_name: 'id'
+    output: true
+    description: |
+      The uniquely generated identifier for the resource. This identifier is defined by the server.

@@ -1,9 +1,9 @@
 package cai2hcl
 
 import (
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/common"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/services/compute"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/services/resourcemanager"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/cai2hcl/common"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/cai2hcl/services/compute"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/cai2hcl/services/resourcemanager"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	tpg_provider "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
 )

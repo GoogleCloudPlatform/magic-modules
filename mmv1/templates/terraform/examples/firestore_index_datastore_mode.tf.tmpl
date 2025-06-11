@@ -9,12 +9,13 @@ resource "google_firestore_database" "database" {
 }
 
 resource "google_firestore_index" "{{$.PrimaryResourceId}}" {
-  project     = "{{index $.TestEnvVars "project_id"}}"
+  project    = "{{index $.TestEnvVars "project_id"}}"
   database   = google_firestore_database.database.name
   collection = "atestcollection"
 
   query_scope = "COLLECTION_RECURSIVE"
-  api_scope = "DATASTORE_MODE_API"
+  api_scope   = "DATASTORE_MODE_API"
+  density     = "SPARSE_ALL"
 
   fields {
     field_path = "name"

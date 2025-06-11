@@ -68,6 +68,7 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_self_link.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
+# Exclude tests for examples becauses tests run in parallel and will conflict when trying to create the org level access policy
 examples:
   - name: 'access_context_manager_service_perimeter_basic'
     primary_resource_id: 'service-perimeter'
@@ -84,6 +85,11 @@ examples:
     primary_resource_id: 'service-perimeter'
     vars:
       service_perimeter_name: 'restrict_bigquery_dryrun_storage'
+    exclude_test: true
+  - name: 'access_context_manager_service_perimeter_granular_controls'
+    primary_resource_id: 'service-perimeter'
+    vars:
+      service_perimeter_name: 'granular_controls'
     exclude_test: true
 parameters:
   # Parent is a path parameter that _cannot_ be read or sent in the request at all.
@@ -313,6 +319,14 @@ properties:
                   is_set: true
                   item_type:
                     type: String
+                - name: 'roles'
+                  type: Array
+                  item_type:
+                    type: String
+                  description: |
+                    A list of IAM roles that represent the set of operations that the sources
+                    specified in the corresponding `IngressFrom`
+                    are allowed to perform.
                 - name: 'operations'
                   type: Array
                   description: |
@@ -441,6 +455,14 @@ properties:
                   is_set: true
                   item_type:
                     type: String
+                - name: 'roles'
+                  type: Array
+                  item_type:
+                    type: String
+                  description: |
+                    A list of IAM roles that represent the set of operations that the sources
+                    specified in the corresponding `EgressFrom`
+                    are allowed to perform.
                 - name: 'operations'
                   type: Array
                   description: |
@@ -639,6 +661,14 @@ properties:
                   is_set: true
                   item_type:
                     type: String
+                - name: 'roles'
+                  type: Array
+                  item_type:
+                    type: String
+                  description: |
+                    A list of IAM roles that represent the set of operations that the sources
+                    specified in the corresponding `IngressFrom`
+                    are allowed to perform.
                 - name: 'operations'
                   type: Array
                   description: |
@@ -765,6 +795,14 @@ properties:
                   is_set: true
                   item_type:
                     type: String
+                - name: 'roles'
+                  type: Array
+                  item_type:
+                    type: String
+                  description: |
+                    A list of IAM roles that represent the set of operations that the sources
+                    specified in the corresponding `EgressFrom`
+                    are allowed to perform.
                 - name: 'operations'
                   type: Array
                   description: |

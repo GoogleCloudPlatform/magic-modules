@@ -53,3 +53,22 @@ func setToSortedSlice(set map[string]struct{}) []string {
 	sort.Strings(slice)
 	return slice
 }
+
+func (fs FieldSet) IsSubsetOf(other FieldSet) bool {
+	for field := range fs {
+		if _, ok := other[field]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
+func (fs FieldSet) Difference(subset FieldSet) map[string]struct{} {
+	diff := make(map[string]struct{})
+	for k := range fs {
+		if _, ok := subset[k]; !ok {
+			diff[k] = struct{}{}
+		}
+	}
+	return diff
+}

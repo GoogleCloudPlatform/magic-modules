@@ -29,6 +29,11 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete']
+  operation:
+    base_url: '{{op_id}}'
 custom_code:
   constants: 'templates/terraform/constants/monitoring_monitored_project.go.tmpl'
   encoder: 'templates/terraform/encoders/monitoring_monitored_project.go.tmpl'
@@ -37,10 +42,10 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/monitoring_monitored_project.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/monitoring_monitored_project.go.tmpl'
 error_retry_predicates:
-
   - 'transport_tpg.IsMonitoringPermissionError'
 schema_version: 1
 state_upgraders: true
+exclude_sweeper: true
 examples:
   - name: 'monitoring_monitored_project_basic'
     primary_resource_id: 'primary'

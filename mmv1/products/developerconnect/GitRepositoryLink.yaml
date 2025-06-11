@@ -14,7 +14,10 @@
 ---
 name: 'GitRepositoryLink'
 description: "A git repository link to a parent connection."
-docs:
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/developer-connect/docs/overview'
+  api: 'https://cloud.google.com/developer-connect/docs/api/reference/rest/v1/projects.locations.connections.gitRepositoryLinks'
 id_format: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks'
 self_link: 'projects/{{project}}/locations/{{location}}/connections/{{parent_connection}}/gitRepositoryLinks/{{git_repository_link_id}}'

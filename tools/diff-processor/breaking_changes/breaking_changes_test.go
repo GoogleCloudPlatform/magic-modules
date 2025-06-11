@@ -298,7 +298,7 @@ func TestComputeBreakingChanges(t *testing.T) {
 			},
 			wantViolations: []BreakingChange{
 				{
-					Message:                "Field `field-a.sub-field-1` MinItems went from 100 to 25 on `google-x`",
+					Message:                "Field `field-a.sub-field-1` MaxItems went from 100 to 25 on `google-x`",
 					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#field-shrinking-max",
 				},
 			},
@@ -343,7 +343,7 @@ func TestComputeBreakingChanges(t *testing.T) {
 			},
 			wantViolations: []BreakingChange{
 				{
-					Message:                "Field `field-a.sub-field-1` MinItems went from 100 to 25 on `google-x`",
+					Message:                "Field `field-a.sub-field-1` MaxItems went from 100 to 25 on `google-x`",
 					DocumentationReference: "https://googlecloudplatform.github.io/magic-modules/breaking-changes/breaking-changes#field-shrinking-max",
 				},
 			},

@@ -137,4 +137,13 @@ type CustomCode struct {
 	// resource was successfully deleted. Use this if the API responds
 	// with a success HTTP code for deleted resources
 	TestCheckDestroy string `yaml:"test_check_destroy"`
+
+	ValidateRawResourceConfigFuncs string `yaml:"raw_resource_config_validation"`
+
+	// ====================
+	// TGC Encoders & Decoders
+	// ====================
+	TgcEncoder string `yaml:"tgc_encoder"`
+
+	TgcDecoder string `yaml:"tgc_decoder"`
 }

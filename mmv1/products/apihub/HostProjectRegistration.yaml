@@ -1,0 +1,78 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: HostProjectRegistration
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/hostProjectRegistrations/{hostproject}'
+description: |-
+  Host project registration refers to the registration of a Google cloud project with API hub as a host project.
+  This is the project where API hub is provisioned.
+  It acts as the consumer project for the API hub instance provisioned.
+  Multiple runtime projects can be attached to the host project and these attachments define the scope of API hub.
+base_url: projects/{{project}}/locations/{{location}}/hostProjectRegistrations
+immutable: true
+self_link: projects/{{project}}/locations/{{location}}/hostProjectRegistrations/{{host_project_registration_id}}
+create_url: projects/{{project}}/locations/{{location}}/hostProjectRegistrations?hostProjectRegistrationId={{host_project_registration_id}}
+id_format: projects/{{project}}/locations/{{location}}/hostProjectRegistrations/{{host_project_registration_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/hostProjectRegistrations/{{host_project_registration_id}}
+examples:
+  - name: apihub_host_project_registration_basic
+    primary_resource_id: apihub_host_project
+    vars:
+      project_id: 'apihub-proj'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    external_providers: ["time"]
+exclude_delete: true
+autogen_status: SG9zdFByb2plY3RSZWdpc3RyYXRpb24=
+parameters:
+  - name: location
+    type: String
+    description: Part of `parent`. See documentation of `projectsId`.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: hostProjectRegistrationId
+    type: String
+    description: |-
+      Required. The ID to use for the Host Project Registration, which will become the
+      final component of the host project registration's resource name. The ID
+      must be the same as the Google cloud project specified in the
+      host_project_registration.gcp_project field.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    description: |-
+      Identifier. The name of the host project registration.
+      Format:
+      "projects/{project}/locations/{location}/hostProjectRegistrations/{host_project_registration}".
+    output: true
+  - name: gcpProject
+    type: String
+    description: |-
+      Required. Immutable. Google cloud project name in the format: "projects/abc" or "projects/123".
+      As input, project name with either project id or number are accepted.
+      As output, this field will contain project number.
+    immutable: true
+    required: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: createTime
+    type: String
+    description: Output only. The time at which the host project registration was created.
+    output: true

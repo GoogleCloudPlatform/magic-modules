@@ -1,7 +1,7 @@
 resource "google_discovery_engine_target_site" "advanced" {
   location                    = google_discovery_engine_data_store.advanced.location
   data_store_id               = google_discovery_engine_data_store.advanced.data_store_id
-  provided_uri_pattern        = "http://cloud.google.com/docs/*"
+  provided_uri_pattern        = "cloud.google.com/docs/*"
   type                        = "INCLUDE"
   exact_match                 = false
 }

@@ -26,7 +26,7 @@ import (
 
 	membership "magician/github"
 
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v68/github"
 	"github.com/spf13/cobra"
 
 	"golang.org/x/exp/slices"
@@ -296,6 +296,10 @@ func notificationState(pr *github.PullRequest, issueEventsDesc []*github.IssueEv
 		if _, ok := removedRequests[*event.RequestedReviewer.Login]; ok {
 			continue
 		}
+		// Ignore review requests to the PR author
+		if *event.RequestedReviewer.Login == *pr.User.Login {
+			continue
+		}
 		if membership.IsCoreReviewer(*event.RequestedReviewer.Login) {
 			latestReviewRequest = event
 			break
@@ -319,7 +323,12 @@ func notificationState(pr *github.PullRequest, issueEventsDesc []*github.IssueEv
 		if review.User == nil {
 			continue
 		}
+		// Ignore reviews by non-core reviewers
 		if !membership.IsCoreReviewer(*review.User.Login) {
+			continue
+		}
+		// Ignore reviews by the PR author
+		if *review.User.Login == *pr.User.Login {
 			continue
 		}
 		reviewer := *review.User.Login
@@ -488,6 +497,7 @@ func formatReminderComment(pullRequest *github.PullRequest, state pullRequestRev
 	default:
 		return "", fmt.Errorf("state does not have corresponding template: %s", state.String())
 	}
+
 	tmpl, err := template.New("").Funcs(template.FuncMap{
 		"weekdaysToWeeks": func(a int) int {
 			return a / 5
@@ -499,8 +509,9 @@ func formatReminderComment(pullRequest *github.PullRequest, state pullRequestRev
 
 	var coreReviewers []string
 	if currentReviewer == "" {
+		// A core reviewer that isn't the author
 		for _, reviewer := range pullRequest.RequestedReviewers {
-			if membership.IsCoreReviewer(*reviewer.Login) {
+			if membership.IsCoreReviewer(*reviewer.Login) && *reviewer.Login != *pullRequest.User.Login {
 				coreReviewers = append(coreReviewers, *reviewer.Login)
 			}
 		}

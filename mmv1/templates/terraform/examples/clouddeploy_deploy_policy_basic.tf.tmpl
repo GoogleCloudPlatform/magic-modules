@@ -1,0 +1,27 @@
+resource "google_clouddeploy_deploy_policy" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "policy"}}"
+  location = "us-central1"
+  selectors {
+    delivery_pipeline {
+      id = "{{index $.Vars "delivery_pipeline"}}"
+    }
+  }
+  rules {
+    rollout_restriction {
+      id = "rule"
+      time_windows {
+        time_zone = "America/Los_Angeles"
+        weekly_windows {
+            start_time {
+                hours = "12"
+                minutes = "00"
+            }
+            end_time {
+                hours = "13"
+                minutes = "00"
+            }
+        }
+      }
+    }
+  }
+}

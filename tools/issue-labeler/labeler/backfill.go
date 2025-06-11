@@ -3,11 +3,13 @@ package labeler
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v68/github"
 )
 
 type Label struct {
@@ -45,20 +47,60 @@ func GetIssues(repository, since string) ([]*github.Issue, error) {
 	var allIssues []*github.Issue
 	ctx := context.Background()
 
-	for {
-		issues, resp, err := client.Issues.ListByRepo(ctx, owner, repo, opt)
-		if err != nil {
-			return nil, fmt.Errorf("listing issues: %w", err)
-		}
-		allIssues = append(allIssues, issues...)
+	issues, resp, err := client.Issues.ListByRepo(ctx, owner, repo, opt)
+	if err != nil {
+		return nil, fmt.Errorf("listing issues: %w", err)
+	}
+	allIssues = append(allIssues, issues...)
 
-		if resp.NextPage == 0 {
+	for {
+		// use link headers instead of page parameter based pagination as
+		// it is not supported for large datasets
+
+		next := parseNextLink(resp.Response)
+		if next == "" {
 			break
 		}
-		opt.Page = resp.NextPage
+
+		req, err := client.NewRequest("GET", next, nil)
+		if err != nil {
+			return allIssues, err
+		}
+		req.Header.Set("Accept", "application/vnd.github.raw+json")
+
+		var issues []*github.Issue
+		resp, err = client.Do(ctx, req, &issues)
+		if err != nil {
+			return allIssues, err
+		}
+
+		allIssues = append(allIssues, issues...)
 	}
 
 	return allIssues, nil
+}
+
+// parseNextLink finds the next page for a GitHub API request by parsing the previous response's Link header.
+// https://docs.github.com/en/rest/using-the-rest-api/using-pagination-in-the-rest-api?apiVersion=2022-11-28#using-link-headers
+func parseNextLink(resp *http.Response) string {
+	var next string
+	for _, hdr := range resp.Header.Values("Link") {
+		links := strings.Split(hdr, ",")
+		for _, link := range links {
+			pair := strings.Split(strings.TrimSpace(link), ";")
+			if len(pair) == 2 {
+				if strings.TrimSpace(pair[0]) == `rel="next"` {
+					next = strings.Trim(pair[1], "<> ")
+				} else if strings.TrimSpace(pair[1]) == `rel="next"` {
+					next = strings.Trim(pair[0], "<> ")
+				}
+				if next != "" {
+					break
+				}
+			}
+		}
+	}
+	return next
 }
 
 // ComputeIssueUpdates remains the same as it doesn't interact with GitHub API
@@ -79,6 +121,7 @@ func ComputeIssueUpdates(issues []*github.Issue, regexpLabels []RegexpLabel) []I
 		_, terraform := desired["service/terraform"]
 		_, linked := desired["forward/linked"]
 		_, exempt := desired["forward/exempt"]
+		_, testfailure := desired["test-failure"]
 		if terraform || exempt {
 			continue
 		}
@@ -95,6 +138,7 @@ func ComputeIssueUpdates(issues []*github.Issue, regexpLabels []RegexpLabel) []I
 		for label := range desired {
 			issueUpdate.OldLabels = append(issueUpdate.OldLabels, label)
 		}
+		sort.Strings(issueUpdate.OldLabels)
 
 		affectedResources := ExtractAffectedResources(issue.GetBody())
 		for _, needed := range ComputeLabels(affectedResources, regexpLabels) {
@@ -102,7 +146,8 @@ func ComputeIssueUpdates(issues []*github.Issue, regexpLabels []RegexpLabel) []I
 		}
 
 		if len(desired) > len(issueUpdate.OldLabels) {
-			if !linked {
+			// Forwarding test failure ticket directly
+			if !linked && !testfailure {
 				issueUpdate.Labels = append(issueUpdate.Labels, "forward/review")
 			}
 			for label := range desired {

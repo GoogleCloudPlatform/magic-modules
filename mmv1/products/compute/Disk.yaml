@@ -144,6 +144,27 @@ properties:
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
+  - name: 'sourceInstantSnapshot'
+    type: String
+    description: |
+      The source instant snapshot used to create this disk. You can provide this as a partial or full URL to the resource.
+      For example, the following are valid values:
+
+      * `https://www.googleapis.com/compute/v1/projects/project/zones/zone/instantSnapshots/instantSnapshot`
+      * `projects/project/zones/zone/instantSnapshots/instantSnapshot`
+      * `zones/zone/instantSnapshots/instantSnapshot`
+    resource: 'Snapshot'
+    imports: 'selfLink'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+  - name: 'sourceInstantSnapshotId'
+    type: String
+    description: |
+      The unique ID of the instant snapshot used to create this disk. This value identifies
+      the exact instant snapshot that was used to create this persistent disk.
+      For example, if you created the persistent disk from an instant snapshot that was later
+      deleted and recreated under the same name, the source instant snapshot ID would identify
+      the exact version of the instant snapshot that was used.
+    output: true
   - name: 'sourceImageId'
     type: String
     description: |
@@ -249,7 +270,15 @@ properties:
       snapshot ID would identify the exact version of the snapshot that was
       used.
     output: true
-
+  - name: 'sourceStorageObject'
+    type: String
+    description: |
+      The full Google Cloud Storage URI where the disk image is stored.
+      This file must be a gzip-compressed tarball whose name ends in .tar.gz or virtual machine disk whose name ends in vmdk.
+      Valid URIs may start with gs:// or https://storage.googleapis.com/.
+      This flag is not optimized for creating multiple disks from a source storage object.
+      To create many disks from a source storage object, use gcloud compute images import instead.
+    ignore_read: true
   - name: 'labelFingerprint'
     type: Fingerprint
     description: |
@@ -294,6 +323,8 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
+    validation:
+      function: 'verify.ValidateGCEName'
   - name: 'size'
     type: Integer
     description: |
@@ -460,6 +491,26 @@ properties:
         description: |
           Primary disk for asynchronous disk replication.
         required: true
+  - name: 'architecture'
+    ignore_read: true
+    type: String
+    description: |
+      The architecture of the disk. Values include `X86_64`, `ARM64`.
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the disk. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true
   - name: 'guestOsFeatures'
     type: Array
     description: |
@@ -514,3 +565,15 @@ properties:
     default_from_api: true
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=accessMode'
     update_verb: 'PATCH'
+virtual_fields:
+  - name: 'create_snapshot_before_destroy'
+    type: Boolean
+    default_value: false
+    description: |
+      If set to true, a snapshot of the disk will be created before it is destroyed.
+      If your disk is encrypted with customer managed encryption keys these will be reused for the snapshot creation.
+      The name of the snapshot by default will be `{{disk-name}}-YYYYMMDD-HHmm`
+  - name: 'create_snapshot_before_destroy_prefix'
+    type: String
+    description: |
+      This will set a custom name prefix for the snapshot that's created when the disk is deleted.

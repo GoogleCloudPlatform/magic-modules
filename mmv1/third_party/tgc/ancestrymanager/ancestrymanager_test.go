@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/tfdata"
+	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/tfdata"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 
@@ -30,10 +30,12 @@ func TestGetAncestors(t *testing.T) {
 
 	// Setup a simple test server to mock the response of resource manager.
 	v3Responses := map[string]*crmv3.Project{
-		"folders/bar":        {Name: "folders/bar", Parent: "organizations/qux"},
-		"organizations/qux":  {Name: "organizations/qux", Parent: ""},
-		"folders/bar2":       {Name: "folders/bar2", Parent: "organizations/qux2"},
-		"organizations/qux2": {Name: "organizations/qux2", Parent: ""},
+		"folders/bar":         {Name: "folders/bar", Parent: "organizations/qux"},
+		"organizations/qux":   {Name: "organizations/qux", Parent: ""},
+		"folders/bar2":        {Name: "folders/bar2", Parent: "organizations/qux2"},
+		"organizations/qux2":  {Name: "organizations/qux2", Parent: ""},
+		"organizations/12345": {Name: "organizations/12345"},
+		"folders/67890":       {Name: "folders/67890", Parent: "organizations/12345"},
 	}
 	v1Responses := map[string][]*crmv1.Ancestor{
 		ownerProject: {
@@ -51,6 +53,13 @@ func TestGetAncestors(t *testing.T) {
 			{ResourceId: &crmv1.ResourceId{Id: "bar2", Type: "folder"}},
 			{ResourceId: &crmv1.ResourceId{Id: "qux2", Type: "organization"}},
 		},
+		"organizations/12345": {
+			{ResourceId: &crmv1.ResourceId{Id: "12345", Type: "organization"}},
+		},
+		"folders/67890": {
+			{ResourceId: &crmv1.ResourceId{Id: "67890", Type: "folder"}},
+			{ResourceId: &crmv1.ResourceId{Id: "12345", Type: "organization"}},
+		},
 	}
 
 	ts := newTestServer(t, v1Responses, v3Responses)
@@ -65,7 +74,9 @@ func TestGetAncestors(t *testing.T) {
 	}
 
 	entries := map[string]string{
-		ownerProject: ownerAncestryPath,
+		ownerProject:          ownerAncestryPath,
+		"organizations/12345": "organizations/12345",
+		"folders/67890":       "organizations/12345/folders/67890",
 	}
 
 	p := provider.Provider()
@@ -499,6 +510,36 @@ func TestGetAncestors(t *testing.T) {
 			},
 			want:       []string{"organizations/unknown"},
 			wantParent: "//cloudresourcemanager.googleapis.com/organizations/unknown",
+		},
+		{
+			name: "Org-level CuOP set with parent field",
+			data: tfdata.NewFakeResourceData(
+				"google_org_policy_custom_constraint",
+				p.ResourcesMap["google_org_policy_custom_constraint"].Schema,
+				map[string]interface{}{
+					"parent": "organizations/12345",
+				},
+			),
+			asset: &resources.Asset{
+				Type: "orgpolicy.googleapis.com/CustomConstraint",
+			},
+			want:       []string{"organizations/12345"},
+			wantParent: "//cloudresourcemanager.googleapis.com/organizations/12345",
+		},
+		{
+			name: "Folder-level Firewall Policy",
+			data: tfdata.NewFakeResourceData(
+				"google_compute_firewall_policy",
+				p.ResourcesMap["google_compute_firewall_policy"].Schema,
+				map[string]interface{}{
+					"parent": "folders/67890",
+				},
+			),
+			asset: &resources.Asset{
+				Type: "compute.googleapis.com/FirewallPolicy",
+			},
+			want:       []string{"folders/67890", "organizations/12345"},
+			wantParent: "//cloudresourcemanager.googleapis.com/folders/67890",
 		},
 	}
 	for _, c := range cases {

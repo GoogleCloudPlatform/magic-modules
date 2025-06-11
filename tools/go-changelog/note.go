@@ -37,7 +37,7 @@ var textInBodyREs = []*regexp.Regexp{
 	regexp.MustCompile("(?ms)^```releasenote:(?P<type>[^\r\n]*)\r?\n?(?P<note>.*?)\r?\n?```"),
 }
 
-var enhancementOrBugFixRegexp = regexp.MustCompile(`^[a-z0-9]+: .+$`)
+var enhancementOrBugFixRegexp = regexp.MustCompile(`^[a-z0-9_]+: .+$`)
 var newResourceOrDatasourceRegexp = regexp.MustCompile("`google_[a-z0-9_]+`")
 var newlineRegexp = regexp.MustCompile(`\n`)
 

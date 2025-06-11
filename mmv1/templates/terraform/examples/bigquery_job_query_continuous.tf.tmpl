@@ -1,0 +1,10 @@
+resource "google_bigquery_job" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  job_id     = "{{index $.Vars "job_id"}}"
+
+  query {
+    query = "SELECT state FROM [lookerdata:cdc.project_tycho_reports]"
+    continuous = true
+  }
+}

@@ -6,7 +6,7 @@ import (
 
 	membership "magician/github"
 
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v68/github"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -619,6 +619,62 @@ func TestNotificationState(t *testing.T) {
 			},
 			expectState: waitingForContributor,
 			expectSince: time.Date(2024, 1, 5, 0, 0, 0, 0, time.UTC), // Should use latest ready_for_review time
+		},
+		"ignore reviews from PR author": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+			},
+			reviews: []*github.PullRequestReview{
+				{
+					User:        &github.User{Login: github.String("author")}, // PR author's review
+					State:       github.String("COMMENTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+				},
+				{
+					User:        &github.User{Login: github.String("author")}, // PR author's review
+					State:       github.String("CHANGES_REQUESTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
+				},
+			},
+			expectState: waitingForReview, // Should stay in waitingForReview since author's reviews don't count
+			expectSince: time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC),
+		},
+
+		// Add case where both author and reviewer comment
+		"reviews from both author and reviewer": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+			},
+			reviews: []*github.PullRequestReview{
+				{
+					User:        &github.User{Login: github.String("author")}, // PR author's review
+					State:       github.String("COMMENTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+				},
+				{
+					User:        &github.User{Login: github.String(firstCoreReviewer)}, // Reviewer's comment
+					State:       github.String("COMMENTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
+				},
+			},
+			expectState: waitingForContributor, // Should change to waitingForContributor due to reviewer's comment
+			expectSince: time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC),
 		},
 	}
 
@@ -1242,6 +1298,28 @@ func TestFormatReminderComment(t *testing.T) {
 				"disable-automatic-closure",
 				"@" + firstCoreReviewer,
 				"@" + secondCoreReviewer,
+				"@other-reviewer",
+			},
+		},
+		"waitingForReview with author as core reviewer": {
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String(firstCoreReviewer)}, // PR author is a core reviewer
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},  // Review requested from author
+					&github.User{Login: github.String(secondCoreReviewer)}, // Review requested from another core reviewer
+					&github.User{Login: github.String("other-reviewer")},   // Non-core reviewer
+				},
+			},
+			state:     waitingForReview,
+			sinceDays: 3,
+			expectedStrings: []string{
+				"waiting for review for 3 weekdays",
+				"disable-review-reminders",
+				"@" + secondCoreReviewer, // Should mention the non-author core reviewer
+			},
+			notExpectedStrings: []string{
+				"@GoogleCloudPlatform/terraform-team",
+				"@" + firstCoreReviewer, // Should not mention the author even though they're a core reviewer
 				"@other-reviewer",
 			},
 		},

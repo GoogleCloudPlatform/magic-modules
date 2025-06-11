@@ -63,7 +63,6 @@ properties:
     description: |
       A unique identifier for the instance configuration. Values are of the
       form projects/<project>/instanceConfigs/[a-z][-a-z0-9]*
-    required: true
     immutable: true
     default_from_api: true
   - name: 'displayName'

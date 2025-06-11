@@ -1,5 +1,4 @@
 package parametermanagerregional
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"encoding/base64"
@@ -50,6 +49,10 @@ func DataSourceParameterManagerRegionalRegionalParameterVersion() *schema.Resour
 			},
 			"disabled": {
 				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"kms_key_version": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"location": {
@@ -151,6 +154,12 @@ func dataSourceParameterManagerRegionalRegionalParameterVersionRead(d *schema.Re
 		return fmt.Errorf("error reading regional parameterVersion: %s", err)
 	}
 
+	if parameterVersion["kmsKeyVersion"] != nil {
+		if err := d.Set("kms_key_version", parameterVersion["kmsKeyVersion"].(string)); err != nil {
+			return fmt.Errorf("error setting kms_key_version: %s", err)
+		}
+	}
+
 	if err := d.Set("disabled", false); err != nil {
 		return fmt.Errorf("error setting disabled: %s", err)
 	}
@@ -175,5 +184,3 @@ func dataSourceParameterManagerRegionalRegionalParameterVersionRead(d *schema.Re
 	d.SetId(nameValue.(string))
 	return nil
 }
-
-{{ end }}

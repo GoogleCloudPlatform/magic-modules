@@ -13,6 +13,10 @@
 
 ---
 name: 'Policy'
+api_variant_patterns:
+  - 'folders/{folder}/policies/{policy}'
+  - 'organizations/{organization}/policies/{policy}'
+  - 'projects/{project}/policies/{policy}'
 description: "Defines an organization policy which is used to specify constraints for configurations of Google Cloud resources."
 references:
   guides:
@@ -36,7 +40,6 @@ custom_code:
   pre_read: 'templates/terraform/pre_read/org_policy_policy.go.tmpl'
   pre_update: 'templates/terraform/pre_update/org_policy_policy.go.tmpl'
 error_retry_predicates:
-
   - 'transport_tpg.IsOrgpolicyRetryableError'
 examples:
   - name: 'org_policy_policy_enforce'
@@ -88,6 +91,7 @@ properties:
       - name: 'rules'
         type: Array
         description: 'In Policies for boolean constraints, the following requirements apply: - There must be one and only one PolicyRule where condition is unset. - BooleanPolicyRules with conditions must set `enforced` to the opposite of the PolicyRule without a condition. - During policy evaluation, PolicyRules with conditions that are true for a target resource take precedence.'
+        diff_suppress_func: 'resourceOrgPolicyPolicySpecRulesDiffSuppress'
         item_type:
           description: 'In Policies for boolean constraints, the following requirements apply: - There must be one and only one PolicyRule where condition is unset. - BooleanPolicyRules with conditions must set `enforced` to the opposite of the PolicyRule without a condition. - During policy evaluation, PolicyRules with conditions that are true for a target resource take precedence.'
           type: NestedObject
@@ -170,6 +174,7 @@ properties:
         output: true
       - name: 'rules'
         type: Array
+        diff_suppress_func: 'resourceOrgPolicyPolicyDryRunSpecRulesDiffSuppress'
         description: 'In policies for boolean constraints, the following requirements apply: - There must be one and only one policy rule where condition is unset. - Boolean policy rules with conditions must set `enforced` to the opposite of the policy rule without a condition. - During policy evaluation, policy rules with conditions that are true for a target resource take precedence.'
         item_type:
           description: 'In policies for boolean constraints, the following requirements apply: - There must be one and only one policy rule where condition is unset. - Boolean policy rules with conditions must set `enforced` to the opposite of the policy rule without a condition. - During policy evaluation, policy rules with conditions that are true for a target resource take precedence.'

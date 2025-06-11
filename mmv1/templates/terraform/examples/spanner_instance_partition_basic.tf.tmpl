@@ -1,0 +1,15 @@
+resource "google_spanner_instance" "main" {
+  name         = "{{index $.Vars "instance_name"}}"
+  config       = "nam6"
+  display_name = "main-instance"
+  num_nodes    = 1
+  edition     = "ENTERPRISE_PLUS"
+}
+
+resource "google_spanner_instance_partition" "partition" {
+  name         = "{{index $.Vars "partition_name"}}"
+  instance     = google_spanner_instance.main.name
+  config       = "nam8"
+  display_name = "test-spanner-partition"
+  node_count   = 1
+} 

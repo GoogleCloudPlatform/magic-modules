@@ -18,6 +18,9 @@ kind: 'compute#backendService'
 description: |
   A Region Backend Service defines a regionally-scoped group of virtual
   machines that will serve traffic for load balancing.
+
+  ~> **Note:** Recreating a `google_compute_region_backend_service` that references other dependent resources like `google_compute_instance_group` will give a `resourceInUseByAnotherResource` error, when decreasing the number of other dependent resources.
+  Use `lifecycle.create_before_destroy` on the dependent resources to avoid this type of error as shown in the Dynamic Backend Count example.
 references:
   guides:
     'Internal TCP/UDP Load Balancing': 'https://cloud.google.com/compute/docs/load-balancing/internal/'
@@ -53,12 +56,12 @@ custom_diff:
 schema_version: 1
 migrate_state: 'tpgresource.MigrateStateNoop'
 sweeper:
-  regions:
-    - "us-west1"
-    - "us-west2"
-    - "us-central1"
-    - "europe-west1"
-    - "europe-west4"
+  url_substitutions:
+    - region: "us-west2"
+    - region: "us-central1"
+    - region: "europe-west4"
+    - region: "europe-west1"
+    - region: "us-west1"
 examples:
   - name: 'region_backend_service_basic'
     primary_resource_id: 'default'
@@ -121,6 +124,26 @@ examples:
     vars:
       region_backend_service_name: 'region-service'
       health_check_name: 'rbs-health-check'
+  - name: 'region_backend_service_ilb_custom_metrics'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'region-service'
+      default_neg_name: 'network-endpoint'
+      health_check_name: 'rbs-health-check'
+      network_name: 'network'
+  - name: 'region_backend_service_dynamic_backend_count'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'region-service'
+      health_check_name: 'health-check'
+      instance_group_name: 'instance_group'
+      network_name: 'network'
+    exclude_test: true
+  - name: 'region_backend_service_dynamic_forwarding'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      region_backend_service_name: 'region-service'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -165,6 +188,7 @@ properties:
             - 'UTILIZATION'
             - 'RATE'
             - 'CONNECTION'
+            - 'CUSTOM_METRICS'
         - name: 'capacityScaler'
           type: Double
           description: |
@@ -280,12 +304,44 @@ properties:
             Used when balancingMode is UTILIZATION. This ratio defines the
             CPU utilization target for the group. Valid range is [0.0, 1.0].
             Cannot be set for INTERNAL backend services.
+        - name: 'customMetrics'
+          type: Array
+          description: |
+            The set of custom metrics that are used for <code>CUSTOM_METRICS</code> BalancingMode.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'name'
+                type: String
+                required: true
+                description: |
+                  Name of a custom utilization signal. The name must be 1-64 characters
+                  long and match the regular expression [a-z]([-_.a-z0-9]*[a-z0-9])? which
+                  means the first character must be a lowercase letter, and all following
+                  characters must be a dash, period, underscore, lowercase letter, or
+                  digit, except the last character, which cannot be a dash, period, or
+                  underscore. For usage guidelines, see Custom Metrics balancing mode. This
+                  field can only be used for a global or regional backend service with the
+                  loadBalancingScheme set to <code>EXTERNAL_MANAGED</code>,
+                  <code>INTERNAL_MANAGED</code> <code>INTERNAL_SELF_MANAGED</code>.
+              - name: 'dryRun'
+                type: Boolean
+                required: true
+                description: |
+                  If true, the metric data is collected and reported to Cloud
+                  Monitoring, but is not used for load balancing.
+              - name: 'maxUtilization'
+                type: Double
+                description: |
+                  Optional parameter to define a target utilization for the Custom Metrics
+                  balancing mode. The valid range is <code>[0.0, 1.0]</code>.
+                default_value: 0.8
   - name: 'circuitBreakers'
     type: NestedObject
     description: |
       Settings controlling the volume of connections to a backend service. This field
       is applicable only when the `load_balancing_scheme` is set to INTERNAL_MANAGED
-      and the `protocol` is set to HTTP, HTTPS, or HTTP2.
+      and the `protocol` is set to HTTP, HTTPS, HTTP2 or H2C.
     properties:
       - name: 'connectTimeout'
         type: NestedObject
@@ -390,7 +446,7 @@ properties:
       hashing.
       This field only applies when all of the following are true -
         * `load_balancing_scheme` is set to INTERNAL_MANAGED
-        * `protocol` is set to HTTP, HTTPS, or HTTP2
+        * `protocol` is set to HTTP, HTTPS, HTTP2 or H2C
         * `locality_lb_policy` is set to MAGLEV or RING_HASH
     properties:
       - name: 'httpCookie'
@@ -757,7 +813,9 @@ properties:
     output: true
   - name: 'iap'
     type: NestedObject
-    description: Settings for enabling Cloud Identity Aware Proxy
+    description: |
+      Settings for enabling Cloud Identity Aware Proxy.
+      If OAuth client is not set, Google-managed OAuth client is used.
     default_from_api: true
     send_empty_value: true
     properties:
@@ -849,9 +907,16 @@ properties:
                            UNAVAILABLE_WEIGHT. Otherwise, Load Balancing remains
                            equal-weight.
 
+      * `WEIGHTED_ROUND_ROBIN`: Per-endpoint weighted round-robin Load Balancing using weights computed
+                                from Backend reported Custom Metrics. If set, the Backend Service
+                                responses are expected to contain non-standard HTTP response header field
+                                X-Endpoint-Load-Metrics. The reported metrics
+                                to use for computing the weights are specified via the
+                                backends[].customMetrics fields.
+
       locality_lb_policy is applicable to either:
 
-      * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
+      * A regional backend service with the service_protocol set to HTTP, HTTPS, HTTP2 or H2C,
         and loadBalancingScheme set to INTERNAL_MANAGED.
       * A global backend service with the load_balancing_scheme set to INTERNAL_SELF_MANAGED.
       * A regional backend service with loadBalancingScheme set to EXTERNAL (External Network
@@ -872,6 +937,7 @@ properties:
       - 'ORIGINAL_DESTINATION'
       - 'MAGLEV'
       - 'WEIGHTED_MAGLEV'
+      - 'WEIGHTED_ROUND_ROBIN'
   - name: 'name'
     type: String
     description: |
@@ -884,12 +950,37 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
+  - name: 'customMetrics'
+    type: Array
+    description: |
+      List of custom metrics that are used for the WEIGHTED_ROUND_ROBIN locality_lb_policy.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          required: true
+          description: |
+            Name of a custom utilization signal. The name must be 1-64 characters
+            long and match the regular expression [a-z]([-_.a-z0-9]*[a-z0-9])? which
+            means the first character must be a lowercase letter, and all following
+            characters must be a dash, period, underscore, lowercase letter, or
+            digit, except the last character, which cannot be a dash, period, or
+            underscore. For usage guidelines, see Custom Metrics balancing mode. This
+            field can only be used for a global or regional backend service with the
+            loadBalancingScheme set to <code>EXTERNAL_MANAGED</code>,
+            <code>INTERNAL_MANAGED</code> <code>INTERNAL_SELF_MANAGED</code>.
+        - name: 'dryRun'
+          type: Boolean
+          required: true
+          description: |
+            If true, the metric data is not used for load balancing.
   - name: 'outlierDetection'
     type: NestedObject
     description: |
       Settings controlling eviction of unhealthy hosts from the load balancing pool.
       This field is applicable only when the `load_balancing_scheme` is set
-      to INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, or HTTP2.
+      to INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, HTTP2 or H2C.
     properties:
       - name: 'baseEjectionTime'
         type: NestedObject
@@ -1133,22 +1224,21 @@ properties:
   - name: 'protocol'
     type: Enum
     description: |
-      The protocol this RegionBackendService uses to communicate with backends.
-      The default is HTTP. **NOTE**: HTTP2 is only valid for beta HTTP/2 load balancer
-      types and may result in errors if used with the GA API.
+      The protocol this BackendService uses to communicate with backends.
+      The default is HTTP. Possible values are HTTP, HTTPS, HTTP2, H2C, TCP, SSL, UDP
+      or GRPC. Refer to the documentation for the load balancers or for Traffic Director
+      for more information.
     default_from_api: true
-    # This is removed to avoid breaking terraform, as default values cannot be
-    # unspecified. Providers should include this as needed via overrides
-    # default_value: :TCP
     enum_values:
       - 'HTTP'
       - 'HTTPS'
       - 'HTTP2'
-      - 'SSL'
       - 'TCP'
+      - 'SSL'
       - 'UDP'
       - 'GRPC'
       - 'UNSPECIFIED'
+      - 'H2C'
   - name: 'securityPolicy'
     type: String
     description: |
@@ -1297,6 +1387,7 @@ properties:
         at_least_one_of:
           - 'log_config.0.enable'
           - 'log_config.0.sample_rate'
+          - 'log_config.0.optional_mode'
       - name: 'sampleRate'
         type: Double
         description: |
@@ -1307,8 +1398,30 @@ properties:
         at_least_one_of:
           - 'log_config.0.enable'
           - 'log_config.0.sample_rate'
+          - 'log_config.0.optional_mode'
         diff_suppress_func: 'suppressWhenDisabled'
         default_value: 1.0
+      - name: 'optionalMode'
+        type: Enum
+        description: |
+          Specifies the optional logging mode for the load balancer traffic.
+          Supported values: INCLUDE_ALL_OPTIONAL, EXCLUDE_ALL_OPTIONAL, CUSTOM.
+        enum_values:
+          - 'INCLUDE_ALL_OPTIONAL'
+          - 'EXCLUDE_ALL_OPTIONAL'
+          - 'CUSTOM'
+        at_least_one_of:
+          - 'log_config.0.enable'
+          - 'log_config.0.sample_rate'
+          - 'log_config.0.optional_mode'
+        default_from_api: true
+      - name: 'optionalFields'
+        type: Array
+        description: |
+          Specifies the fields to include in logging. This field can only be specified if logging is enabled for this backend service.
+        item_type:
+          type: String
+        default_from_api: true
   - name: 'network'
     type: ResourceRef
     description: |
@@ -1330,3 +1443,32 @@ properties:
         required: true
         enum_values:
           - 'CONSISTENT_HASH_SUBSETTING'
+      - name: 'subsetSize'
+        type: Integer
+        description: |
+          The number of backends per backend group assigned to each proxy instance or each service mesh client.
+          An input parameter to the CONSISTENT_HASH_SUBSETTING algorithm. Can only be set if policy is set to
+          CONSISTENT_HASH_SUBSETTING. Can only be set if load balancing scheme is INTERNAL_MANAGED or INTERNAL_SELF_MANAGED.
+          subsetSize is optional for Internal HTTP(S) load balancing and required for Traffic Director.
+          If you do not provide this value, Cloud Load Balancing will calculate it dynamically to optimize the number
+          of proxies/clients visible to each backend and vice versa.
+          Must be greater than 0. If subsetSize is larger than the number of backends/endpoints, then subsetting is disabled.
+  - name: 'dynamicForwarding'
+    type: NestedObject
+    description: |
+      Dynamic forwarding configuration. This field is used to configure the backend service with dynamic forwarding
+      feature which together with Service Extension allows customized and complex routing logic.
+    min_version: beta
+    properties:
+      - name: 'ipPortSelection'
+        type: NestedObject
+        description: |
+          IP:PORT based dynamic forwarding configuration.
+        min_version: beta
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            min_version: beta
+            description: |
+              A boolean flag enabling IP:PORT based dynamic forwarding.
+            immutable: true

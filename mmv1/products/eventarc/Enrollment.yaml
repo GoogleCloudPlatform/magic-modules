@@ -1,0 +1,123 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Enrollment
+description: |
+  The Eventarc Enrollment resource
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/eventarc/advanced/docs/receive-events/create-enrollment'
+  api: https://cloud.google.com/eventarc/docs/reference/rest/v1/projects.locations.enrollments
+base_url: projects/{{project}}/locations/{{location}}/enrollments
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/enrollments/{{enrollment_id}}
+create_url: projects/{{project}}/locations/{{location}}/enrollments?enrollmentId={{enrollment_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/enrollments/{{enrollment_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/enrollments/{{enrollment_id}}
+autogen_async: true
+async:
+  actions: ['create', 'update', 'delete']
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  type: OpAsync
+  result:
+    resource_inside_response: true
+examples:
+  - name: eventarc_enrollment_with_pipeline_destination
+    primary_resource_id: primary
+    vars:
+      enrollment_id: some-enrollment
+      pipeline_id: some-pipeline
+      message_bus_id: some-message-bus
+      network_attachment_name: some-network-attachment
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    exclude_test: true
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: enrollmentId
+    type: String
+    description: |-
+      The user-provided ID to be assigned to the Enrollment. It should match the
+      format `^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$`.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: displayName
+    type: String
+    description: Resource display name.
+  - name: messageBus
+    type: String
+    description: |-
+      Resource name of the message bus identifying the source of the messages. It
+      matches the form
+      projects/{project}/locations/{location}/messageBuses/{messageBus}.
+    required: true
+    immutable: true
+  - name: name
+    type: String
+    description: |-
+      Resource name of the form
+      projects/{project}/locations/{location}/enrollments/{enrollment}
+    output: true
+  - name: etag
+    type: String
+    description: |-
+      This checksum is computed by the server based on the value of other
+      fields, and might be sent only on update and delete requests to ensure that
+      the client has an up-to-date value before proceeding.
+    output: true
+  - name: createTime
+    type: String
+    description: The creation time.
+    output: true
+  - name: updateTime
+    type: String
+    description: The last-modified time.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Resource labels.
+  - name: celMatch
+    type: String
+    description: A CEL expression identifying which messages this enrollment applies to.
+    required: true
+  - name: destination
+    type: String
+    description: |-
+      Destination is the Pipeline that the Enrollment is delivering to. It must
+      point to the full resource name of a Pipeline. Format:
+      "projects/{PROJECT_ID}/locations/{region}/pipelines/{PIPELINE_ID)"
+    required: true
+  - name: uid
+    type: String
+    description: |-
+      Server assigned unique identifier for the channel. The value is a UUID4
+      string and guaranteed to remain unchanged until the resource is deleted.
+    output: true
+  - name: annotations
+    type: KeyValueAnnotations
+    description: Resource annotations.

@@ -24,7 +24,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
@@ -92,6 +91,14 @@ func (td *TemplateData) GenerateMetadataFile(filePath string, resource api.Resou
 		templatePath,
 	}
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
+func (td *TemplateData) GenerateProductFile(filePath string, product api.Product) {
+	templatePath := "templates/terraform/product.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, product, true, templates...)
 }
 
 func (td *TemplateData) GenerateOperationFile(filePath string, resource api.Resource) {
@@ -183,11 +190,13 @@ func (td *TemplateData) GenerateSweeperFile(filePath string, resource api.Resour
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
-func (td *TemplateData) GenerateTGCResourceFile(filePath string, resource api.Resource) {
-	templatePath := "templates/tgc/resource_converter.go.tmpl"
+func (td *TemplateData) GenerateTGCResourceFile(templatePath, filePath string, resource api.Resource) {
 	templates := []string{
 		templatePath,
 		"templates/terraform/expand_property_method.go.tmpl",
+		"templates/terraform/schema_property.go.tmpl",
+		"templates/terraform/schema_subresource.go.tmpl",
+		"templates/terraform/flatten_property_method.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
@@ -203,7 +212,14 @@ func (td *TemplateData) GenerateTGCIamResourceFile(filePath string, resource api
 func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, goFormat bool, templates ...string) {
 	templateFileName := filepath.Base(templatePath)
 
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
+	funcMap := template.FuncMap{
+		"TemplatePath": func() string { return templatePath },
+	}
+	for k, v := range google.TemplateFunctions {
+		funcMap[k] = v
+	}
+
+	tmpl, err := template.New(templateFileName).Funcs(funcMap).ParseFiles(templates...)
 	if err != nil {
 		glog.Exit(fmt.Sprintf("error parsing %s for filepath %s ", templateFileName, filePath), err)
 	}
