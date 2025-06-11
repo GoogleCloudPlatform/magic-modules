@@ -175,7 +175,7 @@ properties:
                 type: integer
         - name: wireProperties
           type: NestedObject
-          output: true # This is redundant if the parent 'wires' is output: true, but harmless
+          output: true
           properties:
             - name: bandwidthUnmetered
               type: Integer
