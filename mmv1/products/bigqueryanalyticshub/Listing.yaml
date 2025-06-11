@@ -73,7 +73,7 @@ examples:
     region_override: 'US'
     vars:
       data_exchange_id: 'tf-test-log-email-de'
-      listing_id: 'tf-test-log-email-listing' 
+      listing_id: 'tf-test-log-email-listing'
       dataset_id: 'tf-test-log-email-ds'
       description: 'Example for log email test'
 parameters:
@@ -208,3 +208,4 @@ properties:
     description:
       If true, subscriber email logging is enabled and all queries on the linked dataset will log the email address of the querying user.
     immutable: true
+    
