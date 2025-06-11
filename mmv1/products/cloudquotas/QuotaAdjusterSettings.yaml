@@ -82,7 +82,7 @@ properties:
     description: |
       Indicates whether the setting is inherited or explicitly specified.
     output: true
-  - name: 'inherited_from'
+  - name: 'inheritedFrom'
     type: String
     description: |
       The resource container from which the setting is inherited. This refers to the  nearest ancestor with enablement set (either ENABLED or DISABLED).
