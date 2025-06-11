@@ -6,6 +6,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -564,6 +566,40 @@ func TestAccStorageObject_sourceMd5Hash(t *testing.T) {
 	})
 }
 
+func TestAccStorageObject_knownAfterApply(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+	destinationDirPath := t.TempDir()
+	destinationFilePath := filepath.Join(destinationDirPath, "local_file")
+	destinationFilePath = strings.ReplaceAll(destinationFilePath, `\`, `\\`)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"local": resource.ExternalProvider{
+				VersionConstraint: "> 2.5.0",
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleStorageBucketObject(bucketName, "first", destinationFilePath),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageValidOutput(t),
+				),
+			},
+			{
+				Config: testGoogleStorageBucketObjectKnownAfterApply(bucketName, "second", destinationFilePath),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageValidOutput(t),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckGoogleStorageObject(t *testing.T, bucket, object, md5 string) resource.TestCheckFunc {
 	return testAccCheckGoogleStorageObjectWithEncryption(t, bucket, object, md5, "")
 }
@@ -918,4 +954,100 @@ resource "google_storage_bucket_object" "bo_1861894" {
   source         = "%s"
 }
 `, bucketName, objectName, md5hash, sourceFilename)
+}
+
+func testAccCheckGoogleStorageValidOutput(t *testing.T) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		var root = s.Modules[0]
+		var outputs, ok = root.Outputs["valid"]
+
+		if !ok {
+			return fmt.Errorf("Error: `valid` output missing")
+		}
+
+		if outputs == nil {
+			return fmt.Errorf("Terraform output `valid` does not exists")
+		}
+
+		if outputs.Value == false {
+			return fmt.Errorf("File content is not valid")
+		}
+		return nil
+	}
+}
+
+func testGoogleStorageBucketObject(bucketName, content, filename string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "changing" {
+  bucket  = google_storage_bucket.bucket.name
+  name    = "dynamic"
+  content = "%s"
+}
+
+resource "local_file" "test" {
+  content  = jsonencode(google_storage_bucket_object.changing.content)
+  filename = "%s"
+}
+
+resource "google_storage_bucket_object" "bo" {
+  source = local_file.test.filename
+  //source_md5hash = local_file.test.content_md5
+  bucket = google_storage_bucket.bucket.name
+  name   = "test-file-bucket"
+}
+
+data "google_storage_bucket_object_content" "bo" {
+  bucket     = google_storage_bucket_object.bo.bucket
+  name       = google_storage_bucket_object.bo.name
+  depends_on = [google_storage_bucket_object.bo]
+}
+
+output "valid" {
+  value = nonsensitive(local_file.test.content) == data.google_storage_bucket_object_content.bo.content
+}
+`, bucketName, content, filename)
+}
+
+func testGoogleStorageBucketObjectKnownAfterApply(bucketName, content, filename string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "changing" {
+  bucket  = google_storage_bucket.bucket.name
+  name    = "dynamic"
+  content = "%s"
+}
+
+resource "local_file" "test" {
+  content  = jsonencode(google_storage_bucket_object.changing.content)
+  filename = "%s"
+}
+
+resource "google_storage_bucket_object" "bo" {
+  source = local_file.test.filename
+  source_md5hash = local_file.test.content_md5
+  bucket = google_storage_bucket.bucket.name
+  name   = "test-file-bucket"
+}
+
+data "google_storage_bucket_object_content" "bo" {
+  bucket     = google_storage_bucket_object.bo.bucket
+  name       = google_storage_bucket_object.bo.name
+  depends_on = [google_storage_bucket_object.bo]
+}
+
+output "valid" {
+  value = nonsensitive(local_file.test.content) == data.google_storage_bucket_object_content.bo.content
+}
+`, bucketName, content, filename)
 }

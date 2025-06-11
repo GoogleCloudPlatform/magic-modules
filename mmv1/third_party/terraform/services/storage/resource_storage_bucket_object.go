@@ -406,7 +406,7 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	if d.HasChange("content") || d.HasChange("detect_md5hash") {
+	if d.HasChange("content") || d.HasChange("source_md5hash") || d.HasChange("detect_md5hash") {
 		// The KMS key name are not able to be set on create :
 		// or you get error: Error uploading object test-maarc: googleapi: Error 400: Malformed Cloud KMS crypto key: projects/myproject/locations/myregion/keyRings/mykeyring/cryptoKeys/mykeyname/cryptoKeyVersions/1, invalid
 		d.Set("kms_key_name", nil)
