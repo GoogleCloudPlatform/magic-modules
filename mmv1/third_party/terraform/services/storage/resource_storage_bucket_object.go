@@ -156,7 +156,6 @@ func ResourceStorageBucketObject() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					localMd5Hash := ""
 					if d.GetRawConfig().GetAttr("source_md5hash") == cty.UnknownVal(cty.String) {
-						log.Printf("source md5hash is not present")
 						return true
 					}
 					if v, ok := d.GetOk("source_md5hash"); ok && v != "" {
