@@ -1,0 +1,65 @@
+BBBmau:
+    timezone: US/Pacific
+    vacations:
+        - start: 2025/04/07
+          end: 2025/04/11
+NickElliot:
+    timezone: US/Pacific
+    vacations:
+        - start: YYYY/MM/DD
+          end: YYYY/MM/DD
+ScottSuarez:
+    timezone: US/Pacific
+    vacations:
+        - start: YYYY/MM/DD
+          end: YYYY/MM/DD
+SirGitsalot:
+    timezone: US/Pacific
+    vacations:
+        - start: 2025/01/18
+          end: 2025/01/25
+c2thorn:
+    timezone: US/Pacific
+    vacations:
+        - start: 2025/04/09
+          end: 2025/04/15
+hao-nan-li:
+    timezone: US/Pacific
+    vacations:
+        - start: YYYY/MM/DD
+          end: YYYY/MM/DD
+melinath:
+    timezone: US/Pacific
+    vacations:
+        - start: YYYY/MM/DD
+          end: YYYY/MM/DD
+rileykarson:
+    timezone: US/Pacific
+    vacations:
+        - start: 2025/02/25
+          end: 2025/03/10
+roaks3:
+    timezone: US/Pacific
+    vacations:
+        - start: YYYY/MM/DD
+          end: YYYY/MM/DD
+shuyama1:
+    timezone: US/Pacific
+    vacations:
+        - start: 2025/05/23
+          end: 2025/05/30
+slevenick:
+    timezone: US/Pacific
+    vacations:
+        - start: 2025/05/22
+          end: 2025/06/07
+trodge:
+    timezone: US/Pacific
+    vacations:
+        - start: YYYY/MM/DD
+          end: YYYY/MM/DD
+zli82016:
+    timezone: US/Pacific
+    vacations:
+        - start: 2025/01/15
+          end: 2025/02/09
