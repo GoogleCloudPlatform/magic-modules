@@ -46,8 +46,8 @@ custom_code:
   custom_import: templates/terraform/custom_import/storage_folder.go.tmpl
   custom_update: templates/terraform/custom_update/storage_folder_update.go.tmpl
   custom_delete: templates/terraform/custom_delete/storage_folder_delete.go.tmpl
-  pre_create: templates/terraform/common/custom_headers.go.tmpl
-  pre_read: templates/terraform/common/custom_headers.go.tmpl
+  pre_create: templates/terraform/pre_create/custom_headers.go.tmpl
+  pre_read: templates/terraform/pre_create/custom_headers.go.tmpl
 virtual_fields:
   - name: 'force_destroy'
     description:
