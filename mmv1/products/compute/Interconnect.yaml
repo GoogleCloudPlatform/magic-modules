@@ -54,15 +54,6 @@ examples:
     vars:
       interconnect_name: 'example-interconnect'
     exclude_docs: true
-  - name: 'compute_interconnect_cross_site_network_update'
-    primary_resource_id: 'example-interconnect-cross-site-network'
-    vars:
-      interconnect_name: 'example-interconnect-cross-site-network'
-      description: 'Example Interconnect'
-      customer_name: 'example_customer'
-      cross_site_network: 'example-cross-site-network'
-    exclude_docs: true
-    min_version: beta
 parameters:
 properties:
   - name: 'description'
@@ -410,6 +401,7 @@ properties:
         interconnects.list of features requested for this Interconnect connection
       enum_values:
         - 'MACSEC'
+        - 'CROSS_SITE_NETWORK'
         - 'IF_MACSEC'
   - name: 'availableFeatures'
     type: Array
@@ -421,6 +413,10 @@ properties:
     output: true
     item_type:
       type: Enum
+      enum_values:
+        - 'IF_CROSS_SITE_NETWORK'
+        - 'IF_MACSEC'
+        - 'MACSEC'
   - name: 'wireGroups'
     type: Array
     min_version: beta
