@@ -535,6 +535,9 @@ func TestAccStorageObject_sourceMd5Hash(t *testing.T) {
 		t.Errorf("error writing file: %v", err)
 	}
 
+	updateMd5 := []byte("sample")
+	newMd5 := writeMd5(updateMd5)
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -551,6 +554,10 @@ func TestAccStorageObject_sourceMd5Hash(t *testing.T) {
 					}
 				},
 				Config: testGoogleStorageBucketsObjectFileMd5(bucketName, testFile.Name(), updatedDataMd5),
+				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, updatedDataMd5),
+			},
+			{
+				Config: testGoogleStorageBucketsObjectFileMd5(bucketName, testFile.Name(), newMd5),
 				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, updatedDataMd5),
 			},
 		},
