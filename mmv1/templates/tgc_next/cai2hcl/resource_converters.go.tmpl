@@ -42,4 +42,5 @@ var provider *schema.Provider = tpg_provider.Provider()
 var ConverterMap = map[string]models.Converter{
 	resourcemanager.ProjectAssetType: resourcemanager.NewProjectConverter(provider),
 	compute.ComputeInstanceAssetType: compute.NewComputeInstanceConverter(provider),
+	compute.ComputeAddressAssetType:  compute.NewComputeAddressConverter(provider),
 }
