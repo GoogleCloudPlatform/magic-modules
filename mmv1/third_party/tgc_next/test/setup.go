@@ -17,17 +17,16 @@ import (
 )
 
 type ResourceMetadata struct {
-	CaiAssetName    string         `json:"cai_asset_name"`
-	CaiAssetData    caiasset.Asset `json:"cai_asset_data"`
-	ResourceType    string         `json:"resource_type"`
-	ResourceAddress string         `json:"resource_address"`
-	ImportMetadata  ImportMetadata `json:"import_metadata,omitempty"`
-	Service         string         `json:"service"`
+	CaiAssetNames   []string            `json:"cai_asset_names"`
+	ResourceType    string              `json:"resource_type"`
+	ResourceAddress string              `json:"resource_address"`
+	Service         string              `json:"service"`
+	Cai             map[string]*CaiData `json:"cai_data,omitempty"` // Holds the fetched CAI assets data
 }
 
-type ImportMetadata struct {
-	Id            string   `json:"id,omitempty"`
-	IgnoredFields []string `json:"ignored_fields,omitempty"`
+// CaiData holds the fetched CAI asset and related error information.
+type CaiData struct {
+	CaiAsset caiasset.Asset `json:"cai_asset,omitempty"`
 }
 
 type TgcMetadataPayload struct {
@@ -97,11 +96,11 @@ func ReadTestsDataFromGcs() (map[string]TgcMetadataPayload, error) {
 func prepareTestData(testName string) (map[string]ResourceTestData, string, error) {
 	var err error
 	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
 	TestsMetadata, err = ReadTestsDataFromGcs()
 	if err != nil {
 		return nil, "", err
 	}
-	cacheMutex.Unlock()
 
 	testMetadata := TestsMetadata[testName]
 	resourceMetadata := testMetadata.ResourceMetadata
@@ -236,4 +235,15 @@ func convertToConfigMap(resources []Resource) map[string]map[string]interface{} 
 	}
 
 	return configMap
+}
+
+// Converts the slice of assets to map with the asset name as the key
+func convertToAssetMap(assets []caiasset.Asset) map[string]caiasset.Asset {
+	assetMap := make(map[string]caiasset.Asset)
+
+	for _, asset := range assets {
+		asset.Resource.Data = nil
+		assetMap[asset.Type] = asset
+	}
+	return assetMap
 }
