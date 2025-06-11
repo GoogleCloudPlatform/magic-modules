@@ -515,10 +515,12 @@ func TestAccComputeNetwork_resourceManagerTags(t *testing.T) {
 
 	var network compute.Network
 	pid := envvar.GetTestProjectFromEnv()
+	org := envvar.GetTestOrgFromEnv(t)
+
 	suffixName := acctest.RandString(t, 10)
-	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-networks-tagkey")
+	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-networks-tagkey", "organizations/"+org, make(map[string]interface{}))
 	sharedTagkey,_ := tagKeyResult["shared_tag_key"].(string)
-	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-networks-tagvalue", sharedTagkey)
+	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-networks-tagvalue", sharedTagkey, org)
 	networkName := fmt.Sprintf("tf-test-network-resource-manager-tags-%s", suffixName)
 	context := map[string]interface{}{
 		"network_name": networkName,

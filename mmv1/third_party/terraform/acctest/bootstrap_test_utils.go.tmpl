@@ -2074,7 +2074,7 @@ func BootstrapSharedTestOrganizationTagKey(t *testing.T, testId string, obj map[
 }
 
 // parent should be in format: {"organization" OR "projects"}/{id}
-func BootstrapSharedTestTagKeyDetails(t *testing.T, testId, parent string, obj map[string]interface{}) string {
+func BootstrapSharedTestTagKeyDetails(t *testing.T, testId string, parent string, obj map[string]interface{}) map[string]interface{} {
 	sharedTagKey := fmt.Sprintf("%s-%s", sharedTagKeyPrefix, testId)
 
 	parentSplit := strings.Split(parent, "/")
@@ -2170,7 +2170,7 @@ func BootstrapSharedTestOrganizationTagValue(t *testing.T, testId string, tagKey
 	return sharedTagValue
 }
 
-func BootstrapSharedTestTagValueDetails(t *testing.T, testId string, tagKey, parentId string) string {
+func BootstrapSharedTestTagValueDetails(t *testing.T, testId string, tagKey, parentId string) map[string]interface{} {
 	sharedTagValue := fmt.Sprintf("%s-%s", sharedTagValuePrefix, testId)
 	tagKeyName := fmt.Sprintf("%s/%s", parentId, tagKey)
 	tagValueName := fmt.Sprintf("%s/%s", tagKeyName, sharedTagValue)
