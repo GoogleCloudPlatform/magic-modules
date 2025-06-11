@@ -89,7 +89,8 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
     }
 
     metadata = {
-      terraform = "true"
+      terraform = "true",
+      serial-port-logging-enable = "false"
     }
 
     reservation_affinity {
