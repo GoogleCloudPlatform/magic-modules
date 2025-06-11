@@ -87,33 +87,23 @@ properties:
     validation:
       regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
   - name: endpoints
-    type: Map
+    type: KeyValuePairs
     description: |
       Endpoints grouped by location, each mapping to interconnect configurations.
-    key_name: 'endpoint'
-    key_description: |
-      The name of the endpoint, which is a city name.
-    value_type:
-      type: NestedObject
-      properties:
-        - name: interconnects
-          type: Map
-          key_name: interconnect_name
-          key_description: |
-            The name of the interconnect.
-          value_type:
-            type: NestedObject
+    properties:
+      - name: interconnects
+        type: KeyValuePairs
+        description: |
+          Map of interconnect details.
+        properties:
+          - name: interconnect
+            type: string
+          - name: vlan_tags
+            type: Array
             description: |
-              Map of interconnect details.
-            properties:
-              - name: interconnect
-                type: string
-              - name: vlan_tags
-                type: Array
-                description: |
-                  VLAN tags for the interconnect.
-                item_type:
-                  type: integer
+              VLAN tags for the interconnect.
+            item_type:
+              type: integer
   - name: adminEnabled
     type: boolean
     description: |
@@ -175,7 +165,7 @@ properties:
                 type: integer
         - name: wireProperties
           type: NestedObject
-          output: true
+          output: true # This is redundant if the parent 'wires' is output: true, but harmless
           properties:
             - name: bandwidthUnmetered
               type: Integer
