@@ -514,7 +514,6 @@ func TestAccComputeNetwork_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
 	var network compute.Network
-	pid := envvar.GetTestProjectFromEnv()
 	org := envvar.GetTestOrgFromEnv(t)
 
 	suffixName := acctest.RandString(t, 10)
@@ -524,7 +523,6 @@ func TestAccComputeNetwork_resourceManagerTags(t *testing.T) {
 	networkName := fmt.Sprintf("tf-test-network-resource-manager-tags-%s", suffixName)
 	context := map[string]interface{}{
 		"network_name": networkName,
-		"project_id":    pid,
 		"tag_key_id": tagKeyResult["name"],
 		"tag_value_id": tagValueResult["name"],
 	}
