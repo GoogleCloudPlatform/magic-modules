@@ -237,8 +237,7 @@ func GenerateProduct(productName string, productsForVersionChannel chan *api.Pro
 		resource.SourceYamlFile = resourceYamlPath
 
 		resource.TargetVersionName = *version
-		propertiesWithLabelsRelatedFields := resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
-		resource.Properties = resource.AddWriteOnlyRelatedFields(propertiesWithLabelsRelatedFields)
+		resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
 		resource.SetDefault(productApi)
 		resource.Validate()
 		resources = append(resources, resource)
@@ -271,8 +270,7 @@ func GenerateProduct(productName string, productsForVersionChannel chan *api.Pro
 			}
 
 			resource.TargetVersionName = *version
-			propertiesWithLabelsRelatedFields := resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
-			resource.Properties = resource.AddWriteOnlyRelatedFields(propertiesWithLabelsRelatedFields)
+			resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
 			resource.SetDefault(productApi)
 			resource.Validate()
 			resources = append(resources, resource)

@@ -710,34 +710,52 @@ func (r Resource) GetIdentity() []*Type {
 	})
 }
 
-func (r *Resource) AddWriteOnlyRelatedFields(props []*Type) []*Type {
-	// TODO add implementation for adding write-only related fields
-	for _, p := range props {
-		if p.WriteOnly {
-			props = append(props, p)
-		} else if p.IsA("NestedObject") && len(p.AllProperties()) > 0 {
-			p.Properties = r.AddWriteOnlyRelatedFields(p.AllProperties())
-		}
+func buildWriteOnlyField(name string, originalField *Type) *Type {
+	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API.", originalField.Description)
+
+	options := []func(*Type){
+		propertyWithType("String"),
+		propertyWithRequired(false),
+		propertyWithDescription(description),
+		propertyWithWriteOnly(true),
+		propertyWithConflicts([]string{originalField.Name}),
+		propertyWithRequiredWith([]string{fmt.Sprintf("%s_version", name)}),
 	}
-	return props
+
+	return NewProperty(name, originalField.ApiName, options)
 }
 
-func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type) []*Type {
-	// TODO generate the extra write-only related fields
-	writeOnlyField := nil
-	writeOnlyVersionField := nil
+func buildWriteOnlyVersionField(name string, writeOnlyField *Type) *Type {
+	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", writeOnlyField.Name)
+
+	options := []func(*Type){
+		propertyWithType("Boolean"),
+		propertyWithImmutable(true),
+		propertyWithDescription(description),
+		propertyWithDefault(0),
+	}
+	return NewProperty(name, name, options)
+}
+
+func (r *Resource) addWriteOnlyFields(props []*Type, parent *Type, propWithWoConfigured *Type) []*Type {
+	writeOnlyField := buildWriteOnlyField(fmt.Sprintf("%s_wo", propWithWoConfigured.Name), propWithWoConfigured)
+	writeOnlyVersionField := buildWriteOnlyVersionField(fmt.Sprintf("%s_version", writeOnlyField.Name), writeOnlyField)
 	props = append(props, writeOnlyField, writeOnlyVersionField)
 	return props
 }
 
-func (r *Resource) AddLabelsRelatedFields(props []*Type, parent *Type) []*Type {
+func (r *Resource) AddExtraFields(props []*Type, parent *Type) []*Type {
 	for _, p := range props {
+		if p.WriteOnly && !strings.HasSuffix(p.Name, "_wo") {
+			props = r.addWriteOnlyFields(props, parent, p)
+			p.WriteOnly = false
+		}
 		if p.IsA("KeyValueLabels") {
 			props = r.addLabelsFields(props, parent, p)
 		} else if p.IsA("KeyValueAnnotations") {
 			props = r.addAnnotationsFields(props, parent, p)
 		} else if p.IsA("NestedObject") && len(p.AllProperties()) > 0 {
-			p.Properties = r.AddLabelsRelatedFields(p.AllProperties(), p)
+			p.Properties = r.AddExtraFields(p.AllProperties(), p)
 		}
 	}
 	return props
