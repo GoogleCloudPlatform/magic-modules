@@ -13,8 +13,8 @@ func TestAccNetworkServicesWasmPlugin_wasmPluginLogConfigUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"test_project_id" : envvar.GetTestProjectFromEnv(),
+		"random_suffix":   acctest.RandString(t, 10),
+		"test_project_id": envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -49,8 +49,8 @@ func TestAccNetworkServicesWasmPlugin_wasmPluginVersionUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"test_project_id" : envvar.GetTestProjectFromEnv(),
+		"random_suffix":   acctest.RandString(t, 10),
+		"test_project_id": envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -85,8 +85,8 @@ func TestAccNetworkServicesWasmPlugin_wasmPluginConfigUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"test_project_id" : envvar.GetTestProjectFromEnv(),
+		"random_suffix":   acctest.RandString(t, 10),
+		"test_project_id": envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -202,7 +202,7 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
     min_log_level =  "WARN"
   }
 
-	versions {
+  versions {
     version_name = "v1"
     description = "v1 version of my wasm plugin"
     image_uri = "us-central1-docker.pkg.dev/%{test_project_id}/svextensionplugin/my-wasm-plugin:prod"
