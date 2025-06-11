@@ -1,0 +1,29 @@
+name: vcr-test-report
+
+permissions:
+  actions: read
+  contents: read
+  statuses: write
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+
+      - name: Run a process and update summary
+        run: |
+          echo "VCR test report" >> $GITHUB_STEP_SUMMARY
+
+          echo "✅ Step 1" >> $GITHUB_STEP_SUMMARY
+          sleep 5
+          echo "✅ Step 2" >> $GITHUB_STEP_SUMMARY
+          sleep 5
+          echo "✅ Step 3" >> $GITHUB_STEP_SUMMARY
+          sleep 5
+
+          echo "All steps finished successfully." >> $GITHUB_STEP_SUMMARY
