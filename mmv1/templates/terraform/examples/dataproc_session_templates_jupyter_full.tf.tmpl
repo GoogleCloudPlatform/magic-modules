@@ -12,6 +12,7 @@ resource "google_dataproc_session_template" "{{$.PrimaryResourceId}}" {
     runtime_config {
       properties    = { "spark.dynamicAllocation.enabled": "false", "spark.executor.instances": "2" }
       version = "2.2"
+      container_image = "us-docker.pkg.dev/{{index $.TestEnvVars "project_name"}}/s8s-spark-test-images/s8s-spark:latest"
     }
 
     environment_config {
