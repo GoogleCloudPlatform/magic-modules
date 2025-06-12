@@ -997,7 +997,6 @@ resource "local_file" "test" {
 
 resource "google_storage_bucket_object" "bo" {
   source = local_file.test.filename
-  //source_md5hash = local_file.test.content_md5
   bucket = google_storage_bucket.bucket.name
   name   = "test-file-bucket"
 }
