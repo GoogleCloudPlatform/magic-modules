@@ -9,14 +9,12 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestInsightsAnalysisRule(t *testing.T) {
+func TestAccContactCenterInsightsAnalysisRule_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
-		"random_suffix":   acctest.RandString(t, 10),
-		"project_name":    envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
+		"project_name":  envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -60,18 +58,8 @@ func TestInsightsAnalysisRule(t *testing.T) {
 
 func testAccInsightsAnalysisRule(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	resource "google_project" "project" {
-		name = "tf-test-insights-analysis-rule"
-		project_id = "tf-test-insights-analysis-rule-%{random_suffix}"
-		org_id     = "%{org_id}"
-		billing_account = "%{billing_account}"
-	}
-	
 	resource "google_contact_center_insights_analysis_rule" "default" {
-	  	project = google_project.project.project_id
 		location = "us-central1"
-		create_time = "2024-01-01T00:00:00Z"
-		update_time = "2024-01-01T00:00:00Z"
 		conversation_filter = "test-filter"
 		analysis_percentage = 0.5
 		summarization_config {
@@ -88,8 +76,6 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
   display_name = "analysis-rule-display-name-%{random_suffix}"
   location = "us-central1"
   analysis_rule_id = "some-analysis-rule-%{random_suffix}"
-  create_time = "2025-01-01T00:00:00Z"
-  update_time = "2025-01-01T00:00:00Z"
   conversation_filter = "agent_id = \"1\""
   annotator_selector {
     run_interruption_annotator = true
@@ -102,7 +88,7 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
     }
     run_entity_annotator         = true
     run_intent_annotator         = true
-    run_issue_model_annotator    = true
+    run_issue_model_annotator    = false
     run_phrase_matcher_annotator = true
     run_qa_annotator             = true
     run_sentiment_annotator      = true
@@ -124,8 +110,6 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
   display_name = "analysis-rule-display-name-%{random_suffix}-updated"
   location = "us-central1"
   analysis_rule_id = "some-analysis-rule-%{random_suffix}"
-  create_time = "2025-01-02T00:00:00Z"
-  update_time = "2025-01-02T00:00:00Z"
   conversation_filter = "agent_id = \"1\""
   annotator_selector {
     run_interruption_annotator = false
@@ -138,7 +122,7 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
     }
     run_entity_annotator         = false
     run_intent_annotator         = false
-    run_issue_model_annotator    = false
+    run_issue_model_annotator    = true
     run_phrase_matcher_annotator = false
     run_qa_annotator             = false
     run_sentiment_annotator      = false
