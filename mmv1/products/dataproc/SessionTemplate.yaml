@@ -27,7 +27,6 @@ id_format: '{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/sessionTemplates'
 self_link: '{{name}}'
 update_verb: 'PATCH'
-update_mask: true
 autogen_async: true
 import_format:
   - '{{name}}'
@@ -140,33 +139,6 @@ properties:
         description: |
           A mapping of property names to values, which are used to configure workload execution.
         output: true
-      - name: 'autotuningConfig'
-        type: NestedObject
-        immutable: true
-        description: |
-          Optional. Autotuning configuration of the workload.
-        properties:
-          - name: 'scenarios'
-            type: Array
-            required_with:
-              - 'runtimeConfig.0.cohort'
-            description: |
-              Optional. Scenarios for which tunings are applied.
-            item_type:
-              type: Enum
-              description: |
-                Scenario represents a specific goal that autotuning will attempt to achieve by modifying workloads.
-              required: true
-              enum_values:
-                - 'SCALING'
-                - 'BROADCAST_HASH_JOIN'
-                - 'MEMORY'
-      - name: 'cohort'
-        type: String
-        description: |
-          Optional. Cohort identifier. Identifies families of the workloads having the same shape, e.g. daily ETL jobs.
-        immutable: true
-        required: false
   - name: 'environmentConfig'
     type: NestedObject
     description: |
@@ -212,18 +184,10 @@ properties:
               Cloud Dataproc will determine a Cloud Storage location according to the region where your workload is running,
               and then create and manage project-level, per-location staging and temporary buckets.
               This field requires a Cloud Storage bucket name, not a gs://... URI to a Cloud Storage bucket.
-          - name: 'networkUri'
-            type: String
-            description: |
-              Network configuration for workload execution.
-            conflicts:
-              - environment_config.0.execution_config.0.subnetwork_uri
           - name: 'subnetworkUri'
             type: String
             description: |
               Subnetwork configuration for workload execution.
-            conflicts:
-              - environment_config.0.execution_config.0.network_uri
       - name: 'peripheralsConfig'
         type: NestedObject
         description: |
