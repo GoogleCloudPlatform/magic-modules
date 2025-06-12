@@ -716,6 +716,11 @@ cluster_config {
       kms_key_uri = "projects/projectId/locations/locationId/keyRings/keyRingId/cryptoKeys/keyId"
       root_principal_password_uri = "bucketId/o/objectId"
     }
+    identity_config {
+      user_service_account_mapping = {
+        "user@company.com" = "service-account@iam.gserviceaccounts.com"
+      }
+    }
   }
 }
 ```
@@ -767,6 +772,11 @@ cluster_config {
 
     * `truststore_uri` - (Optional) The Cloud Storage URI of the truststore file used for
        SSL encryption. If not provided, Dataproc will provide a self-signed certificate.
+
+* `identity_config` Identity Configuration
+
+    * `user_service_account_mapping` - (Required) The end user to service account mappings in a
+      service account based multi-tenant cluster
 
 - - -
 

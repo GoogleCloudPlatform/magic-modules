@@ -1100,6 +1100,30 @@ func TestAccDataprocCluster_withKerberos(t *testing.T) {
 	})
 }
 
+func TestAccDataprocCluster_withIdentityConfig(t *testing.T) {
+	t.Parallel()
+
+	rnd := acctest.RandString(t, 10)
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
+
+	var cluster dataproc.Cluster
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataprocCluster_withIdentityConfig(rnd, subnetworkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.identity_config", &cluster),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDataprocCluster_withAutoscalingPolicy(t *testing.T) {
 	t.Parallel()
 
@@ -2639,6 +2663,29 @@ resource "google_dataproc_cluster" "kerb" {
   }
 }
 `, rnd, rnd, rnd, subnetworkName, kmsKey)
+}
+
+func testAccDataprocCluster_withIdentityConfig(rnd, subnetworkName string) string {
+	return fmt.Sprintf(`
+resource "google_dataproc_cluster" "identity_config" {
+  name   = "tf-test-dproc-%s"
+  region = "us-central1"
+
+  cluster_config {
+    gce_cluster_config {
+      subnetwork = "%s"
+    }
+
+    security_config {
+      identity_config {
+        user_service_account_mapping = {
+          "bob@company.com" = "bob-sa@iam.gserviceaccouts.com"
+        }
+      }
+    }
+  }
+}
+`, rnd, subnetworkName)
 }
 
 func testAccDataprocCluster_withAutoscalingPolicy(rnd, subnetworkName string) string {
