@@ -56,6 +56,18 @@ examples:
     primary_resource_id: 'http_target_oauth'
     vars:
       name: 'cloud-tasks-queue-http-target-oauth'
+virtual_fields:
+  - name: 'desired_state'
+    type: Enum
+    description: |
+      The desired state of the queue. Use this to pause and resume the queue.
+      
+      * RUNNING: The queue is running. Tasks can be dispatched.
+      * PAUSED: The queue is paused. Tasks are not dispatched but can be added to the queue.
+    default_value: 'RUNNING'
+    enum_values:
+      - 'RUNNING'
+      - 'PAUSED'
 parameters:
   - name: 'location'
     type: String
