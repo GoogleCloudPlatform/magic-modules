@@ -296,4 +296,3 @@ properties:
             min_version: 'beta'
             item_type:
               type: String
-
