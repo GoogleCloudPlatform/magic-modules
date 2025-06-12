@@ -87,23 +87,33 @@ properties:
     validation:
       regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
   - name: endpoints
-    type: KeyValuePairs
+    type: Map
     description: |
       Endpoints grouped by location, each mapping to interconnect configurations.
-    properties:
-      - name: interconnects
-        type: KeyValuePairs
-        description: |
-          Map of interconnect details.
-        properties:
-          - name: interconnect
-            type: string
-          - name: vlan_tags
-            type: Array
+    key_name: 'endpoint'
+    key_description: |
+      The name of the endpoint, which is a city name.
+    value_type:
+      type: NestedObject
+      properties:
+        - name: interconnects
+          type: Map
+          key_name: interconnect_name
+          key_description: |
+            The name of the interconnect.
+          value_type:
+            type: NestedObject
             description: |
-              VLAN tags for the interconnect.
-            item_type:
-              type: integer
+              Map of interconnect details.
+            properties:
+              - name: interconnect
+                type: string
+              - name: vlan_tags
+                type: Array
+                description: |
+                  VLAN tags for the interconnect.
+                item_type:
+                  type: integer
   - name: adminEnabled
     type: boolean
     description: |
