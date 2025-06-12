@@ -105,39 +105,9 @@ func dataSourceGoogleKmsKeyRingsRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	for {
-		url, err = transport_tpg.AddQueryParams(url, params)
-		if err != nil {
-			return err
-		}
-
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:               config,
-			Method:               "GET",
-			Project:              billingProject,
-			RawURL:               url,
-			UserAgent:            userAgent,
-			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.Is429RetryableQuotaError},
-		})
-		if err != nil {
-			return fmt.Errorf("Error retrieving buckets: %s", err)
-		}
-
-		if res["keyRings"] == nil {
-			break
-		}
-		pageKeyRings, err := flattenKMSKeyRingsList(config, res["keyRings"])
-		if err != nil {
-			return fmt.Errorf("error flattening key rings list: %s", err)
-		}
-		keyRings = append(keyRings, pageKeyRings...)
-
-		pToken, ok := res["nextPageToken"]
-		if ok && pToken != nil && pToken.(string) != "" {
-			params["pageToken"] = pToken.(string)
-		} else {
-			break
-		}
+	keyRings, err = transport_tpg.PluralDataSourceGet(d, config, &billingProject, userAgent, url, flattenKMSKeyRingsList, params, "keyRings")
+	if err != nil {
+		return fmt.Errorf("Error retrieving key rings: %s", err)
 	}
 
 	log.Printf("[DEBUG] Found %d key rings", len(keyRings))

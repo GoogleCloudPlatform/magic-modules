@@ -73,7 +73,7 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
-		return fmt.Errorf("Error fetching project: %s", err)
+		return fmt.Errorf("Error ππfetching project: %s", err)
 	}
 	billingProject = project
 
@@ -87,7 +87,7 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error setting api endpoint")
 	}
 
-	listedLocations, err := transport_tpg.PluralDataSourceGet(d, config, &billingProject, userAgent, url, nil, "locations")
+	listedLocations, err := transport_tpg.PluralDataSourceGet(d, config, &billingProject, userAgent, url, nil, nil, "locations")
 	if err != nil {
 		return err
 	}
