@@ -69,8 +69,7 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
     }
 
     metadata = {
-      terraform = "true",
-      serial-port-logging-enable = "false"
+      terraform = "true"
     }
 
     enable_ip_forwarding = true
