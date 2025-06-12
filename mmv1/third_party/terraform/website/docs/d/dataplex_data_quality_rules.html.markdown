@@ -35,4 +35,4 @@ The following arguments are supported:
 
 The attributes are exported:
 
-* `rule` - (Computed) The list of generated data quality rules. For more details, please see the [datascan page](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/dataplex_datascan#nested_data_quality_spec_rules).
+* `rules` - (Computed) The list of generated data quality rules. For more details, please see the [datascan page](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/dataplex_datascan#nested_data_quality_spec_rules).

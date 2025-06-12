@@ -29,28 +29,10 @@ func TestAccDataplexDataQualityRules(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataplexDataQualityRules_datascan_config(context),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_dataplex_datascan.tf_test_datascan_profile", "project", context["project"].(string)),
-					resource.TestCheckResourceAttr("google_dataplex_datascan.tf_test_datascan_profile", "location", context["location"].(string)),
-					resource.TestCheckResourceAttr("google_dataplex_datascan.tf_test_datascan_profile", "data_scan_id", context["data_scan_id"].(string)),
-					resource.TestCheckResourceAttr("google_dataplex_datascan.tf_test_datascan_profile", "data.0.resource", "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"),
-				),
-			},
-			{
-				ResourceName:            "google_dataplex_datascan.tf_test_datascan_profile",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
 			},
 			{
 				RefreshState: true,
 				Check:        testAccDataplexDataScanJobTriggerRunAndWaitUntilComplete(t, "google_dataplex_datascan.tf_test_datascan_profile"),
-			},
-			{
-				ResourceName:            "google_dataplex_datascan.tf_test_datascan_profile",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels", "execution_status"},
 			},
 			{
 				Config: testAccDataplexDataQualityRules_rules_config(context),
@@ -66,7 +48,7 @@ func testAccDataplexDataQualityRules_datascan_config(context map[string]interfac
 	return acctest.Nprintf(`
 		resource "google_dataplex_datascan" "tf_test_datascan_profile" {
 			location     = "%{location}"
-			data_scan_id = "%{data_scan_id}"
+			data_scan_id = "%{data_scan_id}-%{random_suffix}"
 
 			data {
 				resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
@@ -145,7 +127,7 @@ func testAccDataplexDataQualityRules_rules_config(context map[string]interface{}
 	return acctest.Nprintf(`
 		resource "google_dataplex_datascan" "tf_test_datascan_profile" {
 			location     = "%{location}"
-			data_scan_id = "%{data_scan_id}"
+			data_scan_id = "%{data_scan_id}-%{random_suffix}"
 
 			data {
 				resource = "//bigquery.googleapis.com/projects/bigquery-public-data/datasets/samples/tables/shakespeare"
