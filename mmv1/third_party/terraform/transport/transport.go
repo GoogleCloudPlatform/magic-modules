@@ -200,16 +200,19 @@ func PluralDataSourceGet(d *schema.ResourceData, config *Config, billingProject 
 		}
 
 		headers := make(http.Header)
-		res, err := SendRequest(SendRequestOptions{
+		opts := SendRequestOptions{
 			Config:    config,
 			Method:    "GET",
-			Project:   *billingProject,
 			RawURL:    url,
 			UserAgent: userAgent,
 			Headers:   headers,
 			// ErrorRetryPredicates used to allow retrying if rate limits are hit when requesting multiple pages in a row
 			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
-		})
+		}
+		if billingProject != nil {
+			opts.Project = *billingProject
+		}
+		res, err := SendRequest(opts)
 		if err != nil {
 			return nil, HandleNotFoundError(err, d, fmt.Sprintf("%s %q", resourecToList, d.Id()))
 		}
