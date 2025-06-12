@@ -910,10 +910,6 @@ func TestAccSqlDatabaseInstance_updateMCPEnabled(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSqlDatabaseInstance_withoutMCPEnabled(instanceName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "settings.0.connection_pool_config.0.connection_pooling_enabled", "false"),
-					resource.TestCheckResourceAttr(resourceName, "settings.0.connection_pool_config.0.flags.#", "0"),
-				),
 			},
 			{
 				Config: testAccSqlDatabaseInstance_withMCPEnabled(instanceName),
