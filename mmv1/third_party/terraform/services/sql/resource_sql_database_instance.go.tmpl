@@ -424,6 +424,7 @@ is set to true. Defaults to ZONAL.`,
 						"disk_size": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							// Default is likely 10gb, but it is undocumented and may change.
 							Computed:    true,
 							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB for PD_SSD, PD_HDD and 20GB for HYPERDISK_BALANCED.`,
 						},
@@ -433,7 +434,7 @@ is set to true. Defaults to ZONAL.`,
 							Computed:         true,
 							ForceNew:         true,
 							DiffSuppressFunc: caseDiffDashSuppress,
-							Description:      `The type of supported data disk is tier dependent and can be PD_SSD or PD_HDD or HYPERDISK_BALANCED.`,
+							Description:      `The type of supported data disk is tier dependent and can be PD_SSD or PD_HDD or HyperDisk_Balanced `,
 						},
 {{- if ne $.TargetVersionName "ga" }}
 						"data_disk_provisioned_iops": {
@@ -2170,6 +2171,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	s := d.Get("settings")
 	instance = &sqladmin.DatabaseInstance{
 		Settings: expandSqlDatabaseInstanceSettings(desiredSetting.([]interface{}), databaseVersion),
+		DatabaseVersion = databaseVersion,
 	}
 	_settings := s.([]interface{})[0].(map[string]interface{})
 	// Instance.Patch operation on completion updates the settings proto version by +8. As terraform does not know this it tries
