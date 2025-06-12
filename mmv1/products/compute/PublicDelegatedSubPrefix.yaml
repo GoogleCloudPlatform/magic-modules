@@ -106,7 +106,7 @@ properties:
           required: true
           description: |
             The IP address range in the CIDR format represented by this sub prefix. 
-        - name: 'delegated Project'
+        - name: 'delegatedProject'
           type: String
           required: true
           description: |
@@ -121,5 +121,6 @@ properties:
             The PublicDelegatedSubPrefix mode for IPv6 only.
         - name: 'allocatablePrefixLength'
           type: Integer
+          default_from_api: true
           description: |
             The allocatable prefix length supported by this PublicDelegatedSubPrefix.
