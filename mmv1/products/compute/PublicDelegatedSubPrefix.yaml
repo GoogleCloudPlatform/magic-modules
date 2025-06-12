@@ -35,8 +35,9 @@ examples:
     primary_resource_id: 'prefixes'
     vars:
       sub_prefix_name: 'sub-prefix-test'
-      delegatee_project: 'tf-static-byoip'
+      delegated_project: 'tf-static-byoip'
       region: 'us-central1'
+      public_delegated_prefix: 'projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp'
       parent_prefix: 'projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp'
 parameters:
   - name: 'public_delegated_prefix'
@@ -72,6 +73,11 @@ properties:
             The URL of parent PublicDelegatedPrefix.
           required: true
           diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+        - name: 'public_delegated_prefix'
+          type: String
+          required: true
+          description: |
+                The name of the parent Public Delegated Prefix that this sub-prefix belongs to.  
         - name: 'status'
           type: Enum
           output: true
