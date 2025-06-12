@@ -27,15 +27,8 @@ create_url: 'projects/{{project}}/locations/{{location}}/encryptionSpec:initiali
 
 immutable: true
 
-async:
-  actions: ['create']
-  type: 'OpAsync'
-  operation:
-    full_url: 'https://{{location}}-dialogflow.googleapis.com/v3/{{op_id}}'
-    timeouts:
-      insert_minutes: 60
-  result:
-    resource_inside_response: true
+custom_code:
+  post_create: 'templates/terraform/post_create/dialogflowcx_operation_with_no_projectid.go.tmpl'
 
 parameters:
   - name: 'location'
