@@ -94,6 +94,9 @@ type {{$.ResourceName}}FWModel struct {
 	{{ if $.HasProject -}}
 	Project            types.String `tfsdk:"project"`
     {{- end }}
+
+	Id       types.String `tfsdk:"id"`{{/* TODO should this be gated behind a greenfield/brownfield flag? */}}
+	Timeouts timeouts.Value `tfsdk:"timeouts"`
 }
 
 // Metadata returns the resource type name.
@@ -189,11 +192,17 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 		return
 	}
 
+	var project, billingProject types.String
 {{ if $.HasProject -}}
-    project := fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
+    project = fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+{{ if $.LegacyLongFormProject -}}
+    billingProject = strings.TrimPrefix(project, "projects/")
+{{      else -}}
+    billingProject = project
+{{- end }}
 {{- end }}
 {{ if $.HasRegion -}}
 	region := fwresource.GetRegionFramework(data.Region, types.StringValue(r.providerConfig.Region), &resp.Diagnostics)
@@ -234,7 +243,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 {{- end }}
 
 
-
+	{{/* TODO default timeouts */}}
     createTimeout, diags := data.Timeouts.Create(ctx, 20*time.Minute)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -247,6 +256,8 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
     }
 
     log.Printf("[DEBUG] Creating new {{ $.Name -}}: %#v", obj)
+
+	{{/* Nested Query block */}}
 
     headers := make(http.Header)
 {{- if $.CustomCode.PreCreate }}
@@ -288,6 +299,52 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 	data.Zone = zone
 {{- end }}
 
+{{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
+{{  if ($.GetAsync.IsA "OpAsync") -}}
+{{    if and $.GetAsync.Result.ResourceInsideResponse $.HasPostCreateComputedFields -}}
+    // Use the resource in the operation response to populate
+    // identity fields and d.Id() before read
+    var opRes map[string]interface{}
+    err = {{ $.ClientNamePascal -}}OperationWaitTimeWithResponse(
+    r.providerConfig, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project.ValueString()){{ else }}project.ValueString(){{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
+        createTimeout)
+    if err != nil {
+      {{/* Postcreate Failure */}}
+{{-     if not $.TaintResourceOnFailedCreate -}}
+        // The resource didn't actually create
+        resp.State.RemoveResource(ctx){{/* TODO verify this works */}}
+{{      end -}}
+		resp.Diagnostics.AddError("Error, failure waiting to create {{ $.Name -}}", err.Error())
+		return
+    }
+
+        {{/* CustomCode.Decoder */}}
+        {{/* NestedQuery */}}
+        {{/* if $.HasPostCreateComputedFields */}}
+		{{/* This may have caused the ID to update - update it if so. */}}
+{{    else -}}{{/* $.GetAsync.Result.ResourceInsideResponse */}}
+    err := {{ $.ClientNamePascal -}}OperationWaitTime(
+    r.providerConfig, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project.ValueString()){{ else }}project.ValueString(){{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
+        createTimeout)
+
+    if err != nil {
+
+        {{/* Postcreate Failure */}}
+{{-     if not $.TaintResourceOnFailedCreate -}}
+        // The resource didn't actually create
+        resp.State.RemoveResource(ctx){{/* TODO verify this works */}}
+{{      end -}}
+		resp.Diagnostics.AddError("Error, failure waiting to create {{ $.Name -}}", err.Error())
+		return
+    }
+
+{{    end  -}}{{/* $.GetAsync.Result.ResourceInsideResponse */}}
+{{  end -}}{{/*if ($.GetAsync.IsA "OpAsync")*/}}
+{{end -}}{{/*if and $.GetAsync ($.GetAsync.Allow "Create")*/}}
+{{if $.CustomCode.PostCreate -}} 
+    {{- $.CustomTemplate $.CustomCode.PostCreate false -}}
+{{- end}}
+
 
 	// read back {{$.Name}}
 	r.{{$.ResourceName}}FWRefresh(ctx, &data, &resp.State, req, &resp.Diagnostics)
@@ -298,6 +355,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 
+    log.Printf("[DEBUG] Finished creating {{ $.Name }} %q: %#v", data.Id.ValueString(), res)
 {{ end }} {{/* if CustomCreate */}}
 }
 
@@ -318,9 +376,6 @@ func (r *{{$.ResourceName}}FWResource) Read(ctx context.Context, req resource.Re
 		return
 	}
 
-	// Use provider_meta to set User-Agent
-	r.client.UserAgent = fwtransport.GenerateFrameworkUserAgentString(metaData, r.client.UserAgent)
-
 	tflog.Trace(ctx, "read {{$.Name}} resource")
 
     // read back {{$.Name}}
@@ -337,6 +392,11 @@ func (r *{{$.ResourceName}}FWResource) Read(ctx context.Context, req resource.Re
 func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var state, plan {{$.ResourceName}}FWModel
 	var metaData *fwmodels.ProviderMetaModel
+    // Read Provider meta into the meta model
+	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
     resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
@@ -348,11 +408,17 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 		return
 	}
 
+	var project, billingProject types.String
 {{ if $.HasProject -}}
-    project := fwresource.GetProjectFramework(plan.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
+    project = fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+{{ if $.LegacyLongFormProject -}}
+    billingProject = strings.TrimPrefix(project, "projects/")
+{{      else -}}
+    billingProject = project
+{{- end }}
 {{- end }}
 {{ if $.HasRegion -}}
 	region := fwresource.GetRegionFramework(plan.Region, types.StringValue(r.providerConfig.Region), &resp.Diagnostics)
@@ -394,6 +460,13 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 	}
 {{- end }}
 
+	{{/* TODO default timeouts */}}
+    updateTimeout, diags := data.Timeouts.Update(ctx, 20*time.Minute)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
     url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.CreateUri}}")
     if resp.Diagnostics.HasError() {
         return
@@ -417,7 +490,7 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
         RawURL: url,
         UserAgent: userAgent,
         Body: obj,
-        Timeout: createTimeout,
+        Timeout: updateTimeout,
         Headers: headers,
 {{- if $.ErrorRetryPredicates }}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
@@ -427,11 +500,30 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 {{- end}}
     }, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
-{{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
-        resource{{ $.ResourceName -}}PostUpdateFailure(d, meta)
-{{- end}}
         return 
     }
+
+{{if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
+{{  if $.GetAsync.IsA "OpAsync" -}}
+	    err = {{ $.ClientNamePascal -}}OperationWaitTime(
+	        r.providerConfig, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project.ValueString()){{ else }}project.ValueString(){{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
+	        updateTimeout)
+	    if err != nil {
+			resp.Diagnostics.AddError("Error, failure waiting to update {{ $.Name -}}", err.Error())
+			return
+	    }
+{{- else if $.GetAsync.IsA "PollAsync" -}}
+	    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
+	    if err != nil {
+{{-   if $.GetAsync.SuppressError -}}
+	        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", data.Id.ValueString(), err)
+{{-   else -}}
+			resp.Diagnostics.AddError("Error, failure polling for update in {{ $.Name -}}", err.Error())
+			return
+{{-   end}}
+        }
+{{- end}}{{/* if $.GetAsync.IsA "OpAsync" */}}
+{{- end}}{{/* if and ($.GetAsync) ($.GetAsync.Allow "update") */}}
 
 	tflog.Trace(ctx, "updated {{$.Name}} resource")
 
@@ -448,11 +540,16 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 
 func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data {{$.ResourceName}}FWModel
-
+	var metaData *fwmodels.ProviderMetaModel
+    // Read Provider meta into the meta model
+	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 {{- if $.ExcludeDelete }}
     log.Printf("[WARNING] {{ $.ProductMetadata.Name }}{{" "}}{{ $.Name }} resources" +
     " cannot be deleted from Google Cloud. The resource %s will be removed from Terraform" +
-    " state, but will still be present on Google Cloud.", r.Id())
+    " state, but will still be present on Google Cloud.", data.Id.ValueString())
     r.SetId("")
 
     return nil
@@ -464,11 +561,17 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 		return
 	}
 
+	var project, billingProject types.String
 {{ if $.HasProject -}}
-    project := fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
+    project = fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+{{ if $.LegacyLongFormProject -}}
+    billingProject = strings.TrimPrefix(project, "projects/")
+{{      else -}}
+    billingProject = project
+{{- end }}
 {{- end }}
 {{ if $.HasRegion -}}
 	region := fwresource.GetRegionFramework(data.Region, types.StringValue(r.providerConfig.Region), &resp.Diagnostics)
@@ -518,7 +621,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
         {{ $.CustomTemplate $.CustomCode.PreDelete false -}}
     {{- end }}
 
-    log.Printf("[DEBUG] Deleting {{ $.Name }} %q", r.Id())
+    log.Printf("[DEBUG] Deleting {{ $.Name }} %q", data.Id.ValueString())
     res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.DeleteVerb -}}",
@@ -526,7 +629,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
         RawURL: url,
         UserAgent: userAgent,
         Body: obj,
-        Timeout: createTimeout,
+        Timeout: deleteTimeout,
         Headers: headers,
 {{- if $.ErrorRetryPredicates }}
         ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
@@ -536,14 +639,37 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
 {{- end}}
     }, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
-		diags.AddError(fmt.Sprintf("Error deleting {{ $.Name -}}: %s", data.Id))
+		diags.AddError(fmt.Sprintf("Error deleting {{ $.Name -}}: %s", data.Id.ValueString()), err.Error())
         return 
     }
+{{if and $.GetAsync ($.GetAsync.Allow "Delete") -}}
+{{  if $.GetAsync.IsA "PollAsync" }}
+    err := transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncAbsence }}, "Deleting {{ $.Name }}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }})
+    if err != nil {
+{{-   if $.Async.SuppressError }}
+		log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", data.Id.ValueString(), err)
+{{-   else }}
+		resp.Diagnostics.AddError("Error, failure polling for delete in {{ $.Name -}}", err.Error())
+		return
+{{-   end }}
+    }
+{{- else }}
+    err := {{ $.ClientNamePascal }}OperationWaitTime(
+        r.providerConfig, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project.ValueString()){{ else }}project.ValueString(){{ end }}, {{ end -}} "Deleting {{ $.Name -}}", userAgent,
+        deleteTimeout)
+
+    if err != nil {
+		resp.Diagnostics.AddError("Error, failure waiting to delete {{ $.Name -}}", err.Error())
+		return
+    }
+{{- end }}{{/* if $.GetAsync.IsA "PollAsync" */}}
+{{- end }}{{/* if and $.GetAsync ($.GetAsync.Allow "Delete") */}}
+
 {{- if $.CustomCode.PostDelete }}
     {{ $.CustomTemplate $.CustomCode.PostDelete false -}}
 {{- end }}
 
-    log.Printf("[DEBUG] Finished deleting {{ $.Name }} %q: %#v", data.Id, res)
+    log.Printf("[DEBUG] Finished deleting {{ $.Name }} %q: %#v", data.Id.ValueString(), res)
 
 
 {{- end }}{{/* if CustomCode.CustomDelete */}}
