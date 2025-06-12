@@ -40,30 +40,12 @@ examples:
       region: 'us-central1'
       parent_prefix: 'projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp'
 parameters:
-  - name: 'project'
-    type: String
-    required: true
-    url_param_only: true
-    description: |
-          The ID of the project in which the resource belongs.
-  - name: 'region'
-    type: String
-    required: true
-    url_param_only: true
-    description: |
-          The region of the parent Public Delegated Prefix.
   - name: 'public_delegated_prefix'
     type: String
     required: true
     url_param_only: true
     description: |
           The name of the parent Public Delegated Prefix that this sub-prefix belongs to.
-  - name: 'name'
-    type: String
-    required: true
-    url_param_only: true
-    description: |
-            Name of the Public Delegated Sub Prefix.
 properties:
         - name: 'name'
           type: String
