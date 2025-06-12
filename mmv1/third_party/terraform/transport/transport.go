@@ -190,7 +190,7 @@ func IsApiNotEnabledError(err error) bool {
 	return false
 }
 
-func PluralDataSourceGet(d *schema.ResourceData, config *Config, billingProject *string, userAgent string, url string, params map[string]string, resourecToList string) ([]interface{}, error) {
+func PluralDataSourceGet(d *schema.ResourceData, config *Config, billingProject *string, userAgent string, url string, listFlattener func(config *Config, res interface{}) ([]interface{}, error), params map[string]string, resourecToList string) ([]interface{}, error) {
 	items := make([]interface{}, 0)
 	for {
 		// Depending on previous iterations, params might contain a pageToken param
@@ -224,9 +224,18 @@ func PluralDataSourceGet(d *schema.ResourceData, config *Config, billingProject 
 			return nil, nil
 		}
 
-		// Store info from this page
-		if v, ok := res[resourecToList].([]interface{}); ok {
-			items = append(items, v...)
+		if listFlattener != nil {
+			if res[resourecToList] == nil {
+				break
+			}
+			items, err = listFlattener(config, res[resourecToList])
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			if v, ok := res[resourecToList].([]interface{}); ok {
+				items = append(items, v...)
+			}
 		}
 
 		// Handle pagination for next loop, or break loop

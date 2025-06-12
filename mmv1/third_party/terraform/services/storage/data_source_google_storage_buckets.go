@@ -81,7 +81,7 @@ func datasourceGoogleStorageBucketsRead(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	res, err := transport_tpg.PluralDataSourceGet(d, config, nil, userAgent, url, params, "items")
+	res, err := transport_tpg.PluralDataSourceGet(d, config, nil, userAgent, url, nil, params, "items")
 	if err != nil {
 		return fmt.Errorf("Error retrieving buckets: %s", err)
 	}
