@@ -1,0 +1,126 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# API resource name
+name: 'PublicDelegatedSubPrefix'
+# Resource description for the provider documentation.
+description: |
+  Represents a PublicDelegatedSubPrefix created under Public Delegated Prefix for use with bring your own IP addresses (BYOIP). 
+references:
+  guides:
+    'Creating Sub Prefixes': 'https://cloud.google.com/vpc/docs/create-sub-prefixes-ip-addresses'
+base_url: 'projects/{{project}}/regions/{{region}}/publicDelegatedPrefixes/{{public_delegated_prefix}}/publicDelegatedSubPrefixs'
+self_link: 'projects/{{project}}/regions/{{region}}/publicDelegatedPrefixes/{{public_delegated_prefix}}/publicDelegatedSubPrefixs/{{name}}'
+immutable: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+examples:
+  - name: 'compute_public_delegated_sub_prefix'
+    primary_resource_id: 'prefixes'
+    skip_vcr: true
+    vars:
+      sub_prefix_name: 'sub-prefix-test'
+      delegatee_project: 'tf-static-byoip'
+      region: 'us-central1'
+      parent_prefix: 'projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp'
+parameters:
+name: 'project'
+    type: String
+    required: true
+    url_param_only: true
+    description: |
+      The ID of the project in which the resource belongs.
+name: 'region'
+    type: String
+    required: true
+    url_param_only: true
+    description: |
+      The region of the parent Public Delegated Prefix.
+name: 'public_delegated_prefix'
+    type: String
+    required: true
+    url_param_only: true
+    description: |
+      The name of the parent Public Delegated Prefix that this sub-prefix belongs to.
+name: 'name'
+    type: String
+    required: true
+    url_param_only: true
+    description: |
+      Name of the Public Delegated Sub Prefix.
+properties:
+  properties:
+        - name: 'name'
+          type: String
+          required: true
+          description: |
+            Name of the resource. The name must be 1-63 characters long, and
+            comply with RFC1035. Specifically, the name must be 1-63 characters
+            long and match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?`
+            which means the first character must be a lowercase letter, and all
+            following characters must be a dash, lowercase letter, or digit,
+            except the last character, which cannot be a dash.
+        - name: 'description'
+          type: String
+          description: |
+            Optional description of this sub public delgated prefix.
+        - name: 'region'
+          type: String
+          url_param_only: true
+          required: true
+          description: |
+            Output-only. The region of the sub public delegated prefix if it is regional. If absent, the sub prefix is global.
+        - name: 'parentPrefix'
+          type: String
+          description:
+            The URL of parent PublicDelegatedPrefix.
+          required: true
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+        - name: 'status'
+          type: Enum
+          output: true
+          description: |
+            Output-only. The status of the sub public delegated prefix.
+          enum_values:
+            - 'INITIALIZING'
+            - 'READY_TO_ANNOUNCE'
+            - 'ANNOUNCED'
+            - 'DELETING'
+        - name: 'ipCidrRange'
+          type: String
+          required: true
+          description: |
+            The IP address range in the CIDR format represented by this sub prefix. 
+        - name: 'delegated Project'
+          type: String
+          required: true
+          description: |
+            Name of the project scoping this PublicDelegatedSubPrefix.
+        - name: 'isAddress'
+          type: Boolean
+          description: |
+            Whether the sub prefix is delegated for address creation. 
+        - name: 'mode'
+          type: Enum
+          description: |
+            The PublicDelegatedSubPrefix mode for IPv6 only.
+        - name: 'allocatablePrefixLength'
+          type: Integer
+          description: |
+            The allocatable prefix length supported by this PublicDelegatedSubPrefix.
