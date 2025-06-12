@@ -86,28 +86,6 @@ properties:
     required: true
     validation:
       regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
-  - name: endpoints
-    type: KeyValuePairs
-    description: |
-      Endpoints grouped by location, each mapping to interconnect configurations.
-    properties:
-      - name: interconnects
-        type: KeyValuePairs
-        description: |
-          Map of interconnect details.
-        properties:
-          - name: interconnect
-            type: string
-          - name: vlan_tags
-            type: Array
-            description: |
-              VLAN tags for the interconnect.
-            item_type:
-              type: integer
-  - name: adminEnabled
-    type: boolean
-    description: |
-      Indicates whether the wire group is administratively enabled.
   - name: wireGroupProperties
     type: NestedObject
     description: |
@@ -152,8 +130,10 @@ properties:
       properties:
         - name: label
           type: string
+          output: true
         - name: endpoints
           type: Array
+          output: true
           description: |
             'Wire endpoints are specific Interconnect connections.'
           item_type:
@@ -161,8 +141,10 @@ properties:
             properties:
               - name: interconnect
                 type: string
+                output: true
               - name: vlanTag
                 type: integer
+                output: true
         - name: wireProperties
           type: NestedObject
           output: true # This is redundant if the parent 'wires' is output: true, but harmless
@@ -176,6 +158,7 @@ properties:
                 - 'DISABLE_PORT'
         - name: adminEnabled
           type: boolean
+          output: true
   - name: topology
     type: NestedObject
     description: |
@@ -189,5 +172,7 @@ properties:
           properties:
             - name: label
               type: string
+              output: true
             - name: city
               type: string
+              output: true
