@@ -218,6 +218,15 @@ properties:
           This field may contain any value between 0.0 and 1.0, inclusive. 0.0 is the
           default and means that no operations are logged.
         required: true
+  - name: 'state'
+    type: Enum
+    description: |
+      The current state of the queue.
+    output: true
+    enum_values:
+      - 'RUNNING'
+      - 'PAUSED'
+      - 'DISABLED'
   - name: 'httpTarget'
     type: NestedObject
     description: Modifies HTTP target for HTTP tasks.
