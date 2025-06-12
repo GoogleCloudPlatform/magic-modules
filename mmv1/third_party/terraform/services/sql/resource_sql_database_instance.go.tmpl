@@ -1458,6 +1458,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		MaintenanceWindow:             expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),
 		InsightsConfig:                expandInsightsConfig(_settings["insights_config"].([]interface{})),
 		PasswordValidationPolicy:      expandPasswordValidationPolicy(_settings["password_validation_policy"].([]interface{})),
+		ConnectionPoolConfig:          expandConnectionPoolConfig(_settings["connection_pool_config"].(*schema.Set).List()),
 	}
 
 	resize := _settings["disk_autoresize"].(bool)
@@ -2166,37 +2167,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	// Check if connection pool config is being updated.
-	if d.HasChange("settings.0.connection_pool_config") {
-		connectionPoolConfig := expandConnectionPoolConfig(d.Get("settings.0.connection_pool_config").(*schema.Set).List())
-		instance = &sqladmin.DatabaseInstance{
-			DatabaseVersion: databaseVersion,
-			Settings: &sqladmin.Settings{
-				ConnectionPoolConfig: connectionPoolConfig,
-			},
-		}
-		err = transport_tpg.Retry(transport_tpg.RetryOptions{
-			RetryFunc: func() (rerr error) {
-				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
-				return rerr
-			},
-			Timeout:              d.Timeout(schema.TimeoutUpdate),
-			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
-		})
-		if err != nil {
-			return fmt.Errorf("Error, failed to patch instance connection pool config for %s: %s", d.Get("name").(string), err)
-		}
-		err = SqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
-		if err != nil {
-			return err
-		}
-		err = resourceSqlDatabaseInstanceRead(d, meta)
-		if err != nil {
-			return err
-		}
-	}
-
-
 	s := d.Get("settings")
 	instance = &sqladmin.DatabaseInstance{
 		Settings: expandSqlDatabaseInstanceSettings(desiredSetting.([]interface{}), databaseVersion),
@@ -2222,8 +2192,8 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	}
 
 	// Database Version is required for all calls with Google ML integration enabled or it will be rejected by the API.
-	if d.Get("settings.0.enable_google_ml_integration").(bool) {
-		instance.DatabaseVersion = databaseVersion
+	if d.Get("settings.0.enable_google_ml_integration").(bool) || len(_settings["connection_pool_config"].(*schema.Set).List()) > 0 {
+			instance.DatabaseVersion = databaseVersion
 	}
 
 	failoverDrReplicaName := d.Get("replication_cluster.0.failover_dr_replica_name").(string)
