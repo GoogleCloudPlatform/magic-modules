@@ -424,7 +424,6 @@ is set to true. Defaults to ZONAL.`,
 						"disk_size": {
 							Type:     schema.TypeInt,
 							Optional: true,
-							// Default is likely 10gb, but it is undocumented and may change.
 							Computed:    true,
 							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB for PD_SSD, PD_HDD and 20GB for HYPERDISK_BALANCED.`,
 						},
@@ -434,7 +433,7 @@ is set to true. Defaults to ZONAL.`,
 							Computed:         true,
 							ForceNew:         true,
 							DiffSuppressFunc: caseDiffDashSuppress,
-							Description:      `The type of supported data disk is tier dependent and can be PD_SSD or PD_HDD or HyperDisk_Balanced `,
+							Description:      `The type of supported data disk is tier dependent and can be PD_SSD or PD_HDD or HYPERDISK_BALANCED. `,
 						},
 {{- if ne $.TargetVersionName "ga" }}
 						"data_disk_provisioned_iops": {
@@ -1454,7 +1453,6 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		UserLabels:                    tpgresource.ConvertStringMap(_settings["user_labels"].(map[string]interface{})),
 		BackupConfiguration:           expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
 		DatabaseFlags:                 expandDatabaseFlags(_settings["database_flags"].(*schema.Set).List()),
-		ConnectionPoolConfig:      	   expandConnectionPoolConfig(_settings["connection_pool_config"].(*schema.Set).List()),
 		IpConfiguration:               expandIpConfiguration(_settings["ip_configuration"].([]interface{}), databaseVersion),
 		LocationPreference:            expandLocationPreference(_settings["location_preference"].([]interface{})),
 		MaintenanceWindow:             expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),
@@ -2168,10 +2166,40 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+	// Check if connection pool config is being updated.
+	if d.HasChange("settings.0.connection_pool_config") {
+		connectionPoolConfig := expandConnectionPoolConfig(d.Get("settings.0.connection_pool_config").(*schema.Set).List())
+		instance = &sqladmin.DatabaseInstance{
+			DatabaseVersion: databaseVersion,
+			Settings: &sqladmin.Settings{
+				ConnectionPoolConfig: connectionPoolConfig,
+			},
+		}
+		err = transport_tpg.Retry(transport_tpg.RetryOptions{
+			RetryFunc: func() (rerr error) {
+				op, rerr = config.NewSqlAdminClient(userAgent).Instances.Patch(project, d.Get("name").(string), instance).Do()
+				return rerr
+			},
+			Timeout:              d.Timeout(schema.TimeoutUpdate),
+			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+		})
+		if err != nil {
+			return fmt.Errorf("Error, failed to patch instance connection pool config for %s: %s", d.Get("name").(string), err)
+		}
+		err = SqlAdminOperationWaitTime(config, op, project, "Patch Instance", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if err != nil {
+			return err
+		}
+		err = resourceSqlDatabaseInstanceRead(d, meta)
+		if err != nil {
+			return err
+		}
+	}
+
+
 	s := d.Get("settings")
 	instance = &sqladmin.DatabaseInstance{
 		Settings: expandSqlDatabaseInstanceSettings(desiredSetting.([]interface{}), databaseVersion),
-		DatabaseVersion: databaseVersion,
 	}
 	_settings := s.([]interface{})[0].(map[string]interface{})
 	// Instance.Patch operation on completion updates the settings proto version by +8. As terraform does not know this it tries
