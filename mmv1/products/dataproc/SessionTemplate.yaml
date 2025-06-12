@@ -218,7 +218,6 @@ properties:
         description: |
           Kernel to be used with Jupyter interactive session.
         enum_values:
-          - 'KERNEL_UNSPECIFIED'
           - 'PYTHON'
           - 'SCALA'
       - name: 'displayName'
