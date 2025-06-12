@@ -34,6 +34,7 @@ iam_policy:
     - '{{name}}'
 custom_code:
   constants: 'templates/terraform/constants/cloud_tasks_retry_config_custom_diff.go.tmpl'
+  post_create: 'templates/terraform/post_create/cloud_tasks_queue_state.go.tmpl'
 examples:
   - name: 'queue_basic'
     primary_resource_id: 'default'
