@@ -339,12 +339,6 @@ properties:
                 description: |
                   The resource name of the secret version in the format,
                   format as: projects/*/secrets/*/versions/*.
-        exactly_one_of:
-          - auth_config.0.user_password
-          - auth_config.0.oauth2_jwt_bearer
-          - auth_config.0.oauth2_client_credentials
-          - auth_config.0.ssh_public_key
-          - auth_config.0.oauth2_auth_code_flow
       - !ruby/object:Api::Type::NestedObject
         name: "oauth2JwtBearer"
         description: |
@@ -380,12 +374,6 @@ properties:
                 name: "audience"
                 description: |
                   Value for the "aud" claim.
-        exactly_one_of:
-          - auth_config.0.user_password
-          - auth_config.0.oauth2_jwt_bearer
-          - auth_config.0.oauth2_client_credentials
-          - auth_config.0.ssh_public_key
-          - auth_config.0.oauth2_auth_code_flow
       - !ruby/object:Api::Type::NestedObject
         name: "oauth2ClientCredentials"
         description: |
@@ -407,12 +395,6 @@ properties:
                 description: |
                   The resource name of the secret version in the format,
                   format as: projects/*/secrets/*/versions/*.
-        exactly_one_of:
-          - auth_config.0.user_password
-          - auth_config.0.oauth2_jwt_bearer
-          - auth_config.0.oauth2_client_credentials
-          - auth_config.0.ssh_public_key
-          - auth_config.0.oauth2_auth_code_flow
       - !ruby/object:Api::Type::NestedObject
         name: "sshPublicKey"
         description: |
@@ -449,12 +431,6 @@ properties:
                 description: |
                   The resource name of the secret version in the format,
                   format as: projects/*/secrets/*/versions/*.
-        exactly_one_of:
-          - auth_config.0.user_password
-          - auth_config.0.oauth2_jwt_bearer
-          - auth_config.0.oauth2_client_credentials
-          - auth_config.0.ssh_public_key
-          - auth_config.0.oauth2_auth_code_flow
       - !ruby/object:Api::Type::NestedObject
         name: "oauth2AuthCodeFlow"
         description: |
@@ -488,13 +464,6 @@ properties:
             name: "authUri"
             description: |
               Auth URL for Authorization Code Flow.
-        exactly_one_of:
-          - auth_config.0.user_password
-          - auth_config.0.oauth2_jwt_bearer
-          - auth_config.0.oauth2_client_credentials
-          - auth_config.0.ssh_public_key
-          - auth_config.0.oauth2_auth_code_flow
-
   - !ruby/object:Api::Type::NestedObject
     name: "lockConfig"
     description: |
