@@ -433,7 +433,7 @@ is set to true. Defaults to ZONAL.`,
 							Computed:         true,
 							ForceNew:         true,
 							DiffSuppressFunc: caseDiffDashSuppress,
-							Description:      `The type of supported data disk is tier dependent and can be PD_SSD or PD_HDD or HYPERDISK_BALANCED. `,
+							Description:      `The type of supported data disk is tier dependent and can be PD_SSD or PD_HDD or HYPERDISK_BALANCED.`,
 						},
 {{- if ne $.TargetVersionName "ga" }}
 						"data_disk_provisioned_iops": {
