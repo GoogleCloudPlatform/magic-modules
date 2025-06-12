@@ -73,11 +73,6 @@ properties:
             The URL of parent PublicDelegatedPrefix.
           required: true
           diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-        - name: 'public_delegated_prefix'
-          type: String
-          required: true
-          description: |
-                The name of the parent Public Delegated Prefix that this sub-prefix belongs to.  
         - name: 'status'
           type: Enum
           output: true
