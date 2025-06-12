@@ -87,5 +87,5 @@ properties:
     description: |
       The resource container from which the setting is inherited. This refers to the  nearest ancestor with enablement set (either ENABLED or DISABLED).
       The value can be `organizations/{organization_id}`, `folders/{folder_id}`, or can be `default` if no ancestor exists with enablement set.
-      The value will be empty when enablement is specified on this resource container.
+      The value will be empty when `enablement` is specified on this resource container.
     output: true
