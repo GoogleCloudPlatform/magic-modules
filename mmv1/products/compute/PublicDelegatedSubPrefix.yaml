@@ -33,7 +33,6 @@ async:
 examples:
   - name: 'compute_public_delegated_sub_prefix'
     primary_resource_id: 'prefixes'
-    skip_vcr: true
     vars:
       sub_prefix_name: 'sub-prefix-test'
       delegatee_project: 'tf-static-byoip'
