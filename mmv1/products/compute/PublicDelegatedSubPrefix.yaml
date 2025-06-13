@@ -35,6 +35,9 @@ examples:
     primary_resource_id: 'prefixes'
     vars:
       sub_prefix_name: 'sub-prefix-test'
+      parent_prefix = "{{$.TestEnvVars.parent_prefix}}"
+      delegated_project = {{$.TestEnvVars.delegated_project}}
+      public_delegated_prefix = {{$.TestEnvVars.public_delegated_prefix}} 
     test_env_vars:
       delegated_project: 'tf-static-byoip'
       public_delegated_prefix: 'projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp'
