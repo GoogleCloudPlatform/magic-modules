@@ -67,47 +67,12 @@ func datasourceGoogleStorageBucketObjectsRead(d *schema.ResourceData, meta inter
 
 	params := make(map[string]string)
 	bucketObjects := make([]map[string]interface{}, 0)
-
-	for {
-		bucket := d.Get("bucket").(string)
-		url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{StorageBasePath}}b/%s/o", bucket))
-		if err != nil {
-			return err
-		}
-
-		if v, ok := d.GetOk("match_glob"); ok {
-			params["matchGlob"] = v.(string)
-		}
-
-		if v, ok := d.GetOk("prefix"); ok {
-			params["prefix"] = v.(string)
-		}
-
-		url, err = transport_tpg.AddQueryParams(url, params)
-		if err != nil {
-			return err
-		}
-
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			RawURL:    url,
-			UserAgent: userAgent,
-		})
-		if err != nil {
-			return fmt.Errorf("Error retrieving bucket objects: %s", err)
-		}
-
-		pageBucketObjects := flattenDatasourceGoogleBucketObjectsList(res["items"])
-		bucketObjects = append(bucketObjects, pageBucketObjects...)
-
-		pToken, ok := res["nextPageToken"]
-		if ok && pToken != nil && pToken.(string) != "" {
-			params["pageToken"] = pToken.(string)
-		} else {
-			break
-		}
+	bucket := d.Get("bucket").(string)
+	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{StorageBasePath}}b/%s/o", bucket))
+	if err != nil {
+		return err
 	}
+	bucketObjects, err = transport_tpg.PluralDataSourceGetListMap(d, config, nil, userAgent, url, flattenDatasourceGoogleBucketObjectsList, params, "items")
 
 	if err := d.Set("bucket_objects", bucketObjects); err != nil {
 		return fmt.Errorf("Error retrieving bucket_objects: %s", err)
@@ -118,22 +83,22 @@ func datasourceGoogleStorageBucketObjectsRead(d *schema.ResourceData, meta inter
 	return nil
 }
 
-func flattenDatasourceGoogleBucketObjectsList(v interface{}) []map[string]interface{} {
+func flattenDatasourceGoogleBucketObjectsList(config *transport_tpg.Config, v interface{}) ([]map[string]interface{}, error) {
 	if v == nil {
-		return make([]map[string]interface{}, 0)
+		return make([]map[string]interface{}, 0), nil
 	}
 
 	ls := v.([]interface{})
-	bucketObjects := make([]map[string]interface{}, 0, len(ls))
+	buckets := make([]map[string]interface{}, 0, len(ls))
 	for _, raw := range ls {
 		o := raw.(map[string]interface{})
 
-		var mContentType, mMediaLink, mName, mSelfLink, mStorageClass interface{}
-		if oContentType, ok := o["contentType"]; ok {
-			mContentType = oContentType
+		var mLabels, mLocation, mName, mSelfLink, mStorageClass interface{}
+		if oLabels, ok := o["labels"]; ok {
+			mLabels = oLabels
 		}
-		if oMediaLink, ok := o["mediaLink"]; ok {
-			mMediaLink = oMediaLink
+		if oLocation, ok := o["location"]; ok {
+			mLocation = oLocation
 		}
 		if oName, ok := o["name"]; ok {
 			mName = oName
@@ -144,14 +109,14 @@ func flattenDatasourceGoogleBucketObjectsList(v interface{}) []map[string]interf
 		if oStorageClass, ok := o["storageClass"]; ok {
 			mStorageClass = oStorageClass
 		}
-		bucketObjects = append(bucketObjects, map[string]interface{}{
-			"content_type":  mContentType,
-			"media_link":    mMediaLink,
+		buckets = append(buckets, map[string]interface{}{
+			"labels":        mLabels,
+			"location":      mLocation,
 			"name":          mName,
 			"self_link":     mSelfLink,
 			"storage_class": mStorageClass,
 		})
 	}
 
-	return bucketObjects
+	return buckets, nil
 }

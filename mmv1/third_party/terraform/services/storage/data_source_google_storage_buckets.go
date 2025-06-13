@@ -63,7 +63,6 @@ func datasourceGoogleStorageBucketsRead(d *schema.ResourceData, meta interface{}
 	}
 
 	params := make(map[string]string)
-	buckets := make([]map[string]interface{}, 0)
 
 	url := "https://storage.googleapis.com/storage/v1/b"
 
@@ -81,13 +80,10 @@ func datasourceGoogleStorageBucketsRead(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	res, err := transport_tpg.PluralDataSourceGet(d, config, nil, userAgent, url, nil, params, "items")
+	buckets, err := transport_tpg.PluralDataSourceGetListMap(d, config, nil, userAgent, url, flattenDatasourceGoogleBucketsList, params, "items")
 	if err != nil {
 		return fmt.Errorf("Error retrieving buckets: %s", err)
 	}
-
-	pageBuckets := flattenDatasourceGoogleBucketsList(res)
-	buckets = append(buckets, pageBuckets...)
 
 	if err := d.Set("buckets", buckets); err != nil {
 		return fmt.Errorf("Error retrieving buckets: %s", err)
@@ -98,9 +94,9 @@ func datasourceGoogleStorageBucketsRead(d *schema.ResourceData, meta interface{}
 	return nil
 }
 
-func flattenDatasourceGoogleBucketsList(v interface{}) []map[string]interface{} {
+func flattenDatasourceGoogleBucketsList(config *transport_tpg.Config, v interface{}) ([]map[string]interface{}, error) {
 	if v == nil {
-		return make([]map[string]interface{}, 0)
+		return make([]map[string]interface{}, 0), nil
 	}
 
 	ls := v.([]interface{})
@@ -133,5 +129,5 @@ func flattenDatasourceGoogleBucketsList(v interface{}) []map[string]interface{} 
 		})
 	}
 
-	return buckets
+	return buckets, nil
 }

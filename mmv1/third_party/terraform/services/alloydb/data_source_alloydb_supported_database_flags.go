@@ -139,7 +139,7 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 	if err != nil {
 		return fmt.Errorf("Error setting api endpoint")
 	}
-	result, err := transport_tpg.PluralDataSourceGet(d, config, &billingProject, userAgent, url, nil, nil, "supportedDatabaseFlags")
+	result, err := transport_tpg.PluralDataSourceGetList(d, config, &billingProject, userAgent, url, nil, nil, "supportedDatabaseFlags")
 	if err != nil {
 		return err
 	}

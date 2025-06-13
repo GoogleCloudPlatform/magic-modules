@@ -105,7 +105,7 @@ func dataSourceGoogleKmsKeyRingsRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	keyRings, err = transport_tpg.PluralDataSourceGet(d, config, &billingProject, userAgent, url, flattenKMSKeyRingsList, params, "keyRings")
+	keyRings, err = transport_tpg.PluralDataSourceGetList(d, config, &billingProject, userAgent, url, flattenKMSKeyRingsList, params, "keyRings")
 	if err != nil {
 		return fmt.Errorf("Error retrieving key rings: %s", err)
 	}

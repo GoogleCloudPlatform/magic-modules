@@ -182,7 +182,7 @@ func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}
 	}
 
 	cryptoKeyVersions := make([]interface{}, 0)
-	cryptoKeyVersions, err = transport_tpg.PluralDataSourceGet(d, config, &billingProject, userAgent, url, nil, params, "cryptoKeyVersions")
+	cryptoKeyVersions, err = transport_tpg.PluralDataSourceGetList(d, config, &billingProject, userAgent, url, nil, params, "cryptoKeyVersions")
 	if err != nil {
 		return nil, err
 	}

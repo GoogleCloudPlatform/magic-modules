@@ -190,7 +190,7 @@ func IsApiNotEnabledError(err error) bool {
 	return false
 }
 
-func PluralDataSourceGet(d *schema.ResourceData, config *Config, billingProject *string, userAgent string, url string, listFlattener func(config *Config, res interface{}) ([]interface{}, error), params map[string]string, resourecToList string) ([]interface{}, error) {
+func PluralDataSourceGetList(d *schema.ResourceData, config *Config, billingProject *string, userAgent string, url string, listFlattener func(config *Config, res interface{}) ([]interface{}, error), params map[string]string, resourecToList string) ([]interface{}, error) {
 	items := make([]interface{}, 0)
 	for {
 		// Depending on previous iterations, params might contain a pageToken param
@@ -234,6 +234,66 @@ func PluralDataSourceGet(d *schema.ResourceData, config *Config, billingProject 
 			}
 		} else {
 			if v, ok := res[resourecToList].([]interface{}); ok {
+				items = append(items, v...)
+			}
+		}
+
+		// Handle pagination for next loop, or break loop
+		v, ok := res["nextPageToken"]
+		if ok {
+			params["pageToken"] = v.(string)
+		}
+		if !ok {
+			break
+		}
+	}
+	return items, nil
+}
+
+func PluralDataSourceGetListMap(d *schema.ResourceData, config *Config, billingProject *string, userAgent string, url string, listFlattener func(config *Config, res interface{}) ([]map[string]interface{}, error), params map[string]string, resourecToList string) ([]map[string]interface{}, error) {
+	items := make([]map[string]interface{}, 0)
+	for {
+		// Depending on previous iterations, params might contain a pageToken param
+		url, err := AddQueryParams(url, params)
+		if err != nil {
+			return nil, err
+		}
+
+		headers := make(http.Header)
+		opts := SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			RawURL:    url,
+			UserAgent: userAgent,
+			Headers:   headers,
+			// ErrorRetryPredicates used to allow retrying if rate limits are hit when requesting multiple pages in a row
+			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
+		}
+		if billingProject != nil {
+			opts.Project = *billingProject
+		}
+		res, err := SendRequest(opts)
+		if err != nil {
+			return nil, HandleNotFoundError(err, d, fmt.Sprintf("%s %q", resourecToList, d.Id()))
+		}
+
+		if res == nil {
+			// Decoding the object has resulted in it being gone. It may be marked deleted
+			log.Printf("[DEBUG] Removing KMSCryptoKey because it no longer exists.")
+			d.SetId("")
+			return nil, nil
+		}
+
+		if listFlattener != nil {
+			if res[resourecToList] == nil {
+				break
+			}
+			items, err = listFlattener(config, res[resourecToList])
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			if v, ok := res[resourecToList].([]map[string]interface{}); ok {
 				items = append(items, v...)
 			}
 		}
