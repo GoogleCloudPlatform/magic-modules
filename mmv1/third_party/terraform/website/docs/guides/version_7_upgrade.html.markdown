@@ -102,8 +102,8 @@ Description of the change and how users should adjust their configuration (if ne
 
 ## Resources
 
-## Resource: `google_product_resource`
+## Resource: `google_storage_bucket`
 
-### Resource-level change example header
+### `retention_period` now changed to `string` data type
 
-Description of the change and how users should adjust their configuration (if needed).
+`retention_period` now changed to `string` data type to handle higher values for bucket retention period.
