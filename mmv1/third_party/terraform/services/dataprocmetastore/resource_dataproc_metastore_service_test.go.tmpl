@@ -180,23 +180,17 @@ func TestAccMetastoreService_tags(t *testing.T) {
 	disallowedTagValueURI := acctest.BootstrapSharedTestTagValue(t, "metastore-org-policy-disallowed-value", tagKeyURI)
 
 	allowedTagValueCanonicalName := strings.TrimPrefix(allowedTagValueURI, "//cloudresourcemanager.googleapis.com/")
-	tagKeyShortName := strings.Split(tagKeyURI, "/")[len(strings.Split(tagKeyURI, "/"))-1]
 
-	orgID := envvar.GetTestOrgFromEnv(t)
-	if orgID == "" {
-		orgID = "735183260412" // Default value if env var is not set
-		t.Logf("GOOGLE_ORGANIZATION environment variable not set, using default org id: %s", orgID)
-	}
 	contextData := map[string]interface{}{
 		"random_suffix":                acctest.RandString(t, 10),
-		"org_id":                       orgID,
+		"org":                          envvar.GetTestOrgFromEnv(t),
+		"org_id":                       "735183260412",
 		"project":                      "tags-blr-test-ap",
 		"location":                     "us-central1",
-		"tagKey":                       tagKeyShortName,
+		"tagKey":                       tagKeyURI,
 		"allowedTagValue":              allowedTagValueURI,
 		"disallowedTagValue":           disallowedTagValueURI,
 		"allowedTagValueCanonicalName": allowedTagValueCanonicalName,
-		"tagKeyURI":                    tagKeyURI,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -206,41 +200,37 @@ func TestAccMetastoreService_tags(t *testing.T) {
 			testAccCheckDataprocMetastoreServiceDestroyProducer(t),
 		),
 		Steps: []resource.TestStep{
-			// Step 0: Define the custom constraint
+			// Step 1: Create the Organization Policy
 			{
-				Config: testAccCustomConstraint(contextData),
+				Config: testAccOrgPolicyAllowSpecificTagValue(contextData),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"google_org_policy_custom_constraint.constraint",
-						"display_name",
-						"Metastore Service Custom Constraint",
-					),
-					resource.TestCheckResourceAttr(
-						"google_org_policy_custom_constraint.constraint",
-						"condition",
-						"resource.management.autoUpgrade == false",
-					),
-				),
-			},
-			// Step 1: Define the Organization Policy with rules inside spec and a condition
-			{
-				Config: testAccOrgPolicy(contextData),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_org_policy_policy.primary",
+						"google_organization_policy.allow_specific_tag",
 						"constraint",
-						fmt.Sprintf("custom.metastoreService%s", contextData["random_suffix"]),
+						"serviceuser.services",
 					),
 					resource.TestCheckResourceAttr(
-						"google_org_policy_policy.primary",
-						"spec.0.rules.0.enforce",
-						"false",
+						"google_organization_policy.allow_specific_tag",
+						"list_policy.0.allow.0.values.0",
+						contextData["allowedTagValueCanonicalName"].(string),
+					),
+					resource.TestCheckResourceAttr(
+						"google_organization_policy.allow_specific_tag",
+						"list_policy.0.deny.0.all",
+						"true",
 					),
 				),
 			},
 			// Step 2: Create a Metastore Service with the ALLOWED tag (should succeed)
 			{
-				Config: testAccMetastoreServiceTags(contextData),
+				Config: testAccMetastoreServiceTags(map[string]interface{}{
+					"random_suffix": contextData["random_suffix"],
+					"org":           contextData["org"],
+					"tagKey":        contextData["tagKey"],
+					"tagValue":      contextData["allowedTagValue"], // Use the allowed tag
+					"location":      contextData["location"],
+					"project":       contextData["project"],
+				}),
 				Check: resource.ComposeTestCheckFunc(
 					// Verify the tag is present in the Terraform state
 					resource.TestCheckResourceAttr(
@@ -257,7 +247,14 @@ func TestAccMetastoreService_tags(t *testing.T) {
 			},
 			// Step 3: Attempt to create a Metastore Service with the DISALLOWED tag (should fail)
 			{
-				Config: testAccMetastoreServiceTagsDisallowed(contextData),
+				Config: testAccMetastoreServiceTagsDisallowed(map[string]interface{}{
+					"random_suffix":      acctest.RandString(t, 10) + "-disallowed", // Ensure a unique service_id for this failed attempt
+					"org":                contextData["org"],
+					"tagKey":             contextData["tagKey"],
+					"disallowedTagValue": contextData["disallowedTagValue"], // Use the disallowed tag
+					"location":           contextData["location"],
+					"project":            contextData["project"],
+				}),
 				// Expect an error indicating policy violation
 				ExpectError: regexp.MustCompile(`(?i)(CONSTRAINT_VIOLATION|policy violation|denied by a policy)`),
 			},
@@ -289,7 +286,26 @@ resource "google_dataproc_metastore_service" "default" {
     env = "test"
   }
   tags = {
-    "%{org_id}/%{tagKey}" = "%{tagValue}"
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
+}
+
+// Organization Policy to allow only a specific tag value
+func testAccOrgPolicyAllowSpecificTagValue(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_organization_policy" "allow_specific_tag" {
+  org_id = "735183260412"
+
+  constraint   = "serviceuser.services"
+
+  list_policy {
+    allow {
+      values = [
+        "%{allowedTagValueCanonicalName}",
+      ]
+    }
   }
 }
 `, context)
@@ -304,63 +320,35 @@ resource "google_dataproc_metastore_service" "disallowed_service" {
   port       = 9080
   tier       = "DEVELOPER"
 
+
   maintenance_window {
     hour_of_day = 2
     day_of_week = "SUNDAY"
    }
 
+
   hive_metastore_config {
     version = "2.3.6"
   }
+
 
   labels = {
     env = "test"
   }
   tags = {
-    "%{org_id}/%{tagKey}" = "%{disallowedTagValue}" # Using the disallowed tag value
+	"%{org}/%{tagKey}" = "%{disallowedTagValue}" # Using the disallowed tag value
   }
 }
-`, context)
-}
-
-func testAccOrgPolicy(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_org_policy_policy" "primary" {
-  name = "organizations/%{org_id}/policies/${google_org_policy_custom_constraint.constraint.name}"
-  parent = "organizations/%{org_id}"
-  spec {
-      rules {
-          enforce = "FALSE"
-      }
-  }
-}
-`, context)
-}
-
-func testAccCustomConstraint(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_org_policy_custom_constraint" "constraint" {
-    name         = "custom.metastoreService%{random_suffix}"
-    parent       = "organizations/%{org_id}"
-    display_name = "Metastore Service Custom Constraint"
-    description  = "Only allow Metastore resource to be created or updated if AutoUpgrade is not enabled where this custom constraint is enforced."
-  
-    action_type    = "ALLOW"
-    condition      = "resource.management.autoUpgrade == false"
-    method_types   = ["CREATE"]
-    resource_types = ["metastore.googleapis.com/Service"]
-  }
 `, context)
 }
 
 // Configuration to delete the Organization Policy
 func testAccOrgPolicyDelete(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_org_policy_policy" "primary" {
+resource "google_organization_policy" "allow_specific_tag" {
   org_id = "%{org_id}"
   constraint = "serviceuser.services"
   policy_type = "unset"
 }
 `, context)
 }
-
