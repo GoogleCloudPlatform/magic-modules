@@ -89,8 +89,8 @@ parameters:
 properties:
   - name: 'name'
     type: String
-    description: 
-      The resource name of the session template in the following format: 
+    description: |
+      The resource name of the session template in the following format:
       projects/{project}/locations/{location}/sessionTemplates/{template_id}
     required: true
     immutable: true
