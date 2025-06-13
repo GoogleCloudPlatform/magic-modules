@@ -426,11 +426,13 @@ properties:
     description: |
       Enable or disable the Application Aware Interconnect(AAI) feature on this interconnect.
     send_empty_value: true
+    min_version: beta
   - name: 'applicationAwareInterconnect'
     type: NestedObject
     description: |
       Configuration that enables Media Access Control security (MACsec) on the Cloud
       Interconnect connection between Google and your on-premises router.
+    min_version: beta
     properties:
       - name: 'profileDescription'
         type: String

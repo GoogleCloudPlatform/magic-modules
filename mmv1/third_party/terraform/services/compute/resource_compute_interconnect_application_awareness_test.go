@@ -18,7 +18,7 @@ func TestAccComputeInterconnect_computeInterconnectBasicTestExample_update(t *te
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckComputeInterconnectDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -53,6 +53,7 @@ func testAccComputeInterconnect_computeInterconnectBasicTestExample_basic(contex
 data "google_project" "project" {}
 
 resource "google_compute_interconnect" "example-interconnect" {
+  provider             = google-beta	
   name                 = "tf-test-example-interconnect%{random_suffix}"
   customer_name        = "internal_customer" # Special customer only available for Google testing.
   interconnect_type    = "DEDICATED"
@@ -76,6 +77,7 @@ func testAccComputeInterconnect_computeInterconnectBasicTestExample_update(conte
 data "google_project" "project" {}
 
 resource "google_compute_interconnect" "example-interconnect" {
+  provider             = google-beta
   name                 = "tf-test-example-interconnect%{random_suffix}"
   customer_name        = "internal_customer" # Special customer only available for Google testing.
   interconnect_type    = "DEDICATED"
