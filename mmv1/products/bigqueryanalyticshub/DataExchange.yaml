@@ -59,7 +59,7 @@ examples:
     vars:
       data_exchange_id: 'dcr_data_exchange'
       desc: 'example dcr data exchange'
-  - name: 'bigquery_analyticshub_dataexchange_log_linked_dataset_query_user'
+  - name: 'bigquery_analyticshub_data_exchange_log_linked_dataset_query_user'
     primary_resource_id: 'data_exchange'
     primary_resource_name: 'fmt.Sprintf("tf_test_log_email_data_exchange%s", context["random_suffix"])'
     region_override: 'US'
