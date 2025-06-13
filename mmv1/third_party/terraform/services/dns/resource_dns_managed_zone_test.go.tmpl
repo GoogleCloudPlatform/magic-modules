@@ -662,7 +662,6 @@ resource "google_dns_managed_zone" "foobar" {
 `, suffix, suffix, description, project)
 }
 
-{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func TestAccDNSManagedZone_privateForwardingWithDomainNameUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -670,7 +669,7 @@ func TestAccDNSManagedZone_privateForwardingWithDomainNameUpdate(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDNSManagedZoneDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -696,7 +695,6 @@ func TestAccDNSManagedZone_privateForwardingWithDomainNameUpdate(t *testing.T) {
 func testAccDnsManagedZone_privateForwardingWithDomainNameUpdate(suffix, domain_name, forwarding_path string) string {
 	return fmt.Sprintf(`
 resource "google_dns_managed_zone" "private" {
-  provider = google-beta
   name        = "private-zone-%s"
   dns_name    = "private.example.com."
   description = "Example private DNS zone"
@@ -716,13 +714,13 @@ resource "google_dns_managed_zone" "private" {
 }
 
 resource "google_compute_network" "network-1" {
-  provider = google-beta
   name                    = "tf-test-net-1-%s"
   auto_create_subnetworks = false
 }
 `, suffix, domain_name, forwarding_path, suffix)
 }
 
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
 func TestAccDNSManagedZone_dnsManagedZoneUpdateWithServiceDirectory(t *testing.T) {
 	t.Parallel()
 
