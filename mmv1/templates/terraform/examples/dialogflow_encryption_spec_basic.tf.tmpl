@@ -23,7 +23,6 @@ resource "google_kms_crypto_key" "key" {
   name     = "example-key"
   key_ring = google_kms_key_ring.keyring.id
   purpose  = "ENCRYPT_DECRYPT"
-  project  = google_project.project.project_id
 }
 
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
