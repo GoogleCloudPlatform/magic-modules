@@ -6,8 +6,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
-	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -570,9 +568,7 @@ func TestAccStorageObject_knownAfterApply(t *testing.T) {
 	t.Parallel()
 
 	bucketName := acctest.TestBucketName(t)
-	destinationDirPath := t.TempDir()
-	destinationFilePath := filepath.Join(destinationDirPath, "local_file")
-	destinationFilePath = strings.ReplaceAll(destinationFilePath, `\`, `\\`)
+	destinationFilePath := getNewTmpTestFile(t, "tf-test-apply-")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -585,13 +581,13 @@ func TestAccStorageObject_knownAfterApply(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: testGoogleStorageBucketObject(bucketName, "first", destinationFilePath),
+				Config: testGoogleStorageBucketObject(bucketName, "first", destinationFilePath.Name()),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleStorageValidOutput(t),
 				),
 			},
 			{
-				Config: testGoogleStorageBucketObjectKnownAfterApply(bucketName, "second", destinationFilePath),
+				Config: testGoogleStorageBucketObjectKnownAfterApply(bucketName, "second", destinationFilePath.Name()),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleStorageValidOutput(t),
 				),
