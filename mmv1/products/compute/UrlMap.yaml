@@ -165,7 +165,6 @@ examples:
       storage_bucket_name: 'static-asset-bucket'
   - name: 'url_map_custom_error_response_policy'
     primary_resource_id: 'urlmap'
-    min_version: 'beta'
     vars:
       url_map_name: 'urlmap'
       backend_service_name: 'login'
