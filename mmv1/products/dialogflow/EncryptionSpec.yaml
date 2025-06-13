@@ -60,6 +60,7 @@ properties:
 examples:
   - name: "dialogflow_encryption_spec_basic"
     primary_resource_id: "example-encryption-spec"
+    min_version: "beta"
     vars:
       kms_key_name: 'kms-key'
     test_vars_overrides:
