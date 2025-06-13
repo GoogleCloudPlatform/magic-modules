@@ -3,4 +3,5 @@ resource "google_bigquery_analytics_hub_data_exchange" "{{$.PrimaryResourceId}}_
   data_exchange_id = "{{index $.Vars "data_exchange_id"}}" 
   display_name     = "{{index $.Vars "data_exchange_id"}}" 
   description      = "{{index $.Vars "description"}}"
+  log_linked_dataset_query_user_email = true
 }
