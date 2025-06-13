@@ -940,7 +940,6 @@ func testGoogleStorageBucketsObjectFileMd5(bucketName, sourceFilename, md5hash s
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
-  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "bo_1861894" {
@@ -977,7 +976,6 @@ func testGoogleStorageBucketObject(bucketName, content, filename string) string 
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
-  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "changing" {
@@ -1014,7 +1012,6 @@ func testGoogleStorageBucketObjectKnownAfterApply(bucketName, content, filename 
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
-  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "changing" {
