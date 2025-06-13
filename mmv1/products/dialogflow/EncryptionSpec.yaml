@@ -61,7 +61,3 @@ examples:
   - name: "dialogflow_encryption_spec_basic"
     primary_resource_id: "example-encryption-spec"
     min_version: "beta"
-    vars:
-      kms_key_name: 'kms-key'
-    test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
