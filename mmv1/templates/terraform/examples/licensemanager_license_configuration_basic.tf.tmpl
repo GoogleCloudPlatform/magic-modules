@@ -3,7 +3,8 @@ data "google_project" "project" {
 }
 
 resource "google_licensemanager_license_configuration" "{{$.PrimaryResourceId}}" {
-    location = "us-central1"
+    provider = google-beta
+    location = "australia-southeast1"
     product = "Office2021ProfessionalPlus"
     project = data.google_project.project.project_id
     license_configuration_name = "lima_config"
@@ -14,5 +15,4 @@ resource "google_licensemanager_license_configuration" "{{$.PrimaryResourceId}}"
     next_billing_info {
         user_count_billing { user_count = 10 }
     }
-    provider = google-beta
 }

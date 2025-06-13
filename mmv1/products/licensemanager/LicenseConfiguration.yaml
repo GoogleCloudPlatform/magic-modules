@@ -29,7 +29,13 @@ immutable: false
 create_url: 'projects/{{project}}/locations/{{location}}/configurations?configurationId={{license_configuration_name}}'
 update_verb: 'PATCH'
 update_mask: true
-autogen_async: false
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
 parameters:
   - name: 'location'
     type: String
