@@ -1,4 +1,5 @@
 resource "google_project" "project" {
+  provider = google-beta
   project_id      = "example-project"
   name            = "example-project"
   deletion_policy = "DELETE"
@@ -11,12 +12,14 @@ resource "google_project_service_identity" "cmek_sa" {
 }
 
 resource "google_kms_key_ring" "keyring" {
+  provider = google-beta
   name     = "example-keyring"
   location = "us-central1"
   project  = google_project.project.project_id
 }
 
 resource "google_kms_crypto_key" "key" {
+  provider = google-beta
   name     = "example-key"
   key_ring = google_kms_key_ring.keyring.id
   purpose  = "ENCRYPT_DECRYPT"
@@ -24,6 +27,7 @@ resource "google_kms_crypto_key" "key" {
 }
 
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  provider = google-beta
   crypto_key_id = google_kms_crypto_key.key.id
   member        = google_project_service_identity.cmek_sa.member
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
@@ -31,6 +35,7 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
 }
 
 resource "google_dialogflow_encryption_spec" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
   location = "us-central1"
   encryption_spec {
     kms_key = google_kms_crypto_key.key.id
