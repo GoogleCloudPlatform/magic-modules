@@ -35,7 +35,10 @@ examples:
     primary_resource_id: 'prefixes'
     vars:
       sub_prefix_name: 'sub-prefix-test'
-    test_env_vars:
+      delegated_project: 'tf-static-byoip'
+      public_delegated_prefix: 'projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp'
+      parent_prefix: 'projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp'
+    test_vars_overrides:
       delegated_project: 'tf-static-byoip'
       public_delegated_prefix: 'projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp'
       parent_prefix: 'projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp'
