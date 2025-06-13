@@ -5,7 +5,6 @@ package kms
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"regexp"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -183,48 +182,9 @@ func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}
 	}
 
 	cryptoKeyVersions := make([]interface{}, 0)
-	for {
-		// Depending on previous iterations, params might contain a pageToken param
-		url, err = transport_tpg.AddQueryParams(url, params)
-		if err != nil {
-			return nil, err
-		}
-
-		headers := make(http.Header)
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			Project:   billingProject,
-			RawURL:    url,
-			UserAgent: userAgent,
-			Headers:   headers,
-			// ErrorRetryPredicates used to allow retrying if rate limits are hit when requesting multiple pages in a row
-			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.Is429RetryableQuotaError},
-		})
-		if err != nil {
-			return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("KMSCryptoKeyVersions %q", d.Id()))
-		}
-
-		if res == nil {
-			// Decoding the object has resulted in it being gone. It may be marked deleted
-			log.Printf("[DEBUG] Removing KMSCryptoKeyVersion because it no longer exists.")
-			d.SetId("")
-			return nil, nil
-		}
-
-		// Store info from this page
-		if v, ok := res["cryptoKeyVersions"].([]interface{}); ok {
-			cryptoKeyVersions = append(cryptoKeyVersions, v...)
-		}
-
-		// Handle pagination for next loop, or break loop
-		v, ok := res["nextPageToken"]
-		if ok {
-			params["pageToken"] = v.(string)
-		}
-		if !ok {
-			break
-		}
+	cryptoKeyVersions, err = transport_tpg.PluralDataSourceGet(d, config, &billingProject, userAgent, url, nil, params, "cryptoKeyVersions")
+	if err != nil {
+		return nil, err
 	}
 
 	return cryptoKeyVersions, nil
