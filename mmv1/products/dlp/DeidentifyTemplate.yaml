@@ -349,7 +349,8 @@ properties:
                       description: |
                         Replace each matching finding with the name of the info type.
                       custom_flatten: 'templates/terraform/custom_flatten/object_to_bool.go.tmpl'
-                      custom_expand: 'templates/terraform/custom_expand/bool_to_object.go.tmpl'
+                      # THIS TEMPLATE IS DEPRECATED, DO NOT USE FOR NEW FIELDS
+                      custom_expand: 'templates/terraform/custom_expand/deprecated_bool_to_object.go.tmpl'
                     - name: 'characterMaskConfig'
                       type: NestedObject
                       description: |
