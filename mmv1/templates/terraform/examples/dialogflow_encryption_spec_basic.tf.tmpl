@@ -25,7 +25,7 @@ resource "google_kms_crypto_key" "key" {
 
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
   crypto_key_id = google_kms_crypto_key.key.id
-  member        = google_project_service_identity.gcp_sa_cloud_cmek.member
+  member        = google_project_service_identity.cmek_sa.member
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   project       = google_project.project.project_id
 }
