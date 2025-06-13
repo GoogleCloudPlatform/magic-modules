@@ -62,9 +62,6 @@ func testAccInsightsAnalysisRule(context map[string]interface{}) string {
 		location = "us-central1"
 		conversation_filter = "test-filter"
 		analysis_percentage = 0.5
-		summarization_config {
-          conversation_profile = "projects/%{project_name}/locations/us-central1/conversationProfiles/some_conversation_profile"
-		}
 		active = true
 	}
 	`, context)
@@ -78,7 +75,7 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
   analysis_rule_id = "some-analysis-rule-%{random_suffix}"
   conversation_filter = "agent_id = \"1\""
   annotator_selector {
-    run_interruption_annotator = true
+    run_interruption_annotator = false
     issue_models    = ["projects/%{project_name}/locations/us-central1/issueModels/some_issue_model_id"]
     phrase_matchers = ["projects/%{project_name}/locations/us-central1/phraseMatchers/123"]
     qa_config {
@@ -86,14 +83,14 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
         qa_scorecard_revisions = ["projects/%{project_name}/locations/us-central1/qaScorecards/*/revisions/some_scorecard_revision_id"]
       }
     }
-    run_entity_annotator         = true
-    run_intent_annotator         = true
+    run_entity_annotator         = false
+    run_intent_annotator         = false
     run_issue_model_annotator    = false
-    run_phrase_matcher_annotator = true
-    run_qa_annotator             = true
-    run_sentiment_annotator      = true
-    run_silence_annotator        = true
-    run_summarization_annotator  = true
+    run_phrase_matcher_annotator = false
+    run_qa_annotator             = false
+    run_sentiment_annotator      = false
+    run_silence_annotator        = false
+    run_summarization_annotator  = false
     summarization_config {
       summarization_model  = "BASELINE_MODEL"
     }
@@ -112,7 +109,7 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
   analysis_rule_id = "some-analysis-rule-%{random_suffix}"
   conversation_filter = "agent_id = \"1\""
   annotator_selector {
-    run_interruption_annotator = false
+    run_interruption_annotator = true
 	issue_models    = ["projects/%{project_name}/locations/us-central1/issueModels/alt_issue_model_id"]
     phrase_matchers = ["projects/%{project_name}/locations/us-central1/phraseMatchers/123"]
     qa_config {
@@ -120,14 +117,14 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
         qa_scorecard_revisions = ["projects/%{project_name}/locations/us-central1/qaScorecards/*/revisions/alt_scorecard_revision_id"]
       }
     }
-    run_entity_annotator         = false
-    run_intent_annotator         = false
+    run_entity_annotator         = true
+    run_intent_annotator         = true
     run_issue_model_annotator    = true
-    run_phrase_matcher_annotator = false
-    run_qa_annotator             = false
-    run_sentiment_annotator      = false
-    run_silence_annotator        = false
-    run_summarization_annotator  = false
+    run_phrase_matcher_annotator = true
+    run_qa_annotator             = true
+    run_sentiment_annotator      = true
+    run_silence_annotator        = true
+    run_summarization_annotator  = true
     summarization_config {
       summarization_model  = "BASELINE_MODEL_V2_0"
     }

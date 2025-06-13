@@ -3,7 +3,7 @@ resource "google_contact_center_insights_analysis_rule" "{{$.PrimaryResourceId}}
   display_name = "analysis-rule-display-name"
   conversation_filter = "agent_id = \"1\""
   annotator_selector {
-    run_interruption_annotator = true
+    run_interruption_annotator = false
     issue_models    = ["projects/{{index $.TestEnvVars "project_name"}}/locations/us-central1/issueModels/some_issue_model_id"]
     phrase_matchers = ["projects/{{index $.TestEnvVars "project_name"}}/locations/us-central1/phraseMatchers/123"]
     qa_config {
@@ -11,14 +11,14 @@ resource "google_contact_center_insights_analysis_rule" "{{$.PrimaryResourceId}}
         qa_scorecard_revisions = ["projects/{{index $.TestEnvVars "project_name"}}/locations/us-central1/qaScorecards/*/revisions/some_scorecard_revision_id"]
       }
     }
-    run_entity_annotator         = true
-    run_intent_annotator         = true
+    run_entity_annotator         = false
+    run_intent_annotator         = false
     run_issue_model_annotator    = false
-    run_phrase_matcher_annotator = true
-    run_qa_annotator             = true
-    run_sentiment_annotator      = true
-    run_silence_annotator        = true
-    run_summarization_annotator  = true
+    run_phrase_matcher_annotator = false
+    run_qa_annotator             = false
+    run_sentiment_annotator      = false
+    run_silence_annotator        = false
+    run_summarization_annotator  = false
     summarization_config {
       summarization_model  = "BASELINE_MODEL"
     }
