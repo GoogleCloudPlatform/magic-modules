@@ -25,11 +25,12 @@ import (
 )
 
 func TestChooseCoreReviewers(t *testing.T) {
-	if len(AvailableReviewers(nil)) < 2 {
-		t.Fatalf("not enough available reviewers (%v) to test (need at least 2)", AvailableReviewers(nil))
+	available := AvailableReviewers(nil)
+	if len(available) < 2 {
+		t.Fatalf("not enough available reviewers (%v) to test (need at least 2)", available)
 	}
-	firstCoreReviewer := AvailableReviewers(nil)[0]
-	secondCoreReviewer := AvailableReviewers(nil)[1]
+	firstCoreReviewer := available[0]
+	secondCoreReviewer := available[1]
 	cases := map[string]struct {
 		RequestedReviewers                               []User
 		PreviousReviewers                                []User
@@ -39,7 +40,7 @@ func TestChooseCoreReviewers(t *testing.T) {
 		"no previous review requests assigns new reviewer from team": {
 			RequestedReviewers:      []User{},
 			PreviousReviewers:       []User{},
-			ExpectReviewersFromList: AvailableReviewers(nil),
+			ExpectReviewersFromList: available,
 			ExpectPrimaryReviewer:   true,
 		},
 		"requested reviewer from team means that primary reviewer was already selected": {
@@ -61,7 +62,7 @@ func TestChooseCoreReviewers(t *testing.T) {
 		"previously involved reviewers that are not team members are ignored": {
 			RequestedReviewers:      []User{},
 			PreviousReviewers:       []User{User{Login: "foobar"}},
-			ExpectReviewersFromList: AvailableReviewers(nil),
+			ExpectReviewersFromList: available,
 			ExpectPrimaryReviewer:   true,
 		},
 		"only previously involved team member reviewers will have review requested": {
