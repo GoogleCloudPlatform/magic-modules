@@ -4,6 +4,15 @@ if d.HasChange("display_name") {
     updateMask = append(updateMask, "displayName")
 }
 
+if d.HasChange("is_publicly_readable") {
+    updateMask = append(updateMask, "isPubliclyReadable")
+}
+
+if d.HasChange("dataplex_transfer_status") {
+    updateMask = append(updateMask, "dataplexTransferStatus")
+}
+
+
 // updateMask is a URL parameter but not present in the schema, so ReplaceVars
 // won't set it
 url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})

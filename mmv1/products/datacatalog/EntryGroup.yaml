@@ -92,3 +92,8 @@ properties:
     type: String
     description: |
       Entry group description, which can consist of several sentences or paragraphs that describe entry group contents.
+  - name: 'transferredToDataplex'
+    type: Boolean
+    description: |
+      When set to [true], it means DataCatalog EntryGroup was transferred to Dataplex Catalog Service. It makes EntryGroup and its Entries to be read-only in DataCatalog.
+      However, new Tags on EntryGroup and its Entries can be created. After setting the flag to [true] it cannot be unset.
