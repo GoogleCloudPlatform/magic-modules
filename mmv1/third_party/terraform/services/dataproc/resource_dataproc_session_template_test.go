@@ -27,7 +27,7 @@ func TestAccDataprocSessionTemplate_dataprocSessionTemplatesJupyterFullExample_u
 		CheckDestroy:             testAccCheckDataprocSessionTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocSessionTemplate_dataprocSessionTemplatesJupyterFullExample(context),
+				Config: testAccDataprocSessionTemplate_dataprocSessionTemplatesJupyterExample_basic(context),
 			},
 			{
 				ResourceName:            "google_dataproc_session_template.dataproc_session_templates_jupyter_full",
@@ -53,7 +53,7 @@ func TestAccDataprocSessionTemplate_dataprocSessionTemplatesJupyterFullExample_u
 	})
 }
 
-func testAccDataprocSessionTemplate_dataprocSessionTemplatesJupyterFullExample_full(context map[string]interface{}) string {
+func testAccDataprocSessionTemplate_dataprocSessionTemplatesJupyterExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_dataproc_session_template" "dataproc_session_templates_jupyter_full" {
     name     = "projects/%{project_name}/locations/us-central1/sessionTemplates/tf-test-jupyter-session-template%{random_suffix}"
@@ -66,7 +66,7 @@ resource "google_dataproc_session_template" "dataproc_session_templates_jupyter_
 
     environment_config {
       execution_config {
-        network_uri = "%{network_name}"
+        subnetwork_uri = "%{subnetwork_name}"
         ttl            = "3600s"
         network_tags   = ["tag1"]
       }
@@ -100,8 +100,8 @@ resource "google_dataproc_session_template" "dataproc_session_templates_jupyter_
 
     environment_config {
       execution_config {
-        ttl = "3600s"
-        network_tags = ["tag1"]
+        ttl = "4800s"
+        network_tags = ["tag2"]
         kms_key = "%{kms_key_name}"
 	subnetwork_uri = "%{subnetwork_name}"
         service_account = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
@@ -116,8 +116,8 @@ resource "google_dataproc_session_template" "dataproc_session_templates_jupyter_
     }
 
     jupyter_session {
-      kernel       = "PYTHON"
-      display_name = "tf python kernel"
+      kernel       = "SCALA"
+      display_name = "tf scala kernel"
     }
 
     depends_on = [
