@@ -1,7 +1,7 @@
 resource "google_project" "project" {
   provider = google-beta
-  project_id      = "example-project"
-  name            = "example-project"
+  project_id      = "{{index $.Vars "project_id"}}"
+  name            = "{{index $.Vars "project_id"}}"
   org_id = "{{index $.TestEnvVars "org_id"}}"
   deletion_policy = "DELETE"
 }
@@ -14,14 +14,14 @@ resource "google_project_service_identity" "cmek_sa" {
 
 resource "google_kms_key_ring" "keyring" {
   provider = google-beta
-  name     = "example-keyring"
+  name     = "{{index $.Vars "kms_keyring"}}"
   location = "us-central1"
   project  = google_project.project.project_id
 }
 
 resource "google_kms_crypto_key" "key" {
   provider = google-beta
-  name     = "example-key"
+  name     = ""{{index $.Vars "kms_key"}}"
   key_ring = google_kms_key_ring.keyring.id
   purpose  = "ENCRYPT_DECRYPT"
 }

@@ -61,5 +61,9 @@ examples:
   - name: "dialogflow_encryption_spec_basic"
     primary_resource_id: "example-encryption-spec"
     min_version: "beta"
+    vars:
+      project_id: 'example-project'
+      kms_keyring: 'example-keyring'
+      kms_key: 'example-key'
     test_env_vars:
       org_id: 'ORG_ID'
