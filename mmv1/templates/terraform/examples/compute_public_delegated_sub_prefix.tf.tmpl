@@ -3,7 +3,7 @@ resource "google_compute_public_delegated_sub_prefix" "{{$.PrimaryResourceId}}" 
   region = "us-central1"
   description = "Public sub delegated prefix for testing "
   ip_cidr_range = "192.0.2.0/24"
-  parent_prefix = {{$.Vars.parent_prefix}}
-  delegated_project = {{$.Vars.delegated_project}}
-  public_delegated_prefix = {{$.Vars.public_delegated_prefix}}
+  parent_prefix = "projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"
+  delegated_project = "tf-static-byoip"
+  public_delegated_prefix = "projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-forwarding-rule-mode-pdp"
 }
