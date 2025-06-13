@@ -1,6 +1,6 @@
 resource "google_compute_public_delegated_sub_prefix" "{{$.PrimaryResourceId}}" {
   name = "{{$.Vars.sub_prefix_name}}"
-  region = "{{$.TestEnvVars.region}}"
+  region = "us-central1"
   description = "Public sub delegated prefix for testing "
   ip_cidr_range = "192.0.2.0/24"
   parent_prefix = "{{$.TestEnvVars.parent_prefix}}"
