@@ -2680,7 +2680,7 @@ resource "google_storage_bucket" "bucket" {
   force_destroy = true
 
   retention_policy {
-    retention_period = 10
+    retention_period = "10"
   }
 }
 `, bucketName)
@@ -2695,7 +2695,7 @@ resource "google_storage_bucket" "bucket" {
 
   retention_policy {
     is_locked        = true
-    retention_period = 10
+    retention_period = "10"
   }
 }
 `, bucketName)
@@ -2788,7 +2788,7 @@ resource "google_storage_bucket" "bucket" {
   force_destroy = true
 
   retention_policy {
-    retention_period = 3600
+    retention_period = "3600"
   }
 }
 `, bucketName)
