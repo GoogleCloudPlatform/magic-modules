@@ -714,7 +714,6 @@ resource "google_dns_managed_zone" "private" {
 }
 
 resource "google_compute_network" "network-1" {
-  provider = google-beta
   name                    = "tf-test-net-1-%s"
   auto_create_subnetworks = false
 }
