@@ -426,7 +426,6 @@ properties:
     description: |
       Enable or disable the Application Aware Interconnect(AAI) feature on this interconnect.
     send_empty_value: true
-    default_value: false
   - name: 'applicationAwareInterconnect'
     type: NestedObject
     description: |
@@ -446,7 +445,7 @@ properties:
       - name: 'bandwidthPercentagePolicy'
         type: NestedObject
         description: |
-          Bandwidth Percentage policy allows you to have granular control over how your Interconnect 
+          Bandwidth Percentage policy allows you to have granular control over how your Interconnect
           bandwidth is utilized among your workloads mapping to different traffic classes.
         properties:
           - name: bandwidthPercentage
