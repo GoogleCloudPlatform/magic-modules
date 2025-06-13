@@ -95,6 +95,7 @@ properties:
     type: String
     description: |
       Name of the resource.
+    required: true
   - name: 'nodeTemplate'
     type: ResourceRef
     description: |
