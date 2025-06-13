@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccDataprocSessionTemplate_dataprocSessionTemplatesJupyterFullExample_update(t *testing.T) {
+func TestAccDataprocSessionTemplate_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -27,24 +27,24 @@ func TestAccDataprocSessionTemplate_dataprocSessionTemplatesJupyterFullExample_u
 		CheckDestroy:             testAccCheckDataprocSessionTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocSessionTemplate_dataprocSessionTemplatesJupyterExample_basic(context),
+				Config: testAccDataprocSessionTemplate_preupdate(context),
 			},
 			{
-				ResourceName:            "google_dataproc_session_template.dataproc_session_templates_jupyter_full",
+				ResourceName:            "google_dataproc_session_template.dataproc_session_templates_jupyter_update",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "runtime_config.0.properties", "terraform_labels"},
 			},
 			{
-				Config: testAccDataprocSessionTemplate_dataprocSessionTemplatesJupyterFullExample_update(context),
+				Config: testAccDataprocSessionTemplate_updated(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_dataproc_session_template.dataproc_session_templates_jupyter_full", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_dataproc_session_template.dataproc_session_templates_jupyter_update", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
 			{
-				ResourceName:            "google_dataproc_session_template.dataproc_session_templates_jupyter_full",
+				ResourceName:            "google_dataproc_session_template.dataproc_session_templates_jupyter_update",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "runtime_config.0.properties", "terraform_labels"},
@@ -53,9 +53,9 @@ func TestAccDataprocSessionTemplate_dataprocSessionTemplatesJupyterFullExample_u
 	})
 }
 
-func testAccDataprocSessionTemplate_dataprocSessionTemplatesJupyterExample_basic(context map[string]interface{}) string {
+func testAccDataprocSessionTemplate_preupdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_dataproc_session_template" "dataproc_session_templates_jupyter_full" {
+resource "google_dataproc_session_template" "dataproc_session_templates_jupyter_update" {
     name     = "projects/%{project_name}/locations/us-central1/sessionTemplates/tf-test-jupyter-session-template%{random_suffix}"
     location = "us-central1"
     labels   = {"session_template_test": "terraform"}
@@ -80,7 +80,7 @@ resource "google_dataproc_session_template" "dataproc_session_templates_jupyter_
 `, context)
 }
 
-func testAccDataprocSessionTemplate_dataprocSessionTemplatesJupyterFullExample_update(context map[string]interface{}) string {
+func testAccDataprocSessionTemplate_updated(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
 }
@@ -88,7 +88,7 @@ data "google_project" "project" {
 data "google_storage_project_service_account" "gcs_account" {
 }
 
-resource "google_dataproc_session_template" "dataproc_session_templates_jupyter_full" {
+resource "google_dataproc_session_template" "dataproc_session_templates_jupyter_update" {
     name     = "projects/%{project_name}/locations/us-central1/sessionTemplates/tf-test-jupyter-session-template%{random_suffix}"
     location      = "us-central1"
     labels        = {"session_template_test": "terraform"}
