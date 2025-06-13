@@ -1,0 +1,6 @@
+resource "google_vertex_ai_model" "{{$.PrimaryResourceId}}" {
+  project = "{{index $.TestEnvVars "project_name"}}"
+  source_model = "projects/{{index $.TestEnvVars "project_name"}}/locations/us-central1/models/tf-static-1"
+
+  region       = "us-central1"
+}
