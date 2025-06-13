@@ -21,6 +21,8 @@ references:
     'Official Documentation': 'https://cloud.google.com/identity/docs/how-to/memberships-google-groups'
   api: 'https://cloud.google.com/identity/docs/reference/rest/v1/groups.memberships'
 docs:
+  optional_properties: |
+    * `create_ignore_already_exists` - (Optional) If set to true, skip group member creation if a membership with the same name already exists.
   warning: |
     If you are using User ADCs (Application Default Credentials) with this resource,
     you must specify a `billing_project` and set `user_project_override` to true
@@ -37,6 +39,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  extra_schema_entry: templates/terraform/extra_schema_entry/cloud_identity_group_membership.tmpl
+  custom_create: templates/terraform/custom_create/cloud_identity_group_membership.go.tmpl
   post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_update: 'templates/terraform/custom_update/cloud_identity_group_membership.go.tmpl'
   post_import: 'templates/terraform/post_import/cloud_identity_group_membership.go.tmpl'
