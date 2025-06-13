@@ -1,17 +1,38 @@
-resource "google_project_service_identity" "gcp_sa_cloud_cmek" {
+resource "google_project" "project" {
+  project_id      = "example-project"
+  name            = "example-project"
+  deletion_policy = "DELETE"
+}
+
+resource "google_project_service_identity" "cmek_sa" {
   provider = google-beta
   service  = "dialogflow.googleapis.com"
+  project  = google_project.project.project_id
+}
+
+resource "google_kms_key_ring" "keyring" {
+  name     = "example-keyring"
+  location = "us-central1"
+  project  = google_project.project.project_id
+}
+
+resource "google_kms_crypto_key" "key" {
+  name     = "example-key"
+  key_ring = google_kms_key_ring.keyring.id
+  purpose  = "ENCRYPT_DECRYPT"
+  project  = google_project.project.project_id
 }
 
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
-  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
+  crypto_key_id = google_kms_crypto_key.key.id
   member        = google_project_service_identity.gcp_sa_cloud_cmek.member
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  project       = google_project.project.project_id
 }
 
 resource "google_dialogflow_encryption_spec" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
   encryption_spec {
-    kms_key = "{{index $.Vars "kms_key_name"}}"
+    kms_key = google_kms_crypto_key.key.id
   }
 }
