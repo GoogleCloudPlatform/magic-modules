@@ -477,11 +477,23 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	}
 	optionsMap := sdkPipelineOptions["options"].(map[string]interface{})
 
+	// sdkPipelineOptions is not always populated with these values, hence the fallback
+	if _, ok := d.GetOk("num_workers"); !ok && optionsMap["numWorkers"] == nil || optionsMap["numWorkers"] == 0 {
+		optionsMap["numWorkers"] = job.Environment.WorkerPools[0].NumWorkers
+	}
+	if _, ok := d.GetOk("max_num_workers"); !ok && optionsMap["maxNumWorkers"] == nil || optionsMap["maxNumWorkers"] == 0 {
+		optionsMap["maxNumWorkers"] = job.Environment.WorkerPools[0].AutoscalingSettings.MaxNumWorkers
+	}
+	if _, ok := d.GetOk("machine_type"); !ok && optionsMap["workerMachineType"] == nil || optionsMap["workerMachineType"] == "" {
+		optionsMap["workerMachineType"] = job.Environment.WorkerPools[0].MachineType
+	}
+	if _, ok := d.GetOk("sdk_container_image"); !ok && optionsMap["sdkContainerImage"] == nil || optionsMap["sdkContainerImage"] == "" {
+		optionsMap["sdkContainerImage"] = job.Environment.WorkerPools[0].WorkerHarnessContainerImage
+	}
+
+
 	if err := d.Set("temp_location", optionsMap["tempLocation"]); err != nil {
 		return fmt.Errorf("Error setting temp_gcs_location: %s", err)
-	}
-	if err := d.Set("network", optionsMap["network"]); err != nil {
-		return fmt.Errorf("Error setting network: %s", err)
 	}
 	if err := d.Set("num_workers", optionsMap["numWorkers"]); err != nil {
 		return fmt.Errorf("Error setting num_workers: %s", err)
@@ -495,10 +507,10 @@ func resourceDataflowFlexTemplateJobRead(d *schema.ResourceData, meta interface{
 	if err := d.Set("sdk_container_image", optionsMap["sdkContainerImage"]); err != nil {
 		return fmt.Errorf("Error setting sdk_container_image: %s", err)
 	}
-	if err := d.Set("network", optionsMap["network"]); err != nil {
+	if err := d.Set("network",  job.Environment.WorkerPools[0].Network); err != nil {
 		return fmt.Errorf("Error setting network: %s", err)
 	}
-	if err := d.Set("subnetwork", optionsMap["subnetwork"]); err != nil {
+	if err := d.Set("subnetwork", job.Environment.WorkerPools[0].Subnetwork); err != nil {
 		return fmt.Errorf("Error setting subnetwork: %s", err)
 	}
 	if err := d.Set("machine_type", optionsMap["workerMachineType"]); err != nil {
