@@ -21,7 +21,7 @@ resource "google_kms_key_ring" "keyring" {
 
 resource "google_kms_crypto_key" "key" {
   provider = google-beta
-  name     = ""{{index $.Vars "kms_key"}}"
+  name     = "{{index $.Vars "kms_key"}}"
   key_ring = google_kms_key_ring.keyring.id
   purpose  = "ENCRYPT_DECRYPT"
 }
