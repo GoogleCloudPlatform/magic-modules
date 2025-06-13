@@ -28,7 +28,13 @@ create_url: 'projects/{{project}}/locations/{{location}}/encryptionSpec:initiali
 immutable: true
 
 custom_code:
-  post_create: 'templates/terraform/post_create/dialogflowcx_operation_with_no_projectid.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
+
+autogen_async: true
+async:
+  actions: ['create']
+  operation:
+    base_url: '{{op_id}}'
 
 parameters:
   - name: 'location'
@@ -53,7 +59,7 @@ properties:
           Format: projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{key}
 
 examples:
-  - name: "dialogflowcx_encryption_spec_basic"
+  - name: "dialogflow_encryption_spec_basic"
     primary_resource_id: "example-encryption-spec"
     vars:
       kms_key_name: 'kms-key'
