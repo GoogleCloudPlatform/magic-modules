@@ -394,7 +394,6 @@ properties:
             When used in conjunction with pathMatcher.defaultRouteAction.retryPolicy, retries take precedence. Only once all retries are exhausted, the defaultCustomErrorResponsePolicy is applied. While attempting a retry, if load balancer is successful in reaching the service, the defaultCustomErrorResponsePolicy is ignored and the response from the service is returned to the client.
 
             defaultCustomErrorResponsePolicy is supported only for global external Application Load Balancers.
-          min_version: 'beta'
           properties:
             - name: 'errorResponseRule'
               type: Array
@@ -555,7 +554,6 @@ properties:
                   A PathRule for /coming_soon/ is configured for the error code 404.
                   If the request is for www.myotherdomain.com and a 404 is encountered, the policy under UrlMap.defaultCustomErrorResponsePolicy takes effect. If a 404 response is encountered for the request www.example.com/current_events/, the pathMatcher's policy takes effect. If however, the request for www.example.com/coming_soon/ encounters a 404, the policy in PathRule.customErrorResponsePolicy takes effect. If any of the requests in this example encounter a 500 error code, the policy at UrlMap.defaultCustomErrorResponsePolicy takes effect.
                   customErrorResponsePolicy is supported only for global external Application Load Balancers.
-                min_version: 'beta'
                 properties:
                   - name: 'errorResponseRule'
                     type: Array
@@ -1816,7 +1814,6 @@ properties:
                 type: NestedObject
                 description: |
                   customErrorResponsePolicy specifies how the Load Balancer returns error responses when BackendService or BackendBucket responds with an error.
-                min_version: 'beta'
                 properties:
                   - name: 'errorResponseRule'
                     type: Array
@@ -2373,7 +2370,6 @@ properties:
       When used in conjunction with pathMatcher.defaultRouteAction.retryPolicy, retries take precedence. Only once all retries are exhausted, the defaultCustomErrorResponsePolicy is applied. While attempting a retry, if load balancer is successful in reaching the service, the defaultCustomErrorResponsePolicy is ignored and the response from the service is returned to the client.
 
       defaultCustomErrorResponsePolicy is supported only for global external Application Load Balancers.
-    min_version: 'beta'
     properties:
       - name: 'errorResponseRule'
         type: Array
