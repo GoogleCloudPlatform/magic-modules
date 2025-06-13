@@ -1,3 +1,13 @@
+resource "google_project_service_identity" "gcp_sa_cloud_cmek" {
+  service  = "dialogflow.googleapis.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
+  member        = google_project_service_identity.gcp_sa_cloud_cmek.member
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+}
+
 resource "google_dialogflow_encryption_spec" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
   encryption_spec {
