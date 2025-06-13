@@ -104,6 +104,6 @@ Description of the change and how users should adjust their configuration (if ne
 
 ## Resource: `google_storage_bucket`
 
-### `retention_period` now changed to `string` data type
+### `retention_period` changed to `string` data type
 
 `retention_period` now changed to `string` data type to handle higher values for bucket retention period.
