@@ -12,9 +12,9 @@ resource "google_project_service" "kms" {
   service   = "cloudkms.googleapis.com"
 }
 
-resource "time_sleep" "wait_120s" {
+resource "time_sleep" "wait_300s" {
   depends_on      = [google_project_service.kms]
-  create_duration = "120s"
+  create_duration = "300s"
 }
 
 resource "google_project_service_identity" "cmek_sa" {
