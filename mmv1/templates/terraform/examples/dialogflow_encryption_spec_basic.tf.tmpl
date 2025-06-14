@@ -35,9 +35,7 @@ resource "google_project_service_identity" "cmek_sa" {
 }
 
 resource "time_sleep" "wait_create_sa" {
-  depends_on = [
-    google_project_service_identity.cmek_sa
-  ]
+  depends_on      = [google_project_service_identity.cmek_sa]
   create_duration = "120s"
 }
 
@@ -64,6 +62,11 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
   depends_on    = [time_sleep.wait_create_sa]
 }
 
+resource "time_sleep" "wait_set_iam" {
+  depends_on      = [google_kms_crypto_key_iam_member.crypto_key]
+  create_duration = "120s"
+}
+
 resource "google_dialogflow_encryption_spec" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   project  = google_project.project.project_id
@@ -71,5 +74,5 @@ resource "google_dialogflow_encryption_spec" "{{$.PrimaryResourceId}}" {
   encryption_spec {
     kms_key = google_kms_crypto_key.key.id
   }
-  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
+  depends_on = [time_sleep.wait_set_iam]
 }
