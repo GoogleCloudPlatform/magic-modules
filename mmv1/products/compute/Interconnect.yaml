@@ -401,6 +401,7 @@ properties:
         interconnects.list of features requested for this Interconnect connection
       enum_values:
         - 'MACSEC'
+        - 'CROSS_SITE_NETWORK'
         - 'IF_MACSEC'
   - name: 'availableFeatures'
     type: Array
@@ -409,6 +410,18 @@ properties:
       MACSEC. If present then the Interconnect connection is provisioned on MACsec capable hardware
       ports. If not present then the Interconnect connection is provisioned on non-MACsec capable
       ports and MACsec isn't supported and enabling MACsec fails).
+    output: true
+    item_type:
+      type: Enum
+      enum_values:
+        - 'IF_CROSS_SITE_NETWORK'
+        - 'IF_MACSEC'
+        - 'MACSEC'
+  - name: 'wireGroups'
+    type: Array
+    min_version: beta
+    description: |
+      A list of the URLs of all CrossSiteNetwork WireGroups configured to use this Interconnect.[The Interconnect   cannot be deleted if this list is non-empty.]
     output: true
     item_type:
       type: String
