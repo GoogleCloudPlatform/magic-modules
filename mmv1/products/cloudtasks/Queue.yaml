@@ -63,7 +63,7 @@ virtual_fields:
     type: Enum
     description: |
       The desired state of the queue. Use this to pause and resume the queue.
-      
+
       * RUNNING: The queue is running. Tasks can be dispatched.
       * PAUSED: The queue is paused. Tasks are not dispatched but can be added to the queue.
     default_value: 'RUNNING'
