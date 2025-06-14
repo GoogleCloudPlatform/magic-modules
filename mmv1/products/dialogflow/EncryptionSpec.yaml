@@ -67,5 +67,6 @@ examples:
       kms_key: 'my-key'
     test_env_vars:
       org_id: 'ORG_ID'
+      billing_acct: 'BILLING_ACCT'
     external_providers:
       - "time"
