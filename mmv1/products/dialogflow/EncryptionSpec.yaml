@@ -67,3 +67,5 @@ examples:
       kms_key: 'my-key'
     test_env_vars:
       org_id: 'ORG_ID'
+    external_providers:
+      - "time"
