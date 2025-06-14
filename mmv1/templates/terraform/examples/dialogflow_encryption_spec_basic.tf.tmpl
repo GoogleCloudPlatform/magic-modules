@@ -13,6 +13,7 @@ resource "google_project_service" "kms" {
 }
 
 resource "time_sleep" "wait_120s" {
+  provider        = google-beta
   depends_on      = [google_project_service.kms]
   create_duration = "120s"
 }
