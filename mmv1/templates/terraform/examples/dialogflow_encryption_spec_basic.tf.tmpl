@@ -7,21 +7,31 @@ resource "google_project" "project" {
   deletion_policy = "DELETE"
 }
 
-resource "google_project_service" "kms" {
+resource "google_project_service" "cloudkms" {
   provider  = google-beta
   project   = google_project.project.project_id
   service   = "cloudkms.googleapis.com"
 }
 
+resource "google_project_service" "dialogflow" {
+  provider  = google-beta
+  project   = google_project.project.project_id
+  service   = "dialogflow.googleapis.com"
+}
+
 resource "time_sleep" "wait_enable_service_api" {
-  depends_on      = [google_project_service.kms]
+  depends_on = [
+    google_project_service.cloudkms,
+    google_project_service.dialogflow
+  ]
   create_duration = "120s"
 }
 
 resource "google_project_service_identity" "cmek_sa" {
-  provider = google-beta
-  service  = "dialogflow.googleapis.com"
-  project  = google_project.project.project_id
+  provider   = google-beta
+  service    = "dialogflow.googleapis.com"
+  project    = google_project.project.project_id
+  depends_on = [time_sleep.wait_enable_service_api]
 }
 
 resource "google_kms_key_ring" "keyring" {
