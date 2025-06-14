@@ -5,7 +5,7 @@ if d.HasChange("desired_state") {
   if old.(string) != new.(string) {
     var action string
 
-    actionUrl, err := tpgresource.ReplaceVars(d, config, "{{CloudTasksBasePath}}projects/{{project}}/locations/{{location}}/queues/{{name}}")
+    actionUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}CloudTasksBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/queues/{{"{{"}}name{{"}}"}}")
 		if err != nil {
 			return err
 		}
