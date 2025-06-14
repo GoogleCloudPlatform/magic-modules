@@ -12,6 +12,11 @@ resource "google_project_service" "kms" {
   service   = "cloudkms.googleapis.com"
 }
 
+resource "time_sleep" "wait_120s" {
+  depends_on      = [google_project_service.kms]
+  create_duration = "120s"
+}
+
 resource "google_project_service_identity" "cmek_sa" {
   provider = google-beta
   service  = "dialogflow.googleapis.com"
