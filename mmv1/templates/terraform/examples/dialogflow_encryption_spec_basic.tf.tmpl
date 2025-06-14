@@ -12,9 +12,9 @@ resource "google_project_service" "kms" {
   service   = "cloudkms.googleapis.com"
 }
 
-resource "time_sleep" "wait_300s" {
+resource "time_sleep" "wait_enable_service_api" {
   depends_on      = [google_project_service.kms]
-  create_duration = "300s"
+  create_duration = "120s"
 }
 
 resource "google_project_service_identity" "cmek_sa" {
@@ -24,10 +24,11 @@ resource "google_project_service_identity" "cmek_sa" {
 }
 
 resource "google_kms_key_ring" "keyring" {
-  provider = google-beta
-  name     = "{{index $.Vars "kms_keyring"}}"
-  location = "us-central1"
-  project  = google_project.project.project_id
+  provider   = google-beta
+  name       = "{{index $.Vars "kms_keyring"}}"
+  location   = "us-central1"
+  project    = google_project.project.project_id
+  depends_on = [time_sleep.wait_enable_service_api]
 }
 
 resource "google_kms_crypto_key" "key" {
@@ -50,4 +51,5 @@ resource "google_dialogflow_encryption_spec" "{{$.PrimaryResourceId}}" {
   encryption_spec {
     kms_key = google_kms_crypto_key.key.id
   }
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
