@@ -3,7 +3,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#        http://www.apache.org/licenses/LICENSE-2.0
+#       http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,46 +13,59 @@
 
 # This is a Terraform template file (.tf.tmpl) for creating a Template resource.
 
-resource "google_model_armor_template" "basic" {
-  location    = "<%= ctx[:vars]['location'] %>"
-  template_id = "<%= ctx[:vars]['templateId'] %>"
-  provider    = google-beta
+resource "google_model_armor_template" "test-resource" {
+  location    = "{{.Vars.location}}"
+  template_id = "{{.Vars.templateId}}"
 
   labels = {
-    label-key = "<%= ctx[:vars]['labelValue'] %>"
+    "test-label" = "{{.Vars.label_test_label}}"
+    # Add other labels here if defined in vars
   }
+
   filter_config {
     rai_settings {
+      # Hardcode array elements for the example
       rai_filters {
-        filter_type      = "<%= ctx[:vars]['filter_config_rai_settings_rai_filters_0_filter_type'] %>"
-        confidence_level = "<%= ctx[:vars]['filter_config_rai_settings_rai_filters_0_confidence_level'] %>"
+        filter_type      = "{{.Vars.filter_config_rai_settings_rai_filters_0_filter_type}}"
+        confidence_level = "{{.Vars.filter_config_rai_settings_rai_filters_0_confidence_level}}"
       }
+      filter_version        = "{{.Vars.filter_config_rai_settings_filter_version}}"
     }
+    {{if .Vars.sdp_settings_config_type}}
     sdp_settings {
+      {{if eq .Vars.sdp_settings_config_type "basic"}}
       basic_config {
-        filter_enforcement = "<%= ctx[:vars]['filter_config_sdp_settings_basic_config_filter_enforcement'] %>"
+          filter_enforcement = "{{.Vars.filter_config_sdp_settings_basic_config_filter_enforcement}}"
       }
+      {{else if eq .Vars.sdp_settings_config_type "advanced"}}
+      advanced_config {
+        inspect_template     = "{{.Vars.filter_config_sdp_settings_advanced_config_inspect_template}}"
+        deidentify_template  = "{{.Vars.filter_config_sdp_settings_advanced_config_deidentify_template}}"
+      }
+      {{end}}
     }
+    {{end}}
+    
     pi_and_jailbreak_filter_settings {
-      filter_enforcement = "<%= ctx[:vars]['filter_config_pi_and_jailbreak_filter_settings_filter_enforcement'] %>"
-      confidence_level   = "<%= ctx[:vars]['filter_config_pi_and_jailbreak_filter_settings_confidence_level'] %>"
+      filter_enforcement = "{{.Vars.filter_config_pi_and_jailbreak_filter_settings_filter_enforcement}}"
+      confidence_level   = "{{.Vars.filter_config_pi_and_jailbreak_filter_settings_confidence_level}}"
+      filter_version     = "{{.Vars.filter_config_pi_and_jailbreak_filter_settings_filter_version}}"
     }
     malicious_uri_filter_settings {
-      filter_enforcement = "<%= ctx[:vars]['filter_config_malicious_uri_filter_settings_filter_enforcement'] %>"
+      filter_enforcement = "{{.Vars.filter_config_malicious_uri_filter_settings_filter_enforcement}}"
     }
   }
   template_metadata {
-    custom_llm_response_safety_error_message = "<%= ctx[:vars]['template_metadata_custom_llm_response_safety_error_message'] %>"
-    # Removed quotes for boolean values
-    log_template_operations                  = <%= ctx[:vars]["template_metadata_log_template_operations"] %>
-    log_sanitize_operations                  = <%= ctx[:vars]["template_metadata_log_sanitize_operations"] %>
+    custom_llm_response_safety_error_message = "{{.Vars.template_metadata_custom_llm_response_safety_error_message}}"
+    log_sanitize_operations                  = {{.Vars.template_metadata_log_sanitize_operations}}
+    log_template_operations                  = {{.Vars.template_metadata_log_template_operations}}
     multi_language_detection {
-      enable_multi_language_detection = <%= ctx[:vars]["template_metadata_multi_language_detection_enable_multi_language_detection"] %>
+      enable_multi_language_detection        = {{.Vars.template_metadata_multi_language_detection_enable_multi_language_detection}}
     }
-    ignore_partial_invocation_failures = <%= ctx[:vars]["template_metadata_ignore_partial_invocation_failures"] %>
-    # Removed quotes for integer values
-    custom_prompt_safety_error_code    = <%= ctx[:vars]["template_metadata_custom_prompt_safety_error_code"] %>
-    custom_prompt_safety_error_message = "<%= ctx[:vars]["template_metadata_custom_prompt_safety_error_message"] %>"
-    custom_llm_response_safety_error_code = <%= ctx[:vars]["template_metadata_custom_llm_response_safety_error_code"] %>
+    ignore_partial_invocation_failures       = {{.Vars.template_metadata_ignore_partial_invocation_failures}}
+    custom_prompt_safety_error_code          = {{.Vars.template_metadata_custom_prompt_safety_error_code}}
+    custom_prompt_safety_error_message       = "{{.Vars.template_metadata_custom_prompt_safety_error_message}}"
+    custom_llm_response_safety_error_code    = {{.Vars.template_metadata_custom_llm_response_safety_error_code}}
+    enforcement_type                         = "{{.Vars.template_metadata_enforcement_type}}"
   }
 }

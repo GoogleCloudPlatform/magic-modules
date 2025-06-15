@@ -24,44 +24,29 @@ import_format:
 - projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 examples:
 - name: modelarmor_template_basic
-  primary_resource_id: basic
+  primary_resource_id: test_resource
   vars:
     location: us-central1
-    templateId: test-template-id
-    labelValue: test-label-value
-    resource_name: test-basic-resource
-    resourcee_id_for_tmpl: basic
-    # Flatten these nested fields according to how they'll appear in Terraform
+    templateId: tf-test-template-id
+    label_test_label: "test-value"
     filter_config_rai_settings_rai_filters_0_filter_type: SEXUALLY_EXPLICIT
     filter_config_rai_settings_rai_filters_0_confidence_level: LOW_AND_ABOVE
+    filter_config_rai_settings_filter_version: STABLE
+    sdp_settings_config_type: "basic-config"
     filter_config_sdp_settings_basic_config_filter_enforcement: ENABLED
     filter_config_pi_and_jailbreak_filter_settings_filter_enforcement: ENABLED
     filter_config_pi_and_jailbreak_filter_settings_confidence_level: MEDIUM_AND_ABOVE
+    filter_config_pi_and_jailbreak_filter_settings_filter_version: STABLE
     filter_config_malicious_uri_filter_settings_filter_enforcement: DISABLED
-    template_metadata_custom_llm_response_safety_error_message: "This is a custom error message for LLM response"
     template_metadata_log_template_operations: true
     template_metadata_log_sanitize_operations: false
     template_metadata_multi_language_detection_enable_multi_language_detection: true
     template_metadata_ignore_partial_invocation_failures: false
+    template_metadata_custom_llm_response_safety_error_message: "This is a custom error message for LLM response"
     template_metadata_custom_prompt_safety_error_code: 400
     template_metadata_custom_prompt_safety_error_message: "This is a custom error message for prompt"
     template_metadata_custom_llm_response_safety_error_code: 401
-autogen_async: true
-async:
-  operation:
-    timeouts:
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
-    base_url: '{{op_id}}'
-  actions:
-  - create
-  - delete
-  - update
-  type: OpAsync
-  result:
-    resource_inside_response: true
-  include_project: false
+    template_metadata_enforcement_type: INSPECT_ONLY
 autogen_status: VGVtcGxhdGU=
 parameters:
 - name: location
@@ -141,12 +126,19 @@ properties:
             LOW_AND_ABOVE
             MEDIUM_AND_ABOVE
             HIGH
+    - name: filterVersion
+      type: String
+      description: |-
+            Possible values:
+            RAI_FILTER_VERSION_UNSPECIFIED
+            STABLE
   - name: sdpSettings
     type: NestedObject
     description: Sensitive Data Protection settings.
     properties:
     - name: advancedConfig
       type: NestedObject
+      conflicts: [basicConfig]
       description: Sensitive Data Protection Advanced configuration.
       properties:
       - name: inspectTemplate
@@ -159,7 +151,7 @@ properties:
           Sanitization. All Sensitive Data Protection findings identified during
           inspection will be returned as SdpFinding in SdpInsepctionResult.
 
-          e.g.
+          e.g:-
           `projects/{project}/locations/{location}/inspectTemplates/{inspect_template}`
       - name: deidentifyTemplate
         type: String
@@ -176,6 +168,7 @@ properties:
           `projects/{project}/locations/{location}/deidentifyTemplates/{deidentify_template}`
     - name: basicConfig
       type: NestedObject
+      conflicts: [advancedConfig]
       description: Sensitive Data Protection basic configuration.
       properties:
       - name: filterEnforcement
@@ -208,6 +201,12 @@ properties:
         LOW_AND_ABOVE
         MEDIUM_AND_ABOVE
         HIGH
+    - name: filterVersion
+      type: String
+      description: |-
+        Possible values:
+        PI_AND_JAILBREAK_FILTER_VERSION_UNSPECIFIED
+        STABLE
 - name: templateMetadata
   type: NestedObject
   description: Message describing TemplateMetadata
@@ -221,11 +220,13 @@ properties:
   - name: multiLanguageDetection
     type: NestedObject
     description: Metadata to enable multi language detection via template.
+    custom_flatten: 'templates/terraform/custom_flatten/modelarmor_template_multilanguage_detection.go.tmpl'
     properties:
     - name: enableMultiLanguageDetection
       type: Boolean
       description: If true, multi language detection will be enabled.
       required: true
+      send_empty_value: true
   - name: ignorePartialInvocationFailures
     type: Boolean
     description: If true, partial detector failures should be ignored.
@@ -249,3 +250,10 @@ properties:
     description: |-
       Indicates the custom error message set by the user to be returned to the
       end user if the LLM response trips Model Armor filters.
+  - name: enforcementType
+    type: String
+    description: |-
+        Possible values:
+        ENFORCEMENT_TYPE_UNSPECIFIED
+        INSPECT_ONLY
+        INSPECT_AND_BLOCK
