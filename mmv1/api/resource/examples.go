@@ -175,6 +175,14 @@ type Examples struct {
 	DocumentationHCLText string `yaml:"-"`
 	TestHCLText          string `yaml:"-"`
 	OicsHCLText          string `yaml:"-"`
+
+	// ====================
+	// TGC
+	// ====================
+	// Extra properties to ignore test.
+	// These properties are present in Terraform resources schema, but not in CAI assets.
+	// Virtual Fields and url parameters are already ignored by default and do not need to be duplicated here.
+	TGCTestIgnoreExtra []string `yaml:"tgc_test_ignore_extra,omitempty"`
 }
 
 // Set default value for fields
