@@ -96,15 +96,13 @@ examples:
     primary_resource_id: 'basic_discovery'
     vars:
       datascan_name: 'datadiscovery-basic'
-      buckent_name: 'bucket-basic-discovery'
     test_env_vars:
       project_name: 'PROJECT_NAME'
       location: 'REGION'
   - name: 'dataplex_datascan_full_discovery'
     primary_resource_id: 'full_discovery'
     vars:
-      datascan_name: 'datadiscovery-basic'
-      buckent_name: 'bucket-full-discovery'
+      datascan_name: 'datadiscovery-full'
     test_env_vars:
       project_name: 'PROJECT_NAME'
       location: 'REGION'
