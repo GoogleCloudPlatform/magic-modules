@@ -42,7 +42,7 @@ resource "time_sleep" "wait_create_sa" {
 resource "google_kms_key_ring" "keyring" {
   provider   = google-beta
   name       = "{{index $.Vars "kms_keyring"}}"
-  location   = "us-central1"
+  location   = "europe-west1"
   project    = google_project.project.project_id
   depends_on = [time_sleep.wait_enable_service_api]
 }
@@ -70,7 +70,7 @@ resource "time_sleep" "wait_set_iam" {
 resource "google_dialogflow_encryption_spec" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   project  = google_project.project.project_id
-  location = "us-central1"
+  location = "europe-west1"
   encryption_spec {
     kms_key = google_kms_crypto_key.key.id
   }
