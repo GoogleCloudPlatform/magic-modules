@@ -181,8 +181,8 @@ type Examples struct {
 	// ====================
 	// Extra properties to ignore test.
 	// These properties are present in Terraform resources schema, but not in CAI assets.
-	// Virtual Fields are already ignored by default and do not need to be duplicated here.
-	IgnoreTestPropertiesTGC []string `yaml:"ignore_test_properties_tgc,omitempty"`
+	// Virtual Fields and url parameters are already ignored by default and do not need to be duplicated here.
+	TGCTestIgnoreExtra []string `yaml:"tgc_test_ignore_extra,omitempty"`
 }
 
 // Set default value for fields

@@ -1979,13 +1979,19 @@ func (r Resource) MarkdownHeader(templatePath string) string {
 
 // TGC Methods
 // ====================
-func (r Resource) IgnoreTestPropertiesTGC(e resource.Examples) []string {
+// Lists fields that test.BidirectionalConversion should ignore
+func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string {
 	var props []string
 	for _, tp := range r.VirtualFields {
-		props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp.Name)))
+		props = append(props, google.Underscore(tp.Name))
 	}
-	for _, tp := range e.IgnoreTestPropertiesTGC {
-		props = append(props, fmt.Sprintf("\"%s\"", tp))
+	for _, tp := range r.AllUserProperties() {
+		if tp.UrlParamOnly {
+			props = append(props, google.Underscore(tp.Name))
+		}
+	}
+	for _, tp := range e.TGCTestIgnoreExtra {
+		props = append(props, tp)
 	}
 
 	slices.Sort(props)
