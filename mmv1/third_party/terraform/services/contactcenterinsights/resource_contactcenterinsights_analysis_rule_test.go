@@ -61,7 +61,7 @@ func testAccInsightsAnalysisRule(context map[string]interface{}) string {
 	resource "google_contact_center_insights_analysis_rule" "default" {
 	    display_name = "default-analysis-rule-display-name-%{random_suffix}"
 		location = "us-central1"
-		conversation_filter = "test-filter"
+		conversation_filter = "agent_id = \"1\""
 		analysis_percentage = 0.5
 		active = true
 	}

@@ -142,13 +142,16 @@ properties:
               Format:
               projects/{project}/locations/{location}/conversationProfiles/{conversation_profile}
           - name: summarizationModel
-            type: String
+            type: Enum
             description: |-
               Default summarization model to be used.
               Possible values:
               SUMMARIZATION_MODEL_UNSPECIFIED
               BASELINE_MODEL
               BASELINE_MODEL_V2_0
+            enum_values:
+              - 'BASELINE_MODEL'
+              - 'BASELINE_MODEL_V2_0'
       - name: qaConfig
         type: NestedObject
         description: Configuration for the QA feature.
