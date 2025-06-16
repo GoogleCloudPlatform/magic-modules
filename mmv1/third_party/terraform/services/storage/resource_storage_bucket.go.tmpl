@@ -866,7 +866,7 @@ func resourceStorageBucketCreate(d *schema.ResourceData, meta interface{}) error
 				if err != nil {
 					return err
 				}
-				sb.RetentionPolicy.RetentionPeriod = int64(value)
+				sb.RetentionPolicy.RetentionPeriod = value
 			}
 		}
 	}
@@ -1474,9 +1474,11 @@ func expandBucketRetentionPolicy(configured interface{}) *storage.BucketRetentio
 	}
 	retentionPolicy := retentionPolicies[0].(map[string]interface{})
 
+	value, _ := strconv.ParseInt(v.(string), 10, 64)
+
 	bucketRetentionPolicy := &storage.BucketRetentionPolicy{
 		IsLocked:        retentionPolicy["is_locked"].(bool),
-		RetentionPeriod: int64(retentionPolicy["retention_period"].(int)),
+		RetentionPeriod: value,
 	}
 
 	return bucketRetentionPolicy
