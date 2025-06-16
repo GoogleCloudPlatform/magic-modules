@@ -4,6 +4,7 @@ package storage
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -89,16 +90,16 @@ func flattenDatasourceGoogleBucketObjectsList(config *transport_tpg.Config, v in
 	}
 
 	ls := v.([]interface{})
-	buckets := make([]map[string]interface{}, 0, len(ls))
+	bucketObjects := make([]map[string]interface{}, 0, len(ls))
 	for _, raw := range ls {
 		o := raw.(map[string]interface{})
 
-		var mLabels, mLocation, mName, mSelfLink, mStorageClass interface{}
-		if oLabels, ok := o["labels"]; ok {
-			mLabels = oLabels
+		var mContentType, mMediaLink, mName, mSelfLink, mStorageClass interface{}
+		if oContentType, ok := o["contentType"]; ok {
+			mContentType = oContentType
 		}
-		if oLocation, ok := o["location"]; ok {
-			mLocation = oLocation
+		if oMediaLink, ok := o["mediaLink"]; ok {
+			mMediaLink = oMediaLink
 		}
 		if oName, ok := o["name"]; ok {
 			mName = oName
@@ -109,14 +110,18 @@ func flattenDatasourceGoogleBucketObjectsList(config *transport_tpg.Config, v in
 		if oStorageClass, ok := o["storageClass"]; ok {
 			mStorageClass = oStorageClass
 		}
-		buckets = append(buckets, map[string]interface{}{
-			"labels":        mLabels,
-			"location":      mLocation,
+		bucketObjects = append(bucketObjects, map[string]interface{}{
+			"content_type":  mContentType,
+			"media_link":    mMediaLink,
 			"name":          mName,
 			"self_link":     mSelfLink,
 			"storage_class": mStorageClass,
 		})
 	}
 
-	return buckets, nil
+	sort.Slice(bucketObjects, func(i, j int) bool {
+		return bucketObjects[i]["name"].(string) < bucketObjects[j]["name"].(string)
+	})
+
+	return bucketObjects, nil
 }
