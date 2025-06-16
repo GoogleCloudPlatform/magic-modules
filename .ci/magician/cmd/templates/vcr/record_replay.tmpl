@@ -2,7 +2,7 @@
 {{color "green" "Tests passed during RECORDING mode:"}}
 {{range .RecordingResult.PassedTests -}}
 `{{.}}` {{/* remove trailing whitespace */ -}}
-  [[Debug log](https://storage.cloud.google.com/{{$.LogBucket}}/{{$.Version}}/refs/heads/{{$.Head}}/artifacts/{{$.BuildID}}/recording/{{.}}.log)]
+  [[Debug log]({{$.LogBaseUrl}}/recording/{{.}}.log)]
 {{/* remove trailing whitespace */ -}}
 {{end}}
 
@@ -11,8 +11,8 @@
 {{color "red" "Tests failed when rerunning REPLAYING mode:"}}
 {{range .ReplayingAfterRecordingResult.FailedTests -}}
 `{{.}}` {{/* remove trailing whitespace */ -}}
-  [[Error message](https://storage.cloud.google.com/{{$.LogBucket}}/{{$.Version}}/refs/heads/{{$.Head}}/artifacts/{{$.BuildID}}/build-log/replaying_build_after_recording/{{compoundTest .}}_replaying_test.log)] {{/* remove trailing whitespace */ -}}
-  [[Debug log](https://storage.cloud.google.com/{{$.LogBucket}}/{{$.Version}}/refs/heads/{{$.Head}}/artifacts/{{$.BuildID}}/replaying_after_recording/{{.}}.log)]
+  [[Error message]({{$.LogBaseUrl}}/build-log/replaying_build_after_recording/{{compoundTest .}}_replaying_test.log)] {{/* remove trailing whitespace */ -}}
+  [[Debug log]({{$.LogBaseUrl}}/replaying_after_recording/{{.}}.log)]
 {{/* remove trailing whitespace */ -}}
 {{end}}
 
@@ -30,8 +30,8 @@ Please fix these to complete your PR. If you believe these test failures to be i
 {{color "red" "Tests failed during RECORDING mode:"}}
 {{range .RecordingResult.FailedTests -}}
 `{{.}}` {{/* remove trailing whitespace */ -}}
-  [[Error message](https://storage.cloud.google.com/{{$.LogBucket}}/{{$.Version}}/refs/heads/{{$.Head}}/artifacts/{{$.BuildID}}/build-log/recording_build/{{compoundTest .}}_recording_test.log)] {{/* remove trailing whitespace */ -}}
-  [[Debug log](https://storage.cloud.google.com/{{$.LogBucket}}/{{$.Version}}/refs/heads/{{$.Head}}/artifacts/{{$.BuildID}}/recording/{{.}}.log)]
+  [[Error message]({{$.LogBaseUrl}}/build-log/recording_build/{{compoundTest .}}_recording_test.log)] {{/* remove trailing whitespace */ -}}
+  [[Debug log]({{$.LogBaseUrl}}/recording/{{.}}.log)]
 {{/* remove trailing whitespace */ -}}
 {{end}}
 {{end}} {{- /* end of if gt (len .RecordingResult.FailedTests) 0 */ -}}
@@ -42,5 +42,5 @@ Please fix these to complete your PR. If you believe these test failures to be i
 
 {{if .AllRecordingPassed}}{{color "green" "All tests passed!"}}{{end}}
 
-View the [build log](https://storage.cloud.google.com/{{.LogBucket}}/{{.Version}}/refs/heads/{{.Head}}/artifacts/{{.BuildID}}/build-log/recording_test.log) {{/* remove trailing whitespace */ -}}
-or the [debug log](https://console.cloud.google.com/storage/browser/{{.LogBucket}}/{{.Version}}/refs/heads/{{.Head}}/artifacts/{{.BuildID}}/recording) for each test
+View the [build log]({{.LogBaseUrl}}/build-log/recording_test.log) {{/* remove trailing whitespace */ -}}
+or the [debug log]({{.BrowseLogBaseUrl}}/recording) for each test
