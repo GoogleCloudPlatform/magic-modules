@@ -98,7 +98,9 @@ func (m *Merger) Merge() error {
 
 func (m *Merger) UploadToGCS(gcsPrefix string, buildID string) (string, error) {
 	bucketName := strings.TrimPrefix(gcsPrefix, "gs://")
-	args := []string{"-m", "cp", m.HTMLCovPath(), fmt.Sprintf("gs://%s/%s/", bucketName, buildID)}
+	gcsPath := fmt.Sprintf("gs://%s/%s/", bucketName, buildID)
+	fmt.Printf("Uploading coverage result to %s\n", gcsPath)
+	args := []string{"-m", "cp", m.HTMLCovPath(), gcsPath}
 	if _, err := m.rnr.Run("gsutil", args, nil); err != nil {
 		fmt.Println(err)
 		return "", fmt.Errorf("error upload cov html: %w", err)
@@ -124,13 +126,16 @@ func (m *Merger) PackageCovComment() (string, error) {
 	covList := strings.Split(strings.TrimSpace(out), "\n")
 
 	commentTemplate := `
-Test Coverage:
-
+<details>
+<summary>Click here to see Test Coverage Metrics </summary>
 <blockquote>
+<ul>
 {{range .}}
-- {{. -}}
+<li>{{. -}}</li>
 {{end}}
-</blockquote>	 
+</ul>
+</blockquote>
+</details>
 	`
 
 	// Create a new template and parse the letter into it.

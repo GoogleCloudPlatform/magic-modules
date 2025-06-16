@@ -147,13 +147,18 @@ func TestPackageCovComment(t *testing.T) {
 	}
 
 	want := strings.TrimSpace(`
-Test Coverage:
-
+<details>
+<summary>Click here to see Test Coverage Metrics </summary>
 <blockquote>
+<ul>
 
-- pkg1 10%
-- pkg2 20%
-</blockquote>	 
+<li>pkg1 10%</li>
+
+<li>pkg2 20%</li>
+
+</ul>
+</blockquote>
+</details>
 	`)
 	if got != want {
 		t.Errorf("PackageCovComment got = %s, want = %s", got, want)
