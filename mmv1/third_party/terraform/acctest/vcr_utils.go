@@ -152,12 +152,11 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		}
 		fmt.Printf("Temporary file created at: %s\n", temp_file.Name())
 
-		var testFailed = false
 		defer func() {
 			if temp_file != nil {
 				temp_file.Close() // Close the file handle
 
-				if testFailed {
+				if t.Failed() {
 					fmt.Printf("Test failed, keeping log file: %s\n", temp_file.Name())
 				} else {
 					err := os.Remove(temp_file.Name())
@@ -187,11 +186,6 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 	c.Steps = steps
 
 	resource.Test(t, c)
-
-	if t.Failed() {
-		fmt.Fprintf(os.Stdout, "Test %s failed, see logs for details.\n", t.Name())
-
-	}
 
 }
 
@@ -249,6 +243,7 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, temp_file *
 		c.ExternalProviders[releaseProvider] = resource.ExternalProvider{}
 	} else {
 		c.ExternalProviders = map[string]resource.ExternalProvider{
+			// TODO: make a github action to get most recent release + current head, this is not a fix just for testing
 			releaseProvider: {
 				VersionConstraint: "= 6.33.0",
 			},
