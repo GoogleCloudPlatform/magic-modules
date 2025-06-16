@@ -27,7 +27,6 @@ create_url: 'projects/{{project}}/locations/{{location}}/encryptionSpec:initiali
 
 exclude_read: true
 exclude_delete: true
-exclude_import: true
 exclude_sweeper: true
 
 immutable: true
