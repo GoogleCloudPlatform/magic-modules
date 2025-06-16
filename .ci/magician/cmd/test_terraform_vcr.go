@@ -77,6 +77,8 @@ type recordReplay struct {
 	Version                       string
 	Head                          string
 	BuildID                       string
+	LogBaseUrl                    string
+	BrowseLogBaseUrl              string
 }
 
 var testTerraformVCRCmd = &cobra.Command{
@@ -528,5 +530,11 @@ func formatPostReplay(data postReplay) (string, error) {
 }
 
 func formatRecordReplay(data recordReplay) (string, error) {
+	logBasePath := fmt.Sprintf("%s/%s/refs/heads/%s/artifacts/%s", data.LogBucket, data.Version, data.Head, data.BuildID)
+	if data.BuildID == "" {
+		logBasePath = fmt.Sprintf("%s/%s/refs/heads/%s", data.LogBucket, data.Version, data.Head)
+	}
+	data.LogBaseUrl = fmt.Sprintf("https://storage.cloud.google.com/%s", logBasePath)
+	data.BrowseLogBaseUrl = fmt.Sprintf("https://console.cloud.google.com/storage/browser/%s", logBasePath)
 	return formatComment("record_replay.tmpl", recordReplayTmplText, data)
 }
