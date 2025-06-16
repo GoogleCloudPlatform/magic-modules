@@ -1,0 +1,113 @@
+data "google_project" "project" {
+}
+
+data "google_storage_project_service_account" "gcs_account" {
+}
+
+resource "google_dataproc_session_template" "{{$.PrimaryResourceId}}" {
+    name     = "projects/{{index $.TestEnvVars "project_name"}}/locations/us-central1/sessionTemplates/{{index $.Vars "name"}}"
+    location      = "us-central1"
+    labels        = {"session_template_test": "terraform"}
+
+    runtime_config {
+      properties    = { "spark.dynamicAllocation.enabled": "false", "spark.executor.instances": "2" }
+      version = "2.2"
+      container_image = "us-docker.pkg.dev/{{index $.TestEnvVars "project_name"}}/s8s-spark-test-images/s8s-spark:latest"
+    }
+
+    environment_config {
+      execution_config {
+        ttl = "3600s"
+        network_tags = ["tag1"]
+        kms_key = "{{index $.Vars "kms_key_name"}}"
+	subnetwork_uri = "{{index $.Vars "subnetwork_name"}}"
+        service_account = "${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+        staging_bucket = google_storage_bucket.bucket.name
+      }
+      peripherals_config {
+        metastore_service = google_dataproc_metastore_service.ms.name
+        spark_history_server_config {
+          dataproc_cluster = google_dataproc_cluster.basic.id
+        }
+      }
+    }
+
+    jupyter_session {
+      kernel       = "PYTHON"
+      display_name = "tf python kernel"
+    }
+
+    depends_on = [
+      google_kms_crypto_key_iam_member.crypto_key_member_1,
+    ]
+}
+
+resource "google_storage_bucket" "bucket" {
+  uniform_bucket_level_access = true
+  name                        = "{{index $.Vars "bucket_name"}}"
+  location                    = "US"
+  force_destroy               = true
+}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key_member_1" {
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${data.google_project.project.number}@dataproc-accounts.iam.gserviceaccount.com"
+}
+
+resource "google_dataproc_cluster" "basic" {
+  name   = "{{index $.Vars "name"}}"
+  region = "us-central1"
+
+  cluster_config {
+    # Keep the costs down with smallest config we can get away with
+    software_config {
+      override_properties = {
+        "dataproc:dataproc.allow.zero.workers" = "true"
+        "spark:spark.history.fs.logDirectory"  = "gs://${google_storage_bucket.bucket.name}/*/spark-job-history"
+      }
+    }
+
+    gce_cluster_config {
+      subnetwork = "{{index $.Vars "subnetwork_name"}}"
+    }
+
+    endpoint_config {
+      enable_http_port_access = true
+    }
+
+    master_config {
+      num_instances = 1
+      machine_type  = "e2-standard-2"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    metastore_config {
+      dataproc_metastore_service = google_dataproc_metastore_service.ms.name
+    }
+  }
+}
+
+resource "google_dataproc_metastore_service" "ms" {
+  service_id = "{{index $.Vars "name"}}"
+  location   = "us-central1"
+  port       = 9080
+  tier       = "DEVELOPER"
+
+  maintenance_window {
+    hour_of_day = 2
+    day_of_week = "SUNDAY"
+  }
+
+  hive_metastore_config {
+    version = "3.1.2"
+  }
+
+  network_config {
+    consumers {
+      subnetwork = "projects/{{index $.TestEnvVars "project_name"}}/regions/us-central1/subnetworks/{{index $.Vars "subnetwork_name"}}"
+    }
+  }
+}
