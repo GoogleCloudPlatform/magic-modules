@@ -118,13 +118,13 @@ properties:
                       description: |
                         Type of Human Agent Assistant API feature to request.
                       enum_values:
-                        - TYPE_UNSPECIFIED
                         - ARTICLE_SUGGESTION
                         - FAQ
                         - SMART_REPLY
                         - KNOWLEDGE_SEARCH
                         - KNOWLEDGE_ASSIST
                         - DIALOGFLOW_ASSIST
+                        - ENTITY_EXTRACTION
                 - type: Boolean
                   name: 'enableEventBasedSuggestion'
                   description: |
@@ -146,7 +146,7 @@ properties:
                     Enable including conversation context during query answer generation.
                     This feature is only supported for types: KNOWLEDGE_SEARCH.
                 - type: Boolean
-                  name: 'enableQuerySuggetioOnly'
+                  name: 'enableQuerySuggestionOnly'
                   description: |
                     Enable query suggestion only.
                     This feature is only supported for types: KNOWLEDGE_ASSIST
@@ -155,6 +155,7 @@ properties:
                   description: |
                     Settings of suggestion trigger.
                     This feature is only supported for types: ARTICLE_SUGGESTION, FAQ.
+                  custom_flatten: 'templates/terraform/custom_flatten/conversation_profile_suggestion_trigger_settings.go.tmpl'
                   properties:
                     - type: Boolean
                       name: 'noSmallTalk'
@@ -183,6 +184,7 @@ properties:
                       name: contextFilterSettings
                       description: |
                         Determines how recent conversation context is filtered when generating suggestions. If unspecified, no messages will be dropped.
+                      custom_flatten: 'templates/terraform/custom_flatten/conversation_profile_context_filter_settings.go.tmpl'
                       properties:
                         - type: Boolean
                           name: 'dropHandoffMessages'
@@ -288,7 +290,7 @@ properties:
                       description: |
                         Number of recent non-small-talk sentences to use as context for article and FAQ suggestion
           - type: Boolean
-            name: 'groupSuggestionsResponses'
+            name: 'groupSuggestionResponses'
             description: |
               If groupSuggestionResponses is false, and there are multiple featureConfigs in event based suggestion or StreamingAnalyzeContent, we will try to deliver suggestions to customers as soon as we get new suggestion. Different type of suggestions based on the same context will be in separate Pub/Sub event or StreamingAnalyzeContentResponse.
 
@@ -332,6 +334,7 @@ properties:
                         - KNOWLEDGE_SEARCH
                         - KNOWLEDGE_ASSIST
                         - DIALOGFLOW_ASSIST
+                        - ENTITY_EXTRACTION
                 - type: Boolean
                   name: 'enableEventBasedSuggestion'
                   description: |
@@ -353,7 +356,7 @@ properties:
                     Enable including conversation context during query answer generation.
                     This feature is only supported for types: KNOWLEDGE_SEARCH.
                 - type: Boolean
-                  name: 'enableQuerySuggetioOnly'
+                  name: 'enableQuerySuggestionOnly'
                   description: |
                     Enable query suggestion only.
                     This feature is only supported for types: KNOWLEDGE_ASSIST
@@ -362,6 +365,7 @@ properties:
                   description: |
                     Settings of suggestion trigger.
                     This feature is only supported for types: ARTICLE_SUGGESTION, FAQ.
+                  custom_flatten: 'templates/terraform/custom_flatten/conversation_profile_suggestion_trigger_settings.go.tmpl'
                   properties:
                     - type: Boolean
                       name: 'noSmallTalk'
@@ -390,6 +394,7 @@ properties:
                       name: contextFilterSettings
                       description: |
                         Determines how recent conversation context is filtered when generating suggestions. If unspecified, no messages will be dropped.
+                      custom_flatten: 'templates/terraform/custom_flatten/conversation_profile_context_filter_settings.go.tmpl'
                       properties:
                         - type: Boolean
                           name: 'dropHandoffMessages'
@@ -495,7 +500,7 @@ properties:
                       description: |
                         Number of recent non-small-talk sentences to use as context for article and FAQ suggestion
           - type: Boolean
-            name: 'groupSuggestionsResponses'
+            name: 'groupSuggestionResponses'
             description: |
               If groupSuggestionResponses is false, and there are multiple featureConfigs in event based suggestion or StreamingAnalyzeContent, we will try to deliver suggestions to customers as soon as we get new suggestion. Different type of suggestions based on the same context will be in separate Pub/Sub event or StreamingAnalyzeContentResponse.
 
@@ -534,43 +539,12 @@ properties:
         name: livePersonConfig
         description: |
           Config for using LivePerson.
-        exactly_one_of:
-          - humanAgentHandoffConfig.livePersonConfig
-          - humanAgentHandoffConfig.salesforceLiveAgentConfig
         properties:
           - type: String
             name: 'accountNumber'
             required: true
             description: |
               Account number of the LivePerson account to connect.
-      - type: NestedObject
-        name: salesforceLiveAgentConfig
-        description: |
-          Config for using a Salesforce Live agent
-        exactly_one_of:
-          - humanAgentHandoffConfig.livePersonConfig
-          - humanAgentHandoffConfig.salesforceLiveAgentConfig
-        properties:
-          - type: String
-            name: 'organizationId'
-            required: true
-            description: |
-              The organization ID of the Salesforce account.
-          - type: String
-            name: 'deploymentId'
-            required: true
-            description: |
-              Live Agent deployment ID.
-          - type: String
-            name: 'buttonId'
-            required: true
-            description: |
-              Live Agent chat button ID.
-          - type: String
-            name: 'endpointDomain'
-            required: true
-            description: |
-              Domain of the Live Agent endpoint for this agent.
   - type: NestedObject
     name: 'notificationConfig'
     description: |
@@ -591,6 +565,7 @@ properties:
           - JSON
   - type: NestedObject
     name: 'loggingConfig'
+    custom_flatten: 'templates/terraform/custom_flatten/conversation_profile_stack_driver.go.tmpl'
     description: |
       Defines logging behavior for conversation lifecycle events.
     properties:
@@ -636,7 +611,7 @@ properties:
           Which Speech model to select.
           Leave this field unspecified to use Agent Speech settings for model selection.
       - type: Enum
-        name: 'audoEncoding'
+        name: 'audioEncoding'
         description: |
           Audio encoding of the audio content to process.
         enum_values:
