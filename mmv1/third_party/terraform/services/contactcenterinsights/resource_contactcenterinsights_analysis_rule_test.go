@@ -59,6 +59,7 @@ func TestAccContactCenterInsightsAnalysisRule_update(t *testing.T) {
 func testAccInsightsAnalysisRule(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_contact_center_insights_analysis_rule" "default" {
+	    display_name = "default-analysis-rule-display-name-%{random_suffix}"
 		location = "us-central1"
 		conversation_filter = "test-filter"
 		analysis_percentage = 0.5
@@ -89,7 +90,7 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
     run_phrase_matcher_annotator = false
     run_qa_annotator             = false
     run_sentiment_annotator      = false
-    run_silence_annotator        = false
+    run_silence_annotator        = true
     run_summarization_annotator  = false
     summarization_config {
       summarization_model  = "BASELINE_MODEL"
