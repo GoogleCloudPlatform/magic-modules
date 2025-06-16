@@ -1381,11 +1381,14 @@ func expandBucketRetentionPolicy(configured interface{}) *storage.BucketRetentio
 	}
 	retentionPolicy := retentionPolicies[0].(map[string]interface{})
 
-	value, _ := strconv.ParseInt(v.(string), 10, 64)
-
+	var retentionPeriod int64
+	if retentionPolicy["retention_period"] != "" {
+		retentionPeriod, _ = strconv.ParseInt(retentionPolicy["retention_period"].(string), 10, 64)
+	}
+	
 	bucketRetentionPolicy := &storage.BucketRetentionPolicy{
 		IsLocked:        retentionPolicy["is_locked"].(bool),
-		RetentionPeriod: value,
+		RetentionPeriod: retentionPeriod,
 	}
 
 	return bucketRetentionPolicy
