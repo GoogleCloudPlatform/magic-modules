@@ -242,7 +242,6 @@ func convertToAssetMap(assets []caiasset.Asset) map[string]caiasset.Asset {
 	assetMap := make(map[string]caiasset.Asset)
 
 	for _, asset := range assets {
-		asset.Resource.Data = nil
 		assetMap[asset.Type] = asset
 	}
 	return assetMap
