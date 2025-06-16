@@ -144,6 +144,7 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 	if IsVcrEnabled() {
 		defer closeRecorder(t)
 	} else if isReleaseDiffEnabled() {
+		//todo - don't hardcode the directory and test name, done for now as interm fix
 		temp_file, err := os.CreateTemp("../../../", "bigtable_instance_test_")
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error creating temporary file: %v\n", err)
