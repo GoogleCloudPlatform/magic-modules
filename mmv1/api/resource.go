@@ -1977,9 +1977,27 @@ func (r Resource) MarkdownHeader(templatePath string) string {
 	return strings.Replace(r.CodeHeader(templatePath), "//", "#", -1)
 }
 
+// TGC Methods
 // ====================
-// TGC
-// ====================
+// Lists fields that test.BidirectionalConversion should ignore
+func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string {
+	var props []string
+	for _, tp := range r.VirtualFields {
+		props = append(props, google.Underscore(tp.Name))
+	}
+	for _, tp := range r.AllUserProperties() {
+		if tp.UrlParamOnly {
+			props = append(props, google.Underscore(tp.Name))
+		}
+	}
+	for _, tp := range e.TGCTestIgnoreExtra {
+		props = append(props, tp)
+	}
+
+	slices.Sort(props)
+	return props
+}
+
 // Filters out computed properties during cai2hcl
 func (r Resource) ReadPropertiesForTgc() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
