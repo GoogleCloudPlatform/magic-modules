@@ -220,10 +220,13 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string) resource.Te
 		c.ExternalProviders[releaseProvider] = resource.ExternalProvider{}
 	} else {
 		c.ExternalProviders = map[string]resource.ExternalProvider{
-			releaseProvider: {},
+			releaseProvider: {
+				VersionConstraint: "= 6.33.0",
+			},
 		}
 	}
 
+	// create files to config this step(flag), do this in temp file created within this method? preconfig/postconfig
 	localProviderName := "google-local"
 	if c.Providers != nil {
 		c.Providers = map[string]*schema.Provider{
@@ -242,14 +245,31 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string) resource.Te
 			},
 		}
 	}
+	var countSteps = 0
 
 	var replacementSteps []resource.TestStep
+	temp_file, err := os.CreateTemp("../../../", "bigtable_instance_test_")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating temporary file: %v\n", err)
+		return c
+	}
+	fmt.Printf("Temporary file created at: %s\n", temp_file.Name())
 	for _, testStep := range c.Steps {
+		// todo: add preconfig - categorize test failures (add flag to steps that if they fail is a diff failure)
 		if testStep.Config != "" {
 			ogConfig := testStep.Config
 			testStep.Config = reformConfigWithProvider(ogConfig, localProviderName)
-			if testStep.ExpectError == nil && testStep.PlanOnly == false {
+			fmt.Fprintf(os.Stdout, "Reformatted config: %s\n", testStep.Config)
+			testStep.PreConfig = func() {
+				fmt.Fprintf(temp_file, "Step %d: Bigtable Invalid Instance creation started\n", countSteps)
+				countSteps++
+			}
+			if testStep.ExpectError == nil && !testStep.PlanOnly {
 				newStep := resource.TestStep{
+					PreConfig: func() {
+						fmt.Fprintf(temp_file, "Step %d: Bigtable Invalid Instance creation started\n", countSteps)
+						countSteps++
+					},
 					Config: reformConfigWithProvider(ogConfig, releaseProvider),
 				}
 				testStep.PlanOnly = true
