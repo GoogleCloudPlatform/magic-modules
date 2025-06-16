@@ -108,6 +108,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_datastream_private_connection":            {datastream.ResourceConverterDatastreamPrivateConnection()},
 		"google_datastream_stream":                        {datastream.ResourceConverterDatastreamStream()},
 		"google_firebase_project":                         {firebase.ResourceConverterFirebaseProject()},
+		"google_org_policy_custom_constraint":             {orgpolicy.ResourceConverterOrgPolicyCustomConstraint()},
 		"google_org_policy_policy":                        {resourcemanager.ResourceConverterOrgPolicyPolicy()},
 		"google_redis_instance":                           {redis.ResourceConverterRedisInstance()},
 		"google_spanner_database":                         {spanner.ResourceConverterSpannerDatabase()},

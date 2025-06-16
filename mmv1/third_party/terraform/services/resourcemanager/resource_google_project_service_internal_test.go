@@ -9,10 +9,6 @@ func TestProjectServiceServiceValidateFunc(t *testing.T) {
 		val                   interface{}
 		ExpectValidationError bool
 	}{
-		"ignoredProjectService": {
-			val:                   "dataproc-control.googleapis.com",
-			ExpectValidationError: true,
-		},
 		"bannedProjectService": {
 			val:                   "bigquery-json.googleapis.com",
 			ExpectValidationError: true,

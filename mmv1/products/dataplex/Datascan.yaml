@@ -84,6 +84,14 @@ examples:
       datascan_name: 'dataquality-full'
     test_env_vars:
       project_name: 'PROJECT_NAME'
+    exclude_test: true
+  - name: 'dataplex_datascan_full_quality_test'
+    primary_resource_id: 'full_quality_test'
+    vars:
+      datascan_name: 'dataquality-full-test'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    exclude_docs: true
 parameters:
   - name: 'location'
     type: String
@@ -327,7 +335,7 @@ properties:
             - name: 'dimension'
               type: String
               description: |
-                The dimension a rule belongs to. Results are also aggregated at the dimension level. Supported dimensions are ["COMPLETENESS", "ACCURACY", "CONSISTENCY", "VALIDITY", "UNIQUENESS", "INTEGRITY"]
+                The dimension name a rule belongs to. Custom dimension name is supported with all uppercase letters and maximum length of 30 characters.
               required: true
             - name: 'threshold'
               type: Double
@@ -477,6 +485,10 @@ properties:
                     The SQL statement.
                   required: true
         min_size: 1
+      - name: 'catalogPublishingEnabled'
+        type: Boolean
+        description: |
+          If set, the latest DataScan job result will be published to Dataplex Catalog.
   - name: 'dataProfileSpec'
     type: NestedObject
     description: |

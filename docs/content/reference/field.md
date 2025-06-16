@@ -285,6 +285,8 @@ Example:
 ```
 
 ### `validation`
+In many cases, it is better to avoid client-side validation. See [Best practices: Validation]({{< ref "/best-practices/validation" >}}) for more information.
+
 Controls the value set for the field's [`ValidateFunc`](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc).
 
 For Enum fields, this will override the default validation (that the provided value is one of the enum [`values`](#values)).
@@ -375,10 +377,11 @@ url_param_only: true
 ## `Enum` properties
 
 ### `enum_values`
-Enum only. If the allowed values change frequently, use a String field instead
-to allow better forwards-compatibility, and link to API documentation
-stating the current allowed values in the String field's description. Do not
-include UNSPECIFIED values in this list.
+Enum only. If the allowed values may change in the future, use a String field instead and link to API documentation
+stating the current allowed values in the String field's description. 
+See [Best practices: Validation]({{< ref "/best-practices/validation" >}}) for more information.
+
+Do not include UNSPECIFIED values in this list.
 
 Enums will validate that the provided field is in the allowed list unless a
 custom [`validation`]({{<ref "#validation" >}}) is provided.
@@ -431,6 +434,8 @@ item_type:
 ### `item_validation`
 Array only. Controls the [`ValidateFunc`](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc)
 used to validate individual items in the array. Behaves like [`validation`]({{<ref "#validation" >}}).
+
+In many cases, it is better to avoid client-side validation. See [Best practices: Validation]({{< ref "/best-practices/validation" >}}) for more information.
 
 For arrays of enums, this will override the default validation (that the provided value is one of the enum [`values`](#values)).
 If you need additional validation on top of an enum, ensure that the supplied validation func also verifies the enum

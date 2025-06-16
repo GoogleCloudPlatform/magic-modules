@@ -21,14 +21,8 @@ import (
 )
 
 var (
-	//go:embed templates/vcr/test_analytics.tmpl
-	testsAnalyticsTmplText string
-	//go:embed templates/vcr/non_exercised_tests.tmpl
-	nonExercisedTestsTmplText string
-	//go:embed templates/vcr/with_replay_failed_tests.tmpl
-	withReplayFailedTestsTmplText string
-	//go:embed templates/vcr/without_replay_failed_tests.tmpl
-	withoutReplayFailedTestsTmplText string
+	//go:embed templates/vcr/post_replay.tmpl
+	postReplayTmplText string
 	//go:embed templates/vcr/record_replay.tmpl
 	recordReplayTmplText string
 )
@@ -60,27 +54,17 @@ var ttvOptionalEnvironmentVariables = [...]string{
 	"GOOGLE_VMWAREENGINE_PROJECT",
 }
 
-type analytics struct {
-	ReplayingResult  vcr.Result
+type postReplay struct {
 	RunFullVCR       bool
 	AffectedServices []string
-}
-
-type nonExercisedTests struct {
-	NotRunBetaTests []string
-	NotRunGATests   []string
-}
-
-type withReplayFailedTests struct {
-	ReplayingResult vcr.Result
-}
-
-type withoutReplayFailedTests struct {
-	ReplayingErr error
-	LogBucket    string
-	Version      string
-	Head         string
-	BuildID      string
+	NotRunBetaTests  []string
+	NotRunGATests    []string
+	ReplayingResult  vcr.Result
+	ReplayingErr     error
+	LogBucket        string
+	Version          string
+	Head             string
+	BuildID          string
 }
 
 type recordReplay struct {
@@ -249,41 +233,30 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	for s := range services {
 		servicesArr = append(servicesArr, s)
 	}
-	analyticsData := analytics{
-		ReplayingResult:  replayingResult,
-		RunFullVCR:       runFullVCR,
-		AffectedServices: sort.StringSlice(servicesArr),
-	}
-	testsAnalyticsComment, err := formatTestsAnalytics(analyticsData)
-	if err != nil {
-		return fmt.Errorf("error formatting test_analytics comment: %w", err)
-	}
 
 	notRunBeta, notRunGa := notRunTests(tpgRepo.UnifiedZeroDiff, tpgbRepo.UnifiedZeroDiff, replayingResult)
 
-	nonExercisedTestsData := nonExercisedTests{
-		NotRunBetaTests: notRunBeta,
-		NotRunGATests:   notRunGa,
+	postReplayData := postReplay{
+		RunFullVCR:       runFullVCR,
+		AffectedServices: sort.StringSlice(servicesArr),
+		NotRunBetaTests:  notRunBeta,
+		NotRunGATests:    notRunGa,
+		ReplayingResult:  subtestResult(replayingResult),
+		ReplayingErr:     replayingErr,
+		LogBucket:        "ci-vcr-logs",
+		Version:          provider.Beta.String(),
+		Head:             newBranch,
+		BuildID:          buildID,
 	}
-	nonExercisedTestsComment, err := formatNonExercisedTests(nonExercisedTestsData)
+
+	comment, err := formatPostReplay(postReplayData)
 	if err != nil {
-		return fmt.Errorf("error formatting non exercised tests comment: %w", err)
+		return fmt.Errorf("error formatting post replay comment: %w", err)
 	}
-
+	if err := gh.PostComment(prNumber, comment); err != nil {
+		return fmt.Errorf("error posting comment: %w", err)
+	}
 	if len(replayingResult.FailedTests) > 0 {
-		withReplayFailedTestsData := withReplayFailedTests{
-			ReplayingResult: replayingResult,
-		}
-		withReplayFailedTestsComment, err := formatWithReplayFailedTests(withReplayFailedTestsData)
-		if err != nil {
-			return fmt.Errorf("error formatting action taken comment: %w", err)
-		}
-
-		comment := strings.Join([]string{testsAnalyticsComment, nonExercisedTestsComment, withReplayFailedTestsComment}, "\n")
-		if err := gh.PostComment(prNumber, comment); err != nil {
-			return fmt.Errorf("error posting comment: %w", err)
-		}
-
 		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
 			Mode:     vcr.Recording,
 			Version:  provider.Beta,
@@ -346,8 +319,8 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		allRecordingPassed := len(recordingResult.FailedTests) == 0 && !hasTerminatedTests && recordingErr == nil
 
 		recordReplayData := recordReplay{
-			RecordingResult:               recordingResult,
-			ReplayingAfterRecordingResult: replayingAfterRecordingResult,
+			RecordingResult:               subtestResult(recordingResult),
+			ReplayingAfterRecordingResult: subtestResult(replayingAfterRecordingResult),
 			RecordingErr:                  recordingErr,
 			HasTerminatedTests:            hasTerminatedTests,
 			AllRecordingPassed:            allRecordingPassed,
@@ -361,24 +334,6 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 			return fmt.Errorf("error formatting record replay comment: %w", err)
 		}
 		if err := gh.PostComment(prNumber, recordReplayComment); err != nil {
-			return fmt.Errorf("error posting comment: %w", err)
-		}
-
-	} else { //  len(replayingResult.FailedTests) == 0
-		withoutReplayFailedTestsData := withoutReplayFailedTests{
-			ReplayingErr: replayingErr,
-			LogBucket:    "ci-vcr-logs",
-			Version:      provider.Beta.String(),
-			Head:         newBranch,
-			BuildID:      buildID,
-		}
-		withoutReplayFailedTestsComment, err := formatWithoutReplayFailedTests(withoutReplayFailedTestsData)
-		if err != nil {
-			return fmt.Errorf("error formatting action taken comment: %w", err)
-		}
-
-		comment := strings.Join([]string{testsAnalyticsComment, nonExercisedTestsComment, withoutReplayFailedTestsComment}, "\n")
-		if err := gh.PostComment(prNumber, comment); err != nil {
 			return fmt.Errorf("error posting comment: %w", err)
 		}
 	}
@@ -430,6 +385,43 @@ func notRunTests(gaDiff, betaDiff string, result vcr.Result) ([]string, []string
 	sort.Strings(notRunBeta)
 	sort.Strings(notRunGa)
 	return notRunBeta, notRunGa
+}
+
+func subtestResult(original vcr.Result) vcr.Result {
+	return vcr.Result{
+		PassedTests:  excludeCompoundTests(original.PassedTests, original.PassedSubtests),
+		FailedTests:  excludeCompoundTests(original.FailedTests, original.FailedSubtests),
+		SkippedTests: excludeCompoundTests(original.SkippedTests, original.SkippedSubtests),
+		Panics:       original.Panics,
+	}
+}
+
+// Returns the name of the compound test that the given subtest belongs to.
+func compoundTest(subtest string) string {
+	parts := strings.Split(subtest, "__")
+	if len(parts) != 2 {
+		return subtest
+	}
+	return parts[0]
+}
+
+// Returns subtests and tests that are not compound tests.
+func excludeCompoundTests(allTests, subtests []string) []string {
+	res := make([]string, 0, len(allTests)+len(subtests))
+	compoundTests := make(map[string]struct{}, len(subtests))
+	for _, subtest := range subtests {
+		if compound := compoundTest(subtest); compound != subtest {
+			compoundTests[compound] = struct{}{}
+			res = append(res, subtest)
+		}
+	}
+	for _, test := range allTests {
+		if _, ok := compoundTests[test]; !ok {
+			res = append(res, test)
+		}
+	}
+	sort.Strings(res)
+	return res
 }
 
 func modifiedPackages(changedFiles []string, version provider.Version) (map[string]struct{}, bool) {
@@ -514,9 +506,10 @@ func init() {
 
 func formatComment(fileName string, tmplText string, data any) (string, error) {
 	funcs := template.FuncMap{
-		"join":  strings.Join,
-		"add":   func(i, j int) int { return i + j },
-		"color": color,
+		"join":         strings.Join,
+		"add":          func(i, j int) int { return i + j },
+		"color":        color,
+		"compoundTest": compoundTest,
 	}
 	tmpl, err := template.New(fileName).Funcs(funcs).Parse(tmplText)
 	if err != nil {
@@ -530,20 +523,8 @@ func formatComment(fileName string, tmplText string, data any) (string, error) {
 	return strings.TrimSpace(sb.String()), nil
 }
 
-func formatTestsAnalytics(data analytics) (string, error) {
-	return formatComment("test_analytics.tmpl", testsAnalyticsTmplText, data)
-}
-
-func formatNonExercisedTests(data nonExercisedTests) (string, error) {
-	return formatComment("non_exercised_tests.tmpl", nonExercisedTestsTmplText, data)
-}
-
-func formatWithReplayFailedTests(data withReplayFailedTests) (string, error) {
-	return formatComment("with_replay_failed_tests.tmpl", withReplayFailedTestsTmplText, data)
-}
-
-func formatWithoutReplayFailedTests(data withoutReplayFailedTests) (string, error) {
-	return formatComment("without_replay_failed_tests.tmpl", withoutReplayFailedTestsTmplText, data)
+func formatPostReplay(data postReplay) (string, error) {
+	return formatComment("post_replay.tmpl", postReplayTmplText, data)
 }
 
 func formatRecordReplay(data recordReplay) (string, error) {

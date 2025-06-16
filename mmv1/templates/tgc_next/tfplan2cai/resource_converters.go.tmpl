@@ -36,4 +36,5 @@ import (
 var ConverterMap = map[string]cai.ResourceConverter{
 	"google_project":          resourcemanager.ResourceConverterProject(),
 	"google_compute_instance": compute.ResourceConverterComputeInstance(),
+	"google_compute_address":  compute.ResourceConverterComputeAddress(),
 }

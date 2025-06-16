@@ -18,6 +18,7 @@ func TestAccUniverseDomainStorage(t *testing.T) {
 
 	universeDomain := envvar.GetTestUniverseDomainFromEnv(t)
 	bucketName := acctest.TestBucketName(t)
+	region := envvar.GetTestRegionFromEnv()
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -25,13 +26,13 @@ func TestAccUniverseDomainStorage(t *testing.T) {
 		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccUniverseDomain_bucket(universeDomain, bucketName),
+				Config: testAccUniverseDomain_bucket(universeDomain, bucketName, region),
 			},
 		},
 	})
 }
 
-func testAccUniverseDomain_bucket(universeDomain string, bucketName string) string {
+func testAccUniverseDomain_bucket(universeDomain string, bucketName string, region string) string {
 	return fmt.Sprintf(`
 provider "google" {
   universe_domain = "%s"
@@ -39,7 +40,7 @@ provider "google" {
 	  
 resource "google_storage_bucket" "foo" {
   name     = "%s"
-  location = "US"
+  location = "%s"
 }
   
 data "google_storage_bucket" "bar" {
@@ -48,7 +49,7 @@ data "google_storage_bucket" "bar" {
 	google_storage_bucket.foo,
   ]
 }
-`, universeDomain, bucketName)
+`, universeDomain, bucketName, region)
 }
 
 func testAccStorageBucketDestroyProducer(t *testing.T) func(s *terraform.State) error {
