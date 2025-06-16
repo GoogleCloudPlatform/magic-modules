@@ -80,6 +80,7 @@ properties:
       The storage capacity of the instance in gibibytes (GiB). Allowed values
       are from `18000` to `954000`, in increments of 9000.
     required: true
+    immutable: true
   - name: updateTime
     type: String
     description: Timestamp when the instance was last updated.
@@ -138,6 +139,7 @@ properties:
       The throughput of the instance in MB/s/TiB.
       Valid values are 125, 250, 500, 1000.
     required: true
+    immutable: true
   - name: name
     type: String
     description: Identifier. The name of the instance.
