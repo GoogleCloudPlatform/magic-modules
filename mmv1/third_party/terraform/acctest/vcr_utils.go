@@ -141,14 +141,36 @@ func vcrFileName(name string) string {
 // Can be called when VCR is not enabled, and it will behave as normal
 func VcrTest(t *testing.T, c resource.TestCase) {
 	t.Helper()
-
 	if IsVcrEnabled() {
 		defer closeRecorder(t)
 	} else if isReleaseDiffEnabled() {
-		c = initializeReleaseDiffTest(c, t.Name())
-	}
+		temp_file, err := os.CreateTemp("../../../", "bigtable_instance_test_")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error creating temporary file: %v\n", err)
+			return
+		}
+		fmt.Printf("Temporary file created at: %s\n", temp_file.Name())
 
-	c = extendWithTGCData(t, c)
+		var testFailed = false
+		defer func() {
+			if temp_file != nil {
+				temp_file.Close() // Close the file handle
+
+				if testFailed {
+					fmt.Printf("Test failed, keeping log file: %s\n", temp_file.Name())
+				} else {
+					err := os.Remove(temp_file.Name())
+					if err != nil {
+						fmt.Fprintf(os.Stdout, "Test passed, but failed to delete log file: %v\n", err)
+					} else {
+						fmt.Println("Test passed, deleted log file.")
+					}
+				}
+			}
+		}()
+		c = initializeReleaseDiffTest(c, t.Name(), temp_file)
+
+	}
 
 	// terraform_labels is a computed field to which "goog-terraform-provisioned": "true" is always
 	// added by the provider. ImportStateVerify "checks for strict equality and does not respect
@@ -164,6 +186,12 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 	c.Steps = steps
 
 	resource.Test(t, c)
+
+	if t.Failed() {
+		fmt.Fprintf(os.Stdout, "Test %s failed, see logs for details.\n", t.Name())
+
+	}
+
 }
 
 // We need to explicitly close the VCR recorder to save the cassette
@@ -207,7 +235,7 @@ func isReleaseDiffEnabled() bool {
 	return releaseDiff != ""
 }
 
-func initializeReleaseDiffTest(c resource.TestCase, testName string) resource.TestCase {
+func initializeReleaseDiffTest(c resource.TestCase, testName string, temp_file *os.File) resource.TestCase {
 	var releaseProvider string
 	packagePath := fmt.Sprint(reflect.TypeOf(transport_tpg.Config{}).PkgPath())
 	if strings.Contains(packagePath, "google-beta") {
@@ -248,12 +276,6 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string) resource.Te
 	var countSteps = 0
 
 	var replacementSteps []resource.TestStep
-	temp_file, err := os.CreateTemp("../../../", "bigtable_instance_test_")
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error creating temporary file: %v\n", err)
-		return c
-	}
-	fmt.Printf("Temporary file created at: %s\n", temp_file.Name())
 	for _, testStep := range c.Steps {
 		// todo: add preconfig - categorize test failures (add flag to steps that if they fail is a diff failure)
 		if testStep.Config != "" {
@@ -261,6 +283,7 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string) resource.Te
 			testStep.Config = reformConfigWithProvider(ogConfig, localProviderName)
 			fmt.Fprintf(os.Stdout, "Reformatted config: %s\n", testStep.Config)
 			testStep.PreConfig = func() {
+				// todo: more descriptive steps (maybe done through a helper function)
 				fmt.Fprintf(temp_file, "Step %d: Bigtable Invalid Instance creation started\n", countSteps)
 				countSteps++
 			}
