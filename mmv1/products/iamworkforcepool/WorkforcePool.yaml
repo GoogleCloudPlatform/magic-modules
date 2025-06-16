@@ -68,6 +68,10 @@ examples:
 iam_policy:
   parent_resource_attribute: 'workforce_pool_id'
   method_name_separator: ':'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  allowed_iam_role: 'roles/iam.workforcePoolViewer'
+  admin_iam_role: 'roles/iam.workforcePoolAdmin'
+  iam_conditions_request_type: 'REQUEST_BODY'
   fetch_iam_policy_verb: 'POST'
   import_format:
     - 'locations/{{location}}/workforcePools/{{workforce_pool_id}}'
