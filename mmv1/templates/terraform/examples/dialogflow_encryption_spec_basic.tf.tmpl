@@ -27,7 +27,7 @@ resource "time_sleep" "wait_enable_service_api" {
   create_duration = "120s"
 }
 
-resource "google_project_service_identity" "cmek_sa" {
+resource "google_project_service_identity" "gcp_sa" {
   provider   = google-beta
   service    = "dialogflow.googleapis.com"
   project    = google_project.project.project_id
@@ -35,7 +35,7 @@ resource "google_project_service_identity" "cmek_sa" {
 }
 
 resource "time_sleep" "wait_create_sa" {
-  depends_on      = [google_project_service_identity.cmek_sa]
+  depends_on      = [google_project_service_identity.gcp_sa]
   create_duration = "120s"
 }
 
@@ -57,7 +57,7 @@ resource "google_kms_crypto_key" "key" {
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
   provider      = google-beta
   crypto_key_id = google_kms_crypto_key.key.id
-  member        = google_project_service_identity.cmek_sa.member
+  member        = "${replace(google_project_service_identity.gcp_sa.member, "@gcp-sa-dialogflow.iam", "@gcp-sa-ccai-cmek.iam")}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   depends_on    = [time_sleep.wait_create_sa]
 }
