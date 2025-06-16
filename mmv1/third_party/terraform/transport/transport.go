@@ -190,23 +190,26 @@ func IsApiNotEnabledError(err error) bool {
 	return false
 }
 
-func PluralDataSourceGetList(d *schema.ResourceData, config *Config, billingProject *string, userAgent string, url string, listFlattener func(config *Config, res interface{}) ([]interface{}, error), params map[string]string, resourecToList string) ([]interface{}, error) {
+func PluralDataSourceGetList(d *schema.ResourceData, config *Config, billingProject *string, userAgent string, u string, listFlattener func(config *Config, res interface{}) ([]interface{}, error), params map[string]string, resourecToList string) ([]interface{}, error) {
+	if params == nil {
+		params = make(map[string]string)
+	}
+
 	items := make([]interface{}, 0)
 	for {
 		// Depending on previous iterations, params might contain a pageToken param
-		url, err := AddQueryParams(url, params)
+		url, err := AddQueryParams(u, params)
 		if err != nil {
 			return nil, err
 		}
 
 		headers := make(http.Header)
 		opts := SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			RawURL:    url,
-			UserAgent: userAgent,
-			Headers:   headers,
-			// ErrorRetryPredicates used to allow retrying if rate limits are hit when requesting multiple pages in a row
+			Config:               config,
+			Method:               "GET",
+			RawURL:               url,
+			UserAgent:            userAgent,
+			Headers:              headers,
 			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
 		}
 		if billingProject != nil {
@@ -218,55 +221,55 @@ func PluralDataSourceGetList(d *schema.ResourceData, config *Config, billingProj
 		}
 
 		if res == nil {
-			// Decoding the object has resulted in it being gone. It may be marked deleted
-			log.Printf("[DEBUG] Removing KMSCryptoKey because it no longer exists.")
+			log.Printf("[DEBUG] Removing %s because it no longer exists.", resourecToList)
 			d.SetId("")
 			return nil, nil
 		}
 
+		var newItems []interface{}
 		if listFlattener != nil {
-			if res[resourecToList] == nil {
-				break
-			}
-			items, err = listFlattener(config, res[resourecToList])
-			if err != nil {
-				return nil, err
+			if res[resourecToList] != nil {
+				flattened, err := listFlattener(config, res[resourecToList])
+				if err != nil {
+					return nil, err
+				}
+				newItems = flattened
 			}
 		} else {
 			if v, ok := res[resourecToList].([]interface{}); ok {
-				items = append(items, v...)
+				newItems = v
 			}
 		}
+		items = append(items, newItems...)
 
-		// Handle pagination for next loop, or break loop
-		v, ok := res["nextPageToken"]
-		if ok {
+		if v, ok := res["nextPageToken"]; ok && v != nil && v.(string) != "" {
 			params["pageToken"] = v.(string)
-		}
-		if !ok {
+		} else {
 			break
 		}
 	}
 	return items, nil
 }
 
-func PluralDataSourceGetListMap(d *schema.ResourceData, config *Config, billingProject *string, userAgent string, url string, listFlattener func(config *Config, res interface{}) ([]map[string]interface{}, error), params map[string]string, resourecToList string) ([]map[string]interface{}, error) {
+func PluralDataSourceGetListMap(d *schema.ResourceData, config *Config, billingProject *string, userAgent string, u string, listFlattener func(config *Config, res interface{}) ([]map[string]interface{}, error), params map[string]string, resourecToList string) ([]map[string]interface{}, error) {
+	if params == nil {
+		params = make(map[string]string)
+	}
+
 	items := make([]map[string]interface{}, 0)
 	for {
-		// Depending on previous iterations, params might contain a pageToken param
-		url, err := AddQueryParams(url, params)
+		url, err := AddQueryParams(u, params)
 		if err != nil {
 			return nil, err
 		}
 
 		headers := make(http.Header)
 		opts := SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			RawURL:    url,
-			UserAgent: userAgent,
-			Headers:   headers,
-			// ErrorRetryPredicates used to allow retrying if rate limits are hit when requesting multiple pages in a row
+			Config:               config,
+			Method:               "GET",
+			RawURL:               url,
+			UserAgent:            userAgent,
+			Headers:              headers,
 			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
 		}
 		if billingProject != nil {
@@ -278,32 +281,36 @@ func PluralDataSourceGetListMap(d *schema.ResourceData, config *Config, billingP
 		}
 
 		if res == nil {
-			// Decoding the object has resulted in it being gone. It may be marked deleted
-			log.Printf("[DEBUG] Removing KMSCryptoKey because it no longer exists.")
+			log.Printf("[DEBUG] Removing %s because it no longer exists.", resourecToList)
 			d.SetId("")
 			return nil, nil
 		}
 
+		var newItems []map[string]interface{}
 		if listFlattener != nil {
-			if res[resourecToList] == nil {
-				break
-			}
-			items, err = listFlattener(config, res[resourecToList])
-			if err != nil {
-				return nil, err
+			if res[resourecToList] != nil {
+				flattened, err := listFlattener(config, res[resourecToList])
+				if err != nil {
+					return nil, err
+				}
+				newItems = flattened
 			}
 		} else {
-			if v, ok := res[resourecToList].([]map[string]interface{}); ok {
-				items = append(items, v...)
+			if v, ok := res[resourecToList].([]interface{}); ok {
+				for _, item := range v {
+					if m, ok := item.(map[string]interface{}); ok {
+						newItems = append(newItems, m)
+					} else {
+						return nil, fmt.Errorf("item in list is not a map[string]interface{}")
+					}
+				}
 			}
 		}
+		items = append(items, newItems...)
 
-		// Handle pagination for next loop, or break loop
-		v, ok := res["nextPageToken"]
-		if ok {
+		if v, ok := res["nextPageToken"]; ok && v != nil && v.(string) != "" {
 			params["pageToken"] = v.(string)
-		}
-		if !ok {
+		} else {
 			break
 		}
 	}
