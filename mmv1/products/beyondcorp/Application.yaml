@@ -13,7 +13,7 @@
 
 ---
 name: Application
-deprecation_message: '`google_beyondcorp_application` is deprecated.'
+deprecation_message: '`google_beyondcorp_application` is deprecated. Use `google_beyondcorp_security_gateway_application` instead.'
 description: Specifies application endpoint(s) to protect behind a Security Gateway.
 base_url: projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications
 update_mask: true

@@ -37,7 +37,9 @@ const (
 	testNonMember     = "bananaman5000"
 	testRepo          = "magic-modules"
 	testOwner         = "GoogleCloudPlatform"
-	testPRNumber      = "13969"                                    // replace this with an actual PR Number
+	testReviewer      = "melinath"
+	testPRNumber      = "14031"
+	testOldPRNumber   = "13969"                                    // replace this with an actual PR Number
 	testPRCommitSha   = "4a8409686810551655eea2533e939cc5344e83e2" // replace this with an actual SHA
 	testMainCommitSha = "fd910977cf24595d2c04e3f0a369a82c79fdb8f8" // replace this with an actual SHA
 	testLabel         = "terraform-3.0"
@@ -276,27 +278,70 @@ func TestIntegrationCreateWorkflowDispatchEvent(t *testing.T) {
 	t.Logf("Successfully triggered workflow dispatch event")
 }
 
+func TestIntegrationRequestAndRemovePullRequestReviewers(t *testing.T) {
+	client := skipIfNoToken(t)
+
+	// Request a reviewer
+	reviewers := []string{testReviewer} // Request the owner to review their own PR
+	err := client.RequestPullRequestReviewers(testPRNumber, reviewers)
+	if err != nil {
+		t.Fatalf("RequestPullRequestReviewers failed: %v", err)
+	}
+
+	// Remove the reviewer
+	err = client.RemovePullRequestReviewers(testPRNumber, reviewers)
+	if err != nil {
+		t.Fatalf("RemovePullRequestReviewers failed: %v", err)
+	}
+
+	t.Logf("Successfully requested and removed reviewers: %v", reviewers)
+}
+
+func TestIntegrationGetPullRequestRequestedReviewers(t *testing.T) {
+	client := skipIfNoToken(t)
+
+	reviewers, err := client.GetPullRequestRequestedReviewers(testPRNumber)
+	if err != nil {
+		t.Fatalf("GetPullRequestRequestedReviewers failed: %v", err)
+	}
+
+	t.Logf("Found %d requested reviewers", len(reviewers))
+	for i, reviewer := range reviewers {
+		t.Logf("Reviewer %d: %s", i+1, reviewer.Login)
+	}
+}
+
+func TestIntegrationGetPullRequestPreviousReviewers(t *testing.T) {
+	client := skipIfNoToken(t)
+
+	reviewers, err := client.GetPullRequestPreviousReviewers(testOldPRNumber)
+	if err != nil {
+		t.Fatalf("GetPullRequestPreviousReviewers failed: %v", err)
+	}
+
+	t.Logf("Found %d previous reviewers", len(reviewers))
+	for i, reviewer := range reviewers {
+		t.Logf("Previous reviewer %d: %s", i+1, reviewer.Login)
+	}
+}
+
 // TestIntegrationMergePullRequest is commented out as it has permanent effects
 // Uncomment and run only if you're sure you want to merge the PR
 /*
  func TestIntegrationMergePullRequest(t *testing.T) {
 	 client := skipIfNoToken(t)
-
 	 // Skip this test by default as it has permanent effects
 	 if os.Getenv("RUN_MERGE_PR_TEST") != "true" {
 		 t.Skip("Skipping merge PR test: set RUN_MERGE_PR_TEST=true to run")
 	 }
-
 	 // You'll need a valid commit SHA for this test
 	 if testPRCommitSha == "HEAD" {
 		 t.Skip("Skipping MergePullRequest test: need a valid commit SHA")
 	 }
-
 	 err := client.MergePullRequest(testOwner, testRepo, testPRNumber, testPRCommitSha)
 	 if err != nil {
 		 t.Fatalf("MergePullRequest failed: %v", err)
 	 }
-
 	 t.Logf("Successfully merged pull request")
  }
 */

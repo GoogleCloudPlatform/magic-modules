@@ -42,7 +42,7 @@ async:
 iam_policy:
   method_name_separator: ':'
   allowed_iam_role: 'roles/artifactregistry.reader'
-    # TODO (camthornton): Change to repository_id in 4.0
+    # TODO: Change to repository_id in 4.0
   parent_resource_attribute: 'repository'
   base_url: 'projects/{{project}}/locations/{{location}}/repositories/{{name}}'
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
@@ -99,7 +99,7 @@ examples:
   - name: 'artifact_registry_repository_remote_apt'
     primary_resource_id: 'my-repo'
     vars:
-      repository_id: 'debian-buster'
+      repository_id: 'debian-stable'
       desc: 'example remote apt repository'
   - name: 'artifact_registry_repository_remote_yum'
     primary_resource_id: 'my-repo'
@@ -389,7 +389,7 @@ properties:
           type: NestedObject
           description: |-
             Policy condition for matching versions.
-          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
+          # TODO: exactly_one_of: condition, mostRecentVersions
           properties:
             - name: 'tagState'
               type: Enum
@@ -435,7 +435,7 @@ properties:
           description: |-
             Policy condition for retaining a minimum number of versions. May only be
             specified with a Keep action.
-          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
+          # TODO: exactly_one_of: condition, mostRecentVersions
           properties:
             - name: 'packageNamePrefixes'
               type: Array
@@ -483,7 +483,7 @@ properties:
               - name: 'repositoryBase'
                 type: Enum
                 description: |-
-                  A common public repository base for Apt, e.g. `"debian/dists/buster"`
+                  A common public repository base for Apt, e.g. `"debian/dists/stable"`
                 required: true
                 immutable: true
                 enum_values:

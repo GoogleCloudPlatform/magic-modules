@@ -11,12 +11,9 @@ import (
 	"time"
 	"net/http"
 
-{{ if ne $.TargetVersionName `ga` -}}
-	// For beta tests only
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
 	tpgservicusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
-{{- end }}
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/tags"
@@ -41,14 +38,9 @@ import (
 
 var SharedKeyRing = "tftest-shared-keyring-1"
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 var DefaultKeyHandleName = "eed58b7b-20ad-4da8-ad85-ba78a0d5ab87"
 var DefaultKeyHandleResourceType = "compute.googleapis.com/Disk"
 var CloudKmsSrviceName = "cloudkms.googleapis.com"
-
-{{- end }}
-
 
 var SharedCryptoKey = map[string]string{
 	"ENCRYPT_DECRYPT":    "tftest-shared-key-1",
@@ -90,8 +82,6 @@ func BootstrapKMSKeyWithPurpose(t *testing.T, purpose string) BootstrappedKMS {
 func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID string) BootstrappedKMS {
 	return BootstrapKMSKeyWithPurposeInLocationAndName(t, purpose, locationID, SharedCryptoKey[purpose])
 }
-
-{{ if ne $.TargetVersionName `ga` -}}
 
 type BootstrappedKMSAutokey struct {
     *cloudkms.AutokeyConfig
@@ -327,8 +317,6 @@ func setPolicy(crmService *resourceManagerV3.Service, resourceType string, resou
 	return nil
 }
 
-{{- end }}
-
 func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, locationID, keyShortName string) BootstrappedKMS {
 	config := BootstrapConfig(t)
 	if config == nil {
@@ -397,7 +385,7 @@ func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, location
 		t.Fatalf("Unable to bootstrap KMS key. CryptoKey is nil!")
 	}
 
-	// TODO(b/372305432): Use the pagination properly.
+	// TODO: b/372305432 Use the pagination properly.
 	ckvResp, err := kmsClient.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(keyName).Do()
 	if err != nil {
 		t.Fatalf("Unable to list cryptoKeyVersions: %v", err)
@@ -883,8 +871,6 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 	return projects
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 // BootstrapFolder creates or get a folder having a input folderDisplayName within a TestOrgEnv
 func BootstrapFolder(t *testing.T, folderDisplayName string) *resourceManagerV3.Folder {
 	config := BootstrapConfig(t)
@@ -933,8 +919,6 @@ func BootstrapFolder(t *testing.T, folderDisplayName string) *resourceManagerV3.
 	}
 	return folder
 }
-
-{{- end }}
 
 // BootstrapProject will create or get a project named
 // "<projectIDPrefix><projectIDSuffix>" that will persist across test runs,
@@ -2059,15 +2043,34 @@ func BootstrapSharedCodeRepositoryIndex(t *testing.T, codeRepositoryIndexId, loc
 }
 
 const sharedTagKeyPrefix = "tf-bootstrap-tagkey"
+const sharedTagKeyParentErr = "Parent %q is not valid. Should be in format: 'organizations/123' OR 'projects/123'."
 
-func BootstrapSharedTestTagKey(t *testing.T, testId string) string {
+func BootstrapSharedTestProjectTagKey(t *testing.T, testId string, obj map[string]interface{}) string {
+	pid := envvar.GetTestProjectFromEnv()
+	return BootstrapSharedTestTagKeyDetails(t, testId, "projects/"+pid, obj)["shared_tag_key"]
+}
+
+func BootstrapSharedTestOrganizationTagKey(t *testing.T, testId string, obj map[string]interface{}) string {
 	org := envvar.GetTestOrgFromEnv(t)
+	return BootstrapSharedTestTagKeyDetails(t, testId, "organizations/"+org, obj)["shared_tag_key"]
+}
+
+// parent should be in format: {"organization" OR "projects"}/{id}
+func BootstrapSharedTestTagKeyDetails(t *testing.T, testId string, parent string, obj map[string]interface{}) map[string]string {
 	sharedTagKey := fmt.Sprintf("%s-%s", sharedTagKeyPrefix, testId)
-	tagKeyName := fmt.Sprintf("%s/%s", org, sharedTagKey)
+
+	parentSplit := strings.Split(parent, "/")
+	if len(parentSplit) < 2 || (parentSplit[0] != "organizations" && parentSplit[0] != "projects") {
+		parentErr := fmt.Sprintf(sharedTagKeyParentErr, parent)
+		t.Fatalf("Error bootstrapping shared tag key %q: %s", sharedTagKey, parentErr)
+	}
+
+	parentId := parentSplit[1]
+	tagKeyName := fmt.Sprintf("%s/%s", parentId, sharedTagKey)
 
 	config := BootstrapConfig(t)
 	if config == nil {
-		return ""
+		return make(map[string]string)
 	}
 
 	log.Printf("[DEBUG] Getting shared test tag key %q", sharedTagKey)
@@ -2083,9 +2086,12 @@ func BootstrapSharedTestTagKey(t *testing.T, testId string) string {
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
 		log.Printf("[DEBUG] TagKey %q not found, bootstrapping", sharedTagKey)
 		tagKeyObj := map[string]interface{}{
-			"parent":      "organizations/" + org,
+			"parent":      parent,
 			"shortName":   sharedTagKey,
 			"description": "Bootstrapped tag key for Terraform Acceptance testing",
+		}
+		if obj != nil {
+			maps.Insert(tagKeyObj, maps.All(obj))
 		}
 
 		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -2113,7 +2119,7 @@ func BootstrapSharedTestTagKey(t *testing.T, testId string) string {
 		}
 	}
 
-	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	getTagKeyResponse, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		Project:   config.Project,
@@ -2126,20 +2132,32 @@ func BootstrapSharedTestTagKey(t *testing.T, testId string) string {
 		t.Fatalf("Error getting shared tag key %q: %s", sharedTagKey, err)
 	}
 
-	return sharedTagKey
+	return map[string]string{
+		"name": getTagKeyResponse["name"].(string),
+		"shared_tag_key":    sharedTagKey,
+	}
 }
 
 const sharedTagValuePrefix = "tf-bootstrap-tagvalue"
 
-func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey string) string {
+func BootstrapSharedTestProjectTagValue(t *testing.T, testId string, tagKey string) string {
+	pid := envvar.GetTestProjectFromEnv()
+	return BootstrapSharedTestTagValueDetails(t, testId, tagKey, pid)["shared_tag_value"]
+}
+
+func BootstrapSharedTestOrganizationTagValue(t *testing.T, testId string, tagKey string) string {
 	org := envvar.GetTestOrgFromEnv(t)
+	return BootstrapSharedTestTagValueDetails(t, testId, tagKey, org)["shared_tag_value"]
+}
+
+func BootstrapSharedTestTagValueDetails(t *testing.T, testId string, tagKey, parentId string) map[string]string {
 	sharedTagValue := fmt.Sprintf("%s-%s", sharedTagValuePrefix, testId)
-	tagKeyName := fmt.Sprintf("%s/%s", org, tagKey)
+	tagKeyName := fmt.Sprintf("%s/%s", parentId, tagKey)
 	tagValueName := fmt.Sprintf("%s/%s", tagKeyName, sharedTagValue)
 
 	config := BootstrapConfig(t)
 	if config == nil {
-		return ""
+		return make(map[string]string)
 	}
 
 	log.Printf("[DEBUG] Getting shared test tag value %q", sharedTagValue)
@@ -2198,8 +2216,7 @@ func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey string) str
 			t.Fatalf("Error waiting to create TagValue: %s", err)
 		}
 	}
-
-	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	getTagValueResponse, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		Project:   config.Project,
@@ -2212,7 +2229,10 @@ func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey string) str
 		t.Fatalf("Error getting shared tag value %q: %s", sharedTagValue, err)
 	}
 
-	return sharedTagValue
+    return map[string]string{
+		"name": getTagValueResponse["name"].(string),
+		"shared_tag_value":    sharedTagValue,
+	}
 }
 
 type BootstrapClient struct {
