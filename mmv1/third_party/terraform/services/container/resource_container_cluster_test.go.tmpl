@@ -1298,7 +1298,6 @@ func TestAccContainerCluster_withInvalidReleaseChannel(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withAcceleratedGkeAutoUpgradeConfig(t *testing.T) {
 	t.Parallel()
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
@@ -1323,7 +1322,6 @@ func TestAccContainerCluster_withAcceleratedGkeAutoUpgradeConfig(t *testing.T) {
 		},
 	})
 }
-{{- end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withTelemetryEnabled(t *testing.T) {
@@ -7504,7 +7502,6 @@ resource "google_container_cluster" "with_release_channel" {
 `, clusterName, channel, networkName, subnetworkName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccContainerCluster_withAcceleratedGkeAutoUpgradeConfig(clusterName, patchMode, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_gke_auto_upgrade_config" {
@@ -7522,7 +7519,6 @@ resource "google_container_cluster" "with_gke_auto_upgrade_config" {
 }
 `, clusterName, patchMode, networkName, subnetworkName)
 }
-{{- end }}
 
 {{ if ne $.TargetVersionName `ga` -}}
 func testAccContainerCluster_withTelemetryEnabled(clusterName, telemetryType, networkName, subnetworkName string) string {

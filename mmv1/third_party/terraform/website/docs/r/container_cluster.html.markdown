@@ -330,7 +330,7 @@ field from your config will cause Terraform to stop managing your cluster's
 release channel, but will not unenroll it. Instead, use the `"UNSPECIFIED"`
 channel. Structure is [documented below](#nested_release_channel).
 
-* `gke_auto_upgrade_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html))
+* `gke_auto_upgrade_config` - (Optional)
 Configuration options for the auto-upgrade patch type feature, which provide more control over the speed of automatic upgrades of your GKE clusters.
 Structure is [documented below](#nested_gke_auto_upgrade_config).
 
