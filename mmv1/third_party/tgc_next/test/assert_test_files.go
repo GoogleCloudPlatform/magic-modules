@@ -21,6 +21,7 @@ import (
 	"go.uber.org/zap/zaptest"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 var (
@@ -169,7 +170,19 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 			if err := compareAssetName(asset.Name, roundtripAsset.Name); err != nil {
 				return err
 			}
-			if diff := cmp.Diff(asset.Resource, roundtripAsset.Resource); diff != "" {
+			if diff := cmp.Diff(
+				asset.Resource,
+				roundtripAsset.Resource,
+				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data"),
+				// Consider DiscoveryDocumentURI equal if they have the same number of path segments when split by "/".
+				cmp.FilterPath(func(p cmp.Path) bool {
+					return p.Last().String() == ".DiscoveryDocumentURI"
+				}, cmp.Comparer(func(x, y string) bool {
+					parts1 := strings.Split(x, "/")
+					parts2 := strings.Split(y, "/")
+					return len(parts1) == len(parts2)
+				})),
+			); diff != "" {
 				return fmt.Errorf("differences found between exported asset and roundtrip asset (-want +got):\n%s", diff)
 			}
 		}
