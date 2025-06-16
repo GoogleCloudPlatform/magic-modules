@@ -13,5 +13,5 @@ fields:
   - field: 'instance_name'
   - field: 'name'
   - field: 'project'
-  - field: 'split_keys'
   - field: 'row_key_schema'
+  - field: 'split_keys'
