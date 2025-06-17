@@ -107,12 +107,6 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
 
 func testAccContactCenterInsightsAnalysisRule_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_contact_center_insights_issue_model" "alt_issue_model_id" {
-  display_name = "test-issue-model-%{random_suffix}"
-  location = "us-central1"
-  state = "DEPLOYED"
-}
-
 resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
   display_name = "analysis-rule-display-name-%{random_suffix}-updated"
   location = "us-central1"
@@ -128,7 +122,7 @@ resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
     }
     run_entity_annotator         = true
     run_intent_annotator         = true
-    run_issue_model_annotator    = true
+    run_issue_model_annotator    = false
     run_phrase_matcher_annotator = true
     run_qa_annotator             = true
     run_sentiment_annotator      = true
