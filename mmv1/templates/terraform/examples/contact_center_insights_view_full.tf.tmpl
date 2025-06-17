@@ -1,0 +1,5 @@
+resource "google_contact_center_insights_view" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+  display_name = "view-display-name"
+  value    = "medium=\"PHONE_CALL\""
+}
