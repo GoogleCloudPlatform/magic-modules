@@ -40,8 +40,9 @@ examples:
       policy_name: 'tf-test-policy'
   - name: 'region_network_firewall_policy_roce'
     primary_resource_id: 'policy'
+    min_version: beta
     vars:
-      policy_name: 'tf-test-policy'
+      policy_name: 'rnf-policy'
 parameters:
   - name: 'region'
     type: String
