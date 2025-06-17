@@ -445,6 +445,7 @@ properties:
           Enabling outbound public ip for the instance.
       - name: 'allocatedIpRangeOverride'
         type: String
+        immutable: true
         description: |
           Name of the allocated IP range for the private IP AlloyDB instance, for example: "google-managed-services-default".
           If set, the instance IPs will be created from this allocated range and will override the IP range used by the parent cluster.
