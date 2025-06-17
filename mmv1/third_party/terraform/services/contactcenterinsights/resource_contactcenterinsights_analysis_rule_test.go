@@ -77,7 +77,6 @@ func testAccContactCenterInsightsAnalysisRule_full(context map[string]interface{
 resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
   display_name = "analysis-rule-display-name-%{random_suffix}"
   location = "us-central1"
-  analysis_rule_id = "some-analysis-rule-%{random_suffix}"
   conversation_filter = "agent_id = \"1\""
   annotator_selector {
     run_interruption_annotator = false
@@ -111,7 +110,6 @@ func testAccContactCenterInsightsAnalysisRule_update(context map[string]interfac
 resource "google_contact_center_insights_analysis_rule" "basic_analysis_rule" {
   display_name = "analysis-rule-display-name-%{random_suffix}-updated"
   location = "us-central1"
-  analysis_rule_id = "some-analysis-rule-%{random_suffix}"
   conversation_filter = "agent_id = \"1\""
   annotator_selector {
     run_interruption_annotator = true
