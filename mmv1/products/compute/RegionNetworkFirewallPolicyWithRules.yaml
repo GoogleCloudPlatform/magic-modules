@@ -52,6 +52,11 @@ examples:
       tag_value: 'tag-value'
     test_env_vars:
       org_id: 'ORG_ID'
+  - name: 'compute_region_network_firewall_policy_with_rules_roce'
+    primary_resource_id: 'policy'
+    min_version: beta
+    vars:
+      policy_name: 'rnf-policy'
 parameters:
   - name: 'region'
     type: String
