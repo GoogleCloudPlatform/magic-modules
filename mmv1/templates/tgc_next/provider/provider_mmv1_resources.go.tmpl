@@ -13,3 +13,12 @@ var handwrittenTfplan2caiResources = map[string]*schema.Resource{
 	"google_project":          resourcemanager.ResourceGoogleProject(),
 	// ####### END handwritten resources ###########
 }
+
+// Generated resources: {{ $.ResourceCount }}
+var generatedResources = map[string]*schema.Resource{
+	{{- range $object := $.ResourcesForVersion }}
+		{{- if $object.ResourceName }}
+			"{{ $object.TerraformName }}": {{ $object.ServiceName }}.Resource{{ $object.ResourceName -}}(),
+		{{- end }}
+	{{- end }}
+}
