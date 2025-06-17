@@ -20,9 +20,9 @@ description: |
 references:
   guides:
     'Creating Sub Prefixes': 'https://cloud.google.com/vpc/docs/create-sub-prefixes-ip-addresses'
-base_url: 'projects/{{delegatedProject}}/regions/{{region}}/publicDelegatedPrefixes/{{public_delegated_prefix}}/publicDelegatedSubPrefixs'
-self_link: 'projects/{{delegatedProject}}/regions/{{region}}/publicDelegatedPrefixes/{{public_delegated_prefix}}/publicDelegatedSubPrefixs/{{name}}'
-create_url: 'projects/{{delegatedProject}}/regions/{{region}}/publicDelegatedPrefixes/{{public_delegated_prefix}}/publicDelegatedSubPrefixs?resourceId={{name}}'
+base_url: 'projects/{{project}}/regions/{{region}}/publicDelegatedPrefixes/{{public_delegated_prefix}}/publicDelegatedSubPrefixs'
+self_link: 'projects/{{project}}/regions/{{region}}/publicDelegatedPrefixes/{{public_delegated_prefix}}/publicDelegatedSubPrefixs/{{name}}'
+create_url: 'projects/{{project}}/regions/{{region}}/publicDelegatedPrefixes/{{public_delegated_prefix}}/publicDelegatedSubPrefixs?resourceId={{name}}'
 immutable: true
 async:
   actions: ['create', 'delete', 'update']
@@ -58,6 +58,12 @@ properties:
           type: String
           description: |
             Optional description of this sub public delgated prefix.
+        - name: 'project'
+          type: String
+          url_param_only: true
+          required: true
+          description: |
+            Project under which the PublicdelegatedPrefix is present.
         - name: 'region'
           type: String
           url_param_only: true
