@@ -8,15 +8,15 @@ resource "google_project" "project" {
 }
 
 resource "google_project_service" "cloudkms" {
-  provider  = google-beta
-  project   = google_project.project.project_id
-  service   = "cloudkms.googleapis.com"
+  provider = google-beta
+  project  = google_project.project.project_id
+  service  = "cloudkms.googleapis.com"
 }
 
 resource "google_project_service" "dialogflow" {
-  provider  = google-beta
-  project   = google_project.project.project_id
-  service   = "dialogflow.googleapis.com"
+  provider = google-beta
+  project  = google_project.project.project_id
+  service  = "dialogflow.googleapis.com"
 }
 
 resource "time_sleep" "wait_enable_service_api" {
@@ -24,7 +24,7 @@ resource "time_sleep" "wait_enable_service_api" {
     google_project_service.cloudkms,
     google_project_service.dialogflow
   ]
-  create_duration = "120s"
+  create_duration = "30s"
 }
 
 resource "google_project_service_identity" "gcp_sa" {
@@ -36,7 +36,7 @@ resource "google_project_service_identity" "gcp_sa" {
 
 resource "time_sleep" "wait_create_sa" {
   depends_on      = [google_project_service_identity.gcp_sa]
-  create_duration = "120s"
+  create_duration = "30s"
 }
 
 resource "google_kms_key_ring" "keyring" {
@@ -62,11 +62,6 @@ resource "google_kms_crypto_key_iam_member" "crypto_key" {
   depends_on    = [time_sleep.wait_create_sa]
 }
 
-resource "time_sleep" "wait_set_iam" {
-  depends_on      = [google_kms_crypto_key_iam_member.crypto_key]
-  create_duration = "120s"
-}
-
 resource "google_dialogflow_encryption_spec" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   project  = google_project.project.project_id
@@ -74,5 +69,5 @@ resource "google_dialogflow_encryption_spec" "{{$.PrimaryResourceId}}" {
   encryption_spec {
     kms_key = google_kms_crypto_key.key.id
   }
-  depends_on = [time_sleep.wait_set_iam]
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
