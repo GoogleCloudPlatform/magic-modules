@@ -9,8 +9,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-	"github.com/hashicorp/terraform-provider-google/tpgresource"
 )
 
 func TestAccFirestoreDocument_update(t *testing.T) {
@@ -110,7 +110,7 @@ func TestAccFirestoreDocument_firestoreDocumentUpdateExampleEmptyField(t *testin
 			"random": {},
 			"time":   {},
 		},
-		CheckDestroy: testAccCheckFirestoreDocumentDestroyProducer(t),
+		CheckDestroy: testAccCheckFirestoreDocumentDestroyProducerManuallyGenerated(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirestoreDocument_firestoreDocumentBasicInitialConfiguration(context),
@@ -224,7 +224,7 @@ resource "google_firestore_document" "empty_doc" {
 `, context)
 }
 
-func testAccCheckFirestoreDocumentDestroyProducer(t *testing.T) func(s *terraform.State) error {
+func testAccCheckFirestoreDocumentDestroyProducerManuallyGenerated(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
 			if rs.Type != "google_firestore_document" {
