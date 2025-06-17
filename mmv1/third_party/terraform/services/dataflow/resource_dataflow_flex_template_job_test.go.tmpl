@@ -422,6 +422,9 @@ func TestAccDataflowFlexTemplateJob_withProviderDefaultLabels(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDataflowFlexTemplateJob_withProviderDefaultLabels(job, bucket, topic, randStr),
