@@ -230,6 +230,9 @@ type Resource struct {
 	// (i.e. terraform-provider-conversion)
 	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
 
+	// If true, include resource in the new package of TGC (terraform-provider-conversion)
+	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
+
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 
