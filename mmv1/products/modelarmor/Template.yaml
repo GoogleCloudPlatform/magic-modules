@@ -23,21 +23,37 @@ id_format: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 import_format:
 - projects/{{project}}/locations/{{location}}/templates/{{template_id}}
 examples:
-- name: modelarmor_template_basic
-  primary_resource_id: test_resource
+- name: 'modelarmor_template_basic'
+  primary_resource_id: 'template-basic'
   vars:
-    location: us-central1
-    templateId: tf-test-template-id
-    label_test_label: "test-value"
+    location: "us-central1"
+    templateId: "modelarmor1"
     filter_config_rai_settings_rai_filters_0_filter_type: SEXUALLY_EXPLICIT
     filter_config_rai_settings_rai_filters_0_confidence_level: LOW_AND_ABOVE
+    template_metadata_multi_language_detection_enable_multi_language_detection: true
+- name: 'modelarmor_template_filter_config'
+  primary_resource_id: 'template-filter-config'
+  vars:
+    location: "us-east7"
+    templateId: "modelarmor2"
+    filter_config_rai_settings_rai_filters_0_filter_type: HATE_SPEECH
+    filter_config_rai_settings_rai_filters_0_confidence_level: HIGH
     filter_config_rai_settings_filter_version: STABLE
-    sdp_settings_config_type: "basic-config"
+    sdp_settings_config_type: "basic_config"
     filter_config_sdp_settings_basic_config_filter_enforcement: ENABLED
     filter_config_pi_and_jailbreak_filter_settings_filter_enforcement: ENABLED
     filter_config_pi_and_jailbreak_filter_settings_confidence_level: MEDIUM_AND_ABOVE
     filter_config_pi_and_jailbreak_filter_settings_filter_version: STABLE
-    filter_config_malicious_uri_filter_settings_filter_enforcement: DISABLED
+    filter_config_malicious_uri_filter_settings_filter_enforcement: ENABLED
+    template_metadata_multi_language_detection_enable_multi_language_detection: false
+- name: 'modelarmor_template_template_metadata'
+  primary_resource_id: 'template-template-metadata'
+  vars:
+    location: "us-west1"
+    tempalteId: "modelarmor3"
+    filter_config_rai_settings_rai_filters_0_filter_type: HARASSMENT
+    filter_config_rai_settings_rai_filters_0_confidence_level: MEDIUM_AND_ABOVE
+    filter_config_rai_settings_filter_version: STABLE
     template_metadata_log_template_operations: true
     template_metadata_log_sanitize_operations: false
     template_metadata_multi_language_detection_enable_multi_language_detection: true
@@ -47,6 +63,15 @@ examples:
     template_metadata_custom_prompt_safety_error_message: "This is a custom error message for prompt"
     template_metadata_custom_llm_response_safety_error_code: 401
     template_metadata_enforcement_type: INSPECT_ONLY
+- name: 'modelarmor_template_label'
+  primary_resource_id: 'template-label'
+  vars:
+    location: "us-central1"
+    templateId: "modelarmor4"
+    label_test_label: template-test-label
+    filter_config_rai_settings_rai_filters_0_filter_type: DANGEROUS
+    filter_config_rai_settings_rai_filters_0_confidence_level: MEDIUM_AND_ABOVE
+    template_metadata_multi_language_detection_enable_multi_language_detection: false
 autogen_status: VGVtcGxhdGU=
 parameters:
 - name: location

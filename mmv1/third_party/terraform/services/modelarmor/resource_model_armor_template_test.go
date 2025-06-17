@@ -11,23 +11,109 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccModelArmorTemplate_createAndUpdate(t *testing.T) {
+// Helper function to expand a template
+func expandTemplate(tmplStr string, data map[string]interface{}) (string, error) {
+	tmpl, err := template.New("config").Parse(tmplStr)
+	if err != nil {
+		return "", err
+	}
+	var buf bytes.Buffer
+	err = tmpl.Execute(&buf, data)
+	if err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+func TestAccModelArmorTemplate_basic(t *testing.T) {
 	t.Parallel()
 
-	templateId := "tf-test-" + acctest.RandString(t, 10)
+	templateId := "modelarmor-test-basic-" + acctest.RandString(t, 10)
 
-	// Step 1: Create without any SDP settings
+	basicContext := map[string]interface{}{
+		"location":   "us-central1",
+		"templateId": templateId,
+		"filter_config_rai_settings_rai_filters_0_filter_type":                 "SEXUALLY_EXPLICIT",
+		"filter_config_rai_settings_rai_filters_0_confidence_level":            "LOW_AND_ABOVE",
+		"template_metadata_multi_language_detection_enable_multi_language_detection": true,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckModelArmorTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: func() string {
+					cfg, err := testAccModelArmorTemplate_basic_config(basicContext)
+					if err != nil {
+						t.Fatalf("Failed to expand basic config template: %v", err)
+					}
+					return cfg
+				}(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_model_armor_template.template-basic", "location", "us-central1"),
+					resource.TestCheckResourceAttr("google_model_armor_template.template-basic", "template_id", templateId),
+					resource.TestCheckResourceAttr("google_model_armor_template.template-basic", "filter_config.0.rai_settings.0.rai_filters.0.filter_type", "SEXUALLY_EXPLICIT"),
+					resource.TestCheckResourceAttr("google_model_armor_template.template-basic", "filter_config.0.rai_settings.0.rai_filters.0.confidence_level", "LOW_AND_ABOVE"),
+					resource.TestCheckResourceAttr("google_model_armor_template.template-basic", "template_metadata.0.multi_language_detection.0.enable_multi_language_detection", "true"),
+					resource.TestCheckResourceAttr("google_model_armor_template.template-basic", "filter_config.0.sdp_settings.#", "0"),
+				),
+			},
+			{
+				ResourceName:      "google_model_armor_template.template-basic",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccModelArmorTemplate_basic_config(context map[string]interface{}) (string, error) {
+	const basic_template = `
+resource "google_model_armor_template" "template-basic" {
+  location    = "{{.location}}"
+  template_id = "{{.templateId}}"
+
+  filter_config {
+    rai_settings {
+      rai_filters {
+        filter_type      = "{{.filter_config_rai_settings_rai_filters_0_filter_type}}"
+        confidence_level = "{{.filter_config_rai_settings_rai_filters_0_confidence_level}}"
+      }
+    }
+  }
+  template_metadata {
+    multi_language_detection {
+      enable_multi_language_detection = {{.template_metadata_multi_language_detection_enable_multi_language_detection}}
+    }
+  }
+}`
+	return expandTemplate(basic_template, context)
+}
+
+func TestAccModelArmorTemplate_pdate(t *testing.T) {
+	t.Parallel()
+
+	templateId := "modelarmor-test-update-" + acctest.RandString(t, 10)
+
 	initialContext := map[string]interface{}{
-		"location":         "us-central1",
-		"templateId":       templateId,
+		"location":   "us-central1",
+		"templateId": templateId,
+
 		"label_test_label": "env-testing-" + acctest.RandString(t, 5),
 
 		"filter_config_rai_settings_rai_filters_0_filter_type":      "HATE_SPEECH",
 		"filter_config_rai_settings_rai_filters_0_confidence_level": "MEDIUM_AND_ABOVE",
+		"filter_config_rai_settings_filter_version":                 "STABLE",
 
-		// No sdp_settings_config_type means no sdp_settings block rendered
+		"sdp_settings_config_type": "advanced_config",
+		"filter_config_sdp_settings_advanced_config_inspect_template":    "projects/llm-firewall-demo/locations/us-central1/inspectTemplates/t2",
+		"filter_config_sdp_settings_advanced_config_deidentify_template": "projects/llm-firewall-demo/locations/us-central1/deidentifyTemplates/t3",
+
 		"filter_config_pi_and_jailbreak_filter_settings_filter_enforcement": "ENABLED",
 		"filter_config_pi_and_jailbreak_filter_settings_confidence_level":   "HIGH",
+		"filter_config_pi_and_jailbreak_filter_settings_filter_version":     "STABLE",
 
 		"filter_config_malicious_uri_filter_settings_filter_enforcement": "ENABLED",
 
@@ -39,26 +125,27 @@ func TestAccModelArmorTemplate_createAndUpdate(t *testing.T) {
 		"template_metadata_custom_prompt_safety_error_code":                          400,
 		"template_metadata_custom_prompt_safety_error_message":                       "This is a custom error message for prompt",
 		"template_metadata_custom_llm_response_safety_error_code":                    401,
+		"template_metadata_enforcement_type":                                         "INSPECT_ONLY",
 	}
 
-	// Step 2: Update to include basic SDP settings
 	updatedContext := map[string]interface{}{
-		"location":         initialContext["location"],
-		"templateId":       initialContext["templateId"],
+		"location":   initialContext["location"],
+		"templateId": initialContext["templateId"],
+
 		"label_test_label": "env-updated-" + acctest.RandString(t, 5),
 
 		"filter_config_rai_settings_rai_filters_0_filter_type":      "DANGEROUS",
 		"filter_config_rai_settings_rai_filters_0_confidence_level": "LOW_AND_ABOVE",
+		"filter_config_rai_settings_filter_version":                 "RAI_FILTER_VERSION_UNSPECIFIED",
 
-		"sdp_settings_config_type":                                   "basic_config", // Control sdp_settings block
+		"sdp_settings_config_type":                                   "basic_config",
 		"filter_config_sdp_settings_basic_config_filter_enforcement": "ENABLED",
-		// advanced keys not needed for basic
 		"filter_config_sdp_settings_advanced_config_inspect_template":    "",
 		"filter_config_sdp_settings_advanced_config_deidentify_template": "",
 
-
 		"filter_config_pi_and_jailbreak_filter_settings_filter_enforcement": "DISABLED",
 		"filter_config_pi_and_jailbreak_filter_settings_confidence_level":   "MEDIUM_AND_ABOVE",
+		"filter_config_pi_and_jailbreak_filter_settings_filter_version":     "PI_AND_JAILBREAK_FILTER_VERSION_UNSPECIFIED",
 
 		"filter_config_malicious_uri_filter_settings_filter_enforcement": "DISABLED",
 
@@ -70,9 +157,9 @@ func TestAccModelArmorTemplate_createAndUpdate(t *testing.T) {
 		"template_metadata_custom_prompt_safety_error_code":                          404,
 		"template_metadata_custom_prompt_safety_error_message":                       "Updated prompt error message",
 		"template_metadata_custom_llm_response_safety_error_code":                    500,
+		"template_metadata_enforcement_type":                                         "INSPECT_AND_BLOCK",
 	}
 
-	// Single Terraform configuration template
 	const config_template = `
 resource "google_model_armor_template" "test-resource" {
   location    = "{{.location}}"
@@ -83,12 +170,15 @@ resource "google_model_armor_template" "test-resource" {
   }
 
   filter_config {
+    {{with .filter_config_rai_settings_rai_filters_0_filter_type}}
     rai_settings {
       rai_filters {
-        filter_type      = "{{.filter_config_rai_settings_rai_filters_0_filter_type}}"
-        confidence_level = "{{.filter_config_rai_settings_rai_filters_0_confidence_level}}"
+        filter_type      = "{{.}}"
+        confidence_level = "{{$.filter_config_rai_settings_rai_filters_0_confidence_level}}"
       }
+      filter_version = "{{$.filter_config_rai_settings_filter_version}}"
     }
+    {{end}}
 
     {{with .sdp_settings_config_type}} {{if ne . ""}}
     sdp_settings {
@@ -107,6 +197,7 @@ resource "google_model_armor_template" "test-resource" {
     pi_and_jailbreak_filter_settings {
       filter_enforcement = "{{.filter_config_pi_and_jailbreak_filter_settings_filter_enforcement}}"
       confidence_level   = "{{.filter_config_pi_and_jailbreak_filter_settings_confidence_level}}"
+      filter_version     = "{{.filter_config_pi_and_jailbreak_filter_settings_filter_version}}"
     }
     malicious_uri_filter_settings {
       filter_enforcement = "{{.filter_config_malicious_uri_filter_settings_filter_enforcement}}"
@@ -123,33 +214,17 @@ resource "google_model_armor_template" "test-resource" {
     custom_prompt_safety_error_code          = {{.template_metadata_custom_prompt_safety_error_code}}
     custom_prompt_safety_error_message       = "{{.template_metadata_custom_prompt_safety_error_message}}"
     custom_llm_response_safety_error_code    = {{.template_metadata_custom_llm_response_safety_error_code}}
+    enforcement_type                         = "{{.template_metadata_enforcement_type}}"
   }
 }
 `
-
-	// Helper function to expand the template
-	expandTemplate := func(data map[string]interface{}) (string, error) {
-		tmpl, err := template.New("config").Parse(config_template)
-		if err != nil {
-			return "", err
-		}
-		var buf bytes.Buffer
-		err = tmpl.Execute(&buf, data)
-		if err != nil {
-			return "", err
-		}
-		return buf.String(), nil
-	}
-
-	// Helper to build checks for Step 1 (no SDP)
 	step1Checks := func(ctx map[string]interface{}) []resource.TestCheckFunc {
 		return []resource.TestCheckFunc{
 			resource.TestCheckResourceAttr("google_model_armor_template.test-resource", "labels.test-label", ctx["label_test_label"].(string)),
-			resource.TestCheckResourceAttr("google_model_armor_template.test-resource", "filter_config.0.sdp_settings.#", "0"), // Ensure no sdp_settings block
+			resource.TestCheckResourceAttr("google_model_armor_template.test-resource", "filter_config.0.sdp_settings.0.advanced_config.0.inspect_template", ctx["filter_config_sdp_settings_advanced_config_inspect_template"].(string)),
 		}
 	}
 
-	// Helper to build checks for Step 2 (SDP basic)
 	step2Checks := func(ctx map[string]interface{}) []resource.TestCheckFunc {
 		checks := []resource.TestCheckFunc{
 			resource.TestCheckResourceAttr("google_model_armor_template.test-resource", "labels.test-label", ctx["label_test_label"].(string)),
@@ -168,9 +243,9 @@ resource "google_model_armor_template" "test-resource" {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckModelArmorTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
-			{ // Step 1: Create WITHOUT SDP
+			{
 				Config: func() string {
-					cfg, err := expandTemplate(initialContext)
+					cfg, err := expandTemplate(config_template, initialContext)
 					if err != nil {
 						t.Fatalf("Failed to expand initial config template: %v", err)
 						return ""
@@ -179,9 +254,9 @@ resource "google_model_armor_template" "test-resource" {
 				}(),
 				Check: resource.ComposeTestCheckFunc(step1Checks(initialContext)...),
 			},
-			{ // Step 2: Update WITH SDP basic
+			{
 				Config: func() string {
-					cfg, err := expandTemplate(updatedContext)
+					cfg, err := expandTemplate(config_template, updatedContext)
 					if err != nil {
 						t.Fatalf("Failed to expand updated config template: %v", err)
 						return ""

@@ -13,9 +13,13 @@
 
 # This is a Terraform template file (.tf.tmpl) for creating a Template resource.
 
-resource "google_model_armor_template" "template-basic" {
+resource "google_model_armor_template" "test-resource" {
   location    = "{{.Vars.location}}"
   template_id = "{{.Vars.templateId}}"
+
+  labels = {
+    "test-label" = "{{.Vars.label_test_label}}"
+  }
 
   filter_config {
     rai_settings {
