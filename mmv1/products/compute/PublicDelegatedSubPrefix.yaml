@@ -58,12 +58,6 @@ properties:
           type: String
           description: |
             Optional description of this sub public delgated prefix.
-        - name: 'project'
-          type: String
-          url_param_only: true
-          required: true
-          description: |
-            Project under which the PublicdelegatedPrefix is present.
         - name: 'region'
           type: String
           url_param_only: true
