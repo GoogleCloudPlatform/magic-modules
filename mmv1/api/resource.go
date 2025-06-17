@@ -714,15 +714,19 @@ func (r Resource) GetIdentity() []*Type {
 }
 
 func buildWriteOnlyField(name string, originalField *Type) *Type {
-	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API.", originalField.Description)
+	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", originalField.Description)
 
 	options := []func(*Type){
 		propertyWithType("String"),
 		propertyWithRequired(false),
 		propertyWithDescription(description),
 		propertyWithWriteOnly(true),
+		propertyWithIgnoreRead(true),
 		propertyWithConflicts([]string{originalField.Name}),
-		propertyWithRequiredWith([]string{fmt.Sprintf("%s_version", name)}),
+	}
+
+	if originalField.Required {
+		options = append(options, propertyWithExactlyOneOf([]string{name, originalField.Name}))
 	}
 
 	return NewProperty(name, originalField.ApiName, options)
@@ -732,24 +736,26 @@ func buildWriteOnlyVersionField(name string, writeOnlyField *Type) *Type {
 	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", writeOnlyField.Name)
 
 	options := []func(*Type){
-		propertyWithType("Boolean"),
+		propertyWithType("Integer"),
 		propertyWithImmutable(true),
 		propertyWithDescription(description),
 		propertyWithDefault(0),
+		propertyWithRequiredWith([]string{writeOnlyField.Name}),
 	}
+
 	return NewProperty(name, name, options)
 }
 
 func (r *Resource) addWriteOnlyFields(props []*Type, parent *Type, propWithWoConfigured *Type) []*Type {
-	writeOnlyField := buildWriteOnlyField(fmt.Sprintf("%s_wo", propWithWoConfigured.Name), propWithWoConfigured)
-	writeOnlyVersionField := buildWriteOnlyVersionField(fmt.Sprintf("%s_version", writeOnlyField.Name), writeOnlyField)
+	writeOnlyField := buildWriteOnlyField(fmt.Sprintf("%sWo", propWithWoConfigured.Name), propWithWoConfigured)
+	writeOnlyVersionField := buildWriteOnlyVersionField(fmt.Sprintf("%sVersion", writeOnlyField.Name), writeOnlyField)
 	props = append(props, writeOnlyField, writeOnlyVersionField)
 	return props
 }
 
 func (r *Resource) AddExtraFields(props []*Type, parent *Type) []*Type {
 	for _, p := range props {
-		if p.WriteOnly && !strings.HasSuffix(p.Name, "_wo") {
+		if p.WriteOnly && !strings.HasSuffix(p.Name, "Wo") {
 			props = r.addWriteOnlyFields(props, parent, p)
 			p.WriteOnly = false
 		}

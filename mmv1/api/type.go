@@ -612,6 +612,14 @@ func (t Type) ExactlyOneOfList() []string {
 	if t.ResourceMetadata == nil {
 		return []string{}
 	}
+	// TODO(ramon) figure out why all slice fields generate as empty slices
+	// logs show (3x in row while last is empty)
+	// [DEBUG][RAMON] ExactlyOneOf: [secretAccessKeyWo secretAccessKey]
+	// [DEBUG][RAMON] ExactlyOneOf: [secretAccessKeyWo secretAccessKey]
+	// [DEBUG][RAMON] ExactlyOneOf: []
+	if strings.Contains(t.Name, "secretAccessKeyWo") {
+		fmt.Printf("[DEBUG][RAMON] ExactlyOneOf: %s\n", t.ExactlyOneOf)
+	}
 
 	return t.ExactlyOneOf
 }
@@ -997,6 +1005,12 @@ func propertyWithWriteOnly(writeOnly bool) func(*Type) {
 	}
 }
 
+func propertyWithIgnoreRead(ignoreRead bool) func(*Type) {
+	return func(p *Type) {
+		p.IgnoreRead = ignoreRead
+	}
+}
+
 func propertyWithConflicts(conflicts []string) func(*Type) {
 	return func(p *Type) {
 		p.Conflicts = conflicts
@@ -1006,6 +1020,18 @@ func propertyWithConflicts(conflicts []string) func(*Type) {
 func propertyWithRequiredWith(requiredWith []string) func(*Type) {
 	return func(p *Type) {
 		p.RequiredWith = requiredWith
+	}
+}
+
+func propertyWithExactlyOneOf(exactlyOneOf []string) func(*Type) {
+	return func(p *Type) {
+		p.ExactlyOneOf = exactlyOneOf
+		// TODO(ramon) figure out why all slice fields generate as empty slices
+		// logs show:
+		// [DEBUG][RAMON] ExactlyOneOf before rendering template: [secretAccessKeyWo secretAccessKey]
+		if strings.Contains(p.Name, "secretAccessKeyWo") {
+			fmt.Printf("[DEBUG][RAMON] ExactlyOneOf before rendering template: %s\n", p.ExactlyOneOf)
+		}
 	}
 }
 
