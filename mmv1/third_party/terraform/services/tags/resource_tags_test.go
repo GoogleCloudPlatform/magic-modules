@@ -877,8 +877,6 @@ func TestAccTagsLocationTagBinding_locationTagBindingBasicWithProjectId(t *testi
 	t.Parallel()
 
 	context := map[string]interface{}{
-		// "org_id":        envvar.GetTestOrgFromEnv(t),
-		// "project_id":    "tf-test-" + acctest.RandString(t, 10),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
