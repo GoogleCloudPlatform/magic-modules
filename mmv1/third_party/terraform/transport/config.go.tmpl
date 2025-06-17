@@ -1358,7 +1358,7 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 	var creds *googleoauth.Credentials
 	var err error
 	if c.ImpersonateServiceAccount != "" && !initialCredentialsOnly {
-		jsonCreds, err := credentials.DetectDefault(&credentials.DetectOptions{
+		defaultCreds, err := credentials.DetectDefault(&credentials.DetectOptions{
 			Scopes: clientScopes,
 		})
 		if err != nil {
@@ -1369,7 +1369,7 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 			TargetPrincipal: c.ImpersonateServiceAccount,
 			Scopes:          clientScopes,
 			Delegates:       c.ImpersonateServiceAccountDelegates,
-			Credentials:     jsonCreds,
+			Credentials:     defaultCreds,
 		}
 
 		if c.UniverseDomain != "" && c.UniverseDomain != "googleapis.com" {
