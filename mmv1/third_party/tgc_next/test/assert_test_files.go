@@ -51,13 +51,14 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 	// If the primary resource is available, only test the primary resource.
 	// Otherwise, test all of the resources in the test.
 	if primaryResource != "" {
-		err = testSingleResource(t, t.Name(), resourceTestData[primaryResource], tfDir, ignoredFields, logger)
+		t.Logf("Test for the primary resource %s begins.", primaryResource)
+		err = testSingleResource(t, t.Name(), resourceTestData[primaryResource], tfDir, ignoredFields, logger, true)
 		if err != nil {
 			t.Fatal("Test fails:", err)
 		}
 	} else {
 		for _, testData := range resourceTestData {
-			err = testSingleResource(t, t.Name(), testData, tfDir, ignoredFields, logger)
+			err = testSingleResource(t, t.Name(), testData, tfDir, ignoredFields, logger, false)
 			if err != nil {
 				t.Fatal("Test fails: ", err)
 			}
@@ -66,11 +67,12 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 }
 
 // Tests a single resource
-func testSingleResource(t *testing.T, testName string, testData ResourceTestData, tfDir string, ignoredFields []string, logger *zap.Logger) error {
+func testSingleResource(t *testing.T, testName string, testData ResourceTestData, tfDir string, ignoredFields []string, logger *zap.Logger, primaryResource bool) error {
 	resourceType := testData.ResourceType
+	var tfplan2caiNotSupported, cai2hclNotSupported bool
 	if _, ok := tfplan2caiconverters.ConverterMap[resourceType]; !ok {
-		log.Printf("Test for %s is skipped as it is not supported in tfplan2cai conversion.", resourceType)
-		return nil
+		log.Printf("%s is not supported in tfplan2cai conversion.", resourceType)
+		tfplan2caiNotSupported = true
 	}
 
 	assets := make([]caiasset.Asset, 0)
@@ -81,9 +83,22 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 			return fmt.Errorf("cai asset is unavailable for %s", assetName)
 		}
 		if _, ok := cai2hclconverters.ConverterMap[assetType]; !ok {
-			log.Printf("Test for %s is skipped as it is not supported in cai2hcl conversion.", assetType)
+			log.Printf("%s is not supported in cai2hcl conversion.", assetType)
+			cai2hclNotSupported = true
+		}
+	}
+
+	if tfplan2caiNotSupported && cai2hclNotSupported {
+		if primaryResource {
+			return fmt.Errorf("conversion of the primary resource %s is not supported in tgc", testData.ResourceAddress)
+		} else {
+			log.Printf("Test for %s is skipped as the resource is not supported in tgc.", resourceType)
 			return nil
 		}
+	}
+
+	if tfplan2caiNotSupported || cai2hclNotSupported {
+		return fmt.Errorf("resource %s is not supported in both tfplan2cai and cai2hcl in tgc", resourceType)
 	}
 
 	// Uncomment these lines when debugging issues locally
@@ -133,6 +148,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	if len(missingKeys) > 0 {
 		return fmt.Errorf("missing fields in address %s after cai2hcl conversion:\n%s", testData.ResourceAddress, missingKeys)
 	}
+	log.Printf("Step 1 passes for resource %s. All of the fields in raw config are in export config", testData.ResourceAddress)
 
 	// Step 2
 	// Run a terraform plan using export_config.
@@ -158,6 +174,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		log.Printf("Roundtrip config is different from the export config.\nroundtrip config:\n%s\nexport config:\n%s", string(roundtripConfigData), string(exportConfigData))
 		return fmt.Errorf("test %s got diff (-want +got): %s", testName, diff)
 	}
+	log.Printf("Step 2 passes for resource %s. Roundtrip config and export config are identical", testData.ResourceAddress)
 
 	// Step 3
 	// Compare most fields between the exported asset and roundtrip asset, except for "data" field for resource
@@ -187,6 +204,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 			}
 		}
 	}
+	log.Printf("Step 3 passes for resource %s. Exported asset and roundtrip asset are identical", testData.ResourceAddress)
 
 	return nil
 }

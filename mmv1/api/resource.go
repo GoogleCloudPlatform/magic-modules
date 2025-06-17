@@ -1991,11 +1991,11 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 	for _, tp := range r.AllUserProperties() {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
+		} else if tp.IsMissingInCai {
+			props = append(props, tp.MetadataLineage())
 		}
 	}
-	for _, tp := range e.TGCTestIgnoreExtra {
-		props = append(props, tp)
-	}
+	props = append(props, e.TGCTestIgnoreExtra...)
 
 	slices.Sort(props)
 	return props
