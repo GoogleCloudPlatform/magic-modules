@@ -50,7 +50,9 @@ func TestAccComputeInterconnect_computeInterconnectBasicTestExample_update(t *te
 
 func testAccComputeInterconnect_computeInterconnectBasicTestExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {}
+data "google_project" "project" {
+  provider = google-beta
+}
 
 resource "google_compute_interconnect" "example-interconnect" {
   provider             = google-beta	
@@ -74,7 +76,9 @@ resource "google_compute_interconnect" "example-interconnect" {
 
 func testAccComputeInterconnect_computeInterconnectBasicTestExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {}
+data "google_project" "project" {
+  provider = google-beta
+}
 
 resource "google_compute_interconnect" "example-interconnect" {
   provider             = google-beta
