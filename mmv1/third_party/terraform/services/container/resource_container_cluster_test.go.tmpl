@@ -1310,7 +1310,7 @@ func TestAccContainerCluster_withAcceleratedGkeAutoUpgradeConfig(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccContainerCluster_withAcceleratedGkeAutoUpgradeConfig(clusterName, "ACCELERATED", networkName, subnetworkName),
+				Config: testAccContainerCluster_withGkeAutoUpgradeConfig(clusterName, "ACCELERATED", networkName, subnetworkName),
 			},
 			{
 				ResourceName:            "google_container_cluster.with_gke_auto_upgrade_config",
@@ -7502,7 +7502,7 @@ resource "google_container_cluster" "with_release_channel" {
 `, clusterName, channel, networkName, subnetworkName)
 }
 
-func TestAccContainerCluster_withAcceleratedGkeAutoUpgradeConfig(clusterName, patchMode, networkName, subnetworkName string) string {
+func testAccContainerCluster_withGkeAutoUpgradeConfig(clusterName, patchMode, networkName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_container_cluster" "with_gke_auto_upgrade_config" {
   name               = "%s"
