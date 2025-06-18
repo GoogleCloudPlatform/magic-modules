@@ -26,20 +26,12 @@ resource "google_model_armor_template" "template-filter-config" {
       }
       filter_version = "{{.Vars.filter_config_rai_settings_filter_version}}"
     }
-    {{with .Vars.sdp_settings_config_type}} {{if ne . ""}}
     sdp_settings {
-      {{if eq . "basic_config"}}
+      # Given example of basic_config type
       basic_config {
-          filter_enforcement = "{{$.Vars.filter_config_sdp_settings_basic_config_filter_enforcement}}"
+          filter_enforcement = "{{.Vars.filter_config_sdp_settings_basic_config_filter_enforcement}}"
       }
-      {{else if eq . "advanced_config"}}
-      advanced_config {
-        inspect_template     = "{{$.Vars.filter_config_sdp_settings_advanced_config_inspect_template}}"
-        deidentify_template  = "{{$.Vars.filter_config_sdp_settings_advanced_config_deidentify_template}}"
-      }
-      {{end}}
     }
-    {{end}}{{end}}
     
     pi_and_jailbreak_filter_settings {
       filter_enforcement = "{{.Vars.filter_config_pi_and_jailbreak_filter_settings_filter_enforcement}}"

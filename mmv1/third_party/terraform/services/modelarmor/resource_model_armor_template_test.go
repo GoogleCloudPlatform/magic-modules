@@ -33,8 +33,8 @@ func TestAccModelArmorTemplate_basic(t *testing.T) {
 	basicContext := map[string]interface{}{
 		"location":   "us-central1",
 		"templateId": templateId,
-		"filter_config_rai_settings_rai_filters_0_filter_type":                 "SEXUALLY_EXPLICIT",
-		"filter_config_rai_settings_rai_filters_0_confidence_level":            "LOW_AND_ABOVE",
+		"filter_config_rai_settings_rai_filters_0_filter_type":                       "SEXUALLY_EXPLICIT",
+		"filter_config_rai_settings_rai_filters_0_confidence_level":                  "LOW_AND_ABOVE",
 		"template_metadata_multi_language_detection_enable_multi_language_detection": true,
 	}
 
@@ -92,7 +92,7 @@ resource "google_model_armor_template" "template-basic" {
 	return expandTemplate(basic_template, context)
 }
 
-func TestAccModelArmorTemplate_pdate(t *testing.T) {
+func TestAccModelArmorTemplate_update(t *testing.T) {
 	t.Parallel()
 
 	templateId := "modelarmor-test-update-" + acctest.RandString(t, 10)
@@ -107,7 +107,7 @@ func TestAccModelArmorTemplate_pdate(t *testing.T) {
 		"filter_config_rai_settings_rai_filters_0_confidence_level": "MEDIUM_AND_ABOVE",
 		"filter_config_rai_settings_filter_version":                 "STABLE",
 
-		"sdp_settings_config_type": "advanced_config",
+		"sdp_settings_config_type":                                       "advanced_config",
 		"filter_config_sdp_settings_advanced_config_inspect_template":    "projects/llm-firewall-demo/locations/us-central1/inspectTemplates/t2",
 		"filter_config_sdp_settings_advanced_config_deidentify_template": "projects/llm-firewall-demo/locations/us-central1/deidentifyTemplates/t3",
 
@@ -138,8 +138,8 @@ func TestAccModelArmorTemplate_pdate(t *testing.T) {
 		"filter_config_rai_settings_rai_filters_0_confidence_level": "LOW_AND_ABOVE",
 		"filter_config_rai_settings_filter_version":                 "RAI_FILTER_VERSION_UNSPECIFIED",
 
-		"sdp_settings_config_type":                                   "basic_config",
-		"filter_config_sdp_settings_basic_config_filter_enforcement": "ENABLED",
+		"sdp_settings_config_type":                                       "basic_config",
+		"filter_config_sdp_settings_basic_config_filter_enforcement":     "ENABLED",
 		"filter_config_sdp_settings_advanced_config_inspect_template":    "",
 		"filter_config_sdp_settings_advanced_config_deidentify_template": "",
 
