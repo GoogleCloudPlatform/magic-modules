@@ -23,6 +23,7 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+	"unicode"
 
 	"github.com/golang/glog"
 
@@ -713,8 +714,39 @@ func (r Resource) GetIdentity() []*Type {
 	})
 }
 
-func buildWriteOnlyField(name string, originalField *Type) *Type {
+// TODO(ramon) find alternative approach for this
+func camelToSnake(s string) string {
+	var result strings.Builder
+	for i, ch := range s {
+		if unicode.IsUpper(ch) {
+			if i > 0 {
+				result.WriteByte('_')
+			}
+			result.WriteRune(unicode.ToLower(ch))
+		} else {
+			result.WriteRune(ch)
+		}
+	}
+	return result.String()
+}
+
+func buildWriteOnlyField(name string, parent *Type, originalField *Type) *Type {
+	var conflictsWith string
+	var exactlyOneOfOriginalField string
+	var exactlyOneOfWriteOnlyField string
 	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", originalField.Description)
+
+	// TODO(ramon) I see a pattern, refactor to method later
+	// double check if this ".0." works for all type of nesting, probably requires some more debugging/testing
+	if parent != nil {
+		conflictsWith = parent.TerraformLineage() + ".0." + originalField.TerraformLineage()
+		exactlyOneOfOriginalField = parent.TerraformLineage() + ".0." + originalField.TerraformLineage()
+		exactlyOneOfWriteOnlyField = parent.TerraformLineage() + ".0." + camelToSnake(name)
+	} else {
+		conflictsWith = originalField.TerraformLineage()
+		exactlyOneOfOriginalField = originalField.TerraformLineage()
+		exactlyOneOfWriteOnlyField = camelToSnake(name)
+	}
 
 	options := []func(*Type){
 		propertyWithType("String"),
@@ -722,33 +754,42 @@ func buildWriteOnlyField(name string, originalField *Type) *Type {
 		propertyWithDescription(description),
 		propertyWithWriteOnly(true),
 		propertyWithIgnoreRead(true),
-		propertyWithConflicts([]string{originalField.Name}),
+		propertyWithConflicts([]string{conflictsWith}),
 	}
 
 	if originalField.Required {
-		options = append(options, propertyWithExactlyOneOf([]string{name, originalField.Name}))
+		options = append(options, propertyWithExactlyOneOf([]string{exactlyOneOfOriginalField, exactlyOneOfWriteOnlyField}))
 	}
 
 	return NewProperty(name, originalField.ApiName, options)
 }
 
-func buildWriteOnlyVersionField(name string, writeOnlyField *Type) *Type {
+func buildWriteOnlyVersionField(name string, parent *Type, writeOnlyField *Type) *Type {
+	var requiredWith string
 	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", writeOnlyField.Name)
+
+	// TODO(ramon) I see a pattern, refactor to method later
+	// double check if this ".0." works for all type of nesting, probably requires some more debugging/testing
+	if parent != nil {
+		requiredWith = parent.TerraformLineage() + ".0." + writeOnlyField.TerraformLineage()
+	} else {
+		requiredWith = writeOnlyField.TerraformLineage()
+	}
 
 	options := []func(*Type){
 		propertyWithType("Integer"),
 		propertyWithImmutable(true),
 		propertyWithDescription(description),
 		propertyWithDefault(0),
-		propertyWithRequiredWith([]string{writeOnlyField.Name}),
+		propertyWithRequiredWith([]string{requiredWith}),
 	}
 
 	return NewProperty(name, name, options)
 }
 
 func (r *Resource) addWriteOnlyFields(props []*Type, parent *Type, propWithWoConfigured *Type) []*Type {
-	writeOnlyField := buildWriteOnlyField(fmt.Sprintf("%sWo", propWithWoConfigured.Name), propWithWoConfigured)
-	writeOnlyVersionField := buildWriteOnlyVersionField(fmt.Sprintf("%sVersion", writeOnlyField.Name), writeOnlyField)
+	writeOnlyField := buildWriteOnlyField(fmt.Sprintf("%sWo", propWithWoConfigured.Name), parent, propWithWoConfigured)
+	writeOnlyVersionField := buildWriteOnlyVersionField(fmt.Sprintf("%sVersion", writeOnlyField.Name), parent, writeOnlyField)
 	props = append(props, writeOnlyField, writeOnlyVersionField)
 	return props
 }
