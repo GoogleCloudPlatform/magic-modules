@@ -696,7 +696,6 @@ func gcsDataSchema() *schema.Resource {
 			},
 			"path": {
 				Optional:    true,
-				Computed:    true,
 				Type:        schema.TypeString,
 				Description: `Google Cloud Storage path in bucket to transfer`,
 				ValidateFunc: validatePath,
