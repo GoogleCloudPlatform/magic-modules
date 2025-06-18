@@ -97,33 +97,33 @@ resource "google_compute_interconnect" "example-interconnect" {
   labels = {
     mykey = "myvalue"
   }
-  aaiEnabled = true
-  applicationAwareInterconnect = {
-    profileDescription = "application awareness config with BandwidthPercentage policy."
-	bandwidthPercentagePolicy = {
-	  bandwidthPercentages = [
+  aai_enabled = true
+  application_aware_interconnect = {
+    profile_description = "application awareness config with BandwidthPercentage policy."
+	bandwidth-percentage_policy = {
+	  bandwidth_percentages = [
 	 	 {
-	  		trafficClass = "TC1"
+	  		traffic_class = "TC1"
 			percentage   = 20
 		 },
 		 {
-	  		trafficClass = "TC2"
+	  		traffic_class = "TC2"
 			percentage   = 20
 		 },
 		 {
-	  		trafficClass = "TC3"
+	  		traffic_class = "TC3"
 			percentage   = 20
 		 },
 		 {
-	  		trafficClass = "TC4"
+	  		traffic_class = "TC4"
 			percentage   = 20
 		 },
 		 {
-	  		trafficClass = "TC5"
+	  		traffic_class = "TC5"
 			percentage   = 10
 		 },
 		 {
-	  		trafficClass = "TC6"
+	  		traffic_class = "TC6"
 			percentage   = 10
 		 }
 	  ]
