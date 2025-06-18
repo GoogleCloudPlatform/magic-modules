@@ -5,6 +5,8 @@ resource "google_compute_backend_bucket" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
-  name     = "{{index $.Vars "bucket_name"}}"
-  location = "US"
+  name                        = "{{index $.Vars "bucket_name"}}"
+  location                    = "US-CENTRAL1"
+  force_destroy               = true
+  uniform_bucket_level_access = true
 }
