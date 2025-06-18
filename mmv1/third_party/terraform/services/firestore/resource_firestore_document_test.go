@@ -178,7 +178,7 @@ resource "google_firestore_document" "mydoc" {
   database    = google_firestore_database.database.name
   collection  = "somenewcollection"
   document_id = "tf-test-my-doc-id%{random_suffix}"
-  fields      = "{\"something\":{\"mapValue\":{\"fields\":{\"akey\":{\"stringValue\":\"avalue\"}}}}}"
+  fields      = jsonencode({})
 }
 `, context)
 }
@@ -219,7 +219,7 @@ resource "google_firestore_document" "empty_doc" {
   database    = google_firestore_database.database.name
   collection  = "emptycollection"
   document_id = "tf-test-empty-doc-id%{random_suffix}"
-  fields      = jsonencode({}) # This is the key: an empty JSON object
+  fields      = jsonencode({})
 }
 `, context)
 }
