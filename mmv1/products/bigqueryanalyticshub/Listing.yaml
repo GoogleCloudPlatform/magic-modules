@@ -40,7 +40,7 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}'
     - '{{listing_id}}'
 custom_code:
-  custom_update: 'templates/terraform/custom_update/bigquery_analyticshub_listing_pubsub_topic_data_affinity_regions.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/bigqueryanalyticshub_listing.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
 examples:
@@ -214,6 +214,7 @@ properties:
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
       - name: 'dataAffinityRegions'
         type: Array
+        is_set: true
         description: |-
           Region hint on where the data might be published. Data affinity regions are modifiable.
           See https://cloud.google.com/about/locations for full listing of possible Cloud regions.
