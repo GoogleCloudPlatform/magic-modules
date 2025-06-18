@@ -21,25 +21,12 @@ import (
 func ParseImportId(idRegexes []string, d TerraformResourceData, config *transport_tpg.Config) error {
 	for _, idFormat := range idRegexes {
 		re, err := regexp.Compile(idFormat)
-
 		if err != nil {
 			log.Printf("[DEBUG] Could not compile %s.", idFormat)
 			return fmt.Errorf("Import is not supported. Invalid regex formats.")
 		}
 
-		if d.Id() == "" {
-			identity, err := d.Identity()
-			if err != nil {
-				return err
-			}
-			if err := identityImport(re, identity, idFormat, d); err != nil {
-				return err
-			}
-			err = setDefaultValues(idRegexes[0], identity, d, config)
-			if err != nil {
-				return err
-			}
-		} else if fieldValues := re.FindStringSubmatch(d.Id()); fieldValues != nil {
+		if fieldValues := re.FindStringSubmatch(d.Id()); fieldValues != nil {
 			log.Printf("[DEBUG] matching ID %s to regex %s.", d.Id(), idFormat)
 			// Starting at index 1, the first match is the full string.
 			for i := 1; i < len(fieldValues); i++ {
@@ -75,13 +62,25 @@ func ParseImportId(idRegexes []string, d TerraformResourceData, config *transpor
 						"cannot handle %s, which currently has value %v, and should be set to %#v, during import", fieldName, val, fieldValue)
 				}
 			}
-
+			return nil
+		} else if d.Id() == "" {
 			// The first id format is applied first and contains all the fields.
 			err := setDefaultValues(idRegexes[0], nil, d, config)
 			if err != nil {
 				return err
 			}
 
+			identity, err := d.Identity()
+			if err != nil {
+				return err
+			}
+			if err := identityImport(re, identity, idFormat, d); err != nil {
+				return err
+			}
+			err = setDefaultValues(idRegexes[0], identity, d, config)
+			if err != nil {
+				return err
+			}
 			return nil
 		}
 	}
@@ -91,13 +90,17 @@ func ParseImportId(idRegexes []string, d TerraformResourceData, config *transpor
 func identityImport(re *regexp.Regexp, identity *schema.IdentityData, idFormat string, d TerraformResourceData) error {
 	log.Print("[DEBUG] Using IdentitySchema to import resource")
 	namedGroups := re.SubexpNames()
-
+	log.Printf("[DEBUG] Named Groups %v", namedGroups)
 	for _, group := range namedGroups {
+		if val, ok := d.GetOk(group); ok && group != "" {
+			log.Printf("[DEBUG] Group %s = %s Identity Group", group, val)
+			identity.Set(group, val)
+		}
 		if identityValue, identityExists := identity.GetOk(group); identityExists {
-			log.Printf("[DEBUG] Importing %s = %s", group, identityValue)
+			log.Printf("[DEBUG] identity Importing %s = %s", group, identityValue)
 			d.Set(group, identityValue)
 		} else {
-			return fmt.Errorf("No value was found for %s during import", group)
+			log.Printf("[DEBUG] No value was found for %s during import", group)
 		}
 	}
 
