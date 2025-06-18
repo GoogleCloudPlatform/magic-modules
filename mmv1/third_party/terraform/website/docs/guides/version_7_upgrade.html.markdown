@@ -106,4 +106,4 @@ Description of the change and how users should adjust their configuration (if ne
 
 ### `path` does not allow strings starting with /
 
-`path` does not allow strings starting with /
+`path` does not allow strings starting with /.
