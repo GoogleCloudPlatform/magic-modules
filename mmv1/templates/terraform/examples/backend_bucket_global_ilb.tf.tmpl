@@ -1,13 +1,10 @@
-resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
-  name                        = "{{index $.Vars "bucket_name"}}"
-  location                    = "EU"
-  storage_class               = "STANDARD"
-  force_destroy               = true
-  uniform_bucket_level_access = true
-}
-
 resource "google_compute_backend_bucket" "{{$.PrimaryResourceId}}" {
   name                  = "{{index $.Vars "backend_bucket_name"}}"
   bucket_name           = google_storage_bucket.{{$.PrimaryResourceId}}.name
   load_balancing_scheme = "INTERNAL_MANAGED"
+}
+
+resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "bucket_name"}}"
+  location = "US"
 }
