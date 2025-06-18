@@ -4,6 +4,7 @@ package storage
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -67,47 +68,12 @@ func datasourceGoogleStorageBucketObjectsRead(d *schema.ResourceData, meta inter
 
 	params := make(map[string]string)
 	bucketObjects := make([]map[string]interface{}, 0)
-
-	for {
-		bucket := d.Get("bucket").(string)
-		url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{StorageBasePath}}b/%s/o", bucket))
-		if err != nil {
-			return err
-		}
-
-		if v, ok := d.GetOk("match_glob"); ok {
-			params["matchGlob"] = v.(string)
-		}
-
-		if v, ok := d.GetOk("prefix"); ok {
-			params["prefix"] = v.(string)
-		}
-
-		url, err = transport_tpg.AddQueryParams(url, params)
-		if err != nil {
-			return err
-		}
-
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			RawURL:    url,
-			UserAgent: userAgent,
-		})
-		if err != nil {
-			return fmt.Errorf("Error retrieving bucket objects: %s", err)
-		}
-
-		pageBucketObjects := flattenDatasourceGoogleBucketObjectsList(res["items"])
-		bucketObjects = append(bucketObjects, pageBucketObjects...)
-
-		pToken, ok := res["nextPageToken"]
-		if ok && pToken != nil && pToken.(string) != "" {
-			params["pageToken"] = pToken.(string)
-		} else {
-			break
-		}
+	bucket := d.Get("bucket").(string)
+	url, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("{{StorageBasePath}}b/%s/o", bucket))
+	if err != nil {
+		return err
 	}
+	bucketObjects, err = transport_tpg.PluralDataSourceGetListMap(d, config, nil, userAgent, url, flattenDatasourceGoogleBucketObjectsList, params, "items")
 
 	if err := d.Set("bucket_objects", bucketObjects); err != nil {
 		return fmt.Errorf("Error retrieving bucket_objects: %s", err)
@@ -118,9 +84,9 @@ func datasourceGoogleStorageBucketObjectsRead(d *schema.ResourceData, meta inter
 	return nil
 }
 
-func flattenDatasourceGoogleBucketObjectsList(v interface{}) []map[string]interface{} {
+func flattenDatasourceGoogleBucketObjectsList(config *transport_tpg.Config, v interface{}) ([]map[string]interface{}, error) {
 	if v == nil {
-		return make([]map[string]interface{}, 0)
+		return make([]map[string]interface{}, 0), nil
 	}
 
 	ls := v.([]interface{})
@@ -153,5 +119,9 @@ func flattenDatasourceGoogleBucketObjectsList(v interface{}) []map[string]interf
 		})
 	}
 
-	return bucketObjects
+	sort.Slice(bucketObjects, func(i, j int) bool {
+		return bucketObjects[i]["name"].(string) < bucketObjects[j]["name"].(string)
+	})
+
+	return bucketObjects, nil
 }
