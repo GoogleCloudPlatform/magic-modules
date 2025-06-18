@@ -1208,6 +1208,45 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_InvalidSchemas(t *testing.T
 	})
 }
 
+func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionIDAndHivePartitioning(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+	objectName := fmt.Sprintf("country_partitioned=US/tf_test_%s.csv", acctest.RandString(t, 10))
+
+	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+	connectionID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
+
+	projectID := envvar.GetTestProjectFromEnv()
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableFromGCSWithSchemaWithConnectionIdAndHivePartitioning(datasetID, tableID, connectionID, projectID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "schema"},
+			},
+			{
+				Config: testAccBigQueryTableFromGCSWithSchema(datasetID, tableID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "schema"},
+			},
+		},
+	})
+}
+
 func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionID_UpdateNoConnectionID(t *testing.T) {
 	t.Parallel()
 
@@ -1232,7 +1271,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionID_UpdateNoConn
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema"},
 			},
 			{
 				Config: testAccBigQueryTableFromGCSWithSchema(datasetID, tableID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
@@ -1241,7 +1280,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionID_UpdateNoConn
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema"},
 			},
 		},
 	})
@@ -3150,17 +3189,17 @@ resource "google_bigquery_table" "test" {
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
   external_data_configuration {
-	connection_id   = local.connection_id_reformatted
+  connection_id   = local.connection_id_reformatted
     autodetect    = false
     source_format = "PARQUET"
 
     source_uris = [
       "gs://${google_storage_bucket.test.name}/*",
     ]
-	metadata_cache_mode = "%s"
-	hive_partitioning_options {
-		source_uri_prefix = "gs://${google_storage_bucket.test.name}/"
-	}
+    metadata_cache_mode = "%s"
+    hive_partitioning_options {
+      source_uri_prefix = "gs://${google_storage_bucket.test.name}/"
+    }
   }
 
   max_staleness = "%s"
@@ -3550,6 +3589,70 @@ resource "google_bigquery_table" "test" {
 `, connectionID, datasetID, bucketName, objectName, tableID, maxStaleness)
 }
 
+func testAccBigQueryTableFromGCSWithSchemaWithConnectionIdAndHivePartitioning(datasetID, tableID, connectionID, projectID, bucketName, objectName, content, schema string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "test" {
+  dataset_id = "%s"
+}
+resource "google_storage_bucket" "test" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access = true
+}
+resource "google_storage_bucket_object" "test" {
+  name    = "%s"
+  content = <<EOF
+%s
+EOF
+  bucket = google_storage_bucket.test.name
+}
+resource "google_bigquery_connection" "test" {
+   connection_id = "%s"
+   location = "US"
+   cloud_resource {}
+}
+locals {
+   connection_id_split = split("/", google_bigquery_connection.test.name)
+   connection_id_reformatted = "${local.connection_id_split[1]}.${local.connection_id_split[3]}.${local.connection_id_split[5]}"
+}
+resource "google_project_iam_member" "test" {
+   role = "roles/storage.objectViewer"
+   project = "%s"
+   member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
+}
+resource "google_bigquery_table" "test" {
+  deletion_protection = false
+  table_id   = "%s"
+  dataset_id = google_bigquery_dataset.test.dataset_id
+
+	ignore_auto_generated_schema = true
+
+  schema = <<EOF
+  %s
+  EOF
+  external_data_configuration {
+    autodetect    = false
+    connection_id = local.connection_id_reformatted
+    source_format = "CSV"
+    csv_options {
+      encoding = "UTF-8"
+      quote = ""
+    }
+    source_uris = [
+      "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}",
+    ]
+    hive_partitioning_options {
+      mode = "AUTO"
+      source_uri_prefix = "gs://${google_storage_bucket.test.name}/"
+      require_partition_filter = false
+    }
+  }
+  depends_on = [google_project_iam_member.test]
+}
+`, datasetID, bucketName, objectName, content, connectionID, projectID, tableID, schema)
+}
+
 func testAccBigQueryTableFromGCSWithSchemaWithConnectionId(datasetID, tableID, connectionID, projectID, bucketName, objectName, content, schema string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
@@ -3559,6 +3662,7 @@ resource "google_storage_bucket" "test" {
   name          = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 resource "google_storage_bucket_object" "test" {
   name    = "%s"
