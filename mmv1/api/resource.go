@@ -757,7 +757,10 @@ func (r *Resource) AddExtraFields(props []*Type, parent *Type) []*Type {
 	for _, p := range props {
 		if p.WriteOnly && !strings.HasSuffix(p.Name, "Wo") {
 			props = r.addWriteOnlyFields(props, parent, p)
+			// the generated field will have WriteOnly set to true, so we need to adjust the original
 			p.WriteOnly = false
+			// the generated field will have ExactlyOneOf referring the original field, so original must be false
+			p.Required = false
 		}
 		if p.IsA("KeyValueLabels") {
 			props = r.addLabelsFields(props, parent, p)
