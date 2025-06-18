@@ -2,6 +2,7 @@ package billing_test
 
 import (
 	"fmt"
+	"google.golang.org/grpc/balancer/grpclb/state"
 	"regexp"
 	"testing"
 
@@ -44,6 +45,7 @@ func TestAccDataSourceGoogleBillingAccount_byShortName(t *testing.T) {
 					resource.TestCheckResourceAttr("data.google_billing_account.acct", "id", billingId),
 					resource.TestCheckResourceAttr("data.google_billing_account.acct", "name", name),
 					resource.TestCheckResourceAttr("data.google_billing_account.acct", "open", "true"),
+					resource.TestCheckResourceAttrSet("data.google_billing_account.acct", "currency_code"),
 				),
 			},
 		},
