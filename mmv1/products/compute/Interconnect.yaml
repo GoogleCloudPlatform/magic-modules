@@ -438,23 +438,27 @@ properties:
         type: String
         description: |
           A description for the AAI profile on this interconnect.
+        min_version: beta
       - name: 'strictPriorityPolicy'
         type: NestedObject
         allow_empty_object: true
         description: |
           Specify configuration for StrictPriorityPolicy.
         properties: []
+        min_version: beta
       - name: 'bandwidthPercentagePolicy'
         type: NestedObject
         description: |
           Bandwidth Percentage policy allows you to have granular control over how your Interconnect
           bandwidth is utilized among your workloads mapping to different traffic classes.
+        min_version: beta
         properties:
           - name: bandwidthPercentage
             type: Array
             description: |
               Specify bandwidth percentages for various traffic classes for queuing
               type Bandwidth Percent.
+            min_version: beta
             item_type:
               type: NestedObject
               properties:
@@ -471,15 +475,18 @@ properties:
                     - 'TC4'
                     - 'TC5'
                     - 'TC6'
+                  min_version: beta
                 - name: percentage
                   type: Integer
                   description: |
                     Bandwidth percentage for a specific traffic class.
+                  min_version: beta
       - name: shapeAveragePercentage
         type: Array
         description: |
           Optional field to specify a list of shape average percentages to be
           applied in conjunction with StrictPriorityPolicy or BandwidthPercentagePolicy
+        min_version: beta
         item_type:
           type: NestedObject
           properties:
@@ -496,7 +503,9 @@ properties:
                 - 'TC4'
                 - 'TC5'
                 - 'TC6'
+              min_version: beta
             - name: percentage
               type: Integer
               description: |
                 Bandwidth percentage for a specific traffic class.
+              min_version: beta
