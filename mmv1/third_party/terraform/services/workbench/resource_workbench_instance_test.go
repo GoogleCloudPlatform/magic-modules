@@ -87,7 +87,8 @@ resource "google_workbench_instance" "instance" {
 	  }
 
     metadata = {
-      terraform = "true"
+      terraform = "true",
+	  "serial-port-logging-enable" = "false",
     }
 
   }
@@ -353,6 +354,19 @@ func TestAccWorkbenchInstance_updateMetadataKey(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
 			},
 			{
+				Config: testAccWorkbenchInstance_update(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_workbench_instance.instance", "state", "ACTIVE"),
+				),
+			},
+			{
+				ResourceName:            "google_workbench_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"name", "instance_owners", "location", "instance_id", "request_id", "labels", "terraform_labels", "desired_state", "update_time", "health_info", "health_state"},
+			},
+			{
 				Config: testAccWorkbenchInstance_updateMetadata(context),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -379,6 +393,7 @@ resource "google_workbench_instance" "instance" {
     metadata = {
       terraform = "true"
       "resource-url" = "new-fake-value",
+      "serial-port-logging-enable" = "false",
     }
   }
 
@@ -401,7 +416,7 @@ resource "google_workbench_instance" "instance" {
       terraform = "true",
       "idle-timeout-seconds" = "10800",
       "image-url" = "fake-value",
-	  "container-custom-params" = "test-params",
+      "container-custom-params" = "test-params",
     }
   }
 
