@@ -36,18 +36,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'database_migration_service_connection_profile_cloudsql'
@@ -65,6 +59,32 @@ examples:
       - 'mysql.0.ssl.0.client_certificate'
       - 'mysql.0.ssl.0.client_key'
   - name: 'database_migration_service_connection_profile_postgres'
+    primary_resource_id: 'postgresprofile'
+    vars:
+      sqldb: 'my-database'
+      sqldb_cert: 'my-cert'
+      sqldb_user: 'my-username'
+      sqldb_pass: 'my-password'
+      profile: 'my-profileid'
+    ignore_read_extra:
+      - 'postgresql.0.password'
+      - 'postgresql.0.ssl.0.ca_certificate'
+      - 'postgresql.0.ssl.0.client_certificate'
+      - 'postgresql.0.ssl.0.client_key'
+  - name: 'database_migration_service_connection_profile_postgres_no_ssl'
+    primary_resource_id: 'postgresprofile'
+    vars:
+      sqldb: 'my-database'
+      sqldb_cert: 'my-cert'
+      sqldb_user: 'my-username'
+      sqldb_pass: 'my-password'
+      profile: 'my-profileid'
+    ignore_read_extra:
+      - 'postgresql.0.password'
+      - 'postgresql.0.ssl.0.ca_certificate'
+      - 'postgresql.0.ssl.0.client_certificate'
+      - 'postgresql.0.ssl.0.client_key'
+  - name: 'database_migration_service_connection_profile_postgres_required_ssl'
     primary_resource_id: 'postgresprofile'
     vars:
       sqldb: 'my-database'
@@ -238,10 +258,11 @@ properties:
             type: Enum
             description: |
               The current connection profile state.
-            output: true
             enum_values:
               - 'SERVER_ONLY'
               - 'SERVER_CLIENT'
+              - 'REQUIRED'
+              - 'NONE'
           - name: 'clientKey'
             type: String
             description: |
@@ -261,9 +282,8 @@ properties:
           - name: 'caCertificate'
             type: String
             description: |
-              Required. Input only. The x509 PEM-encoded certificate of the CA that signed the source database server's certificate.
+              Input only. The x509 PEM-encoded certificate of the CA that signed the source database server's certificate.
               The replica will use this certificate to verify it's connecting to the right host.
-            required: true
             immutable: true
             sensitive: true
             custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_mysql_ssl_ca_certificate.go.tmpl'
@@ -332,10 +352,11 @@ properties:
             type: Enum
             description: |
               The current connection profile state.
-            output: true
             enum_values:
               - 'SERVER_ONLY'
               - 'SERVER_CLIENT'
+              - 'REQUIRED'
+              - 'NONE'
           - name: 'clientKey'
             type: String
             description: |
@@ -359,9 +380,8 @@ properties:
           - name: 'caCertificate'
             type: String
             description: |
-              Required. Input only. The x509 PEM-encoded certificate of the CA that signed the source database server's certificate.
+              Input only. The x509 PEM-encoded certificate of the CA that signed the source database server's certificate.
               The replica will use this certificate to verify it's connecting to the right host.
-            required: true
             immutable: true
             sensitive: true
             custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_postgresql_ssl_ca_certificate.go.tmpl'
@@ -462,9 +482,8 @@ properties:
           - name: 'caCertificate'
             type: String
             description: |
-              Required. Input only. The x509 PEM-encoded certificate of the CA that signed the source database server's certificate.
+              Input only. The x509 PEM-encoded certificate of the CA that signed the source database server's certificate.
               The replica will use this certificate to verify it's connecting to the right host.
-            required: true
             immutable: true
             sensitive: true
             custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_connection_profile_oracle_ssl_ca_certificate.go.tmpl'

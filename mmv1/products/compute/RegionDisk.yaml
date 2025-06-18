@@ -13,6 +13,7 @@
 
 ---
 name: 'RegionDisk'
+api_resource_type_kind: Disk
 kind: 'compute#disk'
 description: |
   Persistent disks are durable storage devices that function similarly to
@@ -47,15 +48,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 iam_policy:
   parent_resource_attribute: 'name'
@@ -70,7 +64,7 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
-  - 'hyperDiskIopsUpdateDiffSupress'
+  - 'hyperDiskIopsUpdateDiffSuppress'
 examples:
   - name: 'region_disk_basic'
     primary_resource_id: 'regiondisk'
@@ -138,6 +132,13 @@ properties:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
+        sensitive: true
+      - name: 'rsaEncryptedKey'
+        type: String
+        description: |
+          Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit
+          customer-supplied encryption key to either encrypt or decrypt
+          this resource. You can provide either the rawKey or the rsaEncryptedKey.
         sensitive: true
       - name: 'sha256'
         type: String
@@ -313,7 +314,13 @@ properties:
       * projects/{project}/regions/{region}/disks/{disk}
       * zones/{zone}/disks/{disk}
       * regions/{region}/disks/{disk}
-    diff_suppress_func: 'sourceDiskDiffSupress'
+    diff_suppress_func: 'sourceDiskDiffSuppress'
+  - name: 'DiskId'
+    type: String
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - name: 'sourceDiskId'
     type: String
     description: |
@@ -369,3 +376,15 @@ properties:
       description: 'An applicable license URI'
       resource: 'License'
       imports: 'selfLink'
+virtual_fields:
+  - name: 'create_snapshot_before_destroy'
+    type: Boolean
+    default_value: false
+    description: |
+      If set to true, a snapshot of the disk will be created before it is destroyed.
+      If your disk is encrypted with customer managed encryption keys these will be reused for the snapshot creation.
+      The name of the snapshot by default will be `{{disk-name}}-YYYYMMDD-HHmm`
+  - name: 'create_snapshot_before_destroy_prefix'
+    type: String
+    description: |
+      This will set a custom name prefix for the snapshot that's created when the disk is deleted.

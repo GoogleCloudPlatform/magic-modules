@@ -37,6 +37,7 @@ create_url: '{{parent}}/authorizedOrgsDescs'
 update_verb: 'PATCH'
 import_format:
   - '{{name}}'
+mutex: '{{parent}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -47,14 +48,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   encoder: 'templates/terraform/encoders/access_level_never_send_parent.go.tmpl'
   post_create: 'templates/terraform/post_create/sleep_2_min.go.tmpl'
@@ -66,6 +61,8 @@ examples:
   - name: 'access_context_manager_authorized_orgs_desc_basic'
     primary_resource_id: 'authorized-orgs-desc'
     exclude_test: true
+    test_env_vars:
+      org_id: 'ORG_ID'
 parameters:
   - name: 'parent'
     type: String

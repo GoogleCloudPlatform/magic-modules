@@ -16,6 +16,10 @@ name: 'Lien'
 description:
   A Lien represents an encumbrance on the actions that can be performed on a
   resource.
+references:
+  guides:
+    'Create a Lien': 'https://cloud.google.com/resource-manager/docs/project-liens'
+  api: 'https://cloud.google.com/resource-manager/reference/rest'
 docs:
 id_format: '{{name}}'
 base_url: 'liens'
@@ -41,7 +45,6 @@ nested_query:
   modify_by_patch: false
 custom_code:
   decoder: 'templates/terraform/decoders/avoid_meaningless_project_update.tmpl'
-  post_create: 'templates/terraform/post_create/lien.tmpl'
   pre_delete: 'templates/terraform/pre_delete/modify_delete_url.tmpl'
   post_import: 'templates/terraform/post_import/lien_import.tmpl'
 examples:

@@ -33,16 +33,14 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
+sweeper:
+  dependencies:
+    # - "google_network_security_intercept_endpoint_group" (beta only)
+    # - "google_network_security_intercept_deployment_group" (beta only)
+    - "google_network_security_firewall_endpoint_association"
 custom_code:
   encoder: 'templates/terraform/encoders/compute_network.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/compute_network.go.tmpl'
@@ -67,21 +65,18 @@ examples:
       project: 'PROJECT_NAME'
   - name: 'network_bgp_best_path_selection_mode'
     primary_resource_id: 'vpc_network'
-    min_version: 'beta'
     vars:
       network_name: 'vpc-network'
     test_env_vars:
       project: 'PROJECT_NAME'
   - name: 'network_bgp_best_path_selection_mode_standard'
     primary_resource_id: 'vpc_network'
-    min_version: 'beta'
     vars:
       network_name: 'vpc-network'
     test_env_vars:
       project: 'PROJECT_NAME'
   - name: 'network_bgp_best_path_selection_mode_standard_custom_fields'
     primary_resource_id: 'vpc_network'
-    min_version: 'beta'
     vars:
       network_name: 'vpc-network'
     test_env_vars:
@@ -123,10 +118,16 @@ properties:
     immutable: true
     validation:
       function: 'verify.ValidateGCEName'
+  - name: 'networkId'
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - name: 'numericId'
     type: String
     description: |
       The unique identifier for the resource. This identifier is defined by the server.
+    deprecation_message: '`numeric_id` is deprecated and will be removed in a future major release. Use `network_id` instead.'
     output: true
   - name: 'autoCreateSubnetworks'
     type: Boolean
@@ -169,7 +170,6 @@ properties:
         type: Enum
         description: |
          The BGP best selection algorithm to be employed. MODE can be LEGACY or STANDARD.
-        min_version: 'beta'
         default_from_api: true
         update_url: 'projects/{{project}}/global/networks/{{name}}'
         update_verb: 'PATCH'
@@ -181,7 +181,6 @@ properties:
         description: |
          Enables/disables the comparison of MED across routes with different Neighbor ASNs.
          This value can only be set if the --bgp-best-path-selection-mode is STANDARD
-        min_version: 'beta'
         required: false
         default_from_api: true
         update_url: 'projects/{{project}}/global/networks/{{name}}'
@@ -190,7 +189,6 @@ properties:
         type: Enum
         description: |
          Choice of the behavior of inter-regional cost and MED in the BPS algorithm.
-        min_version: 'beta'
         required: false
         default_from_api: true
         update_url: 'projects/{{project}}/global/networks/{{name}}'
@@ -206,8 +204,11 @@ properties:
       Note that packets larger than 1500 bytes (standard Ethernet) can be subject to TCP-MSS clamping or dropped
       with an ICMP `Fragmentation-Needed` message if the packets are routed to the Internet or other VPCs
       with varying MTUs.
-    immutable: true
     default_from_api: true
+    update_url: 'projects/{{project}}/global/networks/{{name}}'
+    update_verb: 'PATCH'
+    update_id: 'mtu'
+    fingerprint_name: 'fingerprint'
   - name: 'enableUlaInternalIpv6'
     type: Boolean
     description: |
@@ -237,10 +238,10 @@ properties:
   - name: 'networkProfile'
     type: String
     immutable: true
-    min_version: 'beta'
     description: |
       A full or partial URL of the network profile to apply to this network.
       This field can be set only at resource creation time. For example, the
       following are valid URLs:
-      * https://www.googleapis.com/compute/beta/projects/{projectId}/global/networkProfiles/{network_profile_name}
+      * https://www.googleapis.com/compute/v1/projects/{projectId}/global/networkProfiles/{network_profile_name}
       * projects/{projectId}/global/networkProfiles/{network_profile_name}
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'

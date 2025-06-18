@@ -30,23 +30,18 @@ timeouts:
 import_format:
   - 'projects/{{project}}/locations/{{location}}/autonomousDatabases/{{autonomous_database_id}}'
 autogen_async: true
+autogen_status: QXV0b25vbW91c0RhdGFiYXNl
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 240
       update_minutes: 120
       delete_minutes: 120
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/oracledatabase_autonomous_database.go.tmpl'
 examples:
@@ -55,25 +50,29 @@ examples:
     vars:
       project: 'my-project'
       autonomous_database_id: 'my-instance'
+      database_name: 'mydatabase'
       deletion_protection: 'true'
     ignore_read_extra:
       - 'deletion_protection'
     test_vars_overrides:
-      'deletion_protection': 'false'
-      'project': '"oci-terraform-testing"'
-      'autonomous_database_id': '"my-adb-instance-id"'
+      deletion_protection: 'false'
+      project: '"oci-terraform-testing-prod"'
+      database_name: 'fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))'
   - name: 'oracledatabase_autonomous_database_full'
     primary_resource_id: 'myADB'
     vars:
       project: 'my-project'
       autonomous_database_id: 'my-instance'
+      database_name: 'mydatabase'
+      endpoint_name: 'myendpoint'
       deletion_protection: 'true'
     ignore_read_extra:
       - 'deletion_protection'
     test_vars_overrides:
-      'project': '"oci-terraform-testing"'
-      'autonomous_database_id': '"my-adb-instance-id-2"'
-      'deletion_protection': 'false'
+      project: '"oci-terraform-testing-prod"'
+      deletion_protection: 'false'
+      database_name: 'fmt.Sprintf("tftestdatabase%s", acctest.RandString(t, 10))'
+      endpoint_name: 'fmt.Sprintf("tftestendpoint%s", acctest.RandString(t, 10))'
 virtual_fields:
   - name: 'deletion_protection'
     type: Boolean

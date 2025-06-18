@@ -13,7 +13,7 @@
 
 ---
 name: 'RegionDiskResourcePolicyAttachment'
-api_resource_type_kind: RegionDisk
+api_resource_type_kind: Disk
 description: |
   Adds existing resource policies to a disk. You can only add one policy
   which will be applied to this disk for scheduling snapshot creation.
@@ -36,15 +36,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 identity:
   - name
 nested_query:

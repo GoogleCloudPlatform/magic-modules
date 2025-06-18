@@ -38,14 +38,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/apigee_nat_address.go.tmpl'
   encoder: 'templates/terraform/encoders/apigee_nat_address.go.tmpl'
@@ -69,6 +63,7 @@ examples:
     exclude_docs: true
       # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
   - name: 'apigee_nat_address_with_activate'
     vars:
       nat_address_name: 'my-nat-address'

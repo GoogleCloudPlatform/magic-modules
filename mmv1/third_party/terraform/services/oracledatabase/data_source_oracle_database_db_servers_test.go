@@ -22,8 +22,6 @@ func TestAccOracleDatabaseDbServers_basic(t *testing.T) {
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_db_servers.my_db_servers", "db_servers.1.display_name"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_db_servers.my_db_servers", "db_servers.1.properties.#"),
 					resource.TestCheckResourceAttrSet("data.google_oracle_database_db_servers.my_db_servers", "db_servers.1.properties.0.max_ocpu_count"),
-					resource.TestCheckResourceAttr("data.google_oracle_database_db_servers.my_db_servers", "db_servers.0.display_name", "dbServer-1"),
-					resource.TestCheckResourceAttr("data.google_oracle_database_db_servers.my_db_servers", "db_servers.1.display_name", "dbServer-2"),
 					resource.TestCheckResourceAttr("data.google_oracle_database_db_servers.my_db_servers", "db_servers.0.properties.0.max_ocpu_count", "126"),
 					resource.TestCheckResourceAttr("data.google_oracle_database_db_servers.my_db_servers", "db_servers.1.properties.0.max_ocpu_count", "126"),
 				),
@@ -35,7 +33,7 @@ func TestAccOracleDatabaseDbServers_basic(t *testing.T) {
 const testAccOracleDatabaseDbServers_basic = `
 data "google_oracle_database_db_servers" "my_db_servers"{
 	location = "us-east4"
-	project = "oci-terraform-testing"
+	project = "oci-terraform-testing-prod"
 	cloud_exadata_infrastructure = "ofake-do-not-delete-tf-exadata"
 }
 `

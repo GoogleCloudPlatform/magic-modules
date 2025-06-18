@@ -72,8 +72,11 @@ examples:
       subscription_name: 'example-subscription'
       dataset_id: 'example_dataset'
       table_id: 'example_table'
-    test_vars_overrides:
-      policy_changed: 'acctest.BootstrapPSARoles(t, "service-", "gcp-sa-pubsub", []string{"roles/bigquery.dataEditor", "roles/bigquery.metadataViewer"})'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+        role: "roles/bigquery.dataEditor"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+        role: "roles/bigquery.metadataViewer"
   - name: 'pubsub_subscription_push_bq_table_schema'
     primary_resource_id: 'example'
     vars:
@@ -81,8 +84,11 @@ examples:
       subscription_name: 'example-subscription'
       dataset_id: 'example_dataset'
       table_id: 'example_table'
-    test_vars_overrides:
-      policy_changed: 'acctest.BootstrapPSARoles(t, "service-", "gcp-sa-pubsub", []string{"roles/bigquery.dataEditor", "roles/bigquery.metadataViewer"})'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+        role: "roles/bigquery.dataEditor"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+        role: "roles/bigquery.metadataViewer"
   - name: 'pubsub_subscription_push_bq_service_account'
     primary_resource_id: 'example'
     vars:
@@ -500,3 +506,60 @@ properties:
 
       Note that subscribers may still receive multiple copies of a message when `enable_exactly_once_delivery`
       is true if the message was published multiple times by a publisher client. These copies are considered distinct by Pub/Sub and have distinct messageId values
+  - name: messageTransforms
+    type: Array
+    description: |
+      Transforms to be applied to messages published to the topic. Transforms are applied in the
+      order specified.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: javascriptUdf
+          type: NestedObject
+          description: |
+            Javascript User Defined Function. If multiple Javascript UDFs are specified on a resource,
+            each one must have a unique `function_name`.
+          properties:
+            - name: functionName
+              type: String
+              required: true
+              description: |
+                Name of the JavaScript function that should be applied to Pub/Sub messages.
+            - name: code
+              type: String
+              required: true
+              description: |
+                JavaScript code that contains a function `function_name` with the
+                following signature:
+                ```
+                  /**
+                  * Transforms a Pub/Sub message.
+                  *
+                  * @return {(Object<string, (string | Object<string, string>)>|null)} - To
+                  * filter a message, return `null`. To transform a message return a map
+                  * with the following keys:
+                  *   - (required) 'data' : {string}
+                  *   - (optional) 'attributes' : {Object<string, string>}
+                  * Returning empty `attributes` will remove all attributes from the
+                  * message.
+                  *
+                  * @param  {(Object<string, (string | Object<string, string>)>} Pub/Sub
+                  * message. Keys:
+                  *   - (required) 'data' : {string}
+                  *   - (required) 'attributes' : {Object<string, string>}
+                  *
+                  * @param  {Object<string, any>} metadata - Pub/Sub message metadata.
+                  * Keys:
+                  *   - (required) 'message_id'  : {string}
+                  *   - (optional) 'publish_time': {string} YYYY-MM-DDTHH:MM:SSZ format
+                  *   - (optional) 'ordering_key': {string}
+                  */
+                  function <function_name>(message, metadata) {
+                  }
+                ```
+        - name: disabled
+          type: Boolean
+          default_value: false
+          description: |
+            Controls whether or not to use this transform. If not set or `false`,
+            the transform will be applied to messages. Default: `true`.

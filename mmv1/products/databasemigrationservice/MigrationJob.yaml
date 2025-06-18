@@ -36,18 +36,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'database_migration_service_migration_job_mysql_to_mysql'
@@ -161,6 +155,7 @@ properties:
         description: |
           A list of messages that carry the error details.
         output: true
+        custom_flatten: 'templates/terraform/custom_flatten/dms_migration_job_error_details.tmpl'
         item_type:
           type: KeyValuePairs
   - name: 'type'

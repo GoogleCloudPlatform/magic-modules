@@ -14,7 +14,6 @@
 ---
 name: 'ManagementServer'
 description: A Backup and DR Management Server (Also referred as Management Console)
-min_version: 'beta'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/backup-disaster-recovery/docs'
@@ -35,19 +34,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'backup_dr_management_server'
     primary_resource_id: 'ms-console'
-    min_version: 'beta'
     vars:
       network_name: 'vpc-network'
       managementserver_name: 'ms-console'
@@ -59,14 +51,12 @@ parameters:
     type: String
     description: |
       The location for the management server (management console)
-    min_version: 'beta'
     url_param_only: true
     required: true
   - name: 'name'
     type: String
     description: |-
       The name of management server (management console)
-    min_version: 'beta'
     url_param_only: true
     required: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
@@ -76,7 +66,6 @@ properties:
     type: Enum
     description: |
       The type of management server (management console).
-    min_version: 'beta'
     default_value: "BACKUP_RESTORE"
     enum_values:
       - 'BACKUP_RESTORE'
@@ -84,7 +73,6 @@ properties:
     type: Array
     description: |
       Network details to create management server (management console).
-    min_version: 'beta'
     item_type:
       type: NestedObject
       properties:
@@ -92,13 +80,11 @@ properties:
           type: String
           description: |
             Network with format `projects/{{project_id}}/global/networks/{{network_id}}`
-          min_version: 'beta'
           required: true
         - name: 'peeringMode'
           type: Enum
           description: |
             Type of Network peeringMode
-          min_version: 'beta'
           enum_values:
             - 'PRIVATE_SERVICE_ACCESS'
           default_value: "PRIVATE_SERVICE_ACCESS"
@@ -108,24 +94,20 @@ properties:
     type: String
     description: |
       The oauth2ClientId of management console.
-    min_version: 'beta'
     output: true
   - name: 'managementUri'
     type: NestedObject
     description: |-
       The management console URI
-    min_version: 'beta'
     output: true
     properties:
       - name: 'webUi'
         type: String
         description: |-
           The management console webUi.
-        min_version: 'beta'
         output: true
       - name: 'api'
         type: String
         description: |-
           The management console api endpoint.
-        min_version: 'beta'
         output: true

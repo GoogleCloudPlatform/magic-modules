@@ -42,6 +42,7 @@ custom_code:
   constants: 'templates/terraform/constants/billing_budget.tmpl'
 schema_version: 1
 state_upgraders: true
+exclude_sweeper: true
 examples:
   - name: 'billing_budget_basic'
     primary_resource_id: 'budget'
@@ -213,7 +214,7 @@ properties:
           this is a list of credit types to be subtracted from gross cost to determine the spend for threshold calculations. See a list of acceptable credit type values.
           If creditTypesTreatment is not INCLUDE_SPECIFIED_CREDITS, this field must be empty.
 
-          **Note:** If the field has a value in the config and needs to be removed, the field has to be an emtpy array in the config.
+          **Note:** If the field has a value in the config and needs to be removed, the field has to be an empty array in the config.
         default_from_api: true
         at_least_one_of:
           - 'budget_filter.0.projects'
@@ -236,7 +237,7 @@ properties:
           If the field is omitted, the report will include usage from the parent
           account and all subaccounts, if they exist.
 
-          **Note:** If the field has a value in the config and needs to be removed, the field has to be an emtpy array in the config.
+          **Note:** If the field has a value in the config and needs to be removed, the field has to be an empty array in the config.
         default_from_api: true
         at_least_one_of:
           - 'budget_filter.0.projects'
@@ -411,7 +412,8 @@ properties:
           - 'amount.0.specified_amount'
           - 'amount.0.last_period_amount'
         custom_flatten: 'templates/terraform/custom_flatten/object_to_bool.go.tmpl'
-        custom_expand: 'templates/terraform/custom_expand/bool_to_object.go.tmpl'
+        # THIS TEMPLATE IS DEPRECATED, DO NOT USE FOR NEW FIELDS
+        custom_expand: 'templates/terraform/custom_expand/deprecated_bool_to_object.go.tmpl'
   - name: 'thresholdRules'
     type: Array
     description: |

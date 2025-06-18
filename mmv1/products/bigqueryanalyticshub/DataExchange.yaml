@@ -41,6 +41,9 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}'
     - '{{data_exchange_id}}'
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "US"
 examples:
   - name: 'bigquery_analyticshub_data_exchange_basic'
     primary_resource_id: 'data_exchange'
@@ -56,6 +59,13 @@ examples:
     vars:
       data_exchange_id: 'dcr_data_exchange'
       desc: 'example dcr data exchange'
+  - name: 'bigquery_analyticshub_data_exchange_log_linked_dataset_query_user'
+    primary_resource_id: 'data_exchange'
+    primary_resource_name: 'fmt.Sprintf("tf_test_log_email_data_exchange%s", context["random_suffix"])'
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'tf_test_log_email_data_exchange'
+      description: 'Example for log email test for data exchange'
 parameters:
 properties:
   - name: 'name'
@@ -136,3 +146,8 @@ properties:
           - 'sharing_environment_config.0.dcr_exchange_config'
         properties:
           []
+  - name: 'logLinkedDatasetQueryUserEmail'
+    type: Boolean
+    description:
+      If true, subscriber email logging is enabled and all queries on the linked dataset will log the email address of the querying user.
+    immutable: true

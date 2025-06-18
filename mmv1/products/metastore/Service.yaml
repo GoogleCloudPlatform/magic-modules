@@ -28,27 +28,21 @@ update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
 timeouts:
-  insert_minutes: 60
-  update_minutes: 60
-  delete_minutes: 60
+  insert_minutes: 75
+  update_minutes: 75
+  delete_minutes: 75
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
-      insert_minutes: 60
-      update_minutes: 60
-      delete_minutes: 60
+      insert_minutes: 75
+      update_minutes: 75
+      delete_minutes: 75
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'service_id'
@@ -77,8 +71,9 @@ examples:
     primary_resource_id: 'default'
     vars:
       metastore_service_name: 'example-service'
-      key_name: 'example-key'
-      keyring_name: 'example-keyring'
+      kms_key_name: 'example-key'
+    test_vars_overrides:
+      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-metastore-service-key1").CryptoKey.Name'
     exclude_docs: true
     skip_vcr: true
   - name: 'dataproc_metastore_service_cmek_example'
@@ -142,22 +137,18 @@ examples:
       metastore_service_name: 'backup'
   - name: 'dataproc_metastore_service_autoscaling_max_scaling_factor'
     primary_resource_id: 'test_resource'
-    min_version: 'beta'
     vars:
       metastore_service_name: 'test-service'
   - name: 'dataproc_metastore_service_autoscaling_min_and_max_scaling_factor'
     primary_resource_id: 'test_resource'
-    min_version: 'beta'
     vars:
       metastore_service_name: 'test-service'
   - name: 'dataproc_metastore_service_autoscaling_min_scaling_factor'
     primary_resource_id: 'test_resource'
-    min_version: 'beta'
     vars:
       metastore_service_name: 'test-service'
   - name: 'dataproc_metastore_service_autoscaling_no_limit_config'
     primary_resource_id: 'test_resource'
-    min_version: 'beta'
     vars:
       metastore_service_name: 'test-service'
 parameters:
@@ -183,6 +174,16 @@ properties:
     type: String
     description: |
       The relative resource name of the metastore service.
+    output: true
+  - name: 'createTime'
+    type: Time
+    description: |
+      Output only. The time when the metastore service was created.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Output only. The time when the metastore service was last updated.
     output: true
   - name: 'labels'
     type: KeyValueLabels
@@ -262,13 +263,17 @@ properties:
         type: NestedObject
         description: |
           Represents the autoscaling configuration of a metastore service.
-        min_version: 'beta'
         required: false
         properties:
           - name: 'autoscalingEnabled'
             type: Boolean
             description: |
               Defines whether autoscaling is enabled. The default value is false.
+          - name: 'autoscalingFactor'
+            type: Double
+            description: |
+              Output only. The scaling factor of a service with autoscaling enabled.
+            output: true
           - name: 'limitConfig'
             type: NestedObject
             description: |

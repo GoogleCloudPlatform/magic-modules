@@ -39,18 +39,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 45
       update_minutes: 45
       delete_minutes: 20
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
   include_project: true
 custom_code:
   encoder: 'templates/terraform/encoders/vertex_ai_index_endpoint_deployed_index.go.tmpl'
@@ -114,6 +108,11 @@ parameters:
     immutable: true
     resource: 'IndexEndpoint'
     imports: 'name'
+  - name: 'region'
+    type: String
+    description: The region of the index endpoint deployment. eg us-central1
+    url_param_only: true
+    immutable: true
 properties:
   - name: 'name'
     type: String
@@ -187,7 +186,7 @@ properties:
     description: |
       A description of resources that the DeployedIndex uses, which to large degree are decided by Vertex AI, and optionally allows only a modest additional configuration.
 
-    # Note: Having the fields within automaticResouces not being marked as immutable was done in order to support the ability to update such fields. See : https://github.com/GoogleCloudPlatform/magic-modules/pull/11039#issuecomment-2209316648
+    # Note: Having the fields within automaticResources not being marked as immutable was done in order to support the ability to update such fields. See : https://github.com/GoogleCloudPlatform/magic-modules/pull/11039#issuecomment-2209316648
     default_from_api: true
     properties:
       - name: 'minReplicaCount'

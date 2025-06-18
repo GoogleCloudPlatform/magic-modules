@@ -21,9 +21,8 @@ references:
     'Creating an environment': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-environment'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.envgroups/create'
 docs:
-base_url: 'envgroups'
+base_url: '{{org_id}}/envgroups'
 self_link: '{{org_id}}/envgroups/{{name}}'
-create_url: '{{org_id}}/envgroups'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
@@ -39,16 +38,11 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_environment_group.go.tmpl'
+exclude_sweeper: true
 examples:
   - name: 'apigee_environment_group_basic'
     vars:
@@ -64,6 +58,7 @@ examples:
     exclude_docs: true
       # Resource creation race
     skip_vcr: true
+    external_providers: ["time"]
 parameters:
   - name: 'orgId'
     type: String

@@ -34,15 +34,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 10000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/interconnect.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'
@@ -88,10 +81,11 @@ properties:
     type: ResourceRef
     description: |
       URL of the InterconnectLocation object that represents where this connection is to be provisioned.
-      Specifies the location inside Google's Networks, should not be passed in case of cross-cloud interconnect.
+      Specifies the location inside Google's Networks.
     immutable: true
     resource: 'InterconnectLocations'
     imports: 'selfLink'
+    required: true
   - name: 'linkType'
     type: Enum
     description: |
@@ -99,11 +93,13 @@ properties:
       bundle, not the speed of the entire bundle. Can take one of the following values:
         - LINK_TYPE_ETHERNET_10G_LR: A 10G Ethernet with LR optics.
         - LINK_TYPE_ETHERNET_100G_LR: A 100G Ethernet with LR optics.
+        - LINK_TYPE_ETHERNET_400G_LR4: A 400G Ethernet with LR4 optics
     required: true
     immutable: true
     enum_values:
       - 'LINK_TYPE_ETHERNET_10G_LR'
       - 'LINK_TYPE_ETHERNET_100G_LR'
+      - 'LINK_TYPE_ETHERNET_400G_LR4'
   - name: 'requestedLinkCount'
     type: Integer
     description: |
@@ -405,6 +401,7 @@ properties:
         interconnects.list of features requested for this Interconnect connection
       enum_values:
         - 'MACSEC'
+        - 'CROSS_SITE_NETWORK'
         - 'IF_MACSEC'
   - name: 'availableFeatures'
     type: Array
@@ -414,5 +411,26 @@ properties:
       ports. If not present then the Interconnect connection is provisioned on non-MACsec capable
       ports and MACsec isn't supported and enabling MACsec fails).
     output: true
+    item_type:
+      type: Enum
+      enum_values:
+        - 'IF_CROSS_SITE_NETWORK'
+        - 'IF_MACSEC'
+        - 'MACSEC'
+  - name: 'wireGroups'
+    type: Array
+    min_version: beta
+    description: |
+      A list of the URLs of all CrossSiteNetwork WireGroups configured to use this Interconnect. The Interconnect cannot be deleted if this list is non-empty.
+    output: true
+    item_type:
+      type: String
+  - name: 'interconnectGroups'
+    type: Array
+    description: |
+      URLs of InterconnectGroups that include this Interconnect.
+      Order is arbitrary and items are unique.
+    output: true
+    is_set: true
     item_type:
       type: String

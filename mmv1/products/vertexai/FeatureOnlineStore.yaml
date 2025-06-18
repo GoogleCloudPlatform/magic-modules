@@ -33,31 +33,36 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'feature_online_store'
+  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_feature_online_store.tf.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{name}}'
+  min_version: 'beta'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/vertex_ai_force_delete.go.tmpl'
 examples:
   - name: 'vertex_ai_feature_online_store'
     primary_resource_id: 'feature_online_store'
+    primary_resource_name: 'fmt.Sprintf("tf_test_example_feature_online_store%s", context["random_suffix"])'
     vars:
       name: 'example_feature_online_store'
     ignore_read_extra:
       - 'force_destroy'
   - name: 'vertex_ai_featureonlinestore_with_optimized'
     primary_resource_id: 'featureonlinestore'
+    primary_resource_name: 'fmt.Sprintf("tf_test_example_feature_online_store_optimized%s", context["random_suffix"])'
     vars:
       name: 'example_feature_online_store_optimized'
     ignore_read_extra:
       - 'force_destroy'
   - name: 'vertex_ai_featureonlinestore_with_beta_fields_bigtable'
     primary_resource_id: 'featureonlinestore'
+    primary_resource_name: 'fmt.Sprintf("tf_test_example_feature_online_store_beta_bigtable%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       name: 'example_feature_online_store_beta_bigtable'

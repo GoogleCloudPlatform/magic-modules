@@ -171,6 +171,8 @@ type Type struct {
 
 	Sensitive bool `yaml:"sensitive,omitempty"` // Adds `Sensitive: true` to the schema
 
+	WriteOnly bool `yaml:"write_only,omitempty"` // Adds `WriteOnly: true` to the schema
+
 	// Does not set this value to the returned API value.  Useful for fields
 	// like secrets where the returned API value is not helpful.
 	IgnoreRead bool `yaml:"ignore_read,omitempty"`
@@ -361,6 +363,14 @@ func (t *Type) Validate(rName string) {
 		log.Fatalf("'default_value' and 'default_from_api' cannot be both set in resource %s", rName)
 	}
 
+	if t.WriteOnly && (t.DefaultFromApi || t.Output) {
+		log.Fatalf("Property %s cannot be write_only and default_from_api or output at the same time in resource %s", t.Name, rName)
+	}
+
+	if t.WriteOnly && t.Sensitive {
+		log.Fatalf("Property %s cannot be write_only and sensitive at the same time in resource %s", t.Name, rName)
+	}
+
 	t.validateLabelsField()
 
 	switch {
@@ -397,6 +407,48 @@ func (t Type) Lineage() string {
 	}
 
 	return fmt.Sprintf("%s.%s", t.ParentMetadata.Lineage(), google.Underscore(t.Name))
+}
+
+// Returns a dot notation path to where the field is nested within the parent
+// object. eg: parent.meta.label.foo
+// This format is intended for resource metadata, to be used for connecting a Terraform
+// type with a corresponding API type.
+func (t Type) MetadataLineage() string {
+	if t.ParentMetadata == nil {
+		return google.Underscore(t.Name)
+	}
+
+	// Skip arrays because otherwise the array name will be included twice
+	if t.ParentMetadata.IsA("Array") {
+		return t.ParentMetadata.MetadataLineage()
+	}
+
+	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataLineage(), google.Underscore(t.Name))
+}
+
+// Returns a dot notation path to where the field is nested within the parent
+// object. eg: parent.meta.label.foo
+// This format is intended for to represent an API type.
+func (t Type) MetadataApiLineage() string {
+	apiName := t.ApiName
+	if t.ParentMetadata == nil {
+		return google.Underscore(apiName)
+	}
+
+	if t.ParentMetadata.IsA("Array") {
+		return t.ParentMetadata.MetadataApiLineage()
+	}
+
+	return fmt.Sprintf("%s.%s", t.ParentMetadata.MetadataApiLineage(), google.Underscore(apiName))
+}
+
+// Returns the lineage in snake case
+func (t Type) LineageAsSnakeCase() string {
+	if t.ParentMetadata == nil {
+		return google.Underscore(t.Name)
+	}
+
+	return fmt.Sprintf("%s_%s", t.ParentMetadata.LineageAsSnakeCase(), google.Underscore(t.Name))
 }
 
 // Prints the access path of the field in the configration eg: metadata.0.labels
@@ -633,6 +685,30 @@ func (t Type) NestedProperties() []*Type {
 		props = t.UserProperties()
 	case t.IsA("Map"):
 		props = google.Reject(t.ValueType.NestedProperties(), func(p *Type) bool {
+			return t.Exclude
+		})
+	default:
+	}
+	return props
+}
+
+// Returns write-only properties for this property.
+func (t Type) WriteOnlyProperties() []*Type {
+	props := make([]*Type, 0)
+
+	switch {
+	case t.IsA("Array"):
+		if t.ItemType.IsA("NestedObject") {
+			props = google.Reject(t.ItemType.WriteOnlyProperties(), func(p *Type) bool {
+				return t.Exclude
+			})
+		}
+	case t.IsA("NestedObject"):
+		props = google.Select(t.UserProperties(), func(p *Type) bool {
+			return p.WriteOnly
+		})
+	case t.IsA("Map"):
+		props = google.Reject(t.ValueType.WriteOnlyProperties(), func(p *Type) bool {
 			return t.Exclude
 		})
 	default:
@@ -1002,7 +1078,7 @@ func (t Type) NamespaceProperty() string {
 }
 
 func (t Type) CustomTemplate(templatePath string, appendNewline bool) string {
-	return resource.ExecuteTemplate(&t, templatePath, appendNewline)
+	return ExecuteTemplate(&t, templatePath, appendNewline)
 }
 
 func (t *Type) GetIdFormat() string {
@@ -1047,13 +1123,61 @@ func (t *Type) IsForceNew() bool {
 		return t.Immutable
 	}
 
+	// WriteOnly fields are never immutable
+	if t.WriteOnly {
+		return false
+	}
+
+	// Output fields (except effective labels) can't be immutable
+	if t.Output && !t.IsA("KeyValueEffectiveLabels") {
+		return false
+	}
+
+	// Explicitly-marked fields are always immutable
+	if t.Immutable {
+		return true
+	}
+
+	// At this point the field can only be immutable if the resource is immutable.
+	if !t.ResourceMetadata.Immutable {
+		return false
+	}
+
+	// If this field has an update_url set, it's not immutable.
+	if t.UpdateUrl != "" {
+		return false
+	}
+
+	// If this is a top-level field, it inherits immutability from the resource.
 	parent := t.Parent()
-	return (!t.Output || t.IsA("KeyValueEffectiveLabels")) &&
-		(t.Immutable ||
-			(t.ResourceMetadata.Immutable && t.UpdateUrl == "" &&
-				(parent == nil ||
-					(parent.IsForceNew() &&
-						!(parent.FlattenObject && t.IsA("KeyValueLabels"))))))
+	if parent == nil {
+		return true
+	}
+
+	// If the parent field _isn't_ immutable, that's inherited by this field.
+	if !parent.IsForceNew() {
+		return false
+	}
+
+	// Otherwise, the field is immutable unless it's a KeyValueLabels field
+	// and the parent has FlattenObject set.
+	return !(parent.FlattenObject && t.IsA("KeyValueLabels"))
+}
+
+// Returns true if the type does not correspond to an API type
+func (t *Type) ProviderOnly() bool {
+	// These are special case fields created by the generator which have no API counterpart
+	if t.IsA("KeyValueEffectiveLabels") || t.IsA("KeyValueTerraformLabels") {
+		return true
+	}
+
+	if t.UrlParamOnly || t.ClientSide {
+		return true
+	}
+
+	// The type is provider-only if any of its ancestors are provider-only (it is inherited)
+	parent := t.Parent()
+	return parent != nil && parent.ProviderOnly()
 }
 
 // Returns an updated path for a given Terraform field path (e.g.

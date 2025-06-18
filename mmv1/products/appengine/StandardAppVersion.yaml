@@ -48,19 +48,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'appengine#operation'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 20
       update_minutes: 20
       delete_minutes: 20
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'versions'
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/appversion_delete.go.tmpl'
@@ -414,6 +407,9 @@ properties:
             type: Integer
             description: |
               Maximum number of instances to run for this version. Set to zero to disable maxInstances configuration.
+
+              **Note:** Starting from March 2025, App Engine sets the maxInstances default for standard environment deployments to 20. This change doesn't impact existing apps. To override the default, specify a new value between 0 and 2147483647, and deploy a new version or redeploy over an existing version. To disable the maxInstances default configuration setting, specify the maximum permitted value 2147483647.
+            default_from_api: true
   - name: 'basicScaling'
     type: NestedObject
     description: |

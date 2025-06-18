@@ -9,8 +9,17 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"net/http"
+
+{{ if ne $.TargetVersionName `ga` -}}
+	// For beta tests only
+	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
+	tpgservicusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
+	"github.com/hashicorp/terraform-provider-google/google/services/kms"
+{{- end }}
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/tags"
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/privateca"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
@@ -19,7 +28,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgiamresource"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
-
+	
 	"google.golang.org/api/cloudbilling/v1"
 	cloudkms "google.golang.org/api/cloudkms/v1"
 	cloudresourcemanager "google.golang.org/api/cloudresourcemanager/v1"
@@ -31,6 +40,16 @@ import (
 )
 
 var SharedKeyRing = "tftest-shared-keyring-1"
+
+{{ if ne $.TargetVersionName `ga` -}}
+
+var DefaultKeyHandleName = "eed58b7b-20ad-4da8-ad85-ba78a0d5ab87"
+var DefaultKeyHandleResourceType = "compute.googleapis.com/Disk"
+var CloudKmsSrviceName = "cloudkms.googleapis.com"
+
+{{- end }}
+
+
 var SharedCryptoKey = map[string]string{
 	"ENCRYPT_DECRYPT":    "tftest-shared-key-1",
 	"ASYMMETRIC_SIGN":    "tftest-shared-sign-key-1",
@@ -71,6 +90,244 @@ func BootstrapKMSKeyWithPurpose(t *testing.T, purpose string) BootstrappedKMS {
 func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID string) BootstrappedKMS {
 	return BootstrapKMSKeyWithPurposeInLocationAndName(t, purpose, locationID, SharedCryptoKey[purpose])
 }
+
+{{ if ne $.TargetVersionName `ga` -}}
+
+type BootstrappedKMSAutokey struct {
+    *cloudkms.AutokeyConfig
+	*cloudkms.KeyHandle
+}
+
+func BootstrapKMSAutokeyKeyHandle(t *testing.T) BootstrappedKMSAutokey {
+	return BootstrapKMSAutokeyKeyHandleWithLocation(t, "global")
+}
+
+func BootstrapKMSAutokeyKeyHandleWithLocation(t *testing.T, locationID string) BootstrappedKMSAutokey {
+	config := BootstrapConfig(t)
+	if config == nil {
+		return BootstrappedKMSAutokey{
+			&cloudkms.AutokeyConfig{},
+			&cloudkms.KeyHandle{},
+		}
+	}
+
+	autokeyFolder, kmsProject, resourceProject := setupAutokeyTestResources(t, config)
+
+	// Enable autokey on autokey test folder
+	kmsClient := config.NewKmsClient(config.UserAgent)
+	autokeyConfigID := fmt.Sprintf("%s/autokeyConfig", autokeyFolder.Name)
+	autokeyConfig, err := kmsClient.Folders.UpdateAutokeyConfig(autokeyConfigID, &cloudkms.AutokeyConfig{
+		KeyProject: fmt.Sprintf("projects/%s", kmsProject.ProjectId),
+	}).UpdateMask("keyProject").Do()
+	if err != nil {
+		t.Errorf("unable to bootstrap KMS keyHandle. Cannot enable autokey on autokey test folder: %s", err)
+	}
+
+	keyHandleParent := fmt.Sprintf("projects/%s/locations/%s", resourceProject.ProjectId, locationID)
+	keyHandleName := fmt.Sprintf("%s/keyHandles/%s", keyHandleParent, DefaultKeyHandleName)
+
+	// Get or Create the hard coded keyHandle for testing
+	keyHandle, err := kmsClient.Projects.Locations.KeyHandles.Get(keyHandleName).Do()
+
+	if err != nil {
+		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+			newKeyHandle := cloudkms.KeyHandle{
+				ResourceTypeSelector: DefaultKeyHandleResourceType,
+			}
+
+			keyHandleOp, err := kmsClient.Projects.Locations.KeyHandles.Create(keyHandleParent, &newKeyHandle).KeyHandleId(DefaultKeyHandleName).Do()
+			if err != nil {
+				t.Errorf("unable to bootstrap KMS keyHandle. Cannot create new KeyHandle: %s", err)
+			}
+
+			opAsMap, err := tpgresource.ConvertToMap(keyHandleOp)
+			if err != nil {
+				t.Errorf("unable to bootstrap KMS keyHandle. Cannot get operation map: %s", err)
+			}
+
+			var response map[string]interface{}
+			err = kms.KMSOperationWaitTimeWithResponse(config, opAsMap, &response, resourceProject.ProjectId, "creating keyHandle", config.UserAgent, time.Duration(5)*time.Minute)
+			if err != nil {
+				t.Errorf("unable to bootstrap KMS keyHandle. Cannot wait for create keyhandle operation: %s", err)
+			}
+			keyHandle = &cloudkms.KeyHandle{
+				Name:                 response["name"].(string),
+				KmsKey:               response["kmsKey"].(string),
+				ResourceTypeSelector: response["resourceTypeSelector"].(string),
+			}
+		} else {
+			t.Errorf("unable to bootstrap KMS keyHandle. Cannot call KeyHandle service: %s", err)
+		}
+	}
+
+	if keyHandle == nil {
+		t.Fatalf("unable to bootstrap KMS keyHandle. KeyHandle is nil!")
+	}
+
+	return BootstrappedKMSAutokey{
+	    autokeyConfig,
+		keyHandle,
+	}
+}
+
+func setupAutokeyTestResources(t *testing.T, config *transport_tpg.Config) (*resourceManagerV3.Folder, *cloudresourcemanager.Project, *cloudresourcemanager.Project) {
+	projectIDSuffix := strings.Replace(envvar.GetTestProjectFromEnv(), "ci-test-project-", "", 1)
+	defaultAutokeyTestFolderName := fmt.Sprintf("autokeytest-%s-fd", projectIDSuffix)
+	defaultAutokeyTestKmsProject := fmt.Sprintf("test-kms-%s-prj", projectIDSuffix)
+	defaultAutokeyTestResourceProject := fmt.Sprintf("test-res-%s-prj", projectIDSuffix)
+
+	curUserEmail, err := transport_tpg.GetCurrentUserEmail(config, config.UserAgent)
+	if err != nil {
+		t.Errorf("unable to bootstrap KMS keyHandle. Cannot get current usr: %s", err)
+	}
+	// create a folder to configure autokey config and resource folder
+	autokeyFolder := BootstrapFolder(t, defaultAutokeyTestFolderName)
+	parent := &cloudresourcemanager.ResourceId{
+		Type: "folder",
+		Id:   strings.Split(autokeyFolder.Name, "/")[1],
+	}
+	// create and setup kms project for hosting keyring and keys for autokey
+	kmsProject := BootstrapProjectWithParent(t, defaultAutokeyTestKmsProject, envvar.GetTestBillingAccountFromEnv(t), parent, []string{CloudKmsSrviceName})
+	kmsProjectID := fmt.Sprintf("projects/%s", kmsProject.ProjectId)
+	kmsSAEmail, err := GenerateCloudKmsServiceIdentity(config, fmt.Sprintf("%v", kmsProject.ProjectNumber))
+	if err != nil {
+		t.Errorf("unable to bootstrap KMS keyHandle. Cannot create cloudkms service identity: %s", err)
+	}
+	err = addFolderBinding2(config.NewResourceManagerV3Client(config.UserAgent), autokeyFolder.Name, fmt.Sprintf("user:%s", curUserEmail), []string{"roles/cloudkms.admin"})
+	if err != nil {
+		t.Errorf("unable to bootstrap KMS keyHandle. Cannot assign cloudkms.admin role to current user on autokey test folder: %s", err)
+	}
+	err = addProjectBinding(config.NewResourceManagerV3Client(config.UserAgent), kmsProjectID, fmt.Sprintf("user:%s", curUserEmail), []string{"roles/resourcemanager.projectIamAdmin", "roles/cloudkms.admin"})
+	if err != nil {
+		t.Errorf("unable to bootstrap KMS keyHandle. Cannot assign cloudkms.admin and projectIamAdmin role to current user on kms project: %s", err)
+	}
+	err = addProjectBinding(config.NewResourceManagerV3Client(config.UserAgent), kmsProjectID, fmt.Sprintf("serviceAccount:%s", kmsSAEmail), []string{"roles/cloudkms.admin"})
+	if err != nil {
+		t.Errorf("unable to bootstrap KMS keyHandle. Cannot assign cloudkms.admin role to cloudkms service identity on kms project: %s", err)
+	}
+
+	// create and setup resource folder to host keyhandle
+	resourceProject := BootstrapProjectWithParent(t, defaultAutokeyTestResourceProject, envvar.GetTestBillingAccountFromEnv(t), parent, []string{})
+	return autokeyFolder, kmsProject, resourceProject
+}
+
+// GenerateCloudKmsServiceIdentity generates cloud kms service identity within a project
+func GenerateCloudKmsServiceIdentity(config *transport_tpg.Config, projectNum string) (string, error) {
+	url := fmt.Sprintf("https://serviceusage.googleapis.com/v1beta1/projects/%s/services/%s:generateServiceIdentity", projectNum, CloudKmsSrviceName)
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   projectNum,
+		RawURL:    url,
+		UserAgent: config.UserAgent,
+		Timeout:   time.Minute * 4,
+	})
+	if err != nil {
+		return "", fmt.Errorf("error creating cloudkms service identity: %s", err)
+	}
+
+	var opRes map[string]interface{}
+	err = tpgservicusage.ServiceUsageOperationWaitTimeWithResponse(
+		config, res, &opRes, projectNum, "Creating cloudkms service identity", config.UserAgent,
+		time.Minute*4)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("service-%s@gcp-sa-cloudkms.iam.gserviceaccount.com", projectNum), nil
+}
+
+func addProjectBinding(crmService *resourceManagerV3.Service, projectID string, member string, roles []string) error {
+	return addBinding(crmService, "project", projectID, member, roles)
+}
+
+func addFolderBinding2(crmService *resourceManagerV3.Service, folderID string, member string, roles []string) error {
+	return addBinding(crmService, "folder", folderID, member, roles)
+}
+
+// addBinding adds the member to the project's IAM policy
+func addBinding(crmService *resourceManagerV3.Service, resourceType string, resourceID string, member string, roles []string) error {
+
+	policy, err := getPolicy(crmService, resourceType, resourceID)
+	if err != nil {
+		return err
+	}
+
+	// Find the policy binding for role. Only one binding can have the role.
+	var binding *resourceManagerV3.Binding
+	for _, role := range roles {
+		for _, b := range policy.Bindings {
+			if b.Role == role {
+				binding = b
+				break
+			}
+		}
+
+		if binding != nil {
+			// If the binding exists, adds the member to the binding
+			binding.Members = append(binding.Members, member)
+		} else {
+			// If the binding does not exist, adds a new binding to the policy
+			binding = &resourceManagerV3.Binding{
+				Role:    role,
+				Members: []string{member},
+			}
+			policy.Bindings = append(policy.Bindings, binding)
+		}
+	}
+	setPolicy(crmService, resourceType, resourceID, policy)
+	return nil
+}
+
+// getPolicy gets the IAM policy on input resourceID
+// resourceType can be "project" or "folder"
+func getPolicy(crmService *resourceManagerV3.Service, resourceType string, resourceID string) (*resourceManagerV3.Policy, error) {
+
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+	request := new(resourceManagerV3.GetIamPolicyRequest)
+	var policy *resourceManagerV3.Policy
+	var err error
+	if resourceType == "project" {
+		policy, err = crmService.Projects.GetIamPolicy(resourceID, request).Do()
+	} else if resourceType == "folder" {
+		policy, err = crmService.Folders.GetIamPolicy(resourceID, request).Do()
+	} else {
+		return nil, fmt.Errorf("invalid resourceType, supported values: project or folder")
+	}
+	if err != nil {
+		return nil, fmt.Errorf("error getting iam policy: %s", err)
+	}
+	return policy, nil
+}
+
+// setPolicy sets the IAM policy on input resourceID
+// resourceType can be "project" or "folder"
+func setPolicy(crmService *resourceManagerV3.Service, resourceType string, resourceID string, policy *resourceManagerV3.Policy) error {
+
+	ctx := context.Background()
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
+	defer cancel()
+	request := new(resourceManagerV3.SetIamPolicyRequest)
+	request.Policy = policy
+	var err error
+	if resourceType == "project" {
+		_, err = crmService.Projects.SetIamPolicy(resourceID, request).Do()
+	} else if resourceType == "folder" {
+		_, err = crmService.Folders.SetIamPolicy(resourceID, request).Do()
+	} else {
+		return fmt.Errorf("invalid resourceType, supported values: project or folder")
+	}
+	if err != nil {
+		return fmt.Errorf("error setting iam policy: %s", err)
+	}
+	return nil
+}
+
+{{- end }}
 
 func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, locationID, keyShortName string) BootstrappedKMS {
 	config := BootstrapConfig(t)
@@ -497,14 +754,14 @@ func NewServiceNetworkSettings(options ...func(*ServiceNetworkSettings)) *Servic
 // BootstrapSharedServiceNetworkingConnection returns a persistent compute network name
 // for a test or set of tests.
 //
-// To delete a service networking conneciton, all of the service instances that use that connection
+// To delete a service networking connection, all of the service instances that use that connection
 // must be deleted first. After the service instances are deleted, some service producers delay the deletion
 // utnil a waiting period has passed. For example, after four days that you delete a SQL instance,
 // the service networking connection can be deleted.
 // That is the reason to use the shared service networking connection for test resources.
 // https://cloud.google.com/vpc/docs/configure-private-services-access#removing-connection
 //
-// testId specifies the test for which a shared network and a gobal address are used/initialized.
+// testId specifies the test for which a shared network and a global address are used/initialized.
 func BootstrapSharedServiceNetworkingConnection(t *testing.T, testId string, params ...func(*ServiceNetworkSettings)) string {
 	settings := NewServiceNetworkSettings(params...)
 	parentService := "services/" + settings.ParentService
@@ -626,6 +883,59 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 	return projects
 }
 
+{{ if ne $.TargetVersionName `ga` -}}
+
+// BootstrapFolder creates or get a folder having a input folderDisplayName within a TestOrgEnv
+func BootstrapFolder(t *testing.T, folderDisplayName string) *resourceManagerV3.Folder {
+	config := BootstrapConfig(t)
+	if config == nil {
+		return nil
+	}
+
+	crmClient := config.NewResourceManagerV3Client(config.UserAgent)
+	searchQuery := fmt.Sprintf("displayName=%s", folderDisplayName)
+	folderSearchResp, err := crmClient.Folders.Search().Query(searchQuery).Do()
+	if err != nil {
+		t.Fatalf("error searching for folder with displayName: %s", folderDisplayName)
+	}
+	var folder *resourceManagerV3.Folder
+	if len(folderSearchResp.Folders) == 0 {
+		op, err := crmClient.Folders.Create(&resourceManagerV3.Folder{
+			DisplayName: folderDisplayName,
+			Parent:      fmt.Sprintf("organizations/%s", envvar.GetTestOrgFromEnv(t)),
+		}).Do()
+		if err != nil {
+			t.Fatalf("error bootstrapping test folder: %s", err)
+		}
+
+		opAsMap, err := tpgresource.ConvertToMap(op)
+		if err != nil {
+			t.Fatalf("error converting folder operation map: %s", err)
+		}
+		var responseMap map[string]interface{}
+		err = resourcemanager.ResourceManagerOperationWaitTimeWithResponse(config, opAsMap, &responseMap, "creating folder", config.UserAgent, 4*time.Minute)
+		if err != nil {
+			t.Fatalf("error waiting for create folder operation: %s", err)
+		}
+		folder, err = crmClient.Folders.Get(responseMap["name"].(string)).Do()
+		if err != nil {
+			t.Fatalf("error getting folder: %s", err)
+		}
+	} else {
+		folder = folderSearchResp.Folders[0]
+	}
+
+	if folder.State == "DELETE_REQUESTED" {
+		_, err := crmClient.Folders.Undelete(folder.Name, &resourceManagerV3.UndeleteFolderRequest{}).Do()
+		if err != nil {
+			t.Fatalf("error undeleting folder: %s", err)
+		}
+	}
+	return folder
+}
+
+{{- end }}
+
 // BootstrapProject will create or get a project named
 // "<projectIDPrefix><projectIDSuffix>" that will persist across test runs,
 // where projectIDSuffix is based off of getTestProjectFromEnv(). The reason
@@ -633,14 +943,22 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 // Given the existing projects being used by our team, the prefix provided to
 // this function can be no longer than 18 characters.
 func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, services []string) *cloudresourcemanager.Project {
+	org := envvar.GetTestOrgFromEnv(t)
+	parent := &cloudresourcemanager.ResourceId{
+		Type: "organization",
+		Id:   org,
+	}
+	projectIDSuffix := strings.Replace(envvar.GetTestProjectFromEnv(), "ci-test-project-", "", 1)
+	projectID := projectIDPrefix + projectIDSuffix
+
+	return BootstrapProjectWithParent(t, projectID, billingAccount, parent, services)
+}
+
+func BootstrapProjectWithParent(t *testing.T, projectID string, billingAccount string, parent *cloudresourcemanager.ResourceId, services []string) *cloudresourcemanager.Project {
 	config := BootstrapConfig(t)
 	if config == nil {
 		return nil
 	}
-
-	projectIDSuffix := strings.Replace(envvar.GetTestProjectFromEnv(), "ci-test-project-", "", 1)
-	projectID := projectIDPrefix + projectIDSuffix
-
 	crmClient := config.NewResourceManagerClient(config.UserAgent)
 
 	project, err := crmClient.Projects.Get(projectID).Do()
@@ -648,15 +966,10 @@ func BootstrapProject(t *testing.T, projectIDPrefix, billingAccount string, serv
 		if !transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
 			t.Fatalf("Error getting bootstrapped project: %s", err)
 		}
-		org := envvar.GetTestOrgFromEnv(t)
-
 		op, err := crmClient.Projects.Create(&cloudresourcemanager.Project{
 			ProjectId: projectID,
 			Name:      "Bootstrapped Test Project",
-			Parent: &cloudresourcemanager.ResourceId{
-				Type: "organization",
-				Id:   org,
-			},
+			Parent:    parent,
 		}).Do()
 		if err != nil {
 			t.Fatalf("Error creating bootstrapped test project: %s", err)
@@ -1435,12 +1748,341 @@ func SetupProjectsAndGetAccessToken(org, billing, pid, service string, config *t
 	return accessToken, nil
 }
 
-const sharedTagKeyPrefix = "tf-bootstrap-tagkey"
+// For bootstrapping Developer Connect git repository link
+const SharedGitRepositoryLinkIdPrefix = "tf-bootstrap-git-repository-"
 
-func BootstrapSharedTestTagKey(t *testing.T, testId string) string {
+func BootstrapGitRepository(t *testing.T, gitRepositoryLinkId, location, cloneUri, parentConnectionId string) string {
+	gitRepositoryLinkId = SharedGitRepositoryLinkIdPrefix + gitRepositoryLinkId
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		t.Fatal("Could not bootstrap config.")
+	}
+
+	log.Printf("[DEBUG] Getting shared git repository link %q", gitRepositoryLinkId)
+
+	getURL := fmt.Sprintf("%sprojects/%s/locations/%s/connections/%s/gitRepositoryLinks/%s",
+		config.DeveloperConnectBasePath, config.Project, location, parentConnectionId, gitRepositoryLinkId)
+
+	headers := make(http.Header)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   config.Project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Headers:   headers,
+	})
+
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[DEBUG] Git repository link %q not found, bootstrapping", gitRepositoryLinkId)
+		obj := map[string]interface{}{
+			"clone_uri":   cloneUri,
+			"annotations": map[string]string{},
+		}
+
+		postURL := fmt.Sprintf("%sprojects/%s/locations/%s/connections/%s/gitRepositoryLinks?gitRepositoryLinkId=%s",
+			config.DeveloperConnectBasePath, config.Project, location, parentConnectionId, gitRepositoryLinkId)
+		headers := make(http.Header)
+		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   config.Project,
+			RawURL:    postURL,
+			UserAgent: config.UserAgent,
+			Body:      obj,
+			Timeout:   20 * time.Minute,
+			Headers:   headers,
+		})
+		if err != nil {
+			t.Fatalf("Error bootstrapping git repository link %q: %s", gitRepositoryLinkId, err)
+		}
+
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    getURL,
+			UserAgent: config.UserAgent,
+			Timeout:   20 * time.Minute,
+			Headers:   headers,
+		})
+		if err != nil {
+			t.Fatalf("Error getting git repository link %q: %s", gitRepositoryLinkId, err)
+		}
+	}
+
+	return gitRepositoryLinkId
+}
+
+const SharedConnectionIdPrefix = "tf-bootstrap-developer-connect-connection-"
+
+// For bootstrapping Developer Connect connection resources
+func BootstrapDeveloperConnection(t *testing.T, connectionId, location, tokenResource string, appInstallationId int) string {
+	connectionId = SharedConnectionIdPrefix + connectionId
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		t.Fatal("Could not bootstrap config.")
+	}
+
+	log.Printf("[DEBUG] Getting shared developer connection %q", connectionId)
+
+	getURL := fmt.Sprintf("%sprojects/%s/locations/%s/connections/%s",
+		config.DeveloperConnectBasePath, config.Project, location, connectionId)
+
+	headers := make(http.Header)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   config.Project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Headers:   headers,
+	})
+
+	if err != nil {
+		log.Printf("[DEBUG] Developer connection %q not found, bootstrapping", connectionId)
+		authorizerCredential := map[string]string{
+			"oauth_token_secret_version": tokenResource,
+		}
+		githubConfig := map[string]interface{}{
+			"github_app":            "DEVELOPER_CONNECT",
+			"app_installation_id":   appInstallationId,
+			"authorizer_credential": authorizerCredential,
+		}
+		obj := map[string]interface{}{
+			"disabled":      false,
+			"github_config": githubConfig,
+		}
+
+		postURL := fmt.Sprintf("%sprojects/%s/locations/%s/connections?connectionId=%s",
+			config.DeveloperConnectBasePath, config.Project, location, connectionId)
+		headers := make(http.Header)
+		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   config.Project,
+			RawURL:    postURL,
+			UserAgent: config.UserAgent,
+			Body:      obj,
+			Timeout:   20 * time.Minute,
+			Headers:   headers,
+		})
+		if err != nil {
+			t.Fatalf("Error bootstrapping developer connection %q: %s", connectionId, err)
+		}
+
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    getURL,
+			UserAgent: config.UserAgent,
+			Timeout:   20 * time.Minute,
+			Headers:   headers,
+		})
+		if err != nil {
+			t.Fatalf("Error getting developer connection %q: %s", connectionId, err)
+		}
+	}
+
+	return connectionId
+}
+
+const SharedRepositoryGroupPrefix = "tf-bootstrap-repo-group-"
+
+func BoostrapSharedRepositoryGroup(t *testing.T, repositoryGroupId, location, labels, codeRepositoryIndexId, resource string) string {
+	repositoryGroupId = SharedRepositoryGroupPrefix + repositoryGroupId
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		t.Fatal("Could not bootstrap config.")
+	}
+
+	log.Printf("[DEBUG] Getting shared repository group %q", repositoryGroupId)
+
+	getURL := fmt.Sprintf("%sprojects/%s/locations/%s/codeRepositoryIndexes/%s/repositoryGroups/%s",
+		config.GeminiBasePath, config.Project, location, codeRepositoryIndexId, repositoryGroupId)
+
+	headers := make(http.Header)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   config.Project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Headers:   headers,
+	})
+	if err != nil {
+		log.Printf("[DEBUG] Repository group %q not found, bootstrapping", codeRepositoryIndexId)
+		repositories := [1]interface{}{map[string]string{
+			"resource":       resource,
+			"branch_pattern": "main",
+		}}
+		postURL := fmt.Sprintf("%sprojects/%s/locations/%s/codeRepositoryIndexes/%s/repositoryGroups?repositoryGroupId=%s",
+			config.GeminiBasePath, config.Project, location, codeRepositoryIndexId, repositoryGroupId)
+		obj := map[string]interface{}{
+			"repositories": repositories,
+		}
+		if labels != "" {
+			obj["labels"] = labels
+		}
+
+		headers := make(http.Header)
+		for {
+			_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "POST",
+				Project:   config.Project,
+				RawURL:    postURL,
+				UserAgent: config.UserAgent,
+				Body:      obj,
+				Timeout:   20 * time.Minute,
+				Headers:   headers,
+			})
+			if err != nil {
+				if transport_tpg.IsGoogleApiErrorWithCode(err, 409) {
+					errMsg := fmt.Sprintf("%s", err)
+					if strings.Contains(errMsg, "unable to queue the operation") {
+						log.Printf("[DEBUG] Waiting for enqueued operation to finish before creating RepositoryGroup: %#v", obj)
+						time.Sleep(10 * time.Second)
+					} else if strings.Contains(errMsg, "parent resource not in ready state") {
+						log.Printf("[DEBUG] Waiting for parent resource to become active before creating RepositoryGroup: %#v", obj)
+						time.Sleep(1 * time.Minute)
+					} else {
+						t.Fatalf("Error creating RepositoryGroup: %s", err)
+					}
+				} else {
+					t.Fatalf("Error creating repository group %q: %s", repositoryGroupId, err)
+				}
+			} else {
+				break
+			}
+		}
+
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    getURL,
+			UserAgent: config.UserAgent,
+			Timeout:   20 * time.Minute,
+			Headers:   headers,
+		})
+		if err != nil {
+			t.Errorf("Error getting repository group %q: %s", repositoryGroupId, err)
+		}
+	}
+
+	return repositoryGroupId
+}
+
+// BootstrapSharedCodeRepositoryIndex will create a code repository index
+// if it hasn't been created in the test project.
+//
+// BootstrapSharedCodeRepositoryIndex returns a persistent code repository index
+// for a test or set of tests.
+//
+// Deletion of code repository index takes a few minutes, and creation of it
+// currently takes about half an hour.
+// That is the reason to use the shared code repository indexes for test resources.
+const SharedCodeRepositoryIndexPrefix = "tf-bootstrap-cri-"
+
+func BootstrapSharedCodeRepositoryIndex(t *testing.T, codeRepositoryIndexId, location, kmsKey string, labels map[string]string) string {
+	codeRepositoryIndexId = SharedCodeRepositoryIndexPrefix + codeRepositoryIndexId
+
+	config := BootstrapConfig(t)
+	if config == nil {
+		t.Fatal("Could not bootstrap config.")
+	}
+
+	log.Printf("[DEBUG] Getting shared code repository index %q", codeRepositoryIndexId)
+
+	getURL := fmt.Sprintf("%sprojects/%s/locations/%s/codeRepositoryIndexes/%s", config.GeminiBasePath, config.Project, location, codeRepositoryIndexId)
+
+	headers := make(http.Header)
+	_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   config.Project,
+		RawURL:    getURL,
+		UserAgent: config.UserAgent,
+		Timeout:   90 * time.Minute,
+		Headers:   headers,
+	})
+
+	// CRI not found responds with 404 not found
+	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		log.Printf("[DEBUG] Code repository index %q not found, bootstrapping", codeRepositoryIndexId)
+		postURL := fmt.Sprintf("%sprojects/%s/locations/%s/codeRepositoryIndexes?codeRepositoryIndexId=%s", config.GeminiBasePath, config.Project, location, codeRepositoryIndexId)
+		obj := make(map[string]interface{})
+		if labels != nil {
+			obj["labels"] = labels
+		}
+		if kmsKey != "" {
+			obj["kmsKey"] = kmsKey
+		}
+
+		headers := make(http.Header)
+		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   config.Project,
+			RawURL:    postURL,
+			UserAgent: config.UserAgent,
+			Body:      obj,
+			Timeout:   90 * time.Minute,
+			Headers:   headers,
+		})
+		if err != nil {
+			t.Fatalf("Error creating code repository index %q: %s", codeRepositoryIndexId, err)
+		}
+
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   config.Project,
+			RawURL:    getURL,
+			UserAgent: config.UserAgent,
+			Timeout:   90 * time.Minute,
+			Headers:   headers,
+		})
+		if err != nil {
+			t.Fatalf("Error getting code repository index %q: %s", codeRepositoryIndexId, err)
+		}
+	} else if err != nil {
+		t.Fatalf("Error getting code repository index %q: %s", codeRepositoryIndexId, err)
+	}
+
+	return codeRepositoryIndexId
+}
+
+const sharedTagKeyPrefix = "tf-bootstrap-tagkey"
+const sharedTagKeyParentErr = "Parent %q is not valid. Should be in format: 'organizations/123' OR 'projects/123'."
+
+func BootstrapSharedTestProjectTagKey(t *testing.T, testId string, obj map[string]interface{}) string {
+	pid := envvar.GetTestProjectFromEnv()
+	return bootstrapSharedTestTagKey(t, testId, "projects/"+pid, obj)
+}
+
+func BootstrapSharedTestOrganizationTagKey(t *testing.T, testId string, obj map[string]interface{}) string {
 	org := envvar.GetTestOrgFromEnv(t)
+	return bootstrapSharedTestTagKey(t, testId, "organizations/"+org, obj)
+}
+
+// parent should be in format: {"organization" OR "projects"}/{id}
+func bootstrapSharedTestTagKey(t *testing.T, testId, parent string, obj map[string]interface{}) string {
 	sharedTagKey := fmt.Sprintf("%s-%s", sharedTagKeyPrefix, testId)
-	tagKeyName := fmt.Sprintf("%s/%s", org, sharedTagKey)
+
+	parentSplit := strings.Split(parent, "/")
+	if len(parentSplit) < 2 || (parentSplit[0] != "organizations" && parentSplit[0] != "projects") {
+		parentErr := fmt.Sprintf(sharedTagKeyParentErr, parent)
+		t.Fatalf("Error bootstrapping shared tag key %q: %s", sharedTagKey, parentErr)
+	}
+
+	parentId := parentSplit[1]
+	tagKeyName := fmt.Sprintf("%s/%s", parentId, sharedTagKey)
 
 	config := BootstrapConfig(t)
 	if config == nil {
@@ -1460,12 +2102,15 @@ func BootstrapSharedTestTagKey(t *testing.T, testId string) string {
 	if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
 		log.Printf("[DEBUG] TagKey %q not found, bootstrapping", sharedTagKey)
 		tagKeyObj := map[string]interface{}{
-			"parent":      "organizations/" + org,
+			"parent":      parent,
 			"shortName":   sharedTagKey,
 			"description": "Bootstrapped tag key for Terraform Acceptance testing",
 		}
+		if obj != nil {
+			maps.Insert(tagKeyObj, maps.All(obj))
+		}
 
-		_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
 			Project:   config.Project,
@@ -1479,6 +2124,15 @@ func BootstrapSharedTestTagKey(t *testing.T, testId string) string {
 		}
 
 		log.Printf("[DEBUG] Waiting for shared tag key creation to finish")
+
+		err = tags.TagsOperationWaitTime(
+			config, res, "Creating TagKey", config.UserAgent,
+			20 * time.Minute)
+
+		if err != nil {
+			// The resource didn't actually create
+			t.Fatalf("Error waiting to create TagKey: %s", err)
+		}
 	}
 
 	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -1499,10 +2153,19 @@ func BootstrapSharedTestTagKey(t *testing.T, testId string) string {
 
 const sharedTagValuePrefix = "tf-bootstrap-tagvalue"
 
-func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey string) string {
+func BootstrapSharedTestProjectTagValue(t *testing.T, testId string, tagKey string) string {
+	pid := envvar.GetTestProjectFromEnv()
+	return BootstrapSharedTestTagValue(t, testId, tagKey, pid)
+}
+
+func BootstrapSharedTestOrganizationTagValue(t *testing.T, testId string, tagKey string) string {
 	org := envvar.GetTestOrgFromEnv(t)
+	return BootstrapSharedTestTagValue(t, testId, tagKey, org)
+}
+
+func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey, parentId string) string {
 	sharedTagValue := fmt.Sprintf("%s-%s", sharedTagValuePrefix, testId)
-	tagKeyName := fmt.Sprintf("%s/%s", org, tagKey)
+	tagKeyName := fmt.Sprintf("%s/%s", parentId, tagKey)
 	tagValueName := fmt.Sprintf("%s/%s", tagKeyName, sharedTagValue)
 
 	config := BootstrapConfig(t)
@@ -1541,7 +2204,7 @@ func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey string) str
 			"description": "Bootstrapped tag value for Terraform Acceptance testing",
 		}
 
-		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 			Config:    config,
 			Method:    "POST",
 			Project:   config.Project,
@@ -1550,11 +2213,21 @@ func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey string) str
 			Body:      tagKeyObj,
 			Timeout:   10 * time.Minute,
 		})
+
 		if err != nil {
 			t.Fatalf("Error bootstrapping shared tag value %q: %s", sharedTagValue, err)
 		}
 
 		log.Printf("[DEBUG] Waiting for shared tag value creation to finish")
+
+		err = tags.TagsOperationWaitTime(
+			config, res, "Creating TagValue", config.UserAgent,
+			20 * time.Minute)
+
+		if err != nil {
+			// The resource didn't actually create
+			t.Fatalf("Error waiting to create TagValue: %s", err)
+		}
 	}
 
 	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
@@ -1571,4 +2244,81 @@ func BootstrapSharedTestTagValue(t *testing.T, testId string, tagKey string) str
 	}
 
 	return sharedTagValue
+}
+
+type BootstrapClient struct {
+	ProjectID string
+	Region    string
+	IsGMEK    bool
+}
+
+func BootstrapIntegrationsClient(t *testing.T, locationID string) BootstrapClient {
+	config := BootstrapConfig(t)
+	if config == nil {
+		return BootstrapClient{}
+	}
+
+	projectID := envvar.GetTestProjectFromEnv()
+	parent := fmt.Sprintf("projects/%s/locations/%s", projectID, locationID)
+
+	baseURL := fmt.Sprintf("%s%s", config.IntegrationsBasePath, parent)
+
+	resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   projectID,
+		RawURL:    fmt.Sprintf("%s/clients", baseURL),
+		UserAgent: config.UserAgent,
+		Timeout:   2 * time.Minute,
+	})
+	if err != nil && !transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
+		t.Fatalf("Error getting client: %s", err)
+	}
+	if clientVal, ok := resp["client"]; ok {
+		// examine client and deprovision if needed
+		client, ok := clientVal.(map[string]any)
+		if !ok {
+			t.Fatalf("Error reading client from response")
+		}
+
+		shouldDeprovision := true
+		if isGmekVal, ok := client["isGmek"]; ok {
+			if isGmek, ok := isGmekVal.(bool); ok {
+				shouldDeprovision = !isGmek
+			}
+		}
+
+		if shouldDeprovision {
+			_, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "POST",
+				Project:   projectID,
+				RawURL:    fmt.Sprintf("%s/clients:deprovision", baseURL),
+				UserAgent: config.UserAgent,
+				Timeout:   2 * time.Minute,
+			})
+			if err != nil {
+				t.Fatalf("Unable to deprovision client: %s", err)
+			}
+		}
+	}
+
+	// Provision client
+	_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   projectID,
+		RawURL:    fmt.Sprintf("%s/clients:provision", baseURL),
+		UserAgent: config.UserAgent,
+		Timeout:   2 * time.Minute,
+	})
+	if err != nil {
+		t.Fatalf("Unable to provision client: %s", err)
+	}
+
+	return BootstrapClient{
+		ProjectID: projectID,
+		Region:    locationID,
+		IsGMEK:    true,
+	}
 }

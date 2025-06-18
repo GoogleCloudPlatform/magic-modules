@@ -26,7 +26,7 @@ import (
 
 	membership "magician/github"
 
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v68/github"
 	"github.com/spf13/cobra"
 
 	"golang.org/x/exp/slices"
@@ -267,29 +267,20 @@ func (s pullRequestReviewState) String() string {
 // We don't specially handle cases where the contributor has "acted" because it would be
 // significant additional effort, and this case is already handled by re-requesting review
 // automatically based on contributor actions.
-func notificationState(pr *github.PullRequest, issueEvents []*github.IssueEvent, reviews []*github.PullRequestReview) (pullRequestReviewState, time.Time, error) {
-	slices.SortFunc(issueEvents, func(a, b *github.IssueEvent) int {
-		if a.CreatedAt.Before(*b.CreatedAt.GetTime()) {
-			return 1
+func notificationState(pr *github.PullRequest, issueEventsDesc []*github.IssueEvent, reviewsDesc []*github.PullRequestReview) (pullRequestReviewState, time.Time, error) {
+	issueEventsDesc = sortedEventsDesc(issueEventsDesc)
+	reviewsDesc = sortedReviewsDesc(reviewsDesc)
+
+	var readyForReviewTime = *pr.CreatedAt.GetTime()
+	for _, event := range issueEventsDesc {
+		if "ready_for_review" == *event.Event {
+			readyForReviewTime = maxTime(*event.CreatedAt.GetTime(), readyForReviewTime)
 		}
-		if a.CreatedAt.After(*b.CreatedAt.GetTime()) {
-			return -1
-		}
-		return 0
-	})
-	slices.SortFunc(reviews, func(a, b *github.PullRequestReview) int {
-		if a.SubmittedAt.Before(*b.SubmittedAt.GetTime()) {
-			return 1
-		}
-		if a.SubmittedAt.After(*b.SubmittedAt.GetTime()) {
-			return -1
-		}
-		return 0
-	})
+	}
 
 	var latestReviewRequest *github.IssueEvent
 	removedRequests := map[string]struct{}{}
-	for _, event := range issueEvents {
+	for _, event := range issueEventsDesc {
 		if *event.Event == "review_request_removed" && event.RequestedReviewer != nil {
 			removedRequests[*event.RequestedReviewer.Login] = struct{}{}
 			continue
@@ -303,6 +294,10 @@ func notificationState(pr *github.PullRequest, issueEvents []*github.IssueEvent,
 		}
 		// Ignore review requests that were later removed.
 		if _, ok := removedRequests[*event.RequestedReviewer.Login]; ok {
+			continue
+		}
+		// Ignore review requests to the PR author
+		if *event.RequestedReviewer.Login == *pr.User.Login {
 			continue
 		}
 		if membership.IsCoreReviewer(*event.RequestedReviewer.Login) {
@@ -320,7 +315,7 @@ func notificationState(pr *github.PullRequest, issueEvents []*github.IssueEvent,
 	var earliestCommented *github.PullRequestReview
 
 	ignoreBy := map[string]struct{}{}
-	for _, review := range reviews {
+	for _, review := range reviewsDesc {
 		if review.SubmittedAt.Before(*latestReviewRequest.CreatedAt.GetTime()) {
 			break
 		}
@@ -328,7 +323,12 @@ func notificationState(pr *github.PullRequest, issueEvents []*github.IssueEvent,
 		if review.User == nil {
 			continue
 		}
+		// Ignore reviews by non-core reviewers
 		if !membership.IsCoreReviewer(*review.User.Login) {
+			continue
+		}
+		// Ignore reviews by the PR author
+		if *review.User.Login == *pr.User.Login {
 			continue
 		}
 		reviewer := *review.User.Login
@@ -355,15 +355,59 @@ func notificationState(pr *github.PullRequest, issueEvents []*github.IssueEvent,
 	}
 
 	if earliestChangesRequested != nil {
-		return waitingForContributor, *earliestChangesRequested.SubmittedAt.GetTime(), nil
+		timeState := maxTime(*earliestChangesRequested.SubmittedAt.GetTime(), readyForReviewTime)
+		return waitingForContributor, timeState, nil
 	}
 	if earliestApproved != nil {
-		return waitingForMerge, *earliestApproved.SubmittedAt.GetTime(), nil
+		timeState := maxTime(*earliestApproved.SubmittedAt.GetTime(), readyForReviewTime)
+		return waitingForMerge, timeState, nil
 	}
 	if earliestCommented != nil {
-		return waitingForContributor, *earliestCommented.SubmittedAt.GetTime(), nil
+		timeState := maxTime(*earliestCommented.SubmittedAt.GetTime(), readyForReviewTime)
+		return waitingForContributor, timeState, nil
 	}
-	return waitingForReview, *latestReviewRequest.CreatedAt.GetTime(), nil
+	timeState := maxTime(*latestReviewRequest.CreatedAt.GetTime(), readyForReviewTime)
+	return waitingForReview, timeState, nil
+}
+
+// compareTimeDesc returns sort ordering for descending time comparison (newest first)
+func compareTimeDesc(a, b time.Time) int {
+	if a.Before(b) {
+		return 1
+	}
+	if a.After(b) {
+		return -1
+	}
+	return 0
+}
+
+// sortedEventsDesc returns events sorted by creation time, newest first
+func sortedEventsDesc(events []*github.IssueEvent) []*github.IssueEvent {
+	sortedEvents := make([]*github.IssueEvent, len(events))
+	copy(sortedEvents, events)
+	slices.SortFunc(sortedEvents, func(a, b *github.IssueEvent) int {
+		return compareTimeDesc(*a.CreatedAt.GetTime(), *b.CreatedAt.GetTime())
+	})
+	return sortedEvents
+}
+
+// sortedReviewsDesc returns reviews sorted by submission time, newest first
+func sortedReviewsDesc(reviews []*github.PullRequestReview) []*github.PullRequestReview {
+	sortedReviews := make([]*github.PullRequestReview, len(reviews))
+	copy(sortedReviews, reviews)
+	slices.SortFunc(sortedReviews, func(a, b *github.PullRequestReview) int {
+		return compareTimeDesc(*a.SubmittedAt.GetTime(), *b.SubmittedAt.GetTime())
+	})
+	return sortedReviews
+}
+
+// maxTime - returns whichever time occured after the other
+func maxTime(time1, time2 time.Time) time.Time {
+	// Return the later time
+	if time1.After(time2) {
+		return time1
+	}
+	return time2
 }
 
 // Calculates the number of PDT days between from and to (by calendar date, not # of hours).
@@ -453,6 +497,7 @@ func formatReminderComment(pullRequest *github.PullRequest, state pullRequestRev
 	default:
 		return "", fmt.Errorf("state does not have corresponding template: %s", state.String())
 	}
+
 	tmpl, err := template.New("").Funcs(template.FuncMap{
 		"weekdaysToWeeks": func(a int) int {
 			return a / 5
@@ -464,8 +509,9 @@ func formatReminderComment(pullRequest *github.PullRequest, state pullRequestRev
 
 	var coreReviewers []string
 	if currentReviewer == "" {
+		// A core reviewer that isn't the author
 		for _, reviewer := range pullRequest.RequestedReviewers {
-			if membership.IsCoreReviewer(*reviewer.Login) {
+			if membership.IsCoreReviewer(*reviewer.Login) && *reviewer.Login != *pullRequest.User.Login {
 				coreReviewers = append(coreReviewers, *reviewer.Login)
 			}
 		}

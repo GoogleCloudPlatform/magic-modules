@@ -33,19 +33,14 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+exclude_sweeper: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'

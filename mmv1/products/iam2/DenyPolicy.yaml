@@ -13,6 +13,7 @@
 
 ---
 name: 'DenyPolicy'
+api_resource_type_kind: Policy
 description: |
   Represents a collection of denial policies to apply to a given resource.
 references:
@@ -35,14 +36,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'iam_deny_policy_basic'

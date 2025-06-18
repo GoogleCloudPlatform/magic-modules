@@ -15,7 +15,6 @@
 name: 'RouterRoutePolicy'
 api_resource_type_kind: Router
 description: A route policy created in a router
-min_version: 'beta'
 references:
   guides:
     'Google Cloud Router': 'https://cloud.google.com/router/docs/'
@@ -41,15 +40,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
   decoder: 'templates/terraform/decoders/unwrap_route_policy_resource.go.tmpl'
 examples:
@@ -72,7 +64,6 @@ parameters:
     type: ResourceRef
     description: |
       The name of the Cloud Router in which this route policy will be configured.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -81,7 +72,6 @@ parameters:
   - name: 'region'
     type: ResourceRef
     description: Region where the router and NAT reside.
-    min_version: 'beta'
     url_param_only: true
     required: false
     immutable: true
@@ -93,7 +83,6 @@ parameters:
     type: String
     description: |
       Name of the route policy. This policy's name, which must be a resource ID segment and unique within all policies owned by the Router
-    min_version: 'beta'
     required: true
     immutable: true
 properties:
@@ -101,7 +90,6 @@ properties:
     type: Enum
     description: |
       This is policy's type, which is one of IMPORT or EXPORT
-    min_version: 'beta'
     enum_values:
       - 'ROUTE_POLICY_TYPE_IMPORT'
       - 'ROUTE_POLICY_TYPE_EXPORT'
@@ -109,7 +97,6 @@ properties:
     type: Array
     description: |
       List of terms (the order in the list is not important, they are evaluated in order of priority).
-    min_version: 'beta'
     required: true
     immutable: true
     item_type:
@@ -119,42 +106,35 @@ properties:
           type: Integer
           description: |
             The evaluation priority for this term, which must be between 0 (inclusive) and 231 (exclusive), and unique within the list.
-          min_version: 'beta'
           required: true
         - name: 'match'
           type: NestedObject
           description: |
             CEL expression evaluated against a route to determine if this term applies (see Policy Language). When not set, the term applies to all routes.
-          min_version: 'beta'
           properties:
             - name: 'expression'
               type: String
               description:
                 Textual representation of an expression in Common Expression
                 Language syntax.
-              min_version: 'beta'
               required: true
             - name: 'title'
               type: String
               description:
                 Title for the expression, i.e. a short string describing its
                 purpose.
-              min_version: 'beta'
             - name: 'description'
               type: String
               description: Description of the expression
-              min_version: 'beta'
             - name: 'location'
               type: String
               description:
                 String indicating the location of the expression for error
                 reporting, e.g. a file name and a position in the file
-              min_version: 'beta'
         - name: 'actions'
           type: Array
           description: |
             'CEL expressions to evaluate to modify a route when this term matches.'\
-          min_version: 'beta'
           item_type:
             type: NestedObject
             properties:
@@ -163,29 +143,25 @@ properties:
                 description: |
                   Textual representation of an expression in Common Expression
                   Language syntax.
-                min_version: 'beta'
                 required: true
               - name: 'title'
                 type: String
                 description: |
                   Title for the expression, i.e. a short string describing its
                   purpose.
-                min_version: 'beta'
               - name: 'description'
                 type: String
                 description: |
                   Description of the expression
-                min_version: 'beta'
               - name: 'location'
                 type: String
                 description: |
                   String indicating the location of the expression for error
                   reporting, e.g. a file name and a position in the file
-                min_version: 'beta'
+    custom_expand: 'templates/terraform/custom_expand/expand_route_policy_terms.go.tmpl'
   - name: 'fingerprint'
     type: Fingerprint
     description: |
       The fingerprint used for optimistic locking of this resource.  Used
       internally during updates.
-    min_version: 'beta'
     output: true

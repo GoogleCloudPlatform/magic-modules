@@ -23,7 +23,7 @@ docs:
 id_format: 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/privateConnections'
 self_link: 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/privateConnections?privateConnectionId={{private_connection_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/privateConnections?privateConnectionId={{private_connection_id}}&skip_validation={{create_without_validation}}'
 immutable: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/privateConnections/{{private_connection_id}}'
@@ -37,8 +37,6 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
     resource_inside_response: false
 custom_code:
@@ -48,6 +46,7 @@ examples:
     vars:
       private_connection_id: 'my-connection'
       network_name: 'my-network'
+      create_without_validation: 'false'
 parameters:
   - name: 'privateConnectionId'
     type: String
@@ -56,6 +55,14 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+  - name: 'create_without_validation'
+    type: Boolean
+    description: |-
+      If set to true, will skip validations.
+    url_param_only: true
+    required: false
+    immutable: true
+    default_value: false
   - name: 'location'
     type: String
     description: |

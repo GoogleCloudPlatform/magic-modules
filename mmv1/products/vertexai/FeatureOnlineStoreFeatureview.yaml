@@ -26,8 +26,6 @@ self_link: 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feat
 create_url: 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews?featureViewId={{name}}'
 update_verb: 'PATCH'
 update_mask: true
-import_format:
-  - 'projects/{{project}}/locations/{{region}}/featureOnlineStores/{{feature_online_store}}/featureViews/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -37,18 +35,23 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_type: 'feature_online_store'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'feature_view'
+  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_feature_online_store_featureview.tf.tmpl'
+  import_format:
+    - '{{feature_online_store}}/featureViews/{{name}}'
+    - '{{name}}'
+  min_version: 'beta'
 custom_code:
 examples:
   - name: 'vertex_ai_featureonlinestore_featureview'
     primary_resource_id: 'featureview'
+    primary_resource_name: 'fmt.Sprintf("projects/%s/locations/%s/featureOnlineStores/%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), fmt.Sprintf("tf_test_example_feature_view%s", context["random_suffix"])), fmt.Sprintf("tf_test_example_feature_view%s", context["random_suffix"])'
     vars:
       name: 'example_feature_view'
   - name: 'vertex_ai_featureonlinestore_featureview_feature_registry'
@@ -86,6 +89,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+    default_from_api: true
 properties:
   - name: 'name'
     type: String

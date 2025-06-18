@@ -29,27 +29,21 @@ create_url: 'projects/{{project}}/locations/{{region}}/appGateways?app_gateway_i
 # This resources is not updatable
 immutable: true
 timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
+  insert_minutes: 40
+  update_minutes: 40
+  delete_minutes: 40
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
+      insert_minutes: 40
+      update_minutes: 40
+      delete_minutes: 40
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 schema_version: 1
 state_upgraders: true

@@ -14,6 +14,11 @@
 ---
 name: 'LinkedDataset'
 api_resource_type_kind: Link
+api_variant_patterns:
+  - 'billingAccounts/{billingAccount}/locations/{location}/buckets/{bucket}/links/{link}'
+  - 'folders/{folder}/locations/{location}/buckets/{bucket}/links/{link}'
+  - 'organizations/{organization}/locations/{location}/buckets/{bucket}/links/{link}'
+  - 'projects/{project}/locations/{location}/buckets/{bucket}/links/{link}'
 description: |
   Describes a BigQuery linked dataset
 references:
@@ -38,14 +43,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   encoder: 'templates/terraform/encoders/logging_linked_dataset.go.tmpl'
 # Skip sweeper gen since this is a child resource.

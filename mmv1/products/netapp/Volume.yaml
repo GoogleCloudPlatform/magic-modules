@@ -56,7 +56,7 @@ examples:
       pool_name: 'test-pool'
       network_name: 'test-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
     ignore_read_extra:
       - 'deletion_policy'
 virtual_fields:
@@ -113,7 +113,7 @@ properties:
   - name: 'storagePool'
     type: String
     description: |
-      Name of the storage pool to create the volume in. Pool needs enough spare capacity to accomodate the volume.
+      Name of the storage pool to create the volume in. Pool needs enough spare capacity to accommodate the volume.
     required: true
   - name: 'network'
     type: String
@@ -123,7 +123,7 @@ properties:
   - name: 'serviceLevel'
     type: String
     description: |
-      Service level of the volume. Inherited from storage pool. Supported values are : PREMIUM, EXTERME, STANDARD, FLEX.
+      Service level of the volume. Inherited from storage pool. Supported values are : PREMIUM, EXTREME, STANDARD, FLEX.
     output: true
   - name: 'capacityGib'
     type: String
@@ -146,7 +146,7 @@ properties:
             - name: 'allowedClients'
               type: String
               description: |-
-                Defines the client ingress specification (allowed clients) as a comma seperated list with IPv4 CIDRs or IPv4 host addresses.
+                Defines the client ingress specification (allowed clients) as a comma separated list with IPv4 CIDRs or IPv4 host addresses.
             - name: 'hasRootAccess'
               type: String
               description: |-
@@ -293,7 +293,7 @@ properties:
       - name: 'sourceBackup'
         type: String
         description: |-
-          Full name of the snapshot to use for creating this volume.
+          Full name of the backup to use for creating this volume.
           `source_snapshot` and `source_backup` cannot be used simultaneously.
           Format: `projects/{{project}}/locations/{{location}}/backupVaults/{{backupVaultId}}/backups/{{backup}}`.
         immutable: true
@@ -507,11 +507,12 @@ properties:
     update_mask_fields:
       - 'tiering_policy.cooling_threshold_days'
       - 'tiering_policy.tier_action'
+      - 'tiering_policy.hot_tier_bypass_mode_enabled'
     properties:
       - name: 'coolingThresholdDays'
         type: Integer
         description: |
-          Optional. Time in days to mark the volume's data block as cold and make it eligible for tiering, can be range from 7-183.
+          Optional. Time in days to mark the volume's data block as cold and make it eligible for tiering, can be range from 2-183.
           Default is 31.
       - name: 'tierAction'
         type: Enum
@@ -521,3 +522,47 @@ properties:
         enum_values:
           - 'ENABLED'
           - 'PAUSED'
+      - name: 'hotTierBypassModeEnabled'
+        type: Boolean
+        description: |
+          Optional. Flag indicating that the hot tier bypass mode is enabled. Default is false.
+          Only applicable to Flex service level.
+        min_version: 'beta'
+  - name: 'hybridReplicationParameters'
+    type: NestedObject
+    description: |-
+      The Hybrid Replication parameters for the volume.
+    properties:
+      - name: 'replication'
+        type: String
+        description: |
+          Required. Desired name for the replication of this volume.
+      - name: 'peerVolumeName'
+        type: String
+        description: |
+          Required. Name of the user's local source volume to be peered with the destination volume.
+      - name: 'peerClusterName'
+        type: String
+        description: |
+          Required. Name of the user's local source cluster to be peered with the destination cluster.
+      - name: 'peerSvmName'
+        type: String
+        description: |
+          Required. Name of the user's local source vserver svm to be peered with the destination vserver svm.
+      - name: 'peerIpAddresses'
+        type: String
+        description: |
+          Required. List of node ip addresses to be peered with.
+      - name: 'clusterLocation'
+        type: String
+        description: |
+          Optional. Name of source cluster location associated with the Hybrid replication. This is a free-form field for the display purpose only.
+      - name: 'description'
+        type: String
+        description: |
+          Optional. Description of the replication.
+      - name: 'labels'
+        type: KeyValuePairs
+        description: |
+          Optional. Labels to be added to the replication as the key value pairs.
+          An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.

@@ -28,19 +28,14 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+autogen_status: U2VydmljZVByb2plY3RBdHRhY2htZW50
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/apphub_service_project.go.tmpl'
 examples:

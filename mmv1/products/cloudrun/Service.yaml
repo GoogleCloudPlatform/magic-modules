@@ -60,6 +60,11 @@ error_retry_predicates:
 schema_version: 2
 state_upgrade_base_schema_version: 1
 state_upgraders: true
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west1"
+    - region: "europe-north1"
 examples:
   - name: 'cloud_run_service_basic'
     primary_resource_id: 'default'
@@ -71,7 +76,6 @@ examples:
   - name: 'cloud_run_service_gpu'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
-    min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-srv'
     test_env_vars:
@@ -136,6 +140,14 @@ examples:
       project: 'PROJECT_NAME'
   - name: 'cloud_run_service_multicontainer'
     primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      cloud_run_service_name: 'cloudrun-srv'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+  - name: 'cloud_run_service_iap'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
     min_version: 'beta'
     vars:
       cloud_run_service_name: 'cloudrun-srv'
@@ -317,10 +329,14 @@ properties:
                     for connections to the Revision.
                   - `run.googleapis.com/startup-cpu-boost` sets whether to allocate extra CPU to containers on startup.
                     See https://cloud.google.com/sdk/gcloud/reference/run/deploy#--[no-]cpu-boost.
+                  - `run.googleapis.com/network-interfaces` sets [Direct VPC egress](https://cloud.google.com/run/docs/configuring/vpc-direct-vpc#yaml)
+                    for the Revision.
                   - `run.googleapis.com/vpc-access-connector` sets a [VPC connector](https://cloud.google.com/run/docs/configuring/connecting-vpc#terraform_1)
                     for the Revision.
                   - `run.googleapis.com/vpc-access-egress` sets the outbound traffic to send through the VPC connector for this resource.
                     See https://cloud.google.com/sdk/gcloud/reference/run/deploy#--vpc-egress.
+                  - `run.googleapis.com/gpu-zonal-redundancy-disabled` sets
+                    [GPU zonal redundancy](https://cloud.google.com/run/docs/configuring/services/gpu-zonal-redundancy) for the Revision.
                 default_from_api: true
                 diff_suppress_func: 'cloudrunTemplateAnnotationDiffSuppress'
               - name: 'name'
@@ -446,6 +462,10 @@ properties:
                             description: Name of the environment variable.
                           - name: 'value'
                             type: String
+                            # env is a set.
+                            # The env.value has value "" in Terraform state, but it has value nil in Terraform plan,
+                            # which causes the diffs for unchanged env. default_value: "" is to suppress the diffs.
+                            default_value: ""
                             description: |-
                               Defaults to "".
                           - name: 'valueFrom'
@@ -470,7 +490,8 @@ properties:
                                     description: |-
                                       The name of the secret in Cloud Secret Manager. By default, the secret is assumed to be in the same project.
                                       If the secret is in another project, you must define an alias.
-                                      An alias definition has the form: :projects/{project-id|project-number}/secrets/.
+                                      An alias definition has the form:
+                                      {alias}:projects/{project-id|project-number}/secrets/{secret-name}.
                                       If multiple alias definitions are needed, they must be separated by commas.
                                       The alias definitions must be set on the run.googleapis.com/secrets annotation.
                                     required: true
@@ -752,7 +773,6 @@ properties:
                   Node Selector describes the hardware requirements of the resources.
                   Use the following node selector keys to configure features on a Revision:
                     - `run.googleapis.com/accelerator` sets the [type of GPU](https://cloud.google.com/run/docs/configuring/services/gpu) required by the Revision to run.
-                min_version: 'beta'
               - name: 'containerConcurrency'
                 type: Integer
                 description: |-
@@ -1086,3 +1106,6 @@ properties:
             for the Service. For example, `"run.googleapis.com/ingress" = "all"`.
           - `run.googleapis.com/launch-stage` sets the [launch stage](https://cloud.google.com/run/docs/troubleshooting#launch-stage-validation)
             when a preview feature is used. For example, `"run.googleapis.com/launch-stage": "BETA"`
+          - `run.googleapis.com/minScale` sets the [minimum number of container instances](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--min) of the Service.
+          - `run.googleapis.com/scalingMode` sets the type of scaling mode for the service. The supported values for scaling mode are "manual" and "automatic". If not provided, it defaults to "automatic".
+          - `run.googleapis.com/manualInstanceCount` sets the total instance count for the service in manual scaling mode. This number of instances is divided among all revisions with specified traffic based on the percent of traffic they are receiving.

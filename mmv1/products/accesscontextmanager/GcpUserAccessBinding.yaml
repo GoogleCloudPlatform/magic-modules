@@ -36,14 +36,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   custom_import: 'templates/terraform/custom_import/set_id_name_with_slashes.go.tmpl'
 exclude_tgc: true
@@ -85,9 +79,116 @@ properties:
   - name: 'accessLevels'
     type: Array
     description: |
-      Required. Access level that a user must have to be granted access. Only one access level is supported, not multiple. This repeated field must have exactly one element. Example: "accessPolicies/9522/accessLevels/device_trusted"
-    required: true
+      Optional. Access level that a user must have to be granted access. Only one access level is supported, not multiple. This repeated field must have exactly one element. Example: "accessPolicies/9522/accessLevels/device_trusted"
     item_type:
       type: String
     min_size: 1
     max_size: 1
+  - name: 'sessionSettings'
+    type: NestedObject
+    description: |
+      Optional. The Google Cloud session length (GCSL) policy for the group key.
+    properties:
+      - name: 'sessionReauthMethod'
+        description: |
+          Optional. The session challenges proposed to users when the Google Cloud session length is up.
+        type: Enum
+        enum_values:
+          - 'LOGIN'
+          - 'SECURITY_KEY'
+          - 'PASSWORD'
+      - name: 'sessionLength'
+        description: |
+          Optional. The session length. Setting this field to zero is equal to disabling session. Also can set infinite session by flipping the enabled bit to false below. If useOidcMaxAge is true, for OIDC apps, the session length will be the minimum of this field and OIDC max_age param.
+        type: String
+      - name: 'maxInactivity'
+        description: |
+          Optional. How long a user is allowed to take between actions before a new access token must be issued. Only set for Google Cloud apps.
+        type: String
+      - name: 'useOidcMaxAge'
+        description: |
+          Optional. Only useful for OIDC apps. When false, the OIDC max_age param, if passed in the authentication request will be ignored. When true, the re-auth period will be the minimum of the sessionLength field and the max_age OIDC param.
+        type: Boolean
+      - name: 'sessionLengthEnabled'
+        type: Boolean
+        description: |
+          Optional. This field enables or disables Google Cloud session length. When false, all fields set above will be disregarded and the session length is basically infinite.
+  - name: 'scopedAccessSettings'
+    type: Array
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'scope'
+          type: NestedObject
+          description: |
+            Optional. Application, etc. to which the access settings will be applied to. Implicitly, this is the scoped access settings key; as such, it must be unique and non-empty.
+          properties:
+            - name: 'clientScope'
+              type: NestedObject
+              description: |
+                Optional. Client scope for this access scope.
+              properties:
+                - name: restrictedClientApplication
+                  type: NestedObject
+                  description: |
+                    Optional. The application that is subject to this binding's scope.
+                  properties:
+                    - name: clientId
+                      type: String
+                      description: |
+                        The OAuth client ID of the application.
+        - name: 'activeSettings'
+          type: NestedObject
+          description: |
+            Optional. Access settings for this scoped access settings. This field may be empty if dryRunSettings is set.
+          properties:
+            - name: accessLevels
+              type: Array
+              item_type:
+                type: String
+              description: |
+                Optional. Access level that a user must have to be granted access. Only one access level is supported, not multiple. This repeated field must have exactly one element. Example: "accessPolicies/9522/accessLevels/device_trusted"
+            - name: sessionSettings
+              type: NestedObject
+              description: |
+                Optional. Session settings applied to user access on a given AccessScope.
+              properties:
+                - name: 'sessionReauthMethod'
+                  description: |
+                    Optional. The session challenges proposed to users when the Google Cloud session length is up.
+                  type: Enum
+                  enum_values:
+                    - 'LOGIN'
+                    - 'SECURITY_KEY'
+                    - 'PASSWORD'
+                - name: 'sessionLength'
+                  description: |
+                    Optional. The session length. Setting this field to zero is equal to disabling session. Also can set infinite session by flipping the enabled bit to false below. If useOidcMaxAge is true, for OIDC apps, the session length will be the minimum of this field and OIDC max_age param.
+                  type: String
+                - name: 'maxInactivity'
+                  description: |
+                    Optional. How long a user is allowed to take between actions before a new access token must be issued. Only set for Google Cloud apps.
+                  type: String
+                - name: 'useOidcMaxAge'
+                  description: |
+                    Optional. Only useful for OIDC apps. When false, the OIDC max_age param, if passed in the authentication request will be ignored. When true, the re-auth period will be the minimum of the sessionLength field and the max_age OIDC param.
+                  type: Boolean
+                - name: 'sessionLengthEnabled'
+                  type: Boolean
+                  description: |
+                    Optional. This field enables or disables Google Cloud session length. When false, all fields set above will be disregarded and the session length is basically infinite.
+        - name: 'dryRunSettings'
+          type: NestedObject
+          description: |
+            Optional. Dry-run access settings for this scoped access settings. This field may be empty if activeSettings is set. Cannot contain session settings.
+          properties:
+            - name: accessLevels
+              type: Array
+              item_type:
+                type: String
+              description: |
+                Optional. Access level that a user must have to be granted access. Only one access level is supported, not multiple. This repeated field must have exactly one element. Example: "accessPolicies/9522/accessLevels/device_trusted"
+              min_size: 1
+              max_size: 1
+    description: |
+      Optional. A list of scoped access settings that set this binding's restrictions on a subset of applications.

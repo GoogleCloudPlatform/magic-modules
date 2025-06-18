@@ -49,6 +49,7 @@ examples:
     vars:
       instance_name: 'memory-cache'
       project_id: 'my-project'
+      quota_start_time: '2014-10-02T15:01:23Z'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_acct: 'BILLING_ACCT'
@@ -207,6 +208,7 @@ properties:
         type: NestedObject
         description: |
           The user credentials to include in the JWT payload that is sent to the registered Blocking Functions.
+        custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_forward_inbound_credentials.go.tmpl'
         properties:
           - name: 'idToken'
             type: Boolean
@@ -228,20 +230,29 @@ properties:
       - name: 'signUpQuotaConfig'
         type: NestedObject
         description: |
-          Quota for the Signup endpoint, if overwritten. Signup quota is measured in sign ups per project per hour per IP.
+          Quota for the Signup endpoint, if overwritten. Signup quota is measured in sign ups per project per hour per IP. None of quota, startTime, or quotaDuration can be skipped.
         properties:
           - name: 'quota'
             type: Integer
             description: |
-              A sign up APIs quota that customers can override temporarily.
+              A sign up APIs quota that customers can override temporarily. Value can be in between 1 and 1000.
+            required_with:
+              - quota.0.signUpQuotaConfig.0.startTime
+              - quota.0.signUpQuotaConfig.0.quotaDuration
           - name: 'startTime'
             type: Time
             description: |
               When this quota will take affect.
+            required_with:
+              - quota.0.signUpQuotaConfig.0.quota
+              - quota.0.signUpQuotaConfig.0.quotaDuration
           - name: 'quotaDuration'
             type: String
             description: |
               How long this quota will be active for. It is measurred in seconds, e.g., Example: "9.615s".
+            required_with:
+              - quota.0.signUpQuotaConfig.0.startTime
+              - quota.0.signUpQuotaConfig.0.quota
   - name: 'authorizedDomains'
     type: Array
     description: |
@@ -370,6 +381,7 @@ properties:
     type: NestedObject
     description: |
       Configuration related to multi-tenant functionality.
+    custom_flatten: 'templates/terraform/custom_flatten/identity_platform_config_multi_tenant.go.tmpl'
     properties:
       - name: 'allowTenants'
         type: Boolean

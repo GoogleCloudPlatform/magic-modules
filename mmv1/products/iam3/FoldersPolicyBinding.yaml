@@ -13,7 +13,11 @@
 
 ---
 name: 'FoldersPolicyBinding'
-description: A policy binding to a folder
+api_resource_type_kind: PolicyBinding
+api_variant_patterns:
+  - 'folders/{folder}/locations/{location}/policyBindings/{policyBinding}'
+description: |
+  A policy binding to a folder. This is a Terraform resource, and maps to a policy binding resource in GCP.
 references:
   guides:
     'Apply a policy binding': 'https://cloud.google.com/iam/docs/principal-access-boundary-policies-create#create_binding'
@@ -38,25 +42,19 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
   include_project: true
 examples:
   - name: 'iam_folders_policy_binding'
-    primary_resource_id: 'my-folder-binding'
+    primary_resource_id: 'binding-for-all-folder-principals'
     test_env_vars:
       org_id: 'ORG_ID'
     vars:
       pab_policy_id: 'my-pab-policy'
-      display_name: 'test folder binding'
-      folder_binding_id: 'test-folder-binding'
-      folder_name: 'test folder'
+      display_name: 'binding for all principals in the folder'
+      folder_binding_id: 'binding-for-all-folder-principals'
+      folder_name: 'my folder'
     external_providers: ["time"]
 parameters:
   - name: 'folder'
@@ -113,8 +111,10 @@ properties:
       - name: 'principalSet'
         type: String
         description: |
-          Required. Immutable. The resource name of the policy to be bound.
-          The binding parent and policy must belong to the same Organization (or Project).
+          Required. Immutable. Full Resource Name of the principal set used for principal access boundary policy bindings.
+          Examples for each one of the following supported principal set types:
+          * Folder: `//cloudresourcemanager.googleapis.com/folders/FOLDER_ID`
+          It must be parent by the policy binding's parent (the folder).
         immutable: true
   - name: 'policyKind'
     type: String

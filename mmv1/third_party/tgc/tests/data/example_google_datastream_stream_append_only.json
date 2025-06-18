@@ -42,7 +42,6 @@
                         "binaryLogEnabled": true,
                         "enabled": true
                     },
-                    "dataDiskType": "PD_SSD",
                     "ipConfiguration": {
                         "authorizedNetworks": [
                             {
@@ -139,11 +138,14 @@
                 },
                 "sourceConfig": {
                     "mysqlSourceConfig": {
+                        "binaryLogPosition":          null,
+                        "gtid":                       null,
                         "maxConcurrentBackfillTasks": 0,
                         "maxConcurrentCdcTasks": 0
                     },
                     "oracleSourceConfig": null,
                     "postgresqlSourceConfig": null,
+                    "salesforceSourceConfig": null,
                     "sqlServerSourceConfig": null
                 }
             }

@@ -40,14 +40,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'
@@ -55,6 +49,7 @@ iam_policy:
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
 exclude_tgc: true
+exclude_sweeper: true
 examples:
   - name: 'tag_value_basic'
     primary_resource_id: 'value'

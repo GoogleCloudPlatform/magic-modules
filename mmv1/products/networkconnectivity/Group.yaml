@@ -26,14 +26,7 @@ references:
 async:
   type: 'OpAsync'
   operation:
-    path: 'name'
     base_url: '{{op_id}}'
-    wait_ms: 1000
-  result:
-    path: 'targetLink'
-  error:
-    path: 'error/errors'
-    message: 'message'
 # A handwritten sweeper is needed as the resource name can only be `default`, `center`, and `edge`.
 exclude_sweeper: true
 examples:

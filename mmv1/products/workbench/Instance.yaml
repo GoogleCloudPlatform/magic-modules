@@ -14,6 +14,10 @@
 ---
 name: 'Instance'
 description: A Workbench instance.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs/workbench/instances/introduction'
+  api: 'https://cloud.google.com/vertex-ai/docs/workbench/reference/rest/v2/projects.locations.instances'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/instances'
@@ -24,7 +28,7 @@ update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
 timeouts:
-  insert_minutes: 20
+  insert_minutes: 40
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
@@ -33,14 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'name'
@@ -54,6 +52,10 @@ custom_code:
   post_create: 'templates/terraform/post_create/workbench_instance.go.tmpl'
   pre_update: 'templates/terraform/pre_update/workbench_instance.go.tmpl'
   post_update: 'templates/terraform/post_update/workbench_instance.go.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us-central1-a"
+    - region: "us-west1-a"
 examples:
   - name: 'workbench_instance_basic'
     primary_resource_id: 'instance'
@@ -103,6 +105,12 @@ examples:
       - 'gce_setup.0.vm_image'
       - 'gce_setup.0.boot_disk.0.disk_type'
       - 'gce_setup.0.data_disks.0.disk_type'
+  - name: 'workbench_instance_confidential_compute'
+    primary_resource_id: 'instance'
+    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
+    region_override: 'us-west1-a'
+    vars:
+      instance_name: 'workbench-instance'
 virtual_fields:
   - name: 'desired_state'
     description: |
@@ -439,6 +447,18 @@ properties:
           Optional. Flag to enable ip forwarding or not, default false/off.
           https://cloud.google.com/vpc/docs/using-routes#canipforward
         immutable: true
+      - name: 'confidentialInstanceConfig'
+        type: NestedObject
+        immutable: true
+        description: |
+          Confidential instance configuration.
+        properties:
+          - name: 'confidentialInstanceType'
+            type: Enum
+            description: |
+              Defines the type of technology used by the confidential instance.
+            enum_values:
+              - 'SEV'
   - name: 'proxyUri'
     type: String
     description: |
@@ -549,3 +569,8 @@ properties:
       Optional. Labels to apply to this instance. These can be later modified
       by the UpdateInstance method.
     diff_suppress_func: 'WorkbenchInstanceLabelsDiffSuppress'
+  - name: 'enableThirdPartyIdentity'
+    type: Boolean
+    description: |
+      Flag that specifies that a notebook can be accessed with third party
+      identity provider.

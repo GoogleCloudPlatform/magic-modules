@@ -14,6 +14,10 @@
 ---
 name: 'GuestPolicies'
 api_resource_type_kind: GuestPolicy
+api_variant_patterns:
+  - 'folders/{folder}/guestPolicies/{guestPolicy}'
+  - 'organizations/{organization}/guestPolicies/{guestPolicy}'
+  - 'projects/{project}/guestPolicies/{guestPolicy}'
 description: |
   An OS Config resource representing a guest configuration policy. These policies represent
   the desired state for VM instance guest environments including packages to install or remove,
@@ -34,8 +38,6 @@ timeouts:
   delete_minutes: 20
 identity:
   - guestPolicyId
-custom_code:
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
 examples:
   - name: 'os_config_guest_policies_basic'
     primary_resource_id: 'guest_policies'

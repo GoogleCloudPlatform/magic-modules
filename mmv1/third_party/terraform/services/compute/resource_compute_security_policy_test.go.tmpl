@@ -475,7 +475,6 @@ func TestAccComputeSecurityPolicy_withRateLimitWithRedirectOptions(t *testing.T)
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccComputeSecurityPolicy_withRateLimit_withEnforceOnKeyConfigs(t *testing.T) {
 	t.Parallel()
 
@@ -518,6 +517,14 @@ func TestAccComputeSecurityPolicy_withRateLimitOption_withMultipleEnforceOnKeyCo
 			},
 			{
 				Config: testAccComputeSecurityPolicy_withRateLimitOption_withMultipleEnforceOnKeyConfigs2(spName),
+			},
+			{
+				ResourceName:      "google_compute_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeSecurityPolicy_withRateLimitOption_withMultipleEnforceOnKeyConfigs3(spName),
 			},
 			{
 				ResourceName:      "google_compute_security_policy.policy",
@@ -590,9 +597,6 @@ func TestAccComputeSecurityPolicy_EnforceOnKeyUpdates(t *testing.T) {
 		},
 	})
 }
-
-
-{{ end }}
 
 func TestAccComputeSecurityPolicy_withRecaptchaOptionsConfig(t *testing.T) {
 	t.Parallel()
@@ -1393,7 +1397,7 @@ resource "google_compute_security_policy" "policy" {
     }
     log_level    = "VERBOSE"
     user_ip_request_headers = [
-      "True-Client-IP", 
+      "True-Client-IP",
       "x-custom-ip"
     ]
   }
@@ -1710,7 +1714,6 @@ resource "google_compute_security_policy" "policy" {
 `, spName)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccComputeSecurityPolicy_withRateLimitOptions_withEnforceOnKey(spName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_security_policy" "policy" {
@@ -1940,7 +1943,51 @@ resource "google_compute_security_policy" "policy" {
 }
 `, spName)
 }
-{{- end }}
+
+func testAccComputeSecurityPolicy_withRateLimitOption_withMultipleEnforceOnKeyConfigs3(spName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_security_policy" "policy" {
+	name        = "%s"
+	description = "throttle rule with enforce_on_key_configs"
+
+	rule {
+		action   = "throttle"
+		priority = "2147483647"
+		match {
+			versioned_expr = "SRC_IPS_V1"
+			config {
+				src_ip_ranges = ["*"]
+			}
+		}
+		description = "default rule withMultipleEnforceOnKeyConfigs3"
+
+		rate_limit_options {
+			conform_action = "allow"
+			exceed_action = "deny(429)"
+
+			rate_limit_threshold {
+				count = 10
+				interval_sec = 60
+			}
+
+			enforce_on_key = ""
+
+			enforce_on_key_configs {
+				enforce_on_key_type = "REGION_CODE"
+			}
+
+			enforce_on_key_configs {
+				enforce_on_key_type = "TLS_JA4_FINGERPRINT"
+			}
+
+			enforce_on_key_configs {
+				enforce_on_key_type = "USER_IP"
+			}
+		}
+	}
+}
+`, spName)
+}
 
 func TestAccComputeSecurityPolicy_withRedirectOptionsRecaptcha(t *testing.T) {
 	t.Parallel()

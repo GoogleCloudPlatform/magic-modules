@@ -22,15 +22,3 @@ versions:
     base_url: 'https://iam.googleapis.com/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/iam'
-async:
-  type: "OpAsync"
-  operation:
-    base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
-  result:
-    path: 'targetLink'
-    resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'

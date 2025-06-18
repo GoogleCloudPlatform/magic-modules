@@ -20,9 +20,8 @@ references:
     "Organizing client app ownership": "https://cloud.google.com/apigee/docs/api-platform/publish/organizing-client-app-ownership"
   api: "https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.appgroups"
 docs:
-base_url: "appgroups"
+base_url: "{{org_id}}/appgroups"
 self_link: "{{org_id}}/appgroups/{{name}}"
-create_url: "{{org_id}}/appgroups"
 import_format:
   - "{{org_id}}/appgroups/{{name}}"
   - "{{org_id}}/{{name}}"
@@ -40,6 +39,7 @@ examples:
       billing_account: "BILLING_ACCT"
     exclude_docs: true
     skip_vcr: true
+    external_providers: ["time"]
   - name: "apigee_app_group_with_attributes"
     vars:
       app_group_name: "my-app-group"
@@ -51,6 +51,7 @@ examples:
       billing_account: "BILLING_ACCT"
     exclude_docs: true
     skip_vcr: true
+    external_providers: ["time"]
 parameters:
   - name: "orgId"
     type: String
@@ -79,7 +80,7 @@ properties:
   - name: "channelId"
     type: String
     description: |
-      Channel identifier identifies the owner maintaing this grouping.
+      Channel identifier identifies the owner maintaining this grouping.
   - name: "displayName"
     type: String
     description: |

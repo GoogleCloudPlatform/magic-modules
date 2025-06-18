@@ -22,7 +22,7 @@ references:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/networkAttachments'
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/networkAttachments'
-immutable: true
+update_verb: 'PATCH'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -32,15 +32,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
 examples:
@@ -69,6 +62,7 @@ parameters:
     description: |
       Name of the resource. Provided by the client when the resource is created. The name must be 1-63 characters long, and comply with RFC1035. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])? which means the first character must be a lowercase letter, and all following characters must be a dash, lowercase letter, or digit, except the last character, which cannot be a dash.
     required: true
+    immutable: true
   - name: 'region'
     type: ResourceRef
     description: |
@@ -109,6 +103,7 @@ properties:
     type: Enum
     description: |
       The connection preference of service attachment. The value can be set to ACCEPT_AUTOMATIC. An ACCEPT_AUTOMATIC service attachment is one that always accepts the connection from consumer forwarding rules.
+    immutable: true
     required: true
     enum_values:
       - 'ACCEPT_AUTOMATIC'

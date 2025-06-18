@@ -1,0 +1,20 @@
+// removeRunFrequencyFromUpdateMask removes 'runFrequency' from the updateMask in a URL.
+removeRunFrequencyFromUpdateMask := func(url string) (string) {
+    // Remove "runFrequency" and handle commas.
+    url = strings.ReplaceAll(url, "%2CrunFrequency", "")
+    url = strings.ReplaceAll(url, "runFrequency%2C", "")
+    url = strings.ReplaceAll(url, "runFrequency", "")
+
+    // Remove extra commas.
+    url = strings.ReplaceAll(url, "%2C%2C", "%2C")
+
+    //Remove trailing commas.
+    url = strings.TrimSuffix(url, "%2C")
+
+    return url
+}
+
+// Remove "runFrequency" and handle commas if run_frequency not configured by user
+if _, ok := d.GetOk("run_frequency"); !ok {
+    url = removeRunFrequencyFromUpdateMask(url)
+}

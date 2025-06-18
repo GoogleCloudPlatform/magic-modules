@@ -35,21 +35,19 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 5000
     timeouts:
       insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "me-west1"
 examples:
   - name: 'vmware_engine_network_policy_basic'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20719
     primary_resource_id: 'vmw-engine-network-policy'
     vars:
       network_name: 'sample-network'
@@ -57,6 +55,7 @@ examples:
     test_env_vars:
       region: 'REGION'
   - name: 'vmware_engine_network_policy_full'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20719
     primary_resource_id: 'vmw-engine-network-policy'
     vars:
       network_name: 'sample-network'

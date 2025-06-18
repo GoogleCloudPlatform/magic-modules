@@ -18,6 +18,7 @@ description: |
 references:
   guides:
     'Creating an API organization': 'https://cloud.google.com/apigee/docs/api-platform/get-started/create-org'
+    'Setting a custom endpoint (required for data residency)': 'https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference#advanced-settings-configuration'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations'
 docs:
 base_url: 'organizations'
@@ -30,22 +31,18 @@ timeouts:
   delete_minutes: 45
 autogen_async: true
 async:
-  actions: ['create', 'delete', 'update']
+  actions: ['create']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 45
       update_minutes: 45
       delete_minutes: 45
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
+sweeper:
+  identifier_field: "organization"
 custom_code:
   encoder: 'templates/terraform/encoders/apigee_organization.go.tmpl'
   custom_import: 'templates/terraform/custom_import/apigee_organization.go.tmpl'
@@ -70,6 +67,20 @@ examples:
   # This is a more verbose version of the above that creates all
   # the resources needed for the acceptance test.
   - name: 'apigee_organization_cloud_basic_disable_vpc_peering_test'
+    primary_resource_id: 'org'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    ignore_read_extra:
+      - 'properties'
+    exclude_docs: true
+    # Resource creation race
+    skip_vcr: true
+  - name: 'apigee_organization_cloud_basic_data_residency'
+    exclude_test: true
+  # This is a more verbose version of the above that creates all
+  # the resources needed for the acceptance test.
+  - name: 'apigee_organization_cloud_basic_data_residency_test'
     primary_resource_id: 'org'
     test_env_vars:
       org_id: 'ORG_ID'

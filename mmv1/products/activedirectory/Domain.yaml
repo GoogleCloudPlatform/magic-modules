@@ -41,19 +41,13 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
       # It takes about 35-40 mins to get the resource created
     timeouts:
       insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/active_directory_domain.go.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'

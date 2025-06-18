@@ -12,7 +12,7 @@
 # limitations under the License.
 
 ---
- # This is the plural of `ServicePerimeter`, any changes here should be made to `ServicePerimeter` as well
+# This is the plural of `ServicePerimeter`, any changes here should be made to `ServicePerimeter` as well
 name: 'ServicePerimeters'
 api_resource_type_kind: ServicePerimeter
 description: |
@@ -30,6 +30,7 @@ base_url: '{{parent}}/servicePerimeters:replaceAll'
 self_link: '{{parent}}/servicePerimeters'
 update_url: '{{parent}}/servicePerimeters:replaceAll'
 update_verb: 'POST'
+mutex: '{{parent}}'
 import_format:
   - '{{parent}}/servicePerimeters'
 timeouts:
@@ -42,19 +43,14 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   custom_delete: 'templates/terraform/custom_delete/replace_all_service_perimeters_empty_list.go.tmpl'
   custom_import: 'templates/terraform/custom_import/set_access_policy_parent_from_access_policy.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
+# Exclude tests for examples becauses tests run in parallel and will conflict when trying to create the org level access policy
 examples:
   - name: 'access_context_manager_service_perimeters_basic'
     primary_resource_id: 'service-perimeter'
@@ -100,13 +96,6 @@ properties:
           description: |
             Description of the ServicePerimeter and its use. Does not affect
             behavior.
-        - name: 'etag'
-          type: Fingerprint
-          description: |
-            An opaque identifier for the current version of the ServicePerimeter. This
-            identifier does not follow any specific format. If an etag is not provided, the
-            operation will be performed as if a valid etag is provided.
-          output: true
         - name: 'createTime'
           type: Time
           description: |
@@ -306,6 +295,15 @@ properties:
                         is_set: true
                         item_type:
                           type: String
+                      - name: 'roles'
+                        type: Array
+                        item_type:
+                          type: String
+                        is_set: true
+                        description: |
+                          A list of IAM roles that represent the set of operations that the sources
+                          specified in the corresponding `IngressFrom`
+                          are allowed to perform.
                       - name: 'operations'
                         type: Array
                         description: |
@@ -341,6 +339,10 @@ properties:
                                     description: |
                                       Value for permission should be a valid Cloud IAM permission for the
                                       corresponding `serviceName` in `ApiOperation`.
+                  - name: 'title'
+                    type: 'string'
+                    description: |
+                      Human readable title. Must be unique within the perimeter. Does not affect behavior.
             - name: 'egressPolicies'
               type: Array
               description: |
@@ -385,6 +387,15 @@ properties:
                             - name: 'accessLevel'
                               type: String
                               description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
+                            - name: 'resource'
+                              type: String
+                              description: |
+                                A Google Cloud resource that is allowed to egress the perimeter.
+                                Requests from these resources are allowed to access data outside the perimeter.
+                                Currently only projects are allowed. Project format: `projects/{project_number}`.
+                                The resource may be in any Google Cloud organization, not just the
+                                organization that the perimeter is defined in. `*` is not allowed, the
+                                case of allowing all Google Cloud resources only is not supported.
                       - name: 'sourceRestriction'
                         type: Enum
                         description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
@@ -418,6 +429,15 @@ properties:
                         is_set: true
                         item_type:
                           type: String
+                      - name: 'roles'
+                        type: Array
+                        item_type:
+                          type: String
+                        is_set: true
+                        description: |
+                          A list of IAM roles that represent the set of operations that the sources
+                          specified in the corresponding `EgressFrom`
+                          are allowed to perform.
                       - name: 'operations'
                         type: Array
                         description: |
@@ -453,6 +473,10 @@ properties:
                                     description: |
                                       Value for permission should be a valid Cloud IAM permission for the
                                       corresponding `serviceName` in `ApiOperation`.
+                  - name: 'title'
+                    type: 'string'
+                    description: |
+                      Human readable title. Must be unique within the perimeter. Does not affect behavior.
         - name: 'spec'
           type: NestedObject
           description: |
@@ -605,6 +629,15 @@ properties:
                         is_set: true
                         item_type:
                           type: String
+                      - name: 'roles'
+                        type: Array
+                        item_type:
+                          type: String
+                        is_set: true
+                        description: |
+                          A list of IAM roles that represent the set of operations that the sources
+                          specified in the corresponding `IngressFrom`
+                          are allowed to perform.
                       - name: 'operations'
                         type: Array
                         description: |
@@ -640,6 +673,10 @@ properties:
                                     description: |
                                       Value for permission should be a valid Cloud IAM permission for the
                                       corresponding `serviceName` in `ApiOperation`.
+                  - name: 'title'
+                    type: 'string'
+                    description: |
+                      Human readable title. Must be unique within the perimeter. Does not affect behavior.
             - name: 'egressPolicies'
               type: Array
               description: |
@@ -686,6 +723,15 @@ properties:
                             - name: 'accessLevel'
                               type: String
                               description: 'An AccessLevel resource name that allows resources outside the ServicePerimeter to be accessed from the inside.'
+                            - name: 'resource'
+                              type: String
+                              description: |
+                                A Google Cloud resource that is allowed to egress the perimeter.
+                                Requests from these resources are allowed to access data outside the perimeter.
+                                Currently only projects are allowed. Project format: `projects/{project_number}`.
+                                The resource may be in any Google Cloud organization, not just the
+                                organization that the perimeter is defined in. `*` is not allowed, the
+                                case of allowing all Google Cloud resources only is not supported.
                       - name: 'sourceRestriction'
                         type: Enum
                         description: 'Whether to enforce traffic restrictions based on `sources` field. If the `sources` field is non-empty, then this field must be set to `SOURCE_RESTRICTION_ENABLED`.'
@@ -719,6 +765,15 @@ properties:
                         is_set: true
                         item_type:
                           type: String
+                      - name: 'roles'
+                        type: Array
+                        item_type:
+                          type: String
+                        is_set: true
+                        description: |
+                          A list of IAM roles that represent the set of operations that the sources
+                          specified in the corresponding `EgressFrom`
+                          are allowed to perform.
                       - name: 'operations'
                         type: Array
                         description: |
@@ -754,6 +809,10 @@ properties:
                                     description: |
                                       Value for permission should be a valid Cloud IAM permission for the
                                       corresponding `serviceName` in `ApiOperation`.
+                  - name: 'title'
+                    type: 'string'
+                    description: |
+                      Human readable title. Must be unique within the perimeter. Does not affect behavior.
         - name: 'useExplicitDryRunSpec'
           type: Boolean
           description: |

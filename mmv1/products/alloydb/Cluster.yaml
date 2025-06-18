@@ -32,6 +32,7 @@ docs:
       3. Verify the sync of terraform state by running `terraform plan` and ensure that the infrastructure matches the configuration and no changes are required.
 base_url: 'projects/{{project}}/locations/{{location}}/clusters'
 self_link: 'projects/{{project}}/locations/{{location}}/clusters/{{cluster_id}}'
+mutex: 'projects/{{project}}'
 create_url: 'projects/{{project}}/locations/{{location}}/clusters?clusterId={{cluster_id}}'
 update_verb: 'PATCH'
 update_mask: true
@@ -48,18 +49,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 120
       update_minutes: 120
       delete_minutes: 120
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   pre_create: 'templates/terraform/pre_create/alloydb_cluster.go.tmpl'
   pre_update: 'templates/terraform/pre_update/alloydb_cluster.go.tmpl'
@@ -71,6 +66,22 @@ examples:
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
+  - name: 'alloydb_cluster_before_upgrade'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-1")'
+  - name: 'alloydb_cluster_after_upgrade'
+    primary_resource_id: 'default'
+    vars:
+      alloydb_cluster_name: 'alloydb-cluster'
+      alloydb_instance_name: 'alloydb-instance'
+      network_name: 'alloydb-network'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-1")'
   - name: 'alloydb_cluster_full'
     primary_resource_id: 'full'
     vars:
@@ -105,7 +116,7 @@ examples:
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     exclude_docs: true
 virtual_fields:
   - name: 'deletion_policy'
@@ -116,6 +127,13 @@ virtual_fields:
       Possible values: DEFAULT, FORCE
     type: String
     default_value: "DEFAULT"
+  - name: 'skip_await_major_version_upgrade'
+    type: Boolean
+    default_value: true
+    description: |
+      Set to true to skip awaiting on the major version upgrade of the cluster.
+      Possible values: true, false
+      Default value: "true"
 parameters:
   - name: 'clusterId'
     type: String
@@ -262,7 +280,8 @@ properties:
   - name: 'databaseVersion'
     type: String
     description: |
-      The database engine major version. This is an optional field and it's populated at the Cluster creation time. This field cannot be changed after cluster creation.
+      The database engine major version. This is an optional field and it's populated at the Cluster creation time.
+      Note: Changing this field to a higer version results in upgrading the AlloyDB cluster which is an irreversible change.
     default_from_api: true
   - name: 'pscConfig'
     type: NestedObject
@@ -271,6 +290,12 @@ properties:
       - name: 'pscEnabled'
         type: Boolean
         description: 'Create an instance that allows connections from Private Service Connect endpoints to the instance.'
+      - name: 'serviceOwnedProjectNumber'
+        type: Integer
+        description: |
+          The project number that needs to be allowlisted on the network attachment to enable outbound connectivity, if the network attachment is configured to ACCEPT_MANUAL connections.
+          In case the network attachment is configured to ACCEPT_AUTOMATIC, this project number does not need to be allowlisted explicitly.
+        output: true
   - name: 'initialUser'
     type: NestedObject
     description: |

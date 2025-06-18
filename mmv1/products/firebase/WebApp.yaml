@@ -42,14 +42,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 identity:
   - appId
   - name
@@ -58,7 +52,6 @@ custom_code:
 # Sweeper skipped as this resource has customized deletion.
 exclude_sweeper: true
 examples:
- # TODO: https://github.com/hashicorp/terraform-provider-google/issues/14158
   - name: 'firebase_web_app_basic'
     primary_resource_id: 'basic'
     min_version: 'beta'
@@ -72,7 +65,6 @@ examples:
     ignore_read_extra:
       - 'project'
       - 'deletion_policy'
-    skip_vcr: true
   - name: 'firebase_web_app_custom_api_key'
     primary_resource_id: 'default'
     min_version: 'beta'

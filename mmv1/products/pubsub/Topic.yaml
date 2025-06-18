@@ -87,6 +87,18 @@ examples:
     primary_resource_id: 'example'
     vars:
       topic_name: 'example-topic'
+  - name: 'pubsub_topic_ingestion_azure_event_hubs'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+  - name: 'pubsub_topic_ingestion_aws_msk'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+  - name: 'pubsub_topic_ingestion_confluent_cloud'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
 parameters:
 properties:
   - name: 'name'
@@ -118,6 +130,7 @@ properties:
     default_from_api: true
     properties:
       - name: 'allowedPersistenceRegions'
+        is_set: true
         type: Array
         description: |
           A list of IDs of GCP regions where messages that are published to
@@ -129,6 +142,14 @@ properties:
         required: true
         item_type:
           type: String
+      - name: "enforceInTransit"
+        type: Boolean
+        description: |
+          If true, `allowedPersistenceRegions` is also used to enforce in-transit
+          guarantees for messages. That is, Pub/Sub will fail topics.publish
+          operations on this topic and subscribe operations on any subscription
+          attached to this topic in any region that is not in `allowedPersistenceRegions`.
+        required: false
   - name: 'schemaSettings'
     type: NestedObject
     description: |
@@ -173,6 +194,9 @@ properties:
         conflicts:
           - 'aws_kinesis'
           - 'cloud_storage'
+          - 'azure_event_hubs'
+          - 'aws_msk'
+          - 'confluent_cloud'
         properties:
           - name: 'streamArn'
             type: String
@@ -207,6 +231,9 @@ properties:
         conflicts:
           - 'aws_kinesis'
           - 'cloud_storage'
+          - 'azure_event_hubs'
+          - 'aws_msk'
+          - 'confluent_cloud'
         properties:
           - name: 'bucket'
             type: String
@@ -298,3 +325,173 @@ properties:
               - 'INFO'
               - 'WARNING'
               - 'ERROR'
+      - name: 'azureEventHubs'
+        type: NestedObject
+        description: |
+          Settings for ingestion from Azure Event Hubs.
+        conflicts:
+          - 'aws_kinesis'
+          - 'cloud_storage'
+          - 'azure_event_hubs'
+          - 'aws_msk'
+          - 'confluent_cloud'
+        properties:
+          - name: 'resourceGroup'
+            type: String
+            description: |
+              The name of the resource group within an Azure subscription.
+          - name: 'namespace'
+            type: String
+            description: |
+              The Azure event hub namespace to ingest data from.
+          - name: 'eventHub'
+            type: String
+            description: |
+              The Azure event hub to ingest data from.
+          - name: 'clientId'
+            type: String
+            description: |
+              The Azure event hub client ID to use for ingestion.
+          - name: 'tenantId'
+            type: String
+            description: |
+              The Azure event hub tenant ID to use for ingestion.
+          - name: 'subscriptionId'
+            type: String
+            description: |
+              The Azure event hub subscription ID to use for ingestion.
+          - name: 'gcpServiceAccount'
+            type: String
+            description: |
+              The GCP service account to be used for Federated Identity authentication
+              with Azure (via a `AssumeRoleWithWebIdentity` call for the provided
+              role).
+      - name: 'awsMsk'
+        type: NestedObject
+        description: |
+          Settings for ingestion from Amazon Managed Streaming for Apache Kafka.
+        conflicts:
+          - 'aws_kinesis'
+          - 'cloud_storage'
+          - 'azure_event_hubs'
+          - 'aws_msk'
+          - 'confluent_cloud'
+        properties:
+          - name: 'clusterArn'
+            type: String
+            description: |
+              ARN that uniquely identifies the MSK cluster.
+            required: true
+          - name: 'topic'
+            type: String
+            description: |
+              The name of the MSK topic that Pub/Sub will import from.
+            required: true
+          - name: 'awsRoleArn'
+            type: String
+            description: |
+              AWS role ARN to be used for Federated Identity authentication with
+              MSK. Check the Pub/Sub docs for how to set up this role and the
+              required permissions that need to be attached to it.
+            required: true
+          - name: 'gcpServiceAccount'
+            type: String
+            description: |
+              The GCP service account to be used for Federated Identity authentication
+              with MSK (via a `AssumeRoleWithWebIdentity` call for the provided
+              role). The `awsRoleArn` must be set up with `accounts.google.com:sub`
+              equals to this service account number.
+            required: true
+      - name: 'confluentCloud'
+        type: NestedObject
+        description: |
+          Settings for ingestion from Confluent Cloud.
+        conflicts:
+          - 'aws_kinesis'
+          - 'cloud_storage'
+          - 'azure_event_hubs'
+          - 'aws_msk'
+          - 'confluent_cloud'
+        properties:
+          - name: 'bootstrapServer'
+            type: String
+            description: |
+              The Confluent Cloud bootstrap server. The format is url:port.
+            required: true
+          - name: 'clusterId'
+            type: String
+            description: |
+              The Confluent Cloud cluster ID.
+          - name: 'topic'
+            type: String
+            description: |
+              Name of the Confluent Cloud topic that Pub/Sub will import from.
+            required: true
+          - name: 'identityPoolId'
+            type: String
+            description: |
+              Identity pool ID to be used for Federated Identity authentication with Confluent Cloud.
+            required: true
+          - name: 'gcpServiceAccount'
+            type: String
+            description: |
+              The GCP service account to be used for Federated Identity authentication
+              with Confluent Cloud.
+            required: true
+  - name: messageTransforms
+    type: Array
+    description: |
+      Transforms to be applied to messages published to the topic. Transforms are applied in the
+      order specified.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: javascriptUdf
+          type: NestedObject
+          description: |
+            Javascript User Defined Function. If multiple Javascript UDFs are specified on a resource,
+            each one must have a unique `function_name`.
+          properties:
+            - name: functionName
+              type: String
+              required: true
+              description: |
+                Name of the JavaScript function that should be applied to Pub/Sub messages.
+            - name: code
+              type: String
+              required: true
+              description: |
+                JavaScript code that contains a function `function_name` with the
+                following signature:
+                ```
+                  /**
+                  * Transforms a Pub/Sub message.
+                  *
+                  * @return {(Object<string, (string | Object<string, string>)>|null)} - To
+                  * filter a message, return `null`. To transform a message return a map
+                  * with the following keys:
+                  *   - (required) 'data' : {string}
+                  *   - (optional) 'attributes' : {Object<string, string>}
+                  * Returning empty `attributes` will remove all attributes from the
+                  * message.
+                  *
+                  * @param  {(Object<string, (string | Object<string, string>)>} Pub/Sub
+                  * message. Keys:
+                  *   - (required) 'data' : {string}
+                  *   - (required) 'attributes' : {Object<string, string>}
+                  *
+                  * @param  {Object<string, any>} metadata - Pub/Sub message metadata.
+                  * Keys:
+                  *   - (required) 'message_id'  : {string}
+                  *   - (optional) 'publish_time': {string} YYYY-MM-DDTHH:MM:SSZ format
+                  *   - (optional) 'ordering_key': {string}
+                  */
+                  function <function_name>(message, metadata) {
+                  }
+                ```
+        - name: disabled
+          type: Boolean
+          default_value: false
+          description: |
+            Controls whether or not to use this transform. If not set or `false`,
+            the transform will be applied to messages. Default: `true`.

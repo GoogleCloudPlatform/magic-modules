@@ -297,7 +297,9 @@ module "project-services" {
     "ids.googleapis.com",
     "logging.googleapis.com",
     "looker.googleapis.com",
+    "lustre.googleapis.com",
     "managedidentities.googleapis.com",
+    "managedkafka.googleapis.com",
     "memcache.googleapis.com",
     "memorystore.googleapis.com",
     "metastore.googleapis.com",
@@ -316,8 +318,10 @@ module "project-services" {
     "osconfig.googleapis.com",
     "oslogin.googleapis.com",
     "parallelstore.googleapis.com",
+    "parametermanager.googleapis.com",
     "privateca.googleapis.com",
     "privilegedaccessmanager.googleapis.com",
+    "progressiverollout.googleapis.com",
     "pubsub.googleapis.com",
     "pubsublite.googleapis.com",
     "publicca.googleapis.com",
@@ -388,6 +392,30 @@ resource "google_project_service_identity" "sqladmin_sa" {
 
   project = google_project.proj.project_id
   service = "sqladmin.googleapis.com"
+}
+
+resource "google_project_service_identity" "osconfig_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "osconfig.googleapis.com"
+}
+
+resource "google_project_service_identity" "progressiverollout_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "progressiverollout.googleapis.com"
+}
+
+resource "google_project_service_identity" "parametermanager_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "parametermanager.googleapis.com"
 }
 
 # TestAccComposerEnvironment_fixPyPiPackages
@@ -467,6 +495,13 @@ resource "google_project_iam_member" "compute_agent_encrypter_decrypter" {
   member  = "serviceAccount:service-${google_project.proj.number}@compute-system.iam.gserviceaccount.com"
 }
 
+# TestAccColabRuntime_colabRuntimeBasicExample
+# TestAccColabRuntime_colabRuntimeFullExample
+resource "google_project_iam_member" "colab_admin_permissions" {
+  project = google_project.proj.project_id
+  role    = "roles/aiplatform.colabEnterpriseAdmin"
+  member  = "user:gterraformtestuser@gmail.com"
+}
 
 data "google_organization" "org2" {
   organization = var.org2_id

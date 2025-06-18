@@ -14,6 +14,8 @@
 ---
 name: 'GlobalForwardingRule'
 api_resource_type_kind: ForwardingRule
+api_variant_patterns:
+  - 'projects/{project}/global/forwardingRules/{forwardingRule}'
 kind: 'compute#forwardingRule'
 description: |
   Represents a GlobalForwardingRule resource. Global forwarding rules are
@@ -37,17 +39,11 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
+  pre_create: 'templates/terraform/pre_create/compute_global_forwarding_rule.go.tmpl'
   post_create: 'templates/terraform/post_create/labels.tmpl'
 legacy_long_form_project: true
 examples:
@@ -322,6 +318,8 @@ properties:
       - 'EXTERNAL_MANAGED'
       - 'INTERNAL_MANAGED'
       - 'INTERNAL_SELF_MANAGED'
+    update_url: 'projects/{{project}}/global/forwardingRules/{{name}}'
+    update_verb: 'PATCH'
   - name: 'metadataFilters'
     type: Array
     description: |
@@ -485,6 +483,59 @@ properties:
     update_url: 'projects/{{project}}/global/forwardingRules/{{name}}/setTarget'
     update_verb: 'POST'
     diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+  - name: 'networkTier'
+    type: Enum
+    description: |
+      This signifies the networking tier used for configuring
+      this load balancer and can only take the following values:
+      `PREMIUM`, `STANDARD`.
+
+      For regional ForwardingRule, the valid values are `PREMIUM` and
+      `STANDARD`. For GlobalForwardingRule, the valid value is
+      `PREMIUM`.
+
+      If this field is not specified, it is assumed to be `PREMIUM`.
+      If `IPAddress` is specified, this value must be equal to the
+      networkTier of the Address.
+    immutable: true
+    default_from_api: true
+    enum_values:
+      - 'PREMIUM'
+      - 'STANDARD'
+  - name: 'externalManagedBackendBucketMigrationState'
+    type: Enum
+    description: |
+      Specifies the canary migration state for the backend buckets attached to this forwarding rule.
+      Possible values are PREPARE, TEST_BY_PERCENTAGE, and TEST_ALL_TRAFFIC.
+
+      To begin the migration from EXTERNAL to EXTERNAL_MANAGED, the state must be changed to
+      PREPARE. The state must be changed to TEST_ALL_TRAFFIC before the loadBalancingScheme can be
+      changed to EXTERNAL_MANAGED. Optionally, the TEST_BY_PERCENTAGE state can be used to migrate
+      traffic to backend buckets attached to this forwarding rule by percentage using
+      externalManagedBackendBucketMigrationTestingPercentage.
+
+      Rolling back a migration requires the states to be set in reverse order. So changing the
+      scheme from EXTERNAL_MANAGED to EXTERNAL requires the state to be set to TEST_ALL_TRAFFIC at
+      the same time. Optionally, the TEST_BY_PERCENTAGE state can be used to migrate some traffic
+      back to EXTERNAL or PREPARE can be used to migrate all traffic back to EXTERNAL.
+    enum_values:
+      - 'PREPARE'
+      - 'TEST_BY_PERCENTAGE'
+      - 'TEST_ALL_TRAFFIC'
+    update_url: 'projects/{{project}}/global/forwardingRules/{{name}}'
+    update_verb: 'PATCH'
+  - name: 'externalManagedBackendBucketMigrationTestingPercentage'
+    type: Double
+    description: |
+      Determines the fraction of requests to backend buckets that should be processed by the Global
+      external Application Load Balancer.
+
+      The value of this field must be in the range [0, 100].
+
+      This value can only be set if the loadBalancingScheme in the forwarding rule is set to
+      EXTERNAL (when using the Classic ALB) and the migration state is TEST_BY_PERCENTAGE.
+    update_url: 'projects/{{project}}/global/forwardingRules/{{name}}'
+    update_verb: 'PATCH'
   - name: 'serviceDirectoryRegistrations'
     type: Array
     description: |

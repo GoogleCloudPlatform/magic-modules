@@ -13,6 +13,8 @@
 
 ---
 name: 'TargetSite'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/collections/{collection}/dataStores/{dataStore}/siteSearchEngine/targetSites/{targetSite}'
 description: |
   TargetSite represents a URI pattern that the users want to confine their
   search.
@@ -28,29 +30,19 @@ immutable: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/collections/default_collection/dataStores/{{data_store_id}}/siteSearchEngine/targetSites/{{target_site_id}}'
 timeouts:
-  insert_minutes: 60
-  update_minutes: 60
-  delete_minutes: 60
-autogen_async: true
+  # 8 hour timeout to allow for indexing/unindexing as needed
+  insert_minutes: 480
+  update_minutes: 480
+  delete_minutes: 480
+autogen_async: false
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
-    timeouts:
-      insert_minutes: 60
-      update_minutes: 60
-      delete_minutes: 60
   result:
-    path: 'response'
-    resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
+    resource_inside_response: true
 custom_code:
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/discoveryengine_targetsite_set_id.go.tmpl'
 examples:
   - name: 'discoveryengine_targetsite_basic'
@@ -85,7 +77,6 @@ parameters:
     type: String
     description: |
       The unique id of the target site.
-
     url_param_only: true
     immutable: true
     output: true

@@ -14,6 +14,8 @@
 ---
 name: 'InstanceGroupNamedPort'
 api_resource_type_kind: InstanceGroup
+api_variant_patterns:
+  - 'projects/{project}/zones/{zone}/instanceGroups/{instanceGroup}'
 description: |
   Mange the named ports setting for a managed instance group without
   managing the group as whole. This resource is primarily intended for use
@@ -43,15 +45,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 identity:
   - port
   - name

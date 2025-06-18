@@ -132,50 +132,34 @@ func main() {
 	}
 
 	startTime := time.Now()
-	log.Printf("Generating MM output to '%s'", *outputPath)
-	log.Printf("Using %s version", *version)
-	log.Printf("Using %s provider", *forceProvider)
-
-	// Building compute takes a long time and can't be parallelized within the product
-	// so lets build it first
-	sort.Slice(allProductFiles, func(i int, j int) bool {
-		if allProductFiles[i] == "products/compute" {
-			return true
-		}
-		return false
-	})
-
-	var providerToGenerate provider.Provider
-
-	productFileChannel := make(chan string, len(allProductFiles))
-	productsForVersionChannel := make(chan *api.Product, len(allProductFiles))
-	for _, pf := range allProductFiles {
-		productFileChannel <- pf
+	providerName := "default (terraform)"
+	if *forceProvider != "" {
+		providerName = *forceProvider
 	}
+	log.Printf("Generating MM output to '%s'", *outputPath)
+	log.Printf("Building %s version", *version)
+	log.Printf("Building %s provider", providerName)
 
-	for i := 0; i < len(allProductFiles); i++ {
+	productsForVersionChannel := make(chan *api.Product, len(allProductFiles))
+	for _, productFile := range allProductFiles {
 		wg.Add(1)
-		go GenerateProduct(productFileChannel, providerToGenerate, productsForVersionChannel, startTime, productsToGenerate, *resourceToGenerate, *overrideDirectory, generateCode, generateDocs)
+		go GenerateProduct(productFile, productsForVersionChannel, startTime, productsToGenerate, *resourceToGenerate, *overrideDirectory, generateCode, generateDocs)
 	}
 	wg.Wait()
 
-	close(productFileChannel)
 	close(productsForVersionChannel)
 
 	var productsForVersion []*api.Product
-
 	for p := range productsForVersionChannel {
 		productsForVersion = append(productsForVersion, p)
 	}
-
 	slices.SortFunc(productsForVersion, func(p1, p2 *api.Product) int {
 		return strings.Compare(strings.ToLower(p1.Name), strings.ToLower(p2.Name))
 	})
 
 	// In order to only copy/compile files once per provider this must be called outside
-	// of the products loop. This will get called with the provider from the final iteration
-	// of the loop
-	providerToGenerate = setProvider(*forceProvider, *version, productsForVersion[0], startTime)
+	// of the products loop. Create an MMv1 provider with an arbitrary product (the first loaded).
+	providerToGenerate := newProvider(*forceProvider, *version, productsForVersion[0], startTime)
 	providerToGenerate.CopyCommonFiles(*outputPath, generateCode, generateDocs)
 
 	if generateCode {
@@ -185,10 +169,8 @@ func main() {
 	provider.FixImports(*outputPath, *showImportDiffs)
 }
 
-func GenerateProduct(productChannel chan string, providerToGenerate provider.Provider, productsForVersionChannel chan *api.Product, startTime time.Time, productsToGenerate []string, resourceToGenerate, overrideDirectory string, generateCode, generateDocs bool) {
-
+func GenerateProduct(productName string, productsForVersionChannel chan *api.Product, startTime time.Time, productsToGenerate []string, resourceToGenerate, overrideDirectory string, generateCode, generateDocs bool) {
 	defer wg.Done()
-	productName := <-productChannel
 
 	productYamlPath := path.Join(productName, "product.yaml")
 
@@ -252,6 +234,7 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 
 		resource := &api.Resource{}
 		api.Compile(resourceYamlPath, resource, overrideDirectory)
+		resource.SourceYamlFile = resourceYamlPath
 
 		resource.TargetVersionName = *version
 		resource.Properties = resource.AddLabelsRelatedFields(resource.PropertiesWithExcluded(), nil)
@@ -303,8 +286,7 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 	productApi.Objects = resources
 	productApi.Validate()
 
-	providerToGenerate = setProvider(*forceProvider, *version, productApi, startTime)
-
+	providerToGenerate := newProvider(*forceProvider, *version, productApi, startTime)
 	productsForVersionChannel <- productApi
 
 	if !slices.Contains(productsToGenerate, productName) {
@@ -313,16 +295,18 @@ func GenerateProduct(productChannel chan string, providerToGenerate provider.Pro
 	}
 
 	log.Printf("%s: Generating files", productName)
+
 	providerToGenerate.Generate(*outputPath, productName, resourceToGenerate, generateCode, generateDocs)
 }
 
-// Sets provider via flag
-func setProvider(forceProvider, version string, productApi *api.Product, startTime time.Time) provider.Provider {
-	switch forceProvider {
+func newProvider(providerName, version string, productApi *api.Product, startTime time.Time) provider.Provider {
+	switch providerName {
 	case "tgc":
 		return provider.NewTerraformGoogleConversion(productApi, version, startTime)
 	case "tgc_cai2hcl":
 		return provider.NewCaiToTerraformConversion(productApi, version, startTime)
+	case "tgc_next":
+		return provider.NewTerraformGoogleConversionNext(productApi, version, startTime)
 	case "oics":
 		return provider.NewTerraformOiCS(productApi, version, startTime)
 	default:

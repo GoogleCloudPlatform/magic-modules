@@ -1,5 +1,4 @@
 resource "google_secret_manager_secret" "github-token-secret" {
-  provider = google-beta
   secret_id = "github-token-secret"
 
   replication {

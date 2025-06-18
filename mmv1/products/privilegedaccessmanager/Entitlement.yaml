@@ -13,8 +13,17 @@
 
 ---
 name: 'Entitlement'
+api_variant_patterns:
+  - 'folders/{folder}/locations/{location}/entitlements/{entitlement}'
+  - 'organizations/{organization}/locations/{location}/entitlements/{entitlement}'
+  - 'projects/{project}/locations/{location}/entitlements/{entitlement}'
 description: |
   An Entitlement defines the eligibility of a set of users to obtain a predefined access for some time possibly after going through an approval workflow.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/iam/docs/pam-overview'
+    'How to create an Entitlement': 'https://cloud.google.com/iam/docs/pam-create-entitlements'
+  api: 'https://cloud.google.com/iam/docs/reference/pam/rest'
 docs:
 id_format: '{{parent}}/locations/{{location}}/entitlements/{{entitlement_id}}'
 base_url: '{{parent}}/locations/{{location}}/entitlements'
@@ -35,14 +44,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/privileged_access_manager_entitlement.go.tmpl'
   pre_update: 'templates/terraform/pre_update/privileged_access_manager_entitlement.go.tmpl'

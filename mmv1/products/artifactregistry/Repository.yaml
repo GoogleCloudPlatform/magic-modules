@@ -27,7 +27,6 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
-  - '{{repository_id}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -38,14 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   allowed_iam_role: 'roles/artifactregistry.reader'
@@ -61,8 +54,18 @@ custom_code:
   constants: 'templates/terraform/constants/artifact_registry_repository.go.tmpl'
   encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
   pre_create: 'templates/terraform/pre_create/artifact_registry_remote_repository.go.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us"
 examples:
   - name: 'artifact_registry_repository_basic'
+    primary_resource_id: 'my-repo'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
+    vars:
+      repository_id: 'my-repository'
+      desc: 'example docker repository'
+  - name: 'artifact_registry_repository_multi_region'
     primary_resource_id: 'my-repo'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
     vars:
@@ -208,16 +211,13 @@ examples:
       # Ignore this field as it is INPUT_ONLY. AR will not return this in the
       # response.
       - 'remote_repository_config.0.disable_upstream_validation'
+  - name: 'artifact_registry_repository_vulnerability_scanning'
+    primary_resource_id: 'my-repo'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
+    vars:
+      repository_id: 'my-repository'
+      desc: 'example docker repository with vulnerability scanning config'
 parameters:
-properties:
-  - name: 'name'
-    type: String
-    description: |-
-      The name of the repository, for example:
-      "repo1"
-    output: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
   - name: 'repository_id'
     type: String
     description: |-
@@ -229,12 +229,26 @@ properties:
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'location'
     type: String
-    description: |
-      The name of the location this repository is located in.
+    description: |-
+      The name of the repository's location. In addition to specific regions,
+      special values for multi-region locations are `asia`, `europe`, and `us`.
+      See [here](https://cloud.google.com/artifact-registry/docs/repositories/repo-locations),
+      or use the
+      [google_artifact_registry_locations](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/artifact_registry_locations)
+      data source for possible values.
     url_param_only: true
     required: false
     immutable: true
     default_from_api: true
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      The name of the repository, for example:
+      "repo1"
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/shortname_to_url.go.tmpl'
   - name: 'format'
     type: String
     description: |-
@@ -290,6 +304,7 @@ properties:
       Provides additional configuration details for repositories of the maven
       format type.
     allow_empty_object: true
+    diff_suppress_func: 'emptyMavenConfigDiffSuppress'
     properties:
       # Maven properties.
       - name: 'allowSnapshotOverwrites'
@@ -358,6 +373,7 @@ properties:
     key_name: 'id'
     key_description: |-
       The policy ID. Must be unique within a repository.
+    set_hash_func: 'mapHashID'
     value_type:
       name: cleanupPolicies
       type: NestedObject
@@ -406,12 +422,14 @@ properties:
               type: String
               description: |-
                 Match versions older than a duration.
-              diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+              custom_expand: 'templates/terraform/custom_expand/duration_to_seconds.go.tmpl'
+              diff_suppress_func: 'durationDiffSuppress'
             - name: 'newerThan'
               type: String
               description: |-
                 Match versions newer than a duration.
-              diff_suppress_func: 'tpgresource.DurationDiffSuppress'
+              custom_expand: 'templates/terraform/custom_expand/duration_to_seconds.go.tmpl'
+              diff_suppress_func: 'durationDiffSuppress'
         - name: 'mostRecentVersions'
           type: NestedObject
           description: |-
@@ -471,6 +489,7 @@ properties:
                 enum_values:
                   - 'DEBIAN'
                   - 'UBUNTU'
+                  - 'DEBIAN_SNAPSHOT'
               - name: 'repositoryPath'
                 type: String
                 description: |-
@@ -732,3 +751,30 @@ properties:
     description: |-
       If true, the cleanup pipeline is prevented from deleting versions in this
       repository.
+  - name: 'vulnerabilityScanningConfig'
+    type: NestedObject
+    description: |-
+      Configuration for vulnerability scanning of artifacts stored in this repository.
+    default_from_api: true
+    properties:
+      - name: 'enablementConfig'
+        type: Enum
+        description: |-
+          This configures whether vulnerability scanning is automatically performed for artifacts pushed to this repository.
+        enum_values:
+          - 'INHERITED'
+          - 'DISABLED'
+      - name: 'enablementState'
+        type: Enum
+        description: |-
+          This field returns whether scanning is active for this repository.
+        output: true
+        enum_values:
+          - 'SCANNING_UNSUPPORTED'
+          - 'SCANNING_DISABLED'
+          - 'SCANNING_ACTIVE'
+      - name: 'enablementStateReason'
+        type: String
+        description: |-
+          This provides an explanation for the state of scanning on this repository.
+        output: true

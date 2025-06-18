@@ -127,7 +127,7 @@ func TestAccProject_labels(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProject_labels(pid, org, map[string]string{"test": "that"}),
+				Config: testAccProject_labels(pid, org, "test", "that"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectHasLabels(t, "google_project.acceptance", pid, map[string]string{"test": "that"}),
 				),
@@ -141,7 +141,7 @@ func TestAccProject_labels(t *testing.T) {
 			},
 			// update project with labels
 			{
-				Config: testAccProject_labels(pid, org, map[string]string{"label": "label-value"}),
+				Config: testAccProject_labels(pid, org, "label", "label-value"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 					testAccCheckGoogleProjectHasLabels(t, "google_project.acceptance", pid, map[string]string{"label": "label-value"}),
@@ -153,6 +153,12 @@ func TestAccProject_labels(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 					testAccCheckGoogleProjectHasNoLabels(t, "google_project.acceptance", pid),
+				),
+			},
+			{
+				Config: testAccProject_labels(pid, org, "label", "label-value"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleProjectHasLabels(t, "google_project.acceptance", pid, map[string]string{"label": "label-value"}),
 				),
 			},
 		},
@@ -238,10 +244,15 @@ func TestAccProject_migrateParent(t *testing.T) {
 func TestAccProject_tags(t *testing.T) {
 	t.Parallel()
 
-	org := envvar.GetTestOrgFromEnv(t)
 	pid := fmt.Sprintf("%s-%d", TestPrefix, acctest.RandInt(t))
-	tagKey := acctest.BootstrapSharedTestTagKey(t, "crm-projects-tagkey")
-	tagValue := acctest.BootstrapSharedTestTagValue(t, "crm-projects-tagvalue", tagKey)
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "crm-projects-tagkey", nil)
+	context := map[string]interface{}{
+		"pid":           pid,
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "crm-projects-tagvalue", tagKey),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck: func() { acctest.AccTestPreCheck(t) },
 		ExternalProviders: map[string]resource.ExternalProvider{
@@ -250,7 +261,7 @@ func TestAccProject_tags(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccProject_tags(pid, org, map[string]string{org + "/" + tagKey: tagValue}),
+				Config: testAccProject_tags(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
 				),
@@ -264,11 +275,11 @@ func TestAccProject_tags(t *testing.T) {
 			},
 			// Update tags tries to replace project but fails due to deletion policy
 			{
-				Config:      testAccProject_tags(pid, org, map[string]string{}),
+				Config:      testAccProject_withoutTags(context),
 				ExpectError: regexp.MustCompile("deletion_policy"),
 			},
 			{
-				Config: testAccProject_tagsAllowDestroy(pid, org, map[string]string{org + "/" + tagKey: tagValue}),
+				Config: testAccProject_tagsAllowDestroy(context),
 			},
 		},
 	})
@@ -443,8 +454,7 @@ func TestAccProject_abandon(t *testing.T) {
 				Config:  testAccProject_abandon(pid, org),
 				Destroy: true,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckGoogleProjectExists("google_project.acceptance", pid),
-				),
+					testAccCheckGoogleProjectExists("google_project.acceptance", pid)),
 			},
 		},
 	})
@@ -505,8 +515,8 @@ resource "google_project" "acceptance" {
 `, pid, pid, org, billing)
 }
 
-func testAccProject_labels(pid, org string, labels map[string]string) string {
-	r := fmt.Sprintf(`
+func testAccProject_labels(pid, org, key, value string) string {
+	return fmt.Sprintf(`
 provider "google" {
   add_terraform_attribution_label = false
 }
@@ -516,15 +526,11 @@ resource "google_project" "acceptance" {
   name       = "%s"
   org_id     = "%s"
   deletion_policy = "DELETE"
-  labels = {`, pid, pid, org)
-
-	l := ""
-	for key, value := range labels {
-		l += fmt.Sprintf("%q = %q\n", key, value)
-	}
-
-	l += fmt.Sprintf("}\n}")
-	return r + l
+  labels = {
+    "%s" = "%s"
+  }
+}
+`, pid, pid, org, key, value)
 }
 
 func testAccProject_deleteDefaultNetwork(pid, org, billing string) string {
@@ -594,34 +600,39 @@ resource "google_folder" "folder1" {
 `, pid, pid, org, folderName, org)
 }
 
-func testAccProject_tags(pid, org string, tags map[string]string) string {
-	r := fmt.Sprintf(`
+func testAccProject_tags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_project" "acceptance" {
-  project_id = "%s"
-  name       = "%s"
-  org_id     = "%s"
-  tags = {`, pid, pid, org)
-
-	l := ""
-	for key, value := range tags {
-		l += fmt.Sprintf("%q = %q\n", key, value)
-	}
-	l += fmt.Sprintf("}\n}")
-	return r + l
+  project_id = "%{pid}"
+  name       = "%{pid}"
+  org_id     = "%{org}"
+  tags = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
 }
 
-func testAccProject_tagsAllowDestroy(pid, org string, tags map[string]string) string {
-	r := fmt.Sprintf(`resource "google_project" "acceptance" {
-	 project_id = "%s"
-  name       = "%s"
-  org_id     = "%s"
-  deletion_policy = "DELETE"
-  tags = {`, pid, pid, org)
-	l := ""
-	for key, value := range tags {
-		l += fmt.Sprintf("%q = %q\n", key, value)
-	}
+func testAccProject_withoutTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "acceptance" {
+  project_id = "%{pid}"
+  name       = "%{pid}"
+  org_id     = "%{org}"
+}
+`, context)
+}
 
-	l += fmt.Sprintf("}\n}")
-	return r + l
+func testAccProject_tagsAllowDestroy(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "acceptance" {
+  project_id      = "%{pid}"
+  name            = "%{pid}"
+  org_id          = "%{org}"
+  deletion_policy = "DELETE"
+  tags            = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
 }

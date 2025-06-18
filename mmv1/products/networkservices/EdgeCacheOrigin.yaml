@@ -36,18 +36,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 120
       update_minutes: 120
       delete_minutes: 120
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'network_services_edge_cache_origin_basic'
@@ -338,3 +332,26 @@ properties:
         item_type:
           type: String
         max_size: 5
+  - name: 'flexShielding'
+    type: NestedObject
+    description: |
+      The FlexShieldingOptions to be used for all routes to this origin.
+
+      If not set, defaults to a global caching layer in front of the origin.
+    properties:
+      - name: flexShieldingRegions
+        type: Array
+        description: |
+          Whenever possible, content will be fetched from origin and cached in or
+          near the specified origin. Best effort.
+
+          You must specify exactly one FlexShieldingRegion.
+        item_type:
+          type: Enum
+          description: |
+            Available regions for flexible shielding caching layer.
+          enum_values:
+            - 'AFRICA_SOUTH1'
+            - 'ME_CENTRAL1'
+        min_size: 1
+        max_size: 1

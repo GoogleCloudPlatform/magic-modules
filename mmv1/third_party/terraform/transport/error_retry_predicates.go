@@ -49,6 +49,12 @@ var defaultErrorRetryPredicates = []RetryErrorPredicateFunc{
 	// GCE returns the wrong error code, as this should be a 429, which we retry
 	// already.
 	is403QuotaExceededPerMinuteError,
+
+	// GCE Networks are considered unready for a brief period when certain
+	// operations are performed on them, and the scope is likely too broad to
+	// apply a mutex. If we attempt an operation w/ an unready network, retry
+	// it.
+	isNetworkUnreadyError,
 }
 
 /** END GLOBAL ERROR RETRY PREDICATES HERE **/
@@ -115,6 +121,21 @@ func is409OperationInProgressError(err error) (bool, string) {
 	return false, ""
 }
 
+// Code Repository Index is a long running operation
+// The resource takes time to change it's state from "CREATING" to "ACTIVE"
+func IsCodeRepositoryIndexUnreadyError(err error) (bool, string) {
+	gerr, ok := err.(*googleapi.Error)
+	if !ok {
+		return false, ""
+	}
+
+	if gerr.Code == 409 && strings.Contains(gerr.Body, "parent resource not in ready state") {
+		log.Printf("[DEBUG] Dismissed an error as retryable based on error code 409 and error reason 'parent resource not in ready state': %s", err)
+		return true, "CodeRepositoryIndex not ready"
+	}
+	return false, ""
+}
+
 func isSubnetworkUnreadyError(err error) (bool, string) {
 	gerr, ok := err.(*googleapi.Error)
 	if !ok {
@@ -124,6 +145,19 @@ func isSubnetworkUnreadyError(err error) (bool, string) {
 	if gerr.Code == 400 && strings.Contains(gerr.Body, "resourceNotReady") && strings.Contains(gerr.Body, "subnetworks") {
 		log.Printf("[DEBUG] Dismissed an error as retryable based on error code 400 and error reason 'resourceNotReady' w/ `subnetwork`: %s", err)
 		return true, "Subnetwork not ready"
+	}
+	return false, ""
+}
+
+func isNetworkUnreadyError(err error) (bool, string) {
+	gerr, ok := err.(*googleapi.Error)
+	if !ok {
+		return false, ""
+	}
+
+	if gerr.Code == 400 && strings.Contains(gerr.Body, "resourceNotReady") && strings.Contains(gerr.Body, "networks") {
+		log.Printf("[DEBUG] Dismissed an error as retryable based on error code 400 and error reason 'resourceNotReady' w/ 'networks': %s", err)
+		return true, "Network not ready"
 	}
 	return false, ""
 }
@@ -259,6 +293,17 @@ func IsBigqueryIAMQuotaError(err error) (bool, string) {
 	return false, ""
 }
 
+// Retry if Repository Group operation returns a 409 with a specific message for
+// enqueued operations.
+func IsRepositoryGroupQueueError(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 409 && (strings.Contains(strings.ToLower(gerr.Body), "unable to queue the operation")) {
+			return true, "Waiting for other enqueued operations to finish"
+		}
+	}
+	return false, ""
+}
+
 // Retry if Monitoring operation returns a 409 with a specific message for
 // concurrent operations.
 func IsMonitoringConcurrentEditError(err error) (bool, string) {
@@ -276,6 +321,16 @@ func IsMonitoringPermissionError(err error) (bool, string) {
 	if gerr, ok := err.(*googleapi.Error); ok {
 		if gerr.Code == 403 {
 			return true, "Waiting for project to be ready for metrics scope"
+		}
+	}
+	return false, ""
+}
+
+// Retry if Eventarc Channel operation returns a 403
+func EventarcChannel403Retry(err error) (bool, string) {
+	if gerr, ok := err.(*googleapi.Error); ok {
+		if gerr.Code == 403 && strings.Contains(gerr.Body, "The caller does not have permission") {
+			return true, "Waiting for channel to be ready"
 		}
 	}
 	return false, ""

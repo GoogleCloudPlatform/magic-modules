@@ -1,5 +1,5 @@
 {{- $primaryResourceId := $.ExamplePrimaryResourceId }}
 {{- $ids := $.IamSelfLinkIdentifiers }}
-{{- range $i, $attribue := $.IamAttributes}}
-  {{ $attribue }} = {{ $.IamParentSourceType }}.{{ $primaryResourceId }}.{{ underscore (index $ids $i)}}
+{{- range $i, $attribute := $.IamAttributes}}
+  {{ $attribute }} = {{ $.IamParentSourceType }}.{{ $primaryResourceId }}.{{ underscore (index $ids $i)}}
 {{- end }}

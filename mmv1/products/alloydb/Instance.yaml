@@ -39,18 +39,12 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 120
       update_minutes: 120
       delete_minutes: 120
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
   include_project: true
 custom_code:
   pre_create: 'templates/terraform/pre_create/alloydb_instance.go.tmpl'
@@ -88,7 +82,7 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -102,7 +96,7 @@ examples:
       alloydb_secondary_instance_name: 'alloydb-secondary-instance'
       network_name: 'alloydb-secondary-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -197,15 +191,31 @@ properties:
     description: |
       'Availability type of an Instance. Defaults to REGIONAL for both primary and read instances.
       Note that primary and read instances can have different availability types.
-      Only READ_POOL instance supports ZONAL type. Users can't specify the zone for READ_POOL instance.
-      Zone is automatically chosen from the list of zones in the region specified.
-      Read pool of size 1 can only have zonal availability. Read pools with node count of 2 or more
-      can have regional availability (nodes are present in 2 or more zones in a region).'
+      Primary instances can be either ZONAL or REGIONAL. Read Pool instances can also be either ZONAL or REGIONAL.
+      Read pools of size 1 can only have zonal availability. Read pools with a node count of 2 or more
+      can have regional availability (nodes are present in 2 or more zones in a region).
+      Possible values are: `AVAILABILITY_TYPE_UNSPECIFIED`, `ZONAL`, `REGIONAL`.'
     default_from_api: true
     enum_values:
       - 'AVAILABILITY_TYPE_UNSPECIFIED'
       - 'ZONAL'
       - 'REGIONAL'
+  - name: 'activationPolicy'
+    type: Enum
+    description: |
+      'Specifies whether an instance needs to spin up. Once the instance is
+      active, the activation policy can be updated to the `NEVER` to stop the
+      instance. Likewise, the activation policy can be updated to `ALWAYS` to
+      start the instance.
+      There are restrictions around when an instance can/cannot be activated (for
+      example, a read pool instance should be stopped before stopping primary
+      etc.). Please refer to the API documentation for more details.
+      Possible values are: `ACTIVATION_POLICY_UNSPECIFIED`, `ALWAYS`, `NEVER`.'
+    default_from_api: true
+    enum_values:
+      - 'ACTIVATION_POLICY_UNSPECIFIED'
+      - 'ALWAYS'
+      - 'NEVER'
   - name: 'instanceType'
     type: Enum
     description: |
@@ -274,6 +284,9 @@ properties:
       - name: 'trackActiveQueries'
         type: Boolean
         description: 'Track actively running queries. If not set, default value is "off".'
+      - name: 'assistiveExperiencesEnabled'
+        type: Boolean
+        description: 'Whether assistive experiences are enabled for this AlloyDB instance.'
   - name: 'readPoolConfig'
     type: NestedObject
     description: 'Read pool specific config. If the instance type is READ_POOL, this configuration must be provided.'
@@ -291,7 +304,13 @@ properties:
       - name: 'cpuCount'
         type: Integer
         description: "The number of CPU's in the VM instance."
-
+        default_from_api: true
+      - name: 'machineType'
+        type: String
+        description: |
+          Machine type of the VM instance.
+          E.g. "n2-highmem-4", "n2-highmem-8", "c4a-highmem-4-lssd".
+          `cpu_count` must match the number of vCPUs in the machine type.
         default_from_api: true
   - name: 'clientConnectionConfig'
     type: NestedObject
@@ -344,8 +363,59 @@ properties:
           The DNS name of the instance for PSC connectivity.
           Name convention: <uid>.<uid>.<region>.alloydb-psc.goog
         output: true
+      - name: 'pscInterfaceConfigs'
+        type: Array
+        description: |
+          Configurations for setting up PSC interfaces attached to the instance
+          which are used for outbound connectivity. Currently, AlloyDB supports only 0 or 1 PSC interface.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'networkAttachmentResource'
+              type: String
+              description: |
+                The network attachment resource created in the consumer project to which the PSC interface will be linked.
+                This is of the format: "projects/${CONSUMER_PROJECT}/regions/${REGION}/networkAttachments/${NETWORK_ATTACHMENT_NAME}".
+                The network attachment must be in the same region as the instance.
+      - name: 'pscAutoConnections'
+        type: Array
+        description: |
+          Configurations for setting up PSC service automation.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'consumerProject'
+              type: String
+              description: |
+                The consumer project to which the PSC service automation endpoint will
+                be created. The API expects the consumer project to be the project ID(
+                and not the project number).
+            - name: 'consumerNetwork'
+              type: String
+              description: |
+                The consumer network for the PSC service automation, example:
+                "projects/vpc-host-project/global/networks/default".
+                The consumer network might be hosted a different project than the
+                consumer project. The API expects the consumer project specified to be
+                the project ID (and not the project number)
+            - name: 'ipAddress'
+              type: String
+              description: |
+                The IP address of the PSC service automation endpoint.
+              output: true
+            - name: 'status'
+              type: String
+              description: |
+                The status of the PSC service automation connection.
+              output: true
+            - name: 'consumerNetworkStatus'
+              type: String
+              description: |
+                The status of the service connection policy.
+              output: true
   - name: 'networkConfig'
     type: NestedObject
+    default_from_api: true
     description: |
       Instance level network configuration.
     properties:

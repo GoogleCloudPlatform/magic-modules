@@ -35,19 +35,14 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
+exclude_sweeper: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/iam_workforce_pool_provider.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
@@ -68,6 +63,8 @@ examples:
       provider_id: 'example-prvdr'
     test_env_vars:
       org_id: 'ORG_ID'
+    ignore_read_extra:
+      - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
   - name: 'iam_workforce_pool_provider_oidc_basic'
     primary_resource_id: 'example'
     vars:
@@ -86,6 +83,7 @@ examples:
       org_id: 'ORG_ID'
     ignore_read_extra:
       - 'oidc.0.client_secret.0.value.0.plain_text'
+      - 'extra_attributes_oauth2_client.0.client_secret.0.value.0.plain_text'
   - name: 'iam_workforce_pool_provider_oidc_upload_key'
     primary_resource_id: 'example'
     vars:
@@ -394,7 +392,7 @@ properties:
       The configuration for OAuth 2.0 client used to get the additional user
       attributes. This should be used when users can't get the desired claims
       in authentication credentials. Currently this configuration is only
-      supported with OIDC protocol.
+      supported with SAML and OIDC protocol.
     properties:
       - name: 'issuerUri'
         type: String
@@ -440,9 +438,18 @@ properties:
           in ExtraAttributesOAuth2Client and `mail` property of the `microsoft.graph.group` object is used for claim mapping.
           See https://learn.microsoft.com/en-us/graph/api/resources/group?view=graph-rest-1.0#properties for more details on
           `microsoft.graph.group` properties. The attributes obtained from idntity provider are mapped to `assertion.groups`.
+          * AZURE_AD_GROUPS_ID:  Used to get the user's group claims from the Azure AD identity provider
+          using configuration provided in ExtraAttributesOAuth2Client and `id`
+          property of the `microsoft.graph.group` object is used for claim mapping. See
+          https://learn.microsoft.com/en-us/graph/api/resources/group?view=graph-rest-1.0#properties
+          for more details on `microsoft.graph.group` properties. The
+          group IDs obtained from Azure AD are present in `assertion.groups` for
+          OIDC providers and `assertion.attributes.groups` for SAML providers for
+          attribute mapping.
         required: true
         enum_values:
           - 'AZURE_AD_GROUPS_MAIL'
+          - 'AZURE_AD_GROUPS_ID'
       - name: 'queryParameters'
         type: NestedObject
         description: |
@@ -451,6 +458,6 @@ properties:
           - name: 'filter'
             type: String
             description: |
-              The filter used to request specific records from IdP. In case of attributes type as AZURE_AD_GROUPS_MAIL, it represents the
+              The filter used to request specific records from IdP. In case of attributes type as AZURE_AD_GROUPS_MAIL and AZURE_AD_GROUPS_ID, it represents the
               filter used to request specific groups for users from IdP. By default, all of the groups associated with the user are fetched. The
-              groups should be mail enabled and security enabled. See https://learn.microsoft.com/en-us/graph/search-query-parameter for more details.
+              groups should be security enabled. See https://learn.microsoft.com/en-us/graph/search-query-parameter for more details.

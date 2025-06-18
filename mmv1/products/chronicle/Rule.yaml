@@ -1,0 +1,268 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Rule
+description: The Rule resource represents a user-created rule.
+references:
+  guides:
+    'Google SecOps Guides': 'https://cloud.google.com/chronicle/docs/secops/secops-overview'
+  api: 'https://cloud.google.com/chronicle/docs/reference/rest/v1/projects.locations.instances.rules'
+base_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance}}/rules/{{rule_id}}
+update_verb: PATCH
+update_mask: true
+autogen_status: UnVsZQ==
+
+examples:
+  - name: 'chronicle_rule_basic'
+    primary_resource_id: example
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+    ignore_read_extra:
+      - 'deletion_policy'
+    exclude_import_test: true
+  - name: 'chronicle_rule_with_force_deletion'
+    primary_resource_id: example
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+    ignore_read_extra:
+      - 'deletion_policy'
+    exclude_import_test: true
+  - name: 'chronicle_rule_with_data_access_scope'
+    primary_resource_id: example
+    vars:
+      data_access_scope_id: scope-name
+    test_env_vars:
+      chronicle_id: 'CHRONICLE_ID'
+    exclude_import_test: true
+
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/chronicle_rule.go.tmpl'
+
+virtual_fields:
+  - name: 'deletion_policy'
+    description: |
+      Policy to determine if the rule should be deleted forcefully.
+      If deletion_policy = "FORCE", any retrohunts and any detections associated with the rule
+      will also be deleted. If deletion_policy = "DEFAULT", the call will only succeed if the
+      rule has no associated retrohunts, including completed retrohunts, and no
+      associated detections. Regardless of this field's value, the rule
+      deployment associated with this rule will also be deleted.
+      Possible values: DEFAULT, FORCE
+    type: String
+    default_value: "DEFAULT"
+
+parameters:
+  - name: location
+    type: String
+    description: The location of the resource. This is the geographical region where the Chronicle instance resides, such as "us" or "europe-west2".
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: instance
+    type: String
+    description: The unique identifier for the Chronicle instance, which is the same as the customer ID.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    output: true
+    description: |-
+      Full resource name for the rule. This unique identifier is generated using values provided for the URL parameters.
+      Format:
+      projects/{project}/locations/{location}/instances/{instance}/rules/{rule}
+  - name: ruleId
+    type: String
+    output: true
+    immutable: true
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
+    description: |-
+      Rule Id is the ID of the Rule.
+  - name: text
+    type: String
+    description: |-
+      The YARA-L content of the rule.
+      Populated in FULL view.
+  - name: metadata
+    type: KeyValuePairs
+    description: |-
+      Output only. Additional metadata specified in the meta section of text.
+      Populated in FULL view.
+    output: true
+  - name: scope
+    type: String
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+    description: |-
+      Resource name of the DataAccessScope bound to this rule.
+      Populated in BASIC view and FULL view.
+      If reference lists are used in the rule, validations will be performed
+      against this scope to ensure that the reference lists are compatible with
+      both the user's and the rule's scopes.
+      The scope should be in the format:
+      "projects/{project}/locations/{location}/instances/{instance}/dataAccessScopes/{scope}".
+  - name: nearRealTimeLiveRuleEligible
+    type: Boolean
+    description: |-
+      Output only. Indicate the rule can run in near real time live rule.
+      If this is true, the rule uses the near real time live rule when the run
+      frequency is set to LIVE.
+    output: true
+  - name: revisionId
+    type: String
+    description: |-
+      Output only. The revision ID of the rule.
+      A new revision is created whenever the rule text is changed in any way.
+      Format: v_{10 digits}_{9 digits}
+      Populated in REVISION_METADATA_ONLY view and FULL view.
+    output: true
+  - name: severity
+    type: NestedObject
+    description: Severity represents the severity level of the rule.
+    output: true
+    properties:
+      - name: displayName
+        type: String
+        description: |-
+          The display name of the severity level. Extracted from the meta section of
+          the rule text.
+  - name: revisionCreateTime
+    type: String
+    description: |-
+      Output only. The timestamp of when the rule revision was created.
+      Populated in FULL, REVISION_METADATA_ONLY views.
+    output: true
+  - name: compilationState
+    type: String
+    description: |-
+      Output only. The current compilation state of the rule.
+      Populated in FULL view.
+      Possible values:
+      COMPILATION_STATE_UNSPECIFIED
+      SUCCEEDED
+      FAILED
+    output: true
+  - name: type
+    type: String
+    output: true
+    description: |2-
+
+      Possible values:
+      RULE_TYPE_UNSPECIFIED
+      SINGLE_EVENT
+      MULTI_EVENT
+  - name: referenceLists
+    type: Array
+    description: |-
+      Output only. Resource names of the reference lists used in this rule.
+      Populated in FULL view.
+    output: true
+    item_type:
+      type: String
+  - name: displayName
+    type: String
+    description: |-
+      Output only. Display name of the rule.
+      Populated in BASIC view and FULL view.
+    output: true
+  - name: createTime
+    type: String
+    description: |-
+      Output only. The timestamp of when the rule was created.
+      Populated in FULL view.
+    output: true
+  - name: author
+    type: String
+    description: |-
+      Output only. The author of the rule. Extracted from the meta section of text.
+      Populated in BASIC view and FULL view.
+    output: true
+  - name: allowedRunFrequencies
+    type: Array
+    description: |-
+      Output only. The run frequencies that are allowed for the rule.
+      Populated in BASIC view and FULL view.
+    output: true
+    item_type:
+      type: String
+  - name: etag
+    type: String
+    default_from_api: true
+    description: |-
+      The etag for this rule.
+      If this is provided on update, the request will succeed if and only if it
+      matches the server-computed value, and will fail with an ABORTED error
+      otherwise.
+      Populated in BASIC view and FULL view.
+  - name: compilationDiagnostics
+    type: Array
+    description: |-
+      Output only. A list of a rule's corresponding compilation diagnostic messages
+      such as compilation errors and compilation warnings.
+      Populated in FULL view.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: message
+          type: String
+          description: Output only. The diagnostic message.
+          output: true
+        - name: position
+          type: NestedObject
+          description: |-
+            CompilationPosition represents the location of a compilation diagnostic in
+            rule text.
+          properties:
+            - name: startLine
+              type: Integer
+              description: Output only. Start line number, beginning at 1.
+              output: true
+            - name: startColumn
+              type: Integer
+              description: Output only. Start column number, beginning at 1.
+              output: true
+            - name: endLine
+              type: Integer
+              description: Output only. End line number, beginning at 1.
+              output: true
+            - name: endColumn
+              type: Integer
+              description: Output only. End column number, beginning at 1.
+              output: true
+        - name: severity
+          type: String
+          description: |-
+            Output only. The severity of a rule's compilation diagnostic.
+            Possible values:
+            SEVERITY_UNSPECIFIED
+            WARNING
+            ERROR
+          output: true
+        - name: uri
+          type: String
+          description: Output only. Link to documentation that describes a diagnostic in more detail.
+          output: true
+  - name: dataTables
+    type: Array
+    description: Output only. Resource names of the data tables used in this rule.
+    output: true
+    item_type:
+      type: String

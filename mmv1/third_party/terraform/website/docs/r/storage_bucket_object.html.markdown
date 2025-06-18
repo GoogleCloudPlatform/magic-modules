@@ -6,12 +6,16 @@ description: |-
 
 # google_storage_bucket_object
 
-Creates a new object inside an existing bucket in Google cloud storage service (GCS). 
+Creates a new object inside an existing bucket in Google cloud storage service (GCS).
 [ACLs](https://cloud.google.com/storage/docs/access-control/lists) can be applied using the `google_storage_object_acl` resource.
- For more information see 
-[the official documentation](https://cloud.google.com/storage/docs/key-terms#objects) 
-and 
+ For more information see
+[the official documentation](https://cloud.google.com/storage/docs/key-terms#objects)
+and
 [API](https://cloud.google.com/storage/docs/json_api/v1/objects).
+
+A datasource can be used to retrieve the data of the stored object:
+
+* `google_storage_bucket_object_content`: Retrieves the content within a specified bucket object in Google Cloud Storage Service (GCS)
 
 
 ## Example Usage
@@ -83,6 +87,8 @@ One of the following is required:
 
 * `kms_key_name` - (Optional) The resource name of the Cloud KMS key that will be used to [encrypt](https://cloud.google.com/storage/docs/encryption/using-customer-managed-keys) the object.
 
+* `source_md5hash` - (Optional) User-provided md5hash to trigger replacement of object in storage bucket, Must be Base 64 MD5 hash of the object data. The usual way to set this is filemd5("file.zip"), where "file.zip" is the local filename
+
 ---
 
 <a name="nested_customer_encryption"></a>The `customer_encryption` block supports:
@@ -116,6 +122,8 @@ exported:
 `google_storage_object_acl` resources when your `google_storage_bucket_object` is recreated.
 
 * `media_link` - (Computed) A url reference to download this object.
+
+* `md5hexhash` - (Computed) Hex value of md5hash`
 
 ## Timeouts
 

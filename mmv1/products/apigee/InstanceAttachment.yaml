@@ -39,14 +39,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_instance_attachment.go.tmpl'
 # Skipping the sweeper due to the non-standard instance_id
@@ -57,6 +51,9 @@ examples:
       project_id: 'my-project'
       instance_name: 'my-instance-name'
       environment_name: 'my-environment-name'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     exclude_test: true
       # This is a more verbose version of the above that creates all
       # the resources needed for the acceptance test.

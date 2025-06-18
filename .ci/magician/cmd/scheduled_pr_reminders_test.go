@@ -6,12 +6,12 @@ import (
 
 	membership "magician/github"
 
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v68/github"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNotificationState(t *testing.T) {
-	availableReviewers := membership.AvailableReviewers()
+	availableReviewers := membership.AvailableReviewers(nil)
 	firstCoreReviewer := availableReviewers[0]
 	secondCoreReviewer := availableReviewers[1]
 	cases := map[string]struct {
@@ -443,6 +443,239 @@ func TestNotificationState(t *testing.T) {
 			expectState: waitingForMerge,
 			expectSince: time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC),
 		},
+		"ready_for_review event after creation": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				&github.IssueEvent{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+				&github.IssueEvent{
+					Event:     github.String("ready_for_review"),
+					CreatedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+				},
+			},
+			expectState: waitingForReview,
+			expectSince: time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC),
+		},
+
+		"ready_for_review event before review request": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				&github.IssueEvent{
+					Event:     github.String("ready_for_review"),
+					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+				},
+				&github.IssueEvent{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+			},
+			expectState: waitingForReview,
+			expectSince: time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC),
+		},
+
+		"review after ready_for_review": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				&github.IssueEvent{
+					Event:     github.String("ready_for_review"),
+					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+				},
+				&github.IssueEvent{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+			},
+			reviews: []*github.PullRequestReview{
+				&github.PullRequestReview{
+					User:        &github.User{Login: github.String(firstCoreReviewer)},
+					State:       github.String("APPROVED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
+				},
+			},
+			expectState: waitingForMerge,
+			expectSince: time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC),
+		},
+		"changes_requested after ready_for_review": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				&github.IssueEvent{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)}, // Earlier request
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+				&github.IssueEvent{
+					Event:     github.String("ready_for_review"),
+					CreatedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+				},
+			},
+			reviews: []*github.PullRequestReview{
+				&github.PullRequestReview{
+					User:        &github.User{Login: github.String(firstCoreReviewer)},
+					State:       github.String("CHANGES_REQUESTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)}, // Early changes requested
+				},
+			},
+			expectState: waitingForContributor,
+			expectSince: time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC), // Should use ready_for_review time
+		},
+
+		"changes_requested before ready_for_review": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				&github.IssueEvent{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+				&github.IssueEvent{
+					Event:     github.String("ready_for_review"),
+					CreatedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)}, // Earlier ready
+				},
+			},
+			reviews: []*github.PullRequestReview{
+				&github.PullRequestReview{
+					User:        &github.User{Login: github.String(firstCoreReviewer)},
+					State:       github.String("CHANGES_REQUESTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+				},
+			},
+			expectState: waitingForContributor,
+			expectSince: time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC), // Should use changes requested time since it's later
+		},
+
+		"comment review after ready_for_review": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				&github.IssueEvent{
+					Event:     github.String("ready_for_review"),
+					CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+				},
+				&github.IssueEvent{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+			},
+			reviews: []*github.PullRequestReview{
+				&github.PullRequestReview{
+					User:        &github.User{Login: github.String(firstCoreReviewer)},
+					State:       github.String("COMMENTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+				},
+			},
+			expectState: waitingForContributor,
+			expectSince: time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC), // Should use ready_for_review time
+		},
+
+		"multiple ready_for_review events": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				&github.IssueEvent{
+					Event:     github.String("ready_for_review"),
+					CreatedAt: &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+				},
+				&github.IssueEvent{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+				&github.IssueEvent{
+					Event:     github.String("ready_for_review"),
+					CreatedAt: &github.Timestamp{time.Date(2024, 1, 5, 0, 0, 0, 0, time.UTC)}, // Later ready_for_review
+				},
+			},
+			reviews: []*github.PullRequestReview{
+				&github.PullRequestReview{
+					User:        &github.User{Login: github.String(firstCoreReviewer)},
+					State:       github.String("CHANGES_REQUESTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
+				},
+			},
+			expectState: waitingForContributor,
+			expectSince: time.Date(2024, 1, 5, 0, 0, 0, 0, time.UTC), // Should use latest ready_for_review time
+		},
+		"ignore reviews from PR author": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+			},
+			reviews: []*github.PullRequestReview{
+				{
+					User:        &github.User{Login: github.String("author")}, // PR author's review
+					State:       github.String("COMMENTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+				},
+				{
+					User:        &github.User{Login: github.String("author")}, // PR author's review
+					State:       github.String("CHANGES_REQUESTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
+				},
+			},
+			expectState: waitingForReview, // Should stay in waitingForReview since author's reviews don't count
+			expectSince: time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC),
+		},
+
+		// Add case where both author and reviewer comment
+		"reviews from both author and reviewer": {
+			pullRequest: &github.PullRequest{
+				User:      &github.User{Login: github.String("author")},
+				CreatedAt: &github.Timestamp{time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)},
+			},
+			issueEvents: []*github.IssueEvent{
+				{
+					Event:             github.String("review_requested"),
+					CreatedAt:         &github.Timestamp{time.Date(2024, 1, 2, 0, 0, 0, 0, time.UTC)},
+					RequestedReviewer: &github.User{Login: github.String(firstCoreReviewer)},
+				},
+			},
+			reviews: []*github.PullRequestReview{
+				{
+					User:        &github.User{Login: github.String("author")}, // PR author's review
+					State:       github.String("COMMENTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 3, 0, 0, 0, 0, time.UTC)},
+				},
+				{
+					User:        &github.User{Login: github.String(firstCoreReviewer)}, // Reviewer's comment
+					State:       github.String("COMMENTED"),
+					SubmittedAt: &github.Timestamp{time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC)},
+				},
+			},
+			expectState: waitingForContributor, // Should change to waitingForContributor due to reviewer's comment
+			expectSince: time.Date(2024, 1, 4, 0, 0, 0, 0, time.UTC),
+		},
 	}
 
 	for tn, tc := range cases {
@@ -787,7 +1020,7 @@ func TestShouldNotify(t *testing.T) {
 }
 
 func TestFormatReminderComment(t *testing.T) {
-	availableReviewers := membership.AvailableReviewers()
+	availableReviewers := membership.AvailableReviewers(nil)
 	firstCoreReviewer := availableReviewers[0]
 	secondCoreReviewer := availableReviewers[1]
 	cases := map[string]struct {
@@ -1065,6 +1298,28 @@ func TestFormatReminderComment(t *testing.T) {
 				"disable-automatic-closure",
 				"@" + firstCoreReviewer,
 				"@" + secondCoreReviewer,
+				"@other-reviewer",
+			},
+		},
+		"waitingForReview with author as core reviewer": {
+			pullRequest: &github.PullRequest{
+				User: &github.User{Login: github.String(firstCoreReviewer)}, // PR author is a core reviewer
+				RequestedReviewers: []*github.User{
+					&github.User{Login: github.String(firstCoreReviewer)},  // Review requested from author
+					&github.User{Login: github.String(secondCoreReviewer)}, // Review requested from another core reviewer
+					&github.User{Login: github.String("other-reviewer")},   // Non-core reviewer
+				},
+			},
+			state:     waitingForReview,
+			sinceDays: 3,
+			expectedStrings: []string{
+				"waiting for review for 3 weekdays",
+				"disable-review-reminders",
+				"@" + secondCoreReviewer, // Should mention the non-author core reviewer
+			},
+			notExpectedStrings: []string{
+				"@GoogleCloudPlatform/terraform-team",
+				"@" + firstCoreReviewer, // Should not mention the author even though they're a core reviewer
 				"@other-reviewer",
 			},
 		},

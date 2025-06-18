@@ -2,123 +2,145 @@ package github
 
 import "time"
 
+type date struct {
+	year  int
+	month int
+	day   int
+}
+
+func newDate(year, month, day int) date {
+	return date{
+		year:  year,
+		month: month,
+		day:   day,
+	}
+}
+
+type Vacation struct {
+	startDate, endDate date
+}
+
+// GetStart returns a time corresponding to the beginning of the start date in the given timezone.
+func (v Vacation) GetStart(timezone *time.Location) time.Time {
+	if timezone == nil {
+		timezone = usPacific
+	}
+	return time.Date(v.startDate.year, time.Month(v.startDate.month), v.startDate.day, 0, 0, 0, 0, timezone)
+}
+
+// GetEnd returns a time corresponding to the end of the end date in the given timezone
+func (v Vacation) GetEnd(timezone *time.Location) time.Time {
+	if timezone == nil {
+		timezone = usPacific
+	}
+	return time.Date(v.endDate.year, time.Month(v.endDate.month), v.endDate.day, 0, 0, 0, 0, timezone).AddDate(0, 0, 1).Add(-1 * time.Millisecond)
+}
+
+type ReviewerConfig struct {
+	// timezone controls the timezone for vacation start / end dates. Default: US/Pacific.
+	timezone *time.Location
+
+	// vacations allows specifying times when new reviews should not be requested of the reviewer.
+	// Existing PRs will still have reviews re-requested.
+	// Both startDate and endDate are inclusive.
+	// Example: taking vacation from 2024-03-28 to 2024-04-02.
+	// {
+	// 	 vacations:        []Vacation{
+	//     startDate: newDate(2024, 3, 28),
+	// 	   endDate:   newDate(2024, 4, 2),
+	//   },
+	// },
+	vacations []Vacation
+}
+
 var (
+	usPacific, _ = time.LoadLocation("US/Pacific")
+	usCentral, _ = time.LoadLocation("US/Central")
+	usEastern, _ = time.LoadLocation("US/Eastern")
+	london, _    = time.LoadLocation("Europe/London")
+
 	// This is for the random-assignee rotation.
-	reviewerRotation = map[string]struct{}{
-		"slevenick":   {},
-		"c2thorn":     {},
-		"rileykarson": {},
-		"melinath":    {},
-		"ScottSuarez": {},
-		"shuyama1":    {},
-		"roaks3":      {},
-		"zli82016":    {},
-		"trodge":      {},
-		"hao-nan-li":  {},
-		"NickElliot":  {},
-		"BBBmau":      {},
-		"SirGitsalot": {},
+	reviewerRotation = map[string]ReviewerConfig{
+		"BBBmau": {
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 4, 7),
+					endDate:   newDate(2025, 4, 11),
+				},
+			},
+		},
+		"c2thorn": {
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 4, 9),
+					endDate:   newDate(2025, 4, 15),
+				},
+			},
+		},
+		"hao-nan-li": {
+			vacations: []Vacation{},
+		},
+		"melinath": {
+			vacations: []Vacation{},
+		},
+		"NickElliot": {
+			vacations: []Vacation{},
+		},
+		"rileykarson": {
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 2, 25),
+					endDate:   newDate(2025, 3, 10),
+				},
+			},
+		},
+		"roaks3": {
+			vacations: []Vacation{},
+		},
+		"ScottSuarez": {
+			vacations: []Vacation{},
+		},
+		"shuyama1": {
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 5, 23),
+					endDate:   newDate(2025, 5, 30),
+				},
+			},
+		},
+		"SirGitsalot": {
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 1, 18),
+					endDate:   newDate(2025, 1, 25),
+				},
+			},
+		},
+		"slevenick": {
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 5, 22),
+					endDate:   newDate(2025, 6, 7),
+				},
+			},
+		},
+		"trodge": {
+			vacations: []Vacation{},
+		},
+		"zli82016": {
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 1, 15),
+					endDate:   newDate(2025, 2, 9),
+				},
+			},
+		},
 	}
 
 	// This is for new team members who are onboarding
-	trustedContributors = map[string]struct{}{}
-
-	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
-	// User can specify the time zone like this, and following the example below:
-	pdtLoc, _           = time.LoadLocation("America/Los_Angeles")
-	bstLoc, _           = time.LoadLocation("Europe/London")
-	onVacationReviewers = []onVacationReviewer{
-		// Example: taking vacation from 2024-03-28 to 2024-04-02 in pdt time zone.
-		// both ends are inclusive:
-		// {
-		// 	id:        "xyz",
-		// 	startDate: newDate(2024, 3, 28, pdtLoc),
-		// 	endDate:   newDate(2024, 4, 2, pdtLoc),
-		// },
-		{
-			id:        "BBBmau",
-			startDate: newDate(2024, 11, 1, pdtLoc),
-			endDate:   newDate(2024, 11, 1, pdtLoc),
-		},
-		{
-			id:        "hao-nan-li",
-			startDate: newDate(2024, 9, 24, pdtLoc),
-			endDate:   newDate(2024, 10, 4, pdtLoc),
-		},
-		{
-			id:        "ScottSuarez",
-			startDate: newDate(2024, 4, 30, pdtLoc),
-			endDate:   newDate(2024, 7, 31, pdtLoc),
-		},
-		{
-			id:        "shuyama1",
-			startDate: newDate(2024, 9, 26, pdtLoc),
-			endDate:   newDate(2024, 10, 4, pdtLoc),
-		},
-		{
-			id:        "melinath",
-			startDate: newDate(2024, 9, 18, pdtLoc),
-			endDate:   newDate(2024, 9, 23, pdtLoc),
-		},
-		{
-			id:        "slevenick",
-			startDate: newDate(2024, 7, 5, pdtLoc),
-			endDate:   newDate(2024, 7, 16, pdtLoc),
-		},
-		{
-			id:        "c2thorn",
-			startDate: newDate(2024, 7, 10, pdtLoc),
-			endDate:   newDate(2024, 7, 16, pdtLoc),
-		},
-		{
-			id:        "rileykarson",
-			startDate: newDate(2024, 7, 18, pdtLoc),
-			endDate:   newDate(2024, 8, 10, pdtLoc),
-		},
-		{
-			id:        "roaks3",
-			startDate: newDate(2024, 8, 2, pdtLoc),
-			endDate:   newDate(2024, 8, 9, pdtLoc),
-		},
-		{
-			id:        "slevenick",
-			startDate: newDate(2024, 8, 10, pdtLoc),
-			endDate:   newDate(2024, 8, 17, pdtLoc),
-		},
-		{
-			id:        "trodge",
-			startDate: newDate(2024, 10, 23, pdtLoc),
-			endDate:   newDate(2024, 10, 25, pdtLoc),
-		},
-		{
-			id:        "roaks3",
-			startDate: newDate(2024, 9, 13, pdtLoc),
-			endDate:   newDate(2024, 9, 20, pdtLoc),
-		},
-		{
-			id:        "c2thorn",
-			startDate: newDate(2024, 10, 2, bstLoc),
-			endDate:   newDate(2024, 10, 14, bstLoc),
-		},
-		{
-			id:        "ScottSuarez",
-			startDate: newDate(2024, 10, 31, bstLoc),
-			endDate:   newDate(2024, 11, 17, bstLoc),
-		},
-		{
-			id:        "c2thorn",
-			startDate: newDate(2024, 11, 1, pdtLoc),
-			endDate:   newDate(2024, 11, 11, pdtLoc),
-		},
-		{
-			id:        "shuyama1",
-			startDate: newDate(2024, 11, 26, pdtLoc),
-			endDate:   newDate(2024, 12, 4, pdtLoc),
-		},
-		{
-			id:        "c2thorn",
-			startDate: newDate(2024, 11, 27, pdtLoc),
-			endDate:   newDate(2024, 12, 9, pdtLoc),
-		},
+	trustedContributors = map[string]struct{}{
+		"bbasata":           struct{}{},
+		"jaylonmcshan03":    struct{}{},
+		"malhotrasagar2212": struct{}{},
 	}
 )

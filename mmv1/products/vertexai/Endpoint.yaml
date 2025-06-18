@@ -13,6 +13,8 @@
 
 ---
 name: 'Endpoint'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/endpoints/{endpoint}'
 description:
   'Models are deployed into it, and afterwards Endpoint is called to obtain
   predictions and explanations.'
@@ -35,14 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   fetch_iam_policy_verb: 'POST'

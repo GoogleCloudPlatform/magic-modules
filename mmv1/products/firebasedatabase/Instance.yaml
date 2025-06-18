@@ -13,6 +13,7 @@
 
 ---
 name: 'Instance'
+api_resource_type_kind: DatabaseInstance
 description: A Firebase Realtime Database instance.
 min_version: 'beta'
 references:
@@ -57,6 +58,8 @@ examples:
   - name: 'firebase_database_instance_default_database'
     primary_resource_id: 'default'
     min_version: 'beta'
+    # Wait for IAM propagation
+    external_providers: ["time"]
     vars:
       project_id: 'rtdb-project'
     test_env_vars:

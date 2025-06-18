@@ -33,14 +33,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 custom_code:
 legacy_long_form_project: true
 examples:
@@ -52,6 +46,19 @@ examples:
     primary_resource_id: 'primary'
     vars:
       resource_name: 'basic'
+  - name: 'network_connectivity_hub_mesh_topology'
+    primary_resource_id: 'primary'
+    vars:
+      resource_name: 'mesh'
+  - name: 'network_connectivity_hub_star_topology'
+    primary_resource_id: 'primary'
+    vars:
+      resource_name: 'star'
+  - name: 'network_connectivity_hub_policy_mode'
+    primary_resource_id: 'primary'
+    vars:
+      resource_name: 'policy'
+
 parameters:
 properties:
   - name: 'name'
@@ -98,6 +105,22 @@ properties:
         - name: 'uri'
           type: String
           description: The URI of the VPC network.
+  - name: 'presetTopology'
+    type: Enum
+    description: Optional. The topology implemented in this hub. Currently, this field is only used when policyMode = PRESET. The available preset topologies are MESH and STAR. If presetTopology is unspecified and policyMode = PRESET, the presetTopology defaults to MESH. When policyMode = CUSTOM, the presetTopology is set to PRESET_TOPOLOGY_UNSPECIFIED.
+    immutable: true
+    enum_values:
+      - 'MESH'
+      - 'STAR'
+    default_from_api: true
+  - name: 'policyMode'
+    type: Enum
+    description: Optional. The policy mode of this hub. This field can be either PRESET or CUSTOM. If unspecified, the policyMode defaults to PRESET.
+    immutable: true
+    enum_values:
+      - 'CUSTOM'
+      - 'PRESET'
+    default_from_api: true
   - name: 'exportPsc'
     type: Boolean
     description: Whether Private Service Connect transitivity is enabled for the hub. If true, Private Service Connect endpoints in VPC spokes attached to the hub are made accessible to other VPC spokes attached to the hub. The default value is false.

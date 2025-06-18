@@ -32,23 +32,18 @@ timeouts:
   update_minutes: 60
   delete_minutes: 60
 autogen_async: true
+autogen_status: Q2xvdWRWbUNsdXN0ZXI=
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 120
       update_minutes: 60
       delete_minutes: 60
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/oracledatabase_cloud_vmcluster.go.tmpl'
 examples:
@@ -63,9 +58,13 @@ examples:
       - 'deletion_protection'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'project': '"oci-terraform-testing"'
-      'cloud_vm_cluster_id': '"ofake-vmcluster-basic"'
-      'cloud_exadata_infrastructure_id': '"ofake-exadata-for-vm-basic"'
+      'project': '"oci-terraform-testing-prod"'
+      # ofake- prefix is needed to create a dummy resource for testing purposes only
+      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
+      # As a result these resources are not sweepable
+      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
+      cloud_vm_cluster_id: 'fmt.Sprintf("ofake-tf-test-vmcluster-basic-%s", acctest.RandString(t, 10))'
+      cloud_exadata_infrastructure_id: 'fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-basic-%s", acctest.RandString(t, 10))'
   - name: 'oracledatabase_cloud_vmcluster_full'
     primary_resource_id: 'my_vmcluster'
     vars:
@@ -77,9 +76,13 @@ examples:
       - 'deletion_protection'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'project': '"oci-terraform-testing"'
-      'cloud_vm_cluster_id': '"ofake-vmcluster-full"'
-      'cloud_exadata_infrastructure_id': '"ofake-exadata-for-vm-full"'
+      'project': '"oci-terraform-testing-prod"'
+      # ofake- prefix is needed to create a dummy resource for testing purposes only
+      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
+      # As a result these resources are not sweepable
+      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
+      cloud_vm_cluster_id: 'fmt.Sprintf("ofake-tf-test-vmcluster-full-%s", acctest.RandString(t, 10))'
+      cloud_exadata_infrastructure_id: 'fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-full-%s", acctest.RandString(t, 10))'
 virtual_fields:
   - name: 'deletion_protection'
     type: Boolean

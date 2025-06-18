@@ -15,6 +15,9 @@
 name: 'Location'
 kind: 'compute#zone'
 description: 'Represents a Location resource.'
+deprecation_message: >-
+  `google_notebooks_location` is deprecated and will be removed in a future major release.
+  This resource is not functional.
 readonly: true
 docs:
 base_url: 'projects/{{project}}/locations'
@@ -28,14 +31,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
 parameters:

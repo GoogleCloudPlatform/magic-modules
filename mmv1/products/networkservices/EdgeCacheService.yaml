@@ -35,19 +35,14 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 60
       update_minutes: 60
       delete_minutes: 60
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
+  encoder: 'templates/terraform/encoders/network_services_edge_cache_service.go.tmpl'
 examples:
   - name: 'network_services_edge_cache_service_basic'
     primary_resource_id: 'instance'
@@ -335,6 +330,24 @@ properties:
                           # TODO: (scottsuarez) conflicts also won't work for array path matchers yet, uncomment here once supported.
                           # conflicts:
                           #   - Routing.PathMatcher.RouteRule.prefixMatch
+                  - name: 'routeMethods'
+                    type: NestedObject
+                    description: |
+                      Allow overriding the set of methods that are allowed for this route.
+                      When not set, Media CDN allows only "GET", "HEAD", and "OPTIONS".
+                    properties:
+                      - name: 'allowedMethods'
+                        type: Array
+                        description: |
+                          The non-empty set of HTTP methods that are allowed for this route.
+
+                          Any combination of "GET", "HEAD", "OPTIONS", "PUT", "POST", "DELETE", and "PATCH".
+                        item_type:
+                          type: String
+                        min_size: 1
+                        max_size: 7
+                        item_validation:
+                          regex: '^(?:GET|HEAD|OPTIONS|PUT|POST|DELETE|PATCH)$'
                   - name: 'headerAction'
                     type: NestedObject
                     description: |
@@ -824,6 +837,15 @@ properties:
                             type: Boolean
                             description: |
                               If true, specifies the CORS policy is disabled. The default value is false, which indicates that the CORS policy is in effect.
+                      - name: 'compressionMode'
+                        type: Enum
+                        description: |
+                          Setting the compression mode to automatic enables dynamic compression for every eligible response.
+
+                          When dynamic compression is enabled, it is recommended to also set a cache policy to maximize efficiency.
+                        enum_values:
+                          - 'DISABLED'
+                          - 'AUTOMATIC'
                   - name: 'origin'
                     type: String
                     description: |

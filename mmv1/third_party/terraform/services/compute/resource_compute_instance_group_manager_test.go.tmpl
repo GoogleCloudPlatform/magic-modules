@@ -123,6 +123,9 @@ func TestAccInstanceGroupManager_update(t *testing.T) {
 				Config: testAccInstanceGroupManager_update(template1, target1, description, igm),
 				Check: resource.ComposeTestCheckFunc(
 					       resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "DO_NOTHING"),
+{{- if ne $.TargetVersionName "ga" }}
+                 resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "DO_NOTHING"),
+{{- end }}
 							 ),
 			},
 			{
@@ -135,6 +138,9 @@ func TestAccInstanceGroupManager_update(t *testing.T) {
 				Config: testAccInstanceGroupManager_update2(template1, target1, target2, template2, description, igm),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "REPAIR"),
+{{- if ne $.TargetVersionName "ga" }}
+          resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "REPAIR"),
+{{- end }}
 				),
 			},
 			{
@@ -147,6 +153,9 @@ func TestAccInstanceGroupManager_update(t *testing.T) {
 				Config: testAccInstanceGroupManager_update3(template1, target1, target2, template2, description2, igm),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "REPAIR"),
+{{- if ne $.TargetVersionName "ga" }}
+          resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "REPAIR"),
+{{- end }}
 				),
 			},
 			{
@@ -394,7 +403,6 @@ func TestAccInstanceGroupManager_stateful(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccInstanceGroupManager_stoppedSuspendedTargetSize(t *testing.T) {
   t.Parallel()
 
@@ -428,7 +436,6 @@ func TestAccInstanceGroupManager_stoppedSuspendedTargetSize(t *testing.T) {
     },
   })
 }
-{{- end }}
 
 func TestAccInstanceGroupManager_waitForStatus(t *testing.T) {
 	t.Parallel()
@@ -750,6 +757,9 @@ resource "google_compute_instance_group_manager" "igm-update" {
   instance_lifecycle_policy {
     force_update_on_repair = "YES"
     default_action_on_failure = "DO_NOTHING"
+{{- if ne $.TargetVersionName "ga" }}
+    on_failed_health_check = "DO_NOTHING"
+{{- end }}
   }
 }
 `, template, target, description, igm)
@@ -855,6 +865,9 @@ resource "google_compute_instance_group_manager" "igm-update" {
   instance_lifecycle_policy {
     force_update_on_repair = "NO"
     default_action_on_failure = "REPAIR"
+{{- if ne $.TargetVersionName "ga" }}
+    on_failed_health_check = "REPAIR"
+{{- end }}
   }
 }
 `, template1, target1, target2, template2, description, igm)
@@ -1743,7 +1756,6 @@ resource "google_compute_instance_group_manager" "igm-basic" {
 `, network, template, target, igm)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccInstanceGroupManager_stoppedSuspendedTargetSize(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1835,7 +1847,6 @@ resource "google_compute_instance_group_manager" "sr-igm" {
 }
 `, network, template, igm)
 }
-{{- end }}
 
 func testAccInstanceGroupManager_waitForStatus(template, target, igm, perInstanceConfig string) string {
 	return fmt.Sprintf(`
@@ -1961,6 +1972,9 @@ resource "google_compute_instance_group_manager" "igm-basic" {
   instance_lifecycle_policy {
     force_update_on_repair = "YES"
     default_action_on_failure = "REPAIR"
+{{- if ne $.TargetVersionName "ga" }}
+    on_failed_health_check = "REPAIR"
+{{- end }}
   }
   wait_for_instances = true
   wait_for_instances_status = "UPDATED"

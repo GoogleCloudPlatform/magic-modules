@@ -337,6 +337,14 @@ func ValidateBase64String(i interface{}, val string) ([]string, []error) {
 	return nil, nil
 }
 
+func ValidateBase64URLString(i interface{}, val string) ([]string, []error) {
+	_, err := base64.URLEncoding.DecodeString(i.(string))
+	if err != nil {
+		return nil, []error{fmt.Errorf("could not decode %q as a valid base64URL value.", val)}
+	}
+	return nil, nil
+}
+
 // StringNotInSlice returns a SchemaValidateFunc which tests if the provided value
 // is of type string and that it matches none of the element in the invalid slice.
 // if ignorecase is true, case is ignored.
@@ -435,6 +443,17 @@ func ValidateRegexp(re string) schema.SchemaValidateFunc {
 				"%q (%q) doesn't match regexp %q", k, value, re))
 		}
 
+		return
+	}
+}
+
+func ValidateRegexCompiles() schema.SchemaValidateFunc {
+	return func(v interface{}, k string) (ws []string, errs []error) {
+		value := v.(string)
+		if _, err := regexp.Compile(value); err != nil {
+			errs = append(errs, fmt.Errorf(
+				"%s (%s) is not a valid regex pattern: %s", k, value, err))
+		}
 		return
 	}
 }

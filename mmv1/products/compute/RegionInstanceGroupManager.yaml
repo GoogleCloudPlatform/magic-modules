@@ -13,6 +13,8 @@
 
 ---
 name: 'RegionInstanceGroupManager'
+api_variant_patterns:
+  - 'projects/{project}/regions/{region}/instanceGroupManagers/{instanceGroupManager}'
 kind: 'compute#instanceGroupManager'
 description: |
   Creates a managed instance group using the information that you specify in
@@ -24,6 +26,10 @@ description: |
 
   A managed instance group can have up to 1000 VM instances per group.
 exclude: true
+references:
+  guides:
+    'Creating Regional Managed Instance Groups': 'https://cloud.google.com/compute/docs/instance-groups/distributing-instances-with-regional-instance-groups'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/v1/regionInstanceGroupManagers'
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/instanceGroupManagers'
 has_self_link: true
@@ -36,15 +42,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
 parameters:

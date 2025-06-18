@@ -39,15 +39,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'gkehub#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error/errors'
-    message: 'message'
 iam_policy:
   method_name_separator: ':'
   parent_resource_attribute: 'scope_id'

@@ -34,15 +34,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    kind: 'compute#operation'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'targetLink'
     resource_inside_response: false
-  error:
-    path: 'error/errors'
-    message: 'message'
 collection_url_key: 'items'
 custom_code:
   encoder: 'templates/terraform/encoders/compute_target_https_proxy.go.tmpl'
@@ -86,6 +79,14 @@ examples:
       certificate_manager_certificate_name: 'my-certificate'
       url_map_name: 'url-map'
       backend_service_name: 'backend-service'
+  - name: 'target_https_proxy_fingerprint'
+    primary_resource_id: 'default'
+    vars:
+      target_https_proxy_name: 'test-fingerprint-proxy'
+      ssl_certificate_name: 'my-certificate'
+      url_map_name: 'url-map'
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'http-health-check'
 parameters:
 properties:
   - name: 'creationTimestamp'
@@ -139,6 +140,7 @@ properties:
     enum_values:
       - 'STRICT'
       - 'PERMISSIVE'
+      - 'UNRESTRICTED'
       - 'DISABLED'
   - name: 'certificateManagerCertificates'
     type: Array
@@ -244,3 +246,12 @@ properties:
     fingerprint_name: 'fingerprint'
     resource: 'ServerTlsPolicy'
     imports: 'selfLink'
+  - name: 'fingerprint'
+    type: Fingerprint
+    description: |
+      Fingerprint of this resource. A hash of the contents stored in this object. This field is used in optimistic locking.
+      This field will be ignored when inserting a TargetHttpsProxy. An up-to-date fingerprint must be provided in order to
+      patch the TargetHttpsProxy; otherwise, the request will fail with error 412 conditionNotMet.
+      To see the latest fingerprint, make a get() request to retrieve the TargetHttpsProxy.
+      A base64-encoded string.
+    output: true

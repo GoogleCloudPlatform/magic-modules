@@ -17,6 +17,7 @@ description: 'BranchRule is the protection rule to enforce pre-defined rules on 
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/secure-source-manager/docs/overview'
+  api: 'https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories.branchRules'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules?branch_rule_id={{branch_rule_id}}'
@@ -36,13 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'secure_source_manager_branch_rule_basic'

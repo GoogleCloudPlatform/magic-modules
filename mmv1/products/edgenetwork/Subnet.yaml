@@ -37,14 +37,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
 examples:
   - name: 'edgenetwork_subnet'
@@ -65,6 +59,7 @@ examples:
       location: 'REGION'
       zone: 'ZONE'
     exclude_test: true
+exclude_sweeper: true
 parameters:
   - name: 'location'
     type: String

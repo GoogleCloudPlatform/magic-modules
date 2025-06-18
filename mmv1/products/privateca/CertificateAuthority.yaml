@@ -43,14 +43,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/privateca_certificate_authority.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
@@ -76,6 +70,21 @@ examples:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'deletion_protection'
+  - name: 'privateca_certificate_authority_basic_no_org'
+    primary_resource_id: 'default'
+    vars:
+      certificate_authority_id: 'my-certificate-authority'
+      pool_name: 'ca-pool'
+      pool_location: 'us-central1'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'pool_name': 'acctest.BootstrapSharedCaPoolInLocation(t, "us-central1")'
+      'pool_location': '"us-central1"'
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
+    # This example is meant to confirm that it's possible to make
+    # a CA without specifying the organization field
   - name: 'privateca_certificate_authority_subordinate'
     primary_resource_id: 'default'
     vars:
@@ -111,7 +120,7 @@ examples:
     # Skip test because it depends on a beta resource, but PrivateCA does
     # not have a beta endpoint
     exclude_test: true
-      # Multiple IAM bindings on the same key cause non-determinism
+    # Multiple IAM bindings on the same key cause non-determinism
     skip_vcr: true
   - name: 'privateca_certificate_authority_custom_ski'
     primary_resource_id: 'default'
@@ -132,6 +141,19 @@ examples:
     exclude_test: true
     # Multiple IAM bindings on the same key cause non-determinism
     skip_vcr: true
+  - name: 'privateca_certificate_authority_basic_with_custom_cdp_aia_urls'
+    primary_resource_id: 'default'
+    vars:
+      certificate_authority_id: 'my-certificate-authority'
+      pool_name: 'ca-pool'
+      pool_location: 'us-central1'
+      deletion_protection: 'true'
+    test_vars_overrides:
+      'pool_name': 'acctest.BootstrapSharedCaPoolInLocation(t, "us-central1")'
+      'pool_location': '"us-central1"'
+      'deletion_protection': 'false'
+    ignore_read_extra:
+      - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -225,7 +247,7 @@ properties:
         properties:
           - name: 'keyId'
             type: String
-            description: The value of the KeyId in lowercase hexidecimal.
+            description: The value of the KeyId in lowercase hexadecimal.
             immutable: true
       - name: 'x509Config'
         type: NestedObject
@@ -558,7 +580,6 @@ properties:
               - name: 'organization'
                 type: String
                 description: The organization of the subject.
-                required: true
                 immutable: true
               - name: 'organizationalUnit'
                 type: String
@@ -644,7 +665,7 @@ properties:
       "notAfterTime" fields inside an X.509 certificate. A duration in seconds with up to nine
       fractional digits, terminated by 's'. Example: "3.5s".
     immutable: true
- # 10 years
+    # 10 years
     default_value: "315360000s"
   - name: 'keySpec'
     type: NestedObject
@@ -791,3 +812,21 @@ properties:
 
       An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass":
       "1.3kg", "count": "3" }.
+  - name: 'userDefinedAccessUrls'
+    type: NestedObject
+    description: |
+      Custom URLs for accessing content published by this CA, such as the CA certificate and CRLs,
+      that can be specified by users.
+    properties:
+      - name: 'aiaIssuingCertificateUrls'
+        type: Array
+        description: |
+          A list of URLs where this CertificateAuthority's CA certificate is published that is specified by users.
+        item_type:
+          type: String
+      - name: 'crlAccessUrls'
+        type: Array
+        description: |
+          A list of URLs where this CertificateAuthority's CRLs are published that is specified by users.
+        item_type:
+          type: String

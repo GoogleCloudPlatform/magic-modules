@@ -39,22 +39,23 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
     timeouts:
       insert_minutes: 30
       update_minutes: 30
       delete_minutes: 30
   result:
-    path: 'response'
     resource_inside_response: false
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   constants: 'templates/terraform/constants/network_services_gateway.go.tmpl'
   post_delete: 'templates/terraform/post_delete/network_services_gateway.go.tmpl'
-  pre_update: 'templates/terraform/pre_update/network_services_gateway.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/network_services_gateway.go.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us-east1"
+    - region: "us-central1"
+    - region: "us-south1"
+    - region: "us-west1"
+    - region: "us-west2"
 examples:
   - name: 'network_services_gateway_basic'
     primary_resource_id: 'default'
@@ -103,7 +104,7 @@ parameters:
   - name: 'name'
     type: String
     description: |
-      Short name of the Gateway resource to be created.
+      Name of the Gateway resource.
     url_param_only: true
     required: true
   - name: 'location'
@@ -112,7 +113,7 @@ parameters:
       The location of the gateway.
       The default value is `global`.
     url_param_only: true
-    default_value: "global"
+    default_value: 'global'
 properties:
   - name: 'selfLink'
     type: String
@@ -122,16 +123,17 @@ properties:
   - name: 'createTime'
     type: Time
     description: |
-      Time the AccessPolicy was created in UTC.
+      The timestamp when the resource was created.
     output: true
   - name: 'updateTime'
     type: Time
     description: |
-      Time the AccessPolicy was updated in UTC.
+      The timestamp when the resource was updated.
     output: true
   - name: 'labels'
     type: KeyValueLabels
-    description: Set of label tags associated with the Gateway resource.
+    description: |
+      Set of label tags associated with the Gateway resource.
   - name: 'description'
     type: String
     description: |
@@ -139,66 +141,45 @@ properties:
   - name: 'type'
     type: Enum
     description: |
-      Immutable. The type of the customer-managed gateway. Possible values are: * OPEN_MESH * SECURE_WEB_GATEWAY.
+      Immutable. The type of the customer managed gateway.
     required: true
     immutable: true
     enum_values:
-      - 'TYPE_UNSPECIFIED'
       - 'OPEN_MESH'
       - 'SECURE_WEB_GATEWAY'
+  - name: 'addresses'
+    type: Array
+    description: |
+      Zero or one IPv4 or IPv6 address on which the Gateway will receive the traffic.
+      When no address is provided, an IP from the subnetwork is allocated.
+
+      This field only applies to gateways of type 'SECURE_WEB_GATEWAY'.
+      Gateways of type 'OPEN_MESH' listen on 0.0.0.0 for IPv4 and :: for IPv6.
+    immutable: true
+    default_from_api: true
+    item_type:
+      type: String
   - name: 'ports'
     type: Array
     description: |
       One or more port numbers (1-65535), on which the Gateway will receive traffic.
-      The proxy binds to the specified ports. Gateways of type 'SECURE_WEB_GATEWAY' are
-      limited to 1 port. Gateways of type 'OPEN_MESH' listen on 0.0.0.0 and support multiple ports.
+      The proxy binds to the specified ports. Gateways of type 'SECURE_WEB_GATEWAY' are limited to 1 port.
+       Gateways of type 'OPEN_MESH' listen on 0.0.0.0 for IPv4 and :: for IPv6 and support multiple ports.
     required: true
-    immutable: true
     item_type:
       type: Integer
   - name: 'scope'
     type: String
     description: |
       Immutable. Scope determines how configuration across multiple Gateway instances are merged.
-      The configuration for multiple Gateway instances with the same scope will be merged as presented as
-      a single coniguration to the proxy/load balancer.
+      The configuration for multiple Gateway instances with the same scope will be merged as presented as a single coniguration to the proxy/load balancer.
+
       Max length 64 characters. Scope should start with a letter and can only have letters, numbers, hyphens.
     immutable: true
   - name: 'serverTlsPolicy'
     type: String
     description: |
-      A fully-qualified ServerTLSPolicy URL reference. Specifies how TLS traffic is terminated.
-      If empty, TLS termination is disabled.
-  - name: 'addresses'
-    type: Array
-    description: |
-      Zero or one IPv4-address on which the Gateway will receive the traffic. When no address is provided,
-      an IP from the subnetwork is allocated This field only applies to gateways of type 'SECURE_WEB_GATEWAY'.
-      Gateways of type 'OPEN_MESH' listen on 0.0.0.0.
-    immutable: true
-    default_from_api: true
-    item_type:
-      type: String
-  - name: 'subnetwork'
-    type: String
-    description: |
-      The relative resource name identifying the subnetwork in which this SWG is allocated.
-      For example: `projects/*/regions/us-central1/subnetworks/network-1`.
-      Currently, this field is specific to gateways of type 'SECURE_WEB_GATEWAY.
-    immutable: true
-  - name: 'network'
-    type: String
-    description: |
-      The relative resource name identifying the VPC network that is using this configuration.
-      For example: `projects/*/global/networks/network-1`.
-      Currently, this field is specific to gateways of type 'SECURE_WEB_GATEWAY'.
-    immutable: true
-  - name: 'gatewaySecurityPolicy'
-    type: String
-    description: |
-      A fully-qualified GatewaySecurityPolicy URL reference. Defines how a server should apply security policy to inbound (VM to Proxy) initiated connections.
-      For example: `projects/*/locations/*/gatewaySecurityPolicies/swg-policy`.
-      This policy is specific to gateways of type 'SECURE_WEB_GATEWAY'.
+      A fully-qualified ServerTLSPolicy URL reference. Specifies how TLS traffic is terminated. If empty, TLS termination is disabled.
   - name: 'certificateUrls'
     type: Array
     description: |
@@ -206,6 +187,44 @@ properties:
       This feature only applies to gateways of type 'SECURE_WEB_GATEWAY'.
     item_type:
       type: String
+  - name: 'gatewaySecurityPolicy'
+    type: String
+    description: |
+      A fully-qualified GatewaySecurityPolicy URL reference. Defines how a server should apply security policy to inbound (VM to Proxy) initiated connections.
+      For example: 'projects/*/locations/*/gatewaySecurityPolicies/swg-policy'.
+      This policy is specific to gateways of type 'SECURE_WEB_GATEWAY'.
+  - name: 'network'
+    type: String
+    description: |
+      The relative resource name identifying the VPC network that is using this configuration.
+      For example: 'projects/*/global/networks/network-1'.
+
+      Currently, this field is specific to gateways of type 'SECURE_WEB_GATEWAY'.
+    immutable: true
+  - name: 'subnetwork'
+    type: String
+    description: |
+      The relative resource name identifying the subnetwork in which this SWG is allocated.
+      For example: projects/*/regions/us-central1/subnetworks/network-1.
+
+      Currently, this field is specific to gateways of type 'SECURE_WEB_GATEWAY'.
+    immutable: true
+  - name: 'ipVersion'
+    type: Enum
+    description: |
+      The IP Version that will be used by this gateway.
+    enum_values:
+      - 'IPV4'
+      - 'IPV6'
+  - name: 'envoyHeaders'
+    type: Enum
+    description: |
+      Determines if envoy will insert internal debug headers into upstream requests.
+      Other Envoy headers may still be injected.
+      By default, envoy will not insert any debug headers.
+    enum_values:
+      - 'NONE'
+      - 'DEBUG_HEADERS'
   - name: 'routingMode'
     type: Enum
     description: |

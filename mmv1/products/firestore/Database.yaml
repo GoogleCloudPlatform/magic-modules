@@ -45,14 +45,8 @@ async:
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
-    path: 'name'
-    wait_ms: 1000
   result:
-    path: 'response'
     resource_inside_response: true
-  error:
-    path: 'error'
-    message: 'message'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/firestore_database.go.tmpl'
 examples:
@@ -130,6 +124,17 @@ examples:
       - 'project'
       - 'etag'
       - 'deletion_policy'
+  - name: 'firestore_database_enterprise'
+    primary_resource_id: 'enterprise-db'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
 virtual_fields:
   - name: 'deletion_policy'
     description: |
@@ -140,6 +145,7 @@ virtual_fields:
       See also `delete_protection`.
     type: String
     default_value: "ABANDON"
+    deprecation_message: '`deletion_policy` is deprecated and will be removed in a future major release. Use `delete_protection_state` instead.'
 parameters:
 properties:
   - name: 'name'
@@ -172,6 +178,17 @@ properties:
     enum_values:
       - 'FIRESTORE_NATIVE'
       - 'DATASTORE_MODE'
+  - name: 'databaseEdition'
+    type: Enum
+    description: |
+      The database edition.
+    required: false
+    default_from_api: true
+    # Picking a database edition is an irreversible decision
+    immutable: true
+    enum_values:
+      - 'STANDARD'
+      - 'ENTERPRISE'
   - name: 'concurrencyMode'
     type: Enum
     description: |
@@ -280,7 +297,7 @@ properties:
 
           This value should be the KMS key resource ID in the format of
           `projects/{project_id}/locations/{kms_location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
-          How to retrive this resource ID is listed at
+          How to retrieve this resource ID is listed at
           https://cloud.google.com/kms/docs/getting-resource-ids#getting_the_id_for_a_key_and_version.
         required: true
         immutable: true
