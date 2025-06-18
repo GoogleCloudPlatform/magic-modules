@@ -198,21 +198,21 @@ properties:
                 Format: For table: projects/{projectId}/datasets/{datasetId}/tables/{tableId} Example:"projects/test_project/datasets/test_dataset/tables/test_table"
               immutable: true
               diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-  - name: 'pubsubTopic' 
+  - name: 'pubsubTopic'
     type: NestedObject
     description: Pub/Sub topic source.
     exactly_one_of:
       - 'pubsubTopic'
       - 'bigqueryDataset'
     properties:
-      - name: 'topic' 
+      - name: 'topic'
         type: String
         description: |-
           Resource name of the Pub/Sub topic source for this listing. e.g. projects/myproject/topics/topicId
-        required: true 
+        required: true
         immutable: true
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-      - name: 'dataAffinityRegions' 
+      - name: 'dataAffinityRegions'
         type: Array
         description: |-
           Region hint on where the data might be published. Data affinity regions are modifiable.
