@@ -102,9 +102,9 @@ Description of the change and how users should adjust their configuration (if ne
 
 ## Resources
 
-## Resource: `google_product_resource`
+## Resource: `google_storage_transfer_job`
 
-### Resource-level change example header
+### `path` does not allow strings starting with /
 
 Description of the change and how users should adjust their configuration (if needed).
 
@@ -125,3 +125,4 @@ Description of the change and how users should adjust their configuration (if ne
 ### `instance` is now removed
 
 `instance` has been removed in favor of `instance_name`.
+`path` does not allow strings starting with /
