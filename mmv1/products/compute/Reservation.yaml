@@ -341,7 +341,6 @@ properties:
         enum_values:
           - 'ALLOW_ALL'
           - 'DISALLOW_ALL'
-          - 'SERVICE_SHARE_TYPE_UNSPECIFIED'
         default_from_api: true
         immutable: true
   - name: 'enableEmergentMaintenance'
