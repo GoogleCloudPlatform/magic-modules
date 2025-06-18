@@ -18,10 +18,10 @@
 package dialogflow_test
 
 import (
-	"testing"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"testing"
 )
 
 func TestAccDialogflowConversationProfile_update(t *testing.T) {
@@ -58,54 +58,56 @@ func TestAccDialogflowConversationProfile_update(t *testing.T) {
 		},
 	})
 }
-//TODO make sure to flip agent back
-//Flip topics from leftover topics to resources within this tf
+
+// TODO make sure to flip agent back
+// Flip topics from leftover topics to resources within this tf
 func testAccDialogflowConversationProfile_dialogflowAgentFull1(context map[string]interface{}) string {
-return acctest.Nprintf(`
-			resource "google_project" "agent_project" {
-				name = "tf-test-dialogflow-%{random_suffix}"
-				project_id = "tf-test-dialogflow-%{random_suffix}"
-				org_id     = "%{org_id}"
-				billing_account = "%{billing_account}"
-			}
+	return acctest.Nprintf(`
+	resource "google_project" "agent_project" {
+		name = "tf-test-dialogflow-%{random_suffix}"
+		project_id = "tf-test-dialogflow-%{random_suffix}"
+		org_id     = "%{org_id}"
+		billing_account = "%{billing_account}"
+	}
 
-			resource "google_project_service" "agent_project" {
-				project = "${google_project.agent_project.id}"
-				service = "dialogflow.googleapis.com"
-				disable_dependent_services = false
-			}
-
-			resource "google_service_account" "dialogflow_service_account" {
+	resource "google_project_service" "agent_project" {
+		project = "${google_project.agent_project.id}"
+		service = "dialogflow.googleapis.com"
+		disable_dependent_services = false
+	}
+	
+	resource "google_service_account" "dialogflow_service_account" {
 		account_id = "tf-test-dialogflow-%{random_suffix}"
-			}
+		}
 
-			resource "google_project_iam_member" "agent_create" {
-				project = "${google_project.agent_project.id}"
-				role    = "roles/dialogflow.admin"
-				member  = "serviceAccount:${google_service_account.dialogflow_service_account.email}"
-			}
+	resource "google_project_iam_member" "agent_create" {
+		project = "${google_project.agent_project.id}"
+		role    = "roles/dialogflow.admin"
+		member  = "serviceAccount:${google_service_account.dialogflow_service_account.email}"
+	}
 
-			resource "google_dialogflow_agent" "agent" {
-				project = "${google_project.agent_project.id}"
-				display_name = "tf-test-agent-%{random_suffix}"
-				default_language_code = "en-us"
-				time_zone = "America/New_York"
-				depends_on = [google_project_iam_member.agent_create]
-			}
+	resource "google_dialogflow_agent" "agent" {
+		project = "${google_project.agent_project.id}"
+		display_name = "tf-test-agent-%{random_suffix}"
+		default_language_code = "en-us"
+		time_zone = "America/New_York"
+		depends_on = [google_project_iam_member.agent_create]
+	}
+
 	resouce "google_pubsub_topic" "topic" {
 		name = "tf-test-topic-%{random_suffix}"
 	}
-	
+
 	resource "google_dialogflow_conversation_profile" "profile" {
 		depends_on    = [google_dialogflow_agent.agent]
 		project       = google_project.agent_project.id
 		display_name  = "tf-test-conversation-profile-%{random_suffix}"
 		location = "global"
 		language_code = "en-US"
-        	automated_agent_config {
-            		agent = google_dialogflow_agent.agent.id
-	    		session_ttl = "30s"
-        	}
+		automated_agent_config {
+			agent = google_dialogflow_agent.agent.id
+			session_ttl = "30s"
+		}
 		human_agent_assistant_config {
 			end_user_suggestion_config {
 				disable_high_latency_features_sync_delivery = true
@@ -114,12 +116,12 @@ return acctest.Nprintf(`
 						model                  = "projects/${google_project.agent_project.id}/locations/global/conversationModels/43277ed5ce78441d"
 					}
 					conversation_process_config {
-						recent_sentences_count = 1 
+						recent_sentences_count = 1
 					}
 					disable_agent_query_logging            = true
-					enable_conversation_augmented_query    = true 
+					enable_conversation_augmented_query    = true
 					enable_event_based_suggestion          = true
- 					enable_query_suggestion_when_no_answer = true
+					enable_query_suggestion_when_no_answer = true
 					enable_query_suggestion_only            = true
 					query_config {
 						confidence_threshold = "1.0"
@@ -134,7 +136,7 @@ return acctest.Nprintf(`
 								agent = "projects/${google_project.agent_project.id}/locations/global/agent/environments/draft"
 							}
 						}
-						max_results = 1 
+						max_results = 1
 						sections {
 							section_types = ["SECTION_TYPE_UNSPECIFIED"]
 						}
@@ -150,139 +152,137 @@ return acctest.Nprintf(`
 				generators                  = ["projects/${google_project.agent_project.id}/locations/global/generators/NDM5MDEwODcyNDM0NjIyNDY0MQ"]
 				group_suggestion_responses = true
 			}
-		human_agent_suggestion_config {
-			disable_high_latency_features_sync_delivery = true
-			feature_configs {
-				conversation_model_config {
-					model                  = "projects/${google_project.agent_project.id}/locations/global/conversationModels/43277ed5ce78441d"
-				}
-				conversation_process_config {
-					recent_sentences_count = 1
-				}
-				disable_agent_query_logging            = true
-				enable_conversation_augmented_query    = true
-				enable_event_based_suggestion          = true
-				enable_query_suggestion_when_no_answer = true
-				enable_query_suggestion_only            = true
-				query_config {
-					confidence_threshold = 0.1
-					context_filter_settings {
-						drop_handoff_messages       = true
-						drop_ivr_messages           = true
-						drop_virtual_agent_messages = true
+			human_agent_suggestion_config {
+				disable_high_latency_features_sync_delivery = true
+				feature_configs {
+					conversation_model_config {
+						model                  = "projects/${google_project.agent_project.id}/locations/global/conversationModels/43277ed5ce78441d"
 					}
-	  				dialogflow_query_source {
-						agent = "projects/${google_project.agent_project.id}/locations/global/agent/environments/draft"
-						human_agent_side_config {
+					conversation_process_config {
+						recent_sentences_count = 1
+					}
+					disable_agent_query_logging            = true
+					enable_conversation_augmented_query    = true
+					enable_event_based_suggestion          = true
+					enable_query_suggestion_when_no_answer = true
+					enable_query_suggestion_only           = true
+					query_config {
+						confidence_threshold = 0.1
+						context_filter_settings {
+							drop_handoff_messages       = true
+							drop_ivr_messages           = true
+							drop_virtual_agent_messages = true
+						}
+						dialogflow_query_source {
 							agent = "projects/${google_project.agent_project.id}/locations/global/agent/environments/draft"
+							human_agent_side_config {
+								agent = "projects/${google_project.agent_project.id}/locations/global/agent/environments/draft"
+							}
+						}
+						max_results = 1
+						sections {
+							section_types = ["SECTION_TYPE_UNSPECIFIED"]
 						}
 					}
-					max_results = 1
-					sections {
-						section_types = ["SECTION_TYPE_UNSPECIFIED"]
+					suggestion_feature {
+						type = "DIALOGFLOW_ASSIST"
+					}
+					suggestion_trigger_settings {
+						no_small_talk = true
+						only_end_user = true
 					}
 				}
-				suggestion_feature {
-					type = "DIALOGFLOW_ASSIST"
-				}
-				suggestion_trigger_settings {
-					no_small_talk = true
-					only_end_user = true
-				}
+				generators                  = ["projects/${google_project.agent_project.id}/locations/global/generators/NDM5MDEwODcyNDM0NjIyNDY0MQ"]
+				group_suggestion_responses = true
 			}
-			generators                  = ["projects/${google_project.agent_project.id}/locations/global/generators/NDM5MDEwODcyNDM0NjIyNDY0MQ"]
-			group_suggestion_responses = true
+			notification_config {
+				message_format = "JSON"
+				topic          = google_pubsub_topic.topic.id
+			}
+		}
+		human_agent_handoff_config {
+			live_person_config {
+				account_number = "00"
+			}
+		}
+		logging_config {
+			enable_stackdriver_logging = true
+		}
+		new_message_event_notification_config {
+			message_format = "JSON"
+			topic          = google_pubsub_topic.topic.id
 		}
 		notification_config {
 			message_format = "JSON"
-		topic          = google_pubsub_topic.topic.id
+			topic          = google_pubsub_topic.topic.id
 		}
+		security_settings = "projects/${google_project.agent_project.id}/locations/global/securitySettings/8eb9889250e643b1"
+		stt_config {
+			enable_word_info              = true
+			language_code                 = "en-US"
+			model                         = "phone_call"
+			sample_rate_hertz             = 1000
+			speech_model_variant          = "USE_ENHANCED"
+			use_timeout_based_endpointing = true
 		}
-  human_agent_handoff_config {
-    live_person_config {
-      account_number = "00"
-    }
-  }
-  logging_config {
-    enable_stackdriver_logging = true
-  }
-  new_message_event_notification_config {
-    message_format = "JSON"
-    topic          = google_pubsub_topic.topic.id
-  }
-  notification_config {
-    message_format = "JSON"
-    topic          = google_pubsub_topic.topic.id
-  }
-  security_settings = "projects/${google_project.agent_project.id}/locations/global/securitySettings/8eb9889250e643b1"
-  stt_config {
-    enable_word_info              = true
-    language_code                 = "en-US"
-    model                         = "phone_call"
-    sample_rate_hertz             = 1000
-    speech_model_variant          = "USE_ENHANCED"
-    use_timeout_based_endpointing = true
-  }
-  tts_config {
-    effects_profile_id = ["id"]
-    pitch              = 1
-    speaking_rate      = 1
-    voice {
-      name        = "john"
-      ssml_gender = "SSML_VOICE_GENDER_MALE"
-    }
-    volume_gain_db = 5
-  }
-
+		tts_config {
+			effects_profile_id = ["id"]
+			pitch              = 1
+			speaking_rate      = 1
+			voice {
+			name        = "john"
+			ssml_gender = "SSML_VOICE_GENDER_MALE"
+		}
+			volume_gain_db = 5
+		}
 	}
-	`, context)
+`, context)
 }
 func testAccDialogflowConversationProfile_dialogflowAgentFull2(context map[string]interface{}) string {
-return acctest.Nprintf(`
-			resource "google_project" "agent_project" {
-				name = "tf-test-dialogflow-%{random_suffix}"
-				project_id = "tf-test-dialogflow-%{random_suffix}"
-				org_id     = "%{org_id}"
-				billing_account = "%{billing_account}"
-			}
+	return acctest.Nprintf(`
+	resource "google_project" "agent_project" {
+		name = "tf-test-dialogflow-%{random_suffix}"
+		project_id = "tf-test-dialogflow-%{random_suffix}"
+		org_id     = "%{org_id}"
+		billing_account = "%{billing_account}"
+	}
+	resource "google_project_service" "agent_project" {
+		project = "${google_project.agent_project.id}"
+		service = "dialogflow.googleapis.com"
+		disable_dependent_services = false
+	}
 
-			resource "google_project_service" "agent_project" {
-				project = "${google_project.agent_project.id}"
-				service = "dialogflow.googleapis.com"
-				disable_dependent_services = false
-			}
+	resource "google_service_account" "dialogflow_service_account" {
+		account_id = "tf-test-dialogflow-%{random_suffix}"
+	}
 
-			resource "google_service_account" "dialogflow_service_account" {
-				account_id = "tf-test-dialogflow-%{random_suffix}"
-			}
+	resource "google_project_iam_member" "agent_create" {
+		project = "${google_project.agent_project.id}"
+		role    = "roles/dialogflow.admin"
+		member  = "serviceAccount:${google_service_account.dialogflow_service_account.email}"
+	}
 
-			resource "google_project_iam_member" "agent_create" {
-				project = "${google_project.agent_project.id}"
-				role    = "roles/dialogflow.admin"
-				member  = "serviceAccount:${google_service_account.dialogflow_service_account.email}"
-			}
-
-			resource "google_dialogflow_agent" "agent" {
-				project = "${google_project.agent_project.id}"
-				display_name = "tf-test-agent-%{random_suffix}"
-				default_language_code = "en-us"
-				time_zone = "America/New_York"
-				depends_on = [google_project_iam_member.agent_create]
-			}
+	resource "google_dialogflow_agent" "agent" {
+		project = "${google_project.agent_project.id}"
+		display_name = "tf-test-agent-%{random_suffix}"
+		default_language_code = "en-us"
+		time_zone = "America/New_York"
+		depends_on = [google_project_iam_member.agent_create]
+	}
 	resouce "google_pubsub_topic" "topic" {
 		name = "tf-test-topic-%{random_suffix}-diff"
 	}
-	
+
 	resource "google_dialogflow_conversation_profile" "profile" {
-		#depends_on    = [google_dialogflow_agent.agent]
+		depends_on    = [google_dialogflow_agent.agent]
 		project       = "${google_project.agent_project.id}"
 		display_name  = "tf-test-conversation-profile-%{random_suffix}-new"
 		location = "global"
 		language_code = "fr"
-        	automated_agent_config {
-            		agent = "projects/${google_project.agent_project.id}/locations/global/agent/environments/draft2"
-	    		session_ttl = "31s"
-        	}
+		automated_agent_config {
+			agent = "projects/${google_project.agent_project.id}/locations/global/agent/environments/draft2"
+			session_ttl = "31s"
+		}
 		human_agent_assistant_config {
 			end_user_suggestion_config {
 				disable_high_latency_features_sync_delivery = false
@@ -291,13 +291,13 @@ return acctest.Nprintf(`
 						model                  = "projects/${google_project.agent_project.id}/locations/global/conversationModels/34498444b41199d4"
 					}
 					conversation_process_config {
-						recent_sentences_count = 2 
+						recent_sentences_count = 2
 					}
 					disable_agent_query_logging            = false
-					enable_conversation_augmented_query    = false 
+					enable_conversation_augmented_query    = false
 					enable_event_based_suggestion          = false
- 					enable_query_suggestion_when_no_answer = false
-					enable_query_suggestion_only            = false
+					enable_query_suggestion_when_no_answer = false
+					enable_query_suggestion_only           = false
 					query_config {
 						confidence_threshold = "0.9"
 						context_filter_settings {
@@ -311,7 +311,7 @@ return acctest.Nprintf(`
 								agent = "projects/${google_project.agent_project.id}/locations/global/agent/environments/draft2"
 							}
 						}
-						max_results = 2 
+						max_results = 2
 						sections {
 							section_types = ["SITUATION"]
 						}
@@ -324,76 +324,76 @@ return acctest.Nprintf(`
 						only_end_user = false
 					}
 				}
+				generators                 = ["projects/${google_project.agent_project.id}/locations/global/generators/MTM4Mzk2MTA3MjA2MTU5MjM3MTM"]
+				group_suggestion_responses = false
+			}
+			human_agent_suggestion_config {
+				disable_high_latency_features_sync_delivery = false
+				feature_configs {
+					conversation_model_config {
+						model                  = "projects/${google_project.agent_project.id}/locations/global/conversationModels/43277ed5ce78441d"
+					}
+					conversation_process_config {
+						recent_sentences_count = 2
+					}
+					disable_agent_query_logging            = false
+					enable_conversation_augmented_query    = false
+					enable_event_based_suggestion          = false
+					enable_query_suggestion_when_no_answer = false
+					enable_query_suggestion_only            = false
+					query_config {
+						confidence_threshold = 0.2
+						context_filter_settings {
+							drop_handoff_messages       = false
+							drop_ivr_messages           = false
+							drop_virtual_agent_messages = false
+						}
+						dialogflow_query_source {
+							agent = "projects/${google_project.agent_project.id}/locations/global/agent/environments/draft2"
+							human_agent_side_config {
+								agent = "projects/${google_project.agent_project.id}/locations/global/agent/environments/draft2"
+							}
+						}
+						max_results = 2
+						sections {
+							section_types = ["SITUATION"]
+						}
+					}
+					suggestion_feature {
+						type = "DIALOGFLOW_ASSIST"
+					}
+					suggestion_trigger_settings {
+						no_small_talk = false
+						only_end_user = false
+					}
+				}
 				generators                  = ["projects/${google_project.agent_project.id}/locations/global/generators/MTM4Mzk2MTA3MjA2MTU5MjM3MTM"]
 				group_suggestion_responses = false
 			}
-		human_agent_suggestion_config {
-			disable_high_latency_features_sync_delivery = false
-			feature_configs {
-				conversation_model_config {
-					model                  = "projects/${google_project.agent_project.id}/locations/global/conversationModels/43277ed5ce78441d"
-				}
-				conversation_process_config {
-					recent_sentences_count = 2
-				}
-				disable_agent_query_logging            = false
-				enable_conversation_augmented_query    = false
-				enable_event_based_suggestion          = false
-				enable_query_suggestion_when_no_answer = false
-				enable_query_suggestion_only            = false
-				query_config {
-					confidence_threshold = 0.2
-					context_filter_settings {
-						drop_handoff_messages       = false
-						drop_ivr_messages           = false
-						drop_virtual_agent_messages = false
-					}
-	  				dialogflow_query_source {
-						agent = "projects/${google_project.agent_project.id}/locations/global/agent/environments/draft2"
-						human_agent_side_config {
-							agent = "projects/${google_project.agent_project.id}/locations/global/agent/environments/draft2"
-						}
-					}
-					max_results = 2
-					sections {
-						section_types = ["SITUATION"]
-					}
-				}
-				suggestion_feature {
-					type = "DIALOGFLOW_ASSIST"
-				}
-				suggestion_trigger_settings {
-					no_small_talk = false
-					only_end_user = false
-				}
+			notification_config {
+				message_format = "PROTO"
+				topic          = google_pubsub_topic.topic.id
 			}
-			generators                  = ["projects/${google_project.agent_project.id}/locations/global/generators/MTM4Mzk2MTA3MjA2MTU5MjM3MTM"]
-			group_suggestion_responses = false
+		}
+		human_agent_handoff_config {
+			live_person_config {
+				account_number = "01"
+			}
+		}
+		logging_config {
+			enable_stackdriver_logging = false
+		}
+		new_message_event_notification_config {
+			message_format = "PROTO"
+			topic          = google_pubsub_topic.topic.id
 		}
 		notification_config {
 			message_format = "PROTO"
-		topic          = google_pubsub_topic.topic.id
+			topic          = google_pubsub_topic.topic.id
 		}
-		}
-  human_agent_handoff_config {
-    live_person_config {
-      account_number = "01"
-    }
-  }
-  logging_config {
-    enable_stackdriver_logging = false
-  }
-  new_message_event_notification_config {
-    message_format = "PROTO"
-    topic          = google_pubsub_topic.topic.id
-  }
-  notification_config {
-    message_format = "PROTO"
-    topic          = google_pubsub_topic.topic.id
-  }
-  security_settings = "projects/${google_project.agent_project.id}/locations/global/securitySettings/3bff22a0a17aabb2"
+		security_settings = "projects/${google_project.agent_project.id}/locations/global/securitySettings/3bff22a0a17aabb2"
 	}
-	`, context)
+`, context)
 }
 func TestAccDialogflowConversationProfile_update_knowledgebase(t *testing.T) {
 	t.Parallel()
@@ -430,147 +430,145 @@ func TestAccDialogflowConversationProfile_update_knowledgebase(t *testing.T) {
 	})
 }
 func testAccDialogflowConversationProfile_dialogflowAgentKnowledgebase1(context map[string]interface{}) string {
-return acctest.Nprintf(`
-			resource "google_project" "agent_project" {
-				name = "tf-test-dialogflow-%{random_suffix}"
-				project_id = "tf-test-dialogflow-%{random_suffix}"
-				org_id     = "%{org_id}"
-				billing_account = "%{billing_account}"
-			}
-
-			resource "google_project_service" "agent_project" {
-				project = "${google_project.agent_project.id}"
-				service = "dialogflow.googleapis.com"
-				disable_dependent_services = false
-			}
-
-			resource "google_service_account" "dialogflow_service_account" {
-				account_id = "tf-test-dialogflow-%{random_suffix}"
-			}
-
-			resource "google_project_iam_member" "agent_create" {
-				project = "${google_project.agent_project.id}"
-				role    = "roles/dialogflow.admin"
-				member  = "serviceAccount:${google_service_account.dialogflow_service_account.email}"
-			}
-
-			resource "google_dialogflow_agent" "agent" {
-				project = "${google_project.agent_project.id}"
-				display_name = "tf-test-agent-%{random_suffix}"
-				default_language_code = "en-us"
-				time_zone = "America/New_York"
-				depends_on = [google_project_iam_member.agent_create]
-			}
-resource "google_dialogflow_conversation_profile" "profile" {
-		display_name  = "tf-test-conversation-profile-%{random_suffix}-new"
-
-  location = "global"
-  human_agent_assistant_config {
-    human_agent_suggestion_config {
-      feature_configs {
-        enable_event_based_suggestion = true
-        suggestion_feature {
-          type = "FAQ"
-        }
-        query_config {
-					context_filter_settings {
-						drop_handoff_messages       = false
-						drop_ivr_messages           = false
-						drop_virtual_agent_messages = false
-					}
-	knowledge_base_query_source {
-		knowledge_bases = ["projects/${google_project.agent_project.id}/locations/global/knowledgeBases/MTIxNTkzNjM1NzY3NjY2NjA2MDk"]
+	return acctest.Nprintf(`
+	resource "google_project" "agent_project" {
+		name = "tf-test-dialogflow-%{random_suffix}"
+		project_id = "tf-test-dialogflow-%{random_suffix}"
+		org_id     = "%{org_id}"
+		billing_account = "%{billing_account}"
 	}
-          max_results = 1
-        }
-        suggestion_trigger_settings {
-          only_end_user = true
-        }
-      }
-    }
-    message_analysis_config {
-      enable_entity_extraction  = true
-      enable_sentiment_analysis = true
-    }
-  }
-  logging_config {
-    enable_stackdriver_logging = true
-  }
-  language_code = "en-US"
-}
+
+	resource "google_project_service" "agent_project" {
+		project = "${google_project.agent_project.id}"
+		service = "dialogflow.googleapis.com"
+		disable_dependent_services = false
+	}
+
+	resource "google_service_account" "dialogflow_service_account" {
+		account_id = "tf-test-dialogflow-%{random_suffix}"
+	}
+
+	resource "google_project_iam_member" "agent_create" {
+		project = "${google_project.agent_project.id}"
+		role    = "roles/dialogflow.admin"
+		member  = "serviceAccount:${google_service_account.dialogflow_service_account.email}"
+	}
+
+	resource "google_dialogflow_agent" "agent" {
+		project = "${google_project.agent_project.id}"
+		display_name = "tf-test-agent-%{random_suffix}"
+		default_language_code = "en-us"
+		time_zone = "America/New_York"
+		depends_on = [google_project_iam_member.agent_create]
+	}
 	
+	resource "google_dialogflow_conversation_profile" "profile" {
+		display_name  = "tf-test-conversation-profile-%{random_suffix}-new"
+		location = "global"
+		human_agent_assistant_config {
+			human_agent_suggestion_config {
+				feature_configs {
+					enable_event_based_suggestion = true
+					suggestion_feature {
+						type = "FAQ"
+					}
+					query_config {
+						context_filter_settings {
+							drop_handoff_messages       = false
+							drop_ivr_messages           = false
+							drop_virtual_agent_messages = false
+						}
+						knowledge_base_query_source {
+							knowledge_bases = ["projects/${google_project.agent_project.id}/locations/global/knowledgeBases/MTIxNTkzNjM1NzY3NjY2NjA2MDk"]
+						}
+						max_results = 1
+					}
+					suggestion_trigger_settings {
+						only_end_user = true
+					}
+				}
+			}
+			message_analysis_config {
+				enable_entity_extraction  = true
+				enable_sentiment_analysis = true
+			}
+		}
+		logging_config {
+			enable_stackdriver_logging = true
+		}
+		language_code = "en-US"
+	}
 	`, context)
 }
 func testAccDialogflowConversationProfile_dialogflowAgentKnowledgebase2(context map[string]interface{}) string {
-return acctest.Nprintf(`
-		resource "google_project" "agent_project" {
-				name = "tf-test-dialogflow-%{random_suffix}"
-				project_id = "tf-test-dialogflow-%{random_suffix}"
-				org_id     = "%{org_id}"
-				billing_account = "%{billing_account}"
-			}
-
-			resource "google_project_service" "agent_project" {
-				project = "${google_project.agent_project.id}"
-				service = "dialogflow.googleapis.com"
-				disable_dependent_services = false
-			}
-
-			resource "google_service_account" "dialogflow_service_account" {
-		account_id = "tf-test-dialogflow-%{random_suffix}"
-			}
-
-			resource "google_project_iam_member" "agent_create" {
-				project = "${google_project.agent_project.id}"
-				role    = "roles/dialogflow.admin"
-				member  = "serviceAccount:${google_service_account.dialogflow_service_account.email}"
-			}
-
-			resource "google_dialogflow_agent" "agent" {
-				project = "${google_project.agent_project.id}"
-				display_name = "tf-test-agent-%{random_suffix}"
-				default_language_code = "en-us"
-				time_zone = "America/New_York"
-				depends_on = [google_project_iam_member.agent_create]
-			}
-	
-resource "google_dialogflow_conversation_profile" "profile" {
-		display_name  = "tf-test-conversation-profile-%{random_suffix}-new"
-
-  location = "global"
-  human_agent_assistant_config {
-    human_agent_suggestion_config {
-      feature_configs {
-        enable_event_based_suggestion = true
-        suggestion_feature {
-          type = "FAQ"
-        }
-        query_config {
-					context_filter_settings {
-						drop_handoff_messages       = false
-						drop_ivr_messages           = false
-						drop_virtual_agent_messages = false
-					}
-	knowledge_base_query_source {
-		knowledge_bases = ["projects/${google_project.agent_project.id}/locations/global/knowledgeBases/MTIxNTkzNjM1NzY3NjY2NjA2MDk"]
+	return acctest.Nprintf(`
+	resource "google_project" "agent_project" {
+		name = "tf-test-dialogflow-%{random_suffix}"
+		project_id = "tf-test-dialogflow-%{random_suffix}"
+		org_id     = "%{org_id}"
+		billing_account = "%{billing_account}"
 	}
-          max_results = 1
-        }
-        suggestion_trigger_settings {
-          only_end_user = true
-        }
-      }
-    }
-    message_analysis_config {
-      enable_entity_extraction  = true
-      enable_sentiment_analysis = true
-    }
-  }
-  logging_config {
-    enable_stackdriver_logging = true
-  }
-  language_code = "en-US"
-}
+
+	resource "google_project_service" "agent_project" {
+		project = "${google_project.agent_project.id}"
+		service = "dialogflow.googleapis.com"
+		disable_dependent_services = false
+	}
+
+	resource "google_service_account" "dialogflow_service_account" {
+		account_id = "tf-test-dialogflow-%{random_suffix}"
+	}
+
+	resource "google_project_iam_member" "agent_create" {
+		project = "${google_project.agent_project.id}"
+		role    = "roles/dialogflow.admin"
+		member  = "serviceAccount:${google_service_account.dialogflow_service_account.email}"
+	}
+
+	resource "google_dialogflow_agent" "agent" {
+		project = "${google_project.agent_project.id}"
+		display_name = "tf-test-agent-%{random_suffix}"
+		default_language_code = "en-us"
+		time_zone = "America/New_York"
+		depends_on = [google_project_iam_member.agent_create]
+	}
+
+	resource "google_dialogflow_conversation_profile" "profile" {
+		display_name  = "tf-test-conversation-profile-%{random_suffix}-new"
+		location = "global"
+		human_agent_assistant_config {
+			human_agent_suggestion_config {
+				feature_configs {
+					enable_event_based_suggestion = true
+					suggestion_feature {
+						type = "FAQ"
+					}
+					query_config {
+						context_filter_settings {
+							drop_handoff_messages       = false
+							drop_ivr_messages           = false
+							drop_virtual_agent_messages = false
+						}
+						knowledge_base_query_source {
+							knowledge_bases = ["projects/${google_project.agent_project.id}/locations/global/knowledgeBases/MTIxNTkzNjM1NzY3NjY2NjA2MDk"]
+						}
+						max_results = 1
+					}
+					suggestion_trigger_settings {
+						only_end_user = true
+					}
+				}
+			}
+			message_analysis_config {
+				enable_entity_extraction  = true
+				enable_sentiment_analysis = true
+			}
+		}
+		logging_config {
+			enable_stackdriver_logging = true
+		}
+		language_code = "en-US"
+	}
 	`, context)
 }
 func TestAccDialogflowConversationProfile_update_document(t *testing.T) {
@@ -608,152 +606,150 @@ func TestAccDialogflowConversationProfile_update_document(t *testing.T) {
 	})
 }
 func testAccDialogflowConversationProfile_dialogflowAgentDocument1(context map[string]interface{}) string {
-return acctest.Nprintf(`
-			resource "google_project" "agent_project" {
-				name = "tf-test-dialogflow-%{random_suffix}"
-				project_id = "tf-test-dialogflow-%{random_suffix}"
-				org_id     = "%{org_id}"
-				billing_account = "%{billing_account}"
-			}
+	return acctest.Nprintf(`
+	resource "google_project" "agent_project" {
+		name = "tf-test-dialogflow-%{random_suffix}"
+		project_id = "tf-test-dialogflow-%{random_suffix}"
+		org_id     = "%{org_id}"
+		billing_account = "%{billing_account}"
+	}
 
-			resource "google_project_service" "agent_project" {
-				project = "${google_project.agent_project.id}"
-				service = "dialogflow.googleapis.com"
-				disable_dependent_services = false
-			}
+	resource "google_project_service" "agent_project" {
+		project = "${google_project.agent_project.id}"
+		service = "dialogflow.googleapis.com"
+		disable_dependent_services = false
+	}
 
-			resource "google_service_account" "dialogflow_service_account" {
+	resource "google_service_account" "dialogflow_service_account" {
 		account_id = "tf-test-dialogflow-%{random_suffix}"
-			}
+	}
 
-			resource "google_project_iam_member" "agent_create" {
-				project = "${google_project.agent_project.id}"
-				role    = "roles/dialogflow.admin"
-				member  = "serviceAccount:${google_service_account.dialogflow_service_account.email}"
-			}
+	resource "google_project_iam_member" "agent_create" {
+		project = "${google_project.agent_project.id}"
+		role    = "roles/dialogflow.admin"
+		member  = "serviceAccount:${google_service_account.dialogflow_service_account.email}"
+	}
 
-			resource "google_dialogflow_agent" "agent" {
-				project = "${google_project.agent_project.id}"
-				display_name = "tf-test-agent-%{random_suffix}"
-				default_language_code = "en-us"
-				time_zone = "America/New_York"
-				depends_on = [google_project_iam_member.agent_create]
-			}
-resource "google_dialogflow_conversation_profile" "profile" {
+	resource "google_dialogflow_agent" "agent" {
+		project = "${google_project.agent_project.id}"
+		display_name = "tf-test-agent-%{random_suffix}"
+		default_language_code = "en-us"
+		time_zone = "America/New_York"
+		depends_on = [google_project_iam_member.agent_create]
+	}
+	resource "google_dialogflow_conversation_profile" "profile" {
 		display_name  = "tf-test-conversation-profile-%{random_suffix}-new"
-
-  location = "global"
-  human_agent_assistant_config {
-    human_agent_suggestion_config {
-      feature_configs {
-        enable_event_based_suggestion = false
-        suggestion_feature {
-          type = "SMART_REPLY"
-        }
-        query_config {
-					context_filter_settings {
-						drop_handoff_messages       = false
-						drop_ivr_messages           = false
-						drop_virtual_agent_messages = false
+		location = "global"
+		human_agent_assistant_config {
+			human_agent_suggestion_config {
+				feature_configs {
+					enable_event_based_suggestion = false
+					suggestion_feature {
+						type = "SMART_REPLY"
 					}
-	document_query_source {
-		documents = ["projects/ccai-shared-external/locations/global/knowledgeBases/smart_messaging_kb/documents/NzU1MDYzOTkxNzU0MjQwODE5Mg"]
+					query_config {
+						context_filter_settings {
+							drop_handoff_messages       = false
+							drop_ivr_messages           = false
+							drop_virtual_agent_messages = false
+						}
+						document_query_source {
+							documents = ["projects/ccai-shared-external/locations/global/knowledgeBases/smart_messaging_kb/documents/NzU1MDYzOTkxNzU0MjQwODE5Mg"]
+						}
+						max_results = 1
+					}
+					conversation_model_config {
+						model = "projects/ccai-shared-external/locations/global/conversationModels/c671dd72c5e4656f"
+					}
+					suggestion_trigger_settings {
+						only_end_user = true
+					}
+				}
+			}
+			message_analysis_config {
+				enable_entity_extraction  = true
+				enable_sentiment_analysis = true
+			}
+		}
+		logging_config {
+			enable_stackdriver_logging = true
+		}
+		language_code = "en-US"
 	}
-          max_results = 1
-        }
-	conversation_model_config{
-		model = "projects/ccai-shared-external/locations/global/conversationModels/c671dd72c5e4656f"
-	}
-        suggestion_trigger_settings {
-          only_end_user = true
-        }
-      }
-    }
-    message_analysis_config {
-      enable_entity_extraction  = true
-      enable_sentiment_analysis = true
-    }
-  }
-  logging_config {
-    enable_stackdriver_logging = true
-  }
-  language_code = "en-US"
-}
-	
+
 	`, context)
 }
 func testAccDialogflowConversationProfile_dialogflowAgentDocument2(context map[string]interface{}) string {
-return acctest.Nprintf(`
-			resource "google_project" "agent_project" {
-				name = "tf-test-dialogflow-%{random_suffix}"
-				project_id = "tf-test-dialogflow-%{random_suffix}"
-				org_id     = "%{org_id}"
-				billing_account = "%{billing_account}"
-			}
+	return acctest.Nprintf(`
+	resource "google_project" "agent_project" {
+		name = "tf-test-dialogflow-%{random_suffix}"
+		project_id = "tf-test-dialogflow-%{random_suffix}"
+		org_id     = "%{org_id}"
+		billing_account = "%{billing_account}"
+	}
 
-			resource "google_project_service" "agent_project" {
-				project = "${google_project.agent_project.id}"
-				service = "dialogflow.googleapis.com"
-				disable_dependent_services = false
-			}
+	resource "google_project_service" "agent_project" {
+		project = "${google_project.agent_project.id}"
+		service = "dialogflow.googleapis.com"
+		disable_dependent_services = false
+	}
 
-			resource "google_service_account" "dialogflow_service_account" {
+	resource "google_service_account" "dialogflow_service_account" {
 		account_id = "tf-test-dialogflow-%{random_suffix}"
-			}
+	}
 
-			resource "google_project_iam_member" "agent_create" {
-				project = "${google_project.agent_project.id}"
-				role    = "roles/dialogflow.admin"
-				member  = "serviceAccount:${google_service_account.dialogflow_service_account.email}"
-			}
+	resource "google_project_iam_member" "agent_create" {
+		project = "${google_project.agent_project.id}"
+		role    = "roles/dialogflow.admin"
+		member  = "serviceAccount:${google_service_account.dialogflow_service_account.email}"
+	}
 
-			resource "google_dialogflow_agent" "agent" {
-				project = "${google_project.agent_project.id}"
-				display_name = "tf-test-agent-%{random_suffix}"
-				default_language_code = "en-us"
-				time_zone = "America/New_York"
-				depends_on = [google_project_iam_member.agent_create]
-			}
-	
-resource "google_dialogflow_conversation_profile" "profile" {
+	resource "google_dialogflow_agent" "agent" {
+		project = "${google_project.agent_project.id}"
+		display_name = "tf-test-agent-%{random_suffix}"
+		default_language_code = "en-us"
+		time_zone = "America/New_York"
+		depends_on = [google_project_iam_member.agent_create]
+	}
+
+	resource "google_dialogflow_conversation_profile" "profile" {
 		display_name  = "tf-test-conversation-profile-%{random_suffix}-new"
-
-  location = "global"
-  human_agent_assistant_config {
-    human_agent_suggestion_config {
-      feature_configs {
-        enable_event_based_suggestion = false
-        suggestion_feature {
-          type = "SMART_REPLY"
-        }
-        query_config {
-					context_filter_settings {
-						drop_handoff_messages       = false
-						drop_ivr_messages           = false
-						drop_virtual_agent_messages = false
+		location = "global"
+		human_agent_assistant_config {
+			human_agent_suggestion_config {
+				feature_configs {
+					enable_event_based_suggestion = false
+					suggestion_feature {
+						type = "SMART_REPLY"
 					}
-	document_query_source {
-		documents = ["projects/ccai-shared-external/locations/global/knowledgeBases/smart_messaging_kb/documents/NzU1MDYzOTkxNzU0MjQwODE5Mg"]
+					query_config {
+						context_filter_settings {
+							drop_handoff_messages       = false
+							drop_ivr_messages           = false
+							drop_virtual_agent_messages = false
+						}
+						document_query_source {
+							documents = ["projects/ccai-shared-external/locations/global/knowledgeBases/smart_messaging_kb/documents/NzU1MDYzOTkxNzU0MjQwODE5Mg"]
+						}
+						max_results = 1
+					}
+					conversation_model_config {
+						model = "projects/ccai-shared-external/locations/global/conversationModels/c671dd72c5e4656f"
+					}
+					suggestion_trigger_settings {
+						only_end_user = true
+					}
+				}
+			}
+			message_analysis_config {
+				enable_entity_extraction  = true
+				enable_sentiment_analysis = true
+			}
+		}
+		logging_config {
+			enable_stackdriver_logging = true
+		}
+		language_code = "en-US"
 	}
-          max_results = 1
-        }
-	conversation_model_config{
-		model = "projects/ccai-shared-external/locations/global/conversationModels/c671dd72c5e4656f"
-	}
-        suggestion_trigger_settings {
-          only_end_user = true
-        }
-      }
-    }
-    message_analysis_config {
-      enable_entity_extraction  = true
-      enable_sentiment_analysis = true
-    }
-  }
-  logging_config {
-    enable_stackdriver_logging = true
-  }
-  language_code = "en-US"
-}
 	`, context)
 }
