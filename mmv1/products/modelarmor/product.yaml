@@ -15,10 +15,10 @@
 name: ModelArmor
 display_name: Model Armor
 scopes:
-- https://www.googleapis.com/auth/cloud-platform
+ - https://www.googleapis.com/auth/cloud-platform
 versions:
-- name: ga
-  base_url: 'https://modelarmor.{{location}}.rep.googleapis.com/v1/'
-- name: beta
-  base_url: 'https://modelarmor.{{location}}.rep.googleapis.com/v1/'
+ - name: ga
+   base_url: 'https://modelarmor.{{location}}.rep.googleapis.com/v1/'
+ - name: beta
+   base_url: 'https://modelarmor.{{location}}.rep.googleapis.com/v1/'
 caibaseurl: "https://modelarmor.googleapis.com/v1/" 

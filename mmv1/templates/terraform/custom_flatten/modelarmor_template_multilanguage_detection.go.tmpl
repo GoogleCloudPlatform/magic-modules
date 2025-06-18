@@ -13,8 +13,7 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     if val, ok := original["enableMultiLanguageDetection"]; ok {
         transformed["enable_multi_language_detection"] = val
     } else {
-        // Since the field is REQUIRED in the schema and the block exists,
-        // default to false if the key is missing from the API response.
+        // Since the field is REQUIRED in the schema and the block exists, default to false if the key is missing from the API response.
         transformed["enable_multi_language_detection"] = false
     }
     return []interface{}{transformed}
