@@ -1,0 +1,228 @@
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	billingProject := ""
+
+	projectID, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project for Listing: %s", err)
+	}
+	billingProject = projectID
+
+	obj := make(map[string]interface{})
+	updateMask := []string{}
+	headers := make(http.Header)
+
+	// Process each top-level field for changes
+	if d.HasChange("display_name") {
+		displayNameProp, err := expandBigqueryAnalyticsHubListingDisplayName(d.Get("display_name"), d, config)
+		if err != nil {
+			return err
+		}
+		obj["displayName"] = displayNameProp
+		updateMask = append(updateMask, "displayName")
+	}
+
+	if d.HasChange("description") {
+		descriptionProp, err := expandBigqueryAnalyticsHubListingDescription(d.Get("description"), d, config)
+		if err != nil {
+			return err
+		}
+		obj["description"] = descriptionProp
+		updateMask = append(updateMask, "description")
+	}
+
+	if d.HasChange("primary_contact") {
+		primaryContactProp, err := expandBigqueryAnalyticsHubListingPrimaryContact(d.Get("primary_contact"), d, config)
+		if err != nil {
+			return err
+		}
+		obj["primaryContact"] = primaryContactProp
+		updateMask = append(updateMask, "primaryContact")
+	}
+
+	if d.HasChange("documentation") {
+		documentationProp, err := expandBigqueryAnalyticsHubListingDocumentation(d.Get("documentation"), d, config)
+		if err != nil {
+			return err
+		}
+		obj["documentation"] = documentationProp
+		updateMask = append(updateMask, "documentation")
+	}
+
+	if d.HasChange("icon") {
+		iconProp, err := expandBigqueryAnalyticsHubListingIcon(d.Get("icon"), d, config)
+		if err != nil {
+			return err
+		}
+		obj["icon"] = iconProp
+		updateMask = append(updateMask, "icon")
+	}
+
+	if d.HasChange("request_access") {
+		requestAccessProp, err := expandBigqueryAnalyticsHubListingRequestAccess(d.Get("request_access"), d, config)
+		if err != nil {
+			return err
+		}
+		obj["requestAccess"] = requestAccessProp
+		updateMask = append(updateMask, "requestAccess")
+	}
+
+	if d.HasChange("data_provider") {
+		dataProviderProp, err := expandBigqueryAnalyticsHubListingDataProvider(d.Get("data_provider"), d, config)
+		if err != nil {
+			return err
+		}
+		obj["dataProvider"] = dataProviderProp
+		updateMask = append(updateMask, "dataProvider")
+	}
+
+	if d.HasChange("publisher") {
+		publisherProp, err := expandBigqueryAnalyticsHubListingPublisher(d.Get("publisher"), d, config)
+		if err != nil {
+			return err
+		}
+		obj["publisher"] = publisherProp
+		updateMask = append(updateMask, "publisher")
+	}
+
+	if d.HasChange("categories") {
+		categoriesProp, err := expandBigqueryAnalyticsHubListingCategories(d.Get("categories"), d, config)
+		if err != nil {
+			return err
+		}
+		obj["categories"] = categoriesProp
+		updateMask = append(updateMask, "categories")
+	}
+
+	// This logic ensures that if only data_affinity_regions within pubsub_topic changes,
+	// we send a granular update mask and a body containing only the changed field.
+	if d.HasChange("pubsub_topic.0.data_affinity_regions") {
+		log.Printf("[DEBUG] Detected change in pubsub_topic.data_affinity_regions.")
+
+		var dataAffinityRegions []string
+
+		// Safely retrieve the pubsub_topic block
+		// Corrected: Capture both return values from d.GetOk first.
+		rawPubsubTopicConfig, ok := d.GetOk("pubsub_topic")
+		if ok && rawPubsubTopicConfig != nil {
+			if pubsubTopicConfig, isList := rawPubsubTopicConfig.([]interface{}); isList && len(pubsubTopicConfig) > 0 {
+				if pubsubTopicMap, ok := pubsubTopicConfig[0].(map[string]interface{}); ok {
+					// Retrieve the raw value of data_affinity_regions from the map
+					if rawRegions, regionsOk := pubsubTopicMap["data_affinity_regions"]; regionsOk && rawRegions != nil {
+						var regionsSet *schema.Set
+						if s, isSet := rawRegions.(*schema.Set); isSet {
+							// It's already a *schema.Set, use it directly
+							regionsSet = s
+						} else if list, isList := rawRegions.([]interface{}); isList {
+							// If it's a []interface{}, convert it to a *schema.Set
+							regionsSet = schema.NewSet(schema.HashString, list)
+						} else {
+							// Unexpected type, return an error
+							return fmt.Errorf("unexpected type for data_affinity_regions within pubsub_topic map: %T, expected *schema.Set or []interface{}", rawRegions)
+						}
+
+						// Convert the *schema.Set to a slice of strings
+						for _, region := range regionsSet.List() {
+							dataAffinityRegions = append(dataAffinityRegions, region.(string))
+						}
+					} else {
+						// data_affinity_regions field is not present or is nil within the map, treat as empty.
+						dataAffinityRegions = []string{}
+						log.Printf("[DEBUG] data_affinity_regions field is not present or nil in pubsub_topic map, treating as empty.")
+					}
+				} else {
+					// The first element of pubsub_topic (if present) was not a map as expected.
+					return fmt.Errorf("expected pubsub_topic[0] to be a map[string]interface{}, got %T", pubsubTopicConfig[0])
+				}
+			} else {
+				// The rawPubsubTopicConfig was not a list or was an empty list.
+				// This implies the pubsub_topic block is not configured as expected.
+				dataAffinityRegions = []string{}
+				log.Printf("[WARN] pubsub_topic block is not a list or is empty, despite data_affinity_regions change detection. Setting dataAffinityRegions to empty.")
+			}
+		} else {
+			// This block means the 'pubsub_topic' configuration itself is entirely missing or d.GetOk returned false.
+			dataAffinityRegions = []string{}
+			log.Printf("[WARN] pubsub_topic block itself is missing or empty, despite data_affinity_regions change detection. Setting dataAffinityRegions to empty.")
+		}
+
+		// Construct the partial pubsubTopic object for the request body.
+		// It MUST only contain the field that is being updated
+		// when the updateMask is granular (e.g., "pubsubTopic.dataAffinityRegions").
+		pubsubTopicBody := map[string]interface{}{
+			"dataAffinityRegions": dataAffinityRegions,
+		}
+		obj["pubsubTopic"] = pubsubTopicBody // Assign this partial object to the main obj
+
+		// Add the granular field to the updateMask
+		updateMask = append(updateMask, "pubsubTopic.dataAffinityRegions")
+	} else if d.HasChange("pubsub_topic") {
+		// This block handles changes to the entire 'pubsub_topic' block, but *not* just
+		// 'data_affinity_regions'. This implicitly means the `topic` field or other top-level fields within `pubsub_topic`
+		// are attempting to change. Since `topic` is immutable, such an update will fail.
+		// We avoid adding "pubsubTopic" to the update mask in this general case,
+		// as that's what led to the initial API rejection when `topic` was included.
+		log.Printf("[WARN] Detected change in 'pubsub_topic' block, but not just 'data_affinity_regions'. " +
+			"If 'topic' field was modified, the API will reject this update. " +
+			"The API only allows specific updates like 'pubsubTopic.dataAffinityRegions'. No updateMask " +
+			"will be added for the general 'pubsubTopic' block to prevent immutable field update errors.")
+		// No updateMask entry added for "pubsubTopic" for general changes to the block
+	}
+
+
+	if d.HasChange("restricted_export_config") {
+		restrictedExportConfigProp, err := expandBigqueryAnalyticsHubListingRestrictedExportConfig(d.Get("restricted_export_config"), d, config)
+		if err != nil {
+			return err
+		}
+		obj["restrictedExportConfig"] = restrictedExportConfigProp
+		updateMask = append(updateMask, "restrictedExportConfig")
+	}
+
+	// If updateMask is empty, we are not updating anything, so skip the API call and return early.
+	if len(updateMask) == 0 {
+		log.Printf("[DEBUG] No changes detected for Listing %q, skipping API call.", d.Id())
+		return resourceBigqueryAnalyticsHubListingRead(d, meta)
+	}
+
+	// The d.Id() already contains the full resource name in the expected format:
+	// projects/{project}/locations/{location}/dataExchanges/{dataExchangeId}/listings/{listingId}
+	const bigqueryAnalyticsHubAPIBase = "https://analyticshub.googleapis.com/v1/"
+	url := bigqueryAnalyticsHubAPIBase + d.Id()
+
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+	if err != nil {
+		return err
+	}
+
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PATCH",
+		Project:   billingProject,
+		RawURL:    url,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   d.Timeout(schema.TimeoutUpdate),
+		Headers:   headers, 
+	})
+
+	if err != nil {
+		if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
+			log.Printf("[WARN] Error updating Listing %q: %s, resource not found (404). Marking as gone.", d.Id(), err)
+			d.SetId("") // Mark resource as gone
+			return nil
+		}
+		return fmt.Errorf("Error updating Listing %q: %s", d.Id(), err)
+	} else {
+		log.Printf("[DEBUG] Finished updating Listing %q: %#v", d.Id(), res)
+	}
+
+	// Read the resource state back after the update.
+	return resourceBigqueryAnalyticsHubListingRead(d, meta)
