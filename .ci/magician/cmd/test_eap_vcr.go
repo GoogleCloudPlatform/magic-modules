@@ -2,6 +2,7 @@ package cmd
 
 import (
 	_ "embed"
+	"encoding/json"
 	"fmt"
 	"magician/exec"
 	"magician/provider"
@@ -44,6 +45,42 @@ var tevOptionalEnvironmentVariables = [...]string{
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
 	"GOOGLE_SERVICE_ACCOUNT",
 	"GOOGLE_VMWAREENGINE_PROJECT",
+}
+
+// GerritComment is a single inline comment for a Gerrit CL.
+// See go/kokoro-gob-scm#gerrit-inline-comments.
+type GerritComment struct {
+	Path    string `json:"path"`
+	Message string `json:"message"`
+}
+
+// GerritCommenter is used to add comments to a Gerrit CL.
+type GerritCommenter struct {
+	gerritCommentsFilename string
+	rnr                    ExecRunner
+	comments               []GerritComment
+}
+
+func NewGerritCommenter(gerritCommentsFilename string, rnr ExecRunner) *GerritCommenter {
+	return &GerritCommenter{
+		gerritCommentsFilename: gerritCommentsFilename,
+		rnr:                    rnr,
+	}
+}
+
+// Add adds a comment to the gerrit_comments_file json file. If a path is not
+// specified, the comment is added at the patchset level, just like other
+// kokoro messages.
+func (g *GerritCommenter) Add(c GerritComment) error {
+	if c.Path == "" {
+		c.Path = "/PATCHSET_LEVEL"
+	}
+	g.comments = append(g.comments, c)
+	b, err := json.Marshal(g.comments)
+	if err != nil {
+		return err
+	}
+	return g.rnr.WriteFile(g.gerritCommentsFilename, string(b))
 }
 
 var testEAPVCRCmd = &cobra.Command{
@@ -131,7 +168,10 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 		return fmt.Errorf("error uploading replaying logs: %w", err)
 	}
 
-	if hasPanics, err := handleEAPVCRPanics(head, kokoroArtifactsDir, modifiedFilePath, replayingResult, vcr.Replaying, rnr); err != nil {
+	// Comments for VCR must go in the gerrit_comments_acctest.json json file.
+	commenter := NewGerritCommenter(filepath.Join(kokoroArtifactsDir, "gerrit_comments_acctest.json"), rnr)
+
+	if hasPanics, err := handleEAPVCRPanics(head, replayingResult, vcr.Replaying, commenter); err != nil {
 		return fmt.Errorf("error handling panics: %w", err)
 	} else if hasPanics {
 		return nil
@@ -154,8 +194,11 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 	if err != nil {
 		return fmt.Errorf("error formatting post replay comment: %w", err)
 	}
-	if err := postGerritComment(kokoroArtifactsDir, modifiedFilePath, comment, rnr); err != nil {
-		return fmt.Errorf("error posting comment: %w", err)
+	c := GerritComment{
+		Message: comment,
+	}
+	if err := commenter.Add(c); err != nil {
+		return fmt.Errorf("error adding comment: %w", err)
 	}
 	if len(replayingResult.FailedTests) > 0 {
 		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
@@ -182,7 +225,7 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 			return fmt.Errorf("error uploading recording logs: %w", err)
 		}
 
-		if hasPanics, err := handleEAPVCRPanics(head, kokoroArtifactsDir, modifiedFilePath, recordingResult, vcr.Recording, rnr); err != nil {
+		if hasPanics, err := handleEAPVCRPanics(head, recordingResult, vcr.Recording, commenter); err != nil {
 			return fmt.Errorf("error handling panics: %w", err)
 		} else if hasPanics {
 			return nil
@@ -222,29 +265,27 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 		if err != nil {
 			return fmt.Errorf("error formatting record replay comment: %w", err)
 		}
-		if err := postGerritComment(kokoroArtifactsDir, modifiedFilePath, recordReplayComment, rnr); err != nil {
-			return fmt.Errorf("error posting comment: %w", err)
+		c = GerritComment{
+			Message: recordReplayComment,
+		}
+		if err := commenter.Add(c); err != nil {
+			return fmt.Errorf("error adding comment: %w", err)
 		}
 	}
 	return nil
 }
 
-func handleEAPVCRPanics(head, kokoroArtifactsDir, modifiedFilePath string, result vcr.Result, mode vcr.Mode, rnr ExecRunner) (bool, error) {
+func handleEAPVCRPanics(head string, result vcr.Result, mode vcr.Mode, commenter *GerritCommenter) (bool, error) {
 	if len(result.Panics) > 0 {
-		comment := fmt.Sprintf(`The provider crashed while running the VCR tests in %s mode.
+		c := GerritComment{
+			Message: fmt.Sprintf(`The provider crashed while running the VCR tests in %s mode.
 Please fix it to complete your CL
 View the [build log](https://storage.cloud.google.com/ci-vcr-logs/%s/refs/heads/%s/build-log/%s_test.log)`,
-			provider.Private.String(), mode.Upper(), head, mode.Lower())
-		if err := postGerritComment(kokoroArtifactsDir, modifiedFilePath, comment, rnr); err != nil {
-			return true, fmt.Errorf("error posting comment: %v", err)
+				provider.Private.String(), mode.Upper(), head, mode.Lower()),
 		}
-		return true, nil
+		return true, commenter.Add(c)
 	}
 	return false, nil
-}
-
-func postGerritComment(kokoroArtifactsDir, modifiedFilePath, comment string, rnr ExecRunner) error {
-	return rnr.AppendFile(filepath.Join(kokoroArtifactsDir, "gerrit_comments.json"), fmt.Sprintf("\n{path: \"%s\", message: \"%s\"}", modifiedFilePath, comment))
 }
 
 func init() {

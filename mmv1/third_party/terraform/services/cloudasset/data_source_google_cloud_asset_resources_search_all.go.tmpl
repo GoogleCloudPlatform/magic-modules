@@ -97,7 +97,14 @@ func datasourceGoogleCloudAssetResourcesSearchAllRead(d *schema.ResourceData, me
 	query := d.Get("query").(string)
 	assetTypes := d.Get("asset_types").([]interface{})
 
-	url := fmt.Sprintf("https://cloudasset.googleapis.com/v1p1beta1/%s/resources:searchAll", scope)
+	universeDomain := config.UniverseDomain
+	url := ""
+	if universeDomain != "" && universeDomain != "googleapis.com" {
+		url = fmt.Sprintf("https://cloudasset.%s/v1p1beta1/%s/resources:searchAll", universeDomain, scope)
+	} else {
+		url = fmt.Sprintf("https://cloudasset.googleapis.com/v1p1beta1/%s/resources:searchAll", scope)
+	}
+	
 	params["query"] = query
 
 	url, err = transport_tpg.AddArrayQueryParams(url, "asset_types", assetTypes)
