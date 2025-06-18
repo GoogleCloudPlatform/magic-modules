@@ -114,12 +114,12 @@ func TestAccSpannerBackupSchedule_MRCMEKIncrementalBackup(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": suffix,
-		"key_ring1":      kms1.KeyRing.Name,
-		"key_name1":      kms1.CryptoKey.Name,
-		"key_ring2":      kms2.KeyRing.Name,
-		"key_name2":      kms2.CryptoKey.Name,
-		"key_ring3":      kms3.KeyRing.Name,
-		"key_name3":      kms3.CryptoKey.Name,
+		"key_ring1":     kms1.KeyRing.Name,
+		"key_name1":     kms1.CryptoKey.Name,
+		"key_ring2":     kms2.KeyRing.Name,
+		"key_name2":     kms2.CryptoKey.Name,
+		"key_ring3":     kms3.KeyRing.Name,
+		"key_name3":     kms3.CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -149,12 +149,12 @@ func TestAccSpannerBackupSchedule_MRCMEKFullBackup(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": suffix,
-		"key_ring1":      kms1.KeyRing.Name,
-		"key_name1":      kms1.CryptoKey.Name,
-		"key_ring2":      kms2.KeyRing.Name,
-		"key_name2":      kms2.CryptoKey.Name,
-		"key_ring3":      kms3.KeyRing.Name,
-		"key_name3":      kms3.CryptoKey.Name,
+		"key_ring1":     kms1.KeyRing.Name,
+		"key_name1":     kms1.CryptoKey.Name,
+		"key_ring2":     kms2.KeyRing.Name,
+		"key_name2":     kms2.CryptoKey.Name,
+		"key_ring3":     kms3.KeyRing.Name,
+		"key_name3":     kms3.CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
