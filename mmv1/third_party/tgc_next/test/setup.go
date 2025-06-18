@@ -96,11 +96,11 @@ func ReadTestsDataFromGcs() (map[string]TgcMetadataPayload, error) {
 func prepareTestData(testName string) (map[string]ResourceTestData, string, error) {
 	var err error
 	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
 	TestsMetadata, err = ReadTestsDataFromGcs()
 	if err != nil {
 		return nil, "", err
 	}
-	cacheMutex.Unlock()
 
 	testMetadata := TestsMetadata[testName]
 	resourceMetadata := testMetadata.ResourceMetadata
@@ -242,7 +242,6 @@ func convertToAssetMap(assets []caiasset.Asset) map[string]caiasset.Asset {
 	assetMap := make(map[string]caiasset.Asset)
 
 	for _, asset := range assets {
-		asset.Resource.Data = nil
 		assetMap[asset.Type] = asset
 	}
 	return assetMap

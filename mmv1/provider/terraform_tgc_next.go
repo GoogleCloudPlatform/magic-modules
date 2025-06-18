@@ -31,7 +31,7 @@ import (
 	"github.com/otiai10/copy"
 )
 
-// This proivder is for both tfplan2cai and cai2hcl conversions,
+// TerraformGoogleConversionNext is for both tfplan2cai and cai2hcl conversions
 // and copying other files, such as transport.go
 type TerraformGoogleConversionNext struct {
 	TargetVersionName string
@@ -93,6 +93,8 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs, "tfplan2cai")
+		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs, "cai2hcl")
+		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
 }
 
@@ -110,6 +112,29 @@ func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, t
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
+}
+
+func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+	eligibleExample := false
+	for _, example := range object.Examples {
+		if !example.ExcludeTest {
+			if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
+				eligibleExample = true
+				break
+			}
+		}
+	}
+	if !eligibleExample {
+		return
+	}
+
+	productName := tgc.Product.ApiName
+	targetFolder := path.Join(outputFolder, "test", "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_generated_test.go", productName, google.Underscore(object.Name)))
+	templateData.GenerateTGCNextTestFile(targetFilePath, object)
 }
 
 func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
