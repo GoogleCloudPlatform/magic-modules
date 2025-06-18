@@ -36,7 +36,6 @@ examples:
     primary_resource_id: 'prefixes'
     vars:
       sub_prefix_name: 'sub-prefix-test'
-    skip_vcr: true
 parameters:
   - name: 'public_delegated_prefix'
     type: String
@@ -45,62 +44,62 @@ parameters:
     description: |
           The name of the parent Public Delegated Prefix that this sub-prefix belongs to.
 properties:
-        - name: 'name'
-          type: String
-          required: true
-          description: |
-            Name of the resource. The name must be 1-63 characters long, and
-            comply with RFC1035. Specifically, the name must be 1-63 characters
-            long and match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?`
-            which means the first character must be a lowercase letter, and all
-            following characters must be a dash, lowercase letter, or digit,
-            except the last character, which cannot be a dash.
-        - name: 'description'
-          type: String
-          description: |
-            Optional description of this sub public delgated prefix.
-        - name: 'region'
-          type: String
-          url_param_only: true
-          required: true
-          description: |
-            Output-only. The region of the sub public delegated prefix if it is regional. If absent, the sub prefix is global.
-        - name: 'parentPrefix'
-          type: String
-          description:
-            The URL of parent PublicDelegatedPrefix.
-          required: true
-          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
-        - name: 'status'
-          type: Enum
-          output: true
-          description: |
-            Output-only. The status of the sub public delegated prefix.
-          enum_values:
-            - 'INITIALIZING'
-            - 'READY_TO_ANNOUNCE'
-            - 'ANNOUNCED'
-            - 'DELETING'
-        - name: 'ipCidrRange'
-          type: String
-          required: true
-          description: |
-            The IP address range in the CIDR format represented by this sub prefix. 
-        - name: 'delegatedProject'
-          type: String
-          required: true
-          description: |
-            Name of the project scoping this PublicDelegatedSubPrefix.
-        - name: 'isAddress'
-          type: Boolean
-          description: |
-            Whether the sub prefix is delegated for address creation. 
-        - name: 'mode'
-          type: Enum
-          description: |
-            The PublicDelegatedSubPrefix mode for IPv6 only.
-        - name: 'allocatablePrefixLength'
-          type: Integer
-          default_from_api: true
-          description: |
-            The allocatable prefix length supported by this PublicDelegatedSubPrefix.
+  - name: 'name'
+    type: String
+    required: true
+    description: |
+      Name of the resource. The name must be 1-63 characters long, and
+      comply with RFC1035. Specifically, the name must be 1-63 characters
+      long and match the regular expression `[a-z]([-a-z0-9]*[a-z0-9])?`
+      which means the first character must be a lowercase letter, and all
+      following characters must be a dash, lowercase letter, or digit,
+      except the last character, which cannot be a dash.
+  - name: 'description'
+    type: String
+    description: |
+      Optional description of this sub public delgated prefix.
+  - name: 'region'
+    type: String
+    url_param_only: true
+    required: true
+    description: |
+      Output-only. The region of the sub public delegated prefix if it is regional. If absent, the sub prefix is global.
+  - name: 'parentPrefix'
+    type: String
+    description:
+      The URL of parent PublicDelegatedPrefix.
+    required: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+  - name: 'status'
+    type: Enum
+    output: true
+    description: |
+      Output-only. The status of the sub public delegated prefix.
+    enum_values:
+      - 'INITIALIZING'
+      - 'READY_TO_ANNOUNCE'
+      - 'ANNOUNCED'
+      - 'DELETING'
+  - name: 'ipCidrRange'
+    type: String
+    required: true
+    description: |
+      The IP address range in the CIDR format represented by this sub prefix. 
+  - name: 'delegatedProject'
+    type: String
+    required: true
+    description: |
+      Name of the project scoping this PublicDelegatedSubPrefix.
+  - name: 'isAddress'
+    type: Boolean
+    description: |
+      Whether the sub prefix is delegated for address creation. 
+  - name: 'mode'
+    type: Enum
+    description: |
+      The PublicDelegatedSubPrefix mode for IPv6 only.
+  - name: 'allocatablePrefixLength'
+    type: Integer
+    default_from_api: true
+    description: |
+      The allocatable prefix length supported by this PublicDelegatedSubPrefix.
