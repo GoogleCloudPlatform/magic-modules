@@ -9,39 +9,33 @@ import (
 )
 
 func DataSourceGoogleKmsKeyHandle() *schema.Resource {
-	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceKMSCryptoKey().Schema)
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceKMSKeyHandle().Schema)
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "name")
-	tpgresource.AddRequiredFieldsToSchema(dsSchema, "key_ring")
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "location")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
-		Read:   dataSourceGoogleKmsCryptoKeyRead,
+		Read:   dataSourceGoogleKmsKeyHandleRead,
 		Schema: dsSchema,
 	}
 
 }
 
-func dataSourceGoogleKmsCryptoKeyRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceGoogleKmsKeyHandleRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-
-	keyRingId, err := parseKmsKeyRingId(d.Get("key_ring").(string), config)
+	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
 		return err
 	}
-
-	cryptoKeyId := KmsCryptoKeyId{
-		KeyRingId: *keyRingId,
-		Name:      d.Get("name").(string),
+	keyHandleId := KmsKeyHandleId{
+		Name:     d.Get("name").(string),
+		Location: d.Get("location").(string),
+		Project:  project,
 	}
-
-	id := cryptoKeyId.CryptoKeyId()
+	id := keyHandleId.KeyHandleId()
 	d.SetId(id)
-
-	err = resourceKMSCryptoKeyRead(d, meta)
+	err = resourceKMSKeyHandleRead(d, meta)
 	if err != nil {
-		return err
-	}
-
-	if err := tpgresource.SetDataSourceLabels(d); err != nil {
 		return err
 	}
 
