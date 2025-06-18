@@ -1,0 +1,6 @@
+location := d.Get("location").(string)
+
+// insert location into url for a different endpoint.
+if strings.HasPrefix(url, "https://dialogflow.googleapis.com/v2/") {
+	url = strings.Replace(url, "https://dialogflow", fmt.Sprintf("https://%s-dialogflow", location), 1)
+}
