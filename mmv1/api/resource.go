@@ -230,6 +230,9 @@ type Resource struct {
 	// (i.e. terraform-provider-conversion)
 	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
 
+	// If true, include resource in the new package of TGC (terraform-provider-conversion)
+	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
+
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 
@@ -1988,11 +1991,11 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 	for _, tp := range r.AllUserProperties() {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
+		} else if tp.IsMissingInCai {
+			props = append(props, tp.MetadataLineage())
 		}
 	}
-	for _, tp := range e.TGCTestIgnoreExtra {
-		props = append(props, tp)
-	}
+	props = append(props, e.TGCTestIgnoreExtra...)
 
 	slices.Sort(props)
 	return props

@@ -250,6 +250,7 @@ func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 {{- else }}
 	return mergeResourceMaps(
 		handwrittenTfplan2caiResources,
+		generatedResources,
 	)
 {{- end }}
 }

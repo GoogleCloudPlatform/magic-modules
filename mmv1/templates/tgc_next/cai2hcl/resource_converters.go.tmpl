@@ -29,7 +29,9 @@ package converters
 
 import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/models"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/services/compute"
+	{{- range $service := $.Products }}
+	  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/services/{{ lower $service.Name }}"
+	{{- end }}
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/services/resourcemanager"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -40,7 +42,14 @@ var provider *schema.Provider = tpg_provider.Provider()
 
 // ConverterMap is a collection of converters instances, indexed by cai asset type.
 var ConverterMap = map[string]models.Converter{
+	// ####### START handwritten resources ###########
 	resourcemanager.ProjectAssetType: resourcemanager.NewProjectConverter(provider),
 	compute.ComputeInstanceAssetType: compute.NewComputeInstanceConverter(provider),
-	compute.ComputeAddressAssetType:  compute.NewComputeAddressConverter(provider),
+	// ####### END handwritten resources ###########
+
+	{{- range $object := $.ResourcesForVersion }}
+		{{- if $object.ResourceName }}
+			{{ $object.ServiceName }}.{{ $object.ResourceName }}AssetType: {{ $object.ServiceName }}.New{{ $object.ResourceName -}}Converter(provider),
+		{{- end }}
+	{{- end }}
 }

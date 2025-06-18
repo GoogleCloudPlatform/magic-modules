@@ -49,6 +49,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
   post_create: 'templates/terraform/post_create/labels.tmpl'
   tgc_encoder: 'templates/tgc_next/encoders/compute_address.go.tmpl'

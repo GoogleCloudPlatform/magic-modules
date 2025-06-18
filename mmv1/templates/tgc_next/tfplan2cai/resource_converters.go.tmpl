@@ -29,12 +29,21 @@ package converters
 
 import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/cai"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/services/compute"
+	{{- range $service := $.Products }}
+	  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/services/{{ lower $service.Name }}"
+	{{- end }}
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/services/resourcemanager"
 )
 
 var ConverterMap = map[string]cai.ResourceConverter{
+	// ####### START handwritten resources ###########
 	"google_project":          resourcemanager.ResourceConverterProject(),
 	"google_compute_instance": compute.ResourceConverterComputeInstance(),
-	"google_compute_address":  compute.ResourceConverterComputeAddress(),
+	// ####### END handwritten resources ###########
+
+	{{- range $object := $.ResourcesForVersion }}
+		{{- if $object.ResourceName }}
+			"{{ $object.TerraformName }}": {{ $object.ServiceName }}.ResourceConverter{{ $object.ResourceName -}}(),
+		{{- end }}
+	{{- end }}
 }
