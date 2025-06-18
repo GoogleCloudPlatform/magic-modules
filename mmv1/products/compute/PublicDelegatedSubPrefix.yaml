@@ -36,6 +36,7 @@ examples:
     primary_resource_id: 'prefixes'
     vars:
       sub_prefix_name: 'sub-prefix-test'
+    skip_vcr: true
 parameters:
   - name: 'public_delegated_prefix'
     type: String
