@@ -182,7 +182,7 @@ properties:
       - name: 'projects'
         type: Array
         description: |
-          List of project IDs with which the reservation is shared. Only available in beta.
+          List of project IDs with which the reservation is shared.
         item_type:
           type: String
         min_version: 'beta'
@@ -283,7 +283,7 @@ properties:
           - name: 'maintenanceInterval'
             type: Enum
             description: |
-              Specifies the frequency of planned maintenance events. The accepted values are: PERIODIC.
+              Specifies the frequency of planned maintenance events.
             enum_values:
               - 'AS_NEEDED'
               - 'PERIODIC'
@@ -338,7 +338,6 @@ properties:
         type: Enum
         description: |
           Sharing config for all Google Cloud services.
-          Possible values: ["ALLOW_ALL", "DISALLOW_ALL", "SERVICE_SHARE_TYPE_UNSPECIFIED"].
         enum_values:
           - 'ALLOW_ALL'
           - 'DISALLOW_ALL'
