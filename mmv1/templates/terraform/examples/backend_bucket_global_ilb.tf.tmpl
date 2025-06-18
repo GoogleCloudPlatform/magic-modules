@@ -38,3 +38,8 @@ resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
   bucket_name           = google_storage_bucket.{{$.PrimaryResourceId}}.name
   load_balancing_scheme = "INTERNAL_MANAGED"
 }
+
+resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
+  name     = "{{index $.Vars "bucket_name"}}"
+  location = "US"
+}
