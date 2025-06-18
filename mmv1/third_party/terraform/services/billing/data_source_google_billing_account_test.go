@@ -2,7 +2,6 @@ package billing_test
 
 import (
 	"fmt"
-	"google.golang.org/grpc/balancer/grpclb/state"
 	"regexp"
 	"testing"
 
