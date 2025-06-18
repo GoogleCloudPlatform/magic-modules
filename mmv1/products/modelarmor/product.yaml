@@ -21,4 +21,4 @@ versions:
    base_url: 'https://modelarmor.{{location}}.rep.googleapis.com/v1/'
  - name: beta
    base_url: 'https://modelarmor.{{location}}.rep.googleapis.com/v1/'
-caibaseurl: "https://modelarmor.googleapis.com/v1/" 
+caibaseurl: "https://modelarmor.googleapis.com/v1/"

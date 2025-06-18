@@ -6,7 +6,6 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     if !ok {
         return nil // Should not happen if API is consistent
     }
-
     // Populating the field even if the returned block is empty.
     transformed := make(map[string]interface{})
 
