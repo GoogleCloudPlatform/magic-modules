@@ -125,4 +125,4 @@ Description of the change and how users should adjust their configuration (if ne
 ### `instance` is now removed
 
 `instance` has been removed in favor of `instance_name`.
-`path` does not allow strings starting with /
+
