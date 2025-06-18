@@ -218,7 +218,7 @@ resource "google_access_context_manager_access_level" "test-access" {
     combining_function = "AND"
     conditions {
       ip_subnetworks = ["192.0.4.0/24"]
-      members = ["user:test@google.com", "user:test2@google.com"]
+      members = ["group:test@google.com", "group:test2@google.com"]
       negate = false
       device_policy {
         require_screen_lock = false
