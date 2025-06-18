@@ -37,7 +37,7 @@ import (
 type TerraformGoogleConversionNext struct {
 	ResourceCount int
 
-	ResourcesForVersion []map[string]string
+	ResourcesForVersion []ResourceIdentifier
 
 	TargetVersionName string
 
@@ -46,6 +46,12 @@ type TerraformGoogleConversionNext struct {
 	Product *api.Product
 
 	StartTime time.Time
+}
+
+type ResourceIdentifier struct {
+	ServiceName   string
+	TerraformName string
+	ResourceName  string
 }
 
 func NewTerraformGoogleConversionNext(product *api.Product, versionName string, startTime time.Time) TerraformGoogleConversionNext {
@@ -316,10 +322,10 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 
 			tgc.ResourceCount++
 
-			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, map[string]string{
-				"ServiceName":   service,
-				"TerraformName": object.TerraformName(),
-				"ResourceName":  object.ResourceName(),
+			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, ResourceIdentifier{
+				ServiceName:   service,
+				TerraformName: object.TerraformName(),
+				ResourceName:  object.ResourceName(),
 			})
 		}
 	}

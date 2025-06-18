@@ -69,10 +69,9 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 // Tests a single resource
 func testSingleResource(t *testing.T, testName string, testData ResourceTestData, tfDir string, ignoredFields []string, logger *zap.Logger, primaryResource bool) error {
 	resourceType := testData.ResourceType
-	var tfplan2caiNotSupported, cai2hclNotSupported bool
-	if _, ok := tfplan2caiconverters.ConverterMap[resourceType]; !ok {
+	var tfplan2caiSupported, cai2hclSupported bool
+	if _, tfplan2caiSupported = tfplan2caiconverters.ConverterMap[resourceType]; !tfplan2caiSupported {
 		log.Printf("%s is not supported in tfplan2cai conversion.", resourceType)
-		tfplan2caiNotSupported = true
 	}
 
 	assets := make([]caiasset.Asset, 0)
@@ -82,23 +81,22 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		if assetType == "" {
 			return fmt.Errorf("cai asset is unavailable for %s", assetName)
 		}
-		if _, ok := cai2hclconverters.ConverterMap[assetType]; !ok {
+		if _, cai2hclSupported = cai2hclconverters.ConverterMap[assetType]; !cai2hclSupported {
 			log.Printf("%s is not supported in cai2hcl conversion.", assetType)
-			cai2hclNotSupported = true
 		}
 	}
 
-	if tfplan2caiNotSupported && cai2hclNotSupported {
+	if !tfplan2caiSupported && !cai2hclSupported {
 		if primaryResource {
 			return fmt.Errorf("conversion of the primary resource %s is not supported in tgc", testData.ResourceAddress)
 		} else {
-			log.Printf("Test for %s is skipped as the resource is not supported in tgc.", resourceType)
+			log.Printf("Test for %s is skipped as conversion of the resource is not supported in tgc.", resourceType)
 			return nil
 		}
 	}
 
-	if tfplan2caiNotSupported || cai2hclNotSupported {
-		return fmt.Errorf("resource %s is not supported in both tfplan2cai and cai2hcl in tgc", resourceType)
+	if !(tfplan2caiSupported && cai2hclSupported) {
+		return fmt.Errorf("resource %s is supported in either tfplan2cai or cai2hcl within tgc, but not in both", resourceType)
 	}
 
 	// Uncomment these lines when debugging issues locally
