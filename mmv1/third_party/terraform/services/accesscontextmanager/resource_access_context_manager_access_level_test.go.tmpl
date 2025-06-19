@@ -208,7 +208,7 @@ func testAccAccessContextManagerAccessLevel_full(org, policyTitle, levelTitleNam
     "billing_account":  envvar.GetTestBillingAccountFromEnv(t),
     "random_suffix":    acctest.RandString(t, 10),
     "policy_title":     policyTitle,
-    "level_title_name": levelTitleName
+    "level_title_name": levelTitleName,
   }
 
 	return acctest.Nprintf(`
