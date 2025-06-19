@@ -26,7 +26,7 @@ func TestAccComputeInterconnect_computeInterconnectBasicTestExample_update(t *te
 				Config: testAccComputeInterconnect_computeInterconnectBasicTestExample_basic(context),
 			},
 			{
-				ResourceName:            "google_compute_interconnect.example-interconnect",
+				ResourceName:            "google_compute_interconnect.foobar-interconnect",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
@@ -35,12 +35,12 @@ func TestAccComputeInterconnect_computeInterconnectBasicTestExample_update(t *te
 				Config: testAccComputeInterconnect_computeInterconnectBasicTestExample_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_compute_interconnect.example-interconnect", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_compute_interconnect.foobar-interconnect", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
 			{
-				ResourceName:            "google_compute_interconnect.example-interconnect",
+				ResourceName:            "google_compute_interconnect.foobar-interconnect",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "location", "terraform_labels"},
