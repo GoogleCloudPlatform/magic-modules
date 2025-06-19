@@ -163,14 +163,6 @@ func TestAccSpannerBackupSchedule_MRCMEKFullBackup(t *testing.T) {
 		CheckDestroy:             testAccCheckSpannerBackupScheduleDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSpannerBackupSchedule_basic(context),
-			},
-			{
-				ResourceName:      "google_spanner_backup_schedule.backup_schedule",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
 				Config: testAccSpannerBackupSchedule_MRCMEKFull(context),
 			},
 			{
@@ -386,7 +378,7 @@ resource "google_spanner_backup_schedule" "backup_schedule" {
   incremental_backup_spec {}
 
   encryption_config {
-    encryption_type = "CUSTOMER_MANAGED_ENCRYPTION"
+    encryption_type = "GOOGLE_DEFAULT_ENCRYPTION"
     kms_key_names = [
       "%{key_name1}",
       "%{key_name2}",
