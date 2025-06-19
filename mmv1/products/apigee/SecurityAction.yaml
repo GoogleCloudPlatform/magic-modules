@@ -63,14 +63,6 @@ parameters:
     immutable: true
     url_param_only: true
 properties:
-  # not sure if it is still required in the payload
-  - name: 'name'
-    type: String
-    description: |
-      This field is ignored during creation as per AIP-133. Please set the securityActionId field in the
-      CreateSecurityActionRequest when creating a new SecurityAction.
-      Format: organizations/{org}/environments/{env}/securityActions/{securityAction}
-    immutable: true
   - name: 'description'
     type: String
     description: |
