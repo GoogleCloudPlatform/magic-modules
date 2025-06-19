@@ -31,6 +31,10 @@ The following arguments are supported:
 * `is_secret_data_base64` - (Optional) If set to 'true', the secret data is
     expected to be base64-encoded string.
 
+* `fetch_secret_data` - (Optional) If set to 'false', the `secret_data` 
+    will not be fetched.
+
+
 ## Attributes Reference
 
 The following attributes are exported:
