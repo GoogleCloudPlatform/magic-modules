@@ -425,7 +425,6 @@ properties:
     type: Boolean
     description: |
       Enable or disable the Application Aware Interconnect(AAI) feature on this interconnect.
-    send_empty_value: true
     min_version: beta
   - name: 'applicationAwareInterconnect'
     type: NestedObject
