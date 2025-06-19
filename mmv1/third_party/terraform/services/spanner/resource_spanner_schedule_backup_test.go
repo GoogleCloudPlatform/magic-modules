@@ -350,7 +350,7 @@ resource "google_spanner_instance" "instance" {
   config       = "nam3"
   display_name = "My Instance"
   num_nodes    = 1
-  edition      = "ENTERPRISE"
+  edition      = "ENTERPRISE_PLUS"
 }
 
 resource "google_spanner_database" "database" {
@@ -404,7 +404,7 @@ resource "google_spanner_instance" "instance" {
   config       = "nam3"
   display_name = "My Instance"
   num_nodes    = 1
-  edition      = "ENTERPRISE"
+  edition      = "ENTERPRISE_PLUS"
 }
 
 resource "google_spanner_database" "database" {
