@@ -22,7 +22,15 @@ if d.Get("create_ignore_already_exists").(bool) {
         Headers:   headers,
     })
     // Do normal create if membership does not exist
-    if err == nil {
+    
+    if err != nil {
+        gerr, ok := err.(*googleapi.Error)
+        notFound := ok && gerr.Code == 404
+        // If group membership is not found, we can proceed with the create operation.
+        if !notFound {
+            return fmt.Errorf("Error checking if GroupMembership exists: %s", err)
+        }
+    } else { 
         // Set computed resource properties from create API response so that they're available on the subsequent Read call.
         err = resourceCloudIdentityGroupMembershipPostCreateSetComputedFields(d, meta, res)
         if err != nil {
