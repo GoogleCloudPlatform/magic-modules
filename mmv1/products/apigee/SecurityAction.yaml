@@ -181,7 +181,7 @@ properties:
       - 'allow'
       - 'deny'
       - 'flag'
-    properties:
+    properties: []
   - name: 'deny'
     type: NestedObject
     description: |
