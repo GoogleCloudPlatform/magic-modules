@@ -20,7 +20,7 @@ func TestAccNetappBackup_NetappBackupFull_update(t *testing.T) {
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetappBackupDestroyProducer(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
+		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
 		Steps: []resource.TestStep{
