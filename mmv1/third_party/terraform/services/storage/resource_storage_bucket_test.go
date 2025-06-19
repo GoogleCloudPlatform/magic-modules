@@ -2876,9 +2876,6 @@ resource "google_storage_bucket" "bucket" {
   force_destroy = true
   ip_filter  {
     mode = "Enabled"
-    public_network_source {
-      allowed_ip_cidr_ranges = ["0.0.0.0/0", "::/0"]
-    }
     vpc_network_sources {
       network = google_compute_network.vpc_gcs_ipfilter1.id
       allowed_ip_cidr_ranges = ["0.0.0.0/0"]

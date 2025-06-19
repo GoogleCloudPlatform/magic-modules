@@ -635,7 +635,7 @@ func ResourceStorageBucket() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: `Whether to allow cross-org VPCs in the bucket's IP filter configuration.`,
-              RequiredWith: []string{"ip_filter.0.vpc_network_sources"},
+							RequiredWith: []string{"ip_filter.0.vpc_network_sources"},
 						},
 						"allow_all_service_agent_access" : {
 							Type:        schema.TypeBool,
