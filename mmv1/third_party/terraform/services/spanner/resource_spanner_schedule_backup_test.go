@@ -379,11 +379,6 @@ resource "google_spanner_backup_schedule" "backup_schedule" {
 
   encryption_config {
     encryption_type = "GOOGLE_DEFAULT_ENCRYPTION"
-    kms_key_names = [
-      "%{key_name1}",
-      "%{key_name2}",
-      "%{key_name3}",
-    ]
   }
 }
 `, context)
