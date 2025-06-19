@@ -98,9 +98,9 @@ resource "google_compute_interconnect" "foobar-interconnect" {
     mykey = "myvalue"
   }
   aai_enabled = true
-  application_aware_interconnect = {
+  application_aware_interconnect  {
     profile_description = "application awareness config with BandwidthPercentage policy."
-	bandwidth-percentage_policy = {
+	bandwidth-percentage_policy  {
 	  bandwidth_percentages = [
 	 	 {
 	  		traffic_class = "TC1"
