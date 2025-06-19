@@ -34,7 +34,6 @@ The following arguments are supported:
 * `fetch_secret_data` - (Optional) If set to 'false', the `secret_data` 
     will not be fetched.
 
-
 ## Attributes Reference
 
 The following attributes are exported:
