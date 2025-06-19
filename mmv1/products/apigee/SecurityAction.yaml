@@ -22,7 +22,7 @@ references:
   guides:
     'Creating security actions': 'https://cloud.google.com/apigee/docs/api-security/security-actions-api#create-security-actions'
   api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.environments.securityActions/create'
-docs: 'https://cloud.google.com/apigee/docs/api-security/security-actions'
+docs:
 base_url: 'organizations/{{org_id}}/environments/{{env_id}}/securityActions'
 self_link: 'organizations/{{org_id}}/environments/{{env_id}}/securityActions/{{security_action_id}}'
 create_url: 'organizations/{{org_id}}/environments/{{env_id}}/securityActions?securityActionId={{security_action_id}}'
