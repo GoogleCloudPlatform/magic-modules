@@ -2135,7 +2135,7 @@ func BootstrapSharedTestTagKeyDetails(t *testing.T, testId string, parent string
 		}
 	}
 
-	createTagKeyResponse, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	getTagKeyResponse, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		Project:   config.Project,
@@ -2149,7 +2149,7 @@ func BootstrapSharedTestTagKeyDetails(t *testing.T, testId string, parent string
 	}
 
 	return map[string]string{
-		"name": createTagKeyResponse["name"].(string),
+		"name": getTagKeyResponse["name"].(string),
 		"shared_tag_key":    sharedTagKey,
 	}
 }
@@ -2232,7 +2232,7 @@ func BootstrapSharedTestTagValueDetails(t *testing.T, testId string, tagKey, par
 			t.Fatalf("Error waiting to create TagValue: %s", err)
 		}
 	}
-	createTagValueResponse, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	getTagValueResponse, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
 		Project:   config.Project,
@@ -2246,7 +2246,7 @@ func BootstrapSharedTestTagValueDetails(t *testing.T, testId string, tagKey, par
 	}
 
     return map[string]string{
-		"name": createTagValueResponse["name"].(string),
+		"name": getTagValueResponse["name"].(string),
 		"shared_tag_value":    sharedTagValue,
 	}
 }
