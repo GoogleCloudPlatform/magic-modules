@@ -8,7 +8,6 @@ resource "google_compute_public_delegated_prefix" "{{$.PrimaryResourceId}}" {
 
   public_delegated_sub_prefixs {
     name = "{{$.Vars.sub_prefix_name_1}}"
-    region = "us-central1"
     description = "Public delegated prefix for testing public delegated sub prefix"
     delegatee_project = "tf-static-byoip"
     ip_cidr_range = "192.0.2.0/28"
