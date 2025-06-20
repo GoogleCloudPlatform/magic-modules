@@ -35,6 +35,7 @@ resource "google_datastream_stream" "default" {
       single_target_dataset {
         dataset_id = google_bigquery_dataset.postgres.id
       }
+      merge {}
     }
   }
 

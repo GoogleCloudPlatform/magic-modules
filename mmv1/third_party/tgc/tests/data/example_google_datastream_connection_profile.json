@@ -11,6 +11,9 @@
             "data": {
                 "bigqueryProfile": null,
                 "displayName": "Connection profile",
+                "labels": {
+                  "goog-terraform-provisioned": "true"
+                },
                 "gcsProfile": {
                     "bucket": "my-bucket",
                     "rootPath": "/path"

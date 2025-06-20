@@ -1,0 +1,24 @@
+[
+  {
+    "name": "//aiplatform.googleapis.com/placeholder-VSDAy5Fn",
+    "asset_type": "aiplatform.googleapis.com/Dataset",
+    "resource": {
+      "version": "v1beta1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/aiplatform/v1beta1/rest",
+      "discovery_name": "Dataset",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+      "data": {
+        "displayName": "terraform",
+        "labels": {
+          "env": "test",
+          "goog-terraform-provisioned": "true"
+        },
+        "metadataSchemaUri": "gs://google-cloud-aiplatform/schema/dataset/metadata/image_1.0.0.yaml"
+      }
+    },
+    "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+    "ancestors": [
+      "organizations/{{.OrgID}}"
+    ]
+  }
+]

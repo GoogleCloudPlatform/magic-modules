@@ -11,6 +11,9 @@
             "data": {
                 "description": "example docker repository",
                 "format": "DOCKER",
+                "labels": {
+                  "goog-terraform-provisioned": "true"
+                },
                 "mode": "STANDARD_REPOSITORY"
             }
         },

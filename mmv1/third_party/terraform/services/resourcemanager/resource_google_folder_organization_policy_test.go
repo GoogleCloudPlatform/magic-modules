@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"google.golang.org/api/cloudresourcemanager/v1"
 )
 
@@ -310,6 +310,7 @@ func testAccFolderOrganizationPolicy_boolean(org, folder string, enforced bool) 
 resource "google_folder" "orgpolicy" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 
 resource "google_folder_organization_policy" "bool" {
@@ -329,6 +330,7 @@ func testAccFolderOrganizationPolicy_list_allowAll(org, folder string) string {
 resource "google_folder" "orgpolicy" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 
 resource "google_folder_organization_policy" "list" {
@@ -349,6 +351,7 @@ func testAccFolderOrganizationPolicy_list_allowSome(org, folder, project string)
 resource "google_folder" "orgpolicy" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 
 resource "google_folder_organization_policy" "list" {
@@ -369,6 +372,7 @@ func testAccFolderOrganizationPolicy_list_denySome(org, folder string) string {
 resource "google_folder" "orgpolicy" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 
 resource "google_folder_organization_policy" "list" {
@@ -392,6 +396,7 @@ func testAccFolderOrganizationPolicy_restore_defaultTrue(org, folder string) str
 resource "google_folder" "orgpolicy" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 
 resource "google_folder_organization_policy" "restore" {

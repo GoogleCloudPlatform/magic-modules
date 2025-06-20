@@ -19,13 +19,17 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"golang.org/x/exp/slices"
 )
 
 func TestChooseCoreReviewers(t *testing.T) {
-	firstCoreReviewer := AvailableReviewers()[0]
-	secondCoreReviewer := AvailableReviewers()[1]
+	if len(AvailableReviewers(nil)) < 2 {
+		t.Fatalf("not enough available reviewers (%v) to test (need at least 2)", AvailableReviewers(nil))
+	}
+	firstCoreReviewer := AvailableReviewers(nil)[0]
+	secondCoreReviewer := AvailableReviewers(nil)[1]
 	cases := map[string]struct {
 		RequestedReviewers                               []User
 		PreviousReviewers                                []User
@@ -35,7 +39,7 @@ func TestChooseCoreReviewers(t *testing.T) {
 		"no previous review requests assigns new reviewer from team": {
 			RequestedReviewers:      []User{},
 			PreviousReviewers:       []User{},
-			ExpectReviewersFromList: AvailableReviewers(),
+			ExpectReviewersFromList: AvailableReviewers(nil),
 			ExpectPrimaryReviewer:   true,
 		},
 		"requested reviewer from team means that primary reviewer was already selected": {
@@ -57,7 +61,7 @@ func TestChooseCoreReviewers(t *testing.T) {
 		"previously involved reviewers that are not team members are ignored": {
 			RequestedReviewers:      []User{},
 			PreviousReviewers:       []User{User{Login: "foobar"}},
-			ExpectReviewersFromList: AvailableReviewers(),
+			ExpectReviewersFromList: AvailableReviewers(nil),
 			ExpectPrimaryReviewer:   true,
 		},
 		"only previously involved team member reviewers will have review requested": {
@@ -138,5 +142,68 @@ func TestFormatReviewerComment(t *testing.T) {
 			}
 		})
 
+	}
+}
+
+func TestFindReviewerComment(t *testing.T) {
+	cases := map[string]struct {
+		Comments        []PullRequestComment
+		ExpectReviewer  string
+		ExpectCommentID int
+	}{
+		"no reviewer comment": {
+			Comments: []PullRequestComment{
+				{
+					Body: "this is not a reviewer comment",
+				},
+			},
+			ExpectReviewer:  "",
+			ExpectCommentID: 0,
+		},
+		"reviewer comment": {
+			Comments: []PullRequestComment{
+				{
+					Body: FormatReviewerComment("trodge"),
+					ID:   1234,
+				},
+			},
+			ExpectReviewer:  "trodge",
+			ExpectCommentID: 1234,
+		},
+		"multiple reviewer comments": {
+			Comments: []PullRequestComment{
+				{
+					Body:      FormatReviewerComment("trodge"),
+					ID:        1234,
+					CreatedAt: time.Date(2023, 12, 1, 0, 0, 0, 0, time.UTC),
+				},
+				{
+					Body:      FormatReviewerComment("c2thorn"),
+					ID:        5678,
+					CreatedAt: time.Date(2023, 12, 3, 0, 0, 0, 0, time.UTC),
+				},
+				{
+					Body:      FormatReviewerComment("melinath"),
+					ID:        91011,
+					CreatedAt: time.Date(2023, 12, 2, 0, 0, 0, 0, time.UTC),
+				},
+			},
+			ExpectReviewer:  "c2thorn",
+			ExpectCommentID: 5678,
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+			comment, reviewer := FindReviewerComment(tc.Comments)
+			if reviewer != tc.ExpectReviewer {
+				t.Errorf("wanted reviewer to be %s; got %s", tc.ExpectReviewer, reviewer)
+			}
+			if comment.ID != tc.ExpectCommentID {
+				t.Errorf("wanted comment ID to be %d; got %d", tc.ExpectCommentID, comment.ID)
+			}
+		})
 	}
 }

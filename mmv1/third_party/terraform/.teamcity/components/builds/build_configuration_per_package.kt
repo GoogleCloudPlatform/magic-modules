@@ -7,17 +7,20 @@
 
 package builds
 
+import ArtifactRules
 import DefaultBuildTimeoutDuration
 import DefaultParallelism
 import generated.ServiceParallelism
 import jetbrains.buildServer.configs.kotlin.BuildType
+import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnText
+import jetbrains.buildServer.configs.kotlin.failureConditions.failOnText
 import jetbrains.buildServer.configs.kotlin.sharedResources
 import jetbrains.buildServer.configs.kotlin.vcs.GitVcsRoot
 import replaceCharsId
 
 // BuildConfigurationsForPackages accepts a map containing details of multiple packages in a provider and returns a list of build configurations for them all.
 // Intended to be used in projects where we're testing all packages, e.g. the nightly test projects
-fun BuildConfigurationsForPackages(packages: Map<String, Map<String, String>>, providerName: String, parentProjectName: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration): List<BuildType> {
+fun BuildConfigurationsForPackages(packages: Map<String, Map<String, String>>, providerName: String, parentProjectName: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration, testPrefix: String = "TestAcc"): List<BuildType> {
     val list = ArrayList<BuildType>()
 
     // Create build configurations for all packages, except sweeper
@@ -26,7 +29,7 @@ fun BuildConfigurationsForPackages(packages: Map<String, Map<String, String>>, p
         val displayName: String = info.getValue("displayName").toString()
 
         val pkg = PackageDetails(packageName, displayName, providerName, parentProjectName)
-        val buildConfig = pkg.buildConfiguration(path, vcsRoot, sharedResources, environmentVariables)
+        val buildConfig = pkg.buildConfiguration(path, vcsRoot, sharedResources, environmentVariables, testPrefix = testPrefix)
         list.add(buildConfig)
     }
 
@@ -35,17 +38,16 @@ fun BuildConfigurationsForPackages(packages: Map<String, Map<String, String>>, p
 
 // BuildConfigurationForSinglePackage accepts details of a single package in a provider and returns a build configuration for it
 // Intended to be used in short-lived projects where we're testing specific packages, e.g. feature branch testing
-fun BuildConfigurationForSinglePackage(packageName: String, packagePath: String, packageDisplayName: String, providerName: String, parentProjectName: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration): BuildType{
+fun BuildConfigurationForSinglePackage(packageName: String, packagePath: String, packageDisplayName: String, providerName: String, parentProjectName: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration, testPrefix: String = "TestAcc"): BuildType{
     val pkg = PackageDetails(packageName, packageDisplayName, providerName, parentProjectName)
-    return pkg.buildConfiguration(packagePath, vcsRoot, sharedResources, environmentVariables)
+    return pkg.buildConfiguration(packagePath, vcsRoot, sharedResources, environmentVariables, testPrefix = testPrefix)
 }
 
 class PackageDetails(private val packageName: String, private val displayName: String, private val providerName: String, private val parentProjectName: String) {
 
     // buildConfiguration returns a BuildType for a service package
     // For BuildType docs, see https://teamcity.jetbrains.com/app/dsl-documentation/root/build-type/index.html
-    fun buildConfiguration(path: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration, buildTimeout: Int = DefaultBuildTimeoutDuration): BuildType {
-
+    fun buildConfiguration(path: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration, buildTimeout: Int = DefaultBuildTimeoutDuration, testPrefix: String): BuildType {
         val testPrefix = "TestAcc"
         val testTimeout = "12"
 
@@ -72,6 +74,7 @@ class PackageDetails(private val packageName: String, private val displayName: S
                 downloadTerraformBinary()
                 runAcceptanceTests()
                 saveArtifactsToGCS()
+                archiveArtifactsIfOverLimit() // Must be after push to GCS step, as this step impacts debug log files
             }
 
             features {
@@ -96,11 +99,20 @@ class PackageDetails(private val packageName: String, private val displayName: S
                 workingDirectory(path)
             }
 
-            artifactRules = "%teamcity.build.checkoutDir%/debug*.txt"
+            artifactRules = ArtifactRules
 
             failureConditions {
                 errorMessage = true
                 executionTimeoutMin = buildTimeout
+
+                // Stop builds if the branch does not exist
+                failOnText {
+                  conditionType = BuildFailureOnText.ConditionType.CONTAINS
+                  pattern = "which does not correspond to any branch monitored by the build VCS roots"
+                  failureMessage = "Error: The branch %teamcity.build.branch% does not exist"
+                  reverse = false
+                  stopBuildOnFailure = true
+                }
             }
 
         }

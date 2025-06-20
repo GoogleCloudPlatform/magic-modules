@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,80 +11,85 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Occurrence'
-base_url: projects/{{project}}/occurrences
-self_link: projects/{{project}}/occurrences/{{name}}
-update_verb: :PATCH
-update_mask: true
 description: |
   An occurrence is an instance of a Note, or type of analysis that
   can be done for a resource.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/container-analysis/'
   api: 'https://cloud.google.com/container-analysis/api/reference/rest/'
-mutex: '{{note_name}}'
+docs:
 id_format: 'projects/{{project}}/occurrences/{{name}}'
-import_format: ['projects/{{project}}/occurrences/{{name}}']
+base_url: 'projects/{{project}}/occurrences'
+self_link: 'projects/{{project}}/occurrences/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+mutex: '{{note_name}}'
+import_format:
+  - 'projects/{{project}}/occurrences/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  encoder: 'templates/terraform/encoders/containeranalysis_occurrence.go.tmpl'
+  update_encoder: 'templates/terraform/update_encoder/containeranalysis_occurrence.go.tmpl'
+  decoder: 'templates/terraform/decoders/containeranalysis_occurrence.go.tmpl'
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name:
-      'container_analysis_occurrence_kms'
-      # Occurrence requires custom logic for signing payloads.
-    skip_test: true
+  - name: 'container_analysis_occurrence_kms'
     primary_resource_id: 'occurrence'
     vars:
       note_name: 'attestation-note'
       attestor: 'attestor'
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  encoder: templates/terraform/encoders/containeranalysis_occurrence.go.erb
-  update_encoder: templates/terraform/update_encoder/containeranalysis_occurrence.go.erb
-  decoder: templates/terraform/decoders/containeranalysis_occurrence.go.erb
+    # Occurrence requires custom logic for signing payloads.
+    exclude_test: true
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       The name of the occurrence.
     output: true
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: resourceUri
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'resourceUri'
+    type: String
     description: |
       Required. Immutable. A URI that represents the resource for which
       the occurrence applies. For example,
       https://gcr.io/project/image@sha256:123abc for a Docker image.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: noteName
+  - name: 'noteName'
+    type: String
     description: |
       The analysis note associated with this occurrence, in the form of
       projects/[PROJECT]/notes/[NOTE_ID]. This field can be used as a
       filter in list requests.
     required: true
     immutable: true
-  - !ruby/object:Api::Type::String
-    name: kind
+  - name: 'kind'
+    type: String
     description: |
       The note kind which explicitly denotes which of the occurrence
       details are specified. This field can be used as a filter in list
       requests.
     output: true
-  - !ruby/object:Api::Type::String
-    name: remediation
+  - name: 'remediation'
+    type: String
     description: |
       A description of actions that can be taken to remedy the note.
-  - !ruby/object:Api::Type::Time
-    name: createTime
+  - name: 'createTime'
+    type: Time
     description: The time when the repository was created.
     output: true
-  - !ruby/object:Api::Type::Time
-    name: updateTime
+  - name: 'updateTime'
+    type: Time
     description: The time when the repository was last updated.
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: attestation
+  - name: 'attestation'
+    type: NestedObject
     description: |
       Occurrence that represents a single "attestation". The authenticity
       of an attestation can be verified using the attached signature.
@@ -96,26 +101,27 @@ properties:
       which authority this attestation was intended to sign.
     required: true
     properties:
-      - !ruby/object:Api::Type::String
-        name: serializedPayload
+      - name: 'serializedPayload'
+        type: String
         description: |
           The serialized payload that is verified by one or
           more signatures. A base64-encoded string.
         required: true
-      - !ruby/object:Api::Type::Array
-        name: signatures
+      - name: 'signatures'
+        type: Array
         description: |
           One or more signatures over serializedPayload.
           Verifier implementations should consider this attestation
           message verified if at least one signature verifies
           serializedPayload. See Signature in common.proto for more
           details on signature structure and verification.
-        required: true
         is_set: true
-        item_type: !ruby/object:Api::Type::NestedObject
+        required: true
+        item_type:
+          type: NestedObject
           properties:
-            - !ruby/object:Api::Type::String
-              name: signature
+            - name: 'signature'
+              type: String
               description: |
                 The content of the signature, an opaque bytestring.
                 The payload that this signature verifies MUST be
@@ -124,9 +130,8 @@ properties:
                 payload explicitly. Alternatively, a message might
                 have a canonical serialization that can always be
                 unambiguously computed to derive the payload.
-            - !ruby/object:Api::Type::String
-              name: publicKeyId
-              required: true
+            - name: 'publicKeyId'
+              type: String
               description: |
                 The identifier for the public key that verifies this
                 signature. MUST be an RFC3986 conformant
@@ -139,3 +144,4 @@ properties:
                     * `openpgp4fpr:74FAF3B861BDA0870C7B6DEF607E48D2A663AEEA`
                 * RFC6920 digest-named SubjectPublicKeyInfo (digest of the DER serialization):
                     * "ni:///sha-256;cD9o9Cq6LG3jD0iKXqEi_vdjJGecm_iXkbqVoScViaU"
+              required: true

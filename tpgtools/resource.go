@@ -160,7 +160,7 @@ type Resource struct {
 	// CustomSerializer defines the function this resource should use to serialize itself.
 	CustomSerializer *string
 
-	// TerraformProductName is the Product name overriden from the DCL
+	// TerraformProductName is the Product name overridden from the DCL
 	TerraformProductName *SnakeCaseProductName
 
 	// The array of Samples associated with the resource

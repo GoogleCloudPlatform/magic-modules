@@ -8,6 +8,9 @@
          "discovery_name":"Job",
          "parent":"//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
          "data":{
+            "labels": {
+             "goog-terraform-provisioned": "true"
+           },
             "template":{
                "template":{
                   "containers":[

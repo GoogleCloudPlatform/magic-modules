@@ -1,0 +1,20 @@
+config := meta.(*transport_tpg.Config)
+if err := tpgresource.ParseImportId([]string{
+  "^projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/collections/default_collection/dataStores/(?P<data_store_id>[^/]+)/siteSearchEngine/targetSites/(?P<target_site_id>[^/]+)$",
+}, d, config); err != nil {
+  return nil, err
+}
+
+// Set name based on the components
+if err := d.Set("name", "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/collections/default_collection/dataStores/{{"{{"}}data_store_id{{"}}"}}/siteSearchEngine/targetSites/{{"{{"}}target_site_id{{"}}"}}"); err != nil {
+  return nil, fmt.Errorf("Error setting name: %s", err)
+}
+
+// Replace import id for the resource id
+id, err := tpgresource.ReplaceVars(d, config, d.Get("name").(string))
+if err != nil {
+  return nil, fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+return []*schema.ResourceData{d}, nil

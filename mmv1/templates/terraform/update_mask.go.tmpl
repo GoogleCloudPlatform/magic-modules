@@ -9,18 +9,18 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-*/}}
-{{- define "UpdateMask" }}
+*/ -}}
 updateMask := []string{}
-{{- range $field, $masks := $.GetPropertyUpdateMasksGroups }}
-if d.HasChange("{{ $field }}") {
-  updateMask = append(updateMask, {{ join $masks ","}})
+{{- $maskGroups := $.GetPropertyUpdateMasksGroups $.UpdateBodyProperties "" }}
+{{- range $key := $.GetPropertyUpdateMasksGroupKeys $.UpdateBodyProperties }}
+
+if d.HasChange("{{ $key }}") {
+  updateMask = append(updateMask, "{{ join (index $maskGroups $key) "\",\n\""}}")
 }
-{{ end }}
+{{- end }}
 // updateMask is a URL parameter but not present in the schema, so ReplaceVars
 // won't set it
 url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 if err != nil {
   return err
 }
-{{- end }}{{/* define */}}

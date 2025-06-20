@@ -16,24 +16,26 @@ package resource
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"net/url"
+	"os"
 	"path/filepath"
+	"regexp"
+	"slices"
 	"strings"
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/golang/glog"
-	"gopkg.in/yaml.v3"
 )
+
+type IamMember struct {
+	Member, Role string
+}
 
 // Generates configs to be shown as examples in docs and outputted as tests
 // from a shared template
 type Examples struct {
-	// google.YamlValidator
-
-	// include Compile::Core
-	// include Google::GolangUtils
-
 	// The name of the example in lower snake_case.
 	// Generally takes the form of the resource name followed by some detail
 	// about the specific test. For example, "address_with_subnetwork".
@@ -50,7 +52,14 @@ type Examples struct {
 	// Optional resource type of the "primary" resource. Used in import tests.
 	// If set, this will override the default resource type implied from the
 	// object parent
-	PrimaryResourceType string `yaml:"primary_resource_type"`
+	PrimaryResourceType string `yaml:"primary_resource_type,omitempty"`
+
+	// BootstrapIam will automatically bootstrap the given member/role pairs.
+	// This should be used in cases where specific IAM permissions must be
+	// present on the default test project, to avoid race conditions between
+	// tests. Permissions attached to resources created in a test should instead
+	// be provisioned with standard terraform resources.
+	BootstrapIam []IamMember `yaml:"bootstrap_iam,omitempty"`
 
 	// Vars is a Hash from template variable names to output variable names.
 	// It will use the provided value as a prefix for generated tests, and
@@ -65,18 +74,20 @@ type Examples struct {
 	//
 	// test_env_vars is a Hash from template variable names to one of the
 	// following symbols:
-	//  - :PROJECT_NAME
-	//  - :CREDENTIALS
-	//  - :REGION
-	//  - :ORG_ID
-	//  - :ORG_TARGET
-	//  - :BILLING_ACCT
-	//  - :MASTER_BILLING_ACCT
-	//  - :SERVICE_ACCT
-	//  - :CUST_ID
-	//  - :IDENTITY_USER
+	//  - PROJECT_NAME
+	//  - CREDENTIALS
+	//  - REGION
+	//  - ORG_ID
+	//  - ORG_TARGET
+	//  - BILLING_ACCT
+	//  - MASTER_BILLING_ACCT
+	//  - SERVICE_ACCT
+	//  - CUST_ID
+	//  - IDENTITY_USER
+	//  - CHRONICLE_ID
+	//  - VMWAREENGINE_PROJECT
 	// This list corresponds to the `get*FromEnv` methods in provider_test.go.
-	TestEnvVars map[string]string `yaml:"test_env_vars"`
+	TestEnvVars map[string]string `yaml:"test_env_vars,omitempty"`
 
 	// Hash to provider custom override values for generating test config
 	// If field my-var is set in this hash, it will replace vars[my-var] in
@@ -95,11 +106,11 @@ type Examples struct {
 	//         "network": nameOfVpc
 	//         ...
 	//       }
-	TestVarsOverrides map[string]string `yaml:"test_vars_overrides"`
+	TestVarsOverrides map[string]string `yaml:"test_vars_overrides,omitempty"`
 
 	// Hash to provider custom override values for generating oics config
 	// See test_vars_overrides for more details
-	OicsVarsOverrides map[string]string `yaml:"oics_vars_overrides"`
+	OicsVarsOverrides map[string]string `yaml:"oics_vars_overrides,omitempty"`
 
 	// The version name of of the example's version if it's different than the
 	// resource version, eg. `beta`
@@ -118,74 +129,166 @@ type Examples struct {
 	// explicit provider block should be defined. While the tests @ 0.12 will
 	// use `google-beta` automatically, past Terraform versions required an
 	// explicit block.
-	MinVersion string `yaml:"min_version"`
+	MinVersion string `yaml:"min_version,omitempty"`
 
 	// Extra properties to ignore read on during import.
 	// These properties will likely be custom code.
-	IgnoreReadExtra []string `yaml:"ignore_read_extra"`
+	IgnoreReadExtra []string `yaml:"ignore_read_extra,omitempty"`
 
 	// Whether to skip generating tests for this resource
-	SkipTest bool `yaml:"skip_test"`
+	ExcludeTest bool `yaml:"exclude_test,omitempty"`
 
 	// Whether to skip generating docs for this example
-	SkipDocs bool `yaml:"skip_docs"`
+	ExcludeDocs bool `yaml:"exclude_docs,omitempty"`
 
 	// Whether to skip import tests for this example
-	SkipImportTest bool `yaml:"skip_import_test"`
+	ExcludeImportTest bool `yaml:"exclude_import_test,omitempty"`
 
 	// The name of the primary resource for use in IAM tests. IAM tests need
 	// a reference to the primary resource to create IAM policies for
-	PrimaryResourceName string `yaml:"primary_resource_name"`
+	PrimaryResourceName string `yaml:"primary_resource_name,omitempty"`
 
 	// The name of the location/region override for use in IAM tests. IAM
 	// tests may need this if the location is not inherited on the resource
 	// for one reason or another
-	RegionOverride string `yaml:"region_override"`
+	RegionOverride string `yaml:"region_override,omitempty"`
 
 	// The path to this example's Terraform config.
 	// Defaults to `templates/terraform/examples/{{name}}.tf.erb`
-	ConfigPath string `yaml:"config_path"`
+	ConfigPath string `yaml:"config_path,omitempty"`
 
 	// If the example should be skipped during VCR testing.
 	// This is the case when something about the resource or config causes VCR to fail for example
-	// a resource with a unique identifier generated within the resource via resource.UniqueId()
+	// a resource with a unique identifier generated within the resource via id.UniqueId()
 	// Or a config with two fine grained resources that have a race condition during create
-	SkipVcr bool `yaml:"skip_vcr"`
+	SkipVcr bool `yaml:"skip_vcr,omitempty"`
+
+	// The reason to skip a test. For example, a link to a ticket explaining the issue that needs to be resolved before
+	// unskipping the test. If this is not empty, the test will be skipped.
+	SkipTest string `yaml:"skip_test,omitempty"`
 
 	// Specify which external providers are needed for the testcase.
 	// Think before adding as there is latency and adds an external dependency to
 	// your test so avoid if you can.
-	ExternalProviders []string `yaml:"external_providers"`
+	ExternalProviders []string `yaml:"external_providers,omitempty"`
 
-	DocumentationHCLText string
-	TestHCLText          string
+	DocumentationHCLText string `yaml:"-"`
+	TestHCLText          string `yaml:"-"`
+	OicsHCLText          string `yaml:"-"`
+
+	// ====================
+	// TGC
+	// ====================
+	// Extra properties to ignore test.
+	// These properties are present in Terraform resources schema, but not in CAI assets.
+	// Virtual Fields and url parameters are already ignored by default and do not need to be duplicated here.
+	TGCTestIgnoreExtra []string `yaml:"tgc_test_ignore_extra,omitempty"`
 }
 
 // Set default value for fields
-func (e *Examples) UnmarshalYAML(n *yaml.Node) error {
+func (e *Examples) UnmarshalYAML(unmarshal func(any) error) error {
 	type exampleAlias Examples
 	aliasObj := (*exampleAlias)(e)
 
-	err := n.Decode(&aliasObj)
+	err := unmarshal(aliasObj)
 	if err != nil {
 		return err
 	}
 
-	e.ConfigPath = fmt.Sprintf("templates/terraform/examples/go/%s.tf.tmpl", e.Name)
+	if e.ConfigPath == "" {
+		e.ConfigPath = fmt.Sprintf("templates/terraform/examples/%s.tf.tmpl", e.Name)
+	}
 	e.SetHCLText()
 
 	return nil
 }
 
+func (e *Examples) Validate(rName string) {
+	if e.Name == "" {
+		log.Fatalf("Missing `name` for one example in resource %s", rName)
+	}
+	e.ValidateExternalProviders()
+}
+
+func validateRegexForContents(r *regexp.Regexp, contents string, configPath string, objName string, vars map[string]string) {
+	matches := r.FindAllStringSubmatch(contents, -1)
+	for _, v := range matches {
+		found := false
+		for k, _ := range vars {
+			if k == v[1] {
+				found = true
+				break
+			}
+		}
+		if !found {
+			log.Fatalf("Failed to find %s environment variable defined in YAML file when validating the file %s. Please define this in %s", v[1], configPath, objName)
+		}
+	}
+}
+
+func (e *Examples) ValidateExternalProviders() {
+	// Official providers supported by HashiCorp
+	// https://registry.terraform.io/search/providers?namespace=hashicorp&tier=official
+	HASHICORP_PROVIDERS := []string{"aws", "random", "null", "template", "azurerm", "kubernetes", "local",
+		"external", "time", "vault", "archive", "tls", "helm", "azuread", "http", "cloudinit", "tfe", "dns",
+		"consul", "vsphere", "nomad", "awscc", "googleworkspace", "hcp", "boundary", "ad", "azurestack", "opc",
+		"oraclepaas", "hcs", "salesforce"}
+
+	var unallowedProviders []string
+	for _, p := range e.ExternalProviders {
+		if !slices.Contains(HASHICORP_PROVIDERS, p) {
+			unallowedProviders = append(unallowedProviders, p)
+		}
+	}
+
+	if len(unallowedProviders) > 0 {
+		log.Fatalf("Providers %#v are not allowed. Only providers published by HashiCorp are allowed.", unallowedProviders)
+	}
+}
+
 // Executes example templates for documentation and tests
 func (e *Examples) SetHCLText() {
-	e.DocumentationHCLText = ExecuteTemplate(e, e.ConfigPath, true)
+	originalVars := e.Vars
+	originalTestEnvVars := e.TestEnvVars
+	docTestEnvVars := make(map[string]string)
+	docs_defaults := map[string]string{
+		"PROJECT_NAME":         "my-project-name",
+		"PROJECT_NUMBER":       "1111111111111",
+		"CREDENTIALS":          "my/credentials/filename.json",
+		"REGION":               "us-west1",
+		"ORG_ID":               "123456789",
+		"ORG_DOMAIN":           "example.com",
+		"ORG_TARGET":           "123456789",
+		"BILLING_ACCT":         "000000-0000000-0000000-000000",
+		"MASTER_BILLING_ACCT":  "000000-0000000-0000000-000000",
+		"SERVICE_ACCT":         "my@service-account.com",
+		"CUST_ID":              "A01b123xz",
+		"IDENTITY_USER":        "cloud_identity_user",
+		"PAP_DESCRIPTION":      "description",
+		"CHRONICLE_ID":         "00000000-0000-0000-0000-000000000000",
+		"VMWAREENGINE_PROJECT": "my-vmwareengine-project",
+	}
 
-	copy := e
+	// Apply doc defaults to test_env_vars from YAML
+	for key := range e.TestEnvVars {
+		docTestEnvVars[key] = docs_defaults[e.TestEnvVars[key]]
+	}
+	e.TestEnvVars = docTestEnvVars
+	e.DocumentationHCLText = e.ExecuteTemplate()
+	e.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.DocumentationHCLText, "\n")
+
+	// Remove region tags
+	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
+	re2 := regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
+	e.DocumentationHCLText = re1.ReplaceAllString(e.DocumentationHCLText, "")
+	e.DocumentationHCLText = re2.ReplaceAllString(e.DocumentationHCLText, "")
+
+	testVars := make(map[string]string)
+	testTestEnvVars := make(map[string]string)
 	// Override vars to inject test values into configs - will have
 	//   - "a-example-var-value%{random_suffix}""
 	//   - "%{my_var}" for overrides that have custom Golang values
-	for key, value := range copy.Vars {
+	for key, value := range originalVars {
 		var newVal string
 		if strings.Contains(value, "-") {
 			newVal = fmt.Sprintf("tf-test-%s", value)
@@ -199,24 +302,48 @@ func (e *Examples) SetHCLText() {
 		if len(newVal) > 54 {
 			newVal = newVal[:54]
 		}
-		copy.Vars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
+		testVars[key] = fmt.Sprintf("%s%%{random_suffix}", newVal)
 	}
 
 	// Apply overrides from YAML
-	for key := range copy.TestVarsOverrides {
-		copy.Vars[key] = fmt.Sprintf("%%{%s}", key)
+	for key := range e.TestVarsOverrides {
+		testVars[key] = fmt.Sprintf("%%{%s}", key)
+	}
+	for key := range originalTestEnvVars {
+		testTestEnvVars[key] = fmt.Sprintf("%%{%s}", key)
 	}
 
-	e.TestHCLText = ExecuteTemplate(copy, copy.ConfigPath, true)
+	e.Vars = testVars
+	e.TestEnvVars = testTestEnvVars
+	e.TestHCLText = e.ExecuteTemplate()
+	e.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.TestHCLText, "\n")
+	// Remove region tags
+	e.TestHCLText = re1.ReplaceAllString(e.TestHCLText, "")
+	e.TestHCLText = re2.ReplaceAllString(e.TestHCLText, "")
+	e.TestHCLText = SubstituteTestPaths(e.TestHCLText)
+
+	// Reset the example
+	e.Vars = originalVars
+	e.TestEnvVars = originalTestEnvVars
 }
 
-func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
-	templates := []string{
-		templatePath,
+func (e *Examples) ExecuteTemplate() string {
+	templateContent, err := os.ReadFile(e.ConfigPath)
+	if err != nil {
+		glog.Exit(err)
 	}
-	templateFileName := filepath.Base(templatePath)
 
-	tmpl, err := template.New(templateFileName).ParseFiles(templates...)
+	fileContentString := string(templateContent)
+
+	// Check that any variables in Vars or TestEnvVars used in the example are defined via YAML
+	envVarRegex := regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
+	validateRegexForContents(envVarRegex, fileContentString, e.ConfigPath, "test_env_vars", e.TestEnvVars)
+	varRegex := regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
+	validateRegexForContents(varRegex, fileContentString, e.ConfigPath, "vars", e.Vars)
+
+	templateFileName := filepath.Base(e.ConfigPath)
+
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -228,126 +355,15 @@ func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
 
 	rs := contents.String()
 
-	if !strings.HasSuffix(rs, "\n") && appendNewline {
+	if !strings.HasSuffix(rs, "\n") {
 		rs = fmt.Sprintf("%s\n", rs)
 	}
 
 	return rs
 }
 
-// func (e *Examples) config_documentation(pwd) {
-// docs_defaults = {
-//   PROJECT_NAME: 'my-project-name',
-//   CREDENTIALS: 'my/credentials/filename.json',
-//   REGION: 'us-west1',
-//   ORG_ID: '123456789',
-//   ORG_DOMAIN: 'example.com',
-//   ORG_TARGET: '123456789',
-//   BILLING_ACCT: '000000-0000000-0000000-000000',
-//   MASTER_BILLING_ACCT: '000000-0000000-0000000-000000',
-//   SERVICE_ACCT: 'my@service-account.com',
-//   CUST_ID: 'A01b123xz',
-//   IDENTITY_USER: 'cloud_identity_user',
-//   PAP_DESCRIPTION: 'description'
-// }
-// @vars ||= {}
-// @test_env_vars ||= {}
-// body = lines(compile_file(
-//                {
-//                  vars:,
-//                  test_env_vars: test_env_vars.to_h { |k, v| [k, docs_defaults[v]] },
-//                  primary_resource_id:
-//                },
-//                "//{pwd}///{config_path}"
-//              ))
-
-// // Remove region tags
-// body = body.gsub(/// \[[a-zA-Z_ ]+\]\n/, '')
-// body = body.gsub(/\n// \[[a-zA-Z_ ]+\]/, '')
-// lines(compile_file(
-//         { content: body },
-//         "//{pwd}/templates/terraform/examples/base_configs/documentation.tf.erb"
-//       ))
-// }
-
-// func (e *Examples) config_test(pwd) {
-// body = config_test_body(pwd)
-// lines(compile_file(
-//         {
-//           content: body
-//         },
-//         "//{pwd}/templates/terraform/examples/base_configs/test_body.go.erb"
-//       ))
-// }
-
-// rubocop:disable Style/FormatStringToken
-// func (e *Examples) config_test_body(pwd) {
-// @vars ||= {}
-// @test_env_vars ||= {}
-// @test_vars_overrides ||= {}
-
-// // Construct map for vars to inject into config - will have
-// //   - "a-example-var-value%{random_suffix}""
-// //   - "%{my_var}" for overrides that have custom Golang values
-// rand_vars = vars.map do |k, v|
-//   // Some resources only allow underscores.
-//   testv = if v.include?('-')
-//             "tf-test-//{v}"
-//           elsif v.include?('_')
-//             "tf_test_//{v}"
-//           else
-//             // Some vars like descriptions shouldn't have prefix
-//             v
-//           end
-//   // Random suffix is 10 characters and standard name length <= 64
-//   testv = "//{testv[0...54]}%{random_suffix}"
-//   [k, testv]
-// end
-
-// rand_vars = rand_vars.to_h
-// overrides = test_vars_overrides.to_h { |k, _| [k, "%{//{k}}"] }
-// body = lines(compile_file(
-//                {
-//                  vars: rand_vars.merge(overrides),
-//                  test_env_vars: test_env_vars.to_h { |k, _| [k, "%{//{k}}"] },
-//                  primary_resource_id:,
-//                  primary_resource_type:
-//                },
-//                "//{pwd}///{config_path}"
-//              ))
-
-// // Remove region tags
-// body = body.gsub(/// \[[a-zA-Z_ ]+\]\n/, '')
-// body = body.gsub(/\n// \[[a-zA-Z_ ]+\]/, '')
-// substitute_test_paths body
-// }
-
-// func (e *Examples) config_oics(pwd) {
-// @vars ||= []
-// @oics_vars_overrides ||= {}
-
-// rand_vars = vars.to_h { |k, str| [k, "//{str}-${local.name_suffix}"] }
-
-// // Examples with test_env_vars are skipped elsewhere
-// body = lines(compile_file(
-//                {
-//                  vars: rand_vars.merge(oics_vars_overrides),
-//                  primary_resource_id:
-//                },
-//                "//{pwd}///{config_path}"
-//              ))
-
-// // Remove region tags
-// body = body.gsub(/// \[[a-zA-Z_ ]+\]\n/, '')
-// body = body.gsub(/\n// \[[a-zA-Z_ ]+\]/, '')
-// substitute_example_paths body
-// }
-
 func (e *Examples) OiCSLink() string {
 	v := url.Values{}
-	// TODO Q2: Values.Encode() sorts the values by key alphabetically. This will produce
-	//			diffs for every URL when we convert to using this function. We should sort the
-	// 			Ruby-version query alphabetically beforehand to remove these diffs.
 	v.Add("cloudshell_git_repo", "https://github.com/terraform-google-modules/docs-examples.git")
 	v.Add("cloudshell_working_dir", e.Name)
 	v.Add("cloudshell_image", "gcr.io/cloudshell-images/cloudshell:latest")
@@ -375,62 +391,53 @@ func (e *Examples) ResourceType(terraformName string) string {
 	return terraformName
 }
 
-// rubocop:disable Layout/LineLength
-// func (e *Examples) substitute_test_paths(config) {
-// config.gsub!('../static/img/header-logo.png', 'test-fixtures/header-logo.png')
-// config.gsub!('path/to/private.key', 'test-fixtures/test.key')
-// config.gsub!('path/to/certificate.crt', 'test-fixtures/test.crt')
-// config.gsub!('path/to/index.zip', '%{zip_path}')
-// config.gsub!('verified-domain.com', 'tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com')
-// config.gsub!('path/to/id_rsa.pub', 'test-fixtures/ssh_rsa.pub')
-// config
-// }
+func SubstituteExamplePaths(config string) string {
+	config = strings.ReplaceAll(config, "../static/img/header-logo.png", "../static/header-logo.png")
+	config = strings.ReplaceAll(config, "path/to/private.key", "../static/ssl_cert/test.key")
+	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "../static/ssh_rsa.pub")
+	config = strings.ReplaceAll(config, "path/to/certificate.crt", "../static/ssl_cert/test.crt")
+	return config
+}
 
-// func (e *Examples) substitute_example_paths(config) {
-// config.gsub!('../static/img/header-logo.png', '../static/header-logo.png')
-// config.gsub!('path/to/private.key', '../static/ssl_cert/test.key')
-// config.gsub!('path/to/id_rsa.pub', '../static/ssh_rsa.pub')
-// config.gsub!('path/to/certificate.crt', '../static/ssl_cert/test.crt')
-// config
-// end
-// // rubocop:enable Layout/LineLength
-// // rubocop:enable Style/FormatStringToken
-// }
+func SubstituteTestPaths(config string) string {
+	config = strings.ReplaceAll(config, "../static/img/header-logo.png", "test-fixtures/header-logo.png")
+	config = strings.ReplaceAll(config, "path/to/private.key", "test-fixtures/test.key")
+	config = strings.ReplaceAll(config, "path/to/certificate.crt", "test-fixtures/test.crt")
+	config = strings.ReplaceAll(config, "path/to/index.zip", "%{zip_path}")
+	config = strings.ReplaceAll(config, "verified-domain.com", "tf-test-domain%{random_suffix}.gcp.tfacc.hashicorptest.com")
+	config = strings.ReplaceAll(config, "path/to/id_rsa.pub", "test-fixtures/ssh_rsa.pub")
+	return config
+}
 
-// func (e *Examples) validate() {
-// super
-// check :name, type: String, required: true
-// check :primary_resource_id, type: String
-// check :min_version, type: String
-// check :vars, type: Hash
-// check :test_env_vars, type: Hash
-// check :test_vars_overrides, type: Hash
-// check :ignore_read_extra, type: Array, item_type: String, default: []
-// check :primary_resource_name, type: String
-// check :skip_test, type: TrueClass
-// check :skip_import_test, type: TrueClass
-// check :skip_docs, type: TrueClass
-// check :config_path, type: String, default: "templates/terraform/examples///{name}.tf.erb"
-// check :skip_vcr, type: TrueClass
-// }
+// Executes example templates for documentation and tests
+func (e *Examples) SetOiCSHCLText() {
+	originalVars := e.Vars
+	originalTestEnvVars := e.TestEnvVars
 
-// TODO
-// validate_external_providers
+	// // Remove region tags
+	re1 := regexp.MustCompile(`# \[[a-zA-Z_ ]+\]\n`)
+	re2 := regexp.MustCompile(`\n# \[[a-zA-Z_ ]+\]`)
 
-// func (e *Examples) merge(other) {
-// result = self.class.new
-// instance_variables.each do |v|
-//   result.instance_variable_set(v, instance_variable_get(v))
-// end
+	testVars := make(map[string]string)
+	for key, value := range originalVars {
+		testVars[key] = fmt.Sprintf("%s-${local.name_suffix}", value)
+	}
 
-// other.instance_variables.each do |v|
-//   if other.instance_variable_get(v).instance_of?(Array)
-//     result.instance_variable_set(v, deep_merge(result.instance_variable_get(v),
-//                                                other.instance_variable_get(v)))
-//   else
-//     result.instance_variable_set(v, other.instance_variable_get(v))
-//   end
-// end
+	// Apply overrides from YAML
+	for key, value := range e.OicsVarsOverrides {
+		testVars[key] = value
+	}
 
-// result
-// }
+	e.Vars = testVars
+	e.OicsHCLText = e.ExecuteTemplate()
+	e.OicsHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.OicsHCLText, "\n")
+
+	// Remove region tags
+	e.OicsHCLText = re1.ReplaceAllString(e.OicsHCLText, "")
+	e.OicsHCLText = re2.ReplaceAllString(e.OicsHCLText, "")
+	e.OicsHCLText = SubstituteExamplePaths(e.OicsHCLText)
+
+	// Reset the example
+	e.Vars = originalVars
+	e.TestEnvVars = originalTestEnvVars
+}

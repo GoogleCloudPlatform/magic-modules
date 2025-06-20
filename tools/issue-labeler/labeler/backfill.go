@@ -1,99 +1,127 @@
 package labeler
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
 	"fmt"
-	"io"
 	"net/http"
-	"os"
 	"sort"
+	"strings"
+	"time"
 
 	"github.com/golang/glog"
+	"github.com/google/go-github/v68/github"
 )
-
-type ErrorResponse struct {
-	Message string
-}
-
-type Issue struct {
-	Number      uint64
-	Body        string
-	Labels      []Label
-	PullRequest map[string]any `json:"pull_request"`
-}
 
 type Label struct {
 	Name string
 }
 
 type IssueUpdate struct {
-	Number    uint64
+	Number    int
 	Labels    []string
 	OldLabels []string
 }
 
-type IssueUpdateBody struct {
-	Labels []string `json:"labels"`
+func GetIssues(repository, since string) ([]*github.Issue, error) {
+	client := newGitHubClient()
+	owner, repo, err := splitRepository(repository)
+	if err != nil {
+		return nil, fmt.Errorf("invalid repository format: %w", err)
+	}
+
+	sinceTime, err := time.Parse("2006-01-02", since) // input format YYYY-MM-DD
+	if err != nil {
+		return nil, fmt.Errorf("invalid since time format: %w", err)
+	}
+
+	opt := &github.IssueListByRepoOptions{
+		Since:     sinceTime,
+		State:     "all",
+		Sort:      "updated",
+		Direction: "desc",
+		ListOptions: github.ListOptions{
+			PerPage: 100,
+		},
+	}
+
+	var allIssues []*github.Issue
+	ctx := context.Background()
+
+	issues, resp, err := client.Issues.ListByRepo(ctx, owner, repo, opt)
+	if err != nil {
+		return nil, fmt.Errorf("listing issues: %w", err)
+	}
+	allIssues = append(allIssues, issues...)
+
+	for {
+		// use link headers instead of page parameter based pagination as
+		// it is not supported for large datasets
+
+		next := parseNextLink(resp.Response)
+		if next == "" {
+			break
+		}
+
+		req, err := client.NewRequest("GET", next, nil)
+		if err != nil {
+			return allIssues, err
+		}
+		req.Header.Set("Accept", "application/vnd.github.raw+json")
+
+		var issues []*github.Issue
+		resp, err = client.Do(ctx, req, &issues)
+		if err != nil {
+			return allIssues, err
+		}
+
+		allIssues = append(allIssues, issues...)
+	}
+
+	return allIssues, nil
 }
 
-func GetIssues(repository, since string) []Issue {
-	client := &http.Client{}
-	done := false
-	page := 1
-	var issues []Issue
-	for !done {
-		url := fmt.Sprintf("https://api.github.com/repos/%s/issues?since=%s&per_page=100&page=%d", repository, since, page)
-		req, err := http.NewRequest("GET", url, nil)
-		if err != nil {
-			glog.Exitf("Error creating request: %v", err)
-		}
-		req.Header.Add("Accept", "application/vnd.github+json")
-		req.Header.Add("Authorization", "Bearer "+os.Getenv("GITHUB_TOKEN"))
-		req.Header.Add("X-GitHub-Api-Version", "2022-11-28")
-		resp, err := client.Do(req)
-		if err != nil {
-			glog.Exitf("Error listing issues: %v", err)
-		}
-		defer resp.Body.Close()
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			glog.Exitf("Error reading response body: %v", err)
-		}
-		var newIssues []Issue
-		json.Unmarshal(body, &newIssues)
-		if len(newIssues) == 0 {
-			var err ErrorResponse
-			json.Unmarshal(body, &err)
-			if err.Message == "Bad credentials" {
-				glog.Exitf("Error from API: Bad credentials")
+// parseNextLink finds the next page for a GitHub API request by parsing the previous response's Link header.
+// https://docs.github.com/en/rest/using-the-rest-api/using-pagination-in-the-rest-api?apiVersion=2022-11-28#using-link-headers
+func parseNextLink(resp *http.Response) string {
+	var next string
+	for _, hdr := range resp.Header.Values("Link") {
+		links := strings.Split(hdr, ",")
+		for _, link := range links {
+			pair := strings.Split(strings.TrimSpace(link), ";")
+			if len(pair) == 2 {
+				if strings.TrimSpace(pair[0]) == `rel="next"` {
+					next = strings.Trim(pair[1], "<> ")
+				} else if strings.TrimSpace(pair[1]) == `rel="next"` {
+					next = strings.Trim(pair[0], "<> ")
+				}
+				if next != "" {
+					break
+				}
 			}
-			glog.Infof("API returned message: %s", err.Message)
-			done = true
-		} else {
-			issues = append(issues, newIssues...)
-			page++
 		}
 	}
-	return issues
+	return next
 }
 
-func ComputeIssueUpdates(issues []Issue, regexpLabels []RegexpLabel) []IssueUpdate {
+// ComputeIssueUpdates remains the same as it doesn't interact with GitHub API
+func ComputeIssueUpdates(issues []*github.Issue, regexpLabels []RegexpLabel) []IssueUpdate {
 	var issueUpdates []IssueUpdate
 
 	for _, issue := range issues {
-		if len(issue.PullRequest) > 0 {
+		// Skip pull requests
+		if issue.IsPullRequest() {
 			continue
 		}
 
 		desired := make(map[string]struct{})
 		for _, existing := range issue.Labels {
-			desired[existing.Name] = struct{}{}
+			desired[*existing.Name] = struct{}{}
 		}
 
 		_, terraform := desired["service/terraform"]
 		_, linked := desired["forward/linked"]
 		_, exempt := desired["forward/exempt"]
+		_, testfailure := desired["test-failure"]
 		if terraform || exempt {
 			continue
 		}
@@ -110,14 +138,16 @@ func ComputeIssueUpdates(issues []Issue, regexpLabels []RegexpLabel) []IssueUpda
 		for label := range desired {
 			issueUpdate.OldLabels = append(issueUpdate.OldLabels, label)
 		}
+		sort.Strings(issueUpdate.OldLabels)
 
-		affectedResources := ExtractAffectedResources(issue.Body)
+		affectedResources := ExtractAffectedResources(issue.GetBody())
 		for _, needed := range ComputeLabels(affectedResources, regexpLabels) {
 			desired[needed] = struct{}{}
 		}
 
 		if len(desired) > len(issueUpdate.OldLabels) {
-			if !linked {
+			// Forwarding test failure ticket directly
+			if !linked && !testfailure {
 				issueUpdate.Labels = append(issueUpdate.Labels, "forward/review")
 			}
 			for label := range desired {
@@ -125,61 +155,48 @@ func ComputeIssueUpdates(issues []Issue, regexpLabels []RegexpLabel) []IssueUpda
 			}
 			sort.Strings(issueUpdate.Labels)
 
-			issueUpdate.Number = issue.Number
-
-			issueUpdates = append(issueUpdates, issueUpdate)
+			issueUpdate.Number = issue.GetNumber()
+			if issueUpdate.Number > 0 {
+				issueUpdates = append(issueUpdates, issueUpdate)
+			}
 		}
 	}
 
 	return issueUpdates
 }
 
-func UpdateIssues(repository string, issueUpdates []IssueUpdate, dryRun bool) {
-	client := &http.Client{}
-	for _, issueUpdate := range issueUpdates {
-		url := fmt.Sprintf("https://api.github.com/repos/%s/issues/%d", repository, issueUpdate.Number)
-		updateBody := IssueUpdateBody{Labels: issueUpdate.Labels}
-		body, err := json.Marshal(updateBody)
-		if err != nil {
-			glog.Errorf("Error marshalling json: %v", err)
-			continue
-		}
-		buf := bytes.NewReader(body)
-		req, err := http.NewRequest("PATCH", url, buf)
-		req.Header.Add("Authorization", "Bearer "+os.Getenv("GITHUB_TOKEN"))
-		req.Header.Add("X-GitHub-Api-Version", "2022-11-28")
-		if err != nil {
-			glog.Errorf("Error creating request: %v", err)
-			continue
-		}
-		fmt.Printf("Existing labels: %v\n", issueUpdate.OldLabels)
-		fmt.Printf("New labels: %v\n", issueUpdate.Labels)
-		fmt.Printf("%s %s (https://github.com/%s/issues/%d)\n", req.Method, req.URL, repository, issueUpdate.Number)
-		b, err := json.MarshalIndent(updateBody, "", "  ")
-		if err != nil {
-			glog.Errorf("Error marshalling json: %v", err)
-			continue
-		}
-		fmt.Println(string(b))
-		if !dryRun {
-			resp, err := client.Do(req)
-			if err != nil {
-				glog.Errorf("Error updating issue: %v", err)
-				continue
-			}
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				glog.Errorf("Error reading response body: %v", err)
-				continue
-			}
-			var errResp ErrorResponse
-			json.Unmarshal(body, &errResp)
-			if errResp.Message != "" {
-				fmt.Printf("API error: %s", errResp.Message)
-				continue
-			}
-
-		}
-		fmt.Printf("GitHub Issue %s %d updated successfully", repository, issueUpdate.Number)
+func UpdateIssues(repository string, issueUpdates []IssueUpdate, dryRun bool) error {
+	client := newGitHubClient()
+	owner, repo, err := splitRepository(repository)
+	if err != nil {
+		return fmt.Errorf("invalid repository format: %w", err)
 	}
+
+	ctx := context.Background()
+	failed := 0
+
+	for _, update := range issueUpdates {
+		fmt.Printf("Existing labels: %v\n", update.OldLabels)
+		fmt.Printf("New labels: %v\n", update.Labels)
+		fmt.Printf("Updating issue: https://github.com/%s/issues/%d\n", repository, update.Number)
+		if dryRun {
+			continue
+		}
+		_, _, err := client.Issues.Edit(ctx, owner, repo, int(update.Number), &github.IssueRequest{
+			Labels: &update.Labels,
+		})
+
+		if err != nil {
+			glog.Errorf("Error updating issue %d: %v", update.Number, err)
+			failed++
+			continue
+		}
+
+		fmt.Printf("GitHub Issue %s %d updated successfully\n", repository, update.Number)
+	}
+
+	if failed > 0 {
+		return fmt.Errorf("failed to update %d / %d issues", failed, len(issueUpdates))
+	}
+	return nil
 }

@@ -1,7 +1,0 @@
-func expand<%= prefix -%><%= titlelize_property(property) -%>(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-		if v == "default-internet-gateway" {
-				return tpgresource.ReplaceVars(d, config, "projects/{{project}}/global/gateways/default-internet-gateway")
-		} else {
-				return v, nil
-		}
-}

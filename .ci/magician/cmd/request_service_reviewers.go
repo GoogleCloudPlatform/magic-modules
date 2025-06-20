@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"magician/github"
 	"math/rand"
-	"os"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
@@ -36,17 +35,16 @@ var requestServiceReviewersCmd = &cobra.Command{
 	If a PR has more than 3 service labels, the command will not do anything.
 	`,
 	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		prNumber := args[0]
 		fmt.Println("PR Number: ", prNumber)
 
 		githubToken, ok := lookupGithubTokenOrFallback("GITHUB_TOKEN_MAGIC_MODULES")
 		if !ok {
-			fmt.Println("Did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variable")
-			os.Exit(1)
+			return fmt.Errorf("did not provide GITHUB_TOKEN_MAGIC_MODULES or GITHUB_TOKEN environment variable")
 		}
 		gh := github.NewClient(githubToken)
-		execRequestServiceReviewers(prNumber, gh, labeler.EnrolledTeamsYaml)
+		return execRequestServiceReviewers(prNumber, gh, labeler.EnrolledTeamsYaml)
 	},
 }
 
@@ -55,29 +53,25 @@ type LabelData struct {
 	Team string `yaml:"team,omitempty"`
 }
 
-func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeamsYaml []byte) {
+func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeamsYaml []byte) error {
 	pullRequest, err := gh.GetPullRequest(prNumber)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return err
 	}
 
 	enrolledTeams := make(map[string]LabelData)
 	if err := yaml.Unmarshal(enrolledTeamsYaml, &enrolledTeams); err != nil {
-		fmt.Printf("Error unmarshalling enrolled teams yaml: %s", err)
-		os.Exit(1)
+		return fmt.Errorf("error unmarshalling enrolled teams yaml: %w", err)
 	}
 
 	requestedReviewers, err := gh.GetPullRequestRequestedReviewers(prNumber)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return err
 	}
 
 	previousReviewers, err := gh.GetPullRequestPreviousReviewers(prNumber)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return err
 	}
 
 	// If more than three service labels are impacted, don't request reviews.
@@ -96,7 +90,7 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 
 	if teamCount > 3 {
 		fmt.Println("Provider-wide change (>3 services impacted); not requesting service team reviews")
-		return
+		return nil
 	}
 
 	// For each service team, check if one of the team members is already a reviewer. Rerequest
@@ -113,7 +107,7 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 	}
 
 	exitCode := 0
-	for githubTeam, _ := range githubTeamsSet {
+	for githubTeam := range githubTeamsSet {
 		members, err := gh.GetTeamMembers("GoogleCloudPlatform", githubTeam)
 		if err != nil {
 			fmt.Printf("Error fetching members for GoogleCloudPlatform/%s: %s", githubTeam, err)
@@ -150,8 +144,9 @@ func execRequestServiceReviewers(prNumber string, gh GithubClient, enrolledTeams
 		exitCode = 1
 	}
 	if exitCode != 0 {
-		os.Exit(1)
+		return fmt.Errorf("exit code = %d", exitCode)
 	}
+	return nil
 }
 
 func init() {

@@ -1,5 +1,0 @@
-resource "google_dataplex_entry_type" "<%= ctx[:primary_resource_id] %>" {
-  entry_type_id = "<%= ctx[:vars]['entry_type_name'] %>"
-  project = "<%= ctx[:test_env_vars]['project_name'] %>"
-  location = "us-central1"
-}

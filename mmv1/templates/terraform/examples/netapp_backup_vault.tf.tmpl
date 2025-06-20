@@ -1,0 +1,8 @@
+resource "google_netapp_backup_vault" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "backup_vault_name"}}"
+  location = "us-west1"
+  description = "Terraform created vault"
+  labels = { 
+    "creator": "testuser"
+  }
+}

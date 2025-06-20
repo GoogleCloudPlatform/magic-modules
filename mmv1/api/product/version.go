@@ -14,10 +14,10 @@
 package product
 
 import (
+	"log"
+
 	"golang.org/x/exp/slices"
 )
-
-// require 'api/object'
 
 var ORDER = []string{"ga", "beta", "alpha", "private"}
 
@@ -26,34 +26,19 @@ var ORDER = []string{"ga", "beta", "alpha", "private"}
 // a superset of beta, and beta a superset of GA. Each version will have a
 // different version url.
 type Version struct {
-	// TODO: Should embed NamedObject or not?
-	// < Api::NamedObject
-	// include Comparable
-
-	// attr_reader
-	CaiBaseUrl string `yaml:"cai_base_url"`
-
-	// attr_accessor
-	BaseUrl string `yaml:"base_url"`
-
-	// attr_accessor
-	Name string
+	CaiBaseUrl string `yaml:"cai_base_url,omitempty"`
+	BaseUrl    string `yaml:"base_url"`
+	Name       string
 }
 
-// def validate
-//   super
-//   check :cai_base_url, type: String, required: false
-//   check :base_url, type: String, required: true
-//   check :name, type: String, allowed: ORDER, required: true
-// end
-
-// def to_s
-//   "//{name}: //{base_url}"
-// end
-
-// def <=>(other)
-//   ORDER.index(name) <=> ORDER.index(other.name) if other.is_a?(Version)
-// end
+func (v *Version) Validate(pName string) {
+	if v.Name == "" {
+		log.Fatalf("Missing `name` in `version` for product %s", pName)
+	}
+	if v.BaseUrl == "" {
+		log.Fatalf("Missing `base_url` in `version` for product %s", pName)
+	}
+}
 
 func (v *Version) CompareTo(other *Version) int {
 	return slices.Index(ORDER, v.Name) - slices.Index(ORDER, other.Name)

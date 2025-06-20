@@ -17,12 +17,8 @@ type: key
 versions:
 - ga
 resource: samples/ios.key.json
-dependencies:
-- samples/basic.cloudresourcemanager.project.json
 updates:
 - resource: samples/ios_update.key.json
-  dependencies:
-  - samples/basic.cloudresourcemanager.project.json
 variables:
 - name: app
   type: resource_name

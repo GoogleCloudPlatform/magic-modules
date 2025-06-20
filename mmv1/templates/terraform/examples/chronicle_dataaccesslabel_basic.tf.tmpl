@@ -1,0 +1,7 @@
+resource "google_chronicle_data_access_label" "{{$.PrimaryResourceId}}" {
+  location = "us" 
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  data_access_label_id = "{{index $.Vars "data_access_label_id"}}"
+  udm_query = "principal.hostname=\"google.com\""
+  description = "{{index $.Vars "description"}}"
+}

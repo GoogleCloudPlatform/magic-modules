@@ -57,6 +57,12 @@ resource "google_organization_iam_member" "sa_billing_viewer" {
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "sa_chronicle_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/chronicle.admin"
+  member = google_service_account.sa.member
+}
+
 resource "google_organization_iam_member" "sa_cloudkms_admin" {
   org_id = data.google_organization.org.org_id
   role   = "roles/cloudkms.admin"
@@ -153,6 +159,18 @@ resource "google_organization_iam_member" "sa_storage_admin" {
   member = google_service_account.sa.member
 }
 
+resource "google_organization_iam_member" "sa_securitycenter_bigquery_exports_editor" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/securitycenter.bigQueryExportsEditor"
+  member = google_service_account.sa.member
+}
+
+resource "google_organization_iam_member" "sa_principal_access_boundary_admin" {
+  org_id = data.google_organization.org.org_id
+  role   = "roles/iam.principalAccessBoundaryAdmin"
+  member = google_service_account.sa.member
+}
+
 resource "google_billing_account_iam_member" "sa_master_billing_admin" {
   billing_account_id = data.google_billing_account.master_acct.id
   role               = "roles/billing.admin"
@@ -205,6 +223,8 @@ module "project-services" {
     "binaryauthorization.googleapis.com",
     "blockchainnodeengine.googleapis.com",
     "certificatemanager.googleapis.com",
+    "chronicle.googleapis.com",
+    "cloudaicompanion.googleapis.com",
     "cloudapis.googleapis.com",
     "cloudasset.googleapis.com",
     "cloudbilling.googleapis.com",
@@ -277,8 +297,11 @@ module "project-services" {
     "ids.googleapis.com",
     "logging.googleapis.com",
     "looker.googleapis.com",
+    "lustre.googleapis.com",
     "managedidentities.googleapis.com",
+    "managedkafka.googleapis.com",
     "memcache.googleapis.com",
+    "memorystore.googleapis.com",
     "metastore.googleapis.com",
     "migrationcenter.googleapis.com",
     "ml.googleapis.com",
@@ -295,8 +318,10 @@ module "project-services" {
     "osconfig.googleapis.com",
     "oslogin.googleapis.com",
     "parallelstore.googleapis.com",
+    "parametermanager.googleapis.com",
     "privateca.googleapis.com",
     "privilegedaccessmanager.googleapis.com",
+    "progressiverollout.googleapis.com",
     "pubsub.googleapis.com",
     "pubsublite.googleapis.com",
     "publicca.googleapis.com",
@@ -321,6 +346,7 @@ module "project-services" {
     "servicenetworking.googleapis.com",
     "serviceusage.googleapis.com",
     "sourcerepo.googleapis.com",
+    "speech.googleapis.com",
     "spanner.googleapis.com",
     "sql-component.googleapis.com",
     "sqladmin.googleapis.com",
@@ -334,6 +360,7 @@ module "project-services" {
     "testing.googleapis.com",
     "tpu.googleapis.com",
     "trafficdirector.googleapis.com",
+    "transcoder.googleapis.com",
     "vmwareengine.googleapis.com",
     "vpcaccess.googleapis.com",
     "websecurityscanner.googleapis.com",
@@ -367,7 +394,29 @@ resource "google_project_service_identity" "sqladmin_sa" {
   service = "sqladmin.googleapis.com"
 }
 
-# TODO: Replace these permissions with bootstrapped permissions
+resource "google_project_service_identity" "osconfig_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "osconfig.googleapis.com"
+}
+
+resource "google_project_service_identity" "progressiverollout_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "progressiverollout.googleapis.com"
+}
+
+resource "google_project_service_identity" "parametermanager_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "parametermanager.googleapis.com"
+}
 
 # TestAccComposerEnvironment_fixPyPiPackages
 # TestAccComposerEnvironmentComposer2_private
@@ -400,6 +449,24 @@ resource "google_project_iam_member" "compute_agent_secret_accessor" {
   member  = "serviceAccount:${google_project.proj.number}-compute@developer.gserviceaccount.com"
 }
 
+# TestAccHealthcarePipelineJob_healthcarePipelineJobMappingReconDestExample
+# TestAccHealthcarePipelineJob_healthcarePipelineJobReconciliationExample
+# TestAccHealthcarePipelineJob_healthcarePipelineJobWhistleMappingExample
+resource "google_project_iam_member" "healthcare_agent_storage_object_admin" {
+  project = google_project.proj.project_id
+  role    = "roles/storage.objectAdmin"
+  member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-healthcare.iam.gserviceaccount.com"
+}
+
+# TestAccHealthcarePipelineJob_healthcarePipelineJobMappingReconDestExample
+# TestAccHealthcarePipelineJob_healthcarePipelineJobReconciliationExample
+# TestAccHealthcarePipelineJob_healthcarePipelineJobWhistleMappingExample
+resource "google_project_iam_member" "healthcare_agent_fhir_resource_editor" {
+  project = google_project.proj.project_id
+  role    = "roles/healthcare.fhirResourceEditor"
+  member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-healthcare.iam.gserviceaccount.com"
+}
+
 # TestAccVertexAIEndpoint_vertexAiEndpointNetwork
 # TestAccVertexAIFeaturestoreEntitytype_vertexAiFeaturestoreEntitytypeExample
 # TestAccVertexAIFeaturestoreEntitytype_vertexAiFeaturestoreEntitytypeWithBetaFieldsExample
@@ -412,6 +479,28 @@ resource "google_project_iam_member" "aiplatform_agent_encrypter_decrypter" {
   project = google_project.proj.project_id
   role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member  = "serviceAccount:service-${google_project.proj.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+}
+
+# TestAccComputeInstance_confidentialHyperDiskBootDisk
+resource "google_project_iam_member" "compute_default_sa_encrypter_decrypter" {
+  project = google_project.proj.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:${google_project.proj.number}-compute@developer.gserviceaccount.com"
+}
+
+# TestAccComputeInstance_confidentialHyperDiskBootDisk
+resource "google_project_iam_member" "compute_agent_encrypter_decrypter" {
+  project = google_project.proj.project_id
+  role    = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member  = "serviceAccount:service-${google_project.proj.number}@compute-system.iam.gserviceaccount.com"
+}
+
+# TestAccColabRuntime_colabRuntimeBasicExample
+# TestAccColabRuntime_colabRuntimeFullExample
+resource "google_project_iam_member" "colab_admin_permissions" {
+  project = google_project.proj.project_id
+  role    = "roles/aiplatform.colabEnterpriseAdmin"
+  member  = "user:gterraformtestuser@gmail.com"
 }
 
 data "google_organization" "org2" {
@@ -440,34 +529,6 @@ resource "google_organization_iam_member" "sa_org2_resource_settings_admin" {
   org_id = data.google_organization.org2.org_id
   role   = "roles/resourcesettings.admin"
   member = google_service_account.sa.member
-}
-
-resource "google_project" "firestore_proj" {
-  name            = var.firestore_project_id
-  project_id      = var.firestore_project_id
-  org_id          = data.google_organization.org.org_id
-  billing_account = var.billing_account_id
-}
-
-module "firestore-project-services" {
-  source  = "terraform-google-modules/project-factory/google//modules/project_services"
-  version = "~> 14.1"
-
-  project_id = google_project.firestore_proj.project_id
-
-  activate_apis = [
-    "firestore.googleapis.com",
-  ]
-}
-
-resource "google_firestore_database" "firestore_db" {
-  provider = google-beta
-  depends_on = [module.firestore-project-services]
-
-  project     = google_project.firestore_proj.project_id
-  name        = "(default)"
-  location_id = "nam5"
-  type        = "FIRESTORE_NATIVE"
 }
 
 output "service_account" {

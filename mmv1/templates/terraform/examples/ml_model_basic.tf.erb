@@ -1,5 +1,0 @@
-resource "google_ml_engine_model" "<%= ctx[:primary_resource_id] -%>" {
-  name        = "<%= ctx[:vars]['model_name'] -%>"
-  description = "My model"
-  regions     = ["us-central1"]
-}

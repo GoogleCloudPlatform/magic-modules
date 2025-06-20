@@ -1,0 +1,5 @@
+// Since RouterNatAddress reopresents only the natIps field, we must make sure we only remove this value and not the entire nat
+obj, err = resourceComputeRouterNatAddressDeleteOnlyNatIps(d, meta, obj)
+if err != nil {
+	return err
+}

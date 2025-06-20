@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -128,6 +128,7 @@ func testAccDataSourceGoogleActiveFolderConfig(parent string, displayName string
 resource "google_folder" "foobar" {
   parent       = "%s"
   display_name = "%s"
+  deletion_protection = false
 }
 
 data "google_active_folder" "my_folder" {
@@ -142,6 +143,7 @@ func testAccDataSourceGoogleActiveFolderConfig_Search(parent string, displayName
 resource "google_folder" "foobar" {
   parent       = "%s"
   display_name = "%s"
+  deletion_protection = false
 }
 
 # Wait after folder creation to limit eventual consistency errors.

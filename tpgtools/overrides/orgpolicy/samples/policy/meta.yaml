@@ -1,8 +1,0 @@
-ignore_read:
-  - name
-  - "spec.0.rules.0.condition.0.expression"
-# The feature for this sample is not ready
-test_hide:
-- organization_dry_run_policy.yaml
-doc_hide:
-- organization_dry_run_policy.yaml

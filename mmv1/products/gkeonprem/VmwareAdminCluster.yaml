@@ -1,0 +1,703 @@
+# Copyright 2023 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the License);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: "VmwareAdminCluster"
+min_version: beta
+base_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters"
+create_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters?vmware_admin_cluster_id={{name}}"
+update_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"
+self_link: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"
+update_verb: "PATCH"
+update_mask: true
+description: "A Google VMware Admin Cluster."
+exclude_delete: true
+id_format: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"
+import_format: ["projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"]
+timeouts:
+  insert_minutes: 60
+  delete_minutes: 60
+  update_minutes: 60
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+taint_resource_on_failed_create: true
+examples:
+  - name: "gkeonprem_vmware_admin_cluster_basic"
+    primary_resource_id: "admin-cluster-basic"
+    min_version: beta
+    vars:
+      name: "basic"
+    test_env_vars:
+      project: "fake-backend-360322"
+  - name: 'gkeonprem_vmware_admin_cluster_full'
+    primary_resource_id: 'admin-cluster-full'
+    min_version: beta
+    vars:
+      name: 'full'
+    test_env_vars:
+      project: 'fake-backend-360322'
+  - name: 'gkeonprem_vmware_admin_cluster_metallb'
+    primary_resource_id: 'admin-cluster-metallb'
+    min_version: beta
+    vars:
+      name: 'metallb'
+    test_env_vars:
+      project: 'fake-backend-360322'
+parameters:
+  - type: String
+    name: "name"
+    description: The VMware admin cluster resource name.
+    immutable: true
+    url_param_only: true
+    required: true
+  - type: String
+    name: "location"
+    description: The location of the resource.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - type: String
+    name: "description"
+    description: |
+      A human readable description of this VMware admin cluster.
+    default_from_api: true
+  - type: String
+    name: "onPremVersion"
+    description: |
+      The Anthos clusters on the VMware version for the admin cluster.
+  - type: String
+    name: "imageType"
+    description: |
+      The OS image type for the VMware admin cluster.
+    default_from_api: true
+  - type: String
+    name: "bootstrapClusterMembership"
+    description: |
+      The bootstrap cluster this VMware admin cluster belongs to.
+    default_from_api: true
+  - type: KeyValueAnnotations
+    name: "annotations"
+    description: |
+      Annotations on the VMware Admin Cluster.
+      This field has the same restrictions as Kubernetes annotations.
+      The total size of all keys and values combined is limited to 256k.
+      Key can have 2 segments: prefix (optional) and name (required),
+      separated by a slash (/).
+      Prefix must be a DNS subdomain.
+      Name must be 63 characters or less, begin and end with alphanumerics,
+      with dashes (-), underscores (_), dots (.), and alphanumerics between.
+    default_from_api: true
+  - type: NestedObject
+    name: "networkConfig"
+    description: |
+      The VMware admin cluster network configuration.
+    required: true
+    properties:
+      - type: Array
+        name: 'serviceAddressCidrBlocks'
+        item_type:
+          type: String
+        required: true
+        description: |
+          All services in the cluster are assigned an RFC1918 IPv4 address
+          from these ranges. Only a single range is supported.. This field
+          cannot be changed after creation.
+      - type: Array
+        name: 'podAddressCidrBlocks'
+        item_type:
+          type: String
+        required: true
+        description: |
+          All pods in the cluster are assigned an RFC1918 IPv4 address from these ranges.
+          Only a single range is supported. This field cannot be changed after creation.
+      - type: NestedObject
+        name: 'staticIpConfig'
+        description: Configuration settings for a static IP configuration.
+        exactly_one_of:
+          - network_config.0.static_ip_config
+          - network_config.0.dhcp_ip_config
+        properties:
+          - type: Array
+            name: ipBlocks
+            description:
+              Represents the configuration values for static IP allocation to
+              nodes.
+            item_type:
+              type: NestedObject
+              properties:
+                - type: String
+                  name: 'netmask'
+                  description: The netmask used by the VMware Admin Cluster.
+                  required: true
+                - type: String
+                  name: 'gateway'
+                  description:
+                    The network gateway used by the VMware Admin Cluster.
+                  required: true
+                - type: Array
+                  name: 'ips'
+                  description:
+                    The node's network configurations used by the VMware Admin
+                    Cluster.
+                  required: true
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - type: String
+                        name: 'ip'
+                        description:
+                          IP could be an IP address (like 1.2.3.4) or a CIDR
+                          (like 1.2.3.0/24).
+                        required: true
+                      - type: String
+                        name: 'hostname'
+                        description:
+                          Hostname of the machine. VM's name will be used if
+                          this field is empty.
+                        default_from_api: true
+      - type: NestedObject
+        name: 'dhcpIpConfig'
+        description: Configuration settings for a DHCP IP configuration.
+        exactly_one_of:
+          - network_config.0.static_ip_config
+          - network_config.0.dhcp_ip_config
+        default_from_api: true
+        properties:
+          - type: Boolean
+            name: enabled
+            description: |
+              enabled is a flag to mark if DHCP IP allocation is
+              used for VMware admin clusters.
+            required: true
+      - type: String
+        name: 'vcenterNetwork'
+        description:
+          vcenter_network specifies vCenter network name.
+      - type: NestedObject
+        name: 'hostConfig'
+        description:
+          Represents common network settings irrespective of the host's IP
+          address.
+        default_from_api: true
+        properties:
+          - type: Array
+            name: 'dnsServers'
+            description: DNS servers.
+            item_type:
+              type: String
+          - type: Array
+            name: 'ntpServers'
+            description: NTP servers.
+            item_type:
+              type: String
+          - type: Array
+            name: 'dnsSearchDomains'
+            description: DNS search domains.
+            item_type:
+              type: String
+      - type: NestedObject
+        name: 'haControlPlaneConfig'
+        description:
+          Configuration for HA admin cluster control plane.
+        properties:
+          - type: NestedObject
+            name: 'controlPlaneIpBlock'
+            description: Static IP addresses for the control plane nodes.
+            properties:
+              - type: String
+                name: 'netmask'
+                description: The netmask used by the VMware Admin Cluster.
+                required: true
+              - type: String
+                name: 'gateway'
+                description:
+                  The network gateway used by the VMware Admin Cluster.
+                required: true
+              - type: Array
+                name: 'ips'
+                description:
+                  The node's network configurations used by the VMware Admin
+                  Cluster.
+                required: true
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - type: String
+                      name: 'ip'
+                      description:
+                        IP could be an IP address (like 1.2.3.4) or a CIDR
+                        (like 1.2.3.0/24).
+                      required: true
+                    - type: String
+                      name: 'hostname'
+                      description:
+                        Hostname of the machine. VM's name will be used if
+                        this field is empty.
+                      default_from_api: true
+  - type: NestedObject
+    name: "controlPlaneNode"
+    description: |
+      The VMware admin cluster control plane node configuration.
+    properties:
+      - type: Integer
+        name: cpus
+        description: |
+          The number of vCPUs for the control-plane node of the admin cluster.
+        default_value: 4
+      - type: Integer
+        name: memory
+        description: |
+          The number of mebibytes of memory for the control-plane node of the admin cluster.
+        default_value: 8192
+      - type: Integer
+        name: replicas
+        description: |
+          The number of control plane nodes for this VMware admin cluster.
+        default_value: 1
+  - type: NestedObject
+    name: "addonNode"
+    description: |
+      The VMware admin cluster addon node configuration.
+    default_from_api: true
+    properties:
+      - type: NestedObject
+        name: "autoResizeConfig"
+        description: |
+          Specifies auto resize config.
+        default_from_api: true
+        properties:
+          - type: Boolean
+            name: enabled
+            description: |
+              Whether to enable controle plane node auto resizing.
+            required: true
+  - type: NestedObject
+    name: "loadBalancer"
+    description: |
+      Specifies the load balancer configuration for VMware admin cluster.
+    properties:
+      - type: NestedObject
+        name: "vipConfig"
+        required: true
+        description: |
+          Specified the VMware Load Balancer Config
+        properties:
+          - type: String
+            name: "controlPlaneVip"
+            required: true
+            description: |
+              The VIP which you previously set aside for the Kubernetes
+              API of this VMware Admin Cluster.
+          - type: String
+            name: "addonsVip"
+            description: |
+              The VIP to configure the load balancer for add-ons.
+      - type: NestedObject
+        name: 'f5Config'
+        description: Configuration for F5 Big IP typed load balancers.
+        exactly_one_of:
+          - loadBalancer.0.f5_config
+          - loadBalancer.0.manual_lb_config
+          - loadBalancer.0.metal_lb_config
+        properties:
+          - type: String
+            name: 'address'
+            description: The load balancer's IP address.
+          - type: String
+            name: 'partition'
+            description: |
+              he preexisting partition to be used by the load balancer. T
+              his partition is usually created for the admin cluster for example:
+              'my-f5-admin-partition'.
+          - type: String
+            name: 'snatPool'
+            description: The pool name. Only necessary, if using SNAT.
+      - type: NestedObject
+        name: 'manualLbConfig'
+        description: Manually configured load balancers.
+        exactly_one_of:
+          - loadBalancer.0.f5_config
+          - loadBalancer.0.manual_lb_config
+          - loadBalancer.0.metal_lb_config
+        properties:
+          - type: Integer
+            name: 'ingressHttpNodePort'
+            description: |
+              NodePort for ingress service's http. The ingress service in the admin
+              cluster is implemented as a Service of type NodePort (ex. 32527).
+            default_from_api: true
+          - type: Integer
+            name: 'ingressHttpsNodePort'
+            description: |
+              NodePort for ingress service's https. The ingress service in the admin
+              cluster is implemented as a Service of type NodePort (ex. 30139).
+            default_from_api: true
+          - type: Integer
+            name: 'controlPlaneNodePort'
+            description: |
+              NodePort for control plane service. The Kubernetes API server in the admin
+              cluster is implemented as a Service of type NodePort (ex. 30968).
+            default_from_api: true
+          - type: Integer
+            name: 'konnectivityServerNodePort'
+            description: |
+              NodePort for konnectivity server service running as a sidecar in each
+              kube-apiserver pod (ex. 30564).
+            default_from_api: true
+          - type: Integer
+            name: 'addonsNodePort'
+            description: |
+              NodePort for add-ons server in the admin cluster.
+            default_from_api: true
+      - type: NestedObject
+        name: 'metalLbConfig'
+        description: Metal LB load balancers.
+        send_empty_value: true
+        exactly_one_of:
+          - loadBalancer.0.f5_config
+          - loadBalancer.0.manual_lb_config
+          - loadBalancer.0.metal_lb_config
+        properties:
+          - type: Boolean
+            name: enabled
+            description: Metal LB is enabled.
+  - type: NestedObject
+    name: vcenter
+    description: |
+      Specifies vCenter config for the admin cluster.
+    properties:
+      - type: String
+        name: 'resourcePool'
+        description: The name of the vCenter resource pool for the admin cluster.
+      - type: String
+        name: 'datastore'
+        description: The name of the vCenter datastore for the admin cluster.
+      - type: String
+        name: 'datacenter'
+        description: The name of the vCenter datacenter for the admin cluster.
+      - type: String
+        name: 'cluster'
+        description: The name of the vCenter cluster for the admin cluster.
+      - type: String
+        name: 'folder'
+        description: The name of the vCenter folder for the admin cluster.
+      - type: String
+        name: 'caCertData'
+        description:
+          Contains the vCenter CA certificate public key for SSL verification.
+      - type: String
+        name: 'address'
+        description: The vCenter IP address.
+      - type: String
+        name: 'dataDisk'
+        description: The name of the virtual machine disk (VMDK) for the admin cluster.
+      - type: String
+        name: 'storagePolicyName'
+        description: The name of the vCenter storage policy for the user cluster.
+  - type: NestedObject
+    name: antiAffinityGroups
+    description: |
+      AAGConfig specifies whether to spread VMware Admin Cluster nodes across at
+      least three physical hosts in the datacenter.
+    default_from_api: true
+    properties:
+      - type: Boolean
+        name: aagConfigDisabled
+        description: |
+          Spread nodes across at least three physical hosts (requires at least three
+          hosts).
+          Enabled by default.
+        required: true
+  - type: NestedObject
+    name: autoRepairConfig
+    description: Configuration for auto repairing.
+    default_from_api: true
+    properties:
+      - type: Boolean
+        name: enabled
+        description: Whether auto repair is enabled.
+        required: true
+  - type: NestedObject
+    name: authorization
+    description: The VMware admin cluster authorization configuration.
+    properties:
+      - type: Array
+        name: viewerUsers
+        description: |
+          Users that will be granted the cluster-admin role on the cluster, providing
+          full access to the cluster.
+        item_type:
+          type: NestedObject
+          properties:
+            - type: String
+              name: username
+              required: true
+              description: The name of the user, e.g. `my-gcp-id@gmail.com`.
+  - type: NestedObject
+    name: platformConfig
+    description: |
+      The VMware platform configuration.
+    properties:
+      - type: String
+        name: 'requiredPlatformVersion'
+        description: |
+          The required platform version e.g. 1.13.1.
+          If the current platform version is lower than the target version,
+          the platform version will be updated to the target version.
+          If the target version is not installed in the platform
+          (bundle versions), download the target version bundle.
+        ignore_read: true
+      - type: String
+        name: 'platformVersion'
+        description: |
+          The platform version e.g. 1.13.2.
+        output: true
+      - type: Array
+        name: bundles
+        description: |
+          The list of bundles installed in the admin cluster.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - type: String
+              name: 'version'
+              description: |
+                The version of the bundle.
+              output: true
+            - type: NestedObject
+              name: status
+              description: ResourceStatus representing detailed cluster state.
+              output: true
+              properties:
+                - type: String
+                  name: 'errorMessage'
+                  description: |
+                    Human-friendly representation of the error message from the admin cluster
+                    controller. The error message can be temporary as the admin cluster
+                    controller creates a cluster or node pool. If the error message persists
+                    for a longer period of time, it can be used to surface error message to
+                    indicate real problems requiring user intervention.
+                  output: true
+                - type: Array
+                  name: 'conditions'
+                  description: |
+                    ResourceConditions provide a standard mechanism for higher-level status reporting from admin cluster controller.
+                  output: true
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - type: String
+                        name: 'type'
+                        description: |
+                          Type of the condition.
+                          (e.g., ClusterRunning, NodePoolRunning or ServerSidePreflightReady)
+                        output: true
+                      - type: String
+                        name: 'reason'
+                        description: |
+                          Machine-readable message indicating details about last transition.
+                        output: true
+                      - type: String
+                        name: 'message'
+                        description: |
+                          Human-readable message indicating details about last transition.
+                        output: true
+                      - name: 'lastTransitionTime'
+                        type: Time
+                        description: |
+                          Last time the condition transit from one status to another.
+                        output: true
+                      - name: 'state'
+                        type: String
+                        description: The lifecycle state of the condition.
+                        output: true
+      - type: NestedObject
+        name: status
+        description: ResourceStatus representing detailed cluster state.
+        output: true
+        properties:
+          - type: String
+            name: 'errorMessage'
+            description: |
+              Human-friendly representation of the error message from the admin cluster
+              controller. The error message can be temporary as the admin cluster
+              controller creates a cluster or node pool. If the error message persists
+              for a longer period of time, it can be used to surface error message to
+              indicate real problems requiring user intervention.
+            output: true
+          - type: Array
+            name: 'conditions'
+            description: |
+              ResourceConditions provide a standard mechanism for higher-level status reporting from admin cluster controller.
+            output: true
+            item_type:
+              type: NestedObject
+              properties:
+                - type: String
+                  name: 'type'
+                  description: |
+                    Type of the condition.
+                    (e.g., ClusterRunning, NodePoolRunning or ServerSidePreflightReady)
+                  output: true
+                - type: String
+                  name: 'reason'
+                  description: |
+                    Machine-readable message indicating details about last transition.
+                  output: true
+                - type: String
+                  name: 'message'
+                  description: |
+                    Human-readable message indicating details about last transition.
+                  output: true
+                - name: 'lastTransitionTime'
+                  type: Time
+                  description: |
+                    Last time the condition transit from one status to another.
+                  output: true
+                - name: 'state'
+                  type: String
+                  description: The lifecycle state of the condition.
+                  output: true
+  - type: String
+    name: "uid"
+    description: |
+      The unique identifier of the VMware Admin Cluster.
+    output: true
+  - name: "state"
+    type: String
+    description: The lifecycle state of the VMware admin cluster.
+    output: true
+  - type: String
+    name: "endpoint"
+    description: |
+      The DNS name of VMware admin cluster's API server.
+    output: true
+  - type: Boolean
+    name: "reconciling"
+    description: |
+      If set, there are currently changes in flight to the VMware admin cluster.
+    output: true
+  - name: "createTime"
+    type: Time
+    description: |
+      The time the cluster was created, in RFC3339 text format.
+    output: true
+  - name: "updateTime"
+    type: Time
+    description: |
+      The time the cluster was last updated, in RFC3339 text format.
+    output: true
+  - type: String
+    name: "localName"
+    description: |
+      The object name of the VMwareAdminCluster custom resource on the
+      associated admin cluster. This field is used to support conflicting
+      names when enrolling existing clusters to the API. When used as a part of
+      cluster enrollment, this field will differ from the ID in the resource
+      name. For new clusters, this field will match the user provided cluster ID
+      and be visible in the last component of the resource name. It is not
+      modifiable.
+      All users should use this name to access their cluster using gkectl or
+      kubectl and should expect to see the local name when viewing admin
+      cluster controller logs.
+    output: true
+  - type: String
+    name: "etag"
+    description: |
+      This checksum is computed by the server based on the value of other
+      fields, and may be sent on update and delete requests to ensure the
+      client has an up-to-date value before proceeding.
+      Allows clients to perform consistent read-modify-writes
+      through optimistic concurrency control.
+    output: true
+  - type: NestedObject
+    name: fleet
+    description: Fleet configuration for the cluster.
+    output: true
+    properties:
+      - type: String
+        name: 'membership'
+        description: |
+          The name of the managed Fleet Membership resource associated to this cluster.
+          Membership names are formatted as
+          `projects/<project-number>/locations/<location>/memberships/<cluster-id>`.
+        output: true
+  - type: NestedObject
+    name: status
+    description: ResourceStatus representing detailed cluster state.
+    output: true
+    properties:
+      - type: String
+        name: 'errorMessage'
+        description: |
+          Human-friendly representation of the error message from the admin cluster
+          controller. The error message can be temporary as the admin cluster
+          controller creates a cluster or node pool. If the error message persists
+          for a longer period of time, it can be used to surface error message to
+          indicate real problems requiring user intervention.
+        output: true
+      - type: Array
+        name: 'conditions'
+        description: |
+          ResourceConditions provide a standard mechanism for higher-level status reporting from admin cluster controller.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - type: String
+              name: 'type'
+              description: |
+                Type of the condition.
+                (e.g., ClusterRunning, NodePoolRunning or ServerSidePreflightReady)
+              output: true
+            - type: String
+              name: 'reason'
+              description: |
+                Machine-readable message indicating details about last transition.
+              output: true
+            - type: String
+              name: 'message'
+              description: |
+                Human-readable message indicating details about last transition.
+              output: true
+            - name: 'lastTransitionTime'
+              type: Time
+              description: |
+                Last time the condition transit from one status to another.
+              output: true
+            - name: 'state'
+              type: String
+              description: The lifecycle state of the condition.
+              output: true
+  - type: Boolean
+    name: enableAdvancedCluster
+    description: If set, the advanced cluster feature is enabled.
+    output: true
+  - type: NestedObject
+    name: privateRegistryConfig
+    description: Configuration for private registry.
+    properties:
+      - type: String
+        name: 'address'
+        description: The registry address.
+      - type: String
+        name: 'caCert'
+        description: The CA certificate public key for private registry.

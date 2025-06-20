@@ -11,12 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Product
-name: CloudQuotas
-display_name: Cloud Quotas
+---
+name: 'CloudQuotas'
+display_name: 'Cloud Quotas'
 versions:
-  - !ruby/object:Api::Product::Version
-    name: ga
-    base_url: https://cloudquotas.googleapis.com/v1/
+  - name: 'ga'
+    base_url: 'https://cloudquotas.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://cloudquotas.googleapis.com/v1beta/'
 scopes:
-  - https://www.googleapis.com/auth/cloud-platform
+  - 'https://www.googleapis.com/auth/cloud-platform'

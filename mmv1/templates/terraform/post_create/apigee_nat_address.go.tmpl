@@ -1,0 +1,10 @@
+if d.Get("activate").(bool) {
+  if err := waitForNatAddressReserved(d, config, d.Timeout(schema.TimeoutCreate) - time.Minute); err != nil {
+    return fmt.Errorf("Error waiting for NatAddress %q to be RESERVED during creation: %q", d.Id(), err)
+  }
+
+  log.Printf("[DEBUG] Activating for NatAddress %q to become ACTIVE", d.Id())
+  if err := resourceApigeeNatAddressActivate(config, d, billingProject, userAgent); err != nil {
+    return fmt.Errorf("Error activating NatAddress: %s", err)
+  }
+}

@@ -1,0 +1,145 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Instance
+description: A Managed Lustre instance
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/managed-lustre/docs/create-instance'
+  api: 'https://cloud.google.com/managed-lustre/docs/reference/rest/v1/projects.locations.instances'
+base_url: projects/{{project}}/locations/{{location}}/instances
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
+create_url: projects/{{project}}/locations/{{location}}/instances?instanceId={{instance_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
+examples:
+
+  - name: lustre_instance_basic
+    primary_resource_id: 'instance'
+    vars:
+      name: 'my-instance'
+      address_name: 'my-ip-address-name'
+      network_name: 'my-network'
+      subnetwork_name: 'my-subnetwork'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "default-vpc")'
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: SW5zdGFuY2U=
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: instanceId
+    type: String
+    description: |-
+      The name of the Managed Lustre instance.
+
+      * Must contain only lowercase letters, numbers, and hyphens.
+      * Must start with a letter.
+      * Must be between 1-63 characters.
+      * Must end with a number or a letter.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: capacityGib
+    type: String
+    description: |-
+      The storage capacity of the instance in gibibytes (GiB). Allowed values
+      are from `18000` to `954000`, in increments of 9000.
+    required: true
+  - name: updateTime
+    type: String
+    description: Timestamp when the instance was last updated.
+    output: true
+  - name: gkeSupportEnabled
+    type: Boolean
+    description: |-
+      Indicates whether you want to enable support for GKE clients. By default,
+      GKE clients are not supported.
+  - name: filesystem
+    type: String
+    description: |-
+      The filesystem name for this instance. This name is used by client-side
+      tools, including when mounting the instance. Must be eight characters or
+      less and can only contain letters and numbers.
+    immutable: true
+    required: true
+  - name: network
+    type: String
+    description: |-
+      The full name of the VPC network to which the instance is connected.
+      Must be in the format
+      `projects/{project_id}/global/networks/{network_name}`.
+    immutable: true
+    required: true
+  - name: state
+    type: String
+    description: |-
+      The state of the instance.
+      Possible values:
+      STATE_UNSPECIFIED
+      ACTIVE
+      CREATING
+      DELETING
+      UPGRADING
+      REPAIRING
+      STOPPED
+    output: true
+  - name: mountPoint
+    type: String
+    description: Mount point of the instance in the format `IP_ADDRESS@tcp:/FILESYSTEM`.
+    output: true
+  - name: createTime
+    type: String
+    description: Timestamp when the instance was created.
+    output: true
+  - name: description
+    type: String
+    description: A user-readable description of the instance.
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key value pairs.
+  - name: perUnitStorageThroughput
+    type: String
+    description: |-
+      The throughput of the instance in MB/s/TiB.
+      Valid values are 125, 250, 500, 1000.
+    required: true
+    immutable: true
+  - name: name
+    type: String
+    description: Identifier. The name of the instance.
+    output: true

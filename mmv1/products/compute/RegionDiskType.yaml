@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,67 +11,73 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'RegionDiskType'
 kind: 'compute#diskType'
-base_url: projects/{{project}}/regions/{{region}}/diskTypes
-collection_url_key: 'items'
 description: |
   Represents a regional DiskType resource. A DiskType resource represents
   the type of disk to use, such as a pd-ssd, pd-balanced or pd-standard. To reference a
   disk type, use the disk type's full or partial URL.
-readonly: true
-has_self_link: true
 exclude: true
+readonly: true
+docs:
+base_url: 'projects/{{project}}/regions/{{region}}/diskTypes'
+has_self_link: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+collection_url_key: 'items'
+custom_code:
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'region'
-    resource: 'Region'
-    imports: 'name'
+  - name: 'region'
+    type: ResourceRef
     description: 'A reference to the region where the disk type resides.'
     required: true
-    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.erb'
+    custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    resource: 'Region'
+    imports: 'name'
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+  - name: 'creationTimestamp'
+    type: Time
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: 'defaultDiskSizeGb'
+  - name: 'defaultDiskSizeGb'
+    type: Integer
     description: 'Server-defined default disk size in GB.'
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'deprecated'
+  - name: 'deprecated'
+    type: NestedObject
     description: 'The deprecation status associated with this disk type.'
     output: true
     properties:
-      - !ruby/object:Api::Type::Time
-        name: 'deleted'
+      - name: 'deleted'
+        type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to DELETED.
         output: true
-      - !ruby/object:Api::Type::Time
-        name: 'deprecated'
+      - name: 'deprecated'
+        type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to DEPRECATED.
         output: true
-      - !ruby/object:Api::Type::Time
-        name: 'obsolete'
+      - name: 'obsolete'
+        type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to OBSOLETE.
         output: true
-      - !ruby/object:Api::Type::String
-        name: 'replacement'
+      - name: 'replacement'
+        type: String
         description: |
           The URL of the suggested replacement for a deprecated resource. The
           suggested replacement resource must be the same kind of resource as
           the deprecated resource.
         output: true
-      - !ruby/object:Api::Type::Enum
-        name: 'state'
+      - name: 'state'
+        type: Enum
         description: |
           The deprecation state of this resource. This can be DEPRECATED,
           OBSOLETE, or DELETED. Operations which create a new resource using a
@@ -79,24 +85,24 @@ properties:
           indicating the deprecated resource and recommending its replacement.
           Operations which use OBSOLETE or DELETED resources will be rejected
           and result in an error.
-        values:
-          - :DEPRECATED
-          - :OBSOLETE
-          - :DELETED
         output: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+        enum_values:
+          - 'DEPRECATED'
+          - 'OBSOLETE'
+          - 'DELETED'
+  - name: 'description'
+    type: String
     description: 'An optional description of this resource.'
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
+  - name: 'id'
+    type: Integer
     description: 'The unique identifier for the resource.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: 'Name of the resource.'
-  - !ruby/object:Api::Type::String
-    name: 'validDiskSize'
+  - name: 'validDiskSize'
+    type: String
     description: |
       An optional textual description of the valid disk size, such as
       "10GB-10TB".

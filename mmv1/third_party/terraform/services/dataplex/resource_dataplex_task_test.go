@@ -3,7 +3,7 @@ package dataplex_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -29,7 +29,7 @@ func TestAccDataplexTaskDataplexTask_update(t *testing.T) {
 				ResourceName:            "google_dataplex_task.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "lake", "task_id"},
+				ImportStateVerifyIgnore: []string{"location", "lake", "task_id", "execution_status"},
 			},
 			{
 				Config: testAccDataplexTask_dataplexTaskPrimaryUpdate(context),
@@ -38,7 +38,7 @@ func TestAccDataplexTaskDataplexTask_update(t *testing.T) {
 				ResourceName:            "google_dataplex_task.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "lake", "task_id"},
+				ImportStateVerifyIgnore: []string{"location", "lake", "task_id", "execution_status"},
 			},
 		},
 	})

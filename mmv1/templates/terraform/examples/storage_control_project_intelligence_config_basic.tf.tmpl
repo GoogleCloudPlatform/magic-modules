@@ -1,0 +1,9 @@
+resource "google_storage_control_project_intelligence_config" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "project_id"}}"
+  edition_config = "TRIAL"
+  filter {
+    included_cloud_storage_buckets{
+      bucket_id_regexes = ["test-id-1*", "test-id-2*"]
+    }
+  }
+}

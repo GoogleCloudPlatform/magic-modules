@@ -1,0 +1,189 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'FoldersPolicyBinding'
+api_resource_type_kind: PolicyBinding
+api_variant_patterns:
+  - 'folders/{folder}/locations/{location}/policyBindings/{policyBinding}'
+description: |
+  A policy binding to a folder. This is a Terraform resource, and maps to a policy binding resource in GCP.
+references:
+  guides:
+    'Apply a policy binding': 'https://cloud.google.com/iam/docs/principal-access-boundary-policies-create#create_binding'
+  api: 'https://cloud.google.com/iam/docs/reference/rest/v3/folders.locations.policyBindings'
+id_format: 'folders/{{folder}}/locations/{{location}}/policyBindings/{{policy_binding_id}}'
+base_url: 'folders/{{folder}}/locations/{{location}}/policyBindings'
+self_link: 'folders/{{folder}}/locations/{{location}}/policyBindings/{{policy_binding_id}}'
+create_url: 'folders/{{folder}}/locations/{{location}}/policyBindings?policyBindingId={{policy_binding_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'folders/{{folder}}/locations/{{location}}/policyBindings/{{policy_binding_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  post_delete: 'templates/terraform/post_delete/sleep.go.tmpl'
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+  include_project: true
+examples:
+  - name: 'iam_folders_policy_binding'
+    primary_resource_id: 'binding-for-all-folder-principals'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    vars:
+      pab_policy_id: 'my-pab-policy'
+      display_name: 'binding for all principals in the folder'
+      folder_binding_id: 'binding-for-all-folder-principals'
+      folder_name: 'my folder'
+    external_providers: ["time"]
+parameters:
+  - name: 'folder'
+    type: String
+    description: |
+      The parent folder for the PolicyBinding.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The location of the PolicyBinding.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'policyBindingId'
+    type: String
+    description: |
+      The Policy Binding ID.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The name of the policy binding in the format `{binding_parent/locations/{location}/policyBindings/{policy_binding_id}`
+    output: true
+  - name: 'uid'
+    type: String
+    description: |
+      Output only. The globally unique ID of the policy binding. Assigned when the policy binding is created.
+    output: true
+  - name: 'etag'
+    type: String
+    description: |
+      Optional. The etag for the policy binding. If this is provided on update, it must match the server's etag.
+    output: true
+  - name: 'displayName'
+    type: String
+    description: |
+      Optional. The description of the policy binding. Must be less than or equal to 63 characters.
+  - name: 'annotations'
+    type: KeyValueAnnotations
+    description: |
+      Optional. User defined annotations. See https://google.aip.dev/148#annotations for more details such as format and size limitations
+  - name: 'target'
+    type: NestedObject
+    description: |
+      Target is the full resource name of the resource to which the policy will be bound. Immutable once set.
+    required: true
+    properties:
+      - name: 'principalSet'
+        type: String
+        description: |
+          Required. Immutable. Full Resource Name of the principal set used for principal access boundary policy bindings.
+          Examples for each one of the following supported principal set types:
+          * Folder: `//cloudresourcemanager.googleapis.com/folders/FOLDER_ID`
+          It must be parent by the policy binding's parent (the folder).
+        immutable: true
+  - name: 'policyKind'
+    type: String
+    description: |
+      Immutable. The kind of the policy to attach in this binding. This
+      field must be one of the following:  - Left empty (will be automatically set
+      to the policy kind) - The input policy kind   Possible values:  POLICY_KIND_UNSPECIFIED PRINCIPAL_ACCESS_BOUNDARY ACCESS
+    immutable: true
+  - name: 'policy'
+    type: String
+    description: |
+      Required. Immutable. The resource name of the policy to be bound. The binding parent and policy must belong to the same Organization (or Project).
+    required: true
+    immutable: true
+  - name: 'policyUid'
+    type: String
+    description: |
+      Output only. The globally unique ID of the policy to be bound.
+    output: true
+  - name: 'condition'
+    type: NestedObject
+    description: |
+      Represents a textual expression in the Common Expression Language
+      (CEL) syntax. CEL is a C-like expression language. The syntax and semantics of
+      CEL are documented at https://github.com/google/cel-spec.
+      Example (Comparison):
+      title: \"Summary size limit\"
+      description: \"Determines if a summary is less than 100 chars\"
+      expression: \"document.summary.size() < 100\"
+      Example
+      (Equality):
+      title: \"Requestor is owner\"
+      description: \"Determines if requestor is the document owner\"
+      expression: \"document.owner == request.auth.claims.email\"  Example
+      (Logic):
+      title: \"Public documents\"
+      description: \"Determine whether the document should be publicly visible\"
+      expression: \"document.type != 'private' && document.type != 'internal'\"
+      Example (Data Manipulation):
+      title: \"Notification string\"
+      description: \"Create a notification string with a timestamp.\"
+      expression: \"'New message received at ' + string(document.create_time)\"
+      The exact variables and functions that may be referenced within an expression are
+      determined by the service that evaluates it. See the service documentation for
+      additional information.
+    properties:
+      - name: 'expression'
+        type: String
+        description: |
+          Textual representation of an expression in Common Expression Language syntax.
+      - name: 'title'
+        type: String
+        description: |
+          Optional. Title for the expression, i.e. a short string describing its purpose. This can be used e.g. in UIs which allow to enter the expression.
+      - name: 'description'
+        type: String
+        description: |
+          Optional. Description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
+      - name: 'location'
+        type: String
+        description: |
+          Optional. String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
+  - name: 'createTime'
+    type: String
+    description: |
+      Output only. The time when the policy binding was created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      Output only. The time when the policy binding was most recently updated.
+    output: true

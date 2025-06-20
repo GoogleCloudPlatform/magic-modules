@@ -12,16 +12,6 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/fwprovider"
 	"github.com/hashicorp/terraform-provider-google/google/provider"
-	ver "github.com/hashicorp/terraform-provider-google/version"
-)
-
-var (
-	// these will be set by the goreleaser configuration
-	// to appropriate values for the compiled binary
-	version string = ver.ProviderVersion
-
-	// goreleaser can also pass the specific commit if you want
-	// commit  string = ""
 )
 
 func main() {
@@ -30,16 +20,18 @@ func main() {
 	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
 	flag.Parse()
 
-	// concat with sdkv2 provider
+	// primary is the SDKv2 implementation of the provider
+	primary := provider.Provider()
+
 	providers := []func() tfprotov5.ProviderServer{
-		providerserver.NewProtocol5(fwprovider.New(version)), // framework provider
-		provider.Provider().GRPCProvider,                     // sdk provider
+		primary.GRPCProvider, // sdk provider
+		providerserver.NewProtocol5(fwprovider.New(primary)), // framework provider
 	}
 
 	// use the muxer
 	muxServer, err := tf5muxserver.NewMuxServer(context.Background(), providers...)
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	var serveOpts []tf5server.ServeOpt

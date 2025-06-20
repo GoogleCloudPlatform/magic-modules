@@ -1,15 +1,12 @@
 package sweeper
 
 import (
-	"encoding/hex"
 	"fmt"
-	"hash/crc32"
-	"runtime"
+	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
@@ -19,6 +16,7 @@ var testResourcePrefixes = []string{
 	// include a "-" or "_" respectively, and they are the preferred prefix for our test resources to use
 	"tf-test",
 	"tf_test",
+	// Resource-specific prefixes that should be moved to the corresponding resource sweeper as part of https://github.com/hashicorp/terraform-provider-google/issues/20638
 	"tfgen",
 	"gke-us-central1-tf",  // composer-created disks which are abandoned by design (https://cloud.google.com/composer/pricing)
 	"gcs-bucket-tf-test-", // https://github.com/hashicorp/terraform-provider-google/issues/8909
@@ -26,6 +24,7 @@ var testResourcePrefixes = []string{
 	"resourcegroup-",      // https://github.com/hashicorp/terraform-provider-google/issues/8924
 	"cluster-",            // https://github.com/hashicorp/terraform-provider-google/issues/8924
 	"k8s-fw-",             // firewall rules are getting created and not cleaned up by k8 resources using this prefix
+	"ext-tf-test",         // Cloud Tasks Queues created automatically by tests for `google_firebase_extensions_instance`.
 }
 
 // SharedConfigForRegion returns a common config setup needed for the sweeper
@@ -52,23 +51,55 @@ func SharedConfigForRegion(region string) (*transport_tpg.Config, error) {
 }
 
 func IsSweepableTestResource(resourceName string) bool {
-	for _, p := range testResourcePrefixes {
-		if strings.HasPrefix(resourceName, p) {
+	return hasAnyPrefix(resourceName, testResourcePrefixes)
+}
+
+// hasAnyPrefix checks if the input string begins with any prefix from the given slice.
+// Returns true if a match is found, false otherwise.
+func hasAnyPrefix(input string, prefixes []string) bool {
+	for _, p := range prefixes {
+		if strings.HasPrefix(input, p) {
 			return true
 		}
 	}
 	return false
 }
 
-func AddTestSweepers(name string, sweeper func(region string) error) {
-	_, filename, _, _ := runtime.Caller(0)
-	hash := crc32.NewIEEE()
-	hash.Write([]byte(filename))
-	hashedFilename := hex.EncodeToString(hash.Sum(nil))
-	uniqueName := name + "_" + hashedFilename
+// ListParentResourcesInLocation calls a provided list endpoint and returns the names of any resources found in the response.
+// This function is intended to be used in sweepers where the resources being swept can only be found with knowledge about existing parental resources.
+func ListParentResourcesInLocation(d *tpgresource.ResourceDataMock, config *transport_tpg.Config, listTemplate, responseField string) ([]string, error) {
+	listUrl, err := tpgresource.ReplaceVars(d, config, listTemplate)
+	if err != nil {
+		log.Printf("[INFO][SWEEPER_LOG] error preparing sweeper list url: %s", err)
+		return nil, err
+	}
 
-	resource.AddTestSweepers(uniqueName, &resource.Sweeper{
-		Name: name,
-		F:    sweeper,
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   config.Project,
+		RawURL:    listUrl,
+		UserAgent: config.UserAgent,
 	})
+	if err != nil {
+		log.Printf("[INFO][SWEEPER_LOG] Error in response from request %s: %s", listUrl, err)
+		return nil, err
+	}
+
+	resourceList, ok := res[responseField]
+	if !ok {
+		log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
+		return nil, fmt.Errorf("nothing found in response")
+	}
+
+	rl := resourceList.([]interface{})
+	names := []string{}
+	for _, r := range rl {
+		resource := r.(map[string]interface{})
+		if name, ok := resource["name"]; ok {
+			names = append(names, name.(string))
+		}
+
+	}
+	return names, nil
 }

@@ -11,13 +11,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ccEnvironmentVariables = [...]string{
+var ccRequiredEnvironmentVariables = [...]string{
 	"COMMIT_SHA",
 	"GOCACHE",
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
 	"GOOGLE_CUST_ID",
-	"GOOGLE_FIRESTORE_PROJECT",
 	"GOOGLE_IDENTITY_USER",
 	"GOOGLE_MASTER_BILLING_ACCOUNT",
 	"GOOGLE_ORG",
@@ -33,47 +32,56 @@ var ccEnvironmentVariables = [...]string{
 	"SA_KEY",
 }
 
+var ccOptionalEnvironmentVariables = [...]string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
+	"GOOGLE_VMWAREENGINE_PROJECT",
+}
+
 var checkCassettesCmd = &cobra.Command{
 	Use:   "check-cassettes",
 	Short: "Run VCR tests on downstream main branch",
 	Long: `This command runs after downstream changes are merged and runs the most recent
 	VCR cassettes using the newly built beta provider.
 
-	The following environment variables are expected:
-` + listCCEnvironmentVariables() + `
+	The following environment variables are required:
+` + listCCRequiredEnvironmentVariables() + `
 
 	It prints a list of tests that failed in replaying mode along with all test output.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		env := make(map[string]string, len(ccEnvironmentVariables))
-		for _, ev := range ccEnvironmentVariables {
+	RunE: func(cmd *cobra.Command, args []string) error {
+		env := make(map[string]string)
+		for _, ev := range ccRequiredEnvironmentVariables {
 			val, ok := os.LookupEnv(ev)
 			if !ok {
-				fmt.Printf("Did not provide %s environment variable\n", ev)
-				os.Exit(1)
+				return fmt.Errorf("did not provide %s environment variable", ev)
 			}
 			env[ev] = val
+		}
+		for _, ev := range ccOptionalEnvironmentVariables {
+			val, ok := os.LookupEnv(ev)
+			if ok {
+				env[ev] = val
+			} else {
+				fmt.Printf("🟡 Did not provide %s environment variable\n", ev)
+			}
 		}
 
 		githubToken, ok := lookupGithubTokenOrFallback("GITHUB_TOKEN_DOWNSTREAMS")
 		if !ok {
-			fmt.Println("Did not provide GITHUB_TOKEN_DOWNSTREAMS or GITHUB_TOKEN environment variables")
-			os.Exit(1)
+			return fmt.Errorf("did not provide GITHUB_TOKEN_DOWNSTREAMS or GITHUB_TOKEN environment variables")
 		}
 
 		rnr, err := exec.NewRunner()
 		if err != nil {
-			fmt.Println("Error creating Runner: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error creating Runner: %w", err)
 		}
 
 		ctlr := source.NewController(env["GOPATH"], "modular-magician", githubToken, rnr)
 
-		vt, err := vcr.NewTester(env, rnr)
+		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "vcr-check-cassettes", rnr)
 		if err != nil {
-			fmt.Println("Error creating VCR tester: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
-		execCheckCassettes(env["COMMIT_SHA"], vt, ctlr)
+		return execCheckCassettes(env["COMMIT_SHA"], vt, ctlr)
 	},
 }
 
@@ -85,18 +93,17 @@ func lookupGithubTokenOrFallback(tokenName string) (string, bool) {
 	return val, ok
 }
 
-func listCCEnvironmentVariables() string {
+func listCCRequiredEnvironmentVariables() string {
 	var result string
-	for i, ev := range ccEnvironmentVariables {
+	for i, ev := range ccRequiredEnvironmentVariables {
 		result += fmt.Sprintf("\t%2d. %s\n", i+1, ev)
 	}
 	return result
 }
 
-func execCheckCassettes(commit string, vt *vcr.Tester, ctlr *source.Controller) {
+func execCheckCassettes(commit string, vt *vcr.Tester, ctlr *source.Controller) error {
 	if err := vt.FetchCassettes(provider.Beta, "main", ""); err != nil {
-		fmt.Println("Error fetching cassettes: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error fetching cassettes: %w", err)
 	}
 
 	providerRepo := &source.Repo{
@@ -105,18 +112,22 @@ func execCheckCassettes(commit string, vt *vcr.Tester, ctlr *source.Controller) 
 	}
 	ctlr.SetPath(providerRepo)
 	if err := ctlr.Clone(providerRepo); err != nil {
-		fmt.Println("Error cloning provider: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error cloning provider: %w", err)
 	}
 	vt.SetRepoPath(provider.Beta, providerRepo.Path)
 
-	result, err := vt.Run(vcr.Replaying, provider.Beta, nil)
+	result, err := vt.Run(vcr.RunOptions{
+		Mode:    vcr.Replaying,
+		Version: provider.Beta,
+	})
 	if err != nil {
 		fmt.Println("Error running VCR: ", err)
 	}
-	if err := vt.UploadLogs("vcr-check-cassettes", "", "", false, false, vcr.Replaying, provider.Beta); err != nil {
-		fmt.Println("Error uploading logs: ", err)
-		os.Exit(1)
+	if err := vt.UploadLogs(vcr.UploadLogsOptions{
+		Mode:    vcr.Replaying,
+		Version: provider.Beta,
+	}); err != nil {
+		return fmt.Errorf("error uploading logs: %w", err)
 	}
 	fmt.Println(len(result.FailedTests), " failed tests: ", result.FailedTests)
 	// TODO(trodge) report these failures to bigquery
@@ -124,9 +135,9 @@ func execCheckCassettes(commit string, vt *vcr.Tester, ctlr *source.Controller) 
 	fmt.Println(len(result.SkippedTests), " skipped tests: ", result.SkippedTests)
 
 	if err := vt.Cleanup(); err != nil {
-		fmt.Println("Error cleaning up vcr tester: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error cleaning up vcr tester: %w", err)
 	}
+	return nil
 }
 
 func init() {

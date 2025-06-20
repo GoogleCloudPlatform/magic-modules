@@ -1,7 +1,0 @@
-resource "google_apphub_application" "<%= ctx[:primary_resource_id] %>" {
-  location = "us-east1"
-  application_id = "<%= ctx[:vars]['application_id'] %>"
-  scope {
-    type = "REGIONAL"
-  }
-}

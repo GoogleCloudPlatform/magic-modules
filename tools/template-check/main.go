@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/GoogleCloudPlatform/magic-modules/tools/template-check/ruby"
+	"github.com/GoogleCloudPlatform/magic-modules/tools/template-check/gotemplate"
 )
 
 func isValidTemplate(filename string) (bool, error) {
-	results, err := ruby.CheckVersionGuardsForFile(filename)
+	results, err := gotemplate.CheckVersionGuardsForFile(filename)
 	if err != nil {
 		return false, err
 	}

@@ -26,7 +26,7 @@ import (
 
 	membership "magician/github"
 
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v68/github"
 	"github.com/spf13/cobra"
 
 	"golang.org/x/exp/slices"
@@ -38,20 +38,20 @@ var (
 	// used for flags
 	dryRun bool
 
-	//go:embed SCHEDULED_PR_WAITING_FOR_CONTRIBUTOR.md.tmpl
+	//go:embed templates/SCHEDULED_PR_WAITING_FOR_CONTRIBUTOR.md.tmpl
 	waitingForContributorTemplate string
 
-	//go:embed SCHEDULED_PR_WAITING_FOR_MERGE.md.tmpl
+	//go:embed templates/SCHEDULED_PR_WAITING_FOR_MERGE.md.tmpl
 	waitingForMergeTemplate string
 
-	//go:embed SCHEDULED_PR_WAITING_FOR_REVIEW.md.tmpl
+	//go:embed templates/SCHEDULED_PR_WAITING_FOR_REVIEW.md.tmpl
 	waitingForReviewTemplate string
 )
 
 type reminderCommentData struct {
-	PullRequest *github.PullRequest
-	State       pullRequestReviewState
-	SinceDays   int
+	User          string
+	SinceDays     int
+	CoreReviewers []string
 }
 
 // scheduledPrReminders sends automated PR notifications and closes stale PRs
@@ -63,15 +63,15 @@ var scheduledPrReminders = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		githubToken, ok := os.LookupEnv("GITHUB_TOKEN")
 		if !ok {
-			fmt.Println("Did not provide GITHUB_TOKEN environment variable")
-			os.Exit(1)
+			return fmt.Errorf("did not provide GITHUB_TOKEN environment variable")
 		}
 		gh := github.NewClient(nil).WithAuthToken(githubToken)
-		return execScheduledPrReminders(gh)
+		mgh := membership.NewClient(githubToken)
+		return execScheduledPrReminders(gh, mgh)
 	},
 }
 
-func execScheduledPrReminders(gh *github.Client) error {
+func execScheduledPrReminders(gh *github.Client, mgh GithubClient) error {
 	ctx := context.Background()
 	opt := &github.PullRequestListOptions{
 		State:       "open",
@@ -166,10 +166,14 @@ func execScheduledPrReminders(gh *github.Client) error {
 		)
 		sinceDays := businessDaysDiff(since, time.Now())
 		if shouldNotify(pr, state, sinceDays) {
-			comment, err := formatReminderComment(state, reminderCommentData{
-				PullRequest: pr,
-				SinceDays:   sinceDays,
-			})
+			// Determine the current primary reviewer.
+			comments, err := mgh.GetPullRequestComments(fmt.Sprintf("%d", *pr.Number))
+			if err != nil {
+				return err
+			}
+			_, currentReviewer := membership.FindReviewerComment(comments)
+
+			reminderComment, err := formatReminderComment(pr, state, sinceDays, currentReviewer)
 			if err != nil {
 				fmt.Printf(
 					"%d/%d: PR %d: error rendering comment: %s\n",
@@ -181,7 +185,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 				continue
 			}
 			if dryRun {
-				fmt.Printf("DRY RUN: Would post comment: %s\n", comment)
+				fmt.Printf("DRY RUN: Would post comment: %s\n", reminderComment)
 			} else {
 				_, _, err := gh.Issues.CreateComment(
 					ctx,
@@ -189,11 +193,11 @@ func execScheduledPrReminders(gh *github.Client) error {
 					"magic-modules",
 					*pr.Number,
 					&github.IssueComment{
-						Body: github.String(comment),
+						Body: github.String(reminderComment),
 					},
 				)
 				if err != nil {
-					return fmt.Errorf("Error posting comment to PR %d: %w", *pr.Number, err)
+					return fmt.Errorf("error posting comment to PR %d: %w", *pr.Number, err)
 				}
 			}
 		}
@@ -212,7 +216,7 @@ func execScheduledPrReminders(gh *github.Client) error {
 					},
 				)
 				if err != nil {
-					return fmt.Errorf("Error closing PR %d: %w", *pr.Number, err)
+					return fmt.Errorf("error closing PR %d: %w", *pr.Number, err)
 				}
 			}
 		}
@@ -263,32 +267,37 @@ func (s pullRequestReviewState) String() string {
 // We don't specially handle cases where the contributor has "acted" because it would be
 // significant additional effort, and this case is already handled by re-requesting review
 // automatically based on contributor actions.
-func notificationState(pr *github.PullRequest, issueEvents []*github.IssueEvent, reviews []*github.PullRequestReview) (pullRequestReviewState, time.Time, error) {
-	slices.SortFunc(issueEvents, func(a, b *github.IssueEvent) int {
-		if a.CreatedAt.Before(*b.CreatedAt.GetTime()) {
-			return 1
+func notificationState(pr *github.PullRequest, issueEventsDesc []*github.IssueEvent, reviewsDesc []*github.PullRequestReview) (pullRequestReviewState, time.Time, error) {
+	issueEventsDesc = sortedEventsDesc(issueEventsDesc)
+	reviewsDesc = sortedReviewsDesc(reviewsDesc)
+
+	var readyForReviewTime = *pr.CreatedAt.GetTime()
+	for _, event := range issueEventsDesc {
+		if "ready_for_review" == *event.Event {
+			readyForReviewTime = maxTime(*event.CreatedAt.GetTime(), readyForReviewTime)
 		}
-		if a.CreatedAt.After(*b.CreatedAt.GetTime()) {
-			return -1
-		}
-		return 0
-	})
-	slices.SortFunc(reviews, func(a, b *github.PullRequestReview) int {
-		if a.SubmittedAt.Before(*b.SubmittedAt.GetTime()) {
-			return 1
-		}
-		if a.SubmittedAt.After(*b.SubmittedAt.GetTime()) {
-			return -1
-		}
-		return 0
-	})
+	}
 
 	var latestReviewRequest *github.IssueEvent
-	for _, event := range issueEvents {
+	removedRequests := map[string]struct{}{}
+	for _, event := range issueEventsDesc {
+		if *event.Event == "review_request_removed" && event.RequestedReviewer != nil {
+			removedRequests[*event.RequestedReviewer.Login] = struct{}{}
+			continue
+		}
 		if *event.Event != "review_requested" {
 			continue
 		}
+		// Ignore review requests for users who no longer exist.
 		if event.RequestedReviewer == nil {
+			continue
+		}
+		// Ignore review requests that were later removed.
+		if _, ok := removedRequests[*event.RequestedReviewer.Login]; ok {
+			continue
+		}
+		// Ignore review requests to the PR author
+		if *event.RequestedReviewer.Login == *pr.User.Login {
 			continue
 		}
 		if membership.IsCoreReviewer(*event.RequestedReviewer.Login) {
@@ -306,7 +315,7 @@ func notificationState(pr *github.PullRequest, issueEvents []*github.IssueEvent,
 	var earliestCommented *github.PullRequestReview
 
 	ignoreBy := map[string]struct{}{}
-	for _, review := range reviews {
+	for _, review := range reviewsDesc {
 		if review.SubmittedAt.Before(*latestReviewRequest.CreatedAt.GetTime()) {
 			break
 		}
@@ -314,7 +323,12 @@ func notificationState(pr *github.PullRequest, issueEvents []*github.IssueEvent,
 		if review.User == nil {
 			continue
 		}
+		// Ignore reviews by non-core reviewers
 		if !membership.IsCoreReviewer(*review.User.Login) {
+			continue
+		}
+		// Ignore reviews by the PR author
+		if *review.User.Login == *pr.User.Login {
 			continue
 		}
 		reviewer := *review.User.Login
@@ -341,15 +355,59 @@ func notificationState(pr *github.PullRequest, issueEvents []*github.IssueEvent,
 	}
 
 	if earliestChangesRequested != nil {
-		return waitingForContributor, *earliestChangesRequested.SubmittedAt.GetTime(), nil
+		timeState := maxTime(*earliestChangesRequested.SubmittedAt.GetTime(), readyForReviewTime)
+		return waitingForContributor, timeState, nil
 	}
 	if earliestApproved != nil {
-		return waitingForMerge, *earliestApproved.SubmittedAt.GetTime(), nil
+		timeState := maxTime(*earliestApproved.SubmittedAt.GetTime(), readyForReviewTime)
+		return waitingForMerge, timeState, nil
 	}
 	if earliestCommented != nil {
-		return waitingForContributor, *earliestCommented.SubmittedAt.GetTime(), nil
+		timeState := maxTime(*earliestCommented.SubmittedAt.GetTime(), readyForReviewTime)
+		return waitingForContributor, timeState, nil
 	}
-	return waitingForReview, *latestReviewRequest.CreatedAt.GetTime(), nil
+	timeState := maxTime(*latestReviewRequest.CreatedAt.GetTime(), readyForReviewTime)
+	return waitingForReview, timeState, nil
+}
+
+// compareTimeDesc returns sort ordering for descending time comparison (newest first)
+func compareTimeDesc(a, b time.Time) int {
+	if a.Before(b) {
+		return 1
+	}
+	if a.After(b) {
+		return -1
+	}
+	return 0
+}
+
+// sortedEventsDesc returns events sorted by creation time, newest first
+func sortedEventsDesc(events []*github.IssueEvent) []*github.IssueEvent {
+	sortedEvents := make([]*github.IssueEvent, len(events))
+	copy(sortedEvents, events)
+	slices.SortFunc(sortedEvents, func(a, b *github.IssueEvent) int {
+		return compareTimeDesc(*a.CreatedAt.GetTime(), *b.CreatedAt.GetTime())
+	})
+	return sortedEvents
+}
+
+// sortedReviewsDesc returns reviews sorted by submission time, newest first
+func sortedReviewsDesc(reviews []*github.PullRequestReview) []*github.PullRequestReview {
+	sortedReviews := make([]*github.PullRequestReview, len(reviews))
+	copy(sortedReviews, reviews)
+	slices.SortFunc(sortedReviews, func(a, b *github.PullRequestReview) int {
+		return compareTimeDesc(*a.SubmittedAt.GetTime(), *b.SubmittedAt.GetTime())
+	})
+	return sortedReviews
+}
+
+// maxTime - returns whichever time occured after the other
+func maxTime(time1, time2 time.Time) time.Time {
+	// Return the later time
+	if time1.After(time2) {
+		return time1
+	}
+	return time2
 }
 
 // Calculates the number of PDT days between from and to (by calendar date, not # of hours).
@@ -422,12 +480,12 @@ func shouldNotify(pr *github.PullRequest, state pullRequestReviewState, sinceDay
 		if _, ok := labels["disable-review-reminders"]; ok {
 			return false
 		}
-		return sinceDays == 2 || (sinceDays > 0 && sinceDays%5 == 0)
+		return sinceDays == 3 || (sinceDays > 0 && sinceDays%5 == 0)
 	}
 	return false
 }
 
-func formatReminderComment(state pullRequestReviewState, data reminderCommentData) (string, error) {
+func formatReminderComment(pullRequest *github.PullRequest, state pullRequestReviewState, sinceDays int, currentReviewer string) (string, error) {
 	embeddedTemplate := ""
 	switch state {
 	case waitingForMerge:
@@ -439,6 +497,7 @@ func formatReminderComment(state pullRequestReviewState, data reminderCommentDat
 	default:
 		return "", fmt.Errorf("state does not have corresponding template: %s", state.String())
 	}
+
 	tmpl, err := template.New("").Funcs(template.FuncMap{
 		"weekdaysToWeeks": func(a int) int {
 			return a / 5
@@ -447,6 +506,25 @@ func formatReminderComment(state pullRequestReviewState, data reminderCommentDat
 	if err != nil {
 		panic(fmt.Sprintf("Unable to parse template for %s: %s", state.String(), err))
 	}
+
+	var coreReviewers []string
+	if currentReviewer == "" {
+		// A core reviewer that isn't the author
+		for _, reviewer := range pullRequest.RequestedReviewers {
+			if membership.IsCoreReviewer(*reviewer.Login) && *reviewer.Login != *pullRequest.User.Login {
+				coreReviewers = append(coreReviewers, *reviewer.Login)
+			}
+		}
+	} else {
+		coreReviewers = append(coreReviewers, currentReviewer)
+	}
+
+	data := reminderCommentData{
+		User:          *pullRequest.User.Login,
+		SinceDays:     sinceDays,
+		CoreReviewers: coreReviewers,
+	}
+
 	sb := new(strings.Builder)
 	err = tmpl.Execute(sb, data)
 	if err != nil {

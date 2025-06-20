@@ -63,20 +63,24 @@ provider "google-beta" {}
 ### Running Terraform on your workstation.
 
 If you are using Terraform on your workstation we recommend that you install
-`gcloud` and authenticate using [User Application Default Credentials ("ADCs")](https://cloud.google.com/sdk/gcloud/reference/auth/application-default)
-as a primary authentication method. You can enable ADCs by running the command
-`gcloud auth application-default login`.
+the `gcloud` CLI and authenticate using [Application Default Credentials (ADC)][adc]
+as a primary authentication method. You can set up ADC with your user credentials by running the command
+[`gcloud auth application-default login`](https://cloud.google.com/sdk/gcloud/reference/auth/application-default).
+
+<!-- 
+TODO: quota project is not currently read from ADC file b/360405077#comment8
 
 Google Cloud reads the quota project for requests will be read automatically
 from the `core/project` value. You can override this project by specifying the
 `--project` flag when running `gcloud auth application-default login`. `gcloud`
 should return this message if you have set the correct billing project:
-`Quota project "your-project" was added to ADC which can be used by Google client libraries for billing and quota.`
+`Quota project "your-project" was added to ADC which can be used by Google client libraries for billing and quota.` 
+-->
 
 ### Running Terraform on Google Cloud
 
 If you are running Terraform in a machine on Google Cloud, you can configure
-that instance or cluster to use a [Google Service Account](https://cloud.google.com/compute/docs/authentication).
+that instance or cluster to use a [Google Service Account](https://cloud.google.com/compute/docs/access/authenticate-workloads).
 This allows Terraform to authenticate to Google Cloud without a separate
 credential/authentication file. Ensure that the scope of the VM/Cluster is set
 to or includes `https://www.googleapis.com/auth/cloud-platform`.
@@ -101,7 +105,7 @@ All runs within the workspace will use the `GOOGLE_CREDENTIALS` variable to auth
 
 ### Impersonating Service Accounts
 
-Terraform can [impersonate a Google service account](https://cloud.google.com/iam/docs/creating-short-lived-service-account-credentials),
+Terraform can [impersonate a Google service account](https://cloud.google.com/docs/authentication/use-service-account-impersonation),
 acting as a service account without managing its key locally.
 
 To impersonate a service account, you must use another authentication method
@@ -175,21 +179,39 @@ variable.
 
 * `impersonate_service_account_delegates` - (Optional) The delegation chain for an impersonating a service account as described [here](https://cloud.google.com/iam/docs/creating-short-lived-service-account-credentials#sa-credentials-delegated).
 
+---
+
+* `external_credentials` - (Optional) Configuration of external credentials for the provider, such as Workload Identity Federation credentials. Terraform constructs a function as a [user-defined function credentials source](https://pkg.go.dev/golang.org/x/oauth2/google/externalaccount#hdr-Workload_Identity_Federation) based on the fixed (per execution) `identity_token` value. To use this with HCP Terraform, see the [External Credentials in Terraform Stacks](/website/docs/guides/external_credentials_stacks.html.markdown) guide.
+
+`external_credentials` takes precedence over `credentials` and `access_token` as well as `GOOGLE_CREDENTIALS` and `GOOGLE_OAUTH_ACCESS_TOKEN` environment variables. It includes the following fields:
+
+* `audience` - (Required) The Secure Token Service (STS) audience for the external credentials.
+* `service_account_email` - (Required) The email of the service account to impersonate when retrieving a Google access token.
+* `identity_token` - (Required) An identity token from the external identity provider to use for authentication with the external provider.
+
+    -> Terraform cannot renew these access tokens, and they will eventually
+    expire (default `1 hour`). If Terraform needs access for longer than a token's
+    lifetime, supply a [credential configuration](https://cloud.google.com/iam/docs/workload-identity-federation-with-other-providers#create-credential-config) through the `credentials` field instead.
+
 ## Quota Management Configuration
 
-* `user_project_override` - (Optional) Defaults to `false`. Controls the quota
-project used in requests to GCP APIs for the purpose of preconditions, quota,
-and billing. If `false`, the quota project is determined by the API and may be
-the project associated with your credentials, or the resource project. If `true`,
-most resources in the provider will explicitly supply their resource project, as
-described in their documentation. Otherwise, a `billing_project` value must be
-supplied. Alternatively, this can be specified using the `USER_PROJECT_OVERRIDE`
-environment variable.
+* `user_project_override` - (Optional) Defaults to `false`. Controls the
+[quota project](https://cloud.google.com/docs/quotas/quota-project) used
+in requests to GCP APIs for the purpose of preconditions, quota, and
+billing. If `false`, the quota project is determined by the API and may
+be the project associated with your credentials for a
+[client-based API](https://cloud.google.com/docs/quotas/quota-project#project-client-based),
+or the resource project for a
+[resource-based API](https://cloud.google.com/docs/quotas/quota-project#project-resource-based).
+If `true`, most resources in the provider will explicitly supply their resource
+project, as described in their documentation. Otherwise, a `billing_project`
+value must be supplied. Alternatively, this can be specified using the
+`USER_PROJECT_OVERRIDE` environment variable.
 
 Service account credentials are associated with the project the service account
 was created in. Credentials that come from the gcloud tool are associated with a
 project owned by Google. In order to properly use credentials that come from
-gcloud with Terraform, it is recommended to set this property to true.
+gcloud with Terraform, it is recommended to set this property to `true`.
 
 `user_project_override` uses the `X-Goog-User-Project`
 [system parameter](https://cloud.google.com/apis/docs/system-parameters). When
@@ -277,8 +299,9 @@ automatically to resources, and will be returned in the `terraform_labels`
 and `effective_labels` fields. This makes it possible to distinguish Terraform
 resources when using other tools like Cloud Console or gcloud.
 
-The default value is `false`. No label will be added unless the provider is
-explicitly configured to do so by setting the value to `true`.
+The default value is `true`. Unless explicitly configured (along with
+`terraform_attribution_label_addition_strategy`, described below) the label
+be added to newly provisioned resources.
 
 ---
 
@@ -338,8 +361,8 @@ provider "google" {
 ```
 
 Custom endpoints are an advanced feature. To determine the possible values you
-can set, consult the implementation in [provider.go](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/provider.go)
-and [config.go](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/config.go).
+can set, consult the implementation in [provider.go](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/provider/provider.go)
+and [config.go](https://github.com/hashicorp/terraform-provider-google-beta/blob/main/google-beta/transport/config.go).
 
 Support for custom endpoints is on a best-effort basis. The underlying
 endpoint and default values for a resource can be changed at any time without
@@ -400,8 +423,8 @@ See [RFC 9110](https://www.rfc-editor.org/rfc/rfc9110#field.user-agent) for form
 [OAuth 2.0 access token]: https://developers.google.com/identity/protocols/OAuth2
 [service account key file]: https://cloud.google.com/iam/docs/creating-managing-service-account-keys
 [manage key files using the Cloud Console]: https://console.cloud.google.com/apis/credentials/serviceaccountkey
-[adc]: https://cloud.google.com/docs/authentication/production
+[adc]: https://cloud.google.com/docs/authentication/application-default-credentials
 [gce-service-account]: https://cloud.google.com/compute/docs/authentication
 [gcloud adc]: https://cloud.google.com/sdk/gcloud/reference/auth/application-default/login
-[service accounts]: https://cloud.google.com/docs/authentication/getting-started
+[service accounts]: https://cloud.google.com/docs/authentication/set-up-adc-attached-service-account
 [scopes]: https://developers.google.com/identity/protocols/googlescopes

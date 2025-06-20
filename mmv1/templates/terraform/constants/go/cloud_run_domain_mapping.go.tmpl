@@ -1,9 +1,0 @@
-func hasMetadata(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
-	newCount := diff.Get("metadata.#")
-
-	if newCount.(int) < 1 {
-		return fmt.Errorf("Insufficient \"metadata\" blocks. 1 \"metadata\" block is required.")
-	}
-
-	return nil
-}

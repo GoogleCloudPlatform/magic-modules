@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package bigquery_test
 
 import (
@@ -6,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"google.golang.org/api/bigquery/v2"
@@ -121,7 +123,7 @@ func TestAccBigQueryDataset_withComputedLabels(t *testing.T) {
 					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "labels.env", "foo"),
 					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "labels.default_table_expiration_ms", "3600000"),
 
-					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.%", "2"),
+					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.%", "3"),
 					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.env", "foo"),
 					resource.TestCheckResourceAttr("google_bigquery_dataset.test", "effective_labels.default_table_expiration_ms", "3600000"),
 				),
@@ -164,7 +166,7 @@ func TestAccBigQueryDataset_withProvider5(t *testing.T) {
 		CheckDestroy: testAccCheckBigQueryDatasetDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config:            testAccBigQueryDataset_withoutLabels(datasetID),
+				Config:            testAccBigQueryDataset_withoutLabelsV4(datasetID),
 				ExternalProviders: oldVersion,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_bigquery_dataset.test", "labels.%"),
@@ -296,6 +298,15 @@ func TestAccBigQueryDataset_access(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
+				Config: testAccBigQueryDatasetWithConditionAccess(datasetID),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.access_test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
 				Config: testAccBigQueryDatasetWithViewAccess(datasetID, otherDatasetID, otherTableID),
 			},
 			{
@@ -418,6 +429,99 @@ func TestAccBigQueryDataset_invalidLongID(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryDataset_bigqueryDatasetResourceTags_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryDataset_bigqueryDatasetResourceTags_basic(context),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.dataset",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccBigQueryDataset_bigqueryDatasetResourceTags_update(context),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.dataset",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func TestAccBigQueryDataset_bigqueryDatasetExternalReferenceAws(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryDataset_bigqueryDatasetExternalReferenceAws(context),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.dataset",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "etag", "last_modified_time"},
+			},
+		},
+	})
+}
+
+func TestAccBigQueryDataset_externalCatalogDatasetOptions_update(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigQueryDatasetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryDataset_externalCatalogDatasetOptions_basic(context),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.dataset",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccBigQueryDataset_externalCatalogDatasetOptions_update(context),
+			},
+			{
+				ResourceName:            "google_bigquery_dataset.dataset",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
 func testAccAddTable(t *testing.T, datasetID string, tableID string) resource.TestCheckFunc {
 	// Not actually a check, but adds a table independently of terraform
 	return func(s *terraform.State) error {
@@ -457,6 +561,23 @@ func addOutOfBandLabels(t *testing.T, datasetID string) resource.TestCheckFunc {
 }
 
 func testAccBigQueryDataset_withoutLabels(datasetID string) string {
+	return fmt.Sprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
+resource "google_bigquery_dataset" "test" {
+  dataset_id                      = "%s"
+  friendly_name                   = "foo"
+  description                     = "This is a foo description"
+  location                        = "EU"
+  default_partition_expiration_ms = 3600000
+  default_table_expiration_ms     = 3600000
+}
+`, datasetID)
+}
+
+func testAccBigQueryDataset_withoutLabelsV4(datasetID string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
   dataset_id                      = "%s"
@@ -617,6 +738,35 @@ resource "google_bigquery_dataset" "access_test" {
 `, datasetID)
 }
 
+func testAccBigQueryDatasetWithConditionAccess(datasetID string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "access_test" {
+  dataset_id = "%s"
+
+  access {
+    role          = "OWNER"
+    user_by_email = "Joe@example.com"
+  }
+
+  access {
+    role          = "READER"
+    user_by_email = "Joe@example.com"
+    condition {
+        title       = "test-condition"
+        description = "Request after midnight of 2019-12-31"
+        expression  = "request.time > timestamp(\"2020-01-01T00:00:00Z\")"
+        location    = "any.file.anywhere"
+    }
+  }
+
+  labels = {
+    env                         = "foo"
+    default_table_expiration_ms = 3600000
+  }
+}
+`, datasetID)
+}
+
 func testAccBigQueryDatasetWithThreeAccess(datasetID string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "access_test" {
@@ -734,4 +884,131 @@ resource "google_bigquery_dataset" "test" {
   }
 }
 `, datasetID)
+}
+
+func testAccBigQueryDataset_bigqueryDatasetResourceTags_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {}
+
+resource "google_tags_tag_key" "tag_key1" {
+  parent     = data.google_project.project.id
+  short_name = "tf_test_tag_key1%{random_suffix}"
+}
+
+resource "google_tags_tag_value" "tag_value1" {
+  parent = google_tags_tag_key.tag_key1.id
+  short_name = "tf_test_tag_value1%{random_suffix}"
+}
+
+resource "google_tags_tag_key" "tag_key2" {
+  parent     = data.google_project.project.id
+  short_name = "tf_test_tag_key2%{random_suffix}"
+}
+
+resource "google_tags_tag_value" "tag_value2" {
+  parent     = google_tags_tag_key.tag_key2.id
+  short_name = "tf_test_tag_value2%{random_suffix}"
+}
+
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id                  = "dataset%{random_suffix}"
+  friendly_name               = "test"
+  description                 = "This is a test description"
+  location                    = "EU"
+
+  resource_tags = {
+    (google_tags_tag_key.tag_key1.namespaced_name) = google_tags_tag_value.tag_value1.short_name
+    (google_tags_tag_key.tag_key2.namespaced_name) = google_tags_tag_value.tag_value2.short_name
+  }
+}
+`, context)
+}
+
+func testAccBigQueryDataset_bigqueryDatasetResourceTags_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
+resource "google_tags_tag_key" "tag_key1" {
+  parent     = data.google_project.project.id
+  short_name = "tf_test_tag_key1%{random_suffix}"
+}
+
+resource "google_tags_tag_value" "tag_value1" {
+  parent     = google_tags_tag_key.tag_key1.id
+  short_name = "tf_test_tag_value1%{random_suffix}"
+}
+
+resource "google_tags_tag_key" "tag_key2" {
+  parent     = data.google_project.project.id
+  short_name = "tf_test_tag_key2%{random_suffix}"
+}
+
+resource "google_tags_tag_value" "tag_value2" {
+  parent     = google_tags_tag_key.tag_key2.id
+  short_name = "tf_test_tag_value2%{random_suffix}"
+}
+
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id                  = "dataset%{random_suffix}"
+  friendly_name               = "test"
+  description                 = "This is a test description"
+  location                    = "EU"
+
+  resource_tags = {
+  }
+}
+`, context)
+}
+
+func testAccBigQueryDataset_externalCatalogDatasetOptions_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id    = "dataset%{random_suffix}"
+  friendly_name = "test"
+  description   = "This is a test description"
+  location      = "US"
+
+  external_catalog_dataset_options {
+    parameters = {
+      "dataset_owner" = "dataset_owner"
+    }
+    default_storage_location_uri = "gs://test_dataset/tables"
+  }
+}
+`, context)
+}
+
+func testAccBigQueryDataset_externalCatalogDatasetOptions_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id    = "dataset%{random_suffix}"
+  friendly_name = "test"
+  description   = "This is a test description"
+  location      = "US"
+
+  external_catalog_dataset_options {
+    parameters = {
+      "new_dataset_owner" = "new_dataset_owner"
+    }
+    default_storage_location_uri = "gs://new_test_dataset/new_tables"
+  }
+}
+`, context)
+}
+
+func testAccBigQueryDataset_bigqueryDatasetExternalReferenceAws(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id                  = "dataset%{random_suffix}"
+  friendly_name               = "test"
+  description                 = "This is a test description"
+  location                    = "aws-us-east-1"
+
+  external_dataset_reference {
+    external_source = "aws-glue://arn:aws:glue:us-east-1:772042918353:database/db_other_formats_external"
+    connection      = "projects/bigquerytestdefault/locations/aws-us-east-1/connections/external_test-connection"
+  }
+}
+`, context)
 }

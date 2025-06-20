@@ -1,0 +1,13 @@
+resource: 'google_logging_organization_exclusion'
+generation_type: 'handwritten'
+api_service_name: 'logging.googleapis.com'
+api_version: 'v2'
+api_resource_type_kind: 'LogExclusion'
+api_variant_patterns:
+  - 'organizations/{organization}/exclusions/{exclusion}'
+fields:
+  - field: 'description'
+  - field: 'disabled'
+  - field: 'filter'
+  - field: 'name'
+  - field: 'org_id'

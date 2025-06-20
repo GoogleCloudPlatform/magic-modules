@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,34 +11,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Tunnel'
-base_url: 'projects/{{project}}/iap_tunnel'
-self_link: 'projects/{{project}}/iap_tunnel'
+description: |
+  Only used to generate IAM resources
 # This resource is only used to generate IAM resources. They do not correspond to real
 # GCP resources, and should not be used to generate anything other than IAM support.
 exclude_resource: true
-description: |
-  Only used to generate IAM resources
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  method_name_separator: ':'
-  fetch_iam_policy_verb: :POST
-  parent_resource_type: 'google_project_service'
-  parent_resource_attribute: 'project'
-  allowed_iam_role: 'roles/iap.tunnelResourceAccessor'
-  iam_conditions_request_type: :REQUEST_BODY
+docs:
 id_format: 'projects/{{project}}/iap_tunnel'
-import_format: ['projects/{{project}}/iap_tunnel']
+base_url: 'projects/{{project}}/iap_tunnel'
+self_link: 'projects/{{project}}/iap_tunnel'
+import_format:
+  - 'projects/{{project}}/iap_tunnel'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_type: 'google_project_service'
+  fetch_iam_policy_verb: 'POST'
+  allowed_iam_role: 'roles/iap.tunnelResourceAccessor'
+  parent_resource_attribute: 'project'
+  iam_conditions_request_type: 'REQUEST_BODY'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'iap_project'
-    external_providers: ["random", "time"]
+  - name: 'iap_project'
     primary_resource_id: 'project_service'
     primary_resource_name: 'fmt.Sprintf("tf-test%s", context["random_suffix"])'
     test_env_vars:
-      org_id: :ORG_ID
+      org_id: 'ORG_ID'
+    external_providers: ["random", "time"]
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'project'
+  - name: 'project'
+    type: String
     description: Project ID.
     required: true

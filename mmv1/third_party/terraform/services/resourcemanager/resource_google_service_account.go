@@ -1,7 +1,9 @@
 package resourcemanager
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -30,6 +32,7 @@ func ResourceGoogleServiceAccount() *schema.Resource {
 		},
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
+			resourceServiceAccountCustomDiff,
 		),
 		Schema: map[string]*schema.Schema{
 			"email": {
@@ -152,11 +155,17 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 
 	// We poll until the resource is found due to eventual consistency issue
 	// on part of the api https://cloud.google.com/iam/docs/overview#consistency
-	err = transport_tpg.PollingWaitTime(resourceServiceAccountPollRead(d, meta), transport_tpg.PollCheckForExistence, "Creating Service Account", d.Timeout(schema.TimeoutCreate), 1)
+	// IAM API returns 403 when the queried SA is not found, so we must ignore both 404 & 403 errors
+	err = transport_tpg.PollingWaitTime(resourceServiceAccountPollRead(d, meta), transport_tpg.PollCheckForExistenceWith403, "Creating Service Account", d.Timeout(schema.TimeoutCreate), 1)
 
 	if err != nil {
 		return err
 	}
+
+	// We can't guarantee complete consistency even after polling,
+	// so sleep for some additional time to reduce the likelihood of
+	// eventual consistency failures.
+	time.Sleep(10 * time.Second)
 
 	return resourceGoogleServiceAccountRead(d, meta)
 }
@@ -315,4 +324,35 @@ func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func ResourceServiceAccountCustomDiffFunc(diff tpgresource.TerraformResourceDiff) error {
+	if !tpgresource.IsNewResource(diff) && !diff.HasChange("account_id") {
+		return nil
+	}
+
+	aid := diff.Get("account_id").(string)
+	proj := diff.Get("project").(string)
+	if aid == "" || proj == "" {
+		return nil
+	}
+
+	email := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", aid, proj)
+	if err := diff.SetNew("email", email); err != nil {
+		return fmt.Errorf("error setting email: %s", err)
+	}
+	if err := diff.SetNew("member", "serviceAccount:"+email); err != nil {
+		return fmt.Errorf("error setting member: %s", err)
+	}
+
+	return nil
+}
+func resourceServiceAccountCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if ud := transport_tpg.GetUniverseDomainFromMeta(meta); ud != "googleapis.com" {
+		log.Printf("[WARN] The UniverseDomain is set to %q. Skipping resourceServiceAccountCustomDiff", ud)
+		return nil
+	}
+
+	// separate func to allow unit testing
+	return ResourceServiceAccountCustomDiffFunc(diff)
 }

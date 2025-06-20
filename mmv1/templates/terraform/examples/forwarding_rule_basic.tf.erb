@@ -1,9 +1,0 @@
-resource "google_compute_forwarding_rule" "<%= ctx[:primary_resource_id] %>" {
-  name       = "<%= ctx[:vars]['forwarding_rule_name'] %>"
-  target     = google_compute_target_pool.default.id
-  port_range = "80"
-}
-
-resource "google_compute_target_pool" "default" {
-  name = "<%= ctx[:vars]['target_pool_name'] %>"
-}

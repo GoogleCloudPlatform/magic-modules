@@ -15,6 +15,9 @@
             "name": "share1"
           }
         ],
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
         "networks": [
           {
             "connectMode": "DIRECT_PEERING",

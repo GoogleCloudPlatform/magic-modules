@@ -3,7 +3,7 @@ package dialogflowcx_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -25,17 +25,19 @@ func TestAccDialogflowCXFlow_update(t *testing.T) {
 				Config: testAccDialogflowCXFlow_basic(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_cx_flow.my_flow",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_dialogflow_cx_flow.my_flow",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"advanced_settings.0.logging_settings"},
 			},
 			{
 				Config: testAccDialogflowCXFlow_full(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_cx_flow.my_flow",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_dialogflow_cx_flow.my_flow",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"advanced_settings.0.logging_settings"},
 			},
 		},
 	})
@@ -232,6 +234,8 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
             },
           ])
         }
+
+        enable_generative_fallback = true
       }
     }
 
@@ -341,11 +345,39 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
       audio_export_gcs_destination {
         uri = "${google_storage_bucket.bucket.url}/prefix-"
       }
+      speech_settings {
+        endpointer_sensitivity        = 30
+        no_speech_timeout             = "3.500s"
+        use_timeout_based_endpointing = true
+        models = {
+          name : "wrench"
+          mass : "1.3kg"
+          count : "3"
+        }
+      }
       dtmf_settings {
         enabled      = true
         max_digits   = 1
         finish_digit = "#"
       }
+      logging_settings {
+        enable_stackdriver_logging     = true
+        enable_interaction_logging     = true
+        enable_consent_based_redaction = true
+      }
+    }
+
+    knowledge_connector_settings {
+      enabled = true
+      trigger_fulfillment {
+        messages {
+          channel = "some-channel"
+          output_audio_text {
+            text = "some output text"
+          }
+        }
+      }
+      target_flow = google_dialogflow_cx_agent.agent_entity.start_flow
     }
   }
 `, context)
@@ -501,6 +533,10 @@ resource "google_dialogflow_cx_intent" "default_welcome_intent" {
   }
 }
 
+resource "google_dialogflow_cx_page" "my_page" {
+  parent       = google_dialogflow_cx_agent.agent.start_flow
+  display_name = "MyPage"
+}
 
 resource "google_dialogflow_cx_flow" "default_start_flow" {
   parent                = google_dialogflow_cx_agent.agent.id
@@ -546,6 +582,18 @@ resource "google_dialogflow_cx_flow" "default_start_flow" {
         }
       }
     }
+  }
+
+  knowledge_connector_settings {
+    enabled = false
+    trigger_fulfillment {
+      messages {
+        output_audio_text {
+          text = "We can update the knowledge_connector_settings in this flow!"
+        }
+      }
+    }
+    target_page = google_dialogflow_cx_page.my_page.id
   }
 }
 `, context)

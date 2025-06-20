@@ -13,6 +13,9 @@
                 },
                 "description": "Database of postgres",
                 "friendlyName": "stpostgres",
+                "labels": {
+                  "goog-terraform-provisioned": "true"
+                },
                 "location": "us-central1"
             }
         },
@@ -39,7 +42,6 @@
                         "binaryLogEnabled": true,
                         "enabled": true
                     },
-                    "dataDiskType": "PD_SSD",
                     "ipConfiguration": {
                         "authorizedNetworks": [
                             {
@@ -59,7 +61,7 @@
                             }
                         ],
                         "ipv4Enabled": true,
-                        "requireSsl": false
+                        "requireSsl": null
                     },
                     "pricingPlan": "PER_USE",
                     "storageAutoResize": true,
@@ -80,7 +82,10 @@
             "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
             "data": {
                 "bigqueryProfile": {},
-                "displayName": "Connection profile"
+                "displayName": "Connection profile",
+                "labels": {
+                  "goog-terraform-provisioned": "true"
+                }
             }
         },
         "ancestors": ["organizations/{{.OrgID}}"],
@@ -97,6 +102,9 @@
             "data": {
                 "bigqueryProfile": null,
                 "displayName": "Source connection profile",
+                "labels": {
+                  "goog-terraform-provisioned": "true"
+                },
                 "mysqlProfile": {
                     "port": 3306,
                     "username": "my-user"
@@ -119,17 +127,25 @@
                 "backfillNone": null,
                 "destinationConfig": {
                     "bigqueryDestinationConfig": {
-                        "dataFreshness": "900s"
+                        "appendOnly": null,
+                        "dataFreshness": "900s",
+                        "merge": {}
                     }
                 },
                 "displayName": "postgres to bigQuery",
+                "labels": {
+                  "goog-terraform-provisioned": "true"
+                },
                 "sourceConfig": {
                     "mysqlSourceConfig": {
+                        "binaryLogPosition":          null,
+                        "gtid":                       null,
                         "maxConcurrentBackfillTasks": 0,
                         "maxConcurrentCdcTasks": 0
                     },
                     "oracleSourceConfig": null,
                     "postgresqlSourceConfig": null,
+                    "salesforceSourceConfig": null,
                     "sqlServerSourceConfig": null
                 }
             }

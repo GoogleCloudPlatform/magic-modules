@@ -37,7 +37,7 @@ func TestExecMembershipChecker_CoreContributorFlow(t *testing.T) {
 
 	execMembershipChecker("pr1", "sha1", gh, cb)
 
-	method := "ApproveCommunityChecker"
+	method := "ApproveDownstreamGenAndTest"
 	expected := [][]any{{"pr1", "sha1"}}
 	if calls, ok := cb.calledMethods[method]; !ok {
 		t.Fatal("Community checker not approved for core author")
@@ -57,7 +57,7 @@ func TestExecMembershipChecker_GooglerFlow(t *testing.T) {
 		userType:           github.GooglerUserType,
 		calledMethods:      make(map[string][][]any),
 		requestedReviewers: []github.User{github.User{Login: "reviewer1"}},
-		previousReviewers:  []github.User{github.User{Login: github.GetRandomReviewer()}, github.User{Login: "reviewer3"}},
+		previousReviewers:  []github.User{github.User{Login: github.GetRandomReviewer(nil)}, github.User{Login: "reviewer3"}},
 	}
 	cb := &mockCloudBuild{
 		calledMethods: make(map[string][][]any),
@@ -65,7 +65,7 @@ func TestExecMembershipChecker_GooglerFlow(t *testing.T) {
 
 	execMembershipChecker("pr1", "sha1", gh, cb)
 
-	method := "ApproveCommunityChecker"
+	method := "ApproveDownstreamGenAndTest"
 	expected := [][]any{{"pr1", "sha1"}}
 	if calls, ok := cb.calledMethods[method]; !ok {
 		t.Fatal("Community checker not approved for googler")
@@ -83,8 +83,8 @@ func TestExecMembershipChecker_AmbiguousUserFlow(t *testing.T) {
 		},
 		userType:           github.CommunityUserType,
 		calledMethods:      make(map[string][][]any),
-		requestedReviewers: []github.User{github.User{Login: github.GetRandomReviewer()}},
-		previousReviewers:  []github.User{github.User{Login: github.GetRandomReviewer()}, github.User{Login: "reviewer3"}},
+		requestedReviewers: []github.User{github.User{Login: github.GetRandomReviewer(nil)}},
+		previousReviewers:  []github.User{github.User{Login: github.GetRandomReviewer(nil)}, github.User{Login: "reviewer3"}},
 	}
 	cb := &mockCloudBuild{
 		calledMethods: make(map[string][][]any),
@@ -100,7 +100,7 @@ func TestExecMembershipChecker_AmbiguousUserFlow(t *testing.T) {
 		t.Fatalf("Wrong calls for %s, got %v, expected %v", method, calls, expected)
 	}
 
-	if _, ok := gh.calledMethods["ApproveCommunityChecker"]; ok {
+	if _, ok := gh.calledMethods["ApproveDownstreamGenAndTest"]; ok {
 		t.Fatal("Incorrectly approved community checker for ambiguous user")
 	}
 }

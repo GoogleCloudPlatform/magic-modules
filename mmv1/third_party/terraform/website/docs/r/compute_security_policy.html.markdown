@@ -229,7 +229,7 @@ The following arguments are supported:
 * `match` - (Required) A match condition that incoming traffic is evaluated against.
     If it evaluates to true, the corresponding `action` is enforced. Structure is [documented below](#nested_match).
 
-* `preconfigured_waf_config` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Preconfigured WAF configuration to be applied for the rule. If the rule does not evaluate preconfigured WAF rules, i.e., if `evaluatePreconfiguredWaf()` is not used, this field will have no effect. Structure is [documented below](#nested_preconfigured_waf_config).
+* `preconfigured_waf_config` - (Optional) Preconfigured WAF configuration to be applied for the rule. If the rule does not evaluate preconfigured WAF rules, i.e., if `evaluatePreconfiguredWaf()` is not used, this field will have no effect. Structure is [documented below](#nested_preconfigured_waf_config).
 
 * `description` - (Optional) An optional description of this rule. Max size is 64.
 
@@ -260,6 +260,11 @@ The following arguments are supported:
     such as `origin.ip`, `source.region_code` and `contents` in the request header.
     Structure is [documented below](#nested_expr).
 
+* `expr_options` -
+  (Optional)
+  The configuration options available when specifying a user defined CEVAL expression (i.e., 'expr').
+  Structure is [documented below](#nested_expr_options).
+
 <a name="nested_config"></a>The `config` block supports:
 
 * `src_ip_ranges` - (Required) Set of IP addresses or ranges (IPV4 or IPV6) in CIDR notation
@@ -270,6 +275,23 @@ The following arguments are supported:
 
 * `expression` - (Required) Textual representation of an expression in Common Expression Language syntax.
     The application context of the containing message determines which well-known feature set of CEL is supported.
+
+<a name="nested_expr_options"></a>The `expr_options` block supports:
+
+* `recaptcha_options` -
+  (Required)
+  reCAPTCHA configuration options to be applied for the rule. If the rule does not evaluate reCAPTCHA tokens, this field has no effect.
+  Structure is [documented below](#nested_recaptcha_options).
+
+<a name="nested_recaptcha_options"></a>The `recaptcha_options` block supports:
+
+* `action_token_site_keys` -
+  (Optional)
+  A list of site keys to be used during the validation of reCAPTCHA action-tokens. The provided site keys need to be created from reCAPTCHA API under the same project where the security policy is created.
+
+* `session_token_site_keys` -
+  (Optional)
+  A list of site keys to be used during the validation of reCAPTCHA session-tokens. The provided site keys need to be created from reCAPTCHA API under the same project where the security policy is created.
 
 <a name="nested_preconfigured_waf_config"></a>The `preconfigured_waf_config` block supports:
 
@@ -328,6 +350,9 @@ The following arguments are supported:
   * `HTTP_PATH`: The URL path of the HTTP request. The key value is truncated to the first 128 bytes
   * `SNI`: Server name indication in the TLS session of the HTTPS request. The key value is truncated to the first 128 bytes. The key type defaults to `ALL` on a HTTP session.
   * `REGION_CODE`: The country/region from which the request originates.
+  * `TLS_JA3_FINGERPRINT`: JA3 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
+  * `TLS_JA4_FINGERPRINT`: JA4 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
+  * `USER_IP`: The IP address of the originating client, which is resolved based on "user_ip_request_headers" configured with the securitypolicy. If there is no "user_ip_request_headers" configuration or an IP address cannot be resolved from it, the key type defaults to IP.
 
 * `enforce_on_key_name` - (Optional) Rate limit key name applicable only for the following key types:
 
@@ -355,6 +380,9 @@ The following arguments are supported:
     * `HTTP_PATH`: The URL path of the HTTP request. The key value is truncated to the first 128 bytes
     * `SNI`: Server name indication in the TLS session of the HTTPS request. The key value is truncated to the first 128 bytes. The key type defaults to `ALL` on a HTTP session.
     * `REGION_CODE`: The country/region from which the request originates.
+    * `TLS_JA3_FINGERPRINT`: JA3 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
+    * `TLS_JA4_FINGERPRINT`: JA4 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
+    * `USER_IP`: The IP address of the originating client, which is resolved based on "user_ip_request_headers" configured with the securitypolicy. If there is no "user_ip_request_headers" configuration or an IP address cannot be resolved from it, the key type defaults to IP.
 
 * `exceed_redirect_options` - (Optional) Parameters defining the redirect action that is used as the exceed action. Cannot be specified if the exceed action is not redirect. Structure is [documented below](#nested_exceed_redirect_options).
 
@@ -364,7 +392,7 @@ The following arguments are supported:
 
 * `interval_sec` - (Required) Interval over which the threshold is computed.
 
-* <a  name="nested_exceed_redirect_options"></a>The `exceed_redirect_options` block supports:
+<a  name="nested_exceed_redirect_options"></a>The `exceed_redirect_options` block supports:
 
 * `type` - (Required) Type of the redirect action.
 
@@ -403,6 +431,39 @@ The following arguments are supported:
 
   * `STANDARD` - opaque rules. (default)
   * `PREMIUM` - transparent rules.
+
+* `threshold_configs` - (Optional) Configuration options for layer7 adaptive protection for various customizable thresholds. Structure is [documented below](#nested_threshold_configs).
+
+<a name="nested_threshold_configs"></a>The `threshold_configs` block supports:
+
+* `name` - The name of config. The name must be 1-63 characters long, and comply with RFC1035. The name must be unique within the security policy.
+
+* `auto_deploy_load_threshold` - (Optional) Load threshold above which Adaptive Protection automatically deploy threshold based on the backend load threshold and detect a new rule during an alerted attack.
+
+* `auto_deploy_confidence_threshold` - (Optional) Confidence threshold above which Adaptive Protection's auto-deploy takes actions.
+
+* `auto_deploy_impacted_baseline_threshold` - (Optional) Impacted baseline threshold below which Adaptive Protection's auto-deploy takes actions.
+
+* `auto_deploy_expiration_sec` - (Optional) Duration over which Adaptive Protection's auto-deployed actions last.
+
+* `detection_load_threshold` - (Optional) Detection threshold based on the backend service's load.
+
+* `detection_absolute_qps` - (Optional) Detection threshold based on absolute QPS.
+
+* `detection_relative_to_baseline_qps` - (Optional) Detection threshold based on QPS relative to the average of baseline traffic.
+
+* `traffic_granularity_configs` - (Optional) Configuration options for enabling Adaptive Protection to work on the specified service granularity. Structure is [documented below](#nested_traffic_granularity_configs).
+
+<a name="nested_traffic_granularity_configs"></a>The `traffic_granularity_configs` block supports:
+
+* `type` - The type of this configuration, a granular traffic unit can be one of the following:
+  * `HTTP_HEADER_HOST`
+  * `HTTP_PATH`
+
+* `value` - (Optional) Requests that match this value constitute a granular traffic unit.
+
+* `enable_each_unique_value` - (Optional) If enabled, traffic matching each unique value for the specified type constitutes a separate traffic unit. It can only be set to true if value is empty.
+
 
 <a name="nested_auto_deploy_config"></a>The `auto_deploy_config` block supports:
 

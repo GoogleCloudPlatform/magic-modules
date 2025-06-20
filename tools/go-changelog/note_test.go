@@ -9,11 +9,13 @@ import (
 )
 
 func TestValidateNote(t *testing.T) {
-	cases := map[string]struct {
+	cases := []struct {
+		name          string
 		changelogNote Note
 		expectedError *EntryValidationError
 	}{
-		"invalid type": {
+		{
+			name: "invalid type",
 			changelogNote: Note{
 				Type: "feature",
 				Body: "this is to add a feature",
@@ -22,7 +24,8 @@ func TestValidateNote(t *testing.T) {
 				Code: EntryErrorUnknownTypes,
 			},
 		},
-		"newline after changelog content": {
+		{
+			name: "newline after changelog content",
 			changelogNote: Note{
 				Type: "note",
 				Body: "test only change\n",
@@ -31,14 +34,16 @@ func TestValidateNote(t *testing.T) {
 				Code: EntryErrorMultipleLines,
 			},
 		},
-		"valid new resource changelog format": {
+		{
+			name: "valid new resource changelog format",
 			changelogNote: Note{
 				Type: "new-resource",
 				Body: "`google_new_resource`",
 			},
 			expectedError: nil,
 		},
-		"invalid new resource/datasource changelog format: missing backticks": {
+		{
+			name: "invalid new resource/datasource changelog format: missing backticks",
 			changelogNote: Note{
 				Type: "new-resource",
 				Body: "google_new_resource",
@@ -47,7 +52,8 @@ func TestValidateNote(t *testing.T) {
 				Code: EntryErrorInvalidNewReourceOrDatasourceFormat,
 			},
 		},
-		"invalid new resource/datasource changelog format: missing google prefix": {
+		{
+			name: "invalid new resource/datasource changelog format: missing google prefix",
 			changelogNote: Note{
 				Type: "new-datasource",
 				Body: "`new_datasource`",
@@ -56,7 +62,8 @@ func TestValidateNote(t *testing.T) {
 				Code: EntryErrorInvalidNewReourceOrDatasourceFormat,
 			},
 		},
-		"invalid new resource/datasource changelog format: including spaces": {
+		{
+			name: "invalid new resource/datasource changelog format: including spaces",
 			changelogNote: Note{
 				Type: "new-datasource",
 				Body: "`google new datasource`",
@@ -65,14 +72,24 @@ func TestValidateNote(t *testing.T) {
 				Code: EntryErrorInvalidNewReourceOrDatasourceFormat,
 			},
 		},
-		"valid enhancement/bug fix changelog format": {
+		{
+			name: "valid enhancement/bug fix changelog format",
 			changelogNote: Note{
 				Type: "enhancement",
 				Body: "compute: added a new field to google_resource resource",
 			},
 			expectedError: nil,
 		},
-		"invalid enhancement/bug fix changelog format: missing product": {
+		{
+			name: "valid enhancement/bug: allow underscore in product name",
+			changelogNote: Note{
+				Type: "enhancement",
+				Body: "backup_dr: added a new field to google_resource resource",
+			},
+			expectedError: nil,
+		},
+		{
+			name: "invalid enhancement/bug fix changelog format: missing product",
 			changelogNote: Note{
 				Type: "enhancement",
 				Body: "added a new field to google_resource resource",
@@ -81,7 +98,8 @@ func TestValidateNote(t *testing.T) {
 				Code: EntryErrorInvalidEnhancementOrBugFixFormat,
 			},
 		},
-		"invalid enhancement/bug fix changelog format: incorrect product name": {
+		{
+			name: "invalid enhancement/bug fix changelog format: incorrect product name",
 			changelogNote: Note{
 				Type: "enhancement",
 				Body: "compute engine: added a new field to google_resource resource",
@@ -92,9 +110,9 @@ func TestValidateNote(t *testing.T) {
 		},
 	}
 
-	for tn, tc := range cases {
+	for _, tc := range cases {
 		tc := tc
-		t.Run(tn, func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			actualError := tc.changelogNote.Validate()
 			if actualError != nil && tc.expectedError != nil {

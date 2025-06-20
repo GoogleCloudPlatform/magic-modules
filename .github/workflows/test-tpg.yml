@@ -19,19 +19,22 @@ on:
       branch:
         description: 'The branch or sha of the provider execute against'
         required: true
+      pr-number:
+        description: 'The pull request number in magic-modules repository'
+        required: true
       sha:
         description: "The commit SHA in magic-modules repository where the status result will be posted"
         required: true
 
 concurrency:
-  group: test-tpg-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.branch }}
+  group: test-tpg-${{ github.event.inputs.owner }}-${{ github.event.inputs.repo }}-${{ github.event.inputs.pr-number }}
   cancel-in-progress: true
 
 jobs:
   build-and-unit-test:
     permissions:
       statuses: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 30
     steps:
     - name: Get Job URL
@@ -70,7 +73,7 @@ jobs:
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
       with:
-        go-version: '^1.21'
+        go-version: '^1.23'
     - name: Build Provider
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
@@ -78,7 +81,7 @@ jobs:
     - name: Run Unit Tests
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        make testnolint TESTARGS="-p 4"
+        make testnolint
     - name: Lint Check
       if: ${{ !cancelled() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
