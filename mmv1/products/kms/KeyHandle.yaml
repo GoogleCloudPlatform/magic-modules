@@ -51,6 +51,8 @@ custom_code:
 examples:
   - name: 'kms_key_handle_basic'
     primary_resource_id: 'example-keyhandle'
+    # test depends upon google_project_service_identity service which is still in beta, so we need to keep test limited to beta
+    min_version: 'beta'
     vars:
       folder_name: 'my-folder'
       key_project_name: 'key-proj'

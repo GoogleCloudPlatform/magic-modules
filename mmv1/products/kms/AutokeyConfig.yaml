@@ -58,6 +58,8 @@ exclude_sweeper: true
 examples:
   - name: 'kms_autokey_config_all'
     primary_resource_id: 'example-autokeyconfig'
+    # test depends upon google_project_service_identity service which is still in beta, so we need to keep test limited to beta
+    min_version: 'beta'
     vars:
       folder_name: 'my-folder'
       key_project_name: 'key-proj'
