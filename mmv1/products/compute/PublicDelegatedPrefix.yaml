@@ -75,7 +75,6 @@ examples:
     vars:
       prefixes_name: 'prefix-with-sub-prefixes'
       sub_prefix_name_1: 'sub-prefix-1'
-    exclude_test: true
 parameters:
 properties:
   - name: 'region'
