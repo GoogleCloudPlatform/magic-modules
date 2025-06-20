@@ -148,14 +148,12 @@ properties:
       (https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors).
   - !ruby/object:Api::Type::String
     name: description
-    immutable: true
-    required: true
+    immutable: false
     description:
       A detailed description of the metric, which can be used in documentation.
   - !ruby/object:Api::Type::String
     name: displayName
-    immutable: true
-    required: true
+    immutable: false
     description:
       A concise name for the metric, which can be displayed in user interfaces.
       Use sentence case without an ending period, for example "Request count".
