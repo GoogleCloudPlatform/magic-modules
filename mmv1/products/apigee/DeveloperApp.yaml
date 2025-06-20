@@ -27,6 +27,8 @@ immutable: false
 import_format:
   - "{{org_id}}/developers/{{developer_email}}/apps/{{name}}"
   - "{{org_id}}/{{developer_email}}/{{name}}"
+custom_code:
+  custom_import: "templates/terraform/custom_import/apigee_developer_app.go.tmpl"
 examples:
   - name: "apigee_developer_app_basic"
     vars:
@@ -194,11 +196,6 @@ properties:
     type: String
     description: |
       Expiration time, in milliseconds, for the consumer key that is generated for the developer app. If not set or left to the default value of -1, the API key never expires. The expiration time can't be updated after it is set.
-  - name: "appFamily"
-    type: String
-    description: |
-      Developer app family.
-    default_from_api: true
   - name: "apiProducts"
     type: Array
     description: |
