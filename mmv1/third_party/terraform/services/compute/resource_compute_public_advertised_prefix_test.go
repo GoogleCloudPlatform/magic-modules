@@ -115,7 +115,7 @@ func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicTest(t *tes
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputePublicDelegatedPrefixDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputePublicDelegatedPrefixDestroyProducerTest(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicExample(context),
@@ -166,7 +166,7 @@ func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesIpv6Test(t *test
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputePublicDelegatedPrefixDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputePublicDelegatedPrefixDestroyProducerTest(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesIpv6Example(context),
@@ -221,7 +221,7 @@ func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixIpv6SubnetModeTest
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputePublicDelegatedPrefixDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputePublicDelegatedPrefixDestroyProducerTest(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputePublicDelegatedPrefix_publicDelegatedPrefixIpv6SubnetModeExample(context),
@@ -266,7 +266,7 @@ resource "google_compute_public_delegated_prefix" "subprefix" {
 `, context)
 }
 
-func testAccCheckComputePublicDelegatedPrefixDestroyProducer(t *testing.T) func(s *terraform.State) error {
+func testAccCheckComputePublicDelegatedPrefixDestroyProducerTest(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
 		for name, rs := range s.RootModule().Resources {
 			if rs.Type != "google_compute_public_delegated_prefix" {
