@@ -23,7 +23,7 @@ import (
 )
 
 func TestTrustedContributors(t *testing.T) {
-	for member, _ := range trustedContributors {
+	for member := range trustedContributors {
 		if IsCoreReviewer(member) {
 			t.Fatalf(`%v should not be on reviewerRotation list`, member)
 		}
@@ -41,16 +41,21 @@ func TestAvailable(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	usPacific, _ := time.LoadLocation("US/Pacific")
+	usEastern, _ := time.LoadLocation("US/Eastern")
+	europeCentral, _ := time.LoadLocation("Europe/Warsaw")
+	bangalore, _ := time.LoadLocation("Asia/Kolkata")
+
 	tests := []struct {
 		name              string
-		rotation          map[string]ReviewerConfig
+		rotation          ReviewerRotation
 		timeNow           time.Time
 		excludedReviewers []string
 		want              []string
 	}{
 		{
 			name: "reviewers on vacation start date are excluded",
-			rotation: map[string]ReviewerConfig{
+			rotation: ReviewerRotation{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
 					timezone: time.UTC,
@@ -67,10 +72,10 @@ func TestAvailable(t *testing.T) {
 		},
 		{
 			name: "reviewers on vacation end date are excluded",
-			rotation: map[string]ReviewerConfig{
+			rotation: ReviewerRotation{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
-					timezone: time.UTC,
+					timezone: europeCentral,
 					vacations: []Vacation{
 						{
 							startDate: newDate(2024, 3, 29),
@@ -79,15 +84,15 @@ func TestAvailable(t *testing.T) {
 					},
 				},
 			},
-			timeNow: time.Date(2024, 4, 2, 10, 0, 0, 0, time.UTC),
+			timeNow: time.Date(2024, 4, 2, 10, 0, 0, 0, europeCentral),
 			want:    []string{"id1"},
 		},
 		{
 			name: "reviewers are included after vacation ends",
-			rotation: map[string]ReviewerConfig{
+			rotation: ReviewerRotation{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
-					timezone: time.UTC,
+					timezone: bangalore,
 					vacations: []Vacation{
 						{
 							startDate: newDate(2024, 3, 29),
@@ -96,12 +101,12 @@ func TestAvailable(t *testing.T) {
 					},
 				},
 			},
-			timeNow: time.Date(2024, 4, 3, 0, 0, 0, 0, time.UTC),
+			timeNow: time.Date(2024, 4, 3, 9, 0, 0, 0, bangalore), // 9 am in Bangalore the day after vacation ends
 			want:    []string{"id1", "id2"},
 		},
 		{
 			name: "reviewers are included before vacation starts",
-			rotation: map[string]ReviewerConfig{
+			rotation: ReviewerRotation{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
 					timezone: time.UTC,
@@ -113,12 +118,12 @@ func TestAvailable(t *testing.T) {
 					},
 				},
 			},
-			timeNow: time.Date(2024, 3, 28, 23, 0, 0, 0, time.UTC),
+			timeNow: time.Date(2024, 3, 28, 16, 0, 0, 0, time.UTC),
 			want:    []string{"id1", "id2"},
 		},
 		{
 			name: "reviewers are excluded if vacation has not ended in the specified time zone",
-			rotation: map[string]ReviewerConfig{
+			rotation: ReviewerRotation{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
 					vacations: []Vacation{
@@ -135,7 +140,7 @@ func TestAvailable(t *testing.T) {
 		},
 		{
 			name: "included before vacations",
-			rotation: map[string]ReviewerConfig{
+			rotation: ReviewerRotation{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
 					vacations: []Vacation{
@@ -150,12 +155,12 @@ func TestAvailable(t *testing.T) {
 					},
 				},
 			},
-			timeNow: time.Date(2024, 3, 1, 0, 0, 0, 0, usPacific),
+			timeNow: time.Date(2024, 3, 28, 0, 0, 0, 0, usPacific),
 			want:    []string{"id1", "id2"},
 		},
 		{
 			name: "excluded during first vacation",
-			rotation: map[string]ReviewerConfig{
+			rotation: ReviewerRotation{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
 					vacations: []Vacation{
@@ -175,7 +180,7 @@ func TestAvailable(t *testing.T) {
 		},
 		{
 			name: "included between vacations",
-			rotation: map[string]ReviewerConfig{
+			rotation: ReviewerRotation{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
 					vacations: []Vacation{
@@ -195,7 +200,7 @@ func TestAvailable(t *testing.T) {
 		},
 		{
 			name: "excluded during second vacation",
-			rotation: map[string]ReviewerConfig{
+			rotation: ReviewerRotation{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
 					vacations: []Vacation{
@@ -215,7 +220,7 @@ func TestAvailable(t *testing.T) {
 		},
 		{
 			name: "included after vacations",
-			rotation: map[string]ReviewerConfig{
+			rotation: ReviewerRotation{
 				"id1": {vacations: []Vacation{}},
 				"id2": {
 					vacations: []Vacation{
@@ -235,7 +240,7 @@ func TestAvailable(t *testing.T) {
 		},
 		{
 			name: "explicitly excluded reviewers",
-			rotation: map[string]ReviewerConfig{
+			rotation: ReviewerRotation{
 				"id1": {vacations: []Vacation{}},
 				"id2": {vacations: []Vacation{}},
 			},
@@ -245,7 +250,8 @@ func TestAvailable(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := available(test.timeNow, test.rotation, test.excludedReviewers)
+			test.rotation.setStartEnd()
+			got := test.rotation.available(test.timeNow, test.excludedReviewers)
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("available(%v, %v, %v) got diff: %s", test.timeNow, test.rotation, test.excludedReviewers, diff)
 			}
