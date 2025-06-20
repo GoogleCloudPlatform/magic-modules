@@ -287,13 +287,13 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, temp_file *
 			fmt.Fprintf(os.Stdout, "Reformatted config: %s\n", testStep.Config)
 			testStep.PreConfig = func() {
 				// todo: more descriptive steps (maybe done through a helper function)
-				fmt.Fprintf(temp_file, "Step %d: Bigtable Invalid Instance creation started\n", countSteps)
+				fmt.Fprintf(temp_file, "Step %d\n", countSteps)
 				countSteps++
 			}
 			if testStep.ExpectError == nil && !testStep.PlanOnly {
 				newStep := resource.TestStep{
 					PreConfig: func() {
-						fmt.Fprintf(temp_file, "Step %d: Bigtable Invalid Instance creation started\n", countSteps)
+						fmt.Fprintf(temp_file, "Step %d\n", countSteps)
 						countSteps++
 					},
 					Config: reformConfigWithProvider(ogConfig, releaseProvider),
