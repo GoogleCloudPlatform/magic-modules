@@ -1,6 +1,7 @@
 package compute
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -38,6 +39,7 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
 			tpgresource.DefaultProviderZone,
+			customdiff.ForceNewIfChange("resource_policies.0.workload_policy", ForceNewResourcePoliciesWorkloadPolicyIfNewIsEmpty),
 		),
 		Schema: map[string]*schema.Schema{
 			"base_instance_name": {
@@ -601,6 +603,10 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 		},
 		UseJSONNumber: true,
 	}
+}
+
+func ForceNewResourcePoliciesWorkloadPolicyIfNewIsEmpty(_ context.Context, old, new, _ interface{}) bool {
+	return (old.(string) != "") && (new.(string) == "")
 }
 
 func parseUniqueId(s string) (string, string) {
