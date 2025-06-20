@@ -67,7 +67,7 @@ resource "google_monitoring_metric_descriptor" "basic" {
 		ingest_delay = "%s"
 	}
 }
-`, description, displayName, samplePeriod, ingestDelay
+`, description, displayName, samplePeriod, ingestDelay,
 	)
 }
 
