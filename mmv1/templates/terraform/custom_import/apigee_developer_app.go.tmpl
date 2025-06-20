@@ -7,25 +7,25 @@ if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err !=
 
 nameParts := strings.Split(d.Get("name").(string), "/")
 if len(nameParts) == 6 {
-	// `organizations/{{"{{"}}org_name{{"}}"}}/developers/{{"{{"}}email{{"}}"}}/apps/{{"{{"}}name{{"}}"}}`
+	// `organizations/{{"{{"}}org_name{{"}}"}}/developers/{{"{{"}}developer_email{{"}}"}}/apps/{{"{{"}}name{{"}}"}}`
 	orgId := fmt.Sprintf("organizations/%s", nameParts[1])
 	if err := d.Set("org_id", orgId); err != nil {
 		return nil, fmt.Errorf("Error setting org_id: %s", err)
 	}
-	if err := d.Set("email", nameParts[3]); err != nil {
-		return nil, fmt.Errorf("Error setting email: %s", err)
+	if err := d.Set("developer_email", nameParts[3]); err != nil {
+		return nil, fmt.Errorf("Error setting developer_email: %s", err)
 	}
 	if err := d.Set("name", nameParts[5]); err != nil {
 		return nil, fmt.Errorf("Error setting name: %s", err)
 	}
 } else if len(nameParts) == 4 {
-	// `organizations/{{"{{"}}org_name{{"}}"}}/{{"{{"}}email{{"}}"}}/{{"{{"}}name{{"}}"}}`
+	// `organizations/{{"{{"}}org_name{{"}}"}}/{{"{{"}}developer_email{{"}}"}}/{{"{{"}}name{{"}}"}}`
 	orgId := fmt.Sprintf("organizations/%s", nameParts[1])
 	if err := d.Set("org_id", orgId); err != nil {
 		return nil, fmt.Errorf("Error setting org_id: %s", err)
 	}
-	if err := d.Set("email", nameParts[2]); err != nil {
-		return nil, fmt.Errorf("Error setting email: %s", err)
+	if err := d.Set("developer_email", nameParts[2]); err != nil {
+		return nil, fmt.Errorf("Error setting developer_email: %s", err)
 	}
 	if err := d.Set("name", nameParts[3]); err != nil {
 		return nil, fmt.Errorf("Error setting name: %s", err)
@@ -34,12 +34,12 @@ if len(nameParts) == 6 {
 	return nil, fmt.Errorf(
 		"Saw %s when the name is expected to have shape %s or %s",
 		d.Get("name"),
-		"organizations/{{"{{"}}org_name{{"}}"}}/developers/{{"{{"}}email{{"}}"}}/apps/{{"{{"}}name{{"}}"}}",
-		"organizations/{{"{{"}}org_name{{"}}"}}/{{"{{"}}email{{"}}"}}/{{"{{"}}name{{"}}"}}")
+		"organizations/{{"{{"}}org_name{{"}}"}}/developers/{{"{{"}}developer_email{{"}}"}}/apps/{{"{{"}}name{{"}}"}}",
+		"organizations/{{"{{"}}org_name{{"}}"}}/{{"{{"}}developer_email{{"}}"}}/{{"{{"}}name{{"}}"}}")
 }
 
 // Replace import id for the resource id
-id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}org_id{{"}}"}}/developers/{{"{{"}}email{{"}}"}}/apps/{{"{{"}}name{{"}}"}}")
+id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}org_id{{"}}"}}/developers/{{"{{"}}developer_email{{"}}"}}/apps/{{"{{"}}name{{"}}"}}")
 if err != nil {
 	return nil, fmt.Errorf("Error constructing id: %s", err)
 }
