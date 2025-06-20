@@ -56,9 +56,9 @@ resource "google_monitoring_metric_descriptor" "basic" {
 	value_type = "DOUBLE"
 	unit = "{USD}"
 	labels {
-		key = "key1"
+		key = "key"
 		value_type = "STRING"
-		description = "description1"
+		description = "description"
 	}
 	launch_stage = "BETA"
 	metadata {
@@ -77,9 +77,9 @@ resource "google_monitoring_metric_descriptor" "basic" {
 	value_type = "DOUBLE"
 	unit = "{USD}"
 	labels {
-		key = "key1"
+		key = "key"
 		value_type = "STRING"
-		description = "description1"
+		description = "description"
 	}
 	launch_stage = "BETA"
 	metadata {
