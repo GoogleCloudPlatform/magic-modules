@@ -26,6 +26,7 @@ docs:
 base_url: 'organizations/{{org_id}}/environments/{{env_id}}/securityActions'
 self_link: 'organizations/{{org_id}}/environments/{{env_id}}/securityActions/{{security_action_id}}'
 create_url: 'organizations/{{org_id}}/environments/{{env_id}}/securityActions?securityActionId={{security_action_id}}'
+immutable: true
 import_format:
   - 'organizations/{{org_id}}/environments/{{env_id}}/securityActions/{{security_action_id}}'
 examples:
