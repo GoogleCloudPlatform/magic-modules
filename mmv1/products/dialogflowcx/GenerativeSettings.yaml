@@ -21,7 +21,7 @@ references:
   api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents/getGenerativeSettings'
 docs:
 base_url: '{{parent}}/generativeSettings'
-self_link: '{{parent}}/generativeSettings?languageCode={{lang_code}}'
+self_link: '{{parent}}/generativeSettings?languageCode={{language_code}}'
 create_url: '{{parent}}/generativeSettings'
 update_url: '{{parent}}/generativeSettings'
 create_verb: 'PATCH'
@@ -52,13 +52,6 @@ parameters:
     description: |
       The agent to create a flow for.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
-    url_param_only: true
-    immutable: true
-  - name: 'langCode'
-    type: String
-    default_value: 'en'
-    description: |
-      Language code of the generative settings.
     url_param_only: true
     immutable: true
 properties:

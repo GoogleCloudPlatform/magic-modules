@@ -8,7 +8,6 @@ resource "google_dialogflow_cx_agent" "agent" {
 
 resource "google_dialogflow_cx_generative_settings" "{{$.PrimaryResourceId}}" {
   parent       = google_dialogflow_cx_agent.agent.id
-  lang_code    = "en"
 
   fallback_settings {
     selected_prompt = "example prompt"
