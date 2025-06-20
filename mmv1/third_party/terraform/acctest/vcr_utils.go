@@ -293,7 +293,7 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, temp_file *
 			if testStep.ExpectError == nil && !testStep.PlanOnly {
 				newStep := resource.TestStep{
 					PreConfig: func() {
-						fmt.Fprintf(temp_file, "Step %d\n", countSteps)
+						fmt.Fprintf(temp_file, "[Diff] Step %d\n", countSteps)
 						countSteps++
 					},
 					Config: reformConfigWithProvider(ogConfig, releaseProvider),
