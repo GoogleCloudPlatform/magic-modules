@@ -159,7 +159,7 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 				var output, err = parseReleaseDiffOutput(temp_file, temp_file.Name())
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Error parsing release diff output: %v\n", err)
-				} else {
+				} else if t.Failed() {
 					fmt.Printf("Release diff output:\n%s\n", output)
 				}
 				temp_file.Close() // Close the file handle
@@ -339,7 +339,7 @@ func parseReleaseDiffOutput(temp *os.File, output string) (string, error) {
 		return "", fmt.Errorf("failed to seek to beginning of temporary file: %w", err)
 	}
 
-	var diffSteps []string
+	var lastDiffLine string
 	scanner := bufio.NewScanner(temp)
 
 	diffMarker := "[Diff]"
@@ -347,18 +347,19 @@ func parseReleaseDiffOutput(temp *os.File, output string) (string, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.Contains(line, diffMarker) {
-			diffSteps = append(diffSteps, line)
+			lastDiffLine = line
 		}
 	}
 
 	if err := scanner.Err(); err != nil {
 		return "", fmt.Errorf("error reading temporary file: %w", err)
 	}
-	if len(diffSteps) == 0 {
+
+	if lastDiffLine == "" {
 		return "No diff steps found in the output.", nil
 	}
 
-	return strings.Join(diffSteps, "\n"), nil
+	return lastDiffLine, nil
 }
 
 // HandleVCRConfiguration configures the recorder (github.com/dnaeon/go-vcr/recorder) used in the VCR test
