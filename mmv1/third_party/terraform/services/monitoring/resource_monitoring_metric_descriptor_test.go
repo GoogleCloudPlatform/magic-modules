@@ -16,7 +16,7 @@ func TestAccMonitoringMetricDescriptor_update(t *testing.T) {
 		CheckDestroy:             testAccCheckMonitoringMetricDescriptorDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMonitoringMetricDescriptor_initialConfig("initial description", "initial display name"),
+				Config: testAccMonitoringMetricDescriptor_initialConfig("initial description", "initial display name", "30s", "30s"),
 			},
 			{
 				ResourceName:            "google_monitoring_metric_descriptor.basic",
@@ -25,7 +25,7 @@ func TestAccMonitoringMetricDescriptor_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"metadata", "launch_stage"},
 			},
 			{
-				Config: testAccMonitoringMetricDescriptor_updatedConfig("updated description", "updated display name"),
+				Config: testAccMonitoringMetricDescriptor_updatedConfig("updated description", "updated display name", "60s", "60s"),
 			},
 			{
 				ResourceName:            "google_monitoring_metric_descriptor.basic",
@@ -46,7 +46,7 @@ func TestAccMonitoringMetricDescriptor_update(t *testing.T) {
 	})
 }
 
-func testAccMonitoringMetricDescriptor_initialConfig(description, displayName string) string {
+func testAccMonitoringMetricDescriptor_update(description, displayName, samplePeriod, ingestDelay string) string {
 	return fmt.Sprintf(`
 resource "google_monitoring_metric_descriptor" "basic" {
 	description = "%s"
@@ -62,34 +62,11 @@ resource "google_monitoring_metric_descriptor" "basic" {
 	}
 	launch_stage = "BETA"
 	metadata {
-		sample_period = "30s"
-		ingest_delay = "30s"
+		sample_period = "%s"
+		ingest_delay = "%s"
 	}
 }
-`, description, displayName)
-}
-
-func testAccMonitoringMetricDescriptor_updatedConfig(description, displayName string) string {
-	return fmt.Sprintf(`
-resource "google_monitoring_metric_descriptor" "basic" {
-	description = "%s"
-	display_name = "%s"
-	type = "custom.googleapis.com/stores/daily_sales"
-	metric_kind = "GAUGE"
-	value_type = "DOUBLE"
-	unit = "{USD}"
-	labels {
-		key = "key1"
-		value_type = "STRING"
-		description = "description1"
-	}
-	launch_stage = "BETA"
-	metadata {
-		sample_period = "30s"
-		ingest_delay = "30s"
-	}
-}
-`, description, displayName)
+`, description, displayName, samplePeriod, ingestDelay )
 }
 
 func testAccMonitoringMetricDescriptor_omittedFields() string {
