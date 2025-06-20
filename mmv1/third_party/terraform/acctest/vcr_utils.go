@@ -1,11 +1,13 @@
 package acctest
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -154,8 +156,13 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 
 		defer func() {
 			if temp_file != nil {
+				var output, err = parseReleaseDiffOutput(temp_file, temp_file.Name())
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error parsing release diff output: %v\n", err)
+				} else {
+					fmt.Printf("Release diff output:\n%s\n", output)
+				}
 				temp_file.Close() // Close the file handle
-
 				if t.Failed() {
 					fmt.Printf("Test failed, keeping log file: %s\n", temp_file.Name())
 				} else {
@@ -323,14 +330,35 @@ func reformConfigWithProvider(config, provider string) string {
 }
 
 func parseReleaseDiffOutput(temp *os.File, output string) (string, error) {
-	// This function is a placeholder for parsing the output of the release diff
-	// It should return the parsed output or an error if parsing fails
-	// For now, it just returns the output as is
 	if temp == nil {
 		return "", errors.New("temporary file is nil")
 	}
-	return output, nil
 
+	_, err := temp.Seek(0, io.SeekStart)
+	if err != nil {
+		return "", fmt.Errorf("failed to seek to beginning of temporary file: %w", err)
+	}
+
+	var diffSteps []string
+	scanner := bufio.NewScanner(temp)
+
+	diffMarker := "[Diff]"
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.Contains(line, diffMarker) {
+			diffSteps = append(diffSteps, line)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return "", fmt.Errorf("error reading temporary file: %w", err)
+	}
+	if len(diffSteps) == 0 {
+		return "No diff steps found in the output.", nil
+	}
+
+	return strings.Join(diffSteps, "\n"), nil
 }
 
 // HandleVCRConfiguration configures the recorder (github.com/dnaeon/go-vcr/recorder) used in the VCR test
