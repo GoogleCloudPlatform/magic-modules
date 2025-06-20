@@ -1,0 +1,804 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Instance'
+description: A Google Cloud Memorystore instance.
+docs:
+references:
+  guides:
+    'Official Documentation': https://cloud.google.com/memorystore/docs/valkey/create-instances
+  api: 'https://cloud.google.com/memorystore/docs/valkey/reference/rest/v1/projects.locations.instances'
+id_format: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/instances'
+self_link: 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/instances?instanceId={{instance_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 120
+  delete_minutes: 30
+autogen_async: true
+autogen_status: SW5zdGFuY2U=
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+  encoder: 'templates/terraform/encoders/memorystore_instance.go.tmpl'
+  decoder: 'templates/terraform/decoders/memorystore_instance.go.tmpl'
+examples:
+  - name: 'memorystore_instance_basic'
+    primary_resource_id: 'instance-basic'
+    vars:
+      instance_name: 'basic-instance'
+      policy_name: 'my-policy'
+      subnet_name: 'my-subnet'
+      network_name: 'my-network'
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      'prevent_destroy': 'false'
+  - name: 'memorystore_instance_full'
+    primary_resource_id: 'instance-full'
+    vars:
+      instance_name: 'full-instance'
+      policy_name: 'my-policy'
+      subnet_name: 'my-subnet'
+      network_name: 'my-network'
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      'prevent_destroy': 'false'
+  - name: 'memorystore_instance_persistence_aof'
+    primary_resource_id: 'instance-persistence-aof'
+    vars:
+      instance_name: 'aof-instance'
+      policy_name: 'my-policy'
+      subnet_name: 'my-subnet'
+      network_name: 'my-network'
+      prevent_destroy: 'true'
+    test_vars_overrides:
+      'prevent_destroy': 'false'
+  - name: 'memorystore_instance_secondary_instance'
+    primary_resource_id: 'secondary_instance'
+    vars:
+      primary_instance_name: 'primary-instance'
+      primary_instance_deletion_protection_enabled: 'true'
+      primary_instance_prevent_destroy: 'true'
+      primary_instance_policy_name: 'my-policy-primary-instance'
+      primary_network_name: "my-network-primary-instance"
+      primary_instance_subnet_name: 'my-subnet-primary-instance'
+      secondary_instance_name: 'secondary-instance'
+      secondary_instance_deletion_protection_enabled: 'true'
+      secondary_instance_prevent_destroy: 'true'
+      secondary_instance_policy_name: 'my-policy-secondary-instance'
+      secondary_network_name: "my-network-secondary-instance"
+      secondary_instance_subnet_name: 'my-subnet-secondary-instance'
+    test_vars_overrides:
+      'primary_instance_deletion_protection_enabled': 'false'
+      'secondary_instance_deletion_protection_enabled': 'false'
+      'primary_instance_prevent_destroy': 'false'
+      'secondary_instance_prevent_destroy': 'false'
+    oics_vars_overrides:
+      'primary_instance_deletion_protection_enabled': 'false'
+      'secondary_instance_deletion_protection_enabled': 'false'
+      'primary_instance_prevent_destroy': 'false'
+      'secondary_instance_prevent_destroy': 'false'
+virtual_fields:
+  - name: 'desired_psc_auto_connections'
+    description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead."
+    deprecation_message: '`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead.'
+    type: Array
+    immutable: true
+    conflicts:
+      - desiredAutoCreatedEndpoints
+    item_type:
+      type: NestedObject
+      properties:
+        - type: String
+          name: project_id
+          description:
+            "Required. The consumer project_id where the forwarding rule is
+            created from. "
+          required: true
+        - type: String
+          name: network
+          description:
+            "Required. The consumer network where the IP address resides, in
+            the form of\nprojects/{project_id}/global/networks/{network_id}. "
+          required: true
+  - name: 'desired_auto_created_endpoints'
+    description: "Immutable. User inputs for the auto-created
+      endpoints connections. "
+    type: Array
+    # is_set: true
+    immutable: true
+    conflicts:
+      - desiredPscAutoConnections
+    item_type:
+      type: NestedObject
+      properties:
+        - type: String
+          name: project_id
+          description:
+            "Required. The consumer project_id where the forwarding rule is
+            created from. "
+          required: true
+        - type: String
+          name: network
+          description:
+            "Required. The consumer network where the IP address resides, in
+            the form of\nprojects/{project_id}/global/networks/{network_id}. "
+          required: true
+parameters:
+  - name: 'location'
+    type: String
+    description:
+      "Resource ID segment making up resource `name`. It identifies the resource
+      within its parent collection as described in https://google.aip.dev/122. See documentation
+      for resource type `memorystore.googleapis.com/CertificateAuthority`. "
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'instanceId'
+    type: String
+    description:
+      "Required. The ID to use for the instance, which will become the final
+      component of\nthe instance's resource name.\n\nThis value is subject to the
+      following restrictions:\n\n* Must be 4-63 characters in length\n* Must begin with a letter
+      or digit\n* Must contain only lowercase letters, digits, and hyphens\n* Must not
+      end with a hyphen\n* Must be unique within a location "
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: "Identifier. Unique name of the instance.\nFormat: projects/{project}/locations/{location}/instances/{instance} "
+    output: true
+  - name: 'createTime'
+    type: String
+    description: "Output only. Creation timestamp of the instance. "
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: "Output only. Latest update timestamp of the instance. "
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: "Optional. Labels to represent user-provided metadata. "
+  - name: 'state'
+    type: String
+    description:
+      "Output only. Current state of the instance. \n Possible values:\n
+      CREATING\nACTIVE\nUPDATING\nDELETING"
+    output: true
+  - name: 'stateInfo'
+    type: NestedObject
+    description: "Additional information about the state of the instance. "
+    output: true
+    properties:
+      - name: 'updateInfo'
+        type: NestedObject
+        description: "Represents information about instance with state UPDATING. "
+        output: true
+        properties:
+          - name: 'targetShardCount'
+            type: Integer
+            description: "Output only. Target number of shards for the instance. "
+            output: true
+          - name: 'targetReplicaCount'
+            type: Integer
+            description:
+              "Output only. Target number of replica nodes per shard for the
+              instance. "
+            output: true
+          - name: 'targetEngineVersion'
+            type: String
+            description:
+              "Output only. Target engine version for the instance."
+            output: true
+          - name: 'targetNodeType'
+            type: String
+            description:
+              "Output only. Target node type for the instance."
+            output: true
+  - name: 'automatedBackupConfig'
+    type: NestedObject
+    description: "The automated backup config for a instance."
+    custom_flatten: 'templates/terraform/custom_flatten/memorystore_instance_automated_backup_config.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/memorystore_instance_automated_backup_config.go.tmpl'
+    properties:
+      - name: 'fixedFrequencySchedule'
+        type: NestedObject
+        description: "Trigger automated backups at a fixed frequency."
+        required: true
+        properties:
+          - name: 'startTime'
+            type: NestedObject
+            description: |
+              The start time of every automated backup in UTC.
+              It must be set to the start of an hour. This field is required.
+            required: true
+            properties:
+              - name: 'hours'
+                type: Integer
+                description: |
+                  Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or equal to 23.
+                  An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                required: true
+      - name: 'retention'
+        type: String
+        description: |
+            How long to keep automated backups before the backups are deleted.
+            The value should be between 1 day and 365 days. If not specified, the default value is 35 days.
+            A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s". The default_value is "3024000s"
+        required: true
+  - name: 'uid'
+    type: String
+    description: "Output only. System assigned, unique identifier for the instance. "
+    output: true
+  - name: 'replicaCount'
+    type: Integer
+    description:
+      "Optional. Number of replica nodes per shard. If omitted the default
+      is 0 replicas. "
+    default_from_api: true
+  - name: 'authorizationMode'
+    type: String
+    description:
+      "Optional. Immutable. Authorization mode of the instance.
+      Possible values:\n AUTH_DISABLED\nIAM_AUTH"
+    immutable: true
+    default_from_api: true
+  - name: 'transitEncryptionMode'
+    type: String
+    description:
+      "Optional. Immutable. In-transit encryption mode of the instance. \n
+      Possible values:\n TRANSIT_ENCRYPTION_DISABLED\nSERVER_AUTHENTICATION"
+    immutable: true
+    default_from_api: true
+  - name: 'shardCount'
+    type: Integer
+    description: "Required. Number of shards for the instance. "
+    required: true
+  - name: 'discoveryEndpoints'
+    type: Array
+    description:
+      "Output only. Endpoints clients can connect to the instance through.
+      Currently only one\ndiscovery endpoint is supported. "
+    deprecation_message: '`discovery_endpoints` is deprecated  Use `endpoints` instead.'
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'address'
+          type: String
+          description:
+            "Output only. IP address of the exposed endpoint clients connect
+            to. "
+          output: true
+        - name: 'port'
+          type: Integer
+          description: "Output only. The port number of the exposed endpoint. "
+          output: true
+        - name: 'network'
+          type: String
+          description:
+            "Output only. The network where the IP address of the discovery
+            endpoint will be\nreserved, in the form of\nprojects/{network_project}/global/networks/{network_id}. "
+          output: true
+  - name: 'nodeType'
+    type: String
+    description:
+      "Optional. Machine type for individual nodes of the instance.
+      \n Possible values:\n SHARED_CORE_NANO\nHIGHMEM_MEDIUM\nHIGHMEM_XLARGE\nSTANDARD_SMALL"
+    default_from_api: true
+  - name: 'persistenceConfig'
+    type: NestedObject
+    description: "Represents persistence configuration for a instance. "
+    default_from_api: true
+    properties:
+      - name: 'mode'
+        type: Enum
+        description: "Optional. Current persistence mode. \n Possible values:\nDISABLED\nRDB\nAOF"
+        default_from_api: true
+        enum_values:
+          - 'DISABLED'
+          - 'RDB'
+          - 'AOF'
+      - name: 'rdbConfig'
+        type: NestedObject
+        description: "Configuration for RDB based persistence. "
+        default_from_api: true
+        properties:
+          - name: 'rdbSnapshotPeriod'
+            type: String
+            description:
+              "Optional. Period between RDB snapshots. \n Possible values:\n
+              ONE_HOUR\nSIX_HOURS\nTWELVE_HOURS\nTWENTY_FOUR_HOURS"
+            default_from_api: true
+          - name: 'rdbSnapshotStartTime'
+            type: String
+            description:
+              "Optional. Time that the first snapshot was/will be attempted,
+              and to which future\nsnapshots will be aligned. If not provided, the current
+              time will be\nused. "
+            default_from_api: true
+      - name: 'aofConfig'
+        type: NestedObject
+        description: "Configuration for AOF based persistence. "
+        default_from_api: true
+        properties:
+          - name: 'appendFsync'
+            type: String
+            description: "Optional. The fsync mode. \n Possible values:\n NEVER\nEVERY_SEC\nALWAYS"
+            default_from_api: true
+  - name: 'maintenancePolicy'
+    type: NestedObject
+    description: Maintenance policy for a cluster
+    properties:
+      - name: 'createTime'
+        type: String
+        description: |
+          The time when the policy was created.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+        output: true
+      - name: 'updateTime'
+        type: String
+        description: |
+          The time when the policy was last updated.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+        output: true
+      - name: 'weeklyMaintenanceWindow'
+        type: Array
+        description: |
+          Optional. Maintenance window that is applied to resources covered by this policy.
+          Minimum 1. For the current version, the maximum number
+          of weekly_window is expected to be one.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'day'
+              type: Enum
+              description: |
+                The day of week that maintenance updates occur.
+
+                - DAY_OF_WEEK_UNSPECIFIED: The day of the week is unspecified.
+                - MONDAY: Monday
+                - TUESDAY: Tuesday
+                - WEDNESDAY: Wednesday
+                - THURSDAY: Thursday
+                - FRIDAY: Friday
+                - SATURDAY: Saturday
+                - SUNDAY: Sunday
+              required: true
+              enum_values:
+                - 'DAY_OF_WEEK_UNSPECIFIED'
+                - 'MONDAY'
+                - 'TUESDAY'
+                - 'WEDNESDAY'
+                - 'THURSDAY'
+                - 'FRIDAY'
+                - 'SATURDAY'
+                - 'SUNDAY'
+            - name: 'duration'
+              type: String
+              description: |
+                Duration of the maintenance window.
+                The current window is fixed at 1 hour.
+                A duration in seconds with up to nine fractional digits,
+                terminated by 's'. Example: "3.5s".
+              output: true
+            - name: 'startTime'
+              type: NestedObject
+              description: |
+                Start time of the window in UTC time.
+              required: true
+              send_empty_value: true
+              allow_empty_object: true
+              properties:
+                - name: 'hours'
+                  type: Integer
+                  description: |
+                    Hours of day in 24 hour format. Should be from 0 to 23.
+                    An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                  validation:
+                    function: 'validation.IntBetween(0,23)'
+                - name: 'minutes'
+                  type: Integer
+                  description: |
+                    Minutes of hour of day. Must be from 0 to 59.
+                  validation:
+                    function: 'validation.IntBetween(0,59)'
+                - name: 'seconds'
+                  type: Integer
+                  description: |
+                    Seconds of minutes of the time. Must normally be from 0 to 59.
+                    An API may allow the value 60 if it allows leap-seconds.
+                  validation:
+                    function: 'validation.IntBetween(0,60)'
+                - name: 'nanos'
+                  type: Integer
+                  description: |
+                    Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                  validation:
+                    function: 'validation.IntBetween(0,999999999)'
+  - name: 'maintenanceSchedule'
+    type: NestedObject
+    description: Upcoming maintenance schedule.
+    output: true
+    properties:
+      - name: 'startTime'
+        type: String
+        description: |
+          The start time of any upcoming scheduled maintenance for this cluster.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+        output: true
+      - name: 'endTime'
+        type: String
+        description: |
+          The end time of any upcoming scheduled maintenance for this cluster.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+        output: true
+      - name: 'scheduleDeadlineTime'
+        type: String
+        description: |
+          The deadline that the maintenance schedule start time
+          can not go beyond, including reschedule.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+        output: true
+  - name: 'engineVersion'
+    type: String
+    description: "Optional. Engine version of the instance."
+    default_from_api: true
+  - name: 'engineConfigs'
+    type: KeyValuePairs
+    description: "Optional. User-provided engine configurations for the instance. "
+  - name: 'nodeConfig'
+    type: NestedObject
+    description: "Represents configuration for nodes of the instance. "
+    output: true
+    properties:
+      - name: 'sizeGb'
+        type: Double
+        description: "Output only. Memory size in GB of the node. "
+        output: true
+  - name: 'zoneDistributionConfig'
+    type: NestedObject
+    description: "Zone distribution configuration for allocation of instance resources. "
+    immutable: true
+    default_from_api: true
+    properties:
+      - name: 'zone'
+        type: String
+        description:
+          "Optional. Defines zone where all resources will be allocated with
+          SINGLE_ZONE mode.\nIgnored for MULTI_ZONE mode. "
+        immutable: true
+      - name: 'mode'
+        type: Enum
+        description:
+          "Optional. Current zone distribution mode. Defaults to MULTI_ZONE.
+          \n Possible values:\n MULTI_ZONE\nSINGLE_ZONE"
+        default_from_api: true
+        enum_values:
+          - 'MULTI_ZONE'
+          - 'SINGLE_ZONE'
+  - name: 'deletionProtectionEnabled'
+    type: Boolean
+    description: "Optional. If set to true deletion of the instance will fail. "
+    default_value: true
+  - name: 'endpoints'
+    type: Array
+    description: "Endpoints for the instance."
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'connections'
+          type: Array
+          description: "A group of PSC connections. They are created in the same VPC network, one for each service attachment in the cluster."
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'pscAutoConnection'
+                type: NestedObject
+                description: "Detailed information of a PSC connection that is created through service connectivity automation."
+                properties:
+                  - name: 'pscConnectionId'
+                    type: String
+                    description:
+                      "Output only. The PSC connection id of the forwarding rule connected
+                      to the\nservice attachment. "
+                    output: true
+                  - name: 'ipAddress'
+                    type: String
+                    description:
+                      "Output only. The IP allocated on the consumer network for the
+                      PSC forwarding rule. "
+                    output: true
+                  - name: 'forwardingRule'
+                    type: String
+                    description: "Output only. The URI of the consumer side forwarding rule.\nFormat:\nprojects/{project}/regions/{region}/forwardingRules/{forwarding_rule} "
+                    output: true
+                  - name: 'projectId'
+                    type: String
+                    description:
+                      "Output only. The consumer project_id where the forwarding rule is
+                      created from. "
+                    output: true
+                  - name: 'network'
+                    type: String
+                    description:
+                      "Output only. The consumer network where the IP address resides, in
+                      the form of\nprojects/{project_id}/global/networks/{network_id}. "
+                    output: true
+                  - name: 'serviceAttachment'
+                    type: String
+                    description:
+                      "Output only. The service attachment which is the target of the PSC connection, in the form of
+                      projects/{project-id}/regions/{region}/serviceAttachments/{service-attachment-id}."
+                    output: true
+                  - name: 'connectionType'
+                    type: Enum
+                    description:
+                      "Output Only. Type of a PSC Connection.
+                      \n Possible values:\n CONNECTION_TYPE_DISCOVERY \n CONNECTION_TYPE_PRIMARY \n CONNECTION_TYPE_READER"
+                    output: true
+                    enum_values:
+                      - 'CONNECTION_TYPE_READER'
+                      - 'CONNECTION_TYPE_PRIMARY'
+                      - 'CONNECTION_TYPE_DISCOVERY'
+                  - name: 'port'
+                    type: Integer
+                    description:
+                      "Output only. Ports of the exposed endpoint."
+                    output: true
+  - name: 'crossInstanceReplicationConfig'
+    type: NestedObject
+    description: Cross instance replication config
+    default_from_api: true
+    properties:
+      - name: 'instanceRole'
+        type: Enum
+        description: |
+          The instance role supports the following values:
+          1. `INSTANCE_ROLE_UNSPECIFIED`: This is an independent instance that has never participated in cross instance replication. It allows both reads and writes.
+          2. `NONE`: This is an independent instance that previously participated in cross instance replication(either as a `PRIMARY` or `SECONDARY` cluster). It allows both reads and writes.
+          3. `PRIMARY`: This instance serves as the replication source for secondary instance that are replicating from it. Any data written to it is automatically replicated to its secondary clusters. It allows both reads and writes.
+          4. `SECONDARY`: This instance replicates data from the primary instance. It allows only reads.
+        enum_values:
+          - 'INSTANCE_ROLE_UNSPECIFIED'
+          - 'NONE'
+          - 'PRIMARY'
+          - 'SECONDARY'
+      - name: 'primaryInstance'
+        type: NestedObject
+        description: |
+          This field is only set for a secondary instance. Details of the primary instance that is used as the replication source for this secondary instance. This is allowed to be set only for clusters whose cluster role is of type `SECONDARY`.
+        properties:
+          - name: 'instance'
+            type: String
+            description: |
+              The full resource path of the primary instance in the format: projects/{project}/locations/{region}/instances/{instance-id}
+          - name: 'uid'
+            type: String
+            description: |
+              The unique id of the primary instance.
+            output: true
+      - name: 'secondaryInstances'
+        type: Array
+        description: |
+          List of secondary instances that are replicating from this primary cluster. This is allowed to be set only for instances whose cluster role is of type `PRIMARY`.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'instance'
+              type: String
+              description: |
+                The full resource path of the Nth instance in the format: projects/{project}/locations/{region}/instance/{instance-id}
+            - name: 'uid'
+              type: String
+              description: |
+                The unique id of the Nth instance.
+              output: true
+      - name: 'membership'
+        type: NestedObject
+        description: |
+          An output only view of all the member instance participating in cross instance replication. This field is populated for all the member clusters irrespective of their cluster role.
+        output: true
+        properties:
+          - name: 'primaryInstance'
+            type: NestedObject
+            description: |
+              Details of the primary instance that is used as the replication source for all the secondary instances.
+            output: true
+            properties:
+              - name: 'instance'
+                type: String
+                description: |
+                  The full resource path of the primary instance in the format: projects/{project}/locations/{region}/instance/{instance-id}
+                output: true
+              - name: 'uid'
+                type: String
+                description: |
+                  The unique id of the primary instance.
+                output: true
+          - name: 'secondaryInstance'
+            type: Array
+            description: |
+              List of secondary instances that are replicating from the primary instance.
+            output: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'instance'
+                  type: String
+                  description: |
+                    The full resource path of the secondary instance in the format: projects/{project}/locations/{region}/instance/{instance-id}
+                  output: true
+                - name: 'uid'
+                  type: String
+                  description: |
+                    The unique id of the secondary instance.
+                  output: true
+      - name: 'updateTime'
+        type: String
+        description: |
+          The last time cross instance replication config was updated.
+        output: true
+  - name: 'mode'
+    type: Enum
+    description:
+      "Optional. cluster or cluster-disabled.
+      \n Possible values:\n CLUSTER\n CLUSTER_DISABLED"
+    default_from_api: true
+    immutable: true
+    enum_values:
+      - 'CLUSTER'
+      - 'CLUSTER_DISABLED'
+  - name: 'pscAttachmentDetails'
+    type: Array
+    description:
+      "Configuration of a service attachment of the cluster, for creating PSC connections."
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'serviceAttachment'
+          type: String
+          description:
+            "Service attachment URI which your self-created PscConnection should use as target."
+          output: true
+        - name: 'connectionType'
+          type: String
+          description:
+            "Service attachment URI which your self-created PscConnection should use as target."
+          output: true
+  - name: 'pscAutoConnections'
+    type: Array
+    description:
+      "Output only. User inputs and resource details of the auto-created
+      PSC connections. "
+    deprecation_message: '`psc_auto_connections` is deprecated  Use `endpoints.connections.pscAutoConnections` instead.'
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'pscConnectionId'
+          type: String
+          description:
+            "Output only. The PSC connection id of the forwarding rule connected
+            to the\nservice attachment. "
+          output: true
+        - name: 'ipAddress'
+          type: String
+          description:
+            "Output only. The IP allocated on the consumer network for the
+            PSC forwarding rule. "
+          output: true
+        - name: 'forwardingRule'
+          type: String
+          description: "Output only. The URI of the consumer side forwarding rule.\nFormat:\nprojects/{project}/regions/{region}/forwardingRules/{forwarding_rule} "
+          output: true
+        - name: 'projectId'
+          type: String
+          description:
+            "Output only. The consumer project_id where the forwarding rule is
+            created from. "
+          output: true
+        - name: 'network'
+          type: String
+          description:
+            "Output only. The consumer network where the IP address resides, in
+            the form of\nprojects/{project_id}/global/networks/{network_id}. "
+          output: true
+        - name: 'serviceAttachment'
+          type: String
+          description:
+            "Output only. The service attachment which is the target of the PSC connection, in the form of
+            projects/{project-id}/regions/{region}/serviceAttachments/{service-attachment-id}."
+          output: true
+        - name: 'pscConnectionStatus'
+          type: Enum
+          description:
+            "Output Only. The status of the PSC connection: whether a connection exists and ACTIVE or it no longer exists.
+            \n Possible values:\n ACTIVE \n NOT_FOUND"
+          output: true
+          enum_values:
+            - 'ACTIVE'
+            - 'NOT_FOUND'
+        - name: 'connectionType'
+          type: Enum
+          description:
+            "Output Only. Type of a PSC Connection.
+            \n Possible values:\n CONNECTION_TYPE_DISCOVERY \n CONNECTION_TYPE_PRIMARY \n CONNECTION_TYPE_READER"
+          output: true
+          enum_values:
+            - 'CONNECTION_TYPE_READER'
+            - 'CONNECTION_TYPE_PRIMARY'
+            - 'CONNECTION_TYPE_DISCOVERY'
+        - name: 'port'
+          type: Integer
+          description:
+            "Output only. Ports of the exposed endpoint."
+          output: true
+  - name: 'gcsSource'
+    type: NestedObject
+    description: "GCS source for the instance."
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - managedBackupSource
+    properties:
+      - name: 'uris'
+        type: Array
+        is_set: true
+        description: |
+          URIs of the GCS objects to import.
+          Example: gs://bucket1/object1, gs://bucket2/folder2/object2
+        immutable: true
+        required: true
+        item_type:
+          type: String
+  - name: 'managedBackupSource'
+    type: NestedObject
+    description: "Managed backup source for the instance."
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - gcsSource
+    properties:
+      - name: 'backup'
+        type: String
+        description: |
+          Example: `projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backup}`.
+        immutable: true
+        required: true
+  - name: 'backupCollection'
+    type: String
+    description: |
+      The backup collection full resource name.
+      Example: projects/{project}/locations/{location}/backupCollections/{collection}
+    output: true

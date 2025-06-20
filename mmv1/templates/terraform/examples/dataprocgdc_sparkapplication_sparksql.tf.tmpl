@@ -1,0 +1,17 @@
+resource "google_dataproc_gdc_spark_application" "{{$.PrimaryResourceId}}" {
+  spark_application_id = "{{index $.Vars "spark_application_id"}}"
+  serviceinstance = "do-not-delete-dataproc-gdc-instance"
+  project         = "{{index $.Vars "project"}}"
+  location        = "us-west2"
+  namespace = "default"
+  display_name = "A SparkSql application for a Terraform create test"
+  spark_sql_application_config {
+    jar_file_uris = ["file:///usr/lib/spark/examples/jars/spark-examples.jar"]
+    query_list {
+      queries = ["show tables;"]
+    }
+    script_variables = {
+      "MY_VAR": "1"
+    }
+  }
+}

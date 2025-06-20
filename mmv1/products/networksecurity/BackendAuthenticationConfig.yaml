@@ -1,0 +1,111 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'BackendAuthenticationConfig'
+description: |
+  BackendAuthenticationConfig groups the TrustConfig together with other settings that control how the load balancer authenticates, and expresses its identity to the backend.
+references:
+  guides:
+    'Backend mTLS': 'https://cloud.google.com/load-balancing/docs/backend-authenticated-tls-backend-mtls#backend-authentication-config'
+base_url: 'projects/{{project}}/locations/{{location}}/backendAuthenticationConfigs'
+self_link: 'projects/{{project}}/locations/{{location}}/backendAuthenticationConfigs/{{name}}'
+create_url: 'projects/{{project}}/locations/{{location}}/backendAuthenticationConfigs?backendAuthenticationConfigId={{name}}'
+update_verb: 'PATCH'
+update_mask: true
+autogen_async: true
+min_version: 'beta'
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+sweeper:
+  url_substitutions:
+    - region: "global"
+examples:
+  - name: 'network_security_backend_authentication_config_basic'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-backend-authentication-config'
+  - name: 'network_security_backend_authentication_config_full'
+    primary_resource_id: 'default'
+    vars:
+      resource_name: 'my-backend-authentication-config'
+      certificate_name: 'my-certificate'
+      trust_config_name: 'my-trust-config'
+  - name: 'backend_service_tls_settings'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      backend_service_name: 'backend-service'
+      health_check_name: 'health-check'
+      authentication_name: 'authentication'
+
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the BackendAuthenticationConfig resource.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The location of the backend authentication config.
+      The default value is `global`.
+    url_param_only: true
+    default_value: "global"
+
+properties:
+  - name: 'createTime'
+    type: Time
+    description: |
+      Time the BackendAuthenticationConfig was created in UTC.
+    output: true
+  - name: 'updateTime'
+    type: Time
+    description: |
+      Time the BackendAuthenticationConfig was updated in UTC.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: Set of label tags associated with the BackendAuthenticationConfig resource.
+  - name: 'description'
+    type: String
+    description: |
+      A free-text description of the resource. Max length 1024 characters.
+  - name: 'clientCertificate'
+    type: String
+    description: |
+      Reference to a Certificate resource from the certificatemanager.googleapis.com namespace.
+      Used by a BackendService to negotiate mTLS when the backend connection uses TLS and the backend requests a client certificate. Must have a CLIENT_AUTH scope.
+    immutable: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: 'trustConfig'
+    type: String
+    description: |
+      Reference to a TrustConfig resource from the certificatemanager.googleapis.com namespace.
+      A BackendService uses the chain of trust represented by this TrustConfig, if specified, to validate the server certificates presented by the backend. Required unless wellKnownRoots is set to PUBLIC_ROOTS.
+    immutable: true
+    diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: 'wellKnownRoots'
+    type: Enum
+    "description": |
+      Well known roots to use for server certificate validation. If set to NONE, the BackendService will only validate server certificates against roots specified in TrustConfig.
+      If set to PUBLIC_ROOTS, the BackendService uses a set of well-known public roots, in addition to any roots specified in the trustConfig field, when validating the server certificates presented by the backend.
+      Validation with these roots is only considered when the TlsSettings.sni field in the BackendService is set. The well-known roots are a set of root CAs managed by Google. CAs in this set can be added or removed without notice.
+    enum_values:
+      - 'NONE'
+      - 'PUBLIC_ROOTS'

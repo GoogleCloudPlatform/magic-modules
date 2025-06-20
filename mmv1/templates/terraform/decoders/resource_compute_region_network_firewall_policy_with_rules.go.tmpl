@@ -1,0 +1,16 @@
+rules, predefinedRules, err := regionNetworkFirewallPolicyWithRulesSplitPredefinedRules(res["rules"].([]interface{}))
+
+if err != nil {
+  return nil, fmt.Errorf("Error occurred while splitting pre-defined rules: %s", err)
+}
+
+res["rules"] = rules
+res["predefinedRules"] = predefinedRules
+
+config := meta.(*transport_tpg.Config)
+
+if err := d.Set("predefined_rules", flattenComputeRegionNetworkFirewallPolicyWithRulesPredefinedRules(predefinedRules, d, config)); err != nil {
+  return nil, fmt.Errorf("Error occurred while setting pre-defined rules: %s", err)
+}
+
+return res, nil

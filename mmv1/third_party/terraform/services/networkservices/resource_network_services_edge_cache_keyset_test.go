@@ -3,7 +3,7 @@ package networkservices_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -26,7 +26,7 @@ func TestAccNetworkServicesEdgeCacheKeyset_update(t *testing.T) {
 				ResourceName:            "google_network_services_edge_cache_keyset.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name"},
+				ImportStateVerifyIgnore: []string{"name", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetworkServicesEdgeCacheKeyset_update(context),
@@ -35,7 +35,7 @@ func TestAccNetworkServicesEdgeCacheKeyset_update(t *testing.T) {
 				ResourceName:            "google_network_services_edge_cache_keyset.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"name"},
+				ImportStateVerifyIgnore: []string{"name", "labels", "terraform_labels"},
 			},
 		},
 	})

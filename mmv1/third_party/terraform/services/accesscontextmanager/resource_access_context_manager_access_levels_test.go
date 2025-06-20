@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -17,6 +17,7 @@ import (
 
 func testAccAccessContextManagerAccessLevels_basicTest(t *testing.T) {
 	org := envvar.GetTestOrgFromEnv(t)
+	vpcName := fmt.Sprintf("test-vpc-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -32,7 +33,7 @@ func testAccAccessContextManagerAccessLevels_basicTest(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccAccessContextManagerAccessLevels_basicUpdated(org, "my new policy", "corpnet_access", "prodnet_access"),
+				Config: testAccAccessContextManagerAccessLevels_basicUpdated(org, "my new policy", "corpnet_access", "prodnet_access", vpcName),
 			},
 			{
 				ResourceName:      "google_access_context_manager_access_levels.test-access",
@@ -116,11 +117,15 @@ resource "google_access_context_manager_access_levels" "test-access" {
 `, org, policyTitle, levelTitleName1, levelTitleName1, levelTitleName2, levelTitleName2)
 }
 
-func testAccAccessContextManagerAccessLevels_basicUpdated(org, policyTitle, levelTitleName1, levelTitleName2 string) string {
+func testAccAccessContextManagerAccessLevels_basicUpdated(org, policyTitle, levelTitleName1, levelTitleName2, vpcName string) string {
 	return fmt.Sprintf(`
 resource "google_access_context_manager_access_policy" "test-access" {
   parent = "organizations/%s"
   title  = "%s"
+}
+
+resource "google_compute_network" "vpc_network" {
+	name = "%s"
 }
 
 resource "google_access_context_manager_access_levels" "test-access" {
@@ -139,17 +144,22 @@ resource "google_access_context_manager_access_levels" "test-access" {
   }
 
   access_levels {
-	name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/%s"
-	title       = "%s"
-	description = "hello again"
-	basic {
-	  conditions {
-	    ip_subnetworks = ["176.0.4.0/24"]
-	  }
+    name        = "accessPolicies/${google_access_context_manager_access_policy.test-access.name}/accessLevels/%s"
+    title       = "%s"
+    description = "hello again"
+    basic {
+      conditions {
+        vpc_network_sources {
+          vpc_subnetwork {
+            network = "//compute.googleapis.com/${google_compute_network.vpc_network.id}"
+            vpc_ip_subnetworks = ["20.0.5.0/24"]
+          }
+        }
+      }
     }
   }
 }
-`, org, policyTitle, levelTitleName1, levelTitleName1, levelTitleName2, levelTitleName2)
+`, org, policyTitle, vpcName, levelTitleName1, levelTitleName1, levelTitleName2, levelTitleName2)
 }
 
 func testAccAccessContextManagerAccessLevel_empty(org, policyTitle string) string {

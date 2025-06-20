@@ -1,7 +1,9 @@
 package resourcemanager
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -9,8 +11,10 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"github.com/hashicorp/terraform-provider-google/google/verify"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iam/v1"
 )
 
@@ -26,6 +30,10 @@ func ResourceGoogleServiceAccount() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
 		},
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+			resourceServiceAccountCustomDiff,
+		),
 		Schema: map[string]*schema.Schema{
 			"email": {
 				Type:        schema.TypeString,
@@ -78,6 +86,12 @@ func ResourceGoogleServiceAccount() *schema.Resource {
 				Computed:    true,
 				Description: `The Identity of the service account in the form 'serviceAccount:{email}'. This value is often used to refer to the service account in order to grant IAM permissions.`,
 			},
+			"create_ignore_already_exists": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    false,
+				Description: `If set to true, skip service account creation if a service account with the same email already exists.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -110,7 +124,15 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 
 	sa, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Create("projects/"+project, r).Do()
 	if err != nil {
-		return fmt.Errorf("Error creating service account: %s", err)
+		gerr, ok := err.(*googleapi.Error)
+		alreadyExists := ok && gerr.Code == 409 && d.Get("create_ignore_already_exists").(bool)
+		if alreadyExists {
+			sa = &iam.ServiceAccount{
+				Name: fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", project, aid, project),
+			}
+		} else {
+			return fmt.Errorf("Error creating service account: %s", err)
+		}
 	}
 
 	d.SetId(sa.Name)
@@ -133,11 +155,17 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 
 	// We poll until the resource is found due to eventual consistency issue
 	// on part of the api https://cloud.google.com/iam/docs/overview#consistency
-	err = transport_tpg.PollingWaitTime(resourceServiceAccountPollRead(d, meta), transport_tpg.PollCheckForExistence, "Creating Service Account", d.Timeout(schema.TimeoutCreate), 1)
+	// IAM API returns 403 when the queried SA is not found, so we must ignore both 404 & 403 errors
+	err = transport_tpg.PollingWaitTime(resourceServiceAccountPollRead(d, meta), transport_tpg.PollCheckForExistenceWith403, "Creating Service Account", d.Timeout(schema.TimeoutCreate), 1)
 
 	if err != nil {
 		return err
 	}
+
+	// We can't guarantee complete consistency even after polling,
+	// so sleep for some additional time to reduce the likelihood of
+	// eventual consistency failures.
+	time.Sleep(10 * time.Second)
 
 	return resourceGoogleServiceAccountRead(d, meta)
 }
@@ -212,7 +240,11 @@ func resourceGoogleServiceAccountDelete(d *schema.ResourceData, meta interface{}
 	name := d.Id()
 	_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Delete(name).Do()
 	if err != nil {
-		return err
+		gerr, ok := err.(*googleapi.Error)
+		notFound := ok && gerr.Code == 404
+		if !notFound {
+			return fmt.Errorf("Error deleting service account: %s", err)
+		}
 	}
 	d.SetId("")
 	return nil
@@ -243,21 +275,16 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 		if err != nil {
 			return err
 		}
-
-		if len(updateMask) == 0 {
-			return nil
-		}
-
 	} else if d.HasChange("disabled") && d.Get("disabled").(bool) {
 		_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Disable(d.Id(),
 			&iam.DisableServiceAccountRequest{}).Do()
 		if err != nil {
 			return err
 		}
+	}
 
-		if len(updateMask) == 0 {
-			return nil
-		}
+	if len(updateMask) == 0 {
+		return nil
 	}
 
 	_, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Patch(d.Id(),
@@ -297,4 +324,35 @@ func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}
 	d.SetId(id)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func ResourceServiceAccountCustomDiffFunc(diff tpgresource.TerraformResourceDiff) error {
+	if !tpgresource.IsNewResource(diff) && !diff.HasChange("account_id") {
+		return nil
+	}
+
+	aid := diff.Get("account_id").(string)
+	proj := diff.Get("project").(string)
+	if aid == "" || proj == "" {
+		return nil
+	}
+
+	email := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", aid, proj)
+	if err := diff.SetNew("email", email); err != nil {
+		return fmt.Errorf("error setting email: %s", err)
+	}
+	if err := diff.SetNew("member", "serviceAccount:"+email); err != nil {
+		return fmt.Errorf("error setting member: %s", err)
+	}
+
+	return nil
+}
+func resourceServiceAccountCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if ud := transport_tpg.GetUniverseDomainFromMeta(meta); ud != "googleapis.com" {
+		log.Printf("[WARN] The UniverseDomain is set to %q. Skipping resourceServiceAccountCustomDiff", ud)
+		return nil
+	}
+
+	// separate func to allow unit testing
+	return ResourceServiceAccountCustomDiffFunc(diff)
 }

@@ -1,9 +1,0 @@
-resource "google_healthcare_dataset" "dataset" {
-  location = "us-central1"
-  name     = "<%= ctx[:vars]['dataset_id'] %>"
-}
-
-resource "google_healthcare_consent_store" "<%= ctx[:primary_resource_id] %>" {
-  dataset = google_healthcare_dataset.dataset.id
-  name    = "<%= ctx[:vars]['consent_id'] %>"
-}

@@ -1,0 +1,45 @@
+resource "google_folder" "folder" {
+  provider = google-beta
+  display_name        = "{{index $.Vars "folder"}}"
+  parent              = "organizations/{{index $.TestEnvVars "org_id"}}"
+  deletion_protection = false
+}
+
+resource "google_compute_firewall_policy" "default" {
+  provider = google-beta
+  parent      = google_folder.folder.id
+  short_name  = "{{index $.Vars "fw_policy"}}"
+  description = "Firewall policy"
+}
+
+resource "google_compute_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  firewall_policy = google_compute_firewall_policy.default.name
+  description     = "Firewall policy rule with network scope"
+  priority        = 9000
+  action          = "allow"
+  direction       = "INGRESS"
+  disabled        = false
+
+  match {
+    src_ip_ranges     = ["11.100.0.1/32"]
+    src_network_scope = "VPC_NETWORKS"
+    src_networks      = [google_compute_network.network.id]
+
+    layer4_configs {
+      ip_protocol = "tcp"
+      ports       = [8080]
+    }
+
+    layer4_configs {
+      ip_protocol = "udp"
+      ports       = [22]
+    }
+  }
+}
+
+resource "google_compute_network" "network" {
+  provider = google-beta
+  name                    = "{{index $.Vars "network"}}"
+  auto_create_subnetworks = false
+}

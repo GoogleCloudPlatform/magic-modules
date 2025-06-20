@@ -4,7 +4,7 @@ description: |-
  Allows management of a customized Cloud IAM project role.
 ---
 
-# google\_project\_iam\_custom\_role
+# google_project_iam_custom_role
 
 Allows management of a customized Cloud IAM project role. For more information see
 [the official documentation](https://cloud.google.com/iam/docs/understanding-custom-roles)
@@ -41,7 +41,7 @@ The following arguments are supported:
 
 * `permissions` (Required) The names of the permissions this role grants when bound in an IAM policy. At least one permission must be specified.
 
-* `project` - (Optional) The project that the service account will be created in.
+* `project` - (Optional) The project that the custom role will be created in.
     Defaults to the provider project configuration.
 
 * `stage` - (Optional) The current launch stage of the role.
@@ -63,8 +63,22 @@ exported:
 
 ## Import
 
-
 Custom Roles can be imported using any of these accepted formats:
+
+* `projects/{{project}}/roles/{{role_id}}`
+* `{{project}}/{{role_id}}`
+* `{{role_id}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Custom Roles using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/roles/{{role_id}}"
+  to = google_project_iam_custom_role.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Custom Roles can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_project_iam_custom_role.default projects/{{project}}/roles/{{role_id}}

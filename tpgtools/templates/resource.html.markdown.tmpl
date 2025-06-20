@@ -70,7 +70,7 @@ The following arguments are supported:
 {{- end }}
 
 {{ range $v := $.Objects }}
-  {{- if and ($v.Required) ($v.ShouldGenerateNestedSchema) }}
+  {{- if and ($v.Required) ($v.IsTopLevel) ($v.ShouldGenerateNestedSchema) }}
 The `{{$v.Name}}` block supports:
     {{ range $p := $v.Properties }}
 * `{{$p.Name}}` -
@@ -100,7 +100,7 @@ The `{{$v.Name}}` block supports:
 {{- end }}
 
 {{ range $v := $.Objects }}
-  {{- if and ($v.Optional) ($v.ShouldGenerateNestedSchema) }}
+  {{- if and (or ($v.Optional) (and ($v.Required) (not $v.IsTopLevel))) ($v.ShouldGenerateNestedSchema) }}
 The `{{$v.Name}}` block supports:
     {{ range $p := $v.Properties }}
 * `{{$p.Name}}` -
@@ -142,6 +142,29 @@ This resource provides the following
 ## Import
 {{/* TODO excluded imports */}}
 {{$.DCLTitle}} can be imported using any of these accepted formats:
+
+{{- $id := "" }}
+{{- range $format := $.ImportFormats }}
+{{- $id = $format }}
+* `{{$format}}`
+{{- end }}
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import {{$.DCLTitle}} using one of the formats above. For example:
+
+{{- range $format := $.ImportFormats }}
+{{/* Get the first import format for templating */}}
+{{- $id = $format }}
+{{- break }}
+{{- end }}
+
+```tf
+import {
+  id = "{{$id}}"
+  to = {{$.TerraformName}}.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), {{$.DCLTitle}} can be imported using one of the formats above. For example:
 
 ```
 {{- range $format := $.ImportFormats }}

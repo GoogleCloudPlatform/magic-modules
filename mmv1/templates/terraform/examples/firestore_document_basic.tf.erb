@@ -1,6 +1,0 @@
-resource "google_firestore_document" "<%= ctx[:primary_resource_id] %>" {
-  project     = "<%= ctx[:test_env_vars]['project_id'] %>"
-  collection  = "somenewcollection"
-  document_id = "<%= ctx[:vars]['document_id'] %>"
-  fields      = "{\"something\":{\"mapValue\":{\"fields\":{\"akey\":{\"stringValue\":\"avalue\"}}}}}"
-}

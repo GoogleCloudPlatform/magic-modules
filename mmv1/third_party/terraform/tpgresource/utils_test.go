@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -35,6 +34,153 @@ var fictionalSchema = map[string]*schema.Schema{
 		Type:     schema.TypeString,
 		Optional: true,
 	},
+}
+
+func TestSortByConfigOrder(t *testing.T) {
+	cases := map[string]struct {
+		configData, apiData []string
+		want                []string
+		wantError           bool
+	}{
+		"empty config data and api data": {
+			configData: []string{},
+			apiData:    []string{},
+			want:       []string{},
+		},
+		"config data with empty api data": {
+			configData: []string{"one", "two"},
+			apiData:    []string{},
+			want:       []string{},
+		},
+		"empty config data with api data": {
+			configData: []string{},
+			apiData:    []string{"one", "two", "three"},
+			want:       []string{"one", "three", "two"},
+		},
+		"config data and api data that do not overlap": {
+			configData: []string{"foo", "bar"},
+			apiData:    []string{"one", "two", "three"},
+			want:       []string{"one", "three", "two"},
+		},
+		"config order is preserved": {
+			configData: []string{"foo", "two", "bar", "baz"},
+			apiData:    []string{"one", "two", "three", "bar"},
+			want:       []string{"two", "bar", "one", "three"},
+		},
+		"config data and api data overlap completely": {
+			configData: []string{"foo", "bar", "baz", "one", "two", "three"},
+			apiData:    []string{"baz", "two", "one", "bar", "three", "foo"},
+			want:       []string{"foo", "bar", "baz", "one", "two", "three"},
+		},
+		"config data contains duplicates": {
+			configData: []string{"one", "one"},
+			apiData:    []string{},
+			wantError:  true,
+		},
+		"api data contains duplicates": {
+			configData: []string{},
+			apiData:    []string{"one", "one"},
+			wantError:  true,
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(fmt.Sprintf("strings/%s", tn), func(t *testing.T) {
+			t.Parallel()
+			sorted, err := tpgresource.SortStringsByConfigOrder(tc.configData, tc.apiData)
+			if err != nil {
+				if !tc.wantError {
+					t.Fatalf("Unexpected error: %s", err)
+				}
+			} else if tc.wantError {
+				t.Fatalf("Wanted error, got none")
+			}
+			if !tc.wantError && (len(sorted) > 0 || len(tc.want) > 0) && !reflect.DeepEqual(sorted, tc.want) {
+				t.Fatalf("sorted result is incorrect. want %v, got %v", tc.want, sorted)
+			}
+		})
+
+		t.Run(fmt.Sprintf("maps/%s", tn), func(t *testing.T) {
+			t.Parallel()
+			configData := []map[string]interface{}{}
+			for _, item := range tc.configData {
+				configData = append(configData, map[string]interface{}{
+					"value": item,
+				})
+			}
+			apiData := []map[string]interface{}{}
+			for _, item := range tc.apiData {
+				apiData = append(apiData, map[string]interface{}{
+					"value": item,
+				})
+			}
+			want := []map[string]interface{}{}
+			for _, item := range tc.want {
+				want = append(want, map[string]interface{}{
+					"value": item,
+				})
+			}
+			sorted, err := tpgresource.SortMapsByConfigOrder(configData, apiData, "value")
+			if err != nil {
+				if !tc.wantError {
+					t.Fatalf("Unexpected error: %s", err)
+				}
+			} else if tc.wantError {
+				t.Fatalf("Wanted error, got none")
+			}
+			if !tc.wantError && (len(sorted) > 0 || len(want) > 0) && !reflect.DeepEqual(sorted, want) {
+				t.Fatalf("sorted result is incorrect. want %v, got %v", want, sorted)
+			}
+		})
+	}
+}
+
+func TestSortMapsByConfigOrder(t *testing.T) {
+	// most cases are covered by TestSortByConfigOrder; this covers map-specific cases.
+	cases := map[string]struct {
+		configData, apiData []map[string]interface{}
+		idKey               string
+		wantError           bool
+		want                []map[string]interface{}
+	}{
+		"config data is malformed": {
+			configData: []map[string]interface{}{{
+				"foo": "one",
+			},
+			},
+			apiData:   []map[string]interface{}{},
+			idKey:     "bar",
+			wantError: true,
+		},
+		"api data is malformed": {
+			configData: []map[string]interface{}{},
+			apiData: []map[string]interface{}{{
+				"foo": "one",
+			},
+			},
+			idKey:     "bar",
+			wantError: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+			sorted, err := tpgresource.SortMapsByConfigOrder(tc.configData, tc.apiData, tc.idKey)
+			if err != nil {
+				if !tc.wantError {
+					t.Fatalf("Unexpected error: %s", err)
+				}
+			} else if tc.wantError {
+				t.Fatalf("Wanted error, got none")
+			}
+			if !tc.wantError && (len(sorted) > 0 || len(tc.want) > 0) && !reflect.DeepEqual(sorted, tc.want) {
+				t.Fatalf("sorted result is incorrect. want %v, got %v", tc.want, sorted)
+			}
+		})
+	}
 }
 
 func TestConvertStringArr(t *testing.T) {
@@ -76,93 +222,6 @@ func TestConvertStringMap(t *testing.T) {
 
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("%s did not match expected value: %s", actual, expected)
-	}
-}
-
-func TestIpCidrRangeDiffSuppress(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		ExpectDiffSuppress bool
-	}{
-		"single ip address": {
-			Old:                "10.2.3.4",
-			New:                "10.2.3.5",
-			ExpectDiffSuppress: false,
-		},
-		"cidr format string": {
-			Old:                "10.1.2.0/24",
-			New:                "10.1.3.0/24",
-			ExpectDiffSuppress: false,
-		},
-		"netmask same mask": {
-			Old:                "10.1.2.0/24",
-			New:                "/24",
-			ExpectDiffSuppress: true,
-		},
-		"netmask different mask": {
-			Old:                "10.1.2.0/24",
-			New:                "/32",
-			ExpectDiffSuppress: false,
-		},
-		"add netmask": {
-			Old:                "",
-			New:                "/24",
-			ExpectDiffSuppress: false,
-		},
-		"remove netmask": {
-			Old:                "/24",
-			New:                "",
-			ExpectDiffSuppress: false,
-		},
-	}
-
-	for tn, tc := range cases {
-		if tpgresource.IpCidrRangeDiffSuppress("ip_cidr_range", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
-	}
-}
-
-func TestRfc3339TimeDiffSuppress(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		ExpectDiffSuppress bool
-	}{
-		"same time, format changed to have leading zero": {
-			Old:                "2:00",
-			New:                "02:00",
-			ExpectDiffSuppress: true,
-		},
-		"same time, format changed not to have leading zero": {
-			Old:                "02:00",
-			New:                "2:00",
-			ExpectDiffSuppress: true,
-		},
-		"different time, both without leading zero": {
-			Old:                "2:00",
-			New:                "3:00",
-			ExpectDiffSuppress: false,
-		},
-		"different time, old with leading zero, new without": {
-			Old:                "02:00",
-			New:                "3:00",
-			ExpectDiffSuppress: false,
-		},
-		"different time, new with leading zero, oldwithout": {
-			Old:                "2:00",
-			New:                "03:00",
-			ExpectDiffSuppress: false,
-		},
-		"different time, both with leading zero": {
-			Old:                "02:00",
-			New:                "03:00",
-			ExpectDiffSuppress: false,
-		},
-	}
-	for tn, tc := range cases {
-		if tpgresource.Rfc3339TimeDiffSuppress("time", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Errorf("bad: %s, '%s' => '%s' expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
 	}
 }
 
@@ -239,11 +298,11 @@ func TestGetLocation(t *testing.T) {
 			},
 			ExpectedLocation: "resource-location",
 		},
-		"does not shorten the location value when it is set as a self link in the resource config": {
+		"shortens the location value when it is set as a self link in the resource config": {
 			ResourceConfig: map[string]interface{}{
 				"location": "https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location",
 			},
-			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/locations/resource-location", // No shortening takes place
+			ExpectedLocation: "resource-location",
 		},
 		"returns the region value set in the resource config when location is not in the schema": {
 			ResourceConfig: map[string]interface{}{
@@ -252,11 +311,11 @@ func TestGetLocation(t *testing.T) {
 			},
 			ExpectedLocation: "resource-region",
 		},
-		"does not shorten the region value when it is set as a self link in the resource config": {
+		"shortens the region value when it is set as a self link in the resource config": {
 			ResourceConfig: map[string]interface{}{
 				"region": "https://www.googleapis.com/compute/v1/projects/my-project/region/resource-region",
 			},
-			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/region/resource-region", // No shortening takes place
+			ExpectedLocation: "resource-region",
 		},
 		"returns the zone value set in the resource config when neither location nor region in the schema": {
 			ResourceConfig: map[string]interface{}{
@@ -278,13 +337,23 @@ func TestGetLocation(t *testing.T) {
 			},
 			ExpectedLocation: "provider-zone-a",
 		},
-		"does not shorten the zone value when it is set as a self link in the provider config": {
-			// This behaviour makes sense because provider config values don't originate from APIs
-			// Users should always configure the provider with the short names of regions/zones
+		"returns the region value from the provider config when none of location/region/zone are set in the resource config": {
+			ProviderConfig: map[string]string{
+				"region": "provider-region",
+			},
+			ExpectedLocation: "provider-region",
+		},
+		"shortens the region value when it is set as a self link in the provider config": {
+			ProviderConfig: map[string]string{
+				"region": "https://www.googleapis.com/compute/v1/projects/my-project/region/provider-region",
+			},
+			ExpectedLocation: "provider-region",
+		},
+		"shortens the zone value when it is set as a self link in the provider config": {
 			ProviderConfig: map[string]string{
 				"zone": "https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone-a",
 			},
-			ExpectedLocation: "https://www.googleapis.com/compute/v1/projects/my-project/zones/provider-zone-a",
+			ExpectedLocation: "provider-zone-a",
 		},
 		// Handling of empty strings
 		"returns the region value set in the resource config when location is an empty string": {
@@ -313,13 +382,18 @@ func TestGetLocation(t *testing.T) {
 			},
 			ExpectedLocation: "provider-zone-a",
 		},
-		// Error states
-		"returns an error when only a region value is set in the the provider config and none of location/region/zone are set in the resource config": {
+		"returns the region value when only a region value is set in the the provider config and none of location/region/zone are set in the resource config": {
+			ResourceConfig: map[string]interface{}{
+				"location": "",
+				"region":   "",
+				"zone":     "",
+			},
 			ProviderConfig: map[string]string{
 				"region": "provider-region",
 			},
-			ExpectError: true,
+			ExpectedLocation: "provider-region",
 		},
+		// Error states
 		"returns an error when none of location/region/zone are set on the resource, and neither region or zone is set on the provider": {
 			ExpectError: true,
 		},
@@ -498,11 +572,11 @@ func TestGetRegion(t *testing.T) {
 			},
 			ExpectedRegion: "resource-zone", // is truncated
 		},
-		"does not shorten region values when derived from a zone self link set in the resource config": {
+		"shortens region values when derived from a zone self link set in the resource config": {
 			ResourceConfig: map[string]interface{}{
 				"zone": "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a",
 			},
-			ExpectedRegion: "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1", // Value is not shortenedfrom URI to name
+			ExpectedRegion: "us-central1",
 		},
 		"returns the value of the region field in provider config when region/zone is unset in resource config": {
 			ProviderConfig: map[string]string{
@@ -1090,46 +1164,5 @@ func TestReplaceVars(t *testing.T) {
 				t.Errorf("bad: %s; expected %q, got %q", tn, tc.Expected, v)
 			}
 		})
-	}
-}
-
-func TestCheckGCSName(t *testing.T) {
-	valid63 := acctest.RandString(t, 63)
-	cases := map[string]bool{
-		// Valid
-		"foobar":       true,
-		"foobar1":      true,
-		"12345":        true,
-		"foo_bar_baz":  true,
-		"foo-bar-baz":  true,
-		"foo-bar_baz1": true,
-		"foo--bar":     true,
-		"foo__bar":     true,
-		"foo-goog":     true,
-		"foo.goog":     true,
-		valid63:        true,
-		fmt.Sprintf("%s.%s.%s", valid63, valid63, valid63): true,
-
-		// Invalid
-		"goog-foobar":             false,
-		"foobar-google":           false,
-		"-foobar":                 false,
-		"foobar-":                 false,
-		"_foobar":                 false,
-		"foobar_":                 false,
-		"fo":                      false,
-		"foo$bar":                 false,
-		"foo..bar":                false,
-		acctest.RandString(t, 64): false,
-		fmt.Sprintf("%s.%s.%s.%s", valid63, valid63, valid63, valid63): false,
-	}
-
-	for bucketName, valid := range cases {
-		err := tpgresource.CheckGCSName(bucketName)
-		if valid && err != nil {
-			t.Errorf("The bucket name %s was expected to pass validation and did not pass.", bucketName)
-		} else if !valid && err == nil {
-			t.Errorf("The bucket name %s was NOT expected to pass validation and passed.", bucketName)
-		}
 	}
 }

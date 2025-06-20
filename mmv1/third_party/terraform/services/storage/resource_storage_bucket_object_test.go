@@ -10,8 +10,8 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"os"
 
@@ -45,7 +45,10 @@ func TestAccStorageObject_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
-				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_storage_bucket_object.object", "md5hexhash"),
+					testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
+				),
 			},
 		},
 	})
@@ -415,6 +418,184 @@ func TestAccStorageObject_holds(t *testing.T) {
 	})
 }
 
+func TestAccStorageObject_retention(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+	data := []byte(content)
+	h := md5.New()
+	if _, err := h.Write(data); err != nil {
+		t.Errorf("error calculating md5: %v", err)
+	}
+	dataMd5 := base64.StdEncoding.EncodeToString(h.Sum(nil))
+	testFile := getNewTmpTestFile(t, "tf-test")
+	if err := ioutil.WriteFile(testFile.Name(), data, 0644); err != nil {
+		t.Errorf("error writing file: %v", err)
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleStorageBucketsObjectRetention(bucketName, "2040-01-01T02:03:04.000Z"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
+				),
+			},
+			{
+				Config: testGoogleStorageBucketsObjectRetention(bucketName, "2040-01-02T02:03:04.000Z"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
+				),
+			},
+			{
+				Config: testGoogleStorageBucketsObjectRetentionDisabled(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
+				),
+			},
+		},
+	})
+}
+
+func TestResourceStorageBucketObjectUpdate_ContentChange(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+	initialContent := []byte("initial content")
+	updatedContent := []byte("updated content")
+	h := md5.New()
+	if _, err := h.Write(initialContent); err != nil {
+		t.Errorf("error calculating md5: %v", err)
+	}
+	dataMd5 := base64.StdEncoding.EncodeToString(h.Sum(nil))
+
+	h2 := md5.New()
+	if _, err := h2.Write(updatedContent); err != nil {
+		t.Errorf("error calculating md5: %v", err)
+	}
+	newDataMd5 := base64.StdEncoding.EncodeToString(h2.Sum(nil))
+	// Update the object content and verify
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleStorageBucketsObjectCustomContent(bucketName, string(initialContent)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket_object.object",
+						"content",
+						string(initialContent),
+					),
+				),
+			},
+			{
+				Config: testGoogleStorageBucketsObjectCustomContent(bucketName, string(updatedContent)),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageObject(t, bucketName, objectName, newDataMd5),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket_object.object",
+						"content",
+						string(updatedContent),
+					),
+				),
+			},
+		},
+	})
+}
+
+func TestAccStorageObject_sourceMd5Hash(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+
+	data := []byte("data data data")
+
+	writeMd5 := func(data []byte) string {
+		h := md5.New()
+		if _, err := h.Write(data); err != nil {
+			t.Errorf("error calculating md5: %v", err)
+		}
+		dataMd5 := base64.StdEncoding.EncodeToString(h.Sum(nil))
+		return dataMd5
+	}
+
+	dataMd5 := writeMd5(data)
+
+	updatedata := []byte("datum")
+	updatedDataMd5 := writeMd5(updatedata)
+
+	testFile := getNewTmpTestFile(t, "tf-test")
+	if err := ioutil.WriteFile(testFile.Name(), data, 0644); err != nil {
+		t.Errorf("error writing file: %v", err)
+	}
+
+	updateMd5 := []byte("sample")
+	newMd5 := writeMd5(updateMd5)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleStorageBucketsObjectBasic(bucketName, testFile.Name()),
+				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
+			},
+			{
+				PreConfig: func() {
+					if err := ioutil.WriteFile(testFile.Name(), updatedata, 0644); err != nil {
+						t.Errorf("error writing file: %v", err)
+					}
+				},
+				Config: testGoogleStorageBucketsObjectFileMd5(bucketName, testFile.Name(), updatedDataMd5),
+				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, updatedDataMd5),
+			},
+			{
+				Config: testGoogleStorageBucketsObjectFileMd5(bucketName, testFile.Name(), newMd5),
+				Check:  testAccCheckGoogleStorageObject(t, bucketName, objectName, updatedDataMd5),
+			},
+		},
+	})
+}
+
+func TestAccStorageObject_knownAfterApply(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+	destinationFilePath := getNewTmpTestFile(t, "tf-test-apply-")
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"local": resource.ExternalProvider{
+				VersionConstraint: "> 2.5.0",
+			},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleStorageBucketObject(bucketName, "first", destinationFilePath.Name()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageValidOutput(t),
+				),
+			},
+			{
+				Config: testGoogleStorageBucketObjectKnownAfterApply(bucketName, "second", destinationFilePath.Name()),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageValidOutput(t),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckGoogleStorageObject(t *testing.T, bucket, object, md5 string) resource.TestCheckFunc {
 	return testAccCheckGoogleStorageObjectWithEncryption(t, bucket, object, md5, "")
 }
@@ -493,6 +674,22 @@ func testAccStorageObjectDestroyProducer(t *testing.T) func(s *terraform.State) 
 
 		return nil
 	}
+}
+
+func testGoogleStorageBucketsObjectCustomContent(bucketName string, customContent string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name    = "%s"
+  bucket  = google_storage_bucket.bucket.name
+  content = "%s"
+}
+`, bucketName, objectName, customContent)
 }
 
 func testGoogleStorageBucketsObjectContent(bucketName string) string {
@@ -646,6 +843,44 @@ resource "google_storage_bucket_object" "object" {
 `, bucketName, objectName, content, customerEncryptionKey)
 }
 
+func testGoogleStorageBucketsObjectRetention(bucketName string, retainUntilTime string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name                    = "%s"
+  location                = "US"
+  force_destroy           = true
+  enable_object_retention = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name      = "%s"
+  bucket    = google_storage_bucket.bucket.name
+  content   = "%s"
+  retention {
+	mode              = "Unlocked"
+	retain_until_time = "%s"
+  }      
+}
+`, bucketName, objectName, content, retainUntilTime)
+}
+
+func testGoogleStorageBucketsObjectRetentionDisabled(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name                    = "%s"
+  location                = "US"
+  force_destroy           = true
+  enable_object_retention = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name      = "%s"
+  bucket    = google_storage_bucket.bucket.name
+  content   = "%s" 
+}
+`, bucketName, objectName, content)
+}
+
 func testGoogleStorageBucketsObjectHolds(bucketName string, eventBasedHold bool, temporaryHold bool) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
@@ -698,4 +933,113 @@ func getNewTmpTestFile(t *testing.T, prefix string) *os.File {
 		t.Fatalf("Cannot create temp file: %s", err)
 	}
 	return testFile
+}
+
+func testGoogleStorageBucketsObjectFileMd5(bucketName, sourceFilename, md5hash string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+}
+
+resource "google_storage_bucket_object" "bo_1861894" {
+  name           = "%s"
+  source_md5hash = "%s"
+  bucket         = google_storage_bucket.bucket.name
+  source         = "%s"
+}
+`, bucketName, objectName, md5hash, sourceFilename)
+}
+
+func testAccCheckGoogleStorageValidOutput(t *testing.T) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		var root = s.Modules[0]
+		var outputs, ok = root.Outputs["valid"]
+
+		if !ok {
+			return fmt.Errorf("Error: `valid` output missing")
+		}
+
+		if outputs == nil {
+			return fmt.Errorf("Terraform output `valid` does not exists")
+		}
+
+		if outputs.Value == false {
+			return fmt.Errorf("File content is not valid")
+		}
+		return nil
+	}
+}
+
+func testGoogleStorageBucketObject(bucketName, content, filename string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+}
+
+resource "google_storage_bucket_object" "changing" {
+  bucket  = google_storage_bucket.bucket.name
+  name    = "dynamic"
+  content = "%s"
+}
+
+resource "local_file" "test" {
+  content  = jsonencode(google_storage_bucket_object.changing.content)
+  filename = "%s"
+}
+
+resource "google_storage_bucket_object" "bo" {
+  source = local_file.test.filename
+  bucket = google_storage_bucket.bucket.name
+  name   = "test-file-bucket"
+}
+
+data "google_storage_bucket_object_content" "bo" {
+  bucket     = google_storage_bucket_object.bo.bucket
+  name       = google_storage_bucket_object.bo.name
+  depends_on = [google_storage_bucket_object.bo]
+}
+
+output "valid" {
+  value = nonsensitive(local_file.test.content) == data.google_storage_bucket_object_content.bo.content
+}
+`, bucketName, content, filename)
+}
+
+func testGoogleStorageBucketObjectKnownAfterApply(bucketName, content, filename string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "%s"
+  location = "US"
+}
+
+resource "google_storage_bucket_object" "changing" {
+  bucket  = google_storage_bucket.bucket.name
+  name    = "dynamic"
+  content = "%s"
+}
+
+resource "local_file" "test" {
+  content  = jsonencode(google_storage_bucket_object.changing.content)
+  filename = "%s"
+}
+
+resource "google_storage_bucket_object" "bo" {
+  source = local_file.test.filename
+  source_md5hash = local_file.test.content_md5
+  bucket = google_storage_bucket.bucket.name
+  name   = "test-file-bucket"
+}
+
+data "google_storage_bucket_object_content" "bo" {
+  bucket     = google_storage_bucket_object.bo.bucket
+  name       = google_storage_bucket_object.bo.name
+  depends_on = [google_storage_bucket_object.bo]
+}
+
+output "valid" {
+  value = nonsensitive(local_file.test.content) == data.google_storage_bucket_object_content.bo.content
+}
+`, bucketName, content, filename)
 }

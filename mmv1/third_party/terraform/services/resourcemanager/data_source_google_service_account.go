@@ -41,6 +41,10 @@ func DataSourceGoogleServiceAccount() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"disabled": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -59,7 +63,7 @@ func dataSourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}
 
 	sa, err := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(serviceAccountName).Do()
 	if err != nil {
-		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Service Account %q", serviceAccountName))
+		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Service Account %q", serviceAccountName), serviceAccountName)
 	}
 
 	d.SetId(sa.Name)
@@ -83,6 +87,9 @@ func dataSourceGoogleServiceAccountRead(d *schema.ResourceData, meta interface{}
 	}
 	if err := d.Set("member", "serviceAccount:"+sa.Email); err != nil {
 		return fmt.Errorf("Error setting member: %s", err)
+	}
+	if err := d.Set("disabled", sa.Disabled); err != nil {
+		return fmt.Errorf("Error setting disabled: %s", err)
 	}
 
 	return nil

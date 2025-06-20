@@ -14,8 +14,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/caiasset"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai"
 	"github.com/google/go-cmp/cmp"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"go.uber.org/zap/zaptest"
@@ -69,7 +69,16 @@ func terraformShow(t *testing.T, executable, dir, tfplan string) []byte {
 
 func terraformExec(t *testing.T, executable, dir string, args ...string) []byte {
 	cmd := exec.Command(executable, args...)
-	cmd.Env = []string{"HOME=" + filepath.Join(dir, "fakehome")}
+	cmd.Env = []string{
+		"HOME=" + filepath.Join(dir, "fakehome"),
+		"GOOGLE_PROJECT=" + data.Provider["project"],
+		"GOOGLE_FOLDER=" + data.FolderID,
+		"GOOGLE_ORG=" + data.OrgID,
+		"GOOGLE_OAUTH_ACCESS_TOKEN=fake-token", // GOOGLE_OAUTH_ACCESS_TOKEN is required so terraform plan does not require the google authentication cert
+	}
+	if os.Getenv("TF_CLI_CONFIG_FILE") != "" {
+		cmd.Env = append(cmd.Env, "TF_CLI_CONFIG_FILE="+os.Getenv("TF_CLI_CONFIG_FILE"))
+	}
 	cmd.Dir = dir
 	wantError := false
 	payload, _ := run(t, cmd, wantError)
@@ -179,31 +188,11 @@ func generateTFVconvertedAsset(t *testing.T, testDir, testSlug string) {
 	fmt.Println("created file : " + dstFile)
 }
 
-func getTestPrefix() string {
-	credentials, ok := data.Provider["credentials"]
-	if ok {
-		credentials = "credentials = \"" + credentials + "\""
-	}
-
-	return fmt.Sprintf(`terraform {
-		required_providers {
-			google = {
-				source  = "hashicorp/google"
-				version = "~> %s"
-			}
-		}
-	}
-
-	provider "google" {
-		%s
-	}
-
-`, data.Provider["version"], credentials)
-}
-
 // newTestConfig create a config using the http test server.
 func newTestConfig(server *httptest.Server) *transport_tpg.Config {
-	cfg := &transport_tpg.Config{}
+	cfg := &transport_tpg.Config{
+		Project: data.Provider["project"],
+	}
 	cfg.Client = server.Client()
 	configureTestBasePaths(cfg, server.URL)
 	return cfg

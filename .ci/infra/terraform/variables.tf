@@ -17,7 +17,3 @@ variable "master_billing_account_id" {
 variable "project_id" {
   description = "The new project id"
 }
-
-variable "firestore_project_id" {
-  description = "The new project id for the Firestore project"
-}

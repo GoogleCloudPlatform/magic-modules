@@ -17,7 +17,7 @@
 terraform {
   required_providers {
     google = {
-      source = "hashicorp/google"
+      source = "hashicorp/google-beta"
       version = "~> {{.Provider.version}}"
     }
   }
@@ -53,12 +53,23 @@ resource "google_access_context_manager_service_perimeter" "service-perimeter" {
           }
         }
       }
+
+      title = "ingress_policy_title"
     }
 
     egress_policies {
       egress_from {
+        sources {
+          access_level = "accessPolicies/987654/accessLevels/restrict_storage"
+        }
+        sources {
+          resource = "projects/4321"
+        }
+	      source_restriction = "SOURCE_RESTRICTION_ENABLED"
         identity_type = "ANY_USER_ACCOUNT"
       }
+
+      title = "egress_policy_title"
     }
   }
 }

@@ -1,7 +1,7 @@
 package beyondcorp_test
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"testing"
 
@@ -76,6 +76,9 @@ resource "google_beyondcorp_app_connection" "foo" {
 		port = 8080
 	}
 	connectors = [google_beyondcorp_app_connector.app_connector.id]
+	labels = {
+		my-label = "my-label-value"
+	}
 }
 
 data "google_beyondcorp_app_connection" "foo" {

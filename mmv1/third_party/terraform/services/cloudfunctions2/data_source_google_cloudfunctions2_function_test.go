@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -24,9 +24,11 @@ func TestAccDataSourceGoogleCloudFunctions2Function_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleCloudFunctions2FunctionConfig(functionName,
 					bucketName, zipFilePath),
+				// As the value of "labels" and "terraform_labels" in the state of the data source are all labels,
+				// but the "labels" field in resource are user defined labels, which is the reason for the mismatch.
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(funcDataNameHttp,
-						"google_cloudfunctions2_function.function_http_v2", map[string]struct{}{"build_config.0.source.0.storage_source.0.bucket": {}, "build_config.0.source.0.storage_source.0.object": {}}),
+						"google_cloudfunctions2_function.function_http_v2", map[string]struct{}{"build_config.0.source.0.storage_source.0.bucket": {}, "build_config.0.source.0.storage_source.0.object": {}, "labels.%": {}, "terraform_labels.%": {}}),
 				),
 			},
 		},
@@ -35,6 +37,12 @@ func TestAccDataSourceGoogleCloudFunctions2Function_basic(t *testing.T) {
 
 func testAccDataSourceGoogleCloudFunctions2FunctionConfig(functionName, bucketName, zipFilePath string) string {
 	return fmt.Sprintf(`
+provider "google" {
+  default_labels = {
+    default_key1 = "default_value1"
+  }
+}
+
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
@@ -50,9 +58,11 @@ resource "google_cloudfunctions2_function" "function_http_v2" {
   name = "%s"
   location = "us-central1"
   description = "a new function"
-
+  labels = {
+    env = "test"
+  }
   build_config {
-    runtime = "nodejs12"
+    runtime = "nodejs18"
     entry_point = "helloHttp"
     source {
       storage_source {

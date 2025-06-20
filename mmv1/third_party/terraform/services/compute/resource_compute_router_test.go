@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -72,6 +72,29 @@ func TestAccComputeRouter_full(t *testing.T) {
 				ResourceName:      "google_compute_router.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRouter_advertisedIpRangesOrder(t *testing.T) {
+	t.Parallel()
+
+	testId := acctest.RandString(t, 10)
+	routerName := fmt.Sprintf("tf-test-router-%s", testId)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRouterAdvertisedIpRangesOrder(routerName),
+			},
+			{
+				ResourceName:            "google_compute_router.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"bgp.0.advertised_ip_ranges.0.range", "bgp.0.advertised_ip_ranges.1.range"},
 			},
 		},
 	})
@@ -145,6 +168,39 @@ func TestAccComputeRouter_updateAddRemoveBGP(t *testing.T) {
 			},
 			{
 				Config: testAccComputeRouterBasic(routerName, region),
+			},
+			{
+				ResourceName:      "google_compute_router.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeRouter_addAndUpdateIdentifierRangeBgp(t *testing.T) {
+	t.Parallel()
+
+	testId := acctest.RandString(t, 10)
+	routerName := fmt.Sprintf("tf-test-router-%s", testId)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRouter_addIdentifierRangeBgp(routerName),
+			},
+			{
+				ResourceName:      "google_compute_router.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRouter_updateIdentifierRangeBgp(routerName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_router.foobar", "bgp.0.identifier_range", "169.254.8.8/30"),
+				),
 			},
 			{
 				ResourceName:      "google_compute_router.foobar",
@@ -230,6 +286,32 @@ resource "google_compute_router" "foobar" {
 `, routerName, routerName)
 }
 
+func testAccComputeRouterAdvertisedIpRangesOrder(routerName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%s-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "%s"
+  network = google_compute_network.foobar.name
+  bgp {
+    asn               = 64514
+    advertise_mode    = "CUSTOM"
+    advertised_groups = ["ALL_SUBNETS"]
+	advertised_ip_ranges {
+      range = "6.7.0.0/16"
+    }
+    advertised_ip_ranges {
+      range = "1.2.3.4"
+    }
+    keepalive_interval = 25
+  }
+}
+`, routerName, routerName)
+}
+
 func testAccComputeRouter_noBGP(routerName, resourceRegion string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
@@ -250,4 +332,58 @@ resource "google_compute_router" "foobar" {
   network = google_compute_network.foobar.name
 }
 `, routerName, routerName, resourceRegion, routerName)
+}
+
+func testAccComputeRouter_addIdentifierRangeBgp(routerName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%s-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "%s"
+  network = google_compute_network.foobar.name
+  bgp {
+    asn               = 64514
+    advertise_mode    = "CUSTOM"
+    advertised_groups = ["ALL_SUBNETS"]
+    advertised_ip_ranges {
+      range = "1.2.3.4"
+    }
+    advertised_ip_ranges {
+      range = "6.7.0.0/16"
+    }
+	identifier_range = "169.254.8.8/29"
+    keepalive_interval = 25
+  }
+}
+`, routerName, routerName)
+}
+
+func testAccComputeRouter_updateIdentifierRangeBgp(routerName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%s-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_router" "foobar" {
+  name    = "%s"
+  network = google_compute_network.foobar.name
+  bgp {
+    asn               = 64514
+    advertise_mode    = "CUSTOM"
+    advertised_groups = ["ALL_SUBNETS"]
+    advertised_ip_ranges {
+      range = "1.2.3.4"
+    }
+    advertised_ip_ranges {
+      range = "6.7.0.0/16"
+    }
+	identifier_range = "169.254.8.8/30"
+    keepalive_interval = 25
+  }
+}
+`, routerName, routerName)
 }

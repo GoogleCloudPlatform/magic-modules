@@ -4,112 +4,6 @@ package tpgresource
 
 import "testing"
 
-func TestOptionalPrefixSuppress(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		Prefix             string
-		ExpectDiffSuppress bool
-	}{
-		"with same prefix": {
-			Old:                "my-folder",
-			New:                "folders/my-folder",
-			Prefix:             "folders/",
-			ExpectDiffSuppress: true,
-		},
-		"with different prefix": {
-			Old:                "folders/my-folder",
-			New:                "organizations/my-folder",
-			Prefix:             "folders/",
-			ExpectDiffSuppress: false,
-		},
-		"same without prefix": {
-			Old:                "my-folder",
-			New:                "my-folder",
-			Prefix:             "folders/",
-			ExpectDiffSuppress: false,
-		},
-		"different without prefix": {
-			Old:                "my-folder",
-			New:                "my-new-folder",
-			Prefix:             "folders/",
-			ExpectDiffSuppress: false,
-		},
-	}
-
-	for tn, tc := range cases {
-		if OptionalPrefixSuppress(tc.Prefix)("folder", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
-	}
-}
-
-func TestIgnoreMissingKeyInMap(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		Key                string
-		ExpectDiffSuppress bool
-	}{
-		"missing key in map": {
-			Old:                "",
-			New:                "v1",
-			Key:                "x-goog-version",
-			ExpectDiffSuppress: true,
-		},
-		"different values": {
-			Old:                "v1",
-			New:                "v2",
-			Key:                "x-goog-version",
-			ExpectDiffSuppress: false,
-		},
-		"same values": {
-			Old:                "v1",
-			New:                "v1",
-			Key:                "x-goog-version",
-			ExpectDiffSuppress: false,
-		},
-	}
-
-	for tn, tc := range cases {
-		if IgnoreMissingKeyInMap(tc.Key)("push_config.0.attributes."+tc.Key, tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
-	}
-}
-
-func TestOptionalSurroundingSpacesSuppress(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		ExpectDiffSuppress bool
-	}{
-		"surrounding spaces": {
-			Old:                "value",
-			New:                " value ",
-			ExpectDiffSuppress: true,
-		},
-		"no surrounding spaces": {
-			Old:                "value",
-			New:                "value",
-			ExpectDiffSuppress: true,
-		},
-		"one space each": {
-			Old:                " value",
-			New:                "value ",
-			ExpectDiffSuppress: true,
-		},
-		"different values": {
-			Old:                " different",
-			New:                "values ",
-			ExpectDiffSuppress: false,
-		},
-	}
-
-	for tn, tc := range cases {
-		if OptionalSurroundingSpacesSuppress("filter", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
-	}
-}
-
 func TestCaseDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
 		Old, New           string
@@ -134,118 +28,6 @@ func TestCaseDiffSuppress(t *testing.T) {
 
 	for tn, tc := range cases {
 		if CaseDiffSuppress("key", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
-	}
-}
-
-func TestPortRangeDiffSuppress(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		ExpectDiffSuppress bool
-	}{
-		"different single values": {
-			Old:                "80-80",
-			New:                "443",
-			ExpectDiffSuppress: false,
-		},
-		"different ranges": {
-			Old:                "80-80",
-			New:                "443-444",
-			ExpectDiffSuppress: false,
-		},
-		"same single values": {
-			Old:                "80-80",
-			New:                "80",
-			ExpectDiffSuppress: true,
-		},
-		"same ranges": {
-			Old:                "80-80",
-			New:                "80-80",
-			ExpectDiffSuppress: false,
-		},
-	}
-
-	for tn, tc := range cases {
-		if PortRangeDiffSuppress("ports", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
-	}
-}
-
-func TestLocationDiffSuppress(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		ExpectDiffSuppress bool
-	}{
-		"locations to zones": {
-			Old:                "projects/x/locations/y/resource/z",
-			New:                "projects/x/zones/y/resource/z",
-			ExpectDiffSuppress: true,
-		},
-		"regions to locations": {
-			Old:                "projects/x/regions/y/resource/z",
-			New:                "projects/x/locations/y/resource/z",
-			ExpectDiffSuppress: true,
-		},
-		"locations to locations": {
-			Old:                "projects/x/locations/y/resource/z",
-			New:                "projects/x/locations/y/resource/z",
-			ExpectDiffSuppress: false,
-		},
-		"zones to regions": {
-			Old:                "projects/x/zones/y/resource/z",
-			New:                "projects/x/regions/y/resource/z",
-			ExpectDiffSuppress: false,
-		},
-		"different locations": {
-			Old:                "projects/x/locations/a/resource/z",
-			New:                "projects/x/locations/b/resource/z",
-			ExpectDiffSuppress: false,
-		},
-	}
-
-	for tn, tc := range cases {
-		if LocationDiffSuppress("policy_uri", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
-			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
-		}
-	}
-}
-
-func TestAbsoluteDomainSuppress(t *testing.T) {
-	cases := map[string]struct {
-		Old, New           string
-		ExpectDiffSuppress bool
-	}{
-		"new trailing dot": {
-			Old:                "sslcert.tf-test.club",
-			New:                "sslcert.tf-test.club.",
-			ExpectDiffSuppress: true,
-		},
-		"old trailing dot": {
-			Old:                "sslcert.tf-test.club.",
-			New:                "sslcert.tf-test.club",
-			ExpectDiffSuppress: true,
-		},
-		"same trailing dot": {
-			Old:                "sslcert.tf-test.club.",
-			New:                "sslcert.tf-test.club.",
-			ExpectDiffSuppress: false,
-		},
-		"different trailing dot": {
-			Old:                "sslcert.tf-test.club.",
-			New:                "sslcert.tf-test.clubs.",
-			ExpectDiffSuppress: false,
-		},
-		"different no trailing dot": {
-			Old:                "sslcert.tf-test.club",
-			New:                "sslcert.tf-test.clubs",
-			ExpectDiffSuppress: false,
-		},
-	}
-
-	for tn, tc := range cases {
-		if AbsoluteDomainSuppress("managed.0.domains.", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
@@ -285,45 +67,53 @@ func TestDurationDiffSuppress(t *testing.T) {
 	}
 }
 
-func TestLastSlashDiffSuppress(t *testing.T) {
+func TestProjectNumberDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
 		Old, New           string
 		ExpectDiffSuppress bool
 	}{
-		"slash to no slash": {
-			Old:                "https://hello-rehvs75zla-uc.a.run.app/",
-			New:                "https://hello-rehvs75zla-uc.a.run.app",
+		"different project identifiers": {
+			Old:                "projects/1234/locations/abc/serviceAttachments/xyz",
+			New:                "projects/ten-tp/locations/abc/serviceAttachments/xyz",
 			ExpectDiffSuppress: true,
 		},
-		"no slash to slash": {
-			Old:                "https://hello-rehvs75zla-uc.a.run.app",
-			New:                "https://hello-rehvs75zla-uc.a.run.app/",
-			ExpectDiffSuppress: true,
-		},
-		"slash to slash": {
-			Old:                "https://hello-rehvs75zla-uc.a.run.app/",
-			New:                "https://hello-rehvs75zla-uc.a.run.app/",
-			ExpectDiffSuppress: true,
-		},
-		"no slash to no slash": {
-			Old:                "https://hello-rehvs75zla-uc.a.run.app",
-			New:                "https://hello-rehvs75zla-uc.a.run.app",
-			ExpectDiffSuppress: true,
-		},
-		"different domains": {
-			Old:                "https://x.a.run.app/",
-			New:                "https://y.a.run.app",
+		"different resources": {
+			Old:                "projects/1234/locations/abc/serviceAttachments/jkl",
+			New:                "projects/ten-tp/locations/abc/serviceAttachments/xyz",
 			ExpectDiffSuppress: false,
 		},
 	}
 
 	for tn, tc := range cases {
-		if LastSlashDiffSuppress("uri", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+		if ProjectNumberDiffSuppress("diffSuppress", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
 }
 
+func TestProjectIDDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"different project identifiers": {
+			Old:                "projects/ten-tp/locations/abc/serviceAttachments/xyz",
+			New:                "projects/1234/locations/abc/serviceAttachments/xyz",
+			ExpectDiffSuppress: true,
+		},
+		"different resources": {
+			Old:                "projects/ten-tp/locations/abc/serviceAttachments/xyz",
+			New:                "projects/1234/locations/abc/serviceAttachments/jkl",
+			ExpectDiffSuppress: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if ProjectIDDiffSuppress("diffSuppress", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
 func TestEmptyOrUnsetBlockDiffSuppress(t *testing.T) {
 	cases := map[string]struct {
 		Key, Old, New      string
@@ -420,6 +210,45 @@ func TestEmptyOrUnsetBlockDiffSuppress(t *testing.T) {
 		}
 		if EmptyOrUnsetBlockDiffSuppressLogic(tc.Key, tc.New, tc.Old, tc.NewVal, tc.OldVal) != tc.ExpectDiffSuppress {
 			t.Fatalf("bad: %s (reverse check), '%s' => '%s' expect %t", tn, tc.New, tc.Old, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
+func TestBase64DiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"identical strings": {
+			Old:                "aGVsbG8=",
+			New:                "aGVsbG8=",
+			ExpectDiffSuppress: true,
+		},
+		"standard vs url safe": {
+			Old:                "hello+world/123==",
+			New:                "hello-world_123",
+			ExpectDiffSuppress: true,
+		},
+		"with line endings": {
+			Old:                "aGVs\nbG8=\r\n",
+			New:                "aGVsbG8=",
+			ExpectDiffSuppress: true,
+		},
+		"different content": {
+			Old:                "aGVsbG8=",
+			New:                "d29ybGQ=",
+			ExpectDiffSuppress: false,
+		},
+		"empty strings": {
+			Old:                "",
+			New:                "",
+			ExpectDiffSuppress: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		if Base64DiffSuppress("key", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Fatalf("bad: %s, '%s' => '%s' expect %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
 		}
 	}
 }

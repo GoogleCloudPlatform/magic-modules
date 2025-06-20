@@ -3,6 +3,7 @@ package cloudfunctions
 import (
 	"regexp"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -135,11 +136,17 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Minute),
-			Read:   schema.DefaultTimeout(5 * time.Minute),
-			Update: schema.DefaultTimeout(5 * time.Minute),
-			Delete: schema.DefaultTimeout(5 * time.Minute),
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Read:   schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
+
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+			tpgresource.DefaultProviderRegion,
+			tpgresource.SetLabelsDiff,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -194,7 +201,7 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: `Docker Registry to use for storing the function's Docker images. Allowed values are CONTAINER_REGISTRY (default) and ARTIFACT_REGISTRY.`,
+				Description: `Docker Registry to use for storing the function's Docker images. Allowed values are ARTIFACT_REGISTRY (default) and CONTAINER_REGISTRY.`,
 			},
 
 			"docker_repository": {
@@ -257,13 +264,30 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 				Type:         schema.TypeMap,
 				ValidateFunc: labelKeyValidator,
 				Optional:     true,
-				Description:  `A set of key/value label pairs to assign to the function. Label keys must follow the requirements at https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements.`,
+				Description: `A set of key/value label pairs to assign to the function. Label keys must follow the requirements at https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements.
+
+				**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
+			},
+
+			"terraform_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `The combination of labels configured directly on the resource and default labels configured on the provider.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+
+			"effective_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 
 			"runtime": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: `The runtime in which the function is going to run. Eg. "nodejs12", "nodejs14", "python37", "go111".`,
+				Description: `The runtime in which the function is going to run. Eg. "nodejs20", "python37", "go111".`,
 			},
 
 			"service_account_email": {
@@ -272,6 +296,13 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 				Computed:    true,
 				ForceNew:    true,
 				Description: ` If provided, the self-provided service account to run the function with.`,
+			},
+
+			"build_service_account": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: `The fully-qualified name of the service account to be used for the build step of deploying this function`,
 			},
 
 			"vpc_connector": {
@@ -466,6 +497,11 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 				Computed:    true,
 				Description: `Describes the current stage of a deployment.`,
 			},
+			"version_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `The version identifier of the Cloud Function. Each deployment attempt results in a new version of a function being created.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -558,8 +594,8 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 		function.IngressSettings = v.(string)
 	}
 
-	if _, ok := d.GetOk("labels"); ok {
-		function.Labels = tpgresource.ExpandLabels(d)
+	if _, ok := d.GetOk("effective_labels"); ok {
+		function.Labels = tpgresource.ExpandEffectiveLabels(d)
 	}
 
 	if _, ok := d.GetOk("environment_variables"); ok {
@@ -596,6 +632,10 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 
 	if v, ok := d.GetOk("min_instances"); ok {
 		function.MinInstances = int64(v.(int))
+	}
+
+	if v, ok := d.GetOk("build_service_account"); ok {
+		function.BuildServiceAccount = v.(string)
 	}
 
 	log.Printf("[DEBUG] Creating cloud function: %s", function.Name)
@@ -670,14 +710,23 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 	if err := d.Set("ingress_settings", function.IngressSettings); err != nil {
 		return fmt.Errorf("Error setting ingress_settings: %s", err)
 	}
-	if err := d.Set("labels", function.Labels); err != nil {
+	if err := tpgresource.SetLabels(function.Labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := tpgresource.SetLabels(function.Labels, d, "terraform_labels"); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
+	}
+	if err := d.Set("effective_labels", function.Labels); err != nil {
+		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
 	if err := d.Set("runtime", function.Runtime); err != nil {
 		return fmt.Errorf("Error setting runtime: %s", err)
 	}
 	if err := d.Set("service_account_email", function.ServiceAccountEmail); err != nil {
 		return fmt.Errorf("Error setting service_account_email: %s", err)
+	}
+	if err := d.Set("build_service_account", function.BuildServiceAccount); err != nil {
+		return fmt.Errorf("Error setting build_service_account: %s", err)
 	}
 	if err := d.Set("environment_variables", function.EnvironmentVariables); err != nil {
 		return fmt.Errorf("Error setting environment_variables: %s", err)
@@ -755,6 +804,9 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 	}
 	if err := d.Set("project", cloudFuncId.Project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
+	}
+	if err := d.Set("version_id", strconv.FormatInt(function.VersionId, 10)); err != nil {
+		return fmt.Errorf("Error setting version_id: %s", err)
 	}
 
 	return nil
@@ -839,8 +891,8 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 		updateMaskArr = append(updateMaskArr, "ingressSettings")
 	}
 
-	if d.HasChange("labels") {
-		function.Labels = tpgresource.ExpandLabels(d)
+	if d.HasChange("effective_labels") {
+		function.Labels = tpgresource.ExpandEffectiveLabels(d)
 		updateMaskArr = append(updateMaskArr, "labels")
 	}
 
@@ -859,7 +911,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 		updateMaskArr = append(updateMaskArr, "buildEnvironmentVariables")
 	}
 
-	if d.HasChange("vpc_connector") {
+	if d.HasChange("vpc_connector") || d.HasChange("vpc_connector_egress_settings") {
 		function.VpcConnector = d.Get("vpc_connector").(string)
 		updateMaskArr = append(updateMaskArr, "vpcConnector")
 	}
@@ -905,6 +957,11 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	if d.HasChange("min_instances") {
 		function.MinInstances = int64(d.Get("min_instances").(int))
 		updateMaskArr = append(updateMaskArr, "minInstances")
+	}
+
+	if d.HasChange("build_service_account") {
+		function.BuildServiceAccount = d.Get("build_service_account").(string)
+		updateMaskArr = append(updateMaskArr, "buildServiceAccount")
 	}
 
 	if len(updateMaskArr) > 0 {

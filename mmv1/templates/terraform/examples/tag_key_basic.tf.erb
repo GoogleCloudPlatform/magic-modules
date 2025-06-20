@@ -1,5 +1,0 @@
-resource "google_tags_tag_key" "<%= ctx[:primary_resource_id] %>" {
-  parent = "organizations/<%= ctx[:test_env_vars]['org_id'] %>"
-  short_name = "<%= ctx[:vars]['short_name'] %>"
-  description = "For <%= ctx[:vars]['short_name'] %> resources."
-}

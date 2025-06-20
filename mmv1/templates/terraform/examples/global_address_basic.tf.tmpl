@@ -1,0 +1,3 @@
+resource "google_compute_global_address" "default" {
+  name = "{{index $.Vars "global_address_name"}}"
+}

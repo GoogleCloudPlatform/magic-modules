@@ -1,0 +1,31 @@
+resource "google_compute_network" "producer_network" {
+  name                    = "{{index $.Vars "producer_network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_network" "consumer_network" {
+  name                    = "{{index $.Vars "consumer_network_name"}}"
+  auto_create_subnetworks = false
+}
+
+resource "google_network_security_mirroring_deployment_group" "deployment_group" {
+  mirroring_deployment_group_id = "{{index $.Vars "deployment_group_id"}}"
+  location                      = "global"
+  network                       = google_compute_network.producer_network.id
+}
+
+resource "google_network_security_mirroring_endpoint_group" "endpoint_group" {
+  mirroring_endpoint_group_id   = "{{index $.Vars "endpoint_group_id"}}"
+  location                      = "global"
+  mirroring_deployment_group    = google_network_security_mirroring_deployment_group.deployment_group.id
+}
+
+resource "google_network_security_mirroring_endpoint_group_association" "{{$.PrimaryResourceId}}" {
+  mirroring_endpoint_group_association_id = "{{index $.Vars "endpoint_group_association_id"}}"
+  location                                = "global"
+  network                                 = google_compute_network.consumer_network.id
+  mirroring_endpoint_group                = google_network_security_mirroring_endpoint_group.endpoint_group.id
+  labels = {
+    foo = "bar"
+  }
+}

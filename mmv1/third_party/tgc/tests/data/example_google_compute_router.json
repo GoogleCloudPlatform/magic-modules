@@ -1,0 +1,59 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/networks/my-network",
+        "asset_type": "compute.googleapis.com/Network",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "Network",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "autoCreateSubnetworks": false,
+                "name": "my-network",
+                "networkFirewallPolicyEnforcementOrder": "AFTER_CLASSIC_FIREWALL"
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    },
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-east1/routers/my-router",
+        "asset_type": "compute.googleapis.com/Router",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "Router",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "bgp": {
+                    "advertiseMode": "CUSTOM",
+                    "advertisedGroups": [
+                        "ALL_SUBNETS"
+                    ],
+                    "advertisedIpRanges": [
+                        {
+                            "description": "",
+                            "range": "1.2.3.4"
+                        },
+                        {
+                            "description": "",
+                            "range": "6.7.0.0/16"
+                        }
+                    ],
+                    "asn": 64514,
+                    "keepaliveInterval": 20
+                },
+                "description": "",
+                "name": "my-router",
+                "network": "projects/{{.Provider.project}}/global/networks/my-network",
+                "region": "projects/{{.Provider.project}}/global/regions/us-east1"
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]

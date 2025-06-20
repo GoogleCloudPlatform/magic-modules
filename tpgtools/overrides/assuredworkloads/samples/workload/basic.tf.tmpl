@@ -8,9 +8,24 @@ resource "google_assured_workloads_workload" "primary" {
   provisioned_resources_parent = google_folder.folder1.name
   organization = "{{org_id}}"
   location = "us-central1"
+  workload_options {
+    kaj_enrollment_type = "KEY_ACCESS_TRANSPARENCY_OFF"
+  }
+  resource_settings {
+    resource_type = "CONSUMER_FOLDER"
+    display_name = "folder-display-name"
+  }
+  violation_notifications_enabled = true
+  depends_on = [time_sleep.wait_120_seconds]
+}
+
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_folder.folder1]
 }
 
 resource "google_folder" "folder1" {
   display_name = "{{name}}"
   parent       = "organizations/{{org_id}}"
+  deletion_protection = false
 }

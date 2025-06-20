@@ -1,0 +1,35 @@
+
+package sweeper_test
+
+import (
+	"testing"
+
+{{- range $product := $.Products }}
+	_ "github.com/hashicorp/terraform-provider-google/google/services/{{ lower $product.Name }}"
+{{- end }}
+
+	// Manually add the services for DCL resource and handwritten resource sweepers if they are not in the above list
+	_ "github.com/hashicorp/terraform-provider-google/google/services/apikeys"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/clouddeploy"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/composer"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/container"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/containeraws"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/containerazure"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/dataflow"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/eventarc"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/firebase"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/firebaserules"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/networkconnectivity"
+	_ "github.com/hashicorp/terraform-provider-google/google/services/recaptchaenterprise"
+
+ // TODO: remove dependency on hashicorp flags
+ // need to blank import hashicorp sweeper code to maintain the flags declared in their package
+	_ "github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google/google/sweeper"
+)
+
+func TestAccExecuteSweepers(t *testing.T) {
+	sweeper.ExecuteSweepers(t)
+}
+

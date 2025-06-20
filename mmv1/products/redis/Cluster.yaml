@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,201 +11,822 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Cluster'
 description: |
   A Google Cloud Redis Cluster instance.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/memorystore/docs/cluster/'
-  api: 'https://cloud.google.com/memorystore/docs/cluster/reference/rest/v1beta1/projects.locations.clusters'
-timeouts: !ruby/object:Api::Timeouts
-  insert_minutes: 60
-  update_minutes: 120
-  delete_minutes: 30
-min_version: beta
+  api: 'https://cloud.google.com/memorystore/docs/cluster/reference/rest/v1/projects.locations.clusters'
+docs:
+  note: |
+    For [Multiple VPC Networking](https://cloud.google.com/memorystore/docs/cluster/about-multiple-vpc-networking) if you want to use
+    [User-registered PSC Connections](https://cloud.google.com/memorystore/docs/cluster/about-multiple-vpc-networking#psc_connection_types),
+    then please use `google_redis_cluster_user_created_connections` resource.
+
+    For [Cross Region Replication](https://cloud.google.com/memorystore/docs/cluster/about-cross-region-replication), please follow the instructions below for performing certain update and failover (switchover and detach) operations
+
+    **Cross Region Replication**
+
+    **Settings updated on primary and propagated to secondaries**
+
+    The settings listed [here](https://cloud.google.com/memorystore/docs/cluster/about-cross-region-replication#set_on_primary)
+    are only allowed to be updated on the primary cluster and the changes are automatically propagated to the secondary clusters.
+    To keep the Terraform configuration and state in sync for such settings, please follow the below steps to update them:
+      1. Update the setting on the primary cluster:
+          * Update the setting to its new desired value in the Terraform configuration file.
+          * Execute `terraform apply` to apply the change and wait for it to complete.
+      1. Detect configuration drift on the secondary cluster(s):
+          * Execute `terraform plan`. This should reveal a diff for the modified setting. The proposed value in the Terraform plan should align with the updated value applied to the primary cluster in the preceding step.
+      1. Reconcile secondary cluster(s) configuration:
+          * Manually edit the Terraform configuration file(s) for the secondary cluster(s) to update the setting with the latest value from the state.
+          * Execute `terraform plan` once again. This should not generate any diff, confirming the configuration is in sync with the infrastructure.
+
+
+    **Switchover**
+
+    To perform a [switchover](https://cloud.google.com/memorystore/docs/cluster/working-with-cross-region-replication#perform_a_switchover), please follow the below steps:
+      1. Ensure that the Terraform configuration file for the secondary cluster that needs to become the new primary has the `cross_cluster_replication_config` field. If it is not present:
+          * Add the `cross_cluster_replication_config` field to the configuration file to match the latest value in the state.
+          * Execute `terraform plan`. This should not generate any diff, confirming the configuration is in sync with the infrastructure.
+      1. Update the `cross_cluster_replication_config` field of the secondary that needs to become the new primary:
+          * Change `cross_cluster_replication_config.cluster_role` from `SECONDARY` to `PRIMARY`.
+          * Remove `cross_cluster_replication_config.primary_cluster` field.
+          * Set `cross_cluster_replication_config.secondary_clusters` list with the new secondaries. The new secondaries are the current primary and other secondary clusters(if any).
+
+          -> You can refer to the current value of `cross_cluster_replication_config.membership` field to lookup the current primary and secondary clusters.
+      1. Execute switchover:
+          * Execute`terraform apply` to apply the change and wait for it to complete.
+      1. Fix any configuration drifts on the previous primary and other secondary clusters:
+          * Execute `terraform plan`. If any diffs are reported for `cross_cluster_replication_config` field:
+              * Manually update `cross_cluster_replication_config` field in the configuration file(s) for those clusters with the latest value from the state.
+              * Execute `terraform plan` once again. This should not generate any diff, confirming the configuration is in sync with the infrastructure.
+
+    **Detach a secondary cluster**
+
+    To [detach](https://cloud.google.com/memorystore/docs/cluster/working-with-cross-region-replication#detach_secondary_clusters_option_1) a secondary cluster, please follow the below steps:
+      1. Ensure that the Terraform configuration file for the secondary cluster that needs to be detached has the `cross_cluster_replication_config` field. If it is not present:
+          * Add the `cross_cluster_replication_config` field to the configuration file to match the latest value in the state.
+          * Execute `terraform plan`. This should not generate any diff, confirming the configuration is in sync with the infrastructure.
+      1. Update the `cross_cluster_replication_config` field of the secondary that needs to be detached:
+          * Change `cross_cluster_replication_config.cluster_role` from `SECONDARY` to `NONE`.
+          * Remove `cross_cluster_replication_config.primary_cluster`.
+      1. Execute detach:
+          * Execute`terraform apply` to apply the change and wait for it to complete.
+      1. Fix any configuration drifts on the primary cluster:
+          * Execute `terraform plan`. If any diff is reported for `cross_cluster_replication_config` field:
+              * Manually update `cross_cluster_replication_config` field in the configuration file with the latest value from the state.
+              * Execute `terraform plan` once again. This should not generate any diff, confirming the configuration is in sync with the infrastructure.
+
+    **Detach secondary cluster(s) via primary cluster**
+
+    To [detach](https://cloud.google.com/memorystore/docs/cluster/working-with-cross-region-replication#detach_secondary_clusters_option_2) secondary clusters via primary, please follow the below steps:
+      1. Ensure that the Terraform configuration file for the primary cluster from which the secondary(ies) has(ve) to be detached has the `cross_cluster_replication_config` field. If it is not present:
+          * Add the `cross_cluster_replication_config` field to the configuration file to match the latest value in the state.
+          * Execute `terraform plan`. This should not generate any diff, confirming the configuration is in sync with the infrastructure.
+      1. Update the `cross_cluster_replication_config` field of the primary cluster:
+          * If you are detaching all secondaries from the primary:
+              * Change `cross_cluster_replication_config.cluster_role` from `PRIMARY` to `NONE`.
+              * Remove `cross_cluster_replication_config.secondary_clusters` list field.
+          * If you are detaching a subset of secondaries:
+              * Update `cross_cluster_replication_config.secondary_clusters` list field to remove the secondary clusters that need to be detached.
+      1. Execute detach:
+          * Execute `terraform apply` to apply the change and wait for it to complete.
+      1. Fix any configuration drifts on the secondary cluster(s) that was detached:
+          * Execute `terraform plan`. If any diffs are reported for `cross_cluster_replication_config` field:
+              * Manually update `cross_cluster_replication_config` field in the configuration file(s) for those clusters with the latest value from the state.
+              * Execute `terraform plan` once again. This should not generate any diff, confirming the configuration is in sync with the infrastructure.
+
 base_url: 'projects/{{project}}/locations/{{region}}/clusters'
 self_link: 'projects/{{project}}/locations/{{region}}/clusters/{{name}}'
 create_url: 'projects/{{project}}/locations/{{region}}/clusters?clusterId={{name}}'
-update_verb: :PATCH
+update_verb: 'PATCH'
 update_mask: true
+timeouts:
+  insert_minutes: 60
+  update_minutes: 120
+  delete_minutes: 30
 autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+custom_code:
+  encoder: 'templates/terraform/encoders/redis_cluster.go.tmpl'
+  decoder: 'templates/terraform/decoders/redis_cluster.go.tmpl'
+sweeper:
+  ensure_value:
+    field: deletionProtectionEnabled
+    value: false
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "europe-west1"
+examples:
+  - name: 'redis_cluster_ha'
+    primary_resource_id: 'cluster-ha'
+    vars:
+      cluster_name: 'ha-cluster'
+      policy_name: 'my-policy'
+      subnet_name: 'my-subnet'
+      network_name: 'my-network'
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
+  - name: 'redis_cluster_ha_single_zone'
+    primary_resource_id: 'cluster-ha-single-zone'
+    vars:
+      cluster_name: 'ha-cluster-single-zone'
+      policy_name: 'my-policy'
+      subnet_name: 'my-subnet'
+      network_name: 'my-network'
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
+  - name: 'redis_cluster_secondary'
+    primary_resource_id: 'secondary_cluster'
+    vars:
+      primary_cluster_name: 'my-primary-cluster'
+      primary_cluster_deletion_protection_enabled: 'true'
+      primary_cluster_policy_name: 'mypolicy-primary-cluster'
+      primary_cluster_subnet_name: 'mysubnet-primary-cluster'
+      secondary_cluster_name: 'my-secondary-cluster'
+      secondary_cluster_deletion_protection_enabled: 'true'
+      secondary_cluster_policy_name: 'mypolicy-secondary-cluster'
+      secondary_cluster_subnet_name: 'mysubnet-secondary-cluster'
+      network_name: 'mynetwork'
+    test_vars_overrides:
+      'primary_cluster_deletion_protection_enabled': 'false'
+      'secondary_cluster_deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'primary_cluster_deletion_protection_enabled': 'false'
+      'secondary_cluster_deletion_protection_enabled': 'false'
+  - name: "redis_cluster_rdb"
+    primary_resource_id: "cluster-rdb"
+    vars:
+      cluster_name: "rdb-cluster"
+      policy_name: "my-policy"
+      subnet_name: "my-subnet"
+      network_name: "my-network"
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
+  - name: "redis_cluster_aof"
+    primary_resource_id: "cluster-aof"
+    vars:
+      cluster_name: "aof-cluster"
+      policy_name: "my-policy"
+      subnet_name: "my-subnet"
+      network_name: "my-network"
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
+  - name: "redis_cluster_cmek"
+    primary_resource_id: "cluster-cmek"
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@cloud-redis.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    vars:
+      cluster_name: "cmek-cluster"
+      policy_name: "my-policy"
+      subnet_name: "my-subnet"
+      network_name: "my-network"
+      kms_key_name: "my-key"
+      kms_ring_name: "my-key-ring"
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: name
+  - name: 'name'
+    type: String
     description: |
       Unique name of the resource in this scope including project and location using the form:
       projects/{projectId}/locations/{locationId}/clusters/{clusterId}
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
     default_from_api: true
-  - !ruby/object:Api::Type::String
-    name: 'region'
-    required: false
-    immutable: true
-    url_param_only: true
+  - name: 'region'
+    type: String
     description: |
       The name of the region of the Redis cluster.
+    url_param_only: true
+    required: false
+    immutable: true
     ignore_read: true
     default_from_api: true
-examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: "redis_cluster_ha"
-    min_version: beta
-    primary_resource_id: "cluster-ha"
-    vars:
-      cluster_name: "ha-cluster"
-      policy_name: "mypolicy"
-      subnet_name: "mysubnet"
-      network_name: "mynetwork"
 properties:
-  - !ruby/object:Api::Type::Time
-    name: createTime
+  - name: 'createTime'
+    type: Time
     description: |
       The timestamp associated with the cluster creation request. A timestamp in
       RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional
       digits. Examples: "2014-10-02T15:01:23Z" and "2014-10-02T15:01:23.045123456Z".
     output: true
-  - !ruby/object:Api::Type::Enum
-    name: state
+  - name: 'state'
+    type: Enum
     description: |
       The current state of this cluster. Can be CREATING, READY, UPDATING, DELETING and SUSPENDED
-    values:
-      - :CREATING
-      - :READY
-      - :UPDATING
-      - :DELETING
-      - :SUSPENDED
     immutable: true
     output: true
-  - !ruby/object:Api::Type::String
-    name: uid
+    enum_values:
+      - 'CREATING'
+      - 'READY'
+      - 'UPDATING'
+      - 'DELETING'
+      - 'SUSPENDED'
+  - name: 'uid'
+    type: String
     description: |
       System assigned, unique identifier for the cluster.
     output: true
-  - !ruby/object:Api::Type::Enum
-    name: authorizationMode
+  - name: 'gcsSource'
+    type: NestedObject
+    description: |
+     Backups stored in Cloud Storage buckets. The Cloud Storage buckets need to be the same region as the clusters.
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - managedBackupSource
+    properties:
+      - name: 'uris'
+        type: Array
+        is_set: true
+        description: |
+         URIs of the GCS objects to import. Example: gs://bucket1/object1, gs://bucket2/folder2/object2
+        required: true
+        immutable: true
+        item_type:
+          type: String
+  - name: 'managedBackupSource'
+    type: NestedObject
+    description: "Backups that generated and managed by memorystore."
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - gcsSource
+    properties:
+      - name: 'backup'
+        type: String
+        description: |
+         Example: `projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backup}`.
+        required: true
+        immutable: true
+  - name: 'backupCollection'
+    type: String
+    description: |
+     The backup collection full resource name.
+     Example: projects/{project}/locations/{location}/backupCollections/{collection}
+    output: true
+  - name: 'automatedBackupConfig'
+    type: NestedObject
+    description: "The automated backup config for a instance."
+    custom_flatten: 'templates/terraform/custom_flatten/redis_cluster_automated_backup_config.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/redis_cluster_automated_backup_config.go.tmpl'
+    properties:
+      - name: 'fixedFrequencySchedule'
+        type: NestedObject
+        description: "Trigger automated backups at a fixed frequency."
+        required: true
+        properties:
+          - name: 'startTime'
+            type: NestedObject
+            description: |
+              The start time of every automated backup in UTC.
+              It must be set to the start of an hour. This field is required.
+            required: true
+            properties:
+              - name: 'hours'
+                type: Integer
+                description: |
+                  Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or equal to 23.
+                  An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                required: true
+      - name: 'retention'
+        type: String
+        description: |
+            How long to keep automated backups before the backups are deleted.
+            The value should be between 1 day and 365 days. If not specified, the default value is 35 days.
+            A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+        required: true
+  - name: 'authorizationMode'
+    type: Enum
     description: |
       Optional. The authorization mode of the Redis cluster. If not provided, auth feature is disabled for the cluster.
-    values:
-      - :AUTH_MODE_UNSPECIFIED
-      - :AUTH_MODE_IAM_AUTH
-      - :AUTH_MODE_DISABLED
-    default_value: :AUTH_MODE_DISABLED
-    immutable: true
     required: false
-  - !ruby/object:Api::Type::Enum
-    name: transitEncryptionMode
+    immutable: true
+    default_value: "AUTH_MODE_DISABLED"
+    enum_values:
+      - 'AUTH_MODE_UNSPECIFIED'
+      - 'AUTH_MODE_IAM_AUTH'
+      - 'AUTH_MODE_DISABLED'
+  - name: 'transitEncryptionMode'
+    type: Enum
     description: |
       Optional. The in-transit encryption for the Redis cluster.
       If not provided, encryption is disabled for the cluster.
-    values:
-      - :TRANSIT_ENCRYPTION_MODE_UNSPECIFIED
-      - :TRANSIT_ENCRYPTION_MODE_DISABLED
-      - :TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION
-    default_value: :TRANSIT_ENCRYPTION_MODE_DISABLED
-    immutable: true
     required: false
-  - !ruby/object:Api::Type::Array
-    name: 'pscConfigs'
+    immutable: true
+    default_value: "TRANSIT_ENCRYPTION_MODE_DISABLED"
+    enum_values:
+      - 'TRANSIT_ENCRYPTION_MODE_UNSPECIFIED'
+      - 'TRANSIT_ENCRYPTION_MODE_DISABLED'
+      - 'TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION'
+  - name: 'nodeType'
+    type: Enum
+    description: |
+      The nodeType for the Redis cluster.
+      If not provided, REDIS_HIGHMEM_MEDIUM will be used as default
+    required: false
+    default_from_api: true
+    enum_values:
+      - 'REDIS_SHARED_CORE_NANO'
+      - 'REDIS_HIGHMEM_MEDIUM'
+      - 'REDIS_HIGHMEM_XLARGE'
+      - 'REDIS_STANDARD_SMALL'
+  - name: 'zoneDistributionConfig'
+    type: NestedObject
+    description: Immutable. Zone distribution config for Memorystore Redis cluster.
+    immutable: true
+    default_from_api: true
+    properties:
+      - name: 'mode'
+        type: Enum
+        description: |
+          Immutable. The mode for zone distribution for Memorystore Redis cluster.
+          If not provided, MULTI_ZONE will be used as default
+        default_from_api: true
+        enum_values:
+          - 'MULTI_ZONE'
+          - 'SINGLE_ZONE'
+      - name: 'zone'
+        type: String
+        description: |
+          Immutable. The zone for single zone Memorystore Redis cluster.
+  - name: 'pscConfigs'
+    type: Array
     description: |
       Required. Each PscConfig configures the consumer network where two
       network addresses will be designated to the cluster for client access.
       Currently, only one PscConfig is supported.
-    required: true
     ignore_read: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'network'
+        - name: 'network'
+          type: String
           description: |
             Required. The consumer network where the network address of
             the discovery endpoint will be reserved, in the form of
             projects/{network_project_id_or_number}/global/networks/{network_id}.
           required: true
-  - !ruby/object:Api::Type::Array
-    name: 'discoveryEndpoints'
+  - name: 'discoveryEndpoints'
+    type: Array
     description: |
       Output only. Endpoints created on each given network,
       for Redis clients to connect to the cluster.
       Currently only one endpoint is supported.
     output: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'address'
+        - name: 'address'
+          type: String
           description: |
             Output only. Network address of the exposed Redis endpoint used by clients to connect to the service.
-        - !ruby/object:Api::Type::Integer
-          name: 'port'
+        - name: 'port'
+          type: Integer
           description: |
             Output only. The port number of the exposed Redis endpoint.
-        - !ruby/object:Api::Type::NestedObject
-          name: 'pscConfig'
+        - name: 'pscConfig'
+          type: NestedObject
           description: |
             Output only. Customer configuration for where the endpoint
             is created and accessed from.
           properties:
-            - !ruby/object:Api::Type::String
-              name: 'network'
+            - name: 'network'
+              type: String
               description: |
                 The consumer network where the network address of the discovery
                 endpoint will be reserved, in the form of
                 projects/{network_project_id}/global/networks/{network_id}.
-  - !ruby/object:Api::Type::Array
-    name: 'pscConnections'
+  - name: 'pscConnections'
+    type: Array
     description: |
       Output only. PSC connections for discovery of the cluster topology and accessing the cluster.
-    item_type: !ruby/object:Api::Type::NestedObject
+    output: true
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'pscConnectionId'
+        - name: 'pscConnectionId'
+          type: String
           description: |
             Output only. The PSC connection id of the forwarding rule connected to the service attachment.
-        - !ruby/object:Api::Type::String
-          name: 'address'
+        - name: 'address'
+          type: String
           description: |
             Output only. The IP allocated on the consumer network for the PSC forwarding rule.
-        - !ruby/object:Api::Type::String
-          name: 'forwardingRule'
+        - name: 'forwardingRule'
+          type: String
           description: |
             Output only. The URI of the consumer side forwarding rule. Example: projects/{projectNumOrId}/regions/us-east1/forwardingRules/{resourceId}.
-        - !ruby/object:Api::Type::String
-          name: 'projectId'
+        - name: 'projectId'
+          type: String
           description: |
             Output only. The consumer projectId where the forwarding rule is created from.
-        - !ruby/object:Api::Type::String
-          name: 'network'
+        - name: 'network'
+          type: String
           description: |
             The consumer network where the IP address resides, in the form of projects/{projectId}/global/networks/{network_id}.
-    output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: stateInfo
+  - name: 'stateInfo'
+    type: NestedObject
     description: Output only. Additional information about the current state of the cluster.
-    properties:
-      - !ruby/object:Api::Type::NestedObject
-        name: updateInfo
-        properties:
-          - !ruby/object:Api::Type::Integer
-            name: targetShardCount
-            description: Target number of shards for redis cluster.
-          - !ruby/object:Api::Type::Integer
-            name: targetReplicaCount
-            description: Target number of replica nodes per shard.
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: replicaCount
+    properties:
+      - name: 'updateInfo'
+        type: NestedObject
+        properties:
+          - name: 'targetShardCount'
+            type: Integer
+            description: Target number of shards for redis cluster.
+          - name: 'targetReplicaCount'
+            type: Integer
+            description: Target number of replica nodes per shard.
+  - name: 'replicaCount'
+    type: Integer
     description: |
       Optional. The number of replica nodes per shard.
     required: false
-  - !ruby/object:Api::Type::Integer
-    name: sizeGb
+    send_empty_value: true
+  - name: 'sizeGb'
+    type: Integer
     description: |
       Output only. Redis memory size in GB for the entire cluster.
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: shardCount
+  - name: 'preciseSizeGb'
+    type: Double
+    description: |
+      Output only. Redis memory precise size in GB for the entire cluster.
+    output: true
+  - name: 'shardCount'
+    type: Integer
     description: |
       Required. Number of shards for the Redis cluster.
     required: true
+  - name: 'deletionProtectionEnabled'
+    type: Boolean
+    description: |
+      Optional. Indicates if the cluster is deletion protected or not.
+      If the value if set to true, any delete cluster operation will fail.
+      Default value is true.
+    required: false
+    default_value: true
+  - name: 'redisConfigs'
+    type: KeyValuePairs
+    description: |
+      Configure Redis Cluster behavior using a subset of native Redis configuration parameters.
+      Please check Memorystore documentation for the list of supported parameters:
+      https://cloud.google.com/memorystore/docs/cluster/supported-instance-configurations
+  - name: 'persistenceConfig'
+    type: NestedObject
+    description: Persistence config (RDB, AOF) for the cluster.
+    default_from_api: true
+    properties:
+      - name: 'mode'
+        type: Enum
+        description: |
+          Optional. Controls whether Persistence features are enabled. If not provided, the existing value will be used.
+
+          - DISABLED: 	Persistence (both backup and restore) is disabled for the cluster.
+          - RDB: RDB based Persistence is enabled.
+          - AOF: AOF based Persistence is enabled.
+        enum_values:
+          - 'PERSISTENCE_MODE_UNSPECIFIED'
+          - 'DISABLED'
+          - 'RDB'
+          - 'AOF'
+        default_from_api: true
+      - name: 'rdbConfig'
+        type: NestedObject
+        description: |
+          RDB configuration. This field will be ignored if mode is not RDB.
+        default_from_api: true
+        properties:
+          - name: 'rdbSnapshotPeriod'
+            type: Enum
+            default_from_api: true
+            description: |
+              Optional. Available snapshot periods for scheduling.
+
+              - ONE_HOUR:	Snapshot every 1 hour.
+              - SIX_HOURS:	Snapshot every 6 hours.
+              - TWELVE_HOURS:	Snapshot every 12 hours.
+              - TWENTY_FOUR_HOURS:	Snapshot every 24 hours.
+            enum_values:
+              - 'SNAPSHOT_PERIOD_UNSPECIFIED'
+              - 'ONE_HOUR'
+              - 'SIX_HOURS'
+              - 'TWELVE_HOURS'
+              - 'TWENTY_FOUR_HOURS'
+          - name: 'rdbSnapshotStartTime'
+            type: Time
+            description: |
+              The time that the first snapshot was/will be attempted, and to which
+              future snapshots will be aligned.
+              If not provided, the current time will be used.
+            default_from_api: true
+      - name: 'aofConfig'
+        type: NestedObject
+        description: |
+          AOF configuration. This field will be ignored if mode is not AOF.
+        default_from_api: true
+        properties:
+          - name: 'appendFsync'
+            type: Enum
+            default_from_api: true
+            description: |
+              Optional. Available fsync modes.
+
+              - NO - Do not explicitly call fsync(). Rely on OS defaults.
+              - EVERYSEC - Call fsync() once per second in a background thread. A balance between performance and durability.
+              - ALWAYS - Call fsync() for earch write command.
+            enum_values:
+              - 'APPEND_FSYNC_UNSPECIFIED'
+              - 'NO'
+              - 'EVERYSEC'
+              - 'ALWAYS'
+  - name: 'maintenancePolicy'
+    type: NestedObject
+    description: Maintenance policy for a cluster
+    properties:
+      - name: 'createTime'
+        type: String
+        description: |
+          Output only. The time when the policy was created.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+        output: true
+      - name: 'updateTime'
+        type: String
+        description: |
+          Output only. The time when the policy was last updated.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+        output: true
+      - name: 'weeklyMaintenanceWindow'
+        type: Array
+        description: |
+          Optional. Maintenance window that is applied to resources covered by this policy.
+          Minimum 1. For the current version, the maximum number
+          of weekly_window is expected to be one.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'day'
+              type: Enum
+              description: |
+                Required. The day of week that maintenance updates occur.
+
+                - DAY_OF_WEEK_UNSPECIFIED: The day of the week is unspecified.
+                - MONDAY: Monday
+                - TUESDAY: Tuesday
+                - WEDNESDAY: Wednesday
+                - THURSDAY: Thursday
+                - FRIDAY: Friday
+                - SATURDAY: Saturday
+                - SUNDAY: Sunday
+              required: true
+              enum_values:
+                - 'DAY_OF_WEEK_UNSPECIFIED'
+                - 'MONDAY'
+                - 'TUESDAY'
+                - 'WEDNESDAY'
+                - 'THURSDAY'
+                - 'FRIDAY'
+                - 'SATURDAY'
+                - 'SUNDAY'
+            - name: 'duration'
+              type: String
+              description: |
+                Output only. Duration of the maintenance window.
+                The current window is fixed at 1 hour.
+                A duration in seconds with up to nine fractional digits,
+                terminated by 's'. Example: "3.5s".
+              output: true
+            - name: 'startTime'
+              type: NestedObject
+              description: |
+                Required. Start time of the window in UTC time.
+              required: true
+              send_empty_value: true
+              allow_empty_object: true
+              properties:
+                - name: 'hours'
+                  type: Integer
+                  description: |
+                    Hours of day in 24 hour format. Should be from 0 to 23.
+                    An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                  validation:
+                    function: 'validation.IntBetween(0,23)'
+                - name: 'minutes'
+                  type: Integer
+                  description: |
+                    Minutes of hour of day. Must be from 0 to 59.
+                  validation:
+                    function: 'validation.IntBetween(0,59)'
+                - name: 'seconds'
+                  type: Integer
+                  description: |
+                    Seconds of minutes of the time. Must normally be from 0 to 59.
+                    An API may allow the value 60 if it allows leap-seconds.
+                  validation:
+                    function: 'validation.IntBetween(0,60)'
+                - name: 'nanos'
+                  type: Integer
+                  description: |
+                    Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.
+                  validation:
+                    function: 'validation.IntBetween(0,999999999)'
+  - name: 'maintenanceSchedule'
+    type: NestedObject
+    description: Upcoming maintenance schedule.
+    output: true
+    properties:
+      - name: 'startTime'
+        type: String
+        description: |
+          Output only. The start time of any upcoming scheduled maintenance for this cluster.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+        output: true
+      - name: 'endTime'
+        type: String
+        description: |
+          Output only. The end time of any upcoming scheduled maintenance for this cluster.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+        output: true
+      - name: 'scheduleDeadlineTime'
+        type: String
+        description: |
+          Output only. The deadline that the maintenance schedule start time
+          can not go beyond, including reschedule.
+          A timestamp in RFC3339 UTC "Zulu" format, with nanosecond
+          resolution and up to nine fractional digits.
+        output: true
+  - name: 'crossClusterReplicationConfig'
+    type: NestedObject
+    description: Cross cluster replication config
+    default_from_api: true
+    properties:
+      - name: 'clusterRole'
+        type: Enum
+        description: |
+          The role of the cluster in cross cluster replication. Supported values are:
+
+          1. `CLUSTER_ROLE_UNSPECIFIED`: This is an independent cluster that has never participated in cross cluster replication. It allows both reads and writes.
+
+          1. `NONE`: This is an independent cluster that previously participated in cross cluster replication(either as a `PRIMARY` or `SECONDARY` cluster). It allows both reads and writes.
+
+          1. `PRIMARY`: This cluster serves as the replication source for secondary clusters that are replicating from it. Any data written to it is automatically replicated to its secondary clusters. It allows both reads and writes.
+
+          1. `SECONDARY`: This cluster replicates data from the primary cluster. It allows only reads.
+
+        enum_values:
+          - 'CLUSTER_ROLE_UNSPECIFIED'
+          - 'NONE'
+          - 'PRIMARY'
+          - 'SECONDARY'
+      - name: 'primaryCluster'
+        type: NestedObject
+        description: |
+          Details of the primary cluster that is used as the replication source for this secondary cluster. This is allowed to be set only for clusters whose cluster role is of type `SECONDARY`.
+        properties:
+          - name: 'cluster'
+            type: String
+            description: |
+              The full resource path of the primary cluster in the format: projects/{project}/locations/{region}/clusters/{cluster-id}
+          - name: 'uid'
+            type: String
+            description: |
+              The unique id of the primary cluster.
+            output: true
+      - name: 'secondaryClusters'
+        type: Array
+        description: |
+          List of secondary clusters that are replicating from this primary cluster. This is allowed to be set only for clusters whose cluster role is of type `PRIMARY`.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'cluster'
+              type: String
+              description: |
+                The full resource path of the secondary cluster in the format: projects/{project}/locations/{region}/clusters/{cluster-id}
+            - name: 'uid'
+              type: String
+              description: |
+                The unique id of the secondary cluster.
+              output: true
+      - name: 'membership'
+        type: NestedObject
+        description: |
+          An output only view of all the member clusters participating in cross cluster replication. This field is populated for all the member clusters irrespective of their cluster role.
+        output: true
+        properties:
+          - name: 'primaryCluster'
+            type: NestedObject
+            description: |
+              Details of the primary cluster that is used as the replication source for all the secondary clusters.
+            output: true
+            properties:
+              - name: 'cluster'
+                type: String
+                description: |
+                  The full resource path of the primary cluster in the format: projects/{project}/locations/{region}/clusters/{cluster-id}
+                output: true
+              - name: 'uid'
+                type: String
+                description: |
+                  The unique id of the primary cluster.
+                output: true
+          - name: 'secondaryClusters'
+            type: Array
+            description: |
+              List of secondary clusters that are replicating from the primary cluster.
+            output: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'cluster'
+                  type: String
+                  description: |
+                    The full resource path of the secondary cluster in the format: projects/{project}/locations/{region}/clusters/{cluster-id}
+                  output: true
+                - name: 'uid'
+                  type: String
+                  description: |
+                    The unique id of the secondary cluster.
+                  output: true
+      - name: 'updateTime'
+        type: String
+        description: |
+          The last time cross cluster replication config was updated.
+        output: true
+  - name: 'pscServiceAttachments'
+    type: Array
+    description: Service attachment details to configure Psc connections.
+    output: true
+    item_type:
+      type: NestedObject
+      description: |
+        Configuration of a service attachment of the cluster, for creating PSC connections.
+      properties:
+        - name: 'serviceAttachment'
+          type: String
+          output: true
+          description: |
+              Service attachment URI which your self-created PscConnection should use as
+        - name: 'connectionType'
+          type: Enum
+          output: true
+          enum_values:
+            - 'CONNECTION_TYPE_READER'
+            - 'CONNECTION_TYPE_PRIMARY'
+            - 'CONNECTION_TYPE_DISCOVERY'
+          description: Type of a PSC connection targeting this service attachment.
+  - name: 'kmsKey'
+    type: String
+    description: The KMS key used to encrypt the at-rest data of the cluster.
+  - name: 'managedServerCa'
+    type: NestedObject
+    output: true
+    description: Cluster's Certificate Authority. This field will only be populated if Redis Cluster's transit_encryption_mode is TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION
+    properties:
+      - name: 'caCerts'
+        type: Array
+        output: true
+        description: The PEM encoded CA certificate chains for redis managed server authentication
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'certificates'
+              type: Array
+              output: true
+              description: The certificates that form the CA chain, from leaf to root order
+              item_type:
+                type: String

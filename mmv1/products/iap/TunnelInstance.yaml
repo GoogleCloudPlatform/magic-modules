@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,39 +11,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'TunnelInstance'
-base_url: 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}'
-self_link: 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}'
+description: |
+  Only used to generate IAM resources
 # This resource is only used to generate IAM resources. They do not correspond to real
 # GCP resources, and should not be used to generate anything other than IAM support.
 exclude_resource: true
-description: |
-  Only used to generate IAM resources
-iam_policy: !ruby/object:Api::Resource::IamPolicy
+docs:
+id_format: 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}'
+base_url: 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}'
+self_link: 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}'
+import_format:
+  - 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}'
+  - 'projects/{{project}}/zones/{{zone}}/instances/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
   method_name_separator: ':'
   parent_resource_type: 'google_compute_instance'
-  parent_resource_attribute: 'instance'
-  fetch_iam_policy_verb: :POST
+  fetch_iam_policy_verb: 'POST'
   allowed_iam_role: 'roles/iap.tunnelResourceAccessor'
-  iam_conditions_request_type: :REQUEST_BODY
-id_format: 'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}'
-import_format:
-  [
-    'projects/{{project}}/iap_tunnel/zones/{{zone}}/instances/{{name}}',
-    'projects/{{project}}/zones/{{zone}}/instances/{{name}}',
-  ]
+  parent_resource_attribute: 'instance'
+  iam_conditions_request_type: 'REQUEST_BODY'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+custom_code:
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'instance_basic'
+  - name: 'instance_basic'
     primary_resource_id: 'tunnelvm'
+    primary_resource_name: 'fmt.Sprintf("tf-test-tunnel-vm%s", context["random_suffix"])'
     vars:
       instance_name: 'tunnel-vm'
-    primary_resource_name: "fmt.Sprintf(\"tf-test-tunnel-vm%s\",
-      context[\"random_suffix\"\
-      ])"
+parameters:
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: Name of the instance.
     required: true

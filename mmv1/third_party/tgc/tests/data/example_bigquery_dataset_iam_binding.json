@@ -1,6 +1,6 @@
 [
   {
-    "name": "//bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/test-dataset",
+    "name": "//bigquery.googleapis.com/projects/{{.Provider.project}}/datasets/test_dataset",
     "asset_type": "bigquery.googleapis.com/Dataset",
     "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
     "resource": {
@@ -10,11 +10,12 @@
       "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
       "data": {
         "datasetReference": {
-          "datasetId": "test-dataset"
+          "datasetId": "test_dataset"
         },
         "defaultTableExpirationMs": 3600000,
         "labels": {
-          "env": "dev"
+          "env": "dev",
+          "goog-terraform-provisioned": "true"
         },
         "location": "EU",
         "friendlyName": ""

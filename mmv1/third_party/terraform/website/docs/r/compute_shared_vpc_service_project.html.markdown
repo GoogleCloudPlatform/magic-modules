@@ -15,8 +15,6 @@ For more information, see,
 [the Project API documentation](https://cloud.google.com/compute/docs/reference/latest/projects),
 where the Shared VPC feature is referred to by its former name "XPN".
 
-~> **Note:** If Shared VPC Admin role is set at the folder level, use the google-beta provider. The google provider only supports this permission at project or organizational level currently. [[0]](https://cloud.google.com/vpc/docs/provisioning-shared-vpc#enable-shared-vpc-host)
-
 ## Example Usage
 
 ```hcl
@@ -57,6 +55,19 @@ This resource provides the following
 
 Google Compute Engine Shared VPC service project feature can be imported using the `host_project` and `service_project`, e.g.
 
+* `{{host_project}/{{service_project}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Google Compute Engine Shared VPC service project using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{host_project}/{{service_project}}"
+  to = google_compute_shared_vpc_service_project.default
+}
 ```
-$ terraform import google_compute_shared_vpc_service_project.service1 host-project-id/service-project-id-1
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Google Compute Engine Shared VPC service project can be imported using one of the formats above. For example:
+
 ```
+$ terraform import google_compute_shared_vpc_service_project.default {{host_project}/{{service_project}}
+``````

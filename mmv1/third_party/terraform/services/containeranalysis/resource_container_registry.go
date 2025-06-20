@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -12,9 +13,14 @@ import (
 
 func ResourceContainerRegistry() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceContainerRegistryCreate,
-		Read:   resourceContainerRegistryRead,
-		Delete: resourceContainerRegistryDelete,
+		DeprecationMessage: "Container Registry is deprecated. Effective March 18, 2025, Container Registry is shut down and writing images to Container Registry is unavailable. Resource will be removed in future major release.",
+		Create:             resourceContainerRegistryCreate,
+		Read:               resourceContainerRegistryRead,
+		Delete:             resourceContainerRegistryDelete,
+
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"location": {

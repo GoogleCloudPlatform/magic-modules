@@ -1,0 +1,20 @@
+[
+   {
+      "name":"//cloudtasks.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/queues/cloud-tasks-queue-test",
+      "asset_type":"cloudtasks.googleapis.com/Queue",
+      "resource":{
+         "version":"v2",
+         "discovery_document_uri":"https://www.googleapis.com/discovery/v1/apis/cloudtasks/v2/rest",
+         "discovery_name":"Queue",
+         "parent":"//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+         "data":{
+            "name":"projects/{{.Provider.project}}/locations/us-central1/queues/cloud-tasks-queue-test",
+            "rateLimits":{
+               "maxDispatchesPerSecond":10
+            }
+         }
+      },
+      "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+      "ancestors": ["organizations/{{.OrgID}}"]
+   }
+]

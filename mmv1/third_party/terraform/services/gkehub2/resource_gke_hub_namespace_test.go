@@ -3,7 +3,7 @@ package gkehub2_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -28,7 +28,7 @@ func TestAccGKEHub2Namespace_gkehubNamespaceBasicExample_update(t *testing.T) {
 				ResourceName:            "google_gke_hub_namespace.namespace",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"scope_namespace_id", "scope", "scope_id", "scope"},
+				ImportStateVerifyIgnore: []string{"scope_namespace_id", "scope", "scope_id", "scope", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccGKEHub2Namespace_gkehubNamespaceBasicExample_update(context),
@@ -37,7 +37,7 @@ func TestAccGKEHub2Namespace_gkehubNamespaceBasicExample_update(t *testing.T) {
 				ResourceName:            "google_gke_hub_namespace.namespace",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"scope_namespace_id", "scope", "scope_id", "scope"},
+				ImportStateVerifyIgnore: []string{"scope_namespace_id", "scope", "scope_id", "scope", "labels", "terraform_labels"},
 			},
 		},
 	})

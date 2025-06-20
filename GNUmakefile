@@ -9,9 +9,7 @@ ifeq ($(ENGINE),tpgtools)
   # exist so exclusively build base tpgtools implementation
   mmv1_compile=-p does-not-exist
 else ifneq ($(PRODUCT),)
-  mmv1_compile=-p products/$(PRODUCT)
-else
-  mmv1_compile=-a
+  mmv1_compile=--product $(PRODUCT)
 endif
 
 # tpgtools setup
@@ -26,12 +24,12 @@ else
 endif
 
 ifneq ($(RESOURCE),)
-  mmv1_compile += -t $(RESOURCE)
+  mmv1_compile += --resource $(RESOURCE)
   tpgtools_compile += --resource $(RESOURCE)
 endif
 
 ifneq ($(OVERRIDES),)
-  mmv1_compile += -r $(OVERRIDES)
+  mmv1_compile += --overrides $(OVERRIDES)
   tpgtools_compile += --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
   serialize_compile = --overrides $(OVERRIDES)/tpgtools/overrides --path $(OVERRIDES)/tpgtools/api
 else
@@ -55,37 +53,86 @@ endif
 ifeq ($(FORCE_DCL),)
   FORCE_DCL=latest
 endif
-terraform build provider:
-	@make validate_environment;
-	make mmv1
-	make tpgtools
-	make teamcity-servicemap-generate
+
+SHOULD_SKIP_CLEAN := false # Default: do not skip
+ifneq ($(SKIP_CLEAN),)
+  ifneq ($(SKIP_CLEAN),false)
+    SHOULD_SKIP_CLEAN := true
+  endif
+endif
+
+terraform build provider: validate_environment clean-provider mmv1 tpgtools
+	@echo "Provider generation process finished for $(VERSION) in $(OUTPUT_PATH)"
+
 
 mmv1:
-	cd mmv1;\
-		bundle; \
-		bundle exec compiler.rb -e terraform -o $(OUTPUT_PATH) -v $(VERSION) $(mmv1_compile);
+	@echo "Executing mmv1 build for $(OUTPUT_PATH)"; 
+	@cd mmv1;\
+		if [ "$(VERSION)" = "ga" ]; then \
+			go run . --output $(OUTPUT_PATH) --version ga --no-docs $(mmv1_compile) \
+			&& go run . --output $(OUTPUT_PATH) --version beta --no-code $(mmv1_compile); \
+		else \
+			go run . --output $(OUTPUT_PATH) --version $(VERSION) $(mmv1_compile); \
+		fi
 
-tpgtools:
-	make serialize
-	cd tpgtools;\
+tpgtools: serialize
+	@echo "Executing tpgtools build for $(OUTPUT_PATH)";
+	@cd tpgtools;\
 		go run . --output $(OUTPUT_PATH) --version $(VERSION) $(tpgtools_compile)
 
-# This should be removed when all DCL resources are migrated to MMv1; service map generation should be
-# controlled inside MMv1, like originally implemented in this PR: https://github.com/GoogleCloudPlatform/magic-modules/pull/8254
-teamcity-servicemap-generate:
-	cd tools/teamcity-generator;\
-		go run . --output $(OUTPUT_PATH) --version $(VERSION)
+clean-provider: check_safe_build
+	@if [ -n "$(PRODUCT)" ]; then \
+		printf "\n\e[1;33mWARNING:\e[0m Skipping clean-provider step because PRODUCT ('$(PRODUCT)') is set.\n"; \
+		printf " Ensure your downstream repository is synchronized with the Magic Modules branch\n"; \
+		printf " to avoid potential build inconsistencies.\n"; \
+		printf " Downstream repository (OUTPUT_PATH): %s\n\n" "$(OUTPUT_PATH)"; \
+	elif [ "$(SHOULD_SKIP_CLEAN)" = "true" ]; then \
+		printf "\e[1;33mINFO:\e[0m Skipping clean-provider step because SKIP_CLEAN is set to a non-false value ('$(SKIP_CLEAN)').\n"; \
+	else \
+		echo "Executing clean-provider in $(OUTPUT_PATH)..."; \
+		( \
+			cd $(OUTPUT_PATH) && \
+			echo "---> Changing directory to $(OUTPUT_PATH)" && \
+			if ! command -v git > /dev/null 2>&1; then \
+				printf "\e[1;33mINFO:\e[0m Skipping git-based cleaning because git is not installed.\n"; \
+			elif ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then \
+				printf "\e[1;33mINFO:\e[0m Skipping git-based cleaning because $(OUTPUT_PATH) is not a git repository.\n"; \
+			else \
+				echo "---> Downloading Go module dependencies... (Ensures tools like gofmt can find relevant code)" && \
+				go mod download && \
+				echo "---> Finding tracked files to remove..." && \
+				git ls-files | grep -v -E '(^\.git|^\.changelog|^\.travis\.yml$$|^\.golangci\.yml$$|^CHANGELOG\.md$$|^CHANGELOG_v.*\.md$$|^GNUmakefile$$|docscheck\.sh$$|^LICENSE$$|^CODEOWNERS$$|^README\.md$$|^\.go-version$$|^\.hashibot\.hcl$$|^go\.mod$$|^go\.sum$$|^examples)' | xargs -r git rm -f -q && \
+				echo "---> Unstaging changes with git reset..." && \
+				git reset -q && \
+				echo "---> clean-provider actions finished. Changes have been unstaged."; \
+			fi \
+		) && echo "clean-provider target finished successfully."; \
+	fi
+
+clean-tgc:
+	cd $(OUTPUT_PATH);\
+		rm -rf ./tfplan2cai/testdata/templates/;\
+		rm -rf ./tfplan2cai/testdata/generatedconvert/;\
+		rm -rf ./tfplan2cai/converters/google/provider;\
+		rm -rf ./tfplan2cai/converters/google/resources;\
+		rm -rf ./cai2hcl/*;\
+		find ./tfplan2cai/test/** -type f -exec git rm {} \; > /dev/null;\
+		rm -rf ./pkg/cai2hcl/*;\
+		rm -rf ./pkg/tfplan2cai/*;\
 
 tgc:
 	cd mmv1;\
-		bundle;\
-		bundle exec compiler -e terraform -f tgc -v beta -o $(OUTPUT_PATH) $(mmv1_compile);\
+		go run . --version beta --provider tgc --output $(OUTPUT_PATH)/tfplan2cai $(mmv1_compile)\
+		&& go run . --version beta --provider tgc_cai2hcl --output $(OUTPUT_PATH)/cai2hcl $(mmv1_compile)\
+		&& go run . --version beta --provider tgc_next --output $(OUTPUT_PATH) $(mmv1_compile);\
+
+tf-oics:
+	cd mmv1;\
+		go run . --version ga --provider oics --output $(OUTPUT_PATH) $(mmv1_compile);\
 
 test:
 	cd mmv1; \
-		bundle; \
-		bundle exec rake test
+		go test ./...
 
 serialize:
 	cd tpgtools;\
@@ -102,16 +149,28 @@ upgrade-dcl:
 		MOD_LINE=$$(grep declarative-resource-client-library go.mod);\
 		SUM_LINE=$$(grep declarative-resource-client-library go.sum);\
 	cd ../mmv1/third_party/terraform && \
-		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod.erb; echo "$$SUM_LINE" >> go.sum
+		sed ${SED_I} "s!.*declarative-resource-client-library.*!$$MOD_LINE!" go.mod; echo "$$SUM_LINE" >> go.sum
 
 
-validate_environment:
+validate_environment: check_parameters check_safe_build
+
+check_parameters:
 # only print doctor script to console if there was a dependency failure detected.
 	@./scripts/doctor 2>&1 > /dev/null || ./scripts/doctor
-	@[ -d "$(OUTPUT_PATH)" ] || (printf " \e[1;31mdirectory '$(OUTPUT_PATH)' does not exist - ENV variable \033[0mOUTPUT_PATH\e[1;31m should be set to a provider directory. \033[0m \n" && exit 1);
-	@[ -n "$(VERSION)" ] || (printf " \e[1;31mversion '$(VERSION)' does not exist - ENV variable \033[0mVERSION\e[1;31m should be set to ga or beta \033[0m \n" && exit 1);
+	@[ -d "$(OUTPUT_PATH)" ] || (printf "\n\e[1;31mERROR: directory '$(OUTPUT_PATH)' does not exist - ENV variable \033[0mOUTPUT_PATH\e[1;31m should be set to a provider directory. \033[0m \n\n" && exit 1);
+	@[ -n "$(VERSION)" ] || (printf "\n\e[1;31mERROR: version '$(VERSION)' does not exist - ENV variable \033[0mVERSION\e[1;31m should be set to ga or beta \033[0m \n\n" && exit 1);
+
+
+check_safe_build:
+	@([ -f "$(OUTPUT_PATH)/go.mod" ] && head -n 1 "$(OUTPUT_PATH)/go.mod" | grep -q 'terraform') || \
+		( \
+			printf "\n\e[1;31mERROR: Validation failed for OUTPUT_PATH '$(OUTPUT_PATH)'.\n" && \
+			printf "       Either go.mod is missing or the module name within it does not contain 'terraform'.\n" && \
+			printf "       This is a safety check before cleaning/building. Halting.\033[0m\n\n" && \
+			exit 1 \
+		); \
 
 doctor:
 	./scripts/doctor
 
-.PHONY: mmv1 tpgtools test
+.PHONY: mmv1 tpgtools test clean-provider validate_environment serialize doctor

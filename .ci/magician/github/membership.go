@@ -1,39 +1,28 @@
+/*
+* Copyright 2023 Google LLC. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
 package github
 
 import (
 	"fmt"
 	utils "magician/utility"
 	"math/rand"
+	"slices"
 	"time"
 
-	"golang.org/x/exp/slices"
-)
-
-var (
-	// This is for the random-assignee rotation.
-	reviewerRotation = []string{
-		"slevenick",
-		"c2thorn",
-		"rileykarson",
-		"melinath",
-		"ScottSuarez",
-		"shuyama1",
-		"SarahFrench",
-		"roaks3",
-		"zli82016",
-		"trodge",
-		"hao-nan-li",
-		"NickElliot",
-	}
-
-	// This is for new team members who are onboarding
-	trustedContributors = []string{}
-
-	// This is for reviewers who are "on vacation": will not receive new review assignments but will still receive re-requests for assigned PRs.
-	onVacationReviewers = []string{
-		"melinath",
-		"roaks3",
-	}
+	"golang.org/x/exp/maps"
 )
 
 type UserType int64
@@ -55,18 +44,25 @@ func (ut UserType) String() string {
 	}
 }
 
-func (gh *github) GetUserType(user string) UserType {
-	if isTeamMember(user, gh.token) {
-		fmt.Println("User is a team member")
+func (gh *Client) GetUserType(user string) UserType {
+	if IsCoreContributor(user) {
+		fmt.Println("User is a core contributor")
 		return CoreContributorUserType
 	}
 
-	if isOrgMember(user, "GoogleCloudPlatform", gh.token) {
+	if gh.IsTeamMember("GoogleCloudPlatform", "terraform", user) {
+		fmt.Println("User is an active member of the 'terraform' team in 'GoogleCloudPlatform' organization")
+		return GooglerUserType
+	} else {
+		fmt.Printf("User '%s' is not an active member of the 'terraform' team in 'GoogleCloudPlatform' organization\n", user)
+	}
+
+	if gh.IsOrgMember(user, "GoogleCloudPlatform") {
 		fmt.Println("User is a GCP org member")
 		return GooglerUserType
 	}
 
-	if isOrgMember(user, "googlers", gh.token) {
+	if gh.IsOrgMember(user, "googlers") {
 		fmt.Println("User is a googlers org member")
 		return GooglerUserType
 	}
@@ -75,24 +71,43 @@ func (gh *github) GetUserType(user string) UserType {
 }
 
 // Check if a user is team member to not request a random reviewer
-func isTeamMember(author, githubToken string) bool {
-	return slices.Contains(reviewerRotation, author) || slices.Contains(trustedContributors, author)
+func IsCoreContributor(user string) bool {
+	_, isTrustedContributor := trustedContributors[user]
+	return IsCoreReviewer(user) || isTrustedContributor
 }
 
-func isTeamReviewer(reviewer string) bool {
-	return slices.Contains(reviewerRotation, reviewer)
+func IsCoreReviewer(user string) bool {
+	_, isCoreReviewer := reviewerRotation[user]
+	return isCoreReviewer
 }
 
-func isOrgMember(author, org, githubToken string) bool {
-	url := fmt.Sprintf("https://api.github.com/orgs/%s/members/%s", org, author)
-	res, _ := utils.RequestCall(url, "GET", githubToken, nil, nil)
-
-	return res != 404
-}
-
-func GetRandomReviewer() string {
-	availableReviewers := utils.Removes(reviewerRotation, onVacationReviewers)
-	rand.Seed(time.Now().UnixNano())
+// GetRandomReviewer returns a random available reviewer (optionally excluding some people from the reviewer pool)
+func GetRandomReviewer(excludedReviewers []string) string {
+	availableReviewers := AvailableReviewers(excludedReviewers)
 	reviewer := availableReviewers[rand.Intn(len(availableReviewers))]
 	return reviewer
+}
+
+func AvailableReviewers(excludedReviewers []string) []string {
+	return available(time.Now(), reviewerRotation, excludedReviewers)
+}
+
+func available(nowTime time.Time, reviewerRotation map[string]ReviewerConfig, excludedReviewers []string) []string {
+	excludedReviewers = append(excludedReviewers, onVacation(nowTime, reviewerRotation)...)
+	ret := utils.Removes(maps.Keys(reviewerRotation), excludedReviewers)
+	slices.Sort(ret)
+	return ret
+}
+
+func onVacation(nowTime time.Time, reviewerRotation map[string]ReviewerConfig) []string {
+	var onVacationList []string
+	for reviewer, config := range reviewerRotation {
+		for _, v := range config.vacations {
+			if nowTime.Before(v.GetStart(config.timezone)) || nowTime.After(v.GetEnd(config.timezone)) {
+				continue
+			}
+			onVacationList = append(onVacationList, reviewer)
+		}
+	}
+	return onVacationList
 }

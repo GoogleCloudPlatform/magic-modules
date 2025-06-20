@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -29,6 +29,7 @@ func TestAccBillingProjectInfo_update(t *testing.T) {
 				ResourceName:      "google_billing_project_info.info",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateId:     fmt.Sprintf("projects/%s", projectId),
 			},
 			{
 				Config: testAccBillingProjectInfo_basic(projectId, orgId, ""),
@@ -37,6 +38,7 @@ func TestAccBillingProjectInfo_update(t *testing.T) {
 				ResourceName:      "google_billing_project_info.info",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateId:     fmt.Sprintf("projects/%s", projectId),
 			},
 			{
 				Config: testAccBillingProjectInfo_basic(projectId, orgId, billingAccount),
@@ -45,6 +47,7 @@ func TestAccBillingProjectInfo_update(t *testing.T) {
 				ResourceName:      "google_billing_project_info.info",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateId:     fmt.Sprintf("projects/%s", projectId),
 			},
 		},
 	})
@@ -56,6 +59,7 @@ resource "google_project" "project" {
   project_id = "%s"
   name       = "%[1]s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
   lifecycle {
     ignore_changes = [billing_account]
   }

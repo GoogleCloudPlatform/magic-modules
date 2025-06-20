@@ -1,0 +1,229 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+
+name: 'RuntimeTemplate'
+api_resource_type_kind: NotebookRuntimeTemplate
+description: |
+  'A runtime template is a VM configuration that specifies a machine type and other characteristics of the VM,
+   as well as common settings such as the network and whether public internet access is enabled. When you create
+   a runtime, its VM is created according to the specifications of a runtime template.'
+
+references:
+  guides:
+    'Create a runtime template': 'https://cloud.google.com/colab/docs/create-runtime-template'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.notebookRuntimeTemplates'
+base_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates'
+self_link: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{name}}'
+immutable: true
+create_url: 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates?notebook_runtime_template_id={{name}}'
+async:
+  type: 'OpAsync'
+  operation:
+    full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
+  result:
+    resource_inside_response: true
+iam_policy:
+  parent_resource_attribute: 'runtime_template'
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  example_config_body: 'templates/terraform/iam/example_config_body/colab_runtime_template.tf.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{runtime_template}}'
+    - '{{runtime_template}}'
+examples:
+  - name: 'colab_runtime_template_basic'
+    primary_resource_id: 'runtime-template'
+    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
+    vars:
+      runtime_template_name: 'colab-runtime-template'
+  - name: 'colab_runtime_template_no_name'
+    primary_resource_id: 'runtime-template'
+    exclude_import_test: true
+  - name: 'colab_runtime_template_full'
+    primary_resource_id: 'runtime-template'
+    primary_resource_name: 'fmt.Sprintf("tf-test-colab-runtime-template%s", context["random_suffix"])'
+    vars:
+      runtime_template_name: 'colab-runtime-template'
+      network_name: 'colab-test-default'
+      key_name: 'my-crypto-key'
+    test_vars_overrides:
+      key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    url_param_only: true
+    description: 'The location for the resource: https://cloud.google.com/colab/docs/locations'
+properties:
+  - name: 'name'
+    type: String
+    default_from_api: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    description: 'The resource name of the Runtime Template'
+  - name: 'displayName'
+    type: String
+    description:
+      Required. The display name of the Runtime Template.
+    required: true
+  - name: description
+    type: String
+    description: 'The description of the Runtime Template.'
+  - name: machineSpec
+    type: NestedObject
+    default_from_api: true
+    description: |
+     'The machine configuration of the runtime.'
+    properties:
+      - name: 'machineType'
+        type: string
+        default_from_api: true
+        description: |
+                The Compute Engine machine type selected for the runtime.
+      - name: 'acceleratorType'
+        type: enum
+        description: |
+                The type of hardware accelerator used by the runtime. If specified, acceleratorCount must also be specified.
+        enum_values:
+          - 'NVIDIA_TESLA_V100'
+          - 'NVIDIA_TESLA_T4'
+          - 'NVIDIA_TESLA_A100'
+          - 'NVIDIA_A100_80GB'
+          - 'NVIDIA_L4'
+      - name: 'acceleratorCount'
+        type: Integer
+        default_from_api: true
+        description: 'The number of accelerators used by the runtime.'
+  - name: dataPersistentDiskSpec
+    default_from_api: true
+    type: NestedObject
+    description: 'The configuration for the data disk of the runtime.'
+    properties:
+      - name: 'diskType'
+        type: enum
+        description: 'The type of the persistent disk.'
+        default_from_api: true
+        enum_values:
+          - 'pd-standard'
+          - 'pd-ssd'
+          - 'pd-balanced'
+          - 'pd-extreme'
+      - name: 'diskSizeGb'
+        type: int
+        default_from_api: true
+        description: |
+                The disk size of the runtime in GB. If specified, the diskType must also be specified. The minimum size is 10GB and the maximum is 65536GB.
+  - name: networkSpec
+    type: NestedObject
+    default_from_api: true
+    description: 'The network configuration for the runtime.'
+    properties:
+      - name: 'enableInternetAccess'
+        type: Boolean
+        description: Enable public internet access for the runtime.
+      - name: 'network'
+        default_from_api: true
+        type: String
+        description: 'The name of the VPC that this runtime is in.'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+      - name: 'subnetwork'
+        type: String
+        description: 'The name of the subnetwork that this runtime is in.'
+        diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+  - name: 'labels'
+    type: KeyValueLabels
+    default_from_api: true
+    description: 'Labels to identify and group the runtime template.'
+  - name: idleShutdownConfig
+    type: NestedObject
+    default_from_api: true
+    description: 'Notebook Idle Shutdown configuration for the runtime.'
+    properties:
+      - name: 'idleTimeout'
+        default_from_api: true
+        type: String
+        description: 'The duration after which the runtime is automatically shut down. An input of 0s disables the idle shutdown feature, and a valid range is [10m, 24h].'
+  - name: eucConfig
+    type: NestedObject
+    default_from_api: true
+    description: 'EUC configuration of the NotebookRuntimeTemplate.'
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
+    properties:
+      - name: 'eucDisabled'
+        type: Boolean
+        default_from_api: true
+        description: 'Disable end user credential access for the runtime.'
+        diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+  - name: shieldedVmConfig
+    type: NestedObject
+    default_from_api: true
+    description: 'Runtime Shielded VM spec.'
+    diff_suppress_func: 'tpgresource.EmptyOrUnsetBlockDiffSuppress'
+    properties:
+      - name: 'enableSecureBoot'
+        type: Boolean
+        default_from_api: true
+        description: 'Enables secure boot for the runtime.'
+        diff_suppress_func: 'tpgresource.EmptyOrFalseSuppressBoolean'
+  - name: 'networkTags'
+    type: Array
+    item_type:
+      type: String
+    description: 'Applies the given Compute Engine tags to the runtime.'
+  - name: encryptionSpec
+    type: NestedObject
+    description: 'Customer-managed encryption key spec for the notebook runtime.'
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description: 'The Cloud KMS encryption key (customer-managed encryption key) used to protect the runtime.'
+  - name: softwareConfig
+    type: NestedObject
+    default_from_api: true
+    description: 'The notebook software configuration of the notebook runtime.'
+    properties:
+      - name: 'env'
+        type: Array
+        description: 'Environment variables to be passed to the container.'
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'name'
+              type: String
+              description: 'Name of the environment variable. Must be a valid C identifier.'
+            - name: 'value'
+              type: String
+              description: 'Variables that reference a $(VAR_NAME) are expanded using the previous defined
+                             environment variables in the container and any service environment variables.
+                            If a variable cannot be resolved, the reference in the input string will be unchanged.
+                            The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped
+                            references will never be expanded, regardless of whether the variable exists or not.'
+      - name: 'postStartupScriptConfig'
+        deprecation_message: '`post_startup_script_config` is deprecated and will be removed in a future major release. New resource creation with this field is unavailable at this time.'
+        type: NestedObject
+        description: 'Post startup script config.'
+        properties:
+          - name: 'postStartupScript'
+            type: String
+            description: 'Post startup script to run after runtime is started.'
+          - name: 'postStartupScriptUrl'
+            type: String
+            description: 'Post startup script url to download. Example: https://bucket/script.sh.'
+          - name: 'postStartupScriptBehavior'
+            type: Enum
+            description: 'Post startup script behavior that defines download and execution behavior.'
+            enum_values:
+              - 'RUN_ONCE'
+              - 'RUN_EVERY_START'
+              - 'DOWNLOAD_AND_RUN_EVERY_START'

@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 type LocationDescriber interface {
-	GetLocationDescription(providerConfig *fwtransport.FrameworkProviderConfig) LocationDescription
+	GetLocationDescription(providerConfig *transport_tpg.Config) LocationDescription
 }
 
 type LocationDescription struct {
@@ -32,12 +32,14 @@ type LocationDescription struct {
 func (ld *LocationDescription) GetLocation() (types.String, error) {
 	// Location from resource config
 	if !ld.ResourceLocation.IsNull() && !ld.ResourceLocation.IsUnknown() && !ld.ResourceLocation.Equal(types.StringValue("")) {
-		return ld.ResourceLocation, nil
+		location := tpgresource.GetResourceNameFromSelfLink(ld.ResourceLocation.ValueString()) // Location could be a self link
+		return types.StringValue(location), nil
 	}
 
 	// Location from region in resource config
 	if !ld.ResourceRegion.IsNull() && !ld.ResourceRegion.IsUnknown() && !ld.ResourceRegion.Equal(types.StringValue("")) {
-		return ld.ResourceRegion, nil
+		region := tpgresource.GetResourceNameFromSelfLink(ld.ResourceRegion.ValueString()) // Region could be a self link
+		return types.StringValue(region), nil
 	}
 
 	// Location from zone in resource config
@@ -46,9 +48,16 @@ func (ld *LocationDescription) GetLocation() (types.String, error) {
 		return types.StringValue(location), nil
 	}
 
+	// Location from region in provider config
+	if !ld.ProviderRegion.IsNull() && !ld.ProviderRegion.IsUnknown() && !ld.ProviderRegion.Equal(types.StringValue("")) {
+		location := tpgresource.GetResourceNameFromSelfLink(ld.ProviderRegion.ValueString()) // Region could be a self link
+		return types.StringValue(location), nil
+	}
+
 	// Location from zone in provider config
 	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() && !ld.ProviderZone.Equal(types.StringValue("")) {
-		return ld.ProviderZone, nil
+		location := tpgresource.GetResourceNameFromSelfLink(ld.ProviderZone.ValueString()) // Zone could be a self link
+		return types.StringValue(location), nil
 	}
 
 	var err error
@@ -71,17 +80,18 @@ func (ld *LocationDescription) GetRegion() (types.String, error) {
 	}
 	// Region from zone in resource config
 	if !ld.ResourceZone.IsNull() && !ld.ResourceZone.IsUnknown() && !ld.ResourceZone.Equal(types.StringValue("")) {
-		region := tpgresource.GetRegionFromZone(ld.ResourceZone.ValueString())
-		return types.StringValue(region), nil
+		region := tpgresource.GetResourceNameFromSelfLink(ld.ResourceZone.ValueString()) // Region could be a self link
+		return types.StringValue(tpgresource.GetRegionFromZone(region)), nil
 	}
 	// Region from provider config
 	if !ld.ProviderRegion.IsNull() && !ld.ProviderRegion.IsUnknown() && !ld.ProviderRegion.Equal(types.StringValue("")) {
-		return ld.ProviderRegion, nil
+		region := tpgresource.GetResourceNameFromSelfLink(ld.ProviderRegion.ValueString()) // Region could be a self link
+		return types.StringValue(region), nil
 	}
 	// Region from zone in provider config
 	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() && !ld.ProviderZone.Equal(types.StringValue("")) {
-		region := tpgresource.GetRegionFromZone(ld.ProviderZone.ValueString())
-		return types.StringValue(region), nil
+		region := tpgresource.GetResourceNameFromSelfLink(ld.ProviderZone.ValueString()) // Region could be a self link
+		return types.StringValue(tpgresource.GetRegionFromZone(region)), nil
 	}
 
 	var err error
@@ -103,7 +113,9 @@ func (ld *LocationDescription) GetZone() (types.String, error) {
 		return types.StringValue(zone), nil
 	}
 	if !ld.ProviderZone.IsNull() && !ld.ProviderZone.IsUnknown() && !ld.ProviderZone.Equal(types.StringValue("")) {
-		return ld.ProviderZone, nil
+		// Zone could be a self link
+		zone := tpgresource.GetResourceNameFromSelfLink(ld.ProviderZone.ValueString())
+		return types.StringValue(zone), nil
 	}
 
 	var err error

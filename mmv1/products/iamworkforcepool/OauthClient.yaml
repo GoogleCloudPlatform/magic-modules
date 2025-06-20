@@ -1,0 +1,153 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: OauthClient
+description: |
+  Represents an OAuth Client. Used to access Google Cloud resources on behalf of a
+  Workforce Identity Federation user by using OAuth 2.0 Protocol to obtain an access
+  token from Google Cloud.
+references:
+  guides:
+    "Managing OAuth clients": "https://cloud.google.com/iam/docs/workforce-manage-oauth-app#manage-clients"
+  api: "https://cloud.google.com/iam/docs/reference/rest/v1/projects.locations.oauthClients"
+base_url: projects/{{project}}/locations/{{location}}/oauthClients
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/oauthClients/{{oauth_client_id}}
+create_url: projects/{{project}}/locations/{{location}}/oauthClients?oauthClientId={{oauth_client_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/oauthClients/{{oauth_client_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/oauthClients/{{oauth_client_id}}
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  decoder: "templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl"
+  test_check_destroy: "templates/terraform/custom_check_destroy/iam_oauth_client.go.tmpl"
+  post_create: "templates/terraform/post_create/sleep.go.tmpl"
+  post_update: "templates/terraform/post_create/sleep.go.tmpl"
+  post_delete: "templates/terraform/post_create/sleep.go.tmpl"
+exclude_sweeper: true
+examples:
+  - name: "iam_oauth_client_full"
+    primary_resource_id: "example"
+    vars:
+      oauth_client_id: "example-client-id"
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: oauthClientId
+    type: String
+    description: |-
+      Required. The ID to use for the OauthClient, which becomes the final component of
+      the resource name. This value should be a string of 6 to 63 lowercase
+      letters, digits, or hyphens. It must start with a letter, and cannot have a
+      trailing hyphen. The prefix `gcp-` is reserved for use by Google, and may
+      not be specified.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: allowedScopes
+    type: Array
+    description: |-
+      Required. The list of scopes that the OauthClient is allowed to request during
+      OAuth flows.
+
+      The following scopes are supported:
+
+      * `https://www.googleapis.com/auth/cloud-platform`: See, edit, configure,
+      and delete your Google Cloud data and see the email address for your Google
+      Account.
+      * `openid`: The OAuth client can associate you with your personal
+      information on Google Cloud.
+      * `email`: The OAuth client can read a federated identity's email address.
+      * `groups`: The OAuth client can read a federated identity's groups.
+    required: true
+    item_type:
+      type: String
+  - name: name
+    type: String
+    description: |-
+      Immutable. Identifier. The resource name of the OauthClient.
+
+      Format:`projects/{project}/locations/{location}/oauthClients/{oauth_client}`.
+    output: true
+    immutable: true
+  - name: state
+    type: String
+    description: |-
+      The state of the OauthClient.
+      Possible values:
+      STATE_UNSPECIFIED
+      ACTIVE
+      DELETED
+    output: true
+  - name: disabled
+    type: Boolean
+    description: |-
+      Whether the OauthClient is disabled. You cannot use a disabled OAuth
+      client.
+  - name: clientId
+    type: String
+    description: Output only. The system-generated OauthClient id.
+    output: true
+  - name: displayName
+    type: String
+    description: |-
+      A user-specified display name of the OauthClient.
+
+      Cannot exceed 32 characters.
+  - name: description
+    type: String
+    description: |-
+      A user-specified description of the OauthClient.
+
+      Cannot exceed 256 characters.
+  - name: allowedGrantTypes
+    type: Array
+    description: Required. The list of OAuth grant types is allowed for the OauthClient.
+    required: true
+    item_type:
+      type: String
+  - name: expireTime
+    type: String
+    description: |-
+      Time after which the OauthClient will be permanently purged and cannot
+      be recovered.
+    output: true
+  - name: clientType
+    type: String
+    description: |-
+      Immutable. The type of OauthClient. Either public or private.
+      For private clients, the client secret can be managed using the dedicated
+      OauthClientCredential resource.
+      Possible values:
+      CLIENT_TYPE_UNSPECIFIED
+      PUBLIC_CLIENT
+      CONFIDENTIAL_CLIENT
+    immutable: true
+  - name: allowedRedirectUris
+    type: Array
+    description: |-
+      Required. The list of redirect uris that is allowed to redirect back
+      when authorization process is completed.
+    required: true
+    item_type:
+      type: String

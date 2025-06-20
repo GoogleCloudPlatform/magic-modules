@@ -12,6 +12,9 @@
         "datasetReference": {
           "datasetId": "example_dataset"
         },
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
         "location": "US",
         "friendlyName": ""
       }

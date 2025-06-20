@@ -22,7 +22,7 @@ const (
 
 	SubnetworkLinkRegex = "projects/(" + ProjectRegex + ")/regions/(" + RegionRegex + ")/subnetworks/(" + SubnetworkRegex + ")$"
 
-	RFC1035NameTemplate = "[a-z](?:[-a-z0-9]{%d,%d}[a-z0-9])"
+	RFC1035NameTemplate = "[a-z]([-a-z0-9]%v[a-z0-9])?"
 	CloudIoTIdRegex     = "^[a-zA-Z][-a-zA-Z0-9._+~%]{2,254}$"
 
 	// Format of default Compute service accounts created by Google
@@ -41,7 +41,7 @@ var (
 	// The first and last characters have different restrictions, than
 	// the middle characters. The middle characters length must be between
 	// 4 and 28 since the first and last character are excluded.
-	ServiceAccountNameRegex = fmt.Sprintf(RFC1035NameTemplate, 4, 28)
+	ServiceAccountNameRegex = fmt.Sprintf(RFC1035NameTemplate, "{4,28}")
 
 	ServiceAccountLinkRegexPrefix = "projects/" + ProjectRegexWildCard + "/serviceAccounts/"
 	PossibleServiceAccountNames   = []string{
@@ -54,7 +54,7 @@ var (
 	ServiceAccountKeyNameRegex = ServiceAccountLinkRegexPrefix + "(.+)/keys/(.+)"
 
 	// Format of service accounts created through the API
-	CreatedServiceAccountNameRegex = fmt.Sprintf(RFC1035NameTemplate, 4, 28) + "@" + ProjectNameInDNSFormRegex + "\\.iam\\.gserviceaccount\\.com$"
+	CreatedServiceAccountNameRegex = fmt.Sprintf(RFC1035NameTemplate, "{4,28}") + "@" + ProjectNameInDNSFormRegex + "\\.iam\\.gserviceaccount\\.com$"
 
 	// Format of service-created service account
 	// examples are:
@@ -74,6 +74,16 @@ var (
 	Rfc6996Asn32BitMin  = int64(4200000000)
 	Rfc6996Asn32BitMax  = int64(4294967294)
 	GcpRouterPartnerAsn = int64(16550)
+
+	// Format of GCS Bucket Name
+	// https://cloud.google.com/storage/docs/naming-buckets
+	GCSNameValidChars     = "^[a-z0-9_.-]*$"
+	GCSNameStartEndChars  = "^[a-z|0-9].*[a-z|0-9]$"
+	GCSNameLength         = "^.{3,222}"
+	GCSNameLengthSplit    = "^.{1,63}$"
+	GCSNameCidr           = "^[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}$"
+	GCSNameGoogPrefix     = "^goog.*$"
+	GCSNameContainsGoogle = "^.*google.*$"
 )
 
 var Rfc1918Networks = []string{
@@ -87,6 +97,44 @@ var Rfc1918Networks = []string{
 func ValidateGCEName(v interface{}, k string) (ws []string, errors []error) {
 	re := `^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$`
 	return ValidateRegexp(re)(v, k)
+}
+
+// validateGCSName ensures the name of a gcs bucket matches the requirements for GCS Buckets
+// https://cloud.google.com/storage/docs/naming-buckets
+func ValidateGCSName(v interface{}, k string) (ws []string, errors []error) {
+	value := v.(string)
+
+	if !regexp.MustCompile(GCSNameValidChars).MatchString(value) {
+		errors = append(errors, fmt.Errorf("%q name value can only contain lowercase letters, numeric characters, dashes (-), underscores (_), and dots (.)", value))
+	}
+
+	if !regexp.MustCompile(GCSNameStartEndChars).MatchString(value) {
+		errors = append(errors, fmt.Errorf("%q name value must start and end with a number or letter", value))
+	}
+
+	if !regexp.MustCompile(GCSNameLength).MatchString(value) {
+		errors = append(errors, fmt.Errorf("%q name value must contain 3-63 characters. Names containing dots can contain up to 222 characters, but each dot-separated component can be no longer than 63 characters", value))
+	}
+
+	for _, str := range strings.Split(value, ".") {
+		if !regexp.MustCompile(GCSNameLengthSplit).MatchString(str) {
+			errors = append(errors, fmt.Errorf("%q name value must contain 3-63 characters. Names containing dots can contain up to 222 characters, but each dot-separated component can be no longer than 63 characters", value))
+		}
+	}
+
+	if regexp.MustCompile(GCSNameCidr).MatchString(value) {
+		errors = append(errors, fmt.Errorf("%q name value cannot be represented as an IP address in dotted-decimal notation (for example, 192.168.5.4)", value))
+	}
+
+	if regexp.MustCompile(GCSNameGoogPrefix).MatchString(value) {
+		errors = append(errors, fmt.Errorf("%q name value cannot begin with the \"goog\" prefix", value))
+	}
+
+	if regexp.MustCompile(GCSNameContainsGoogle).MatchString(strings.ReplaceAll(value, "0", "o")) {
+		errors = append(errors, fmt.Errorf("%q name value cannot contain \"google\" or close misspellings, such as \"g00gle\"", value))
+	}
+
+	return
 }
 
 // Ensure that the BGP ASN value of Cloud Router is a valid value as per RFC6996 or a value of 16550
@@ -146,19 +194,26 @@ func ValidateRFC3339Time(v interface{}, k string) (warnings []string, errors []e
 }
 
 func ValidateRFC1035Name(min, max int) schema.SchemaValidateFunc {
-	if min < 2 || max < min {
-		return func(i interface{}, k string) (s []string, errors []error) {
-			if min < 2 {
-				errors = append(errors, fmt.Errorf("min must be at least 2. Got: %d", min))
-			}
-			if max < min {
-				errors = append(errors, fmt.Errorf("max must greater than min. Got [%d, %d]", min, max))
-			}
-			return
+	return func(i interface{}, k string) (s []string, errors []error) {
+		value := i.(string)
+		re := fmt.Sprintf("^"+RFC1035NameTemplate+"$", "*")
+		if min < 1 {
+			errors = append(errors, fmt.Errorf("min must be at least 1. Got: %d", min))
 		}
-	}
+		if max < min {
+			errors = append(errors, fmt.Errorf("max must greater than min. Got [%d, %d]", min, max))
+		}
 
-	return ValidateRegexp(fmt.Sprintf("^"+RFC1035NameTemplate+"$", min-2, max-2))
+		if len(value) < min || len(value) > max {
+			errors = append(errors, fmt.Errorf("%q (%q) must be between %d and %d characters long", k, value, min, max))
+		}
+
+		if !regexp.MustCompile(re).MatchString(value) {
+			errors = append(errors, fmt.Errorf("%q (%q) must match regex %q", k, value, re))
+		}
+
+		return
+	}
 }
 
 func ValidateIpCidrRange(v interface{}, k string) (warnings []string, errors []error) {
@@ -282,6 +337,14 @@ func ValidateBase64String(i interface{}, val string) ([]string, []error) {
 	return nil, nil
 }
 
+func ValidateBase64URLString(i interface{}, val string) ([]string, []error) {
+	_, err := base64.URLEncoding.DecodeString(i.(string))
+	if err != nil {
+		return nil, []error{fmt.Errorf("could not decode %q as a valid base64URL value.", val)}
+	}
+	return nil, nil
+}
+
 // StringNotInSlice returns a SchemaValidateFunc which tests if the provided value
 // is of type string and that it matches none of the element in the invalid slice.
 // if ignorecase is true, case is ignored.
@@ -380,6 +443,17 @@ func ValidateRegexp(re string) schema.SchemaValidateFunc {
 				"%q (%q) doesn't match regexp %q", k, value, re))
 		}
 
+		return
+	}
+}
+
+func ValidateRegexCompiles() schema.SchemaValidateFunc {
+	return func(v interface{}, k string) (ws []string, errs []error) {
+		value := v.(string)
+		if _, err := regexp.Compile(value); err != nil {
+			errs = append(errs, fmt.Errorf(
+				"%s (%s) is not a valid regex pattern: %s", k, value, err))
+		}
 		return
 	}
 }

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
@@ -47,8 +47,13 @@ func testAccDataSourceGoogleSubnetworkCheck(data_source_name string, resource_na
 			"id",
 			"name",
 			"description",
+			"subnetwork_id",
 			"ip_cidr_range",
 			"private_ip_google_access",
+			"external_ipv6_prefix",
+			"internal_ipv6_prefix",
+			"stack_type",
+			"ipv6_access_type",
 			"secondary_ip_range",
 		}
 
@@ -80,6 +85,8 @@ func testAccDataSourceGoogleSubnetwork(networkName, subnetName string) string {
 resource "google_compute_network" "foobar" {
   name        = "%s"
   description = "my-description"
+  enable_ula_internal_ipv6 = true
+  auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "foobar" {
@@ -87,6 +94,8 @@ resource "google_compute_subnetwork" "foobar" {
   description              = "my-description"
   ip_cidr_range            = "10.0.0.0/24"
   network                  = google_compute_network.foobar.self_link
+  stack_type               = "IPV4_IPV6"
+  ipv6_access_type         = "INTERNAL"
   private_ip_google_access = true
   secondary_ip_range {
     range_name    = "tf-test-secondary-range"

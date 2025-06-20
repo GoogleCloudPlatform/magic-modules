@@ -3,7 +3,7 @@ package dialogflowcx_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -25,17 +25,19 @@ func TestAccDialogflowCXFlow_update(t *testing.T) {
 				Config: testAccDialogflowCXFlow_basic(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_cx_flow.my_flow",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_dialogflow_cx_flow.my_flow",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"advanced_settings.0.logging_settings"},
 			},
 			{
 				Config: testAccDialogflowCXFlow_full(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_cx_flow.my_flow",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_dialogflow_cx_flow.my_flow",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"advanced_settings.0.logging_settings"},
 			},
 		},
 	})
@@ -43,18 +45,6 @@ func TestAccDialogflowCXFlow_update(t *testing.T) {
 
 func testAccDialogflowCXFlow_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-  data "google_project" "project" {}
-
-  resource "google_service_account" "dialogflowcx_service_account" {
-    account_id = "tf-test-dialogflow-%{random_suffix}"
-  }
-
-  resource "google_project_iam_member" "agent_create" {
-    project = data.google_project.project.project_id
-    role    = "roles/dialogflow.admin"
-    member  = "serviceAccount:${google_service_account.dialogflowcx_service_account.email}"
-  }
-
   resource "google_dialogflow_cx_agent" "agent_entity" {
     display_name             = "tf-test-%{random_suffix}"
     location                 = "global"
@@ -63,7 +53,6 @@ func testAccDialogflowCXFlow_basic(context map[string]interface{}) string {
     time_zone                = "America/New_York"
     description              = "Description 1."
     avatar_uri               = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
-    depends_on               = [google_project_iam_member.agent_create]
   }
 
   resource "google_dialogflow_cx_flow" "my_flow" {
@@ -80,18 +69,6 @@ func testAccDialogflowCXFlow_basic(context map[string]interface{}) string {
 
 func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-  data "google_project" "project" {}
-
-  resource "google_service_account" "dialogflowcx_service_account" {
-    account_id = "tf-test-dialogflow-%{random_suffix}"
-  }
-
-  resource "google_project_iam_member" "agent_create" {
-    project = data.google_project.project.project_id
-    role    = "roles/dialogflow.admin"
-    member  = "serviceAccount:${google_service_account.dialogflowcx_service_account.email}"
-  }
-
   resource "google_dialogflow_cx_agent" "agent_entity" {
     display_name               = "tf-test-dialogflowcx-agent%{random_suffix}update"
     location                   = "global"
@@ -105,7 +82,12 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
     speech_to_text_settings {
       enable_speech_adaptation = true
     }
-    depends_on                 = [google_project_iam_member.agent_create]
+  }
+
+  resource "google_storage_bucket" "bucket" {
+    name                        = "tf-test-dialogflowcx-bucket%{random_suffix}"
+    location                    = "US"
+    uniform_bucket_level_access = true
   }
 
   resource "google_dialogflow_cx_flow" "my_flow" {
@@ -252,6 +234,8 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
             },
           ])
         }
+
+        enable_generative_fallback = true
       }
     }
 
@@ -356,6 +340,261 @@ func testAccDialogflowCXFlow_full(context map[string]interface{}) string {
       }
       target_flow = google_dialogflow_cx_agent.agent_entity.start_flow
     }
+
+    advanced_settings {
+      audio_export_gcs_destination {
+        uri = "${google_storage_bucket.bucket.url}/prefix-"
+      }
+      speech_settings {
+        endpointer_sensitivity        = 30
+        no_speech_timeout             = "3.500s"
+        use_timeout_based_endpointing = true
+        models = {
+          name : "wrench"
+          mass : "1.3kg"
+          count : "3"
+        }
+      }
+      dtmf_settings {
+        enabled      = true
+        max_digits   = 1
+        finish_digit = "#"
+      }
+      logging_settings {
+        enable_stackdriver_logging     = true
+        enable_interaction_logging     = true
+        enable_consent_based_redaction = true
+      }
+    }
+
+    knowledge_connector_settings {
+      enabled = true
+      trigger_fulfillment {
+        messages {
+          channel = "some-channel"
+          output_audio_text {
+            text = "some output text"
+          }
+        }
+      }
+      target_flow = google_dialogflow_cx_agent.agent_entity.start_flow
+    }
   }
+`, context)
+}
+
+func TestAccDialogflowCXFlow_defaultStartFlow(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				// Note: this isn't actually a "create" test; it creates a resource in the TF state, but is actually importing the default object GCP has created, then updating it.
+				Config: testAccDialogflowCXFlow_defaultStartFlow_create(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dialogflow_cx_flow.default_start_flow", "name", "00000000-0000-0000-0000-000000000000"),
+					resource.TestCheckResourceAttrPair(
+						"google_dialogflow_cx_flow.default_start_flow", "id",
+						"google_dialogflow_cx_agent.agent", "start_flow",
+					),
+				),
+			},
+			{
+				ResourceName:      "google_dialogflow_cx_flow.default_start_flow",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// This is testing updating the default object without having to create it in the TF state first.
+				Config: testAccDialogflowCXFlow_defaultStartFlow_update(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dialogflow_cx_flow.default_start_flow", "name", "00000000-0000-0000-0000-000000000000"),
+					resource.TestCheckResourceAttrPair(
+						"google_dialogflow_cx_flow.default_start_flow", "id",
+						"google_dialogflow_cx_agent.agent", "start_flow",
+					),
+				),
+			},
+			{
+				ResourceName:      "google_dialogflow_cx_flow.default_start_flow",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccDialogflowCXFlow_defaultStartFlow_create(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dialogflow_cx_agent" "agent" {
+  display_name          = "tf-test-dialogflowcx-agent%{random_suffix}"
+  location              = "global"
+  default_language_code = "en"
+  time_zone             = "America/New_York"
+}
+
+resource "google_dialogflow_cx_intent" "default_welcome_intent" {
+  parent                    = google_dialogflow_cx_agent.agent.id
+  is_default_welcome_intent = true
+  display_name              = "Default Welcome Intent"
+  priority                  = 1
+  training_phrases {
+    parts {
+      text = "Hello"
+    }
+    repeat_count = 1
+  }
+}
+
+
+resource "google_dialogflow_cx_flow" "default_start_flow" {
+  parent                = google_dialogflow_cx_agent.agent.id
+  is_default_start_flow = true
+  display_name          = "Default Start Flow"
+  description           = "A start flow created along with the agent"
+
+  nlu_settings {
+    classification_threshold = 0.3
+    model_type               = "MODEL_TYPE_STANDARD"
+  }
+
+  transition_routes {
+    intent = google_dialogflow_cx_intent.default_welcome_intent.id
+    trigger_fulfillment {
+      messages {
+        text {
+          text = ["Response to default welcome intent."]
+        }
+      }
+    }
+  }
+
+  event_handlers {
+    event = "custom-event"
+    trigger_fulfillment {
+      messages {
+        text {
+          text = ["Handle a custom event!"]
+        }
+      }
+    }
+  }
+
+  event_handlers {
+    event = "sys.no-match-default"
+    trigger_fulfillment {
+      messages {
+        text {
+          text = ["This is the flow no-match response."]
+        }
+      }
+    }
+  }
+
+  event_handlers {
+    event = "sys.no-input-default"
+    trigger_fulfillment {
+      messages {
+        text {
+          text = ["This is the flow no-input response."]
+        }
+      }
+    }
+  }
+}
+`, context)
+}
+
+func testAccDialogflowCXFlow_defaultStartFlow_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dialogflow_cx_agent" "agent" {
+  display_name          = "tf-test-dialogflowcx-agent%{random_suffix}"
+  location              = "global"
+  default_language_code = "en"
+  time_zone             = "America/New_York"
+}
+
+resource "google_dialogflow_cx_intent" "default_welcome_intent" {
+  parent                    = google_dialogflow_cx_agent.agent.id
+  is_default_welcome_intent = true
+  display_name              = "Default Welcome Intent"
+  priority                  = 1
+  training_phrases {
+    parts {
+      text = "Hello"
+    }
+    repeat_count = 1
+  }
+}
+
+resource "google_dialogflow_cx_page" "my_page" {
+  parent       = google_dialogflow_cx_agent.agent.start_flow
+  display_name = "MyPage"
+}
+
+resource "google_dialogflow_cx_flow" "default_start_flow" {
+  parent                = google_dialogflow_cx_agent.agent.id
+  is_default_start_flow = true
+  display_name          = "Default Start Flow"
+  description           = "A start flow created along with the agent"
+
+  nlu_settings {
+    classification_threshold = 0.5
+    model_type               = "MODEL_TYPE_STANDARD"
+  }
+
+  transition_routes {
+    intent = google_dialogflow_cx_intent.default_welcome_intent.id
+    trigger_fulfillment {
+      messages {
+        text {
+          text = ["We can update the default welcome intent response!"]
+        }
+      }
+    }
+  }
+
+  // delete the custom-event handler to show we can
+
+  event_handlers {
+    event = "sys.no-match-default"
+    trigger_fulfillment {
+      messages {
+        text {
+          text = ["We an also update the no-match response!"]
+        }
+      }
+    }
+  }
+
+  event_handlers {
+    event = "sys.no-input-default"
+    trigger_fulfillment {
+      messages {
+        text {
+          text = ["The no-input response has been updated too!"]
+        }
+      }
+    }
+  }
+
+  knowledge_connector_settings {
+    enabled = false
+    trigger_fulfillment {
+      messages {
+        output_audio_text {
+          text = "We can update the knowledge_connector_settings in this flow!"
+        }
+      }
+    }
+    target_page = google_dialogflow_cx_page.my_page.id
+  }
+}
 `, context)
 }

@@ -3,7 +3,7 @@ package dialogflowcx_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -43,18 +43,6 @@ func TestAccDialogflowCXPage_update(t *testing.T) {
 
 func testAccDialogflowCXPage_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-  data "google_project" "project" {}
-
-  resource "google_service_account" "dialogflowcx_service_account" {
-    account_id = "tf-test-dialogflow-%{random_suffix}"
-  }
-
-  resource "google_project_iam_member" "agent_create" {
-    project = data.google_project.project.project_id
-    role    = "roles/dialogflow.admin"
-    member  = "serviceAccount:${google_service_account.dialogflowcx_service_account.email}"
-  }
-
   resource "google_dialogflow_cx_agent" "agent_page" {
     display_name             = "tf-test-%{random_suffix}"
     location                 = "global"
@@ -63,7 +51,6 @@ func testAccDialogflowCXPage_basic(context map[string]interface{}) string {
     time_zone                = "America/New_York"
     description              = "Description 1."
     avatar_uri               = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
-    depends_on               = [google_project_iam_member.agent_create]
   }
 
   resource "google_dialogflow_cx_page" "my_page" {
@@ -75,18 +62,6 @@ func testAccDialogflowCXPage_basic(context map[string]interface{}) string {
 
 func testAccDialogflowCXPage_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-  data "google_project" "project" {}
-
-  resource "google_service_account" "dialogflowcx_service_account" {
-    account_id = "tf-test-dialogflow-%{random_suffix}"
-  }
-
-  resource "google_project_iam_member" "agent_create" {
-    project = data.google_project.project.project_id
-    role    = "roles/dialogflow.admin"
-    member  = "serviceAccount:${google_service_account.dialogflowcx_service_account.email}"
-  }
-
   resource "google_dialogflow_cx_agent" "agent_page" {
     display_name               = "tf-test-%{random_suffix}update"
     location                   = "global"
@@ -100,7 +75,6 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
     speech_to_text_settings {
       enable_speech_adaptation = true
     }
-    depends_on = [google_project_iam_member.agent_create]
   }
 
   resource "google_dialogflow_cx_page" "my_page" {
@@ -521,6 +495,13 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
         }
         required = "true"
         redact   = "true"
+        advanced_settings {
+          dtmf_settings {
+            enabled      = true
+            max_digits   = 1
+            finish_digit = "#"
+          }
+        }
       }
     }
 
@@ -624,11 +605,45 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
       }
       target_page = google_dialogflow_cx_page.my_page2.id
     }
+
+    advanced_settings {
+      dtmf_settings {
+        enabled      = true
+        max_digits   = 1
+        finish_digit = "#"
+      }
+    }
+
+    knowledge_connector_settings {
+      enabled = true
+      trigger_fulfillment {
+        messages {
+          channel = "some-channel"
+          output_audio_text {
+            text = "some output text"
+          }
+        }
+      }
+      data_store_connections {
+        data_store_type = "UNSTRUCTURED"
+        data_store = "projects/${data.google_project.project.number}/locations/${google_dialogflow_cx_agent.agent_page.location}/collections/default_collection/dataStores/datastore-page-update"
+        document_processing_mode = "DOCUMENTS"
+      }
+      target_page = google_dialogflow_cx_page.my_page2.id
+    }
   }
 
   resource "google_dialogflow_cx_page" "my_page2" {
     parent       = google_dialogflow_cx_agent.agent_page.start_flow
     display_name = "MyPage2"
+  }
+
+  resource "google_discovery_engine_data_store" "my_datastore" {
+    location          = "global"
+    data_store_id     = "datastore-page-update"
+    display_name      = "datastore-page-update"
+    industry_vertical = "GENERIC"
+    content_config    = "NO_CONTENT"
   }
 
   resource "google_dialogflow_cx_webhook" "my_webhook" {
@@ -637,6 +652,9 @@ func testAccDialogflowCXPage_full(context map[string]interface{}) string {
     generic_web_service {
       uri = "https://example.com"
     }
+  }
+
+  data "google_project" "project" {
   }
 `, context)
 }

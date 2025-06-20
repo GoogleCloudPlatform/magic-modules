@@ -24,7 +24,7 @@ func TestProvider_ValidateCredentials(t *testing.T) {
 				return transport_tpg.TestFakeCredentialsPath // Path to a test fixture
 			},
 		},
-		"configuring credentials as a path to a non-existant file is NOT valid": {
+		"configuring credentials as a path to a non-existent file is NOT valid": {
 			ConfigValue: func(t *testing.T) interface{} {
 				return "./this/path/doesnt/exist.json" // Doesn't exist
 			},
@@ -42,9 +42,12 @@ func TestProvider_ValidateCredentials(t *testing.T) {
 				return string(contents)
 			},
 		},
-		"configuring credentials as an empty string is valid": {
+		"configuring credentials as an empty string is not valid": {
 			ConfigValue: func(t *testing.T) interface{} {
 				return ""
+			},
+			ExpectedErrors: []error{
+				errors.New("expected a non-empty string"),
 			},
 		},
 		"leaving credentials unconfigured is valid": {
@@ -67,178 +70,131 @@ func TestProvider_ValidateCredentials(t *testing.T) {
 
 			// Assert
 			if len(ws) != len(tc.ExpectedWarnings) {
-				t.Errorf("Expected %d warnings, got %d: %v", len(tc.ExpectedWarnings), len(ws), ws)
+				t.Fatalf("Expected %d warnings, got %d: %v", len(tc.ExpectedWarnings), len(ws), ws)
 			}
 			if len(es) != len(tc.ExpectedErrors) {
-				t.Errorf("Expected %d errors, got %d: %v", len(tc.ExpectedErrors), len(es), es)
+				t.Fatalf("Expected %d errors, got %d: %v", len(tc.ExpectedErrors), len(es), es)
 			}
 
-			if len(tc.ExpectedErrors) > 0 {
+			if len(tc.ExpectedErrors) > 0 && len(es) > 0 {
 				if es[0].Error() != tc.ExpectedErrors[0].Error() {
-					t.Errorf("Expected first error to be \"%s\", got \"%s\"", tc.ExpectedErrors[0], es[0])
+					t.Fatalf("Expected first error to be \"%s\", got \"%s\"", tc.ExpectedErrors[0], es[0])
 				}
 			}
 		})
 	}
 }
 
-func TestProvider_ProviderConfigure_credentials(t *testing.T) {
-
-	const pathToMissingFile string = "./this/path/doesnt/exist.json" // Doesn't exist
-
+func TestProvider_ValidateJWT(t *testing.T) {
 	cases := map[string]struct {
-		ConfigValues        map[string]interface{}
-		EnvVariables        map[string]string
-		ExpectError         bool
-		ExpectFieldUnset    bool
-		ExpectedSchemaValue string
-		ExpectedConfigValue string
+		ConfigValue      interface{}
+		ValueNotProvided bool
+		ExpectedWarnings []string
+		ExpectedErrors   []error
 	}{
-		"credentials can be configured as a path to a credentials JSON file": {
-			ConfigValues: map[string]interface{}{
-				"credentials": transport_tpg.TestFakeCredentialsPath,
-			},
-			EnvVariables:        map[string]string{},
-			ExpectedSchemaValue: transport_tpg.TestFakeCredentialsPath,
-			ExpectedConfigValue: transport_tpg.TestFakeCredentialsPath,
+		"a valid JWT is accepted": {
+			ConfigValue: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
 		},
-		"configuring credentials as a path to a non-existant file results in an error": {
-			ConfigValues: map[string]interface{}{
-				"credentials": pathToMissingFile,
+		"an empty JWT is rejected": {
+			ConfigValue: "",
+			ExpectedErrors: []error{
+				errors.New("\"\" cannot be empty"),
 			},
-			ExpectError:         true,
-			ExpectedSchemaValue: pathToMissingFile,
-			ExpectedConfigValue: pathToMissingFile,
 		},
-		"credentials set in the config are not overridden by environment variables": {
-			ConfigValues: map[string]interface{}{
-				"credentials": acctest.GenerateFakeCredentialsJson("test"),
+		"a JWT with invalid base64 parts is rejected": {
+			ConfigValue: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.invalid-signature",
+			ExpectedErrors: []error{
+				errors.New("part 3 of JWT is not valid base64: illegal base64 data at input byte 16"),
 			},
-			EnvVariables: map[string]string{
-				"GOOGLE_CREDENTIALS":             acctest.GenerateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
-				"GOOGLE_CLOUD_KEYFILE_JSON":      acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
-				"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
-				"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
-			},
-			ExpectedSchemaValue: acctest.GenerateFakeCredentialsJson("test"),
-			ExpectedConfigValue: acctest.GenerateFakeCredentialsJson("test"),
 		},
-		"when credentials is unset in the config, environment variables are used: GOOGLE_CREDENTIALS used first": {
-			EnvVariables: map[string]string{
-				"GOOGLE_CREDENTIALS":             acctest.GenerateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
-				"GOOGLE_CLOUD_KEYFILE_JSON":      acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
-				"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
-				"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
+		"a JWT with incorrect format (not 3 parts) is rejected": {
+			ConfigValue: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ",
+			ExpectedErrors: []error{
+				errors.New("\"\" is not a valid JWT format"),
 			},
-			ExpectedSchemaValue: "",
-			ExpectedConfigValue: acctest.GenerateFakeCredentialsJson("GOOGLE_CREDENTIALS"),
 		},
-		"when credentials is unset in the config, environment variables are used: GOOGLE_CLOUD_KEYFILE_JSON used second": {
-			EnvVariables: map[string]string{
-				// GOOGLE_CREDENTIALS not set
-				"GOOGLE_CLOUD_KEYFILE_JSON":      acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
-				"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
-				"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
+		"unconfigured value is not valid": {
+			ValueNotProvided: true,
+			ExpectedErrors: []error{
+				errors.New("\"\" cannot be empty"),
 			},
-			ExpectedSchemaValue: "",
-			ExpectedConfigValue: acctest.GenerateFakeCredentialsJson("GOOGLE_CLOUD_KEYFILE_JSON"),
 		},
-		"when credentials is unset in the config, environment variables are used: GCLOUD_KEYFILE_JSON used third": {
-			EnvVariables: map[string]string{
-				// GOOGLE_CREDENTIALS not set
-				// GOOGLE_CLOUD_KEYFILE_JSON not set
-				"GCLOUD_KEYFILE_JSON":            acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
-				"GOOGLE_APPLICATION_CREDENTIALS": acctest.GenerateFakeCredentialsJson("GOOGLE_APPLICATION_CREDENTIALS"),
-			},
-			ExpectedSchemaValue: "",
-			ExpectedConfigValue: acctest.GenerateFakeCredentialsJson("GCLOUD_KEYFILE_JSON"),
-		},
-		"when credentials is unset in the config (and access_token unset), GOOGLE_APPLICATION_CREDENTIALS is used for auth but not to set values in the config": {
-			EnvVariables: map[string]string{
-				"GOOGLE_APPLICATION_CREDENTIALS": transport_tpg.TestFakeCredentialsPath, // needs to be a path to a file when used
-			},
-			ExpectFieldUnset:    true,
-			ExpectedSchemaValue: "",
-		},
-		// Handling empty strings in config
-		"when credentials is set to an empty string in the config (and access_token unset), GOOGLE_APPLICATION_CREDENTIALS is used": {
-			ConfigValues: map[string]interface{}{
-				"credentials": "",
-			},
-			EnvVariables: map[string]string{
-				"GOOGLE_APPLICATION_CREDENTIALS": transport_tpg.TestFakeCredentialsPath, // needs to be a path to a file when used
-			},
-			ExpectFieldUnset:    true,
-			ExpectedSchemaValue: "",
-		},
-		// Error states
-		// NOTE: these tests can't run in Cloud Build due to ADC locating credentials despite `GOOGLE_APPLICATION_CREDENTIALS` being unset
-		// See https://cloud.google.com/docs/authentication/application-default-credentials#search_order
-		// Also, when running these tests locally you need to run `gcloud auth application-default revoke` to ensure your machine isn't supplying ADCs
-		// "error returned if credentials is set as an empty string and GOOGLE_APPLICATION_CREDENTIALS is unset": {
-		// 	ConfigValues: map[string]interface{}{
-		// 		"credentials": "",
-		// 	},
-		// 	EnvVariables: map[string]string{
-		// 		"GOOGLE_APPLICATION_CREDENTIALS": "",
-		// 	},
-		// 	ExpectError: true,
-		// },
-		// "error returned if neither credentials nor access_token set in the provider config, and GOOGLE_APPLICATION_CREDENTIALS is unset": {
-		// 	EnvVariables: map[string]string{
-		// 		"GOOGLE_APPLICATION_CREDENTIALS": "",
-		// 	},
-		// 	ExpectError: true,
-		// },
 	}
 
 	for tn, tc := range cases {
 		t.Run(tn, func(t *testing.T) {
 
 			// Arrange
-			ctx := context.Background()
-			acctest.UnsetTestProviderConfigEnvs(t)
-			acctest.SetupTestEnvs(t, tc.EnvVariables)
-			p := provider.Provider()
-			d := tpgresource.SetupTestResourceDataFromConfigMap(t, p.Schema, tc.ConfigValues)
+			var configValue interface{}
+			if !tc.ValueNotProvided {
+				configValue = tc.ConfigValue
+			}
 
 			// Act
-			c, diags := provider.ProviderConfigure(ctx, d, p)
+			ws, es := provider.ValidateJWT(configValue, "")
 
 			// Assert
-			if diags.HasError() && !tc.ExpectError {
-				t.Fatalf("unexpected error(s): %#v", diags)
+			if len(ws) != len(tc.ExpectedWarnings) {
+				t.Fatalf("Expected %d warnings, got %d: %v", len(tc.ExpectedWarnings), len(ws), ws)
 			}
-			if !diags.HasError() && tc.ExpectError {
-				t.Fatal("expected error(s) but got none")
+			if len(es) != len(tc.ExpectedErrors) {
+				t.Fatalf("Expected %d errors, got %d: %v", len(tc.ExpectedErrors), len(es), es)
 			}
-			if diags.HasError() && tc.ExpectError {
-				v, ok := d.GetOk("credentials")
-				if ok {
-					val := v.(string)
-					if val != tc.ExpectedSchemaValue {
-						t.Fatalf("expected credentials value set in provider config data to be %s, got %s", tc.ExpectedSchemaValue, val)
-					}
-					if tc.ExpectFieldUnset {
-						t.Fatalf("expected credentials value to not be set in provider config data, got %s", val)
-					}
+
+			for i := 0; i < len(tc.ExpectedErrors) && i < len(es); i++ {
+				if es[i].Error() != tc.ExpectedErrors[i].Error() {
+					t.Fatalf("Expected error %d to be \"%s\", got \"%s\"", i+1, tc.ExpectedErrors[i], es[i])
 				}
-				// Return early in tests where errors expected
-				return
+			}
+		})
+	}
+}
+
+func TestProvider_ValidateEmptyStrings(t *testing.T) {
+	cases := map[string]struct {
+		ConfigValue      interface{}
+		ValueNotProvided bool
+		ExpectedWarnings []string
+		ExpectedErrors   []error
+	}{
+		"non-empty strings are valid": {
+			ConfigValue: "foobar",
+		},
+		"unconfigured values are valid": {
+			ValueNotProvided: true,
+		},
+		"empty strings are not valid": {
+			ConfigValue: "",
+			ExpectedErrors: []error{
+				errors.New("expected a non-empty string"),
+			},
+		},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+
+			// Arrange
+			var configValue interface{}
+			if !tc.ValueNotProvided {
+				configValue = tc.ConfigValue
 			}
 
-			config := c.(*transport_tpg.Config) // Should be non-nil value, as test cases reaching this point experienced no errors
+			// Act
+			// Note: second argument is currently unused by the function but is necessary to fulfill the SchemaValidateFunc type's function signature
+			ws, es := provider.ValidateEmptyStrings(configValue, "")
 
-			v, ok := d.GetOk("credentials")
-			val := v.(string)
-			if ok && tc.ExpectFieldUnset {
-				t.Fatal("expected credentials value to be unset in provider config data")
+			// Assert
+			if len(ws) != len(tc.ExpectedWarnings) {
+				t.Fatalf("Expected %d warnings, got %d: %v", len(tc.ExpectedWarnings), len(ws), ws)
 			}
-			if v != tc.ExpectedSchemaValue {
-				t.Fatalf("expected credentials value set in provider config data to be %s, got %s", tc.ExpectedSchemaValue, val)
+			if len(es) != len(tc.ExpectedErrors) {
+				t.Fatalf("Expected %d errors, got %d: %v", len(tc.ExpectedErrors), len(es), es)
 			}
-			if config.Credentials != tc.ExpectedConfigValue {
-				t.Fatalf("expected credentials value set in Config struct to be to be %s, got %s", tc.ExpectedConfigValue, config.Credentials)
+
+			if len(tc.ExpectedErrors) > 0 && len(es) > 0 {
+				if es[0].Error() != tc.ExpectedErrors[0].Error() {
+					t.Fatalf("Expected first error to be \"%s\", got \"%s\"", tc.ExpectedErrors[0], es[0])
+				}
 			}
 		})
 	}

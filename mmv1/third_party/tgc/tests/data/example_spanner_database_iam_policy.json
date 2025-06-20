@@ -12,6 +12,9 @@
         "instance": {
           "config": "projects/{{.Provider.project}}/instanceConfigs/regional-europe-west1",
           "displayName": "main-instance",
+          "labels": {
+            "goog-terraform-provisioned": "true"
+          },
           "nodeCount": 1
         },
         "instanceId": "my-instance"

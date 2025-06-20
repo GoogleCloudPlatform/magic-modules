@@ -4,7 +4,7 @@ description: |-
   Get a VM instance template within GCE.
 ---
 
-# google\_compute\_region\_instance\_template
+# google_compute_region_instance_template
 
 Get information about a VM instance template resource within GCE. For more information see
 [the official documentation](https://cloud.google.com/compute/docs/instance-templates)
@@ -33,7 +33,7 @@ The following arguments are supported:
 - `name` - (Optional) The name of the instance template. One of `name` or `filter` must be provided.
 
 - `filter` - (Optional) A filter to retrieve the instance templates.
-    See [gcloud topic filters](https://cloud.google.com/sdk/gcloud/reference/topic/filters) for reference.
+    See [API filter parameter documentation](https://cloud.google.com/compute/docs/reference/rest/v1/regionInstanceTemplates/list#body.QUERY_PARAMETERS.filter) for reference.
     If multiple instance templates match, either adjust the filter or specify `most_recent`. One of `name` or `filter` must be provided.
 
 - `most_recent` - (Optional) If `filter` is provided, ensures the most recent template is returned when multiple instance templates match. One of `name` or `filter` must be provided.
@@ -111,6 +111,8 @@ The following arguments are supported:
 
 * `confidential_instance_config` - Enable [Confidential Mode](https://cloud.google.com/compute/confidential-vm/docs/about-cvm) on this VM. Structure is [documented below](#nested_confidential_instance_config)
 
+* `key_revocation_action_type` - Action to be taken when a customer's encryption key is revoked.
+
 <a name="nested_disk"></a>The `disk` block supports:
 
 * `auto_delete` - Whether or not the disk should be auto-deleted.
@@ -124,6 +126,11 @@ The following arguments are supported:
 
 * `disk_name` - Name of the disk. When not provided, this defaults
     to the name of the instance.
+
+* `provisioned_iops` - Indicates how many IOPS to provision for the disk. This
+    sets the number of I/O operations per second that the disk can handle.
+    Values must be between 10,000 and 120,000. For more details, see the
+    [Extreme persistent disk documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk).
 
 * `source_image` - The image from which to
     initialize this disk. This can be one of: the image's `self_link`,
@@ -255,7 +262,9 @@ The `disk_encryption_key` block supports:
    groups will use as host systems. Read more on sole-tenant node creation
    [here](https://cloud.google.com/compute/docs/nodes/create-nodes).
    Structure [documented below](#nested_node_affinities).
-   
+
+* `host_error_timeout_seconds` - [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Time in seconds for host error detection.
+
 * `provisioning_model` - Describe the type of preemptible VM. 
 
 * `instance_termination_action` - Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot) 
@@ -294,6 +303,8 @@ The `disk_encryption_key` block supports:
 ---
 
 * `id` - an identifier for the resource with format `projects/{{project}}/regions/{{region}}/instanceTemplates/{{name}}`
+
+* `creation_timestamp` - Creation timestamp in RFC3339 text format.
 
 * `metadata_fingerprint` - The unique fingerprint of the metadata.
 

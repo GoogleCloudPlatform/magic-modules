@@ -1,6 +1,7 @@
 package tpgresource
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/base64"
 	"errors"
@@ -18,10 +19,13 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/go-cty/cty"
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"golang.org/x/exp/maps"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -50,20 +54,20 @@ type TerraformResourceDiff interface {
 	GetOk(string) (interface{}, bool)
 	Clear(string) error
 	ForceNew(string) error
+	SetNew(string, interface{}) error
 }
 
 // Contains functions that don't really belong anywhere else.
 
 // GetRegionFromZone returns the region from a zone for Google cloud.
-// This is by removing the last two chars from the zone name to leave the region
-// If there aren't enough characters in the input string, an empty string is returned
+// This is by removing the characters after the last '-'.
 // e.g. southamerica-west1-a => southamerica-west1
 func GetRegionFromZone(zone string) string {
-	if zone != "" && len(zone) > 2 {
-		region := zone[:len(zone)-2]
-		return region
+	zoneParts := strings.Split(zone, "-")
+	if len(zoneParts) < 3 {
+		return ""
 	}
-	return ""
+	return strings.Join(zoneParts[:len(zoneParts)-1], "-")
 }
 
 // Infers the region based on the following (in order of priority):
@@ -82,6 +86,13 @@ func GetProject(d TerraformResourceData, config *transport_tpg.Config) (string, 
 	return GetProjectFromSchema("project", d, config)
 }
 
+// GetUniverse reads the "universe_domain" field from the given resource data and falls
+// back to the provider's value if not given. If the provider's value is not
+// given, an error is returned.
+func GetUniverseDomain(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
+	return GetUniverseDomainFromSchema("universe_domain", d, config)
+}
+
 // GetBillingProject reads the "billing_project" field from the given resource data and falls
 // back to the provider's value if not given. If no value is found, an error is returned.
 func GetBillingProject(d TerraformResourceData, config *transport_tpg.Config) (string, error) {
@@ -96,10 +107,47 @@ func GetProjectFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (s
 	if ok {
 		return res.(string), nil
 	}
+	if d.GetRawConfig().GetAttr("project") == cty.UnknownVal(cty.String) {
+		return res.(string), nil
+	}
 	if config.Project != "" {
 		return config.Project, nil
 	}
 	return "", fmt.Errorf("%s: required field is not set", "project")
+}
+
+// getRegionFromDiff reads the "region" field from the given diff and falls
+// back to the provider's value if not given. If the provider's value is not
+// given, an error is returned.
+func GetRegionFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (string, error) {
+	res, ok := d.GetOk("region")
+	if ok {
+		return res.(string), nil
+	}
+	if d.GetRawConfig().GetAttr("region") == cty.UnknownVal(cty.String) {
+		return res.(string), nil
+	}
+	if config.Region != "" {
+		return config.Region, nil
+	}
+	return "", fmt.Errorf("%s: required field is not set", "region")
+}
+
+// getZoneFromDiff reads the "zone" field from the given diff and falls
+// back to the provider's value if not given. If the provider's value is not
+// given, an error is returned.
+func GetZoneFromDiff(d *schema.ResourceDiff, config *transport_tpg.Config) (string, error) {
+	res, ok := d.GetOk("zone")
+	if ok {
+		return res.(string), nil
+	}
+	if d.GetRawConfig().GetAttr("zone") == cty.UnknownVal(cty.String) {
+		return res.(string), nil
+	}
+	if config.Zone != "" {
+		return config.Zone, nil
+	}
+	return "", fmt.Errorf("%s: required field is not set", "zone")
 }
 
 func GetRouterLockName(region string, router string) string {
@@ -165,6 +213,11 @@ func ExpandLabels(d TerraformResourceData) map[string]string {
 	return ExpandStringMap(d, "labels")
 }
 
+// ExpandEffectiveLabels pulls the value of "effective_labels" out of a TerraformResourceData as a map[string]string.
+func ExpandEffectiveLabels(d TerraformResourceData) map[string]string {
+	return ExpandStringMap(d, "effective_labels")
+}
+
 // ExpandEnvironmentVariables pulls the value of "environment_variables" out of a schema.ResourceData as a map[string]string.
 func ExpandEnvironmentVariables(d *schema.ResourceData) map[string]string {
 	return ExpandStringMap(d, "environment_variables")
@@ -184,6 +237,107 @@ func ExpandStringMap(d TerraformResourceData, key string) map[string]string {
 	}
 
 	return ConvertStringMap(v.(map[string]interface{}))
+}
+
+// InterfaceSliceToStringSlice converts a []interface{} containing strings to []string
+func InterfaceSliceToStringSlice(v interface{}) ([]string, error) {
+	interfaceSlice, ok := v.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("expected []interface{}, got %T", v)
+	}
+
+	stringSlice := make([]string, len(interfaceSlice))
+	for i, item := range interfaceSlice {
+		strItem, ok := item.(string)
+		if !ok {
+			return nil, fmt.Errorf("expected string, got %T at index %d", item, i)
+		}
+		stringSlice[i] = strItem
+	}
+
+	return stringSlice, nil
+}
+
+// SortStringsByConfigOrder takes a slice of map[string]interface{} from a TF config
+// and API data, and returns a new slice containing the API data, reorderd to match
+// the TF config as closely as possible (with new items at the end of the list.)
+func SortStringsByConfigOrder(configData, apiData []string) ([]string, error) {
+	configOrder := map[string]int{}
+	for index, item := range configData {
+		_, ok := configOrder[item]
+		if ok {
+			return nil, fmt.Errorf("configData element at %d has duplicate value `%s`", index, item)
+		}
+		configOrder[item] = index
+	}
+
+	apiSeen := map[string]struct{}{}
+	byConfigIndex := map[int]string{}
+	newElements := []string{}
+	for index, item := range apiData {
+		_, ok := apiSeen[item]
+		if ok {
+			return nil, fmt.Errorf("apiData element at %d has duplicate value `%s`", index, item)
+		}
+		apiSeen[item] = struct{}{}
+		configIndex, found := configOrder[item]
+		if found {
+			byConfigIndex[configIndex] = item
+		} else {
+			newElements = append(newElements, item)
+		}
+	}
+
+	// Sort set config indexes and convert to a slice of strings. This removes items present in the config
+	// but not present in the API response.
+	configIndexes := maps.Keys(byConfigIndex)
+	sort.Ints(configIndexes)
+	result := []string{}
+	for _, index := range configIndexes {
+		result = append(result, byConfigIndex[index])
+	}
+
+	// Add new elements to the end of the list, sorted alphabetically.
+	sort.Strings(newElements)
+	result = append(result, newElements...)
+
+	return result, nil
+}
+
+// SortMapsByConfigOrder takes a slice of map[string]interface{} from a TF config
+// and API data, and returns a new slice containing the API data, reorderd to match
+// the TF config as closely as possible (with new items at the end of the list.)
+// idKey is be used to extract a string key from the values in the slice.
+func SortMapsByConfigOrder(configData, apiData []map[string]interface{}, idKey string) ([]map[string]interface{}, error) {
+	configIds := make([]string, len(configData))
+	for i, item := range configData {
+		id, ok := item[idKey].(string)
+		if !ok {
+			return nil, fmt.Errorf("configData element at %d does not contain string value in key `%s`", i, idKey)
+		}
+		configIds[i] = id
+	}
+
+	apiIds := make([]string, len(apiData))
+	apiMap := map[string]map[string]interface{}{}
+	for i, item := range apiData {
+		id, ok := item[idKey].(string)
+		if !ok {
+			return nil, fmt.Errorf("apiData element at %d does not contain string value in key `%s`", i, idKey)
+		}
+		apiIds[i] = id
+		apiMap[id] = item
+	}
+
+	sortedIds, err := SortStringsByConfigOrder(configIds, apiIds)
+	if err != nil {
+		return nil, err
+	}
+	result := []map[string]interface{}{}
+	for _, id := range sortedIds {
+		result = append(result, apiMap[id])
+	}
+	return result, nil
 }
 
 func ConvertStringMap(v map[string]interface{}) map[string]string {
@@ -481,31 +635,6 @@ func Fake404(reasonResourceType, resourceName string) *googleapi.Error {
 	}
 }
 
-// validate name of the gcs bucket. Guidelines are located at https://cloud.google.com/storage/docs/naming-buckets
-// this does not attempt to check for IP addresses or close misspellings of "google"
-func CheckGCSName(name string) error {
-	if strings.HasPrefix(name, "goog") {
-		return fmt.Errorf("error: bucket name %s cannot start with %q", name, "goog")
-	}
-
-	if strings.Contains(name, "google") {
-		return fmt.Errorf("error: bucket name %s cannot contain %q", name, "google")
-	}
-
-	valid, _ := regexp.MatchString("^[a-z0-9][a-z0-9_.-]{1,220}[a-z0-9]$", name)
-	if !valid {
-		return fmt.Errorf("error: bucket name validation failed %v. See https://cloud.google.com/storage/docs/naming-buckets", name)
-	}
-
-	for _, str := range strings.Split(name, ".") {
-		valid, _ := regexp.MatchString("^[a-z0-9_-]{1,63}$", str)
-		if !valid {
-			return fmt.Errorf("error: bucket name validation failed %v", str)
-		}
-	}
-	return nil
-}
-
 // CheckGoogleIamPolicy makes assertions about the contents of a google_iam_policy data source's policy_data attribute
 func CheckGoogleIamPolicy(value string) error {
 	if strings.Contains(value, "\"description\":\"\"") {
@@ -577,7 +706,7 @@ func ReplaceVarsForId(d TerraformResourceData, config *transport_tpg.Config, lin
 // substitution as 10+ calls to allow for future use cases.
 func ReplaceVarsRecursive(d TerraformResourceData, config *transport_tpg.Config, linkTmpl string, shorten bool, depth int) (string, error) {
 	if depth > 10 {
-		return "", errors.New("Recursive substitution detcted")
+		return "", errors.New("Recursive substitution detected")
 	}
 
 	// https://github.com/google/re2/wiki/Syntax
@@ -607,6 +736,9 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 		if err != nil {
 			return nil, err
 		}
+		if shorten {
+			project = strings.TrimPrefix(project, "projects/")
+		}
 	}
 
 	if strings.Contains(linkTmpl, "{{project_id_or_project}}") {
@@ -620,6 +752,10 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 		if err != nil {
 			return nil, err
 		}
+		if shorten {
+			project = strings.TrimPrefix(project, "projects/")
+			projectID = strings.TrimPrefix(projectID, "projects/")
+		}
 	}
 
 	if strings.Contains(linkTmpl, "{{region}}") {
@@ -627,12 +763,18 @@ func BuildReplacementFunc(re *regexp.Regexp, d TerraformResourceData, config *tr
 		if err != nil {
 			return nil, err
 		}
+		if shorten {
+			region = strings.TrimPrefix(region, "regions/")
+		}
 	}
 
 	if strings.Contains(linkTmpl, "{{zone}}") {
 		zone, err = GetZone(d, config)
 		if err != nil {
 			return nil, err
+		}
+		if shorten {
+			zone = strings.TrimPrefix(zone, "zones/")
 		}
 	}
 
@@ -698,4 +840,75 @@ func GetContentMd5Hash(content []byte) string {
 		log.Printf("[WARN] Failed to compute md5 hash for content: %v", err)
 	}
 	return base64.StdEncoding.EncodeToString(h.Sum(nil))
+}
+
+func DefaultProviderProject(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+
+	config := meta.(*transport_tpg.Config)
+
+	//project
+	if project := diff.Get("project"); project != nil {
+		project2, err := GetProjectFromDiff(diff, config)
+		if err != nil {
+			return fmt.Errorf("Failed to retrieve project, pid: %s, err: %s", project, err)
+		}
+		if CompareSelfLinkRelativePaths("", project.(string), project2, nil) {
+			return nil
+		}
+
+		err = diff.SetNew("project", project2)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func DefaultProviderRegion(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+
+	config := meta.(*transport_tpg.Config)
+	//region
+	if region := diff.Get("region"); region != nil {
+		region, err := GetRegionFromDiff(diff, config)
+		if err != nil {
+			return fmt.Errorf("Failed to retrieve region, pid: %s, err: %s", region, err)
+		}
+		err = diff.SetNew("region", region)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func DefaultProviderZone(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+
+	config := meta.(*transport_tpg.Config)
+	// zone
+	if zone := diff.Get("zone"); zone != nil {
+		zone, err := GetZoneFromDiff(diff, config)
+		if err != nil {
+			return fmt.Errorf("Failed to retrieve zone, pid: %s, err: %s", zone, err)
+		}
+		err = diff.SetNew("zone", zone)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// id.UniqueId() returns a timestamp + incremental hash
+// This function truncates the timestamp to provide a prefix + 9 using
+// YYmmdd + last 3 digits of the incremental hash
+func ReducedPrefixedUniqueId(prefix string) string {
+	// uniqueID is timestamp + 8 digit counter (YYYYmmddHHMMSSssss + 12345678)
+	uniqueId := id.PrefixedUniqueId("")
+	// last three digits of the counter (678)
+	counter := uniqueId[len(uniqueId)-3:]
+	// YYmmdd of date
+	date := uniqueId[2:8]
+	return prefix + date + counter
 }

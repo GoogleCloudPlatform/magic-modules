@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -32,6 +32,9 @@ resource "google_compute_global_forwarding_rule" "foobar-fr" {
   name       = "%s"
   target     = google_compute_target_http_proxy.default.id
   port_range = "80"
+  labels     = {
+    my-label = "my-label-value"
+  }
 }
 
 resource "google_compute_target_http_proxy" "default" {

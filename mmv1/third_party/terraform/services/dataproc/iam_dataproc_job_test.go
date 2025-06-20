@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -12,10 +12,14 @@ import (
 func TestAccDataprocJobIamBinding(t *testing.T) {
 	t.Parallel()
 
-	cluster := "tf-dataproc-iam-cluster" + acctest.RandString(t, 10)
-	job := "tf-dataproc-iam-job-" + acctest.RandString(t, 10)
-	account := "tf-dataproc-iam-" + acctest.RandString(t, 10)
+	cluster := "tf-test-iam-" + acctest.RandString(t, 10)
+	job := "tf-test-iam-" + acctest.RandString(t, 10)
+	account := "tf-test-dpiam-" + acctest.RandString(t, 10)
 	role := "roles/editor"
+
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s %s",
 		envvar.GetTestProjectFromEnv(), "us-central1", job, role)
@@ -26,7 +30,7 @@ func TestAccDataprocJobIamBinding(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
-				Config: testAccDataprocJobIamBinding_basic(cluster, job, account, role),
+				Config: testAccDataprocJobIamBinding_basic(cluster, subnetworkName, job, account, role),
 			},
 			{
 				ResourceName:      "google_dataproc_job_iam_binding.binding",
@@ -36,7 +40,7 @@ func TestAccDataprocJobIamBinding(t *testing.T) {
 			},
 			{
 				// Test IAM Binding update
-				Config: testAccDataprocJobIamBinding_update(cluster, job, account, role),
+				Config: testAccDataprocJobIamBinding_update(cluster, subnetworkName, job, account, role),
 			},
 			{
 				ResourceName:      "google_dataproc_job_iam_binding.binding",
@@ -51,10 +55,14 @@ func TestAccDataprocJobIamBinding(t *testing.T) {
 func TestAccDataprocJobIamMember(t *testing.T) {
 	t.Parallel()
 
-	cluster := "tf-dataproc-iam-cluster" + acctest.RandString(t, 10)
-	job := "tf-dataproc-iam-jobid-" + acctest.RandString(t, 10)
-	account := "tf-dataproc-iam-" + acctest.RandString(t, 10)
+	cluster := "tf-test-iam-" + acctest.RandString(t, 10)
+	job := "tf-test-iam-" + acctest.RandString(t, 10)
+	account := "tf-test-dpiam-" + acctest.RandString(t, 10)
 	role := "roles/editor"
+
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s %s serviceAccount:%s",
 		envvar.GetTestProjectFromEnv(),
@@ -69,7 +77,7 @@ func TestAccDataprocJobIamMember(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
-				Config: testAccDataprocJobIamMember(cluster, job, account, role),
+				Config: testAccDataprocJobIamMember(cluster, subnetworkName, job, account, role),
 			},
 			{
 				ResourceName:      "google_dataproc_job_iam_member.member",
@@ -84,10 +92,14 @@ func TestAccDataprocJobIamMember(t *testing.T) {
 func TestAccDataprocJobIamPolicy(t *testing.T) {
 	t.Parallel()
 
-	cluster := "tf-dataproc-iam-cluster" + acctest.RandString(t, 10)
-	job := "tf-dataproc-iam-jobid-" + acctest.RandString(t, 10)
-	account := "tf-dataproc-iam-" + acctest.RandString(t, 10)
+	cluster := "tf-test-iam-" + acctest.RandString(t, 10)
+	job := "tf-test-iam-" + acctest.RandString(t, 10)
+	account := "tf-test-dpiam-" + acctest.RandString(t, 10)
 	role := "roles/editor"
+
+	networkName := acctest.BootstrapSharedTestNetwork(t, "dataproc-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "dataproc-cluster", networkName)
+	acctest.BootstrapFirewallForDataprocSharedNetwork(t, "dataproc-cluster", networkName)
 
 	importId := fmt.Sprintf("projects/%s/regions/%s/jobs/%s",
 		envvar.GetTestProjectFromEnv(), "us-central1", job)
@@ -98,7 +110,7 @@ func TestAccDataprocJobIamPolicy(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Test IAM Binding creation
-				Config: testAccDataprocJobIamPolicy(cluster, job, account, role),
+				Config: testAccDataprocJobIamPolicy(cluster, subnetworkName, job, account, role),
 				Check:  resource.TestCheckResourceAttrSet("data.google_dataproc_job_iam_policy.policy", "policy_data"),
 			},
 			{
@@ -139,7 +151,7 @@ resource "google_dataproc_job" "pyspark" {
 }
 `
 
-func testAccDataprocJobIamBinding_basic(cluster, job, account, role string) string {
+func testAccDataprocJobIamBinding_basic(cluster, subnetworkName, job, account, role string) string {
 	return fmt.Sprintf(testDataprocIamJobConfig+`
 resource "google_service_account" "test-account1" {
   account_id   = "%s-1"
@@ -159,10 +171,10 @@ resource "google_dataproc_job_iam_binding" "binding" {
     "serviceAccount:${google_service_account.test-account1.email}",
   ]
 }
-`, cluster, job, account, account, role)
+`, cluster, subnetworkName, job, account, account, role)
 }
 
-func testAccDataprocJobIamBinding_update(cluster, job, account, role string) string {
+func testAccDataprocJobIamBinding_update(cluster, subnetworkName, job, account, role string) string {
 	return fmt.Sprintf(testDataprocIamJobConfig+`
 resource "google_service_account" "test-account1" {
   account_id   = "%s-1"
@@ -183,10 +195,10 @@ resource "google_dataproc_job_iam_binding" "binding" {
     "serviceAccount:${google_service_account.test-account2.email}",
   ]
 }
-`, cluster, job, account, account, role)
+`, cluster, subnetworkName, job, account, account, role)
 }
 
-func testAccDataprocJobIamMember(cluster, job, account, role string) string {
+func testAccDataprocJobIamMember(cluster, subnetworkName, job, account, role string) string {
 	return fmt.Sprintf(testDataprocIamJobConfig+`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
@@ -198,10 +210,10 @@ resource "google_dataproc_job_iam_member" "member" {
   role   = "%s"
   member = "serviceAccount:${google_service_account.test-account.email}"
 }
-`, cluster, job, account, role)
+`, cluster, subnetworkName, job, account, role)
 }
 
-func testAccDataprocJobIamPolicy(cluster, job, account, role string) string {
+func testAccDataprocJobIamPolicy(cluster, subnetworkName, job, account, role string) string {
 	return fmt.Sprintf(testDataprocIamJobConfig+`
 resource "google_service_account" "test-account" {
   account_id   = "%s"
@@ -226,5 +238,5 @@ data "google_dataproc_job_iam_policy" "policy" {
   region      = "us-central1"
 }
 
-`, cluster, job, account, role)
+`, cluster, subnetworkName, job, account, role)
 }
