@@ -88,7 +88,6 @@ resource "google_apigee_developer_app" "{{$.PrimaryResourceId}}" {
   name              = "tf-test%{random_suffix}"
   developer_email   = google_apigee_developer.apigee_developer.email
   org_id            = google_apigee_organization.apigee_org.id
-  app_family        = "sample"
   callback_url      = "http://localhost"
 
   attributes {

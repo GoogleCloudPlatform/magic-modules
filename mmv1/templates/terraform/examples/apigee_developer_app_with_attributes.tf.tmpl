@@ -47,7 +47,6 @@ resource "google_apigee_developer_app" "apigee_developer_app" {
   name              = "{{index $.Vars "app_name"}}"
   org_id            = google_apigee_organization.apigee_org.id
   developer_email   = google_apigee_developer.email
-  app_family        = "sample"
   callback_url      = "http://localhost"
 
   attributes {

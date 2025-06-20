@@ -42,6 +42,7 @@ examples:
       org_id: "ORG_ID"
       billing_account: "BILLING_ACCT"
     exclude_docs: true
+    skip_vcr: true
     external_providers: ["time"]
   - name: "apigee_developer_app_with_attributes"
     vars:
@@ -55,6 +56,7 @@ examples:
       org_id: "ORG_ID"
       billing_account: "BILLING_ACCT"
     exclude_docs: true
+    skip_vcr: true
     external_providers: ["time"]
 parameters:
   - name: "orgId"
@@ -190,8 +192,9 @@ properties:
   - name: "status"
     type: String
     description: |
-      Status of the credential. Valid values include approved or revoked.
+      Status of the credential. Valid values include approved or revoked. After creation, this field can't be changed in this resource.
     default_from_api: true
+    immutable: true
   - name: "keyExpiresIn"
     type: String
     description: |
