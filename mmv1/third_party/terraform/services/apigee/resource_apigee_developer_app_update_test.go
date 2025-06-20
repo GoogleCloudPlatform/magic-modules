@@ -1,13 +1,11 @@
 package apigee_test
 
 import (
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"testing"
 )
 
 func TestAccApigeeDeveloperApp_apigeeDeveloperApp_full(t *testing.T) {
@@ -148,6 +146,8 @@ resource "google_apigee_developer_app" "apigee_developer_app" {
   developer_email   = google_apigee_developer.apigee_developer.email
   org_id            = google_apigee_organization.apigee_org.id
   callback_url      = "http://localhost"
+	status						= "revoked"
+	key_expires_in		= 900000
 
   attributes {
     name  = "sample_name"
