@@ -74,7 +74,6 @@ properties:
       character must be a lowercase letter, and all following characters must be a dash,
       lowercase letter, or digit, except the last character, which cannot be a dash.
     required: true
-    immutable: true
     validation:
       regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
   - name: 'location'
@@ -82,7 +81,6 @@ properties:
     description: |
       URL of the InterconnectLocation object that represents where this connection is to be provisioned.
       Specifies the location inside Google's Networks.
-    immutable: true
     resource: 'InterconnectLocations'
     imports: 'selfLink'
     required: true
@@ -95,7 +93,6 @@ properties:
         - LINK_TYPE_ETHERNET_100G_LR: A 100G Ethernet with LR optics.
         - LINK_TYPE_ETHERNET_400G_LR4: A 400G Ethernet with LR4 optics
     required: true
-    immutable: true
     enum_values:
       - 'LINK_TYPE_ETHERNET_10G_LR'
       - 'LINK_TYPE_ETHERNET_100G_LR'
@@ -105,7 +102,6 @@ properties:
     description: |
       Target number of physical links in the link bundle, as requested by the customer.
     required: true
-    immutable: true
   - name: 'interconnectType'
     type: Enum
     description: |
@@ -114,7 +110,6 @@ properties:
         - PARTNER: A partner-managed interconnection shared between customers though a partner.
         - DEDICATED: A dedicated physical interconnection with the customer.
     required: true
-    immutable: true
     diff_suppress_func: 'InterconnectTypeDiffSuppress'
     enum_values:
       - 'DEDICATED'
@@ -142,7 +137,6 @@ properties:
       Customer name, to put in the Letter of Authorization as the party authorized to request a
       crossconnect. This field is required for Dedicated and Partner Interconnect, should not be specified
       for cross-cloud interconnect.
-    immutable: true
   - name: 'operationalStatus'
     type: Enum
     description: |
@@ -385,7 +379,6 @@ properties:
     description: |
       Indicates that this is a Cross-Cloud Interconnect. This field specifies the location outside
       of Google's network that the interconnect is connected to.
-    immutable: true
   - name: 'requestedFeatures'
     type: Array
     description: |
@@ -394,7 +387,6 @@ properties:
       specified, the default value is false, which allocates non-MACsec capable ports first if
       available). Note that MACSEC is still technically allowed for compatibility reasons, but it
       does not work with the API, and will be removed in an upcoming major version.
-    immutable: true
     item_type:
       type: Enum
       description: |
@@ -470,6 +462,7 @@ properties:
             description: |
               Specify bandwidth percentages for various traffic classes for queuing
               type Bandwidth Percent.
+            api_name: bandwidthPercentages
             min_version: beta
             item_type:
               type: NestedObject
@@ -493,7 +486,7 @@ properties:
                   description: |
                     Bandwidth percentage for a specific traffic class.
                   min_version: beta
-      - name: shapeAveragePercentage
+      - name: shapeAveragePercentages
         type: Array
         description: |
           Optional field to specify a list of shape average percentages to be

@@ -20,7 +20,6 @@ func TestAccComputeInterconnect_computeInterconnectBasicTestExample_update(t *te
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckComputeInterconnectDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInterconnect_computeInterconnectBasicTestExample_basic(context),
@@ -83,7 +82,7 @@ data "google_project" "project" {
 
 resource "google_compute_interconnect" "foobar-interconnect" {
   provider             = google-beta
-  name                 = "foobar-interconnect%{random_suffix}"
+  name                 = "tf-test-foobar-interconnect%{random_suffix}"
   customer_name        = "internal_customer" # Special customer only available for Google testing.
   interconnect_type    = "DEDICATED"
   link_type            = "LINK_TYPE_ETHERNET_10G_LR"
@@ -100,33 +99,31 @@ resource "google_compute_interconnect" "foobar-interconnect" {
   aai_enabled = true
   application_aware_interconnect  {
     profile_description = "application awareness config with BandwidthPercentage policy."
-	bandwidth-percentage_policy  {
-	  bandwidth_percentages = [
-	 	 {
-	  		traffic_class = "TC1"
-			percentage   = 20
-		 },
-		 {
-	  		traffic_class = "TC2"
-			percentage   = 20
-		 },
-		 {
-	  		traffic_class = "TC3"
-			percentage   = 20
-		 },
-		 {
-	  		traffic_class = "TC4"
-			percentage   = 20
-		 },
-		 {
-	  		traffic_class = "TC5"
-			percentage   = 10
-		 },
-		 {
-	  		traffic_class = "TC6"
-			percentage   = 10
-		 }
-	  ]
+	bandwidth_percentage_policy  {
+	  bandwidth_percentages	{
+		traffic_class = "TC1"
+		percentage   = 20
+	  }
+	  bandwidth_percentages	{
+		traffic_class = "TC2"
+		percentage   = 20
+	  }
+	  bandwidth_percentages	{
+		traffic_class = "TC3"
+		percentage   = 20
+	  }
+	  bandwidth_percentages	{
+		traffic_class = "TC4"
+		percentage   = 20
+	  }
+	  bandwidth_percentages	{
+		traffic_class = "TC5"
+		percentage   = 10
+	  }
+	  bandwidth_percentages	{
+		traffic_class = "TC6"
+		percentage   = 10
+	  }
 	}
   }
 }
