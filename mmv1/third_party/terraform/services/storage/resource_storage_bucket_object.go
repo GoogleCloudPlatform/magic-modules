@@ -386,7 +386,6 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 	insertCall := objectsService.Insert(bucket, object)
 	insertCall.Name(name)
 	if v, ok := d.GetOk("force_empty_content_type"); ok && v.(bool) {
-		object.ContentType = ""
 		insertCall.Media(media, googleapi.ContentType(""))
 	} else {
 		insertCall.Media(media)
@@ -421,6 +420,7 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 		// The KMS key name are not able to be set on create :
 		// or you get error: Error uploading object test-maarc: googleapi: Error 400: Malformed Cloud KMS crypto key: projects/myproject/locations/myregion/keyRings/mykeyring/cryptoKeys/mykeyname/cryptoKeyVersions/1, invalid
 		d.Set("kms_key_name", nil)
+		d.Set("content_type", nil)
 		return resourceStorageBucketObjectCreate(d, meta)
 	} else {
 
