@@ -147,11 +147,7 @@ var (
 	suppressDiffForConfidentialNodes = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 		k = strings.Replace(k, "confidential_instance_type", "enabled", 1)
 		if v, _ := d.Get(k).(bool); v {
-			if oldValue == "SEV" && (newValue == "" || newValue == "CONFIDENTIAL_INSTANCE_TYPE_UNSPECIFIED") {
-				return true
-			}
-		} else {
-			return oldValue == "" && newValue == "CONFIDENTIAL_INSTANCE_TYPE_UNSPECIFIED"
+			return oldValue == "SEV" && newValue == ""
 		}
 		return false
 	})
@@ -1428,7 +1424,7 @@ func ResourceContainerCluster() *schema.Resource {
 							ForceNew:    true,
 							DiffSuppressFunc: suppressDiffForConfidentialNodes,
 							Description: `Defines the type of technology used by the confidential node.`,
-							ValidateFunc: validation.StringInSlice([]string{"CONFIDENTIAL_INSTANCE_TYPE_UNSPECIFIED", "SEV", "SEV_SNP", "TDX"}, false),
+							ValidateFunc: validation.StringInSlice([]string{"SEV", "SEV_SNP", "TDX"}, false),
 						},
 					},
 				},

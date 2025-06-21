@@ -403,7 +403,7 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, false, "CONFIDENTIAL_INSTANCE_TYPE_UNSPECIFIED", "n2d-standard-2"),
+				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, false, "", "n2d-standard-2"),
 			},
 			{
 				ResourceName:            "google_container_cluster.confidential_nodes",
@@ -412,7 +412,7 @@ func TestAccContainerCluster_withConfidentialNodes(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, true, "CONFIDENTIAL_INSTANCE_TYPE_UNSPECIFIED", "n2d-standard-2"),
+				Config: testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName, true, "", "n2d-standard-2"),
 			},
 			{
 				ResourceName:            "google_container_cluster.confidential_nodes",
@@ -7128,6 +7128,11 @@ resource "google_container_cluster" "filtered_notification_config" {
 }
 
 func testAccContainerCluster_withConfidentialNodes(clusterName, npName, networkName, subnetworkName string, enable bool, confidentialInstanceType, machineType string) string {
+	confInsTypeString := ""
+	if confidentialInstanceType != "" {
+		 confInsTypeString = fmt.Sprintf(`confidential_instance_type = "%s"`, confidentialInstanceType)
+	}
+
 	return fmt.Sprintf(`
 resource "google_container_cluster" "confidential_nodes" {
   name               = "%s"
@@ -7143,14 +7148,15 @@ resource "google_container_cluster" "confidential_nodes" {
 
   confidential_nodes {
     enabled = %t
-    confidential_instance_type = "%s"
+    %s
   }
+
   network    = "%s"
   subnetwork = "%s"
 
   deletion_protection = false
 }
-`, clusterName, npName, machineType, enable, confidentialInstanceType, networkName, subnetworkName)
+`, clusterName, npName, machineType, enable, confInsTypeString, networkName, subnetworkName)
 }
 
 func testAccContainerCluster_withLocalSsdEncryptionMode(clusterName, npName, networkName, subnetworkName, mode string) string {

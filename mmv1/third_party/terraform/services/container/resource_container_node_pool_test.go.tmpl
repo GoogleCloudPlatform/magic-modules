@@ -4516,7 +4516,7 @@ func TestAccContainerNodePool_withConfidentialNodes(t *testing.T) {
 		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, false, "CONFIDENTIAL_INSTANCE_TYPE_UNSPECIFIED", "n2d-standard-2"),
+				Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, false, "", "n2d-standard-2"),
 			},
 			{
 				ResourceName:            "google_container_node_pool.np",
@@ -4524,7 +4524,7 @@ func TestAccContainerNodePool_withConfidentialNodes(t *testing.T) {
 				ImportStateVerify:       true,
 			},
 			{
-				Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, true, "CONFIDENTIAL_INSTANCE_TYPE_UNSPECIFIED", "n2d-standard-2"),
+				Config: testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName, true, "", "n2d-standard-2"),
 			},
 			{
 				ResourceName:            "google_container_node_pool.np",
@@ -4558,6 +4558,10 @@ func TestAccContainerNodePool_withConfidentialNodes(t *testing.T) {
 }
 
 func testAccContainerNodePool_withConfidentialNodes(clusterName, np, networkName, subnetworkName string, enable bool, confidentialInstanceType, machineType string) string {
+	confInsTypeString := ""
+        if confidentialInstanceType != "" {
+                 confInsTypeString = fmt.Sprintf(`confidential_instance_type = "%s"`, confidentialInstanceType)
+        }
 	return fmt.Sprintf(`
 resource "google_container_cluster" "cluster" {
   name               = "%s"
@@ -4577,11 +4581,11 @@ resource "google_container_node_pool" "np" {
     machine_type = "%s"
     confidential_nodes {
       enabled = %t
-      confidential_instance_type = "%s"
+      %s
     }
   }
 }
-`, clusterName, networkName, subnetworkName, np, machineType, enable, confidentialInstanceType)
+`, clusterName, networkName, subnetworkName, np, machineType, enable, confInsTypeString)
 }
 
 func TestAccContainerNodePool_withLocalSsdEncryptionMode(t *testing.T) {

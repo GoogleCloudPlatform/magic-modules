@@ -844,7 +844,7 @@ func schemaNodeConfig() *schema.Schema {
 								ForceNew:    true,
 								DiffSuppressFunc: suppressDiffForConfidentialNodes,
 								Description: `Defines the type of technology used by the confidential node.`,
-								ValidateFunc: validation.StringInSlice([]string{"CONFIDENTIAL_INSTANCE_TYPE_UNSPECIFIED", "SEV", "SEV_SNP", "TDX"}, false),
+								ValidateFunc: validation.StringInSlice([]string{"SEV", "SEV_SNP", "TDX"}, false),
 							},
 						},
 					},
