@@ -90,6 +90,12 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Description: `Content-Type of the object data. Defaults to "application/octet-stream" or "text/plain; charset=utf-8".`,
 			},
 
+			"force_empty_content_type": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `Flag to force empty Content-Type.`,
+			},
+
 			"content": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -379,7 +385,11 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 
 	insertCall := objectsService.Insert(bucket, object)
 	insertCall.Name(name)
-	insertCall.Media(media)
+	if v, ok := d.GetOk("force_empty_content_type"); ok && v.(bool) {
+		insertCall.Media(media, googleapi.ContentType(""))
+	} else {
+		insertCall.Media(media)
+	}
 
 	// This is done late as we need to add headers to enable customer encryption
 	if v, ok := d.GetOk("customer_encryption"); ok {
@@ -406,10 +416,11 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	if d.HasChange("content") || d.HasChange("source_md5hash") || d.HasChange("detect_md5hash") {
+	if d.HasChange("content") || d.HasChange("source_md5hash") || d.HasChange("detect_md5hash") || d.HasChange("force_empty_content_type") {
 		// The KMS key name are not able to be set on create :
 		// or you get error: Error uploading object test-maarc: googleapi: Error 400: Malformed Cloud KMS crypto key: projects/myproject/locations/myregion/keyRings/mykeyring/cryptoKeys/mykeyname/cryptoKeyVersions/1, invalid
 		d.Set("kms_key_name", nil)
+		d.Set("content_type", nil)
 		return resourceStorageBucketObjectCreate(d, meta)
 	} else {
 
