@@ -296,7 +296,7 @@ func TestAccDNSRecordSet_routingPolicy(t *testing.T) {
 				Config: testAccDnsRecordSet_routingPolicyWRR(networkName, backendName, forwardingRuleName, zoneName, 300),
 			},
 			{
-				ResourceName:      "google_dns_record_set.foobar",
+				ResourceName:      "google_dns_record_set.wrr",
 				ImportStateId:     fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", envvar.GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:       true,
 				ImportStateVerify: true,
@@ -305,7 +305,7 @@ func TestAccDNSRecordSet_routingPolicy(t *testing.T) {
 				Config: testAccDnsRecordSet_routingPolicyGEO(networkName, backendName, forwardingRuleName, zoneName, 300),
 			},
 			{
-				ResourceName:  "google_dns_record_set.foobar",
+				ResourceName:  "google_dns_record_set.geo",
 				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", envvar.GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:   true,
 				ImportStateVerify: true,
@@ -314,7 +314,7 @@ func TestAccDNSRecordSet_routingPolicy(t *testing.T) {
 				Config: testAccDnsRecordSet_routingPolicyPrimaryBackup(networkName, backendName, forwardingRuleName, zoneName, 300),
 			},
 			{
-				ResourceName:  "google_dns_record_set.foobar",
+				ResourceName:  "google_dns_record_set.failover",
 				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", envvar.GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:   true,
 				ImportStateVerify: true,
@@ -323,7 +323,7 @@ func TestAccDNSRecordSet_routingPolicy(t *testing.T) {
 				Config: testAccDnsRecordSet_routingPolicyRegionalL7PrimaryBackup(networkName, proxySubnetName+"-reg-l7", httpHealthCheckName, backendName, urlMapName, httpProxyName, forwardingRuleName+"-reg-l7", zoneName, 300),
 			},
 			{
-				ResourceName:  "google_dns_record_set.foobar",
+				ResourceName:  "google_dns_record_set.rl7_failover",
 				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", envvar.GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:   true,
 				ImportStateVerify: true,
@@ -332,7 +332,7 @@ func TestAccDNSRecordSet_routingPolicy(t *testing.T) {
 				Config: testAccDnsRecordSet_routingPolicyRegionalL7PrimaryBackupMultipleNoLbType(networkName, proxySubnetName+"-reg-l7-nolbtype", httpHealthCheckName, backendName, urlMapName, httpProxyName, forwardingRuleName+"-reg-l7-nolbtype", zoneName, 300),
 			},
 			{
-				ResourceName:  "google_dns_record_set.foobar",
+				ResourceName:  "google_dns_record_set.implicit_rl7_failover",
 				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", envvar.GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:   true,
 				ImportStateVerify: true,
@@ -341,7 +341,7 @@ func TestAccDNSRecordSet_routingPolicy(t *testing.T) {
 				Config: testAccDnsRecordSet_routingPolicyCrossRegionL7PrimaryBackup(networkName, backendSubnetName, proxySubnetName+"-cross-reg-l7", httpHealthCheckName, backendName, urlMapName, httpProxyName, forwardingRuleName+"-cross-reg-l7", zoneName, 300),
 			},
 			{
-				ResourceName:  "google_dns_record_set.foobar",
+				ResourceName:  "google_dns_record_set.gl7_failover",
 				ImportStateId: fmt.Sprintf("%s/%s/test-record.%s.hashicorptest.com./A", envvar.GetTestProjectFromEnv(), zoneName, zoneName),
 				ImportState:   true,
 				ImportStateVerify: true,
@@ -804,7 +804,7 @@ resource "google_dns_managed_zone" "parent-zone" {
   visibility = "private"
 }
 
-resource "google_dns_record_set" "foobar" {
+resource "google_dns_record_set" "wrr" {
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest.com."
   type         = "A"
@@ -870,7 +870,7 @@ resource "google_dns_managed_zone" "parent-zone" {
   visibility = "private"
 }
 
-resource "google_dns_record_set" "foobar" {
+resource "google_dns_record_set" "geo" {
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest.com."
   type         = "A"
@@ -938,7 +938,7 @@ resource "google_dns_managed_zone" "parent-zone" {
   visibility = "private"
 }
 
-resource "google_dns_record_set" "foobar" {
+resource "google_dns_record_set" "failover" {
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest.com."
   type         = "A"
@@ -1039,7 +1039,7 @@ resource "google_dns_managed_zone" "parent-zone" {
   visibility = "private"
 }
 
-resource "google_dns_record_set" "foobar" {
+resource "google_dns_record_set" "rl7_failover" {
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest.com."
   type         = "A"
@@ -1152,7 +1152,7 @@ resource "google_dns_managed_zone" "parent-zone" {
   visibility = "private"
 }
 
-resource "google_dns_record_set" "foobar" {
+resource "google_dns_record_set" "implicit_rl7_failover" {
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest.com."
   type         = "A"
@@ -1263,7 +1263,7 @@ resource "google_dns_managed_zone" "parent-zone" {
   visibility = "private"
 }
 
-resource "google_dns_record_set" "foobar" {
+resource "google_dns_record_set" "gl7_failover" {
   managed_zone = google_dns_managed_zone.parent-zone.name
   name         = "test-record.%s.hashicorptest.com."
   type         = "A"
