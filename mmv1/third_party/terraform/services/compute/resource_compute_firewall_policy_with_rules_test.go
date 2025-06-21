@@ -1,49 +1,49 @@
 package compute_test
 
 import (
-  "testing"
+	"testing"
 
-  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-  "github.com/hashicorp/terraform-provider-google/google/acctest"
-  "github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccComputeFirewallPolicyWithRules_update(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "org_id":        envvar.GetTestOrgFromEnv(t),
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckComputeFirewallPolicyWithRulesDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccComputeFirewallPolicyWithRules_full(context),
-      },
-      {
-        ResourceName:      "google_compute_firewall_policy_with_rules.firewall-policy-with-rules",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccComputeFirewallPolicyWithRules_update(context),
-      },
-      {
-        ResourceName:      "google_compute_firewall_policy_with_rules.firewall-policy-with-rules",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeFirewallPolicyWithRulesDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeFirewallPolicyWithRules_full(context),
+			},
+			{
+				ResourceName:      "google_compute_firewall_policy_with_rules.firewall-policy-with-rules",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeFirewallPolicyWithRules_update(context),
+			},
+			{
+				ResourceName:      "google_compute_firewall_policy_with_rules.firewall-policy-with-rules",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
 func testAccComputeFirewallPolicyWithRules_full(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
 }
 
@@ -155,10 +155,10 @@ resource "google_network_security_security_profile_group" "security_profile_grou
 }
 
 resource "google_network_security_security_profile" "security_profile_1" {
-  name        = "tf-test-tf-security-profile%{random_suffix}"
-  type        = "THREAT_PREVENTION"
-  parent      = "organizations/%{org_id}"
-  location    = "global"
+  name     = "tf-test-tf-security-profile%{random_suffix}"
+  type     = "THREAT_PREVENTION"
+  parent   = "organizations/%{org_id}"
+  location = "global"
 }
 
 resource "google_tags_tag_key" "basic_key" {
@@ -187,7 +187,7 @@ resource "google_compute_network" "network" {
 }
 
 func testAccComputeFirewallPolicyWithRules_update(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_project" "project" {
 }
 
@@ -223,7 +223,7 @@ resource "google_compute_firewall_policy_with_rules" "firewall-policy-with-rules
     enable_logging = false
     action         = "deny"
     direction      = "INGRESS"
-    disabled = false
+    disabled       = false
 
     match {
       src_ip_ranges            = ["0.0.0.0/0"]
@@ -278,10 +278,10 @@ resource "google_network_security_security_profile_group" "security_profile_grou
 }
 
 resource "google_network_security_security_profile" "security_profile_1" {
-  name        = "tf-test-tf-security-profile%{random_suffix}"
-  type        = "THREAT_PREVENTION"
-  parent      = "organizations/%{org_id}"
-  location    = "global"
+  name     = "tf-test-tf-security-profile%{random_suffix}"
+  type     = "THREAT_PREVENTION"
+  parent   = "organizations/%{org_id}"
+  location = "global"
 }
 
 resource "google_tags_tag_key" "basic_key" {
