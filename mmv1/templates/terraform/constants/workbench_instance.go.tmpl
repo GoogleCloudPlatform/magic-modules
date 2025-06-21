@@ -23,6 +23,10 @@ func WorkbenchInstanceLabelsDiffSuppress(k, old, new string, d *schema.ResourceD
 }
 
 
+var WorkbenchInstanceSettableDefaultMetadata = []string{
+	    "serial-port-logging-enable",
+}
+
 var WorkbenchInstanceProvidedMetadata = []string{
     "agent-health-check-interval-seconds",
     "agent-health-check-path",
@@ -69,7 +73,6 @@ var WorkbenchInstanceProvidedMetadata = []string{
     "report-system-status",
     "resource-url",
     "restriction",
-    "serial-port-logging-enable",
     "service-account-mode",
     "shutdown-script",
     "title",
@@ -90,6 +93,12 @@ func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.Resourc
 
 	for _, metadata := range WorkbenchInstanceProvidedMetadata {
 		if key == metadata {
+			return true
+		}
+	}
+
+	for _, metadata := range WorkbenchInstanceSettableDefaultMetadata {
+		if strings.Contains(k, metadata) && new == "" {
 			return true
 		}
 	}
