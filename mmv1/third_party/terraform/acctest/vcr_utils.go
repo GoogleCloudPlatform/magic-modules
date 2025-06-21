@@ -1,11 +1,13 @@
 package acctest
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -141,14 +143,41 @@ func vcrFileName(name string) string {
 // Can be called when VCR is not enabled, and it will behave as normal
 func VcrTest(t *testing.T, c resource.TestCase) {
 	t.Helper()
-
 	if IsVcrEnabled() {
 		defer closeRecorder(t)
 	} else if isReleaseDiffEnabled() {
-		c = initializeReleaseDiffTest(c, t.Name())
-	}
+		//todo - don't hardcode the directory and test name, done for now as interm fix
+		temp_file, err := os.CreateTemp("../../../", "bigtable_instance_test_")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error creating temporary file: %v\n", err)
+			return
+		}
+		fmt.Printf("Temporary file created at: %s\n", temp_file.Name())
 
-	c = extendWithTGCData(t, c)
+		defer func() {
+			if temp_file != nil {
+				var output, err = parseReleaseDiffOutput(temp_file, temp_file.Name())
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error parsing release diff output: %v\n", err)
+				} else if t.Failed() {
+					fmt.Printf("Release diff output:\n%s\n", output)
+				}
+				temp_file.Close() // Close the file handle
+				if t.Failed() {
+					fmt.Printf("Test failed, keeping log file: %s\n", temp_file.Name())
+				} else {
+					err := os.Remove(temp_file.Name())
+					if err != nil {
+						fmt.Fprintf(os.Stdout, "Test passed, but failed to delete log file: %v\n", err)
+					} else {
+						fmt.Println("Test passed, deleted log file.")
+					}
+				}
+			}
+		}()
+		c = initializeReleaseDiffTest(c, t.Name(), temp_file)
+
+	}
 
 	// terraform_labels is a computed field to which "goog-terraform-provisioned": "true" is always
 	// added by the provider. ImportStateVerify "checks for strict equality and does not respect
@@ -164,6 +193,7 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 	c.Steps = steps
 
 	resource.Test(t, c)
+
 }
 
 // We need to explicitly close the VCR recorder to save the cassette
@@ -207,7 +237,7 @@ func isReleaseDiffEnabled() bool {
 	return releaseDiff != ""
 }
 
-func initializeReleaseDiffTest(c resource.TestCase, testName string) resource.TestCase {
+func initializeReleaseDiffTest(c resource.TestCase, testName string, temp_file *os.File) resource.TestCase {
 	var releaseProvider string
 	packagePath := fmt.Sprint(reflect.TypeOf(transport_tpg.Config{}).PkgPath())
 	if strings.Contains(packagePath, "google-beta") {
@@ -220,10 +250,14 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string) resource.Te
 		c.ExternalProviders[releaseProvider] = resource.ExternalProvider{}
 	} else {
 		c.ExternalProviders = map[string]resource.ExternalProvider{
-			releaseProvider: {},
+			// TODO: make a github action to get most recent release + current head, this is not a fix just for testing
+			releaseProvider: {
+				VersionConstraint: "= 6.33.0",
+			},
 		}
 	}
 
+	// create files to config this step(flag), do this in temp file created within this method? preconfig/postconfig
 	localProviderName := "google-local"
 	if c.Providers != nil {
 		c.Providers = map[string]*schema.Provider{
@@ -242,14 +276,26 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string) resource.Te
 			},
 		}
 	}
+	var countSteps = 0
 
 	var replacementSteps []resource.TestStep
 	for _, testStep := range c.Steps {
+		// todo: add preconfig - categorize test failures (add flag to steps that if they fail is a diff failure)
 		if testStep.Config != "" {
 			ogConfig := testStep.Config
 			testStep.Config = reformConfigWithProvider(ogConfig, localProviderName)
-			if testStep.ExpectError == nil && testStep.PlanOnly == false {
+			fmt.Fprintf(os.Stdout, "Reformatted config: %s\n", testStep.Config)
+			testStep.PreConfig = func() {
+				// todo: more descriptive steps (maybe done through a helper function)
+				fmt.Fprintf(temp_file, "Step %d\n", countSteps)
+				countSteps++
+			}
+			if testStep.ExpectError == nil && !testStep.PlanOnly {
 				newStep := resource.TestStep{
+					PreConfig: func() {
+						fmt.Fprintf(temp_file, "[Diff] Step %d\n", countSteps)
+						countSteps++
+					},
 					Config: reformConfigWithProvider(ogConfig, releaseProvider),
 				}
 				testStep.PlanOnly = true
@@ -281,6 +327,39 @@ func reformConfigWithProvider(config, provider string) string {
 	providerReplacementBytes = []byte(providerReplacement)
 	resourceHeader := regexp.MustCompile(`(resource .*google_.* .*\w+.*\{.*)`)
 	return string(resourceHeader.ReplaceAll(configBytes, providerReplacementBytes))
+}
+
+func parseReleaseDiffOutput(temp *os.File, output string) (string, error) {
+	if temp == nil {
+		return "", errors.New("temporary file is nil")
+	}
+
+	_, err := temp.Seek(0, io.SeekStart)
+	if err != nil {
+		return "", fmt.Errorf("failed to seek to beginning of temporary file: %w", err)
+	}
+
+	var lastDiffLine string
+	scanner := bufio.NewScanner(temp)
+
+	diffMarker := "[Diff]"
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.Contains(line, diffMarker) {
+			lastDiffLine = line
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return "", fmt.Errorf("error reading temporary file: %w", err)
+	}
+
+	if lastDiffLine == "" {
+		return "No diff steps found in the output.", nil
+	}
+
+	return lastDiffLine, nil
 }
 
 // HandleVCRConfiguration configures the recorder (github.com/dnaeon/go-vcr/recorder) used in the VCR test
