@@ -1,0 +1,6 @@
+resource "google_compute_region_network_firewall_policy" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  name = "{{index $.Vars "policy_name"}}"
+  description = "Terraform test"
+  policy_type = "RDMA_ROCE_POLICY"
+}
