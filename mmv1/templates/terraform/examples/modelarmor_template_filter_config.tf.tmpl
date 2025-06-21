@@ -13,9 +13,18 @@
 
 # This is a Terraform template file (.tf.tmpl) for creating a Template resource.
 
+resource "google_project_service" "modelarmor" {
+  project = "{{index $.TestEnvVars "project_id"}}"
+  service = "modelarmor.googleapis.com"
+}
+
 resource "google_model_armor_template" "template-filter-config" {
   location    = "{{.Vars.location}}"
   template_id = "{{.Vars.templateId}}"
+
+  depends_on = [
+    google_project_service.modelarmor
+  ]
 
   filter_config {
     rai_settings {
@@ -32,7 +41,6 @@ resource "google_model_armor_template" "template-filter-config" {
           filter_enforcement = "{{.Vars.filter_config_sdp_settings_basic_config_filter_enforcement}}"
       }
     }
-    
     pi_and_jailbreak_filter_settings {
       filter_enforcement = "{{.Vars.filter_config_pi_and_jailbreak_filter_settings_filter_enforcement}}"
       confidence_level   = "{{.Vars.filter_config_pi_and_jailbreak_filter_settings_confidence_level}}"
