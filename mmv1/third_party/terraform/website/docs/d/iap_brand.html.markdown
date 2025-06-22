@@ -26,6 +26,8 @@ The following arguments are supported:
 
 * `project` - (Required) The name of the brand.
 
+* `brand` - (Optional) The brand id which is the project number. By default, the data source retrieve the project number automatically if `brand` is not specified.
+
 ## Attributes Reference
 
 See [google_iap_client](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iap_brand) resource for details of the available attributes.
