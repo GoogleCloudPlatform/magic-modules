@@ -57,7 +57,7 @@ examples:
   - name: 'memorystore_instance_full'
     primary_resource_id: 'instance-full'
     bootstrap_iam:
-      - member: "serviceAccount:service-{project_number}@cloud-redis.iam.gserviceaccount.com"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-memorystore.iam.gserviceaccount.com"
         role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
       instance_name: 'full-instance'
@@ -810,4 +810,3 @@ properties:
     type: String
     description: The KMS key used to encrypt the at-rest data of the cluster
     immutable: true
-
