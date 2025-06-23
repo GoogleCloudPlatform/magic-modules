@@ -33,8 +33,8 @@ func TestAccModelArmorTemplate_basic(t *testing.T) {
 	basicContext := map[string]interface{}{
 		"location":   "us-central1",
 		"templateId": templateId,
-		"filter_config_rai_settings_rai_filters_0_filter_type":                       "SEXUALLY_EXPLICIT",
-		"filter_config_rai_settings_rai_filters_0_confidence_level":                  "LOW_AND_ABOVE",
+		"filter_config_rai_settings_rai_filters_0_filter_type":      "SEXUALLY_EXPLICIT",
+		"filter_config_rai_settings_rai_filters_0_confidence_level": "LOW_AND_ABOVE",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
