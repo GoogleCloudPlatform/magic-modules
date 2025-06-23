@@ -35,9 +35,4 @@ resource "google_model_armor_template" "template-basic" {
       }
     }
   }
-  template_metadata {
-    multi_language_detection {
-      enable_multi_language_detection = {{.Vars.template_metadata_multi_language_detection_enable_multi_language_detection}}
-    }
-  }
 }

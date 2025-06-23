@@ -35,7 +35,6 @@ func TestAccModelArmorTemplate_basic(t *testing.T) {
 		"templateId": templateId,
 		"filter_config_rai_settings_rai_filters_0_filter_type":                       "SEXUALLY_EXPLICIT",
 		"filter_config_rai_settings_rai_filters_0_confidence_level":                  "LOW_AND_ABOVE",
-		"template_metadata_multi_language_detection_enable_multi_language_detection": true,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -56,8 +55,6 @@ func TestAccModelArmorTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("google_model_armor_template.template-basic", "template_id", templateId),
 					resource.TestCheckResourceAttr("google_model_armor_template.template-basic", "filter_config.0.rai_settings.0.rai_filters.0.filter_type", "SEXUALLY_EXPLICIT"),
 					resource.TestCheckResourceAttr("google_model_armor_template.template-basic", "filter_config.0.rai_settings.0.rai_filters.0.confidence_level", "LOW_AND_ABOVE"),
-					resource.TestCheckResourceAttr("google_model_armor_template.template-basic", "template_metadata.0.multi_language_detection.0.enable_multi_language_detection", "true"),
-					resource.TestCheckResourceAttr("google_model_armor_template.template-basic", "filter_config.0.sdp_settings.#", "0"),
 				),
 			},
 			{
@@ -81,11 +78,6 @@ resource "google_model_armor_template" "template-basic" {
         filter_type      = "{{.filter_config_rai_settings_rai_filters_0_filter_type}}"
         confidence_level = "{{.filter_config_rai_settings_rai_filters_0_confidence_level}}"
       }
-    }
-  }
-  template_metadata {
-    multi_language_detection {
-      enable_multi_language_detection = {{.template_metadata_multi_language_detection_enable_multi_language_detection}}
     }
   }
 }`

@@ -13,7 +13,8 @@
 
 ---
 name: Template
-description: Description
+description: |
+  A `Template` is a resource used to define the filter levels of detection for our data.
 base_url: projects/{{project}}/locations/{{location}}/templates
 update_mask: true
 self_link: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
@@ -31,7 +32,6 @@ examples:
       location: '"us-central1"'
       filter_config_rai_settings_rai_filters_0_filter_type: '"SEXUALLY_EXPLICIT"'
       filter_config_rai_settings_rai_filters_0_confidence_level: '"LOW_AND_ABOVE"'
-      template_metadata_multi_language_detection_enable_multi_language_detection: true
   - name: 'modelarmor_template_filter_config'
     primary_resource_id: 'template-filter-config'
     test_vars_overrides:
@@ -40,7 +40,7 @@ examples:
       location: '"us-east7"'
       filter_config_rai_settings_rai_filters_0_filter_type: '"HATE_SPEECH"'
       filter_config_rai_settings_rai_filters_0_confidence_level: '"HIGH"'
-      filter_config_rai_settings_filter_version: '"STABLE"'
+      filter_config_rai_settings_filter_version: '"PREVIEW"'
       sdp_settings_config_type: '"basic_config"'
       filter_config_sdp_settings_basic_config_filter_enforcement: '"ENABLED"'
       filter_config_pi_and_jailbreak_filter_settings_filter_enforcement: '"ENABLED"'
@@ -165,6 +165,7 @@ properties:
               Possible values:
               RAI_FILTER_VERSION_UNSPECIFIED
               STABLE
+              PREVIEW
       - name: sdpSettings
         type: NestedObject
         description: Sensitive Data Protection settings.
@@ -240,6 +241,7 @@ properties:
               Possible values:
               PI_AND_JAILBREAK_FILTER_VERSION_UNSPECIFIED
               STABLE
+              PREVIEW
   - name: templateMetadata
     type: NestedObject
     description: Message describing TemplateMetadata
