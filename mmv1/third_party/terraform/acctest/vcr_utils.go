@@ -283,6 +283,7 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, temp_file *
 		// todo: add preconfig - categorize test failures (add flag to steps that if they fail is a diff failure)
 		if testStep.Config != "" {
 			ogConfig := testStep.Config
+			fmt.Fprintf(os.Stdout, "Original config: %s\n", ogConfig)
 			testStep.Config = reformConfigWithProvider(ogConfig, localProviderName)
 			fmt.Fprintf(os.Stdout, "Reformatted config: %s\n", testStep.Config)
 			testStep.PreConfig = func() {
@@ -320,12 +321,13 @@ func reformConfigWithProvider(config, provider string) string {
 	providerBlock := regexp.MustCompile(`provider *=.*google-beta.*`)
 
 	if providerBlock.Match(configBytes) {
-		return string(providerBlock.ReplaceAll(configBytes, providerReplacementBytes))
+		out := string(providerBlock.ReplaceAll(configBytes, providerReplacementBytes))
+		return out
 	}
 
-	providerReplacement = fmt.Sprintf("${1}\n\t%s", providerReplacement)
+	providerReplacement = fmt.Sprintf("${1}\n  %s\n", providerReplacement)
 	providerReplacementBytes = []byte(providerReplacement)
-	resourceHeader := regexp.MustCompile(`(resource .*google_.* .*\w+.*\{.*)`)
+	resourceHeader := regexp.MustCompile(`((resource|data) .*google_.* .*\w+.*\{ *)`)
 	return string(resourceHeader.ReplaceAll(configBytes, providerReplacementBytes))
 }
 
