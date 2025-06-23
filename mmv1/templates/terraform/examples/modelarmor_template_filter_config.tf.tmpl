@@ -14,9 +14,9 @@
 # This is a Terraform template file (.tf.tmpl) for creating a Template resource.
 
 resource "google_project_service" "modelarmor" {
-  project = "{{index $.TestEnvVars "project_id"}}"
+  project = "{{index .Vars "project_id"}}"
   service = "modelarmor.googleapis.com"
-}
+} 
 
 resource "google_model_armor_template" "template-filter-config" {
   location    = "{{.Vars.location}}"
