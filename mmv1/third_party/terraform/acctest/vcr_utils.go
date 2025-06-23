@@ -147,7 +147,9 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		defer closeRecorder(t)
 	} else if isReleaseDiffEnabled() {
 		//todo - don't hardcode the directory and test name, done for now as interm fix
-		temp_file, err := os.CreateTemp("../../../", "bigtable_instance_test_")
+		temp_file, err := os.CreateTemp("", "release_diff_test_output_*.log")
+		fmt.Fprintf(os.Stdout, "creating temporary file at %s\n", temp_file.Name())
+
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error creating temporary file: %v\n", err)
 			return
@@ -327,6 +329,9 @@ func reformConfigWithProvider(config, provider string) string {
 
 	providerReplacement = fmt.Sprintf("${1}\n  %s\n", providerReplacement)
 	providerReplacementBytes = []byte(providerReplacement)
+	// Match resource and data blocks that use google_ provider
+	// regex matches for labels resource and data blocks that use google_ provider
+
 	resourceHeader := regexp.MustCompile(`((resource|data) .*google_.* .*\w+.*\{ *)`)
 	return string(resourceHeader.ReplaceAll(configBytes, providerReplacementBytes))
 }
