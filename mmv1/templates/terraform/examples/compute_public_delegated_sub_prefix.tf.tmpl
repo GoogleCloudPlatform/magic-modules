@@ -2,7 +2,7 @@ resource "google_compute_public_delegated_prefix" "{{$.PrimaryResourceId}}" {
   name = "{{$.Vars.prefixes_name}}"
   region = "us-central1"
   description = "Public delegated prefix with sub prefix for testing "
-  ip_cidr_range = "2600:1901:4457:100::/60"
+  ip_cidr_range = "2600:1901:4457:100::/64"
   parent_prefix = "projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"
   project = "tf-static-byoip"
 
@@ -10,7 +10,7 @@ resource "google_compute_public_delegated_prefix" "{{$.PrimaryResourceId}}" {
     name = "{{$.Vars.sub_prefix_name_1}}"
     description = "Public delegated prefix for testing public delegated sub prefix"
     delegatee_project = "tf-static-byoip"
-    ip_cidr_range = "2600:1901:4457:100::/64"
+    ip_cidr_range = "2600:1901:4457:100::/96"
     is_address = true
     allocatable_prefix_length = 28
   }
