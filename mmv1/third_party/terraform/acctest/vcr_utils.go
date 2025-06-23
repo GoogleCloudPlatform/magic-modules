@@ -161,7 +161,7 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Error parsing release diff output: %v\n", err)
 				} else if t.Failed() {
-					fmt.Printf("Release diff output:\n%s\n", output)
+					fmt.Printf("FAILED - Release diff output:\n%s\n", output)
 				}
 				temp_file.Close() // Close the file handle
 				if t.Failed() {
