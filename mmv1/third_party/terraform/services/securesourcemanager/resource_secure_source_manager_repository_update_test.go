@@ -89,7 +89,7 @@ resource "google_secure_source_manager_repository" "default" {
     repository_id = "tf-test-my-repository%{random_suffix}"
     instance = google_secure_source_manager_instance.instance.name
 
-	description = "new description"
+    description = "new description"
 
     # Prevent accidental deletions.
     lifecycle {
