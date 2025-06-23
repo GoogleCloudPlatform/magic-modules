@@ -393,7 +393,7 @@ resource "google_workbench_instance" "instance" {
     metadata = {
       terraform = "true"
       "resource-url" = "new-fake-value",
-      "serial-port-logging-enable" = "false",
+      "serial-port-logging-enable" = "true",
     }
   }
 
