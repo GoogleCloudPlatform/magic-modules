@@ -92,7 +92,7 @@ resource "google_notebooks_instance" "test" {
 
   vm_image {
     project      = "deeplearning-platform-release"
-    image_family = "tf-latest-cpu"
+    image_family = "pytorch-latest-cu124"
   }
 }
 `, name)
@@ -107,7 +107,7 @@ resource "google_notebooks_instance" "instance" {
 
   vm_image {
     project      = "deeplearning-platform-release"
-    image_family = "tf-latest-cpu"
+    image_family = "pytorch-latest-cu124"
   }
 
   metadata = {
@@ -133,7 +133,7 @@ resource "google_notebooks_instance" "instance" {
 
   vm_image {
     project      = "deeplearning-platform-release"
-    image_family = "tf-latest-cpu"
+    image_family = "pytorch-latest-cu124"
   }
 
   metadata = {
