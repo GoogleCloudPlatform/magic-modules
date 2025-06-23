@@ -154,6 +154,7 @@ properties:
     type: String
     description: |
       Language for this settings.
+    required: true
   - name: 'llmModelSettings'
     type: NestedObject
     description: |
