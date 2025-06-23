@@ -161,14 +161,12 @@ properties:
     description:
       A detailed description of the metric, which can be used in documentation.
     required: false
-    immutable: false
   - name: 'displayName'
     type: String
     description:
       A concise name for the metric, which can be displayed in user interfaces.
       Use sentence case without an ending period, for example "Request count".
     required: false
-    immutable: false
   - name: 'metadata'
     type: NestedObject
     description: Metadata which can be used to guide usage of the metric.
