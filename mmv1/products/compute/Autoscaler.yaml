@@ -42,6 +42,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
 sweeper:
   url_substitutions:
@@ -83,6 +84,8 @@ parameters:
     ignore_read: true
     default_from_api: true
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
+    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/compute_auto_scaler.go.tmpl'
+    custom_tgc_expand: 'templates/tgc_next/custom_expand/compute_auto_scaler_zone.go.tmpl'
     resource: 'Zone'
     imports: 'name'
 properties:
@@ -423,5 +426,6 @@ properties:
       URL of the managed instance group that this autoscaler will scale.
     required: true
     custom_expand: 'templates/terraform/custom_expand/compute_full_url.tmpl'
+    custom_tgc_expand: 'templates/tgc_next/custom_expand/compute_full_url.go.tmpl'
     resource: 'InstanceGroupManager'
     imports: 'selfLink'

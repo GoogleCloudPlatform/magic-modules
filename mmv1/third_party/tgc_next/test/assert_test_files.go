@@ -117,7 +117,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	// exportTfFile := fmt.Sprintf("%s_export.tf", t.Name())
 	// err = os.WriteFile(exportTfFile, exportConfigData, 0644)
 	// if err != nil {
-	// 	return fmt.Errorf("error writing file", exportTfFile)
+	// 	return fmt.Errorf("error writing file %s", exportTfFile)
 	// }
 	// defer os.Remove(exportTfFile)
 

@@ -162,5 +162,9 @@ func resource{{ $.ResourceName -}}TgcEncoder(d tpgresource.TerraformResourceData
 {{- end}}
 
 {{ range $prop := $.SettableProperties }}
+    {{ if $prop.CustomTgcExpand }}
+    {{- $prop.CustomTemplate $prop.CustomTgcExpand false -}}
+    {{ else }}
     {{- template "expandPropertyMethod" $prop -}}
+    {{ end }}
 {{- end}}
