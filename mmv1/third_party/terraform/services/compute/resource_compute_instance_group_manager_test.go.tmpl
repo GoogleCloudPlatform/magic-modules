@@ -2288,22 +2288,6 @@ data "google_compute_image" "my_image" {
   project = "debian-cloud"
 }
 
-resource "google_compute_resource_policy" "workload_policy" {
-  name   = "tf-test-gce-policy-%s"
-  region = "us-central1"
-  workload_policy {
-    type = "HIGH_THROUGHPUT"
-  }
-}
-
-resource "google_compute_resource_policy" "workload_policy_2" {
-  name   = "tf-test-gce-policy-%s-2"
-  region = "us-central1"
-  workload_policy {
-    type = "HIGH_THROUGHPUT"
-  }
-}
-
 resource "google_compute_instance_template" "igm-basic" {
   name           = "igm-instance-template-%s"
   machine_type   = "a4-highgpu-8g"
@@ -2339,7 +2323,7 @@ resource "google_compute_instance_group_manager" "igm-workload-policy" {
   zone               = "us-central1-b"
   target_size        = 0
 }
-`, suffix, suffix, suffix, suffix)
+`, suffix, suffix)
 }
 
 
