@@ -287,14 +287,18 @@ func workbenchMetadataCustomizeDiff(_ context.Context, diff *schema.ResourceDiff
 			oldValue, oldOk := oldMetadata[key]
 			newValue, newOk := newMetadata[key]
 
-			// If the key exists in both old and new metadata and their values differ, or
-			// if the key exists in one but not the other, then a meaningful change has occurred.
+			// Condition to force new:
+			// 1. The key exists in both old and new metadata AND their values differ.
+			// 2. The key exists in new but not in old (meaning it was added).
+			//
+			// The key exists in old but not in new (meaning it was removed) is ignored.
 			if (oldOk && newOk && oldValue != newValue) ||
-				(oldOk != newOk) {
+				(!oldOk && newOk) {
+				// If a change is detected for this specific key, force a new resource and stop checking.
 				if err := diff.ForceNew("gce_setup.0.metadata"); err != nil {
 					return err
 				}
-				break // No need to check other keys if we've already decided to ForceNew
+				return nil // Return nil immediately after forcing new
 			}
 		}
 	}
