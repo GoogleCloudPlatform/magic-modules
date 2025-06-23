@@ -37,10 +37,10 @@ export TF_ACC=true
 
 declare -a TEST_COMMANDS
 
-TEST_COMMANDS+=( "make testacc TEST=./google/services/alloydb TESTARGS='-run=TestAccAlloydbCluster_alloydbClusterBasicExample'" )
-TEST_COMMANDS+=( "make testacc TEST=./google/services/bigtable TESTARGS='-run=TestAccBigtableInstance_basic'" )
-TEST_COMMANDS+=( "make testacc TEST=./google/services/alloydb TESTARGS='-run=TestAccAlloydbCluster_withMaintenanceWindowsMissingFields'" )
-TEST_COMMANDS+=( "make testacc TEST=./google/services/bigquery TESTARGS='-run=TestAccDataSourceGoogleBigqueryDefaultServiceAccount_basic'" )
+TEST_COMMANDS+=( "make testacc TEST=./google-beta/services/alloydb TESTARGS='-run=TestAccAlloydbCluster_alloydbClusterBasicExample'" )
+TEST_COMMANDS+=( "make testacc TEST=./google-beta/services/bigtable TESTARGS='-run=TestAccBigtableInstance_basic'" )
+TEST_COMMANDS+=( "make testacc TEST=./google-beta/services/alloydb TESTARGS='-run=TestAccAlloydbCluster_withMaintenanceWindowsMissingFields'" )
+TEST_COMMANDS+=( "make testacc TEST=./google-beta/services/bigquery TESTARGS='-run=TestAccDataSourceGoogleBigqueryDefaultServiceAccount_basic'" )
 OVERALL_STATUS=0
 
 echo "--- Running Terraform Acceptance Tests (Sequentially) ---"
