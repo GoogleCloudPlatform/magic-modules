@@ -5,7 +5,7 @@ description: |-
   You can combine policies and resources into a shared flow that you can consume from multiple API proxies, and even from other shared flows.
 ---
 
-# google\_apigee\_shared\_flow
+# google_apigee_shared_flow
 
 You can combine policies and resources into a shared flow that you can consume from multiple API proxies, and even from other shared flows. Although it's like a proxy, a shared flow has no endpoint. It can be used only from an API proxy or shared flow that's in the same organization as the shared flow itself.
 
@@ -87,6 +87,20 @@ This resource provides the following
 
 
 SharedFlow can be imported using any of these accepted formats:
+
+* `{{org_id}}/sharedflows/{{name}}`
+* `{{org_id}}/{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import SharedFlow using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{org_id}}/sharedflows/{{name}}"
+  to = google_apigee_sharedflow.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), SharedFlow can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_apigee_sharedflow.default {{org_id}}/sharedflows/{{name}}

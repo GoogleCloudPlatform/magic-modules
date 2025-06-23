@@ -104,9 +104,14 @@ The following arguments are supported:
     By defining these properties, the data source can then be queried as
     if it were a standard BigQuery table. Structure is [documented below](#nested_external_data_configuration).
 
+* `biglake_configuration` - (Optional) Specifies the configuration of a BigLake managed table. Structure is [documented below](#nested_biglake_configuration)
+
 * `friendly_name` - (Optional) A descriptive name for the table.
 
-* `max_staleness`: (Optional) The maximum staleness of data that could be returned when the table (or stale MV) is queried. Staleness encoded as a string encoding of sql IntervalValue type.
+* `max_staleness` - (Optional) The maximum staleness of data that could be
+  returned when the table (or stale MV) is queried. Staleness encoded as a
+  string encoding of [SQL IntervalValue
+  type](https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types#interval_type).
 
 * `encryption_configuration` - (Optional) Specifies how the table should be encrypted.
     If left blank, the table will be encrypted with a Google-managed key; that process
@@ -114,14 +119,24 @@ The following arguments are supported:
 
 * `labels` - (Optional) A mapping of labels to assign to the resource.
 
+    **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+    Please refer to the field 'effective_labels' for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
+
 * <a name="schema"></a>`schema` - (Optional) A JSON schema for the table.
 
     ~>**NOTE:** Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
     If the API returns a different value for the same schema, e.g. it
-    switched the order of values or replaced `STRUCT` field type with `RECORD`
-    field type, we currently cannot suppress the recurring diff this causes.
-    As a workaround, we recommend using the schema as returned by the API.
+    switched the order of values or replaced a field data type (`STRUCT` with
+    `RECORD`, `DECIMAL` with `NUMERIC`, etc.), we currently cannot suppress
+    the recurring diff this causes. As a workaround, we recommend using the
+    schema as returned by the API.
 
     ~>**NOTE:**  If you use `external_data_configuration`
     [documented below](#nested_external_data_configuration) and do **not** set
@@ -129,11 +144,18 @@ The following arguments are supported:
     with `external_data_configuration.schema`. Otherwise, schemas must be
     specified with this top-level field.
 
+* `schema_foreign_type_info` - (Optional) Specifies metadata of the foreign data
+    type definition in field schema. Structure is [documented below](#nested_schema_foreign_type_info).
+
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is [documented below](#nested_time_partitioning).
 
 * `range_partitioning` - (Optional) If specified, configures range-based
     partitioning for this table. Structure is [documented below](#nested_range_partitioning).
+
+* `require_partition_filter` - (Optional) If set to true, queries over this table
+    require a partition filter that can be used for partition elimination to be
+    specified.
 
 * `clustering` - (Optional) Specifies column names to use for data clustering.
     Up to four top-level columns are allowed, and should be specified in
@@ -145,18 +167,38 @@ The following arguments are supported:
 * `materialized_view` - (Optional) If specified, configures this table as a materialized view.
     Structure is [documented below](#nested_materialized_view).
 
-* `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
-in Terraform state, a `terraform destroy` or `terraform apply` that would delete the instance will fail.
+* `deletion_protection` - (Optional) Whether Terraform will be prevented from destroying the table.
+    When the field is set to true or unset in Terraform state, a `terraform apply`
+    or `terraform destroy` that would delete the table will fail.
+    When the field is set to false, deleting the table is allowed..
+
+* `table_constraints` - (Optional) Defines the primary key and foreign keys. 
+    Structure is [documented below](#nested_table_constraints).
+
+* `table_replication_info` - (Optional) Replication info of a table created
+    using "AS REPLICA" DDL like:
+    `CREATE MATERIALIZED VIEW mv1 AS REPLICA OF src_mv`.
+    Structure is [documented below](#nested_table_replication_info).
+
+* `resource_tags` - (Optional) The tags attached to this table. Tag keys are
+    globally unique. Tag key is expected to be in the namespaced format, for
+    example "123456789012/environment" where 123456789012 is the ID of the
+    parent organization or project resource for this tag key. Tag value is
+    expected to be the short name, for example "Production". See [Tag definitions](https://cloud.google.com/iam/docs/tags-access-control#definitions)
+    for more details.
+
+* `external_catalog_table_options` - (Optional) Options defining open source
+    compatible table. Structure is [documented below](#nested_external_catalog_table_options).
 
 <a name="nested_external_data_configuration"></a>The `external_data_configuration` block supports:
 
-* `autodetect` - (Required) - Let BigQuery try to autodetect the schema
+* `autodetect` - (Required) Let BigQuery try to autodetect the schema
     and format of the table.
 
-* `compression` (Optional) - The compression type of the data source.
+* `compression` - (Optional) The compression type of the data source.
     Valid values are "NONE" or "GZIP".
 
-* `connection_id` (Optional) - The connection specifying the credentials to be used to read
+* `connection_id` - (Optional) The connection specifying the credentials to be used to read
     external storage, such as Azure Blob, Cloud Storage, or S3. The `connection_id` can have
     the form `{{project}}.{{location}}.{{connection_id}}`
     or `projects/{{project}}/locations/{{location}}/connections/{{connection_id}}`.
@@ -165,35 +207,40 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     table schema must be specified using the top-level `schema` field
     [documented above](#schema).
 
-* `csv_options` (Optional) - Additional properties to set if
+* `csv_options` - (Optional) Additional properties to set if
     `source_format` is set to "CSV". Structure is [documented below](#nested_csv_options).
 
-* `json_options` (Optional) - Additional properties to set if
+* `bigtable_options` - (Optional) Additional properties to set if
+    `source_format` is set to "BIGTABLE". Structure is [documented below](#nested_bigtable_options).
+
+* `json_options` - (Optional) Additional properties to set if
     `source_format` is set to "JSON". Structure is [documented below](#nested_json_options).
 
-* `parquet_options` (Optional) - Additional properties to set if
+* `json_extension` - (Optional) Used to indicate that a JSON variant, rather than normal JSON, is being used as the sourceFormat. This should only be used in combination with the `JSON` source format. Valid values are: `GEOJSON`.
+
+* `parquet_options` - (Optional) Additional properties to set if
     `source_format` is set to "PARQUET". Structure is [documented below](#nested_parquet_options).
 
-* `google_sheets_options` (Optional) - Additional options if
+* `google_sheets_options` - (Optional) Additional options if
     `source_format` is set to "GOOGLE_SHEETS". Structure is
     [documented below](#nested_google_sheets_options).
 
-* `hive_partitioning_options` (Optional) - When set, configures hive partitioning
+* `hive_partitioning_options` - (Optional) When set, configures hive partitioning
     support. Not all storage formats support hive partitioning -- requesting hive
     partitioning on an unsupported format will lead to an error, as will providing
     an invalid specification. Structure is [documented below](#nested_hive_partitioning_options).
 
-* `avro_options` (Optional) - Additional options if `source_format` is set to
+* `avro_options` - (Optional) Additional options if `source_format` is set to
     "AVRO".  Structure is [documented below](#nested_avro_options).
 
-* `ignore_unknown_values` (Optional) - Indicates if BigQuery should
+* `ignore_unknown_values` - (Optional) Indicates if BigQuery should
     allow extra values that are not represented in the table schema.
     If true, the extra values are ignored. If false, records with
     extra columns are treated as bad records, and if there are too
     many bad records, an invalid error is returned in the job result.
     The default value is false.
 
-* `max_bad_records` (Optional) - The maximum number of bad records that
+* `max_bad_records` - (Optional) The maximum number of bad records that
     BigQuery can ignore when reading data.
 
 * `schema` - (Optional) A JSON schema for the external table. Schema is required
@@ -212,7 +259,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     table schema must be specified using the top-level `schema` field
     [documented above](#schema).
 
-* `source_format` (Optional) - The data format. Please see sourceFormat under
+* `source_format` - (Optional) The data format. Please see sourceFormat under
     [ExternalDataConfiguration](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#externaldataconfiguration)
     in Bigquery's public API documentation for supported formats. To use "GOOGLE_SHEETS"
     the `scopes` must include "https://www.googleapis.com/auth/drive.readonly".
@@ -232,7 +279,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 <a name="nested_csv_options"></a>The `csv_options` block supports:
 
-* `quote` (Required) - The value that is used to quote data sections in a
+* `quote` - (Required) The value that is used to quote data sections in a
     CSV file. If your data does not contain quoted sections, set the
     property value to an empty string. If your data contains quoted newline
     characters, you must also set the `allow_quoted_newlines` property to true.
@@ -240,39 +287,63 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     limitations with Terraform default values, this value is required to be
     explicitly set.
 
-* `allow_jagged_rows` (Optional) - Indicates if BigQuery should accept rows
+* `allow_jagged_rows` - (Optional) Indicates if BigQuery should accept rows
     that are missing trailing optional columns.
 
-* `allow_quoted_newlines` (Optional) - Indicates if BigQuery should allow
+* `allow_quoted_newlines` - (Optional) Indicates if BigQuery should allow
     quoted data sections that contain newline characters in a CSV file.
     The default value is false.
 
-* `encoding` (Optional) - The character encoding of the data. The supported
+* `encoding` - (Optional) The character encoding of the data. The supported
     values are UTF-8 or ISO-8859-1.
 
-* `field_delimiter` (Optional) - The separator for fields in a CSV file.
+* `field_delimiter` - (Optional) The separator for fields in a CSV file.
 
-* `skip_leading_rows` (Optional) - The number of rows at the top of a CSV
+* `skip_leading_rows` - (Optional) The number of rows at the top of a CSV
     file that BigQuery will skip when reading the data.
+
+<a name="nested_bigtable_options"></a>The `bigtable_options` block supports:
+
+* `column_family` - (Optional) A list of column families to expose in the table schema along with their types. This list restricts the column families that can be referenced in queries and specifies their value types. You can use this list to do type conversions - see the 'type' field for more details. If you leave this list empty, all column families are present in the table schema and their values are read as BYTES. During a query only the column families referenced in that query are read from Bigtable.  Structure is [documented below](#nested_column_family).
+* `ignore_unspecified_column_families` - (Optional) If field is true, then the column families that are not specified in columnFamilies list are not exposed in the table schema. Otherwise, they are read with BYTES type values. The default value is false.
+* `read_rowkey_as_string` - (Optional) If field is true, then the rowkey column families will be read and converted to string. Otherwise they are read with BYTES type values and users need to manually cast them with CAST if necessary. The default value is false.
+* `output_column_families_as_json` - (Optional) If field is true, then each column family will be read as a single JSON column. Otherwise they are read as a repeated cell structure containing timestamp/value tuples. The default value is false.
+
+<a name="nested_column_family"></a>The `column_family` block supports:
+
+* `column` - (Optional) A List of columns that should be exposed as individual fields as opposed to a list of (column name, value) pairs. All columns whose qualifier matches a qualifier in this list can be accessed as Other columns can be accessed as a list through column field.  Structure is [documented below](#nested_column).
+* `family_id` - (Optional) Identifier of the column family.
+* `type` - (Optional) The type to convert the value in cells of this column family. The values are expected to be encoded using HBase Bytes.toBytes function when using the BINARY encoding value. Following BigQuery types are allowed (case-sensitive): "BYTES", "STRING", "INTEGER", "FLOAT", "BOOLEAN", "JSON". Default type is BYTES. This can be overridden for a specific column by listing that column in 'columns' and specifying a type for it.
+* `encoding` - (Optional) The encoding of the values when the type is not STRING. Acceptable encoding values are: TEXT - indicates values are alphanumeric text strings. BINARY - indicates values are encoded using HBase Bytes.toBytes family of functions. This can be overridden for a specific column by listing that column in 'columns' and specifying an encoding for it.
+* `only_read_latest` - (Optional) If this is set only the latest version of value are exposed for all columns in this column family. This can be overridden for a specific column by listing that column in 'columns' and specifying a different setting for that column.
+
+<a name="nested_column"></a>The `column` block supports:
+
+* `qualifier_encoded` - (Optional) Qualifier of the column. Columns in the parent column family that has this exact qualifier are exposed as . field. If the qualifier is valid UTF-8 string, it can be specified in the qualifierString field. Otherwise, a base-64 encoded value must be set to qualifierEncoded. The column field name is the same as the column qualifier. However, if the qualifier is not a valid BigQuery field identifier i.e. does not match [a-zA-Z][a-zA-Z0-9_]*, a valid identifier must be provided as fieldName.
+* `qualifier_string` - (Optional) Qualifier string.
+* `field_name` - (Optional) If the qualifier is not a valid BigQuery field identifier i.e. does not match [a-zA-Z][a-zA-Z0-9_]*, a valid identifier must be provided as the column field name and is used as field name in queries.
+* `type` - (Optional) The type to convert the value in cells of this column. The values are expected to be encoded using HBase Bytes.toBytes function when using the BINARY encoding value. Following BigQuery types are allowed (case-sensitive): "BYTES", "STRING", "INTEGER", "FLOAT", "BOOLEAN", "JSON", Default type is "BYTES". 'type' can also be set at the column family level. However, the setting at this level takes precedence if 'type' is set at both levels.
+* `encoding` - (Optional) The encoding of the values when the type is not STRING. Acceptable encoding values are: TEXT - indicates values are alphanumeric text strings. BINARY - indicates values are encoded using HBase Bytes.toBytes family of functions. 'encoding' can also be set at the column family level. However, the setting at this level takes precedence if 'encoding' is set at both levels.
+* `only_read_latest` - (Optional) If this is set, only the latest version of value in this column are exposed. 'onlyReadLatest' can also be set at the column family level. However, the setting at this level takes precedence if 'onlyReadLatest' is set at both levels.
 
 <a name="nested_json_options"></a>The `json_options` block supports:
 
-* `encoding` (Optional) - The character encoding of the data. The supported values are UTF-8, UTF-16BE, UTF-16LE, UTF-32BE, and UTF-32LE. The default value is UTF-8.
+* `encoding` - (Optional) The character encoding of the data. The supported values are UTF-8, UTF-16BE, UTF-16LE, UTF-32BE, and UTF-32LE. The default value is UTF-8.
 
 <a name="nested_google_sheets_options"></a>The `google_sheets_options` block supports:
 
-* `range` (Optional) - Range of a sheet to query from. Only used when
+* `range` - (Optional) Range of a sheet to query from. Only used when
     non-empty. At least one of `range` or `skip_leading_rows` must be set.
     Typical format: "sheet_name!top_left_cell_id:bottom_right_cell_id"
     For example: "sheet1!A1:B20"
 
-* `skip_leading_rows` (Optional) - The number of rows at the top of the sheet
+* `skip_leading_rows` - (Optional) The number of rows at the top of the sheet
     that BigQuery will skip when reading the data. At least one of `range` or
     `skip_leading_rows` must be set.
 
 <a name="nested_hive_partitioning_options"></a>The `hive_partitioning_options` block supports:
 
-* `mode` (Optional) - When set, what mode of hive partitioning to use when
+* `mode` - (Optional) When set, what mode of hive partitioning to use when
     reading data. The following modes are supported.
     * AUTO: automatically infer partition key name(s) and type(s).
     * STRINGS: automatically infer partition key name(s). All types are
@@ -285,7 +356,7 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     require a partition filter that can be used for partition elimination to be
     specified.
 
-* `source_uri_prefix` (Optional) - When hive partition detection is requested,
+* `source_uri_prefix` - (Optional) When hive partition detection is requested,
     a common for all source uris must be required. The prefix must end immediately
     before the partition key encoding begins. For example, consider files following
     this data layout. `gs://bucket/path_to_table/dt=2019-06-01/country=USA/id=7/file.avro`
@@ -296,19 +367,24 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 <a name="nested_avro_options"></a>The `avro_options` block supports:
 
-* `use_avro_logical_types` (Optional) - If is set to true, indicates whether
+* `use_avro_logical_types` - (Optional) If is set to true, indicates whether
     to interpret logical types as the corresponding BigQuery data type
     (for example, TIMESTAMP), instead of using the raw type (for example, INTEGER).
 
 <a name="nested_parquet_options"></a>The `parquet_options` block supports:
 
-* `enum_as_string` (Optional) - Indicates whether to infer Parquet ENUM logical type as STRING instead of BYTES by default.
+* `enum_as_string` - (Optional) Indicates whether to infer Parquet ENUM logical type as STRING instead of BYTES by default.
 
-* `enable_list_inference` (Optional) - Indicates whether to use schema inference specifically for Parquet LIST logical type.
+* `enable_list_inference` - (Optional) Indicates whether to use schema inference specifically for Parquet LIST logical type.
+
+<a name="nested_schema_foreign_type_info"></a>The `schema_foreign_type_info` block supports:
+
+* `type_system` - (Required) Specifies the system which defines the foreign data
+    type.
 
 <a name="nested_time_partitioning"></a>The `time_partitioning` block supports:
 
-* `expiration_ms` -  (Optional) Number of milliseconds for which to keep the
+* `expiration_ms` - (Optional) Number of milliseconds for which to keep the
     storage for a partition.
 
 * `field` - (Optional) The field used to determine how to create a time-based
@@ -320,7 +396,8 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 
 * `require_partition_filter` - (Optional) If set to true, queries over this table
     require a partition filter that can be used for partition elimination to be
-    specified.
+    specified. `require_partition_filter` is deprecated and will be removed in
+    a future major release. Use the top level field with the same name instead.
 
 <a name="nested_range_partitioning"></a>The `range_partitioning` block supports:
 
@@ -355,6 +432,9 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
 * `refresh_interval_ms` - (Optional) The maximum frequency at which this materialized view will be refreshed.
     The default value is 1800000
 
+* `allow_non_incremental_definition` - (Optional) Allow non incremental materialized view definition.
+    The default value is false.
+
 <a name="nested_encryption_configuration"></a>The `encryption_configuration` block supports the following arguments:
 
 * `kms_key_name` - (Required) The self link or full name of a key which should be used to
@@ -363,12 +443,124 @@ in Terraform state, a `terraform destroy` or `terraform apply` that would delete
     `google_bigquery_default_service_account` datasource and the
     `google_kms_crypto_key_iam_binding` resource.
 
+<a name="nested_table_constraints"></a>The `table_constraints` block supports:
+
+* `primary_key` - (Optional) Represents the primary key constraint
+    on a table's columns. Present only if the table has a primary key.
+    The primary key is not enforced.
+    Structure is [documented below](#nested_primary_key).
+
+* `foreign_keys` - (Optional) Present only if the table has a foreign key.
+    The foreign key is not enforced.
+    Structure is [documented below](#nested_foreign_keys).
+
+<a name="nested_primary_key"></a>The `primary_key` block supports:
+
+* `columns` - (Required) The columns that are composed of the primary key constraint.
+
+<a name="nested_foreign_keys"></a>The `foreign_keys` block supports:
+
+* `name` - (Optional) Set only if the foreign key constraint is named.
+
+* `referenced_table` - (Required) The table that holds the primary key
+    and is referenced by this foreign key.
+    Structure is [documented below](#nested_referenced_table).
+
+* `column_references` - (Required) The pair of the foreign key column and primary key column.
+    Structure is [documented below](#nested_column_references).
+
+<a name="nested_referenced_table"></a>The `referenced_table` block supports:
+
+* `project_id` - (Required) The ID of the project containing this table.
+
+* `dataset_id` - (Required) The ID of the dataset containing this table.
+
+* `table_id` - (Required) The ID of the table. The ID must contain only
+	letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum
+	length is 1,024 characters. Certain operations allow suffixing of
+	the table ID with a partition decorator, such as
+	sample_table$20190123.
+
+<a name="nested_column_references"></a>The `column_references` block supports:
+
+* `referencing_column` - (Required) The column that composes the foreign key.
+
+* `referenced_column` - (Required) The column in the primary key that are
+    referenced by the referencingColumn
+
+<a name="nested_table_replication_info"></a>The `table_replication_info` block supports:
+
+* `source_project_id` - (Required) The ID of the source project.
+
+* `source_dataset_id` - (Required) The ID of the source dataset.
+
+* `source_table_id` - (Required) The ID of the source materialized view.
+
+* `replication_interval_ms` - (Optional) The interval at which the source
+    materialized view is polled for updates. The default is 300000.
+
+<a name="nested_biglake_configuration"></a>The `biglake_configuration` block supports:
+
+* `connection_id` - (Required) The connection specifying the credentials to be used to
+    read and write to external storage, such as Cloud Storage. The connection_id can
+    have the form "&lt;project\_id&gt;.&lt;location\_id&gt;.&lt;connection\_id&gt;" or
+    projects/&lt;project\_id&gt;/locations/&lt;location\_id&gt;/connections/&lt;connection\_id&gt;".
+
+* `storage_uri` - (Required) The fully qualified location prefix of the external folder where table data
+  is stored. The '*' wildcard character is not allowed. The URI should be in the format "gs://bucket/path_to_table/"
+
+* `file_format` - (Required) The file format the table data is stored in.
+
+* `table_format` - (Required) The table format the metadata only snapshots are stored in.
+
+<a name="nested_external_catalog_table_options"></a>The `external_catalog_table_options` block supports:
+
+* `parameters` - (Optional) A map of key value pairs defining the parameters and
+  properties of the open source table. Corresponds with hive meta store table
+  parameters. Maximum size of 4Mib.
+* `storage_descriptor` - (Optional) A storage descriptor containing information
+  about the physical storage of this table. Structure is [documented below](#nested_storage_descriptor).
+* `connection_id` - (Optional) The connection specifying the credentials to be
+  used to read external storage, such as Azure Blob, Cloud Storage, or S3. The
+  connection is needed to read the open source table from BigQuery Engine. The
+  connection_id can have the form `<project_id>.<location_id>.<connection_id>`
+  or `projects/<project_id>/locations/<location_id>/connections/<connection_id>`.
+
+<a name="nested_storage_descriptor"></a>The `storage_descriptor` block supports:
+
+* `location_uri` - (Optional) The physical location of the table (e.g.
+  'gs://spark-dataproc-data/pangea-data/case_sensitive/' or
+  'gs://spark-dataproc-data/pangea-data/*'). The maximum length is 2056 bytes.
+
+* `input_format` - (Optional) Specifies the fully qualified class name of the
+  InputFormat (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcInputFormat"). The
+  maximum length is 128 characters.
+
+* `output_format` - (Optional) Specifies the fully qualified class name of the
+  OutputFormat (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat"). The
+  maximum length is 128 characters.
+
+* `serde_info` - (Optional) Serializer and deserializer information. Structure
+  is [documented below](#nested_serde_info).
+
+<a name="nested_serde_info"></a>The `serde_info` block supports:
+
+* `name` - (Optional) Name of the SerDe. The maximum length is 256 characters.
+
+* `serialization_library` - (Required) Specifies a fully-qualified class name of
+  the serialization library that is responsible for the translation of data
+  between table representation and the underlying low-level input and output
+  format structures. The maximum length is 256 characters.
+
+* `parameters` - (Optional) Key-value pairs that define the initialization
+  parameters for the serialization library. Maximum size 10 Kib.
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
 exported:
 
-* `id` - an identifier for the resource with format `projects/{{project}}/datasets/{{dataset}}/tables/{{name}}`
+* `id` - An identifier for the resource with format `projects/{{project}}/datasets/{{dataset}}/tables/{{name}}`
 
 * `creation_time` - The time when this table was created, in milliseconds since the epoch.
 
@@ -392,7 +584,22 @@ exported:
 
 ## Import
 
-BigQuery tables imported using any of these accepted formats:
+BigQuery tables can be imported using any of these accepted formats:
+
+* `projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}`
+* `{{project}}/{{dataset_id}}/{{table_id}}`
+* `{{dataset_id}}/{{table_id}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import BigQuery tables using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}"
+  to = google_bigquery_table.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), BigQuery tables can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_bigquery_table.default projects/{{project}}/datasets/{{dataset_id}}/tables/{{table_id}}

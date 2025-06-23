@@ -112,7 +112,7 @@ func dataSourceSqlDatabaseInstancesRead(d *schema.ResourceData, meta interface{}
 			return err
 		}
 
-		pageInstances := flattenDatasourceGoogleDatabaseInstancesList(instances.Items, project)
+		pageInstances := flattenDatasourceGoogleDatabaseInstancesList(instances.Items, project, d)
 		databaseInstances = append(databaseInstances, pageInstances...)
 
 		pageToken = instances.NextPageToken
@@ -130,7 +130,7 @@ func dataSourceSqlDatabaseInstancesRead(d *schema.ResourceData, meta interface{}
 	return nil
 }
 
-func flattenDatasourceGoogleDatabaseInstancesList(fetchedInstances []*sqladmin.DatabaseInstance, project string) []map[string]interface{} {
+func flattenDatasourceGoogleDatabaseInstancesList(fetchedInstances []*sqladmin.DatabaseInstance, project string, d *schema.ResourceData) []map[string]interface{} {
 	if fetchedInstances == nil {
 		return make([]map[string]interface{}, 0)
 	}
@@ -146,13 +146,14 @@ func flattenDatasourceGoogleDatabaseInstancesList(fetchedInstances []*sqladmin.D
 		instance["available_maintenance_versions"] = rawInstance.AvailableMaintenanceVersions
 		instance["instance_type"] = rawInstance.InstanceType
 		instance["service_account_email_address"] = rawInstance.ServiceAccountEmailAddress
-		instance["settings"] = flattenSettings(rawInstance.Settings)
+		instance["settings"] = flattenSettings(rawInstance.Settings, d)
 
 		if rawInstance.DiskEncryptionConfiguration != nil {
 			instance["encryption_key_name"] = rawInstance.DiskEncryptionConfiguration.KmsKeyName
 		}
 
 		instance["replica_configuration"] = flattenReplicaConfigurationforDataSource(rawInstance.ReplicaConfiguration)
+		instance["replication_cluster"] = flattenReplicationClusterForDataSource(rawInstance.ReplicationCluster)
 
 		ipAddresses := flattenIpAddresses(rawInstance.IpAddresses)
 		instance["ip_address"] = ipAddresses
@@ -197,4 +198,20 @@ func flattenReplicaConfigurationforDataSource(replicaConfiguration *sqladmin.Rep
 	}
 
 	return rc
+}
+
+// flattenReplicationClusterForDataSource converts cloud SQL backend ReplicationCluster (proto) to
+// terraform replication_cluster. We explicitly allow the case when ReplicationCluster
+// is nil since replication_cluster is computed+optional.
+func flattenReplicationClusterForDataSource(replicationCluster *sqladmin.ReplicationCluster) []map[string]interface{} {
+	data := make(map[string]interface{})
+	data["failover_dr_replica_name"] = ""
+	if replicationCluster != nil && replicationCluster.FailoverDrReplicaName != "" {
+		data["failover_dr_replica_name"] = replicationCluster.FailoverDrReplicaName
+	}
+	data["dr_replica"] = false
+	if replicationCluster != nil {
+		data["dr_replica"] = replicationCluster.DrReplica
+	}
+	return []map[string]interface{}{data}
 }

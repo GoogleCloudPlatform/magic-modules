@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
 )
@@ -24,6 +25,10 @@ func ResourceSqlSslCert() *schema.Resource {
 			Create: schema.DefaultTimeout(10 * time.Minute),
 			Delete: schema.DefaultTimeout(10 * time.Minute),
 		},
+
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"common_name": {
@@ -51,6 +56,7 @@ func ResourceSqlSslCert() *schema.Resource {
 			"cert": {
 				Type:        schema.TypeString,
 				Computed:    true,
+				Sensitive:   true,
 				Description: `The actual certificate data for this client certificate.`,
 			},
 
@@ -82,6 +88,7 @@ func ResourceSqlSslCert() *schema.Resource {
 			"server_ca_cert": {
 				Type:        schema.TypeString,
 				Computed:    true,
+				Sensitive:   true,
 				Description: `The CA cert of the server this client cert was generated from.`,
 			},
 

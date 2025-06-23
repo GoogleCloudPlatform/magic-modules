@@ -4,14 +4,18 @@ description: |-
   Creates a new object inside a specified bucket
 ---
 
-# google\_storage\_bucket\_object
+# google_storage_bucket_object
 
-Creates a new object inside an existing bucket in Google cloud storage service (GCS). 
+Creates a new object inside an existing bucket in Google cloud storage service (GCS).
 [ACLs](https://cloud.google.com/storage/docs/access-control/lists) can be applied using the `google_storage_object_acl` resource.
- For more information see 
-[the official documentation](https://cloud.google.com/storage/docs/key-terms#objects) 
-and 
+ For more information see
+[the official documentation](https://cloud.google.com/storage/docs/key-terms#objects)
+and
 [API](https://cloud.google.com/storage/docs/json_api/v1/objects).
+
+A datasource can be used to retrieve the data of the stored object:
+
+* `google_storage_bucket_object_content`: Retrieves the content within a specified bucket object in Google Cloud Storage Service (GCS)
 
 
 ## Example Usage
@@ -67,7 +71,9 @@ One of the following is required:
 * `content_type` - (Optional) [Content-Type](https://tools.ietf.org/html/rfc7231#section-3.1.1.5) of the object data. Defaults to "application/octet-stream" or "text/plain; charset=utf-8".
 
 * `customer_encryption` - (Optional) Enables object encryption with Customer-Supplied Encryption Key (CSEK). [Google [documentation about](#nested_customer_encryption) CSEK.](https://cloud.google.com/storage/docs/encryption/customer-supplied-keys)
-    Structure is documented below.
+    Structure is [documented below](#nested_customer_encryption).
+
+* `retention` - (Optional) The [object retention](http://cloud.google.com/storage/docs/object-lock) settings for the object. The retention settings allow an object to be retained until a provided date. Structure is [documented below](#nested_retention).
 
 * `event_based_hold` - (Optional) Whether an object is under [event-based hold](https://cloud.google.com/storage/docs/object-holds#hold-types). Event-based hold is a way to retain objects until an event occurs, which is signified by the hold's release (i.e. this value is set to false). After being released (set to false), such objects will be subject to bucket-level retention (if any).
 
@@ -81,6 +87,8 @@ One of the following is required:
 
 * `kms_key_name` - (Optional) The resource name of the Cloud KMS key that will be used to [encrypt](https://cloud.google.com/storage/docs/encryption/using-customer-managed-keys) the object.
 
+* `source_md5hash` - (Optional) User-provided md5hash to trigger replacement of object in storage bucket, Must be Base 64 MD5 hash of the object data. The usual way to set this is filemd5("file.zip"), where "file.zip" is the local filename
+
 ---
 
 <a name="nested_customer_encryption"></a>The `customer_encryption` block supports:
@@ -89,10 +97,20 @@ One of the following is required:
 
 * `encryption_key` - (Required) Base64 encoded Customer-Supplied Encryption Key.
 
+<a name="nested_retention"></a>The `retention` block supports:
+
+* `mode` - (Required) The retention policy mode. Either `Locked` or `Unlocked`.
+
+* `retain_until_time` - (Required) The time to retain the object until in RFC 3339 format, for example 2012-11-15T16:19:00.094Z.
+
+<a name>
+
 ## Attributes Reference
 
 In addition to the arguments listed above, the following computed attributes are
 exported:
+
+* `generation` - (Computed) The content generation of this object. Used for object [versioning](https://cloud.google.com/storage/docs/object-versioning) and [soft delete](https://cloud.google.com/storage/docs/soft-delete).
 
 * `crc32c` - (Computed) Base 64 CRC32 hash of the uploaded data.
 
@@ -104,6 +122,8 @@ exported:
 `google_storage_object_acl` resources when your `google_storage_bucket_object` is recreated.
 
 * `media_link` - (Computed) A url reference to download this object.
+
+* `md5hexhash` - (Computed) Hex value of md5hash`
 
 ## Timeouts
 

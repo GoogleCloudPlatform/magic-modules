@@ -2,10 +2,11 @@ package resourcemanager_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
@@ -42,9 +43,10 @@ func TestAccFolder_rename(t *testing.T) {
 					testAccCheckGoogleFolderDisplayName(&folder, newFolderDisplayName),
 				)},
 			{
-				ResourceName:      "google_folder.folder1",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_folder.folder1",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -82,6 +84,48 @@ func TestAccFolder_moveParent(t *testing.T) {
 					testAccCheckGoogleFolderParent(&folder2, parent),
 					testAccCheckGoogleFolderDisplayName(&folder2, folder2DisplayName),
 				),
+			},
+		},
+	})
+}
+
+// Test that a Folder resource can be created with tags
+func TestAccFolder_tags(t *testing.T) {
+	t.Parallel()
+
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "crm-folder-tagkey", nil)
+	context := map[string]interface{}{
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "crm-folder-tagvalue", tagKey),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	folder_tags := resourceManagerV3.Folder{}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFolder_tags(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleFolderExists(t, "google_folder.folder_tags", &folder_tags),
+				),
+			},
+			// Make sure import supports tags
+			{
+				ResourceName:            "google_folder.folder_tags",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"tags", "deletion_protection"}, // we don't read tags back
+			},
+			// Update tags tries to replace the folder but fails due to deletion protection
+			{
+				Config:      testAccFolder_withoutTags(context),
+				ExpectError: regexp.MustCompile("deletion_protection"),
+			},
+			{
+				Config: testAccFolder_tagsAllowDestroy(context),
 			},
 		},
 	})
@@ -153,8 +197,43 @@ func testAccFolder_basic(folder, parent string) string {
 resource "google_folder" "folder1" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, folder, parent)
+}
+
+func testAccFolder_tags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder_tags" {
+  display_name = "tf-test-%{random_suffix}"
+  parent       = "organizations/%{org}"
+  tags         = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
+}
+
+func testAccFolder_withoutTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder_tags" {
+  display_name = "tf-test-%{random_suffix}"
+  parent       = "organizations/%{org}"
+}
+`, context)
+}
+
+func testAccFolder_tagsAllowDestroy(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_folder" "folder_tags" {
+  display_name = "tf-test-%{random_suffix}"
+  parent       = "organizations/%{org}"
+  deletion_protection = false
+  tags = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
 }
 
 func testAccFolder_move(folder1, folder2, parent string) string {
@@ -162,11 +241,13 @@ func testAccFolder_move(folder1, folder2, parent string) string {
 resource "google_folder" "folder1" {
   display_name = "%s"
   parent       = google_folder.folder2.name
+  deletion_protection = false
 }
 
 resource "google_folder" "folder2" {
   display_name = "%s"
   parent       = "%s"
+  deletion_protection = false
 }
 `, folder1, folder2, parent)
 }

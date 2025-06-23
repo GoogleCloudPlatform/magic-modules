@@ -1,0 +1,18 @@
+data "google_compute_image" "debian" {
+  family  = "debian-12"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "persistent" {
+  name  = "{{index $.Vars "disk_name"}}"
+  image = data.google_compute_image.debian.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_image" "example" {
+  name = "{{index $.Vars "image_name"}}"
+
+  source_disk = google_compute_disk.persistent.id
+}

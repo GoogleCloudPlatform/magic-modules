@@ -1,0 +1,8 @@
+resource "google_scc_mute_config" "{{$.PrimaryResourceId}}" {
+  mute_config_id = "{{index $.Vars "mute_config_id"}}"
+  parent         = "organizations/{{index $.TestEnvVars "org_id"}}"
+  filter         = "category: \"OS_VULNERABILITY\""
+  description    = "My Mute Config"
+  type           = "DYNAMIC"
+  expiry_time    = "2215-02-03T15:01:23Z"
+}

@@ -11,7 +11,9 @@ import (
 	"time"
 
 	"github.com/hashicorp/errwrap"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 	tpgserviceusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
@@ -40,6 +42,10 @@ func ResourceGoogleProject() *schema.Resource {
 		Update: resourceGoogleProjectUpdate,
 		Delete: resourceGoogleProjectDelete,
 
+		CustomizeDiff: customdiff.All(
+			tpgresource.SetLabelsDiff,
+		),
+
 		Importer: &schema.ResourceImporter{
 			State: resourceProjectImportState,
 		},
@@ -61,11 +67,13 @@ func ResourceGoogleProject() *schema.Resource {
 				ValidateFunc: verify.ValidateProjectID(),
 				Description:  `The project ID. Changing this forces a new project to be created.`,
 			},
-			"skip_delete": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Computed:    true,
-				Description: `If true, the Terraform resource can be deleted without deleting the Project via the Google API.`,
+			"deletion_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "PREVENT",
+				Description: `The deletion policy for the Project. Setting PREVENT will protect the project against any destroy actions caused by a terraform apply or terraform destroy. Setting ABANDON allows the resource
+				to be abandoned rather than deleted. Possible values are: "PREVENT", "ABANDON", "DELETE"`,
+				ValidateFunc: validation.StringInSlice([]string{"PREVENT", "ABANDON", "DELETE"}, false),
 			},
 			"auto_create_network": {
 				Type:        schema.TypeBool,
@@ -103,10 +111,35 @@ func ResourceGoogleProject() *schema.Resource {
 				Description: `The alphanumeric ID of the billing account this project belongs to. The user or service account performing this operation with Terraform must have Billing Account Administrator privileges (roles/billing.admin) in the organization. See Google Cloud Billing API Access Control for more details.`,
 			},
 			"labels": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Description: `A set of key/value label pairs to assign to the project.
+				
+				**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
+			},
+
+			"terraform_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `(ReadOnly) The combination of labels configured directly on the resource and default labels configured on the provider.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+
+			"effective_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+
+			"tags": {
 				Type:        schema.TypeMap,
 				Optional:    true,
+				ForceNew:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
-				Description: `A set of key/value label pairs to assign to the project.`,
+				Description: `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored when empty. This field is only set at create time and modifying this field after creation will trigger recreation. To apply tags to an existing resource, see the google_tags_tag_value resource.`,
 			},
 		},
 		UseJSONNumber: true,
@@ -137,8 +170,12 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	if _, ok := d.GetOk("labels"); ok {
-		project.Labels = tpgresource.ExpandLabels(d)
+	if _, ok := d.GetOk("effective_labels"); ok {
+		project.Labels = tpgresource.ExpandEffectiveLabels(d)
+	}
+
+	if _, ok := d.GetOk("tags"); ok {
+		project.Tags = tpgresource.ExpandStringMap(d, "tags")
 	}
 
 	var op *cloudresourcemanager.Operation
@@ -179,9 +216,9 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	// Sleep for 10s, letting the billing account settle before other resources
+	// Sleep to let the billing account settle before other resources
 	// try to use this project.
-	time.Sleep(10 * time.Second)
+	time.Sleep(15 * time.Second)
 
 	err = resourceGoogleProjectRead(d, meta)
 	if err != nil {
@@ -205,7 +242,13 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 			return errwrap.Wrapf("Error enabling the Compute Engine API required to delete the default network: {{err}} ", err)
 		}
 
-		if err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default"); err != nil {
+		err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default")
+		// Retry if API is not yet enabled.
+		if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
+			time.Sleep(15 * time.Second)
+			err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default")
+		}
+		if err != nil {
 			if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 				log.Printf("[DEBUG] Default network not found for project %q, no need to delete it", project.ProjectId)
 			} else {
@@ -276,7 +319,12 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 		d.SetId("")
 		return nil
 	}
-
+	// Explicitly set client-side fields to default values if unset
+	if _, ok := d.GetOkExists("deletion_policy"); !ok {
+		if err := d.Set("deletion_policy", "PREVENT"); err != nil {
+			return fmt.Errorf("Error setting deletion_policy: %s", err)
+		}
+	}
 	if err := d.Set("project_id", pid); err != nil {
 		return fmt.Errorf("Error setting project_id: %s", err)
 	}
@@ -286,8 +334,14 @@ func resourceGoogleProjectRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("name", p.Name); err != nil {
 		return fmt.Errorf("Error setting name: %s", err)
 	}
-	if err := d.Set("labels", p.Labels); err != nil {
+	if err := tpgresource.SetLabels(p.Labels, d, "labels"); err != nil {
 		return fmt.Errorf("Error setting labels: %s", err)
+	}
+	if err := tpgresource.SetLabels(p.Labels, d, "terraform_labels"); err != nil {
+		return fmt.Errorf("Error setting terraform_labels: %s", err)
+	}
+	if err := d.Set("effective_labels", p.Labels); err != nil {
+		return fmt.Errorf("Error setting effective_labels: %s", err)
 	}
 
 	if p.Parent != nil {
@@ -431,8 +485,8 @@ func resourceGoogleProjectUpdate(d *schema.ResourceData, meta interface{}) error
 	}
 
 	// Project Labels have changed
-	if ok := d.HasChange("labels"); ok {
-		p.Labels = tpgresource.ExpandLabels(d)
+	if ok := d.HasChange("effective_labels"); ok {
+		p.Labels = tpgresource.ExpandEffectiveLabels(d)
 
 		// Do Update on project
 		if p, err = updateProject(config, d, project_name, userAgent, p); err != nil {
@@ -464,8 +518,16 @@ func resourceGoogleProjectDelete(d *schema.ResourceData, meta interface{}) error
 	if err != nil {
 		return err
 	}
-	// Only delete projects if skip_delete isn't set
-	if !d.Get("skip_delete").(bool) {
+	deletionPolicy := d.Get("deletion_policy").(string)
+
+	if deletionPolicy == "PREVENT" {
+		return fmt.Errorf("Cannot destroy project as deletion_policy is set to PREVENT.")
+	} else if deletionPolicy == "ABANDON" {
+		log.Printf("[WARN] The project has been abandoned as deletion_policy set to ABANDON.")
+		d.SetId("")
+		return nil
+	} else {
+		// Only delete projects if deletion_policy isn't PREVENT or ABANDON
 		parts := strings.Split(d.Id(), "/")
 		pid := parts[len(parts)-1]
 		if err := transport_tpg.Retry(transport_tpg.RetryOptions{
@@ -738,7 +800,7 @@ func ListCurrentlyEnabledServices(project, billingProject, userAgent string, con
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			ctx := context.Background()
-			call := config.NewServiceUsageClient(userAgent).Services.List(fmt.Sprintf("projects/%s", project))
+			call := config.NewServiceUsageClient(userAgent).Services.List(fmt.Sprintf("projects/%s", project)).PageSize(200)
 			if config.UserProjectOverride && billingProject != "" {
 				call.Header().Add("X-Goog-User-Project", billingProject)
 			}
@@ -748,16 +810,13 @@ func ListCurrentlyEnabledServices(project, billingProject, userAgent string, con
 						// services are returned as "projects/{{project}}/services/{{name}}"
 						name := tpgresource.GetResourceNameFromSelfLink(v.Name)
 
-						// if name not in ignoredProjectServicesSet
-						if _, ok := ignoredProjectServicesSet[name]; !ok {
-							apiServices[name] = struct{}{}
+						apiServices[name] = struct{}{}
 
-							// if a service has been renamed, set both. We'll deal
-							// with setting the right values later.
-							if v, ok := renamedServicesByOldAndNewServiceNames[name]; ok {
-								log.Printf("[DEBUG] Adding service alias for %s to enabled services: %s", name, v)
-								apiServices[v] = struct{}{}
-							}
+						// if a service has been renamed, set both. We'll deal
+						// with setting the right values later.
+						if v, ok := renamedServicesByOldAndNewServiceNames[name]; ok {
+							log.Printf("[DEBUG] Adding service alias for %s to enabled services: %s", name, v)
+							apiServices[v] = struct{}{}
 						}
 					}
 					return nil

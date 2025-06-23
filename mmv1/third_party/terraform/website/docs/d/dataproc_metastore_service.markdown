@@ -1,10 +1,10 @@
 ---
-subcategory: "Dataproc metastore"
+subcategory: "Dataproc Metastore"
 description: |-
   Get a Dataproc Metastore Service from Google Cloud
 ---
 
-# google\_dataproc\_metastore\_service
+# google_dataproc_metastore_service
 
 Get a Dataproc Metastore service from Google Cloud by its id and location.
 

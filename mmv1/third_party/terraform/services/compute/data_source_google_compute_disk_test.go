@@ -3,7 +3,7 @@ package compute_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -32,7 +32,10 @@ func TestAccDataSourceGoogleComputeDisk_basic(t *testing.T) {
 func testAccDataSourceGoogleComputeDisk_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_disk" "foo" {
-  name     = "tf-test-compute-disk-%{random_suffix}"
+  name   = "tf-test-compute-disk-%{random_suffix}"
+  labels = {
+    my-label = "my-label-value"
+  }
 }
 
 data "google_compute_disk" "foo" {

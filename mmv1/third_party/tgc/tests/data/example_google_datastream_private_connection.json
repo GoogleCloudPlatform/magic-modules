@@ -1,0 +1,45 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/networks/pc-network",
+        "asset_type": "compute.googleapis.com/Network",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "Network",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "autoCreateSubnetworks": true,
+                "name": "pc-network",
+                "networkFirewallPolicyEnforcementOrder": "AFTER_CLASSIC_FIREWALL"
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    },
+    {
+        "name": "//datastream.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/privateConnections/pc-connection",
+        "asset_type": "datastream.googleapis.com/PrivateConnection",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/datastream/v1/rest",
+            "discovery_name": "PrivateConnection",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "displayName": "Connection profile",
+                "labels": {
+                    "goog-terraform-provisioned": "true",
+                    "key": "value"
+                },
+                "vpcPeeringConfig": {
+                    "subnet": "10.0.0.0/29"
+                }
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    }
+]

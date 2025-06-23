@@ -1,9 +1,0 @@
-- type: CUSTOM_IMPORT_FUNCTION
-  details:
-    function: tpgdclresource.ResourceOrgPolicyPolicyCustomImport
-- type: ENUM_BOOL
-  field: spec.rules.allow_all
-- type: ENUM_BOOL
-  field: spec.rules.deny_all
-- type: ENUM_BOOL
-  field: spec.rules.enforce

@@ -1,0 +1,31 @@
+[
+  {
+    "name": "//storage.googleapis.com/image-store-bucket",
+    "asset_type": "storage.googleapis.com/Bucket",
+    "ancestry_path": "organizations/unknown",
+    "resource": {
+      "version": "v1",
+      "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/storage/v1/rest",
+      "discovery_name": "Bucket",
+      "parent": "//cloudresourcemanager.googleapis.com/organizations/unknown",
+      "data": {
+        "iamConfiguration": {
+          "uniformBucketLevelAccess": {
+            "enabled": false
+          }
+        },
+        "lifecycle": {
+          "rule": []
+        },
+        "location": "EU",
+        "name": "image-store-bucket",
+        "project": "",
+        "storageClass": "STANDARD",
+        "website": {
+          "mainPageSuffix": "index.html",
+          "notFoundPage": "404.html"
+        }
+      }
+    }
+  }
+]

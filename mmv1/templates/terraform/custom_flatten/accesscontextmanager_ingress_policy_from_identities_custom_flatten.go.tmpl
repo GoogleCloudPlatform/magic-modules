@@ -1,0 +1,26 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+    rawConfigValue := d.Get("ingress_from.0.identities")
+    // Convert config value to []string
+    configValue, err := tpgresource.InterfaceSliceToStringSlice(rawConfigValue)
+    if err != nil {
+        log.Printf("[ERROR] Failed to convert ingress from identities config value: %s", err)
+        return v
+    }
+    sortedConfigValue := append([]string{}, configValue...)
+    sort.Strings(sortedConfigValue)
+
+    // Convert v to []string
+    apiValue, err := tpgresource.InterfaceSliceToStringSlice(v)
+    if err != nil {
+        log.Printf("[ERROR] Failed to convert ingress from identities API value: %s", err)
+        return v
+    }
+    sortedApiValue := append([]string{}, apiValue...)
+    sort.Strings(sortedApiValue)
+
+    if (slices.Equal(sortedApiValue, sortedConfigValue)) {
+        return configValue
+    }
+
+    return apiValue
+}

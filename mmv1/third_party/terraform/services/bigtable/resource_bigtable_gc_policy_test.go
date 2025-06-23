@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/bigtable"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	tpgbigtable "github.com/hashicorp/terraform-provider-google/google/services/bigtable"
 )
@@ -33,6 +33,43 @@ func TestAccBigtableGCPolicy_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccBigtableGCPolicyExists(
 						t, "google_bigtable_gc_policy.policy", false),
+				),
+			},
+		},
+	})
+}
+
+func TestAccBigtableGCPolicy_ignoreWarnings(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	familyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	cluster1Name := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	cluster2Name := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	gcRulesOriginal := `{"rules":[{"max_age":"10h"}]}`
+	gcRulesNew := `{"rules":[{"max_age":"12h"}]}`
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableGCPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigtableGCPolicyIgnoreWarning(instanceName, tableName, familyName, cluster1Name, cluster2Name, gcRulesOriginal, false),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBigtableGCPolicyExists(t, "google_bigtable_gc_policy.policy", true),
+					resource.TestCheckResourceAttr("google_bigtable_gc_policy.policy", "gc_rules", gcRulesOriginal),
+				),
+			},
+			{
+				Config: testAccBigtableGCPolicyIgnoreWarning(instanceName, tableName, familyName, cluster1Name, cluster2Name, gcRulesNew, true),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBigtableGCPolicyExists(t, "google_bigtable_gc_policy.policy", true),
+					resource.TestCheckResourceAttr("google_bigtable_gc_policy.policy", "gc_rules", gcRulesNew),
 				),
 			},
 		},
@@ -166,6 +203,7 @@ func TestAccBigtableGCPolicy_multiplePolicies(t *testing.T) {
 }
 
 func TestAccBigtableGCPolicy_gcRulesPolicy(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -174,7 +212,7 @@ func TestAccBigtableGCPolicy_gcRulesPolicy(t *testing.T) {
 	familyName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	gcRulesOriginal := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"10h\"},{\"max_version\":2}]}"
-	gcRulesUpdate := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"16h\"},{\"max_version\":1}]}"
+	gcRulesUpdate := "{\"mode\":\"intersection\",\"rules\":[{\"max_age\":\"40h\"},{\"max_version\":1}]}"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -253,14 +291,14 @@ var testUnitGcPolicyToGCRuleStringTestCases = []testUnitGcPolicyToGCRuleString{
 		errorExpected: false,
 	},
 	{
-		name:          "MaxVersionPolicyNotTopeLevel",
+		name:          "MaxVersionPolicyNotTopLevel",
 		policy:        bigtable.MaxVersionsPolicy(1),
 		topLevel:      false,
 		want:          `{"max_version":1}`,
 		errorExpected: false,
 	},
 	{
-		name:          "MaxAgePolicyNotTopeLevel",
+		name:          "MaxAgePolicyNotTopLevel",
 		policy:        bigtable.MaxAgePolicy(time.Hour),
 		topLevel:      false,
 		want:          `{"max_age":"1h"}`,
@@ -562,6 +600,49 @@ resource "google_bigtable_gc_policy" "policy" {
 `, instanceName, instanceName, tableName, family, family)
 }
 
+func testAccBigtableGCPolicyIgnoreWarning(instanceName, tableName, family string, cluster1 string, cluster2 string, gcRule string, ignoreWarnings bool) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+
+  cluster {
+    cluster_id = "%s"
+		num_nodes  = 1
+    zone       = "us-central1-b"
+  }
+
+  cluster {
+    cluster_id = "%s"
+		num_nodes  = 1
+    zone       = "us-central1-c"
+  }
+
+  deletion_protection = false
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "%s"
+  instance_name = google_bigtable_instance.instance.id
+
+  column_family {
+    family = "%s"
+  }
+}
+
+resource "google_bigtable_gc_policy" "policy" {
+  instance_name = google_bigtable_instance.instance.id
+  table         = google_bigtable_table.table.name
+  column_family = "%s"
+	gc_rules = <<EOF
+	%s
+	EOF
+
+	ignore_warnings = %t
+	deletion_policy = "ABANDON"
+}
+`, instanceName, cluster1, cluster2, tableName, family, family, gcRule, ignoreWarnings)
+}
+
 func testAccBigtableGCPolicyToBeAbandoned(instanceName, tableName, family string) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
@@ -793,7 +874,7 @@ func testAccBigtableGCPolicy_gcRulesUpdate(instanceName, tableName, family strin
 		table         = google_bigtable_table.table.name
 		column_family = "%s"
 
-		gc_rules = "{\"mode\":\"intersection\", \"rules\":[{\"max_age\":\"16h\"},{\"max_version\":1}]}"
+		gc_rules = "{\"mode\":\"intersection\", \"rules\":[{\"max_age\":\"1d16h\"},{\"max_version\":1}]}"
 	}
 `, instanceName, instanceName, tableName, family, family)
 }

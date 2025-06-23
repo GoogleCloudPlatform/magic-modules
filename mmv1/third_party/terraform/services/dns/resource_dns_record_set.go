@@ -8,12 +8,25 @@ import (
 
 	"net"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"google.golang.org/api/dns/v1"
 )
+
+func lbTypeNoneDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// Extract the index from the key
+	var index int
+	_, err := fmt.Sscanf(k, "routing_policy.0.primary_backup.0.primary.0.internal_load_balancers.%d.load_balancer_type", &index)
+	if err != nil {
+		return false // Key doesn't match the expected format
+	}
+
+	// Check if the value is changing between "none" and "" (null)
+	return (old == "none" && new == "") || (old == "" && new == "none")
+}
 
 func rrdatasDnsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if k == "rrdatas.#" && (new == "0" || new == "") && old != new {
@@ -80,6 +93,10 @@ func ResourceDnsRecordSet() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: resourceDnsRecordSetImportState,
 		},
+
+		CustomizeDiff: customdiff.All(
+			tpgresource.DefaultProviderProject,
+		),
 
 		Schema: map[string]*schema.Schema{
 			"managed_zone": {
@@ -162,7 +179,7 @@ func ResourceDnsRecordSet() *schema.Resource {
 						"primary_backup": {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: "The configuration for a primary-backup policy with global to regional failover. Queries are responded to with the global primary targets, but if none of the primary targets are healthy, then we fallback to a regional failover policy.",
+							Description: "The configuration for a failover policy with global to regional failover. Queries are responded to with the global primary targets, but if none of the primary targets are healthy, then we fallback to a regional failover policy.",
 							MaxItems:    1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -193,6 +210,12 @@ func ResourceDnsRecordSet() *schema.Resource {
 							},
 							ExactlyOneOf:  []string{"routing_policy.0.wrr", "routing_policy.0.geo", "routing_policy.0.primary_backup"},
 							ConflictsWith: []string{"routing_policy.0.enable_geo_fencing"},
+						},
+						"health_check": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Description: "Specifies the health check.",
 						},
 					},
 				},
@@ -251,15 +274,16 @@ var healthCheckedTargetSchema *schema.Resource = &schema.Resource{
 	Schema: map[string]*schema.Schema{
 		"internal_load_balancers": {
 			Type:        schema.TypeList,
-			Required:    true,
+			Optional:    true,
 			Description: "The list of internal load balancers to health check.",
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"load_balancer_type": {
-						Type:         schema.TypeString,
-						Required:     true,
-						Description:  `The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb", "regionalL7ilb", "globalL7ilb"]`,
-						ValidateFunc: validation.StringInSlice([]string{"regionalL4ilb", "regionalL7ilb", "globalL7ilb"}, false),
+						Type:             schema.TypeString,
+						Optional:         true,
+						DiffSuppressFunc: lbTypeNoneDiffSuppress,
+						Description:      `The type of load balancer. This value is case-sensitive. Possible values: ["regionalL4ilb", "regionalL7ilb", "globalL7ilb"]`,
+						ValidateFunc:     validation.StringInSlice([]string{"regionalL4ilb", "regionalL7ilb", "globalL7ilb"}, false),
 					},
 					"ip_address": {
 						Type:        schema.TypeString,
@@ -294,6 +318,14 @@ var healthCheckedTargetSchema *schema.Resource = &schema.Resource{
 						Description: "The region of the load balancer. Only needed for regional load balancers.",
 					},
 				},
+			},
+		},
+		"external_endpoints": {
+			Type:        schema.TypeList,
+			Description: "The Internet IP addresses to be health checked.",
+			Optional:    true,
+			Elem: &schema.Schema{
+				Type: schema.TypeString,
 			},
 		},
 	},
@@ -356,6 +388,14 @@ func resourceDnsRecordSetCreate(d *schema.ResourceData, meta interface{}) error 
 	if len(deletions) > 0 {
 		chg.Deletions = deletions
 	}
+
+	// Mutex
+	lockName := fmt.Sprintf("projects/%s/managedZones/%s/rrsets/%s/%s", project, zone, name, rType)
+	if err != nil {
+		return err
+	}
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
 	log.Printf("[DEBUG] DNS Record create request: %#v", chg)
 	chg, err = config.NewDnsClient(userAgent).Changes.Create(project, zone, chg).Do()
@@ -425,15 +465,11 @@ func resourceDnsRecordSetRead(d *schema.ResourceData, meta interface{}) error {
 	if err := d.Set("ttl", rrset.Ttl); err != nil {
 		return fmt.Errorf("Error setting ttl: %s", err)
 	}
-	if len(rrset.Rrdatas) > 0 {
-		if err := d.Set("rrdatas", rrset.Rrdatas); err != nil {
-			return fmt.Errorf("Error setting rrdatas: %s", err)
-		}
+	if err := d.Set("rrdatas", rrset.Rrdatas); err != nil {
+		return fmt.Errorf("Error setting rrdatas: %s", err)
 	}
-	if rrset.RoutingPolicy != nil {
-		if err := d.Set("routing_policy", flattenDnsRecordSetRoutingPolicy(rrset.RoutingPolicy)); err != nil {
-			return fmt.Errorf("Error setting routing_policy: %s", err)
-		}
+	if err := d.Set("routing_policy", flattenDnsRecordSetRoutingPolicy(rrset.RoutingPolicy)); err != nil {
+		return fmt.Errorf("Error setting routing_policy: %s", err)
 	}
 	if err := d.Set("project", project); err != nil {
 		return fmt.Errorf("Error setting project: %s", err)
@@ -454,16 +490,21 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 		return err
 	}
 
+	name := d.Get("name").(string)
 	zone := d.Get("managed_zone").(string)
+	rType := d.Get("type").(string)
 
-	// NS records must always have a value, so we short-circuit delete
-	// this allows terraform delete to work, but may have unexpected
-	// side-effects when deleting just that record set.
+	// NS and SOA records on the root zone must always have a value,
+	// so we short-circuit delete this allows terraform delete to work,
+	// but may have unexpected side-effects when deleting just that
+	// record set.
 	// Unfortunately, you can set NS records on subdomains, and those
 	// CAN and MUST be deleted, so we need to retrieve the managed zone,
 	// check if what we're looking at is a subdomain, and only not delete
 	// if it's not actually a subdomain
-	if d.Get("type").(string) == "NS" {
+	// This does not apply to SOA, as they can only be set on the root
+	// zone.
+	if d.Get("type").(string) == "NS" || d.Get("type").(string) == "SOA" {
 		mz, err := config.NewDnsClient(userAgent).ManagedZones.Get(project, zone).Do()
 		if err != nil {
 			return fmt.Errorf("Error retrieving managed zone %q from %q: %s", zone, project, err)
@@ -471,7 +512,7 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 		domain := mz.DnsName
 
 		if domain == d.Get("name").(string) {
-			log.Println("[DEBUG] NS records can't be deleted due to API restrictions, so they're being left in place. See https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/dns_record_set for more information.")
+			log.Printf("[DEBUG] root-level %s records can't be deleted due to API restrictions, so they're being left in place. See https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/dns_record_set for more information.\n", d.Get("type").(string))
 			return nil
 		}
 	}
@@ -493,6 +534,14 @@ func resourceDnsRecordSetDelete(d *schema.ResourceData, meta interface{}) error 
 			},
 		},
 	}
+
+	// Mutex
+	lockName := fmt.Sprintf("projects/%s/managedZones/%s/rrsets/%s/%s", project, zone, name, rType)
+	if err != nil {
+		return err
+	}
+	transport_tpg.MutexStore.Lock(lockName)
+	defer transport_tpg.MutexStore.Unlock(lockName)
 
 	log.Printf("[DEBUG] DNS Record delete request: %#v", chg)
 	chg, err = config.NewDnsClient(userAgent).Changes.Create(project, zone, chg).Do()
@@ -635,11 +684,13 @@ func expandDnsRecordSetRoutingPolicy(configured []interface{}, d tpgresource.Ter
 		if err != nil {
 			return nil, err
 		}
-		return &dns.RRSetRoutingPolicy{
+		rp := &dns.RRSetRoutingPolicy{
+			HealthCheck: data["health_check"].(string),
 			Wrr: &dns.RRSetRoutingPolicyWrrPolicy{
 				Items: wrrItems,
 			},
-		}, nil
+		}
+		return rp, nil
 	}
 
 	if len(geoRawItems) > 0 {
@@ -647,12 +698,14 @@ func expandDnsRecordSetRoutingPolicy(configured []interface{}, d tpgresource.Ter
 		if err != nil {
 			return nil, err
 		}
-		return &dns.RRSetRoutingPolicy{
+		rp := &dns.RRSetRoutingPolicy{
+			HealthCheck: data["health_check"].(string),
 			Geo: &dns.RRSetRoutingPolicyGeoPolicy{
 				Items:         geoItems,
 				EnableFencing: data["enable_geo_fencing"].(bool),
 			},
-		}, nil
+		}
+		return rp, nil
 	}
 
 	if len(rawPrimaryBackup) > 0 {
@@ -660,9 +713,12 @@ func expandDnsRecordSetRoutingPolicy(configured []interface{}, d tpgresource.Ter
 		if err != nil {
 			return nil, err
 		}
-		return &dns.RRSetRoutingPolicy{
+
+		rp := &dns.RRSetRoutingPolicy{
+			HealthCheck:   data["health_check"].(string),
 			PrimaryBackup: primaryBackup,
-		}, nil
+		}
+		return rp, nil
 	}
 
 	return nil, nil // unreachable here if ps is valid data
@@ -724,13 +780,22 @@ func expandDnsRecordSetHealthCheckedTargets(configured []interface{}, d tpgresou
 	}
 
 	data := configured[0].(map[string]interface{})
-	internalLoadBalancers, err := expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancers(data["internal_load_balancers"].([]interface{}), d, config)
-	if err != nil {
-		return nil, err
+	if ilbs := data["internal_load_balancers"].([]interface{}); len(ilbs) > 0 {
+		internalLoadBalancers, err := expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancers(ilbs, d, config)
+		if err != nil {
+			return nil, err
+		}
+		return &dns.RRSetRoutingPolicyHealthCheckTargets{
+			InternalLoadBalancers: internalLoadBalancers,
+		}, nil
 	}
-	return &dns.RRSetRoutingPolicyHealthCheckTargets{
-		InternalLoadBalancers: internalLoadBalancers,
-	}, nil
+
+	if endpoints := data["external_endpoints"].([]interface{}); len(endpoints) > 0 {
+		return &dns.RRSetRoutingPolicyHealthCheckTargets{
+			ExternalEndpoints: tpgresource.ConvertStringArr(endpoints),
+		}, nil
+	}
+	return nil, fmt.Errorf("specify internal load balancers or external endpoints")
 }
 
 func expandDnsRecordSetHealthCheckedTargetsInternalLoadBalancers(configured []interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]*dns.RRSetRoutingPolicyLoadBalancerTarget, error) {
@@ -820,6 +885,7 @@ func flattenDnsRecordSetRoutingPolicy(policy *dns.RRSetRoutingPolicy) []interfac
 	if policy.PrimaryBackup != nil {
 		p["primary_backup"] = flattenDnsRecordSetRoutingPolicyPrimaryBackup(policy.PrimaryBackup)
 	}
+	p["health_check"] = policy.HealthCheck
 	return append(ps, p)
 }
 
@@ -854,6 +920,7 @@ func flattenDnsRecordSetHealthCheckedTargets(targets *dns.RRSetRoutingPolicyHeal
 
 	data := map[string]interface{}{
 		"internal_load_balancers": flattenDnsRecordSetInternalLoadBalancers(targets.InternalLoadBalancers),
+		"external_endpoints":      targets.ExternalEndpoints,
 	}
 
 	return []map[string]interface{}{data}

@@ -6,15 +6,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/services/bigquerydatatransfer"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForceNew(t *testing.T) {
+func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForceNewWhenGoogleCloudStorage(t *testing.T) {
 	t.Parallel()
 
 	cases := map[string]struct {
@@ -152,6 +152,144 @@ func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForce
 	}
 }
 
+func TestBigqueryDataTransferConfig_resourceBigqueryDTCParamsCustomDiffFuncForceNewWhenAmazonS3(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		before   map[string]interface{}
+		after    map[string]interface{}
+		forcenew bool
+	}{
+		"changing_data_path": {
+			before: map[string]interface{}{
+				"data_source_id": "amazon_s3",
+				"params": map[string]interface{}{
+					"data_path":                       "s3://s3-bucket-temp/*.json",
+					"destination_table_name_template": "table-old",
+					"file_format":                     "JSON",
+					"max_bad_records":                 10,
+					"write_disposition":               "WRITE_APPEND",
+				},
+			},
+			after: map[string]interface{}{
+				"data_source_id": "amazon_s3",
+				"params": map[string]interface{}{
+					"data_path":                       "s3://s3-bucket-temp-new/*.json",
+					"destination_table_name_template": "table-old",
+					"file_format":                     "JSON",
+					"max_bad_records":                 10,
+					"write_disposition":               "WRITE_APPEND",
+				},
+			},
+			forcenew: true,
+		},
+		"changing_destination_table_name_template": {
+			before: map[string]interface{}{
+				"data_source_id": "amazon_s3",
+				"params": map[string]interface{}{
+					"data_path":                       "s3://s3-bucket-temp/*.json",
+					"destination_table_name_template": "table-old",
+					"file_format":                     "JSON",
+					"max_bad_records":                 10,
+					"write_disposition":               "WRITE_APPEND",
+				},
+			},
+			after: map[string]interface{}{
+				"data_source_id": "amazon_s3",
+				"params": map[string]interface{}{
+					"data_path":                       "s3://s3-bucket-temp/*.json",
+					"destination_table_name_template": "table-new",
+					"file_format":                     "JSON",
+					"max_bad_records":                 10,
+					"write_disposition":               "WRITE_APPEND",
+				},
+			},
+			forcenew: true,
+		},
+		"changing_non_force_new_fields": {
+			before: map[string]interface{}{
+				"data_source_id": "amazon_s3",
+				"params": map[string]interface{}{
+					"data_path":                       "s3://s3-bucket-temp/*.json",
+					"destination_table_name_template": "table-old",
+					"file_format":                     "JSON",
+					"max_bad_records":                 10,
+					"write_disposition":               "WRITE_APPEND",
+				},
+			},
+			after: map[string]interface{}{
+				"data_source_id": "amazon_s3",
+				"params": map[string]interface{}{
+					"data_path":                       "s3://s3-bucket-temp/*.json",
+					"destination_table_name_template": "table-old",
+					"file_format":                     "JSON",
+					"max_bad_records":                 1000,
+					"write_disposition":               "APPEND",
+				},
+			},
+			forcenew: false,
+		},
+		"changing_destination_table_name_template_for_different_data_source_id": {
+			before: map[string]interface{}{
+				"data_source_id": "scheduled_query",
+				"params": map[string]interface{}{
+					"destination_table_name_template": "table-old",
+					"query":                           "SELECT 1 AS a",
+					"write_disposition":               "WRITE_APPEND",
+				},
+			},
+			after: map[string]interface{}{
+				"data_source_id": "scheduled_query",
+				"params": map[string]interface{}{
+					"destination_table_name_template": "table-new",
+					"query":                           "SELECT 1 AS a",
+					"write_disposition":               "WRITE_APPEND",
+				},
+			},
+			forcenew: false,
+		},
+		"changing_data_path_template_for_different_data_source_id": {
+			before: map[string]interface{}{
+				"data_source_id": "scheduled_query",
+				"params": map[string]interface{}{
+					"data_path":         "s3://s3-bucket-temp/*.json",
+					"query":             "SELECT 1 AS a",
+					"write_disposition": "WRITE_APPEND",
+				},
+			},
+			after: map[string]interface{}{
+				"data_source_id": "scheduled_query",
+				"params": map[string]interface{}{
+					"data_path":         "s3://s3-bucket-temp-new/*.json",
+					"query":             "SELECT 1 AS a",
+					"write_disposition": "WRITE_APPEND",
+				},
+			},
+			forcenew: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		d := &tpgresource.ResourceDiffMock{
+			Before: map[string]interface{}{
+				"params":         tc.before["params"],
+				"data_source_id": tc.before["data_source_id"],
+			},
+			After: map[string]interface{}{
+				"params":         tc.after["params"],
+				"data_source_id": tc.after["data_source_id"],
+			},
+		}
+		err := bigquerydatatransfer.ParamsCustomizeDiffFunc(d)
+		if err != nil {
+			t.Errorf("failed, expected no error but received - %s for the condition %s", err, tn)
+		}
+		if d.IsForceNew != tc.forcenew {
+			t.Errorf("ForceNew not setup correctly for the condition-'%s', expected:%v; actual:%v", tn, tc.forcenew, d.IsForceNew)
+		}
+	}
+}
+
 // The service account TF uses needs the permission granted in the configs
 // but it will get deleted by parallel tests, so they need to be run serially.
 func TestAccBigqueryDataTransferConfig(t *testing.T) {
@@ -163,6 +301,8 @@ func TestAccBigqueryDataTransferConfig(t *testing.T) {
 		"booleanParam":           testAccBigqueryDataTransferConfig_copy_booleanParam,
 		"update_params":          testAccBigqueryDataTransferConfig_force_new_update_params,
 		"update_service_account": testAccBigqueryDataTransferConfig_scheduledQuery_update_service_account,
+		// Multiple connector.authentication.* fields have been deprecated and return 400 errors
+		// "salesforce":             testAccBigqueryDataTransferConfig_salesforce_basic,
 	}
 
 	for name, tc := range testCases {
@@ -233,6 +373,29 @@ func testAccBigqueryDataTransferConfig_scheduledQuery_update(t *testing.T) {
 			},
 			{
 				Config: testAccBigqueryDataTransferConfig_scheduledQuery(random_suffix, random_suffix2, "second", second_start_time, second_end_time, "z"),
+			},
+			{
+				ResourceName:            "google_bigquery_data_transfer_config.query_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
+}
+
+func testAccBigqueryDataTransferConfig_CMEK(t *testing.T) {
+	// Uses time.Now
+	acctest.SkipIfVcr(t)
+	random_suffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryDataTransferConfig_CMEK_basic(random_suffix),
 			},
 			{
 				ResourceName:            "google_bigquery_data_transfer_config.query_config",
@@ -432,6 +595,27 @@ func testAccCheckDataTransferServiceAccountNamePrefix(resourceName string, prefi
 	}
 }
 
+func testAccBigqueryDataTransferConfig_salesforce_basic(t *testing.T) {
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigqueryDataTransferConfigDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigqueryDataTransferConfig_salesforce(randomSuffix),
+			},
+			{
+				ResourceName:            "google_bigquery_data_transfer_config.salesforce_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"},
+			},
+		},
+	})
+}
+
 func testAccBigqueryDataTransferConfig_scheduledQuery(random_suffix, random_suffix2, schedule, start_time, end_time, letter string) string {
 	return fmt.Sprintf(`
 data "google_project" "project" {}
@@ -607,6 +791,74 @@ resource "google_bigquery_data_transfer_config" "copy_config" {
 `, random_suffix, random_suffix, random_suffix)
 }
 
+func testAccBigqueryDataTransferConfig_CMEK_basic(random_suffix string) string {
+	return fmt.Sprintf(`
+data "google_project" "project" {
+}
+
+resource "google_kms_key_ring" "example_keyring" {
+  name     = "keyring-test-%s"
+  location = "us-central1"
+}
+
+resource "google_kms_crypto_key" "example_crypto_key" {
+  name = "crypto-key-%s"
+  key_ring = google_kms_key_ring.example_keyring.id
+  purpose = "ENCRYPT_DECRYPT"
+}
+
+resource "google_service_account" "bqwriter%s" {
+  account_id = "bqwriter%s"
+}
+
+resource "google_project_iam_member" "data_editor" {
+  project = data.google_project.project.project_id
+
+  role   = "roles/bigquery.dataEditor"
+  member = "serviceAccount:${google_service_account.bqwriter%s.email}"
+}
+
+data "google_iam_policy" "owner" {
+  binding {
+    role = "roles/bigquery.dataOwner"
+
+    members = [
+      "serviceAccount:${google_service_account.bqwriter%s.email}",
+    ]
+  }
+}
+
+resource "google_bigquery_dataset_iam_policy" "dataset" {
+  dataset_id  = google_bigquery_dataset.my_dataset.dataset_id
+  policy_data = data.google_iam_policy.owner.policy_data
+}
+
+resource "google_bigquery_data_transfer_config" "query_config" {
+  depends_on = [ google_kms_crypto_key.example_crypto_key ]
+  encryption_configuration {
+    kms_key_name = google_kms_crypto_key.example_crypto_key.id
+  }
+  display_name           = "my-query-%s"
+  location               = "us-central1"
+  data_source_id         = "scheduled_query"
+  schedule               = "first sunday of quarter 00:00"
+  destination_dataset_id = google_bigquery_dataset.my_dataset.dataset_id
+  params = {
+    destination_table_name_template = "my_table"
+    write_disposition               = "WRITE_APPEND"
+    query                           = "SELECT name FROM table WHERE x = 'y'"
+  }
+}
+
+resource "google_bigquery_dataset" "my_dataset" {
+  dataset_id    = "my_dataset_%s"
+  friendly_name = "foo"
+  description   = "bar"
+  location      = "us-central1"
+}
+`, random_suffix, random_suffix, random_suffix, random_suffix, random_suffix, random_suffix, random_suffix, random_suffix)
+}
+
 func testAccBigqueryDataTransferConfig_update_params_force_new(random_suffix, path, table string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "dataset" {
@@ -671,4 +923,29 @@ resource "google_bigquery_data_transfer_config" "query_config" {
   }
 }
 `, service_account, service_account, service_account, random_suffix, random_suffix, service_account)
+}
+
+func testAccBigqueryDataTransferConfig_salesforce(randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_bigquery_dataset" "dataset" {
+  dataset_id       = "tf_test_%s"
+  friendly_name    = "foo"
+  description      = "bar"
+  location         = "US"
+}
+
+resource "google_bigquery_data_transfer_config" "salesforce_config" {
+  display_name           = "tf-test-%s"
+  data_source_id         = "salesforce"
+  destination_dataset_id = google_bigquery_dataset.dataset.dataset_id
+  location               = google_bigquery_dataset.dataset.location
+
+  params = {
+    "connector.authentication.oauth.clientId"     = ""
+    "connector.authentication.oauth.clientSecret" = ""
+    "connector.authentication.oauth.myDomain"     = "MyDomain"
+    "assets"                                      = "[\"asset-a\",\"asset-b\"]"
+  }
+}
+`, randomSuffix, randomSuffix)
 }

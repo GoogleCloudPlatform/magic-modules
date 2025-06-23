@@ -17,7 +17,7 @@
 terraform {
   required_providers {
     google = {
-      source = "hashicorp/google"
+      source = "hashicorp/google-beta"
       version = "~> {{.Provider.version}}"
     }
   }
@@ -28,7 +28,7 @@ provider "google" {
 }
 
 resource "google_bigquery_dataset" "example-dataset" {
-  dataset_id                  = "test-dataset"
+  dataset_id                  = "test_dataset"
   location                    = "EU"
   project                     = "{{.Provider.project}}"
   default_table_expiration_ms = 3600000
@@ -36,7 +36,7 @@ resource "google_bigquery_dataset" "example-dataset" {
   labels = {
     env = "dev"
   }
-  
+
 }
 
 resource "google_bigquery_dataset_iam_policy" "dataset" {

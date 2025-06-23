@@ -1,0 +1,840 @@
+package compute_test
+
+import (
+	"fmt"
+	"regexp"
+	"testing"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+        "github.com/hashicorp/terraform-provider-google/google/tpgresource"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+
+{{ if eq $.TargetVersionName `ga` }}
+	"google.golang.org/api/compute/v1"
+{{- else }}
+	compute "google.golang.org/api/compute/v0.beta"
+{{- end }}
+)
+
+func TestAccComputeNetwork_explicitAutoSubnet(t *testing.T) {
+	t.Parallel()
+
+	var network compute.Network
+	suffixName := acctest.RandString(t, 10)
+	networkName := fmt.Sprintf("tf-test-network-basic-%s", suffixName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetwork_basic(networkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkExists(
+						t, "google_compute_network.bar", &network),
+					testAccCheckComputeNetworkIsAutoSubnet(
+						t, "google_compute_network.bar", &network),
+				),
+			},
+			{
+				ResourceName:      "google_compute_network.bar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeNetwork_customSubnet(t *testing.T) {
+	t.Parallel()
+
+	var network compute.Network
+	suffixName := acctest.RandString(t, 10)
+	networkName := fmt.Sprintf("tf-test-network-custom-sn-%s", suffixName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetwork_custom_subnet(networkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkExists(
+						t, "google_compute_network.baz", &network),
+					testAccCheckComputeNetworkIsCustomSubnet(
+						t, "google_compute_network.baz", &network),
+				),
+			},
+			{
+				ResourceName:      "google_compute_network.baz",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeNetwork_mtuAndUpdate(t *testing.T) {
+	t.Parallel()
+
+	var network compute.Network
+	suffixName := acctest.RandString(t, 10)
+	networkName := fmt.Sprintf("tf-test-network-routing-mode-%s", suffixName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetwork_mtu(networkName, 1460),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkExists(
+						t, "google_compute_network.acc_network_mtu", &network),
+					testAccCheckComputeNetworkHasMtu(
+						t, "google_compute_network.acc_network_mtu", &network, 1460),
+				),
+			},
+			// Test updating the mtu field from 1460 to 1500.
+			{
+				Config: testAccComputeNetwork_mtu(networkName, 1500),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkExists(
+						t, "google_compute_network.acc_network_mtu", &network),
+					testAccCheckComputeNetworkHasMtu(
+						t, "google_compute_network.acc_network_mtu", &network, 1500),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeNetwork_routingModeAndUpdate(t *testing.T) {
+	t.Parallel()
+
+	var network compute.Network
+	suffixName := acctest.RandString(t, 10)
+	networkName := fmt.Sprintf("tf-test-network-routing-mode-%s", suffixName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetwork_routing_mode(networkName, "GLOBAL"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkExists(
+						t, "google_compute_network.acc_network_routing_mode", &network),
+					testAccCheckComputeNetworkHasRoutingMode(
+						t, "google_compute_network.acc_network_routing_mode", &network, "GLOBAL"),
+				),
+			},
+			// Test updating the routing field (only updatable field).
+			{
+				Config: testAccComputeNetwork_routing_mode(networkName, "REGIONAL"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkExists(
+						t, "google_compute_network.acc_network_routing_mode", &network),
+					testAccCheckComputeNetworkHasRoutingMode(
+						t, "google_compute_network.acc_network_routing_mode", &network, "REGIONAL"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeNetwork_bgpBestPathSelectionModeAndUpdate(t *testing.T) {
+   t.Parallel()
+
+   var network compute.Network
+   suffixName := acctest.RandString(t, 10)
+   networkName := fmt.Sprintf("tf-best-bgp-path-selection-mode-%s", suffixName)
+
+   acctest.VcrTest(t, resource.TestCase{
+       PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+       ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+       CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+       Steps: []resource.TestStep{
+           {
+				Config: testAccComputeNetwork_best_bgp_path_selection_mode(networkName, "LEGACY"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkExists(
+						t, "google_compute_network.acc_network_bgp_best_path_selection_mode", &network),
+					resource.TestCheckResourceAttr("google_compute_network.acc_network_bgp_best_path_selection_mode", "bgp_best_path_selection_mode", "LEGACY"),
+				),
+			},
+			// Test updating the best bgp path selection field (only updatable field).
+			{
+				Config: testAccComputeNetwork_best_bgp_path_selection_mode(networkName, "STANDARD"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkExists(
+						t, "google_compute_network.acc_network_bgp_best_path_selection_mode", &network),
+					resource.TestCheckResourceAttr("google_compute_network.acc_network_bgp_best_path_selection_mode", "bgp_best_path_selection_mode", "STANDARD"),
+				),
+			},
+           },
+       },
+   )
+}
+
+
+func TestAccComputeNetwork_bgpAlwaysCompareMedAndUpdate(t *testing.T) {
+   t.Parallel()
+
+   var network compute.Network
+   suffixName := acctest.RandString(t, 10)
+   networkName := fmt.Sprintf("tf-bgp-always-compare-med-%s", suffixName)
+
+   acctest.VcrTest(t, resource.TestCase{
+       PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+       ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+       CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+       Steps: []resource.TestStep{
+           {
+               Config: testAccComputeNetwork_bgp_always_compare_med(networkName, false),
+               Check: resource.ComposeTestCheckFunc(
+                   testAccCheckComputeNetworkExists(
+                       t, "google_compute_network.acc_network_bgp_always_compare_med", &network),
+                   resource.TestCheckResourceAttr("google_compute_network.acc_network_bgp_always_compare_med", "bgp_always_compare_med", "false"),
+               ),
+           },
+           // Test updating the bgpAlwaysCompareMed field (only updatable field).
+           {
+               Config: testAccComputeNetwork_bgp_always_compare_med(networkName, true),
+               Check: resource.ComposeTestCheckFunc(
+                   testAccCheckComputeNetworkExists(
+                       t, "google_compute_network.acc_network_bgp_always_compare_med", &network),
+                   resource.TestCheckResourceAttr("google_compute_network.acc_network_bgp_always_compare_med", "bgp_always_compare_med", "true"),
+               ),
+           },
+       },
+   })
+}
+
+
+func TestAccComputeNetwork_bgpInterRegionCostAndUpdate(t *testing.T) {
+   t.Parallel()
+
+   var network compute.Network
+   suffixName := acctest.RandString(t, 10)
+   networkName := fmt.Sprintf("tf-bgp-inter-region-cost-%s", suffixName)
+
+   acctest.VcrTest(t, resource.TestCase{
+       PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+       ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+       CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+       Steps: []resource.TestStep{
+           {
+               Config: testAccComputeNetwork_bgp_inter_region_cost(networkName, "DEFAULT"),
+               Check: resource.ComposeTestCheckFunc(
+                   testAccCheckComputeNetworkExists(
+                       t, "google_compute_network.acc_network_bgp_inter_region_cost", &network),
+                      resource.TestCheckResourceAttr("google_compute_network.acc_network_bgp_inter_region_cost", "bgp_inter_region_cost", "DEFAULT"),
+               ),
+           },
+           // Test updating the bgpInterRegionCost field (only updatable field).
+           {
+               Config: testAccComputeNetwork_bgp_inter_region_cost(networkName, "ADD_COST_TO_MED"),
+               Check: resource.ComposeTestCheckFunc(
+                   testAccCheckComputeNetworkExists(
+                       t, "google_compute_network.acc_network_bgp_inter_region_cost", &network),
+                   resource.TestCheckResourceAttr("google_compute_network.acc_network_bgp_inter_region_cost", "bgp_inter_region_cost", "ADD_COST_TO_MED"),
+               ),
+           },
+       },
+   })
+}
+
+func TestAccComputeNetwork_networkProfile(t *testing.T) {
+   t.Parallel()
+
+   var network compute.Network
+   suffixName := acctest.RandString(t, 10)
+   networkName := fmt.Sprintf("tf-test-network-profile-%s", suffixName)
+   projectId := envvar.GetTestProjectFromEnv()
+   {{ if eq $.TargetVersionName `ga` }}
+   profileURL := fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/networkProfiles/europe-west1-b-vpc-roce", projectId)
+   {{- else }}
+   profileURL := fmt.Sprintf("https://www.googleapis.com/compute/beta/projects/%s/global/networkProfiles/europe-west1-b-vpc-roce", projectId)
+   {{- end }}
+
+   acctest.VcrTest(t, resource.TestCase{
+       PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+       ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+       CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+       Steps: []resource.TestStep{
+           {
+               Config: testAccComputeNetwork_network_profile(networkName, profileURL),
+               Check: resource.ComposeTestCheckFunc(
+                   testAccCheckComputeNetworkExists(
+                       t, "google_compute_network.acc_network_network_profile", &network),
+                   testAccCheckComputeNetworkHasNetworkProfile(
+                       t, "google_compute_network.acc_network_network_profile", &network, profileURL),
+               ),
+           },
+       },
+   })
+}
+
+func TestComputeNetworkProfileDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"old: no previous profile, new: partial profile URL": {
+			Old: "",
+			New: "projects/dummy-project/global/networkProfiles/europe-west1-b-vpc-roce",
+			ExpectDiffSuppress: false,
+		},
+		"old: no previous profile, new: full profile URL": {
+			Old: "",
+			New: "https://www.googleapis.com/compute/v1/projects/dummy-project/global/networkProfiles/europe-west1-b-vpc-roce",
+			ExpectDiffSuppress: false,
+		},
+		"old: beta profile URL, new: partial profile URL": {
+			Old: "https://www.googleapis.com/compute/beta/projects/dummy-project/global/networkProfiles/europe-west1-b-vpc-roce",
+			New: "projects/dummy-project/global/networkProfiles/europe-west1-b-vpc-roce",
+			ExpectDiffSuppress: true,
+		},
+		"old: v1 profile URL, new: partial profile URL": {
+			Old: "https://www.googleapis.com/compute/v1/projects/dummy-project/global/networkProfiles/europe-west1-b-vpc-roce",
+			New: "projects/dummy-project/global/networkProfiles/europe-west1-b-vpc-roce",
+			ExpectDiffSuppress: true,
+		},
+		"old: beta profile URL, new: v1 profile URL": {
+			Old: "https://www.googleapis.com/compute/beta/projects/dummy-project/global/networkProfiles/europe-west1-b-vpc-roce",
+			New: "https://www.googleapis.com/compute/v1/projects/dummy-project/global/networkProfiles/europe-west1-b-vpc-roce",
+			ExpectDiffSuppress: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		tc := tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+			if tpgresource.CompareSelfLinkRelativePaths("", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+				t.Errorf("%q => %q expected DiffSuppress to return %t", tc.Old, tc.New, tc.ExpectDiffSuppress)
+			}
+		})
+	}
+}
+
+func TestAccComputeNetwork_numericId(t *testing.T) {
+	t.Parallel()
+	suffixName := acctest.RandString(t, 10)
+	networkName := fmt.Sprintf("tf-test-network-basic-%s", suffixName)
+	projectId := envvar.GetTestProjectFromEnv()
+	networkId := fmt.Sprintf("projects/%v/global/networks/%v", projectId, networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetwork_basic(networkName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestMatchResourceAttr("google_compute_network.bar", "network_id",regexp.MustCompile("^\\d{16,48}$")),
+					resource.TestMatchResourceAttr("google_compute_network.bar", "numeric_id",regexp.MustCompile("^\\d{16,48}$")),
+					resource.TestCheckResourceAttr("google_compute_network.bar", "id", networkId),
+				),
+			},
+			{
+				ResourceName:      "google_compute_network.bar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeNetwork_default_routing_mode(t *testing.T) {
+	t.Parallel()
+
+	var network compute.Network
+	suffixName := acctest.RandString(t, 10)
+	networkName := fmt.Sprintf("tf-test-network-network-default-routes-%s", suffixName)
+
+	expectedRoutingMode := "REGIONAL"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetwork_basic(networkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkExists(
+						t, "google_compute_network.bar", &network),
+					testAccCheckComputeNetworkHasRoutingMode(
+						t, "google_compute_network.bar", &network, expectedRoutingMode),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeNetwork_default_bgp_best_path_selection_mode(t *testing.T) {
+	t.Parallel()
+
+	var network compute.Network
+	suffixName := acctest.RandString(t, 10)
+	networkName := fmt.Sprintf("tf-test-bgp-best-path-selection-default-routes-%s", suffixName)
+
+	expectedBgpBestPathSelection := "LEGACY"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetwork_basic(networkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkExists(
+						t, "google_compute_network.bar", &network),
+					resource.TestCheckResourceAttr("google_compute_network.bar", "bgp_best_path_selection_mode", expectedBgpBestPathSelection),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeNetwork_default_bgp_always_compare_med(t *testing.T) {
+   t.Parallel()
+
+   var network compute.Network
+   suffixName := acctest.RandString(t, 10)
+   networkName := fmt.Sprintf("tf-test-bgp-always-compare-med-default-routes-%s", suffixName)
+
+   expectedBgpAlwaysCompareMed := "false"
+
+   acctest.VcrTest(t, resource.TestCase{
+       PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+       ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+       CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+       Steps: []resource.TestStep{
+           {
+               Config: testAccComputeNetwork_best_bgp_path_selection_mode(networkName, "STANDARD"),
+               Check: resource.ComposeTestCheckFunc(
+                   testAccCheckComputeNetworkExists(
+                       t, "google_compute_network.acc_network_bgp_best_path_selection_mode", &network),
+                   	resource.TestCheckResourceAttr("google_compute_network.acc_network_bgp_best_path_selection_mode", "bgp_always_compare_med", expectedBgpAlwaysCompareMed),
+               ),
+           },
+       },
+   })
+}
+
+func TestAccComputeNetwork_networkDeleteDefaultRoute(t *testing.T) {
+	t.Parallel()
+
+	var network compute.Network
+	suffixName := acctest.RandString(t, 10)
+	networkName := fmt.Sprintf("tf-test-network-network-default-routes-%s", suffixName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetwork_deleteDefaultRoute(networkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkExists(
+						t, "google_compute_network.bar", &network),
+					testAccCheckComputeNetworkDefaultRoutesDeleted(
+						t, "google_compute_network.bar", &network),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeNetwork_networkFirewallPolicyEnforcementOrderAndUpdate(t *testing.T) {
+	t.Parallel()
+
+	var network compute.Network
+	var updatedNetwork compute.Network
+	suffixName := acctest.RandString(t, 10)
+	networkName := fmt.Sprintf("tf-test-network-firewall-policy-enforcement-order-%s", suffixName)
+
+	defaultNetworkFirewallPolicyEnforcementOrder := "AFTER_CLASSIC_FIREWALL"
+	explicitNetworkFirewallPolicyEnforcementOrder := "BEFORE_CLASSIC_FIREWALL"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeNetworkDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetwork_networkFirewallPolicyEnforcementOrderDefault(networkName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkExists(
+						t, "google_compute_network.acc_network_firewall_policy_enforcement_order", &network),
+					testAccCheckComputeNetworkHasNetworkFirewallPolicyEnforcementOrder(
+						t, "google_compute_network.acc_network_firewall_policy_enforcement_order", &network, defaultNetworkFirewallPolicyEnforcementOrder),
+				),
+			},
+			{
+				ResourceName: 				"google_compute_network.acc_network_firewall_policy_enforcement_order",
+				ImportState: 				true,
+				ImportStateVerify: 			true,
+				ImportStateVerifyIgnore: 	[]string{"force_destroy"},
+			},
+			// Test updating the enforcement order works and updates in-place
+			{
+				Config: testAccComputeNetwork_networkFirewallPolicyEnforcementOrderUpdate(networkName, explicitNetworkFirewallPolicyEnforcementOrder),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeNetworkExists(
+						t, "google_compute_network.acc_network_firewall_policy_enforcement_order", &updatedNetwork),
+					testAccCheckComputeNetworkHasNetworkFirewallPolicyEnforcementOrder(
+						t, "google_compute_network.acc_network_firewall_policy_enforcement_order", &updatedNetwork, explicitNetworkFirewallPolicyEnforcementOrder),
+					testAccCheckComputeNetworkWasUpdated(&updatedNetwork, &network),
+				),
+			},
+			{
+				ResourceName: 				"google_compute_network.acc_network_firewall_policy_enforcement_order",
+				ImportState: 				true,
+				ImportStateVerify: 			true,
+				ImportStateVerifyIgnore: 	[]string{"force_destroy"},
+			},
+		},
+	})
+}
+
+func testAccCheckComputeNetworkExists(t *testing.T, n string, network *compute.Network) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.Attributes["name"] == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+
+		found, err := config.NewComputeClient(config.UserAgent).Networks.Get(
+			config.Project, rs.Primary.Attributes["name"]).Do()
+		if err != nil {
+			return err
+		}
+
+		if found.Name != rs.Primary.Attributes["name"] {
+			return fmt.Errorf("Network not found")
+		}
+
+		*network = *found
+
+		return nil
+	}
+}
+
+func testAccCheckComputeNetworkDefaultRoutesDeleted(t *testing.T, n string, network *compute.Network) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.Attributes["name"] == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+
+		routes, err := config.NewComputeClient(config.UserAgent).Routes.List(config.Project).Filter(fmt.Sprintf("(network=\"%s\") AND (destRange=\"0.0.0.0/0\")", network.SelfLink)).Do()
+		if err != nil {
+			return err
+		}
+
+		if len(routes.Items) > 0 {
+			return fmt.Errorf("Default routes were not deleted")
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckComputeNetworkIsAutoSubnet(t *testing.T, n string, network *compute.Network) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		found, err := config.NewComputeClient(config.UserAgent).Networks.Get(
+			config.Project, network.Name).Do()
+		if err != nil {
+			return err
+		}
+
+		if !found.AutoCreateSubnetworks {
+			return fmt.Errorf("should have AutoCreateSubnetworks = true")
+		}
+
+		if found.IPv4Range != "" {
+			return fmt.Errorf("should not have IPv4Range")
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckComputeNetworkIsCustomSubnet(t *testing.T, n string, network *compute.Network) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		found, err := config.NewComputeClient(config.UserAgent).Networks.Get(
+			config.Project, network.Name).Do()
+		if err != nil {
+			return err
+		}
+
+		if found.AutoCreateSubnetworks {
+			return fmt.Errorf("should have AutoCreateSubnetworks = false")
+		}
+
+		if found.IPv4Range != "" {
+			return fmt.Errorf("should not have IPv4Range")
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckComputeNetworkHasMtu(t *testing.T, n string, network *compute.Network, mtu int32) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.Attributes["mtu"] == "" {
+			return fmt.Errorf("Routing mode not found on resource")
+		}
+
+		found, err := config.NewComputeClient(config.UserAgent).Networks.Get(
+			config.Project, network.Name).Do()
+		if err != nil {
+			return err
+		}
+
+		foundMtu := found.Mtu
+
+		if int64(mtu) != foundMtu {
+			return fmt.Errorf("Expected mtu %d to match actual routing mode %d", mtu, foundMtu)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckComputeNetworkHasRoutingMode(t *testing.T, n string, network *compute.Network, routingMode string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.Attributes["routing_mode"] == "" {
+			return fmt.Errorf("Routing mode not found on resource")
+		}
+
+		found, err := config.NewComputeClient(config.UserAgent).Networks.Get(
+			config.Project, network.Name).Do()
+		if err != nil {
+			return err
+		}
+
+		foundRoutingMode := found.RoutingConfig.RoutingMode
+
+		if routingMode != foundRoutingMode {
+			return fmt.Errorf("Expected routing mode %s to match actual routing mode %s", routingMode, foundRoutingMode)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckComputeNetworkHasNetworkProfile(t *testing.T, n string, network *compute.Network, networkProfile string) resource.TestCheckFunc {
+   return func(s *terraform.State) error {
+       config := acctest.GoogleProviderConfig(t)
+
+       rs, ok := s.RootModule().Resources[n]
+       if !ok {
+           return fmt.Errorf("Not found: %s", n)
+       }
+
+       if rs.Primary.Attributes["network_profile"] == "" {
+           return fmt.Errorf("Network profile not found on resource")
+       }
+
+       found, err := config.NewComputeClient(config.UserAgent).Networks.Get(
+           config.Project, network.Name).Do()
+       if err != nil {
+           return err
+       }
+
+       foundNetworkProfile := found.NetworkProfile
+
+       if tpgresource.CompareSelfLinkOrResourceName("", foundNetworkProfile, networkProfile, nil) != true {
+           return fmt.Errorf("Expected Network Profile always compare med %s to match actual Network Profile always compare med %s", networkProfile, foundNetworkProfile)
+       }
+
+       return nil
+   }
+}
+
+func testAccCheckComputeNetworkHasNetworkFirewallPolicyEnforcementOrder(t *testing.T, n string, network *compute.Network, order string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		config := acctest.GoogleProviderConfig(t)
+
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.Attributes["network_firewall_policy_enforcement_order"] == "" {
+			return fmt.Errorf("Network firewall policy enforcement order not found on resource")
+		}
+
+		found, err := config.NewComputeClient(config.UserAgent).Networks.Get(
+			config.Project, network.Name).Do()
+		if err != nil {
+			return err
+		}
+
+		foundNetworkFirewallPolicyEnforcementOrder := found.NetworkFirewallPolicyEnforcementOrder
+
+		if order != foundNetworkFirewallPolicyEnforcementOrder {
+			return fmt.Errorf("Expected network firewall policy enforcement order %s to match %s", order, foundNetworkFirewallPolicyEnforcementOrder)
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckComputeNetworkWasUpdated(newNetwork *compute.Network, oldNetwork *compute.Network) resource.TestCheckFunc {
+        return func(s *terraform.State) error {
+                if oldNetwork.CreationTimestamp != newNetwork.CreationTimestamp {
+                        return fmt.Errorf("expected compute network to have been updated (had same creation time), instead was recreated - old creation time %s, new creation time %s", oldNetwork.CreationTimestamp, newNetwork.CreationTimestamp)
+                }
+                return nil
+        }
+}
+
+func testAccComputeNetwork_basic(networkName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "bar" {
+  name                    = "%s"
+  auto_create_subnetworks = true
+}
+`, networkName)
+}
+
+func testAccComputeNetwork_custom_subnet(networkName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "baz" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+`, networkName)
+}
+
+func testAccComputeNetwork_mtu(networkName string, mtu int32) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "acc_network_mtu" {
+  name = "%s"
+  mtu  = %d
+}
+`, networkName, mtu)
+}
+
+func testAccComputeNetwork_routing_mode(networkName, routingMode string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "acc_network_routing_mode" {
+  name         = "%s"
+  routing_mode = "%s"
+}
+`, networkName, routingMode)
+}
+
+func testAccComputeNetwork_best_bgp_path_selection_mode(networkName, bgpBestPathSelection string) string {
+   return fmt.Sprintf(`
+resource "google_compute_network" "acc_network_bgp_best_path_selection_mode" {
+ name         = "%s"
+ routing_mode = "GLOBAL"
+ bgp_best_path_selection_mode = "%s"
+}
+`, networkName, bgpBestPathSelection)
+}
+
+func testAccComputeNetwork_bgp_always_compare_med(networkName string, bgpAlwaysCompareMed bool) string {
+   return fmt.Sprintf(`
+resource "google_compute_network" "acc_network_bgp_always_compare_med" {
+ name         = "%s"
+ routing_mode = "GLOBAL"
+ bgp_best_path_selection_mode = "STANDARD"
+ bgp_always_compare_med = %t
+}
+`, networkName, bgpAlwaysCompareMed)
+}
+
+func testAccComputeNetwork_bgp_inter_region_cost(networkName, bgpInterRegionCost string) string {
+   return fmt.Sprintf(`
+resource "google_compute_network" "acc_network_bgp_inter_region_cost" {
+ name         = "%s"
+ routing_mode = "GLOBAL"
+ bgp_best_path_selection_mode = "STANDARD"
+ bgp_inter_region_cost = "%s"
+}
+`, networkName, bgpInterRegionCost)
+}
+
+func testAccComputeNetwork_network_profile(networkName, networkProfile string) string {
+   return fmt.Sprintf(`
+resource "google_compute_network" "acc_network_network_profile" {
+ name                    = "%s"
+ routing_mode            = "REGIONAL"
+ network_profile         = "%s"
+ auto_create_subnetworks = false
+}
+`, networkName, networkProfile)
+}
+
+func testAccComputeNetwork_deleteDefaultRoute(networkName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "bar" {
+  name                            = "%s"
+  delete_default_routes_on_create = true
+  auto_create_subnetworks         = false
+}
+`, networkName)
+}
+
+func testAccComputeNetwork_networkFirewallPolicyEnforcementOrderDefault(networkName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "acc_network_firewall_policy_enforcement_order" {
+  name = "%s"
+}
+`, networkName)
+}
+
+func testAccComputeNetwork_networkFirewallPolicyEnforcementOrderUpdate(networkName, order string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "acc_network_firewall_policy_enforcement_order" {
+  name                                      = "%s"
+  network_firewall_policy_enforcement_order = "%s"
+}
+`, networkName, order)
+}

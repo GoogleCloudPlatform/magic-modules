@@ -4,7 +4,7 @@ description: |-
   Get information about a Google Compute Image.
 ---
 
-# google\_compute\_image
+# google_compute_image
 
 Get information about a Google Compute Image. Check that your service account has the `compute.imageUser` role if you want to share [custom images](https://cloud.google.com/compute/docs/images/sharing-images-across-projects) from another project. If you want to use [public images][pubimg], do not forget to specify the dedicated project. For more information see
 [the official documentation](https://cloud.google.com/compute/docs/images) and its [API](https://cloud.google.com/compute/docs/reference/latest/images).
@@ -71,7 +71,7 @@ exported:
 * `source_disk_id` - The ID value of the disk used to create this image.
 * `creation_timestamp` - The creation timestamp in RFC3339 text format.
 * `description` - An optional description of this image.
-* `labels` - A map of labels applied to this image.
+* `labels` - All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 * `label_fingerprint` - A fingerprint for the labels being applied to this image.
 * `licenses` - A list of applicable license URI.
 * `status` - The status of the image. Possible values are **FAILED**, **PENDING**, or **READY**.

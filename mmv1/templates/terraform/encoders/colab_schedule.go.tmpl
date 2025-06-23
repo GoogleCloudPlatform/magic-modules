@@ -1,0 +1,23 @@
+config := meta.(*transport_tpg.Config)
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+ 	return nil, err
+}
+
+location, err := tpgresource.GetRegion(d, config)
+if err != nil {
+    return nil, err
+}
+
+// createNotebookExecutionJobRequest does not exist in update requests
+if obj["createNotebookExecutionJobRequest"] == nil {
+    return obj, nil
+}
+
+jobRequest, ok := obj["createNotebookExecutionJobRequest"].(map[string]interface{})
+if !ok {
+    return nil, fmt.Errorf("createNotebookExecutionJobRequest is not of type map[string]interface{} or is nil")
+}
+jobRequest["parent"] = fmt.Sprintf("projects/%s/locations/%s", project, location)
+
+return obj, nil

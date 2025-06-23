@@ -1,0 +1,76 @@
+userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+if err != nil {
+    return err
+}
+
+billingProject := ""
+
+obj := make(map[string]interface{})
+admissionPolicyProp, err := expandStorageAnywhereCacheAdmissionPolicy(d.Get("admission_policy"), d, config)
+if err != nil {
+    return err
+} else if v, ok := d.GetOkExists("admission_policy"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, admissionPolicyProp)) {
+    obj["admissionPolicy"] = admissionPolicyProp
+}
+ttlProp, err := expandStorageAnywhereCacheTtl(d.Get("ttl"), d, config)
+if err != nil {
+    return err
+} else if v, ok := d.GetOkExists("ttl"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, ttlProp)) {
+    obj["ttl"] = ttlProp
+}
+
+url, err := tpgresource.ReplaceVars(d, config, "{{"{{StorageBasePath}}b/{{bucket}}/anywhereCaches/{{anywhere_cache_id}}"}}")
+if err != nil {
+    return err
+}
+
+log.Printf("[DEBUG] Updating AnywhereCache %q: %#v", d.Id(), obj)
+headers := make(http.Header)
+
+// err == nil indicates that the billing_project value was found
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+    billingProject = bp
+}
+
+res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "PATCH",
+    Project:   billingProject,
+    RawURL:    url,
+    UserAgent: userAgent,
+    Body:      obj,
+    Timeout:   d.Timeout(schema.TimeoutUpdate),
+    Headers:   headers,
+})
+
+if err != nil {
+    return fmt.Errorf("Error updating AnywhereCache %q: %s", d.Id(), err)
+} else {
+    log.Printf("[DEBUG] Finished updating AnywhereCache %q: %#v", d.Id(), res)
+}
+
+err = StorageOperationWaitTime(
+    config, res, "Updating AnywhereCache", userAgent,
+    d.Timeout(schema.TimeoutUpdate))
+
+if err != nil {
+    // If any error comes due to LRO, cancel the LRO
+    opSelfLink, ok := res["selfLink"].(string)
+    if !ok {
+        return fmt.Errorf("Unable to parse selfLink from LRO metadata")
+    }
+    log.Printf("[DEBUG] Cancelling LRO: %s", opSelfLink)
+    opCancelUrl := fmt.Sprintf("%s/cancel", opSelfLink)
+    _, opCancelErr := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+        Config:    config,
+        Method:    "POST",
+        RawURL:    opCancelUrl,
+        UserAgent: userAgent,
+    })
+    if opCancelErr != nil {
+        return fmt.Errorf("Error cancelling the LRO: %s", opCancelErr)
+    }
+    return err
+}
+
+return resourceStorageAnywhereCacheRead(d, meta)

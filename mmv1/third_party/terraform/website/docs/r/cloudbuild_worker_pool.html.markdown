@@ -4,7 +4,7 @@ description: |-
   Configuration for custom WorkerPool to run builds
 ---
 
-# google\_cloudbuild\_worker\_pool
+# google_cloudbuild_worker_pool
 
 Definition of custom Cloud Build WorkerPools for running jobs with custom configuration and custom networking.
 
@@ -110,11 +110,11 @@ The following arguments are supported:
     
 * `disk_size_gb` -
   (Optional)
-  Size of the disk attached to the worker, in GB. See (https://cloud.google.com/cloud-build/docs/custom-workers/worker-pool-config-file). Specify a value of up to 1000. If `0` is specified, Cloud Build will use a standard disk size.
+  Size of the disk attached to the worker, in GB. See [diskSizeGb](https://cloud.google.com/build/docs/private-pools/private-pool-config-file-schema#disksizegb). Specify a value of up to 1000. If `0` is specified, Cloud Build will use a standard disk size.
     
 * `machine_type` -
   (Optional)
-  Machine type of a worker, such as `n1-standard-1`. See (https://cloud.google.com/cloud-build/docs/custom-workers/worker-pool-config-file). If left blank, Cloud Build will use `n1-standard-1`.
+  Machine type of a worker, such as `n1-standard-1`. See [machineType](https://cloud.google.com/build/docs/private-pools/private-pool-config-file-schema#machinetype). If left blank, Cloud Build will use `n1-standard-1`.
     
 * `no_external_ip` -
   (Optional)
@@ -150,6 +150,21 @@ This resource provides the following
 ## Import
 
 WorkerPool can be imported using any of these accepted formats:
+
+* `projects/{{project}}/locations/{{location}}/workerPools/{{name}}`
+* `{{project}}/{{location}}/{{name}}`
+* `{{location}}/{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import WorkerPool using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/locations/{{location}}/workerPools/{{name}}"
+  to = google_cloudbuild_worker_pool.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), WorkerPool can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_cloudbuild_worker_pool.default projects/{{project}}/locations/{{location}}/workerPools/{{name}}

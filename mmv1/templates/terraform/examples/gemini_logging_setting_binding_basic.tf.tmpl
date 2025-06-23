@@ -1,0 +1,13 @@
+resource "google_gemini_logging_setting" "basic" {
+    logging_setting_id = "{{index $.Vars "logging_setting_id"}}"
+    location = "global"
+    labels = {"my_key": "my_value"}
+    log_prompts_and_responses = true
+}
+
+resource "google_gemini_logging_setting_binding" "{{$.PrimaryResourceId}}" {
+    logging_setting_id = google_gemini_logging_setting.basic.logging_setting_id
+    setting_binding_id = "{{index $.Vars "setting_binding_id"}}"
+    location = "global"
+    target = "{{index $.Vars "target"}}"
+}

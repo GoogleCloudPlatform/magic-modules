@@ -1,0 +1,137 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Service
+description: A Firebase Data Connect service.
+references:
+  guides:
+    'Official Documentation': 'https://firebase.google.com/docs/data-connect'
+  api: 'https://firebase.google.com/docs/reference/data-connect/rest'
+base_url: projects/{{project}}/locations/{{location}}/services
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/services/{{service_id}}
+create_url: projects/{{project}}/locations/{{location}}/services?serviceId={{service_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/services/{{service_id}}
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
+  - '{{project}}/{{location}}/{{service_id}}'
+  - '{{location}}/{{service_id}}'
+examples:
+  - name: firebasedataconnect_service_basic
+    primary_resource_id: default
+    vars:
+      service_id: example-service
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+  - name: firebasedataconnect_service_with_force_deletion
+    primary_resource_id: default
+    vars:
+      service_id: example-service
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'deletion_policy'
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: "{{op_id}}"
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: U2VydmljZQ==
+parameters:
+  - name: location
+    type: String
+    description: The region in which the service resides, e.g. "us-central1" or "asia-east1".
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: serviceId
+    type: String
+    description: |-
+      Required. The ID to use for the service, which will become the final component of the
+      service's resource name.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: displayName
+    type: String
+    description: Optional. Mutable human-readable name. 63 character limit.
+  - name: annotations
+    type: KeyValueAnnotations
+    description: Optional. Stores small amounts of arbitrary data.
+  - name: reconciling
+    type: Boolean
+    description: |-
+      Output only. A field that if true, indicates that the system is working update the
+      service.
+    output: true
+  - name: etag
+    type: Fingerprint
+    description: |-
+      Output only. This checksum is computed by the server based on the value of other
+      fields, and may be sent on update and delete requests to ensure the
+      client has an up-to-date value before proceeding.
+      [AIP-154](https://google.aip.dev/154)
+    output: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. The relative resource name of the Firebase Data Connect service, in the
+      format:
+      ```
+      projects/{project}/locations/{location}/services/{service}
+      ```
+      Note that the service ID is specific to Firebase Data Connect and does not
+      correspond to any of the instance IDs of the underlying data source
+      connections.
+    output: true
+  - name: createTime
+    type: String
+    description: Output only. [Output only] Create time stamp.
+    output: true
+  - name: updateTime
+    type: String
+    description: Output only. [Output only] Update time stamp.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Optional. Labels as key value pairs.
+  - name: uid
+    type: String
+    description: Output only. System-assigned, unique identifier.
+    output: true
+virtual_fields:
+  - name: deletion_policy
+    type: String
+    default_value: DEFAULT
+    description: |-
+      The deletion policy for the database. Setting the field to FORCE allows the
+      Service to be deleted even if a Schema or Connector is present. By default,
+      the Service deletion will only succeed when no Schema or Connectors are
+      present.
+      Possible values: DEFAULT, FORCE
+custom_code:
+  pre_delete: templates/terraform/pre_delete/firebasedataconnect_service.go.tmpl

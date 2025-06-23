@@ -49,9 +49,33 @@ resource "google_bigtable_table" "table" {
 
   column_family {
     family = "family-second"
+    type   = "intsum"
+  }
+
+  column_family {
+    family = "family-third"
+    type   = <<EOF
+        {
+					"aggregateType": {
+						"max": {},
+						"inputType": {
+							"int64Type": {
+								"encoding": {
+									"bigEndianBytes": {}
+								}
+							}
+						}
+					}
+				}
+        EOF
   }
 
   change_stream_retention = "24h0m0s"
+
+  automated_backup_policy {
+    retention_period = "72h0m0s"
+    frequency = "24h0m0s"
+  }
 }
 ```
 
@@ -76,11 +100,14 @@ to delete/recreate the entire `google_bigtable_table` resource.
 
 * `change_stream_retention` - (Optional) Duration to retain change stream data for the table. Set to 0 to disable. Must be between 1 and 7 days.
 
+* `automated_backup_policy` - (Optional) Defines an automated backup policy for a table, specified by Retention Period and Frequency. To _create_ a table with automated backup disabled, either omit the automated_backup_policy argument, or set both Retention Period and Frequency properties to "0". To disable automated backup on an _existing_ table that has automated backup enabled, set _both_ Retention Period and Frequency properties to "0". When updating an existing table, to modify the Retention Period or Frequency properties of the resource's automated backup policy, set the respective property to a non-zero value. If the automated_backup_policy argument is not provided in the configuration on update, the resource's automated backup policy will _not_ be modified.
+
 -----
 
 `column_family` supports the following arguments:
 
 * `family` - (Optional) The name of the column family.
+* `type`   - (Optional) The type of the column family.
 
 ## Attributes Reference
 
@@ -99,7 +126,24 @@ This resource provides the following
 
 ## Import
 
+-> **Fields affected by import** The following fields can't be read and will show diffs if set in config when imported: `split_keys`
+
 Bigtable Tables can be imported using any of these accepted formats:
+
+* `projects/{{project}}/instances/{{instance_name}}/tables/{{name}}`
+* `{{project}}/{{instance_name}}/{{name}}`
+* `{{instance_name}}/{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import Bigtable Tables using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/instances/{{instance_name}}/tables/{{name}}"
+  to = google_bigtable_table.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Bigtable Tables can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_bigtable_table.default projects/{{project}}/instances/{{instance_name}}/tables/{{name}}
@@ -107,6 +151,4 @@ $ terraform import google_bigtable_table.default {{project}}/{{instance_name}}/{
 $ terraform import google_bigtable_table.default {{instance_name}}/{{name}}
 ```
 
-The following fields can't be read and will show diffs if set in config when imported:
 
-- `split_keys`

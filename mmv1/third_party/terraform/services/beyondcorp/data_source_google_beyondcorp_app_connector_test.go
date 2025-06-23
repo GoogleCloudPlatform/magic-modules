@@ -3,7 +3,7 @@ package beyondcorp_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -178,6 +178,9 @@ resource "google_beyondcorp_app_connector" "foo" {
 		service_account {
 			email = google_service_account.service_account.email
 		}
+	}
+	labels = {
+		my-label = "my-label-value"
 	}
 }
 

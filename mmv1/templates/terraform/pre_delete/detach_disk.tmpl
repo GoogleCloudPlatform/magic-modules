@@ -1,0 +1,157 @@
+readRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config: config,
+	Method: "GET",
+	Project: project,
+	RawURL: url,
+	UserAgent: userAgent,
+{{- if $.ErrorRetryPredicates }}
+	ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- join $.ErrorRetryPredicates "," -}} },
+{{- end }}
+{{- if $.ErrorAbortPredicates }}
+	ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{ {{- join $.ErrorAbortPredicates "," -}} },
+{{- end }}
+})
+if err != nil {
+	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("ComputeDisk %q", d.Id()))
+}
+
+// if the create_snapshot_before_destroy is set to true then create a snapshot before deleting the disk
+if d.Get("create_snapshot_before_destroy").(bool) {
+	instanceName := d.Get("name").(string)
+	nameOrigin := "disk"
+	if d.Get("create_snapshot_before_destroy_prefix").(string) != "" {
+		instanceName = d.Get("create_snapshot_before_destroy_prefix").(string)
+		nameOrigin = "create_snapshot_before_destroy_prefix"
+	}
+
+	if len(instanceName) > 48 {
+		return fmt.Errorf(`Your %s name is too long to perform this action. The max is 48 characters. Please use "create_snapshot_before_destroy_prefix" to set a custom name for the snapshot.`, nameOrigin)
+	}
+
+	snapshotObj := make(map[string]interface{})
+	snapshotObj["name"] = fmt.Sprintf("%s-%s", instanceName, time.Now().Format("20060102-150405"))
+	snapshotObj["sourceDisk"] = d.Get("self_link").(string)
+
+	// Handling encryption
+	if d.Get("disk_encryption_key.0.raw_key").(string) != "" {
+		sourceDiskEncryptionKey := make(map[string]interface{})
+		sourceDiskEncryptionKey["rawKey"] = d.Get("disk_encryption_key.0.raw_key").(string)
+		snapshotObj["sourceDiskEncryptionKey"] = sourceDiskEncryptionKey
+
+		snapshotEncryptionKey := make(map[string]interface{})
+		snapshotEncryptionKey["rawKey"] = d.Get("disk_encryption_key.0.raw_key").(string)
+		snapshotObj["snapshotEncryptionKey"] = snapshotEncryptionKey
+	}
+
+	if d.Get("disk_encryption_key.0.rsa_encrypted_key").(string) != "" {
+		sourceDiskEncryptionKey := make(map[string]interface{})
+		sourceDiskEncryptionKey["rsaEncryptedKey"] = d.Get("disk_encryption_key.0.rsa_encrypted_key").(string)
+		snapshotObj["sourceDiskEncryptionKey"] = sourceDiskEncryptionKey
+
+		snapshotEncryptionKey := make(map[string]interface{})
+		snapshotEncryptionKey["rsaEncryptedKey"] = d.Get("disk_encryption_key.0.rsa_encrypted_key").(string)
+		snapshotObj["snapshotEncryptionKey"] = snapshotEncryptionKey
+	}
+
+	snapshotUrl := fmt.Sprintf("%sprojects/%s/global/snapshots", config.ComputeBasePath, project)
+	
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "POST",
+		Project:   project,
+		RawURL:    snapshotUrl,
+		UserAgent: userAgent,
+		Body:      snapshotObj,
+		Timeout:   d.Timeout(schema.TimeoutCreate),
+	})
+	if err != nil {
+		return fmt.Errorf("Error creating snapshot: %s", err)
+	}
+	
+	err = ComputeOperationWaitTime(
+		config, res, project, "Creating Snapshot", userAgent,
+		d.Timeout(schema.TimeoutCreate))
+	if err != nil {
+		return err
+	}
+}
+
+// if disks are attached to instances, they must be detached before the disk can be deleted
+if v, ok := readRes["users"].([]interface{}); ok {
+	type detachArgs struct{ project, zone, instance, deviceName string }
+	var detachCalls []detachArgs
+
+	for _, instance := range tpgresource.ConvertStringArr(v) {
+		self := d.Get("self_link").(string)
+		instanceProject, instanceZone, instanceName, err := tpgresource.GetLocationalResourcePropertiesFromSelfLinkString(instance)
+		if err != nil {
+			return err
+		}
+
+		// Get instance details using REST API
+		instanceUrl, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s", config.ComputeBasePath, instanceProject, instanceZone, instanceName))
+		if err != nil {
+			return err
+		}
+
+		instanceRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "GET",
+			Project:   instanceProject,
+			RawURL:    instanceUrl,
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 404 {
+				log.Printf("[WARN] instance %q not found, not bothering to detach disks", instance)
+				continue
+			}
+			return fmt.Errorf("Error retrieving instance %s: %s", instance, err.Error())
+		}
+
+		if disks, ok := instanceRes["disks"].([]interface{}); ok {
+			for _, diskInterface := range disks {
+				disk := diskInterface.(map[string]interface{})
+				if tpgresource.CompareSelfLinkOrResourceName("", disk["source"].(string), self, nil) {
+					detachCalls = append(detachCalls, detachArgs{
+						project:    instanceProject,
+						zone:       tpgresource.GetResourceNameFromSelfLink(instanceRes["zone"].(string)),
+						instance:   instanceRes["name"].(string),
+						deviceName: disk["deviceName"].(string),
+					})
+				}
+			}
+		}
+	}
+
+	for _, call := range detachCalls {
+		detachUrl := fmt.Sprintf("%sprojects/%s/zones/%s/instances/%s/detachDisk?deviceName=%s", 
+			config.ComputeBasePath, call.project, call.zone, call.instance, call.deviceName)
+		
+		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   call.project,
+			RawURL:    detachUrl,
+			UserAgent: userAgent,
+			Timeout:   d.Timeout(schema.TimeoutDelete),
+		})
+		if err != nil {
+			return fmt.Errorf("Error detaching disk %s from instance %s/%s/%s: %s", call.deviceName, call.project,
+				call.zone, call.instance, err.Error())
+		}
+		
+		err = ComputeOperationWaitTime(
+			config, res, call.project,
+			fmt.Sprintf("Detaching disk from %s/%s/%s", call.project, call.zone, call.instance), 
+			userAgent, d.Timeout(schema.TimeoutDelete))
+		if err != nil {
+			var opErr ComputeOperationError
+			if errors.As(err, &opErr) && len(opErr.Errors) == 1 && opErr.Errors[0].Code == "RESOURCE_NOT_FOUND" {
+				log.Printf("[WARN] instance %q was deleted while awaiting detach", call.instance)
+				continue
+			}
+			return err
+		}
+	}
+}

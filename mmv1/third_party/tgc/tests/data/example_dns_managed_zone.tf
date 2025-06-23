@@ -17,7 +17,7 @@
 terraform {
   required_providers {
     google = {
-      source = "hashicorp/google"
+      source = "hashicorp/google-beta"
       version = "~> {{.Provider.version}}"
     }
   }
@@ -30,7 +30,7 @@ provider "google" {
 resource "google_dns_managed_zone" "zone1" {
   name        = "publiczone"
   dns_name    = "publiczone.gsecurity.net."
-  
+
   force_destroy = true
   visibility = "public"
 

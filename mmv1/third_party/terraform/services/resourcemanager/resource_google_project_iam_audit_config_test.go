@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func projectIamAuditConfigImportStep(resourceName, pid, service string) resource.TestStep {
@@ -307,6 +307,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_audit_config" "acceptance" {
@@ -329,6 +330,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_audit_config" "acceptance" {
@@ -359,6 +361,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_audit_config" "acceptance" {
@@ -381,6 +384,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_audit_config" "acceptance" {
@@ -409,6 +413,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_audit_config" "acceptance" {
@@ -427,6 +432,7 @@ resource "google_project" "acceptance" {
   project_id = "%s"
   name       = "%s"
   org_id     = "%s"
+  deletion_policy = "DELETE"
 }
 
 resource "google_project_iam_audit_config" "acceptance" {

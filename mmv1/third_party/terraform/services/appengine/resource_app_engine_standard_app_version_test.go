@@ -3,12 +3,13 @@ package appengine_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccAppEngineStandardAppVersion_update(t *testing.T) {
+	t.Skip("https://github.com/hashicorp/terraform-provider-google/issues/18936")
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -20,7 +21,10 @@ func TestAccAppEngineStandardAppVersion_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAppEngineStandardAppVersionDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckAppEngineStandardAppVersionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAppEngineStandardAppVersion_python(context),
@@ -60,6 +64,7 @@ resource "google_project" "my_project" {
   project_id = "tf-test-appeng-std%{random_suffix}"
   org_id = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_app_engine_application" "app" {
@@ -147,6 +152,7 @@ resource "google_project" "my_project" {
   project_id = "tf-test-appeng-std%{random_suffix}"
   org_id = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_app_engine_application" "app" {
@@ -161,11 +167,20 @@ resource "google_project_service" "project" {
   disable_dependent_services = false
 }
 
+resource "time_sleep" "wait_60_seconds" {
+  depends_on = [google_project.my_project]
+
+  create_duration = "60s"
+}
+
 resource "google_project_service" "vpcaccess_api" {
   project = google_project.my_project.project_id
   service = "vpcaccess.googleapis.com"
 
   disable_dependent_services = false
+
+  # Needed for CI tests for permissions to propagate, should not be needed for actual usage
+  depends_on = [time_sleep.wait_60_seconds]
 }
 
 resource "google_vpc_access_connector" "bar" {
@@ -175,8 +190,10 @@ resource "google_vpc_access_connector" "bar" {
   project = google_project.my_project.project_id
   name = "bar"
   region = "us-central1"
-  ip_cidr_range = "10.8.0.0/28"
+  ip_cidr_range = "10.8.0.16/28"
   network = "default"
+  min_throughput  = 200
+  max_throughput = 300
 }
 
 resource "google_app_engine_standard_app_version" "foo" {
@@ -257,6 +274,7 @@ resource "google_project" "my_project" {
   project_id = "tf-test-appeng-std%{random_suffix}"
   org_id = "%{org_id}"
   billing_account = "%{billing_account}"
+  deletion_policy = "DELETE"
 }
 
 resource "google_app_engine_application" "app" {

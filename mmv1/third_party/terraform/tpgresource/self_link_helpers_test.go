@@ -66,6 +66,70 @@ func TestCompareSelfLinkOrResourceName(t *testing.T) {
 	}
 }
 
+func TestCompareSelfLinkRelativePathsIgnoreProjectId(t *testing.T) {
+	cases := map[string]struct {
+		Old, New string
+		Expect   bool
+	}{
+		"full path, project number": {
+			Old:    "https://www.googleapis.com/compute/v1/projects/your-project/global/networks/a-network",
+			New:    "https://www.googleapis.com/compute/v1/projects/1234/global/networks/a-network",
+			Expect: true,
+		},
+		"partial path, project number": {
+			Old:    "https://www.googleapis.com/compute/v1/projects/your-project/global/networks/a-network",
+			New:    "projects/1234/global/networks/a-network",
+			Expect: true,
+		},
+		"partial path, same": {
+			Old:    "https://www.googleapis.com/compute/v1/projects/your-project/global/networks/a-network",
+			New:    "projects/your-project/global/networks/a-network",
+			Expect: true,
+		},
+		"partial path, different name": {
+			Old:    "https://www.googleapis.com/compute/v1/projects/your-project/global/networks/a-network",
+			New:    "projects/your-project/global/networks/another-network",
+			Expect: false,
+		},
+		"partial path, different project": {
+			Old:    "https://www.googleapis.com/compute/v1/projects/your-project/global/networks/a-network",
+			New:    "projects/another-project/global/networks/a-network",
+			Expect: false,
+		},
+		"full path, different name": {
+			Old:    "https://www.googleapis.com/compute/v1/projects/your-project/global/networks/a-network",
+			New:    "https://www.googleapis.com/compute/v1/projects/your-project/global/networks/another-network",
+			Expect: false,
+		},
+		"full path, different project": {
+			Old:    "https://www.googleapis.com/compute/v1/projects/your-project/global/networks/a-network",
+			New:    "https://www.googleapis.com/compute/v1/projects/another-project/global/networks/a-network",
+			Expect: false,
+		},
+		"beta full path, same": {
+			Old:    "https://www.googleapis.com/compute/v1/projects/your-project/global/networks/a-network",
+			New:    "https://www.googleapis.com/compute/beta/projects/your-project/global/networks/a-network",
+			Expect: true,
+		},
+		"beta full path, different name": {
+			Old:    "https://www.googleapis.com/compute/v1/projects/your-project/global/networks/a-network",
+			New:    "https://www.googleapis.com/compute/beta/projects/your-project/global/networks/another-network",
+			Expect: false,
+		},
+		"beta full path, different project": {
+			Old:    "https://www.googleapis.com/compute/v1/projects/your-project/global/networks/a-network",
+			New:    "https://www.googleapis.com/compute/beta/projects/another-project/global/networks/a-network",
+			Expect: false,
+		},
+	}
+
+	for tn, tc := range cases {
+		if CompareSelfLinkRelativePathsIgnoreProjectId("", tc.Old, tc.New, nil) != tc.Expect {
+			t.Errorf("bad: %s, expected %t for old = %q and new = %q", tn, tc.Expect, tc.Old, tc.New)
+		}
+	}
+}
+
 func TestGetResourceNameFromSelfLink(t *testing.T) {
 	cases := map[string]struct {
 		SelfLink, ExpectedName string
@@ -118,6 +182,20 @@ func TestGetRegionFromRegionalSelfLink(t *testing.T) {
 	}
 	for input, expected := range cases {
 		if result := GetRegionFromRegionalSelfLink(input); result != expected {
+			t.Errorf("expected to get %q from %q, got %q", expected, input, result)
+		}
+	}
+}
+
+func TestGetProjectFromRegionalSelfLink(t *testing.T) {
+	cases := map[string]string{
+		"projects/foo/locations/europe-north1/datasets/bar/operations/foobar":                "foo",
+		"projects/REDACTED/regions/europe-north1/subnetworks/tf-test-net-xbwhsmlfm8":         "REDACTED",
+		"projects/REDA:CT-ED09/regions/europe-north1/subnetworks/tf-test-net-xbwhsmlfm8":     "REDA:CT-ED09",
+		"projects/REDA.com:CT-ED09/regions/europe-north1/subnetworks/tf-test-net-xbwhsmlfm8": "REDA.com:CT-ED09",
+	}
+	for input, expected := range cases {
+		if result := GetProjectFromRegionalSelfLink(input); result != expected {
 			t.Errorf("expected to get %q from %q, got %q", expected, input, result)
 		}
 	}

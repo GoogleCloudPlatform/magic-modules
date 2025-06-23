@@ -1,8 +1,0 @@
-resource "google_api_gateway_api" "<%= ctx[:primary_resource_id] %>" {
-  provider = google-beta
-  api_id = "<%= ctx[:vars]['api_id'] %>"
-  display_name = "MM Dev API"
-  labels = {
-    environment = "dev"
-  }
-}

@@ -1,70 +1,63 @@
-GCB CI tools for Magic Modules and Google Providers
+magic-modules CI
 ===
 
-These tools manage the downstream repositories of [magic-modules](https://github.com/GoogleCloudPlatform/magic-modules), and are collectively referred to as "The Magician".
+## Playbook: Resolving downstream build failures
 
-# CI For Downstream/Magic Modules Developers
-If you're interested in developing the repositories that Magic Modules manages, here are the things you'll want to know.
+There are four downstreams, each of which has a corresponding "sync branch" in `magic-modules` which tracks the _most recently generated commit_ from magic-modules to that downstream.
 
-## What The Magician Does
-The Magician takes the PR you write against Magic Modules and creates the downstream (generated) commits that are a result of your changes.  It posts the diffs created by your changes as a comment on your PR, to aid in review.  When your PR is merged, it updates the downstream repositories with your changes.
+- Downstream: [hashicorp/terraform-provider-google](https://github.com/hashicorp/terraform-provider-google)  
+  Sync branch: [`tpg-sync`](https://github.com/GoogleCloudPlatform/magic-modules/tree/tpg-sync)
+- Downstream: [hashicorp/terraform-provider-google-beta](https://github.com/hashicorp/terraform-provider-google-beta)  
+  Sync branch: [`tpgb-sync`](https://github.com/GoogleCloudPlatform/magic-modules/tree/tpgb-sync)
+- Downstream: [GoogleCloudPlatform/terraform-google-conversion](https://github.com/GoogleCloudPlatform/terraform-google-conversion)  
+  Sync branch: [`tgc-sync`](https://github.com/GoogleCloudPlatform/magic-modules/tree/tgc-sync)
+- Downstream: [terraform-google-modules/docs-examples](https://github.com/terraform-google-modules/docs-examples)  
+  Sync branch: [`tf-oics-sync`](https://github.com/GoogleCloudPlatform/magic-modules/tree/tf-oics-sync)  
+  Note: `oics` refers to "Open in Cloud Shell".
 
-## Your Workflow
-You'll write some code and open a PR.  The Magician will run the generator and the downstream tests.  If either the generator or the tests fail, you'll see "check failed" status on your PR, which will link to the step that failed.  Once all the generation steps succeed, the Magician will comment on your PR with links to review the generated diffs.  Your reviewer will review those diffs (as well as your code).  Once your PR is approved, simply merge it in - the Magician will ensure that the downstream repositories are updated within about 5 minutes.
+The goal of this system is that each downstream commit will have exactly one MM commit that it corresponds to, and each MM commit will correspond to at most one commit in a downstream. If an MM commit had no changes in a downstream, no commit will be created.
 
-# CI For CI Developers
-If you're working on enhancing these CI tools, you'll need to know about the structure of the pipeline and about how to develop and test.
+The sync branches allow downstream generation for each downstream to wait until the previous commit for that downstream has finished generating. If downstream generation fails for one commit, the following commits will continue to wait for 24 hours.
 
-## How the pipeline works
+Run the following command to verify what commits the sync branches are pointing to:
 
-### Generation & Diffing
-The generation / diff pipeline generates the downstream at the PR's merge commit and at the left-side parent (`HEAD~`), which guarantees isolation of exclusively the changes made by the PR in question.  It creates commits for the downstreams as before-and-after commits.  Those commits don't have relevant git history - they're not meant to be applied - but they are used in a [two-dot diff](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-comparing-branches-in-pull-requests#three-dot-and-two-dot-git-diff-comparisons).  This means that if there are no changes to the downstream, you'll see an empty diff.  These downstream branches are named `auto-pr-$number-old` and `auto-pr-$number` respectively.
+```
+git fetch origin && git rev-parse origin/tpg-sync origin/tpgb-sync origin/tf-oics-sync origin/tgc-sync
+```
 
-### Downstream Pushing
-The Magician maintains a set of tags called `$REPO-sync` that tracks the Magic Modules commit the downstreams are up to date with.
+### Transient GitHub failures
+Most downstream build failures are transient GitHub failures. To resolve these, click the "Retry" button in Cloud Build. This is safe because downstream builds are idempotent; if a commit has already been generated, we will not make a new commit.
 
-In effect, this means that each downstream commit will correspond 1:1 to an MM commit. If an MM commit had no changes in a downstream, no commit will be created.  We are enforcing squash-merges-only in Magic Modules.
+### Downstream build job is not triggered by commits.
+This is rare but we've seen this happened before. In this case, we need to manually trigger a Cloud Build job by running 
+```
+gcloud builds triggers run build-downstreams --project=graphite-docker-images --substitutions=BRANCH_NAME=<BASE_BRANCH_NAME> --sha=<COMMIT_SHA>
+```
+You'll need to substitute `<COMMIT_SHA>` with the commit sha that you'd like to trigger the build against and `<BASE_BRANCH_NAME>` with base branch that this commit is pushed into, likely `main` but could be feature branches in some cases.
 
-Downstream pushing can only take place if the sync tag points to the commit which precedes the commit that is being pushed.  It is possible for the pipeline to get stuck if a commit is merged into Magic Modules which cannot be generated - this happens most often when the Gemfile.lock is updated.  We expect the failure case to be somewhat uncommon, but when it happens, you need to:
-1. Submit your PR changing Gemfile.lock.  The downstream builder will fail in one of the downstream generation steps, whichever one starts first.
-2. Immediately after your downstream builder job is submitted, prevent submissions to the magic-modules repository.
-3. Once the downstream-builder container is regenerated (about 15 minutes) re-enable submissions to magic-modules and press retry on your downstream builder job.
+### Magician / generation bugs
+Magician or generation bugs are extremely rare. They cause generation itself to fail loudly, and the commits that introduce them need to be skipped.
 
-Disabling submissions to magic-modules can be done through the Admin console in GitHub.
+Be sure that you understand the mechanism for how the commit is causing a failure before proceeding. Skipping commits will cause multiple MM commits to be squashed into a single downstream commit, which breaks commit linking expectations and release notes.
 
-It is safe to have more than one downstream-push running at the same time due to this property, in the event of overruns.  Each run will either
-a) make no changes to any downstream and fail
-or
-b) atomically update every downstream to a fast-forward state that represents the appropriate HEAD as of the beginning of the run
+1. Lock the magic-modules main branch (or ask the team to)
+2. Create a PR to fix the bug
+3. Unlock the main branch, submit the PR, and re-lock the main branch
+4. Update the sync branches to point to the bad commit
+   - This indicates that we've "already generated" the downstreams for this commit, so builds for the following commit will stop waiting
+6. Verify that downstream generation succeeded - this should only take <15 minutes (even though the overall build-downstreams build takes ~1hr)
+7. Unlock the main branch
 
-#### Something went wrong!
-Don't panic - this is all quite safe and we have fixed it before.  We store the state of the pusher tasks in tags (the "sync tags"), one per downstream, and it will be easy to get the system back up and running.  You can send a message to Nathan if you are anxious about running through these steps.  :)
+### Manually pushing commits to downstreams
+In general, this should not be necessary because this situation shouldn't come up. It is a historical process that may not work out of the box. The case where you might want to try this is:
 
-It's possible for a job to be cancelled or fail in the middle of pushing downstreams in a transient way.  The sorts of failures that happen at scale - lightning strikes a datacenter (ours or GitHub's!) or some other unlikely misfortune happens.  This has a chance to cause a hiccup in the downstream history, but isn't dangerous.  If that happens, the sync tags may need to be manually updated to sit at the same commit, just before the commit which needs to be generated, or some failed tasks might need to be run by hand.
+- A commit broke the magician (or downstream generation)
+- Multiple PRs were merged before the main branch was locked
 
-Updating the sync tags is done like this:
-First, check their state: `git fetch origin && git rev-parse origin/tpg-sync origin/tpgb-sync origin/tf-oics-sync origin/tgc-sync` will list the commits for each of the sync tags.
-(If you have changed the name of the `googlecloudplatform/magic-modules` remote from `origin`, substitute that name instead)
-In normal, steady-state operation, these tags will all be identical.  When a failure occurs, some of them may be one commit ahead of the others.  It is rare for any of them to be 2 or more commits ahead of any other.  If some of them are one commit ahead of the others, and there is no pusher task currently running, this means you need to reset them by hand and rerun the failed jobs.  If they diverge by more than one commit, or a pusher task is currently running, you will need to manually run missing tasks.
+In this case, skipping just the initial commit would not work (because the following commit doesn't contain a fix) and skipping all the commits is not desirable (because we don't want to squash them.) You would need to instead locally apply the CI fix and then "manually" replicate the work of downstream generation.
 
-### Divergence by zero commits
-
-Just click retry on the failed job in Cloud Build.  Yay!
-
-### Divergence by exactly one commit.
-
-Find which commit caused the error.  This will usually be easy - cloud build lists the commit which triggered a build, so you can probably just use that one.  You need to set all the sync tags to the parent of that commit.  Say the commit which caused the error is `12345abc`.  You can find the parent of that commit with `git rev-parse 12345abc~` (note the `~` suffix).  Some of the sync tags are likely set to this value already.  For the remainder, simply perform a git push.  Assuming that the parent commit is `98765fed`, that would be, e.g. `git push origin 98765fed:tf-validator-sync`.
-
-If you are unlucky, there may be open PRs - this only happens if the failure occurred during the ~5 second period surrounding the merging of one of the downstreams.  Close those PRs before proceeding to the final step.
-
-Finally, click "retry" on the failed job in Cloud Build.  Watch the retried job and see if it succeeds - it should!  If it does not, the underlying problem may not have been fixed.
-
-### Divergence by more than one commit.
-This situation is interesting.  This means that there was a failure but that it went undetected for a little while, or that there was a failure in a PR which was merged at about the same time as another one.  Don't worry, it's still easy to fix!  To understand this, you should know a little more about the way the pusher tasks work.  For each commit merged in Magic Modules, five pusher tasks (part of one pusher job) start.  Each pusher task waits for all previous pusher tasks of the same type to finish.  That is, the TPGB pusher always waits for all previous TPGB pushers, etc.
-
-When a task fails, all the other tasks which are part of the same job are cancelled.  However, if one of those tasks has already succeeded, the next task of the same kind will be free to start.  That means that all subsequent jobs have partially succeeded - they pushed TF-OICS, but not TPGB.  You'll need to do the work of the failed tasks yourself in order to restore the steady state.
-
-When this happened the first time, Cameron and Nathan wrote this little shell snippet, which should do it for you.  You will need to get the Magician's github token, either by generating a new one (be sure to clean up after yourself when done), by decrypting the value in .ci/gcb-push-downstream.yml as cloudbuild does, or by accessing the token in Google's internal secret store.
+Legacy fix (may no longer work):
+When this happened the first time, the team wrote this little shell snippet, which might do most of the work for you.  You will need to get the Magician's github token, either by generating a new one (be sure to clean up after yourself when done), by decrypting the value in .ci/gcb-push-downstream.yml as cloudbuild does, or by accessing the token in Google's internal secret store.
 
 ```
 SYNC_TAG=tpgb-sync
@@ -89,16 +82,5 @@ If you are making changes to the containers, your changes will not apply until t
 
 Pausing the pipeline is done in the cloud console, by setting the downstream-builder trigger to disabled.  You can find that trigger [here](https://console.cloud.google.com/cloud-build/triggers/edit/f80a7496-b2f4-4980-a706-c5425a52045b?project=graphite-docker-images)
 
-
-## Dependency change handbook:
-If someone (often a bot) creates a PR which updates Gemfile or Gemfile.lock, they will not be able to generate diffs.  This is because bundler doesn't allow you to run a binary unless your installed gems exactly match the Gemfile.lock, and since we have to run generation before and after the change, there is no possible container that will satisfy all requirements.
-
-The best approach is
-* Build the `downstream-generator` container locally, with the new Gemfile and Gemfile.lock.  This will involve hand-modifying the Dockerfile to use the local Gemfile/Gemfile.lock instead of wget from this repo's `main` branch.  You don't need to check in those changes.
-* When that container is built, and while nothing else is running in GCB (wait, if you need to), push the container to GCR, and as soon as possible afterwards, merge the dependency-changing PR.
-
-## Historical Note: Design choices & tradeoffs
-* The downstream push doesn't wait for checks on its PRs against downstreams.  This may inconvenience some existing workflows which rely on the downstream PR checks.  This ensures that merge conflicts never come into play, since the downstreams never have dangling PRs, but it requires some up-front work to get those checks into the differ.  If a new check is introduced into the downstream Travis, we will need to introduce it into the terraform-tester container.
-* The downstream push is disconnected from the output of the differ (but runs the same code).  This means that the diff which is approved isn't guaranteed to be applied *exactly*, if for instance magic modules' behavior changes on main between diff generation and downstream push.  This is also intended to avoid merge conflicts by, effectively, rebasing each commit on top of main before final generation is done.
-    * Imagine the following situation: PR A and PR B are opened simultaneously. PR A changes the copyright date in each file to 2020. PR B adds a new resource. PR A is merged seconds before PR B, so they are picked up in the same push-downstream run.  The commit from PR B will produce a new file with the 2020 copyright date, even though the diff said 2019, since PR A was merged first.
-* We deleted the submodules.  They weren't useful to us and they were annoying to update - they're not in use anymore as far as we know - but it's possible there's some long-forgotten workflow that someone is using which will be damaged.  So far, we haven't seen any such issue.
+## Changes to cloud build yaml:
+If changes are made to `gcb-contributor-membership-checker.yml` or `gcb-community-checker.yml` they will not be reflected in presubmit runs for existing PRs without a rebase. This is because these build triggers are linked to pull request creation and not pushes to the PR branch. If changes are needed to these build files they will need to be made in a backwards-compatible manner. Note that changes to other files used by these triggers will be immediately reflected in all PRs, leading to a possible disconnect between the yaml files and the rest of the CI code.

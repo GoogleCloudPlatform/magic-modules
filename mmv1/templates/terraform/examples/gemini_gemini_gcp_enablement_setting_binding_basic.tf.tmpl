@@ -1,0 +1,14 @@
+resource "google_gemini_gemini_gcp_enablement_setting" "basic" {
+    gemini_gcp_enablement_setting_id = "{{index $.Vars "gemini_gcp_enablement_setting_id"}}"
+    location = "global"
+    labels = {"my_key": "my_value"}
+    enable_customer_data_sharing = true
+    disable_web_grounding = true
+}
+
+resource "google_gemini_gemini_gcp_enablement_setting_binding" "{{$.PrimaryResourceId}}" {
+    gemini_gcp_enablement_setting_id = google_gemini_gemini_gcp_enablement_setting.basic.gemini_gcp_enablement_setting_id
+    setting_binding_id = "{{index $.Vars "setting_binding_id"}}"
+    location = "global"
+    target = "{{index $.Vars "target"}}"
+}

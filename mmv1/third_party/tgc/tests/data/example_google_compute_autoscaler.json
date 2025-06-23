@@ -1,0 +1,30 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/zones/us-east1-c/autoscalers/my-autoscaler",
+        "asset_type": "compute.googleapis.com/Autoscaler",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "Autoscaler",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "autoscalingPolicy": {
+                    "coolDownPeriodSec": 60,
+                    "cpuUtilization": {
+                        "predictiveMethod": "NONE",
+                        "utilizationTarget": 0.5
+                    },
+                    "maxNumReplicas": 5,
+                    "minNumReplicas": 1,
+                    "mode": "ON"
+                },
+                "name": "my-autoscaler",
+                "zone": "projects/{{.Provider.project}}/global/zones/us-east1-c"
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]

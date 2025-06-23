@@ -1,0 +1,111 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: CodeRepositoryIndex
+description: The resource for managing Code Repository Index for Gemini Code Assist.
+references:
+  guides:
+    'Gemini Code Assist overview': 'https://cloud.google.com/gemini/docs/codeassist/overview'
+  api: 'https://cloud.google.com/gemini/docs/api/reference/rest/v1/projects.locations.codeRepositoryIndexes'
+base_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes
+self_link: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
+create_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes?codeRepositoryIndexId={{code_repository_index_id}}
+delete_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}?force={{force_destroy}}
+update_verb: 'PATCH'
+update_mask: true
+id_format: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}
+mutex: 'projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index_id}}'
+examples:
+  - name: "gemini_code_repository_index_basic"
+    primary_resource_id: "example"
+    test_vars_overrides:
+      cri_id: '"cri-example"'
+    exclude_test: true
+timeouts:
+  insert_minutes: 90
+  update_minutes: 90
+  delete_minutes: 90
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 90
+      update_minutes: 90
+      delete_minutes: 90
+    base_url: "{{op_id}}"
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+error_retry_predicates:
+  - 'transport_tpg.IsCodeRepositoryIndexUnreadyError'
+  - 'transport_tpg.IsRepositoryGroupQueueError'
+sweeper:
+  url_substitutions:
+    - force_destroy: true
+virtual_fields:
+  - name: 'force_destroy'
+    description:
+      If set to true, will allow deletion of the CodeRepositoryIndex even if there are existing
+      RepositoryGroups for the resource. These RepositoryGroups will also be deleted.
+    type: Boolean
+    default_value: false
+parameters:
+  - name: location
+    type: String
+    description: The location of the Code Repository Index, for example `us-central1`.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: codeRepositoryIndexId
+    type: String
+    description: Required. Id of the Code Repository Index.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: updateTime
+    type: String
+    description: Output only. Update time stamp.
+    output: true
+  - name: state
+    type: String
+    description: |-
+      Output only. Code Repository Index instance State.
+      Possible values are: `STATE_UNSPECIFIED`, `CREATING`, `ACTIVE`, `DELETING`, `SUSPENDED`.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Optional. Labels as key value pairs.
+  - name: kmsKey
+    type: String
+    description: |-
+      Optional. Immutable. Customer-managed encryption key name, in the format
+      `projects/*/locations/*/keyRings/*/cryptoKeys/*`.
+    immutable: true
+  - name: name
+    type: String
+    description: Immutable. Identifier. Name of Code Repository Index.
+    output: true
+    immutable: true
+  - name: createTime
+    type: String
+    description: Output only. Create time stamp.
+    output: true

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -30,6 +30,10 @@ func testAccRedisInstanceDatasourceConfig(suffix string) string {
 resource "google_redis_instance" "redis" {
   name               = "redis-test-%s"
   memory_size_gb     = 1
+
+  labels   = {
+    my-label = "my-label-value"
+  }
 }
 
 data "google_redis_instance" "redis" {

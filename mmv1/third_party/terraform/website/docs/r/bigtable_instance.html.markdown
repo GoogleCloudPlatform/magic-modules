@@ -97,11 +97,22 @@ to default to the backend value. See [structure below](#nested_cluster).
 
 * `display_name` - (Optional) The human-readable display name of the Bigtable instance. Defaults to the instance `name`.
 
-* `deletion_protection` - (Optional) Whether or not to allow Terraform to destroy the instance. Unless this field is set to false
-in Terraform state, a `terraform destroy` or `terraform apply` that would delete the instance will fail.
+* `force_destroy` - (Optional) Deleting a BigTable instance can be blocked if any backups are present in the instance. When `force_destroy` is set to true, Terraform will delete all backups found in the BigTable instance before attempting to delete the instance itself. Defaults to false.
+
+* `deletion_protection` - (Optional) Whether Terraform will be prevented from destroying the instance. 
+  When the field is set to true or unset in Terraform state, a `terraform apply` or `terraform destroy` that would delete
+  the instance will fail. When the field is set to false, deleting the instance is allowed.
 
 * `labels` - (Optional) A set of key/value label pairs to assign to the resource. Label keys must follow the requirements at https://cloud.google.com/resource-manager/docs/creating-managing-labels#requirements.
 
+  **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+  Please refer to the field 'effective_labels' for all of the labels present on the resource.
+
+* `terraform_labels` -
+  The combination of labels configured directly on the resource and default labels configured on the provider.
+
+* `effective_labels` -
+  All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.
 
 -----
 
@@ -130,6 +141,8 @@ If no value is set, Cloud Bigtable automatically allocates nodes based on your d
 
 * `kms_key_name` - (Optional) Describes the Cloud KMS encryption key that will be used to protect the destination Bigtable cluster. The requirements for this key are: 1) The Cloud Bigtable service account associated with the project that contains this cluster must be granted the `cloudkms.cryptoKeyEncrypterDecrypter` role on the CMEK key. 2) Only regional keys can be used and the region of the CMEK key must match the region of the cluster.
 
+* `node_scaling_factor` - (Optional) The node scaling factor for this cluster. One of `"NodeScalingFactor1X"` or `"NodeScalingFactor2X"`. Defaults to `"NodeScalingFactor1X"`. If `"NodeScalingFactor2X"` is specified, then `num_nodes`, `min_nodes`, and `max_nodes` would need to be specified in increments of 2. This value cannot be updated after the cluster is created.
+
 -> **Note**: Removing the field entirely from the config will cause the provider to default to the backend value.
 
 !> **Warning:** Modifying the `storage_type`, `zone` or `kms_key_name` of an existing cluster (by
@@ -142,6 +155,7 @@ If no value is set, Cloud Bigtable automatically allocates nodes based on your d
 In addition to the arguments listed above, the following computed attributes are exported:
 
 * `id` - an identifier for the resource with format `projects/{{project}}/instances/{{name}}`
+* `cluster.0.state` - describes the current state of the cluster.
 
 ## Timeouts
 
@@ -150,12 +164,28 @@ This resource provides the following
 
 - `create` - Default is 60 minutes.
 - `update` - Default is 60 minutes.
+- `read` - Default is 60 minutes.
 
 Adding clusters to existing instances can take a long time. Consider setting a higher value to timeouts if you plan on doing that.
 
 ## Import
 
 Bigtable Instances can be imported using any of these accepted formats:
+
+* `projects/{{project}}/instances/{{name}}`
+* `{{project}}/{{name}}`
+* `{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to Bigtable Instances using one of the formats above. For example:
+
+```tf
+import {
+  id = "projects/{{project}}/instances/{{name}}"
+  to = google_bigtable_instance.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), Bigtable Instances can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_bigtable_instance.default projects/{{project}}/instances/{{name}}

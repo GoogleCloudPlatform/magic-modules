@@ -16,9 +16,11 @@ type configAttrGetter func(cfg *transport_tpg.Config) string
 func getCredentials(cfg *transport_tpg.Config) string {
 	return cfg.Credentials
 }
+
 func getAccessToken(cfg *transport_tpg.Config) string {
 	return cfg.AccessToken
 }
+
 func getImpersonateServiceAccount(cfg *transport_tpg.Config) string {
 	return cfg.ImpersonateServiceAccount
 }
@@ -29,6 +31,7 @@ func TestNewConfigExtractsEnvVars(t *testing.T) {
 	cases := []struct {
 		name           string
 		envKey         string
+		unsetKeys      []string // environment variables that must be unset before constructing config
 		envValue       string
 		expected       string
 		getConfigValue configAttrGetter
@@ -43,6 +46,7 @@ func TestNewConfigExtractsEnvVars(t *testing.T) {
 		{
 			name:           "GOOGLE_CLOUD_KEYFILE_JSON",
 			envKey:         "GOOGLE_CLOUD_KEYFILE_JSON",
+			unsetKeys:      []string{"GOOGLE_CREDENTIALS"},
 			envValue:       "whatever",
 			expected:       "whatever",
 			getConfigValue: getCredentials,
@@ -50,6 +54,7 @@ func TestNewConfigExtractsEnvVars(t *testing.T) {
 		{
 			name:           "GCLOUD_KEYFILE_JSON",
 			envKey:         "GCLOUD_KEYFILE_JSON",
+			unsetKeys:      []string{"GOOGLE_CREDENTIALS", "GOOGLE_CLOUD_KEYFILE_JSON"},
 			envValue:       "whatever",
 			expected:       "whatever",
 			getConfigValue: getCredentials,
@@ -72,7 +77,22 @@ func TestNewConfigExtractsEnvVars(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
+			// Store existing state of environment variables.
+			existingEnv := make(map[string]string, len(c.unsetKeys)+1)
+			for _, key := range c.unsetKeys {
+				if originalValue, isSet := os.LookupEnv(key); isSet {
+					existingEnv[key] = originalValue
+					// Unset variables that would interfere with test.
+					err := os.Unsetenv(key)
+					if err != nil {
+						t.Fatalf("error unsetting env var %s: %s", key, err)
+					}
+				}
+			}
 			originalValue, isSet := os.LookupEnv(c.envKey)
+			if isSet {
+				existingEnv[c.envKey] = originalValue
+			}
 			err := os.Setenv(c.envKey, c.envValue)
 			if err != nil {
 				t.Fatalf("error setting env var %s=%s: %s", c.envKey, c.envValue, err)
@@ -85,15 +105,18 @@ func TestNewConfigExtractsEnvVars(t *testing.T) {
 
 			assert.Equal(t, c.expected, c.getConfigValue(cfg))
 
-			if isSet {
-				err = os.Setenv(c.envKey, originalValue)
-				if err != nil {
-					t.Fatalf("error setting env var %s=%s: %s", c.envKey, originalValue, err)
-				}
-			} else {
+			// Restore previous states of environment variables.
+			if !isSet {
+				// c.envKey was previously unset.
 				err = os.Unsetenv(c.envKey)
 				if err != nil {
 					t.Fatalf("error unsetting env var %s: %s", c.envKey, err)
+				}
+			}
+			for key, value := range existingEnv {
+				err = os.Setenv(key, value)
+				if err != nil {
+					t.Fatalf("error setting env var %s=%s: %s", key, value, err)
 				}
 			}
 		})
@@ -130,6 +153,10 @@ func TestNewConfigUserAgent(t *testing.T) {
 }
 
 func TestNewConfigUserAgent_nilClientUsesDefault(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode.")
+		return
+	}
 	ctx := context.Background()
 	offline := false
 	cfg, err := NewConfig(ctx, "project", "", "", offline, "", nil)
@@ -141,6 +168,10 @@ func TestNewConfigUserAgent_nilClientUsesDefault(t *testing.T) {
 }
 
 func TestNewConfigUserAgent_usesPassedClient(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode.")
+		return
+	}
 	ctx := context.Background()
 	offline := false
 	client := &http.Client{}

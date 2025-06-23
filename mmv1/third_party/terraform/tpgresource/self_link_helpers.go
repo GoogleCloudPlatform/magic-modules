@@ -17,6 +17,24 @@ func CompareResourceNames(_, old, new string, _ *schema.ResourceData) bool {
 }
 
 // Compare only the relative path of two self links.
+func CompareSelfLinkRelativePathsIgnoreProjectId(unused1, old, new string, unused2 *schema.ResourceData) bool {
+	oldStripped, err := GetRelativePath(old)
+	if err != nil {
+		return false
+	}
+
+	newStripped, err := GetRelativePath(new)
+	if err != nil {
+		return false
+	}
+
+	if oldStripped == newStripped {
+		return true
+	}
+	return ProjectIDDiffSuppress(unused1, oldStripped, newStripped, unused2)
+}
+
+// Compare only the relative path of two self links.
 func CompareSelfLinkRelativePaths(_, old, new string, _ *schema.ResourceData) bool {
 	oldStripped, err := GetRelativePath(old)
 	if err != nil {
@@ -31,7 +49,6 @@ func CompareSelfLinkRelativePaths(_, old, new string, _ *schema.ResourceData) bo
 	if oldStripped == newStripped {
 		return true
 	}
-
 	return false
 }
 
@@ -83,14 +100,6 @@ func ConvertSelfLinkToV1(link string) string {
 func GetResourceNameFromSelfLink(link string) string {
 	parts := strings.Split(link, "/")
 	return parts[len(parts)-1]
-}
-
-func NameFromSelfLinkStateFunc(v interface{}) string {
-	return GetResourceNameFromSelfLink(v.(string))
-}
-
-func StoreResourceName(resourceLink interface{}) string {
-	return GetResourceNameFromSelfLink(resourceLink.(string))
 }
 
 type LocationType int
@@ -162,6 +171,17 @@ func GetLocationalResourcePropertiesFromSelfLinkString(selfLink string) (string,
 // This function supports selflinks that have regions and locations in their paths
 func GetRegionFromRegionalSelfLink(selfLink string) string {
 	re := regexp.MustCompile("projects/[a-zA-Z0-9-]*/(?:locations|regions)/([a-zA-Z0-9-]*)")
+	switch {
+	case re.MatchString(selfLink):
+		if res := re.FindStringSubmatch(selfLink); len(res) == 2 && res[1] != "" {
+			return res[1]
+		}
+	}
+	return selfLink
+}
+
+func GetProjectFromRegionalSelfLink(selfLink string) string {
+	re := regexp.MustCompile("projects/([a-zA-Z0-9-:.]*)/(?:locations|regions)/[a-zA-Z0-9-:]*")
 	switch {
 	case re.MatchString(selfLink):
 		if res := re.FindStringSubmatch(selfLink); len(res) == 2 && res[1] != "" {

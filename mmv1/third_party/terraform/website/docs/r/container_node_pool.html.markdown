@@ -4,7 +4,7 @@ description: |-
   Manages a GKE NodePool resource.
 ---
 
-# google\_container\_node\_pool
+# google_container_node_pool
 
 -> See the [Using GKE with Terraform](/docs/providers/google/guides/using_gke_with_terraform.html)
 guide for more information about using GKE with Terraform.
@@ -170,6 +170,12 @@ cluster.
 * `placement_policy` - (Optional) Specifies a custom placement policy for the
   nodes.
 
+* `queued_provisioning` - (Optional) Specifies node pool-level settings of queued provisioning.
+    Structure is [documented below](#nested_queued_provisioning).
+
+* `reservation_affinity` (Optional) The configuration of the desired reservation which instances could take capacity from.
+    Structure is [documented below](#nested_reservation_affinity).
+
 <a name="nested_autoscaling"></a>The `autoscaling` block supports (either total or per zone limits are required):
 
 * `min_node_count` - (Optional) Minimum number of nodes per zone in the NodePool.
@@ -194,9 +200,9 @@ cluster.
 
 <a name="nested_management"></a>The `management` block supports:
 
-* `auto_repair` - (Optional) Whether the nodes will be automatically repaired.
+* `auto_repair` - (Optional) Whether the nodes will be automatically repaired. Enabled by default.
 
-* `auto_upgrade` - (Optional) Whether the nodes will be automatically upgraded.
+* `auto_upgrade` - (Optional) Whether the nodes will be automatically upgraded. Enabled by default.
 
 <a name="nested_network_config"></a>The `network_config` block supports:
 
@@ -208,12 +214,15 @@ cluster.
 
 * `pod_range` - (Optional) The ID of the secondary range for pod IPs. If `create_pod_range` is true, this ID is used for the new range. If `create_pod_range` is false, uses an existing secondary range with this ID.
 
-* `additional_node_network_configs` - (Optional, Beta) We specify the additional node networks for this node pool using this list. Each node network corresponds to an additional interface.
+* `additional_node_network_configs` - (Optional) We specify the additional node networks for this node pool using this list. Each node network corresponds to an additional interface.
     Structure is [documented below](#nested_additional_node_network_configs)
 
-* `additional_pod_network_configs` - (Optional, Beta) We specify the additional pod networks for this node pool using this list. Each pod network corresponds to an additional alias IP range for the node.
+* `additional_pod_network_configs` - (Optional) We specify the additional pod networks for this node pool using this list. Each pod network corresponds to an additional alias IP range for the node.
     Structure is [documented below](#nested_additional_pod_network_configs)
 
+* `pod_cidr_overprovision_config` - (Optional) Configuration for node-pool level pod cidr overprovision. If not set, the cluster level setting will be inherited. Structure is [documented below](#pod_cidr_overprovision_config).
+
+* `network_performance_config` - (Optional) Network bandwidth tier configuration. Structure is [documented below](#network_performance_config).
 
 <a name="nested_additional_node_network_configs"></a>The `additional_node_network_configs` block supports:
 
@@ -229,6 +238,15 @@ cluster.
 
 * `max_pods_per_node` - The maximum number of pods per node which use this pod network.
 
+<a name="network_performance_config"></a>The `network_performance_config` block supports:
+
+* `total_egress_bandwidth_tier` (Required) - Specifies the total network bandwidth tier for the NodePool. [Valid values](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.locations.clusters.nodePools#NodePool.Tier) include: "TIER_1" and "TIER_UNSPECIFIED".
+* ```
+
+<a name="pod_cidr_overprovision_config"></a>The `pod_cidr_overprovision_config` block supports:
+
+* `disabled` (Required) - Whether pod cidr overprovision is disabled.
+
 <a name="nested_upgrade_settings"></a>The `upgrade_settings` block supports:
 
 * `max_surge` - (Optional) The number of additional nodes that can be added to the node pool during
@@ -241,7 +259,7 @@ cluster.
 
 `max_surge` and `max_unavailable` must not be negative and at least one of them must be greater than zero.
 
-* `strategy` - (Default `SURGE`) The upgrade stragey to be used for upgrading the nodes.
+* `strategy` - (Default `SURGE`) The upgrade strategy to be used for upgrading the nodes.
 
 * `blue_green_settings` - (Optional) The settings to adjust [blue green upgrades](https://cloud.google.com/kubernetes-engine/docs/concepts/node-pool-upgrade-strategies#blue-green-upgrade-strategy).
     Structure is [documented below](#nested_blue_green_settings)
@@ -252,6 +270,11 @@ cluster.
     * `batch_percentage` - (Optional) Percentage of the blue pool nodes to drain in a batch.
     * `batch_node_count` - (Optional) Number of blue nodes to drain in a batch.
     * `batch_soak_duration` - (Optionial) Soak time after each batch gets drained.
+
+* `local_ssd_encryption_mode` - (Optional) Possible Local SSD encryption modes:
+    Accepted values are:
+    * `STANDARD_ENCRYPTION`: The given node will be encrypted using keys managed by Google infrastructure and the keys wll be deleted when the node is deleted.
+    * `EPHEMERAL_KEY_ENCRYPTION`: The given node will opt-in for using ephemeral key for encrypting Local SSDs. The Local SSDs will not be able to recover data in case of node crash.
 
 * `node_pool_soak_duration` - (Optional) Time needed after draining the entire blue pool.
     After this period, the blue pool will be cleaned up.
@@ -266,7 +289,23 @@ cluster.
   The resource policy must be in the same project and region as the node pool.
   If not found, InvalidArgument error is returned.
 
-* `tpu_topology` - (Optional, Beta) The [TPU placement topology](https://cloud.google.com/tpu/docs/types-topologies#tpu_topologies) for pod slice node pool.
+* `tpu_topology` - (Optional) The [TPU topology](https://cloud.google.com/kubernetes-engine/docs/concepts/plan-tpus#topology) like `"2x4"` or `"2x2x2"`.
+
+<a name="nested_queued_provisioning"></a> The `queued_provisioning` block supports:
+
+* `enabled` (Required) - Makes nodes obtainable through the [ProvisioningRequest API](https://cloud.google.com/kubernetes-engine/docs/how-to/provisioningrequest) exclusively.
+
+<a name="nested_reservation_affinity"></a>The `reservation_affinity` block supports:
+
+* `consume_reservation_type` (Required) The type of reservation consumption
+    Accepted values are:
+
+    * `"UNSPECIFIED"`: Default value. This should not be used.
+    * `"NO_RESERVATION"`: Do not consume from any reserved capacity.
+    * `"ANY_RESERVATION"`: Consume any reservation available.
+    * `"SPECIFIC_RESERVATION"`: Must consume from a specific reservation. Must specify key value fields for specifying the reservations.
+* `key` (Optional) The label key of a reservation resource. To target a SPECIFIC_RESERVATION by name, specify "compute.googleapis.com/reservation-name" as the key and specify the name of your reservation as its value.
+* `values` (Optional) The list of label values of reservation resources. For example: the name of the specific reservation when using a key of "compute.googleapis.com/reservation-name"
 
 ## Attributes Reference
 
@@ -293,8 +332,22 @@ In addition to the arguments listed above, the following computed attributes are
 Node pools can be imported using the `project`, `location`, `cluster` and `name`. If
 the project is omitted, the project value in the provider configuration will be used. Examples:
 
-```
-$ terraform import google_container_node_pool.mainpool my-gcp-project/us-east1-a/my-cluster/main-pool
+* `{{project_id}}/{{location}}/{{cluster_id}}/{{pool_id}}`
+* `{{location}}/{{cluster_id}}/{{pool_id}}`
 
-$ terraform import google_container_node_pool.mainpool us-east1/my-cluster/main-pool
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import node pools using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{project_id}}/{{location}}/{{cluster_id}}/{{pool_id}}"
+  to = google_container_node_pool.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), node pools can be imported using one of the formats above. For example:
+
+```
+$ terraform import google_container_node_pool.default {{project_id}}/{{location}}/{{cluster_id}}/{{pool_id}}
+
+$ terraform import google_container_node_pool.default {{location}}/{{cluster_id}}/{{pool_id}}
 ```

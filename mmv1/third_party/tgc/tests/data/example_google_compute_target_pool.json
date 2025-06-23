@@ -1,0 +1,23 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/regions/us-central1/targetPools/instance-target-pool",
+        "asset_type": "compute.googleapis.com/TargetPool",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+            "discovery_name": "TargetPool",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "instances": [
+                    "us-central1-b/myinstance2",
+                    "us-central1-a/myinstance1"
+                ],
+                "name": "instance-target-pool",
+                "region": "us-central1",
+                "sessionAffinity": "NONE"
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    }
+]

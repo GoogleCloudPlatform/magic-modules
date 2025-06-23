@@ -9,13 +9,13 @@ import (
 	"strings"
 	"testing"
 
-	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/converters/google/resources"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v2/tfplan2cai/tfdata"
+	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/tfdata"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 
 	"github.com/google/go-cmp/cmp"
-	provider "github.com/hashicorp/terraform-provider-google-beta/google-beta"
+	provider "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
 	"go.uber.org/zap"
 	crmv1 "google.golang.org/api/cloudresourcemanager/v1"
 	crmv3 "google.golang.org/api/cloudresourcemanager/v3"
@@ -30,10 +30,12 @@ func TestGetAncestors(t *testing.T) {
 
 	// Setup a simple test server to mock the response of resource manager.
 	v3Responses := map[string]*crmv3.Project{
-		"folders/bar":        {Name: "folders/bar", Parent: "organizations/qux"},
-		"organizations/qux":  {Name: "organizations/qux", Parent: ""},
-		"folders/bar2":       {Name: "folders/bar2", Parent: "organizations/qux2"},
-		"organizations/qux2": {Name: "organizations/qux2", Parent: ""},
+		"folders/bar":         {Name: "folders/bar", Parent: "organizations/qux"},
+		"organizations/qux":   {Name: "organizations/qux", Parent: ""},
+		"folders/bar2":        {Name: "folders/bar2", Parent: "organizations/qux2"},
+		"organizations/qux2":  {Name: "organizations/qux2", Parent: ""},
+		"organizations/12345": {Name: "organizations/12345"},
+		"folders/67890":       {Name: "folders/67890", Parent: "organizations/12345"},
 	}
 	v1Responses := map[string][]*crmv1.Ancestor{
 		ownerProject: {
@@ -51,6 +53,13 @@ func TestGetAncestors(t *testing.T) {
 			{ResourceId: &crmv1.ResourceId{Id: "bar2", Type: "folder"}},
 			{ResourceId: &crmv1.ResourceId{Id: "qux2", Type: "organization"}},
 		},
+		"organizations/12345": {
+			{ResourceId: &crmv1.ResourceId{Id: "12345", Type: "organization"}},
+		},
+		"folders/67890": {
+			{ResourceId: &crmv1.ResourceId{Id: "67890", Type: "folder"}},
+			{ResourceId: &crmv1.ResourceId{Id: "12345", Type: "organization"}},
+		},
 	}
 
 	ts := newTestServer(t, v1Responses, v3Responses)
@@ -65,7 +74,9 @@ func TestGetAncestors(t *testing.T) {
 	}
 
 	entries := map[string]string{
-		ownerProject: ownerAncestryPath,
+		ownerProject:          ownerAncestryPath,
+		"organizations/12345": "organizations/12345",
+		"folders/67890":       "organizations/12345/folders/67890",
 	}
 
 	p := provider.Provider()
@@ -499,6 +510,36 @@ func TestGetAncestors(t *testing.T) {
 			},
 			want:       []string{"organizations/unknown"},
 			wantParent: "//cloudresourcemanager.googleapis.com/organizations/unknown",
+		},
+		{
+			name: "Org-level CuOP set with parent field",
+			data: tfdata.NewFakeResourceData(
+				"google_org_policy_custom_constraint",
+				p.ResourcesMap["google_org_policy_custom_constraint"].Schema,
+				map[string]interface{}{
+					"parent": "organizations/12345",
+				},
+			),
+			asset: &resources.Asset{
+				Type: "orgpolicy.googleapis.com/CustomConstraint",
+			},
+			want:       []string{"organizations/12345"},
+			wantParent: "//cloudresourcemanager.googleapis.com/organizations/12345",
+		},
+		{
+			name: "Folder-level Firewall Policy",
+			data: tfdata.NewFakeResourceData(
+				"google_compute_firewall_policy",
+				p.ResourcesMap["google_compute_firewall_policy"].Schema,
+				map[string]interface{}{
+					"parent": "folders/67890",
+				},
+			),
+			asset: &resources.Asset{
+				Type: "compute.googleapis.com/FirewallPolicy",
+			},
+			want:       []string{"folders/67890", "organizations/12345"},
+			wantParent: "//cloudresourcemanager.googleapis.com/folders/67890",
 		},
 	}
 	for _, c := range cases {
@@ -1032,6 +1073,8 @@ func TestParseAncestryPath_Fail(t *testing.T) {
 }
 
 func TestInitAncestryCache(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name    string
 		entries map[string]string
@@ -1082,9 +1125,23 @@ func TestInitAncestryCache(t *testing.T) {
 				"organizations/123":  {"organizations/123"},
 			},
 		},
+		{
+			name: "project id key with project number ancestry",
+			entries: map[string]string{
+				"projects/test-proj": "organizations/456/projects/123",
+			},
+			want: map[string][]string{
+				"projects/test-proj": {"projects/123", "organizations/456"},
+				"projects/123":       {"projects/123", "organizations/456"},
+				"organizations/456":  {"organizations/456"},
+			},
+		},
 	}
 	for _, test := range tests {
+		test := test
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+
 			m := &manager{
 				ancestorCache: make(map[string][]string),
 			}
@@ -1419,6 +1476,95 @@ func TestGetProjectFromResource(t *testing.T) {
 			}
 			if got != c.want {
 				t.Fatalf("getProjectFromResource() = %s, want = %s", got, c.want)
+			}
+		})
+	}
+}
+
+func TestGetAncestorsRetry(t *testing.T) {
+	v3Called := 0
+	v1Called := 0
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var payload []byte
+		var err error
+		if strings.HasPrefix(r.URL.Path, "/v3/") {
+			v3Called++
+			if v3Called == 1 {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				resp := &crmv3.Project{
+					Name:   "folders/123",
+					Parent: "organizations/456",
+				}
+				payload, err = resp.MarshalJSON()
+			}
+		} else if strings.HasPrefix(r.URL.Path, "/v1/") {
+			v1Called++
+			if v1Called == 1 {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			} else {
+				resp := &crmv1.GetAncestryResponse{
+					Ancestor: []*crmv1.Ancestor{
+						{ResourceId: &crmv1.ResourceId{Id: "abc", Type: "project"}},
+						{ResourceId: &crmv1.ResourceId{Id: "888", Type: "organization"}},
+					},
+				}
+				payload, err = resp.MarshalJSON()
+			}
+		} else {
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte(fmt.Sprintf("no response for url path %s", r.URL.Path)))
+			return
+		}
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(fmt.Sprintf("failed to MarshalJSON: %s", err)))
+			return
+		}
+		w.Write(payload)
+	}))
+	defer ts.Close()
+
+	tests := []struct {
+		name  string
+		input string
+		want  []string
+	}{
+		{
+			name:  "access v1 API",
+			input: "projects/abc",
+			want:  []string{"projects/abc", "organizations/888"},
+		},
+		{
+			name:  "access v3 API",
+			input: "folders/123",
+			want:  []string{"folders/123", "organizations/456"},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mockV1Client, err := crmv1.NewService(context.Background(), option.WithEndpoint(ts.URL), option.WithoutAuthentication())
+			if err != nil {
+				t.Fatal(err)
+			}
+			mockV3Client, err := crmv3.NewService(context.Background(), option.WithEndpoint(ts.URL), option.WithoutAuthentication())
+			if err != nil {
+				t.Fatal(err)
+			}
+			m := &manager{
+				errorLogger:       zap.NewExample(),
+				ancestorCache:     make(map[string][]string),
+				resourceManagerV3: mockV3Client,
+				resourceManagerV1: mockV1Client,
+			}
+			got, err := m.getAncestorsWithCache(test.input)
+			if err != nil {
+				t.Fatalf("getAncestorsWithCache(%s) = %s, want = nil", test.input, err)
+			}
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("getAncestorsWithCache(%v) returned unexpected diff (-want +got):\n%s", test.input, diff)
 			}
 		})
 	}

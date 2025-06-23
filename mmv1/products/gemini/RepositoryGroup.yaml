@@ -1,0 +1,124 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: RepositoryGroup
+description: The resource for managing Repository Group for Gemini Code Assist.
+references:
+  api: 'https://cloud.google.com/gemini/docs/api/reference/rest/v1/projects.locations.codeRepositoryIndexes.repositoryGroups'
+base_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups
+self_link: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups/{{repository_group_id}}
+create_url: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups?repositoryGroupId={{repository_group_id}}
+update_verb: 'PATCH'
+update_mask: true
+id_format: projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups/{{repository_group_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups/{{repository_group_id}}
+mutex: 'projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}'
+examples:
+  - name: "gemini_repository_group_basic"
+    primary_resource_id: "example"
+    vars:
+      repository_group_id: "example-repository-group"
+      git_repository_link_id: 'example-git-repository-link-id'
+      cri_id: "cri-example"
+      repository_resource: "projects/example-project/locations/us-central1/connections/example-connection/gitRepositoryLinks/example-repo"
+      connection_id: "example-connection-id"
+    exclude_test: true
+timeouts:
+  insert_minutes: 30
+  update_minutes: 30
+  delete_minutes: 30
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 30
+      update_minutes: 30
+      delete_minutes: 30
+    base_url: "{{op_id}}"
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+iam_policy:
+  parent_resource_attribute: 'repository_group_id'
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'GET'
+  set_iam_policy_verb: 'POST'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/codeRepositoryIndexes/{{code_repository_index}}/repositoryGroups/{{repository_group_id}}'
+    - '{{repository_group_id}}'
+  allowed_iam_role: 'roles/cloudaicompanion.repositoryGroupsUser'
+error_retry_predicates:
+  - 'transport_tpg.IsCodeRepositoryIndexUnreadyError'
+  - 'transport_tpg.IsRepositoryGroupQueueError'
+parameters:
+  - name: location
+    type: String
+    description: The location of the Code Repository Index, for example `us-central1`.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: codeRepositoryIndex
+    type: String
+    description: Required. Id of the Code Repository Index.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: repositoryGroupId
+    type: String
+    description: Required. Id of the Repository Group.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: repositories
+    type: Array
+    description: Required. List of repositories to group.
+    required: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: resource
+          type: String
+          description: |-
+            Required. The DeveloperConnect repository full resource name, relative resource name
+            or resource URL to be indexed.
+          required: true
+        - name: branchPattern
+          type: String
+          description: |-
+            Required. The Git branch pattern used for indexing in RE2 syntax.
+            See https://github.com/google/re2/wiki/syntax for syntax.
+          required: true
+  - name: name
+    type: String
+    description: Immutable. Identifier. Name of Repository Group.
+    output: true
+    immutable: true
+  - name: createTime
+    type: String
+    description: Output only. Create time stamp.
+    output: true
+  - name: updateTime
+    type: String
+    description: Output only. Update time stamp.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Optional. Labels as key value pairs.

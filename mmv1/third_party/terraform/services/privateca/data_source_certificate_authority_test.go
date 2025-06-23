@@ -3,7 +3,7 @@ package privateca_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -80,6 +80,9 @@ resource "google_privateca_certificate_authority" "default" {
   lifetime = "86400s"
   key_spec {
     algorithm = "RSA_PKCS1_4096_SHA256"
+  }
+  labels = {
+    my-label = "my-label-value"
   }
 }
 

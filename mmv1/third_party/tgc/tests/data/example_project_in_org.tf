@@ -17,7 +17,7 @@
 terraform {
   required_providers {
     google = {
-      source = "hashicorp/google"
+      source = "hashicorp/google-beta"
       version = "~> {{.Provider.version}}"
     }
   }
@@ -31,4 +31,5 @@ resource "google_project" "my_project" {
   name = "My Project"
   project_id = "foobat"
   org_id     = "{{.OrgID}}"
+  deletion_policy = "DELETE"
 }

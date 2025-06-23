@@ -4,7 +4,7 @@ description: |-
   Get a subnetwork within GCE.
 ---
 
-# google\_compute\_subnetwork
+# google_compute_subnetwork
 
 Get a subnetwork within GCE from its name and region.
 
@@ -40,16 +40,26 @@ In addition to the arguments listed above, the following attributes are exported
 * `network` - The network name or resource link to the parent
     network of this subnetwork.
 
+* `subnetwork_id` - The numeric ID of the resource.
+
 * `description` - Description of this subnetwork.
 
 * `ip_cidr_range` - The IP address range that machines in this
     network are assigned to, represented as a CIDR block.
+
+* `external_ipv6_prefix` - The external IPv6 address range that is assigned to this subnetwork.
+
+* `internal_ipv6_prefix` - The internal IPv6 address range that is assigned to this subnetwork.
 
 * `gateway_address` - The IP address of the gateway.
 
 * `private_ip_google_access` - Whether the VMs in this subnet
     can access Google services without assigned external IP
     addresses.
+
+* `stack_type` - The stack type for the subnet. Possible values are: `IPV4_ONLY`, `IPV4_IPV6`, `IPV6_ONLY`.
+
+* `ipv6_access_type` - The access type of IPv6 address this subnet holds. Possible values are: `EXTERNAL`, `INTERNAL`.
 
 * `secondary_ip_range` - An array of configurations for secondary IP ranges for
     VM instances contained in this subnetwork. Structure is [documented below](#nested_secondary_ip_range).

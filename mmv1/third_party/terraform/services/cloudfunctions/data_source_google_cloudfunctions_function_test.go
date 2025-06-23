@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccDataSourceGoogleCloudFunctionsFunction_basic(t *testing.T) {
@@ -53,7 +53,7 @@ resource "google_storage_bucket_object" "archive" {
 
 resource "google_cloudfunctions_function" "function_http" {
   name                  = "%s-http"
-  runtime               = "nodejs14"
+  runtime               = "nodejs20"
   description           = "test function"
   available_memory_mb   = 128
   source_archive_bucket = google_storage_bucket.bucket.name
@@ -61,6 +61,9 @@ resource "google_cloudfunctions_function" "function_http" {
   trigger_http          = true
   timeout               = 61
   entry_point           = "helloGET"
+  labels = {
+    my-label = "my-label-value"
+  }
 }
 
 data "google_cloudfunctions_function" "function_http" {

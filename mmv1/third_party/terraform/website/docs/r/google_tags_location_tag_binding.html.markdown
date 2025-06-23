@@ -1,75 +1,74 @@
 ---
 subcategory: "Tags"
 description: |-
-  A LocationTagBinding represents a connection between a TagValue and a Regional cloud resources.
+  A LocationTagBinding represents a connection between a TagValue and a non-global cloud resource.
 ---
 
-# google\_tags\_location\_tag\_binding
+# google_tags_location_tag_binding
 
-A TagBinding represents a connection between a TagValue and a Regional cloud resource (currently project, folder, or organization). Once a TagBinding is created, the TagValue is applied to all the descendants of the cloud resource.
+A LocationTagBinding represents a connection between a TagValue and a non-global target such as a Cloud Run Service or Compute Instance. Once a LocationTagBinding is created, the TagValue is applied to all the descendants of the cloud resource.
 
-
-To get more information about TagBinding, see:
+To get more information about LocationTagBinding, see:
 
 * [API documentation](https://cloud.google.com/resource-manager/reference/rest/v3/tagBindings)
 * How-to Guides
     * [Official Documentation](https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing)
 
-## Example Usage
+## Example Usage - Cloud Run Service
 
-To bind a tag to a Cloud Run instance:
+To bind a tag to a Cloud Run service:
 
 ```hcl
 resource "google_project" "project" {
-	project_id = "project_id"
-	name       = "project_id"
-	org_id     = "123456789"
+  project_id = "project_id"
+  name       = "project_id"
+  org_id     = "123456789"
 }
 
 resource "google_tags_tag_key" "key" {
-	parent      = "organizations/123456789"
-	short_name  = "keyname"
-	description = "For keyname resources."
+  parent      = "organizations/123456789"
+  short_name  = "keyname"
+  description = "For keyname resources."
 }
 
 resource "google_tags_tag_value" "value" {
-	parent      = "tagKeys/${google_tags_tag_key.key.name}"
-	short_name  = "valuename"
-	description = "For valuename resources."
+  parent      = google_tags_tag_key.key.id
+  short_name  = "valuename"
+  description = "For valuename resources."
 }
 
 resource "google_tags_location_tag_binding" "binding" {
-	parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
-	tag_value = "tagValues/${google_tags_tag_value.value.name}"
-	location  = "us-central1"
+  parent    = "//run.googleapis.com/projects/${data.google_project.project.number}/locations/${google_cloud_run_service.default.location}/services/${google_cloud_run_service.default.name}"
+  tag_value = google_tags_tag_value.value.id
+  location  = "us-central1"
 }
 ```
 
-To bind a (firewall) tag to compute instance:
+## Example Usage - Compute Instance
 
 ```hcl
 resource "google_project" "project" {
-	project_id = "project_id"
-	name       = "project_id"
-	org_id     = "123456789"
+  project_id = "project_id"
+  name       = "project_id"
+  org_id     = "123456789"
 }
 
 resource "google_tags_tag_key" "key" {
-	parent      = "organizations/123456789"
-	short_name  = "keyname"
-	description = "For keyname resources."
+  parent      = "organizations/123456789"
+  short_name  = "keyname"
+  description = "For keyname resources."
 }
 
 resource "google_tags_tag_value" "value" {
-	parent      = "tagKeys/${google_tags_tag_key.key.name}"
-	short_name  = "valuename"
-	description = "For valuename resources."
+  parent      = google_tags_tag_key.key.id
+  short_name  = "valuename"
+  description = "For valuename resources."
 }
 
 resource "google_tags_location_tag_binding" "binding" {
-	parent    = "//compute.googleapis.com/projects/${google_project.project.number}/zones/us-central1-a/instances/${google_compute_instance.instance.instance_id}"
-	tag_value = "tagValues/${google_tags_tag_value.value.name}"
-	location  = "us-central1-a"
+  parent    = "//compute.googleapis.com/projects/${google_project.project.number}/zones/us-central1-a/instances/${google_compute_instance.instance.instance_id}"
+  tag_value = google_tags_tag_value.value.id
+  location  = "us-central1-a"
 }
 ```
 
@@ -88,7 +87,7 @@ The following arguments are supported:
 
 * `location` -
   (Required)
-  Location of the resource.
+  Location of the target resource.
 
 - - -
 
@@ -115,7 +114,20 @@ This resource provides the following
 ## Import
 
 
-TagBinding can be imported using any of these accepted formats:
+LocationTagBinding can be imported using any of these accepted formats:
+
+* `{{location}}/{{name}}`
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import TagBinding using one of the formats above. For example:
+
+```tf
+import {
+  id = "{{location}}/{{name}}"
+  to = google_tags_location_tag_binding.default
+}
+```
+
+When using the [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import), TagBinding can be imported using one of the formats above. For example:
 
 ```
 $ terraform import google_tags_location_tag_binding.default {{location}}/{{name}}

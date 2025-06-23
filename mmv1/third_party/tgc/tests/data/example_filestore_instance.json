@@ -15,6 +15,9 @@
             "name": "share1"
           }
         ],
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
         "networks": [
           {
             "connectMode": "DIRECT_PEERING",
@@ -24,6 +27,7 @@
             "network": "default"
           }
         ],
+        "protocol": "NFS_V3",
         "tier": "BASIC_SSD"
       }
     }

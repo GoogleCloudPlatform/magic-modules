@@ -7,10 +7,11 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	tpgstorage "github.com/hashicorp/terraform-provider-google/google/services/storage"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"google.golang.org/api/storage/v1"
 )
 
@@ -21,7 +22,7 @@ var (
 func TestAccStorageNotification_basic(t *testing.T) {
 	t.Parallel()
 
-	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT")
+	envvar.SkipIfEnvNotSet(t, "GOOGLE_PROJECT")
 
 	var notification storage.Notification
 	bucketName := acctest.TestBucketName(t)
@@ -65,7 +66,7 @@ func TestAccStorageNotification_basic(t *testing.T) {
 func TestAccStorageNotification_withEventsAndAttributes(t *testing.T) {
 	t.Parallel()
 
-	acctest.SkipIfEnvNotSet(t, "GOOGLE_PROJECT")
+	envvar.SkipIfEnvNotSet(t, "GOOGLE_PROJECT")
 
 	var notification storage.Notification
 	bucketName := acctest.TestBucketName(t)

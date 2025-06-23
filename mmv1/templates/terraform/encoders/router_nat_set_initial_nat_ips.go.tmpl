@@ -1,0 +1,15 @@
+// initial_nat_ips uses the same api_name as nat_ips
+if tpgresource.IsEmptyValue(reflect.ValueOf(obj["initialNatIps"])) {
+  return obj, nil
+}
+
+newObj := make(map[string]interface{})
+for key, value := range obj {
+  newObj[key] = value
+}
+
+newObj["natIps"] = obj["initialNatIps"]
+delete(newObj, "initialNatIps")
+
+log.Printf("[DEBUG] Replacing initialNatIps value \n oldObj: %+v \n newObj: %+v", obj, newObj)
+return newObj, nil

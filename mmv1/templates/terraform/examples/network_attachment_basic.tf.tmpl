@@ -1,0 +1,47 @@
+resource "google_compute_network_attachment" "default" {
+    name = "{{index $.Vars "resource_name"}}"
+    region = "us-central1"
+    description = "basic network attachment description"
+    connection_preference = "ACCEPT_MANUAL"
+
+    subnetworks = [
+        google_compute_subnetwork.default.self_link
+    ]
+
+    producer_accept_lists = [
+        google_project.accepted_producer_project.project_id
+    ]
+
+    producer_reject_lists = [
+        google_project.rejected_producer_project.project_id
+    ]
+}
+
+resource "google_compute_network" "default" {
+    name = "{{index $.Vars "network_name"}}"
+    auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+    name = "{{index $.Vars "subnetwork_name"}}"
+    region = "us-central1"
+
+    network = google_compute_network.default.id
+    ip_cidr_range = "10.0.0.0/16"
+}
+
+resource "google_project" "rejected_producer_project" {
+    project_id      = "{{index $.Vars "rejected_producer_project_name"}}"
+    name            = "{{index $.Vars "rejected_producer_project_name"}}"
+    org_id          = "{{index $.TestEnvVars "org_id"}}"
+    billing_account = "{{index $.TestEnvVars "billing_account"}}"
+    deletion_policy = "DELETE"
+}
+
+resource "google_project" "accepted_producer_project" {
+    project_id      = "{{index $.Vars "accepted_producer_project_name"}}"
+    name            = "{{index $.Vars "accepted_producer_project_name"}}"
+    org_id          = "{{index $.TestEnvVars "org_id"}}"
+    billing_account = "{{index $.TestEnvVars "billing_account"}}"
+    deletion_policy = "DELETE"
+}

@@ -3,7 +3,7 @@ package pubsub_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -60,6 +60,9 @@ resource "google_pubsub_topic" "foo" {
 resource "google_pubsub_subscription" "foo" {
   name     = "tf-test-pubsub-subscription-%{random_suffix}"
   topic    = google_pubsub_topic.foo.name
+  labels   = {
+    my-label = "my-label-value"
+  }
 }
 
 data "google_pubsub_subscription" "foo" {

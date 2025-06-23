@@ -3,7 +3,7 @@ package beyondcorp_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -101,6 +101,9 @@ resource "google_beyondcorp_app_gateway" "foo" {
 	name      = "tf-test-appgateway-%{random_suffix}"
 	type      = "TCP_PROXY"
 	host_type = "GCP_REGIONAL_MIG"
+	labels = {
+		my-label = "my-label-value"
+	}
 }
 
 data "google_beyondcorp_app_gateway" "foo" {

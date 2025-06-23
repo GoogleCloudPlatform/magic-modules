@@ -3,7 +3,7 @@ package containerattached_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -26,7 +26,7 @@ func TestAccContainerAttachedCluster_update(t *testing.T) {
 				ResourceName:            "google_container_attached_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "annotations"},
 			},
 			{
 				Config: testAccContainerAttachedCluster_containerAttachedCluster_update(context),
@@ -35,7 +35,25 @@ func TestAccContainerAttachedCluster_update(t *testing.T) {
 				ResourceName:            "google_container_attached_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "annotations"},
+			},
+			{
+				Config: testAccContainerAttachedCluster_containerAttachedCluster_removeAuthorizationUsers(context),
+			},
+			{
+				ResourceName:            "google_container_attached_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "annotations"},
+			},
+			{
+				Config: testAccContainerAttachedCluster_containerAttachedCluster_removeAuthorizationGroups(context),
+			},
+			{
+				ResourceName:            "google_container_attached_cluster.primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "annotations"},
 			},
 			{
 				Config: testAccContainerAttachedCluster_containerAttachedCluster_destroy(context),
@@ -44,7 +62,7 @@ func TestAccContainerAttachedCluster_update(t *testing.T) {
 				ResourceName:            "google_container_attached_cluster.primary",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "annotations"},
 			},
 		},
 	})
@@ -71,6 +89,7 @@ resource "google_container_attached_cluster" "primary" {
   }
   authorization {
     admin_users = [ "user1@example.com", "user2@example.com"]
+    admin_groups = [ "group1@example.com", "group2@example.com"]
   }
   oidc_config {
       issuer_url = "https://oidc.issuer.url"
@@ -88,6 +107,15 @@ resource "google_container_attached_cluster" "primary" {
   monitoring_config {
     managed_prometheus_config {
       enabled = true
+    }
+  }
+  binary_authorization {
+    evaluation_mode = "PROJECT_SINGLETON_POLICY_ENFORCE"
+  }
+  proxy_config {
+    kubernetes_secret {
+      name = "proxy-config"
+      namespace = "default"
     }
   }
 }
@@ -116,6 +144,7 @@ resource "google_container_attached_cluster" "primary" {
   }
   authorization {
     admin_users = [ "user2@example.com", "user3@example.com"]
+    admin_groups = [ "group3@example.com"]
   }
   oidc_config {
       issuer_url = "https://oidc.issuer.url"
@@ -127,6 +156,112 @@ resource "google_container_attached_cluster" "primary" {
   }
   monitoring_config {
     managed_prometheus_config {}
+  }
+  binary_authorization {
+    evaluation_mode = "DISABLED"
+  }
+  proxy_config {
+    kubernetes_secret {
+      name = "new-proxy-config"
+      namespace = "custom-ns"
+    }
+  }
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+`, context)
+}
+
+func testAccContainerAttachedCluster_containerAttachedCluster_removeAuthorizationUsers(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
+data "google_container_attached_versions" "versions" {
+	location       = "us-west1"
+	project        = data.google_project.project.project_id
+}
+
+resource "google_container_attached_cluster" "primary" {
+  name     = "update%{random_suffix}"
+  project = data.google_project.project.project_id
+  location = "us-west1"
+  description = "Test cluster updated"
+  distribution = "aks"
+  annotations = {
+    label-one = "value-one"
+  label-two = "value-two"
+  }
+  authorization {
+    admin_groups = [ "group3@example.com"]
+  }
+  oidc_config {
+      issuer_url = "https://oidc.issuer.url"
+      jwks = base64encode("{\"keys\":[{\"use\":\"sig\",\"kty\":\"RSA\",\"kid\":\"testid\",\"alg\":\"RS256\",\"n\":\"somedata\",\"e\":\"AQAB\"}]}")
+  }
+  platform_version = data.google_container_attached_versions.versions.valid_versions[0]
+  fleet {
+    project = "projects/${data.google_project.project.number}"
+  }
+  monitoring_config {
+    managed_prometheus_config {}
+  }
+  binary_authorization {
+    evaluation_mode = "DISABLED"
+  }
+  proxy_config {
+    kubernetes_secret {
+      name = "new-proxy-config"
+      namespace = "custom-ns"
+    }
+  }
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+`, context)
+}
+
+func testAccContainerAttachedCluster_containerAttachedCluster_removeAuthorizationGroups(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
+data "google_container_attached_versions" "versions" {
+	location       = "us-west1"
+	project        = data.google_project.project.project_id
+}
+
+resource "google_container_attached_cluster" "primary" {
+  name     = "update%{random_suffix}"
+  project = data.google_project.project.project_id
+  location = "us-west1"
+  description = "Test cluster updated"
+  distribution = "aks"
+  annotations = {
+    label-one = "value-one"
+  label-two = "value-two"
+  }
+  oidc_config {
+      issuer_url = "https://oidc.issuer.url"
+      jwks = base64encode("{\"keys\":[{\"use\":\"sig\",\"kty\":\"RSA\",\"kid\":\"testid\",\"alg\":\"RS256\",\"n\":\"somedata\",\"e\":\"AQAB\"}]}")
+  }
+  platform_version = data.google_container_attached_versions.versions.valid_versions[0]
+  fleet {
+    project = "projects/${data.google_project.project.number}"
+  }
+  monitoring_config {
+    managed_prometheus_config {}
+  }
+  binary_authorization {
+    evaluation_mode = "DISABLED"
+  }
+  proxy_config {
+    kubernetes_secret {
+      name = "new-proxy-config"
+      namespace = "custom-ns"
+    }
   }
   lifecycle {
     prevent_destroy = true
@@ -157,9 +292,6 @@ resource "google_container_attached_cluster" "primary" {
     label-one = "value-one"
   label-two = "value-two"
   }
-  authorization {
-    admin_users = [ "user2@example.com", "user3@example.com"]
-  }
   oidc_config {
       issuer_url = "https://oidc.issuer.url"
       jwks = base64encode("{\"keys\":[{\"use\":\"sig\",\"kty\":\"RSA\",\"kid\":\"testid\",\"alg\":\"RS256\",\"n\":\"somedata\",\"e\":\"AQAB\"}]}")
@@ -170,6 +302,15 @@ resource "google_container_attached_cluster" "primary" {
   }
   monitoring_config {
     managed_prometheus_config {}
+  }
+  binary_authorization {
+    evaluation_mode = "DISABLED"
+  }
+  proxy_config {
+    kubernetes_secret {
+      name = "new-proxy-config"
+      namespace = "custom-ns"
+    }
   }
 }
 `, context)

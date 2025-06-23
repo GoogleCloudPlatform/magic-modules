@@ -4,18 +4,16 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
 func TestAccMemcacheInstance_update(t *testing.T) {
 	t.Parallel()
-	// Temporary as CI has used up servicenetworking quota
-	acctest.SkipIfVcr(t)
 
 	prefix := fmt.Sprintf("%d", acctest.RandInt(t))
 	name := fmt.Sprintf("tf-test-%s", prefix)
-	network := acctest.BootstrapSharedTestNetwork(t, "memcache-update")
+	network := acctest.BootstrapSharedServiceNetworkingConnection(t, "memcache-instance-update-1")
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -26,9 +24,10 @@ func TestAccMemcacheInstance_update(t *testing.T) {
 				Config: testAccMemcacheInstance_update(prefix, name, network),
 			},
 			{
-				ResourceName:      "google_memcache_instance.test",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_memcache_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"reserved_ip_range_id"},
 			},
 			{
 				Config: testAccMemcacheInstance_update2(prefix, name, network),
@@ -44,24 +43,10 @@ func TestAccMemcacheInstance_update(t *testing.T) {
 
 func testAccMemcacheInstance_update(prefix, name, network string) string {
 	return fmt.Sprintf(`
-resource "google_compute_global_address" "service_range" {
-  name          = "tf-test%s"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 16
-  network       = data.google_compute_network.memcache_network.id
-}
-
-resource "google_service_networking_connection" "private_service_connection" {
-  network                 = data.google_compute_network.memcache_network.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.service_range.name]
-}
-
 resource "google_memcache_instance" "test" {
   name = "%s"
   region = "us-central1"
-  authorized_network = google_service_networking_connection.private_service_connection.network
+  authorized_network = data.google_compute_network.memcache_network.id
 
   node_config {
     cpu_count      = 1
@@ -75,34 +60,21 @@ resource "google_memcache_instance" "test" {
       "max-item-size" = "8388608"
     }
   }
+  reserved_ip_range_id = ["tf-bootstrap-addr-memcache-instance-update-1"]
 }
 
 data "google_compute_network" "memcache_network" {
   name = "%s"
 }
-`, prefix, name, network)
+`, name, network)
 }
 
 func testAccMemcacheInstance_update2(prefix, name, network string) string {
 	return fmt.Sprintf(`
-resource "google_compute_global_address" "service_range" {
-  name          = "tf-test%s"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 16
-  network       = data.google_compute_network.memcache_network.id
-}
-
-resource "google_service_networking_connection" "private_service_connection" {
-  network                 = data.google_compute_network.memcache_network.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.service_range.name]
-}
-
 resource "google_memcache_instance" "test" {
   name = "%s"
   region = "us-central1"
-  authorized_network = google_service_networking_connection.private_service_connection.network
+  authorized_network = data.google_compute_network.memcache_network.id
 
   node_config {
     cpu_count      = 1
@@ -116,10 +88,12 @@ resource "google_memcache_instance" "test" {
       "max-item-size" = "8388608"
     }
   }
+
+  memcache_version = "MEMCACHE_1_6_15"
 }
 
 data "google_compute_network" "memcache_network" {
   name = "%s"
 }
-`, prefix, name, network)
+`, name, network)
 }

@@ -1,0 +1,57 @@
+resource "google_compute_region_target_https_proxy" "{{$.PrimaryResourceId}}" {
+  region                      = "us-central1"
+  name                        = "{{index $.Vars "region_target_https_proxy_name"}}"
+  http_keep_alive_timeout_sec = 600
+  url_map                     = google_compute_region_url_map.default.id
+  ssl_certificates            = [google_compute_region_ssl_certificate.default.id]
+}
+
+resource "google_compute_region_ssl_certificate" "default" {
+  region      = "us-central1"
+  name        = "{{index $.Vars "region_ssl_certificate_name"}}"
+  private_key = file("path/to/private.key")
+  certificate = file("path/to/certificate.crt")
+}
+
+resource "google_compute_region_url_map" "default" {
+  region      = "us-central1"
+  name        = "{{index $.Vars "region_url_map_name"}}"
+  description = "a description"
+
+  default_service = google_compute_region_backend_service.default.id
+
+  host_rule {
+    hosts        = ["mysite.com"]
+    path_matcher = "allpaths"
+  }
+
+  path_matcher {
+    name            = "allpaths"
+    default_service = google_compute_region_backend_service.default.id
+
+    path_rule {
+      paths   = ["/*"]
+      service = google_compute_region_backend_service.default.id
+    }
+  }
+}
+
+resource "google_compute_region_backend_service" "default" {
+  region                = "us-central1"
+  name                  = "{{index $.Vars "region_backend_service_name"}}"
+  port_name             = "http"
+  protocol              = "HTTP"
+  timeout_sec           = 10
+  load_balancing_scheme = "INTERNAL_MANAGED"
+
+  health_checks = [google_compute_region_health_check.default.id]
+}
+
+resource "google_compute_region_health_check" "default" {
+  region = "us-central1"
+  name   = "{{index $.Vars "region_health_check_name"}}"
+
+  http_health_check {
+    port = 80
+  }
+}

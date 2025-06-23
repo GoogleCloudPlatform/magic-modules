@@ -24,6 +24,9 @@
           "nonExistence": "nsec3",
           "state": "on"
         },
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
         "name": "publiczone",
         "privateVisibilityConfig": {
           "networks": []

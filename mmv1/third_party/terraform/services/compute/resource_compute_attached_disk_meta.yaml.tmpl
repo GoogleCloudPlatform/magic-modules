@@ -1,0 +1,17 @@
+resource: 'google_compute_attached_disk'
+generation_type: 'handwritten'
+api_service_name: 'compute.googleapis.com'
+{{- if ne $.TargetVersionName "ga" }}
+api_version: 'beta'
+{{- else }}
+api_version: 'v1'
+{{- end }}
+api_resource_type_kind: 'Instance'
+fields:
+  - field: 'device_name'
+  - field: 'disk'
+  - field: 'instance'
+  - field: 'interface'
+  - field: 'mode'
+  - field: 'project'
+  - field: 'zone'

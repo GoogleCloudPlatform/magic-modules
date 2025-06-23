@@ -3,7 +3,7 @@ package dialogflowcx_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -25,17 +25,19 @@ func TestAccDialogflowCXIntent_update(t *testing.T) {
 				Config: testAccDialogflowCXIntent_basic(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_cx_intent.my_intent",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_dialogflow_cx_intent.my_intent",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDialogflowCXIntent_full(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_cx_intent.my_intent",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_dialogflow_cx_intent.my_intent",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
@@ -43,18 +45,6 @@ func TestAccDialogflowCXIntent_update(t *testing.T) {
 
 func testAccDialogflowCXIntent_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	data "google_project" "project" {}
-
-	resource "google_service_account" "dialogflowcx_service_account" {
-		account_id = "tf-test-dialogflow-%{random_suffix}"
-	}
-
-	resource "google_project_iam_member" "agent_create" {
-		project = data.google_project.project.project_id
-		role    = "roles/dialogflow.admin"
-		member  = "serviceAccount:${google_service_account.dialogflowcx_service_account.email}"
-	}
-
 	resource "google_dialogflow_cx_agent" "agent_intent" {
 		display_name = "tf-test-%{random_suffix}"
 		location = "global"
@@ -63,7 +53,6 @@ func testAccDialogflowCXIntent_basic(context map[string]interface{}) string {
 		time_zone = "America/New_York"
 		description = "Description 1."
 		avatar_uri = "https://storage.cloud.google.com/dialogflow-test-host-image/cloud-logo.png"
-		depends_on = [google_project_iam_member.agent_create]
 	}
     
 	resource "google_dialogflow_cx_intent" "my_intent" {
@@ -102,18 +91,6 @@ func testAccDialogflowCXIntent_basic(context map[string]interface{}) string {
 
 func testAccDialogflowCXIntent_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	data "google_project" "project" {}
-
-	resource "google_service_account" "dialogflowcx_service_account" {
-		account_id = "tf-test-dialogflow-%{random_suffix}"
-	}
-
-	resource "google_project_iam_member" "agent_create" {
-		project = data.google_project.project.project_id
-		role    = "roles/dialogflow.admin"
-		member  = "serviceAccount:${google_service_account.dialogflowcx_service_account.email}"
-	}
-
 	resource "google_dialogflow_cx_agent" "agent_intent" {
 		display_name = "tf-test-%{random_suffix}update"
 		location = "global"
@@ -127,7 +104,6 @@ func testAccDialogflowCXIntent_full(context map[string]interface{}) string {
 		speech_to_text_settings {
 			enable_speech_adaptation = true
 		}
-		depends_on = [google_project_iam_member.agent_create]
 	}
     
 	resource "google_dialogflow_cx_intent" "my_intent" {
@@ -162,4 +138,135 @@ func testAccDialogflowCXIntent_full(context map[string]interface{}) string {
         } 
     } 
 	  `, context)
+}
+
+func TestAccDialogflowCXIntent_defaultIntents(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				// Note: this isn't actually a "create" test; it creates resources in the TF state, but is actually importing the default objects GCP has created, then updating them.
+				Config: testAccDialogflowCXIntent_defaultIntents_create(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dialogflow_cx_intent.default_negative_intent", "name", "00000000-0000-0000-0000-000000000001"),
+					resource.TestCheckResourceAttr("google_dialogflow_cx_intent.default_welcome_intent", "name", "00000000-0000-0000-0000-000000000000"),
+				),
+			},
+			{
+				ResourceName:            "google_dialogflow_cx_intent.default_negative_intent",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				ResourceName:            "google_dialogflow_cx_intent.default_welcome_intent",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				// This is testing updating the default objects without having to create them in the TF state first.
+				Config: testAccDialogflowCXIntent_defaultIntents_update(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_dialogflow_cx_intent.default_negative_intent", "name", "00000000-0000-0000-0000-000000000001"),
+					resource.TestCheckResourceAttr("google_dialogflow_cx_intent.default_welcome_intent", "name", "00000000-0000-0000-0000-000000000000"),
+				),
+			},
+			{
+				ResourceName:            "google_dialogflow_cx_intent.default_negative_intent",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				ResourceName:            "google_dialogflow_cx_intent.default_welcome_intent",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccDialogflowCXIntent_defaultIntents_create(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dialogflow_cx_agent" "agent" {
+  display_name          = "tf-test-dialogflowcx-agent%{random_suffix}"
+  location              = "global"
+  default_language_code = "en"
+  time_zone             = "America/New_York"
+}
+
+resource "google_dialogflow_cx_intent" "default_negative_intent" {
+  parent                     = google_dialogflow_cx_agent.agent.id
+  is_default_negative_intent = true
+  display_name               = "Default Negative Intent"
+  priority                   = 1
+  is_fallback                = true
+  training_phrases {
+     parts {
+         text = "Never match this phrase"
+     }
+     repeat_count = 1
+  }
+}
+
+resource "google_dialogflow_cx_intent" "default_welcome_intent" {
+  parent                    = google_dialogflow_cx_agent.agent.id
+  is_default_welcome_intent = true
+  display_name              = "Default Welcome Intent"
+  priority                  = 1
+  training_phrases {
+     parts {
+         text = "Hello"
+     }
+     repeat_count = 1
+  }
+}
+`, context)
+}
+
+func testAccDialogflowCXIntent_defaultIntents_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dialogflow_cx_agent" "agent" {
+  display_name          = "tf-test-dialogflowcx-agent%{random_suffix}"
+  location              = "global"
+  default_language_code = "en"
+  time_zone             = "America/New_York"
+}
+
+resource "google_dialogflow_cx_intent" "default_negative_intent" {
+  parent                     = google_dialogflow_cx_agent.agent.id
+  is_default_negative_intent = true
+  display_name               = "Default Negative Intent"
+  priority                   = 1
+  is_fallback                = true
+  training_phrases {
+     parts {
+         text = "An updated phrase to never match."
+     }
+     repeat_count = 2
+  }
+}
+
+resource "google_dialogflow_cx_intent" "default_welcome_intent" {
+  parent                    = google_dialogflow_cx_agent.agent.id
+  is_default_welcome_intent = true
+  display_name              = "Default Welcome Intent"
+  priority                  = 1
+  training_phrases {
+     parts {
+         text = "An updated hello."
+     }
+     repeat_count = 2
+  }
+}
+`, context)
 }

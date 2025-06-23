@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -31,7 +31,6 @@ func TestAccComputeVpnTunnel_regionFromGateway(t *testing.T) {
 				ResourceName:            "google_compute_vpn_tunnel.foobar",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateIdPrefix:     fmt.Sprintf("%s/%s/", envvar.GetTestProjectFromEnv(), region),
 				ImportStateVerifyIgnore: []string{"shared_secret", "detailed_status"},
 			},
 		},

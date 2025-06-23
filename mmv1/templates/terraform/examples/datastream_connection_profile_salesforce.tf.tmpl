@@ -1,0 +1,16 @@
+resource "google_datastream_connection_profile" "default" {
+    display_name          = "Salesforce Source"
+    location              = "us-central1"
+    connection_profile_id = "{{index $.Vars "source_connection_profile_id"}}"
+    create_without_validation = true
+    provider = google-beta
+
+    salesforce_profile {
+        domain = "fake-domain.my.salesforce.com"
+        user_credentials {
+          username = "fake-username"
+          secret_manager_stored_password = "fake-password"
+          secret_manager_stored_security_token = "fake-token"
+        }
+    }
+}

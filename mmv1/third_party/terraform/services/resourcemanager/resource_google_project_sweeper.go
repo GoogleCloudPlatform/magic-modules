@@ -21,10 +21,11 @@ func init() {
 	// already be in-progress.
 	// Example: SKIP_PROJECT_SWEEPER=1 go test ./google -v -sweep=us-central1 -sweep-run=
 	if os.Getenv("SKIP_PROJECT_SWEEPER") != "" {
+		// No logging here - see https://github.com/GoogleCloudPlatform/magic-modules/pull/7439
 		return
 	}
 
-	sweeper.AddTestSweepers("GoogleProject", testSweepProject)
+	sweeper.AddTestSweepersLegacy("GoogleProject", testSweepProject)
 }
 
 func testSweepProject(region string) error {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -47,7 +47,7 @@ func generateIfNotSet(d *schema.ResourceData, field, prefix string) (string, err
 		if prefix == "" {
 			prefix = "tf-generated-"
 		}
-		v := resource.PrefixedUniqueId(prefix)
+		v := id.PrefixedUniqueId(prefix)
 		if len(v) > 30 {
 			v = v[:30]
 		}

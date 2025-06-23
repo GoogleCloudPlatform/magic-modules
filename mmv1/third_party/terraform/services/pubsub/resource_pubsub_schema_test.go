@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -48,17 +48,6 @@ func testAccPubsubSchema_basic(schema string) string {
 		type = "PROTOCOL_BUFFER"
 		definition = "syntax = \"proto3\";\nmessage Results {\nstring message_request = 1;\nstring message_response = 2;\n}"
 	}
-
-	# Need to introduce delay for updates in order for tests to complete
-	# successfully due to caching effects.
-	resource "time_sleep" "wait_121_seconds" {
-		create_duration = "121s"
-		lifecycle {
-			replace_triggered_by = [
-				google_pubsub_schema.foo
-			]
-		}
-	}
 `, schema)
 }
 
@@ -68,17 +57,6 @@ func testAccPubsubSchema_updated(schema string) string {
 		name = "%s"
 		type = "PROTOCOL_BUFFER"
 		definition = "syntax = \"proto3\";\nmessage Results {\nstring message_request = 1;\nstring message_response = 2;\nstring timestamp_request = 3;\n}"
-	}
-
-	# Need to introduce delay for updates in order for tests to complete
-	# successfully due to caching effects.
-	resource "time_sleep" "wait_121_seconds" {
-		create_duration = "121s"
-		lifecycle {
-			replace_triggered_by = [
-				google_pubsub_schema.foo
-			]
-		}
 	}
 `, schema)
 }
