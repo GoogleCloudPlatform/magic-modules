@@ -30,37 +30,13 @@ func TestAccRedisClusterDatasource(t *testing.T) {
 
 func testAccRedisClusterDatasourceConfig(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_compute_network" "network" {
-  name = "tf-test-network%{random_suffix}"
-}
-
-resource "google_compute_global_address" "service_range" {
-  name          = "tf-test-address%{random_suffix}"
-  purpose       = "VPC_PEERING"
-  address_type  = "INTERNAL"
-  prefix_length = 16
-  network       = google_compute_network.network.id
-}
-
-resource "google_service_networking_connection" "private_service_connection" {
-  network                 = google_compute_network.network.id
-  service                 = "servicenetworking.googleapis.com"
-  reserved_peering_ranges = [google_compute_global_address.service_range.name]
-}
-
 resource "google_redis_cluster" "cluster" {
-  name               = "tf-test-cluster%{random_suffix}"
-  region             = "us-central1"
-  shard_count        = 2
-  replica_count      = 1
-  transit_encryption_mode = "TRANSIT_ENCRYPTION_MODE_DISABLED"
-  authorization_mode = "AUTH_MODE_DISABLED"
-  psc_configs {
-    network = google_compute_network.network.id
-  }
-  depends_on = [google_service_networking_connection.private_service_connection]
-  deletion_protection_enabled = false
-}
+  name                           = "tf-test-redis-cluster-%{random_suffix}"
+  shard_count                    = 1
+  region                         = "us-central1"
+  deletion_protection_enabled    = false 
+  
+}   
 
 data "google_redis_cluster" "default" {
   name   = google_redis_cluster.cluster.name

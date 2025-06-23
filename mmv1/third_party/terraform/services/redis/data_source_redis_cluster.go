@@ -26,9 +26,7 @@ func DataSourceRedisCluster() *schema.Resource {
 }
 
 func dataSourceRedisClusterRead(d *schema.ResourceData, meta interface{}) error {
-	config := meta.(*transport_tpg.Config)
-
-	id, err := tpgresource.ReplaceVars(d, config, "projects/{{project}}/locations/{{region}}/clusters/{{name}}")
+	id, err := tpgresource.ReplaceVars(d, meta.(*transport_tpg.Config), "projects/{{project}}/locations/{{region}}/clusters/{{name}}")
 	if err != nil {
 		return fmt.Errorf("Error constructing id: %s", err)
 	}
@@ -36,6 +34,10 @@ func dataSourceRedisClusterRead(d *schema.ResourceData, meta interface{}) error 
 
 	err = resourceRedisClusterRead(d, meta)
 	if err != nil {
+		return err
+	}
+
+	if err := tpgresource.SetDataSourceLabels(d); err != nil {
 		return err
 	}
 
