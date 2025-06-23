@@ -23,7 +23,7 @@ func WorkbenchInstanceLabelsDiffSuppress(k, old, new string, d *schema.ResourceD
 }
 
 
-var WorkbenchInstanceSettableDefaultMetadata = []string{
+var WorkbenchInstanceSettableUnmodifiableDefaultMetadata = []string{
 	    "serial-port-logging-enable",
 }
 
@@ -97,7 +97,7 @@ func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.Resourc
 		}
 	}
 
-	for _, metadata := range WorkbenchInstanceSettableDefaultMetadata {
+	for _, metadata := range WorkbenchInstanceSettableUnmodifiableDefaultMetadata {
 		if strings.Contains(k, metadata) && new == "" {
 			return true
 		}
@@ -275,3 +275,28 @@ func mergeMaps(oldMap, newMap map[string]interface{}) map[string]string {
 	return modifiedMap
 }
 {{- end }}
+
+
+func workbenchMetadataCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if diff.HasChange("gce_setup.0.metadata") {
+		o, n := diff.GetChange("gce_setup.0.metadata")
+		oldMetadata := o.(map[string]interface{})
+		newMetadata := n.(map[string]interface{})
+
+		for _, key := range WorkbenchInstanceSettableUnmodifiableDefaultMetadata {
+			oldValue, oldOk := oldMetadata[key]
+			newValue, newOk := newMetadata[key]
+
+			// If the key exists in both old and new metadata and their values differ, or
+			// if the key exists in one but not the other, then a meaningful change has occurred.
+			if (oldOk && newOk && oldValue != newValue) ||
+				(oldOk != newOk) {
+				if err := diff.ForceNew("gce_setup.0.metadata"); err != nil {
+					return err
+				}
+				break // No need to check other keys if we've already decided to ForceNew
+			}
+		}
+	}
+	return nil
+}
