@@ -217,6 +217,7 @@ properties:
                 and there is no <code>srcIpRange</code>, this rule will be ignored.
                 Maximum number of source tag values allowed is 256.
               api_name: srcSecureTags
+              send_empty_value: true
               item_type:
                 type: NestedObject
                 properties:
@@ -279,6 +280,7 @@ properties:
             to all instances on the specified network.
             Maximum number of target label tags allowed is 256.
           api_name: targetSecureTags
+          send_empty_value: true
           item_type:
             type: NestedObject
             properties:
