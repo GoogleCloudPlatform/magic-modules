@@ -173,6 +173,10 @@ properties:
           type: Enum
           description: |
             The PublicDelegatedSubPrefix mode for IPv6 only.
+          enum_values:
+            - 'DELEGATION'
+            - 'EXTERNAL_IPV6_FORWARDING_RULE_CREATION'
+            - 'EXTERNAL_IPV6_SUBNETWORK_CREATION'
         - name: 'allocatablePrefixLength'
           type: Integer
           description: |
