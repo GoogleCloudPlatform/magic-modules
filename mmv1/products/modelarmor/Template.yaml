@@ -27,7 +27,6 @@ examples:
   - name: 'modelarmor_template_basic'
     primary_resource_id: 'template-basic'
     test_vars_overrides:
-      project_id: '"llm-firewall-demo"'
       templateId: '"modelarmor1"'
       location: '"us-central1"'
       filter_config_rai_settings_rai_filters_0_filter_type: '"SEXUALLY_EXPLICIT"'
@@ -35,7 +34,6 @@ examples:
   - name: 'modelarmor_template_filter_config'
     primary_resource_id: 'template-filter-config'
     test_vars_overrides:
-      project_id: '"llm-firewall-demo"'
       templateId: '"modelarmor2"'
       location: '"us-east7"'
       filter_config_rai_settings_rai_filters_0_filter_type: '"HATE_SPEECH"'
@@ -51,7 +49,6 @@ examples:
   - name: 'modelarmor_template_template_metadata'
     primary_resource_id: 'template-template-metadata'
     test_vars_overrides:
-      project_id: '"llm-firewall-demo"'
       templateId: '"modelarmor3"'
       location: '"us-west1"'
       filter_config_rai_settings_rai_filters_0_filter_type: '"HARASSMENT"'
@@ -69,7 +66,6 @@ examples:
   - name: 'modelarmor_template_label'
     primary_resource_id: 'template-label-advanced-config'
     test_vars_overrides:
-      project_id: '"llm-firewall-demo"'
       templateId: '"modelarmor4"'
       location: '"us-central1"'
       label_test_label: '"template-test-label"'
