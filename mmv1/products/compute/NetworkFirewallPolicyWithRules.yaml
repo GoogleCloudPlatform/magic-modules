@@ -15,7 +15,6 @@
 name: 'NetworkFirewallPolicyWithRules'
 api_resource_type_kind: FirewallPolicy
 description: "The Compute NetworkFirewallPolicy with rules resource"
-min_version: 'beta'
 docs:
 base_url: 'projects/{{project}}/global/firewallPolicies'
 self_link: 'projects/{{project}}/global/firewallPolicies/{{name}}'
@@ -57,7 +56,6 @@ properties:
   - name: 'creationTimestamp'
     type: String
     description: Creation timestamp in RFC3339 text format.
-    min_version: 'beta'
     output: true
   - name: 'name'
     type: String
@@ -68,24 +66,20 @@ properties:
       the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?
       which means the first character must be a lowercase letter, and all following characters must be a dash,
       lowercase letter, or digit, except the last character, which cannot be a dash.
-    min_version: 'beta'
     required: true
     immutable: true
   - name: 'networkFirewallPolicyId'
     type: String
     description: The unique identifier for the resource. This identifier is defined by the server.
     api_name: id
-    min_version: 'beta'
     output: true
   - name: 'description'
     type: String
     description: An optional description of this resource.
-    min_version: 'beta'
   - name: 'rule'
     type: Array
     description: A list of firewall policy rules.
     api_name: rules
-    min_version: 'beta'
     required: true
     item_type:
       type: NestedObject
@@ -94,27 +88,23 @@ properties:
           type: String
           description: |
             A description of the rule.
-          min_version: 'beta'
         - name: 'ruleName'
           type: String
           description: |
             An optional name for the rule. This field is not a unique identifier
             and can be updated.
-          min_version: 'beta'
         - name: 'priority'
           type: Integer
           description: |
             An integer indicating the priority of a rule in the list. The priority must be a value
             between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
             highest priority and 2147483647 is the lowest priority.
-          min_version: 'beta'
           required: true
         - name: 'match'
           type: NestedObject
           description:
             A match condition that incoming traffic is evaluated against. If it
             evaluates to true, the corresponding 'action' is enforced.
-          min_version: 'beta'
           required: true
           properties:
             - name: 'srcIpRanges'
@@ -122,7 +112,6 @@ properties:
               description: |
                 Source IP address range in CIDR format. Required for
                 INGRESS rules.
-              min_version: 'beta'
               item_type:
                 type: String
             - name: 'destIpRanges'
@@ -130,7 +119,6 @@ properties:
               description: |
                 Destination IP address range in CIDR format. Required for
                 EGRESS rules.
-              min_version: 'beta'
               item_type:
                 type: String
             - name: 'srcAddressGroups'
@@ -138,7 +126,6 @@ properties:
               description: |
                 Address groups which should be matched against the traffic source.
                 Maximum number of source address groups is 10.
-              min_version: 'beta'
               item_type:
                 type: String
             - name: 'destAddressGroups'
@@ -146,7 +133,6 @@ properties:
               description: |
                 Address groups which should be matched against the traffic destination.
                 Maximum number of destination address groups is 10.
-              min_version: 'beta'
               item_type:
                 type: String
             - name: 'srcFqdns'
@@ -154,7 +140,6 @@ properties:
               description: |
                 Fully Qualified Domain Name (FQDN) which should be matched against
                 traffic source. Maximum number of source fqdn allowed is 100.
-              min_version: 'beta'
               item_type:
                 type: String
             - name: 'destFqdns'
@@ -162,7 +147,6 @@ properties:
               description: |
                 Fully Qualified Domain Name (FQDN) which should be matched against
                 traffic destination. Maximum number of destination fqdn allowed is 100.
-              min_version: 'beta'
               item_type:
                 type: String
             - name: 'srcRegionCodes'
@@ -172,7 +156,6 @@ properties:
                 of traffic. Should be specified as 2 letter country code defined as per
                 ISO 3166 alpha-2 country codes. ex."US"
                 Maximum number of source region codes allowed is 5000.
-              min_version: 'beta'
               item_type:
                 type: String
             - name: 'destRegionCodes'
@@ -182,7 +165,6 @@ properties:
                 of traffic. Should be specified as 2 letter country code defined as per
                 ISO 3166 alpha-2 country codes. ex."US"
                 Maximum number of destination region codes allowed is 5000.
-              min_version: 'beta'
               item_type:
                 type: String
             - name: 'srcNetworkScope'
@@ -217,7 +199,6 @@ properties:
               description: |
                 Names of Network Threat Intelligence lists.
                 The IPs in these lists will be matched against traffic source.
-              min_version: 'beta'
               item_type:
                 type: String
             - name: 'destThreatIntelligences'
@@ -225,7 +206,6 @@ properties:
               description: |
                 Names of Network Threat Intelligence lists.
                 The IPs in these lists will be matched against traffic destination.
-              min_version: 'beta'
               item_type:
                 type: String
             - name: 'layer4Config'
@@ -233,7 +213,6 @@ properties:
               description: |
                 Pairs of IP protocols and ports that the rule should match.
               api_name: layer4Configs
-              min_version: 'beta'
               required: true
               item_type:
                 type: NestedObject
@@ -246,7 +225,6 @@ properties:
                       This value can either be one of the following well
                       known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
                       or the IP protocol number.
-                    min_version: 'beta'
                     required: true
                   - name: 'ports'
                     type: Array
@@ -257,7 +235,6 @@ properties:
                       applies to connections through any port.
                       Example inputs include: ["22"], ["80","443"], and
                       ["12345-12349"].
-                    min_version: 'beta'
                     item_type:
                       type: String
             - name: 'srcSecureTag'
@@ -269,7 +246,6 @@ properties:
                 and there is no <code>srcIpRange</code>, this rule will be ignored.
                 Maximum number of source tag values allowed is 256.
               api_name: srcSecureTags
-              min_version: 'beta'
               item_type:
                 type: NestedObject
                 properties:
@@ -278,14 +254,12 @@ properties:
                     description: |
                       Name of the secure tag, created with TagManager's TagValue API.
                       @pattern tagValues/[0-9]+
-                    min_version: 'beta'
                   - name: 'state'
                     type: Enum
                     description: |
                       [Output Only] State of the secure tag, either `EFFECTIVE` or
                       `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
                       or its network is deleted.
-                    min_version: 'beta'
                     output: true
                     enum_values:
                       - 'EFFECTIVE'
@@ -305,7 +279,6 @@ properties:
             to all instances on the specified network.
             Maximum number of target label tags allowed is 256.
           api_name: targetSecureTags
-          min_version: 'beta'
           item_type:
             type: NestedObject
             properties:
@@ -314,14 +287,12 @@ properties:
                 description: |
                   Name of the secure tag, created with TagManager's TagValue API.
                   @pattern tagValues/[0-9]+
-                min_version: 'beta'
               - name: 'state'
                 type: Enum
                 description: |
                   [Output Only] State of the secure tag, either `EFFECTIVE` or
                   `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
                   or its network is deleted.
-                min_version: 'beta'
                 output: true
                 enum_values:
                   - 'EFFECTIVE'
@@ -331,13 +302,11 @@ properties:
           description: |
             The Action to perform when the client connection triggers the rule. Can currently be either
             "allow", "deny", "apply_security_profile_group" or "goto_next".
-          min_version: 'beta'
           required: true
         - name: 'direction'
           type: Enum
           description: |
             The direction in which this rule applies. If unspecified an INGRESS rule is created.
-          min_version: 'beta'
           enum_values:
             - 'INGRESS'
             - 'EGRESS'
@@ -347,14 +316,12 @@ properties:
             Denotes whether to enable logging for a particular rule.
             If logging is enabled, logs will be exported to the
             configured export destination in Stackdriver.
-          min_version: 'beta'
           send_empty_value: true
         - name: 'targetServiceAccounts'
           type: Array
           description: |
             A list of service accounts indicating the sets of
             instances that are applied with this rule.
-          min_version: 'beta'
           item_type:
             type: String
         - name: 'securityProfileGroup'
@@ -364,13 +331,11 @@ properties:
             Example:
             https://networksecurity.googleapis.com/v1/projects/{project}/locations/{location}/securityProfileGroups/my-security-profile-group
             Must be specified if action is 'apply_security_profile_group'.
-          min_version: 'beta'
         - name: 'tlsInspect'
           type: Boolean
           description: |
             Boolean flag indicating if the traffic should be TLS decrypted.
             It can be set only if action = 'apply_security_profile_group' and cannot be set for other actions.
-          min_version: 'beta'
         - name: 'disabled'
           type: Boolean
           description: |
@@ -378,11 +343,9 @@ properties:
             the firewall policy rule is not enforced and traffic behaves as if it did
             not exist. If this is unspecified, the firewall policy rule will be
             enabled.
-          min_version: 'beta'
   - name: 'predefinedRules'
     type: Array
     description: A list of firewall policy pre-defined rules.
-    min_version: 'beta'
     output: true
     item_type:
       type: NestedObject
@@ -391,14 +354,12 @@ properties:
           type: String
           description: |
             A description of the rule.
-          min_version: 'beta'
           output: true
         - name: 'ruleName'
           type: String
           description: |
             An optional name for the rule. This field is not a unique identifier
             and can be updated.
-          min_version: 'beta'
           output: true
         - name: 'priority'
           type: Integer
@@ -406,14 +367,12 @@ properties:
             An integer indicating the priority of a rule in the list. The priority must be a value
             between 0 and 2147483647. Rules are evaluated from highest to lowest priority where 0 is the
             highest priority and 2147483647 is the lowest priority.
-          min_version: 'beta'
           output: true
         - name: 'match'
           type: NestedObject
           description:
             A match condition that incoming traffic is evaluated against. If it
             evaluates to true, the corresponding 'action' is enforced.
-          min_version: 'beta'
           output: true
           properties:
             - name: 'srcIpRanges'
@@ -421,7 +380,6 @@ properties:
               description: |
                 Source IP address range in CIDR format. Required for
                 INGRESS rules.
-              min_version: 'beta'
               output: true
               item_type:
                 type: String
@@ -430,7 +388,6 @@ properties:
               description: |
                 Destination IP address range in CIDR format. Required for
                 EGRESS rules.
-              min_version: 'beta'
               output: true
               item_type:
                 type: String
@@ -439,7 +396,6 @@ properties:
               description: |
                 Address groups which should be matched against the traffic source.
                 Maximum number of source address groups is 10.
-              min_version: 'beta'
               output: true
               item_type:
                 type: String
@@ -448,7 +404,6 @@ properties:
               description: |
                 Address groups which should be matched against the traffic destination.
                 Maximum number of destination address groups is 10.
-              min_version: 'beta'
               output: true
               item_type:
                 type: String
@@ -457,7 +412,6 @@ properties:
               description: |
                 Fully Qualified Domain Name (FQDN) which should be matched against
                 traffic source. Maximum number of source fqdn allowed is 100.
-              min_version: 'beta'
               output: true
               item_type:
                 type: String
@@ -466,7 +420,6 @@ properties:
               description: |
                 Fully Qualified Domain Name (FQDN) which should be matched against
                 traffic destination. Maximum number of destination fqdn allowed is 100.
-              min_version: 'beta'
               output: true
               item_type:
                 type: String
@@ -477,7 +430,6 @@ properties:
                 of traffic. Should be specified as 2 letter country code defined as per
                 ISO 3166 alpha-2 country codes. ex."US"
                 Maximum number of source region codes allowed is 5000.
-              min_version: 'beta'
               output: true
               item_type:
                 type: String
@@ -488,7 +440,6 @@ properties:
                 of traffic. Should be specified as 2 letter country code defined as per
                 ISO 3166 alpha-2 country codes. ex."US"
                 Maximum number of destination region codes allowed is 5000.
-              min_version: 'beta'
               output: true
               item_type:
                 type: String
@@ -497,7 +448,6 @@ properties:
               description: |
                 Names of Network Threat Intelligence lists.
                 The IPs in these lists will be matched against traffic source.
-              min_version: 'beta'
               output: true
               item_type:
                 type: String
@@ -506,7 +456,6 @@ properties:
               description: |
                 Names of Network Threat Intelligence lists.
                 The IPs in these lists will be matched against traffic destination.
-              min_version: 'beta'
               output: true
               item_type:
                 type: String
@@ -515,7 +464,6 @@ properties:
               description: |
                 Pairs of IP protocols and ports that the rule should match.
               api_name: layer4Configs
-              min_version: 'beta'
               output: true
               item_type:
                 type: NestedObject
@@ -528,7 +476,6 @@ properties:
                       This value can either be one of the following well
                       known protocol strings (tcp, udp, icmp, esp, ah, ipip, sctp),
                       or the IP protocol number.
-                    min_version: 'beta'
                     output: true
                   - name: 'ports'
                     type: Array
@@ -539,7 +486,6 @@ properties:
                       applies to connections through any port.
                       Example inputs include: ["22"], ["80","443"], and
                       ["12345-12349"].
-                    min_version: 'beta'
                     output: true
                     item_type:
                       type: String
@@ -552,7 +498,6 @@ properties:
                 and there is no <code>srcIpRange</code>, this rule will be ignored.
                 Maximum number of source tag values allowed is 256.
               api_name: srcSecureTags
-              min_version: 'beta'
               output: true
               item_type:
                 type: NestedObject
@@ -562,7 +507,6 @@ properties:
                     description: |
                       Name of the secure tag, created with TagManager's TagValue API.
                       @pattern tagValues/[0-9]+
-                    min_version: 'beta'
                     output: true
                   - name: 'state'
                     type: Enum
@@ -570,7 +514,6 @@ properties:
                       [Output Only] State of the secure tag, either `EFFECTIVE` or
                       `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
                       or its network is deleted.
-                    min_version: 'beta'
                     output: true
                     enum_values:
                       - 'EFFECTIVE'
@@ -590,7 +533,6 @@ properties:
             to all instances on the specified network.
             Maximum number of target label tags allowed is 256.
           api_name: targetSecureTags
-          min_version: 'beta'
           output: true
           item_type:
             type: NestedObject
@@ -600,7 +542,6 @@ properties:
                 description: |
                   Name of the secure tag, created with TagManager's TagValue API.
                   @pattern tagValues/[0-9]+
-                min_version: 'beta'
                 output: true
               - name: 'state'
                 type: Enum
@@ -608,7 +549,6 @@ properties:
                   [Output Only] State of the secure tag, either `EFFECTIVE` or
                   `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
                   or its network is deleted.
-                min_version: 'beta'
                 output: true
                 enum_values:
                   - 'EFFECTIVE'
@@ -618,13 +558,11 @@ properties:
           description: |
             The Action to perform when the client connection triggers the rule. Can currently be either
             "allow", "deny", "apply_security_profile_group" or "goto_next".
-          min_version: 'beta'
           output: true
         - name: 'direction'
           type: Enum
           description: |
             The direction in which this rule applies. If unspecified an INGRESS rule is created.
-          min_version: 'beta'
           output: true
           enum_values:
             - 'INGRESS'
@@ -635,7 +573,6 @@ properties:
             Denotes whether to enable logging for a particular rule.
             If logging is enabled, logs will be exported to the
             configured export destination in Stackdriver.
-          min_version: 'beta'
           output: true
           send_empty_value: true
         - name: 'targetServiceAccounts'
@@ -643,7 +580,6 @@ properties:
           description: |
             A list of service accounts indicating the sets of
             instances that are applied with this rule.
-          min_version: 'beta'
           output: true
           item_type:
             type: String
@@ -654,14 +590,12 @@ properties:
             Example:
             https://networksecurity.googleapis.com/v1/projects/{project}/locations/{location}/securityProfileGroups/my-security-profile-group
             Must be specified if action is 'apply_security_profile_group'.
-          min_version: 'beta'
           output: true
         - name: 'tlsInspect'
           type: Boolean
           description: |
             Boolean flag indicating if the traffic should be TLS decrypted.
             It can be set only if action = 'apply_security_profile_group' and cannot be set for other actions.
-          min_version: 'beta'
           output: true
         - name: 'disabled'
           type: Boolean
@@ -670,25 +604,20 @@ properties:
             the firewall policy rule is not enforced and traffic behaves as if it did
             not exist. If this is unspecified, the firewall policy rule will be
             enabled.
-          min_version: 'beta'
           output: true
   - name: 'fingerprint'
     type: Fingerprint
     description: Fingerprint of the resource. This field is used internally during updates of this resource.
-    min_version: 'beta'
     output: true
   - name: 'selfLink'
     type: String
     description: Server-defined URL for the resource.
-    min_version: 'beta'
     output: true
   - name: 'selfLinkWithId'
     type: String
     description: Server-defined URL for this resource with the resource id.
-    min_version: 'beta'
     output: true
   - name: 'ruleTupleCount'
     type: Integer
     description: Total count of all firewall policy rule tuples. A firewall policy can not exceed a set number of tuples.
-    min_version: 'beta'
     output: true

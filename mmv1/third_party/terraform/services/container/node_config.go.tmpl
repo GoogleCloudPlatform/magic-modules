@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 {{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/container/v1"
 {{- else }}
@@ -470,7 +471,6 @@ func schemaNodeConfig() *schema.Schema {
 
 				"storage_pools": {
 					Type:     schema.TypeList,
-					ForceNew: true,
 					Optional: true,
 					Elem:     &schema.Schema{Type: schema.TypeString},
 					Description: `The list of Storage Pools where boot disks are provisioned.`,
@@ -630,41 +630,41 @@ func schemaNodeConfig() *schema.Schema {
 								Description: `Controls the maximum number of processes allowed to run in a pod.`,
 							},
 							"container_log_max_size": {
-                                                                Type:        schema.TypeString,
-                                                                Optional:    true,
-                                                                Description: `Defines the maximum size of the container log file before it is rotated.`,
-                                                        },
+                            	Type:        schema.TypeString,
+                            	Optional:    true,
+                            	Description: `Defines the maximum size of the container log file before it is rotated.`,
+                            },
 							"container_log_max_files": {
-                                                                Type:        schema.TypeInt,
-                                                                Optional:    true,
-                                                                Description: `Defines the maximum number of container log files that can be present for a container.`,
-                                                        },
+                            	Type:        schema.TypeInt,
+                            	Optional:    true,
+                            	Description: `Defines the maximum number of container log files that can be present for a container.`,
+                            },
 							"image_gc_low_threshold_percent": {
-                                                                Type:        schema.TypeInt,
-                                                                Optional:    true,
-                                                                Description: `Defines the percent of disk usage before which image garbage collection is never run. Lowest disk usage to garbage collect to.`,
-                                                        },
+                            	Type:        schema.TypeInt,
+                            	Optional:    true,
+                            	Description: `Defines the percent of disk usage before which image garbage collection is never run. Lowest disk usage to garbage collect to.`,
+                            },
 							"image_gc_high_threshold_percent": {
-                                                                Type:        schema.TypeInt,
-                                                                Optional:    true,
-                                                                Description: `Defines the percent of disk usage after which image garbage collection is always run.`,
-                                                        },
+                            	Type:        schema.TypeInt,
+                            	Optional:    true,
+                            	Description: `Defines the percent of disk usage after which image garbage collection is always run.`,
+                            },
 							"image_minimum_gc_age": {
-                                                                Type:        schema.TypeString,
-                                                                Optional:    true,
-                                                                Description: `Defines the minimum age for an unused image before it is garbage collected.`,
-                                                        },
+                            	Type:        schema.TypeString,
+                            	Optional:    true,
+                            	Description: `Defines the minimum age for an unused image before it is garbage collected.`,
+                            },
 							"image_maximum_gc_age": {
-                                                                Type:        schema.TypeString,
-                                                                Optional:    true,
-                                                                Description: `Defines the maximum age an image can be unused before it is garbage collected.`,
-                                                        },
+                            	Type:        schema.TypeString,
+                            	Optional:    true,
+                            	Description: `Defines the maximum age an image can be unused before it is garbage collected.`,
+                            },
 							"allowed_unsafe_sysctls": {
-                                                                Type:        schema.TypeList,
-                                                                Optional:    true,
-                                                                Description: `Defines a comma-separated allowlist of unsafe sysctls or sysctl patterns which can be set on the Pods.`,
+                                Type:        schema.TypeList,
+                                Optional:    true,
+                                Description: `Defines a comma-separated allowlist of unsafe sysctls or sysctl patterns which can be set on the Pods.`,
 								Elem:        &schema.Schema{Type: schema.TypeString},
-                                                        },
+                            },
 						},
 					},
 				},
@@ -723,7 +723,6 @@ func schemaNodeConfig() *schema.Schema {
 							"osversion": {
 								Type:         schema.TypeString,
 								Optional:     true,
-								ForceNew:     true,
 								Default:      "OS_VERSION_UNSPECIFIED",
 								Description:  `The OS Version of the windows nodepool.Values are OS_VERSION_UNSPECIFIED,OS_VERSION_LTSC2019 and OS_VERSION_LTSC2022`,
 								ValidateFunc: validation.StringInSlice([]string{"OS_VERSION_UNSPECIFIED", "OS_VERSION_LTSC2019", "OS_VERSION_LTSC2022"}, false),
@@ -748,8 +747,8 @@ func schemaNodeConfig() *schema.Schema {
 						Schema: map[string]*schema.Schema{
 							"threads_per_core": {
 								Type:        schema.TypeInt,
-                                                                Required:    true,
-                                                                ForceNew:    true,
+                                Required:    true,
+                                ForceNew:    true,
 								Description: `The number of threads per physical core. To disable simultaneous multithreading (SMT) set this to 1. If unset, the maximum number of threads supported per core by the underlying processor is assumed.`,
 							},
 							"enable_nested_virtualization": {
@@ -757,6 +756,12 @@ func schemaNodeConfig() *schema.Schema {
 								Optional: true,
 								ForceNew: true,
 								Description: `Whether the node should have nested virtualization enabled.`,
+							},
+							"performance_monitoring_unit": {
+								Type: schema.TypeString,
+								Optional: true,
+								ValidateFunc: verify.ValidateEnum([]string{"ARCHITECTURAL", "STANDARD", "ENHANCED"}),
+								Description: `Level of Performance Monitoring Unit (PMU) requested. If unset, no access to the PMU is assumed.`,
 							},
 						},
 					},
@@ -857,10 +862,10 @@ func schemaNodeConfig() *schema.Schema {
 					Description: `A map of resource manager tags. Resource manager tag keys and values have the same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456. The field is ignored (both PUT & PATCH) when empty.`,
 				},
 				"enable_confidential_storage": {
-						Type:     schema.TypeBool,
-						Optional: true,
-						ForceNew: true,
-						Description: `If enabled boot disks are configured with confidential mode.`,
+					Type:     schema.TypeBool,
+					Optional: true,
+					ForceNew: true,
+					Description: `If enabled boot disks are configured with confidential mode.`,
 				},
 				"local_ssd_encryption_mode": {
 					Type:             schema.TypeString,
@@ -1257,6 +1262,7 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 		nc.AdvancedMachineFeatures = &container.AdvancedMachineFeatures{
 			ThreadsPerCore: int64(advanced_machine_features["threads_per_core"].(int)),
 			EnableNestedVirtualization: advanced_machine_features["enable_nested_virtualization"].(bool),
+			PerformanceMonitoringUnit: advanced_machine_features["performance_monitoring_unit"].(string),
 		}
 	}
 
@@ -1364,30 +1370,30 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 		kConfig.PodPidsLimit = int64(podPidsLimit.(int))
 	}
 	if containerLogMaxSize, ok := cfg["container_log_max_size"]; ok {
-                kConfig.ContainerLogMaxSize = containerLogMaxSize.(string)
-        }
+    	kConfig.ContainerLogMaxSize = containerLogMaxSize.(string)
+    }
 	if containerLogMaxFiles, ok := cfg["container_log_max_files"]; ok {
-                kConfig.ContainerLogMaxFiles = int64(containerLogMaxFiles.(int))
-        }
+    	kConfig.ContainerLogMaxFiles = int64(containerLogMaxFiles.(int))
+    }
 	if imageGcLowThresholdPercent, ok := cfg["image_gc_low_threshold_percent"]; ok {
-                kConfig.ImageGcLowThresholdPercent = int64(imageGcLowThresholdPercent.(int))
-        }
+    	kConfig.ImageGcLowThresholdPercent = int64(imageGcLowThresholdPercent.(int))
+    }
 	if imageGcHighThresholdPercent, ok := cfg["image_gc_high_threshold_percent"]; ok {
-                kConfig.ImageGcHighThresholdPercent = int64(imageGcHighThresholdPercent.(int))
-        }
+    	kConfig.ImageGcHighThresholdPercent = int64(imageGcHighThresholdPercent.(int))
+    }
 	if imageMinimumGcAge, ok := cfg["image_minimum_gc_age"]; ok {
-                kConfig.ImageMinimumGcAge = imageMinimumGcAge.(string)
-        }
+    	kConfig.ImageMinimumGcAge = imageMinimumGcAge.(string)
+    }
 	if imageMaximumGcAge, ok := cfg["image_maximum_gc_age"]; ok {
-                kConfig.ImageMaximumGcAge = imageMaximumGcAge.(string)
-        }
+    	kConfig.ImageMaximumGcAge = imageMaximumGcAge.(string)
+    }
 	if allowedUnsafeSysctls, ok := cfg["allowed_unsafe_sysctls"]; ok {
-	        sysctls := allowedUnsafeSysctls.([]interface{})
+	    sysctls := allowedUnsafeSysctls.([]interface{})
 		kConfig.AllowedUnsafeSysctls = make([]string, len(sysctls))
 		for i, s := range sysctls {
 		    kConfig.AllowedUnsafeSysctls[i] = s.(string)
 		}
-        }
+    }
 	return kConfig
 }
 
@@ -1682,7 +1688,7 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"local_nvme_ssd_block_config": flattenLocalNvmeSsdBlockConfig(c.LocalNvmeSsdBlockConfig),
 		"ephemeral_storage_local_ssd_config": flattenEphemeralStorageLocalSsdConfig(c.EphemeralStorageLocalSsdConfig),
 		"gcfs_config":              flattenGcfsConfig(c.GcfsConfig),
-		"gvnic":										flattenGvnic(c.Gvnic),
+		"gvnic":					flattenGvnic(c.Gvnic),
 		"reservation_affinity":     flattenGKEReservationAffinity(c.ReservationAffinity),
 		"service_account":          c.ServiceAccount,
 		"metadata":                 c.Metadata,
@@ -1700,7 +1706,7 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"effective_taints":         flattenEffectiveTaints(c.Taints),
 		"workload_metadata_config": flattenWorkloadMetadataConfig(c.WorkloadMetadataConfig),
 {{- if ne $.TargetVersionName "ga" }}
-		"sandbox_config": 			    flattenSandboxConfig(c.SandboxConfig),
+		"sandbox_config": 			flattenSandboxConfig(c.SandboxConfig),
 		"host_maintenance_policy":  flattenHostMaintenancePolicy(c.HostMaintenancePolicy),
 {{- end }}
 		"confidential_nodes":       flattenConfidentialNodes(c.ConfidentialNodes),
@@ -1746,6 +1752,7 @@ func flattenAdvancedMachineFeaturesConfig(c *container.AdvancedMachineFeatures) 
 		result = append(result, map[string]interface{}{
 			"threads_per_core": c.ThreadsPerCore,
 			"enable_nested_virtualization": c.EnableNestedVirtualization,
+			"performance_monitoring_unit": c.PerformanceMonitoringUnit,
 		})
 	}
 	return result
