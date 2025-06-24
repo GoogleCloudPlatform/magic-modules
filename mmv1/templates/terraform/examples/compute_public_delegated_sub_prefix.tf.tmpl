@@ -13,6 +13,7 @@ resource "google_compute_public_delegated_prefix" "{{$.PrimaryResourceId}}" {
     ip_cidr_range = "2600:1901:4457:100::/96"
     is_address = true
     allocatable_prefix_length = 28
+    mode = "DELEGATION"
   }
 }
   
