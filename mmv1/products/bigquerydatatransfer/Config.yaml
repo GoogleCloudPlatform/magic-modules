@@ -223,9 +223,6 @@ properties:
       to a different credential configuration in the config will require an apply to update state.
     url_param_only: true
     properties:
-      # TODO implement fix to prevent breaking change
-      # this will introduce a breaking change with the new write-only generation
-      # linked issue: https://github.com/hashicorp/terraform-provider-google/issues/23214
       - name: 'secretAccessKey'
         type: String
         description: |
@@ -233,3 +230,7 @@ properties:
         sensitive: true
         write_only: true
         required: true
+        # TODO: remove this field right before the next major release which is 7.0.0
+        # temporary solution to support bigquerydatatransfer being already mutable (not introducing a breaking change)
+        # https://github.com/hashicorp/terraform-provider-google/issues/23214
+        mark_write_only_version_mutable: true

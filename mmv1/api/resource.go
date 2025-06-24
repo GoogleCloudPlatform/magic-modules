@@ -714,7 +714,9 @@ func (r Resource) GetIdentity() []*Type {
 }
 
 func buildFieldPath(parent *Type, fieldName string) string {
-	// double check if this ".0." works for all types of nesting, probably requires some more debugging/testing
+	// TODO doesn't seem to work for deeper nested fields, such as "http_check.0.auth_info.0.password" in monitoring uptime check
+	// parent.TerraformLineage() just returns "auth_info" for the above example resulting in "auth_info.0.password" instead of "http_check.0.auth_info.0.password"
+	// tried to look through other available methods, but couldn't find a better one yet -> looking for input, otherwise will need to implement a custom one
 	if parent != nil {
 		return parent.TerraformLineage() + ".0." + fieldName
 	}
@@ -743,13 +745,13 @@ func buildWriteOnlyField(name string, parent *Type, originalField *Type) *Type {
 	return NewProperty(name, originalField.ApiName, options)
 }
 
-func buildWriteOnlyVersionField(name string, parent *Type, writeOnlyField *Type) *Type {
+func buildWriteOnlyVersionField(name string, parent *Type, writeOnlyField *Type, immutable bool) *Type {
 	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(writeOnlyField.Name))
 	requiredWith := buildFieldPath(parent, writeOnlyField.TerraformLineage())
 
 	options := []func(*Type){
 		propertyWithType("Integer"),
-		propertyWithImmutable(true),
+		propertyWithImmutable(immutable),
 		propertyWithDescription(description),
 		propertyWithDefault(0),
 		propertyWithRequiredWith([]string{requiredWith}),
@@ -760,7 +762,14 @@ func buildWriteOnlyVersionField(name string, parent *Type, writeOnlyField *Type)
 
 func (r *Resource) addWriteOnlyFields(props []*Type, parent *Type, propWithWoConfigured *Type) []*Type {
 	writeOnlyField := buildWriteOnlyField(fmt.Sprintf("%sWo", propWithWoConfigured.Name), parent, propWithWoConfigured)
-	writeOnlyVersionField := buildWriteOnlyVersionField(fmt.Sprintf("%sVersion", writeOnlyField.Name), parent, writeOnlyField)
+	// TODO: remove this field right before the next major release which is 7.0.0
+	// temporary solution to support bigquerydatatransfer being already mutable (not introducing a breaking change)
+	// https://github.com/hashicorp/terraform-provider-google/issues/23214
+	immutableVersionField := true
+	if propWithWoConfigured.MarkWriteOnlyVersionMutable {
+		immutableVersionField = false
+	}
+	writeOnlyVersionField := buildWriteOnlyVersionField(fmt.Sprintf("%sVersion", writeOnlyField.Name), parent, writeOnlyField, immutableVersionField)
 	props = append(props, writeOnlyField, writeOnlyVersionField)
 	return props
 }
