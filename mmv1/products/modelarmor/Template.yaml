@@ -1,0 +1,271 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Template
+description: |
+  A `Template` is a resource of Model Armor that lets you configure how Model Armor screens prompts and responses.
+  It functions as sets of customized filters and thresholds for different safety and security confidence levels, allowing control over what content is flagged.
+base_url: projects/{{project}}/locations/{{location}}/templates
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
+create_url: projects/{{project}}/locations/{{location}}/templates?templateId={{template_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/templates/{{template_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/templates/{{template_id}}
+examples:
+  - name: 'modelarmor_template_basic'
+    primary_resource_id: 'template-basic'
+    test_vars_overrides:
+      templateId: '"modelarmor1"'
+      location: '"us-central1"'
+  - name: 'modelarmor_template_filter_config'
+    primary_resource_id: 'template-filter-config'
+    test_vars_overrides:
+      templateId: '"modelarmor2"'
+      location: '"us-central1"'
+      filter_config_rai_settings_rai_filters_0_filter_type: '"HATE_SPEECH"'
+      filter_config_rai_settings_rai_filters_0_confidence_level: '"HIGH"'
+      sdp_settings_config_type: '"basic_config"'
+      filter_config_sdp_settings_basic_config_filter_enforcement: '"ENABLED"'
+      filter_config_pi_and_jailbreak_filter_settings_filter_enforcement: '"ENABLED"'
+      filter_config_pi_and_jailbreak_filter_settings_confidence_level: '"MEDIUM_AND_ABOVE"'
+      filter_config_malicious_uri_filter_settings_filter_enforcement: '"ENABLED"'
+      template_metadata_multi_language_detection_enable_multi_language_detection: false
+  - name: 'modelarmor_template_template_metadata'
+    primary_resource_id: 'template-template-metadata'
+    test_vars_overrides:
+      templateId: '"modelarmor3"'
+      location: '"us-central1"'
+      filter_config_rai_settings_rai_filters_0_filter_type: '"HARASSMENT"'
+      filter_config_rai_settings_rai_filters_0_confidence_level: '"MEDIUM_AND_ABOVE"'
+      template_metadata_log_template_operations: true
+      template_metadata_log_sanitize_operations: false
+      template_metadata_multi_language_detection_enable_multi_language_detection: true
+      template_metadata_ignore_partial_invocation_failures: false
+      template_metadata_custom_llm_response_safety_error_message: '"This is a custom error message for LLM response"'
+      template_metadata_custom_prompt_safety_error_code: 400
+      template_metadata_custom_prompt_safety_error_message: '"This is a custom error message for prompt"'
+      template_metadata_custom_llm_response_safety_error_code: 401
+      template_metadata_enforcement_type: '"INSPECT_ONLY"'
+  - name: 'modelarmor_template_label'
+    primary_resource_id: 'template-label-advanced-config'
+    test_vars_overrides:
+      templateId: '"modelarmor4"'
+      location: '"us-central1"'
+      label_test_label: '"template-test-label"'
+      filter_config_rai_settings_rai_filters_0_filter_type: '"DANGEROUS"'
+      filter_config_rai_settings_rai_filters_0_confidence_level: '"MEDIUM_AND_ABOVE"'
+      sdp_settings_config_type: '"advanced_config"'
+      filter_config_sdp_settings_advanced_config_inspect_template: '"projects/llm-firewall-demo/locations/us-central1/inspectTemplates/t3"'
+      filter_config_sdp_settings_advanced_config_deidentify_template: '"projects/llm-firewall-demo/locations/us-central1/deidentifyTemplates/t2"'
+      filter_config_sdp_settings_basic_config_filter_enforcement: '"ENABLED"'
+      template_metadata_multi_language_detection_enable_multi_language_detection: false
+autogen_status: VGVtcGxhdGU=
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: templateId
+    type: String
+    description: |-
+      Id of the requesting object
+      If auto-generating Id server-side, remove this field and
+      template_id from the method_signature of Create RPC
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    description: Identifier. name of resource
+    output: true
+  - name: createTime
+    type: String
+    description: '[Output only] Create time stamp'
+    output: true
+  - name: updateTime
+    type: String
+    description: '[Output only] Update time stamp'
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key value pairs
+  - name: filterConfig
+    type: NestedObject
+    description: Filters configuration.
+    required: true
+    send_empty_value: true
+    allow_empty_object: true
+    properties:
+      - name: maliciousUriFilterSettings
+        type: NestedObject
+        description: Malicious URI filter settings.
+        properties:
+          - name: filterEnforcement
+            type: String
+            description: |-
+              Tells whether the Malicious URI filter is enabled or disabled.
+              Possible values:
+              MALICIOUS_URI_FILTER_ENFORCEMENT_UNSPECIFIED
+              ENABLED
+              DISABLED
+      - name: raiSettings
+        type: NestedObject
+        description: Responsible AI Filter settings.
+        properties:
+          - name: raiFilters
+            type: Array
+            description: List of Responsible AI filters enabled for template.
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: filterType
+                  type: String
+                  description: |-
+                    Possible values:
+                    RAI_FILTER_TYPE_UNSPECIFIED
+                    SEXUALLY_EXPLICIT
+                    HATE_SPEECH
+                    HARASSMENT
+                    DANGEROUS
+                  required: true
+                - name: confidenceLevel
+                  type: String
+                  description: |-
+                    Possible values:
+                    DETECTION_CONFIDENCE_LEVEL_UNSPECIFIED
+                    LOW_AND_ABOVE
+                    MEDIUM_AND_ABOVE
+                    HIGH
+      - name: sdpSettings
+        type: NestedObject
+        description: Sensitive Data Protection settings.
+        properties:
+          - name: advancedConfig
+            type: NestedObject
+            conflicts: [basicConfig]
+            description: Sensitive Data Protection Advanced configuration.
+            properties:
+              - name: inspectTemplate
+                type: String
+                description: |-
+                  Sensitive Data Protection inspect template resource name
+                  If only inspect template is provided (de-identify template not provided),
+                  then Sensitive Data Protection InspectContent action is performed during
+                  Sanitization. All Sensitive Data Protection findings identified during
+                  inspection will be returned as SdpFinding in SdpInsepctionResult.
+                  e.g:-
+                  `projects/{project}/locations/{location}/inspectTemplates/{inspect_template}`
+              - name: deidentifyTemplate
+                type: String
+                description: |-
+                  Optional Sensitive Data Protection Deidentify template resource name.
+                  If provided then DeidentifyContent action is performed during Sanitization
+                  using this template and inspect template. The De-identified data will
+                  be returned in SdpDeidentifyResult.
+                  Note that all info-types present in the deidentify template must be present
+                  in inspect template.
+                  e.g.
+                  `projects/{project}/locations/{location}/deidentifyTemplates/{deidentify_template}`
+          - name: basicConfig
+            type: NestedObject
+            conflicts: [advancedConfig]
+            description: Sensitive Data Protection basic configuration.
+            properties:
+              - name: filterEnforcement
+                type: String
+                description: |-
+                  Tells whether the Sensitive Data Protection basic config is enabled or
+                  disabled.
+                  Possible values:
+                  SDP_BASIC_CONFIG_ENFORCEMENT_UNSPECIFIED
+                  ENABLED
+                  DISABLED
+      - name: piAndJailbreakFilterSettings
+        type: NestedObject
+        description: Prompt injection and Jailbreak Filter settings.
+        properties:
+          - name: filterEnforcement
+            type: String
+            description: |-
+              Tells whether Prompt injection and Jailbreak filter is enabled or
+              disabled.
+              Possible values:
+              PI_AND_JAILBREAK_FILTER_ENFORCEMENT_UNSPECIFIED
+              ENABLED
+              DISABLED
+          - name: confidenceLevel
+            type: String
+            description: |-
+              Possible values:
+              DETECTION_CONFIDENCE_LEVEL_UNSPECIFIED
+              LOW_AND_ABOVE
+              MEDIUM_AND_ABOVE
+              HIGH
+  - name: templateMetadata
+    type: NestedObject
+    description: Message describing TemplateMetadata
+    allow_empty_object: true
+    properties:
+      - name: logTemplateOperations
+        type: Boolean
+        description: If true, log template crud operations.
+      - name: logSanitizeOperations
+        type: Boolean
+        description: If true, log sanitize operations.
+      - name: multiLanguageDetection
+        type: NestedObject
+        description: Metadata to enable multi language detection via template.
+        custom_flatten: 'templates/terraform/custom_flatten/modelarmor_template_multilanguage_detection.go.tmpl'
+        properties:
+          - name: enableMultiLanguageDetection
+            type: Boolean
+            description: If true, multi language detection will be enabled.
+            required: true
+            send_empty_value: true
+      - name: ignorePartialInvocationFailures
+        type: Boolean
+        description: If true, partial detector failures should be ignored.
+      - name: customPromptSafetyErrorCode
+        type: Integer
+        description: |-
+          Indicates the custom error code set by the user to be returned to the end
+          user by the service extension if the prompt trips Model Armor filters.
+      - name: customPromptSafetyErrorMessage
+        type: String
+        description: |-
+          Indicates the custom error message set by the user to be returned to the
+          end user if the prompt trips Model Armor filters.
+      - name: customLlmResponseSafetyErrorCode
+        type: Integer
+        description: |-
+          Indicates the custom error code set by the user to be returned to the end
+          user if the LLM response trips Model Armor filters.
+      - name: customLlmResponseSafetyErrorMessage
+        type: String
+        description: |-
+          Indicates the custom error message set by the user to be returned to the
+          end user if the LLM response trips Model Armor filters.
+      - name: enforcementType
+        type: String
+        description: |-
+            Possible values:
+            ENFORCEMENT_TYPE_UNSPECIFIED
+            INSPECT_ONLY
+            INSPECT_AND_BLOCK
