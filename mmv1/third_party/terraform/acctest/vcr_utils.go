@@ -146,7 +146,6 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 	if IsVcrEnabled() {
 		defer closeRecorder(t)
 	} else if isReleaseDiffEnabled() {
-		//todo - don't hardcode the directory and test name, done for now as interm fix
 		temp_file, err := os.CreateTemp("", "release_diff_test_output_*.log")
 
 		if err != nil {
@@ -157,7 +156,10 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 
 		defer func() {
 			if temp_file != nil {
-				var output, err = parseReleaseDiffOutput(temp_file, temp_file.Name())
+				// parses the temporary file created during the release diff test and returns the last line of output
+				// This is useful for extracting the diff output from the file after the test has run
+
+				var output, err = ParseReleaseDiffOutput(temp_file, temp_file.Name())
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Error parsing release diff output: %v\n", err)
 				} else if t.Failed() {
@@ -292,7 +294,7 @@ func InsertDiffSteps(c resource.TestCase, testName string, temp_file *os.File, r
 		if testStep.Config != "" {
 			ogConfig := testStep.Config
 			fmt.Fprintf(os.Stdout, "Original config: %s\n", ogConfig)
-			testStep.Config = reformConfigWithProvider(ogConfig, localProviderName)
+			testStep.Config = ReformConfigWithProvider(ogConfig, localProviderName)
 			fmt.Fprintf(os.Stdout, "Reformatted config: %s\n", testStep.Config)
 			testStep.PreConfig = func() {
 				fmt.Fprintf(temp_file, "Step %d\n", countSteps)
@@ -304,7 +306,7 @@ func InsertDiffSteps(c resource.TestCase, testName string, temp_file *os.File, r
 						fmt.Fprintf(temp_file, "[Diff] Step %d\n", countSteps)
 						countSteps++
 					},
-					Config: reformConfigWithProvider(ogConfig, releaseProvider),
+					Config: ReformConfigWithProvider(ogConfig, releaseProvider),
 				}
 				testStep.PlanOnly = true
 				testStep.ExpectNonEmptyPlan = false
@@ -323,7 +325,7 @@ func InsertDiffSteps(c resource.TestCase, testName string, temp_file *os.File, r
 // For example: ' data "google_compute_network" "default" { provider = "google-local" } '
 // will be reformatted to ' data "google_compute_network" "default" { provider = "google-beta" } '
 
-func reformConfigWithProvider(config, provider string) string {
+func ReformConfigWithProvider(config, provider string) string {
 	configBytes := []byte(config)
 	providerReplacement := fmt.Sprintf("provider = %s", provider)
 	providerReplacementBytes := []byte(providerReplacement)
@@ -346,7 +348,7 @@ func reformConfigWithProvider(config, provider string) string {
 // parseReleaseDiffOutput reads the temporary file created during the release diff test and returns the last line of output
 // This is useful for extracting the diff output from the file after the test has run
 
-func parseReleaseDiffOutput(temp *os.File, output string) (string, error) {
+func ParseReleaseDiffOutput(temp *os.File, output string) (string, error) {
 	if temp == nil {
 		return "", errors.New("temporary file is nil")
 	}
