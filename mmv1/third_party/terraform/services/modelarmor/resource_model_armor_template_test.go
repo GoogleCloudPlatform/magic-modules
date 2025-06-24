@@ -33,8 +33,6 @@ func TestAccModelArmorTemplate_basic(t *testing.T) {
 	basicContext := map[string]interface{}{
 		"location":   "us-central1",
 		"templateId": templateId,
-		"filter_config_rai_settings_rai_filters_0_filter_type":      "SEXUALLY_EXPLICIT",
-		"filter_config_rai_settings_rai_filters_0_confidence_level": "LOW_AND_ABOVE",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -53,8 +51,6 @@ func TestAccModelArmorTemplate_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_model_armor_template.template-basic", "location", "us-central1"),
 					resource.TestCheckResourceAttr("google_model_armor_template.template-basic", "template_id", templateId),
-					resource.TestCheckResourceAttr("google_model_armor_template.template-basic", "filter_config.0.rai_settings.0.rai_filters.0.filter_type", "SEXUALLY_EXPLICIT"),
-					resource.TestCheckResourceAttr("google_model_armor_template.template-basic", "filter_config.0.rai_settings.0.rai_filters.0.confidence_level", "LOW_AND_ABOVE"),
 				),
 			},
 			{
@@ -73,12 +69,10 @@ resource "google_model_armor_template" "template-basic" {
   template_id = "{{.templateId}}"
 
   filter_config {
-    rai_settings {
-      rai_filters {
-        filter_type      = "{{.filter_config_rai_settings_rai_filters_0_filter_type}}"
-        confidence_level = "{{.filter_config_rai_settings_rai_filters_0_confidence_level}}"
-      }
-    }
+
+  }
+  template_metadata {
+  
   }
 }`
 	return expandTemplate(basic_template, context)
@@ -97,7 +91,6 @@ func TestAccModelArmorTemplate_update(t *testing.T) {
 
 		"filter_config_rai_settings_rai_filters_0_filter_type":      "HATE_SPEECH",
 		"filter_config_rai_settings_rai_filters_0_confidence_level": "MEDIUM_AND_ABOVE",
-		"filter_config_rai_settings_filter_version":                 "STABLE",
 
 		"sdp_settings_config_type":                                       "advanced_config",
 		"filter_config_sdp_settings_advanced_config_inspect_template":    "projects/llm-firewall-demo/locations/us-central1/inspectTemplates/t2",
@@ -105,7 +98,6 @@ func TestAccModelArmorTemplate_update(t *testing.T) {
 
 		"filter_config_pi_and_jailbreak_filter_settings_filter_enforcement": "ENABLED",
 		"filter_config_pi_and_jailbreak_filter_settings_confidence_level":   "HIGH",
-		"filter_config_pi_and_jailbreak_filter_settings_filter_version":     "STABLE",
 
 		"filter_config_malicious_uri_filter_settings_filter_enforcement": "ENABLED",
 
@@ -128,7 +120,6 @@ func TestAccModelArmorTemplate_update(t *testing.T) {
 
 		"filter_config_rai_settings_rai_filters_0_filter_type":      "DANGEROUS",
 		"filter_config_rai_settings_rai_filters_0_confidence_level": "LOW_AND_ABOVE",
-		"filter_config_rai_settings_filter_version":                 "RAI_FILTER_VERSION_UNSPECIFIED",
 
 		"sdp_settings_config_type":                                       "basic_config",
 		"filter_config_sdp_settings_basic_config_filter_enforcement":     "ENABLED",
@@ -137,7 +128,6 @@ func TestAccModelArmorTemplate_update(t *testing.T) {
 
 		"filter_config_pi_and_jailbreak_filter_settings_filter_enforcement": "DISABLED",
 		"filter_config_pi_and_jailbreak_filter_settings_confidence_level":   "MEDIUM_AND_ABOVE",
-		"filter_config_pi_and_jailbreak_filter_settings_filter_version":     "PI_AND_JAILBREAK_FILTER_VERSION_UNSPECIFIED",
 
 		"filter_config_malicious_uri_filter_settings_filter_enforcement": "DISABLED",
 
@@ -168,7 +158,6 @@ resource "google_model_armor_template" "test-resource" {
         filter_type      = "{{.}}"
         confidence_level = "{{$.filter_config_rai_settings_rai_filters_0_confidence_level}}"
       }
-      filter_version = "{{$.filter_config_rai_settings_filter_version}}"
     }
     {{end}}
 
@@ -189,7 +178,6 @@ resource "google_model_armor_template" "test-resource" {
     pi_and_jailbreak_filter_settings {
       filter_enforcement = "{{.filter_config_pi_and_jailbreak_filter_settings_filter_enforcement}}"
       confidence_level   = "{{.filter_config_pi_and_jailbreak_filter_settings_confidence_level}}"
-      filter_version     = "{{.filter_config_pi_and_jailbreak_filter_settings_filter_version}}"
     }
     malicious_uri_filter_settings {
       filter_enforcement = "{{.filter_config_malicious_uri_filter_settings_filter_enforcement}}"

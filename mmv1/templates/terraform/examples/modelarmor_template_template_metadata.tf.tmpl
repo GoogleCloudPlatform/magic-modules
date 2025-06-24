@@ -23,7 +23,6 @@ resource "google_model_armor_template" "template-template-metadata" {
         filter_type      = "{{.Vars.filter_config_rai_settings_rai_filters_0_filter_type}}"
         confidence_level = "{{.Vars.filter_config_rai_settings_rai_filters_0_confidence_level}}"
       }
-      filter_version = "{{.Vars.filter_config_rai_settings_filter_version}}"
     }
   }
   template_metadata {

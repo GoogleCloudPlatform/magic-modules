@@ -18,12 +18,10 @@ resource "google_model_armor_template" "template-basic" {
   template_id = "{{.Vars.templateId}}"
 
   filter_config {
-    rai_settings {
-      # Hardcode array elements for the example
-      rai_filters {
-        filter_type      = "{{.Vars.filter_config_rai_settings_rai_filters_0_filter_type}}"
-        confidence_level = "{{.Vars.filter_config_rai_settings_rai_filters_0_confidence_level}}"
-      }
-    }
+  
+  }
+
+  template_metadata {
+  
   }
 }
