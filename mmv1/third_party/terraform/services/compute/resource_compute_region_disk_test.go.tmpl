@@ -93,6 +93,9 @@ func TestAccComputeRegionDisk_basicUpdate(t *testing.T) {
 					testAccCheckComputeRegionDiskExists(
 						t, "google_compute_region_disk.regiondisk", &disk),
 					resource.TestCheckResourceAttr("google_compute_region_disk.regiondisk", "size", "100"),
+					resource.TestCheckResourceAttr("google_compute_region_disk.regiondisk", "access_mode", "READ_WRITE_SINGLE"),
+					resource.TestCheckResourceAttr("google_compute_region_disk.regiondisk", "provisioned_iops", "20000"),
+					resource.TestCheckResourceAttr("google_compute_region_disk.regiondisk", "provisioned_throughput", "20"),
 					testAccCheckComputeRegionDiskHasLabel(&disk, "my-label", "my-updated-label-value"),
 					testAccCheckComputeRegionDiskHasLabel(&disk, "a-new-label", "a-new-label-value"),
 					testAccCheckComputeRegionDiskHasLabelFingerprint(&disk, "google_compute_region_disk.regiondisk"),
@@ -418,8 +421,13 @@ resource "google_compute_snapshot" "snapdisk" {
 resource "google_compute_region_disk" "regiondisk" {
   name     = "%s"
   snapshot = google_compute_snapshot.snapdisk.%s
-  type     = "pd-ssd"
+  type     = "hyperdisk-balanced-high-availability"
+  size     = 50
   replica_zones = ["us-central1-a", "us-central1-f"]
+
+  access_mode            = "READ_WRITE_MANY"
+  provisioned_iops       = 10000
+  provisioned_throughput = 190
 }
 `, diskName, diskName, diskName, refSelector)
 }
@@ -443,7 +451,7 @@ resource "google_compute_snapshot" "snapdisk" {
 resource "google_compute_region_disk" "regiondisk" {
   name     = "%s"
   snapshot = google_compute_snapshot.snapdisk.%s
-  type     = "pd-ssd"
+  type     = "hyperdisk-balanced-high-availability"
   region   = "us-central1"
 
   replica_zones = ["us-central1-a", "us-central1-f"]
@@ -453,6 +461,10 @@ resource "google_compute_region_disk" "regiondisk" {
     my-label    = "my-updated-label-value"
     a-new-label = "a-new-label-value"
   }
+
+  access_mode            = "READ_WRITE_SINGLE"
+  provisioned_iops       = 20000
+  provisioned_throughput = 250
 }
 `, diskName, diskName, diskName, refSelector)
 }
