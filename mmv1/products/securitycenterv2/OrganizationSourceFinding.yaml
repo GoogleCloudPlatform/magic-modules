@@ -1,0 +1,106 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'OrganizationSourceFinding'
+api_resource_type_kind: Finding
+description: |
+  A Cloud Security Command Center's (Cloud SCC) finding. A finding is 
+  a record of assessment data like security, risk, health, or privacy, 
+  that is ingested into Security Command Center for presentation, notification, 
+  analysis, policy testing, and enforcement. For example, a cross-site scripting (XSS) 
+  vulnerability in an App Engine application is a finding.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/security-command-center/docs'
+  api: 'https://cloud.google.com/security-command-center/docs/reference/rest/v2/organizations.sources.locations.findings'
+docs:
+base_url: 'organizations/{{organization}}/sources/{{source}}/locations/{{location}}/findings'
+self_link: 'organizations/{{organization}}/sources/{{source}}/locations/{{location}}/findings'
+create_url: 'organizations/{{organization}}/sources/{{source}}/locations/{{location}}/findings?findingId={{finding_id}}'
+update_verb: 'PATCH'
+update_mask: true
+exclude_delete: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+  custom_import: 'templates/terraform/custom_import/scc_v2_source_finding_self_link_as_name_set_organization.go.tmpl'
+examples:
+  - name: 'scc_v2_organization_source_finding_basic'
+    primary_resource_id: 'custom_source_finding'
+    vars:
+      source_display_name: 'My Source'
+      source_id: 'my-source'
+      finding_id: 'custom-finding-id'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      # resource can't be destroyed, so checkdestroy fails unnecessarily
+    exclude_test: true
+parameters:
+  - name: 'organization'
+    type: String
+    description: |
+      The organization whose Cloud Security Command Center the Source
+      lives in.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'source'
+    type: String
+    description: |
+      The numeric ID of the source for the finding.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'location'
+    type: String
+    description: |
+      The Security Command Center location in which to create a finding. 
+      When data residency controls are enabled, this attribute specifies the location in which the resource is located and applicable.
+      If not provided, Use global as default.
+    url_param_only: true
+    immutable: true
+    default_value: "global"
+  - name: 'findingId'
+    type: String
+    description: |
+      The numeric ID of the source for the finding.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The resource name of the organization source finding, in the format
+      `organizations/{{organization_id}}/sources/{{source_id}}/locations/{{locationId}}/findings/{{finding_id}}`.
+    output: true
+  - name: 'state'
+    type: Enum
+    description: |
+      The state of the finding.
+    enum_values:
+      - 'ACTIVE'
+      - 'INACTIVE'
+  - name: 'category'
+    type: String
+    description: |
+      The additional taxonomy group within findings from a given source.
+      Example: XSS_FLASH_INJECTION
+  - name: 'eventTime'
+    type: String
+    description: |
+      The time the finding was first detected. 
+      If an existing finding is updated, then this is the time the update occurred.

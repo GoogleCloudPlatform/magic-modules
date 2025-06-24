@@ -1,0 +1,10 @@
+resource "google_scc_v2_organization_source_finding" "{{$.PrimaryResourceId}}" {
+  organization = "{{index $.TestEnvVars "org_id"}}"
+  source       = "{{index $.Vars "source_id"}}"
+  location     = "global"
+  finding_id   = "{{index $.Vars "finding_id"}}"
+  
+  state        = "ACTIVE"
+  category     = "MEDIUM_RISK_ONE"
+  event_time   = "2024-01-01T00:00:00Z"
+}
