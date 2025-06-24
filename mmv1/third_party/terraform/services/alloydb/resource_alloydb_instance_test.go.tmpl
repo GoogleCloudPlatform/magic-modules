@@ -83,7 +83,7 @@ resource "google_alloydb_instance" "default" {
     cpu_count = 4
 	{{- if ne $.TargetVersionName "ga" }}
     machine_type = "n2-highmem-4"
-	{{- end -}}
+    {{ end }}
   }
 
   labels = {
@@ -958,7 +958,7 @@ resource "google_alloydb_instance" "default" {
     cpu_count = 2
 	{{- if ne $.TargetVersionName "ga" }}
     machine_type = "n2-highmem-2"
-	{{- end -}}
+    {{ end }}
   }
   psc_instance_config {
 	allowed_consumer_projects = ["${data.google_project.project.number}"]
