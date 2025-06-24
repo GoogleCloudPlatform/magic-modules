@@ -685,6 +685,9 @@ func init() {
 func checkDocumentFrontmatter(repo source.Repo) []string {
 	var errs []string
 	for _, f := range repo.ChangedFiles {
+		if !strings.HasPrefix(f, "website/docs/r/") && !strings.HasPrefix(f, "website/docs/d/") {
+			continue
+		}
 		if !strings.HasSuffix(f, ".markdown") {
 			continue
 		}

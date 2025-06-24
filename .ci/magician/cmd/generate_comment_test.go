@@ -570,12 +570,22 @@ random: Example Subcategory
 ---	
 `,
 	}
+
+	folderPath := filepath.Join(tmpDir, "website", "docs", "r")
+	if err := os.MkdirAll(folderPath, 0755); err != nil {
+		t.Fatal(err)
+	}
 	for name, content := range files {
-		fullPath := filepath.Join(tmpDir, name)
+		fullPath := filepath.Join(folderPath, name)
 		err := os.WriteFile(fullPath, []byte(content), 0644)
 		if err != nil {
 			t.Fatalf("Failed to create file %s: %v", name, err)
 		}
+	}
+
+	// write a file in other folders
+	if err := os.WriteFile(filepath.Join(tmpDir, "abc.md"), []byte("random"), 0644); err != nil {
+		t.Fatalf("Failed to create file %s: %v", filepath.Join(tmpDir, "abc.md"), err)
 	}
 
 	tests := []struct {
@@ -584,28 +594,33 @@ random: Example Subcategory
 		wantErr      bool
 	}{
 		{
-			name:         "No changed markdown files",
-			changedFiles: []string{"abc.txt"},
+			name:         "not in relevant doc folder",
+			changedFiles: []string{"abc.md"},
+			wantErr:      false,
+		},
+		{
+			name:         "not markdown files",
+			changedFiles: []string{"website/docs/r/abc.txt"},
 			wantErr:      false,
 		},
 		{
 			name:         "malformed markdown",
-			changedFiles: []string{"malformed.markdown"},
+			changedFiles: []string{"website/docs/r/malformed.markdown"},
 			wantErr:      true,
 		},
 		{
-			name:         "not exist markdown",
-			changedFiles: []string{"abc.markdown"},
+			name:         "markdown not exist",
+			changedFiles: []string{"website/docs/d/sample.markdown"},
 			wantErr:      true,
 		},
 		{
-			name:         "Changed files with no frontmatter",
-			changedFiles: []string{"sample.markdown"},
+			name:         "correct format",
+			changedFiles: []string{"website/docs/r/sample.markdown"},
 			wantErr:      false,
 		},
 		{
-			name:         "Missing subcategory in frontmatter",
-			changedFiles: []string{"missingsubcategory.markdown"},
+			name:         "missing subcategory in frontmatter",
+			changedFiles: []string{"website/docs/r/missingsubcategory.markdown"},
 			wantErr:      true,
 		},
 	}
