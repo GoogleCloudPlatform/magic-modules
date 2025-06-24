@@ -17,4 +17,42 @@ resource "google_compute_public_delegated_prefix" "{{$.PrimaryResourceId}}" {
     mode = "DELEGATION"
   }
 }
+
+data "google_compute_public_delegated_prefix" "parent_pdp_info" {
+  # Replace with the actual name of your parent PDP
+  name    = "tf-test-subnet-mode-pdp" 
+  project = "tf-static-byoip" # Replace with your project ID
+  region  = "us-central1"     # Replace with your region
+}
+
+# Output blocks to print the details
+output "parent_pdp_name" {
+  description = "Name of the parent Public Delegated Prefix"
+  value       = data.google_compute_public_delegated_prefix.parent_pdp_info.name
+}
+
+output "parent_pdp_id" {
+  description = "Full ID of the parent Public Delegated Prefix"
+  value       = data.google_compute_public_delegated_prefix.parent_pdp_info.id
+}
+
+output "parent_pdp_ip_cidr_range" {
+  description = "IP CIDR Range of the parent Public Delegated Prefix"
+  value       = data.google_compute_public_delegated_prefix.parent_pdp_info.ip_cidr_range
+}
+
+output "parent_pdp_mode" {
+  description = "Mode of the parent Public Delegated Prefix"
+  value       = data.google_compute_public_delegated_prefix.parent_pdp_info.mode
+}
+
+output "parent_pdp_parent_prefix_id" {
+  description = "Parent prefix ID of the parent Public Delegated Prefix (if delegated from another PDP)"
+  value       = data.google_compute_public_delegated_prefix.parent_pdp_info.parent_prefix
+}
+
+output "parent_pdp_public_advertised_prefix_id" {
+  description = "Public Advertised Prefix ID (if delegated directly from a PAP)"
+  value       = data.google_compute_public_delegated_prefix.parent_pdp_info.public_advertised_prefix
+}
   
