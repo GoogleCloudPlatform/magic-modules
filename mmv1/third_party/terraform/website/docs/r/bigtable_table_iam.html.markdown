@@ -64,7 +64,7 @@ resource "google_bigtable_table_iam_member" "editor" {
 
 The following arguments are supported:
 
-* `instance` - (Required) The name or relative resource id of the instance that owns the table.
+* `instance_name` - (Required) The name or relative resource id of the instance that owns the table.
 
 * `table` - (Required) The name or relative resource id of the table to manage IAM policies for.
 
