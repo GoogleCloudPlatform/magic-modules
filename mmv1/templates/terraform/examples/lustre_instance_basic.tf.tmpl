@@ -1,11 +1,12 @@
 resource "google_lustre_instance" "{{$.PrimaryResourceId}}" {
-  instance_id  = "{{index $.Vars "name"}}"
-  location     = "us-central1-a"
-  description  = "test lustre instance"
-  filesystem   = "testfs"
-  capacity_gib = 18000
-  network      = data.google_compute_network.lustre-network.id
-  labels       = {
+  instance_id                 = "{{index $.Vars "name"}}"
+  location                    = "us-central1-a"
+  description                 = "test lustre instance"
+  filesystem                  = "testfs"
+  capacity_gib                = 18000
+  network                     = data.google_compute_network.lustre-network.id
+  per_unit_storage_throughput = 1000
+  labels                      = {
     test = "value"
   }
   timeouts {

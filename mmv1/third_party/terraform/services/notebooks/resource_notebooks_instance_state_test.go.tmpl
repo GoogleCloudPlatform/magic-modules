@@ -60,7 +60,7 @@ resource "google_notebooks_instance" "test" {
   machine_type = "e2-medium"
   vm_image {
     project      = "deeplearning-platform-release"
-    image_family = "tf-latest-cpu"
+    image_family = "pytorch-latest-cu124"
   }
   desired_state = "ACTIVE"
 }
@@ -75,7 +75,7 @@ resource "google_notebooks_instance" "test" {
   machine_type = "e2-medium"
   vm_image {
     project      = "deeplearning-platform-release"
-    image_family = "tf-latest-cpu"
+    image_family = "pytorch-latest-cu124"
   }
   desired_state = "STOPPED"
 }

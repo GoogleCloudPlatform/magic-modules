@@ -40,6 +40,7 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/listings/{{listing_id}}'
     - '{{listing_id}}'
 custom_code:
+  pre_update: 'templates/terraform/pre_update/bigqueryanalyticshub_listing.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
 examples:
@@ -76,6 +77,15 @@ examples:
       listing_id: 'tf_test_log_email_listing'
       dataset_id: 'tf_test_log_email_ds'
       description: 'Example for log email test'
+  - name: 'bigquery_analyticshub_listing_pubsub'
+    primary_resource_id: 'listing'
+    primary_resource_name: 'fmt.Sprintf("tf_test_pubsub_de%s", context["random_suffix"]),fmt.Sprintf("tf_test_listing%s", context["random_suffix"])'
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'tf_test_pubsub_data_exchange'
+      listing_id: 'tf_test_pubsub_listing'
+      pubsub_topic_name: 'test_pubsub'
+      description: 'Example for pubsub topic source'
 parameters:
 properties:
   - name: 'name'
@@ -162,8 +172,10 @@ properties:
   - name: 'bigqueryDataset'
     type: NestedObject
     description: Shared dataset i.e. BigQuery dataset source.
-    required: true
     immutable: true
+    exactly_one_of:
+      - 'pubsubTopic'
+      - 'bigqueryDataset'
     properties:
       - name: 'dataset'
         type: String
@@ -186,6 +198,28 @@ properties:
                 Format: For table: projects/{projectId}/datasets/{datasetId}/tables/{tableId} Example:"projects/test_project/datasets/test_dataset/tables/test_table"
               immutable: true
               diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: 'pubsubTopic'
+    type: NestedObject
+    description: Pub/Sub topic source.
+    exactly_one_of:
+      - 'pubsubTopic'
+      - 'bigqueryDataset'
+    properties:
+      - name: 'topic'
+        type: String
+        description: |-
+          Resource name of the Pub/Sub topic source for this listing. e.g. projects/myproject/topics/topicId
+        required: true
+        immutable: true
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+      - name: 'dataAffinityRegions'
+        type: Array
+        is_set: true
+        description: |-
+          Region hint on where the data might be published. Data affinity regions are modifiable.
+          See https://cloud.google.com/about/locations for full listing of possible Cloud regions.
+        item_type:
+          type: String
   - name: 'restrictedExportConfig'
     type: NestedObject
     description: If set, restricted export configuration will be propagated and enforced on the linked dataset.
@@ -206,5 +240,4 @@ properties:
   - name: 'logLinkedDatasetQueryUserEmail'
     type: Boolean
     description:
-      If true, subscriber email logging is enabled and all queries on the linked dataset will log the email address of the querying user.
-    immutable: true
+      If true, subscriber email logging is enabled and all queries on the linked dataset will log the email address of the querying user. Once enabled, this setting cannot be turned off.

@@ -12,7 +12,13 @@ var handwrittenTfplan2caiResources = map[string]*schema.Resource{
 	"google_compute_instance": compute.ResourceComputeInstance(),
 	"google_project":          resourcemanager.ResourceGoogleProject(),
 	// ####### END handwritten resources ###########
+}
 
-	// TODO: will generate it automatically for MMv1 resources.
-	"google_compute_address": compute.ResourceComputeAddress(),
+// Generated resources: {{ $.ResourceCount }}
+var generatedResources = map[string]*schema.Resource{
+	{{- range $object := $.ResourcesForVersion }}
+		{{- if $object.ResourceName }}
+			"{{ $object.TerraformName }}": {{ $object.ServiceName }}.Resource{{ $object.ResourceName -}}(),
+		{{- end }}
+	{{- end }}
 }
