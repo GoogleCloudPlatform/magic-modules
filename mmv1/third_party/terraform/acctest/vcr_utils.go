@@ -159,7 +159,7 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 				// parses the temporary file created during the release diff test and returns the last line of output
 				// This is useful for extracting the diff output from the file after the test has run
 
-				var output, err = ParseReleaseDiffOutput(temp_file, temp_file.Name())
+				var output, err = ParseReleaseDiffOutput(temp_file)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Error parsing release diff output: %v\n", err)
 				} else if t.Failed() {
@@ -348,7 +348,7 @@ func ReformConfigWithProvider(config, provider string) string {
 // parseReleaseDiffOutput reads the temporary file created during the release diff test and returns the last line of output
 // This is useful for extracting the diff output from the file after the test has run
 
-func ParseReleaseDiffOutput(temp *os.File, output string) (string, error) {
+func ParseReleaseDiffOutput(temp *os.File) (string, error) {
 	if temp == nil {
 		return "", errors.New("temporary file is nil")
 	}
