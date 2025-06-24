@@ -373,3 +373,7 @@ func prepareCassetteRequest(d requestDescription) cassette.Request {
 
 	return req
 }
+
+// func TestDiffTestStepInjection
+// func TestParseReleaseDiffOutput
+// func TestReformConfigWithProvider

@@ -164,17 +164,14 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 					fmt.Printf("FAILED - Release diff output:\n%s\n", output)
 				}
 				temp_file.Close() // Close the file handle
-				if t.Failed() {
-					fmt.Printf("Test failed, keeping log file: %s\n", temp_file.Name())
+				err = os.Remove(temp_file.Name())
+				if err != nil {
+					fmt.Fprintf(os.Stdout, "Test passed, but failed to delete log file: %v\n", err)
 				} else {
-					err := os.Remove(temp_file.Name())
-					if err != nil {
-						fmt.Fprintf(os.Stdout, "Test passed, but failed to delete log file: %v\n", err)
-					} else {
-						fmt.Println("Test passed, deleted log file.")
-					}
+					fmt.Println("Test passed, deleted log file.")
 				}
 			}
+
 		}()
 		c = initializeReleaseDiffTest(c, t.Name(), temp_file)
 
@@ -252,6 +249,7 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, temp_file *
 	} else {
 		c.ExternalProviders = map[string]resource.ExternalProvider{
 			// TODO: make a github action to get most recent release + current head, this is not a fix just for testing
+			// this should not be hardcoded
 			releaseProvider: {
 				VersionConstraint: "= 6.33.0",
 			},
@@ -277,6 +275,15 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, temp_file *
 			},
 		}
 	}
+
+	c.Steps = InsertDiffSteps(c, testName, temp_file, releaseProvider, localProviderName)
+
+	return c
+}
+
+// InsertDiffSteps inserts a new step into the test case that reformats the config to use the release provider - this allows us to see the diff
+// between the local provider and the release provider. for a certain test, this will be used to see the diff between the local provider and the release provider.
+func InsertDiffSteps(c resource.TestCase, testName string, temp_file *os.File, releaseProvider string, localProviderName string) []resource.TestStep {
 	var countSteps = 0
 
 	var replacementSteps []resource.TestStep
@@ -288,7 +295,6 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, temp_file *
 			testStep.Config = reformConfigWithProvider(ogConfig, localProviderName)
 			fmt.Fprintf(os.Stdout, "Reformatted config: %s\n", testStep.Config)
 			testStep.PreConfig = func() {
-				// todo: more descriptive steps (maybe done through a helper function)
 				fmt.Fprintf(temp_file, "Step %d\n", countSteps)
 				countSteps++
 			}
@@ -309,11 +315,13 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, temp_file *
 			replacementSteps = append(replacementSteps, testStep)
 		}
 	}
-
-	c.Steps = replacementSteps
-
-	return c
+	return replacementSteps
 }
+
+// reformConfigWithProvider reformats the config to use the given provider
+// The method matches a regex for the provider block and replaces it with the given provider.
+// For example: ' data "google_compute_network" "default" { provider = "google-local" } '
+// will be reformatted to ' data "google_compute_network" "default" { provider = "google-beta" } '
 
 func reformConfigWithProvider(config, provider string) string {
 	configBytes := []byte(config)
@@ -335,6 +343,9 @@ func reformConfigWithProvider(config, provider string) string {
 	return string(resourceHeader.ReplaceAll(configBytes, providerReplacementBytes))
 }
 
+// parseReleaseDiffOutput reads the temporary file created during the release diff test and returns the last line of output
+// This is useful for extracting the diff output from the file after the test has run
+
 func parseReleaseDiffOutput(temp *os.File, output string) (string, error) {
 	if temp == nil {
 		return "", errors.New("temporary file is nil")
@@ -355,10 +366,6 @@ func parseReleaseDiffOutput(temp *os.File, output string) (string, error) {
 
 	if err := scanner.Err(); err != nil {
 		return "", fmt.Errorf("error reading temporary file: %w", err)
-	}
-
-	if lastLine == "" {
-		return "No diff steps found in the output.", nil
 	}
 
 	return lastLine, nil

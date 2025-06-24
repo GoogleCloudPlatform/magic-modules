@@ -1,6 +1,7 @@
 
 
 ## outline of what this script does
+## CONVERT TO GO
 
 ## 1. set the release_diff env var to have a non nil value
 # SERVICE_ACCOUNT_KEY_PATH=../../../../ryanoaksnightly2-4466c5daa7a1.json
