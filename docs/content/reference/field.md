@@ -174,7 +174,6 @@ value for the field. This attribute is useful for complex or
 frequently-changed API-side defaults, but provides less useful information at
 plan time than `default_value` and causes the provider to ignore user
 configurations that explicitly set the field to an "empty" value.
-`default_from_api` and `send_empty_value` cannot both be true on the same field.
 
 Example:
 
@@ -189,7 +188,10 @@ strings) to the API if set explicitly in the user's configuration. If false,
 This attribute is useful for fields where the API would behave differently
 for an "empty" value vs no value for a particular field - for example,
 boolean fields that have an API-side default of true.
-`send_empty_value` and `default_from_api` cannot both be true on the same field.
+
+If true simulataneously with `default_from_api`, the provider will send empty values
+explicitly set in configuration. If the field is unset, the provider will
+accept API values as the default as usual with `default_from_api`.
 
 Due to a [bug](https://github.com/hashicorp/terraform-provider-google/issues/13201),
 NestedObject fields will currently be sent as `null` if unset (rather than being
