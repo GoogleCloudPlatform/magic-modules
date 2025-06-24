@@ -388,18 +388,19 @@ func TestParseReleaseDiffOutput(t *testing.T) {
 
 func TestReformConfigWithProvider(t *testing.T) {
 	var config = ` data "google_new_resource" {
-	  provider = google-local
+	  provider = google-beta
 }`
 
-	var newConfig = acctest.ReformConfigWithProvider(config, "google-beta")
+	var newConfig = acctest.ReformConfigWithProvider(config, "google-local")
 
 	// Adjusted expectedConfig to match the actual output of the function
 	expectedConfig := ` data "google_new_resource" {
-  provider = google-beta
-}
-` // Added extra newline and adjusted indentation and provider name
+	  provider = google-local
+}`
+	// Added extra newline and adjusted indentation and provider name
 	if newConfig != expectedConfig {
-		t.Fatalf("Expected config to be reformatted to:\n%s\nbut got:\n%s", expectedConfig, newConfig)
+		// Change %s to %q here to reveal invisible differences!
+		t.Fatalf("Expected config to be reformatted to:\n%q\nbut got:\n%q", expectedConfig, newConfig)
 	}
 	t.Logf("Reformed config:\n%s", newConfig)
 }
