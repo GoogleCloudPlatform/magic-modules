@@ -24,7 +24,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
@@ -92,6 +91,14 @@ func (td *TemplateData) GenerateMetadataFile(filePath string, resource api.Resou
 		templatePath,
 	}
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
+}
+
+func (td *TemplateData) GenerateProductFile(filePath string, product api.Product) {
+	templatePath := "templates/terraform/product.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, product, true, templates...)
 }
 
 func (td *TemplateData) GenerateOperationFile(filePath string, resource api.Resource) {
@@ -183,17 +190,27 @@ func (td *TemplateData) GenerateSweeperFile(filePath string, resource api.Resour
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
-func (td *TemplateData) GenerateTGCResourceFile(filePath string, resource api.Resource) {
-	templatePath := "templates/tgc/resource_converter.go.tmpl"
+func (td *TemplateData) GenerateTGCResourceFile(templatePath, filePath string, resource api.Resource) {
 	templates := []string{
 		templatePath,
 		"templates/terraform/expand_property_method.go.tmpl",
+		"templates/terraform/schema_property.go.tmpl",
+		"templates/terraform/schema_subresource.go.tmpl",
+		"templates/terraform/flatten_property_method.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
 
 func (td *TemplateData) GenerateTGCIamResourceFile(filePath string, resource api.Resource) {
 	templatePath := "templates/tgc/resource_converter_iam.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateTGCNextTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/tgc_next/test/test_file.go.tmpl"
 	templates := []string{
 		templatePath,
 	}

@@ -11,8 +11,8 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/models"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/tfplan"
 
+	provider "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/provider"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	provider "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
 )
 
 var ErrDuplicateAsset = errors.New("duplicate asset")
