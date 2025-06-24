@@ -69,6 +69,8 @@ examples:
     test_vars_overrides:
       'prevent_destroy': 'false'
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    ignore_read_extra:
+      - 'update_time'
   - name: 'memorystore_instance_persistence_aof'
     primary_resource_id: 'instance-persistence-aof'
     vars:
