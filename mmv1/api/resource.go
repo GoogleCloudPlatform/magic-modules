@@ -23,7 +23,6 @@ import (
 	"sort"
 	"strings"
 	"text/template"
-	"unicode"
 
 	"github.com/golang/glog"
 
@@ -714,39 +713,19 @@ func (r Resource) GetIdentity() []*Type {
 	})
 }
 
-// TODO(ramon) find alternative approach for this
-func camelToSnake(s string) string {
-	var result strings.Builder
-	for i, ch := range s {
-		if unicode.IsUpper(ch) {
-			if i > 0 {
-				result.WriteByte('_')
-			}
-			result.WriteRune(unicode.ToLower(ch))
-		} else {
-			result.WriteRune(ch)
-		}
+func buildFieldPath(parent *Type, fieldName string) string {
+	// double check if this ".0." works for all types of nesting, probably requires some more debugging/testing
+	if parent != nil {
+		return parent.TerraformLineage() + ".0." + fieldName
 	}
-	return result.String()
+	return fieldName
 }
 
 func buildWriteOnlyField(name string, parent *Type, originalField *Type) *Type {
-	var conflictsWith string
-	var exactlyOneOfOriginalField string
-	var exactlyOneOfWriteOnlyField string
-	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", originalField.Description)
-
-	// TODO(ramon) I see a pattern, refactor to method later
-	// double check if this ".0." works for all type of nesting, probably requires some more debugging/testing
-	if parent != nil {
-		conflictsWith = parent.TerraformLineage() + ".0." + originalField.TerraformLineage()
-		exactlyOneOfOriginalField = parent.TerraformLineage() + ".0." + originalField.TerraformLineage()
-		exactlyOneOfWriteOnlyField = parent.TerraformLineage() + ".0." + camelToSnake(name)
-	} else {
-		conflictsWith = originalField.TerraformLineage()
-		exactlyOneOfOriginalField = originalField.TerraformLineage()
-		exactlyOneOfWriteOnlyField = camelToSnake(name)
-	}
+	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(originalField.Description))
+	conflictsWith := buildFieldPath(parent, originalField.TerraformLineage())
+	exactlyOneOfOriginalField := buildFieldPath(parent, originalField.TerraformLineage())
+	exactlyOneOfWriteOnlyField := buildFieldPath(parent, google.Underscore(name))
 
 	options := []func(*Type){
 		propertyWithType("String"),
@@ -765,16 +744,8 @@ func buildWriteOnlyField(name string, parent *Type, originalField *Type) *Type {
 }
 
 func buildWriteOnlyVersionField(name string, parent *Type, writeOnlyField *Type) *Type {
-	var requiredWith string
-	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", writeOnlyField.Name)
-
-	// TODO(ramon) I see a pattern, refactor to method later
-	// double check if this ".0." works for all type of nesting, probably requires some more debugging/testing
-	if parent != nil {
-		requiredWith = parent.TerraformLineage() + ".0." + writeOnlyField.TerraformLineage()
-	} else {
-		requiredWith = writeOnlyField.TerraformLineage()
-	}
+	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(writeOnlyField.Name))
+	requiredWith := buildFieldPath(parent, writeOnlyField.TerraformLineage())
 
 	options := []func(*Type){
 		propertyWithType("Integer"),
@@ -800,7 +771,7 @@ func (r *Resource) AddExtraFields(props []*Type, parent *Type) []*Type {
 			props = r.addWriteOnlyFields(props, parent, p)
 			// the generated field will have WriteOnly set to true, so we need to adjust the original
 			p.WriteOnly = false
-			// the generated field will have ExactlyOneOf referring the original field, so original must be false
+			// the generated field will have ExactlyOneOf referring the original field, so the original must be false
 			p.Required = false
 		}
 		if p.IsA("KeyValueLabels") {
