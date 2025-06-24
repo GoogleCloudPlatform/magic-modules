@@ -2099,12 +2099,9 @@ func ResourceContainerCluster() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"type": {
+						"patch_mode": {
 							Type:             schema.TypeString,
-							Required:         true,
-							ValidateFunc:     validation.StringInSlice([]string{"ACCELERATED"}, false),
-							Description:      `The selected auto-upgrade patch type. Accepted values are:
-* ACCELERATED: Upgrades to the latest available patch version in a given minor and release channel.`,
+							Description:      `The selected auto-upgrade patch type.`,
 						},
 					},
 				},
