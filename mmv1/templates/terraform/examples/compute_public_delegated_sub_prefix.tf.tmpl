@@ -5,6 +5,7 @@ resource "google_compute_public_delegated_prefix" "{{$.PrimaryResourceId}}" {
   ip_cidr_range = "2600:1901:4457:100::/64"
   parent_prefix = "projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"
   project = "tf-static-byoip"
+  mode = "DELEGATION"
 
   public_delegated_sub_prefixs {
     name = "{{$.Vars.sub_prefix_name_1}}"
