@@ -2101,6 +2101,7 @@ func ResourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"patch_mode": {
 							Type:             schema.TypeString,
+							Required:         true,
 							Description:      `The selected auto-upgrade patch type.`,
 						},
 					},
