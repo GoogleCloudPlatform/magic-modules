@@ -2944,8 +2944,8 @@ resource "google_storage_bucket" "bucket" {
       network = google_compute_network.vpc_gcs_ipfilter2.id
       allowed_ip_cidr_ranges = ["10.201.0.0/16", "10.202.0.0/16"]
     }
-		allow_cross_org_vpcs = false
-		allow_all_service_agent_access = false
+    allow_cross_org_vpcs = false
+    allow_all_service_agent_access = false
   }
 }
 `, nwSuffix, nwSuffix, nwSuffix, nwSuffix, nwSuffix, project, project, serviceAccount, bucketName)
