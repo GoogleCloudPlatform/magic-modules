@@ -802,3 +802,21 @@ properties:
       The backup collection full resource name.
       Example: projects/{project}/locations/{location}/backupCollections/{collection}
     output: true
+  - name: 'managedServerCa'
+    type: NestedObject
+    output: true
+    description: Instance's Certificate Authority. This field will only be populated if instance's transit_encryption_mode is SERVER_AUTHENTICATION
+    properties:
+      - name: 'caCerts'
+        type: Array
+        output: true
+        description: The PEM encoded CA certificate chains for managed server authentication
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'certificates'
+              type: Array
+              output: true
+              description: The certificates that form the CA chain, from leaf to root order
+              item_type:
+                type: String
