@@ -95,7 +95,7 @@ func TestAccComputeRegionDisk_basicUpdate(t *testing.T) {
 					resource.TestCheckResourceAttr("google_compute_region_disk.regiondisk", "size", "100"),
 					resource.TestCheckResourceAttr("google_compute_region_disk.regiondisk", "access_mode", "READ_WRITE_SINGLE"),
 					resource.TestCheckResourceAttr("google_compute_region_disk.regiondisk", "provisioned_iops", "20000"),
-					resource.TestCheckResourceAttr("google_compute_region_disk.regiondisk", "provisioned_throughput", "20"),
+					resource.TestCheckResourceAttr("google_compute_region_disk.regiondisk", "provisioned_throughput", "250"),
 					testAccCheckComputeRegionDiskHasLabel(&disk, "my-label", "my-updated-label-value"),
 					testAccCheckComputeRegionDiskHasLabel(&disk, "a-new-label", "a-new-label-value"),
 					testAccCheckComputeRegionDiskHasLabelFingerprint(&disk, "google_compute_region_disk.regiondisk"),
