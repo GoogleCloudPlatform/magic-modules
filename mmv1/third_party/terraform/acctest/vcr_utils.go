@@ -345,27 +345,23 @@ func parseReleaseDiffOutput(temp *os.File, output string) (string, error) {
 		return "", fmt.Errorf("failed to seek to beginning of temporary file: %w", err)
 	}
 
-	var lastDiffLine string
+	var lastLine string
 	scanner := bufio.NewScanner(temp)
-
-	diffMarker := "[Diff]"
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		if strings.Contains(line, diffMarker) {
-			lastDiffLine = line
-		}
+		lastLine = line
 	}
 
 	if err := scanner.Err(); err != nil {
 		return "", fmt.Errorf("error reading temporary file: %w", err)
 	}
 
-	if lastDiffLine == "" {
+	if lastLine == "" {
 		return "No diff steps found in the output.", nil
 	}
 
-	return lastDiffLine, nil
+	return lastLine, nil
 }
 
 // HandleVCRConfiguration configures the recorder (github.com/dnaeon/go-vcr/recorder) used in the VCR test
