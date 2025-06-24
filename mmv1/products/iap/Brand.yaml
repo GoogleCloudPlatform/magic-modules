@@ -13,6 +13,8 @@
 
 ---
 name: 'Brand'
+deprecation_message: >-
+  `google_iap_brand` is deprecated.
 description: |
   OAuth brand data. Only "Organization Internal" brands can be created
   programmatically via API. To convert it into an external brands
