@@ -2449,6 +2449,26 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+			"anonymous_authentication_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Computed:    true,
+				Description: `AnonymousAuthenticationConfig allows users to restrict or enable anonymous access to the cluster.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"mode": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"ENABLED", "LIMITED"}, false),
+							Description:  `Setting this to LIMITED will restrict authentication of anonymous users to health check endpoints only.
+ Accepted values are:
+* ENABLED: Authentication of anonymous users is enabled for all endpoints.
+* LIMITED: Anonymous access is only allowed for health check endpoints.`,
+						},
+					},
+				},
+			},
 		},
 	}
 }
