@@ -171,7 +171,7 @@ func resource{{ $.ResourceName }}{{ camelize $prop.Name "upper" }}SetStyleDiff(_
 {{- end}}
 
 {{- $hasWriteOnlyProp := false -}}
-{{- range $prop := $.AllUserProperties -}}
+{{- range $prop := $.SettableProperties -}}
     {{- if $prop.WriteOnly -}}
         {{- $hasWriteOnlyProp = true -}}
     {{- end -}}
