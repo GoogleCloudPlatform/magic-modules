@@ -118,6 +118,24 @@ examples:
       home_backend_service_name: 'home'
       mirror_backend_service_name: 'mirror'
       health_check_name: 'health-check'
+  - name: 'url_map_test_headers'
+    primary_resource_id: 'urlmap'
+    vars:
+      url_map_name: 'urlmap'
+      backend_service_name: 'backend'
+      health_check_name: 'health-check'
+  - name: 'url_map_test_expected_output_url'
+    primary_resource_id: 'urlmap'
+    vars:
+      url_map_name: 'urlmap'
+      backend_service_name: 'backend'
+      health_check_name: 'health-check'
+  - name: 'url_map_test_redirect_response_code'
+    primary_resource_id: 'urlmap'
+    vars:
+      url_map_name: 'urlmap'
+      backend_service_name: 'backend'
+      health_check_name: 'health-check'
   - name: 'external_http_lb_mig_backend'
     primary_resource_id: 'default'
     vars:
@@ -147,7 +165,6 @@ examples:
       storage_bucket_name: 'static-asset-bucket'
   - name: 'url_map_custom_error_response_policy'
     primary_resource_id: 'urlmap'
-    min_version: 'beta'
     vars:
       url_map_name: 'urlmap'
       backend_service_name: 'login'
@@ -376,7 +393,6 @@ properties:
             When used in conjunction with pathMatcher.defaultRouteAction.retryPolicy, retries take precedence. Only once all retries are exhausted, the defaultCustomErrorResponsePolicy is applied. While attempting a retry, if load balancer is successful in reaching the service, the defaultCustomErrorResponsePolicy is ignored and the response from the service is returned to the client.
 
             defaultCustomErrorResponsePolicy is supported only for global external Application Load Balancers.
-          min_version: 'beta'
           properties:
             - name: 'errorResponseRule'
               type: Array
@@ -537,7 +553,6 @@ properties:
                   A PathRule for /coming_soon/ is configured for the error code 404.
                   If the request is for www.myotherdomain.com and a 404 is encountered, the policy under UrlMap.defaultCustomErrorResponsePolicy takes effect. If a 404 response is encountered for the request www.example.com/current_events/, the pathMatcher's policy takes effect. If however, the request for www.example.com/coming_soon/ encounters a 404, the policy in PathRule.customErrorResponsePolicy takes effect. If any of the requests in this example encounter a 500 error code, the policy at UrlMap.defaultCustomErrorResponsePolicy takes effect.
                   customErrorResponsePolicy is supported only for global external Application Load Balancers.
-                min_version: 'beta'
                 properties:
                   - name: 'errorResponseRule'
                     type: Array
@@ -1798,7 +1813,6 @@ properties:
                 type: NestedObject
                 description: |
                   customErrorResponsePolicy specifies how the Load Balancer returns error responses when BackendService or BackendBucket responds with an error.
-                min_version: 'beta'
                 properties:
                   - name: 'errorResponseRule'
                     type: Array
@@ -2355,7 +2369,6 @@ properties:
       When used in conjunction with pathMatcher.defaultRouteAction.retryPolicy, retries take precedence. Only once all retries are exhausted, the defaultCustomErrorResponsePolicy is applied. While attempting a retry, if load balancer is successful in reaching the service, the defaultCustomErrorResponsePolicy is ignored and the response from the service is returned to the client.
 
       defaultCustomErrorResponsePolicy is supported only for global external Application Load Balancers.
-    min_version: 'beta'
     properties:
       - name: 'errorResponseRule'
         type: Array
@@ -2427,13 +2440,45 @@ properties:
           description: |
             Path portion of the URL.
           required: true
+        - name: 'headers'
+          type: Array
+          description: |
+            HTTP headers for this request.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'name'
+                type: String
+                description: |
+                  Header name.
+                required: true
+              - name: 'value'
+                type: String
+                description: |
+                  Header value.
+                required: true
         - name: 'service'
           type: ResourceRef
           description: The backend service or backend bucket link that should be matched by this test.
-          required: true
           custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
           resource: 'BackendService'
           imports: 'selfLink'
+        - name: 'expectedOutputUrl'
+          type: String
+          description: |
+            The expected output URL evaluated by the load balancer containing the scheme, host, path and query parameters.
+
+            For rules that forward requests to backends, the test passes only when expectedOutputUrl matches the request forwarded by the load balancer to backends. For rules with urlRewrite, the test verifies that the forwarded request matches hostRewrite and pathPrefixRewrite in the urlRewrite action. When service is specified, expectedOutputUrl`s scheme is ignored.
+
+            For rules with urlRedirect, the test passes only if expectedOutputUrl matches the URL in the load balancer's redirect response. If urlRedirect specifies httpsRedirect, the test passes only if the scheme in expectedOutputUrl is also set to HTTPS. If urlRedirect specifies stripQuery, the test passes only if expectedOutputUrl does not contain any query parameters.
+
+            expectedOutputUrl is optional when service is specified.
+        - name: 'expectedRedirectResponseCode'
+          type: Integer
+          description: |
+            For rules with urlRedirect, the test passes only if expectedRedirectResponseCode matches the HTTP status code in load balancer's redirect response.
+
+            expectedRedirectResponseCode cannot be set when service is set.
   - name: 'defaultUrlRedirect'
     type: NestedObject
     description: |
