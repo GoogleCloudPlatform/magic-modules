@@ -1449,8 +1449,7 @@ func TestAccMemorystoreInstance_memorystoreInstanceTlsEnabled(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"prevent_destroy": false,
-		"random_suffix":   acctest.RandString(t, 10),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1498,9 +1497,6 @@ resource "google_memorystore_instance" "instance-tls" {
     google_network_connectivity_service_connection_policy.default
   ]
   transit_encryption_mode = "SERVER_AUTHENTICATION"
-  lifecycle {
-    prevent_destroy = "%{prevent_destroy}"
-  }
 }
 
 resource "google_network_connectivity_service_connection_policy" "default" {

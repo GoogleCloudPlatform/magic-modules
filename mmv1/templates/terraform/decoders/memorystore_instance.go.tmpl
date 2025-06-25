@@ -101,7 +101,7 @@
 	config := meta.(*transport_tpg.Config)
 	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
-	return nil, err
+		return nil, err
 	}
 
 	// Only instances with SERVER_AUTHENTICATION mode have certificate authority set
