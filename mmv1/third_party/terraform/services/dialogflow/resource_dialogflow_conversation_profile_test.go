@@ -477,7 +477,7 @@ func testAccDialogflowConversationProfile_dialogflowAgentKnowledgebase1(context 
 							drop_virtual_agent_messages = false
 						}
 						knowledge_base_query_source {
-							knowledge_bases = ["projects/${google_project.agent_project.id}/locations/global/knowledgeBases/MTIxNTkzNjM1NzY3NjY2NjA2MDk"]
+							knowledge_bases = ["projects/${google_project.agent_project.id}/locations/global/knowledgeBases/MTQ5NzI0MjQ0OTQwMTI5NTY2NzM"]
 						}
 						max_results = 1
 					}
@@ -727,7 +727,7 @@ func testAccDialogflowConversationProfile_dialogflowAgentDocument2(context map[s
 							drop_virtual_agent_messages = false
 						}
 						document_query_source {
-							documents = ["projects/ccai-shared-external/locations/global/knowledgeBases/smart_messaging_kb/documents/NzU1MDYzOTkxNzU0MjQwODE5Mg"]
+							documents = ["projects/${google_project.agent_project.id}/locations/global/data/knowledge-bases/MTIxNTkzNjM1NzY3NjY2NjA2MDk/documents/MTM2NjY0MTc1MDQ0MzQ1MjAwNjU"]
 						}
 						max_results = 1
 					}
