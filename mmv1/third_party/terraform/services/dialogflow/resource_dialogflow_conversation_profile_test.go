@@ -59,8 +59,6 @@ func TestAccDialogflowConversationProfile_update(t *testing.T) {
 	})
 }
 
-// TODO make sure to flip agent back
-// Flip topics from leftover topics to resources within this tf
 func testAccDialogflowConversationProfile_dialogflowAgentFull1(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_project" "agent_project" {
