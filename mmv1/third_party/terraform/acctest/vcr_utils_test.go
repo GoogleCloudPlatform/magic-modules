@@ -381,19 +381,16 @@ func TestReformConfigWithProviderGoogleBeta(t *testing.T) {
 
 	var newConfig = acctest.ReformConfigWithProvider(config, "google-local")
 
-	// Adjusted expectedConfig to match the actual output of the function
+	// Adjusted expectedConfig to match the actual output of the function, which should substitute google-beta with google-local
 	expectedConfig := ` resource "google_new_resource" {
 	  provider = google-local
 }`
-	// Added extra newline and adjusted indentation and provider name
 	if newConfig != expectedConfig {
-		// Change %s to %q here to reveal invisible differences!
 		t.Fatalf("Expected config to be reformatted to:\n%q\nbut got:\n%q", expectedConfig, newConfig)
 	}
 	t.Logf("Reformed config:\n%s", newConfig)
 }
 
-// the empty provider case fails, so need to figure out a regex way of handling
 func TestReformConfigWithProviderEmpty(t *testing.T) {
 	var config = `resource "google_alloydb_cluster" "default" {
 	location   = "us-central1"
@@ -404,7 +401,7 @@ func TestReformConfigWithProviderEmpty(t *testing.T) {
 
 	var newConfig = acctest.ReformConfigWithProvider(config, "google-local")
 
-	// some weird formatting happens, but the injection is done correctly
+	// expected config should insert the google-local provider when running the method.
 	expectedConfig := `resource "google_alloydb_cluster" "default" {
   provider = google-local
 
