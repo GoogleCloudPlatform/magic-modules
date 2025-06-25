@@ -1,0 +1,31 @@
+		currentState := d.Get("state").(string)
+        refreshWhenApply:= d.Get("refresh_when_apply").(bool)
+		refreshWhenStale:= d.Get("refresh_when_stale").(bool)
+		refreshfinal := refreshWhenApply || (refreshWhenStale && currentState=="STATE_STALE")
+
+
+		if (refreshfinal) {
+		log.Printf("[DEBUG] BigQuery Analytics Hub Subscription %q (ID: %s) is in STATE_STALE. Attempting to refresh.", d.Get("name").(string), d.Id())
+		refreshUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigqueryAnalyticsHubBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/subscriptions/{{"{{"}}subscription_id{{"}}"}}:refresh")
+		if err != nil {
+			return fmt.Errorf("Error constructing refresh URL for DataExchangeSubscription %q: %s", d.Id(), err)
+		}
+
+		refreshBodyMap := map[string]any{}
+		refreshHeaders := make(http.Header)
+		refreshHeaders.Set("Content-Type", "application/json")
+
+		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   billingProject,
+			RawURL:    refreshUrl,
+			UserAgent: userAgent,
+			Headers:   refreshHeaders,
+			Body:      refreshBodyMap,
+		})
+
+		if err != nil {
+			return fmt.Errorf("Error performing refresh for BigQuery Analytics Hub Subscription %q (state was STATE_STALE): %s", d.Id(), err)
+		}
+		}
