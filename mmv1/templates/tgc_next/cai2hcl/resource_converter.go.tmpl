@@ -130,6 +130,8 @@ func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asse
 func flatten{{$prop.GetPrefix}}{{$prop.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
   return utils.RemoveTerraformAttributionLabel(v)
 }
+    {{ else if $prop.CustomTgcFlatten }}
+        {{- $prop.CustomTemplate $prop.CustomTgcFlatten false -}}
     {{ else }}
         {{ template "flattenPropertyMethod" $prop -}}
     {{- end }}
