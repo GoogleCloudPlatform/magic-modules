@@ -56,10 +56,6 @@ resource "google_scc_v2_organization_source" "default" {
   description  = "Test source for findings"
 }
 
-// locals {
-//   source_id = regex("sources/(.+)$", google_scc_v2_organization_source.default.name)[0]
-// }
-
 locals {
   source_name_parts = regex("sources/([0-9]+)$", google_scc_v2_organization_source.default.name)
   source_id         = length(local.source_name_parts) > 0 ? local.source_name_parts[0] : "INVALID"
@@ -71,6 +67,7 @@ resource "google_scc_v2_organization_source_finding" "default" {
   location     = "global"
   finding_id   = "%{finding_id}"
   
+  resource_name= "//cloudresourcemanager.googleapis.com/organizations/%{org_id}"
   state        = "ACTIVE"
   category     = "MEDIUM_RISK_ONE"
   event_time   = "2024-01-01T00:00:00Z"
@@ -87,10 +84,6 @@ resource "google_scc_v2_organization_source" "default" {
   description  = "Test source for findings"
 }
 
-// locals {
-//   source_id = regex("sources/(.+)$", google_scc_v2_organization_source.default.name)[0]
-// }
-
 locals {
   source_name_parts = regex("sources/([0-9]+)$", google_scc_v2_organization_source.default.name)
   source_id         = length(local.source_name_parts) > 0 ? local.source_name_parts[0] : "INVALID"
@@ -102,8 +95,9 @@ resource "google_scc_v2_organization_source_finding" "default" {
   location     = "global"
   finding_id   = "%{finding_id}"
 
+  resource_name= "//cloudresourcemanager.googleapis.com/organizations/%{org_id}"
   state        = "INACTIVE"
-  category     = "XSS"
+  category     = "MEDIUM_RISK_ONE"
   event_time   = "2024-01-01T00:00:00Z"
 }
 `, context)

@@ -41,9 +41,9 @@ examples:
   - name: 'scc_v2_organization_source_finding_basic'
     primary_resource_id: 'custom_source_finding'
     vars:
-      source_display_name: 'My Source'
       source_id: 'my-source'
       finding_id: 'custom-finding-id'
+      resource_name: '//cloudresourcemanager.googleapis.com/organizations/123'
     test_env_vars:
       org_id: 'ORG_ID'
       # resource can't be destroyed, so checkdestroy fails unnecessarily
@@ -80,13 +80,13 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-properties:
-  - name: 'name'
+  - name: 'resourceName'
     type: String
     description: |
-      The resource name of the organization source finding, in the format
-      `organizations/{{organization_id}}/sources/{{source_id}}/locations/{{locationId}}/findings/{{finding_id}}`.
-    output: true
+      The full resource name of the Google Cloud resource this finding is for, in the format
+      `//cloudresourcemanager.googleapis.com/organizations/123`
+    required: true
+properties:
   - name: 'state'
     type: Enum
     description: |

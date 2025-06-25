@@ -4,6 +4,7 @@ resource "google_scc_v2_organization_source_finding" "{{$.PrimaryResourceId}}" {
   location     = "global"
   finding_id   = "{{index $.Vars "finding_id"}}"
   
+  resource_name= "{{index $.Vars "resource_name"}}"
   state        = "ACTIVE"
   category     = "MEDIUM_RISK_ONE"
   event_time   = "2024-01-01T00:00:00Z"
