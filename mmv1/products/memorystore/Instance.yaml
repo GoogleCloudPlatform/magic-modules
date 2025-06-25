@@ -830,4 +830,3 @@ properties:
               description: The certificates that form the CA chain, from leaf to root order
               item_type:
                 type: String
-    
