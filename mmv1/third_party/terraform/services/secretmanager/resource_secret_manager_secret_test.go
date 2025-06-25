@@ -496,7 +496,7 @@ func TestAccSecretManagerSecret_DeletionProtectionUpdate(t *testing.T) {
 				ResourceName:            "google_secret_manager_secret.secret-deletionprotection",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels", "deletion_protection},
+				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels", "deletion_protection"},
 			},
 		},
 	})
