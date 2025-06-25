@@ -170,12 +170,20 @@ func resource{{ $.ResourceName }}{{ camelize $prop.Name "upper" }}SetStyleDiff(_
 }
 {{- end}}
 
+{{- $hasWriteOnlyProp := false -}}
+{{- range $prop := $.AllUserProperties -}}
+    {{- if $prop.WriteOnly -}}
+        {{- $hasWriteOnlyProp = true -}}
+    {{- end -}}
+{{ end }}
+{{- if $hasWriteOnlyProp -}}
 func resource{{ $.ResourceName -}}GetRawConfigAttributeAsString(d *schema.ResourceData, key string) string {
     if v := d.GetRawConfig().GetAttr(key); !v.IsNull() {
         return v.AsString()
     }
     return ""
 }
+{{ end }}
 
 func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{}) error {
 {{- if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "Create")) -}}
