@@ -217,7 +217,6 @@ properties:
                 and there is no <code>srcIpRange</code>, this rule will be ignored.
                 Maximum number of source tag values allowed is 256.
               api_name: srcSecureTags
-              send_empty_value: true
               item_type:
                 type: NestedObject
                 properties:
@@ -280,7 +279,6 @@ properties:
             to all instances on the specified network.
             Maximum number of target label tags allowed is 256.
           api_name: targetSecureTags
-          send_empty_value: true
           item_type:
             type: NestedObject
             properties:
@@ -500,6 +498,70 @@ properties:
                     output: true
                     item_type:
                       type: String
+            - name: 'srcSecureTag'
+              type: Array
+              description: |
+                List of secure tag values, which should be matched at the source
+                of the traffic.
+                For INGRESS rule, if all the <code>srcSecureTag</code> are INEFFECTIVE,
+                and there is no <code>srcIpRange</code>, this rule will be ignored.
+                Maximum number of source tag values allowed is 256.
+              api_name: srcSecureTags
+              output: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'name'
+                    type: String
+                    description: |
+                      Name of the secure tag, created with TagManager's TagValue API.
+                      @pattern tagValues/[0-9]+
+                    output: true
+                  - name: 'state'
+                    type: Enum
+                    description: |
+                      [Output Only] State of the secure tag, either `EFFECTIVE` or
+                      `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
+                      or its network is deleted.
+                    output: true
+                    enum_values:
+                      - 'EFFECTIVE'
+                      - 'INEFFECTIVE'
+        - name: 'targetSecureTag'
+          type: Array
+          description: |
+            A list of secure tags that controls which instances the firewall rule
+            applies to. If <code>targetSecureTag</code> are specified, then the
+            firewall rule applies only to instances in the VPC network that have one
+            of those EFFECTIVE secure tags, if all the target_secure_tag are in
+            INEFFECTIVE state, then this rule will be ignored.
+            <code>targetSecureTag</code> may not be set at the same time as
+            <code>targetServiceAccounts</code>.
+            If neither <code>targetServiceAccounts</code> nor
+            <code>targetSecureTag</code> are specified, the firewall rule applies
+            to all instances on the specified network.
+            Maximum number of target label tags allowed is 256.
+          api_name: targetSecureTags
+          output: true
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'name'
+                type: String
+                description: |
+                  Name of the secure tag, created with TagManager's TagValue API.
+                  @pattern tagValues/[0-9]+
+                output: true
+              - name: 'state'
+                type: Enum
+                description: |
+                  [Output Only] State of the secure tag, either `EFFECTIVE` or
+                  `INEFFECTIVE`. A secure tag is `INEFFECTIVE` when it is deleted
+                  or its network is deleted.
+                output: true
+                enum_values:
+                  - 'EFFECTIVE'
+                  - 'INEFFECTIVE'
         - name: 'action'
           type: String
           description: |
