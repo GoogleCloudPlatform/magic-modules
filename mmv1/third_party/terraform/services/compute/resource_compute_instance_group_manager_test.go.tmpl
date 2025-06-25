@@ -521,7 +521,7 @@ func TestAccInstanceGroupManager_waitForStatus(t *testing.T) {
 	})
 }
 
-func TestAccInstanceGroupManager_resourcePoliciesWorkloadPolicy(t *testing.T) {
+func TestAccInstanceGroupManager_addingResourcePoliciesToMigWithNonZeroTargetSize_fails(t *testing.T) {
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
