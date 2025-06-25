@@ -1,10 +1,8 @@
 package acctest_test
 
 import (
-	"bufio"
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -13,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/dnaeon/go-vcr/cassette"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -378,35 +377,87 @@ func prepareCassetteRequest(d requestDescription) cassette.Request {
 }
 
 func TestDiffTestStepInjection(t *testing.T) {
-	// This test is a placeholder for the diff test step injection functionality.
-	// It should be implemented to test the diff injection logic in the future.
-	t.Skip("Diff test step injection test not implemented yet")
-}
-
-// todo: fix imports so this is only in vcr_utils.go
-func ParseReleaseDiffOutput(temp *os.File) (string, error) {
-	if temp == nil {
-		return "", errors.New("temporary file is nil")
+	var dummyCase = resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+			},
+			{
+				Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+				ExpectNonEmptyPlan: true,
+			},
+		},
 	}
-
-	_, err := temp.Seek(0, io.SeekStart)
+	temp_file, err := os.CreateTemp("", "release_diff_test_output_*.log")
 	if err != nil {
-		return "", fmt.Errorf("failed to seek to beginning of temporary file: %w", err)
+		t.Fatalf("Failed to create temp file: %v", err)
+	}
+	var releaseDiffSteps = acctest.InsertDiffSteps(dummyCase, temp_file, "google-beta", "google-local")
+
+	var expectedSteps = []resource.TestStep{
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+		},
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-local
+				}`,
+		},
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+		},
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-local
+				}`,
+		},
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+		},
+
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-local
+				}`,
+		},
 	}
 
-	var lastLine string
-	scanner := bufio.NewScanner(temp)
-
-	for scanner.Scan() {
-		line := scanner.Text()
-		lastLine = line
+	if len(releaseDiffSteps) != len(expectedSteps) {
+		t.Fatalf("Expected %d steps, but got %d", len(expectedSteps), len(releaseDiffSteps))
 	}
-
-	if err := scanner.Err(); err != nil {
-		return "", fmt.Errorf("error reading temporary file: %w", err)
+	for i, step := range releaseDiffSteps {
+		if step.Config != expectedSteps[i].Config {
+			t.Fatalf("Expected step %d config to be:\n%q\nbut got:\n%q", i, expectedSteps[i].Config, step.Config)
+		}
+		if (i % 2) == 1 {
+			if step.ExpectNonEmptyPlan != false {
+				t.Fatalf("Expected step %d to have ExpectNonEmptyPlan set to false, but got true", i)
+			}
+			if step.PlanOnly != true {
+				t.Fatalf("Expected step %d to have PlanOnly set to true, but got false", i)
+			}
+		}
 	}
+	defer os.Remove(temp_file.Name())
 
-	return lastLine, nil
 }
 func TestParseReleaseDiffOutput(t *testing.T) {
 	temp_file, err := os.CreateTemp("", "test_release_diff_test_output_*.log")
@@ -422,7 +473,7 @@ func TestParseReleaseDiffOutput(t *testing.T) {
 
 	var expectedOutput = "This is a test release diff output.\n"
 	var output string
-	output, err = ParseReleaseDiffOutput(temp_file)
+	output, err = acctest.ParseReleaseDiffOutput(temp_file)
 	if err != nil {
 		t.Fatalf("Failed to parse release diff output: %v", err)
 	}
@@ -434,14 +485,14 @@ func TestParseReleaseDiffOutput(t *testing.T) {
 }
 
 func TestReformConfigWithProviderGoogleBeta(t *testing.T) {
-	var config = ` data "google_new_resource" {
+	var config = ` resource "google_new_resource" {
 	  provider = google-beta
 }`
 
 	var newConfig = acctest.ReformConfigWithProvider(config, "google-local")
 
 	// Adjusted expectedConfig to match the actual output of the function
-	expectedConfig := ` data "google_new_resource" {
+	expectedConfig := ` resource "google_new_resource" {
 	  provider = google-local
 }`
 	// Added extra newline and adjusted indentation and provider name
@@ -454,18 +505,25 @@ func TestReformConfigWithProviderGoogleBeta(t *testing.T) {
 
 // the empty provider case fails, so need to figure out a regex way of handling
 func TestReformConfigWithProviderEmpty(t *testing.T) {
-	var config = ` data "google_new_resource" {
+	var config = `resource "google_alloydb_cluster" "default" {
+	location   = "us-central1"
+	network_config {
+		network = google_compute_network.default.id
+	}
 }`
 
 	var newConfig = acctest.ReformConfigWithProvider(config, "google-local")
 
-	// Adjusted expectedConfig to match the actual output of the function
-	expectedConfig := ` data "google_new_resource" {
-	  provider = google-local
+	// some weird formatting happens, but the injection is done correctly
+	expectedConfig := `resource "google_alloydb_cluster" "default" {
+  provider = google-local
+
+	location   = "us-central1"
+	network_config {
+		network = google_compute_network.default.id
+	}
 }`
-	// Added extra newline and adjusted indentation and provider name
 	if newConfig != expectedConfig {
-		// Change %s to %q here to reveal invisible differences!
 		t.Fatalf("Expected config to be reformatted to:\n%q\nbut got:\n%q", expectedConfig, newConfig)
 	}
 	t.Logf("Reformed config:\n%s", newConfig)

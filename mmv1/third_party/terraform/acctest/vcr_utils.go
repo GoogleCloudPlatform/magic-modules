@@ -278,14 +278,14 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, temp_file *
 		}
 	}
 
-	c.Steps = InsertDiffSteps(c, testName, temp_file, releaseProvider, localProviderName)
+	c.Steps = InsertDiffSteps(c, temp_file, releaseProvider, localProviderName)
 
 	return c
 }
 
 // InsertDiffSteps inserts a new step into the test case that reformats the config to use the release provider - this allows us to see the diff
 // between the local provider and the release provider. for a certain test, this will be used to see the diff between the local provider and the release provider.
-func InsertDiffSteps(c resource.TestCase, testName string, temp_file *os.File, releaseProvider string, localProviderName string) []resource.TestStep {
+func InsertDiffSteps(c resource.TestCase, temp_file *os.File, releaseProvider string, localProviderName string) []resource.TestStep {
 	var countSteps = 0
 
 	var replacementSteps []resource.TestStep
@@ -294,6 +294,7 @@ func InsertDiffSteps(c resource.TestCase, testName string, temp_file *os.File, r
 		if testStep.Config != "" {
 			ogConfig := testStep.Config
 			fmt.Fprintf(os.Stdout, "Original config: %s\n", ogConfig)
+			fmt.Fprintf(os.Stdout, "Reformatting config to use provider: %s\n", localProviderName)
 			testStep.Config = ReformConfigWithProvider(ogConfig, localProviderName)
 			fmt.Fprintf(os.Stdout, "Reformatted config: %s\n", testStep.Config)
 			testStep.PreConfig = func() {
