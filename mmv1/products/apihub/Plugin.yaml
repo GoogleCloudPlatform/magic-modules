@@ -13,7 +13,7 @@
 
 ---
 name: Plugin
-description: Description
+description: A plugin resource in the API hub.
 base_url: projects/{{project}}/locations/{{location}}/plugins
 immutable: true
 self_link: projects/{{project}}/locations/{{location}}/plugins/{{plugin_id}}
@@ -25,7 +25,7 @@ examples:
   - name: apihub_plugin_full
     primary_resource_id: apihub_plugin_full
     vars:
-      plugin_id: 'test'
+      plugin_id: 'plugin-full'
     # API hub instance needs to be created before this, and end to end creation of that resource using Terraform is not yet supported.
     exclude_test: true
     external_providers: ["time"]
