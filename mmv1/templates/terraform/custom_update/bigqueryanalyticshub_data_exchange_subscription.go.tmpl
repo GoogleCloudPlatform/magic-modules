@@ -1,0 +1,16 @@
+_ = config
+// we can only get here if either refresh_when_apply or refresh_when_stale was updated
+if d.Get("refresh_when_apply") != nil {
+    if err := d.Set("refresh_when_apply", d.Get("refresh_when_apply")); err != nil {
+        return fmt.Errorf("Error updating refresh_when_apply: %s", err)
+    }
+}
+
+if d.Get("refresh_when_stale") != nil {
+    if err := d.Set("refresh_when_stale", d.Get("refresh_when_stale")); err != nil {
+        return fmt.Errorf("Error updating refresh_when_stale: %s", err)
+    }
+}
+
+// all other fields are immutable, don't do anything else
+return nil

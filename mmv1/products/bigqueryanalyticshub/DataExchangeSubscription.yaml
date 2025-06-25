@@ -23,16 +23,19 @@ docs:
   note: |-
     When importing the resource with `terraform import`, provide the destination project and location
     in the format projects/{{destination_project}}/locations/{{destination_location}}/subscriptions/{{subscription_id}}
+  optional_properties: |
+    * `refreshWhenApply` - (Optional) If true, the subscription will be refreshed everytime Terraform apply is called
+    * `refreshWhenStale` - (Optional) If true, the subscription will be refreshed everytime the state is stale and Terraform apply is called
 base_url: 'projects/{{project}}/locations/{{location}}/subscriptions'
 self_link: 'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}'
 create_url: 'projects/{{data_exchange_project}}/locations/{{data_exchange_location}}/dataExchanges/{{data_exchange_id}}:subscribe'
-immutable: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}'
 custom_code:
   decoder: 'templates/terraform/decoders/bigqueryanalyticshub_data_exchange_subscription.go.tmpl'
   encoder: 'templates/terraform/encoders/bigqueryanalyticshub_data_exchange_subscription.go.tmpl'
   post_read: 'templates/terraform/post_read/bigqueryanalyticshub_data_exchange_subscription.go.tmpl'
+  custom_update: 'templates/terraform/custom_update/bigqueryanalyticshub_data_exchange_subscription.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "US"
@@ -55,20 +58,22 @@ virtual_fields:
   - name: 'refreshWhenApply'
     type: Boolean
     description: 'If true, the subscription will be refreshed everytime Terraform apply is called'
-    #immutable: true
+    default_value: true
   - name: 'refreshWhenStale'
     type: Boolean
     description: 'If true, the subscription will be refreshed everytime the state is stale and Terraform apply is called'
-    #immutable: true
+    default_value: true
 parameters:
   - name: 'dataExchangeId'
     type: String
+    immutable: true
     description: |-
       The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.
     url_param_only: true
     required: true
   - name: 'dataExchangeProject'
     type: String
+    immutable: true
     description: |-
       The ID of the Google Cloud project where the Data Exchange is located.
     url_param_only: true
@@ -76,12 +81,14 @@ parameters:
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - name: 'dataExchangeLocation'
     type: String
+    immutable: true
     description: |-
       The name of the location of the Data Exchange.
     url_param_only: true
     required: true
   - name: 'location'
     type: String
+    immutable: true
     description: |
       The geographic location where the Subscription (and its linked dataset) should reside.
       This is the subscriber's desired location for the created resources.
@@ -92,22 +99,26 @@ parameters:
     diff_suppress_func: 'tpgresource.CaseDiffSuppress'
   - name: 'subscriptionId'
     type: String
+    immutable: true
     description: |-
       Name of the subscription to create.
     required: true
     custom_flatten: 'templates/terraform/custom_flatten/id_from_name.tmpl'
   - name: 'subscriberContact'
     type: String
+    immutable: true
     description: |-
       Email of the subscriber.
   - name: 'destinationDataset'
     type: NestedObject
+    immutable: true
     description:
       BigQuery destination dataset to create for the subscriber.
     ignore_read: true
     properties:
       - name: 'location'
         type: String
+        immutable: true
         description: |
           The geographic location where the dataset should reside.
           See https://cloud.google.com/bigquery/docs/locations for supported locations.
@@ -116,26 +127,32 @@ parameters:
         diff_suppress_func: 'tpgresource.CaseDiffSuppress'
       - name: 'datasetReference'
         type: NestedObject
+        immutable: true
         required: true
         description: A reference that identifies the destination dataset.
         properties:
           - name: 'datasetId'
             type: String
+            immutable: true
             description: A unique ID for this dataset, without the project name. The ID must contain only letters (a-z, A-Z), numbers (0-9), or underscores (_). The maximum length is 1,024 characters.
             required: true
           - name: 'projectId'
             type: String
+            immutable: true
             description: The ID of the project containing this dataset.
             required: true
             diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
       - name: 'friendlyName'
         type: String
+        immutable: true
         description: A descriptive name for the dataset.
       - name: 'description'
         type: String
+        immutable: true
         description: A user-friendly description of the dataset.
       - name: 'labels'
         type: KeyValuePairs
+        immutable: true
         description: |
           The labels associated with this dataset. You can use these to
           organize and group your datasets.
