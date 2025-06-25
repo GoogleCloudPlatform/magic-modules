@@ -45,8 +45,8 @@ import (
 {{- $productBackendName := $.CaiProductBackendName $caiProductBaseUrl }}
 {{- $apiVersion := $.CaiApiVersion $productBackendName $caiProductBaseUrl}}
 
-{{if $.CustomCode.Constants -}} 
-    {{- $.CustomTemplate $.CustomCode.Constants true -}}
+{{- range $prop := $.AllUserProperties }}
+{{template "SchemaSubResource" $prop}}
 {{- end}}
 
 const {{ $.ResourceName -}}AssetType string = "{{ $productBackendName }}.googleapis.com/{{ $.Name -}}"
@@ -82,6 +82,7 @@ func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asse
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
 
+    var err error
 	res := asset.Resource.Data
 	config := utils.NewConfig()
 	d := &schema.ResourceData{}
@@ -89,14 +90,14 @@ func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asse
 	hclData := make(map[string]interface{})
 
 {{ if $.CustomCode.TgcDecoder -}}
-    res, err = resource{{ $.ResourceName -}}TgcDecoder(d, meta, res)
+    res, err = resource{{ $.ResourceName -}}TgcDecoder(d, config, res)
     if err != nil {
         return nil, err
     }
 {{ end}}
 
 {{ if $.CustomCode.Decoder -}}
-    res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
+    res, err = resource{{ $.ResourceName -}}Decoder(d, config, res)
     if err != nil {
         return nil, err
     }
