@@ -22,7 +22,7 @@ jobs:
         uses: actions-ecosystem/action-regex-match@d50fd2e7a37d0e617aea3d7ada663bd56862b9cc # v2.0.2
         with:
           text: ${{ github.event.comment.body }}
-          regex: '(?:^|\n|\r)@modular-magician reassign-reviewer ?@?([a-zA-Z0-9-]+)?(?:$|\n|\r)'
+          regex: '.*@modular-magician reassign[- ]reviewer ?@?([a-zA-Z0-9-_]+)?.*'
       - name: Checkout Repository
         if: steps.read-comment.outputs.match != ''
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
