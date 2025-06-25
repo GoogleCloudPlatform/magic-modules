@@ -1,0 +1,165 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'ConnectivityTestRun'
+description: |
+  A connectivity test are a static analysis of your resource configurations
+  that enables you to evaluate connectivity to and from Google Cloud
+  resources in your Virtual Private Cloud (VPC) network. This resource allows
+  you to trigger a rerun operation on a connectivity test.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/network-intelligence-center/docs'
+  api: 'https://cloud.google.com/network-intelligence-center/docs/reference/networkmanagement/rest/v1/projects.locations.global.connectivityTests/rerun'
+docs:
+id_format: 'projects/{{project}}/locations/global/connectivityTests/{{name}}'
+base_url: 'projects/{{project}}/locations/global/connectivityTests'
+create_url: 'projects/{{project}}/locations/global/connectivityTests/{{name}}:rerun'
+exclude_delete: true
+exclude_import: true
+immutable: true
+timeouts:
+  insert_minutes: 5
+autogen_async: true
+async:
+  actions: ['create']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+filename_override: 'connectivity_test_resource_run'
+examples:
+  - name: 'network_management_connectivity_test_run_instances'
+    primary_resource_id: 'instance-test'
+    vars:
+      primary_resource_name: 'conn-test-instances'
+      network_name: 'conn-test-net'
+      source_instance: 'source-vm'
+      dest_instance: 'dest-vm'
+    exclude_test: true
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      Unique name for the connectivity test.
+    required: true
+    immutable: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/network_management_connectivity_test_name.go.tmpl'
+  - name: 'reachabilityDetails'
+    type: NestedObject
+    description: |-
+      Connectivity test reachability details.
+    output: true
+    properties:
+      - name: 'result'
+        type: String
+        description: |
+          Status of the connectivity test: RESULT_UNSPECIFIED, REACHABLE, UNREACHABLE, AMBIGUOUS or UNDETERMINED.
+        output: true
+      - name: 'verifyTime'
+        type: String
+        description: |
+          Time when reachability details were determined. An RFC3339 timestamp in UTC time.
+          This in the format of yyyy-MM-ddTHH:mm:ss.SSSZ.
+        output: true
+      - name: 'traces'
+        type: Array
+        description: |
+          List of connectivity test traces.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'endpointInfo'
+              type: NestedObject
+              description: |
+                Derived from the source and destination endpoints definition specified by user request, and validated by the data plane model.
+              output: true
+              properties:
+                - name: 'sourceIp'
+                  type: String
+                  description: |
+                    Source IP address.
+                  output: true
+                - name: 'destinationIp'
+                  type: String
+                  description: |
+                    Destination IP address.
+                  output: true
+                - name: 'protocol'
+                  type: String
+                  description: |
+                    IP protocol in string format, for example: "TCP", "UDP", "ICMP".
+                  output: true
+                - name: 'sourcePort'
+                  type: Integer
+                  description: |
+                    Source port. Only valid when protocol is TCP or UDP.
+                  output: true
+                - name: 'destinationPort'
+                  type: Integer
+                  description: |
+                    Destination port. Only valid when protocol is TCP or UDP.
+                  output: true
+                - name: 'sourceNetworkUri'
+                  type: String
+                  description: |
+                    URI of the network where this packet originates from.
+                  output: true
+                - name: 'destinationNetworkUri'
+                  type: String
+                  description: |
+                    URI of the network where this packet is sent to.
+                  output: true
+                - name: 'sourceAgentUri'
+                  type: String
+                  description: |
+                    URI of the source telemetry agent this packet originates from.
+                  output: true
+            - name: 'steps'
+              type: Array
+              description: |
+                A trace of a test contains multiple steps from the initial state to the final state (delivered, dropped, forwarded, or aborted).
+              output: true
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'description'
+                    type: String
+                    description: |
+                      Description of the connectivity test step.
+                    output: true
+                  - name: 'state'
+                    type: String
+                    description: |
+                      State of the connectivity test step.
+                    output: true
+                  - name: 'causesDrop'
+                    type: Boolean
+                    description: |
+                      If this step leads to the final state Drop.
+                    output: true
+                  - name: 'projectId'
+                    type: String
+                    description: |
+                      Project ID of the connectivity test step.
+                    output: true
+            - name: 'forwardTraceId'
+              type: Integer
+              description: |
+                ID of the trace.
+              output: true
