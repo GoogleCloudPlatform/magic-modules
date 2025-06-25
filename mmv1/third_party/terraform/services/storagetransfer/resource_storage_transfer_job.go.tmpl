@@ -699,13 +699,6 @@ func gcsDataSchema() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: `Google Cloud Storage path in bucket to transfer`,
 				ValidateFunc: validatePath,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					old, new = strings.TrimSpace(old), strings.TrimSpace(new)
-					if strings.ToLower(old) == strings.ToLower(new) {
-						return true
-					}
-					return false
-				},
 			},
 		},
 	}
