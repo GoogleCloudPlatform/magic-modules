@@ -2102,7 +2102,8 @@ func ResourceContainerCluster() *schema.Resource {
 						"patch_mode": {
 							Type:             schema.TypeString,
 							Required:         true,
-							Description:      `The selected auto-upgrade patch type.`,
+							Description:      `The selected auto-upgrade patch type. Accepted values are:
+* ACCELERATED: Upgrades to the latest available patch version in a given minor and release channel.`,
 						},
 					},
 				},

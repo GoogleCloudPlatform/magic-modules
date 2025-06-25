@@ -1335,7 +1335,9 @@ not.
 
 <a name="nested_gke_auto_upgrade_config"></a>The `gke_auto_upgrade_config` block supports:
 
-* `patch_mode` - The selected patch mode.
+* `patch_mode` - (Required) The selected patch mode.
+    Accepted values are:
+    * ACCELERATED: Upgrades to the latest available patch version in a given minor and release channel.
 
 <a name="nested_cost_management_config"></a>The `cost_management_config` block supports:
 
