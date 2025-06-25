@@ -410,6 +410,9 @@ subnetwork in which the cluster's instances are launched.
 * `security_posture_config` - (Optional)
 Enable/Disable Security Posture API features for the cluster. Structure is [documented below](#nested_security_posture_config).
 
+* `rbac_binding_config` - (Optional)
+RBACBindingConfig allows user to restrict ClusterRoleBindings an RoleBindings that can be created. Structure is [documented below](#nested_rbac_binding_config).
+
 * `fleet` - (Optional)
 Fleet configuration for the cluster. Structure is [documented below](#nested_fleet).
 
@@ -1509,6 +1512,11 @@ linux_node_config {
 
 
 * `vulnerability_mode` - (Optional) Sets the mode of the Kubernetes security posture API's workload vulnerability scanning. Available options include `VULNERABILITY_DISABLED`, `VULNERABILITY_BASIC` and `VULNERABILITY_ENTERPRISE`.
+
+<a name="nested_rbac_binding_config"></a>The `rbac_binding_config` block supports:
+
+* `enable_insecure_binding_system_unauthenticated` - (Optional) Setting this to true will allow any ClusterRoleBinding and RoleBinding with subjects system:anonymous or system:unauthenticated.
+* `enable_insecure_binding_system_authenticated` - (Optional) Setting this to true will allow any ClusterRoleBinding and RoleBinding with subjects system:authenticated.
 
 <a name="nested_fleet"></a>The `fleet` block supports:
 
