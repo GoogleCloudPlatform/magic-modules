@@ -73,7 +73,6 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
       }
     }
 
-
     rules {
       column = "address"
       dimension = "UNIQUENESS"
@@ -112,6 +111,15 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
       sql_assertion {
         sql_statement = "select * from bigquery-public-data.austin_bikeshare.bikeshare_stations where station_id is null"
       }
+    }
+
+    rules {
+      column = "footprint_length"
+      dimension = "VALIDITY"
+      row_condition_expectation {
+        sql_expression = "footprint_length > 0 AND footprint_length <= 100"
+      }
+      suspended = true
     }
   }
 
