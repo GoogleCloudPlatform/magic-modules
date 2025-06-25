@@ -471,7 +471,7 @@ func TestParseReleaseDiffOutput(t *testing.T) {
 		t.Fatalf("Failed to write to temp file: %v", err)
 	}
 
-	var expectedOutput = "This is a test release diff output.\n"
+	var expectedOutput = "This is a test release diff output."
 	var output string
 	output, err = acctest.ParseReleaseDiffOutput(temp_file)
 	if err != nil {
