@@ -14,7 +14,6 @@ func TestAccContactCenterInsightsAnalysisRule_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":  acctest.RandString(t, 10),
-		"project_name":   envvar.GetTestProjectFromEnv(),
 		"project_number": envvar.GetTestProjectNumberFromEnv(),
 	}
 
