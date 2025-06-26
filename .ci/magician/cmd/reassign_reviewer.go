@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"magician/github"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -58,7 +59,7 @@ var reassignReviewerCmd = &cobra.Command{
 
 		var newPrimaryReviewer string
 		if len(args) > 2 {
-			newPrimaryReviewer = args[2]
+			newPrimaryReviewer = strings.TrimPrefix(args[2], "@")
 		}
 		return execReassignReviewer(prNumber, newPrimaryReviewer, gh)
 	},
