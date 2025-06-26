@@ -1,6 +1,18 @@
-		currentState := d.Get("state").(string)
-        refreshWhenApply:= d.Get("refresh_when_apply").(bool)
-		refreshWhenStale:= d.Get("refresh_when_stale").(bool)
+		var currentState string
+        if stateVal, ok := d.GetOk("state"); ok {
+            if s, isString := stateVal.(string); isString {
+                currentState = s
+            } else {
+                log.Printf("[WARN] BigQuery Analytics Hub Subscription (ID: %s): 'state' attribute is present but not a string. Value: %#v. Assuming empty state for refresh logic.", d.Id(), stateVal)
+                currentState = "" // Treat as empty if type assertion fails
+            }
+        } else {
+            // 'state' attribute is missing entirely from resource data
+            log.Printf("[WARN] BigQuery Analytics Hub Subscription (ID: %s): 'state' attribute is missing from resource data. Assuming empty state for refresh logic.", d.Id())
+            currentState = "" // Treat as empty if missing
+        }
+        refreshWhenApply:= d.Get("refresh_when_apply").(bool) //no error handling needed as nil will default to false
+		refreshWhenStale:= d.Get("refresh_when_stale").(bool) //no error handling needed as nil will default to false
 		refreshFinal := refreshWhenApply || (refreshWhenStale && currentState=="STATE_STALE")
 
 		if (refreshFinal) {

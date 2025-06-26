@@ -12,5 +12,8 @@ if d.Get("refresh_when_stale") != nil {
     }
 }
 
-// all other fields are immutable, don't do anything else
+//If a mutable field is added later in the subscription resource, an update API endpoint will be created 
+//and this custom_update will have to be changed and will call a Update API as well as done by mutable resources.
+
+// all other fields are immutable for now, don't do anything else
 return nil

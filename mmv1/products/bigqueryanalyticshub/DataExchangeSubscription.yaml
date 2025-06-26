@@ -38,12 +38,12 @@ custom_code:
   custom_update: 'templates/terraform/custom_update/bigqueryanalyticshub_data_exchange_subscription.go.tmpl'
 sweeper:
   url_substitutions:
-    - region: "US"
+    - region: "us"
 examples:
   - name: 'bigquery_analyticshub_dataexchange_subscription_basic'
     primary_resource_id: 'subscription'
     primary_resource_name: 'fmt.Sprintf("tf_test_subscription_%s", context["random_suffix"])'
-    region_override: 'US'
+    region_override: 'us'
     ignore_read_extra:
       - 'last_modify_time'
       - 'state'
@@ -165,7 +165,7 @@ properties:
   - name: 'name'
     type: String
     description: |-
-      The resource name of the subscription. e.g. "projects/myproject/locations/US/subscriptions/123"
+      The resource name of the subscription. e.g. "projects/myproject/locations/us/subscriptions/123"
     output: true
   - name: 'creationTime'
     type: Time
@@ -202,7 +202,7 @@ properties:
     type: Map
     description: |-
       Output only. Map of listing resource names to associated linked resource,
-      e.g. projects/123/locations/US/dataExchanges/456/listings/789 -> projects/123/datasets/my_dataset
+      e.g. projects/123/locations/us/dataExchanges/456/listings/789 -> projects/123/datasets/my_dataset
       For Data Exchange subscriptions, this map may contain multiple entries if the Data Exchange has multiple listings.
     key_name: resource_name
     key_description: The associated linked resource
