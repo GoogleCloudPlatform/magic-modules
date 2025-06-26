@@ -44,6 +44,11 @@ examples:
     primary_resource_id: 'subscription'
     primary_resource_name: 'fmt.Sprintf("tf_test_subscription_%s", context["random_suffix"])'
     region_override: 'US'
+    ignore_read_extra:
+      - 'last_modify_time'
+      - 'state'
+      - 'linked_dataset_map'
+      - 'linked_resources'
     vars:
       data_exchange_id: 'my_test_dataexchange'
       listing_dataset_id: 'listing_src_dataset'
