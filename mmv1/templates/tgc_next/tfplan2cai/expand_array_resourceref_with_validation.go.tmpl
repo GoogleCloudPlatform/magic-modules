@@ -19,9 +19,12 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
   }
   v = vSet.List()
 {{- end }}
-  l := v.([]interface{})
-  req := make([]interface{}, 0, len(l))
-  for _, raw := range l {
+  vSlice, ok := v.([]interface{})
+  if !ok || vSlice == nil {
+    return nil, fmt.Errorf("invalid type for v: %T, expected []interface{}", v)
+  }
+  req := make([]interface{}, 0, len(vSlice))
+  for _, raw := range vSlice {
     if raw == nil {
       return nil, fmt.Errorf("Invalid value for {{underscore $.Name}}: nil")
     }
