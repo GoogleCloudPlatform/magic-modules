@@ -726,10 +726,12 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error getting identity: %s", err)
 	}
     {{- range $p := $.IdentityProperties }}
-    err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(string))
-    if err != nil {
-        return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
-    }     
+    if v, ok := identity.GetOk("{{ underscore $p.Name}}"); ok && v != "" {
+        err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(string))
+            if err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }     
+    }
     {{- end }}
 {{- end }}
 {{  end -}}
