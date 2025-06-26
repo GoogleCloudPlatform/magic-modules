@@ -1,8 +1,8 @@
 package modelarmor_test
 
 import (
-    "fmt"
 	"bytes"
+	"fmt"
 	"testing"
 	"text/template"
 
@@ -77,11 +77,11 @@ resource "google_model_armor_template" "template-basic" {
 func TestAccModelArmorTemplate_update(t *testing.T) {
 	t.Parallel()
 
-    templateId := fmt.Sprintf("modelarmor-test-update-%s", acctest.RandString(t, 5))
+	templateId := fmt.Sprintf("modelarmor-test-update-%s", acctest.RandString(t, 5))
 
-    context := map[string]interface{}{
-        "templateId": templateId,
-    }
+	context := map[string]interface{}{
+		"templateId": templateId,
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -91,12 +91,12 @@ func TestAccModelArmorTemplate_update(t *testing.T) {
 			{
 				Config: testAccModelArmorTemplate_initial(context),
 			},
-            {
-                ResourceName:      "google_model_armor_template.test-resource",
-				ImportState:       true,
-                ImportStateVerify: true,
-                ImportStateVerifyIgnore: []string{"labels", "location", "template_id", "terraform_labels"},
-            },
+			{
+				ResourceName:            "google_model_armor_template.test-resource",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "template_id", "terraform_labels"},
+			},
 			{
 				Config: testAccModelArmorTemplate_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
@@ -105,18 +105,18 @@ func TestAccModelArmorTemplate_update(t *testing.T) {
 					},
 				},
 			},
-            {
-                ResourceName:      "google_model_armor_template.test-resource",
-                ImportState:       true,
-                ImportStateVerify: true,
-                ImportStateVerifyIgnore: []string{"labels", "location", "template_id", "terraform_labels"},
-            },
+			{
+				ResourceName:            "google_model_armor_template.test-resource",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "location", "template_id", "terraform_labels"},
+			},
 		},
 	})
 }
 
 func testAccModelArmorTemplate_initial(context map[string]interface{}) string {
-    return acctest.Nprintf(`
+	return acctest.Nprintf(`
       resource "google_model_armor_template" "test-resource" {
         location    = "us-central1"
         template_id = "%{templateId}"
@@ -162,7 +162,7 @@ func testAccModelArmorTemplate_initial(context map[string]interface{}) string {
 }
 
 func testAccModelArmorTemplate_update(context map[string]interface{}) string {
-    return acctest.Nprintf(`
+	return acctest.Nprintf(`
       resource "google_model_armor_template" "test-resource" {
         location    = "us-central1"
         template_id = "%{templateId}"
