@@ -40,7 +40,6 @@ custom_code:
   decoder: 'templates/terraform/decoders/bigquery_data_transfer.go.tmpl'
   pre_update: 'templates/terraform/pre_update/bigquerydatatransfer_config.tmpl'
   custom_import: 'templates/terraform/custom_import/bigquery_data_transfer_self_link_as_name_set_location.go.tmpl'
-  raw_resource_config_validation: 'templates/terraform/validation/bigquery_data_transfer_config.go.tmpl'
 custom_diff:
   - 'sensitiveParamCustomizeDiff'
   - 'paramsCustomizeDiff'
