@@ -24,8 +24,8 @@ docs:
     When importing the resource with `terraform import`, provide the destination project and location
     in the format projects/{{destination_project}}/locations/{{destination_location}}/subscriptions/{{subscription_id}}
   optional_properties: |
-    * `refreshWhenApply` - (Optional) If true, the subscription will be refreshed everytime Terraform apply is called
-    * `refreshWhenStale` - (Optional) If true, the subscription will be refreshed everytime the state is stale and Terraform apply is called
+    * `refreshWhenApply` - (Optional) Default value is true. If true, the subscription will be refreshed everytime Terraform apply/plan is called
+    * `refreshWhenStale` - (Optional) Default value is true. If true, the subscription will be refreshed everytime the state is stale and Terraform apply/plan is called
 base_url: 'projects/{{project}}/locations/{{location}}/subscriptions'
 self_link: 'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}'
 create_url: 'projects/{{data_exchange_project}}/locations/{{data_exchange_location}}/dataExchanges/{{data_exchange_id}}:subscribe'
@@ -62,11 +62,11 @@ examples:
 virtual_fields:
   - name: 'refresh_when_apply'
     type: Boolean
-    description: 'If true, the subscription will be refreshed everytime Terraform apply is called'
+    description: 'Default value is true. If true, the subscription will be refreshed everytime Terraform apply is called'
     default_value: true
   - name: 'refresh_when_stale'
     type: Boolean
-    description: 'If true, the subscription will be refreshed everytime the state is stale and Terraform apply is called'
+    description: 'Default value is true. If true, the subscription will be refreshed everytime the state is stale and Terraform apply is called'
     default_value: true
 parameters:
   - name: 'dataExchangeId'
