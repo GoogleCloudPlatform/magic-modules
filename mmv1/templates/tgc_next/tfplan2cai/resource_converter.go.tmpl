@@ -89,16 +89,16 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
 
 func ResourceConverter{{ $.ResourceName -}}() cai.ResourceConverter {
     return cai.ResourceConverter{
-        Convert: Get{{ $.ResourceName -}}CaiObject,
+        Convert: Get{{ $.ResourceName -}}CaiAssets,
     }
 }
 
-func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
+func Get{{ $.ResourceName -}}CaiAssets(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
     name, err := cai.AssetName(d, config, "{{ $.CaiAssetNameTemplate $productBackendName }}")
     if err != nil {
         return []caiasset.Asset{}, err
     }
-    if obj, err := Get{{ $.ResourceName -}}ApiObject(d, config); err == nil {
+    if obj, err := Get{{ $.ResourceName -}}CaiObject(d, config); err == nil {
         location, _ := tpgresource.GetLocation(d, config)
         return []caiasset.Asset{{"{{"}}
             Name: name,
@@ -116,7 +116,7 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
     }
 }
 
-func Get{{ $.ResourceName -}}ApiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
+func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]interface{}, error) {
     obj := make(map[string]interface{})
 {{- range $prop := $.SettableProperties }}
 {{- if $prop.FlattenObject }}
@@ -126,7 +126,7 @@ func Get{{ $.ResourceName -}}ApiObject(d tpgresource.TerraformResourceData, conf
 {{- end}}
     if err != nil {
         return nil, err
-{{- if not $prop.SendEmptyValue }}
+{{- if and (not $prop.SendEmptyValue) (not $prop.IncludeEmptyValueInCai) }}
     } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop)) {
 {{- else }}
     } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop) {
@@ -164,6 +164,8 @@ func resource{{ $.ResourceName -}}TgcEncoder(d tpgresource.TerraformResourceData
 {{ range $prop := $.SettableProperties }}
     {{ if $prop.CustomTgcExpand }}
     {{- $prop.CustomTemplate $prop.CustomTgcExpand false -}}
+    {{ else if and ($prop.IsA "Array") ($prop.ItemType.IsA "ResourceRef")}}
+    {{- template "expandArrayResourcerefWithValidation" $prop -}}
     {{ else }}
     {{- template "expandPropertyMethod" $prop -}}
     {{ end }}
