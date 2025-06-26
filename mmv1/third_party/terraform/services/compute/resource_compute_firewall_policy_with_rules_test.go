@@ -1,110 +1,139 @@
 package compute_test
 
 import (
-	"testing"
+  "testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
+  "github.com/hashicorp/terraform-provider-google/google/acctest"
+  "github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccComputeFirewallPolicyWithRules_update(t *testing.T) {
-	t.Parallel()
+  t.Parallel()
 
-	context := map[string]interface{}{
-		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"random_suffix": acctest.RandString(t, 10),
-	}
+  context := map[string]interface{}{
+    "org_id":        envvar.GetTestOrgFromEnv(t),
+    "random_suffix": acctest.RandString(t, 10),
+  }
 
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckComputeFirewallPolicyWithRulesDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccComputeFirewallPolicyWithRules_full(context),
-			},
-			{
-				ResourceName:      "google_compute_firewall_policy_with_rules.firewall-policy-with-rules",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeFirewallPolicyWithRules_update(context),
-			},
-			{
-				ResourceName:      "google_compute_firewall_policy_with_rules.firewall-policy-with-rules",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
+  acctest.VcrTest(t, resource.TestCase{
+    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+    CheckDestroy:             testAccCheckComputeFirewallPolicyWithRulesDestroyProducer(t),
+    Steps: []resource.TestStep{
+      {
+        Config: testAccComputeFirewallPolicyWithRules_full(context),
+      },
+      {
+        ResourceName:      "google_compute_firewall_policy_with_rules.firewall-policy-with-rules",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+      {
+        Config: testAccComputeFirewallPolicyWithRules_update(context),
+      },
+      {
+        ResourceName:      "google_compute_firewall_policy_with_rules.firewall-policy-with-rules",
+        ImportState:       true,
+        ImportStateVerify: true,
+      },
+    },
+  })
 }
 
 func testAccComputeFirewallPolicyWithRules_full(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 data "google_project" "project" {
 }
 
 resource "google_compute_firewall_policy_with_rules" "firewall-policy-with-rules" {
-  short_name = "tf-test-tf-fw-org-policy-with-rules%{random_suffix}"
+  short_name  = "tf-test-tf-fw-org-policy-with-rules%{random_suffix}"
   description = "Terraform test"
-  parent = "organizations/%{org_id}"
+  parent      = "organizations/%{org_id}"
 
   rule {
-    description    = "tcp rule"
-    priority       = 1000
-    enable_logging = true
-    action         = "allow"
-    direction      = "EGRESS"
+    description      = "tcp rule"
+    priority         = 1000
+    enable_logging   = true
+    action           = "allow"
+    direction        = "EGRESS"
+    target_resources = [google_compute_network.network.self_link]
+
     match {
+      dest_ip_ranges            = ["11.100.0.1/32"]
+      dest_fqdns                = ["www.yyy.com", "www.zzz.com"]
+      dest_region_codes         = ["HK", "IN"]
+      dest_threat_intelligences = ["iplist-search-engines-crawlers", "iplist-tor-exit-nodes"]
+      dest_address_groups       = [google_network_security_address_group.address_group_1.id]
+
       layer4_config {
         ip_protocol = "tcp"
         ports       = [8080, 7070]
       }
-      dest_ip_ranges = ["11.100.0.1/32"]
-      dest_fqdns = ["www.yyy.com", "www.zzz.com"]
-      dest_region_codes = ["HK", "IN"]
-      dest_threat_intelligences = ["iplist-search-engines-crawlers", "iplist-tor-exit-nodes"]
-      dest_address_groups = [google_network_security_address_group.address_group_1.id]
     }
-    target_resources = [google_compute_network.network.self_link]
   }
+
   rule {
     description    = "udp rule"
     priority       = 2000
     enable_logging = false
     action         = "deny"
     direction      = "INGRESS"
+    disabled       = true
+
     match {
+      src_ip_ranges            = ["0.0.0.0/0"]
+      src_fqdns                = ["www.abc.com", "www.def.com"]
+      src_region_codes         = ["US", "CA"]
+      src_threat_intelligences = ["iplist-known-malicious-ips", "iplist-public-clouds"]
+      src_address_groups       = [google_network_security_address_group.address_group_1.id]
+
       layer4_config {
         ip_protocol = "udp"
       }
-      src_ip_ranges = ["0.0.0.0/0"]
-      src_fqdns = ["www.abc.com", "www.def.com"]
-      src_region_codes = ["US", "CA"]
-      src_threat_intelligences = ["iplist-known-malicious-ips", "iplist-public-clouds"]
-      src_address_groups = [google_network_security_address_group.address_group_1.id]
     }
-    disabled = true
   }
+
   rule {
-    description    = "security profile group rule"
-    rule_name      = "tcp rule"
-    priority       = 3000
-    enable_logging = false
-    action         = "apply_security_profile_group"
-    direction      = "INGRESS"
+    description             = "security profile group rule"
+    rule_name               = "tcp rule"
+    priority                = 3000
+    enable_logging          = false
+    action                  = "apply_security_profile_group"
+    direction               = "INGRESS"
+    target_service_accounts = ["test@google.com"]
+    security_profile_group  = "//networksecurity.googleapis.com/${google_network_security_security_profile_group.security_profile_group_1.id}"
+    tls_inspect             = true
+
     match {
+      src_ip_ranges = ["0.0.0.0/0"]
+
       layer4_config {
         ip_protocol = "tcp"
       }
-      src_ip_ranges = ["0.0.0.0/0"]
     }
-    target_service_accounts = ["test@google.com"]
-    security_profile_group = "//networksecurity.googleapis.com/${google_network_security_security_profile_group.security_profile_group_1.id}"
-    tls_inspect = true
+  }
+
+  rule {
+    description    = "secure tags"
+    rule_name      = "secure tags"
+    priority       = 4000
+    enable_logging = false
+    action         = "allow"
+    direction      = "INGRESS"
+
+    match {
+      src_ip_ranges = ["0.0.0.0/0"]
+
+      src_secure_tag {
+        name = google_tags_tag_value.basic_value.id
+      }
+
+      layer4_config {
+        ip_protocol = "tcp"
+      }
+    }
   }
 }
 
@@ -126,10 +155,27 @@ resource "google_network_security_security_profile_group" "security_profile_grou
 }
 
 resource "google_network_security_security_profile" "security_profile_1" {
-  name        = "tf-test-tf-security-profile%{random_suffix}"
-  type        = "THREAT_PREVENTION"
+  name     = "tf-test-tf-security-profile%{random_suffix}"
+  type     = "THREAT_PREVENTION"
+  parent   = "organizations/%{org_id}"
+  location = "global"
+}
+
+resource "google_tags_tag_key" "basic_key" {
+  description = "For keyname resources."
   parent      = "organizations/%{org_id}"
-  location    = "global"
+  purpose     = "GCE_FIREWALL"
+  short_name  = "tf-test-tagkey-%{random_suffix}"
+
+  purpose_data = {
+    organization = "auto"
+  }
+}
+
+resource "google_tags_tag_value" "basic_value" {
+  description = "For valuename resources."
+  parent      = google_tags_tag_key.basic_key.id
+  short_name  = "tf-test-tagvalue-%{random_suffix}"
 }
 
 resource "google_compute_network" "network" {
@@ -141,14 +187,14 @@ resource "google_compute_network" "network" {
 }
 
 func testAccComputeFirewallPolicyWithRules_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+  return acctest.Nprintf(`
 data "google_project" "project" {
 }
 
 resource "google_compute_firewall_policy_with_rules" "firewall-policy-with-rules" {
-  short_name = "tf-test-tf-fw-org-policy-with-rules%{random_suffix}"
+  short_name  = "tf-test-tf-fw-org-policy-with-rules%{random_suffix}"
   description = "Terraform test - update"
-  parent = "organizations/%{org_id}"
+  parent      = "organizations/%{org_id}"
 
   rule {
     description    = "tcp rule - update"
@@ -157,35 +203,61 @@ resource "google_compute_firewall_policy_with_rules" "firewall-policy-with-rules
     enable_logging = false
     action         = "deny"
     direction      = "INGRESS"
+
     match {
+      src_ip_ranges            = ["11.100.0.1/32", "0.0.0.0/0"]
+      src_fqdns                = ["www.yyy.com"]
+      src_region_codes         = ["HK"]
+      src_threat_intelligences = ["iplist-search-engines-crawlers"]
+
       layer4_config {
         ip_protocol = "udp"
         ports       = [8080]
       }
-      src_ip_ranges = ["11.100.0.1/32", "0.0.0.0/0"]
-      src_fqdns = ["www.yyy.com"]
-      src_region_codes = ["HK"]
-      src_threat_intelligences = ["iplist-search-engines-crawlers"]
     }
   }
+
   rule {
-      description    = "udp rule"
-      priority       = 3000
-      enable_logging = false
-      action         = "deny"
-      direction      = "INGRESS"
-      match {
-        layer4_config {
-          ip_protocol = "all"
-        }
-        src_ip_ranges = ["0.0.0.0/0"]
-        src_fqdns = ["www.abc.com", "www.xyz.com"]
-        src_region_codes = ["US", "CA", "FR"]
-        src_threat_intelligences = ["iplist-known-malicious-ips", "iplist-public-clouds"]
-        src_address_groups = [google_network_security_address_group.address_group_1.id]
+    description    = "udp rule"
+    priority       = 3000
+    enable_logging = false
+    action         = "deny"
+    direction      = "INGRESS"
+    disabled       = false
+
+    match {
+      src_ip_ranges            = ["0.0.0.0/0"]
+      src_fqdns                = ["www.abc.com", "www.xyz.com"]
+      src_region_codes         = ["US", "CA", "FR"]
+      src_threat_intelligences = ["iplist-known-malicious-ips", "iplist-public-clouds"]
+      src_address_groups       = [google_network_security_address_group.address_group_1.id]
+
+      layer4_config {
+        ip_protocol = "all"
       }
-      disabled = false
     }
+  }
+
+  rule {
+    description    = "secure tags"
+    rule_name      = "secure tags"
+    priority       = 4000
+    enable_logging = false
+    action         = "allow"
+    direction      = "INGRESS"
+
+    target_secure_tag {
+      name = google_tags_tag_value.basic_value.id
+    }
+
+    match {
+      src_ip_ranges = ["0.0.0.0/0"]
+
+      layer4_config {
+        ip_protocol = "tcp"
+      }
+    }
+  }
 }
 
 resource "google_network_security_address_group" "address_group_1" {
@@ -206,10 +278,27 @@ resource "google_network_security_security_profile_group" "security_profile_grou
 }
 
 resource "google_network_security_security_profile" "security_profile_1" {
-  name        = "tf-test-tf-security-profile%{random_suffix}"
-  type        = "THREAT_PREVENTION"
+  name     = "tf-test-tf-security-profile%{random_suffix}"
+  type     = "THREAT_PREVENTION"
+  parent   = "organizations/%{org_id}"
+  location = "global"
+}
+
+resource "google_tags_tag_key" "basic_key" {
+  description = "For keyname resources."
   parent      = "organizations/%{org_id}"
-  location    = "global"
+  purpose     = "GCE_FIREWALL"
+  short_name  = "tf-test-tagkey-%{random_suffix}"
+
+  purpose_data = {
+    organization = "auto"
+  }
+}
+
+resource "google_tags_tag_value" "basic_value" {
+  description = "For valuename resources."
+  parent      = google_tags_tag_key.basic_key.id
+  short_name  = "tf-test-tagvalue-%{random_suffix}"
 }
 `, context)
 }
