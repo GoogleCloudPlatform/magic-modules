@@ -729,11 +729,17 @@ func buildWriteOnlyField(name string, parent *Type, originalField *Type) *Type {
 	exactlyOneOfOriginalField := buildFieldPath(parent, originalField.TerraformLineage())
 	exactlyOneOfWriteOnlyField := buildFieldPath(parent, google.Underscore(name))
 
+	apiName := originalField.ApiName
+	if apiName == "" {
+		apiName = originalField.Name
+	}
+
 	options := []func(*Type){
 		propertyWithType("String"),
 		propertyWithRequired(false),
 		propertyWithDescription(description),
 		propertyWithWriteOnly(true),
+		propertyWithApiName(apiName),
 		propertyWithIgnoreRead(true),
 		propertyWithConflicts([]string{conflictsWith}),
 	}

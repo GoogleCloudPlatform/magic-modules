@@ -1031,6 +1031,12 @@ func propertyWithDefault(defaultValue interface{}) func(*Type) {
 	}
 }
 
+func propertyWithApiName(apiName string) func(*Type) {
+	return func(p *Type) {
+		p.ApiName = apiName
+	}
+}
+
 func (t *Type) validateLabelsField() {
 	productName := t.ResourceMetadata.ProductMetadata.Name
 	resourceName := t.ResourceMetadata.Name
