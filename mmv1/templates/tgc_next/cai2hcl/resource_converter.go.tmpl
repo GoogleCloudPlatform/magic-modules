@@ -82,7 +82,7 @@ func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asse
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
 
-    var err error
+	var err error
 	res := asset.Resource.Data
 	config := utils.NewConfig()
 	d := &schema.ResourceData{}
