@@ -55,11 +55,11 @@ examples:
       destination_dataset_id: 'subscribed_dest_dataset'
       destination_dataset_friendly_name: 'Subscribed Destination Dataset'
 virtual_fields:
-  - name: 'refreshWhenApply'
+  - name: 'refresh_when_apply'
     type: Boolean
     description: 'If true, the subscription will be refreshed everytime Terraform apply is called'
     default_value: true
-  - name: 'refreshWhenStale'
+  - name: 'refresh_when_stale'
     type: Boolean
     description: 'If true, the subscription will be refreshed everytime the state is stale and Terraform apply is called'
     default_value: true
