@@ -104,9 +104,21 @@ Description of the change and how users should adjust their configuration (if ne
 
 ## Resource: `google_storage_transfer_job`
 
-### `path` does not allow strings starting with /
+### `transfer_spec.gcs_data_sink.path` added validation and can allow empty string
 
-Description of the change and how users should adjust their configuration (if needed).
+`transfer_spec.gcs_data_sink.path` added validation not to allow strings starting with / and can allow empty string.
+
+### `transfer_spec.gcs_data_source.path` added validation to path cannot be started with /
+
+`transfer_spec.gcs_data_source.path` added validation not to allow strings starting with / and can allow empty string.
+
+### `replication_spec.gcs_data_source.path` added validation to path cannot be started with /
+
+`replication_spec.gcs_data_source.path` added validation not to allow strings starting with / and can allow empty string.
+
+### `replication_spec.gcs_data_sink.path` added validation to path cannot be started with /
+
+`replication_spec.gcs_data_sink.path` added validation not to allow strings starting with / and can allow empty string.
 
 ## Resource: `google_bigtable_table_iam_policy`
 
