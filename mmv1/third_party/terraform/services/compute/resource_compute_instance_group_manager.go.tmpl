@@ -595,6 +595,7 @@ func ResourceComputeInstanceGroupManager() *schema.Resource {
 						"workload_policy": {
 							Type:        schema.TypeString,
 							Optional:    true,
+							DiffSuppressFunc: tpgresource.CompareSelfLinkRelativePaths,
 							Description: `The URL of the workload policy that is specified for this managed instance group. It can be a full or partial URL.`,
 						},
 					},
