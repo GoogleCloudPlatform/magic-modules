@@ -6,6 +6,7 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
   }
   region = "us-central1"
   replica_count = 0
+  allow_fewer_zones_deployment = true
   node_type = "REDIS_SHARED_CORE_NANO"
   transit_encryption_mode = "TRANSIT_ENCRYPTION_MODE_DISABLED"
   authorization_mode = "AUTH_MODE_DISABLED"
