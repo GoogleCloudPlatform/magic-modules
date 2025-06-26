@@ -112,7 +112,7 @@ properties:
     default_from_api: true
     description: |
       Optional. The state of the VPC Flow Log configuration. Default value
-      is ENABLED. When creating a new configuration, it must be enabled.   
+      is ENABLED. When creating a new configuration, it must be enabled.
       Possible values: STATE_UNSPECIFIED ENABLED DISABLED
   - name: 'aggregationInterval'
     type: String
