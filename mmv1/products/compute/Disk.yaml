@@ -50,6 +50,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 iam_policy:
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
@@ -458,6 +459,7 @@ properties:
       Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true
     required: false
     default_from_api: true
+    include_empty_value_in_cai: true
   - name: 'multiWriter'
     type: Boolean
     description: |
