@@ -12,16 +12,16 @@
 # limitations under the License.
 
 ---
-name: VpcFlowLogsConfig
-description: Vpc Flow Logs Config allows configure Flow Logs for VPC, Subnet, Interconnect Attachment and VPN.
-base_url: projects/{{project}}/locations/{{location}}/vpcFlowLogsConfigs
-update_mask: true
-self_link: projects/{{project}}/locations/{{location}}/vpcFlowLogsConfigs/{{vpc_flow_logs_config_id}}
-create_url: projects/{{project}}/locations/{{location}}/vpcFlowLogsConfigs?vpcFlowLogsConfigId={{vpc_flow_logs_config_id}}
-update_verb: PATCH
-id_format: projects/{{project}}/locations/{{location}}/vpcFlowLogsConfigs/{{vpc_flow_logs_config_id}}
+name: VpcFlowLogsConfigByOrganizationAndLocation
+description: Vpc Flow Logs Config allows configure Flow Logs for organization.
+min_version: 'beta'
+base_url: organizations/{{organization}}/locations/{{location}}/vpcFlowLogsConfigs
+immutable: true
+self_link: organizations/{{organization}}/locations/{{location}}/vpcFlowLogsConfigs/{{}}
+create_url: organizations/{{organization}}/locations/{{location}}/vpcFlowLogsConfigs?={{}}
+id_format: organizations/{{organization}}/locations/{{location}}/vpcFlowLogsConfigs/{{}}
 import_format:
-- projects/{{project}}/locations/{{location}}/vpcFlowLogsConfigs/{{vpc_flow_logs_config_id}}
+- organizations/{{organization}}/locations/{{location}}/vpcFlowLogsConfigs/{{}}
 examples:
 - name: name_of_example_file
   primary_resource_id: example
@@ -43,8 +43,14 @@ async:
   result:
     resource_inside_response: true
   include_project: false
-autogen_status: VnBjRmxvd0xvZ3NDb25maWc=
+autogen_status: VnBjRmxvd0xvZ3NDb25maWdCeU9yZ2FuaXphdGlvbkFuZExvY2F0aW9u
 parameters:
+- name: organization
+  type: String
+  description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+  immutable: true
+  url_param_only: true
+  required: true
 - name: location
   type: String
   description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
@@ -58,52 +64,6 @@ parameters:
   url_param_only: true
   required: true
 properties:
-- name: interconnectAttachment
-  type: String
-  description: |-
-    Traffic will be logged from the Interconnect Attachment.
-    Format:
-    projects/{project_id}/regions/{region}/interconnectAttachments/{name}
-- name: vpnTunnel
-  type: String
-  description: |-
-    Traffic will be logged from the VPN Tunnel.
-    Format: projects/{project_id}/regions/{region}/vpnTunnels/{name}
-- name: description
-  type: String
-  description: |-
-    The user-supplied description of the VPC Flow Logs configuration.
-    Maximum of 512 characters.
-- name: aggregationInterval
-  type: String
-  description: |-
-    The aggregation interval for the logs. Default value is INTERVAL_5_SEC.
-    Possible values:
-    AGGREGATION_INTERVAL_UNSPECIFIED
-    INTERVAL_5_SEC
-    INTERVAL_30_SEC
-    INTERVAL_1_MIN
-    INTERVAL_5_MIN
-    INTERVAL_10_MIN
-    INTERVAL_15_MIN
-- name: metadata
-  type: String
-  description: |-
-    Configures whether all, none or a subset of metadata fields should be
-    added to the reported VPC flow logs.
-    Default value is INCLUDE_ALL_METADATA.
-    Possible values:
-    METADATA_UNSPECIFIED
-    INCLUDE_ALL_METADATA
-    EXCLUDE_ALL_METADATA
-    CUSTOM_METADATA
-- name: metadataFields
-  type: Array
-  description: |-
-    Custom metadata fields to include in the reported VPC flow logs.
-    Can only be specified if "metadata" was set to CUSTOM_METADATA.
-  item_type:
-    type: String
 - name: targetResourceState
   type: String
   description: |-
@@ -115,7 +75,6 @@ properties:
     TARGET_RESOURCE_DOES_NOT_EXIST
   output: true
 - name: subnet
-  min_version: 'beta'
   type: String
   description: |-
     Traffic will be logged from VMs within the subnetwork.
@@ -132,7 +91,6 @@ properties:
   type: String
   description: Export filter used to define which VPC Flow Logs should be logged.
 - name: network
-  min_version: 'beta'
   type: String
   description: |-
     Traffic will be logged from VMs, VPN tunnels and Interconnect Attachments
@@ -181,3 +139,49 @@ properties:
     STATE_UNSPECIFIED
     ENABLED
     DISABLED
+- name: interconnectAttachment
+  type: String
+  description: |-
+    Traffic will be logged from the Interconnect Attachment.
+    Format:
+    projects/{project_id}/regions/{region}/interconnectAttachments/{name}
+- name: vpnTunnel
+  type: String
+  description: |-
+    Traffic will be logged from the VPN Tunnel.
+    Format: projects/{project_id}/regions/{region}/vpnTunnels/{name}
+- name: description
+  type: String
+  description: |-
+    The user-supplied description of the VPC Flow Logs configuration.
+    Maximum of 512 characters.
+- name: aggregationInterval
+  type: String
+  description: |-
+    The aggregation interval for the logs. Default value is INTERVAL_5_SEC.
+    Possible values:
+    AGGREGATION_INTERVAL_UNSPECIFIED
+    INTERVAL_5_SEC
+    INTERVAL_30_SEC
+    INTERVAL_1_MIN
+    INTERVAL_5_MIN
+    INTERVAL_10_MIN
+    INTERVAL_15_MIN
+- name: metadata
+  type: String
+  description: |-
+    Configures whether all, none or a subset of metadata fields should be
+    added to the reported VPC flow logs.
+    Default value is INCLUDE_ALL_METADATA.
+    Possible values:
+    METADATA_UNSPECIFIED
+    INCLUDE_ALL_METADATA
+    EXCLUDE_ALL_METADATA
+    CUSTOM_METADATA
+- name: metadataFields
+  type: Array
+  description: |-
+    Custom metadata fields to include in the reported VPC flow logs.
+    Can only be specified if "metadata" was set to CUSTOM_METADATA.
+  item_type:
+    type: String
