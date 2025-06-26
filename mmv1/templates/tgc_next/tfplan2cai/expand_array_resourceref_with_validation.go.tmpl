@@ -13,7 +13,11 @@
 {{- define "expandArrayResourcerefWithValidation" }}
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 {{- if $.IsSet }}
-  v = v.(*schema.Set).List()
+  vSet, ok := v.(*schema.Set)
+  if !ok || vSet == nil {
+    return nil, fmt.Errorf("invalid type for v: %T, expected *schema.Set", v)
+  }
+  v = vSet.List()
 {{- end }}
   l := v.([]interface{})
   req := make([]interface{}, 0, len(l))
