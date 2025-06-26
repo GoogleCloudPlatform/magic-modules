@@ -618,11 +618,6 @@ random: Example Subcategory
 			changedFiles: []string{"website/docs/r/sample.markdown"},
 			wantErr:      false,
 		},
-		{
-			name:         "missing subcategory in frontmatter",
-			changedFiles: []string{"website/docs/r/missingsubcategory.markdown"},
-			wantErr:      true,
-		},
 	}
 
 	for _, tc := range tests {

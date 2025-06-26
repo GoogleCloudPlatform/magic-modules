@@ -720,10 +720,6 @@ func checkDocumentFrontmatter(repo source.Repo) []string {
 		}
 		if err := data.Decode(&metadata); err != nil {
 			errs = append(errs, fmt.Sprintf("Failed to decode frontmatter in file %s. This is usually due to an incorrect structure in the frontmatter.", f))
-			continue
-		}
-		if metadata.Subcategory == "" {
-			errs = append(errs, fmt.Sprintf("Failed to detect subcategory in the frontmatter in file %s.", f))
 		}
 	}
 	return errs
