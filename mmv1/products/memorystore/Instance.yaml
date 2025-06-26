@@ -265,6 +265,7 @@ properties:
       "Optional. Number of replica nodes per shard. If omitted the default
       is 0 replicas. "
     default_from_api: true
+    send_empty_value: true
   - name: 'authorizationMode'
     type: String
     description:
