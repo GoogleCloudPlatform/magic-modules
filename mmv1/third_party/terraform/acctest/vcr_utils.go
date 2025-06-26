@@ -146,6 +146,7 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 	if IsVcrEnabled() {
 		defer closeRecorder(t)
 	} else if isReleaseDiffEnabled() {
+		// creates temporary file for the individual test, will be a temporary to store the output
 		temp_file, err := os.CreateTemp("", "release_diff_test_output_*.log")
 
 		if err != nil {
@@ -163,7 +164,8 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "Error parsing release diff output: %v\n", err)
 				} else if t.Failed() {
-					fmt.Printf("FAILED - Release diff output:\n%s\n", output)
+					// if it fails, it prints the output to stdout to the output log file
+					fmt.Fprintf(os.Stdout, "FAILED - Release diff output:\n%s\n", output)
 				}
 				temp_file.Close() // Close the file handle
 				err = os.Remove(temp_file.Name())
@@ -253,7 +255,7 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, temp_file *
 			// TODO: make a github action to get most recent release + current head, this is not a fix just for testing
 			// this should not be hardcoded
 			releaseProvider: {
-				VersionConstraint: "= 6.33.0",
+				VersionConstraint: "= 6.33.0", // if left empty fetches most recent release provider, which is actually optimal
 			},
 		}
 	}

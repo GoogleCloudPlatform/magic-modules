@@ -484,47 +484,78 @@ func TestParseReleaseDiffOutput(t *testing.T) {
 	t.Logf("Parsed output:\n%s", output)
 }
 
-func TestReformConfigWithProviderGoogleBeta(t *testing.T) {
-	var config = ` resource "google_new_resource" {
-	  provider = google-beta
-}`
+func TestReformConfigWithProvider(t *testing.T) {
 
-	var newConfig = acctest.ReformConfigWithProvider(config, "google-local")
-
-	// Adjusted expectedConfig to match the actual output of the function
-	expectedConfig := ` resource "google_new_resource" {
-	  provider = google-local
-}`
-	// Added extra newline and adjusted indentation and provider name
-	if newConfig != expectedConfig {
-		// Change %s to %q here to reveal invisible differences!
-		t.Fatalf("Expected config to be reformatted to:\n%q\nbut got:\n%q", expectedConfig, newConfig)
+	type testCase struct {
+		name             string
+		initialConfig    string
+		providerToInsert string
+		expectedConfig   string
 	}
-	t.Logf("Reformed config:\n%s", newConfig)
-}
 
-// the empty provider case fails, so need to figure out a regex way of handling
-func TestReformConfigWithProviderEmpty(t *testing.T) {
-	var config = `resource "google_alloydb_cluster" "default" {
-	location   = "us-central1"
-	network_config {
-		network = google_compute_network.default.id
-	}
-}`
-
-	var newConfig = acctest.ReformConfigWithProvider(config, "google-local")
-
-	// some weird formatting happens, but the injection is done correctly
-	expectedConfig := `resource "google_alloydb_cluster" "default" {
+	cases := map[string]testCase{
+		"replaces_google_beta_with_local": {
+			name: "Replaces 'google-beta' provider with 'google-local'",
+			initialConfig: `resource "google_new_resource" {
+      provider = google-beta
+}`,
+			providerToInsert: "google-local",
+			expectedConfig: `resource "google_new_resource" {
+      provider = google-local
+}`,
+		},
+		"inserts_local_provider_into_empty_config": {
+			name: "Inserts 'google-local' provider when no provider block exists",
+			initialConfig: `resource "google_alloydb_cluster" "default" {
+    location   = "us-central1"
+    network_config {
+        network = google_compute_network.default.id
+    }
+}`,
+			providerToInsert: "google-local",
+			expectedConfig: `resource "google_alloydb_cluster" "default" {
   provider = google-local
 
-	location   = "us-central1"
-	network_config {
-		network = google_compute_network.default.id
+    location   = "us-central1"
+    network_config {
+        network = google_compute_network.default.id
+    }
+}`,
+		},
+		"no_change_if_target_provider_already_present": {
+			name: "Does not change config if target provider is already present",
+			initialConfig: `resource "google_new_resource" {
+      provider = google-local
+}`,
+			providerToInsert: "google-local",
+			expectedConfig: `resource "google_new_resource" {
+      provider = google-local
+}`,
+		},
+		"inserts_provider_with_other_attributes": {
+			name: "Inserts provider into a resource block with other attributes but no existing provider",
+			initialConfig: `resource "google_compute_instance" "test" {
+  name         = "test-instance"
+  machine_type = "e2-medium"
+}`,
+			providerToInsert: "google-local",
+			expectedConfig: `resource "google_compute_instance" "test" {
+  provider = google-local
+
+  name         = "test-instance"
+  machine_type = "e2-medium"
+}`,
+		},
 	}
-}`
-	if newConfig != expectedConfig {
-		t.Fatalf("Expected config to be reformatted to:\n%q\nbut got:\n%q", expectedConfig, newConfig)
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			newConfig := acctest.ReformConfigWithProvider(tc.initialConfig, tc.providerToInsert)
+
+			if newConfig != tc.expectedConfig {
+				t.Fatalf("Test Case: %s\nExpected config to be reformatted to:\n%q\nbut got:\n%q", tc.name, tc.expectedConfig, newConfig)
+			}
+			t.Logf("Test Case: %s\nReformed config:\n%s", tc.name, newConfig)
+		})
 	}
-	t.Logf("Reformed config:\n%s", newConfig)
 }
