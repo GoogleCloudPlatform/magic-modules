@@ -1,7 +1,6 @@
 package compute
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -16,7 +15,7 @@ func DataSourceGoogleComputeNetworkAttachment() *schema.Resource {
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
-		Read:   dataSourceComputeNetworkEndpointGroupRead,
+		Read:   dataSourceComputeNetworkAttachmentRead,
 		Schema: dsSchema,
 	}
 }
