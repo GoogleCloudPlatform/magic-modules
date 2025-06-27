@@ -340,6 +340,17 @@ properties:
         type: Integer
         description: |
           Minimum number of instances for the service, to be divided among all revisions receiving traffic.
+      - name: 'scalingMode'
+        type: Enum
+        description: |
+          The [scaling mode](https://cloud.google.com/run/docs/reference/rest/v2/projects.locations.services#scalingmode) for the service.
+        enum_values:
+          - 'AUTOMATIC'
+          - 'MANUAL'
+      - name: 'manualInstanceCount'
+        type: Integer
+        description: |
+          Total instance count for the service in manual scaling mode. This number of instances is divided among all revisions with specified traffic based on the percent of traffic they are receiving.
   - name: 'defaultUriDisabled'
     type: Boolean
     description: |-

@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -174,6 +175,14 @@ type Examples struct {
 	DocumentationHCLText string `yaml:"-"`
 	TestHCLText          string `yaml:"-"`
 	OicsHCLText          string `yaml:"-"`
+
+	// ====================
+	// TGC
+	// ====================
+	// Extra properties to ignore test.
+	// These properties are present in Terraform resources schema, but not in CAI assets.
+	// Virtual Fields and url parameters are already ignored by default and do not need to be duplicated here.
+	TGCTestIgnoreExtra []string `yaml:"tgc_test_ignore_extra,omitempty"`
 }
 
 // Set default value for fields
@@ -199,6 +208,22 @@ func (e *Examples) Validate(rName string) {
 		log.Fatalf("Missing `name` for one example in resource %s", rName)
 	}
 	e.ValidateExternalProviders()
+}
+
+func validateRegexForContents(r *regexp.Regexp, contents string, configPath string, objName string, vars map[string]string) {
+	matches := r.FindAllStringSubmatch(contents, -1)
+	for _, v := range matches {
+		found := false
+		for k, _ := range vars {
+			if k == v[1] {
+				found = true
+				break
+			}
+		}
+		if !found {
+			log.Fatalf("Failed to find %s environment variable defined in YAML file when validating the file %s. Please define this in %s", v[1], configPath, objName)
+		}
+	}
 }
 
 func (e *Examples) ValidateExternalProviders() {
@@ -249,7 +274,7 @@ func (e *Examples) SetHCLText() {
 		docTestEnvVars[key] = docs_defaults[e.TestEnvVars[key]]
 	}
 	e.TestEnvVars = docTestEnvVars
-	e.DocumentationHCLText = ExecuteTemplate(e, e.ConfigPath, true)
+	e.DocumentationHCLText = e.ExecuteTemplate()
 	e.DocumentationHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.DocumentationHCLText, "\n")
 
 	// Remove region tags
@@ -290,7 +315,7 @@ func (e *Examples) SetHCLText() {
 
 	e.Vars = testVars
 	e.TestEnvVars = testTestEnvVars
-	e.TestHCLText = ExecuteTemplate(e, e.ConfigPath, true)
+	e.TestHCLText = e.ExecuteTemplate()
 	e.TestHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.TestHCLText, "\n")
 	// Remove region tags
 	e.TestHCLText = re1.ReplaceAllString(e.TestHCLText, "")
@@ -302,20 +327,23 @@ func (e *Examples) SetHCLText() {
 	e.TestEnvVars = originalTestEnvVars
 }
 
-func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
-	templates := []string{
-		templatePath,
-		"templates/terraform/expand_resource_ref.tmpl",
-		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
-		"templates/terraform/flatten_property_method.go.tmpl",
-		"templates/terraform/expand_property_method.go.tmpl",
-		"templates/terraform/update_mask.go.tmpl",
-		"templates/terraform/nested_query.go.tmpl",
-		"templates/terraform/unordered_list_customize_diff.go.tmpl",
+func (e *Examples) ExecuteTemplate() string {
+	templateContent, err := os.ReadFile(e.ConfigPath)
+	if err != nil {
+		glog.Exit(err)
 	}
-	templateFileName := filepath.Base(templatePath)
 
-	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
+	fileContentString := string(templateContent)
+
+	// Check that any variables in Vars or TestEnvVars used in the example are defined via YAML
+	envVarRegex := regexp.MustCompile(`{{index \$\.TestEnvVars "([a-zA-Z_]*)"}}`)
+	validateRegexForContents(envVarRegex, fileContentString, e.ConfigPath, "test_env_vars", e.TestEnvVars)
+	varRegex := regexp.MustCompile(`{{index \$\.Vars "([a-zA-Z_]*)"}}`)
+	validateRegexForContents(varRegex, fileContentString, e.ConfigPath, "vars", e.Vars)
+
+	templateFileName := filepath.Base(e.ConfigPath)
+
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).Parse(fileContentString)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -327,7 +355,7 @@ func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
 
 	rs := contents.String()
 
-	if !strings.HasSuffix(rs, "\n") && appendNewline {
+	if !strings.HasSuffix(rs, "\n") {
 		rs = fmt.Sprintf("%s\n", rs)
 	}
 
@@ -401,7 +429,7 @@ func (e *Examples) SetOiCSHCLText() {
 	}
 
 	e.Vars = testVars
-	e.OicsHCLText = ExecuteTemplate(e, e.ConfigPath, true)
+	e.OicsHCLText = e.ExecuteTemplate()
 	e.OicsHCLText = regexp.MustCompile(`\n\n$`).ReplaceAllString(e.OicsHCLText, "\n")
 
 	// Remove region tags

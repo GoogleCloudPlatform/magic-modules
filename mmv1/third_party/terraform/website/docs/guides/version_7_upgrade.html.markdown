@@ -106,4 +106,26 @@ Description of the change and how users should adjust their configuration (if ne
 
 ### `retention_period` changed to `string` data type
 
+<<<<<<< HEAD
 `retention_period` now changed to `string` data type to handle higher values for bucket retention period.
+=======
+Description of the change and how users should adjust their configuration (if needed).
+
+## Resource: `google_bigtable_table_iam_policy`
+
+### `instance` is now removed
+
+`instance` has been removed in favor of `instance_name`.
+
+## Resource: `google_bigtable_table_iam_binding`
+
+### `instance` is now removed
+
+`instance` has been removed in favor of `instance_name`.
+
+## Resource: `google_bigtable_table_iam_member`
+
+### `instance` is now removed
+
+`instance` has been removed in favor of `instance_name`.
+>>>>>>> FEATURE-BRANCH-major-release-7.0.0
