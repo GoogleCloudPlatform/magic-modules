@@ -52,6 +52,11 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])'
     vars:
       name: 'my-template'
+  - name: 'privateca_template_zero_max_issuer_path_length_null_ca'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-template%s", context["random_suffix"])'
+    vars:
+      name: 'my-template'
 parameters:
 properties:
   - name: 'name'
@@ -69,6 +74,8 @@ properties:
   - name: 'predefinedValues'
     type: NestedObject
     description: Optional. A set of X.509 values that will be applied to all issued certificates that use this template. If the certificate request includes conflicting values for the same properties, they will be overwritten by the values defined here. If the issuing CaPool's IssuancePolicy defines conflicting baseline_values for the same properties, the certificate issuance request will fail.
+    custom_flatten: 'templates/terraform/custom_flatten/privateca_certificate_template_509_config.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/privateca_certificate_template_509_config.go.tmpl'
     properties:
       - name: 'keyUsage'
         type: NestedObject
@@ -178,11 +185,29 @@ properties:
         properties:
           - name: 'isCa'
             type: Boolean
-            description: Optional. Refers to the "CA" X.509 extension, which is a boolean value. When this value is missing, the extension will be omitted from the CA certificate.
+            description: |
+              Optional. Refers to the "CA" X.509 extension, which is a boolean value. When this value is true, the "CA" in Basic Constraints extension will be set to true.
+            send_empty_value: true
+          - name: 'nullCa'
+            type: Boolean
+            description: |
+              Optional. When true, the "CA" in Basic Constraints extension will be set to null and omitted from the CA certificate.
+              If both `is_ca` and `null_ca` are unset, the "CA" in Basic Constraints extension will be set to false.
+              Note that the behavior when `is_ca = false` for this resource is different from the behavior in the Certificate Authority, Certificate and CaPool resources.
+            url_param_only: true
             send_empty_value: true
           - name: 'maxIssuerPathLength'
             type: Integer
-            description: Optional. Refers to the path length restriction X.509 extension. For a CA certificate, this value describes the depth of subordinate CA certificates that are allowed. If this value is less than 0, the request will fail. If this value is missing, the max path length will be omitted from the CA certificate.
+            description: |
+              Optional. Refers to the "path length constraint" in Basic Constraints extension. For a CA certificate, this value describes the depth of
+              subordinate CA certificates that are allowed. If this value is less than 0, the request will fail.
+          - name: 'zeroMaxIssuerPathLength'
+            type: Boolean
+            description: |
+              Optional. When true, the "path length constraint" in Basic Constraints extension will be set to 0.
+              if both `max_issuer_path_length` and `zero_max_issuer_path_length` are unset,
+              the max path length will be omitted from the CA certificate.
+            url_param_only: true
       - name: 'policyIds'
         type: Array
         description: Optional. Describes the X.509 certificate policy object identifiers, per https://tools.ietf.org/html/rfc5280#section-4.2.1.4.
@@ -227,6 +252,89 @@ properties:
               type: String
               description: Required. The value of this X.509 extension.
               required: true
+      - name: 'nameConstraints'
+        type: NestedObject
+        description: |
+          Describes the X.509 name constraints extension.
+        properties:
+          - name: 'critical'
+            type: Boolean
+            description:
+              Indicates whether or not the name constraints are marked
+              critical.
+            required: true
+          - name: 'permittedDnsNames'
+            type: Array
+            description: |
+              Contains permitted DNS names. Any DNS name that can be
+              constructed by simply adding zero or more labels to
+              the left-hand side of the name satisfies the name constraint.
+              For example, `example.com`, `www.example.com`, `www.sub.example.com`
+              would satisfy `example.com` while `example1.com` does not.
+            item_type:
+              type: String
+          - name: 'excludedDnsNames'
+            type: Array
+            description: |
+              Contains excluded DNS names. Any DNS name that can be
+              constructed by simply adding zero or more labels to
+              the left-hand side of the name satisfies the name constraint.
+              For example, `example.com`, `www.example.com`, `www.sub.example.com`
+              would satisfy `example.com` while `example1.com` does not.
+            item_type:
+              type: String
+          - name: 'permittedIpRanges'
+            type: Array
+            description: |
+              Contains the permitted IP ranges. For IPv4 addresses, the ranges
+              are expressed using CIDR notation as specified in RFC 4632.
+              For IPv6 addresses, the ranges are expressed in similar encoding as IPv4
+              addresses.
+            item_type:
+              type: String
+          - name: 'excludedIpRanges'
+            type: Array
+            description: |
+              Contains the excluded IP ranges. For IPv4 addresses, the ranges
+              are expressed using CIDR notation as specified in RFC 4632.
+              For IPv6 addresses, the ranges are expressed in similar encoding as IPv4
+              addresses.
+            item_type:
+              type: String
+          - name: 'permittedEmailAddresses'
+            type: Array
+            description: |
+              Contains the permitted email addresses. The value can be a particular
+              email address, a hostname to indicate all email addresses on that host or
+              a domain with a leading period (e.g. `.example.com`) to indicate
+              all email addresses in that domain.
+            item_type:
+              type: String
+          - name: 'excludedEmailAddresses'
+            type: Array
+            description: |
+              Contains the excluded email addresses. The value can be a particular
+              email address, a hostname to indicate all email addresses on that host or
+              a domain with a leading period (e.g. `.example.com`) to indicate
+              all email addresses in that domain.
+            item_type:
+              type: String
+          - name: 'permittedUris'
+            type: Array
+            description: |
+              Contains the permitted URIs that apply to the host part of the name.
+              The value can be a hostname or a domain with a
+              leading period (like `.example.com`)
+            item_type:
+              type: String
+          - name: 'excludedUris'
+            type: Array
+            description: |
+              Contains the excluded URIs that apply to the host part of the name.
+              The value can be a hostname or a domain with a
+              leading period (like `.example.com`)
+            item_type:
+              type: String
   - name: 'identityConstraints'
     type: NestedObject
     description: Optional. Describes constraints on identities that may be appear in Certificates issued using this template. If this is omitted, then this template will not add restrictions on a certificate's identity.

@@ -25,7 +25,7 @@ ENV GO111MODULE "on"
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-RUN apt-get update && apt-get install -y --no-install-recommends git openssh-client apt-transport-https ca-certificates curl netbase wget gcc make jq libjq1
+RUN apt-get update && apt-get install -y --no-install-recommends git openssh-client apt-transport-https ca-certificates curl netbase wget gcc make jq libjq1 unzip zip
 
 RUN git config --global user.name "Modular Magician"
 RUN git config --global user.email "magic-modules@google.com"

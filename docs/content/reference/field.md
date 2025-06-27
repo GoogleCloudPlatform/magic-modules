@@ -174,7 +174,6 @@ value for the field. This attribute is useful for complex or
 frequently-changed API-side defaults, but provides less useful information at
 plan time than `default_value` and causes the provider to ignore user
 configurations that explicitly set the field to an "empty" value.
-`default_from_api` and `send_empty_value` cannot both be true on the same field.
 
 Example:
 
@@ -189,7 +188,10 @@ strings) to the API if set explicitly in the user's configuration. If false,
 This attribute is useful for fields where the API would behave differently
 for an "empty" value vs no value for a particular field - for example,
 boolean fields that have an API-side default of true.
-`send_empty_value` and `default_from_api` cannot both be true on the same field.
+
+If true simulataneously with `default_from_api`, the provider will send empty values
+explicitly set in configuration. If the field is unset, the provider will
+accept API values as the default as usual with `default_from_api`.
 
 Due to a [bug](https://github.com/hashicorp/terraform-provider-google/issues/13201),
 NestedObject fields will currently be sent as `null` if unset (rather than being
@@ -285,6 +287,8 @@ Example:
 ```
 
 ### `validation`
+In many cases, it is better to avoid client-side validation. See [Best practices: Validation]({{< ref "/best-practices/validation" >}}) for more information.
+
 Controls the value set for the field's [`ValidateFunc`](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc).
 
 For Enum fields, this will override the default validation (that the provided value is one of the enum [`values`](#values)).
@@ -375,10 +379,11 @@ url_param_only: true
 ## `Enum` properties
 
 ### `enum_values`
-Enum only. If the allowed values change frequently, use a String field instead
-to allow better forwards-compatibility, and link to API documentation
-stating the current allowed values in the String field's description. Do not
-include UNSPECIFIED values in this list.
+Enum only. If the allowed values may change in the future, use a String field instead and link to API documentation
+stating the current allowed values in the String field's description. 
+See [Best practices: Validation]({{< ref "/best-practices/validation" >}}) for more information.
+
+Do not include UNSPECIFIED values in this list.
 
 Enums will validate that the provided field is in the allowed list unless a
 custom [`validation`]({{<ref "#validation" >}}) is provided.
@@ -431,6 +436,8 @@ item_type:
 ### `item_validation`
 Array only. Controls the [`ValidateFunc`](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc)
 used to validate individual items in the array. Behaves like [`validation`]({{<ref "#validation" >}}).
+
+In many cases, it is better to avoid client-side validation. See [Best practices: Validation]({{< ref "/best-practices/validation" >}}) for more information.
 
 For arrays of enums, this will override the default validation (that the provided value is one of the enum [`values`](#values)).
 If you need additional validation on top of an enum, ensure that the supplied validation func also verifies the enum

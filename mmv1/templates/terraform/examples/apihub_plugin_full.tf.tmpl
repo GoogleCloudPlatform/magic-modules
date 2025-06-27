@@ -1,0 +1,65 @@
+resource "google_apihub_plugin" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+  display_name = "Test Plugin"
+  description="Test description"
+  plugin_id = "{{index $.Vars "plugin_id"}}"
+  plugin_category = "API_GATEWAY"
+  actions_config {
+    id = "sync-metadata"
+    display_name = "Sync Metadata"
+    description = "Syncs API metadata."
+    trigger_mode = "API_HUB_SCHEDULE_TRIGGER"
+  }
+  documentation {
+    external_uri = "https://example.com/plugin-documentation"
+  }
+  hosting_service {
+    service_uri = "https://your-plugin-service.example.com/api"
+  }
+  config_template {
+    auth_config_template {
+      supported_auth_types = ["NO_AUTH", "USER_PASSWORD"]
+      service_account {
+        service_account = "test@developer.gserviceaccount.com"
+      }
+    }
+    additional_config_template {
+      id = "string-val"
+      description = "API key for the service."
+      value_type = "STRING"
+      required = false
+      validation_regex = "^[a-zA-Z0-9]{5,20}$"
+    }
+    additional_config_template {
+      id = "integer-val"
+      description = "API key for the service."
+      value_type = "INT"
+      required = true
+      validation_regex = ""
+    }
+    additional_config_template {
+      id = "bool-val"
+      description = "API key for the service."
+      value_type = "BOOL"
+      required = false
+      validation_regex = ""
+    }
+    additional_config_template {
+      id = "enum-val"
+      description = "API key for the service."
+      value_type = "ENUM"
+      enum_options {
+        id = "Option1"
+        display_name = "Option1"
+        description = "Description for Option1"
+      }
+      enum_options {
+        id = "Option2"
+        display_name = "Option2"
+        description = "Description for Option2"
+      }
+      required = false
+      validation_regex = ""
+    }
+  }
+}

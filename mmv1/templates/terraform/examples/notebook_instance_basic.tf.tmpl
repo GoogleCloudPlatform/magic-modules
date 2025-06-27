@@ -4,6 +4,6 @@ resource "google_notebooks_instance" "{{$.PrimaryResourceId}}" {
   machine_type = "e2-medium"
   vm_image {
     project      = "deeplearning-platform-release"
-    image_family = "tf-latest-cpu"
+    image_family = "pytorch-latest-cu124"
   }
 }

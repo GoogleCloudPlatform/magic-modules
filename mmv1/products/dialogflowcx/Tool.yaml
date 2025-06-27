@@ -1,0 +1,306 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Tool'
+description: |
+  A tool provides a list of actions which are available to the Playbook to attain its goal.
+  A Tool consists of a description of the tool's usage and a specification of the tool which contains the schema and authentication information.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
+  api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.tools'
+id_format: '{{parent}}/tools/{{name}}'
+base_url: '{{parent}}/tools'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{parent}}/tools/{{name}}'
+timeouts:
+  insert_minutes: 40
+  update_minutes: 40
+  delete_minutes: 20
+custom_code:
+  pre_create: 'templates/terraform/pre_create/dialogflowcx_set_location_skip_default_obj.go.tmpl'
+  pre_read: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/dialogflowcx_set_location_skip_default_obj.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/dialogflowcx_tool.go.tmpl'
+exclude_sweeper: true
+examples:
+  - name: 'dialogflowcx_tool_open_api'
+    primary_resource_id: 'open_api_tool'
+    vars:
+      agent_name: 'dialogflowcx-agent-open-api'
+  - name: 'dialogflowcx_tool_data_store'
+    primary_resource_id: 'data_store_tool'
+    vars:
+      agent_name: 'dialogflowcx-agent-data-store'
+  - name: 'dialogflowcx_tool_function'
+    primary_resource_id: 'function_tool'
+    vars:
+      agent_name: 'dialogflowcx-agent-fucntion'
+parameters:
+  - name: 'parent'
+    type: String
+    description: |
+      The agent to create a Tool for.
+      Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The unique identifier of the Tool.
+      Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/tools/<Tool ID>.
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'displayName'
+    type: String
+    description: |
+      The human-readable name of the tool, unique within the agent.
+    required: true
+  - name: 'description'
+    type: String
+    description: |
+      High level description of the Tool and its usage.
+    required: true
+  - name: 'toolType'
+    type: Enum
+    description: |
+      The tool type.
+    output: true
+  - name: 'openApiSpec'
+    type: NestedObject
+    description: |
+      OpenAPI specification of the Tool.
+      This field is part of a union field `specification`: Only one of `openApiSpec`, `dataStoreSpec`, or `functionSpec` may be set.
+    properties:
+      - name: 'authentication'
+        type: NestedObject
+        description: |
+          Optional. Authentication information required by the API.
+        properties:
+          - name: 'apiKeyConfig'
+            type: NestedObject
+            description: |
+              Config for API key auth.
+              This field is part of a union field `auth_config`: Only one of `apiKeyConfig`, `oauthConfig`, `serviceAgentAuthConfig`, or `bearerTokenConfig` may be set.
+            properties:
+              - name: 'keyName'
+                type: String
+                description: |
+                  The parameter name or the header name of the API key.
+                  E.g., If the API request is "https://example.com/act?X-Api-Key=", "X-Api-Key" would be the parameter name.
+                required: true
+              - name: 'apiKey'
+                type: String
+                description: |
+                  Optional. The API key. If the `secretVersionForApiKey`` field is set, this field will be ignored.
+                sensitive: true
+                ignore_read: true
+              - name: 'secretVersionForApiKey'
+                type: String
+                description: |
+                  Optional. The name of the SecretManager secret version resource storing the API key.
+                  If this field is set, the apiKey field will be ignored.
+                  Format: projects/{project}/secrets/{secret}/versions/{version}
+              - name: 'requestLocation'
+                type: String
+                description: |
+                  Key location in the request.
+                  See [RequestLocation](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.tools#requestlocation) for valid values.
+                required: true
+          - name: 'oauthConfig'
+            type: NestedObject
+            description: |
+              Config for OAuth.
+              This field is part of a union field `auth_config`: Only one of `apiKeyConfig`, `oauthConfig`, `serviceAgentAuthConfig`, or `bearerTokenConfig` may be set.
+            properties:
+              - name: 'oauthGrantType'
+                type: String
+                description: |
+                  OAuth grant types.
+                  See [OauthGrantType](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.tools#oauthgranttype) for valid values
+                required: true
+              - name: 'clientId'
+                type: String
+                description: |
+                  The client ID from the OAuth provider.
+                required: true
+              - name: 'clientSecret'
+                type: String
+                description: |
+                  Optional. The client secret from the OAuth provider. If the `secretVersionForClientSecret` field is set, this field will be ignored.
+                sensitive: true
+                ignore_read: true
+              - name: 'secretVersionForClientSecret'
+                type: String
+                description: |
+                  Optional. The name of the SecretManager secret version resource storing the client secret.
+                  If this field is set, the clientSecret field will be ignored.
+                  Format: projects/{project}/secrets/{secret}/versions/{version}
+              - name: 'tokenEndpoint'
+                type: String
+                description: |
+                  The token endpoint in the OAuth provider to exchange for an access token.
+                required: true
+              - name: 'scopes'
+                type: Array
+                description: |
+                  Optional. The OAuth scopes to grant.
+                item_type:
+                  type: String
+          - name: 'serviceAgentAuthConfig'
+            type: NestedObject
+            description: |
+              Config for [Diglogflow service agent](https://cloud.google.com/iam/docs/service-agents#dialogflow-service-agent) auth.
+              This field is part of a union field `auth_config`: Only one of `apiKeyConfig`, `oauthConfig`, `serviceAgentAuthConfig`, or `bearerTokenConfig` may be set.
+            properties:
+              - name: 'serviceAgentAuth'
+                type: String
+                description: |
+                  Optional. Indicate the auth token type generated from the Diglogflow service agent.
+                  The generated token is sent in the Authorization header.
+                  See [ServiceAgentAuth](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.tools#serviceagentauth) for valid values.
+          - name: 'bearerTokenConfig'
+            type: NestedObject
+            description: |
+              Config for bearer token auth.
+              This field is part of a union field `auth_config`: Only one of `apiKeyConfig`, `oauthConfig`, `serviceAgentAuthConfig`, or `bearerTokenConfig` may be set.
+            properties:
+              - name: 'token'
+                type: String
+                description: |
+                  Optional. The text token appended to the text Bearer to the request Authorization header.
+                  [Session parameters reference](https://cloud.google.com/dialogflow/cx/docs/concept/parameter#session-ref) can be used to pass the token dynamically, e.g. `$session.params.parameter-id`.
+                sensitive: true
+                ignore_read: true
+              - name: 'secretVersionForToken'
+                type: String
+                description: |
+                  Optional. The name of the SecretManager secret version resource storing the Bearer token. If this field is set, the `token` field will be ignored.
+                  Format: projects/{project}/secrets/{secret}/versions/{version}
+      - name: 'tlsConfig'
+        type: NestedObject
+        description: |
+          Optional. TLS configuration for the HTTPS verification.
+        properties:
+          - name: 'caCerts'
+            type: Array
+            description: |
+              Specifies a list of allowed custom CA certificates for HTTPS verification.
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'displayName'
+                  type: String
+                  description: |
+                    The name of the allowed custom CA certificates. This can be used to disambiguate the custom CA certificates.
+                  required: true
+                - name: 'cert'
+                  type: String
+                  description: |
+                    The allowed custom CA certificates (in DER format) for HTTPS verification. This overrides the default SSL trust store.
+                    If this is empty or unspecified, Dialogflow will use Google's default trust store to verify certificates.
+                    N.B. Make sure the HTTPS server certificates are signed with "subject alt name".
+                    For instance a certificate can be self-signed using the following command:
+                    ```
+                      openssl x509 -req -days 200 -in example.com.csr \
+                        -signkey example.com.key \
+                        -out example.com.crt \
+                        -extfile <(printf "\nsubjectAltName='DNS:www.example.com'")
+                    ```
+                    A base64-encoded string.
+                  required: true
+      - name: 'serviceDirectoryConfig'
+        type: NestedObject
+        description: |
+          Optional. Service Directory configuration.
+        properties:
+          - name: 'service'
+            type: String
+            description: |
+              The name of [Service Directory](https://cloud.google.com/service-directory/docs) service.
+              Format: projects/<ProjectID>/locations/<LocationID>/namespaces/<NamespaceID>/services/<ServiceID>. LocationID of the service directory must be the same as the location of the agent.
+            required: true
+      - name: 'textSchema'
+        type: String
+        description: |
+          The OpenAPI schema specified as a text.
+          This field is part of a union field `schema`: only one of `textSchema` may be set.
+        required: true
+  - name: 'dataStoreSpec'
+    type: NestedObject
+    description: |
+      Data store search tool specification.
+      This field is part of a union field `specification`: Only one of `openApiSpec`, `dataStoreSpec`, or `functionSpec` may be set.
+    properties:
+      - name: 'dataStoreConnections'
+        type: Array
+        description: |
+          List of data stores to search.
+        required: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'dataStoreType'
+              type: String
+              description: |
+                The type of the connected data store.
+                See [DataStoreType](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/DataStoreConnection#datastoretype) for valid values.
+            - name: 'dataStore'
+              type: String
+              description: |
+                The full name of the referenced data store. Formats: projects/{project}/locations/{location}/collections/{collection}/dataStores/{dataStore} projects/{project}/locations/{location}/dataStores/{dataStore}
+            - name: 'documentProcessingMode'
+              type: String
+              description: |
+                The document processing mode for the data store connection. Should only be set for PUBLIC_WEB and UNSTRUCTURED data stores. If not set it is considered as DOCUMENTS, as this is the legacy mode.
+                See [DocumentProcessingMode](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/DataStoreConnection#documentprocessingmode) for valid values.
+      - name: 'fallbackPrompt'
+        type: NestedObject
+        description: |
+          Fallback prompt configurations to use.
+        required: true
+        allow_empty_object: true
+        send_empty_value: true
+        properties: []  # Meant to be an empty object with no properties.
+  - name: 'functionSpec'
+    type: NestedObject
+    description: |
+      Client side executed function specification.
+      This field is part of a union field `specification`: Only one of `openApiSpec`, `dataStoreSpec`, or `functionSpec` may be set.
+    properties:
+      - name: 'inputSchema'
+        type: String
+        description: |
+          Optional. The JSON schema is encapsulated in a [google.protobuf.Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct) to describe the input of the function.
+          This input is a JSON object that contains the function's parameters as properties of the object
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+        validation:
+          function: 'validation.StringIsJSON'
+      - name: 'outputSchema'
+        type: String
+        description: |
+          Optional. The JSON schema is encapsulated in a [google.protobuf.Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct) to describe the output of the function.
+          This output is a JSON object that contains the function's parameters as properties of the object
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+        validation:
+          function: 'validation.StringIsJSON'

@@ -27,6 +27,7 @@ id_format: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 examples:
+
   - name: lustre_instance_basic
     primary_resource_id: 'instance'
     vars:
@@ -63,7 +64,7 @@ parameters:
   - name: instanceId
     type: String
     description: |-
-      Required. The name of the Managed Lustre instance.
+      The name of the Managed Lustre instance.
 
       * Must contain only lowercase letters, numbers, and hyphens.
       * Must start with a letter.
@@ -73,10 +74,41 @@ parameters:
     url_param_only: true
     required: true
 properties:
+  - name: capacityGib
+    type: String
+    description: |-
+      The storage capacity of the instance in gibibytes (GiB). Allowed values
+      are from `18000` to `954000`, in increments of 9000.
+    required: true
+  - name: updateTime
+    type: String
+    description: Timestamp when the instance was last updated.
+    output: true
+  - name: gkeSupportEnabled
+    type: Boolean
+    description: |-
+      Indicates whether you want to enable support for GKE clients. By default,
+      GKE clients are not supported.
+  - name: filesystem
+    type: String
+    description: |-
+      The filesystem name for this instance. This name is used by client-side
+      tools, including when mounting the instance. Must be eight characters or
+      less and can only contain letters and numbers.
+    immutable: true
+    required: true
+  - name: network
+    type: String
+    description: |-
+      The full name of the VPC network to which the instance is connected.
+      Must be in the format
+      `projects/{project_id}/global/networks/{network_name}`.
+    immutable: true
+    required: true
   - name: state
     type: String
     description: |-
-      Output only. The state of the instance.
+      The state of the instance.
       Possible values:
       STATE_UNSPECIFIED
       ACTIVE
@@ -88,50 +120,26 @@ properties:
     output: true
   - name: mountPoint
     type: String
-    description: Output only. Mount point of the instance in the format `IP_ADDRESS@tcp:/FILESYSTEM`.
+    description: Mount point of the instance in the format `IP_ADDRESS@tcp:/FILESYSTEM`.
     output: true
-  - name: labels
-    type: KeyValueLabels
-    description: Optional. Labels as key value pairs.
-  - name: capacityGib
-    type: String
-    description: |-
-      Required. The storage capacity of the instance in gibibytes (GiB). Allowed values
-      are from 18000 to 954000, in increments of 9000.
-    required: true
   - name: createTime
     type: String
-    description: Output only. Timestamp when the instance was created.
-    output: true
-  - name: updateTime
-    type: String
-    description: Output only. Timestamp when the instance was last updated.
+    description: Timestamp when the instance was created.
     output: true
   - name: description
     type: String
-    description: Optional. A user-readable description of the instance.
-  - name: gkeSupportEnabled
-    type: Boolean
+    description: A user-readable description of the instance.
+  - name: labels
+    type: KeyValueLabels
+    description: Labels as key value pairs.
+  - name: perUnitStorageThroughput
+    type: String
     description: |-
-      Optional. Indicates whether you want to enable support for GKE clients. By default,
-      GKE clients are not supported.
+      The throughput of the instance in MB/s/TiB.
+      Valid values are 125, 250, 500, 1000.
+    required: true
+    immutable: true
   - name: name
     type: String
     description: Identifier. The name of the instance.
     output: true
-  - name: filesystem
-    type: String
-    description: |-
-      Required. Immutable. The filesystem name for this instance. This name is used by client-side
-      tools, including when mounting the instance. Must be 8 characters or less
-      and may only contain letters and numbers.
-    immutable: true
-    required: true
-  - name: network
-    type: String
-    description: |-
-      Required. Immutable. The full name of the VPC network to which the instance is connected.
-      Must be in the format
-      `projects/{project_id}/global/networks/{network_name}`.
-    immutable: true
-    required: true

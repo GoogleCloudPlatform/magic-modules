@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -547,6 +548,81 @@ func TestPathChanged(t *testing.T) {
 
 			got := pathChanged(tc.path, tc.changedFiles)
 			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestCheckDocumentFrontmatter(t *testing.T) {
+	tmpDir := t.TempDir()
+	files := map[string]string{
+		"malformed.markdown": `
+subcategory: Example Subcategory
+---	
+`,
+		"sample.markdown": `
+---
+subcategory: Example Subcategory
+---	
+`,
+		"missingsubcategory.markdown": `
+---
+random: Example Subcategory
+---	
+`,
+	}
+	for name, content := range files {
+		fullPath := filepath.Join(tmpDir, name)
+		err := os.WriteFile(fullPath, []byte(content), 0644)
+		if err != nil {
+			t.Fatalf("Failed to create file %s: %v", name, err)
+		}
+	}
+
+	tests := []struct {
+		name         string
+		changedFiles []string
+		wantErr      bool
+	}{
+		{
+			name:         "No changed markdown files",
+			changedFiles: []string{"abc.txt"},
+			wantErr:      false,
+		},
+		{
+			name:         "malformed markdown",
+			changedFiles: []string{"malformed.markdown"},
+			wantErr:      true,
+		},
+		{
+			name:         "not exist markdown",
+			changedFiles: []string{"abc.markdown"},
+			wantErr:      true,
+		},
+		{
+			name:         "Changed files with no frontmatter",
+			changedFiles: []string{"sample.markdown"},
+			wantErr:      false,
+		},
+		{
+			name:         "Missing subcategory in frontmatter",
+			changedFiles: []string{"missingsubcategory.markdown"},
+			wantErr:      true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			repo := source.Repo{
+				Path:         tmpDir,
+				ChangedFiles: tc.changedFiles,
+			}
+			got := checkDocumentFrontmatter(repo)
+			if tc.wantErr && len(got) == 0 {
+				t.Errorf("checkDocumentFrontmatter() = %v, want error", got)
+			}
+			if !tc.wantErr && len(got) > 0 {
+				t.Errorf("checkDocumentFrontmatter() = %v, want no error", got)
+			}
 		})
 	}
 }

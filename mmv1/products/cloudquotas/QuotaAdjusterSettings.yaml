@@ -67,15 +67,25 @@ properties:
     type: String
     description: |
       The resource container that determines if the quota adjuster is set for this project.
-      Expect this field to be empty currently.
     output: true
   - name: 'effectiveEnablement'
     type: Enum
     description: |
       Based on the effective container`s setting above, determines Whether this resource container has the quota adjuster enabled.
-      Expect this field to be empty currently.
     output: true
     enum_values:
       - 'DEFAULT'
       - 'ENABLED'
       - 'DISABLED'
+  - name: 'inherited'
+    type: Boolean
+    description: |
+      Indicates whether the setting is inherited or explicitly specified.
+    output: true
+  - name: 'inheritedFrom'
+    type: String
+    description: |
+      The resource container from which the setting is inherited. This refers to the  nearest ancestor with enablement set (either ENABLED or DISABLED).
+      The value can be `organizations/{organization_id}`, `folders/{folder_id}`, or can be `default` if no ancestor exists with enablement set.
+      The value will be empty when `enablement` is specified on this resource container.
+    output: true

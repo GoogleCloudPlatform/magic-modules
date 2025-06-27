@@ -306,6 +306,7 @@ module "project-services" {
     "migrationcenter.googleapis.com",
     "ml.googleapis.com",
     "mobilecrashreporting.googleapis.com",
+    "modelarmor.googleapis.com",
     "monitoring.googleapis.com",
     "multiclustermetering.googleapis.com",
     "netapp.googleapis.com",
