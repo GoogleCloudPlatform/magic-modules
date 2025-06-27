@@ -52,18 +52,17 @@ func TestAccComputeRoute_hopInstance(t *testing.T) {
 
 func TestAccComputeRoute_resourceManagerTags(t *testing.T) {
 
-    org := envvar.GetTestOrgFromEnv(t)
+	org := envvar.GetTestOrgFromEnv(t)
 
-    routeName := fmt.Sprintf("tf-test-route-resource-manager-tags-%s", acctest.RandString(t, 10))
-    tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-nroute-tagkey", "organizations/"+org, make(map[string]interface{}))
-	sharedTagkey,_ := tagKeyResult["shared_tag_key"]
+	routeName := fmt.Sprintf("tf-test-route-resource-manager-tags-%s", acctest.RandString(t, 10))
+	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-nroute-tagkey", "organizations/"+org, make(map[string]interface{}))
+	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
 	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-route-tagvalue", sharedTagkey, org)
 	context := map[string]interface{}{
-		"route_name": routeName,
-		"tag_key_id": tagKeyResult["name"],
+		"route_name":   routeName,
+		"tag_key_id":   tagKeyResult["name"],
 		"tag_value_id": tagValueResult["name"],
 	}
-
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -74,9 +73,9 @@ func TestAccComputeRoute_resourceManagerTags(t *testing.T) {
 				Config: testAccComputeRoute_resourceManagerTags(context),
 			},
 			{
-				ResourceName:      "google_compute_route.acc_route_with_resource_manager_tags",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_route.acc_route_with_resource_manager_tags",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"params"}, // we don't read tags back. The whole params block is input only
 			},
 		},
