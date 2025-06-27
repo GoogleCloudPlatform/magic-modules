@@ -56,7 +56,7 @@ func TestAccComputeRoute_resourceManagerTags(t *testing.T) {
 
     routeName := fmt.Sprintf("tf-test-route-resource-manager-tags-%s", acctest.RandString(t, 10))
     tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-nroute-tagkey", "organizations/"+org, make(map[string]interface{}))
-	sharedTagkey,_ := tagKeyResult["shared_tag_key"].(string)
+	sharedTagkey,_ := tagKeyResult["shared_tag_key"]
 	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-route-tagvalue", sharedTagkey, org)
 	context := map[string]interface{}{
 		"route_name": routeName,
