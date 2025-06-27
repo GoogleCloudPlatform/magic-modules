@@ -323,7 +323,7 @@ func TestAccComputeFirewall_resourceManagerTags(t *testing.T){
 	firewallName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
 
 	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-firewall-tagkey", "organizations/"+org, make(map[string]interface{}))
-	sharedTagkey,_ := tagKeyResult["shared_tag_key"].(string)
+	sharedTagkey,_ := tagKeyResult["shared_tag_key"]
 	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-firewall-tagvalue", sharedTagkey, org)
 
 	context := map[string]interface{}{
