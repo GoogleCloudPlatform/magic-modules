@@ -19,4 +19,4 @@ scopes:
 versions:
  - name: ga
    base_url: 'https://modelarmor.{{location}}.rep.googleapis.com/v1/'
-cai_base_url: "https://modelarmor.googleapis.com/v1/"
+   cai_base_url: "https://modelarmor.googleapis.com/v1/"
