@@ -236,6 +236,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Compute",
         "path" to "./google-beta/services/compute"
     ),
+    "contactcenterinsights" to mapOf(
+        "name" to "contactcenterinsights",
+        "displayName" to "Contact Center AI Insights",
+        "path" to "./google-beta/services/contactcenterinsights"
+    ),
     "container" to mapOf(
         "name" to "container",
         "displayName" to "Container",
@@ -556,6 +561,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Mlengine",
         "path" to "./google-beta/services/mlengine"
     ),
+    "modelarmor" to mapOf(
+        "name" to "modelarmor",
+        "displayName" to "ModelArmor",
+        "path" to "./google-beta/services/modelarmor"
+    ),
     "monitoring" to mapOf(
         "name" to "monitoring",
         "displayName" to "Monitoring",
@@ -670,6 +680,11 @@ var ServicesListBeta = mapOf(
         "name" to "resourcemanager",
         "displayName" to "Resourcemanager",
         "path" to "./google-beta/services/resourcemanager"
+    ),
+    "resourcemanager3" to mapOf(
+        "name" to "resourcemanager3",
+        "displayName" to "Resourcemanager3",
+        "path" to "./google-beta/services/resourcemanager3"
     ),
     "runtimeconfig" to mapOf(
         "name" to "runtimeconfig",

@@ -42,9 +42,12 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_beyondcorp_app_connection":                 beyondcorp.DataSourceGoogleBeyondcorpAppConnection(),
 	"google_beyondcorp_app_connector":                  beyondcorp.DataSourceGoogleBeyondcorpAppConnector(),
 	"google_beyondcorp_app_gateway":                    beyondcorp.DataSourceGoogleBeyondcorpAppGateway(),
+	"google_beyondcorp_security_gateway":               beyondcorp.DataSourceGoogleBeyondcorpSecurityGateway(),
 	"google_billing_account":                           billing.DataSourceGoogleBillingAccount(),
+	"google_bigquery_table":          								  bigquery.DataSourceGoogleBigQueryTable(),
 	"google_bigquery_tables":          								  bigquery.DataSourceGoogleBigQueryTables(),
 	"google_bigquery_dataset":          								bigquery.DataSourceGoogleBigqueryDataset(),
+	"google_bigquery_datasets":          				bigquery.DataSourceGoogleBigqueryDatasets(),
 	"google_bigquery_default_service_account":          bigquery.DataSourceGoogleBigqueryDefaultServiceAccount(),
 	"google_certificate_manager_certificates":          certificatemanager.DataSourceGoogleCertificateManagerCertificates(),
 	"google_certificate_manager_certificate_map":       certificatemanager.DataSourceGoogleCertificateManagerCertificateMap(),
@@ -65,6 +68,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_cloud_run_service":                         cloudrun.DataSourceGoogleCloudRunService(),
 	"google_cloud_run_v2_job":                          cloudrunv2.DataSourceGoogleCloudRunV2Job(),
 	"google_cloud_run_v2_service":                      cloudrunv2.DataSourceGoogleCloudRunV2Service(),
+	"google_cloud_run_v2_worker_pool":					cloudrunv2.DataSourceGoogleCloudRunV2WorkerPool(),
 	"google_composer_environment":                      composer.DataSourceGoogleComposerEnvironment(),
 	"google_composer_user_workloads_config_map":        composer.DataSourceGoogleComposerUserWorkloadsConfigMap(),
 	"google_composer_user_workloads_secret":            composer.DataSourceGoogleComposerUserWorkloadsSecret(),
@@ -126,12 +130,14 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_container_engine_versions":                 container.DataSourceGoogleContainerEngineVersions(),
 	"google_container_registry_image":                  containeranalysis.DataSourceGoogleContainerImage(),
 	"google_container_registry_repository":             containeranalysis.DataSourceGoogleContainerRepo(),
+	"google_dataplex_data_quality_rules":				dataplex.DataSourceDataplexDataQualityRules(),
 	"google_dataproc_metastore_service":                dataprocmetastore.DataSourceDataprocMetastoreService(),
 	"google_datastream_static_ips":                     datastream.DataSourceGoogleDatastreamStaticIps(),
 	"google_dns_keys":                                  dns.DataSourceDNSKeys(),
 	"google_dns_managed_zone":                          dns.DataSourceDnsManagedZone(),
 	"google_dns_managed_zones":                         dns.DataSourceDnsManagedZones(),
 	"google_dns_record_set":                            dns.DataSourceDnsRecordSet(),
+	"google_gke_hub_membership":                        gkehub.DataSourceGoogleGkeHubMembership(),
 	"google_gke_hub_membership_binding":                gkehub2.DataSourceGoogleGkeHubMembershipBinding(),
 	"google_gke_hub_feature":                           gkehub2.DataSourceGoogleGkeHubFeature(),
 	"google_filestore_instance":                        filestore.DataSourceGoogleFilestoreInstance(),
@@ -170,6 +176,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_logging_project_cmek_settings":             logging.DataSourceGoogleLoggingProjectCmekSettings(),
 	"google_logging_project_settings":                  logging.DataSourceGoogleLoggingProjectSettings(),
 	"google_logging_sink":                              logging.DataSourceGoogleLoggingSink(),
+	"google_lustre_instance":                           lustre.DataSourceLustreInstance(),
 	"google_monitoring_notification_channel":           monitoring.DataSourceMonitoringNotificationChannel(),
 	"google_monitoring_cluster_istio_service":          monitoring.DataSourceMonitoringServiceClusterIstio(),
 	"google_monitoring_istio_canonical_service":        monitoring.DataSourceMonitoringIstioCanonicalService(),
@@ -261,6 +268,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	{{- end }}
 	"google_vpc_access_connector":                      vpcaccess.DataSourceVPCAccessConnector(),
 	"google_memorystore_instance":						memorystore.DataSourceMemorystoreInstance(),
+	"google_memcache_instance":							memcache.DataSourceMemcacheInstance(),
 	"google_redis_instance":                            redis.DataSourceGoogleRedisInstance(),
 	"google_vertex_ai_index":                           vertexai.DataSourceVertexAIIndex(),
 	"google_vmwareengine_cluster":                      vmwareengine.DataSourceVmwareengineCluster(),
@@ -504,4 +512,15 @@ var handwrittenIAMResources = map[string]*schema.Resource{
 	"google_service_account_iam_member":            tpgiamresource.ResourceIamMember(resourcemanager.IamServiceAccountSchema, resourcemanager.NewServiceAccountIamUpdater, resourcemanager.ServiceAccountIdParseFunc),
 	"google_service_account_iam_policy":            tpgiamresource.ResourceIamPolicy(resourcemanager.IamServiceAccountSchema, resourcemanager.NewServiceAccountIamUpdater, resourcemanager.ServiceAccountIdParseFunc),
 	// ####### END non-generated IAM resources ###########
+}
+
+// UseGeneratedProducts uses every generated product to avoid "imported and not used" errors.
+// This allows developers to define a product without any resources, datasources, or other files.
+//
+// This avoids goimports which takes a very long time, or needing to know if there are any other
+// files in a given package when generating this file (which is done in parallel)
+func UseGeneratedProducts() {
+	{{- range $service := $.GetMmv1ServicesInVersion $.Products }}
+	  var _ = {{$service}}.ProductName
+	{{- end }}
 }

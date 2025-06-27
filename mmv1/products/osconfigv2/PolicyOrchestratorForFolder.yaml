@@ -13,6 +13,9 @@
 
 ---
 name: PolicyOrchestratorForFolder
+api_resource_type_kind: PolicyOrchestrator
+api_variant_patterns:
+  - 'folders/{folder}/locations/{location}/policyOrchestrators/{policyOrchestrator}'
 description: |
   PolicyOrchestrator helps managing project+zone level policy resources (e.g.
   OS Policy Assignments), by providing tools to create, update and delete them

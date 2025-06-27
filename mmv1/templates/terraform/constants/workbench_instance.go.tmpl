@@ -23,6 +23,10 @@ func WorkbenchInstanceLabelsDiffSuppress(k, old, new string, d *schema.ResourceD
 }
 
 
+var WorkbenchInstanceSettableUnmodifiableDefaultMetadata = []string{
+	    "serial-port-logging-enable",
+}
+
 var WorkbenchInstanceProvidedMetadata = []string{
     "agent-health-check-interval-seconds",
     "agent-health-check-path",
@@ -50,6 +54,7 @@ var WorkbenchInstanceProvidedMetadata = []string{
     "install-monitoring-agent",
     "install-nvidia-driver",
     "installed-extensions",
+    "instance-region",
     "last_updated_diagnostics",
     "notebooks-api",
     "notebooks-api-version",
@@ -68,7 +73,6 @@ var WorkbenchInstanceProvidedMetadata = []string{
     "report-system-status",
     "resource-url",
     "restriction",
-    "serial-port-logging-enable",
     "service-account-mode",
     "shutdown-script",
     "title",
@@ -83,9 +87,18 @@ var WorkbenchInstanceProvidedMetadata = []string{
 }
 
 func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// Suppress diffs for the Metadata
+	// Extract the actual metadata key from the full key path
+    parts := strings.Split(k, ".")
+    key := parts[len(parts)-1]
+
 	for _, metadata := range WorkbenchInstanceProvidedMetadata {
-		if strings.Contains(k, metadata) {
+		if key == metadata {
+			return true
+		}
+	}
+
+	for _, metadata := range WorkbenchInstanceSettableUnmodifiableDefaultMetadata {
+		if strings.Contains(k, metadata) && new == "" {
 			return true
 		}
 	}
@@ -262,3 +275,32 @@ func mergeMaps(oldMap, newMap map[string]interface{}) map[string]string {
 	return modifiedMap
 }
 {{- end }}
+
+
+func workbenchMetadataCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	if diff.HasChange("gce_setup.0.metadata") {
+		o, n := diff.GetChange("gce_setup.0.metadata")
+		oldMetadata := o.(map[string]interface{})
+		newMetadata := n.(map[string]interface{})
+
+		for _, key := range WorkbenchInstanceSettableUnmodifiableDefaultMetadata {
+			oldValue, oldOk := oldMetadata[key]
+			newValue, newOk := newMetadata[key]
+
+			// Condition to force new:
+			// 1. The key exists in both old and new metadata AND their values differ.
+			// 2. The key exists in new but not in old (meaning it was added).
+			//
+			// The key exists in old but not in new (meaning it was removed) is ignored.
+			if (oldOk && newOk && oldValue != newValue) ||
+				(!oldOk && newOk) {
+				// If a change is detected for this specific key, force a new resource and stop checking.
+				if err := diff.ForceNew("gce_setup.0.metadata"); err != nil {
+					return err
+				}
+				return nil // Return nil immediately after forcing new
+			}
+		}
+	}
+	return nil
+}

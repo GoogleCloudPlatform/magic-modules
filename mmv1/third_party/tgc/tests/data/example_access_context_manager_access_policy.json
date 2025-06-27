@@ -2,12 +2,12 @@
     {
         "name": "//accesscontextmanager.googleapis.com/accessPolicies/placeholder-BpLnfgDs",
         "asset_type": "accesscontextmanager.googleapis.com/AccessPolicy",
-        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "ancestry_path": "organizations/{{.OrgID}}",
         "resource": {
             "version": "v1",
             "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/accesscontextmanager/v1/rest",
             "discovery_name": "AccessPolicy",
-            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "parent": "//cloudresourcemanager.googleapis.com/organizations/{{.OrgID}}",
             "data": {
                 "parent": "organizations/{{.OrgID}}",
                 "scopes": [

@@ -81,22 +81,18 @@ examples:
       name: 'gce-policy'
   - name: 'resource_policy_workload_policy'
     primary_resource_id: 'bar'
-    min_version: 'beta'
     vars:
       name: 'gce-policy'
   - name: 'resource_policy_workload_policy_accelerator_topology'
     primary_resource_id: 'bar'
-    min_version: 'beta'
     vars:
       name: 'gce-policy'
   - name: 'resource_policy_workload_policy_max_topology_distance'
     primary_resource_id: 'bar'
-    min_version: 'beta'
     vars:
       name: 'gce-policy'
   - name: 'resource_policy_placement_policy_gpu_topology'
     primary_resource_id: 'baz'
-    min_version: 'beta'
     vars:
       name: 'gce-policy'
   - name: 'resource_policy_placement_policy_tpu_topology'
@@ -336,7 +332,6 @@ properties:
         conflicts:
           - group_placement_policy.0.max_distance
         immutable: true
-        min_version: 'beta'
       - name: 'tpuTopology'
         type: String
         description: |
@@ -414,7 +409,6 @@ properties:
     type: NestedObject
     description: |
       Represents the workload policy.
-    min_version: 'beta'
     properties:
       - name: 'type'
         type: Enum

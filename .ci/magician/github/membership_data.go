@@ -81,7 +81,12 @@ var (
 			vacations: []Vacation{},
 		},
 		"melinath": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 6, 26),
+					endDate:   newDate(2025, 7, 7),
+				},
+			},
 		},
 		"NickElliot": {
 			vacations: []Vacation{},
@@ -103,8 +108,8 @@ var (
 		"shuyama1": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 3, 26),
-					endDate:   newDate(2025, 4, 1),
+					startDate: newDate(2025, 5, 23),
+					endDate:   newDate(2025, 5, 30),
 				},
 			},
 		},
@@ -117,7 +122,12 @@ var (
 			},
 		},
 		"slevenick": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 5, 22),
+					endDate:   newDate(2025, 6, 7),
+				},
+			},
 		},
 		"trodge": {
 			vacations: []Vacation{},
