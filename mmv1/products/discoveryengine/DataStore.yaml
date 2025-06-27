@@ -202,6 +202,7 @@ properties:
       If this field is set and processed successfully, the DataStore will be
       protected by the KMS key, as indicated in the cmek_config field.
     required: false
+    ignore_read: true
   - name: 'documentProcessingConfig'
     type: NestedObject
     description: |
