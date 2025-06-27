@@ -96,11 +96,11 @@ properties:
     output: true
   - name: createTime
     type: String
-    description: '[Output only] Create time stamp'
+    description: 'Create time stamp'
     output: true
   - name: updateTime
     type: String
-    description: '[Output only] Update time stamp'
+    description: 'Update time stamp'
     output: true
   - name: labels
     type: KeyValueLabels
@@ -121,7 +121,6 @@ properties:
             description: |-
               Tells whether the Malicious URI filter is enabled or disabled.
               Possible values:
-              MALICIOUS_URI_FILTER_ENFORCEMENT_UNSPECIFIED
               ENABLED
               DISABLED
       - name: raiSettings
@@ -139,7 +138,6 @@ properties:
                   type: String
                   description: |-
                     Possible values:
-                    RAI_FILTER_TYPE_UNSPECIFIED
                     SEXUALLY_EXPLICIT
                     HATE_SPEECH
                     HARASSMENT
@@ -149,7 +147,6 @@ properties:
                   type: String
                   description: |-
                     Possible values:
-                    DETECTION_CONFIDENCE_LEVEL_UNSPECIFIED
                     LOW_AND_ABOVE
                     MEDIUM_AND_ABOVE
                     HIGH
@@ -194,7 +191,6 @@ properties:
                   Tells whether the Sensitive Data Protection basic config is enabled or
                   disabled.
                   Possible values:
-                  SDP_BASIC_CONFIG_ENFORCEMENT_UNSPECIFIED
                   ENABLED
                   DISABLED
       - name: piAndJailbreakFilterSettings
@@ -207,14 +203,12 @@ properties:
               Tells whether Prompt injection and Jailbreak filter is enabled or
               disabled.
               Possible values:
-              PI_AND_JAILBREAK_FILTER_ENFORCEMENT_UNSPECIFIED
               ENABLED
               DISABLED
           - name: confidenceLevel
             type: String
             description: |-
               Possible values:
-              DETECTION_CONFIDENCE_LEVEL_UNSPECIFIED
               LOW_AND_ABOVE
               MEDIUM_AND_ABOVE
               HIGH
@@ -266,6 +260,5 @@ properties:
         type: String
         description: |-
             Possible values:
-            ENFORCEMENT_TYPE_UNSPECIFIED
             INSPECT_ONLY
             INSPECT_AND_BLOCK
