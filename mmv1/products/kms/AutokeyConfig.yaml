@@ -85,3 +85,8 @@ properties:
       CryptoKey for any new KeyHandle the Developer creates. Should have the form
       `projects/<project_id_or_number>`.
     min_version: 'beta'
+  - name: 'etag'
+    type: String
+    description: 'The etag of the AutokeyConfig for optimistic concurrency control.'
+    min_version: 'beta'
+    output: true
