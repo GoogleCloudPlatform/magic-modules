@@ -56,14 +56,21 @@ examples:
       'prevent_destroy': 'false'
   - name: 'memorystore_instance_full'
     primary_resource_id: 'instance-full'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-memorystore.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
       instance_name: 'full-instance'
       policy_name: 'my-policy'
       subnet_name: 'my-subnet'
       network_name: 'my-network'
       prevent_destroy: 'true'
+      kms_key_name: "my-key"
     test_vars_overrides:
       'prevent_destroy': 'false'
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    ignore_read_extra:
+      - 'update_time'
   - name: 'memorystore_instance_persistence_aof'
     primary_resource_id: 'instance-persistence-aof'
     vars:
@@ -126,7 +133,6 @@ virtual_fields:
     description: "Immutable. User inputs for the auto-created
       endpoints connections. "
     type: Array
-    # is_set: true
     immutable: true
     conflicts:
       - desiredPscAutoConnections
@@ -259,6 +265,7 @@ properties:
       "Optional. Number of replica nodes per shard. If omitted the default
       is 0 replicas. "
     default_from_api: true
+    send_empty_value: true
   - name: 'authorizationMode'
     type: String
     description:
@@ -802,3 +809,7 @@ properties:
       The backup collection full resource name.
       Example: projects/{project}/locations/{location}/backupCollections/{collection}
     output: true
+  - name: kmsKey
+    type: String
+    description: The KMS key used to encrypt the at-rest data of the cluster
+    immutable: true
