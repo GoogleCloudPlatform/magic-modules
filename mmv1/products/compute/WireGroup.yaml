@@ -41,8 +41,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
-custom_code:
-  test_check_destroy: 'templates/terraform/custom_check_destroy/wire_group.go.tmpl'
 examples:
   - name: 'compute_wire_group_basic'
     primary_resource_id: 'example-test-wire-group'
@@ -87,27 +85,38 @@ properties:
     validation:
       regex: '^[a-z]([-a-z0-9]*[a-z0-9])?$'
   - name: endpoints
-    type: KeyValuePairs
+    type: Map
     description: |
       Endpoints grouped by location, each mapping to interconnect configurations.
-    properties:
-      - name: interconnects
-        type: KeyValuePairs
-        description: |
-          Map of interconnect details.
-        properties:
-          - name: interconnect
-            type: string
-          - name: vlan_tags
-            type: Array
+    key_name: 'endpoint'
+    key_description: |
+      The name of the endpoint, which is a city name.
+    value_type:
+      type: NestedObject
+      properties:
+        - name: interconnects
+          type: Map
+          key_name: interconnect_name
+          key_description: |
+            The name of the interconnect.
+          value_type:
+            type: NestedObject
             description: |
-              VLAN tags for the interconnect.
-            item_type:
-              type: integer
+              Map of interconnect details.
+            properties:
+              - name: interconnect
+                type: string
+              - name: vlan_tags
+                type: Array
+                description: |
+                  VLAN tags for the interconnect.
+                item_type:
+                  type: Integer
   - name: adminEnabled
-    type: boolean
+    type: Boolean
     description: |
       Indicates whether the wire group is administratively enabled.
+    default_value: true
   - name: wireGroupProperties
     type: NestedObject
     description: |
@@ -152,8 +161,10 @@ properties:
       properties:
         - name: label
           type: string
+          output: true
         - name: endpoints
           type: Array
+          output: true
           description: |
             'Wire endpoints are specific Interconnect connections.'
           item_type:
@@ -161,21 +172,26 @@ properties:
             properties:
               - name: interconnect
                 type: string
+                output: true
               - name: vlanTag
-                type: integer
+                type: Integer
+                output: true
         - name: wireProperties
           type: NestedObject
-          output: true # This is redundant if the parent 'wires' is output: true, but harmless
+          output: true
           properties:
             - name: bandwidthUnmetered
               type: Integer
+              output: true
             - name: faultResponse
               type: enum
+              output: true
               enum_values:
                 - 'NONE'
                 - 'DISABLE_PORT'
         - name: adminEnabled
-          type: boolean
+          type: Boolean
+          output: true
   - name: topology
     type: NestedObject
     description: |
@@ -184,10 +200,13 @@ properties:
     properties:
       - name: endpoints
         type: Array
+        output: true
         item_type:
           type: NestedObject
           properties:
             - name: label
               type: string
+              output: true
             - name: city
               type: string
+              output: true
