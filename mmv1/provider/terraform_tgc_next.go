@@ -39,6 +39,10 @@ type TerraformGoogleConversionNext struct {
 
 	ResourcesForVersion []ResourceIdentifier
 
+	// Multiple Terraform resources can share the same API resource type.
+	// For example, "google_compute_region_autoscaler" and "google_region_autoscaler"
+	ResourcesGroupedByApiResourceType map[string][]ResourceIdentifier
+
 	TargetVersionName string
 
 	Version product.Version
@@ -52,14 +56,16 @@ type ResourceIdentifier struct {
 	ServiceName   string
 	TerraformName string
 	ResourceName  string
+	AliasName     string // It can be "Default" or the same with ResourceName
 }
 
 func NewTerraformGoogleConversionNext(product *api.Product, versionName string, startTime time.Time) TerraformGoogleConversionNext {
 	t := TerraformGoogleConversionNext{
-		Product:           product,
-		TargetVersionName: versionName,
-		Version:           *product.VersionObjOrClosest(versionName),
-		StartTime:         startTime,
+		Product:                           product,
+		TargetVersionName:                 versionName,
+		Version:                           *product.VersionObjOrClosest(versionName),
+		StartTime:                         startTime,
+		ResourcesGroupedByApiResourceType: make(map[string][]ResourceIdentifier),
 	}
 
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
@@ -309,6 +315,8 @@ func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target 
 // The variable resources_for_version is used to generate resources in file
 // mmv1/templates/tgc_next/provider/provider_mmv1_resources.go.tmpl
 func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products []*api.Product) {
+	resourcesGroupedByApiResourceType := make(map[string][]ResourceIdentifier)
+
 	for _, productDefinition := range products {
 		service := strings.ToLower(productDefinition.Name)
 		for _, object := range productDefinition.Objects {
@@ -322,11 +330,31 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 
 			tgc.ResourceCount++
 
-			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, ResourceIdentifier{
+			resourceIdentifier := ResourceIdentifier{
 				ServiceName:   service,
 				TerraformName: object.TerraformName(),
 				ResourceName:  object.ResourceName(),
-			})
+				AliasName:     object.ResourceName(),
+			}
+			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, resourceIdentifier)
+
+			apiResourceType := fmt.Sprintf("%s.%s", service, object.ApiResourceType())
+			if _, ok := resourcesGroupedByApiResourceType[apiResourceType]; !ok {
+				resourcesGroupedByApiResourceType[apiResourceType] = make([]ResourceIdentifier, 0)
+			}
+			resourcesGroupedByApiResourceType[apiResourceType] = append(resourcesGroupedByApiResourceType[apiResourceType], resourceIdentifier)
+		}
+	}
+
+	for apiResourceType, resources := range resourcesGroupedByApiResourceType {
+		// If no other Terraform resources share the API resource type, override the alias name as "Default"
+		if len(resources) == 1 {
+			for _, resourceIdentifier := range resources {
+				resourceIdentifier.AliasName = "Default"
+				tgc.ResourcesGroupedByApiResourceType[apiResourceType] = []ResourceIdentifier{resourceIdentifier}
+			}
+		} else {
+			tgc.ResourcesGroupedByApiResourceType[apiResourceType] = resources
 		}
 	}
 }

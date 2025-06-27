@@ -2007,3 +2007,15 @@ func (r Resource) ReadPropertiesForTgc() []*Type {
 		return v.Output
 	})
 }
+
+// The API resource type of the resource. Normally, it is the resource name.
+// Rarely, it is the API "resource type kind".
+// For example, the API resource type of "google_compute_autoscaler" is "ComputeAutoscalerAssetType".
+// The API resource type of "google_compute_region_autoscaler" is also "ComputeAutoscalerAssetType".
+func (r Resource) ApiResourceType() string {
+	if r.ApiResourceTypeKind != "" {
+		return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.ApiResourceTypeKind)
+	}
+
+	return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.Name)
+}
