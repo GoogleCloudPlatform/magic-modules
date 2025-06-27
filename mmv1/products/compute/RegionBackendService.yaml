@@ -336,7 +336,7 @@ properties:
     description: |
       Settings controlling the volume of connections to a backend service. This field
       is applicable only when the `load_balancing_scheme` is set to INTERNAL_MANAGED
-      and the `protocol` is set to HTTP, HTTPS, HTTP2 or H2C.
+      and the `protocol` is set to HTTP, HTTPS, or HTTP2.
     properties:
       - name: 'connectTimeout'
         type: NestedObject
@@ -441,7 +441,7 @@ properties:
       hashing.
       This field only applies when all of the following are true -
         * `load_balancing_scheme` is set to INTERNAL_MANAGED
-        * `protocol` is set to HTTP, HTTPS, HTTP2 or H2C
+        * `protocol` is set to HTTP, HTTPS, or HTTP2
         * `locality_lb_policy` is set to MAGLEV or RING_HASH
     properties:
       - name: 'httpCookie'
@@ -911,7 +911,7 @@ properties:
 
       locality_lb_policy is applicable to either:
 
-      * A regional backend service with the service_protocol set to HTTP, HTTPS, HTTP2 or H2C,
+      * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
         and loadBalancingScheme set to INTERNAL_MANAGED.
       * A global backend service with the load_balancing_scheme set to INTERNAL_SELF_MANAGED.
       * A regional backend service with loadBalancingScheme set to EXTERNAL (External Network
@@ -975,7 +975,7 @@ properties:
     description: |
       Settings controlling eviction of unhealthy hosts from the load balancing pool.
       This field is applicable only when the `load_balancing_scheme` is set
-      to INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, HTTP2 or H2C.
+      to INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, or HTTP2.
     properties:
       - name: 'baseEjectionTime'
         type: NestedObject
@@ -1219,21 +1219,22 @@ properties:
   - name: 'protocol'
     type: Enum
     description: |
-      The protocol this BackendService uses to communicate with backends.
-      The default is HTTP. Possible values are HTTP, HTTPS, HTTP2, H2C, TCP, SSL, UDP
-      or GRPC. Refer to the documentation for the load balancers or for Traffic Director
-      for more information.
+      The protocol this RegionBackendService uses to communicate with backends.
+      The default is HTTP. **NOTE**: HTTP2 is only valid for beta HTTP/2 load balancer
+      types and may result in errors if used with the GA API.
     default_from_api: true
+    # This is removed to avoid breaking terraform, as default values cannot be
+    # unspecified. Providers should include this as needed via overrides
+    # default_value: :TCP
     enum_values:
       - 'HTTP'
       - 'HTTPS'
       - 'HTTP2'
-      - 'TCP'
       - 'SSL'
+      - 'TCP'
       - 'UDP'
       - 'GRPC'
       - 'UNSPECIFIED'
-      - 'H2C'
   - name: 'securityPolicy'
     type: String
     description: |

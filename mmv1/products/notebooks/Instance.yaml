@@ -70,8 +70,6 @@ examples:
     region_override: 'us-west1-a'
     vars:
       instance_name: 'notebooks-instance'
-    ignore_read_extra:
-      - 'update_time'
   - name: 'notebook_instance_basic_stopped'
     primary_resource_id: 'instance'
     primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'
@@ -80,7 +78,6 @@ examples:
       instance_name: 'notebooks-instance'
     ignore_read_extra:
       - 'desired_state'
-    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/17593#issuecomment-2888583933
   - name: 'notebook_instance_basic_container'
     primary_resource_id: 'instance'
     primary_resource_name: 'fmt.Sprintf("tf-test-notebooks-instance%s", context["random_suffix"])'

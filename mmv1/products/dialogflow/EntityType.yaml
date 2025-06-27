@@ -38,7 +38,7 @@ examples:
   - name: 'dialogflow_entity_type_basic'
     primary_resource_id: 'basic_entity_type'
     vars:
-      entity_type_name: 'basic-entity-type'
+      intent_name: 'basic-entity-type'
     exclude_test: true
 parameters:
 properties:

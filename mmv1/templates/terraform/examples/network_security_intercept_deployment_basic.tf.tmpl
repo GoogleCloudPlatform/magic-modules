@@ -1,9 +1,11 @@
 resource "google_compute_network" "network" {
+  provider                = google-beta
   name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "subnetwork" {
+  provider      = google-beta
   name          = "{{index $.Vars "subnetwork_name"}}"
   region        = "us-central1"
   ip_cidr_range = "10.1.0.0/16"
@@ -11,14 +13,16 @@ resource "google_compute_subnetwork" "subnetwork" {
 }
 
 resource "google_compute_region_health_check" "health_check" {
-  name   = "{{index $.Vars "health_check_name"}}"
-  region = "us-central1"
+  provider = google-beta
+  name     = "{{index $.Vars "health_check_name"}}"
+  region   = "us-central1"
   http_health_check {
     port = 80
   }
 }
 
 resource "google_compute_region_backend_service" "backend_service" {
+  provider              = google-beta
   name                  = "{{index $.Vars "backend_service_name"}}"
   region                = "us-central1"
   health_checks         = [google_compute_region_health_check.health_check.id]
@@ -27,23 +31,26 @@ resource "google_compute_region_backend_service" "backend_service" {
 }
 
 resource "google_compute_forwarding_rule" "forwarding_rule" {
-  name                  = "{{index $.Vars "forwarding_rule_name"}}"
-  region                = "us-central1"
-  network               = google_compute_network.network.name
-  subnetwork            = google_compute_subnetwork.subnetwork.name
-  backend_service       = google_compute_region_backend_service.backend_service.id
-  load_balancing_scheme = "INTERNAL"
-  ports                 = [6081]
-  ip_protocol           = "UDP"
+  provider               = google-beta
+  name                   = "{{index $.Vars "forwarding_rule_name"}}"
+  region                 = "us-central1"
+  network                = google_compute_network.network.name
+  subnetwork             = google_compute_subnetwork.subnetwork.name
+  backend_service        = google_compute_region_backend_service.backend_service.id
+  load_balancing_scheme  = "INTERNAL"
+  ports                  = [6081]
+  ip_protocol            = "UDP"
 }
 
 resource "google_network_security_intercept_deployment_group" "deployment_group" {
+  provider                      = google-beta
   intercept_deployment_group_id = "{{index $.Vars "deployment_group_id"}}"
   location                      = "global"
   network                       = google_compute_network.network.id
 }
 
 resource "google_network_security_intercept_deployment" "{{$.PrimaryResourceId}}" {
+  provider                   = google-beta
   intercept_deployment_id    = "{{index $.Vars "deployment_id"}}"
   location                   = "us-central1-a"
   forwarding_rule            = google_compute_forwarding_rule.forwarding_rule.id

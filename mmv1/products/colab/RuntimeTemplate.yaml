@@ -32,8 +32,6 @@ async:
   type: 'OpAsync'
   operation:
     full_url: 'https://{{location}}-aiplatform.googleapis.com/v1/{{op_id}}'
-  result:
-    resource_inside_response: true
 iam_policy:
   parent_resource_attribute: 'runtime_template'
   method_name_separator: ':'
@@ -42,6 +40,8 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/notebookRuntimeTemplates/{{runtime_template}}'
     - '{{runtime_template}}'
+custom_code:
+  post_create: 'templates/terraform/post_create/colab_runtime_template.go.tmpl'
 examples:
   - name: 'colab_runtime_template_basic'
     primary_resource_id: 'runtime-template'

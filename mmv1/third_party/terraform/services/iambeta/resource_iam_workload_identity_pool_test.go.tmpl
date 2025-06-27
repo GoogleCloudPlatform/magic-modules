@@ -2,9 +2,6 @@ package iambeta_test
 
 import (
 	"fmt"
-	{{if ne $.TargetVersionName "ga" -}}
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
-	{{- end }}
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
 
@@ -71,56 +68,6 @@ func TestAccIAMBetaWorkloadIdentityPool_minimal(t *testing.T) {
 	})
 }
 
-{{if ne $.TargetVersionName "ga" -}}
-func TestAccIAMBetaWorkloadIdentityPool_beta_update(t *testing.T) {
-	t.Parallel()
-
-	randomSuffix := acctest.RandString(t, 10)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckIAMBetaWorkloadIdentityPoolDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccIAMBetaWorkloadIdentityPool_beta_full(randomSuffix),
-			},
-			{
-				ResourceName:            "google_iam_workload_identity_pool.my_pool",
-				ImportState:             true,
-				ImportStateVerify:       true,
-			},
-			{
-				Config: testAccIAMBetaWorkloadIdentityPool_beta_update(randomSuffix),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_iam_workload_identity_pool.my_pool", plancheck.ResourceActionUpdate),
-					},
-				},
-			},
-			{
-				ResourceName:            "google_iam_workload_identity_pool.my_pool",
-				ImportState:             true,
-				ImportStateVerify:       true,
-			},
-			{
-				Config: testAccIAMBetaWorkloadIdentityPool_beta_minimum(randomSuffix),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_iam_workload_identity_pool.my_pool", plancheck.ResourceActionUpdate),
-					},
-				},
-			},
-			{
-				ResourceName:            "google_iam_workload_identity_pool.my_pool",
-				ImportState:             true,
-				ImportStateVerify:       true,
-			},
-		},
-	})
-}
-{{- end }}
-
 func testAccIAMBetaWorkloadIdentityPool_full(suffix string) string {
 	return fmt.Sprintf(`
 resource "google_iam_workload_identity_pool" "my_pool" {
@@ -150,90 +97,3 @@ resource "google_iam_workload_identity_pool" "my_pool" {
 }
 `, suffix)
 }
-
-{{if ne $.TargetVersionName "ga" -}}
-func testAccIAMBetaWorkloadIdentityPool_beta_full(suffix string) string {
-	return fmt.Sprintf(`
-resource "google_iam_workload_identity_pool" "my_pool" {
-  provider = google-beta
-
-  workload_identity_pool_id = "my-pool-%s"
-  display_name              = "Name of the pool"
-  description               = "Identity pool operates in TRUST_DOMAIN mode"
-  disabled                  = true
-  mode                      = "TRUST_DOMAIN"
-  inline_certificate_issuance_config {
-    ca_pools = {      
-      "us-central1" : "projects/project-bar/locations/us-central1/caPools/ca-pool-bar"
-      "asia-east2" : "projects/project-foo/locations/asia-east2/caPools/ca-pool-foo"
-    }
-    lifetime                   = "86400s"
-    rotation_window_percentage = 50
-    key_algorithm              = "ECDSA_P256"
-  }
-  inline_trust_config {
-    additional_trust_bundles {
-      trust_domain = "ca-pool-foo.global.project-foo.workload.id.goog"
-      trust_anchors {
-        pem_certificate = file("test-fixtures/trust_anchor_1.pem")
-      }
-      trust_anchors {
-        pem_certificate = file("test-fixtures/trust_anchor_2.pem")
-      }
-    }
-    additional_trust_bundles {
-      trust_domain = "ca-pool-bar.global.project-bar.workload.id.goog"
-      trust_anchors {
-        pem_certificate = file("test-fixtures/trust_anchor_3.pem")
-      }
-      trust_anchors {
-        pem_certificate = file("test-fixtures/trust_anchor_4.pem")
-      }
-    }
-  }
-}
-`, suffix)
-}
-
-func testAccIAMBetaWorkloadIdentityPool_beta_update(suffix string) string {
-	return fmt.Sprintf(`
-resource "google_iam_workload_identity_pool" "my_pool" {
-  provider = google-beta
-
-  workload_identity_pool_id = "my-pool-%s"
-  display_name              = "Updated name of the pool"
-  description               = "Updated identity pool operates in TRUST_DOMAIN mode"
-  disabled                  = false
-  mode                      = "TRUST_DOMAIN"
-  inline_certificate_issuance_config {
-    ca_pools = {      
-      "us-central2" : "projects/project-bar/locations/us-central2/caPools/ca-pool-bar"
-      "asia-east1" : "projects/project-foo/locations/asia-east1/caPools/ca-pool-foo"
-    }
-    lifetime                   = "36000s"
-    rotation_window_percentage = 75
-    key_algorithm              = "RSA_4096"
-  }
-  inline_trust_config {
-    additional_trust_bundles {
-      trust_domain = "ca-pool-baz.global.project-baz.workload.id.goog"
-      trust_anchors {
-        pem_certificate = file("test-fixtures/trust_anchor_updated.pem")
-      }
-    }
-  }
-}
-`, suffix)
-}
-
-func testAccIAMBetaWorkloadIdentityPool_beta_minimum(suffix string) string {
-	return fmt.Sprintf(`
-resource "google_iam_workload_identity_pool" "my_pool" {
-  provider = google-beta
-
-  workload_identity_pool_id = "my-pool-%s"
-  mode                      = "TRUST_DOMAIN"
-}
-`, suffix)
-}
-{{- end }}

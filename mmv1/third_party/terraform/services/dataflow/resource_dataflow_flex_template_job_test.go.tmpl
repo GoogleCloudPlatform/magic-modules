@@ -2,7 +2,6 @@ package dataflow_test
 {{- if ne $.TargetVersionName "ga" }}
 
 import (
-	"encoding/json"
 	"fmt"
 	"regexp"
 	"strings"
@@ -373,40 +372,6 @@ func TestAccDataflowFlexTemplateJob_withAdditionalExperiments(t *testing.T) {
 	})
 }
 
-func TestAccDataflowFlexTemplateJob_withAdditionalPipelineOptions(t *testing.T) {
-	// Dataflow responses include serialized java classes and bash commands
-	// This makes body comparison infeasible
-	acctest.SkipIfVcr(t)
-	t.Parallel()
-
-	randStr := acctest.RandString(t, 10)
-	job := "tf-test-dataflow-job-" + randStr
-	additionalPipelineOptions := []string{"numberOfWorkerHarnessThreads=200"}
-	bucket := "tf-test-dataflow-bucket-" + randStr
-	topic := "tf-test-topic" + randStr
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataflowFlexTemplateJob_additionalPipelineOptions(job, bucket, topic, additionalPipelineOptions),
-				Check: resource.ComposeTestCheckFunc(
-					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_pipeline_options", false),
-					testAccDataflowFlexTemplateJobHasAdditionalPipelineOptions(t, "google_dataflow_flex_template_job.flex_job_pipeline_options", additionalPipelineOptions, false),
-				),
-			},
-			{
-				ResourceName:            "google_dataflow_flex_template_job.flex_job_pipeline_options",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "additional_pipeline_options", "container_spec_gcs_path", "labels", "terraform_labels"},
-			},
-		},
-	})
-}
-
 func TestAccDataflowFlexTemplateJob_withProviderDefaultLabels(t *testing.T) {
 	// This resource uses custom retry logic that cannot be sped up without
 	// modifying the actual resource
@@ -703,55 +668,6 @@ func testAccDataflowFlexTemplateJobHasAdditionalExperiments(t *testing.T, res st
 			}
 			if contains != true {
 				return fmt.Errorf("Expected experiment '%s' not found in experiments", expectedExperiment)
-			}
-		}
-
-		return nil
-	}
-}
-
-func testAccDataflowFlexTemplateJobHasAdditionalPipelineOptions(t *testing.T, res string, pipelineOptions []string, wait bool) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[res]
-		if !ok {
-			return fmt.Errorf("resource %q not found in state", res)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-		config := acctest.GoogleProviderConfig(t)
-
-		job, err := config.NewDataflowClient(config.UserAgent).Projects.Jobs.Get(config.Project, rs.Primary.ID).View("JOB_VIEW_ALL").Do()
-		if err != nil {
-			return fmt.Errorf("dataflow job does not exist")
-		}
-
-		var sdkPipelineOptionsMap map[string]interface{}
-		// Unmarshal the SdkPipelineOptions
-		err = json.Unmarshal(job.Environment.SdkPipelineOptions, &sdkPipelineOptionsMap)
-		if err != nil {
-			return fmt.Errorf("Error unmarshaling SdkPipelineOptions: '%s'", err)
-		}
-
-		//Capture the options inside SdkPipelineOptions
-		options, ok := sdkPipelineOptionsMap["options"]
-		if !ok {
-			return fmt.Errorf("Error: 'options' field not found within actualPipelineOptionsMap.")
-		}
-
-		actualPipelineOptionsMap, isMap := options.(map[string]interface{})
-		if !isMap {
-			return fmt.Errorf("Error: 'options' field is not a JSON object")
-		}
-
-		// Check if each pipelineOption exists in SdkPipelineOptions.options
-		for _, expectedPipelineOption := range pipelineOptions {
-			pOption := strings.SplitN(expectedPipelineOption, "=", 2)
-			key := pOption[0]
-			_, ok := actualPipelineOptionsMap[key]
-			if !ok {
-				return fmt.Errorf("Expected pipeline option '%s' not found in SdkPipelineOptions", expectedPipelineOption)
 			}
 		}
 
@@ -1501,61 +1417,6 @@ resource "google_dataflow_flex_template_job" "flex_job_experiments" {
 
 }
 `, topicName, bucket, job, strings.Join(experiments, `", "`))
-}
-
-func testAccDataflowFlexTemplateJob_additionalPipelineOptions(job, bucket, topicName string, pipelineOptions []string) string {
-	return fmt.Sprintf(`
-data "google_project" "project" {}
-
-resource "google_pubsub_topic" "example" {
-	name = "%s"
-}
-
-resource "google_storage_bucket" "bucket" {
-  name = "%s"
-  location = "US-CENTRAL1"
-  force_destroy = true
-  uniform_bucket_level_access = true
-}
-
-resource "google_storage_bucket_object" "schema" {
-  name = "schema.json"
-  bucket = google_storage_bucket.bucket.name
-  content = <<EOF
-{
-	"eventId": "{{"{{"}}uuid(){{"}}"}}",
-	"eventTimestamp": {{"{{"}}timestamp(){{"}}"}},
-	"ipv4": "{{"{{"}}ipv4(){{"}}"}}",
-	"ipv6": "{{"{{"}}ipv6(){{"}}"}}",
-	"country": "{{"{{"}}country(){{"}}"}}",
-	"username": "{{"{{"}}username(){{"}}"}}",
-	"quest": "{{"{{"}}random("A Break In the Ice", "Ghosts of Perdition", "Survive the Low Road"){{"}}"}}",
-	"score": {{"{{"}}integer(100, 10000){{"}}"}},
-	"completed": {{"{{"}}bool(){{"}}"}}
-}
-EOF
-}
-
-data "google_storage_bucket_object" "flex_template" {
-  name   = "latest/flex/Streaming_Data_Generator"
-  bucket = "dataflow-templates"
-}
-resource "google_dataflow_flex_template_job" "flex_job_pipeline_options" {
-  name = "%s"
-  container_spec_gcs_path = "gs://${data.google_storage_bucket_object.flex_template.bucket}/${data.google_storage_bucket_object.flex_template.name}"
-  on_delete = "cancel"
-  parameters = {
-    schemaLocation = "gs://${google_storage_bucket_object.schema.bucket}/schema.json"
-    qps = "1"
-    topic = google_pubsub_topic.example.id
-  }
-  labels = {
-   "my_labels" = "value"
-  }
-  additional_pipeline_options = ["%s"]
-
-}
-`, topicName, bucket, job, strings.Join(pipelineOptions, `", "`))
 }
 
 func testAccDataflowFlexTemplateJob_withProviderDefaultLabels(job, bucket, topicName, randStr string) string {

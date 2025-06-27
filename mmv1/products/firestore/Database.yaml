@@ -145,7 +145,6 @@ virtual_fields:
       See also `delete_protection`.
     type: String
     default_value: "ABANDON"
-    deprecation_message: '`deletion_policy` is deprecated and will be removed in a future major release. Use `delete_protection_state` instead.'
 parameters:
 properties:
   - name: 'name'

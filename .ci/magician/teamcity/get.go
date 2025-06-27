@@ -28,9 +28,6 @@ type Build struct {
 	BuildConfName string `json:"buildConfName"`
 	WebUrl        string `json:"webUrl"`
 	Number        string `json:"number"`
-	QueuedDate    string `json:"queuedDate"`
-	StartDate     string `json:"startDate"`
-	FinishDate    string `json:"finishDate"`
 }
 
 type Builds struct {
@@ -55,7 +52,7 @@ type FirstFailed struct {
 }
 
 func (tc *Client) GetBuilds(project, finishCut, startCut string) (Builds, error) {
-	url := fmt.Sprintf("https://hashicorp.teamcity.com/app/rest/builds?locator=count:500,tag:cron-trigger,project:%s,branch:refs/heads/nightly-test,queuedDate:(date:%s,condition:before),queuedDate:(date:%s,condition:after)&fields=build(id,buildTypeId,buildConfName,webUrl,number,queuedDate,startDate,finishDate)", project, finishCut, startCut)
+	url := fmt.Sprintf("https://hashicorp.teamcity.com/app/rest/builds?locator=count:500,tag:cron-trigger,project:%s,branch:refs/heads/nightly-test,finishDate:(date:%s,condition:before),startDate:(date:%s,condition:after)", project, finishCut, startCut)
 
 	var builds Builds
 
@@ -65,7 +62,7 @@ func (tc *Client) GetBuilds(project, finishCut, startCut string) (Builds, error)
 }
 
 func (tc *Client) GetTestResults(build Build) (TestResults, error) {
-	url := fmt.Sprintf("https://hashicorp.teamcity.com/app/rest/testOccurrences?locator=count:5000,build:(id:%d)&fields=testOccurrence(id,name,status,duration,firstFailed(href),details)", build.Id)
+	url := fmt.Sprintf("https://hashicorp.teamcity.com/app/rest/testOccurrences?locator=count:5000,build:(id:%d)&fields=testOccurrence(id,name,status,duration,firstFailed(href),details,build(webUrl))", build.Id)
 
 	var testResults TestResults
 

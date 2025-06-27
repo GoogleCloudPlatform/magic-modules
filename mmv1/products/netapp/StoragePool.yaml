@@ -74,16 +74,7 @@ examples:
     vars:
       pool_name: 'test-pool'
       network_name: 'test-network'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-2", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
-    exclude_docs: true
-  - name: 'Storage_pool_create_doc'
-    primary_resource_id: 'test_pool'
-    vars:
-      pool_name: 'test-pool'
-      network_name: 'test-network'
       global_name: 'test-address'
-    exclude_test: true
 parameters:
   - name: 'location'
     type: String
@@ -181,16 +172,3 @@ properties:
       Optional. True if the storage pool supports Auto Tiering enabled volumes. Default is false.
       Auto-tiering can be enabled after storage pool creation but it can't be disabled once enabled.
     immutable: true
-  - name: 'customPerformanceEnabled'
-    type: Boolean
-    description: |
-      Optional. True if using Independent Scaling of capacity and performance (Hyperdisk). Default is false.
-    immutable: true
-  - name: 'totalThroughputMibps'
-    type: String
-    description: |
-      Optional. Custom Performance Total Throughput of the pool (in MiB/s).
-  - name: 'totalIops'
-    type: String
-    description: |
-      Optional. Custom Performance Total IOPS of the pool If not provided, it will be calculated based on the totalThroughputMibps

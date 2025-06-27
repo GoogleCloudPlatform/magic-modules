@@ -61,8 +61,6 @@ examples:
   - name: 'access_context_manager_authorized_orgs_desc_basic'
     primary_resource_id: 'authorized-orgs-desc'
     exclude_test: true
-    test_env_vars:
-      org_id: 'ORG_ID'
 parameters:
   - name: 'parent'
     type: String

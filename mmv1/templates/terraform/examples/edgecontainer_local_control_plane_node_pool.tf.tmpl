@@ -1,5 +1,5 @@
 resource "google_edgecontainer_cluster" "{{$.PrimaryResourceId}}" {
-  name = "default"
+  name = "{{index $.Vars "edgecontainer_cluster_name"}}"
   location = "us-central1"
 
   authorization {

@@ -101,35 +101,10 @@ examples:
       'secondary_instance_prevent_destroy': 'false'
 virtual_fields:
   - name: 'desired_psc_auto_connections'
-    description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead."
-    deprecation_message: '`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead.'
-    type: Array
-    immutable: true
-    conflicts:
-      - desiredAutoCreatedEndpoints
-    item_type:
-      type: NestedObject
-      properties:
-        - type: String
-          name: project_id
-          description:
-            "Required. The consumer project_id where the forwarding rule is
-            created from. "
-          required: true
-        - type: String
-          name: network
-          description:
-            "Required. The consumer network where the IP address resides, in
-            the form of\nprojects/{project_id}/global/networks/{network_id}. "
-          required: true
-  - name: 'desired_auto_created_endpoints'
     description: "Immutable. User inputs for the auto-created
-      endpoints connections. "
+      PSC connections. "
     type: Array
-    # is_set: true
     immutable: true
-    conflicts:
-      - desiredPscAutoConnections
     item_type:
       type: NestedObject
       properties:
@@ -282,7 +257,6 @@ properties:
     description:
       "Output only. Endpoints clients can connect to the instance through.
       Currently only one\ndiscovery endpoint is supported. "
-    deprecation_message: '`discovery_endpoints` is deprecated  Use `endpoints` instead.'
     output: true
     item_type:
       type: NestedObject
@@ -701,7 +675,6 @@ properties:
     description:
       "Output only. User inputs and resource details of the auto-created
       PSC connections. "
-    deprecation_message: '`psc_auto_connections` is deprecated  Use `endpoints.connections.pscAutoConnections` instead.'
     output: true
     item_type:
       type: NestedObject

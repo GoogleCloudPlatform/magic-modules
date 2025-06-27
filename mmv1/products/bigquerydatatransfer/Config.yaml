@@ -60,7 +60,6 @@ examples:
       dataset_id: 'example_dataset'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
-      display_name: 'display-name'
     exclude_test: true
   - name: 'bigquerydatatransfer_config_salesforce'
     primary_resource_id: 'salesforce_config'
