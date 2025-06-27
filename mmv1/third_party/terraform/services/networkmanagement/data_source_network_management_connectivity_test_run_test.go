@@ -24,7 +24,7 @@ func TestAccNetworkManagementConnectivityTestRun_basic(t *testing.T) {
 			{
 				Config: testAccNetworkManagementConnectivityTestRun_instanceToInstance(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestMatchResourceAttr("google_network_management_connectivity_test_run.conn-test",
+					resource.TestMatchResourceAttr("data.google_network_management_connectivity_test_run.conn-test",
 						"reachability_details.0.result", regexp.MustCompile("REACHABLE")),
 				),
 			},
@@ -34,7 +34,7 @@ func TestAccNetworkManagementConnectivityTestRun_basic(t *testing.T) {
 
 func testAccNetworkManagementConnectivityTestRun_instanceToInstance(context map[string]interface{}) string {
 	connTestCfg := acctest.Nprintf(`
-resource "google_network_management_connectivity_test_run" "conn-test" {
+data "google_network_management_connectivity_test_run" "conn-test" {
   name = google_network_management_connectivity_test.conn-test.name
 }
 
