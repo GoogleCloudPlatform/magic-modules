@@ -113,6 +113,8 @@ func ResourceComputeNetworkPeering() *schema.Resource {
 				Description: `Which IP version(s) of traffic and routes are allowed to be imported or exported between peer networks. The default value is IPV4_ONLY. Possible values: ["IPV4_ONLY", "IPV4_IPV6"]`,
 				Default: "IPV4_ONLY",
 			},
+
+			{{ if ne $.TargetVersionName `ga` }}
 			"update_strategy": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -120,6 +122,7 @@ func ResourceComputeNetworkPeering() *schema.Resource {
 				Description: `The update strategy determines the semantics for updates and deletes to the peering connection configuration. The default value is INDEPENDENT. Possible values: ["INDEPENDENT", "CONSENSUS"]`,
 				Default: "INDEPENDENT",
 			},
+			{{- end }}
 		},
 		UseJSONNumber: true,
 	}
