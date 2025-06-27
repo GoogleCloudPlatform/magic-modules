@@ -314,7 +314,7 @@ func TestAccComputeFirewall_moduleOutput(t *testing.T) {
 	})
 }
 
-func TestAccComputeFirewall_resourceManagerTags(t *testing.T){
+func TestAccComputeFirewall_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
 	org := envvar.GetTestOrgFromEnv(t)
@@ -323,14 +323,14 @@ func TestAccComputeFirewall_resourceManagerTags(t *testing.T){
 	firewallName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
 
 	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-firewall-tagkey", "organizations/"+org, make(map[string]interface{}))
-	sharedTagkey,_ := tagKeyResult["shared_tag_key"]
+	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
 	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-firewall-tagvalue", sharedTagkey, org)
 
 	context := map[string]interface{}{
-		"network_name": networkName,
+		"network_name":  networkName,
 		"firewall_name": firewallName,
-		"tag_key_id": tagKeyResult["name"],
-		"tag_value_id": tagValueResult["name"],
+		"tag_key_id":    tagKeyResult["name"],
+		"tag_value_id":  tagValueResult["name"],
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -342,9 +342,9 @@ func TestAccComputeFirewall_resourceManagerTags(t *testing.T){
 				Config: testAccComputeFirewall_resourceManagerTags(context),
 			},
 			{
-				ResourceName:      "google_compute_firewall.acc_firewall_with_resource_manager_tags",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_firewall.acc_firewall_with_resource_manager_tags",
+				ImportState:             true,
+				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"params"}, // we don't read tags back. The whole params block is input only
 			},
 		},
