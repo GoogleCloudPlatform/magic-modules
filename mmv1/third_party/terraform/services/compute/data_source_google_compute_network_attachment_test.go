@@ -11,6 +11,31 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
+func TestAccDataSourceComputeNetworkAttachment_basic(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeNetworkAttachment_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "name", fmt.Sprintf("tf-test-basic-network-attachment-%s", context["random_suffix"])),
+					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "region", "us-central1"),
+					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "description", "my basic network attachment"),
+					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "connection_preference", "ACCEPT_AUTOMATIC"),
+					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "subnetworks.#", "1"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccDataSourceComputeNetworkAttachment_full(t *testing.T) {
 	t.Parallel()
 
@@ -25,9 +50,9 @@ func TestAccDataSourceComputeNetworkAttachment_full(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeNetworkAttachment_full(context),
+				Config: testAccDataSourceComputeNetworkAttachment_full(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "name", fmt.Sprintf("tf-test-basic-network-attachment%s", context["random_suffix"])),
+					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "name", fmt.Sprintf("tf-test-basic-network-attachment-%s", context["random_suffix"])),
 					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "region", "us-central1"),
 					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "description", "basic network attachment description"),
 					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "connection_preference", "ACCEPT_MANUAL"),
@@ -45,10 +70,47 @@ func TestAccDataSourceComputeNetworkAttachment_full(t *testing.T) {
 	})
 }
 
+func testAccComputeNetworkAttachment_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_network" "default" {
+    name = "tf-test-basic-network%{random_suffix}"
+    auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+    name   = "tf-test-basic-subnetwork%{random_suffix}"
+    region = "us-central1"
+
+    network       = google_compute_network.default.id
+    ip_cidr_range = "10.0.0.0/16"
+}
+
+resource "google_compute_network_attachment" "default" {
+    name   = "tf-test-basic-network-attachment-%{random_suffix}"
+    region = "us-central1"
+    description = "my basic network attachment"
+
+    subnetworks = [google_compute_subnetwork.default.id]
+    connection_preference = "ACCEPT_AUTOMATIC"
+}
+
+data "google_compute_network_attachment" "default" {
+    name = google_compute_network_attachment.default.name
+	region = google_compute_network_attachment.default.region
+	project = google_compute_network_attachment.default.project
+	depends_on = [
+		google_compute_network.default,
+		google_compute_subnetwork.default,
+		google_compute_network_attachment.default,
+	]
+}
+`, context)
+}
+
 func testAccDataSourceComputeNetworkAttachment_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network_attachment" "default" {
-    name = "tf-test-basic-network-attachment%{random_suffix}"
+    name = "tf-test-basic-network-attachment-%{random_suffix}"
     region = "us-central1"
     description = "basic network attachment description"
     connection_preference = "ACCEPT_MANUAL"
@@ -67,7 +129,7 @@ resource "google_compute_network_attachment" "default" {
 }
 
 resource "google_compute_network" "default" {
-    name = "tf-test-basic-network%{random_suffix}"
+    name = "tf-test-basic-network-%{random_suffix}"
     auto_create_subnetworks = false
 }
 
