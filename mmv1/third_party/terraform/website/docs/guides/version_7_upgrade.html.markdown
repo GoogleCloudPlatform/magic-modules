@@ -102,10 +102,13 @@ Description of the change and how users should adjust their configuration (if ne
 
 ## Resources
 
-## Resource: `google_product_resource`
+## Resource: `google_storage_bucket`
 
-### Resource-level change example header
+### `retention_period` changed to `string` data type
 
+<<<<<<< HEAD
+`retention_period` now changed to `string` data type to handle higher values for bucket retention period.
+=======
 Description of the change and how users should adjust their configuration (if needed).
 
 ## Resource: `google_bigtable_table_iam_policy`
@@ -125,3 +128,4 @@ Description of the change and how users should adjust their configuration (if ne
 ### `instance` is now removed
 
 `instance` has been removed in favor of `instance_name`.
+>>>>>>> FEATURE-BRANCH-major-release-7.0.0
