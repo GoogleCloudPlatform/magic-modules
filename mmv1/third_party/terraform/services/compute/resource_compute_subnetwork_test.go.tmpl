@@ -506,7 +506,7 @@ func TestAccComputeSubnetwork_resourceManagerTags(t *testing.T) {
 
 	suffixName := acctest.RandString(t, 10)
 	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-subnetworks-tagkey", "organizations/"+org, make(map[string]interface{}))
-	sharedTagkey,_ := tagKeyResult["shared_tag_key"].(string)
+	sharedTagkey,_ := tagKeyResult["shared_tag_key"]
 	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-subnetworks-tagvalue", sharedTagkey, org)
 
 	cnName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
