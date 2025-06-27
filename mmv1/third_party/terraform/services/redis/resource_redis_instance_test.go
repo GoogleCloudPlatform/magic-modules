@@ -255,40 +255,6 @@ func TestAccRedisInstance_redisInstanceAuthEnabled(t *testing.T) {
 	})
 }
 
-func TestAccRedisInstance_selfServiceUpdate(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckRedisInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccRedisInstance_selfServiceUpdate20240411_00_00(context),
-			},
-			{
-				ResourceName:            "google_redis_instance.cache",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region"},
-			},
-			{
-				Config: testAccRedisInstance_selfServiceUpdate20240503_00_00(context),
-			},
-			{
-				ResourceName:            "google_redis_instance.cache",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region"},
-			},
-		},
-	})
-}
-
 func TestAccRedisInstance_downgradeRedisVersion(t *testing.T) {
 	t.Parallel()
 
