@@ -38,6 +38,26 @@ func dataSourceComputeNetworkAttachmentRead(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("Error reading Network Attachment %q: %s", id, err)
 	}
 
+	// normalize fields to ensure they are in the correct format
+	// the API returns a full URL here for fields such as `network` and `region` and not just the resource name
+	if v, ok := d.Get("network").(string); ok && v != "" {
+		d.Set("network", tpgresource.GetResourceNameFromSelfLink(v))
+	}
+
+	if v, ok := d.Get("region").(string); ok && v != "" {
+		d.Set("region", tpgresource.GetResourceNameFromSelfLink(v))
+	}
+
+	if v, ok := d.Get("subnetworks").([]interface{}); ok && len(v) > 0 {
+		var subnetworks []string
+		for _, s := range v {
+			subnetworks = append(subnetworks, tpgresource.GetResourceNameFromSelfLink(s.(string)))
+		}
+		if err := d.Set("subnetworks", subnetworks); err != nil {
+			return fmt.Errorf("Error setting subnetworks: %s", err)
+		}
+	}
+
 	if err := tpgresource.SetDataSourceLabels(d); err != nil {
 		return err
 	}
