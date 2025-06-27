@@ -56,6 +56,8 @@ sweeper:
   url_substitutions:
     - region: "us-central1-a"
     - region: "us-west1-a"
+custom_diff:
+  - 'workbenchMetadataCustomizeDiff'
 examples:
   - name: 'workbench_instance_basic'
     primary_resource_id: 'instance'
