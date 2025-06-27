@@ -50,7 +50,9 @@ import (
     {{- $.CustomTemplate $.CustomCode.Constants true -}}
 {{- end}}
 
-const {{ $.ResourceName -}}AssetType string = "{{ $productBackendName }}.googleapis.com/{{ $.Name -}}"
+{{- if not $.ApiResourceTypeKind }}
+const {{ $.ApiResourceType -}}AssetType string = "{{ $productBackendName }}.googleapis.com/{{ $.Name -}}"
+{{- end }}
 
 func Resource{{ $.ResourceName -}}() *schema.Resource {
     return &schema.Resource{
@@ -102,11 +104,11 @@ func Get{{ $.ResourceName -}}CaiAssets(d tpgresource.TerraformResourceData, conf
         location, _ := tpgresource.GetLocation(d, config)
         return []caiasset.Asset{{"{{"}}
             Name: name,
-            Type: {{ $.ResourceName -}}AssetType,
+            Type: {{ $.ApiResourceType -}}AssetType,
             Resource: &caiasset.AssetResource{
                 Version: "{{ $apiVersion }}",
                 DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/{{ $productBackendName }}/{{ $apiVersion }}/rest",
-                DiscoveryName: "{{ $.Name }}",
+                DiscoveryName: "{{ or $.ApiResourceTypeKind $.Name }}",
                 Data: obj,
                 Location:             location,
             },
@@ -166,6 +168,8 @@ func resource{{ $.ResourceName -}}TgcEncoder(d tpgresource.TerraformResourceData
     {{- $prop.CustomTemplate $prop.CustomTgcExpand false -}}
     {{ else if and ($prop.IsA "Array") ($prop.ItemType.IsA "ResourceRef")}}
     {{- template "expandArrayResourcerefWithValidation" $prop -}}
+    {{ else if ($prop.IsA "ResourceRef") }}
+    {{- template "expandResourcerefWithValidation" $prop -}}
     {{ else }}
     {{- template "expandPropertyMethod" $prop -}}
     {{ end }}
