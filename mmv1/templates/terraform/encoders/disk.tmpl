@@ -50,5 +50,40 @@ if v, ok := d.GetOk("image"); ok {
 	obj["sourceImage"] = imageUrl
 	log.Printf("[DEBUG] Image name resolved to: %s", imageUrl)
 }
+{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
+
+encryptionBlock := map[string]interface{}{}
+shouldSetBlock := false
+// raw_key_wo
+if rawKey, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("raw_key_wo")); !diags.HasError() && rawKey.IsKnown() && !rawKey.IsNull() {
+		encryptionBlock["rawKey"] = rawKey.AsString()
+		shouldSetBlock = true
+		// raw_key_wo_version
+		if val, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("raw_key_wo_version")); !diags.HasError() && val.IsKnown() && !val.IsNull() {
+			if intVal, _ := val.AsBigFloat().Int64(); intVal != 0 {
+				encryptionBlock["rawKeyWoVersion"] = intVal
+			}
+		}
+	}
+// rsa_encrypted_key_wo
+if rsaKey, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("rsa_encrypted_key_wo")); !diags.HasError() && rsaKey.IsKnown() && !rsaKey.IsNull() {
+		encryptionBlock["rsaEncryptedKey"] = rsaKey.AsString()
+		shouldSetBlock = true
+		// rsa_encrypted_key_wo_version
+		if val, diags := d.GetRawConfigAt(cty.GetAttrPath("disk_encryption_key").IndexInt(0).GetAttr("rsa_encrypted_key_wo_version")); !diags.HasError() && val.IsKnown() && !val.IsNull() {
+			if intVal, _ := val.AsBigFloat().Int64(); intVal != 0 {
+				encryptionBlock["rsaEncryptedKeyWoVersion"] = intVal
+			}
+		}
+	}
+// Defensive: Only send encryptionBlock if a key was included
+if shouldSetBlock && len(encryptionBlock) > 0 {
+		log.Printf("[DEBUG] ENCODER: Sending diskEncryptionKey block: %#v", encryptionBlock)
+		obj["diskEncryptionKey"] = encryptionBlock
+	} else {
+		log.Printf("[DEBUG] ENCODER: No diskEncryptionKey block sent: %#v", encryptionBlock)
+	}
+
+{{- end }}
 
 return obj, nil
