@@ -370,6 +370,10 @@ properties:
               description: |
                 Description of the rule.
                 The maximum length is 1,024 characters.
+            - name: 'suspended'
+              type: Boolean
+              description: |
+                Whether the Rule is active or suspended. Default is false.
             - name: 'rangeExpectation'
               type: NestedObject
               description: |

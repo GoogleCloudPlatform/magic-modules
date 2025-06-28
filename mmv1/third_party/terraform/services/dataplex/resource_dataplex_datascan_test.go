@@ -209,6 +209,7 @@ resource "google_dataplex_datascan" "full_quality" {
       dimension = "VALIDITY"
       threshold = 0.99
       non_null_expectation {}
+      suspended = true
     }
 
     rules {
