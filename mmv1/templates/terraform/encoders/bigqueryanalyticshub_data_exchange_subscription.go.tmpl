@@ -1,0 +1,36 @@
+config := meta.(*transport_tpg.Config)
+if v, ok := d.GetOk("subscription_id"); ok {
+	obj["subscription"] = v.(string)
+	// Remove the auto-generated "subscriptionId" if it was added by MM, as it conflicts.
+	delete(obj, "subscriptionId")
+}
+
+// The API expects a 'destination' field in the request body for the subscriber's
+// project and location, e.g., "projects/my-project/locations/us-central1".
+// This is derived from the 'project' and 'location' fields of the resource.
+project := d.Get("project").(string)
+location := d.Get("location").(string)
+obj["destination"] = fmt.Sprintf("projects/%s/locations/%s", project, location)
+
+if v, ok := d.GetOk("subscriber_contact"); ok {
+	obj["subscriberContact"] = v.(string)
+}
+
+if v, ok := d.GetOk("destination_dataset"); ok && v != nil {
+	expandedDataset, err := expandBigqueryAnalyticsHubDataExchangeSubscriptionDestinationDataset(v, d, config)
+	if err != nil {
+		return nil, fmt.Errorf("error expanding destination_dataset: %w", err)
+	}
+	// Ensure the expanded dataset is not empty before assigning, to avoid sending empty objects.
+	if expandedDataset != nil && !tpgresource.IsEmptyValue(reflect.ValueOf(expandedDataset)) {
+		obj["destinationDataset"] = expandedDataset
+	} else {
+		// If the expanded dataset is empty, remove it from the payload to avoid API errors.
+		delete(obj, "destinationDataset")
+	}
+} else {
+	// If destination_dataset is not provided by the user, ensure it's not in the payload.
+	delete(obj, "destinationDataset")
+}
+
+return obj, nil
