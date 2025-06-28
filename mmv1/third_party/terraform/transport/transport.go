@@ -189,3 +189,130 @@ func IsApiNotEnabledError(err error) bool {
 	}
 	return false
 }
+
+func PluralDataSourceGetList(d *schema.ResourceData, config *Config, billingProject *string, userAgent string, u string, listFlattener func(config *Config, res interface{}) ([]interface{}, error), params map[string]string, resourecToList string) ([]interface{}, error) {
+	if params == nil {
+		params = make(map[string]string)
+	}
+
+	items := make([]interface{}, 0)
+	for {
+		// Depending on previous iterations, params might contain a pageToken param
+		url, err := AddQueryParams(u, params)
+		if err != nil {
+			return nil, err
+		}
+
+		headers := make(http.Header)
+		opts := SendRequestOptions{
+			Config:               config,
+			Method:               "GET",
+			RawURL:               url,
+			UserAgent:            userAgent,
+			Headers:              headers,
+			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
+		}
+		if billingProject != nil {
+			opts.Project = *billingProject
+		}
+		res, err := SendRequest(opts)
+		if err != nil {
+			return nil, HandleNotFoundError(err, d, fmt.Sprintf("%s %q", resourecToList, d.Id()))
+		}
+
+		if res == nil {
+			log.Printf("[DEBUG] Removing %s because it no longer exists.", resourecToList)
+			d.SetId("")
+			return nil, nil
+		}
+
+		var newItems []interface{}
+		if listFlattener != nil {
+			if res[resourecToList] != nil {
+				flattened, err := listFlattener(config, res[resourecToList])
+				if err != nil {
+					return nil, err
+				}
+				newItems = flattened
+			}
+		} else {
+			if v, ok := res[resourecToList].([]interface{}); ok {
+				newItems = v
+			}
+		}
+		items = append(items, newItems...)
+
+		if v, ok := res["nextPageToken"]; ok && v != nil && v.(string) != "" {
+			params["pageToken"] = v.(string)
+		} else {
+			break
+		}
+	}
+	return items, nil
+}
+
+func PluralDataSourceGetListMap(d *schema.ResourceData, config *Config, billingProject *string, userAgent string, u string, listFlattener func(config *Config, res interface{}) ([]map[string]interface{}, error), params map[string]string, resourecToList string) ([]map[string]interface{}, error) {
+	if params == nil {
+		params = make(map[string]string)
+	}
+
+	items := make([]map[string]interface{}, 0)
+	for {
+		url, err := AddQueryParams(u, params)
+		if err != nil {
+			return nil, err
+		}
+
+		headers := make(http.Header)
+		opts := SendRequestOptions{
+			Config:               config,
+			Method:               "GET",
+			RawURL:               url,
+			UserAgent:            userAgent,
+			Headers:              headers,
+			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
+		}
+		if billingProject != nil {
+			opts.Project = *billingProject
+		}
+		res, err := SendRequest(opts)
+		if err != nil {
+			return nil, HandleNotFoundError(err, d, fmt.Sprintf("%s %q", resourecToList, d.Id()))
+		}
+
+		if res == nil {
+			log.Printf("[DEBUG] Removing %s because it no longer exists.", resourecToList)
+			d.SetId("")
+			return nil, nil
+		}
+
+		var newItems []map[string]interface{}
+		if listFlattener != nil {
+			if res[resourecToList] != nil {
+				flattened, err := listFlattener(config, res[resourecToList])
+				if err != nil {
+					return nil, err
+				}
+				newItems = flattened
+			}
+		} else {
+			if v, ok := res[resourecToList].([]interface{}); ok {
+				for _, item := range v {
+					if m, ok := item.(map[string]interface{}); ok {
+						newItems = append(newItems, m)
+					} else {
+						return nil, fmt.Errorf("item in list is not a map[string]interface{}")
+					}
+				}
+			}
+		}
+		items = append(items, newItems...)
+
+		if v, ok := res["nextPageToken"]; ok && v != nil && v.(string) != "" {
+			params["pageToken"] = v.(string)
+		} else {
+			break
+		}
+	}
+	return items, nil
+}
