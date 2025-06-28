@@ -144,6 +144,7 @@ properties:
     properties:
       - name: 'subnetworks'
         type: Array
+        is_set: true
         description: |
           All instances in one of these subnetworks will be mirrored.
         at_least_one_of:
@@ -165,6 +166,7 @@ properties:
               imports: 'selfLink'
       - name: 'instances'
         type: Array
+        is_set: true
         description: |
           All the listed instances will be mirrored.  Specify at most 50.
         at_least_one_of:
