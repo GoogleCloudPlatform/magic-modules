@@ -464,6 +464,44 @@ func TestAccSecretManagerSecret_updateBetweenTtlAndExpireTime(t *testing.T) {
 	})
 }
 
+func TestAccSecretManagerSecret_DeletionProtectionUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSecretManagerSecret_deletionprotectionBasic(context),
+			},
+			{
+				ResourceName:            "google_secret_manager_secret.secret-deletionprotection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels", "deletion_protection"},
+			},
+			{
+				Config: testAccSecretManagerSecret_deletionprotectionUpdate(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_secret_manager_secret.secret-deletionprotection", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_secret_manager_secret.secret-deletionprotection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels", "deletion_protection"},
+			},
+		},
+	})
+}
+
 func testAccSecretManagerSecret_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-basic" {
@@ -1217,6 +1255,60 @@ resource "google_secret_manager_secret" "secret-basic" {
 
   expire_time = "2122-09-26T10:55:55.163240682Z"
 
+}
+`, context)
+}
+
+func testAccSecretManagerSecret_deletionprotectionBasic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_secret_manager_secret" "secret-deletionprotection" {
+	secret_id = "tf-test-secret-%{random_suffix}"
+
+	labels = {
+		label = "my-label"
+	}
+
+	replication {
+		user_managed {
+			replicas {
+				location = "us-central1"
+			}
+			replicas {
+				location = "us-east1"
+			}
+		}
+	}
+
+	ttl = "3600s"
+
+	deletion_protection = true
+}
+`, context)
+}
+
+func testAccSecretManagerSecret_deletionprotectionUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_secret_manager_secret" "secret-deletionprotection" {
+	secret_id = "tf-test-secret-%{random_suffix}"
+
+	labels = {
+		label = "my-label"
+	}
+
+	replication {
+		user_managed {
+			replicas {
+				location = "us-central1"
+			}
+			replicas {
+				location = "us-east1"
+			}
+		}
+	}
+
+	ttl = "3600s"
+
+	deletion_protection = false
 }
 `, context)
 }
