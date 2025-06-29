@@ -247,8 +247,6 @@ resource "google_network_management_vpc_flow_logs_config" "network-test" {
   vpc_flow_logs_config_id = "tf-test-network-id-%{random_suffix}"
   location                = "global"
   network                 = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.network.name}"
-
-  // Updated fields
   state                   = "DISABLED"
   aggregation_interval    = "INTERVAL_10_MIN"
   flow_sampling           = 0.05
@@ -338,8 +336,6 @@ resource "google_network_management_vpc_flow_logs_config" "subnet-test" {
   vpc_flow_logs_config_id = "tf-test-subnet-id-%{random_suffix}"
   location                = "global"
   subnet                  = "projects/${data.google_project.project.number}/regions/${google_compute_subnetwork.subnet.region}/subnetworks/${google_compute_subnetwork.subnet.name}"
-  
-  // Updated fields
   state                   = "DISABLED"
   aggregation_interval    = "INTERVAL_30_SEC"
   flow_sampling           = 0.5
