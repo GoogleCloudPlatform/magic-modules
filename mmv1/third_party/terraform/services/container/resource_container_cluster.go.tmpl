@@ -6040,22 +6040,22 @@ func expandSecretManagerConfig(configured interface{}) *container.SecretManagerC
 	}
 	{{- if ne $.TargetVersionName "ga" }}
 	if autoRotation, ok := config["rotation_config"]; ok {
-		    if autoRotationList, ok := autoRotation.([]interface{}); ok {
-		        if len(autoRotationList) > 0 {
-		            autoRotationConfig := autoRotationList[0].(map[string]interface{})
-					if rotationInterval, ok := autoRotationConfig["rotation_interval"].(string); ok && rotationInterval != "" {
-						sc.RotationConfig = &container.RotationConfig{
+		if autoRotationList, ok := autoRotation.([]interface{}); ok {
+			if len(autoRotationList) > 0 {
+				autoRotationConfig := autoRotationList[0].(map[string]interface{})
+				if rotationInterval, ok := autoRotationConfig["rotation_interval"].(string); ok && rotationInterval != "" {
+					sc.RotationConfig = &container.RotationConfig{
 						Enabled:         autoRotationConfig["enabled"].(bool),
 						RotationInterval: rotationInterval,
-						}
-					} else {
-						sc.RotationConfig = &container.RotationConfig{
-							Enabled:         autoRotationConfig["enabled"].(bool),
-						}
 					}
-		        }
+				} else {
+					sc.RotationConfig = &container.RotationConfig{
+						Enabled:         autoRotationConfig["enabled"].(bool),
+					}
+				}
 		    }
 		}
+	}
 		{{- end }}
 	return sc
 }
@@ -7060,8 +7060,8 @@ func flattenSecretManagerConfig(c *container.SecretManagerConfig) []map[string]i
 	rotationList := []map[string]interface{}{}
 	if c.RotationConfig != nil {
 		rotationConfigMap := map[string]interface{}{
-            "enabled": c.RotationConfig.Enabled,
-        }
+			"enabled": c.RotationConfig.Enabled,
+		}
 		if c.RotationConfig.RotationInterval != "" {
 			rotationConfigMap["rotation_interval"] = c.RotationConfig.RotationInterval
 		}
