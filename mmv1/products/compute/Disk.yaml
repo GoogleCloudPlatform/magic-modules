@@ -37,7 +37,8 @@ references:
 docs:
 base_url: 'projects/{{project}}/zones/{{zone}}/disks'
 has_self_link: true
-immutable: true
+update_verb: 'PATCH'
+update_mask: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -64,11 +65,17 @@ custom_code:
   update_encoder: 'templates/terraform/update_encoder/hyper_disk.go.tmpl'
   decoder: 'templates/terraform/decoders/disk.tmpl'
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
+  raw_resource_config_validation: 'templates/terraform/validation/compute_disk.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
 examples:
   - name: 'disk_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
+    vars:
+      disk_name: 'test-disk'
+  - name: 'disk_basic_wo'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
     vars:
@@ -190,7 +197,6 @@ properties:
       If you do not provide an encryption key when creating the disk, then
       the disk will be encrypted using an automatically generated key and
       you do not need to provide a key to use the disk later.
-    immutable: true
     properties:
       - name: 'rawKey'
         type: String
@@ -198,6 +204,34 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
+        immutable: true
+        custom_flatten: 'templates/terraform/custom_flatten/compute_key_flatten.go.tmpl'
+        conflicts:
+          - 'disk_encryption_key.0.rawKeyWo'
+      - name: 'rawKeyWoVersion'
+        type: Integer
+        description: |
+          Triggers update of write-only rawKey
+        immutable: true
+        default_value: 0
+        ignore_read: true
+      - name: 'rawKeyWo'
+        type: String
+        description: |
+          Specifies a 256-bit customer-supplied encryption key, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+        write_only: true
+        required_with:
+          - 'disk_encryption_key.0.rawKeyWoVersion'
+        conflicts:
+          - 'disk_encryption_key.0.rawKey'
+      - name: 'rsaEncryptedKeyWoVersion'
+        type: Integer
+        description: |
+          Triggers update of write-only rsaEncryptedKey
+        immutable: true
+        default_value: 0
+        ignore_read: true
       - name: 'rsaEncryptedKey'
         type: String
         description: |
@@ -205,14 +239,29 @@ properties:
           customer-supplied encryption key to either encrypt or decrypt
           this resource. You can provide either the rawKey or the rsaEncryptedKey.
         sensitive: true
+        custom_flatten: 'templates/terraform/custom_flatten/compute_rsa_key_flatten.go.tmpl'
+        conflicts:
+          - 'disk_encryption_key.0.rsaEncryptedKeyWo'
+      - name: 'rsaEncryptedKeyWo'
+        type: String
+        description: |
+          Specifies a 256-bit customer-supplied encryption key, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+        write_only: true
+        required_with:
+          - 'disk_encryption_key.0.rsaEncryptedKeyWoVersion'
+        conflicts:
+          - 'disk_encryption_key.0.rsaEncryptedKey'
       - name: 'sha256'
         type: String
+        immutable: true
         description: |
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
       - name: 'kmsKeySelfLink'
         type: String
+        immutable: true
         description: |
           The self link of the encryption key used to encrypt the disk. Also called KmsKeyName
           in the cloud console. Your project's Compute Engine System service account
@@ -223,6 +272,7 @@ properties:
         diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
       - name: 'kmsKeyServiceAccount'
         type: String
+        immutable: true
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
@@ -518,6 +568,7 @@ properties:
     description: |
       A list of features to enable on the guest operating system.
       Applicable only for bootable disks.
+    immutable: true
     is_set: true
     default_from_api: true
     item_type:
