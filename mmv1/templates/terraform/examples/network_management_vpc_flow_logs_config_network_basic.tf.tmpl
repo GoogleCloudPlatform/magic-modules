@@ -6,7 +6,7 @@ resource "google_network_management_vpc_flow_logs_config" "{{$.PrimaryResourceId
   provider                = google-beta
   vpc_flow_logs_config_id = "{{index $.Vars "vpc_flow_logs_config_id"}}"
   location                = "global"
-  vpc                     = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.network.name}"
+  network                 = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.network.name}"
 }
 
 resource "google_compute_network" "network" {
