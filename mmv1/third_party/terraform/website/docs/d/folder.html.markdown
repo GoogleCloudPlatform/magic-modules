@@ -1,5 +1,4 @@
 ---
-subcategory: "Cloud Platform"
 description: |-
   Get information about a Google Cloud Folder.
 ---
