@@ -333,7 +333,6 @@ resource "google_network_management_vpc_flow_logs_config" "subnet-test" {
   flow_sampling           = 0.5
   metadata                = "EXCLUDE_ALL_METADATA"
   description             = "Updated description for subnet test"
-  cross_project_metadata  = "CROSS_PROJECT_METADATA_DISABLED"
 }
 `, context)
 }
