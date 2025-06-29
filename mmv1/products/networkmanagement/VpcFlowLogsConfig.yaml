@@ -79,6 +79,32 @@ examples:
       esp_forwarding_rule_name: 'full-test-fresp'
       route_name: 'full-test-route'
       vpc_flow_logs_config_id: 'full-test-id'
+  - name: 'network_management_vpc_flow_logs_config_network_basic'
+    primary_resource_id: 'network-test'
+    min_version: 'beta'
+    vars:
+      network_name: 'basic-network-test-network'
+      vpc_flow_logs_config_id: 'basic-network-test-id'
+  - name: 'network_management_vpc_flow_logs_config_network_full'
+    primary_resource_id: 'network-test'
+    min_version: 'beta'
+    vars:
+      network_name: 'full-network-test-network'
+      vpc_flow_logs_config_id: 'full-network-test-id'
+  - name: 'network_management_vpc_flow_logs_config_subnet_basic'
+    primary_resource_id: 'subnet-test'
+    min_version: 'beta'
+    vars:
+      network_name: 'basic-subnet-test-network'
+      subnetwork_name: 'basic-subnet-test-subnetwork'
+      vpc_flow_logs_config_id: 'basic-subnet-test-id'
+  - name: 'network_management_vpc_flow_logs_config_subnet_full'
+    primary_resource_id: 'subnet-test'
+    min_version: 'beta'
+    vars:
+      network_name: 'full-subnet-test-network'
+      subnetwork_name: 'full-subnet-test-subnetwork'
+      vpc_flow_logs_config_id: 'full-subnet-test-id'
 parameters:
   - name: 'location'
     type: String
@@ -112,13 +138,14 @@ properties:
     default_from_api: true
     description: |
       Optional. The state of the VPC Flow Log configuration. Default value
-      is ENABLED. When creating a new configuration, it must be enabled.   Possible
+      is ENABLED. When creating a new configuration, it must be enabled.
+      Possible values: STATE_UNSPECIFIED ENABLED DISABLED
   - name: 'aggregationInterval'
     type: String
     default_from_api: true
     description: |
       Optional. The aggregation interval for the logs. Default value is
-      INTERVAL_5_SEC.   Possible values:  AGGREGATION_INTERVAL_UNSPECIFIED INTERVAL_5_SEC INTERVAL_30_SEC INTERVAL_1_MIN INTERVAL_5_MIN INTERVAL_10_MIN INTERVAL_15_MIN"
+      INTERVAL_5_SEC.   Possible values:  AGGREGATION_INTERVAL_UNSPECIFIED INTERVAL_5_SEC INTERVAL_30_SEC INTERVAL_1_MIN INTERVAL_5_MIN INTERVAL_10_MIN INTERVAL_15_MIN
   - name: 'flowSampling'
     type: Double
     default_from_api: true
@@ -153,6 +180,16 @@ properties:
     type: String
     description: |
       Traffic will be logged from the VPN Tunnel. Format: projects/{project_id}/regions/{region}/vpnTunnels/{name}
+  - name: 'subnet'
+    min_version: 'beta'
+    type: String
+    description: |
+      Traffic will be logged from VMs within the subnetwork. Format: projects/{project_id}/regions/{region}/subnetworks/{name}
+  - name: 'network'
+    min_version: 'beta'
+    type: String
+    description: |
+      Traffic will be logged from VMs, VPN tunnels and Interconnect Attachments within the network. Format: projects/{project_id}/global/networks/{name}
   - name: 'labels'
     type: KeyValueLabels
     description: |
@@ -166,4 +203,14 @@ properties:
     type: String
     description: |
       Output only. The time the config was updated.
+    output: true
+  - name: 'targetResourceState'
+    type: String
+    description: |-
+      Describes the state of the configured target resource for diagnostic
+      purposes.
+      Possible values:
+      TARGET_RESOURCE_STATE_UNSPECIFIED
+      TARGET_RESOURCE_EXISTS
+      TARGET_RESOURCE_DOES_NOT_EXIST
     output: true
