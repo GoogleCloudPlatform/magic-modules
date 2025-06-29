@@ -6,13 +6,14 @@ resource "google_network_management_vpc_flow_logs_config" "{{$.PrimaryResourceId
   provider                = google-beta
   vpc_flow_logs_config_id = "{{index $.Vars "vpc_flow_logs_config_id"}}"
   location                = "global"
-  vpc                     = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.network.name}"
+  network                 = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.network.name}"
 
-  description          = "VPC Flow Logs for a VPC network."
-  state                = "ENABLED"
-  aggregation_interval = "INTERVAL_10_MIN"
-  flow_sampling        = 0.7
-  metadata             = "INCLUDE_ALL_METADATA"
+  description            = "VPC Flow Logs for a VPC network."
+  state                  = "ENABLED"
+  aggregation_interval   = "INTERVAL_10_MIN"
+  flow_sampling          = 0.7
+  metadata               = "INCLUDE_ALL_METADATA"
+  cross_project_metadata = "CROSS_PROJECT_METADATA_DISABLED"
 }
 
 resource "google_compute_network" "network" {
