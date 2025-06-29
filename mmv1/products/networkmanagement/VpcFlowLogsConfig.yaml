@@ -185,13 +185,11 @@ properties:
     type: String
     description: |
       Traffic will be logged from VMs within the subnetwork. Format: projects/{project_id}/regions/{region}/subnetworks/{name}
-    diff_suppress_func: 'tpgresource.CompareProjectsCallback'
   - name: 'network'
     min_version: 'beta'
     type: String
     description: |
       Traffic will be logged from VMs, VPN tunnels and Interconnect Attachments within the network. Format: projects/{project_id}/global/networks/{name}
-    diff_suppress_func: 'tpgresource.CompareProjectsCallback'
   - name: 'labels'
     type: KeyValueLabels
     description: |

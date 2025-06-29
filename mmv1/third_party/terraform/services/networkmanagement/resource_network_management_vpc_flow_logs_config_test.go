@@ -225,7 +225,7 @@ resource "google_compute_network" "network" {
 resource "google_network_management_vpc_flow_logs_config" "network-test" {
   vpc_flow_logs_config_id = "tf-test-network-id-%{random_suffix}"
   location                = "global"
-  network                 = google_compute_network.network.id
+  network                 = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.network.name}"
   state                   = "ENABLED"
 }
 `, context)
@@ -240,7 +240,7 @@ resource "google_compute_network" "network" {
 resource "google_network_management_vpc_flow_logs_config" "network-test" {
   vpc_flow_logs_config_id = "tf-test-network-id-%{random_suffix}"
   location                = "global"
-  network                 = google_compute_network.network.id
+  network                 = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.network.name}"
 
   // Updated fields
   state                   = "DISABLED"
@@ -303,7 +303,7 @@ resource "google_compute_subnetwork" "subnet" {
 resource "google_network_management_vpc_flow_logs_config" "subnet-test" {
   vpc_flow_logs_config_id = "tf-test-subnet-id-%{random_suffix}"
   location                = "global"
-  subnet                  = google_compute_subnetwork.subnet.id
+  subnet                  = "projects/${data.google_project.project.number}/regions/${google_compute_subnetwork.subnet.region}/subnetworks/${google_compute_subnetwork.subnet.name}"
 }
 `, context)
 }
@@ -325,7 +325,7 @@ resource "google_compute_subnetwork" "subnet" {
 resource "google_network_management_vpc_flow_logs_config" "subnet-test" {
   vpc_flow_logs_config_id = "tf-test-subnet-id-%{random_suffix}"
   location                = "global"
-  subnet                  = google_compute_subnetwork.subnet.id
+  subnet                  = "projects/${data.google_project.project.number}/regions/${google_compute_subnetwork.subnet.region}/subnetworks/${google_compute_subnetwork.subnet.name}"
   
   // Updated fields
   state                   = "DISABLED"
