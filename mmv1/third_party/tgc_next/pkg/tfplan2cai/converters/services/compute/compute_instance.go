@@ -20,7 +20,6 @@ import (
 )
 
 const ComputeInstanceAssetType string = "compute.googleapis.com/Instance"
-const ComputeDiskAssetType string = "compute.googleapis.com/Disk"
 
 var (
 	advancedMachineFeaturesKeys = []string{
@@ -1440,7 +1439,7 @@ func ResourceConverterComputeInstance() cai.ResourceConverter {
 func GetComputeInstanceAndDisksCaiObjects(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error) {
 	if instanceAsset, err := GetComputeInstanceCaiObject(d, config); err == nil {
 		assets := []caiasset.Asset{instanceAsset}
-		if diskAsset, err := GetComputeDiskCaiObject(d, config); err == nil {
+		if diskAsset, err := GetComputeInstanceDiskCaiObject(d, config); err == nil {
 			assets = append(assets, diskAsset)
 			return assets, nil
 		} else {
@@ -1829,7 +1828,7 @@ func expandStoragePool(v interface{}, d tpgresource.TerraformResourceData, confi
 	return nil, nil
 }
 
-func GetComputeDiskCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (caiasset.Asset, error) {
+func GetComputeInstanceDiskCaiObject(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (caiasset.Asset, error) {
 	name, err := cai.AssetName(d, config, "//compute.googleapis.com/projects/{{project}}/zones/{{zone}}/disks/{{name}}")
 	if err != nil {
 		return caiasset.Asset{}, err

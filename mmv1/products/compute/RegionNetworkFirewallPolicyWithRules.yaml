@@ -52,6 +52,11 @@ examples:
       tag_value: 'tag-value'
     test_env_vars:
       org_id: 'ORG_ID'
+  - name: 'compute_region_network_firewall_policy_with_rules_roce'
+    primary_resource_id: 'policy'
+    min_version: beta
+    vars:
+      policy_name: 'rnf-policy'
 parameters:
   - name: 'region'
     type: String
@@ -83,6 +88,18 @@ properties:
   - name: 'description'
     type: String
     description: An optional description of this resource.
+  - name: 'policyType'
+    type: Enum
+    immutable: true
+    description: |
+      Policy type is used to determine which resources (networks) the policy can be associated with.
+      A policy can be associated with a network only if the network has the matching policyType in its network profile.
+      Different policy types may support some of the Firewall Rules features.
+    default_from_api: true
+    min_version: 'beta'
+    enum_values:
+      - 'VPC_POLICY'
+      - 'RDMA_ROCE_POLICY'
   - name: 'rule'
     type: Array
     description: A list of firewall policy rules.

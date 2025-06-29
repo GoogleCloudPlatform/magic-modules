@@ -1,0 +1,18 @@
+config := meta.(*transport_tpg.Config)
+	
+// current import_formats can't import fields with forward slashes in their value and parent contains slashes
+if err := tpgresource.ParseImportId([]string{
+    "(?P<parent>.+)/generativeSettings\\?languageCode=(?P<language_code>[a-zA-Z-]+)",
+    "(?P<parent>.+)/generativeSettings",
+}, d, config); err != nil {
+    return nil, err
+}
+
+// Replace import id for the resource id
+id, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}parent{{"}}"}}/generativeSettings?languageCode={{"{{"}}language_code{{"}}"}}")
+if err != nil {
+    return nil, fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
+
+return []*schema.ResourceData{d}, nil
