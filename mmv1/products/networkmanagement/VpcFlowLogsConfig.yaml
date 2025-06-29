@@ -215,6 +215,7 @@ properties:
       TARGET_RESOURCE_DOES_NOT_EXIST
     output: true
   - name: crossProjectMetadata
+    min_version: 'beta'
     type: String
     description: |-
       Determines whether to include cross project annotations in the logs.
