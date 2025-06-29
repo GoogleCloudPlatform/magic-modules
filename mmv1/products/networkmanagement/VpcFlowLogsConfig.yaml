@@ -214,14 +214,3 @@ properties:
       TARGET_RESOURCE_EXISTS
       TARGET_RESOURCE_DOES_NOT_EXIST
     output: true
-  - name: crossProjectMetadata
-    min_version: 'beta'
-    type: String
-    description: |-
-      Determines whether to include cross project annotations in the logs.
-      This field is available only for organization configurations. If not
-      specified in org configs will be set to CROSS_PROJECT_METADATA_ENABLED.
-      Possible values:
-      CROSS_PROJECT_METADATA_UNSPECIFIED
-      CROSS_PROJECT_METADATA_ENABLED
-      CROSS_PROJECT_METADATA_DISABLED
