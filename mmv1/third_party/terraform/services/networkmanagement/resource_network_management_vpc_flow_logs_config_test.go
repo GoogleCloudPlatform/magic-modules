@@ -218,6 +218,9 @@ func TestAccNetworkManagementVpcFlowLogsConfig_network(t *testing.T) {
 
 func testAccNetworkManagementVpcFlowLogsConfig_network(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
 resource "google_compute_network" "network" {
   name = "tf-test-flow-logs-network-%{random_suffix}"
 }
@@ -233,6 +236,9 @@ resource "google_network_management_vpc_flow_logs_config" "network-test" {
 
 func testAccNetworkManagementVpcFlowLogsConfig_networkUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
 resource "google_compute_network" "network" {
   name = "tf-test-flow-logs-network-%{random_suffix}"
 }
@@ -288,6 +294,9 @@ func TestAccNetworkManagementVpcFlowLogsConfig_subnet(t *testing.T) {
 
 func testAccNetworkManagementVpcFlowLogsConfig_subnet(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
 resource "google_compute_network" "network" {
   name                    = "tf-test-subnet-network-%{random_suffix}"
   auto_create_subnetworks = false
@@ -310,6 +319,9 @@ resource "google_network_management_vpc_flow_logs_config" "subnet-test" {
 
 func testAccNetworkManagementVpcFlowLogsConfig_subnetUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+data "google_project" "project" {
+}
+
 resource "google_compute_network" "network" {
   name                    = "tf-test-subnet-network-%{random_suffix}"
   auto_create_subnetworks = false
