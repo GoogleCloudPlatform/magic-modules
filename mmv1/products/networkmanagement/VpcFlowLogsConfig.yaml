@@ -79,6 +79,32 @@ examples:
       esp_forwarding_rule_name: 'full-test-fresp'
       route_name: 'full-test-route'
       vpc_flow_logs_config_id: 'full-test-id'
+  - name: 'network_management_vpc_flow_logs_config_network_basic'
+    primary_resource_id: 'network-test'
+    min_version: 'beta'
+    vars:
+      network_name: 'basic-network-test-network'
+      vpc_flow_logs_config_id: 'basic-network-test-id'
+  - name: 'network_management_vpc_flow_logs_config_network_full'
+    primary_resource_id: 'network-test'
+    min_version: 'beta'
+    vars:
+      network_name: 'full-network-test-network'
+      vpc_flow_logs_config_id: 'full-network-test-id'
+  - name: 'network_management_vpc_flow_logs_config_subnet_basic'
+    primary_resource_id: 'subnet-test'
+    min_version: 'beta'
+    vars:
+      network_name: 'basic-subnet-test-network'
+      subnetwork_name: 'basic-subnet-test-subnetwork'
+      vpc_flow_logs_config_id: 'basic-subnet-test-id'
+  - name: 'network_management_vpc_flow_logs_config_subnet_full'
+    primary_resource_id: 'subnet-test'
+    min_version: 'beta'
+    vars:
+      network_name: 'full-subnet-test-network'
+      subnetwork_name: 'full-subnet-test-subnetwork'
+      vpc_flow_logs_config_id: 'full-subnet-test-id'
 parameters:
   - name: 'location'
     type: String
