@@ -310,6 +310,7 @@ properties:
           }
           ```
         required: false
+        diff_suppress_func: 'jwksJsonDiffSuppressFunc'
   - name: 'saml'
     type: NestedObject
     description:
