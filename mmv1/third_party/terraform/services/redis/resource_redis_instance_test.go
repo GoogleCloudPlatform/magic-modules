@@ -374,26 +374,6 @@ resource "google_redis_instance" "cache" {
 `, context)
 }
 
-func testAccRedisInstance_selfServiceUpdate20240411_00_00(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_redis_instance" "cache" {
-  name           = "tf-test-memory-cache%{random_suffix}"
-  memory_size_gb = 1
-  maintenance_version = "20240411_00_00"
-}
-`, context)
-}
-
-func testAccRedisInstance_selfServiceUpdate20240503_00_00(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_redis_instance" "cache" {
-  name           = "tf-test-memory-cache%{random_suffix}"
-  memory_size_gb = 1
-  maintenance_version = "20240503_00_00"
-}
-`, context)
-}
-
 func testAccRedisInstance_redis5(name string) string {
 	return fmt.Sprintf(`
 resource "google_redis_instance" "test" {
