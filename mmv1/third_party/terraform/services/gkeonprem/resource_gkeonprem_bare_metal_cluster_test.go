@@ -453,7 +453,7 @@ func testAccGkeonpremBareMetalCluster_bareMetalClusterUpdateBgpLbStart(context m
             "10.200.0.14/32",
             "fd00:1::12/128"
           ]
-	  manual_assign = true
+          manual_assign = true
         }
         load_balancer_node_pool_config {
           node_pool_config {
