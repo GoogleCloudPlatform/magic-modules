@@ -1,0 +1,29 @@
+resource "google_compute_interconnect_attachment" "{{$.PrimaryResourceId}}" {
+  name                                   = "{{index $.Vars "interconnect_attachment_name"}}"
+  edge_availability_domain               = "AVAILABILITY_DOMAIN_1"
+  type                                   = "PARTNER"
+  router                                 = google_compute_router.foobar.id
+  mtu                                    = 1500
+  stack_type                             = "IPV4_IPV6"
+  labels                                 = { mykey = "myvalue" }
+  candidate_cloud_router_ip_address      = "192.169.0.1/29"
+  candidate_customer_router_ip_address   = "192.169.0.2/29"
+  candidate_cloud_router_ipv6_address    = "748d:2f23:6651:9455:828b:ca81:6fe0:fed1/125"
+  candidate_customer_router_ipv6_address = "748d:2f23:6651:9455:828b:ca81:6fe0:fed2/125"
+  provider                               = google-beta
+}
+
+resource "google_compute_router" "foobar" {
+  name     = "{{index $.Vars "router_name"}}"
+  network  = google_compute_network.foobar.name
+  bgp {
+    asn = 16550
+  }
+  provider = google-beta
+}
+
+resource "google_compute_network" "foobar" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+  provider                = google-beta
+}

@@ -35,6 +35,14 @@ examples:
       service_id: example-service
     test_env_vars:
       project_id: 'PROJECT_NAME'
+  - name: firebasedataconnect_service_with_force_deletion
+    primary_resource_id: default
+    vars:
+      service_id: example-service
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'deletion_policy'
 autogen_async: true
 async:
   operation:

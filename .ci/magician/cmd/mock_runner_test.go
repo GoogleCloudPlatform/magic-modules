@@ -41,6 +41,7 @@ type mockRunner struct {
 	cwd           string
 	dirStack      *list.List
 	notifyError   bool
+	fileContents  map[string]string
 }
 
 func sortedEnvString(env map[string]string) string {
@@ -72,6 +73,7 @@ func NewMockRunner() MockRunner {
 			"/mock/dir/magic-modules/tools/diff-processor make [build] " + sortedEnvString(diffProcessorEnv):                                                                                      "",
 			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [schema-diff] map[]":                                                                                                 "{\"AddedResources\": [\"google_alloydb_instance\"]}",
 			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [detect-missing-tests /mock/dir/tpgb/google-beta/services] map[]":                                                    `{"google_folder_access_approval_settings":{"SuggestedTest":"resource \"google_folder_access_approval_settings\" \"primary\" {\n  uncovered_field = # value needed\n}","Tests":["a","b","c"]}}`,
+			"/mock/dir/magic-modules/tools/diff-processor bin/diff-processor [detect-missing-docs /mock/dir/tpgb] map[]":                                                                          `{"Resource":[],"DataSource":[]}`,
 			"/mock/dir/tgc git [diff origin/auto-pr-123456-old origin/auto-pr-123456 --shortstat] map[]":                                                                                          " 1 file changed, 10 insertions(+)\n",
 			"/mock/dir/tgc git [fetch origin auto-pr-123456-old] map[]":                                                                                                                           "",
 			"/mock/dir/tfoics git [diff origin/auto-pr-123456-old origin/auto-pr-123456 --shortstat] map[]":                                                                                       "",
@@ -106,10 +108,14 @@ func (mr *mockRunner) Walk(root string, fn filepath.WalkFunc) error {
 }
 
 func (mr *mockRunner) ReadFile(name string) (string, error) {
-	return "", nil
+	return mr.fileContents[name], nil
 }
 
 func (mr *mockRunner) WriteFile(name, data string) error {
+	if mr.fileContents == nil {
+		mr.fileContents = make(map[string]string)
+	}
+	mr.fileContents[name] = data
 	return nil
 }
 

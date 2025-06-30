@@ -7,6 +7,8 @@ api_version: 'v1beta1'
 api_version: 'v1'
 {{- end }}
 api_resource_type_kind: 'Cluster'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/clusters/{cluster}'
 fields:
   - field: 'addons_config.cloudrun_config.disabled'
     api_field: 'addons_config.cloud_run_config.disabled'
@@ -97,6 +99,7 @@ fields:
   - field: 'cluster_telemetry.type'
 {{- end }}
   - field: 'confidential_nodes.enabled'
+  - field: 'confidential_nodes.confidential_instance_type'
   - field: 'control_plane_endpoints_config.dns_endpoint_config.allow_external_traffic'
   - field: 'control_plane_endpoints_config.dns_endpoint_config.endpoint'
   - field: 'cost_management_config.enabled'
@@ -133,6 +136,8 @@ fields:
   - field: 'enable_kubernetes_alpha'
   - field: 'enable_l4_ilb_subsetting'
     api_field: 'network_config.enable_l4ilb_subsetting'
+  - field: 'disable_l4_lb_firewall_reconciliation'
+    api_field: 'network_config.disable_l4_lb_firewall_reconciliation'
   - field: 'enable_legacy_abac'
     api_field: 'legacy_abac.enabled'
   - field: 'enable_multi_networking'
@@ -215,6 +220,7 @@ fields:
   - field: 'node_config.advanced_machine_features.threads_per_core'
   - field: 'node_config.boot_disk_kms_key'
   - field: 'node_config.confidential_nodes.enabled'
+  - field: 'node_config.confidential_nodes.confidential_instance_type'
   - field: 'node_config.containerd_config.private_registry_access_config.certificate_authority_domain_config.fqdns'
   - field: 'node_config.containerd_config.private_registry_access_config.certificate_authority_domain_config.gcp_secret_manager_certificate_config.secret_uri'
   - field: 'node_config.containerd_config.private_registry_access_config.enabled'
@@ -360,6 +366,8 @@ fields:
     api_field: 'node_pools.config.boot_disk_kms_key'
   - field: 'node_pool.node_config.confidential_nodes.enabled'
     api_field: 'node_pools.config.confidential_nodes.enabled'
+  - field: 'node_pool.node_config.confidential_nodes.confidential_instance_type'
+    api_field: 'node_pools.config.confidential_nodes.confidential_instance_type'
   - field: 'node_pool.node_config.containerd_config.private_registry_access_config.certificate_authority_domain_config.fqdns'
     api_field: 'node_pools.config.containerd_config.private_registry_access_config.certificate_authority_domain_config.fqdns'
   - field: 'node_pool.node_config.containerd_config.private_registry_access_config.certificate_authority_domain_config.gcp_secret_manager_certificate_config.secret_uri'

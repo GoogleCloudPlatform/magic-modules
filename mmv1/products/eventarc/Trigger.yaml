@@ -48,14 +48,18 @@ examples:
     primary_resource_id: primary
     vars:
       trigger_name: some-trigger
+      network_attachment_name: network-attachment
     test_vars_overrides:
-      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-trigger-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-trigger-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-trigger-network")))'
+      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-trigger-na", acctest.BootstrapSubnet(t, "tf-bootstrap-eventarc-trigger-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-trigger-network")))'
     test_env_vars:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
     exclude_docs: true
   - name: eventarc_trigger_with_channel_cmek
     primary_resource_id: primary
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-eventarc.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
       trigger_name: some-trigger
       service_name: some-service
@@ -63,7 +67,6 @@ examples:
       key_name: some-key
     test_env_vars:
       project_id: 'PROJECT_NAME'
-      project_number: 'PROJECT_NUMBER'
       service_account: 'SERVICE_ACCT'
     test_vars_overrides:
       'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-trigger-key").CryptoKey.Name'

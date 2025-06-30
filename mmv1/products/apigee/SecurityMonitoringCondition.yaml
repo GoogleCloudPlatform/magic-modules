@@ -1,0 +1,132 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'SecurityMonitoringCondition'
+description: |
+  Security monitoring condition for risk assessment version 2 in Apigee.
+references:
+  guides:
+    'Creating a security monitoring condition': 'https://cloud.google.com/apigee/docs/api-security/security-scores#monitoring-conditions'
+  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations.securityMonitoringConditions/create'
+docs:
+base_url: '{{org_id}}/securityMonitoringConditions'
+self_link: '{{org_id}}/securityMonitoringConditions/{{condition_id}}'
+create_url: '{{org_id}}/securityMonitoringConditions?security_monitoring_condition_id={{condition_id}}'
+update_verb: 'PATCH'
+delete_url: "{{org_id}}/securityMonitoringConditions/{{condition_id}}"
+immutable: false
+import_format:
+  - '{{org_id}}/securityMonitoringConditions/{{condition_id}}'
+  - '{{org_id}}/{{condition_id}}'
+custom_code:
+  custom_import: "templates/terraform/custom_import/apigee_security_monitoring_condition.go.tmpl"
+examples:
+  - name: 'apigee_security_monitoring_condition_basic'
+    vars:
+      environment_name: 'my-environment'
+      security_monitoring_condition_id: 'my-condition'
+    exclude_test: true
+  - name: 'apigee_security_monitoring_condition_basic_test'
+    primary_resource_id: 'security_monitoring_condition'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+    skip_vcr: true
+    external_providers: ["time"]
+parameters:
+  - name: 'orgId'
+    type: String
+    description: |
+      The Apigee Organization associated with the Apigee Security Monitoring Condition,
+      in the format `organizations/{{org_name}}`.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'conditionId'
+    type: String
+    description: |
+      Resource ID of the security monitoring condition.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the security monitoring condition resource,
+      in the format `organizations/{{org_name}}/securityMonitoringConditions/{{condition_id}}`.
+    output: true
+  - name: 'profile'
+    type: String
+    description: |
+      ID of security profile of the security monitoring condition.
+    required: true
+  - name: 'scope'
+    type: String
+    description: |
+      ID of security profile of the security monitoring condition.
+    required: true
+  - name: 'includeAllResources'
+    type: NestedObject
+    exactly_one_of:
+      - include_all_resources
+      # TODO(hashicorp/terraform-provider-google#22581): add this block back + test once deployment is supported
+      # - include
+    properties: []
+    send_empty_value: true
+    allow_empty_object: true
+  # TODO(hashicorp/terraform-provider-google#22581): add this block back + test once deployment is supported
+  # - name: 'include'
+  #   type: NestedObject
+  #   properties:
+  #     - name: 'resources'
+  #       type: Array
+  #       required: true
+  #       item_type:
+  #         type: NestedObject
+  #         properties:
+  #           - name: 'type'
+  #             type: Enum
+  #             description: 'Type of this resource'
+  #             enum_values:
+  #               - 'API_PROXY'
+  #             required: true
+  #           - name: 'name'
+  #             type: String
+  #             description: 'Name of this resource'
+  #             required: true
+  #   exactly_one_of:
+  #     - include_all_resources
+  #     - include
+  - name: 'createTime'
+    type: String
+    description: |
+      The timestamp at which this profile was created.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |
+      The timestamp at which this profile was most recently updated.
+    output: true
+  - name: 'totalMonitoredResources'
+    type: Integer
+    description: |
+      Total number of monitored resources within this condition.
+    output: true
+  - name: 'totalDeployedResources'
+    type: Integer
+    description: |
+      Total number of deployed resources within scope.
+    output: true

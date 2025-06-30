@@ -297,6 +297,7 @@ module "project-services" {
     "ids.googleapis.com",
     "logging.googleapis.com",
     "looker.googleapis.com",
+    "lustre.googleapis.com",
     "managedidentities.googleapis.com",
     "managedkafka.googleapis.com",
     "memcache.googleapis.com",
@@ -305,6 +306,7 @@ module "project-services" {
     "migrationcenter.googleapis.com",
     "ml.googleapis.com",
     "mobilecrashreporting.googleapis.com",
+    "modelarmor.googleapis.com",
     "monitoring.googleapis.com",
     "multiclustermetering.googleapis.com",
     "netapp.googleapis.com",
@@ -320,6 +322,7 @@ module "project-services" {
     "parametermanager.googleapis.com",
     "privateca.googleapis.com",
     "privilegedaccessmanager.googleapis.com",
+    "progressiverollout.googleapis.com",
     "pubsub.googleapis.com",
     "pubsublite.googleapis.com",
     "publicca.googleapis.com",
@@ -390,6 +393,30 @@ resource "google_project_service_identity" "sqladmin_sa" {
 
   project = google_project.proj.project_id
   service = "sqladmin.googleapis.com"
+}
+
+resource "google_project_service_identity" "osconfig_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "osconfig.googleapis.com"
+}
+
+resource "google_project_service_identity" "progressiverollout_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "progressiverollout.googleapis.com"
+}
+
+resource "google_project_service_identity" "parametermanager_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "parametermanager.googleapis.com"
 }
 
 # TestAccComposerEnvironment_fixPyPiPackages

@@ -13,6 +13,8 @@
 
 ---
 name: 'Service'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/applications/{application}/services/{service}'
 description: 'Service is a network/api interface that exposes some functionality to clients for consumption over the network.
   Service typically has one or more Workloads behind it. It registers identified service to the Application.'
 docs:

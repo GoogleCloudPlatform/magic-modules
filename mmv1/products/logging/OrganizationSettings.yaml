@@ -14,6 +14,8 @@
 ---
 name: 'OrganizationSettings'
 api_resource_type_kind: Settings
+api_variant_patterns:
+  - 'organizations/{organization}/settings'
 description: |
   Default resource settings control whether CMEK is required for new log buckets. These settings also determine the storage location for the _Default and _Required log buckets, and whether the _Default sink is enabled or disabled.
 references:

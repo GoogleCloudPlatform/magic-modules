@@ -84,6 +84,11 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])'
     vars:
       region_disk_name: 'my-region-features-disk'
+  - name: 'region_disk_hyperdisk_balanced_ha_write_many'
+    primary_resource_id: 'primary'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])'
+    vars:
+      region_disk_name: 'my-region-hyperdisk'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -315,6 +320,12 @@ properties:
       * zones/{zone}/disks/{disk}
       * regions/{region}/disks/{disk}
     diff_suppress_func: 'sourceDiskDiffSuppress'
+  - name: 'DiskId'
+    type: String
+    description: |
+      The unique identifier for the resource. This identifier is defined by the server.
+    api_name: id
+    output: true
   - name: 'sourceDiskId'
     type: String
     description: |
@@ -370,6 +381,20 @@ properties:
       description: 'An applicable license URI'
       resource: 'License'
       imports: 'selfLink'
+  - name: 'accessMode'
+    type: String
+    description: |
+      The access mode of the disk.
+      For example:
+        * READ_WRITE_SINGLE: The default AccessMode, means the disk can be attached to single instance in RW mode.
+        * READ_WRITE_MANY: The AccessMode means the disk can be attached to multiple instances in RW mode.
+        * READ_ONLY_SINGLE: The AccessMode means the disk can be attached to multiple instances in RO mode.
+      The AccessMode is only valid for Hyperdisk disk types.
+    required: false
+    immutable: false
+    default_from_api: true
+    update_url: 'projects/{{project}}/regions/{{region}}/disks/{{name}}?paths=accessMode'
+    update_verb: 'PATCH'
 virtual_fields:
   - name: 'create_snapshot_before_destroy'
     type: Boolean

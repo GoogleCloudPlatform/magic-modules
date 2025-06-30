@@ -554,6 +554,9 @@ properties:
   - name: 'enableControlPlaneV2'
     type: Boolean
     description: Enable control plane V2. Default to false.
+  - name: 'enableAdvancedCluster'
+    type: Boolean
+    description: Enable advanced cluster. Default to false.
   - name: 'disableBundledIngress'
     type: Boolean
     description: Disable bundled ingress.

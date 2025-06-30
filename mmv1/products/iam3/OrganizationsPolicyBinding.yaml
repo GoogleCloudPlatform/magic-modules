@@ -14,7 +14,10 @@
 ---
 name: 'OrganizationsPolicyBinding'
 api_resource_type_kind: PolicyBinding
-description: A policy binding to an organizations
+api_variant_patterns:
+  - 'organizations/{organization}/locations/{location}/policyBindings/{policyBinding}'
+description: |
+  A policy binding to an organization. This is a Terraform resource, and maps to a policy binding resource in GCP.
 references:
   guides:
     'Apply a policy binding': 'https://cloud.google.com/iam/docs/principal-access-boundary-policies-create#create_binding'
@@ -44,13 +47,13 @@ async:
   include_project: true
 examples:
   - name: 'iam_organizations_policy_binding'
-    primary_resource_id: 'my-org-binding'
+    primary_resource_id: 'binding-for-all-org-principals'
     test_env_vars:
       org_id: 'ORG_ID'
     vars:
       pab_policy_id: 'my-pab-policy'
-      display_name: 'test org binding'
-      org_binding_id: 'test-org-binding'
+      display_name: 'binding for all principals in the Organization'
+      org_binding_id: 'binding-for-all-org-principals'
     external_providers: ["time"]
 parameters:
   - name: 'organization'
@@ -107,8 +110,12 @@ properties:
       - name: 'principalSet'
         type: String
         description: |
-          Required. Immutable. The resource name of the policy to be bound.
-          The binding parent and policy must belong to the same Organization (or Project).
+          Required. Immutable. Full Resource Name of the principal set used for principal access boundary policy bindings.
+          Examples for each one of the following supported principal set types:
+          * Organization `//cloudresourcemanager.googleapis.com/organizations/ORGANIZATION_ID`
+          * Workforce Identity: `//iam.googleapis.com/locations/global/workforcePools/WORKFORCE_POOL_ID`
+          * Workspace Identity: `//iam.googleapis.com/locations/global/workspace/WORKSPACE_ID`
+          It must be parent by the policy binding's parent (the organization).
         immutable: true
   - name: 'policyKind'
     type: String

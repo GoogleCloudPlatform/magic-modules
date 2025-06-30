@@ -10,21 +10,20 @@ import (
 )
 
 func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
-	t.Parallel()
+	// google_logging_organization_settings is a singleton, and multiple tests mutate it.
+	orgSettingsMu.Lock()
+	t.Cleanup(orgSettingsMu.Unlock)
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"folder_name":   "tf-test-" + acctest.RandString(t, 10),
 		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"bucket_id":     "_Default",
+		"original_key":  acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"time": {},
-		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccLoggingBucketConfigFolder_basic(context, 30),
@@ -44,12 +43,17 @@ func TestAccLoggingBucketConfigFolder_basic(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"folder"},
 			},
+			{
+				Config: testAccLoggingOrganizationSettings_full(context),
+			},
 		},
 	})
 }
 
 func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
-	t.Parallel()
+	// google_logging_organization_settings is a singleton, and multiple tests mutate it.
+	orgSettingsMu.Lock()
+	t.Cleanup(orgSettingsMu.Unlock)
 
 	context := map[string]interface{}{
 		"random_suffix":   acctest.RandString(t, 10),
@@ -95,7 +99,9 @@ func TestAccLoggingBucketConfigProject_basic(t *testing.T) {
 }
 
 func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
-	t.Parallel()
+	// google_logging_organization_settings is a singleton, and multiple tests mutate it.
+	orgSettingsMu.Lock()
+	t.Cleanup(orgSettingsMu.Unlock)
 
 	context := map[string]interface{}{
 		"random_suffix":   acctest.RandString(t, 10),
@@ -144,7 +150,9 @@ func TestAccLoggingBucketConfigProject_analyticsEnabled(t *testing.T) {
 }
 
 func TestAccLoggingBucketConfigProject_cmekSettings(t *testing.T) {
-	t.Parallel()
+	// google_logging_organization_settings is a singleton, and multiple tests mutate it.
+	orgSettingsMu.Lock()
+	t.Cleanup(orgSettingsMu.Unlock)
 
 	context := map[string]interface{}{
 		"project_name":    "tf-test-" + acctest.RandString(t, 10),
@@ -184,7 +192,9 @@ func TestAccLoggingBucketConfigProject_cmekSettings(t *testing.T) {
 }
 
 func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
-	t.Parallel()
+	// google_logging_organization_settings is a singleton, and multiple tests mutate it.
+	orgSettingsMu.Lock()
+	t.Cleanup(orgSettingsMu.Unlock)
 
 	context := map[string]interface{}{
 		"random_suffix":        acctest.RandString(t, 10),
@@ -220,7 +230,9 @@ func TestAccLoggingBucketConfigBillingAccount_basic(t *testing.T) {
 }
 
 func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
-	t.Parallel()
+	// google_logging_organization_settings is a singleton, and multiple tests mutate it.
+	orgSettingsMu.Lock()
+	t.Cleanup(orgSettingsMu.Unlock)
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
@@ -256,19 +268,16 @@ func TestAccLoggingBucketConfigOrganization_basic(t *testing.T) {
 
 func testAccLoggingBucketConfigFolder_basic(context map[string]interface{}, retention int) string {
 	return fmt.Sprintf(acctest.Nprintf(`
+// Reset the default bucket and location settings, which may have been changed by other tests.
+resource "google_logging_organization_settings" "default" {
+  organization = "%{org_id}"
+}
+
 resource "google_folder" "default" {
 	display_name = "%{folder_name}"
 	parent       = "organizations/%{org_id}"
 	deletion_protection = false
-}
-
-// Give the _Default bucket a chance to be created
-resource "time_sleep" "wait_1_minute" {
-	create_duration = "1m"
-
-	depends_on = [
-	  google_folder.default,
-	]
+	depends_on = [google_logging_organization_settings.default]
 }
 
 resource "google_logging_folder_bucket_config" "basic" {
@@ -277,14 +286,17 @@ resource "google_logging_folder_bucket_config" "basic" {
 	retention_days = %d
 	description = "retention test %d days"
 	bucket_id = "_Default"
-
-	depends_on = [time_sleep.wait_1_minute]
 }
 `, context), retention, retention)
 }
 
 func testAccLoggingBucketConfigProject_basic(context map[string]interface{}, retention int) string {
 	return fmt.Sprintf(acctest.Nprintf(`
+// Reset the default bucket and location settings, which may have been changed by other tests.
+resource "google_logging_organization_settings" "default" {
+  organization = "%{org_id}"
+}
+
 resource "google_project" "default" {
 	project_id = "%{project_name}"
 	name       = "%{project_name}"
@@ -451,7 +463,9 @@ resource "google_logging_project_bucket_config" "basic" {
 }
 
 func TestAccLoggingBucketConfig_CreateBuckets_withCustomId(t *testing.T) {
-	t.Parallel()
+	// google_logging_organization_settings is a singleton, and multiple tests mutate it.
+	orgSettingsMu.Lock()
+	t.Cleanup(orgSettingsMu.Unlock)
 
 	context := map[string]interface{}{
 		"random_suffix":        acctest.RandString(t, 10),
@@ -484,7 +498,6 @@ func TestAccLoggingBucketConfig_CreateBuckets_withCustomId(t *testing.T) {
 
 func testAccLoggingBucketConfigBillingAccount_basic(context map[string]interface{}, retention int) string {
 	return fmt.Sprintf(acctest.Nprintf(`
-
 data "google_billing_account" "default" {
 	billing_account = "%{billing_account_name}"
 }
@@ -501,6 +514,11 @@ resource "google_logging_billing_account_bucket_config" "basic" {
 
 func testAccLoggingBucketConfigOrganization_basic(context map[string]interface{}, retention int) string {
 	return fmt.Sprintf(acctest.Nprintf(`
+// Reset the default bucket and location settings, which may have been changed by other tests.
+resource "google_logging_organization_settings" "default" {
+  organization = "%{org_id}"
+}
+
 data "google_organization" "default" {
 	organization = "%{org_id}"
 }
@@ -598,7 +616,9 @@ resource "google_logging_organization_bucket_config" "basic" {
 }
 
 func TestAccLoggingBucketConfigProject_indexConfigs(t *testing.T) {
-	t.Parallel()
+	// google_logging_organization_settings is a singleton, and multiple tests mutate it.
+	orgSettingsMu.Lock()
+	t.Cleanup(orgSettingsMu.Unlock)
 
 	context := map[string]interface{}{
 		"project_name":    "tf-test-" + acctest.RandString(t, 10),
@@ -635,6 +655,10 @@ func TestAccLoggingBucketConfigProject_indexConfigs(t *testing.T) {
 
 func testAccLoggingBucketConfigProject_indexConfigs(context map[string]interface{}, urlIndexType, statusIndexType string) string {
 	return fmt.Sprintf(acctest.Nprintf(`
+// Reset the default bucket and location settings, which may have been changed by other tests.
+resource "google_logging_organization_settings" "default" {
+  organization = "%{org_id}"
+}
 
 resource "google_project" "default" {
 	project_id      = "%{project_name}"

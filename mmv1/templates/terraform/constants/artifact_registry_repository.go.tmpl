@@ -113,9 +113,9 @@ func replaceNestedValue(obj any, keys []string, replaceFunc func(any) (any, bool
 	if len(keys) == 0 {
 		return
 	}
-	next := &obj
+	next := obj
 	for _, key := range keys[:len(keys)-1] {
-		nextMap, ok := (*next).(map[string]any)
+		nextMap, ok := next.(map[string]any)
 		if !ok {
 			return
 		}
@@ -130,9 +130,9 @@ func replaceNestedValue(obj any, keys []string, replaceFunc func(any) (any, bool
 		if len(arr) != 1 {
 			return
 		}
-		next = &arr[0]
+		next = arr[0]
 	}
-	lastMap, ok := (*next).(map[string]any)
+	lastMap, ok := next.(map[string]any)
 	if !ok {
 		return
 	}

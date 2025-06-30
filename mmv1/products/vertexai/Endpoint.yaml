@@ -13,6 +13,8 @@
 
 ---
 name: 'Endpoint'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/endpoints/{endpoint}'
 description:
   'Models are deployed into it, and afterwards Endpoint is called to obtain
   predictions and explanations.'

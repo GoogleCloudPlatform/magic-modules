@@ -687,3 +687,17 @@ properties:
               type: String
               description: The lifecycle state of the condition.
               output: true
+  - type: Boolean
+    name: enableAdvancedCluster
+    description: If set, the advanced cluster feature is enabled.
+    output: true
+  - type: NestedObject
+    name: privateRegistryConfig
+    description: Configuration for private registry.
+    properties:
+      - type: String
+        name: 'address'
+        description: The registry address.
+      - type: String
+        name: 'caCert'
+        description: The CA certificate public key for private registry.

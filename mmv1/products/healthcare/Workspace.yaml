@@ -13,6 +13,7 @@
 
 ---
 name: 'Workspace'
+api_resource_type_kind: DataMapperWorkspace
 description: |
   A Data Mapper workspace is used to configure Data Mapper access, permissions and data sources for mapping clinical patient data to the FHIR standard.
 references:

@@ -166,15 +166,16 @@ func suggestedTest(resourceName string, untested []string) string {
 
 // DetectMissingDocs detect new fields that are missing docs given the schema diffs.
 // Return a map of resource names to missing doc info.
+// It parses the document to see if the field is present within the resource document file,
+// and is therefore heavily reliant on the document being written in the expected format.
+// Should avoid printing to stdout since the output will be consumed in generate_comment.go.
 func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]MissingDocDetails, error) {
 	ret := make(map[string]MissingDocDetails)
 	for resource, resourceDiff := range schemaDiff {
 		fieldsInDoc := make(map[string]bool)
 
 		docFilePath, err := resourceToDocFile(resource, repoPath)
-		if err != nil {
-			fmt.Printf("Warning: %s.\n", err)
-		} else {
+		if err == nil {
 			content, err := os.ReadFile(docFilePath)
 			if err != nil {
 				return nil, fmt.Errorf("failed to read resource doc %s: %w", docFilePath, err)
@@ -185,13 +186,7 @@ func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]
 				return nil, fmt.Errorf("failed to parse document %s: %w", docFilePath, err)
 			}
 
-			argumentsInDoc := listToMap(parser.Arguments())
-			attributesInDoc := listToMap(parser.Attributes())
-			for _, m := range []map[string]bool{argumentsInDoc, attributesInDoc} {
-				for k, v := range m {
-					fieldsInDoc[k] = v
-				}
-			}
+			fieldsInDoc = listToMap(parser.FlattenFields())
 			// for iam resource
 			if v, ok := fieldsInDoc["member/members"]; ok {
 				fieldsInDoc["member"] = v
@@ -201,6 +196,10 @@ func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]
 		var newFields []string
 		for field, fieldDiff := range resourceDiff.Fields {
 			if !isNewField(fieldDiff) {
+				continue
+			}
+			// skip condition field, check mmv1/templates/terraform/resource_iam.html.markdown.tmpl for IamConditionsRequestType
+			if field == "condition" || strings.HasPrefix(field, "condition.") {
 				continue
 			}
 			if !fieldsInDoc[field] {
@@ -220,6 +219,10 @@ func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]
 	return ret, nil
 }
 
+// DetectMissingDocsForDatasource detect new fields that are missing docs given the schema diffs.
+// Return a map of resource names to missing doc info.
+// It only checks whether the data source doc file exists.
+// Should avoid printing to stdout since the output will be consumed in generate_comment.go.
 func DetectMissingDocsForDatasource(schemaDiff diff.SchemaDiff, repoPath string) (map[string]MissingDocDetails, error) {
 	ret := make(map[string]MissingDocDetails)
 	for resource, resourceDiff := range schemaDiff {
@@ -254,10 +257,10 @@ func resourceToDocFile(resource string, repoPath string) (string, error) {
 		strings.TrimPrefix(resource, "google_") + ".html.markdown",
 		resource + ".html.markdown",
 	}
-	suffix := []string{"_policy", "_binding", "_member"}
+	suffix := []string{"_iam_policy", "_iam_binding", "_iam_member", "_iam_audit_config"}
 	for _, s := range suffix {
-		if strings.HasSuffix(resource, "_iam"+s) {
-			iamName := strings.TrimSuffix(resource, s)
+		if strings.HasSuffix(resource, s) {
+			iamName := strings.TrimSuffix(resource, s) + "_iam"
 			baseNameOptions = append(baseNameOptions, iamName+".html.markdown")
 			baseNameOptions = append(baseNameOptions, strings.TrimPrefix(iamName, "google_")+".html.markdown")
 		}
@@ -277,8 +280,8 @@ func dataSourceToDocFile(resource string, repoPath string) (string, error) {
 		strings.TrimPrefix(resource, "google_"),
 		resource,
 	}
-	// There are only iam_policy files, no iam_binding, iam_member.
-	suffix := []string{"_iam_binding", "_iam_member"}
+	// There are only iam_policy files, no iam_binding, iam_member, iam_audit_config.
+	suffix := []string{"_iam_binding", "_iam_member", "iam_audit_config"}
 	for _, s := range suffix {
 		if strings.HasSuffix(resource, s) {
 			iamName := strings.ReplaceAll(resource, s, "_iam_policy")

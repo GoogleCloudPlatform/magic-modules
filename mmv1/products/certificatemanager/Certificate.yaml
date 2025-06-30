@@ -44,9 +44,16 @@ sweeper:
   url_substitutions:
     - region: "us-central1"
     - region: "us-east1"
+    - region: "global"
     - region: "us-west2"
-    - region: "us-west1"
     - region: "us-south1"
+    - region: "us-west1"
+  dependencies:
+    - "google_compute_region_target_https_proxy"
+    # - "google_network_security_backend_authentication_config" (beta only)
+    - "google_network_services_gateway"
+    - "google_compute_target_https_proxy"
+    - "google_compute_network"
 examples:
   - name: 'certificate_manager_google_managed_certificate_dns'
     primary_resource_id: 'default'
@@ -92,6 +99,10 @@ examples:
       dns_auth_name: 'dns-auth'
       dns_auth_subdomain: 'subdomain'
       cert_name: 'dns-cert'
+  - name: 'certificate_manager_client_auth_certificate'
+    primary_resource_id: 'default'
+    vars:
+      cert_name: 'client-auth-cert'
 parameters:
   - name: 'name'
     type: String
@@ -129,7 +140,10 @@ properties:
       See https://cloud.google.com/vpc/docs/edge-locations.
 
       ALL_REGIONS: Certificates with ALL_REGIONS scope are served from all GCP regions (You can only use ALL_REGIONS with global certs).
-      See https://cloud.google.com/compute/docs/regions-zones
+      See https://cloud.google.com/compute/docs/regions-zones.
+
+      CLIENT_AUTH: Certificates with CLIENT_AUTH scope are used by a load balancer (TLS client) to be presented to the backend (TLS server) when backend mTLS is configured.
+      See https://cloud.google.com/load-balancing/docs/backend-authenticated-tls-backend-mtls#client-certificate.
     immutable: true
     diff_suppress_func: 'certManagerDefaultScopeDiffSuppress'
     default_value: "DEFAULT"

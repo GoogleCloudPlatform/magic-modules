@@ -13,6 +13,8 @@
 
 ---
 name: HostProjectRegistration
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/hostProjectRegistrations/{hostproject}'
 description: |-
   Host project registration refers to the registration of a Google cloud project with API hub as a host project.
   This is the project where API hub is provisioned.

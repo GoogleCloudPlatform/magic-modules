@@ -34,7 +34,6 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-  constants: "templates/terraform/constants/iam_oauth_client.go.tmpl"
   decoder: "templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl"
   test_check_destroy: "templates/terraform/custom_check_destroy/iam_oauth_client.go.tmpl"
   post_create: "templates/terraform/post_create/sleep.go.tmpl"
@@ -42,10 +41,6 @@ custom_code:
   post_delete: "templates/terraform/post_create/sleep.go.tmpl"
 exclude_sweeper: true
 examples:
-  - name: "iam_oauth_client_basic"
-    primary_resource_id: "example"
-    vars:
-      oauth_client_id: "example-client-id"
   - name: "iam_oauth_client_full"
     primary_resource_id: "example"
     vars:
@@ -98,7 +93,7 @@ properties:
   - name: state
     type: String
     description: |-
-      Output only. The state of the OauthClient.
+      The state of the OauthClient.
       Possible values:
       STATE_UNSPECIFIED
       ACTIVE
@@ -107,7 +102,7 @@ properties:
   - name: disabled
     type: Boolean
     description: |-
-      Optional. Whether the OauthClient is disabled. You cannot use a disabled OAuth
+      Whether the OauthClient is disabled. You cannot use a disabled OAuth
       client.
   - name: clientId
     type: String
@@ -116,13 +111,13 @@ properties:
   - name: displayName
     type: String
     description: |-
-      Optional. A user-specified display name of the OauthClient.
+      A user-specified display name of the OauthClient.
 
       Cannot exceed 32 characters.
   - name: description
     type: String
     description: |-
-      Optional. A user-specified description of the OauthClient.
+      A user-specified description of the OauthClient.
 
       Cannot exceed 256 characters.
   - name: allowedGrantTypes
@@ -134,7 +129,7 @@ properties:
   - name: expireTime
     type: String
     description: |-
-      Output only. Time after which the OauthClient will be permanently purged and cannot
+      Time after which the OauthClient will be permanently purged and cannot
       be recovered.
     output: true
   - name: clientType
