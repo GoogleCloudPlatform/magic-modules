@@ -154,7 +154,7 @@ properties:
   - name: 'tlsConfig'
     type: NestedObject
     default_from_api: true
-    description: "TLS configuration for the Kafka cluster. This is used to configure mTLS authentication."
+    description: "TLS configuration for the Kafka cluster. This is used to configure mTLS authentication. To clear our a TLS configuration that has been previously set, please explicitly add an empty `tls_config` block."
     properties:
       - name: 'trustConfig'
         type: NestedObject
