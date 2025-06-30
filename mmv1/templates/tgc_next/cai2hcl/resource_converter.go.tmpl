@@ -49,7 +49,10 @@ import (
 {{template "SchemaSubResource" $prop}}
 {{- end}}
 
-const {{ $.ResourceName -}}AssetType string = "{{ $productBackendName }}.googleapis.com/{{ $.Name -}}"
+{{- if not $.ApiResourceTypeKind }}
+const {{ $.ApiResourceType -}}AssetType string = "{{ $productBackendName }}.googleapis.com/{{ $.Name -}}"
+{{- end }}
+
 const {{ $.ResourceName -}}SchemaName string = "{{ $.TerraformName }}"
 
 type {{ $.ResourceName -}}Converter struct {
@@ -127,12 +130,19 @@ func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asse
 }
 
 {{- range $prop := $.ReadPropertiesForTgc }}
-    {{ if $prop.IsA "KeyValueLabels" }}
+    {{ if $prop.CustomTgcFlatten }}
+        {{- $prop.CustomTemplate $prop.CustomTgcFlatten false -}}
+    {{ else if $prop.IsA "KeyValueLabels" }}
 func flatten{{$prop.GetPrefix}}{{$prop.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
   return utils.RemoveTerraformAttributionLabel(v)
 }
-    {{ else if $prop.CustomTgcFlatten }}
-        {{- $prop.CustomTemplate $prop.CustomTgcFlatten false -}}
+    {{ else if or (and (eq $prop.Name "zone") $.HasZone) (and (eq $prop.Name "region") $.HasRegion) -}}
+func flatten{{$prop.GetPrefix}}{{$prop.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	return tpgresource.GetResourceNameFromSelfLink(v.(string))
+}
     {{ else }}
         {{ template "flattenPropertyMethod" $prop -}}
     {{- end }}
