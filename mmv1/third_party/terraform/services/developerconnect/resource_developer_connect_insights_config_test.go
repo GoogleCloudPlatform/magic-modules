@@ -43,7 +43,7 @@ func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
 				ResourceName:            "google_developer_connect_insights_config.my_insights_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"annotations", "insights_config_id", "labels", "location", "terraform_labels", "workload"},
+				ImportStateVerifyIgnore: []string{"insights_config_id", "labels", "location", "terraform_labels", "workload"},
 			},
 			{
 				Config: testAccDeveloperConnectInsightsConfig_update(context),
@@ -57,7 +57,7 @@ func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
 				ResourceName:            "google_developer_connect_insights_config.my_insights_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"insights_config_id", "location", "terraform_labels", "workload"},
+				ImportStateVerifyIgnore: []string{"insights_config_id", "location", "labels", "terraform_labels", "workload"},
 			},
 		},
 	})
@@ -69,35 +69,9 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 	  project_id = "devconnect-insights-terraform"
 	}
 	resource "google_apphub_application" "my_app" {
-	  location       = "us-central1"
-	  application_id = "tf-test-app-basic%{random_suffix}"
-	  display_name   = "My Basic App for InsightsConfig"
-	  project        = data.google_project.project.project_id
-	  scope {
-	    type = "REGIONAL"
-	  }
-	}
-	resource "google_developer_connect_insights_config" "my_insights_config" {
-  	  location           = "us-central1"
-	  insights_config_id = "tf-test-ic%{random_suffix}"
-	  project            = data.google_project.project.project_id
-	  app_hub_application = format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
-	  	data.google_project.project.number,
-		google_apphub_application.my_app.location,
-		google_apphub_application.my_app.application_id)
-	}
-  `, context)
-}
-
-func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-	data "google_project" "project" {
-          project_id = "devconnect-insights-terraform"
-        }
-	resource "google_apphub_application" "my_app" {
 		location       = "us-central1"
 		application_id = "tf-test-app-basic%{random_suffix}"
-		display_name   = "My Other App for InsightsConfig"
+		display_name   = "My Basic App for InsightsConfig"
 		project        = data.google_project.project.project_id
 		scope {
 			type = "REGIONAL"
@@ -111,8 +85,43 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 			data.google_project.project.number,
 			google_apphub_application.my_app.location,
 			google_apphub_application.my_app.application_id)
+	}
+  `, context)
+}
+
+func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+	data "google_project" "project" {
+	  project_id = "devconnect-insights-terraform"
+	}
+	resource "google_apphub_application" "my_app" {
+		location       = "us-central1"
+		application_id = "tf-test-app-basic%{random_suffix}"
+		display_name   = "My Basic App for InsightsConfig"
+		project        = data.google_project.project.project_id
+		scope {
+			type = "REGIONAL"
+		}
+	}
+	resource "google_developer_connect_insights_config" "my_insights_config" {
+		location           = "us-central1"
+		insights_config_id = "tf-test-ic%{random_suffix}"
+		project            = data.google_project.project.project_id
+		annotations = {}
+		labels = {}
+		app_hub_application = format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
+			data.google_project.project.number,
+			google_apphub_application.my_app.location,
+			google_apphub_application.my_app.application_id)
 		artifact_configs {
-			uri = "us-docker.pkg.dev/my-project/my-repo/image"
+			uri = "us-docker.pkg.dev/my-project/my-repo/other-image"
+			google_artifact_analysis {
+                project_id = "devconnect-insights-terraform"
+            }
+            google_artifact_registry {
+                artifact_registry_package = "my-package"
+                project_id                = "devconnect-insights-terraform"
+            }
 		}
 	}
   `, context)
