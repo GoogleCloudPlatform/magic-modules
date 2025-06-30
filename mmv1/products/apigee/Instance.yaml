@@ -219,5 +219,5 @@ properties:
         description: |
           Ship the access log entries that match the statusCode defined in the filter.
           The statusCode is the only expected/supported filter field. (Ex: statusCode)
-          The filter will parse it to the Common Expression Language semantics for expression 
+          The filter will parse it to the Common Expression Language semantics for expression
           evaluation to build the filter condition. (Ex: "filter": statusCode >= 200 && statusCode < 300 )
