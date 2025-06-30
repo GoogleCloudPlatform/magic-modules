@@ -20,16 +20,7 @@ resource "google_managed_kafka_cluster" "{{$.PrimaryResourceId}}" {
     }
     ssl_principal_mapping_rules = "RULE:pattern/replacement/L,DEFAULT"
   }
-
-  provider = google-beta
 }
-
-#resource "google_project_service_identity" "kafka_service_identity" {
-#  project  = data.google_project.project.project_id
-#  service  = "managedkafka.googleapis.com"
-#
-#  provider = google-beta
-#}
 
 resource "google_privateca_ca_pool" "ca_pool" {
   name = "test-ca-pool"
@@ -42,5 +33,4 @@ resource "google_privateca_ca_pool" "ca_pool" {
 }
 
 data "google_project" "project" {
-  provider = google-beta
 }
