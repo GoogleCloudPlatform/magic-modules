@@ -90,6 +90,9 @@ func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asse
 	config := utils.NewConfig()
 	d := &schema.ResourceData{}
 
+    assetNameParts := strings.Split(asset.Name, "/")
+    hclBlockName := assetNameParts[len(assetNameParts)-1]
+
 	hclData := make(map[string]interface{})
 
 {{ if $.CustomCode.TgcDecoder -}}
@@ -124,7 +127,7 @@ func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asse
 		return nil, err
 	}
 	return &models.TerraformResourceBlock{
-		Labels: []string{c.name, res["name"].(string)},
+		Labels: []string{c.name, hclBlockName},
 		Value:  ctyVal,
 	}, nil
 }
