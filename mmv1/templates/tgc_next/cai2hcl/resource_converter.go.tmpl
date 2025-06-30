@@ -133,23 +133,23 @@ func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asse
 	}, nil
 }
 
-{{- range $prop := $.ReadPropertiesForTgc }}
-    {{ if $prop.CustomTgcFlatten }}
-        {{- $prop.CustomTemplate $prop.CustomTgcFlatten false -}}
-    {{ else if $prop.IsA "KeyValueLabels" }}
+{{ range $prop := $.ReadPropertiesForTgc }}
+	{{- if $prop.CustomTgcFlatten }}
+{{ $prop.CustomTemplate $prop.CustomTgcFlatten true -}}
+	{{- else if $prop.IsA "KeyValueLabels" }}
 func flatten{{$prop.GetPrefix}}{{$prop.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	return utils.RemoveTerraformAttributionLabel(v)
 }
-    {{ else if or (and (eq $prop.Name "zone") $.HasZone) (and (eq $prop.Name "region") $.HasRegion) -}}
+	{{- else if or (and (eq $prop.Name "zone") $.HasZone) (and (eq $prop.Name "region") $.HasRegion) -}}
 func flatten{{$prop.GetPrefix}}{{$prop.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
 	if v == nil {
 		return v
 	}
 	return tpgresource.GetResourceNameFromSelfLink(v.(string))
 }
-    {{ else }}
-        {{ template "flattenPropertyMethod" $prop -}}
-    {{- end }}
+	{{- else }}
+{{ template "flattenPropertyMethod" $prop -}}
+	{{- end }}
 {{- end }}
 
 {{- if $.CustomCode.TgcDecoder }}
