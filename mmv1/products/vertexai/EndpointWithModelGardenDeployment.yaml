@@ -16,9 +16,9 @@ name: EndpointWithModelGardenDeployment
 api_resource_type_kind: Endpoint
 description: Create an Endpoint and deploy a Model Garden model to it.
 references:
-  guides:
+  guides: null
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations/deploy'
-docs:
+docs: null
 id_format: 'projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}'
 base_url: 'projects/{{project}}/locations/{{location}}:deploy'
 self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}'
@@ -41,26 +41,28 @@ custom_code:
   post_create: 'templates/terraform/post_create/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl'
 examples:
-  - name: 'vertex_ai_deploy'
-    primary_resource_id: 'deploy'
-    primary_resource_name: 'fmt.Sprintf("tf_test_example_deploy%s", context["random_suffix"])'
-    vars:
-      project: 'vertex-ai'
-      publisher_model_name: 'publisher_model_name'
-      accept_eula: 'true'
-    ignore_read_extra:
-      - 'project'
-    exclude_test: true
+- name: 'vertex_ai_deploy'
+  primary_resource_id: 'deploy'
+  primary_resource_name: 'fmt.Sprintf("tf_test_example_deploy%s", context["random_suffix"])'
+  vars:
+    project: 'vertex-ai'
+    publisher_model_name: 'publisher_model_name'
+    accept_eula: 'true'
+  ignore_read_extra:
+  - 'project'
+  exclude_test: true
 parameters:
 - name: location
   type: String
-  description: Resource ID segment making up resource `location`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+  description: Resource ID segment making up resource `location`. It identifies the
+    resource within its parent collection as described in https://google.aip.dev/122.
   immutable: true
   url_param_only: true
   required: true
 - name: endpoint
   type: String
-  description: Resource ID segment making up resource `endpoint`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+  description: Resource ID segment making up resource `endpoint`. It identifies the
+    resource within its parent collection as described in https://google.aip.dev/122.
   url_param_only: true
   output: true
 properties:
@@ -242,7 +244,8 @@ properties:
             Defaults to HTTP. Acceptable values are "HTTP" or "HTTPS".
         - name: httpHeaders
           type: Array
-          description: Custom headers to set in the request. HTTP allows repeated headers.
+          description: Custom headers to set in the request. HTTP allows repeated
+            headers.
           item_type:
             type: NestedObject
             properties:
@@ -261,7 +264,8 @@ properties:
         properties:
         - name: port
           type: Integer
-          description: Port number of the gRPC service. Number must be in the range 1 to 65535.
+          description: Port number of the gRPC service. Number must be in the range
+            1 to 65535.
         - name: service
           type: String
           description: |-
@@ -366,7 +370,8 @@ properties:
             Defaults to HTTP. Acceptable values are "HTTP" or "HTTPS".
         - name: httpHeaders
           type: Array
-          description: Custom headers to set in the request. HTTP allows repeated headers.
+          description: Custom headers to set in the request. HTTP allows repeated
+            headers.
           item_type:
             type: NestedObject
             properties:
@@ -385,7 +390,8 @@ properties:
         properties:
         - name: port
           type: Integer
-          description: Port number of the gRPC service. Number must be in the range 1 to 65535.
+          description: Port number of the gRPC service. Number must be in the range
+            1 to 65535.
         - name: service
           type: String
           description: |-
@@ -618,7 +624,8 @@ properties:
             Defaults to HTTP. Acceptable values are "HTTP" or "HTTPS".
         - name: httpHeaders
           type: Array
-          description: Custom headers to set in the request. HTTP allows repeated headers.
+          description: Custom headers to set in the request. HTTP allows repeated
+            headers.
           item_type:
             type: NestedObject
             properties:
@@ -645,7 +652,8 @@ properties:
             If this is not specified, the default behavior is defined by gRPC.
         - name: port
           type: Integer
-          description: Port number of the gRPC service. Number must be in the range 1 to 65535.
+          description: Port number of the gRPC service. Number must be in the range
+            1 to 65535.
       - name: tcpSocket
         type: NestedObject
         description: |-
