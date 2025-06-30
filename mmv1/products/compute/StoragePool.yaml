@@ -281,9 +281,7 @@ properties:
     type: KeyValueLabels
     description: |
       Labels to apply to this storage pool. These can be later modified by the setLabels method.
-    update_url: "projects/{{project}}/zones/{{zone}}/storagePools/{{name}}/setLabels"
     update_verb: "POST"
-    default_from_api: true
 virtual_fields:
   - name: "deletion_protection"
     type: Boolean
