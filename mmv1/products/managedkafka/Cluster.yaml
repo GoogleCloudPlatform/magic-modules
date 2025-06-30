@@ -154,7 +154,6 @@ properties:
   - name: 'tlsConfig'
     type: NestedObject
     description: "TLS configuration for the Kafka cluster. This is used to configure mTLS authentication."
-    min_version: beta
     properties:
       - name: 'trustConfig'
         type: NestedObject
