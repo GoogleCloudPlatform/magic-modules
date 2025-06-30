@@ -100,7 +100,6 @@ resource "google_service_networking_connection" "apigee_vpc_connection" {
   reserved_peering_ranges = [google_compute_global_address.apigee_range.name]
   depends_on              = [google_project_service.servicenetworking]
 }
- 
 
 resource "google_apigee_organization" "apigee_org" {
   analytics_region   = "us-central1"

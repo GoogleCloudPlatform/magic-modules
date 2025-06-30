@@ -138,6 +138,6 @@ resource "google_apigee_instance" "{{$.PrimaryResourceId}}" {
 
   access_logging_config {
     enabled = true,
-    filter  = "status_code >= 0 && status_code < 600"
+    filter  = "status_code >= 200 && status_code < 300"
   }
 }
