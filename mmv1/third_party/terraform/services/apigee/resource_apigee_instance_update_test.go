@@ -100,6 +100,7 @@ resource "google_service_networking_connection" "apigee_vpc_connection" {
   reserved_peering_ranges = [google_compute_global_address.apigee_range.name]
   depends_on              = [google_project_service.servicenetworking]
 }
+ 
 
 resource "google_apigee_organization" "apigee_org" {
   analytics_region   = "us-central1"
@@ -120,6 +121,11 @@ resource "google_apigee_instance" "apigee_instance" {
   consumer_accept_list = [
     google_project.project1.project_id,
   ]
+
+  access_logging_config {
+    enabled = false,
+    filter  = "status_code >= 0 && status_code < 600"
+  }
 }
 `, context)
 }
@@ -204,6 +210,11 @@ resource "google_apigee_instance" "apigee_instance" {
     google_project.project1.project_id,
     google_project.project2.project_id,
   ]
+
+  access_logging_config {
+    enabled = true,
+    filter  = "status_code >= 200 && status_code < 300"
+  }
 }
 `, context)
 }
