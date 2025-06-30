@@ -11522,7 +11522,6 @@ resource "google_container_cluster" "primary" {
 {{- if ne $.TargetVersionName "ga" }}
   rotation_config {
     enabled = false
-    rotation_interval = "120s"
     }
 {{- end }}
   }
