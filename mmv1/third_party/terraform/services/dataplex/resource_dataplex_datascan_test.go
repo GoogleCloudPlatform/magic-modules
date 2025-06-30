@@ -222,6 +222,7 @@ resource "google_dataplex_datascan" "full_quality" {
         strict_min_enabled = true
         strict_max_enabled = false
       }
+      suspended = true
     }
   }
 

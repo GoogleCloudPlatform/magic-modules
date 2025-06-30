@@ -310,6 +310,9 @@ type Type struct {
 	// creating the function header, `property` and `prefix` are available,
 	// just as they are in the standard flattener template.
 	CustomTgcFlatten string `yaml:"custom_tgc_flatten,omitempty"`
+
+	// If true, we will include the empty value of this attribute in CAI asset.
+	IncludeEmptyValueInCai bool `yaml:"include_empty_value_in_cai,omitempty"`
 }
 
 const MAX_NAME = 20

@@ -45,11 +45,14 @@ import (
 {{- $productBackendName := $.CaiProductBackendName $caiProductBaseUrl }}
 {{- $apiVersion := $.CaiApiVersion $productBackendName $caiProductBaseUrl}}
 
-{{if $.CustomCode.Constants -}} 
-    {{- $.CustomTemplate $.CustomCode.Constants true -}}
+{{- range $prop := $.AllUserProperties }}
+{{template "SchemaSubResource" $prop}}
 {{- end}}
 
-const {{ $.ResourceName -}}AssetType string = "{{ $productBackendName }}.googleapis.com/{{ $.Name -}}"
+{{- if not $.ApiResourceTypeKind }}
+const {{ $.ApiResourceType -}}AssetType string = "{{ $productBackendName }}.googleapis.com/{{ $.Name -}}"
+{{- end }}
+
 const {{ $.ResourceName -}}SchemaName string = "{{ $.TerraformName }}"
 
 type {{ $.ResourceName -}}Converter struct {
@@ -82,6 +85,7 @@ func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asse
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
 
+	var err error
 	res := asset.Resource.Data
 	config := utils.NewConfig()
 	d := &schema.ResourceData{}
@@ -89,14 +93,14 @@ func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asse
 	hclData := make(map[string]interface{})
 
 {{ if $.CustomCode.TgcDecoder -}}
-    res, err = resource{{ $.ResourceName -}}TgcDecoder(d, meta, res)
+    res, err = resource{{ $.ResourceName -}}TgcDecoder(d, config, res)
     if err != nil {
         return nil, err
     }
 {{ end}}
 
 {{ if $.CustomCode.Decoder -}}
-    res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
+    res, err = resource{{ $.ResourceName -}}Decoder(d, config, res)
     if err != nil {
         return nil, err
     }
@@ -126,12 +130,19 @@ func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asse
 }
 
 {{- range $prop := $.ReadPropertiesForTgc }}
-    {{ if $prop.IsA "KeyValueLabels" }}
+    {{ if $prop.CustomTgcFlatten }}
+        {{- $prop.CustomTemplate $prop.CustomTgcFlatten false -}}
+    {{ else if $prop.IsA "KeyValueLabels" }}
 func flatten{{$prop.GetPrefix}}{{$prop.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
   return utils.RemoveTerraformAttributionLabel(v)
 }
-    {{ else if $prop.CustomTgcFlatten }}
-        {{- $prop.CustomTemplate $prop.CustomTgcFlatten false -}}
+    {{ else if or (and (eq $prop.Name "zone") $.HasZone) (and (eq $prop.Name "region") $.HasRegion) -}}
+func flatten{{$prop.GetPrefix}}{{$prop.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return v
+	}
+	return tpgresource.GetResourceNameFromSelfLink(v.(string))
+}
     {{ else }}
         {{ template "flattenPropertyMethod" $prop -}}
     {{- end }}
