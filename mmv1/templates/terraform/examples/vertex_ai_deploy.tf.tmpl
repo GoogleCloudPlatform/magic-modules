@@ -1,0 +1,6 @@
+resource "google_vertex_ai_endpoint_with_model_garden_deployment" "{{$.PrimaryResourceId}}" {
+  publisher_model_name = "publishers/google/models/paligemma@paligemma-224-float32"
+  location             = "us-central1"
+}
+
+data "google_project" "project" {}

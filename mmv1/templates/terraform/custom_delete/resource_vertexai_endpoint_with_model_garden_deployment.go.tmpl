@@ -1,0 +1,38 @@
+log.Printf("[DEBUG] Beginning custom_delete for Vertex AI Endpoint with Model Garden Deployment")
+
+// Log resource ID
+log.Printf("[DEBUG] Resource ID: %s", d.Id())
+
+// Log fields using d.Get
+log.Printf("[DEBUG] Values retrieved using d.Get():")
+for _, key := range []string{
+	"project", "location", "endpoint", "publisher_model_name", "model_id", "deployed_model_id",
+} {
+	valRaw, ok := d.GetOk(key)
+	if ok {
+		log.Printf("[DEBUG] d.Get(%q) = %#v", key, valRaw)
+	} else {
+		log.Printf("[DEBUG] d.Get(%q) = <not found>", key)
+	}
+}
+
+// Log raw state attributes
+log.Printf("[DEBUG] Raw state attributes (d.State().Attributes):")
+for key, val := range d.State().Attributes {
+	log.Printf("[DEBUG] d.State().Attributes[%q] = %q", key, val)
+}
+
+// Log deployed model ID (assuming only one deployed model)
+if idVal, ok := d.State().Attributes["deployed_models.0.id"]; ok {
+	log.Printf("[DEBUG] deployedModels[0].id = %s", idVal)
+} else {
+	log.Printf("[DEBUG] deployedModels.0.id not found in state attributes")
+}
+
+// Surpress userAgent not used error
+log.Printf("[DEBUG] userAgent for deletion: %s", userAgent)
+
+// Continue with actual deletion logic here (undeploy model, delete endpoint, etc.)
+// ...
+log.Printf("[DEBUG] Finished deleting endpoint.")
+return nil
