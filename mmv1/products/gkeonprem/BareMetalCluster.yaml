@@ -497,7 +497,7 @@ properties:
                     If true, avoid using IPs ending in .0 or .255.
                     This avoids buggy consumer devices mistakenly dropping IPv4 traffic for those special IP addresses.
                 - name: 'manualAssign'
-                  type: String
+                  type: Boolean
                   description: |
                     If true, prevent IP addresses from being automatically assigned.
           - name: 'loadBalancerNodePoolConfig'
