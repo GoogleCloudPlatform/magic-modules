@@ -15,7 +15,7 @@ resource "google_managed_kafka_cluster" "{{$.PrimaryResourceId}}" {
   tls_config {
     trust_config {
       cas_configs {
-        ca_pool = "projects/${data.google_project.project.number}/locations/us-central1/caPools/test-ca-pool"
+        ca_pool = google_privateca_ca_pool.ca_pool.id 
       }
     }
     ssl_principal_mapping_rules = "RULE:pattern/replacement/L,DEFAULT"
@@ -23,7 +23,7 @@ resource "google_managed_kafka_cluster" "{{$.PrimaryResourceId}}" {
 }
 
 resource "google_privateca_ca_pool" "ca_pool" {
-  name = "test-ca-pool"
+  name = "{{index $.Vars "ca_pool_id"}}"
   location = "us-central1"
   tier = "ENTERPRISE"
   publishing_options {

@@ -44,6 +44,11 @@ examples:
       cluster_id: 'my-cluster'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
+  - name: 'managedkafka_cluster_mtls'
+    primary_resource_id: 'example'
+    vars:
+      cluster_id: 'my-cluster'
+      ca_pool_id: 'my-ca-pool'
   - name: 'managedkafka_cluster_cmek'
     primary_resource_id: 'example'
     min_version: 'beta'
