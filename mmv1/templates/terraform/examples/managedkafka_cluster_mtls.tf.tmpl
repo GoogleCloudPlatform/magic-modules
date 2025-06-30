@@ -1,0 +1,46 @@
+resource "google_managed_kafka_cluster" "{{$.PrimaryResourceId}}" {
+  cluster_id = "{{index $.Vars "cluster_id"}}"
+  location = "us-central1"
+  capacity_config {
+    vcpu_count = 3
+    memory_bytes = 3221225472
+  }
+  gcp_config {
+    access_config {
+      network_configs {
+        subnet = "projects/${data.google_project.project.number}/regions/us-central1/subnetworks/default"
+      }
+    }
+  }
+  tls_config {
+    trust_config {
+      cas_configs {
+        ca_pool = "projects/${data.google_project.project.number}/locations/us-central1/caPools/test-ca-pool"
+      }
+    }
+    ssl_principal_mapping_rules = "RULE:pattern/replacement/L,DEFAULT"
+  }
+
+  provider = google-beta
+}
+
+#resource "google_project_service_identity" "kafka_service_identity" {
+#  project  = data.google_project.project.project_id
+#  service  = "managedkafka.googleapis.com"
+#
+#  provider = google-beta
+#}
+
+resource "google_privateca_ca_pool" "ca_pool" {
+  name = "test-ca-pool"
+  location = "us-central1"
+  tier = "ENTERPRISE"
+  publishing_options {
+    publish_ca_cert = true
+    publish_crl = true
+  }
+}
+
+data "google_project" "project" {
+  provider = google-beta
+}
