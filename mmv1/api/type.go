@@ -833,6 +833,45 @@ func (t Type) GetFWType() string {
 	return "String"
 }
 
+func (t Type) GetFWGoCast() string {
+	switch t.Type {
+	case "Boolean":
+		return ".(bool)"
+	case "Double":
+		return ".(float64)"
+	case "Integer":
+		return ".(int64)"
+	case "String":
+		return ".(string)"
+	case "Time":
+		return ".(string)"
+	case "Enum":
+		return ".(string)"
+	case "ResourceRef":
+		return ".(string)"
+	case "NestedObject":
+		return ""
+	case "Array":
+		return ""
+	case "KeyValuePairs":
+		return ""
+	case "KeyValueLabels":
+		return ""
+	case "KeyValueTerraformLabels":
+		return ""
+	case "KeyValueEffectiveLabels":
+		return ""
+	case "KeyValueAnnotations":
+		return ""
+	case "Map":
+		return ""
+	case "Fingerprint":
+		return ".(string)"
+	}
+
+	return ".(string)"
+}
+
 // TODO rewrite: validation
 // // Represents an enum, and store is valid values
 // class Enum < Primitive
