@@ -29,7 +29,7 @@ func TestAccDataplexTaskDataplexTask_update(t *testing.T) {
 				ResourceName:            "google_dataplex_task.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "lake", "task_id", "execution_status"},
+				ImportStateVerifyIgnore: []string{"location", "lake", "task_id"},
 			},
 			{
 				Config: testAccDataplexTask_dataplexTaskPrimaryUpdate(context),
@@ -38,7 +38,7 @@ func TestAccDataplexTaskDataplexTask_update(t *testing.T) {
 				ResourceName:            "google_dataplex_task.example",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "lake", "task_id", "execution_status"},
+				ImportStateVerifyIgnore: []string{"location", "lake", "task_id"},
 			},
 		},
 	})

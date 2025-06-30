@@ -33,7 +33,7 @@ func TestAccOracleDatabaseDbServers_basic(t *testing.T) {
 const testAccOracleDatabaseDbServers_basic = `
 data "google_oracle_database_db_servers" "my_db_servers"{
 	location = "us-east4"
-	project = "oci-terraform-testing-prod"
+	project = "oci-terraform-testing"
 	cloud_exadata_infrastructure = "ofake-do-not-delete-tf-exadata"
 }
 `

@@ -71,8 +71,6 @@ examples:
     primary_resource_id: 'default'
     vars:
       metastore_service_name: 'example-service'
-      kms_key_name: 'example-key'
-    test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-metastore-service-key1").CryptoKey.Name'
     exclude_docs: true
     skip_vcr: true
@@ -522,3 +520,11 @@ properties:
         enum_values:
           - 'LEGACY'
           - 'JSON'
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      A map of resource manager tags.
+      Resource manager tag keys and values have the same definition as resource manager tags.
+      Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_value_id}.
+    immutable: true
+    ignore_read: true

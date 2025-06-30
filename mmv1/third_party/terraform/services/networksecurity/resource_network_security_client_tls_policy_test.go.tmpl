@@ -84,6 +84,11 @@ func testAccNetworkSecurityClientTlsPolicy_update(clientTlsPolicyName string) st
       	target_uri = "unix:mypath1"
       }
     }
+    server_validation_ca {
+    	grpc_endpoint {
+      	target_uri = "unix:mypath2"
+      }
+    }
   }
 `, clientTlsPolicyName)
 }

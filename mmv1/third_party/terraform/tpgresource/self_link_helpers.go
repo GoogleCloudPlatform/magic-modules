@@ -102,6 +102,14 @@ func GetResourceNameFromSelfLink(link string) string {
 	return parts[len(parts)-1]
 }
 
+func NameFromSelfLinkStateFunc(v interface{}) string {
+	return GetResourceNameFromSelfLink(v.(string))
+}
+
+func StoreResourceName(resourceLink interface{}) string {
+	return GetResourceNameFromSelfLink(resourceLink.(string))
+}
+
 type LocationType int
 
 const (
@@ -181,7 +189,7 @@ func GetRegionFromRegionalSelfLink(selfLink string) string {
 }
 
 func GetProjectFromRegionalSelfLink(selfLink string) string {
-	re := regexp.MustCompile("projects/([a-zA-Z0-9-:.]*)/(?:locations|regions)/[a-zA-Z0-9-:]*")
+	re := regexp.MustCompile("projects/([a-zA-Z0-9-:]*)/(?:locations|regions)/[a-zA-Z0-9-:]*")
 	switch {
 	case re.MatchString(selfLink):
 		if res := re.FindStringSubmatch(selfLink); len(res) == 2 && res[1] != "" {

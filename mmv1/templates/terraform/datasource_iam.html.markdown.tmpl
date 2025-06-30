@@ -66,16 +66,15 @@ data "{{ $.IamTerraformName }}_policy" "policy" {
 ## Argument Reference
 
 The following arguments are supported:
-{{ range $param := $.IamResourceProperties }}
-  {{- $n := underscore $param.Name }}
-{{-   if eq $n $.IamParentResourceName }}
-* `{{ $n }}` - (Required) Used to find the parent resource to bind the IAM policy to
-{{-   else if or (or (eq $n "region") (eq $n "zone")) (eq $n "location") }}
-* `{{ $n }}` - (Optional) {{ $param.Description }} Used to find the parent resource to bind the IAM policy to. If not specified,
-  the value will be parsed from the identifier of the parent resource. If no {{ $n }} is provided in the parent identifier and no
-  {{ $n }} is specified, it is taken from the provider configuration.
+{{ range $param := $.IamSelfLinkProperties }}
+{{-   if eq $param.Name "name" }}
+* `{{if $.IamPolicy.ParentResourceAttribute}}{{$.IamPolicy.ParentResourceAttribute}}{{else}}{{underscore $.Name}}{{end}}` - (Required) Used to find the parent resource to bind the IAM policy to
+{{-   else if or (or (eq (underscore $param.Name) "region") (eq (underscore $param.Name) "zone")) (eq (underscore $param.Name) "location") }}
+* `{{ underscore $param.Name }}` - (Optional) {{ $param.Description }} Used to find the parent resource to bind the IAM policy to. If not specified,
+  the value will be parsed from the identifier of the parent resource. If no {{ underscore $param.Name }} is provided in the parent identifier and no
+  {{ underscore $param.Name }} is specified, it is taken from the provider configuration.
 {{-  else }}
-* `{{ $n }}` - (Required) {{ $param.Description }} Used to find the parent resource to bind the IAM policy to
+* `{{ underscore $param.Name }}` - (Required) {{ $param.Description }} Used to find the parent resource to bind the IAM policy to
 {{- end }}
 {{- end }}
 {{- if $.IamPolicy.BaseUrl }}

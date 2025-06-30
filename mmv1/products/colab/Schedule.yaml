@@ -62,7 +62,6 @@ examples:
     ignore_read_extra:
       - desired_state
   - name: 'colab_schedule_full'
-    min_version: "beta"
     primary_resource_id: 'schedule'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-dataform.iam.gserviceaccount.com"
@@ -76,7 +75,6 @@ examples:
       dataform_repository: 'dataform-repository'
       start_time: '2014-10-02T15:01:23Z'
       end_time: '2014-10-10T15:01:23Z'
-      key_name: 'my-key'
     test_env_vars:
       project_id: 'PROJECT_NAME'
       location: 'REGION'

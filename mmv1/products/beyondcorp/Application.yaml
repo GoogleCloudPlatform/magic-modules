@@ -13,7 +13,6 @@
 
 ---
 name: Application
-deprecation_message: '`google_beyondcorp_application` is deprecated. Use `google_beyondcorp_security_gateway_application` instead.'
 description: Specifies application endpoint(s) to protect behind a Security Gateway.
 base_url: projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications
 update_mask: true
@@ -32,13 +31,13 @@ iam_policy:
     - 'projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications/{{application_id}}'
     - '{{application_id}}'
 examples:
-  - name: beyondcorp_application_basic
+  - name: beyondcorp_security_gateway_application_basic
     primary_resource_id: example
     primary_resource_name: 'fmt.Sprintf("default%s", context["random_suffix"]), fmt.Sprintf("google%s", context["random_suffix"])'
     vars:
       security_gateway_name: default
       application_name: google
-  - name: beyondcorp_application_vpc
+  - name: beyondcorp_security_gateway_application_vpc
     primary_resource_id: example
     primary_resource_name: 'fmt.Sprintf("default%s", context["random_suffix"]), fmt.Sprintf("google%s", context["random_suffix"])'
     vars:

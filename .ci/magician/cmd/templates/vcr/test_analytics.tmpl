@@ -1,0 +1,20 @@
+#### Tests analytics
+Total tests: {{add (add (len .ReplayingResult.PassedTests) (len .ReplayingResult.SkippedTests)) (len .ReplayingResult.FailedTests) }}
+Passed tests: {{len .ReplayingResult.PassedTests}}
+Skipped tests: {{len .ReplayingResult.SkippedTests}}
+Affected tests: {{len .ReplayingResult.FailedTests}}
+
+<details>
+<summary>Click here to see the affected service packages</summary>
+<blockquote>
+{{if .RunFullVCR}}
+All service packages are affected
+{{else if gt (len .AffectedServices) 0}}
+<ul>
+{{range .AffectedServices}}{{. | printf "<li>%s</li>\n"}}{{end}}
+</ul>
+{{else}}
+None
+{{end}}
+</blockquote>
+</details>

@@ -16,11 +16,10 @@ require (
 require (
 	cloud.google.com/go/storage v1.50.0
 	github.com/google/go-cmp v0.6.0
+	github.com/google/go-github/v61 v61.0.0
 	github.com/google/go-github/v68 v68.0.0
 	github.com/otiai10/copy v1.12.0
 	github.com/stretchr/testify v1.10.0
-	github.com/yuin/goldmark v1.7.8
-	go.abhg.dev/goldmark/frontmatter v0.2.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -32,7 +31,6 @@ require (
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	cloud.google.com/go/iam v1.2.2 // indirect
 	cloud.google.com/go/monitoring v1.21.2 // indirect
-	github.com/BurntSushi/toml v1.2.1 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.25.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.48.1 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.48.1 // indirect

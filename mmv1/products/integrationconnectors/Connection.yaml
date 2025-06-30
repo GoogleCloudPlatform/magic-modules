@@ -569,16 +569,6 @@ properties:
         description: |
           Enabled represents whether logging is enabled or not for a connection.
         required: true
-      - name: 'level'
-        type: Enum
-        description: |
-          Log configuration level.
-        default_from_api: true
-        enum_values:
-          - 'LOG_LEVEL_UNSPECIFIED'
-          - 'ERROR'
-          - 'INFO'
-          - 'DEBUG'
   - name: 'sslConfig'
     type: NestedObject
     description: |

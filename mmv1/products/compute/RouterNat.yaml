@@ -257,36 +257,6 @@ properties:
           is_set: true
           item_type:
             type: String
-  - name: 'sourceSubnetworkIpRangesToNat64'
-    type: Enum
-    description: |
-      Specify the Nat option for NAT64, which can take one of the following values:
-      ALL_IPV6_SUBNETWORKS: All of the IP ranges in every Subnetwork are allowed to Nat.
-      LIST_OF_IPV6_SUBNETWORKS: A list of Subnetworks are allowed to Nat (specified in the field nat64Subnetwork below).
-      Note that if this field contains NAT64_ALL_V6_SUBNETWORKS no other Router.Nat section in this region can also enable NAT64 for any Subnetworks in this network.
-      Other Router.Nat sections can still be present to enable NAT44 only.
-    enum_values:
-      - 'ALL_IPV6_SUBNETWORKS'
-      - 'LIST_OF_IPV6_SUBNETWORKS'
-  - name: 'nat64Subnetwork'
-    type: Array
-    description: |
-      One or more subnetwork NAT configurations whose traffic should be translated by NAT64 Gateway.
-      Only used if `source_subnetwork_ip_ranges_to_nat64` is set to `LIST_OF_IPV6_SUBNETWORKS`
-    api_name: nat64Subnetworks
-    is_set: true
-    send_empty_value: true
-    set_hash_func: computeRouterNatSubnetworkHash
-    item_type:
-      type: NestedObject
-      properties:
-        - name: 'name'
-          type: ResourceRef
-          description: 'Self-link of the subnetwork resource that will use NAT64'
-          required: true
-          custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-          resource: 'Subnetwork'
-          imports: 'selfLink'
   - name: 'minPortsPerVm'
     type: Integer
     description: |
@@ -512,7 +482,6 @@ properties:
       Must be one of: PREMIUM, STANDARD. If not specified, then the current
       project-level default tier is used.
     default_from_api: true
-    ignore_read: true
     enum_values:
       - 'PREMIUM'
       - 'STANDARD'

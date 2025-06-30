@@ -68,6 +68,3 @@ properties:
   - name: enableCustomerDataSharing
     type: Boolean
     description: Whether customer data sharing should be enabled.
-  - name: disableWebGrounding
-    type: Boolean
-    description: Whether web grounding should be disabled.

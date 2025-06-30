@@ -10,7 +10,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
@@ -133,16 +132,9 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Description:  `A path to the data you want to upload. Must be defined if content is not.`,
 			},
 
-			"source_md5hash": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: `User-provided md5hash, Base 64 MD5 hash of the object data.`,
-			},
-
 			// Detect changes to local file or changes made outside of Terraform to the file stored on the server.
 			"detect_md5hash": {
-				Type:       schema.TypeString,
-				Deprecated: "`detect_md5hash` is deprecated and will be removed in future release. Start using `source_md5hash` instead",
+				Type: schema.TypeString,
 				// This field is not Computed because it needs to trigger a diff.
 				Optional: true,
 				// Makes the diff message nicer:
@@ -155,12 +147,6 @@ func ResourceStorageBucketObject() *schema.Resource {
 				// 3. Don't suppress the diff iff they don't match
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					localMd5Hash := ""
-					if d.GetRawConfig().GetAttr("source_md5hash") == cty.UnknownVal(cty.String) {
-						return true
-					}
-					if v, ok := d.GetOk("source_md5hash"); ok && v != "" {
-						return true
-					}
 					if source, ok := d.GetOkExists("source"); ok {
 						localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
 					}
@@ -406,7 +392,7 @@ func resourceStorageBucketObjectUpdate(d *schema.ResourceData, meta interface{})
 	bucket := d.Get("bucket").(string)
 	name := d.Get("name").(string)
 
-	if d.HasChange("content") || d.HasChange("source_md5hash") || d.HasChange("detect_md5hash") {
+	if d.HasChange("content") || d.HasChange("detect_md5hash") {
 		// The KMS key name are not able to be set on create :
 		// or you get error: Error uploading object test-maarc: googleapi: Error 400: Malformed Cloud KMS crypto key: projects/myproject/locations/myregion/keyRings/mykeyring/cryptoKeys/mykeyname/cryptoKeyVersions/1, invalid
 		d.Set("kms_key_name", nil)
@@ -493,9 +479,6 @@ func resourceStorageBucketObjectRead(d *schema.ResourceData, meta interface{}) e
 	}
 	if err := d.Set("detect_md5hash", res.Md5Hash); err != nil {
 		return fmt.Errorf("Error setting detect_md5hash: %s", err)
-	}
-	if err := d.Set("source_md5hash", d.Get("source_md5hash")); err != nil {
-		return fmt.Errorf("Error setting source_md5hash: %s", err)
 	}
 	if err := d.Set("generation", res.Generation); err != nil {
 		return fmt.Errorf("Error setting generation: %s", err)
@@ -643,11 +626,6 @@ func flattenObjectRetention(objectRetention *storage.ObjectRetention) []map[stri
 
 func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	localMd5Hash := ""
-
-	if (d.GetRawConfig().GetAttr("source_md5hash") == cty.UnknownVal(cty.String)) || d.HasChange("source_md5hash") {
-		return showDiff(d)
-	}
-
 	if source, ok := d.GetOkExists("source"); ok {
 		localMd5Hash = tpgresource.GetFileMd5Hash(source.(string))
 	}
@@ -662,10 +640,7 @@ func resourceStorageBucketObjectCustomizeDiff(ctx context.Context, d *schema.Res
 	if ok && oldMd5Hash == localMd5Hash {
 		return nil
 	}
-	return showDiff(d)
-}
 
-func showDiff(d *schema.ResourceDiff) error {
 	err := d.SetNewComputed("md5hash")
 	if err != nil {
 		return fmt.Errorf("Error re-setting md5hash: %s", err)
@@ -678,6 +653,5 @@ func showDiff(d *schema.ResourceDiff) error {
 	if err != nil {
 		return fmt.Errorf("Error re-setting generation: %s", err)
 	}
-
 	return nil
 }

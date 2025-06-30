@@ -73,7 +73,7 @@ resource "google_compute_network" "network2" {
 resource "google_memorystore_instance" "{{$.PrimaryResourceId}}" {
   instance_id                 = "{{index $.Vars "instance_name"}}"
   shard_count                 = 1
-  desired_auto_created_endpoints {
+  desired_psc_auto_connections {
     network                   = google_compute_network.network1.id
     project_id                = data.google_project.project.project_id
   }

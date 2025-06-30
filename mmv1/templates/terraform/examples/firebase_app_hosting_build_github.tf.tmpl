@@ -42,6 +42,10 @@ resource "google_developer_connect_git_repository_link" "my-repository" {
 
   project  = "{{index $.TestEnvVars "project_id"}}"
   location = "us-central1"
+  provider = google-beta
+
+  provider = google-beta
+  project  = "{{index $.TestEnvVars "project_id"}}"
   service  = "developerconnect.googleapis.com"
 }
 

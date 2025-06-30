@@ -105,4 +105,3 @@ properties:
     enum_values:
       - 'GEMINI_CLOUD_ASSIST'
       - 'GEMINI_CODE_ASSIST'
-    default_from_api: true

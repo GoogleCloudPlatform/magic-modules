@@ -62,7 +62,6 @@ examples:
     test_env_vars:
       project: 'PROJECT_NAME'
       organization: 'ORG_ID'
-      location: 'REGION'
   - name: 'dlp_discovery_config_conditions_cadence'
     primary_resource_id: 'conditions_cadence'
     test_env_vars:

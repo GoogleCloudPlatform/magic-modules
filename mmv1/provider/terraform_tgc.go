@@ -60,7 +60,6 @@ func NewTerraformGoogleConversion(product *api.Product, versionName string, star
 	}
 
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
-	t.Product.SetCompiler(ProviderName(t))
 	for _, r := range t.Product.Objects {
 		r.SetCompiler(ProviderName(t))
 		r.ImportPath = ImportPathFromVersion(versionName)
@@ -124,9 +123,8 @@ func (tgc TerraformGoogleConversion) GenerateResource(object api.Resource, templ
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
 
-	templatePath := "templates/tgc/resource_converter.go.tmpl"
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name)))
-	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
+	templateData.GenerateTGCResourceFile(targetFilePath, object)
 }
 
 // Generate the IAM policy for this object. This is used to query and test
