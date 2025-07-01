@@ -186,8 +186,8 @@ type Examples struct {
 	// The properties ignored in CAI assets. It is rarely used and only used
 	// when the nested field has sent_empty_value: true.
 	// But its parent field is C + O and not specified in raw_config.
-	// Example: ['resource.cdnPolicy.signedUrlCacheMaxAgeSec'].
-	// "resource" means that the property is for resource data in CAI asset.
+	// Example: ['RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec'].
+	// "RESOURCE" means that the property is for resource data in CAI asset.
 	TGCTestIgnoreInAsset []string `yaml:"tgc_test_ignore_in_asset,omitempty"`
 }
 

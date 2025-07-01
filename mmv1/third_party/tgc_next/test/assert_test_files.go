@@ -353,19 +353,19 @@ func deleteFieldsFromAsset(assets []caiasset.Asset, ignoredResourceDataFields []
 		if len(parts) <= 1 {
 			continue
 		}
-		if parts[0] == "resource" {
-			if _, ok := ignoredFieldsMap["resource"]; !ok {
-				ignoredFieldsMap["resource"] = make([]Field, 0)
+		if parts[0] == "RESOURCE" {
+			if _, ok := ignoredFieldsMap["RESOURCE"]; !ok {
+				ignoredFieldsMap["RESOURCE"] = make([]Field, 0)
 			}
 			f := Field{Path: parts[1:]}
-			ignoredFieldsMap["resource"] = append(ignoredFieldsMap["resource"], f)
+			ignoredFieldsMap["RESOURCE"] = append(ignoredFieldsMap["RESOURCE"], f)
 		}
 	}
 
 	for _, asset := range assets {
 		if asset.Resource != nil && asset.Resource.Data != nil {
 			data := asset.Resource.Data
-			for _, ignoredField := range ignoredFieldsMap["resource"] {
+			for _, ignoredField := range ignoredFieldsMap["RESOURCE"] {
 				path := ignoredField.Path
 				deleteMapFieldByPath(data, path)
 			}

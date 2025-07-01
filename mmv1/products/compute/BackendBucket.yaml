@@ -60,7 +60,7 @@ examples:
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
-    tgc_test_ignore_in_asset: ['resource.cdnPolicy.signedUrlCacheMaxAgeSec']
+    tgc_test_ignore_in_asset: ['RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec']
   - name: 'backend_bucket_full'
     primary_resource_id: 'image_backend_full'
     vars:
