@@ -13,6 +13,7 @@
 
 ---
 name: ModelArmor
+legacy_name: model_armor
 display_name: Model Armor
 scopes:
  - https://www.googleapis.com/auth/cloud-platform
