@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"maps"
 	"os"
 	"path"
 	"path/filepath"
@@ -442,7 +443,8 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 
 func buildProperties(props openapi3.Schemas, required []string) []*api.Type {
 	properties := []*api.Type{}
-	for k, prop := range props {
+	for _, k := range slices.Sorted(maps.Keys(props)) {
+		prop := props[k]
 		propObj := writeObject(k, prop, propType(prop), false)
 		if slices.Contains(required, k) {
 			propObj.Required = true
