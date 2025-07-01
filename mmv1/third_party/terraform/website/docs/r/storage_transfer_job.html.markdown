@@ -288,13 +288,13 @@ The `azure_credentials` block supports:
 
 * `sas_token` - (Required) Azure shared access signature. See [Grant limited access to Azure Storage resources using shared access signatures (SAS)](https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview).
 
-* `azure_blob_storage_data_source` - Optional, Federated identity config of a user registered Azure application
+* `azure_blob_storage_data_source` - (Optional) Federated identity config of a user registered Azure application
 
 The `azure_blob_storage_data_source` block supports:
 
-* `client_id` - (Required) Required. The client (application) ID of the application with federated credentials.
+* `client_id` - (Required) The client (application) ID of the application with federated credentials.
 
-* `tenant_id` - (Required) Required. The client (directory) ID of the application with federated credentials.
+* `tenant_id` - (Required) The client (directory) ID of the application with federated credentials.
 
 <a name="nested_schedule_start_end_date"></a>The `schedule_start_date` and `schedule_end_date` blocks support:
 
