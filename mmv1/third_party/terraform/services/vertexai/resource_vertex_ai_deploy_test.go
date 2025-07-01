@@ -35,6 +35,7 @@ func TestAccVertexAIEndpointWithModelGardenDeployment_basic(t *testing.T) {
 					"id",
 					"publisher_model_name",
 					"project",
+					"model_config",
 				},
 			},
 		},
@@ -47,6 +48,9 @@ resource "google_vertex_ai_endpoint_with_model_garden_deployment" "test" {
   publisher_model_name = "publishers/google/models/paligemma@paligemma-224-float32"
   location             = "us-central1"
   project              = "%{project}"
+  model_config {
+    accept_eula =  true
+  }
 }
 `, context)
 }

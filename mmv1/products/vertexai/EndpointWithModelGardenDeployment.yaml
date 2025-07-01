@@ -47,7 +47,6 @@ examples:
   vars:
     project: 'vertex-ai'
     publisher_model_name: 'publisher_model_name'
-    accept_eula: 'true'
   ignore_read_extra:
   - 'project'
   exclude_test: true
@@ -82,6 +81,7 @@ properties:
 - name: modelConfig
   type: NestedObject
   description: The model config to use for the deployment.
+  ignore_read: true
   properties:
   - name: huggingFaceCacheEnabled
     type: Boolean
