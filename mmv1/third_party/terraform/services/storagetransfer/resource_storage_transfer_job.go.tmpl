@@ -753,7 +753,7 @@ func awsS3DataSchema() *schema.Resource {
 			"cloudfront_domain": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: `The CloudFront distribution domain name pointing to this bucket, to use when fetching.`,
+				Description: `The CloudFront distribution domain name pointing to this bucket, to use when fetching. See [Transfer from S3 via CloudFront](https://cloud.google.com/storage-transfer/docs/s3-cloudfront) for more information. Format: https://{id}.cloudfront.net or any valid custom domain. Must begin with https://.`,
 			},
 		},
 	}
