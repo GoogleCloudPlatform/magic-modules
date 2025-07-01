@@ -29,7 +29,7 @@ exclude_delete: true
 custom_code:
   custom_import: 'templates/terraform/custom_import/modelarmorglobal_floorsetting.go.tmpl'
   post_create: 'templates/terraform/post_create/modelarmor_floorsetting_sleep.go.tmpl'
-  post_update: 'templates/terraform/post_create/modelarmor_floorsetting_sleep.go.tmpl' 
+  post_update: 'templates/terraform/post_create/modelarmor_floorsetting_sleep.go.tmpl'
 examples:
   - name: 'modelarmor_floorsetting_basic'
     primary_resource_id: 'floorsetting-basic'
@@ -213,16 +213,16 @@ properties:
     type: Array
     description: List of integrated services for which the floor setting is applicable.
     item_type:
-        type: String
-        description: |-
-          Possible values:
-          INTEGRATED_SERVICE_UNSPECIFIED
-          AI_PLATFORM
+      type: String
+      description: |-
+        Possible values:
+        INTEGRATED_SERVICE_UNSPECIFIED
+        AI_PLATFORM
   - name: aiPlatformFloorSetting
     type: NestedObject
     description: AI Platform floor setting.
     allow_empty_object: true
-    exactly_one_of: 
+    exactly_one_of:
       - inspectOnly
       - inspectAndBlock
     properties:
@@ -243,7 +243,7 @@ properties:
     type: NestedObject
     description: Metadata to enable multi language detection via floor setting.
     allow_empty_object: true
-    properties: 
+    properties:
       - name: multiLanguageDetection
         type: NestedObject
         description: Metadata for multi language detection.
