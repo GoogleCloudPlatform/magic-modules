@@ -92,7 +92,6 @@ The following arguments are supported:
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
 	{{- end }}
 {{- end }}
-- - -
 {{ "" }}
 {{- range $p := $.RootProperties }}
 	{{- if and (not $p.Required) (not $p.Output) (not $p.WriteOnly) }}
@@ -113,7 +112,6 @@ The following arguments are supported:
 {{- if $.Docs.OptionalProperties }}
 {{ $.Docs.OptionalProperties }}
 {{- end }}
-- - -
 {{ "" }}
 {{- range $p := $.AllUserProperties }}
 	{{- if $p.Required }}
