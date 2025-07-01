@@ -57,6 +57,13 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: 'data-store-id'
+  - name: 'discoveryengine_datastore_kms_key_name'
+    primary_resource_id: 'kms_key_name'
+    vars:
+      data_store_id: 'data-store-id'
+      kms_key_name: 'kms-key'
+    test_vars_overrides:
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
   - name: 'discoveryengine_datastore_document_processing_config'
     primary_resource_id: 'document_processing_config'
     primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
@@ -185,6 +192,17 @@ properties:
         type: Boolean
         description: If set true, automatic refresh is disabled for the DataStore.
         required: false
+  - name: 'kmsKeyName'
+    type: String
+    description: |
+      KMS key resource name which will be used to encrypt resources:
+      `/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{keyId}`
+      The KMS key to be used to protect this DataStore at creation time. Must be
+      set for requests that need to comply with CMEK Org Policy protections.
+      If this field is set and processed successfully, the DataStore will be
+      protected by the KMS key, as indicated in the cmek_config field.
+    required: false
+    ignore_read: true
   - name: 'documentProcessingConfig'
     type: NestedObject
     description: |
