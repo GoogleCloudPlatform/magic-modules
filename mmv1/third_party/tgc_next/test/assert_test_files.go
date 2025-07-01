@@ -330,9 +330,24 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 	return roundtripAssets, roundtripConfig, nil
 }
 
+// Example:
+//
+//	data := map[string]interface{}{
+//		"database": map[string]interface{}{
+//			"host": "localhost",
+//			"user": "admin",
+//		},
+//	}
+//
+// Path of "host" in "data" is ["database", "host"]
+type Field struct {
+	Path []string
+}
+
 // Deletes fileds from the resource data of CAI assets
 func deleteFieldsFromAsset(assets []caiasset.Asset, ignoredResourceDataFields []string) []caiasset.Asset {
-	ignoredFieldsMap := make(map[string][][]string, 0)
+	// The key is the content type, such as "resource"
+	ignoredFieldsMap := make(map[string][]Field, 0)
 	for _, ignoredField := range ignoredResourceDataFields {
 		parts := strings.Split(ignoredField, ".")
 		if len(parts) <= 1 {
@@ -340,33 +355,53 @@ func deleteFieldsFromAsset(assets []caiasset.Asset, ignoredResourceDataFields []
 		}
 		if parts[0] == "resource" {
 			if _, ok := ignoredFieldsMap["resource"]; !ok {
-				ignoredFieldsMap["resource"] = make([][]string, 0)
+				ignoredFieldsMap["resource"] = make([]Field, 0)
 			}
-			ignoredFieldsMap["resource"] = append(ignoredFieldsMap["resource"], parts[1:])
+			f := Field{Path: parts[1:]}
+			ignoredFieldsMap["resource"] = append(ignoredFieldsMap["resource"], f)
 		}
 	}
 
 	for _, asset := range assets {
 		if asset.Resource != nil && asset.Resource.Data != nil {
 			data := asset.Resource.Data
-			for _, ignoredFieldPathes := range ignoredFieldsMap["resource"] {
-				i := 0
-				for i < len(ignoredFieldPathes)-1 {
-					k := ignoredFieldPathes[i]
-					if v, ok := data[k]; ok {
-						data = v.(map[string]interface{})
-						i++
-					} else {
-						break
-					}
-				}
-				if i == len(ignoredFieldPathes)-1 {
-					delete(data, ignoredFieldPathes[i])
-				}
+			for _, ignoredField := range ignoredFieldsMap["resource"] {
+				path := ignoredField.Path
+				deleteMapFieldByPath(data, path)
 			}
 		}
 	}
 	return assets
+}
+
+// Deletes a field from a map by its path.
+// Example:
+//
+//	data := map[string]interface{}{
+//		"database": map[string]interface{}{
+//			"host": "localhost",
+//			"user": "admin",
+//		},
+//	}
+//
+// path := ["database", "host"]
+func deleteMapFieldByPath(data map[string]interface{}, path []string) {
+	i := 0
+	for i < len(path)-1 {
+		k := path[i]
+		if v, ok := data[k]; ok {
+			if data, ok = v.(map[string]interface{}); ok && data != nil {
+				i++
+			} else {
+				break
+			}
+		} else {
+			break
+		}
+	}
+	if i == len(path)-1 {
+		delete(data, path[i])
+	}
 }
 
 // Compares the asset name in export asset and roundtrip asset and ignores "null" in the name
