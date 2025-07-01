@@ -301,13 +301,13 @@ func InsertDiffSteps(c resource.TestCase, temp_file *os.File, releaseProvider st
 			testStep.Config = ReformConfigWithProvider(ogConfig, localProviderName)
 			fmt.Fprintf(os.Stdout, "Reformatted config: %s\n", testStep.Config)
 			testStep.PreConfig = func() {
-				fmt.Fprintf(temp_file, "Step %d\n", countSteps)
+				fmt.Fprintf(temp_file, "[Diff] Step %d\n", countSteps)
 				countSteps++
 			}
 			if testStep.ExpectError == nil && !testStep.PlanOnly {
 				newStep := resource.TestStep{
 					PreConfig: func() {
-						fmt.Fprintf(temp_file, "[Diff] Step %d\n", countSteps)
+						fmt.Fprintf(temp_file, "Step %d\n", countSteps)
 						countSteps++
 					},
 					Config: ReformConfigWithProvider(ogConfig, releaseProvider),
