@@ -345,7 +345,7 @@ type Field struct {
 }
 
 // Deletes fileds from the resource data of CAI assets
-func deleteFieldsFromAsset(assets []caiasset.Asset, ignoredResourceDataFields []string) []caiasset.Asset {
+func deleteFieldsFromAssets(assets []caiasset.Asset, ignoredResourceDataFields []string) []caiasset.Asset {
 	// The key is the content type, such as "resource"
 	ignoredFieldsMap := make(map[string][]Field, 0)
 	for _, ignoredField := range ignoredResourceDataFields {
