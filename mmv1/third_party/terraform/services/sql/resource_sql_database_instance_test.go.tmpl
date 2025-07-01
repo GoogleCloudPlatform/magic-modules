@@ -1183,6 +1183,39 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enabled(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_withPscEnabled_withNetworkAttachmentUri(t *testing.T) {
+	t.Parallel()
+
+	instanceName := "tf-test-" + acctest.RandString(t, 10)
+	projectId := envvar.GetTestProjectFromEnv()
+	region := "us-central1"
+	networkAttachmentName := "my-na"
+	networkAttachmentUri := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", projectId, region, networkAttachmentName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutPscAutoConnections(instanceName),
+				Check:  resource.ComposeTestCheckFunc(verifyPscAutoConnectionsOperation("google_sql_database_instance.instance", true, true, false, "", "")),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withNetworkAttachmentUri(instanceName, projectId, networkAttachmentName),
+				Check:  resource.ComposeTestCheckFunc(verifyPscNetorkAttachmentOperation("google_sql_database_instance.instance", true, true, networkAttachmentUri)),
+			}
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testing.T) {
 
 	t.Parallel()
@@ -4843,6 +4876,45 @@ func verifyPscAutoConnectionsOperation(resourceName string, isPscConfigExpected 
 	}
 }
 
+func verifyPscNetorkAttachmentOperation(resourceName string, isPscConfigExpected bool, expectedPscEnabled bool, expectedNetworkAttachmentUri string ) func(*terraform.State) error {
+	return func(s *terraform.State) error {
+		resource, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Can't find %s in state", resourceName)
+		}
+
+		resourceAttributes := resource.Primary.Attributes
+		_, ok = resourceAttributes["settings.0.ip_configuration.#"]
+		if !ok {
+			return fmt.Errorf("settings.0.ip_configuration.# block is not present in state for %s", resourceName)
+		}
+
+		if isPscConfigExpected {
+			_, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.#"]
+			if !ok {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config property is not present or set in state of %s", resourceName)
+			}
+
+			pscEnabledStr, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_enabled"]
+			pscEnabled, err := strconv.ParseBool(pscEnabledStr)
+			if err != nil || pscEnabled != expectedPscEnabled {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_enabled property value is not set as expected in state of %s, expected %v, actual %v", resourceName, expectedPscEnabled, pscEnabled)
+			}
+
+			networkAttachmentUriStr, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.network_attachment_uri"]
+			if !ok || len(networkAttachmentUriStr) == 0 {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.network_attachment_uri block is not present or set in state for %s", resourceName)
+			}
+
+			if networkAttachmentUriStr != expectedNetworkAttachmentUri {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.network_attachment_uri block does not match the expected value for %s", resourceName)
+			}
+		}
+
+		return nil
+	}
+}
+
 func testAccSqlDatabaseInstance_withoutMCPEnabled(instanceName string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
@@ -4934,6 +5006,58 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `, networkName, instanceName, projectId, networkName, projectId)
+}
+
+func testAccSqlDatabaseInstance_withPSCEnabled_withNetworkAttachmentUri(instanceName string, projectId string, networkAttachmentName string) string {
+	return fmt.Sprintf(`
+
+resource "google_compute_network_attachment" "default" {
+    name = "%s"
+	project = "%s"
+    region = "us-central1"
+    description = "basic network attachment description"
+    connection_preference = "ACCEPT_AUTOMATIC"
+
+    subnetworks = [
+        google_compute_subnetwork.net1.self_link
+    ]
+}
+
+resource "google_compute_network" "default" {
+    name = "tf-test-basic-network"
+    auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "net1" {
+    name = "tf-test-basic-subnetwork1"
+    region = "us-central1"
+
+    network = google_compute_network.default.id
+    ip_cidr_range = "10.0.0.0/16"
+}
+
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier = "db-g1-small"
+    ip_configuration {
+		psc_config {
+			psc_enabled = true
+			network_attachment_uri = google_compute_network_attachment.default.self_link
+		}
+		ipv4_enabled = false
+    }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
+  }
+}`, networkAttachmentName, projectId, instanceName)
+
 }
 
 func testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName string, specifyPrivatePathOption bool, enablePrivatePath bool) string {
