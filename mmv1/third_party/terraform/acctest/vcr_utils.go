@@ -150,16 +150,33 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		defer closeRecorder(t)
 	} else if isReleaseDiffEnabled() {
 		// creates temporary file for the individual test, will be a temporary to store the output
-		temp_file, err := os.CreateTemp("", "release_diff_test_output_*.log")
+		temp_file, error := os.CreateTemp("", "release_diff_test_output_*.log")
 
+		if error != nil {
+			t.Fatalf("Error creating temporary file: %v", error)
+			return
+		}
+		var dir, _ = os.Getwd()
+		fmt.Printf("current wd: %s\n", dir)
+
+		var regularFailureFile, err = os.Create(filepath.Join("../../../", "regular_failure_file.log"))
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error creating temporary file: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
+			return
+		}
+		var diffFailureFile *os.File
+		// todo = get rid of this hardcoding once again is just meant for visibility
+		diffFailureFile, err = os.Create(filepath.Join("../../../", "diff_failure_file.log"))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
 			return
 		}
 		fmt.Printf("Temporary file created at: %s\n", temp_file.Name())
+		fmt.Printf("Regular failure file created at: %s\n", regularFailureFile.Name())
+		fmt.Printf("Diff failure file created at: %s\n", diffFailureFile.Name())
 
 		defer func() {
-			writeOutputFileDeferFunction(temp_file, t.Failed())
+			writeOutputFileDeferFunction(t, temp_file, diffFailureFile, regularFailureFile, t.Failed())
 		}()
 		c = initializeReleaseDiffTest(c, t.Name(), temp_file)
 
@@ -360,25 +377,12 @@ func ParseReleaseDiffOutput(temp *os.File) (string, error) {
 	return lastLine, nil
 }
 
-func writeOutputFileDeferFunction(temp_file *os.File, failed bool) {
+func writeOutputFileDeferFunction(t *testing.T, temp_file *os.File, regularFailureFile *os.File, diffFailureFile *os.File, failed bool) {
 	if temp_file != nil {
 		// parses the temporary file created during the release diff test and returns the last line of output
 		// This is useful for extracting the diff output from the file after the test has run
-		var regularFailureFile, err = os.Create("regular_test_failures.log")
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
-			return
-		}
-		var diffFailureFile *os.File
-		diffFailureFile, err = os.Create("diff_test_failures.log")
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
-			return
-		}
-		fmt.Fprintf(regularFailureFile, "testing this even works")
-		var output string
 
-		output, err = ParseReleaseDiffOutput(temp_file)
+		var output, err = ParseReleaseDiffOutput(temp_file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error parsing release diff output: %v\n", err)
 		} else if failed {
