@@ -128,6 +128,7 @@ properties:
       'An array of objects that define dataset access for one or more entities.'
     is_set: true
     default_from_api: true
+    is_missing_in_cai: true
     item_type:
       type: NestedObject
       properties:
