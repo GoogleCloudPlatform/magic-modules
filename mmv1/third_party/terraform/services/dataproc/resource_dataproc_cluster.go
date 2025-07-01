@@ -1301,12 +1301,12 @@ func ResourceDataprocCluster() *schema.Resource {
 									"kerberos_config": {
 										Type:        schema.TypeList,
 										Description: "Kerberos related configuration",
-										Optional: true,
+										Optional:    true,
 										AtLeastOneOf: []string{
 											"cluster_config.0.security_config.0.kerberos_config",
 											"cluster_config.0.security_config.0.identity_config",
 										},
-										MaxItems:    1,
+										MaxItems: 1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"cross_realm_trust_admin_server": {
@@ -1393,12 +1393,12 @@ by Dataproc`,
 									"identity_config": {
 										Type:        schema.TypeList,
 										Description: "Identity related configuration",
-										Optional: true,
+										Optional:    true,
 										AtLeastOneOf: []string{
 											"cluster_config.0.security_config.0.kerberos_config",
 											"cluster_config.0.security_config.0.identity_config",
 										},
-										MaxItems:    1,
+										MaxItems: 1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"user_service_account_mapping": {
