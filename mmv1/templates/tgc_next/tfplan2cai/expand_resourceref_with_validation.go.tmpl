@@ -10,16 +10,14 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
+{{- define "expandResourcerefWithValidation" }}
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-  if v == nil || v.(string) == "" {
-    return "", nil
-  }
-  f, err := {{ template "expandResourceRef" dict "VarName" "v.(string)" "ResourceRef" $.ResourceRef "ResourceType" $.ResourceType}}
-  if err != nil {
-    return nil, fmt.Errorf("Invalid value for {{underscore $.Name}}: %s", err)
-  }
+	f, err := tpgresource.ParseProjectFieldValue("{{$.ResourceType}}", v.(string), "project", d, config, true)
+	if err != nil {
+		return nil, fmt.Errorf("Invalid value for {{underscore $.Name}}: %s", err)
+	}
 
-  url := tgcresource.GetComputeSelfLink(config, f.RelativeLink())
-
-  return url, nil
+	fullUrl := tgcresource.GetComputeSelfLink(config, f.RelativeLink())
+	return fullUrl, nil
 }
+{{- end }}
