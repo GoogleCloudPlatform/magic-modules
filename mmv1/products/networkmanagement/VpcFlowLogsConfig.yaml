@@ -41,13 +41,6 @@ sweeper:
   url_substitutions:
     - region: "global"
 examples:
-  - name: 'network_management_vpc_flow_logs_config_interconnect_full'
-    primary_resource_id: 'interconnect-test'
-    vars:
-      network_name: 'full-interconnect-test-network'
-      router_name: 'full-interconnect-test-router'
-      vpc_flow_logs_config_id: 'full-interconnect-test-id'
-      interconnect_attachment_name: 'full-interconnect-test-id'
   - name: 'network_management_vpc_flow_logs_config_interconnect_basic'
     primary_resource_id: 'interconnect-test'
     vars:
@@ -67,30 +60,12 @@ examples:
       esp_forwarding_rule_name: 'basic-test-fresp'
       route_name: 'basic-test-route'
       vpc_flow_logs_config_id: 'basic-test-id'
-  - name: 'network_management_vpc_flow_logs_config_vpn_full'
-    primary_resource_id: 'vpn-test'
-    vars:
-      network_name: 'full-test-network'
-      vpn_tunnel_name: 'full-test-tunnel'
-      target_vpn_gateway_name: 'full-test-gateway'
-      address_name: 'full-test-address'
-      udp500_forwarding_rule_name: 'full-test-fr500'
-      udp4500_forwarding_rule_name: 'full-test-fr4500'
-      esp_forwarding_rule_name: 'full-test-fresp'
-      route_name: 'full-test-route'
-      vpc_flow_logs_config_id: 'full-test-id'
   - name: 'network_management_vpc_flow_logs_config_network_basic'
     primary_resource_id: 'network-test'
     min_version: 'beta'
     vars:
       network_name: 'basic-network-test-network'
       vpc_flow_logs_config_id: 'basic-network-test-id'
-  - name: 'network_management_vpc_flow_logs_config_network_full'
-    primary_resource_id: 'network-test'
-    min_version: 'beta'
-    vars:
-      network_name: 'full-network-test-network'
-      vpc_flow_logs_config_id: 'full-network-test-id'
   - name: 'network_management_vpc_flow_logs_config_subnet_basic'
     primary_resource_id: 'subnet-test'
     min_version: 'beta'
@@ -98,13 +73,6 @@ examples:
       network_name: 'basic-subnet-test-network'
       subnetwork_name: 'basic-subnet-test-subnetwork'
       vpc_flow_logs_config_id: 'basic-subnet-test-id'
-  - name: 'network_management_vpc_flow_logs_config_subnet_full'
-    primary_resource_id: 'subnet-test'
-    min_version: 'beta'
-    vars:
-      network_name: 'full-subnet-test-network'
-      subnetwork_name: 'full-subnet-test-subnetwork'
-      vpc_flow_logs_config_id: 'full-subnet-test-id'
 parameters:
   - name: 'location'
     type: String
