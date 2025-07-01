@@ -344,7 +344,7 @@ type Field struct {
 	Path []string
 }
 
-// Deletes fileds from the resource data of CAI assets
+// Deletes fields from the resource data of CAI assets
 func deleteFieldsFromAssets(assets []caiasset.Asset, ignoredResourceDataFields []string) []caiasset.Asset {
 	// The key is the content type, such as "resource"
 	ignoredFieldsMap := make(map[string][]Field, 0)
