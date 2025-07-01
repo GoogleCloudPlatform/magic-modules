@@ -1564,6 +1564,7 @@ func ResourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"node_kubelet_config": schemaNodePoolAutoConfigNodeKubeletConfig(),
 						"linux_node_config":   schemaNodePoolAutoConfigLinuxNodeConfig(),
+						"containerd_config": schemaContainerdConfig(),
 						"network_tags": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -4889,6 +4890,21 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 
 		log.Printf("[INFO] GKE cluster %s node pool auto config node_kubelet_config parameters have been updated", d.Id())
 	}
+
+	if d.HasChange("node_pool_auto_config.0.containerd_config") {
+	    if v, ok := d.GetOk("node_pool_auto_config.0.containerd_config"); ok {
+            req := &container.UpdateClusterRequest{
+                Update: &container.ClusterUpdate{
+                    DesiredContainerdConfig: expandContainerdConfig(v),
+                },
+            }
+            updateF := updateFunc(req, "updating GKE containerd config")
+            if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+                return err
+            }
+            log.Printf("[INFO] GKE cluster %s containerd config has been updated to %#v", d.Id(), req.Update.DesiredContainerdConfig)
+    		}
+    	}
 
 	if d.HasChange("node_pool_auto_config.0.network_tags.0.tags") {
 		tags := d.Get("node_pool_auto_config.0.network_tags.0.tags").([]interface{})

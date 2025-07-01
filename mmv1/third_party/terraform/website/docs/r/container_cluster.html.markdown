@@ -1166,6 +1166,8 @@ Structure is [documented below](#nested_node_kubelet_config).
 
 * `linux_node_config` (Optional) -  Linux system configuration for the cluster's automatically provisioned node pools. Only `cgroup_mode` field is supported in `node_pool_auto_config`. Structure is [documented below](#nested_linux_node_config).
 
+* `containerd_config` - (Optional) Parameters to customize containerd runtime. Structure is [documented below](#nested_containerd_config).
+
 <a name="nested_node_kubelet_config"></a>The `node_kubelet_config` block supports:
 
 * `insecure_kubelet_readonly_port_enabled` - (Optional) Controls whether the kubelet read-only port is enabled. It is strongly recommended to set this to `FALSE`. Possible values: `TRUE`, `FALSE`.
@@ -1173,6 +1175,7 @@ Structure is [documented below](#nested_node_kubelet_config).
 <a name="nested_network_tags"></a>The `network_tags` block supports:
 
 * `tags` (Optional) - List of network tags applied to auto-provisioned node pools.
+
 
 ```hcl
 node_pool_auto_config {
