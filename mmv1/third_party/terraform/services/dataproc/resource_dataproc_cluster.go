@@ -1389,7 +1389,8 @@ by Dataproc`,
 												},
 											},
 										},
-										"identity_config": {
+									},
+									"identity_config": {
 										Type:        schema.TypeList,
 										Description: "Identity related configuration",
 										Optional: true,
