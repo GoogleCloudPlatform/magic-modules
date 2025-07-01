@@ -74,6 +74,12 @@ examples:
     vars:
       data_store_id: 'data-store-id'
     exclude_docs: true
+  - name: 'discoveryengine_datastore_document_processing_config_layout_full'
+    primary_resource_id: 'document_processing_config_layout_full'
+    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: 'data-store-id'
+    exclude_docs: true
   - name: 'discoveryengine_datastore_advanced_site_search_config'
     primary_resource_id: 'advanced_site_search_config'
     primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
@@ -274,7 +280,44 @@ properties:
               - 'default_parsing_config.0.ocr_parsing_config'
               - 'default_parsing_config.0.layout_parsing_config'
             properties:
-              []
+              - name: 'enableTableAnnotation'
+                type: Boolean
+                description: |
+                  If true, the LLM based annotation is added to the table during parsing.
+                required: false
+              - name: 'enableImageAnnotation'
+                type: Boolean
+                description: |
+                  If true, the LLM based annotation is added to the image during parsing.
+                required: false
+              - name: 'structuredContentTypes'
+                type: Array
+                description: |
+                  Contains the required structure types to extract from the document. Supported values: `shareholder-structure`.
+                required: false
+                item_type:
+                  type: String
+              - name: 'excludeHtmlElements'
+                type: Array
+                description: |
+                  List of HTML elements to exclude from the parsed content.
+                required: false
+                item_type:
+                  type: String
+              - name: 'excludeHtmlClasses'
+                type: Array
+                description: |
+                  List of HTML classes to exclude from the parsed content.
+                required: false
+                item_type:
+                  type: String
+              - name: 'excludeHtmlIds'
+                type: Array
+                description: |
+                  List of HTML ids to exclude from the parsed content.
+                required: false
+                item_type:
+                  type: String
       - name: 'parsingConfigOverrides'
         type: Map
         description: |
@@ -327,7 +370,44 @@ properties:
                 - 'default_parsing_config.0.ocr_parsing_config'
                 - 'default_parsing_config.0.layout_parsing_config'
               properties:
-                []
+                - name: 'enableTableAnnotation'
+                  type: Boolean
+                  description: |
+                    If true, the LLM based annotation is added to the table during parsing.
+                  required: false
+                - name: 'enableImageAnnotation'
+                  type: Boolean
+                  description: |
+                    If true, the LLM based annotation is added to the image during parsing.
+                  required: false
+                - name: 'structuredContentTypes'
+                  type: Array
+                  description: |
+                    Contains the required structure types to extract from the document. Supported values: `shareholder-structure`.
+                  required: false
+                  item_type:
+                    type: String
+                - name: 'excludeHtmlElements'
+                  type: Array
+                  description: |
+                    List of HTML elements to exclude from the parsed content.
+                  required: false
+                  item_type:
+                    type: String
+                - name: 'excludeHtmlClasses'
+                  type: Array
+                  description: |
+                    List of HTML classes to exclude from the parsed content.
+                  required: false
+                  item_type:
+                    type: String
+                - name: 'excludeHtmlIds'
+                  type: Array
+                  description: |
+                    List of HTML ids to exclude from the parsed content.
+                  required: false
+                  item_type:
+                    type: String
   - name: 'createTime'
     type: Time
     description: |
