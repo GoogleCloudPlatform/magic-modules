@@ -176,20 +176,36 @@ properties:
     type: String
     description: |
       Traffic will be logged from the Interconnect Attachment. Format: projects/{project_id}/regions/{region}/interconnectAttachments/{name}
+    conflicts_with:
+      - 'subnet'
+      - 'vpn_tunnel'
+      - 'network'
   - name: 'vpnTunnel'
     type: String
     description: |
       Traffic will be logged from the VPN Tunnel. Format: projects/{project_id}/regions/{region}/vpnTunnels/{name}
+    conflicts_with:
+      - 'subnet'
+      - 'network'
+      - 'interconnect_attachment'
   - name: 'subnet'
     min_version: 'beta'
     type: String
     description: |
       Traffic will be logged from VMs within the subnetwork. Format: projects/{project_id}/regions/{region}/subnetworks/{name}
+    conflicts_with:
+      - 'network'
+      - 'vpn_tunnel'
+      - 'interconnect_attachment'
   - name: 'network'
     min_version: 'beta'
     type: String
     description: |
       Traffic will be logged from VMs, VPN tunnels and Interconnect Attachments within the network. Format: projects/{project_id}/global/networks/{name}
+    conflicts_with:
+      - 'subnet'
+      - 'vpn_tunnel'
+      - 'interconnect_attachment'
   - name: 'labels'
     type: KeyValueLabels
     description: |
