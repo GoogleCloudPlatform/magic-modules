@@ -1363,7 +1363,7 @@ func expandSecurityPolicyAdvancedOptionsConfig(configured []interface{}) *comput
 		JsonCustomConfig:          expandSecurityPolicyAdvancedOptionsConfigJsonCustomConfig(data["json_custom_config"].([]interface{})),
 		LogLevel:                  data["log_level"].(string),
 		UserIpRequestHeaders:      tpgresource.ConvertStringArr(data["user_ip_request_headers"].(*schema.Set).List()),
-    RequestBodyInspectionSize: data["request_body_inspection_size"].(string),
+		RequestBodyInspectionSize: data["request_body_inspection_size"].(string),
 	}
 }
 
@@ -1377,7 +1377,7 @@ func flattenSecurityPolicyAdvancedOptionsConfig(conf *compute.SecurityPolicyAdva
 		"json_custom_config":           flattenSecurityPolicyAdvancedOptionsConfigJsonCustomConfig(conf.JsonCustomConfig),
 		"log_level":                    conf.LogLevel,
 		"user_ip_request_headers":      schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(conf.UserIpRequestHeaders)),
-    "request_body_inspection_size": conf.RequestBodyInspectionSize,
+		"request_body_inspection_size": conf.RequestBodyInspectionSize,
 	}
 
 	return []map[string]interface{}{data}
