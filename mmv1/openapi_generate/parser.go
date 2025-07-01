@@ -357,6 +357,9 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		if len(obj.Value.Enum) > 0 {
 			var enums []string
 			for _, enum := range obj.Value.Enum {
+				if strings.HasSuffix(fmt.Sprintf("%v", enum), "_UNSPECIFIED") {
+					continue
+				}
 				enums = append(enums, fmt.Sprintf("%v", enum))
 			}
 			additionalDescription = fmt.Sprintf("\n Possible values:\n %s", strings.Join(enums, "\n"))
