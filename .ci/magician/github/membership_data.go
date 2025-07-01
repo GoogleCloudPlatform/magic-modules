@@ -64,8 +64,8 @@ var (
 		"BBBmau": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 4, 7),
-					endDate:   newDate(2025, 4, 11),
+					startDate: newDate(2025, 7, 1),
+					endDate:   newDate(2025, 7, 17),
 				},
 			},
 		},
