@@ -21,7 +21,7 @@ const (
 )
 
 var (
-	end     = regexp.MustCompile("--- (PASS|SKIP|FAIL):\\s+([a-zA-Z_]\\S*) \\(([\\.\\d]+)")
+	end     = regexp.MustCompile("--- (PASS|SKIP|FAIL|[Diff]):\\s+([a-zA-Z_]\\S*) \\(([\\.\\d]+)")
 	paniced = regexp.MustCompile(`panic:\s+(.*)\s+\[recovered\]\n`)
 	//suite   = regexp.MustCompile("^(ok|FAIL)\\s+([^\\s]+)\\s+([\\.\\d]+)s")
 	race = regexp.MustCompile("^WARNING: DATA RACE")
@@ -29,7 +29,7 @@ var (
 
 type TeamCityTest struct {
 	Name, Output, ErrOutput, Duration string
-	Race, Fail, Skip, Pass            bool
+	Race, Fail, Skip, Pass, Diff      bool
 	Started                           time.Time
 }
 
@@ -52,6 +52,8 @@ func (test *TeamCityTest) ParseTestRunnerOutput(testOutput string, errOutput str
 			test.Skip = true
 		case "FAIL":
 			test.Fail = true
+		case "[Diff]":
+			test.Diff = true
 		}
 		test.Duration = resultLines[3]
 	}
@@ -94,6 +96,11 @@ func (test *TeamCityTest) FormatTestOutput() string {
 	if test.Pass {
 		output.WriteString(fmt.Sprintf(TeamCityTestFinished, now, test.Name))
 		return output.String()
+	}
+
+	if test.Diff {
+		//output.WriteString()
+		return "filler"
 	}
 
 	output.WriteString(fmt.Sprintf(TeamCityTestFailedPanic, now, test.Name))

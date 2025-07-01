@@ -47,6 +47,9 @@ func IsVcrEnabled() bool {
 	return envPath != "" && vcrMode != ""
 }
 
+// Regex for matching line to start with [Diff]
+var diffRegexpMatch = regexp.MustCompile(`^\[Diff\]`)
+
 var configsLock = sync.RWMutex{}
 var sourcesLock = sync.RWMutex{}
 
@@ -156,26 +159,7 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		fmt.Printf("Temporary file created at: %s\n", temp_file.Name())
 
 		defer func() {
-			if temp_file != nil {
-				// parses the temporary file created during the release diff test and returns the last line of output
-				// This is useful for extracting the diff output from the file after the test has run
-
-				var output, err = ParseReleaseDiffOutput(temp_file)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error parsing release diff output: %v\n", err)
-				} else if t.Failed() {
-					// if it fails, it prints the output to stdout to the output log file
-					fmt.Fprintf(os.Stdout, "FAILED - Release diff output:\n%s\n", output)
-				}
-				temp_file.Close() // Close the file handle
-				err = os.Remove(temp_file.Name())
-				if err != nil {
-					fmt.Fprintf(os.Stdout, "Test passed, but failed to delete log file: %v\n", err)
-				} else {
-					fmt.Println("Test passed, deleted log file.")
-				}
-			}
-
+			writeOutputFileDeferFunction(temp_file, t.Failed())
 		}()
 		c = initializeReleaseDiffTest(c, t.Name(), temp_file)
 
@@ -374,6 +358,45 @@ func ParseReleaseDiffOutput(temp *os.File) (string, error) {
 	}
 
 	return lastLine, nil
+}
+
+func writeOutputFileDeferFunction(temp_file *os.File, failed bool) {
+	if temp_file != nil {
+		// parses the temporary file created during the release diff test and returns the last line of output
+		// This is useful for extracting the diff output from the file after the test has run
+		var regularFailureFile, err = os.Create("regular_test_failures.log")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
+			return
+		}
+		var diffFailureFile *os.File
+		diffFailureFile, err = os.Create("diff_test_failures.log")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
+			return
+		}
+		fmt.Fprintf(regularFailureFile, "testing this even works")
+		var output string
+
+		output, err = ParseReleaseDiffOutput(temp_file)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error parsing release diff output: %v\n", err)
+		} else if failed {
+			// Check if the output line starts with "[Diff]"
+			if diffRegexpMatch.MatchString(output) {
+				fmt.Fprintf(diffFailureFile, "%s\n", output)
+			} else {
+				fmt.Fprintf(regularFailureFile, "%s\n", output)
+			}
+		}
+		temp_file.Close() // Close the file handle
+		err = os.Remove(temp_file.Name())
+		if err != nil {
+			fmt.Fprintf(os.Stdout, "Test passed, but failed to delete log file: %v\n", err)
+		} else {
+			fmt.Println("Test passed, deleted log file.")
+		}
+	}
 }
 
 // HandleVCRConfiguration configures the recorder (github.com/dnaeon/go-vcr/recorder) used in the VCR test
