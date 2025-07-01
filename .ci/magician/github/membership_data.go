@@ -100,7 +100,12 @@ var (
 			},
 		},
 		"roaks3": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 7, 1),
+					endDate:   newDate(2025, 7, 14),
+				},
+			},
 		},
 		"ScottSuarez": {
 			vacations: []Vacation{},
