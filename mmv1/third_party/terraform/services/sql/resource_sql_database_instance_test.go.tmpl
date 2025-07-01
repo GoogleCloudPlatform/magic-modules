@@ -1188,7 +1188,7 @@ func TestAccSqlDatabaseInstance_withPscEnabled_withNetworkAttachmentUri(t *testi
 
 	instanceName := "tf-test-" + acctest.RandString(t, 10)
 	projectId := envvar.GetTestProjectFromEnv()
-	region := "us-central1"
+	region := "us-west2"
 	networkAttachmentName := "my-na"
 	networkAttachmentUri := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", projectId, region, networkAttachmentName)
 
@@ -1211,7 +1211,7 @@ func TestAccSqlDatabaseInstance_withPscEnabled_withNetworkAttachmentUri(t *testi
 			{
 				Config: testAccSqlDatabaseInstance_withPSCEnabled_withNetworkAttachmentUri(instanceName, projectId, networkAttachmentName),
 				Check:  resource.ComposeTestCheckFunc(verifyPscNetorkAttachmentOperation("google_sql_database_instance.instance", true, true, networkAttachmentUri)),
-			}
+			},
 		},
 	})
 }
@@ -5014,7 +5014,7 @@ func testAccSqlDatabaseInstance_withPSCEnabled_withNetworkAttachmentUri(instance
 resource "google_compute_network_attachment" "default" {
     name = "%s"
 	project = "%s"
-    region = "us-central1"
+    region = "us-west2"
     description = "basic network attachment description"
     connection_preference = "ACCEPT_AUTOMATIC"
 
@@ -5030,7 +5030,7 @@ resource "google_compute_network" "default" {
 
 resource "google_compute_subnetwork" "net1" {
     name = "tf-test-basic-subnetwork1"
-    region = "us-central1"
+    region = "us-west2"
 
     network = google_compute_network.default.id
     ip_cidr_range = "10.0.0.0/16"
@@ -5038,7 +5038,7 @@ resource "google_compute_subnetwork" "net1" {
 
 resource "google_sql_database_instance" "instance" {
   name                = "%s"
-  region              = "us-central1"
+  region              = "us-west2"
   database_version    = "MYSQL_8_0"
   deletion_protection = false
   settings {
