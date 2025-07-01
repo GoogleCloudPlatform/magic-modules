@@ -116,11 +116,16 @@ func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asse
 {{ end}}
 
 {{ range $prop := $.ReadPropertiesForTgc }}
-{{   if $prop.FlattenObject -}}
-{{/* TODO */}}
-{{-    else -}}
+	{{ if $prop.FlattenObject -}}
+	// Terraform must set the top level schema field, but since this object contains collapsed properties
+	// it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
+	if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
+		hclData["{{ underscore $prop.Name -}}"] = flattenedProp
+		fmt.Println(flattenedProp)
+	}
+	{{- else -}}
 	hclData["{{ underscore $prop.Name -}}"] = flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)
-{{-    end}}
+	{{- end}}
 {{- end}}
 
 	ctyVal, err := utils.MapToCtyValWithSchema(hclData, c.schema)
