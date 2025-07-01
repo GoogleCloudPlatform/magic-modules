@@ -602,13 +602,16 @@ func TestAccSecretManagerRegionalRegionalSecret_tags(t *testing.T) {
 		CheckDestroy:             testAccCheckSecretManagerRegionalRegionalSecretDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecretManagerRegionalSecret_basic(context),
+				Config: testAccSecretManagerRegionalSecretTags(context),
 			},
 			{
 				ResourceName:            "google_secret_manager_regional_secret.regional-secret-basic",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "secret_id", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "secret_id", "terraform_labels", "deletion_protection", "tags"},
+			},
+			{
+				Config: testAccSecretManagerRegionalSecretTagsDeletionProtection(context),
 			},
 		},
 	})
@@ -1409,6 +1412,19 @@ resource "google_secret_manager_regional_secret" "regional-secret-basic" {
   tags = {
 	"%{org}/%{tagKey}" = "%{tagValue}"
   }
+}
+`, context)
+}
+
+func testAccSecretManagerRegionalSecretTagsDeletionProtection(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_secret_manager_regional_secret" "regional-secret-basic" {
+  secret_id = "tf-test-reg-secret-%{random_suffix}"
+  location = "us-central1"
+  tags = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+  deletion_protection = false  
 }
 `, context)
 }
