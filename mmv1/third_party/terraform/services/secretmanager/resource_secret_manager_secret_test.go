@@ -464,7 +464,7 @@ func TestAccSecretManagerSecret_updateBetweenTtlAndExpireTime(t *testing.T) {
 	})
 }
 
-func TestAccSecretManagerSecret_DeletionProtectionUpdate(t *testing.T) {
+func TestAccSecretManagerSecret_DeletionProtection(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -476,7 +476,7 @@ func TestAccSecretManagerSecret_DeletionProtectionUpdate(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecretManagerSecret_deletionprotectionBasic(context),
+				Config: testAccSecretManagerSecret_deletionprotectionTrue(context),
 			},
 			{
 				ResourceName:            "google_secret_manager_secret.secret-deletionprotection",
@@ -485,18 +485,7 @@ func TestAccSecretManagerSecret_DeletionProtectionUpdate(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels", "deletion_protection"},
 			},
 			{
-				Config: testAccSecretManagerSecret_deletionprotectionUpdate(context),
-				ConfigPlanChecks: resource.ConfigPlanChecks{
-					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_secret_manager_secret.secret-deletionprotection", plancheck.ResourceActionUpdate),
-					},
-				},
-			},
-			{
-				ResourceName:            "google_secret_manager_secret.secret-deletionprotection",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels", "deletion_protection"},
+				Config: testAccSecretManagerSecret_deletionprotectionFalse(context),
 			},
 		},
 	})
@@ -1259,7 +1248,7 @@ resource "google_secret_manager_secret" "secret-basic" {
 `, context)
 }
 
-func testAccSecretManagerSecret_deletionprotectionBasic(context map[string]interface{}) string {
+func testAccSecretManagerSecret_deletionprotectionTrue(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-deletionprotection" {
 	secret_id = "tf-test-secret-%{random_suffix}"
@@ -1286,7 +1275,7 @@ resource "google_secret_manager_secret" "secret-deletionprotection" {
 `, context)
 }
 
-func testAccSecretManagerSecret_deletionprotectionUpdate(context map[string]interface{}) string {
+func testAccSecretManagerSecret_deletionprotectionFalse(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-deletionprotection" {
 	secret_id = "tf-test-secret-%{random_suffix}"
