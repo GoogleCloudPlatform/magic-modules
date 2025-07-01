@@ -284,11 +284,12 @@ The `aws_access_key` block supports:
 
 * `azure_credentials` - (Optional, (https://terraform.io/docs/providers/google/guides/provider_versions.html)) Credentials used to authenticate API requests to Azure block.
 
+* `federated_identity_config` - (Optional) Federated identity config of a user registered Azure application
+
 The `azure_credentials` block supports:
 
 * `sas_token` - (Required) Azure shared access signature. See [Grant limited access to Azure Storage resources using shared access signatures (SAS)](https://docs.microsoft.com/en-us/azure/storage/common/storage-sas-overview).
 
-* `federated_identity_config` - (Optional) Federated identity config of a user registered Azure application
 
 The `federated_identity_config` block supports:
 
