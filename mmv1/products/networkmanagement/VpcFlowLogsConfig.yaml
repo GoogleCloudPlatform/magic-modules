@@ -90,6 +90,11 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+exactly_one_of:
+  - 'subnet'
+  - 'vpn_tunnel'
+  - 'interconnect_attachment'
+  - 'network'
 properties:
   - name: 'name'
     type: String
@@ -158,11 +163,7 @@ properties:
     type: String
     description: |
       Traffic will be logged from VMs, VPN tunnels and Interconnect Attachments within the network. Format: projects/{project_id}/global/networks/{name}
-  - ConflictsWith:
-      - 'subnet'
-      - 'vpn_tunnel'
-      - 'interconnect_attachment'
-      - 'network'
+
   - name: 'labels'
     type: KeyValueLabels
     description: |
