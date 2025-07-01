@@ -90,11 +90,6 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-exactly_one_of:
-  - 'subnet'
-  - 'vpn_tunnel'
-  - 'interconnect_attachment'
-  - 'network'
 properties:
   - name: 'name'
     type: String
