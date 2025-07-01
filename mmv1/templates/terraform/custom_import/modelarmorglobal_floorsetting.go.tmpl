@@ -1,0 +1,34 @@
+config := meta.(*transport_tpg.Config)
+
+if err := tpgresource.ParseImportId([]string{"(?P<name>.+)"}, d, config); err != nil {
+    return nil, err
+}
+
+parts := strings.Split(d.Get("name").(string), "/")
+
+var parent string
+var location string
+
+if parts[4] == "floorSetting" && (parts[0] == "projects" || parts[0] == "folders" || parts[0] == "organizations") {
+    parent = strings.Join(parts[:2], "/")
+    location = parts[3]
+} else {
+    return nil, fmt.Errorf("Unexpected import id, expected form projects/{project}/locations/{location}/floorSetting, folders/{folder}/locations/{location}/floorSetting or organizations/{organization}/locations/{location}/floorSetting")
+}
+
+if err := d.Set("location", location); err != nil {
+    return nil, fmt.Errorf("Error setting location: %s", err)
+}
+
+if err := d.Set("parent", parent); err != nil {
+    return nil, fmt.Errorf("Error setting parent: %s", err)
+}
+
+id, err := tpgresource.ReplaceVars(d, config, fmt.Sprintf("%s/locations/%s/floorSetting", parent, location))
+if err != nil {
+    return nil, fmt.Errorf("Error constructing id: %s", err)
+}
+
+d.SetId(id)
+
+return []*schema.ResourceData{d}, nil

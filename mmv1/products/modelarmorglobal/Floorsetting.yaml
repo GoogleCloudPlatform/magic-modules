@@ -1,0 +1,256 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Floorsetting
+description: Description
+base_url: '{{parent}}/locations/{{location}}/floorSetting'
+update_mask: true
+id_format: '{{parent}}/locations/{{location}}/floorSetting'
+self_link: '{{parent}}/locations/{{location}}/floorSetting'
+create_url: '{{parent}}/locations/{{location}}/floorSetting'
+# This is a singleton resource that is already created, so create
+# is really an update, and therefore should be PATCHed.
+create_verb: 'PATCH'
+update_url: '{{parent}}/locations/{{location}}/floorSetting'
+update_verb: 'PATCH'
+# This is a singleton resource that cannot be deleted, so skip delete.
+exclude_delete: true
+custom_code:
+  custom_import: 'templates/terraform/custom_import/modelarmorglobal_floorsetting.go.tmpl'
+  post_create: 'templates/terraform/post_create/modelarmor_floorsetting_sleep.go.tmpl'
+  post_update: 'templates/terraform/post_create/modelarmor_floorsetting_sleep.go.tmpl' 
+examples:
+  - name: 'modelarmor_floorsetting_basic'
+    primary_resource_id: 'floorsetting-basic'
+    test_vars_overrides:
+      parent: '"projects/modelarmor-api-test"'
+      location: '"global"'
+  - name: 'modelarmor_floorsetting_filter_config'
+    primary_resource_id: 'floorsetting-filter-config'
+    test_vars_overrides:
+      location: '"global"'
+      parent: '"organizations/31999524790"'
+      filter_config_rai_settings_rai_filters_0_filter_type: '"DANGEROUS"'
+      filter_config_rai_settings_rai_filters_0_confidence_level: '"MEDIUM_AND_ABOVE"'
+      sdp_settings_config_type: '"basic_config"'
+      filter_config_sdp_settings_basic_config_filter_enforcement: '"ENABLED"'
+      filter_config_pi_and_jailbreak_filter_settings_filter_enforcement: '"ENABLED"'
+      filter_config_pi_and_jailbreak_filter_settings_confidence_level: '"HIGH"'
+      filter_config_malicious_uri_filter_settings_filter_enforcement: '"ENABLED"'
+      enable_floor_setting_enforcement: true
+  - name: 'modelarmor_floorsetting_ai_platform_metadata'
+    primary_resource_id: 'floorsetting-integrated-metadata'
+    test_vars_overrides:
+      location: '"global"'
+      parent: '"folders/710206369120"'
+      ai_platform_floor_setting_enforcement_type_inspect_only: true
+      ai_platform_floor_setting_enable_cloud_logging: true
+      floor_setting_metadata_multi_language_detection: false
+      enable_floor_setting_enforcement: false
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: parent
+    type: String
+    description: |
+        Will be any one of these:
+
+        * `projects/{project}`
+        * `folders/{folder}`
+        * `organizations/{organizationId}`
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: name
+    type: String
+    description: Identifier. The resource name.
+    output: true
+  - name: createTime
+    type: String
+    description: '[Output only] Create timestamp'
+    output: true
+  - name: updateTime
+    type: String
+    description: '[Output only] Update timestamp'
+    output: true
+  - name: filterConfig
+    type: NestedObject
+    description: Filters configuration.
+    required: true
+    send_empty_value: true
+    allow_empty_object: true
+    properties:
+      - name: maliciousUriFilterSettings
+        type: NestedObject
+        description: Malicious URI filter settings.
+        properties:
+          - name: filterEnforcement
+            type: String
+            description: |-
+              Tells whether the Malicious URI filter is enabled or disabled.
+              Possible values:
+              MALICIOUS_URI_FILTER_ENFORCEMENT_UNSPECIFIED
+              ENABLED
+              DISABLED
+      - name: raiSettings
+        type: NestedObject
+        description: Responsible AI Filter settings.
+        properties:
+          - name: raiFilters
+            type: Array
+            description: List of Responsible AI filters enabled for template.
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: filterType
+                  type: String
+                  description: |-
+                    Possible values:
+                    RAI_FILTER_TYPE_UNSPECIFIED
+                    SEXUALLY_EXPLICIT
+                    HATE_SPEECH
+                    HARASSMENT
+                    DANGEROUS
+                  required: true
+                - name: confidenceLevel
+                  type: String
+                  description: |-
+                    Possible values:
+                    DETECTION_CONFIDENCE_LEVEL_UNSPECIFIED
+                    LOW_AND_ABOVE
+                    MEDIUM_AND_ABOVE
+                    HIGH
+      - name: sdpSettings
+        type: NestedObject
+        description: Sensitive Data Protection settings.
+        properties:
+          - name: advancedConfig
+            type: NestedObject
+            conflicts: [basicConfig]
+            description: Sensitive Data Protection Advanced configuration.
+            properties:
+              - name: inspectTemplate
+                type: String
+                description: |-
+                  Sensitive Data Protection inspect template resource name
+
+                  If only inspect template is provided (de-identify template not provided),
+                  then Sensitive Data Protection InspectContent action is performed during
+                  Sanitization. All Sensitive Data Protection findings identified during
+                  inspection will be returned as SdpFinding in SdpInsepctionResult.
+
+                  e.g:-
+                  `projects/{project}/locations/{location}/inspectTemplates/{inspect_template}`
+              - name: deidentifyTemplate
+                type: String
+                description: |-
+                  Optional Sensitive Data Protection Deidentify template resource name.
+
+                  If provided then DeidentifyContent action is performed during Sanitization
+                  using this template and inspect template. The De-identified data will
+                  be returned in SdpDeidentifyResult.
+                  Note that all info-types present in the deidentify template must be present
+                  in inspect template.
+
+                  e.g.
+                  `projects/{project}/locations/{location}/deidentifyTemplates/{deidentify_template}`
+          - name: basicConfig
+            type: NestedObject
+            conflicts: [advancedConfig]
+            description: Sensitive Data Protection basic configuration.
+            properties:
+              - name: filterEnforcement
+                type: String
+                description: |-
+                  Tells whether the Sensitive Data Protection basic config is enabled or
+                  disabled.
+                  Possible values:
+                  SDP_BASIC_CONFIG_ENFORCEMENT_UNSPECIFIED
+                  ENABLED
+                  DISABLED
+      - name: piAndJailbreakFilterSettings
+        type: NestedObject
+        description: Prompt injection and Jailbreak Filter settings.
+        properties:
+          - name: filterEnforcement
+            type: String
+            description: |-
+              Tells whether Prompt injection and Jailbreak filter is enabled or
+              disabled.
+              Possible values:
+              PI_AND_JAILBREAK_FILTER_ENFORCEMENT_UNSPECIFIED
+              ENABLED
+              DISABLED
+          - name: confidenceLevel
+            type: String
+            description: |-
+              Possible values:
+              DETECTION_CONFIDENCE_LEVEL_UNSPECIFIED
+              LOW_AND_ABOVE
+              MEDIUM_AND_ABOVE
+              HIGH
+  - name: enableFloorSettingEnforcement
+    type: Boolean
+    description: Floor Settings enforcement status.
+  - name: integratedServices
+    type: Array
+    description: List of integrated services for which the floor setting is applicable.
+    item_type:
+        type: String
+        description: |-
+          Possible values:
+          INTEGRATED_SERVICE_UNSPECIFIED
+          AI_PLATFORM
+  - name: aiPlatformFloorSetting
+    type: NestedObject
+    description: AI Platform floor setting.
+    allow_empty_object: true
+    exactly_one_of: 
+      - inspectOnly
+      - inspectAndBlock
+    properties:
+      - name: inspectOnly
+        type: Boolean
+        description: |-
+          If true, Model Armor filters will be run in inspect only mode. No action
+          will be taken on the request.
+      - name: inspectAndBlock
+        type: Boolean
+        description: |-
+          If true, Model Armor filters will be run in inspect and block mode.
+          Requests that trip Model Armor filters will be blocked.
+      - name: enableCloudLogging
+        type: Boolean
+        description: If true, log Model Armor filter results to Cloud Logging.
+  - name: floorSettingMetadata
+    type: NestedObject
+    description: Metadata to enable multi language detection via floor setting.
+    allow_empty_object: true
+    properties: 
+      - name: multiLanguageDetection
+        type: NestedObject
+        description: Metadata for multi language detection.
+        custom_flatten: 'templates/terraform/custom_flatten/modelarmor_floorsetting_multilanguage_detection.go.tmpl'
+        properties:
+          - name: enableMultiLanguageDetection
+            type: Boolean
+            description: If true, multi language detection will be enabled.
+            required: true
+            send_empty_value: true
