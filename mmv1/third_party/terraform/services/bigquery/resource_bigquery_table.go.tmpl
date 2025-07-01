@@ -163,13 +163,7 @@ func bigQueryTableMapKeyOverride(key string, objectA, objectB map[string]interfa
 			return false
 		}
 		// Access the ignore_schema_changes list from the Terraform configuration
-		ignoreSchemaChangesRaw := d.Get("ignore_schema_changes").([]interface{})
-		ignoreSchemaChanges := make([]string, len(ignoreSchemaChangesRaw))
-		for i, v := range ignoreSchemaChangesRaw {
-			if strVal, ok := v.(string); ok {
-				ignoreSchemaChanges[i] = strVal
-			}
-		}
+		ignoreSchemaChanges := d.Get("ignore_schema_changes").([]interface{})
 		// Suppress diffs for the "dataPolicies" field if it was present in "ignore_schema_changes"
 		return slices.Contains(ignoreSchemaChanges, "dataPolicies")
 	}

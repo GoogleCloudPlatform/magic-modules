@@ -48,13 +48,15 @@ func TestAccBigQueryTable_Basic(t *testing.T) {
 func TestAccBigQueryTable_IgnoreSchemaDataPoliciesChanges(t *testing.T) {
 	t.Parallel()
 
+	projectID := envvar.GetTestProjectFromEnv()
 	random_suffix := acctest.RandString(t, 10)
 	datasetID := fmt.Sprintf("tf_test_dataset_%s", random_suffix)
 	tableID := fmt.Sprintf("tf_test_table_%s", random_suffix)
-	dataPolicyID := fmt.Sprintf("tf_test_data_policy_%s", random_suffix)
+	dataPolicyID1 := fmt.Sprintf("tf_test_data_policy_%s", random_suffix)
+	dataPolicyName1 := fmt.Sprintf("projects/%s/locations/us-central1/dataPolicies/%s", projectID, dataPolicyID1)
+	dataPolicyID2 := fmt.Sprintf("tf_test_data_policy_%s", acctest.RandString(t, 10))
+	dataPolicyName2 := fmt.Sprintf("projects/%s/locations/us-central1/dataPolicies/%s", projectID, dataPolicyID2)
 	dataCatTaxonomy := fmt.Sprintf("tf_test_taxonomy_%s", random_suffix)
-	projectID := envvar.GetTestProjectFromEnv()
-	dataPolicyName := fmt.Sprintf("projects/%s/locations/us-central1/dataPolicies/%s", projectID, dataPolicyID)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -62,7 +64,16 @@ func TestAccBigQueryTable_IgnoreSchemaDataPoliciesChanges(t *testing.T) {
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryTableDataPolicies(datasetID, tableID, dataPolicyID, dataCatTaxonomy, dataPolicyName),
+				Config: testAccBigQueryTableDataPolicies(datasetID, tableID, dataPolicyID1, dataCatTaxonomy, dataPolicyName1),
+			},
+			{
+				ResourceName:            "google_bigquery_table.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_schema_changes"},
+			},
+			{
+				Config: testAccBigQueryTableDataPolicies(datasetID, tableID, dataPolicyID2, dataCatTaxonomy, dataPolicyName2),
 			},
 			{
 				ResourceName:            "google_bigquery_table.test",
