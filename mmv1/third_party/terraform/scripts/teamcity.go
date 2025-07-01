@@ -16,12 +16,14 @@ const (
 	TeamCityTestFailedRace  = "##teamcity[testFailed timestamp='%s' name='%s' message='Race detected!']\n"
 	TeamCityTestIgnored     = "##teamcity[testIgnored timestamp='%s' name='%s']\n"
 	TeamCityTestFailedPanic = "##teamcity[testFailed timestamp='%s' name='%s' message='Test ended in panic.']\n"
+	TeamCityTestDiffFailed  = "##teamcity[testDiffFailed timestamp='%s' name='%s']\n"
 	TeamCityTestStdOut      = "##teamcity[testStdOut name='%s' out='%s']\n"
 	TeamCityTestStdErr      = "##teamcity[testStdErr name='%s' out='%s']\n"
 )
 
 var (
-	end     = regexp.MustCompile("--- (PASS|SKIP|FAIL|[Diff]):\\s+([a-zA-Z_]\\S*) \\(([\\.\\d]+)")
+	end     = regexp.MustCompile(`--- (PASS|SKIP|FAIL):\s+([a-zA-Z_]\S*) \(([\.\d]+)\)`)
+	diff    = regexp.MustCompile(`--- \[Diff\]: Step \d+`)
 	paniced = regexp.MustCompile(`panic:\s+(.*)\s+\[recovered\]\n`)
 	//suite   = regexp.MustCompile("^(ok|FAIL)\\s+([^\\s]+)\\s+([\\.\\d]+)s")
 	race = regexp.MustCompile("^WARNING: DATA RACE")
@@ -52,10 +54,14 @@ func (test *TeamCityTest) ParseTestRunnerOutput(testOutput string, errOutput str
 			test.Skip = true
 		case "FAIL":
 			test.Fail = true
-		case "[Diff]":
-			test.Diff = true
 		}
 		test.Duration = resultLines[3]
+	}
+
+	resultDiffLine := diff.FindStringSubmatch(testOutput)
+	if resultDiffLine != nil {
+		test.Diff = true
+		test.Duration = "1.0"
 	}
 
 	if paniced.MatchString(errOutput) {
@@ -75,6 +81,12 @@ func (test *TeamCityTest) FormatTestOutput() string {
 
 	output.WriteString(fmt.Sprintf(TeamCityTestStdOut, test.Name, escapeOutput(test.Output)))
 	output.WriteString(fmt.Sprintf(TeamCityTestStdErr, test.Name, escapeOutput(test.ErrOutput)))
+
+	if test.Diff {
+		output.WriteString(fmt.Sprintf(TeamCityTestDiffFailed, now, test.Name))
+		return output.String()
+
+	}
 
 	if test.Fail {
 		output.WriteString(fmt.Sprintf(TeamCityTestFailed, now, test.Name))
@@ -96,11 +108,6 @@ func (test *TeamCityTest) FormatTestOutput() string {
 	if test.Pass {
 		output.WriteString(fmt.Sprintf(TeamCityTestFinished, now, test.Name))
 		return output.String()
-	}
-
-	if test.Diff {
-		//output.WriteString()
-		return "filler"
 	}
 
 	output.WriteString(fmt.Sprintf(TeamCityTestFailedPanic, now, test.Name))
