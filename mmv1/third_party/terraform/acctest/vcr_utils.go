@@ -397,8 +397,6 @@ func writeOutputFileDeferFunction(t *testing.T, temp_file *os.File, regularFailu
 		err = os.Remove(temp_file.Name())
 		if err != nil {
 			fmt.Fprintf(os.Stdout, "Test passed, but failed to delete log file: %v\n", err)
-		} else {
-			fmt.Println("Test passed, deleted log file.")
 		}
 	}
 }
