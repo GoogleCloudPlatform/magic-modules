@@ -76,7 +76,13 @@ resource "google_compute_interconnect" "example-interconnect" {
   link_type            = "LINK_TYPE_ETHERNET_100G_LR"
   location             = "https://www.googleapis.com/compute/v1/projects/${data.google_project.project.name}/global/interconnectLocations/z2z-us-east4-zone1-pniada-a" # Special location only available for Google testing.
   requested_link_count = 1
+  admin_enabled        = true
+  description          = "example description"
   macsec_enabled       = false
+  noc_contact_email    = "user@example.com"
+  labels = {
+    mykey = "myvalue"
+  }
   aai_enabled          = true
   application_aware_interconnect  {
     profile_description = "application awareness config with BandwidthPercentage policy."
@@ -105,6 +111,18 @@ resource "google_compute_interconnect" "example-interconnect" {
 		traffic_class = "TC6"
 		percentage   = 10
 	  }
+	}
+	shape_average_percentage  {
+      traffic_class = "TC1"
+	  percentage   = 30
+	}
+	shape_average_percentage  {
+	  traffic_class = "TC2"
+	  percentage   = 25
+	}
+	shape_average_percentage  {
+	  traffic_class = "TC3"
+	  percentage   = 25
 	}
   }
 }
