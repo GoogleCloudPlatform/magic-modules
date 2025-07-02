@@ -64,7 +64,7 @@ func TestAccBigQueryTable_IgnoreSchemaDataPoliciesChanges(t *testing.T) {
 		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccBigQueryTableDataPolicies(datasetID, tableID, dataPolicyID1, dataCatTaxonomy, dataPolicyName1),
+				Config: testAccBigQueryTableDataPolicies(datasetID, tableID, dataPolicyID1, dataPolicyID2, dataCatTaxonomy, dataPolicyName1),
 			},
 			{
 				ResourceName:            "google_bigquery_table.test",
@@ -73,13 +73,9 @@ func TestAccBigQueryTable_IgnoreSchemaDataPoliciesChanges(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_schema_changes"},
 			},
 			{
-				Config: testAccBigQueryTableDataPolicies(datasetID, tableID, dataPolicyID2, dataCatTaxonomy, dataPolicyName2),
-			},
-			{
-				ResourceName:            "google_bigquery_table.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_schema_changes"},
+				Config:             testAccBigQueryTableDataPolicies(datasetID, tableID, dataPolicyID1, dataPolicyID2, dataCatTaxonomy, dataPolicyName2),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
 			},
 			{
 				Config: testAccBigQueryTableUpdated(datasetID, tableID),
@@ -2030,20 +2026,30 @@ EOH
 `, datasetID, tableID)
 }
 
-func testAccBigQueryTableDataPolicies(datasetID, tableID, dataPolicyID, dataCatTaxonomy, dataPolicyName string) string {
+func testAccBigQueryTableDataPolicies(datasetID, tableID, dataPolicyID1, dataPolicyID2, dataCatTaxonomy, dataPolicyName string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
   location   = "us-central1"
   dataset_id = "%s"
 }
 
-resource "google_bigquery_datapolicy_data_policy" "data_policy" {
+resource "google_bigquery_datapolicy_data_policy" "data_policy1" {
   location         = "us-central1"
   data_policy_id   = "%s"
   policy_tag       = google_data_catalog_policy_tag.policy_tag.name
   data_policy_type = "DATA_MASKING_POLICY"
   data_masking_policy {
       predefined_expression = "SHA256"
+  }
+}
+
+resource "google_bigquery_datapolicy_data_policy" "data_policy2" {
+  location         = "us-central1"
+  data_policy_id   = "%s"
+  policy_tag       = google_data_catalog_policy_tag.policy_tag.name
+  data_policy_type = "DATA_MASKING_POLICY"
+  data_masking_policy {
+      predefined_expression = "FIRST_FOUR_CHARACTERS"
   }
 }
 
@@ -2061,7 +2067,7 @@ resource "google_data_catalog_taxonomy" "taxonomy" {
 }
 
 resource "google_bigquery_table" "test" {
-  depends_on = [google_bigquery_datapolicy_data_policy.data_policy]
+  depends_on = [google_bigquery_datapolicy_data_policy.data_policy1, google_bigquery_datapolicy_data_policy.data_policy2]
   deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
@@ -2113,7 +2119,7 @@ resource "google_bigquery_table" "test" {
 EOH
 
 }
-`, datasetID, dataPolicyID, dataCatTaxonomy, tableID, dataPolicyName)
+`, datasetID, dataPolicyID1, dataPolicyID2, dataCatTaxonomy, tableID, dataPolicyName)
 }
 
 func testAccBigQueryTableBasicWithTableMetadataView(datasetID, tableID string) string {
