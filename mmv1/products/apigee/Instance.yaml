@@ -212,6 +212,7 @@ properties:
     properties:
       - name: 'enabled'
         type: Boolean
+        required: true
         description: |
           Boolean flag that specifies whether the customer access log feature is enabled.
       - name: 'logFormat'
