@@ -14,11 +14,8 @@ func TestAccBackupDRBackupPlan_fullUpdate(t *testing.T) {
 
 	t.Parallel()
 
-	referenceTime := time.Date(2026, 04, 01, 0, 0, 0, 0, time.UTC)
-
 	context := map[string]interface{}{
 		"project":        envvar.GetTestProjectFromEnv(),
-		"effective_time": referenceTime,
 		"random_suffix":  acctest.RandString(t, 10),
 	}
 
