@@ -382,5 +382,4 @@ properties:
           The field is immutable and causes resource replacement when mutated. This field is only
           set at create time and modifying this field after creation will trigger recreation.
           To apply tags to an existing resource, see the google_tags_tag_binding resource.
-        api_name: resourceManagerTags
         ignore_read: true
