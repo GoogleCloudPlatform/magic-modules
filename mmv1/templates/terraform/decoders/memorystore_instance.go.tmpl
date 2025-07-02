@@ -1,45 +1,141 @@
-// Retrieve pscAutoConnections from API response
-v, ok := res["pscAutoConnections"]
-if !ok {
-	if _, endpointsFound := res["endpoints"]; endpointsFound {
-		return res, nil // For Cluster Disabled instances, we would have 'endpoints' instead of 'pscAutoConnections'
+    // Retrieve endpoints.connections.pscAutoConnection from API response
+	v, ok := res["pscAutoConnections"]
+	if ok {
+
+		connections, ok := v.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("pscAutoConnections is not an array")
+		}
+
+		transformed := make([]interface{}, 0, len(connections))
+		uniqueConnections := make(map[string]bool) // Track unique project+network combos
+
+		for _, raw := range connections {
+			connectionData, ok := raw.(map[string]interface{})
+			if !ok || len(connectionData) < 1 {
+				return nil, fmt.Errorf("Invalid or empty psc connection data: %v", raw)
+			}
+
+			projectID, ok := connectionData["projectId"].(string)
+			if !ok {
+				return nil, fmt.Errorf("invalid project ID in psc connection: %v", connectionData)
+			}
+
+			networkID, ok := connectionData["network"].(string)
+			if !ok {
+				return nil, fmt.Errorf("invalid network ID in psc connection: %v", connectionData)
+			}
+
+			uniqueKey := projectID + networkID
+			if !uniqueConnections[uniqueKey] { // Check for uniqueness
+				uniqueConnections[uniqueKey] = true
+				transformed = append(transformed, map[string]interface{}{
+					"project_id": projectID,
+					"network":    networkID,
+				})
+			}
+		}
+		d.Set("desired_psc_auto_connections", transformed)
+		log.Printf("[DEBUG] You are setting desired_psc_auto_connections in decoder %#v", transformed)
+
+	// Retrieve pscAutoConnections from API response
+	} else if v, ok := res["endpoints"]; ok {
+
+		endpointsArray, ok := v.([]interface{})
+		if !ok || len(endpointsArray) == 0 {
+			// No endpoints or empty array, nothing to process
+		} else {
+			transformed := make([]interface{}, 0)
+			uniqueEndpoints := make(map[string]bool) // Track unique project+network combos
+
+			for _, endpoint := range endpointsArray {
+				endpointData, ok := endpoint.(map[string]interface{})
+				if !ok {
+					continue
+				}
+
+				connections, ok := endpointData["connections"].([]interface{})
+				if !ok {
+					continue
+				}
+
+				for _, connection := range connections {
+					connectionData, ok := connection.(map[string]interface{})
+					if !ok {
+						continue
+					}
+
+					pscAutoConnection, ok := connectionData["pscAutoConnection"].(map[string]interface{})
+					if !ok {
+						continue
+					}
+
+					projectID, projectOk := pscAutoConnection["projectId"].(string)
+					networkID, networkOk := pscAutoConnection["network"].(string)
+
+					if projectOk && networkOk {
+						uniqueKey := projectID + networkID
+						if !uniqueEndpoints[uniqueKey] { // Check for uniqueness
+							uniqueEndpoints[uniqueKey] = true
+							transformed = append(transformed, map[string]interface{}{
+								"project_id": projectID,
+								"network":    networkID,
+							})
+						}
+					}
+				}
+			}
+			if len(transformed) > 0 {
+				d.Set("desired_auto_created_endpoints", transformed)
+				log.Printf("[DEBUG] Setting desired_auto_created_endpoints in decoder for %#v", transformed)
+
+			}
+		}
+
+	}
+
+	// Such custom code is necessary as the instance's certificate authority has to be retrieved via a dedicated 
+	// getCertificateAuthority API.  
+	// See https://cloud.google.com/memorystore/docs/valkey/reference/rest/v1/projects.locations.instances/getCertificateAuthority
+	// for details about this API.
+	config := meta.(*transport_tpg.Config)
+	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return nil, err
+	}
+
+	// Only instances with SERVER_AUTHENTICATION mode have certificate authority set
+	if v, ok := res["transitEncryptionMode"].(string); ok && v=="SERVER_AUTHENTICATION" {
+		url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}MemorystoreBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}region{{"}}"}}/instances/{{"{{"}}instance_id{{"}}"}}/certificateAuthority")
+		if err != nil {
+			return nil, err
+		}
+
+		billingProject := ""
+
+		project, err := tpgresource.GetProject(d, config)
+		if err != nil {
+			return nil, fmt.Errorf("Error fetching project for instance: %s", err)
+		}
+
+		billingProject = project
+
+		// err == nil indicates that the billing_project value was found
+		if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+			billingProject = bp
+		}
+
+		certificateAuthority, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config: config,
+			Method: "GET",
+			Project: billingProject,
+			RawURL: url,
+			UserAgent: userAgent,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("Error reading certificateAuthority: %s", err)
+		}
+
+		res["managedServerCa"]  = certificateAuthority["managedServerCa"]
 	}
 	return res, nil
-}
-
-connections, ok := v.([]interface{})
-if !ok {
-	return nil, fmt.Errorf("pscAutoConnections is not an array")
-}
-
-transformed := make([]interface{}, 0, len(connections))
-uniqueConnections := make(map[string]bool) // Track unique project+network combos
-
-for _, raw := range connections {
-	connectionData, ok := raw.(map[string]interface{})
-	if !ok || len(connectionData) < 1 {
-		return nil, fmt.Errorf("Invalid or empty psc connection data: %v", raw)
-	}
-
-	projectID, ok := connectionData["projectId"].(string)
-	if !ok {
-		return nil, fmt.Errorf("invalid project ID in psc connection: %v", connectionData)
-	}
-
-	networkID, ok := connectionData["network"].(string)
-	if !ok {
-		return nil, fmt.Errorf("invalid network ID in psc connection: %v", connectionData)
-	}
-
-	uniqueKey := projectID + networkID
-	if !uniqueConnections[uniqueKey] { // Check for uniqueness
-		uniqueConnections[uniqueKey] = true
-		transformed = append(transformed, map[string]interface{}{
-			"project_id": projectID,
-			"network":    networkID,
-		})
-	}
-}
-
-d.Set("desired_psc_auto_connections", transformed)
-return res, nil
