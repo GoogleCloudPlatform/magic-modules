@@ -8,6 +8,9 @@ description: |-
 
 # google_network_management_connectivity_test_run
 
+
+!> This datasource triggers side effects on the target resource. It will take a long time to refresh (i.e. `terraform plan` will take much longer than usual) and may modify the state of the parent resource or other copies of the resource copying the same parent.
+
 A connectivity test is a static analysis of your resource configurations
 that enables you to evaluate connectivity to and from Google Cloud
 resources in your Virtual Private Cloud (VPC) network. This data source allows
