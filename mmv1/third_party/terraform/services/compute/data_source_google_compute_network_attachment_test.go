@@ -57,7 +57,7 @@ func TestAccDataSourceComputeNetworkAttachment_full(t *testing.T) {
 					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "description", "basic network attachment description"),
 					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "connection_preference", "ACCEPT_MANUAL"),
 					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "subnetworks.#", "1"),
-					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "subnetworks.0", fmt.Sprintf("projects/%s/regions/us-central1/subnetworks/tf-test-basic-subnetwork1-%s", context["org_id"], context["random_suffix"])),
+					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "subnetworks.0", fmt.Sprintf("tf-test-basic-subnetwork1-%s", context["random_suffix"])),
 					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "producer_accept_lists.#", "2"),
 					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "producer_accept_lists.0", fmt.Sprintf("tf-test-prj-accept1-%s", context["random_suffix"])),
 					resource.TestCheckResourceAttr("data.google_compute_network_attachment.default", "producer_accept_lists.1", fmt.Sprintf("tf-test-prj-accept2-%s", context["random_suffix"])),
