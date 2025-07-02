@@ -1,7 +1,5 @@
 package kms
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 import (
 	"fmt"
 
@@ -36,5 +34,3 @@ func dataSourceGoogleKmsAutokeyConfigRead(d *schema.ResourceData, meta interface
 	}
 	return nil
 }
-
-{{ end }}

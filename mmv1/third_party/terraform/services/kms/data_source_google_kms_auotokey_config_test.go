@@ -1,7 +1,5 @@
 package kms_test
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 import (
 	"fmt"
 	"regexp"
@@ -36,4 +34,3 @@ data "google_kms_autokey_config" "kms_autokey_config" {
 }
 `, folder)
 }
-{{ end }}

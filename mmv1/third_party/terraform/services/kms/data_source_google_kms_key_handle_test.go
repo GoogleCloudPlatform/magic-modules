@@ -1,7 +1,5 @@
 package kms_test
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 import (
 	"fmt"
 	"regexp"
@@ -41,4 +39,3 @@ data "google_kms_key_handle" "kms_key_handle" {
 }
 `, keyHandleName, location, project)
 }
-{{ end }}

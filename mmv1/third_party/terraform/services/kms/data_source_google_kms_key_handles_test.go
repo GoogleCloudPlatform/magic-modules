@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MPL-2.0
 package kms_test
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 import (
 	"errors"
 	"fmt"
@@ -72,5 +70,3 @@ data "google_kms_key_handles" "mykeyhandles" {
 `, project, location, filter)
 	return str
 }
-
-{{ end }}
