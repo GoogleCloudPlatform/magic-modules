@@ -314,7 +314,7 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 		return nil, nil, err
 	}
 
-	deleteFieldsFromAsset(roundtripAssets, ignoredAssetFields)
+	deleteFieldsFromAssets(roundtripAssets, ignoredAssetFields)
 
 	// Uncomment these lines when debugging issues locally
 	// roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", t.Name())
