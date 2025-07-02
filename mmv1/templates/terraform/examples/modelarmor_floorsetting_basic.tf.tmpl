@@ -1,0 +1,8 @@
+resource "google_model_armor_floorsetting" "floorsetting-basic" {
+  parent      = "{{.Vars.parent}}"
+  location    = "{{.Vars.location}}"
+
+  filter_config {
+
+  }
+}
