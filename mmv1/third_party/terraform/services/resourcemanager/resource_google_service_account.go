@@ -124,14 +124,15 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 
 	d.SetId(fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", project, aid, project))
 
-	sa, err = config.NewIamClient(userAgent).Projects.ServiceAccounts.Create("projects/"+project, r).Do()
+	iamClient := config.NewIamClient(userAgent) 
+	sa, err = iamClient.Projects.ServiceAccounts.Create("projects/"+project, r).Do()
 	if err != nil {
 		gerr, ok := err.(*googleapi.Error)
 		alreadyExists := ok && gerr.Code == 409 && d.Get("create_ignore_already_exists").(bool)
 		if alreadyExists {
 			err = transport_tpg.Retry(transport_tpg.RetryOptions{
 				RetryFunc: func() (operr error) {
-					sa, saerr := config.NewIamClient(userAgent).Projects.ServiceAccounts.Get(d.Id()).Do()
+					sa, saerr := iamClient.Projects.ServiceAccounts.Get(d.Id()).Do()
 
 					if saerr != nil {
 						return saerr
@@ -162,20 +163,7 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 		3, // Number of consecutive occurences.
 	)
 
-	email := sa.Name[strings.LastIndex(sa.Name, "/")+1:]
-
-	if err := d.Set("email", email); err != nil {
-		return fmt.Errorf("Error setting email: %s", err)
-	}
-	if err := d.Set("unique_id", sa.UniqueId); err != nil {
-		return fmt.Errorf("Error setting unique_id: %s", err)
-	}
-	if err := d.Set("name", sa.Name); err != nil {
-		return fmt.Errorf("Error setting name: %s", err)
-	}
-	if err := d.Set("member", "serviceAccount:"+email); err != nil {
-		return fmt.Errorf("Error setting member: %s", err)
-	}
+	populateResourceData(d, sa)
 
 	// We can't guarantee complete consistency even after polling,
 	// so sleep for some additional time to reduce the likelihood of
