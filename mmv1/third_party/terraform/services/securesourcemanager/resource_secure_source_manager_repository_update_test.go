@@ -93,7 +93,7 @@ resource "google_secure_source_manager_repository" "default" {
 
     # Prevent accidental deletions.
     lifecycle {
-      prevent_ddestroy = "%{prevent_destroy}"
+      prevent_destroy = "%{prevent_destroy}"
     }
 }
 `, context)
