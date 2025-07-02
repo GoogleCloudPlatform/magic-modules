@@ -67,7 +67,7 @@ properties:
     properties:
       - name: 'advancedApiOpsConfig'
         type: NestedObject
-        description: Configuration for the Monetization add-on.
+        description: Configuration for the Advanced API Ops add-on.
         properties:
           - name: 'enabled'
             type: Boolean
@@ -76,12 +76,12 @@ properties:
               enabled.
       - name: 'integrationConfig'
         type: NestedObject
-        description: Configuration for the Monetization add-on.
+        description: Configuration for the Integration add-on.
         properties:
           - name: 'enabled'
             type: Boolean
             description:
-              Flag that specifies whether the Advanced API Ops add-on is
+              Flag that specifies whether the Integration add-on is
               enabled.
       - name: 'monetizationConfig'
         type: NestedObject
@@ -90,22 +90,20 @@ properties:
           - name: 'enabled'
             type: Boolean
             description:
-              Flag that specifies whether the Advanced API Ops add-on is
-              enabled.
+              Flag that specifies whether the Monetization add-on is enabled.
       - name: 'apiSecurityConfig'
         type: NestedObject
-        description: Configuration for the Monetization add-on.
+        description: Configuration for the API Security add-on.
         properties:
           - name: 'enabled'
             type: Boolean
             description:
-              Flag that specifies whether the Advanced API Ops add-on is
-              enabled.
+              Flag that specifies whether the API security add-on is enabled.
           - name: 'expiresAt'
             type: String
             description:
-              Flag that specifies whether the Advanced API Ops add-on is
-              enabled.
+              Time at which the API Security add-on expires in in milliseconds since epoch.
+              If unspecified, the add-on will never expire.
             output: true
       - name: 'connectorsPlatformConfig'
         type: NestedObject
@@ -114,11 +112,10 @@ properties:
           - name: 'enabled'
             type: Boolean
             description:
-              Flag that specifies whether the Advanced API Ops add-on is
-              enabled.
+              Flag that specifies whether the Connectors Platform add-on is enabled.
           - name: 'expiresAt'
             type: String
             description:
-              Flag that specifies whether the Advanced API Ops add-on is
-              enabled.
+              Time at which the Connectors Platform add-on expires in milliseconds since epoch.
+              If unspecified, the add-on will never expire.
             output: true

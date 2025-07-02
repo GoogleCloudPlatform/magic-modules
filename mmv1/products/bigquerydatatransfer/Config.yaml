@@ -40,7 +40,6 @@ custom_code:
   decoder: 'templates/terraform/decoders/bigquery_data_transfer.go.tmpl'
   pre_update: 'templates/terraform/pre_update/bigquerydatatransfer_config.tmpl'
   custom_import: 'templates/terraform/custom_import/bigquery_data_transfer_self_link_as_name_set_location.go.tmpl'
-  raw_resource_config_validation: 'templates/terraform/validation/bigquery_data_transfer_config.go.tmpl'
 custom_diff:
   - 'sensitiveParamCustomizeDiff'
   - 'paramsCustomizeDiff'
@@ -60,6 +59,7 @@ examples:
       dataset_id: 'example_dataset'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
+      display_name: 'display-name'
     exclude_test: true
   - name: 'bigquerydatatransfer_config_salesforce'
     primary_resource_id: 'salesforce_config'

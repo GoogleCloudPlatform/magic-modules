@@ -204,8 +204,11 @@ properties:
       Note that packets larger than 1500 bytes (standard Ethernet) can be subject to TCP-MSS clamping or dropped
       with an ICMP `Fragmentation-Needed` message if the packets are routed to the Internet or other VPCs
       with varying MTUs.
-    immutable: true
     default_from_api: true
+    update_url: 'projects/{{project}}/global/networks/{{name}}'
+    update_verb: 'PATCH'
+    update_id: 'mtu'
+    fingerprint_name: 'fingerprint'
   - name: 'enableUlaInternalIpv6'
     type: Boolean
     description: |
@@ -241,3 +244,19 @@ properties:
       following are valid URLs:
       * https://www.googleapis.com/compute/v1/projects/{projectId}/global/networkProfiles/{network_profile_name}
       * projects/{projectId}/global/networkProfiles/{network_profile_name}
+    diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the network. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true

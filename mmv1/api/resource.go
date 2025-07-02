@@ -13,18 +13,23 @@
 package api
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"maps"
+	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
+	"text/template"
+
+	"github.com/golang/glog"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"golang.org/x/exp/slices"
 )
 
 const RELATIVE_MAGICIAN_LOCATION = "mmv1/"
@@ -224,6 +229,9 @@ type Resource struct {
 	// If true, exclude resource from Terraform Validator
 	// (i.e. terraform-provider-conversion)
 	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
+
+	// If true, include resource in the new package of TGC (terraform-provider-conversion)
+	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
 
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
@@ -1212,20 +1220,30 @@ func (r Resource) GetIdFormat() string {
 }
 
 // Returns true if the Type is in the ID format and false otherwise.
-func (r Resource) InIdFormat(prop Type) bool {
-	fields := r.ExtractIdentifiers(r.GetIdFormat())
-	return slices.Contains(fields, google.Underscore(prop.Name))
+func (r Resource) InPostCreateComputed(prop Type) bool {
+	fields := map[string]struct{}{}
+	for _, f := range r.ExtractIdentifiers(r.GetIdFormat()) {
+		fields[f] = struct{}{}
+	}
+	for _, f := range r.ExtractIdentifiers(r.SelfLinkUri()) {
+		fields[f] = struct{}{}
+	}
+	_, ok := fields[google.Underscore(prop.Name)]
+	return ok
 }
 
 // Returns true if at least one of the fields in the ID format is computed
-func (r Resource) HasComputedIdFormatFields() bool {
-	idFormatFields := map[string]struct{}{}
+func (r Resource) HasPostCreateComputedFields() bool {
+	fields := map[string]struct{}{}
 	for _, f := range r.ExtractIdentifiers(r.GetIdFormat()) {
-		idFormatFields[f] = struct{}{}
+		fields[f] = struct{}{}
+	}
+	for _, f := range r.ExtractIdentifiers(r.SelfLinkUri()) {
+		fields[f] = struct{}{}
 	}
 	for _, p := range r.GettableProperties() {
 		// Skip fields not in the id format
-		if _, ok := idFormatFields[google.Underscore(p.Name)]; !ok {
+		if _, ok := fields[google.Underscore(p.Name)]; !ok {
 			continue
 		}
 		if (p.Output || p.DefaultFromApi) && !p.IgnoreRead {
@@ -1395,13 +1413,27 @@ func (r Resource) IamSelfLinkIdentifiers() []string {
 	return r.ExtractIdentifiers(selfLink)
 }
 
-// Returns the resource properties that are idenfifires in the selflink url
-func (r Resource) IamSelfLinkProperties() []*Type {
-	params := r.IamSelfLinkIdentifiers()
+// Returns the resource properties that are idenfifires in Iam resource when generating the docs.
+// The "project" and "organization" properties are excluded, as they are handled seperated in the docs.
+func (r Resource) IamResourceProperties() []*Type {
+	urlProperties := make([]*Type, 0)
+	for _, param := range r.IamResourceParams() {
+		if param == "project" || param == "organization" {
+			continue
+		}
 
-	urlProperties := google.Select(r.AllUserProperties(), func(p *Type) bool {
-		return slices.Contains(params, p.Name)
-	})
+		found := false
+		for _, p := range r.AllUserProperties() {
+			if param == google.Underscore(p.Name) {
+				urlProperties = append(urlProperties, p)
+				found = true
+				break
+			}
+		}
+		if !found {
+			urlProperties = append(urlProperties, &Type{Name: param})
+		}
+	}
 
 	return urlProperties
 }
@@ -1590,11 +1622,43 @@ func (r Resource) FormatDocDescription(desc string, indent bool) string {
 }
 
 func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
-	output := resource.ExecuteTemplate(&r, templatePath, appendNewline)
+	output := ExecuteTemplate(&r, templatePath, appendNewline)
 	if !appendNewline {
 		output = strings.TrimSuffix(output, "\n")
 	}
 	return output
+}
+
+func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
+	templates := []string{
+		templatePath,
+		"templates/terraform/expand_resource_ref.tmpl",
+		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
+		"templates/terraform/flatten_property_method.go.tmpl",
+		"templates/terraform/expand_property_method.go.tmpl",
+		"templates/terraform/update_mask.go.tmpl",
+		"templates/terraform/nested_query.go.tmpl",
+		"templates/terraform/unordered_list_customize_diff.go.tmpl",
+	}
+	templateFileName := filepath.Base(templatePath)
+
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	contents := bytes.Buffer{}
+	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
+		glog.Exit(err)
+	}
+
+	rs := contents.String()
+
+	if !strings.HasSuffix(rs, "\n") && appendNewline {
+		rs = fmt.Sprintf("%s\n", rs)
+	}
+
+	return rs
 }
 
 // Returns the key of the list of resources in the List API response
@@ -1914,4 +1978,44 @@ func (r Resource) CodeHeader(templatePath string) string {
 
 func (r Resource) MarkdownHeader(templatePath string) string {
 	return strings.Replace(r.CodeHeader(templatePath), "//", "#", -1)
+}
+
+// TGC Methods
+// ====================
+// Lists fields that test.BidirectionalConversion should ignore
+func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string {
+	var props []string
+	for _, tp := range r.VirtualFields {
+		props = append(props, google.Underscore(tp.Name))
+	}
+	for _, tp := range r.AllUserProperties() {
+		if tp.UrlParamOnly {
+			props = append(props, google.Underscore(tp.Name))
+		} else if tp.IsMissingInCai {
+			props = append(props, tp.MetadataLineage())
+		}
+	}
+	props = append(props, e.TGCTestIgnoreExtra...)
+
+	slices.Sort(props)
+	return props
+}
+
+// Filters out computed properties during cai2hcl
+func (r Resource) ReadPropertiesForTgc() []*Type {
+	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
+		return v.Output
+	})
+}
+
+// The API resource type of the resource. Normally, it is the resource name.
+// Rarely, it is the API "resource type kind".
+// For example, the API resource type of "google_compute_autoscaler" is "ComputeAutoscalerAssetType".
+// The API resource type of "google_compute_region_autoscaler" is also "ComputeAutoscalerAssetType".
+func (r Resource) ApiResourceType() string {
+	if r.ApiResourceTypeKind != "" {
+		return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.ApiResourceTypeKind)
+	}
+
+	return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.Name)
 }
