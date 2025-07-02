@@ -15,8 +15,8 @@ func TestAccBackupDRBackupPlan_fullUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"project":        envvar.GetTestProjectFromEnv(),
-		"random_suffix":  acctest.RandString(t, 10),
+		"project":       envvar.GetTestProjectFromEnv(),
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
