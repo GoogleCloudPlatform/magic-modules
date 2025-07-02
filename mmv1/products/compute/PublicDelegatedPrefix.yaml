@@ -131,9 +131,9 @@ properties:
     type: Array
     description: |
       List of sub public delegated fixes for BYO IP functionality.
-      Each item in this array represents a sub prefix that can be used to 
-      create addresses or further allocations.   
-    item_type: 
+      Each item in this array represents a sub prefix that can be
+      used to create addresses or further allocations.
+    item_type:
       type: NestedObject
       properties:
         - name: 'name'
@@ -143,6 +143,8 @@ properties:
             The name of the sub public delgated prefix.
         - name: 'description'
           type: String
+          optional: true
+          computed: true
           description: |
             Optional description of this sub public delgated prefix.
         - name: 'region'
@@ -167,10 +169,14 @@ properties:
             The IP address range in the CIDR format represented by this sub prefix.
         - name: 'isAddress'
           type: Boolean
+          optional: true
+          computed: true
           description: |
-            Whether the sub prefix is delegated for address creation. 
+            Whether the sub prefix is delegated for address creation.
         - name: 'mode'
           type: Enum
+          optional: true
+          computed: true
           description: |
             The PublicDelegatedSubPrefix mode for IPv6 only.
           enum_values:
@@ -179,6 +185,7 @@ properties:
             - 'EXTERNAL_IPV6_SUBNETWORK_CREATION'
         - name: 'allocatablePrefixLength'
           type: Integer
+          output: true
           description: |
             The allocatable prefix length supported by this PublicDelegatedSubPrefix.
         - name: 'delegatee_project'
@@ -186,4 +193,3 @@ properties:
           required: true
           description: |
             Name of the project scoping this PublicDelegatedSubPrefix.
-        
