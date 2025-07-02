@@ -13,6 +13,9 @@
 
 ---
 name: "VmwareAdminCluster"
+description: "A Google VMware Admin Cluster."
+references:
+  api: 'https://cloud.google.com/kubernetes-engine/distributed-cloud/reference/on-prem-api/rest/v1/projects.locations.vmwareAdminClusters'
 min_version: beta
 base_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters"
 create_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters?vmware_admin_cluster_id={{name}}"
@@ -20,7 +23,6 @@ update_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{n
 self_link: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"
 update_verb: "PATCH"
 update_mask: true
-description: "A Google VMware Admin Cluster."
 exclude_delete: true
 id_format: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"
 import_format: ["projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"]
