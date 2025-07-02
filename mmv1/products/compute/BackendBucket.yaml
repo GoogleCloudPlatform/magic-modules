@@ -107,6 +107,9 @@ examples:
     exclude_docs: true
   - name: 'backend_bucket_global_ilb'
     primary_resource_id: 'global-ilb-backend'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     vars:
       backend_bucket_name: 'global-ilb-backend-bucket'
       bucket_name: 'global-ilb-bucket'
