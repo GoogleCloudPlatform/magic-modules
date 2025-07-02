@@ -99,9 +99,10 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		return fmt.Errorf("resource %s is supported in either tfplan2cai or cai2hcl within tgc, but not in both", resourceType)
 	}
 
-	// Uncomment these lines when debugging issues locally
-	// assetFile := fmt.Sprintf("%s.json", t.Name())
-	// writeJSONFile(assetFile, assets)
+	if os.Getenv("WRITE_FILES") != "" {
+		assetFile := fmt.Sprintf("%s.json", t.Name())
+		writeJSONFile(assetFile, assets)
+	}
 
 	// Step 1: Use cai2hcl to convert export assets into a Terraform configuration (export config).
 	// Compare all of the fields in raw config are in export config.
@@ -113,13 +114,13 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		return fmt.Errorf("error when converting the export assets into export config: %#v", err)
 	}
 
-	// Uncomment these lines when debugging issues locally
-	// exportTfFile := fmt.Sprintf("%s_export.tf", t.Name())
-	// err = os.WriteFile(exportTfFile, exportConfigData, 0644)
-	// if err != nil {
-	// 	return fmt.Errorf("error writing file %s", exportTfFile)
-	// }
-	// defer os.Remove(exportTfFile)
+	if os.Getenv("WRITE_FILES") != "" {
+		exportTfFile := fmt.Sprintf("%s_export.tf", t.Name())
+		err = os.WriteFile(exportTfFile, exportConfigData, 0644)
+		if err != nil {
+			return fmt.Errorf("error writing file %s", exportTfFile)
+		}
+	}
 
 	exportTfFilePath := fmt.Sprintf("%s/%s_export.tf", tfDir, t.Name())
 	err = os.WriteFile(exportTfFilePath, exportConfigData, 0644)
@@ -166,7 +167,9 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	if err != nil {
 		return fmt.Errorf("error when writing the file %s", roundtripTfFilePath)
 	}
-	defer os.Remove(roundtripTfFilePath)
+	if os.Getenv("WRITE_FILES") == "" {
+		defer os.Remove(roundtripTfFilePath)
+	}
 
 	if diff := cmp.Diff(string(roundtripConfigData), string(exportConfigData)); diff != "" {
 		log.Printf("Roundtrip config is different from the export config.\nroundtrip config:\n%s\nexport config:\n%s", string(roundtripConfigData), string(exportConfigData))
@@ -316,9 +319,10 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 
 	deleteFieldsFromAssets(roundtripAssets, ignoredAssetFields)
 
-	// Uncomment these lines when debugging issues locally
-	// roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", t.Name())
-	// writeJSONFile(roundtripAssetFile, roundtripAssets)
+	if os.Getenv("WRITE_FILES") != "" {
+		roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", t.Name())
+		writeJSONFile(roundtripAssetFile, roundtripAssets)
+	}
 
 	roundtripConfig, err := cai2hcl.Convert(roundtripAssets, &cai2hcl.Options{
 		ErrorLogger: logger,

@@ -114,7 +114,9 @@ func prepareTestData(testName string) (map[string]ResourceTestData, string, erro
 	if err != nil {
 		return nil, "", fmt.Errorf("error writing to file %s: %#v", rawTfFile, err)
 	}
-	defer os.Remove(rawTfFile)
+	if os.Getenv("WRITE_FILES") == "" {
+		defer os.Remove(rawTfFile)
+	}
 
 	rawResourceConfigs, err := parseResourceConfigs(rawTfFile)
 	if err != nil {
