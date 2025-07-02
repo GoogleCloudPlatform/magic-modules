@@ -273,7 +273,7 @@ properties:
       client when the resource is created.
   - name: 'enableCdn'
     type: Boolean
-    description:  | 
+    description: |
       If true, enable Cloud CDN for this BackendBucket.
       Note: This cannot be set to true when loadBalancingScheme is set to INTERNAL_MANAGED.
     include_empty_value_in_cai: true
