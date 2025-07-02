@@ -15,7 +15,7 @@ func TestAccBackupDRBackupPlan_fullUpdate(t *testing.T) {
 	t.Parallel()
 
 	timeNow := time.Now().UTC()
-	referenceTime := time.Date(2026,04,01, 0, 0, 0, 0, time.UTC)
+	referenceTime := time.Date(2026, 04, 01, 0, 0, 0, 0, time.UTC)
 
 	context := map[string]interface{}{
 		"project":        envvar.GetTestProjectFromEnv(),
