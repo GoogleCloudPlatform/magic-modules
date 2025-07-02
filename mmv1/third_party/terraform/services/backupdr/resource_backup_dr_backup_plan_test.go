@@ -15,11 +15,11 @@ func TestAccBackupDRBackupPlan_fullUpdate(t *testing.T) {
 	t.Parallel()
 
 	timeNow := time.Now().UTC()
-	referenceTime := time.Date(timeNow.Year(), timeNow.Month(), timeNow.Day(), 0, 0, 0, 0, time.UTC)
+	referenceTime := time.Date(2026,04,01, 0, 0, 0, 0, time.UTC)
 
 	context := map[string]interface{}{
 		"project":        envvar.GetTestProjectFromEnv(),
-		"effective_time": referenceTime.Add(24 * time.Hour).Format(time.RFC3339),
+		"effective_time": referenceTime,
 		"random_suffix":  acctest.RandString(t, 10),
 	}
 
@@ -194,16 +194,28 @@ resource "google_backup_dr_backup_plan" "bp" {
   backup_rules {
     rule_id                = "rule-1"
     backup_retention_days  = 366
+    standard_schedule {
+      recurrence_type = "MONTHLY" # Updated recurrence_type from YEARLY
+      days_of_month   = [1, 15]   # Updated days_of_month
+      time_zone       = "America/New_York" # Updated time_zone
+
+      backup_window {
+        start_hour_of_day = 1  # Updated start hour
+        end_hour_of_day   = 7 # Updated end hour
+      }
+    }
+    # Adding a second rule to test weekly schedule
+    rule_id                = "rule-2"
+    backup_retention_days  = 60 # Different retention for rule-2
 
     standard_schedule {
-      recurrence_type = "YEARLY"
-      months          = ["FEBRUARY"]
-      days_of_month   = [15]
+      recurrence_type = "WEEKLY"
+      days_of_week    = ["MONDAY", "FRIDAY"] # Added days_of_week
       time_zone       = "UTC"
 
       backup_window {
-        start_hour_of_day = 2  # Backup starts at 2:00 AM UTC
-        end_hour_of_day   = 8  # Optional, backup window ends at 3:00 AM
+        start_hour_of_day = 1  # Different backup window for rule-2
+        end_hour_of_day   = 7
       }
     }
   }

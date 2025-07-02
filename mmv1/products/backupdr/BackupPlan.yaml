@@ -50,12 +50,14 @@ parameters:
     type: String
     required: true
     url_param_only: true
+    immutable: true
     description: |
       The location for the backup plan
   - name: 'backup_plan_id'
     type: String
     required: true
     url_param_only: true
+    immutable: true
     description: |-
       The ID of the backup plan
 properties:
@@ -75,6 +77,7 @@ properties:
     description: |
       Backup vault where the backups gets stored using this Backup plan.
     required: true
+    immutable: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - name: 'backupVaultServiceAccount'
     type: String
