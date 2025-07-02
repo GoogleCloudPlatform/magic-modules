@@ -295,7 +295,7 @@ func TestAccComputeSecurityPolicy_withAdvancedOptionsConfig(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-      // Add request_body_inspection_size value
+			// Add request_body_inspection_size value
 			{
 				Config: testAccComputeSecurityPolicy_withAdvancedOptionsConfig_update4(spName),
 			},
@@ -1498,9 +1498,8 @@ resource "google_compute_security_policy" "policy" {
       ]
     }
     log_level    = "NORMAL"
-    user_ip_request_headers = [
+    user_ip_request_headers = []
     request_body_inspection_size = "64KB"
-    ]
   }
 }
 `, spName)

@@ -535,7 +535,7 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 							Description: `An optional list of case-insensitive request header names to use for resolving the callers client IP address.`,
 							Elem:        &schema.Schema{Type: schema.TypeString},
 						},
-            "request_body_inspection_size": {
+						"request_body_inspection_size": {
 							Type: schema.TypeString,
 							Optional: true,
 							Computed: true,
