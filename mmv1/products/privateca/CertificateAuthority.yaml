@@ -70,21 +70,6 @@ examples:
       'deletion_protection': 'false'
     ignore_read_extra:
       - 'deletion_protection'
-  - name: 'privateca_certificate_authority_basic_no_org'
-    primary_resource_id: 'default'
-    vars:
-      certificate_authority_id: 'my-certificate-authority'
-      pool_name: 'ca-pool'
-      pool_location: 'us-central1'
-      deletion_protection: 'true'
-    test_vars_overrides:
-      'pool_name': 'acctest.BootstrapSharedCaPoolInLocation(t, "us-central1")'
-      'pool_location': '"us-central1"'
-      'deletion_protection': 'false'
-    ignore_read_extra:
-      - 'deletion_protection'
-    # This example is meant to confirm that it's possible to make
-    # a CA without specifying the organization field
   - name: 'privateca_certificate_authority_subordinate'
     primary_resource_id: 'default'
     vars:
@@ -580,6 +565,7 @@ properties:
               - name: 'organization'
                 type: String
                 description: The organization of the subject.
+                required: true
                 immutable: true
               - name: 'organizationalUnit'
                 type: String

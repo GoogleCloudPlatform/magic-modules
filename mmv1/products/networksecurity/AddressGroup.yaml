@@ -135,7 +135,6 @@ properties:
     description: |
       Capacity of the Address Group.
     required: true
-    immutable: true
   - name: 'purpose'
     type: Array
     description: |

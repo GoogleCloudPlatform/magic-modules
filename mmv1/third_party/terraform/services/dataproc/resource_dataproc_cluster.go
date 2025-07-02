@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"regexp"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -263,7 +262,7 @@ func ResourceDataprocCluster() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Description: `The list of the labels (key/value pairs) configured on the resource and to be applied to instances in the cluster.
-
+				
 				**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
 				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
 			},
@@ -3443,10 +3442,8 @@ func dataprocImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData
 	if newV.minor != oldV.minor {
 		return false
 	}
-
-	ignoreSubminor := []string{"", "prodcurrent", "prodprevious"}
-	// Only compare subminor version if set to a numeric value in config version.
-	if !slices.Contains(ignoreSubminor, newV.subminor) && newV.subminor != oldV.subminor {
+	// Only compare subminor version if set in config version.
+	if newV.subminor != "" && newV.subminor != oldV.subminor {
 		return false
 	}
 	// Only compare os if it is set in config version.

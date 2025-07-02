@@ -41,8 +41,6 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-  pre_create: 'templates/terraform/pre_create/compute_instance_settings_fingerprint.go.tmpl'
-  pre_update: 'templates/terraform/pre_create/compute_instance_settings_fingerprint.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/clear_instance_settings.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/skip_delete_during_test.go.tmpl'
 examples:
@@ -63,6 +61,7 @@ properties:
         The fingerprint used for optimistic locking of this resource.  Used
         internally during updates.
     output: true
+    custom_expand: 'templates/terraform/custom_expand/compute_instance_settings_fingerprint.tmpl'
   - name: 'metadata'
     type: NestedObject
     description: |

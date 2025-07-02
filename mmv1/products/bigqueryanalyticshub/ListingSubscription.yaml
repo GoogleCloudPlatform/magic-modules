@@ -194,7 +194,3 @@ properties:
           type: string
           description: Output only. Name of the linked dataset, e.g. projects/subscriberproject/datasets/linkedDataset
           output: true
-  - name: 'logLinkedDatasetQueryUserEmail'
-    type: Boolean
-    description: 'Output only. By default, false. If true, the Subscriber agreed to the email sharing mandate that is enabled for Listing.'
-    output: true

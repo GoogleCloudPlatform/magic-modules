@@ -307,5 +307,5 @@ func flattenComputeForwardingRuleRegion(v interface{}, d *schema.ResourceData, c
 	if v == nil {
 		return v
 	}
-	return tpgresource.GetResourceNameFromSelfLink(v.(string))
+	return tpgresource.NameFromSelfLinkStateFunc(v)
 }

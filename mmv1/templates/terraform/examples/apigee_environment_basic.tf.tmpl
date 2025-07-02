@@ -30,11 +30,5 @@ resource "google_apigee_environment" "env" {
   description  = "Apigee Environment"
   display_name = "environment-1"
   org_id       = google_apigee_organization.apigee_org.id
-  client_ip_resolution_config {
-    header_index_algorithm {
-      ip_header_name = "X-Forwarded-For"
-      ip_header_index = 1
-    }
-  }
 }
 

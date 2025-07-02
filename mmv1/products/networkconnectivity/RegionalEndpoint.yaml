@@ -89,7 +89,7 @@ properties:
   - name: 'targetGoogleApi'
     type: String
     description: |
-      The service endpoint this private regional endpoint connects to. Format: `{apiname}.{region}.rep.googleapis.com` Example: \"cloudkms.us-central1.rep.googleapis.com\".
+      The service endpoint this private regional endpoint connects to. Format: `{apiname}.{region}.p.rep.googleapis.com` Example: \"cloudkms.us-central1.p.rep.googleapis.com\".
     required: true
   - name: 'network'
     type: String

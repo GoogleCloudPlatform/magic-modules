@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/golang/glog v1.1.1
-	github.com/google/go-github/v68 v68.0.0
+	github.com/google/go-github/v61 v61.0.0
 	github.com/spf13/cobra v1.8.1
 	golang.org/x/exp v0.0.0-20230810033253-352e893a4cad
 	golang.org/x/oauth2 v0.24.0

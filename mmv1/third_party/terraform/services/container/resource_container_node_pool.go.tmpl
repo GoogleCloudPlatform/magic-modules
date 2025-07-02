@@ -5,9 +5,6 @@ import (
 	"log"
 	"regexp"
 	"strings"
-{{- if ne $.TargetVersionName `ga` }}
-	"sync"
-{{- end }}
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
@@ -18,6 +15,7 @@ import (
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-provider-google/google/verify"
 
 {{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/container/v1"
@@ -27,78 +25,6 @@ import (
 )
 
 var clusterIdRegex = regexp.MustCompile("projects/(?P<project>[^/]+)/locations/(?P<location>[^/]+)/clusters/(?P<name>[^/]+)")
-
-{{ if ne $.TargetVersionName `ga` }}
-type nodePoolWithUpdateTime struct {
-	nodePool   *container.NodePool
-	updateTime time.Time
-}
-
-type nodePoolCache struct {
-	nodePools map[string]*nodePoolWithUpdateTime
-	ttl       time.Duration
-	mutex     sync.RWMutex
-}
-
-func (nodePoolCache *nodePoolCache) get(nodePool string) (*container.NodePool, error) {
-	nodePoolCache.mutex.RLock()
-	defer nodePoolCache.mutex.RUnlock()
-	np, ok := nodePoolCache.nodePools[nodePool]
-	if !ok {
-		return nil, fmt.Errorf("NodePool %q was not found", nodePool)
-	}
-	return np.nodePool, nil
-}
-
-func (nodePoolCache *nodePoolCache) refreshIfNeeded(d *schema.ResourceData, config *transport_tpg.Config, userAgent string, nodePoolInfo *NodePoolInformation, name string) error {
-	if !nodePoolCache.needsRefresh(nodePoolInfo.fullyQualifiedName(name)) {
-		return nil
-	}
-
-	nodePoolCache.mutex.Lock()
-	defer nodePoolCache.mutex.Unlock()
-
-	parent := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", nodePoolInfo.project, nodePoolInfo.location, nodePoolInfo.cluster)
-	clusterNodePoolsListCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.List(parent)
-	if config.UserProjectOverride {
-		clusterNodePoolsListCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
-	}
-	listNodePoolsResponse, err := clusterNodePoolsListCall.Do()
-	if err != nil {
-		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("NodePools from cluster %q", nodePoolInfo.cluster))
-	}
-
-	updateTime := time.Now()
-	for _, nodePool := range listNodePoolsResponse.NodePools {
-		nodePoolCache.nodePools[nodePoolInfo.fullyQualifiedName(nodePool.Name)] = &nodePoolWithUpdateTime{
-			nodePool:  nodePool,
-			updateTime: updateTime,
-		}
-	}
-	return nil
-}
-
-func (nodePoolCache *nodePoolCache) needsRefresh(nodePool string) bool {
-	nodePoolCache.mutex.RLock()
-	defer nodePoolCache.mutex.RUnlock()
-	np, ok := nodePoolCache.nodePools[nodePool]
-	if !ok {
-		return true
-	}
-	return time.Since(np.updateTime) > nodePoolCache.ttl
-}
-
-func (nodePoolCache *nodePoolCache) remove(nodePool string) {
-	nodePoolCache.mutex.Lock()
-	defer nodePoolCache.mutex.Unlock()
-	delete(nodePoolCache.nodePools, nodePool)
-}
-
-var npCache = &nodePoolCache{
-	nodePools: make(map[string]*nodePoolWithUpdateTime),
-	ttl:       30 * time.Second,
-}
-{{- end }}
 
 func ResourceContainerNodePool() *schema.Resource {
 	return &schema.Resource{
@@ -275,7 +201,7 @@ var schemaNodePool = map[string]*schema.Schema{
 				"tpu_topology": {
 					Type:        schema.TypeString,
 					Optional:    true,
-					Description: `The TPU topology like "2x4" or "2x2x2". https://cloud.google.com/kubernetes-engine/docs/concepts/plan-tpus#topology`,
+					Description: `TPU placement topology for pod slice node pool. https://cloud.google.com/tpu/docs/types-topologies#tpu_topologies`,
 				},
 			},
 		},
@@ -464,7 +390,7 @@ var schemaNodePool = map[string]*schema.Schema{
 					Optional:     true,
 					ForceNew:     true,
 					Computed:     true,
-					DiffSuppressFunc: tpgresource.CidrOrSizeDiffSuppress,
+					ValidateFunc: verify.ValidateIpCidrRange,
 					Description:  `The IP address range for pod IPs in this node pool. Only applicable if create_pod_range is true. Set to blank to have a range chosen with the default size. Set to /netmask (e.g. /14) to have a range chosen with a specific netmask. Set to a CIDR notation (e.g. 10.96.0.0/14) to pick a specific range to use.`,
 				},
 				"additional_node_network_configs": {
@@ -544,7 +470,7 @@ var schemaNodePool = map[string]*schema.Schema{
 							"total_egress_bandwidth_tier": {
 								Type:        schema.TypeString,
 								Required:    true,
-								Description: `Specifies the total network bandwidth tier for the NodePool. [Valid values](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/projects.locations.clusters.nodePools#NodePool.Tier) include: "TIER_1" and "TIER_UNSPECIFIED".`,
+								Description: `Specifies the total network bandwidth tier for the NodePool.`,
 							},
 						},
 					},
@@ -777,16 +703,11 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 
 	name := getNodePoolName(d.Id())
 
-{{ if eq $.TargetVersionName `ga` }}
 	clusterNodePoolsGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
 	if config.UserProjectOverride {
 		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 	}
 	nodePool, err := clusterNodePoolsGetCall.Do()
-{{- else }}
-	npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name)
-	nodePool, err := npCache.get(nodePoolInfo.fullyQualifiedName(name))
-{{- end }}
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("NodePool %q from cluster %q", name, nodePoolInfo.cluster))
 	}
@@ -845,10 +766,6 @@ func resourceContainerNodePoolUpdate(d *schema.ResourceData, meta interface{}) e
 	if err != nil {
 		return err
 	}
-
-{{ if ne $.TargetVersionName `ga` }}
-	npCache.remove(nodePoolInfo.fullyQualifiedName(name))
-{{- end }}
 
 	return resourceContainerNodePoolRead(d, meta)
 }
@@ -930,10 +847,6 @@ func resourceContainerNodePoolDelete(d *schema.ResourceData, meta interface{}) e
 
 	d.SetId("")
 
-{{ if ne $.TargetVersionName `ga` }}
-	npCache.remove(nodePoolInfo.fullyQualifiedName(name))
-{{- end }}
-
 	return nil
 }
 
@@ -950,16 +863,11 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 	}
 
 	name := getNodePoolName(d.Id())
-{{- if eq $.TargetVersionName `ga` }}
 	clusterNodePoolsGetCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.Get(nodePoolInfo.fullyQualifiedName(name))
 	if config.UserProjectOverride {
 		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 	}
 	_, err = clusterNodePoolsGetCall.Do()
-{{- else }}
-	npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name)
-	_, err = npCache.get(nodePoolInfo.fullyQualifiedName(name))
-{{- end }}
 
 	if err != nil {
 		if err = transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Container NodePool %s", name)); err == nil {

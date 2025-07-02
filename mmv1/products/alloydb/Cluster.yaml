@@ -72,16 +72,12 @@ examples:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-1")'
   - name: 'alloydb_cluster_after_upgrade'
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
-    test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-1")'
   - name: 'alloydb_cluster_full'
     primary_resource_id: 'full'
     vars:
@@ -116,7 +112,7 @@ examples:
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
     exclude_docs: true
 virtual_fields:
   - name: 'deletion_policy'

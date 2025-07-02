@@ -1,6 +1,7 @@
 resource "google_compute_resource_policy" "bar" {
   name   = "{{index $.Vars "name"}}"
   region = "europe-west1"
+  provider = google-beta
   workload_policy {
     type = "HIGH_THROUGHPUT"
     max_topology_distance = "BLOCK"

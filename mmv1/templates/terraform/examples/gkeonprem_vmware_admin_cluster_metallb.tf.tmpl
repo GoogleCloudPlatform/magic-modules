@@ -36,8 +36,4 @@ resource "google_gkeonprem_vmware_admin_cluster" "{{$.PrimaryResourceId}}" {
       enabled = true
     }
   }
-  private_registry_config {
-    address = "test-address"
-    ca_cert = "test-ca-cert"
-  }
 }

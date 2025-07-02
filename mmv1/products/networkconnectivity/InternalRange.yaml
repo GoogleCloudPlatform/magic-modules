@@ -183,8 +183,3 @@ properties:
           may not exist yet.
           For example /projects/{project}/regions/{region}/subnetworks/{subnet}
         required: true
-  - name: 'immutable'
-    type: Boolean
-    description: |
-      Immutable ranges cannot have their fields modified, except for labels and description.
-    immutable: true

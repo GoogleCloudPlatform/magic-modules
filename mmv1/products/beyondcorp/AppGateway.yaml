@@ -29,9 +29,9 @@ create_url: 'projects/{{project}}/locations/{{region}}/appGateways?app_gateway_i
 # This resources is not updatable
 immutable: true
 timeouts:
-  insert_minutes: 40
-  update_minutes: 40
-  delete_minutes: 40
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -39,9 +39,9 @@ async:
   operation:
     base_url: '{{op_id}}'
     timeouts:
-      insert_minutes: 40
-      update_minutes: 40
-      delete_minutes: 40
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
   result:
     resource_inside_response: true
 custom_code:

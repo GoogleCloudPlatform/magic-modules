@@ -38,16 +38,11 @@ var cntsRequiredEnvironmentVariables = [...]string{
 }
 
 type TestInfo struct {
-	Name            string `json:"name"`
-	Status          string `json:"status"`
-	Service         string `json:"service"`
-	ErrorMessage    string `json:"error_message"`
-	LogLink         string `json"log_link`
-	ProviderVersion string `json:"provider_version"`
-	QueuedDate      string `json:"queuedDate"`
-	StartDate       string `json:"startDate"`
-	FinishDate      string `json:"finishDate"`
-	Duration        int    `json:"duration"`
+	Name         string `json:"name"`
+	Status       string `json:"status"`
+	Service      string `json:"service"`
+	ErrorMessage string `json:"error_message"`
+	LogLink      string `json"log_link`
 }
 
 // collectNightlyTestStatusCmd represents the collectNightlyTestStatus command
@@ -92,8 +87,8 @@ var collectNightlyTestStatusCmd = &cobra.Command{
 		// check if a specific date is provided
 		if customDate != "" {
 			parsedDate, err := time.Parse("2006-01-02", customDate) // input format YYYY-MM-DD
-			// Set the time to 7pm PT
-			date = time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(), 19, 0, 0, 0, loc)
+			// Set the time to 6pm PT
+			date = time.Date(parsedDate.Year(), parsedDate.Month(), parsedDate.Day(), 18, 0, 0, 0, loc)
 			if err != nil {
 				return fmt.Errorf("invalid input time format: %w", err)
 			}
@@ -169,16 +164,11 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 				errorMessage = convertErrorMessage(testResult.ErrorMessage)
 			}
 			testInfoList = append(testInfoList, TestInfo{
-				Name:            testResult.Name,
-				Status:          testResult.Status,
-				Service:         serviceName,
-				ErrorMessage:    errorMessage,
-				LogLink:         logLink,
-				ProviderVersion: pVersion.String(),
-				Duration:        testResult.Duration,
-				QueuedDate:      build.QueuedDate,
-				StartDate:       build.StartDate,
-				FinishDate:      build.FinishDate,
+				Name:         testResult.Name,
+				Status:       testResult.Status,
+				Service:      serviceName,
+				ErrorMessage: errorMessage,
+				LogLink:      logLink,
 			})
 		}
 	}

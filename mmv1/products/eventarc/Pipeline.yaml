@@ -41,8 +41,11 @@ examples:
     vars:
       pipeline_name: some-pipeline
       topic_name: some-topic
+      network_attachment_name: some-network-attachment
     test_env_vars:
       project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-pipeline-network")))'
   - name: eventarc_pipeline_with_http_destination
     primary_resource_id: primary
     vars:
@@ -51,14 +54,17 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
-      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
+      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-pipeline-network")))'
   - name: eventarc_pipeline_with_workflow_destination
     primary_resource_id: primary
     vars:
       pipeline_name: some-pipeline
       workflow_name: some-workflow
+      network_attachment_name: some-network-attachment
     test_env_vars:
       project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-pipeline-network")))'
   - name: eventarc_pipeline_with_oidc_and_json_format
     primary_resource_id: primary
     vars:
@@ -68,7 +74,7 @@ examples:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
     test_vars_overrides:
-      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
+      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-pipeline-network")))'
   - name: eventarc_pipeline_with_oauth_and_protobuf_format
     primary_resource_id: primary
     vars:
@@ -78,7 +84,7 @@ examples:
       project_id: 'PROJECT_NAME'
       service_account: 'SERVICE_ACCT'
     test_vars_overrides:
-      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
+      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-pipeline-network")))'
   - name: eventarc_pipeline_with_cmek_and_avro_format
     primary_resource_id: primary
     bootstrap_iam:
@@ -91,7 +97,7 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
-      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-bootstrap-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-bootstrap-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-bootstrap-eventarc-pipeline-network")))'
+      'network_attachment_name': 'acctest.BootstrapNetworkAttachment(t, "tf-test-eventarc-pipeline-na", acctest.BootstrapSubnet(t, "tf-test-eventarc-pipeline-subnet", acctest.BootstrapSharedTestNetwork(t, "tf-test-eventarc-pipeline-network")))'
       'key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-eventarc-pipeline-key").CryptoKey.Name'
 parameters:
   - name: location
@@ -310,12 +316,9 @@ properties:
               type: String
               description: |-
                 Name of the NetworkAttachment that allows access to the consumer VPC.
-
                 Format:
                 `projects/{PROJECT_ID}/regions/{REGION}/networkAttachments/{NETWORK_ATTACHMENT_NAME}`
-
-                Required for HTTP endpoint destinations. Must not be specified for
-                Workflows, MessageBus, or Topic destinations.
+              required: true
         - name: httpEndpoint
           type: NestedObject
           description: Represents a HTTP endpoint destination.

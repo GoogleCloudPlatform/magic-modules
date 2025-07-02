@@ -1,6 +1,6 @@
 resource "google_compute_instance" "{{$.PrimaryResourceId}}" {
   name         = "{{index $.Vars "instance_name"}}"
-  zone         = "us-central1-a"
+  zone         = "{{index $.Vars "zone_name"}}"
   machine_type = "e2-medium"
 
   boot_disk {

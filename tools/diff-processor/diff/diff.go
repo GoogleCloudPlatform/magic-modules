@@ -11,16 +11,10 @@ import (
 // SchemaDiff is a nested map with resource names as top-level keys.
 type SchemaDiff map[string]ResourceDiff
 
-type ResourceDiffInterface interface {
-	IsNewResource() bool
-	IsFieldInNewNestedStructure(fieldPath string) bool
-}
-
 type ResourceDiff struct {
-	ResourceConfig  ResourceConfigDiff
-	FlattenedSchema FlattenedSchemaRaw
-	Fields          map[string]FieldDiff
-	FieldSets       ResourceFieldSetsDiff
+	ResourceConfig ResourceConfigDiff
+	Fields         map[string]FieldDiff
+	FieldSets      ResourceFieldSetsDiff
 }
 
 type ResourceFieldSetsDiff struct {
@@ -47,11 +41,6 @@ type FieldDiff struct {
 	New *schema.Schema
 }
 
-type FlattenedSchemaRaw struct {
-	Old map[string]*schema.Schema
-	New map[string]*schema.Schema
-}
-
 func ComputeSchemaDiff(oldResourceMap, newResourceMap map[string]*schema.Resource) SchemaDiff {
 	schemaDiff := make(SchemaDiff)
 	for resource := range union(oldResourceMap, newResourceMap) {
@@ -62,14 +51,12 @@ func ComputeSchemaDiff(oldResourceMap, newResourceMap map[string]*schema.Resourc
 		var flattenedOldSchema map[string]*schema.Schema
 		if oldResource, ok := oldResourceMap[resource]; ok {
 			flattenedOldSchema = flattenSchema("", oldResource.Schema)
-			resourceDiff.FlattenedSchema.Old = flattenedOldSchema
 			resourceDiff.ResourceConfig.Old = &schema.Resource{}
 		}
 
 		var flattenedNewSchema map[string]*schema.Schema
 		if newResource, ok := newResourceMap[resource]; ok {
 			flattenedNewSchema = flattenSchema("", newResource.Schema)
-			resourceDiff.FlattenedSchema.New = flattenedNewSchema
 			resourceDiff.ResourceConfig.New = &schema.Resource{}
 		}
 
@@ -325,34 +312,4 @@ func mergeFieldSets(allFields, currentField map[string]FieldSet) map[string]Fiel
 func setKey(set FieldSet) string {
 	slice := setToSortedSlice(set)
 	return strings.Join(slice, ",")
-}
-
-func (rd ResourceDiff) IsNewResource() bool {
-	rcd := rd.ResourceConfig
-	if rcd.Old == nil && rcd.New != nil {
-		return true
-	}
-	return false
-}
-
-// IsFieldInNewNestedStructure determines if a field is part of a completely new nested structure
-func (rd ResourceDiff) IsFieldInNewNestedStructure(fieldPath string) bool {
-	if rd.IsNewResource() {
-		return true
-	}
-
-	// Get the parent path (everything before the last dot)
-	lastDotIndex := strings.LastIndex(fieldPath, ".")
-	if lastDotIndex == -1 {
-		// No parent path (top-level field)
-		return false
-	}
-
-	parentPath := fieldPath[:lastDotIndex]
-
-	// Check if parent exists in new schema but not in old schema
-	_, parentExistsInOld := rd.FlattenedSchema.Old[parentPath]
-	_, parentExistsInNew := rd.FlattenedSchema.New[parentPath]
-
-	return !parentExistsInOld && parentExistsInNew
 }

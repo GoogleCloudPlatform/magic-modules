@@ -246,7 +246,7 @@ resource "google_compute_instance_template" "confidential_instance_template" {
   }
 
   disk {
-    source_image = "ubuntu-os-cloud/ubuntu-2204-lts"
+    source_image = "ubuntu-os-cloud/ubuntu-2004-lts"
   }
 
   network_interface {
@@ -451,8 +451,6 @@ The following arguments are supported:
 
 * `resource_manager_tags` - (Optional) A set of key/value resource manager tag pairs to bind to this disk. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456.
 
-* `guest_os_features` - (optional) A list of features to enable on the guest operating system. Applicable only for bootable images. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
-
 * `source_image` - (Optional) The image from which to
     initialize this disk. This can be one of: the image's `self_link`,
     `projects/{project}/global/images/{image}`,
@@ -485,8 +483,6 @@ The following arguments are supported:
 * `mode` - (Optional) The mode in which to attach this disk, either READ_WRITE
     or READ_ONLY. If you are attaching or creating a boot disk, this must
     read-write mode.
-
-* `architecture` - (Optional) The architecture of the attached disk. Valid values are `ARM64` or `x86_64`.
 
 * `source` - (Optional) The name (**not self_link**)
     of the disk (such as those managed by `google_compute_disk`) to attach.
@@ -798,8 +794,6 @@ exported:
 * `id` - an identifier for the resource with format `projects/{{project}}/global/instanceTemplates/{{name}}`
 
 * `creation_timestamp` - Creation timestamp in RFC3339 text format.
-
-* `numeric_id` - numeric identifier of the resource.
 
 * `metadata_fingerprint` - The unique fingerprint of the metadata.
 

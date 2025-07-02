@@ -16,13 +16,11 @@
 package cmd
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
-	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -36,9 +34,6 @@ import (
 	"github.com/GoogleCloudPlatform/magic-modules/tools/issue-labeler/labeler"
 
 	"github.com/spf13/cobra"
-	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/parser"
-	"go.abhg.dev/goldmark/frontmatter"
 	"golang.org/x/exp/maps"
 
 	_ "embed"
@@ -50,11 +45,9 @@ var (
 )
 
 type Diff struct {
-	Title        string
-	Repo         string
-	ShortStat    string
-	CommitSHA    string
-	OldCommitSHA string
+	Title     string
+	Repo      string
+	ShortStat string
 }
 
 type BreakingChange struct {
@@ -84,12 +77,12 @@ type Errors struct {
 }
 
 type diffCommentData struct {
+	PrNumber             int
 	Diffs                []Diff
 	BreakingChanges      []BreakingChange
 	MissingServiceLabels []string
 	MissingTests         map[string]*MissingTestInfo
 	MissingDocs          *MissingDocsSummary
-	AddedResources       []string
 	Errors               []Errors
 }
 
@@ -99,7 +92,6 @@ type simpleSchemaDiff struct {
 
 const allowBreakingChangesLabel = "override-breaking-change"
 const allowMissingServiceLabelsLabel = "override-missing-service-labels"
-const allowMultipleResourcesLabel = "override-multiple-resources"
 
 var gcEnvironmentVariables = [...]string{
 	"BUILD_ID",
@@ -222,7 +214,9 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 	}
 
 	// Initialize repos
-	data := diffCommentData{}
+	data := diffCommentData{
+		PrNumber: prNumber,
+	}
 	for _, repo := range []*source.Repo{&tpgRepo, &tpgbRepo, &tgcRepo, &tfoicsRepo} {
 		errors[repo.Title] = []string{}
 		repo.Branch = newBranch
@@ -268,24 +262,10 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			errors[repo.Title] = append(errors[repo.Title], "Failed to compute repo diff shortstats")
 		}
 		if shortStat != "" {
-			variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", repo.Name)
-			oldVariablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", repo.Name)
-			commitSHA, err := rnr.ReadFile(variablePath)
-			if err != nil {
-				errors[repo.Title] = append(errors[repo.Title], "Failed to read commit sha from file")
-				continue
-			}
-			oldCommitSHA, err := rnr.ReadFile(oldVariablePath)
-			if err != nil {
-				errors[repo.Title] = append(errors[repo.Title], "Failed to read old commit sha from file")
-				continue
-			}
 			diffs = append(diffs, Diff{
-				Title:        repo.Title,
-				Repo:         repo.Name,
-				ShortStat:    shortStat,
-				CommitSHA:    commitSHA,
-				OldCommitSHA: oldCommitSHA,
+				Title:     repo.Title,
+				Repo:      repo.Name,
+				ShortStat: shortStat,
 			})
 			repo.ChangedFiles, err = ctlr.DiffNameOnly(repo, oldBranch, newBranch)
 			if err != nil {
@@ -349,11 +329,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 				errors[repo.Title] = append(errors[repo.Title], "The missing doc detector failed to run.")
 			}
 			data.MissingDocs = missingDocs
-
-			errStrs := checkDocumentFrontmatter(repo)
-			if len(errStrs) > 0 {
-				errors[repo.Title] = append(errors[repo.Title], errStrs...)
-			}
 		}
 
 		simpleDiff, err := computeAffectedResources(diffProcessorPath, rnr, repo)
@@ -374,25 +349,6 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 		return breakingChangesSlice[i].Message < breakingChangesSlice[j].Message
 	})
 	data.BreakingChanges = breakingChangesSlice
-
-	// Check if multiple resources were added.
-	multipleResourcesState := "success"
-	if len(uniqueAddedResources) > 1 {
-		multipleResourcesState = "failure"
-		for _, label := range pullRequest.Labels {
-			if label.Name == allowMultipleResourcesLabel {
-				multipleResourcesState = "success"
-				break
-			}
-		}
-	}
-	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildId, buildStep, projectId)
-	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-multiple-resources", multipleResourcesState, targetURL, commitSha); err != nil {
-		fmt.Printf("Error posting terraform-provider-multiple-resources build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
-		errors["Other"] = append(errors["Other"], "Failed to update missing-service-labels status check with state: "+multipleResourcesState)
-	}
-	data.AddedResources = maps.Keys(uniqueAddedResources)
-	slices.Sort(data.AddedResources)
 
 	// Compute affected resources based on changed files
 	changedFilesAffectedResources := map[string]struct{}{}
@@ -458,6 +414,7 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 			}
 		}
 	}
+	targetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildId, buildStep, projectId)
 	if err = gh.PostBuildStatus(strconv.Itoa(prNumber), "terraform-provider-breaking-change-test", breakingState, targetURL, commitSha); err != nil {
 		fmt.Printf("Error posting terraform-provider-breaking-change-test build status for pr %d commit %s: %v\n", prNumber, commitSha, err)
 		errors["Other"] = append(errors["Other"], "Failed to update breaking-change status check with state: "+breakingState)
@@ -678,50 +635,4 @@ func pathChanged(path string, changedFiles []string) bool {
 
 func init() {
 	rootCmd.AddCommand(generateCommentCmd)
-}
-
-// checkDocumentFrontmatter checks changed markdown files' frontmatter
-// structure in the repo and returns error strings when applicable.
-func checkDocumentFrontmatter(repo source.Repo) []string {
-	var errs []string
-	for _, f := range repo.ChangedFiles {
-		if !strings.HasSuffix(f, ".markdown") {
-			continue
-		}
-		src, err := os.ReadFile(filepath.Join(repo.Path, f))
-		if err != nil {
-			errs = append(errs, "Error reading file "+f)
-			continue
-		}
-
-		md := goldmark.New(
-			goldmark.WithExtensions(&frontmatter.Extender{}),
-		)
-
-		ctx := parser.NewContext()
-		var buff bytes.Buffer
-
-		err = md.Convert(src, &buff, parser.WithContext(ctx))
-		if err != nil {
-			errs = append(errs, "Error parsing file "+f)
-			continue
-		}
-		data := frontmatter.Get(ctx)
-		if data == nil {
-			errs = append(errs, fmt.Sprintf("No frontmatter found in file %s. This is usually due to an incorrect structure in the frontmatter.", f))
-			continue
-		}
-
-		var metadata struct {
-			Subcategory string
-		}
-		if err := data.Decode(&metadata); err != nil {
-			errs = append(errs, fmt.Sprintf("Failed to decode frontmatter in file %s. This is usually due to an incorrect structure in the frontmatter.", f))
-			continue
-		}
-		if metadata.Subcategory == "" {
-			errs = append(errs, fmt.Sprintf("Failed to detect subcategory in the frontmatter in file %s.", f))
-		}
-	}
-	return errs
 }

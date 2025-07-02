@@ -3,8 +3,8 @@ package cai
 import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
 type ConvertFunc func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error)

@@ -103,8 +103,8 @@ var (
 		"shuyama1": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 5, 23),
-					endDate:   newDate(2025, 5, 30),
+					startDate: newDate(2025, 3, 26),
+					endDate:   newDate(2025, 4, 1),
 				},
 			},
 		},
@@ -117,12 +117,7 @@ var (
 			},
 		},
 		"slevenick": {
-			vacations: []Vacation{
-				{
-					startDate: newDate(2025, 5, 22),
-					endDate:   newDate(2025, 6, 7),
-				},
-			},
+			vacations: []Vacation{},
 		},
 		"trodge": {
 			vacations: []Vacation{},

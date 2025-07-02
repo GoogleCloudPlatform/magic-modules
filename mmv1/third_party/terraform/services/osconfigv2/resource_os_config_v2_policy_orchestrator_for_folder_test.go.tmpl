@@ -1,6 +1,5 @@
 package osconfigv2_test
 
-{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"testing"
 
@@ -111,10 +110,10 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
 
     policy_orchestrator_id = "tf-test-po-folder%{random_suffix}"
     folder_id = google_folder.my_folder.folder_id
-
+    
     state = "ACTIVE"
     action = "UPSERT"
-
+    
     orchestrated_resource {
         id = "tf-test-test-orchestrated-resource-folder%{random_suffix}"
         os_policy_assignment_v1_payload {
@@ -289,4 +288,3 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
 }
 `, context)
 }
-{{- end }}

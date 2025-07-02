@@ -23,7 +23,6 @@ import (
 	"math"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"golang.org/x/exp/slices"
@@ -52,37 +51,21 @@ func defaultRetryConfig() retryConfig {
 // makeHTTPRequest performs the actual HTTP request and returns the response
 func makeHTTPRequest(url, method, credentials string, body any) (*http.Response, []byte, error) {
 	client := &http.Client{}
-
-	fmt.Println("")
-	fmt.Println("request url: ", url)
-
-	var reqBody io.Reader
-	if body != nil {
-		switch v := body.(type) {
-		case []byte:
-			// Body is already serialized, use directly
-			reqBody = bytes.NewBuffer(v)
-			rbString := strings.TrimSpace(string(v))
-			fmt.Println("request body (raw bytes): ", rbString)
-		default:
-			// Body needs serialization
-			jsonBody, err := json.Marshal(body)
-			if err != nil {
-				return nil, nil, fmt.Errorf("error marshaling JSON: %s", err)
-			}
-			reqBody = bytes.NewBuffer(jsonBody)
-			fmt.Println("request body (serialized): ", string(jsonBody))
-		}
+	jsonBody, err := json.Marshal(body)
+	if err != nil {
+		return nil, nil, fmt.Errorf("error marshaling JSON: %s", err)
 	}
-
-	req, err := http.NewRequest(method, url, reqBody)
+	req, err := http.NewRequest(method, url, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return nil, nil, fmt.Errorf("error creating request: %s", err)
 	}
-
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", credentials))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
+
+	fmt.Println("")
+	fmt.Println("request url: ", url)
+	fmt.Println("request body: ", string(jsonBody))
 	fmt.Println("")
 
 	resp, err := client.Do(req)
@@ -160,11 +143,9 @@ func calculateBackoff(attempt int, config retryConfig) time.Duration {
 	return backoff
 }
 
-// RequestCallWithRetryRaw raw version of the retry function that returns the response and body bytes
-func requestCallWithRetryRaw(url, method, credentials string, body any, config retryConfig) (*http.Response, []byte, error) {
+// RequestCallWithRetry makes an HTTP request with retry capability
+func requestCallWithRetry(url, method, credentials string, result any, body any, config retryConfig) error {
 	var lastErr error
-	var lastResp *http.Response
-	var lastBodyBytes []byte
 
 	for attempt := 0; attempt <= config.MaxRetries; attempt++ {
 		// If this is a retry attempt, wait before trying again
@@ -180,36 +161,27 @@ func requestCallWithRetryRaw(url, method, credentials string, body any, config r
 			continue // Network error, retry
 		}
 
-		lastResp = resp
-		lastBodyBytes = respBodyBytes
+		// Process the response
+		err = processResponse(resp, respBodyBytes, result)
+		if err != nil {
+			lastErr = err
 
-		// Check if we should retry based on status code
-		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			// Check if we should retry based on status code
 			if shouldRetry(resp.StatusCode, config) {
 				continue
 			}
 		}
 
-		return lastResp, lastBodyBytes, nil
-	}
-
-	return lastResp, lastBodyBytes, lastErr
-}
-
-// RequestCallWithRetryRaw is a convenience function that uses default retry settings
-func RequestCallWithRetryRaw(url, method, credentials string, body any) (*http.Response, []byte, error) {
-	return requestCallWithRetryRaw(url, method, credentials, body, defaultRetryConfig())
-}
-
-// RequestCallWithRetry is a convenience function that uses default retry settings
-// and unmarshals the response into the result
-func RequestCallWithRetry(url, method, credentials string, result any, body any) error {
-	resp, respBodyBytes, err := requestCallWithRetryRaw(url, method, credentials, body, defaultRetryConfig())
-	if err != nil {
+		// If we got here with no error, return success
 		return err
 	}
 
-	return processResponse(resp, respBodyBytes, result)
+	return fmt.Errorf("max retries exceeded: %w", lastErr)
+}
+
+// RequestCallWithRetry is a convenience function that uses default retry settings
+func RequestCallWithRetry(url, method, credentials string, result any, body any) error {
+	return requestCallWithRetry(url, method, credentials, result, body, defaultRetryConfig())
 }
 
 func Removes(s1 []string, s2 []string) []string {

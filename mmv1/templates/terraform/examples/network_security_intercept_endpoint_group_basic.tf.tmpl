@@ -1,19 +1,22 @@
 resource "google_compute_network" "network" {
+  provider                = google-beta
   name                    = "{{index $.Vars "network_name"}}"
   auto_create_subnetworks = false
 }
 
 resource "google_network_security_intercept_deployment_group" "deployment_group" {
+  provider                      = google-beta
   intercept_deployment_group_id = "{{index $.Vars "deployment_group_id"}}"
   location                      = "global"
   network                       = google_compute_network.network.id
 }
 
 resource "google_network_security_intercept_endpoint_group" "{{$.PrimaryResourceId}}" {
-  intercept_endpoint_group_id = "{{index $.Vars "endpoint_group_id"}}"
-  location                    = "global"
-  intercept_deployment_group  = google_network_security_intercept_deployment_group.deployment_group.id
-  description                 = "some description"
+  provider                      = google-beta
+  intercept_endpoint_group_id   = "{{index $.Vars "endpoint_group_id"}}"
+  location                      = "global"
+  intercept_deployment_group    = google_network_security_intercept_deployment_group.deployment_group.id
+  description                   = "some description"
   labels = {
     foo = "bar"
   }
