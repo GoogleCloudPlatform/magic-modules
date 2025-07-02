@@ -31,6 +31,11 @@ func TestAcc{{ $e.TestSlug $.ProductMetadata.Name $.Name }}(t *testing.T) {
 	"{{ $field }}",
 {{- end }}
 		},
+		[]string{
+{{- range $field := $e.TGCTestIgnoreInAsset }}
+	"{{ $field }}",
+{{- end }}
+		},
 	)
 }
 {{- end }}
