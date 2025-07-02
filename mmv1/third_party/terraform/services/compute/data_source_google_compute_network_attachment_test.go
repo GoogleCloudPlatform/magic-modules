@@ -120,11 +120,13 @@ resource "google_compute_network_attachment" "default" {
     ]
 
     producer_accept_lists = [
-        google_project.accepted_producer_project1.project_id
+        google_project.accepted_producer_project1.project_id,
+        google_project.accepted_producer_project2.project_id
     ]
 
     producer_reject_lists = [
-        google_project.rejected_producer_project1.project_id
+        google_project.rejected_producer_project1.project_id,
+	google_project.rejected_producer_project2.project_id
     ]
 }
 
