@@ -364,3 +364,73 @@ resource "google_gke_backup_backup_plan" "backupplan" {
 }
 `, context)
 }
+
+func TestAccGKEBackupBackupPlan_tags(t *testing.T) {
+	t.Parallel()
+
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "gkeBackup-backup-plan-tagkey", map[string]interface{}{})
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "gkeBackup-backup-plan-tagvalue", tagKey),
+		"project":         envvar.GetTestProjectFromEnv(),
+		"network_name":    acctest.BootstrapSharedTestNetwork(t, "gke-cluster"),
+		"subnetwork_name": acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster")),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGKEBackupBackupPlanDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccGKEBackupBackupPlanTags(context),
+			},
+			{
+				ResourceName:            "google_gke_backup_backup_plan.backupplan",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "tags"},
+			},
+		},
+	})
+}
+
+func testAccGKEBackupBackupPlanTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_container_cluster" "primary" {
+  name               = "tf-test-testcluster%{random_suffix}"
+  location           = "us-central1"
+  initial_node_count = 1
+  workload_identity_config {
+    workload_pool = "%{project}.svc.id.goog"
+  }
+  addons_config {
+    gke_backup_agent_config {
+      enabled = true
+    }
+  }
+  deletion_protection = false
+  network       = "%{network_name}"
+  subnetwork    = "%{subnetwork_name}"
+}
+
+resource "google_gke_backup_backup_plan" "backupplan" {
+  name = "tf-test-testplan%{random_suffix}"
+  cluster = google_container_cluster.primary.id
+  location = "us-central1"
+  backup_config {
+    include_volume_data = false
+    include_secrets = false
+    all_namespaces = true
+  }
+  labels = {
+    "some-key-1": "some-value-1"
+  }
+  tags = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
+}
