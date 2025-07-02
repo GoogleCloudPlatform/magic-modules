@@ -18,7 +18,7 @@ description: |
   Cloud KMS keys.
 references:
   guides:
-  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/CmekConfig'
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rest/v1/projects.locations.cmekConfigs'
 base_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs'
 self_link: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
 # Update API is also used as create API.
@@ -53,7 +53,7 @@ examples:
       cmek_config_id: 'cmek-config-id'
       kms_key_name: 'kms-key-name'
     test_vars_overrides:
-      kms_key_name: 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "us").CryptoKey.Name'
+      kms_key_name: 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-2").CryptoKey.Name'
     ignore_read_extra:
       - 'project'
 parameters:
@@ -97,17 +97,9 @@ properties:
       KMS key version resource name which will be used to encrypt resources
       `<kms_key>/cryptoKeyVersions/{keyVersion}`.
   - name: 'state'
-    type: Enum
+    type: String
     description: |
       The state of the CmekConfig.
-    enum_values:
-      - 'CREATING'
-      - 'ACTIVE'
-      - 'KEY_ISSUE'
-      - 'DELETING'
-      - 'DELETE_FAILED'
-      - 'UNUSABLE'
-      - 'ACTIVE_ROTATING'
     output: true
   - name: 'isDefault'
     type: Boolean
@@ -134,11 +126,7 @@ properties:
             `projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{keyId}`.
           required: true
   - name: 'notebooklmState'
-    type: Enum
+    type: String
     description: |
       Whether the NotebookLM Corpus is ready to be used.
-    enum_values:
-      - 'NOTEBOOK_LM_NOT_READY'
-      - 'NOTEBOOK_LM_READY'
-      - 'NOTEBOOK_LM_NOT_ENABLED'
     output: true
