@@ -563,7 +563,7 @@ var ServicesListGa = mapOf(
     ),
     "modelarmorglobal" to mapOf(
         "name" to "ModelArmorGlobal",
-        "displayName" to "ModelArmor",
+        "displayName" to "ModelArmorGlobal",
         "path" to "./google/services/modelarmorglobal"
     ),
     "monitoring" to mapOf(
