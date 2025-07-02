@@ -1,0 +1,21 @@
+resource "google_model_armor_floorsetting" "floorsetting-integrated-metadata" {
+  location    = "{{.Vars.location}}"
+  parent      = "{{.Vars.parent}}"
+
+  filter_config {
+  
+  }
+
+  enable_floor_setting_enforcement = "{{.Vars.enable_floor_setting_enforcement}}"
+  
+  ai_platform_floor_setting {
+    inspect_only            = {{.Vars.ai_platform_floor_setting_enforcement_type_inspect_only}}
+    enable_cloud_logging    = {{.Vars.ai_platform_floor_setting_enable_cloud_logging}}
+  }
+  
+  floor_setting_metadata {
+    multi_language_detection {
+      enable_multi_language_detection = {{.Vars.floor_setting_metadata_multi_language_detection}}
+    }
+  }
+}
