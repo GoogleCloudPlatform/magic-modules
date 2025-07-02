@@ -14,7 +14,7 @@ import (
 )
 
 var IamBigtableTableSchema = map[string]*schema.Schema{
-	"instance_name": {
+	"instance": {
 		Type:     schema.TypeString,
 		Required: true,
 		ForceNew: true,
