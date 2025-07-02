@@ -5046,7 +5046,7 @@ resource "google_sql_database_instance" "instance" {
     ip_configuration {
 		psc_config {
 			psc_enabled = true
-			network_attachment_uri = google_compute_network_attachment.default.self_link
+			network_attachment_uri = "projects/%s/regions/us-west2/networkAttachments/%s"
 		}
 		ipv4_enabled = false
     }
@@ -5056,8 +5056,7 @@ resource "google_sql_database_instance" "instance" {
 	}
 	availability_type = "REGIONAL"
   }
-}`, networkAttachmentName, projectId, instanceName)
-
+}`, networkAttachmentName, projectId, instanceName, projectId, networkAttachmentName)
 }
 
 func testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName string, specifyPrivatePathOption bool, enablePrivatePath bool) string {
