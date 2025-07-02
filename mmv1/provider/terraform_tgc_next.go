@@ -99,21 +99,26 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
 
 	if !object.IsExcluded() {
-		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs, "tfplan2cai")
-		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs, "cai2hcl")
+		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
 }
 
-func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool, converter string) {
+func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
 	productName := tgc.Product.ApiName
-	conveterFolder := fmt.Sprintf("pkg/%s/converters/services", converter)
-	targetFolder := path.Join(outputFolder, conveterFolder, productName)
+	targetFolder := path.Join(outputFolder, "pkg/services", productName)
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
 
-	templatePath := fmt.Sprintf("templates/tgc_next/%s/resource_converter.go.tmpl", converter)
+	converters := []string{"tfplan2cai", "cai2hcl"}
+	for _, converter := range converters {
+		templatePath := fmt.Sprintf("templates/tgc_next/%s/resource_converter.go.tmpl", converter)
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_%s.go", productName, google.Underscore(object.Name), converter))
+		templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
+	}
+
+	templatePath := "templates/tgc_next/services/resource.go.tmpl"
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name)))
 	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
 }
@@ -156,14 +161,15 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		"pkg/provider/provider_validators.go":            "third_party/terraform/provider/provider_validators.go",
 		"pkg/provider/provider_mmv1_resources.go":        "templates/tgc_next/provider/provider_mmv1_resources.go.tmpl",
 
+		// services
+		"pkg/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
+		"pkg/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
+
 		// tfplan2cai
-		"pkg/tfplan2cai/converters/resource_converters.go":                       "templates/tgc_next/tfplan2cai/resource_converters.go.tmpl",
-		"pkg/tfplan2cai/converters/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
-		"pkg/tfplan2cai/converters/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
+		"pkg/tfplan2cai/converters/resource_converters.go": "templates/tgc_next/tfplan2cai/resource_converters.go.tmpl",
 
 		// cai2hcl
-		"pkg/cai2hcl/converters/resource_converters.go":                       "templates/tgc_next/cai2hcl/resource_converters.go.tmpl",
-		"pkg/cai2hcl/converters/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
+		"pkg/cai2hcl/converters/resource_converters.go": "templates/tgc_next/cai2hcl/resource_converters.go.tmpl",
 	}
 
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
@@ -234,9 +240,9 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		"pkg/verify/path_or_contents.go":           "third_party/terraform/verify/path_or_contents.go",
 		"pkg/version/version.go":                   "third_party/terraform/version/version.go",
 
-		// tfplan2cai
-		"pkg/tfplan2cai/converters/services/compute/image.go":     "third_party/terraform/services/compute/image.go",
-		"pkg/tfplan2cai/converters/services/compute/disk_type.go": "third_party/terraform/services/compute/disk_type.go",
+		// services
+		"pkg/services/compute/image.go":     "third_party/terraform/services/compute/image.go",
+		"pkg/services/compute/disk_type.go": "third_party/terraform/services/compute/disk_type.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }

@@ -7,34 +7,29 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/models"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tgcresource"
 
 	tfschema "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-// ProjectAssetType is the CAI asset type name for project.
-const ProjectAssetType string = "cloudresourcemanager.googleapis.com/Project"
-
-// ProjectSchemaName is the TF resource schema name for resourcemanager project.
-const ProjectSchemaName string = "google_project"
-
-// ProjectConverter for compute project resource.
-type ProjectConverter struct {
+// ProjectCai2hclConverter for compute project resource.
+type ProjectCai2hclConverter struct {
 	name   string
 	schema map[string]*tfschema.Schema
 }
 
 // NewProjectConverter returns an HCL converter for compute project.
-func NewProjectConverter(provider *tfschema.Provider) models.Converter {
+func NewProjectCai2hclConverter(provider *tfschema.Provider) models.Cai2hclConverter {
 	schema := provider.ResourcesMap[ProjectSchemaName].Schema
 
-	return &ProjectConverter{
+	return &ProjectCai2hclConverter{
 		name:   ProjectSchemaName,
 		schema: schema,
 	}
 }
 
 // Convert converts asset resource data.
-func (c *ProjectConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func (c *ProjectCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
 	var blocks []*models.TerraformResourceBlock
 	block, err := c.convertResourceData(asset)
 	if err != nil {
@@ -44,7 +39,7 @@ func (c *ProjectConverter) Convert(asset caiasset.Asset) ([]*models.TerraformRes
 	return blocks, nil
 }
 
-func (c *ProjectConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+func (c *ProjectCai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
@@ -54,7 +49,7 @@ func (c *ProjectConverter) convertResourceData(asset caiasset.Asset) (*models.Te
 	hclData := make(map[string]interface{})
 	hclData["name"] = assetResourceData["name"]
 	hclData["project_id"] = assetResourceData["projectId"]
-	hclData["labels"] = utils.RemoveTerraformAttributionLabel(assetResourceData["labels"])
+	hclData["labels"] = tgcresource.RemoveTerraformAttributionLabel(assetResourceData["labels"])
 	if strings.Contains(asset.Resource.Parent, "folders/") {
 		hclData["folder_id"] = utils.ParseFieldValue(asset.Resource.Parent, "folders")
 	} else if strings.Contains(asset.Resource.Parent, "organizations/") {
