@@ -228,6 +228,10 @@ properties:
   - name: 'routingMode'
     type: Enum
     description: |
-      The routing mode of the Gateway. This field is configurable only for gateways of type SECURE_WEB_GATEWAY. This field is required for gateways of type SECURE_WEB_GATEWAY.
+      The routing mode of the Gateway. This field is configurable only for gateways of type SECURE_WEB_GATEWAY.
+      This field is required for gateways of type SECURE_WEB_GATEWAY.
+    send_empty_value: true
+    default_value: ''
     enum_values:
+      - ''
       - 'NEXT_HOP_ROUTING_MODE'
