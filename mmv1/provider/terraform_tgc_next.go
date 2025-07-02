@@ -23,6 +23,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
@@ -31,9 +32,17 @@ import (
 	"github.com/otiai10/copy"
 )
 
-// This proivder is for both tfplan2cai and cai2hcl conversions,
+// TerraformGoogleConversionNext is for both tfplan2cai and cai2hcl conversions
 // and copying other files, such as transport.go
 type TerraformGoogleConversionNext struct {
+	ResourceCount int
+
+	ResourcesForVersion []ResourceIdentifier
+
+	// Multiple Terraform resources can share the same API resource type.
+	// For example, "google_compute_region_autoscaler" and "google_region_autoscaler"
+	ResourcesGroupedByApiResourceType map[string][]ResourceIdentifier
+
 	TargetVersionName string
 
 	Version product.Version
@@ -43,12 +52,20 @@ type TerraformGoogleConversionNext struct {
 	StartTime time.Time
 }
 
+type ResourceIdentifier struct {
+	ServiceName   string
+	TerraformName string
+	ResourceName  string
+	AliasName     string // It can be "Default" or the same with ResourceName
+}
+
 func NewTerraformGoogleConversionNext(product *api.Product, versionName string, startTime time.Time) TerraformGoogleConversionNext {
 	t := TerraformGoogleConversionNext{
-		Product:           product,
-		TargetVersionName: versionName,
-		Version:           *product.VersionObjOrClosest(versionName),
-		StartTime:         startTime,
+		Product:                           product,
+		TargetVersionName:                 versionName,
+		Version:                           *product.VersionObjOrClosest(versionName),
+		StartTime:                         startTime,
+		ResourcesGroupedByApiResourceType: make(map[string][]ResourceIdentifier),
 	}
 
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
@@ -75,17 +92,7 @@ func (tgc TerraformGoogleConversionNext) Generate(outputFolder, productPath, res
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
-	if object.ExcludeTgc {
-		log.Printf("Skipping fine-grained resource %s", object.Name)
-		return
-	}
-
-	// TODO: remove it after supporting most of resources.
-	supportList := map[string]bool{
-		"ComputeAddress": true,
-	}
-
-	if ok := supportList[object.ResourceName()]; !ok {
+	if !object.IncludeInTGCNext {
 		return
 	}
 
@@ -94,6 +101,7 @@ func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, out
 	if !object.IsExcluded() {
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs, "tfplan2cai")
 		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs, "cai2hcl")
+		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
 }
 
@@ -113,7 +121,32 @@ func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, t
 func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 }
 
+func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+	eligibleExample := false
+	for _, example := range object.Examples {
+		if !example.ExcludeTest {
+			if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
+				eligibleExample = true
+				break
+			}
+		}
+	}
+	if !eligibleExample {
+		return
+	}
+
+	productName := tgc.Product.ApiName
+	targetFolder := path.Join(outputFolder, "test", "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_generated_test.go", productName, google.Underscore(object.Name)))
+	templateData.GenerateTGCNextTestFile(targetFilePath, object)
+}
+
 func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
+	tgc.generateResourcesForVersion(products)
+
 	resourceConverters := map[string]string{
 		// common
 		"pkg/transport/config.go":                        "third_party/terraform/transport/config.go.tmpl",
@@ -121,6 +154,7 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		"pkg/tpgresource/common_diff_suppress.go":        "third_party/terraform/tpgresource/common_diff_suppress.go",
 		"pkg/provider/provider.go":                       "third_party/terraform/provider/provider.go.tmpl",
 		"pkg/provider/provider_validators.go":            "third_party/terraform/provider/provider_validators.go",
+		"pkg/provider/provider_mmv1_resources.go":        "templates/tgc_next/provider/provider_mmv1_resources.go.tmpl",
 
 		// tfplan2cai
 		"pkg/tfplan2cai/converters/resource_converters.go":                       "templates/tgc_next/tfplan2cai/resource_converters.go.tmpl",
@@ -267,6 +301,61 @@ func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target 
 	err = os.WriteFile(targetFile, sourceByte, 0644)
 	if err != nil {
 		log.Fatalf("Cannot write file %s to replace import path: %s", target, err)
+	}
+}
+
+// Generates the list of resources, and gets the count of resources.
+// The resource object has the format
+//
+//	{
+//	   terraform_name:
+//	   resource_name:
+//	}
+//
+// The variable resources_for_version is used to generate resources in file
+// mmv1/templates/tgc_next/provider/provider_mmv1_resources.go.tmpl
+func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products []*api.Product) {
+	resourcesGroupedByApiResourceType := make(map[string][]ResourceIdentifier)
+
+	for _, productDefinition := range products {
+		service := strings.ToLower(productDefinition.Name)
+		for _, object := range productDefinition.Objects {
+			if object.Exclude || object.NotInVersion(productDefinition.VersionObjOrClosest(tgc.TargetVersionName)) {
+				continue
+			}
+
+			if !object.IncludeInTGCNext {
+				continue
+			}
+
+			tgc.ResourceCount++
+
+			resourceIdentifier := ResourceIdentifier{
+				ServiceName:   service,
+				TerraformName: object.TerraformName(),
+				ResourceName:  object.ResourceName(),
+				AliasName:     object.ResourceName(),
+			}
+			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, resourceIdentifier)
+
+			apiResourceType := fmt.Sprintf("%s.%s", service, object.ApiResourceType())
+			if _, ok := resourcesGroupedByApiResourceType[apiResourceType]; !ok {
+				resourcesGroupedByApiResourceType[apiResourceType] = make([]ResourceIdentifier, 0)
+			}
+			resourcesGroupedByApiResourceType[apiResourceType] = append(resourcesGroupedByApiResourceType[apiResourceType], resourceIdentifier)
+		}
+	}
+
+	for apiResourceType, resources := range resourcesGroupedByApiResourceType {
+		// If no other Terraform resources share the API resource type, override the alias name as "Default"
+		if len(resources) == 1 {
+			for _, resourceIdentifier := range resources {
+				resourceIdentifier.AliasName = "Default"
+				tgc.ResourcesGroupedByApiResourceType[apiResourceType] = []ResourceIdentifier{resourceIdentifier}
+			}
+		} else {
+			tgc.ResourcesGroupedByApiResourceType[apiResourceType] = resources
+		}
 	}
 }
 
