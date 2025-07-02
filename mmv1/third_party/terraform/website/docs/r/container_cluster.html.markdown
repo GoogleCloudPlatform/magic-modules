@@ -330,6 +330,10 @@ field from your config will cause Terraform to stop managing your cluster's
 release channel, but will not unenroll it. Instead, use the `"UNSPECIFIED"`
 channel. Structure is [documented below](#nested_release_channel).
 
+* `gke_auto_upgrade_config` - (Optional)
+Configuration options for the auto-upgrade patch type feature, which provide more control over the speed of automatic upgrades of your GKE clusters.
+Structure is [documented below](#nested_gke_auto_upgrade_config).
+
 * `remove_default_node_pool` - (Optional) If `true`, deletes the default node
     pool upon cluster creation. If you're using `google_container_node_pool`
     resources with no default node pool, this should be set to `true`, alongside
@@ -418,6 +422,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 
 * `enterprise_config` - (Optional)
   Configuration for [Enterprise edition].(https://cloud.google.com/kubernetes-engine/enterprise/docs/concepts/gke-editions). Structure is [documented below](#nested_enterprise_config).
+
+* `anonymous_authentication_config` - (Optional)
+  Configuration for [anonymous authentication restrictions](https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#restrict-anon-access). Structure is [documented below](#anonymous_authentication_config).
 
 
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
@@ -1052,6 +1059,9 @@ sole_tenant_config {
 * `enabled` (Required) - Enable Confidential GKE Nodes for this node pool, to
     enforce encryption of data in-use.
 
+* `confidential_instance_type` (Optional) - Defines the type of technology used
+    by the confidential node.
+
 <a name="nested_node_affinity"></a>The `node_affinity` block supports:
 
 * `key` (Required) - The default or custom node affinity label key name.
@@ -1213,6 +1223,9 @@ notification_config {
 * `enabled` (Required) - Enable Confidential GKE Nodes for this cluster, to
     enforce encryption of data in-use.
 
+* `confidential_instance_type` (Optional) - Defines the type of technology used
+    by the confidential node.
+
 <a name="nested_pod_security_policy_config"></a>The `pod_security_policy_config` block supports:
 
 * `enabled` (Required) - Enable the PodSecurityPolicy controller for this cluster.
@@ -1229,6 +1242,12 @@ notification_config {
 <a name="nested_secret_manager_config"></a>The `secret_manager_config` block supports:
 
 * `enabled` (Required) - Enable the Secret Manager add-on for this cluster.
+* `rotation_config` (Optional, Beta) - config for secret manager auto rotation. Structure is [docuemented below](#rotation_config)
+
+<a name="rotation_config"></a>The `rotation_config` block supports:
+
+* `enabled` (Optional) - Enable the roation in Secret Manager add-on for this cluster.
+* `rotation_interval` (Optional) - The interval between two consecutive rotations. Default rotation interval is 2 minutes.
 
 <a name="nested_user_managed_keys_config"></a>The `user_managed_keys_config` block supports:
 
@@ -1328,6 +1347,12 @@ not.
     * REGULAR: Multiple per month upgrade cadence; Production users who need features not yet offered in the Stable channel.
     * STABLE: Every few months upgrade cadence; Production users who need stability above all else, and for whom frequent upgrades are too risky.
     * EXTENDED: GKE provides extended support for Kubernetes minor versions through the Extended channel. With this channel, you can stay on a minor version for up to 24 months.
+
+<a name="nested_gke_auto_upgrade_config"></a>The `gke_auto_upgrade_config` block supports:
+
+* `patch_mode` - (Required) The selected patch mode.
+    Accepted values are:
+    * ACCELERATED: Upgrades to the latest available patch version in a given minor and release channel.
 
 <a name="nested_cost_management_config"></a>The `cost_management_config` block supports:
 
@@ -1521,6 +1546,10 @@ linux_node_config {
 <a name="nested_enterprise_config"></a>The `enterprise_config` block supports:
 
 * `desired_tier` - (Optional) Sets the tier of the cluster. Available options include `STANDARD` and `ENTERPRISE`.
+
+<a name="anonymous_authentication_config"></a>The `anonymous_authentication_config` block supports:
+
+* `mode` - (Optional) Sets or removes authentication restrictions. Available options include `LIMITED` and `ENABLED`.
 
 
 ## Attributes Reference
