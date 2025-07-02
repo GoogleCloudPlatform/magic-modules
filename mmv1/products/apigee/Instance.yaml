@@ -215,7 +215,7 @@ properties:
         required: true
         description: |
           Boolean flag that specifies whether the customer access log feature is enabled.
-      - name: 'logFormat'
+      - name: 'filter'
         type: String
         description: |
           Ship the access log entries that match the statusCode defined in the filter.
