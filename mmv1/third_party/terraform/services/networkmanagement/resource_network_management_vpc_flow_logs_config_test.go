@@ -337,7 +337,7 @@ resource "google_compute_subnetwork" "subnet" {
 }
 
 resource "google_compute_subnetwork" "subnet_update" {
-  name          = "tf-test-flow-logs-subnet-%{random_suffix}"
+  name          = "tf-test-flow-logs-subnet-update-%{random_suffix}"
   ip_cidr_range = "10.3.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.network.id
@@ -346,12 +346,8 @@ resource "google_compute_subnetwork" "subnet_update" {
 resource "google_network_management_vpc_flow_logs_config" "subnet-test" {
   vpc_flow_logs_config_id = "tf-test-subnet-id-%{random_suffix}"
   location                = "global"
-  subnet                  = "projects/${data.google_project.project.number}/regions/${google_compute_subnetwork.subnet.region}/subnetworks/${google_compute_subnetwork.subnet_update.name}"
-  state                   = "DISABLED"
-  aggregation_interval    = "INTERVAL_30_SEC"
-  flow_sampling           = 0.5
-  metadata                = "EXCLUDE_ALL_METADATA"
-  description             = "Updated description for subnet test"
+  subnet                  = "projects/${data.google_project.project.number}/regions/${google_compute_subnetwork.subnet_update.region}/subnetworks/${google_compute_subnetwork.subnet_update.name}"
+  state                   = "ENABLED"
 }
 `, context)
 }
