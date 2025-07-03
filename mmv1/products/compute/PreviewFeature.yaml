@@ -1,0 +1,84 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+# API resource name
+name: 'PreviewFeature'
+kind: 'compute#PreviewFeature'
+description: |
+  Represents a single Google Compute Engine preview feature such as Alpha API access, which can be enabled or disabled for a project.  
+min_version: 'beta'
+references:
+  guides:
+    'Use the Compute Engine alpha API': 'https://cloud.google.com/compute/docs/reference/rest/alpha'
+  api: 'https://cloud.google.com/compute/docs/reference/rest/beta/PreviewFeatures'
+docs:
+base_url: 'projects/{{project}}/global/previewFeatures'
+has_self_link: false
+
+create_url: 'projects/{{project}}/global/previewFeatures/{{name}}'
+create_verb: 'PATCH'
+update_url: 'projects/{{project}}/global/previewFeatures/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+exclude_delete: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false
+
+examples:
+  - name: 'preview_feature_basic'
+    primary_resource_id: 'gce_preview_feature'
+
+parameters: 
+  - name: 'name'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The name of the preview feature.
+
+properties:
+  - name: 'activationStatus'
+    type: Enum
+    description: 'The activation status of the preview feature.'
+    required: true
+    enum_values:
+      - 'ENABLED'
+      - 'DISABLED'
+  - name: 'rolloutOperation'
+    type: NestedObject
+    description: 'The rollout operation of the feature.'
+    ignore_read: true
+    properties:
+      - name: 'rolloutInput'
+        type: NestedObject
+        description: 'The input for the rollout operation.'
+        properties:
+          - name: 'predefinedRolloutPlan'
+            type: Enum
+            description: 'Predefined rollout plans.'
+            required: true
+            enum_values:
+              - 'ROLLOUT_PLAN_FAST_ROLLOUT'
