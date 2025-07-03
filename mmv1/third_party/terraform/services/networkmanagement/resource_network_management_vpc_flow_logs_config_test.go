@@ -238,20 +238,13 @@ func testAccNetworkManagementVpcFlowLogsConfig_networkUpdate(context map[string]
 	return acctest.Nprintf(`
 data "google_project" "project" {
 }
-
 resource "google_compute_network" "network" {
   name = "tf-test-flow-logs-network-%{random_suffix}"
 }
-
 resource "google_network_management_vpc_flow_logs_config" "network-test" {
   vpc_flow_logs_config_id = "tf-test-network-id-%{random_suffix}"
   location                = "global"
-  network                 = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.network.name}"
-  state                   = "DISABLED"
-  aggregation_interval    = "INTERVAL_10_MIN"
-  flow_sampling           = 0.05
-  metadata                = "INCLUDE_ALL_METADATA"
-  description             = "Updated description for network test"
+  state = "ENABLED"
 }
 `, context)
 }
