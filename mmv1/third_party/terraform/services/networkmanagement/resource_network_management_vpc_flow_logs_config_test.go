@@ -338,7 +338,7 @@ resource "google_compute_subnetwork" "subnet" {
 
 resource "google_compute_subnetwork" "subnet_update" {
   name          = "tf-test-flow-logs-subnet-update-%{random_suffix}"
-  ip_cidr_range = "10.3.0.0/16"
+  ip_cidr_range = "10.3.1.0/16"
   region        = "us-central1"
   network       = google_compute_network.network.id
 }
