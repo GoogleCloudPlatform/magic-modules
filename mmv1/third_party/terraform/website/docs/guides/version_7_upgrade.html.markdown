@@ -106,7 +106,11 @@ Description of the change and how users should adjust their configuration (if ne
 
 ### `retention_period` changed to `string` data type
 
-`retention_period` now changed to `string` data type to handle higher values for bucket retention period.
+`retention_period` was changed to the [`string` data type](https://developer.hashicorp.com/terraform/language/expressions/types#string) to handle higher values for the bucket's retention period.
+
+Terraform [Type Conversion](https://developer.hashicorp.com/terraform/language/expressions/types#type-conversion) will handle the change automatically for most configurations, and they will not need to be modified.
+
+To reflect the new type explicitly, surround the current integer value in quotes, i.e. `retention_period = 10` -> `retention_period = "10"`.
 
 ## Resource: `google_bigtable_table_iam_policy`
 
