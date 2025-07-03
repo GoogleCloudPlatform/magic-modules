@@ -213,9 +213,9 @@ func TestAccGKEBackupRestorePlan_tags(t *testing.T) {
 		"network_name":        acctest.BootstrapSharedTestNetwork(t, "gke-cluster"),
 		"subnetwork_name":     acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster")),
 		"random_suffix":       acctest.RandString(t, 10),
-		"org":           envvar.GetTestOrgFromEnv(t),
-		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "gke_backup_restore_plan_tagvalue", tagKey),
+		"org":                 envvar.GetTestOrgFromEnv(t),
+		"tagKey":              tagKey,
+		"tagValue":            acctest.BootstrapSharedTestOrganizationTagValue(t, "gke_backup_restore_plan_tagvalue", tagKey),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

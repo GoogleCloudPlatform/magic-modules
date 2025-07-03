@@ -370,10 +370,10 @@ func TestAccGKEBackupBackupPlan_tags(t *testing.T) {
 
 	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "gkeBackup-backup-plan-tagkey", map[string]interface{}{})
 	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"org":           envvar.GetTestOrgFromEnv(t),
-		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "gkeBackup-backup-plan-tagvalue", tagKey),
+		"random_suffix":   acctest.RandString(t, 10),
+		"org":             envvar.GetTestOrgFromEnv(t),
+		"tagKey":          tagKey,
+		"tagValue":        acctest.BootstrapSharedTestOrganizationTagValue(t, "gkeBackup-backup-plan-tagvalue", tagKey),
 		"project":         envvar.GetTestProjectFromEnv(),
 		"network_name":    acctest.BootstrapSharedTestNetwork(t, "gke-cluster"),
 		"subnetwork_name": acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster")),
