@@ -52,6 +52,7 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
     - '{{instance_id}}'
 custom_code:
+  pre_delete: 'templates/terraform/pre_delete/securesourcemanager_instance.go.tmpl'
 examples:
   - name: 'secure_source_manager_instance_basic'
     primary_resource_id: 'default'
@@ -164,6 +165,15 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+virtual_fields:
+  - name: 'deletion_protection'
+    type: Boolean
+    default_value: false
+    description: |
+      Whether Terraform will be prevented from destroying the CertificateAuthority.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the CertificateAuthority will fail.
+      When the field is set to false, deleting the CertificateAuthority is allowed.
 properties:
   - name: 'name'
     type: String
