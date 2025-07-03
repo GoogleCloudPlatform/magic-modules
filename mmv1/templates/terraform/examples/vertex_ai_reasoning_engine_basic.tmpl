@@ -1,0 +1,6 @@
+resource "google_vertexai_reasoning_engine" "{{$.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "name"}}"
+  display_name = "{{index $.Vars "name"}}"
+  description  = "A basic reasoning engine"
+  region       = "us-central1"
+}
