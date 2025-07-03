@@ -68,23 +68,11 @@ func parseDurationAsSeconds(v string) (int, bool) {
 
 // Like tpgresource.DurationDiffSuppress, but supports 'd'
 func durationDiffSuppress(k, oldr, newr string, d *schema.ResourceData) bool {
-	o, n := d.GetChange(k)
-	old, ok := o.(string)
+	oldSeconds, ok := parseDurationAsSeconds(oldr)
 	if !ok {
 		return false
 	}
-	new, ok := n.(string)
-	if !ok {
-		return false
-	}
-	if old == new {
-		return true
-	}
-	oldSeconds, ok := parseDurationAsSeconds(old)
-	if !ok {
-		return false
-	}
-	newSeconds, ok := parseDurationAsSeconds(new)
+	newSeconds, ok := parseDurationAsSeconds(newr)
 	if !ok {
 		return false
 	}
