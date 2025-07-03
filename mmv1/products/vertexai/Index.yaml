@@ -85,6 +85,7 @@ properties:
   - name: 'metadata'
     type: NestedObject
     description: An additional information about the Index
+    required: true
     properties:
       - name: 'contentsDeltaUri'
         type: String
