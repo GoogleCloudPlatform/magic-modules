@@ -1,0 +1,72 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	if v == nil {
+		return map[string]interface{}{}, nil
+	}
+	m := make(map[string]interface{})
+	for _, raw := range v.(*schema.Set).List() {
+		original := raw.(map[string]interface{})
+		transformed := make(map[string]interface{})
+
+		// Ensure we don't send empty versions
+		if tpgresource.IsEmptyValue(reflect.ValueOf(original["version_name"])) {
+			continue
+		}
+
+		transformedDescription, err := expandNetworkServicesWasmPluginVersionsFields(original["description"], d, config)
+		if err != nil {
+			return nil, err
+		} else if val := reflect.ValueOf(transformedDescription); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+			transformed["description"] = transformedDescription
+		}
+
+		transformedLabels, err := expandNetworkServicesWasmPluginVersionsLabels(original["labels"], d, config)
+		if err != nil {
+			return nil, err
+		} else if val := reflect.ValueOf(transformedLabels); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+			transformed["labels"] = transformedLabels
+		}
+
+		transformedImageUri, err := expandNetworkServicesWasmPluginVersionsFields(original["image_uri"], d, config)
+		if err != nil {
+			return nil, err
+		} else if val := reflect.ValueOf(transformedImageUri); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+			transformed["imageUri"] = transformedImageUri
+		}
+
+		transformedPluginConfigData, err := expandNetworkServicesWasmPluginVersionsFields(original["plugin_config_data"], d, config)
+		if err != nil {
+			return nil, err
+		} else if val := reflect.ValueOf(transformedPluginConfigData); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+			transformed["pluginConfigData"] = transformedPluginConfigData
+		}
+
+		transformedPluginConfigUri, err := expandNetworkServicesWasmPluginVersionsFields(original["plugin_config_uri"], d, config)
+		if err != nil {
+			return nil, err
+		} else if val := reflect.ValueOf(transformedPluginConfigUri); val.IsValid() && !tpgresource.IsEmptyValue(val) {
+			transformed["pluginConfigUri"] = transformedPluginConfigUri
+		}
+
+		transformedVersionName, err := tpgresource.ExpandString(original["version_name"], d, config)
+		if err != nil {
+			return nil, err
+		}
+		m[transformedVersionName] = transformed
+	}
+	return m, nil
+}
+
+func expandNetworkServicesWasmPluginVersionsFields(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return v, nil
+}
+
+func expandNetworkServicesWasmPluginVersionsLabels(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (map[string]string, error) {
+	if v == nil {
+		return map[string]string{}, nil
+	}
+	m := make(map[string]string)
+	for k, val := range v.(map[string]interface{}) {
+		m[k] = val.(string)
+	}
+	return m, nil
+}
