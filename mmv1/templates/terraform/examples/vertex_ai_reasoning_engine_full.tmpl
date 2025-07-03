@@ -1,0 +1,105 @@
+resource "google_vertexai_reasoning_engine" "{{$.PrimaryResourceId}}" {
+  name         = "{{index $.Vars "name"}}"
+  display_name = "{{index $.Vars "name"}}"
+  description  = "A basic reasoning engine"
+  region       = "us-central1"
+
+  spec {
+    agent_framework = "google-adk"
+    class_methods   = []
+
+    deployment_spec {
+
+      env {
+        name  = "var_1"
+        value = "value_1"
+      }
+
+      env {
+        name  = "var_2"
+        value = "value_2"
+      }
+
+      secretEnv {
+        name  = "secret_var_1"
+
+        secretRef {
+          secret  = google_secret_manager_secret.secret.secret_id
+          version = "latest"
+        }
+      }
+
+      secretEnv {
+        name  = "secret_var_2"
+
+        secretRef {
+          secret  = google_secret_manager_secret.secret.secret_id
+          version = "latest"
+        }
+      }
+    }
+
+    package_spec {
+      dependencyFilesGcsUri = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_dependencies_tar_gz.name}"
+      pickleObjectGcsUri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_pkl_txt.name}"
+      python_version        = "3.10"
+      requirementsGcsUri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_requirements_txt.name}"
+    }
+  }
+
+  depends_on = [
+    google_secret_manager_secret_iam_member.secret_access
+  ]
+}
+
+resource "google_secret_manager_secret" "secret" {
+  secret_id = "secret"
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_iam_member" "secret_access" {
+  secret_id  = google_secret_manager_secret.secret.id
+  role       = "roles/secretmanager.secretAccessor"
+  member     = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
+
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.Vars "bucket_name"}}"
+  location                    = "us-central1"
+  uniform_bucket_level_access = true
+  force_destroy = true        = true
+}
+
+resource "google_storage_bucket_object" "bucket_obj_requirements_txt" {
+  name         = "requirements.txt"
+  content      = "requests"
+  content_type = "text/plain"
+  bucket       = google_storage_bucket.bucket.id
+}
+
+resource "google_storage_bucket_object" "bucket_obj_pkl_txt" {
+  name         = "pickled_object.pkl"
+  # {'hello': 'world'}
+  content      = "b'\x80\x04\x95\x15\x00\x00\x00\x00\x00\x00\x00}\x94\x8c\x05hello\x94\x8c\x05world\x94s.'"
+  content_type = "text/plain"
+  bucket       = google_storage_bucket.bucket.id
+}
+
+resource "google_storage_bucket_object" "bucket_obj_dependencies_tar_gz" {
+  name   = "dependencies.tar.gz"
+  source = "./dependencies.tar.gz"
+  bucket = google_storage_bucket.bucket.id
+}
+
+data "archive_file" "dependencies_tar_gz" {
+  type             = "tar.gz"
+  source_content   = "extra_packages = None"
+  source_file_name = "test.txt"
+  output_path      = "dependencies.tar.gz"
+}
+
+data "google_project" "project" {
+}
