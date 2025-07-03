@@ -53,10 +53,13 @@ examples:
     vars:
       repository_id: 'my-repository'
       instance_id: 'my-instance'
+      deletion_protection: 'true'
       prevent_destroy: 'true'
     test_vars_overrides:
+      'deletion_protection': 'false'
       'prevent_destroy': 'false'
     oics_vars_overrides:
+      'deletion_protection': 'false'
       'prevent_destroy': 'false'
   - name: 'secure_source_manager_repository_initial_config'
     primary_resource_id: 'default'
@@ -64,10 +67,13 @@ examples:
     vars:
       repository_id: 'my-repository'
       instance_id: 'my-instance'
+      deletion_protection: 'true'
       prevent_destroy: 'true'
     test_vars_overrides:
+      'deletion_protection': 'false'
       'prevent_destroy': 'false'
     oics_vars_overrides:
+      'deletion_protection': 'false'
       'prevent_destroy': 'false'
 parameters:
   - name: 'location'
