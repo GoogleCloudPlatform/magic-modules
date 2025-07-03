@@ -695,9 +695,23 @@ func gcsDataSchema() *schema.Resource {
 			},
 			"path": {
 				Optional:    true,
-				Computed:    true,
 				Type:        schema.TypeString,
 				Description: `Google Cloud Storage path in bucket to transfer`,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// This function returns 'true' to suppress (ignore) a diff.
+					// We only want to suppress a diff if the user has omitted the field
+					// in their config (new == "") and the old state from the API
+					// is also the default empty string (old == "").
+					// This prevents a "permadiff" while allowing all other changes.
+					if old == "" && new == "" {
+						return true
+					}
+
+					// In our key scenario of updating "foo" => "", this will be old="foo", new="".
+					// The condition above is false, so we fall through. Returning false below
+					// correctly shows the diff to the user.
+					return false
+				},
 			},
 		},
 	}
