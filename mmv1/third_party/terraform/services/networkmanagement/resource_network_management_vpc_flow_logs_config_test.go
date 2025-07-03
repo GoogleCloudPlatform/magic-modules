@@ -243,10 +243,14 @@ resource "google_compute_network" "network" {
   name = "tf-test-flow-logs-network-%{random_suffix}"
 }
 
+resource "google_compute_network" "network_update" {
+	name = "tf-test-flow-logs-network-update-%{random_suffix}"
+}
+
 resource "google_network_management_vpc_flow_logs_config" "network-test" {
   vpc_flow_logs_config_id = "tf-test-network-id-%{random_suffix}"
   location                = "global"
-  network                 = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.network.name}"
+  network                 = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.network_update.name}"
   state                   = "DISABLED"
   aggregation_interval    = "INTERVAL_10_MIN"
   flow_sampling           = 0.05
@@ -332,10 +336,17 @@ resource "google_compute_subnetwork" "subnet" {
   network       = google_compute_network.network.id
 }
 
+resource "google_compute_subnetwork" "subnet_update" {
+  name          = "tf-test-flow-logs-subnet-%{random_suffix}"
+  ip_cidr_range = "10.3.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.network.id
+}
+
 resource "google_network_management_vpc_flow_logs_config" "subnet-test" {
   vpc_flow_logs_config_id = "tf-test-subnet-id-%{random_suffix}"
   location                = "global"
-  subnet                  = "projects/${data.google_project.project.number}/regions/${google_compute_subnetwork.subnet.region}/subnetworks/${google_compute_subnetwork.subnet.name}"
+  subnet                  = "projects/${data.google_project.project.number}/regions/${google_compute_subnetwork.subnet.region}/subnetworks/${google_compute_subnetwork.subnet_update.name}"
   state                   = "DISABLED"
   aggregation_interval    = "INTERVAL_30_SEC"
   flow_sampling           = 0.5
