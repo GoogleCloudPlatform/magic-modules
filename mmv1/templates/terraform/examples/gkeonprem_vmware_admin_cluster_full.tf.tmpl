@@ -1,5 +1,4 @@
 resource "google_gkeonprem_vmware_admin_cluster" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   name = "{{index $.Vars "name"}}"
   location = "us-west1"
   description = "test admin cluster"
