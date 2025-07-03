@@ -52,17 +52,18 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
     - '{{instance_id}}'
 custom_code:
+  pre_delete: 'templates/terraform/pre_delete/securesourcemanager_instance.go.tmpl'
 examples:
   - name: 'secure_source_manager_instance_basic'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
-      prevent_destroy: 'true'
+      deletion_protection: 'true'
     test_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_protection': 'false'
     oics_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_protection': 'false'
     ignore_read_extra:
       - 'update_time'
   - name: 'secure_source_manager_instance_cmek'
@@ -71,12 +72,12 @@ examples:
     vars:
       instance_id: 'my-instance'
       kms_key_name: 'my-key'
-      prevent_destroy: 'true'
+      deletion_protection: 'true'
     test_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_protection': 'false'
       'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-secure-source-manager-key1").CryptoKey.Name'
     oics_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_protection': 'false'
     ignore_read_extra:
       - 'update_time'
   - name: 'secure_source_manager_instance_private'
@@ -86,11 +87,11 @@ examples:
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
       root_ca_id: 'root-ca'
-      prevent_destroy: 'true'
+      deletion_protection: 'true'
     test_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_protection': 'false'
     oics_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_protection': 'false'
     external_providers: ["time"]
     ignore_read_extra:
       - 'update_time'
@@ -109,11 +110,11 @@ examples:
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
       root_ca_id: 'root-ca'
-      prevent_destroy: 'true'
+      deletion_protection: 'true'
     test_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_protection': 'false'
     oics_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_protection': 'false'
     external_providers: ["time"]
     ignore_read_extra:
       - 'update_time'
@@ -129,11 +130,11 @@ examples:
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
       root_ca_id: 'root-ca'
-      prevent_destroy: 'true'
+      deletion_protection: 'true'
     test_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_protection': 'false'
     oics_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_protection': 'false'
     external_providers: ["time"]
     ignore_read_extra:
       - 'update_time'
@@ -142,11 +143,11 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
-      prevent_destroy: 'true'
+      deletion_protection: 'true'
     test_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_protection': 'false'
     oics_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_protection': 'false'
     ignore_read_extra:
       - 'update_time'
 parameters:
@@ -164,6 +165,15 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+virtual_fields:
+  - name: 'deletion_protection'
+    type: Boolean
+    default_value: false
+    description: |
+      Whether Terraform will be prevented from destroying the Instance.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the Instance will fail.
+      When the field is set to false, deleting the Instance is allowed.
 properties:
   - name: 'name'
     type: String

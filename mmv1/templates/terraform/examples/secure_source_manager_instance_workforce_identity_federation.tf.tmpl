@@ -6,8 +6,5 @@ resource "google_secure_source_manager_instance" "{{$.PrimaryResourceId}}" {
       enabled = true
     }
 
-    # Prevent accidental deletions.
-    lifecycle {
-      prevent_destroy = "{{index $.Vars "prevent_destroy"}}"
-    }
+    deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }
