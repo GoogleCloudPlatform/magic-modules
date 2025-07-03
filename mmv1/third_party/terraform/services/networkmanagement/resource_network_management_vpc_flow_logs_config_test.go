@@ -328,7 +328,12 @@ resource "google_compute_subnetwork" "subnet" {
 resource "google_network_management_vpc_flow_logs_config" "subnet-test" {
   vpc_flow_logs_config_id = "tf-test-subnet-id-%{random_suffix}"
   location                = "global"
+  subnet                  = "projects/${data.google_project.project.number}/regions/${google_compute_subnetwork.subnet.region}/subnetworks/${google_compute_subnetwork.subnet.name}"
   state                   = "DISABLED"
+  aggregation_interval    = "INTERVAL_30_SEC"
+  flow_sampling           = 0.5
+  metadata                = "EXCLUDE_ALL_METADATA"
+  description             = "Updated description for subnet test"
 }
 `, context)
 }
