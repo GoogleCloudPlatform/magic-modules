@@ -1,4 +1,5 @@
-package modelarmor_test
+package modelarmor_test;
+{{- if ne $.TargetVersionName "ga" -}}
 
 import (
 	"fmt"
@@ -8,9 +9,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-)
+);
 
-func TestAccModelArmorTemplate_basic(t *testing.T) {
+
+func TestAccModelArmorTemplate_basicBeta(t *testing.T) {
 	t.Parallel()
 
 	templateId := "modelarmor-test-basic-" + acctest.RandString(t, 10)
@@ -22,11 +24,11 @@ func TestAccModelArmorTemplate_basic(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckModelArmorTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccModelArmorTemplate_basic_config(basicContext),
+				Config: testAccModelArmorTemplate_basic_configBeta(basicContext),
 			},
 			{
 				ResourceName:      "google_model_armor_template.template-basic",
@@ -37,9 +39,10 @@ func TestAccModelArmorTemplate_basic(t *testing.T) {
 	})
 }
 
-func testAccModelArmorTemplate_basic_config(context map[string]interface{}) string {
+func testAccModelArmorTemplate_basic_configBeta(context map[string]interface{}) (string) {
 	return acctest.Nprintf(`
 resource "google_model_armor_template" "template-basic" {
+  provider    = "google-beta"
   location    = "%{location}"
   template_id = "%{templateId}"
   filter_config {
@@ -51,23 +54,23 @@ resource "google_model_armor_template" "template-basic" {
 }`, context)
 }
 
-func TestAccModelArmorTemplate_update(t *testing.T) {
+func TestAccModelArmorTemplate_updateBeta(t *testing.T) {
 	t.Parallel()
 
 	templateId := fmt.Sprintf("modelarmor-test-update-%s", acctest.RandString(t, 5))
 
 	context := map[string]interface{}{
-		"location":   "us-central1",
+        "location": "us-central1",
 		"templateId": templateId,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckModelArmorTemplateDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccModelArmorTemplate_initial(context),
+				Config: testAccModelArmorTemplate_initialBeta(context),
 			},
 			{
 				ResourceName:            "google_model_armor_template.test-resource",
@@ -76,7 +79,7 @@ func TestAccModelArmorTemplate_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"labels", "location", "template_id", "terraform_labels"},
 			},
 			{
-				Config: testAccModelArmorTemplate_update(context),
+				Config: testAccModelArmorTemplate_updateBeta(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_model_armor_template.test-resource", plancheck.ResourceActionUpdate),
@@ -93,9 +96,10 @@ func TestAccModelArmorTemplate_update(t *testing.T) {
 	})
 }
 
-func testAccModelArmorTemplate_initial(context map[string]interface{}) string {
+func testAccModelArmorTemplate_initialBeta(context map[string]interface{}) string {
 	return acctest.Nprintf(`
       resource "google_model_armor_template" "test-resource" {
+        provider    = "google-beta"
         location    = "%{location}"
         template_id = "%{templateId}"
         labels = {
@@ -139,10 +143,11 @@ func testAccModelArmorTemplate_initial(context map[string]interface{}) string {
     `, context)
 }
 
-func testAccModelArmorTemplate_update(context map[string]interface{}) string {
+func testAccModelArmorTemplate_updateBeta(context map[string]interface{}) string {
 	return acctest.Nprintf(`
       resource "google_model_armor_template" "test-resource" {
-        location    = "us-central1"
+        provider    = "google-beta"
+        location    = "%{location}"
         template_id = "%{templateId}"
         labels = {
             "test-label" = "env-testing-updated"
@@ -182,4 +187,6 @@ func testAccModelArmorTemplate_update(context map[string]interface{}) string {
         }
       }
     `, context)
-}
+};
+
+{{- end }}
