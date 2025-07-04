@@ -29,9 +29,10 @@ func TestAccBigtableSchemaBundle_update(t *testing.T) {
 				Config: testAccBigtableSchemaBundle_update(instanceName, tableName, sbName, "proto_schema_bundle"),
 			},
 			{
-				ResourceName:      "google_bigtable_schema_bundle.schema_bundle",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_bigtable_schema_bundle.schema_bundle",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
 			},
 			{
 				Config: testAccBigtableSchemaBundle_update(instanceName, tableName, sbName, "updated_proto_schema_bundle"),
@@ -43,17 +44,19 @@ func TestAccBigtableSchemaBundle_update(t *testing.T) {
 				},
 			},
 			{
-				ResourceName:      "google_bigtable_schema_bundle.schema_bundle",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_bigtable_schema_bundle.schema_bundle",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
 			},
 			{
 				Config: testAccBigtableSchemaBundle_update(instanceName, tableName, sbName, "proto_schema_bundle"),
 			},
 			{
-				ResourceName:      "google_bigtable_schema_bundle.schema_bundle",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_bigtable_schema_bundle.schema_bundle",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ignore_warnings"},
 			},
 		},
 	})
@@ -88,6 +91,8 @@ resource "google_bigtable_schema_bundle" "schema_bundle" {
   proto_schema {
     proto_descriptors = filebase64("test-fixtures/%s.pb")
   }
+
+  ignore_warnings = true
 }
 `, instanceName, instanceName, tableName, sbName, fileName)
 }
