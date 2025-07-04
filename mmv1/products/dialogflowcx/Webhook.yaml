@@ -166,6 +166,13 @@ properties:
           When the same header name is specified in both `request_headers` and
           `secret_versions_for_request_headers`, the value in
           `secret_versions_for_request_headers` will be used.
+        properties:
+          - name: secretVersion
+            type: String
+            description: |
+              The SecretManager secret version resource storing the header value.
+              Format: `projects/{project}/secrets/{secret}/versions/{version}`
+            required: true
       - name: serviceAgentAuth
         type: Enum
         description: |-
@@ -292,6 +299,13 @@ properties:
               When the same header name is specified in both `request_headers` and
               `secret_versions_for_request_headers`, the value in
               `secret_versions_for_request_headers` will be used.
+            properties:
+              - name: secretVersion
+                type: String
+                description: |
+                  The SecretManager secret version resource storing the header value.
+                  Format: `projects/{project}/secrets/{secret}/versions/{version}`
+                required: true
           - name: serviceAgentAuth
             type: Enum
             description: |-
