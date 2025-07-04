@@ -32,8 +32,6 @@ timeouts:
   update_minutes: 75
   delete_minutes: 75
 autogen_async: true
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  pre_delete: 'templates/terraform/pre_delete/metastore_service.go.tmpl'
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -52,7 +50,8 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
     - '{{service_id}}'
-custom_code:
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: 'templates/terraform/pre_delete/metastore_service.go.tmpl'
 examples:
   - name: 'dataproc_metastore_service_basic'
     primary_resource_id: 'default'
@@ -75,6 +74,8 @@ examples:
     primary_resource_id: 'default'
     vars:
       metastore_service_name: 'example-service'
+      kms_key_name: 'example-key'
+    test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-metastore-service-key1").CryptoKey.Name'
     exclude_docs: true
     skip_vcr: true
