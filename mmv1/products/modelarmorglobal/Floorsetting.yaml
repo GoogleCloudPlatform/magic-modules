@@ -31,7 +31,7 @@ custom_code:
   post_create: 'templates/terraform/post_create/modelarmor_floorsetting_sleep.go.tmpl'
   post_update: 'templates/terraform/post_create/modelarmor_floorsetting_sleep.go.tmpl'
 examples:
-# Excluding tests as they modify a singleton resource and hence will result in race conditions
+    # Excluding tests as they modify a singleton resource and hence will result in race conditions
   - name: 'modelarmor_floorsetting_basic'
     primary_resource_id: 'floorsetting-basic'
     test_vars_overrides:
