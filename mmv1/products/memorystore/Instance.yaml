@@ -265,6 +265,7 @@ properties:
       "Optional. Number of replica nodes per shard. If omitted the default
       is 0 replicas. "
     default_from_api: true
+    send_empty_value: true
   - name: 'authorizationMode'
     type: String
     description:
@@ -812,3 +813,21 @@ properties:
     type: String
     description: The KMS key used to encrypt the at-rest data of the cluster
     immutable: true
+  - name: 'managedServerCa'
+    type: NestedObject
+    output: true
+    description: Instance's Certificate Authority. This field will only be populated if instance's transit_encryption_mode is SERVER_AUTHENTICATION
+    properties:
+      - name: 'caCerts'
+        type: Array
+        output: true
+        description: The PEM encoded CA certificate chains for managed server authentication
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'certificates'
+              type: Array
+              output: true
+              description: The certificates that form the CA chain, from leaf to root order
+              item_type:
+                type: String
