@@ -1,0 +1,14 @@
+if v, ok := res["name"]; ok && v != nil {
+	name := v.(string)
+	parts := strings.Split(name, "/")
+	if len(parts) > 0 {
+		// The last part of the resource name is the subscription ID.
+		d.Set("subscription_id", parts[len(parts)-1])
+	}
+}
+
+if v, ok := res["subscriberContact"]; ok && v != nil {
+	d.Set("subscriber_contact", v.(string))
+}
+
+return res, nil
