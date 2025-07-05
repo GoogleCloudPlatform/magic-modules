@@ -1,3 +1,45 @@
+		// var currentState string
+        // if stateVal, ok := d.GetOk("state"); ok {
+        //     if s, isString := stateVal.(string); isString {
+        //         currentState = s
+        //     } else {
+        //         log.Printf("[WARN] BigQuery Analytics Hub Subscription (ID: %s): 'state' attribute is present but not a string. Value: %#v. Assuming empty state for refresh logic.", d.Id(), stateVal)
+        //         currentState = "" // Treat as empty if type assertion fails
+        //     }
+        // } else {
+        //     // 'state' attribute is missing entirely from resource data
+        //     log.Printf("[WARN] BigQuery Analytics Hub Subscription (ID: %s): 'state' attribute is missing from resource data. Assuming empty state for refresh logic.", d.Id())
+        //     currentState = "" // Treat as empty if missing
+        // }
+        // refreshWhenApply:= d.Get("refresh_when_apply").(bool) //no error handling needed as nil will default to false
+		// refreshWhenStale:= d.Get("refresh_when_stale").(bool) //no error handling needed as nil will default to false
+		// refreshFinal := refreshWhenApply || (refreshWhenStale && currentState=="STATE_STALE")
+
+		// if (refreshFinal) {
+		// log.Printf("[DEBUG] Attempting to refresh BigQuery Analytics Hub Subscription %q (ID: %s)", d.Get("name").(string), d.Id())
+		// refreshUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigqueryAnalyticsHubBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/subscriptions/{{"{{"}}subscription_id{{"}}"}}:refresh")
+		// if err != nil {
+		// 	return fmt.Errorf("Error constructing refresh URL for DataExchangeSubscription %q: %s", d.Id(), err)
+		// }
+
+		// refreshBodyMap := map[string]any{}
+		// refreshHeaders := make(http.Header)
+		// refreshHeaders.Set("Content-Type", "application/json")
+
+		// _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		// 	Config:    config,
+		// 	Method:    "POST",
+		// 	Project:   billingProject,
+		// 	RawURL:    refreshUrl,
+		// 	UserAgent: userAgent,
+		// 	Headers:   refreshHeaders,
+		// 	Body:      refreshBodyMap,
+		// })
+
+		// if err != nil {
+		// 	return fmt.Errorf("Error performing refresh for BigQuery Analytics Hub Subscription %q : %s", d.Id(), err)
+		// }
+		// }
 		var currentState string
         if stateVal, ok := d.GetOk("state"); ok {
             if s, isString := stateVal.(string); isString {
@@ -11,32 +53,41 @@
             log.Printf("[WARN] BigQuery Analytics Hub Subscription (ID: %s): 'state' attribute is missing from resource data. Assuming empty state for refresh logic.", d.Id())
             currentState = "" // Treat as empty if missing
         }
-        refreshWhenApply:= d.Get("refresh_when_apply").(bool) //no error handling needed as nil will default to false
-		refreshWhenStale:= d.Get("refresh_when_stale").(bool) //no error handling needed as nil will default to false
-		refreshFinal := refreshWhenApply || (refreshWhenStale && currentState=="STATE_STALE")
 
-		if (refreshFinal) {
-		log.Printf("[DEBUG] Attempting to refresh BigQuery Analytics Hub Subscription %q (ID: %s)", d.Get("name").(string), d.Id())
-		refreshUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigqueryAnalyticsHubBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/subscriptions/{{"{{"}}subscription_id{{"}}"}}:refresh")
-		if err != nil {
-			return fmt.Errorf("Error constructing refresh URL for DataExchangeSubscription %q: %s", d.Id(), err)
-		}
+        // Get the value of the 'refresh_policy' enum field
+        refreshPolicy := d.Get("refresh_policy").(string)
 
-		refreshBodyMap := map[string]any{}
-		refreshHeaders := make(http.Header)
-		refreshHeaders.Set("Content-Type", "application/json")
+        // Determine if the refresh API call should be triggered based on the new policy
+        shouldTriggerRefreshAPI := false
+        if refreshPolicy == "ON_READ" {
+            shouldTriggerRefreshAPI = true
+        } else if refreshPolicy == "ON_STALE" {
+            shouldTriggerRefreshAPI = (currentState == "STATE_STALE")
+        } // If refreshPolicy is "NEVER", shouldTriggerRefreshAPI remains false.
 
-		_, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "POST",
-			Project:   billingProject,
-			RawURL:    refreshUrl,
-			UserAgent: userAgent,
-			Headers:   refreshHeaders,
-			Body:      refreshBodyMap,
-		})
+        if (shouldTriggerRefreshAPI) {
+            log.Printf("[DEBUG] Attempting to refresh BigQuery Analytics Hub Subscription %q (ID: %s)", d.Get("name").(string), d.Id())
 
-		if err != nil {
-			return fmt.Errorf("Error performing refresh for BigQuery Analytics Hub Subscription %q : %s", d.Id(), err)
-		}
-		}
+            refreshUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}BigqueryAnalyticsHubBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/subscriptions/{{"{{"}}subscription_id{{"}}"}}:refresh")
+            if err != nil {
+                return fmt.Errorf("Error constructing refresh URL for DataExchangeSubscription %q: %s", d.Id(), err)
+            }
+
+            refreshBodyMap := map[string]any{}
+            refreshHeaders := make(http.Header)
+            refreshHeaders.Set("Content-Type", "application/json")
+
+            _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+                Config:    config,
+                Method:    "POST",
+                Project:   billingProject,
+                RawURL:    refreshUrl,
+                UserAgent: userAgent,
+                Headers:   refreshHeaders,
+                Body:      refreshBodyMap,
+            })
+
+            if err != nil {
+                return fmt.Errorf("Error performing refresh for BigQuery Analytics Hub Subscription %q : %s", d.Id(), err)
+            }
+        }

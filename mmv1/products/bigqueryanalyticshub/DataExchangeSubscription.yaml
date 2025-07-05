@@ -23,9 +23,6 @@ docs:
   note: |-
     When importing the resource with `terraform import`, provide the destination project and location
     in the format projects/{{destination_project}}/locations/{{destination_location}}/subscriptions/{{subscription_id}}
-  optional_properties: |
-    * `refresh_when_apply` - (Optional) Default value is true. If true, the subscription will be refreshed everytime terraform apply/plan is called
-    * `refresh_when_stale` - (Optional) Default value is true. If true, the subscription will be refreshed everytime the state is STATE_STALE and terraform apply/plan is called
 base_url: 'projects/{{project}}/locations/{{location}}/subscriptions'
 self_link: 'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}'
 create_url: 'projects/{{data_exchange_project}}/locations/{{data_exchange_location}}/dataExchanges/{{data_exchange_id}}:subscribe'
@@ -60,14 +57,18 @@ examples:
       destination_dataset_id: 'subscribed_dest_dataset'
       destination_dataset_friendly_name: 'Subscribed Destination Dataset'
 virtual_fields:
-  - name: 'refresh_when_apply'
-    type: Boolean
-    description: 'Default value is true. If true, the subscription will be refreshed everytime terraform apply/plan is called'
-    default_value: true
-  - name: 'refresh_when_stale'
-    type: Boolean
-    description: 'Default value is true. If true, the subscription will be refreshed everytime the state is STATE_STALE and terraform apply/plan is called'
-    default_value: true
+  - name: 'refresh_policy'
+    type: Enum
+    description: |-
+        Controls when the subscription is automatically refreshed by the provider.
+        * `ON_READ`: Default value if not specified. The subscription will be refreshed every time Terraform performs a read operation (e.g., `terraform plan`, `terraform apply`, `terraform refresh`). This ensures the state is always up-to-date.
+        * `ON_STALE`: The subscription will only be refreshed when its reported `state` (an output-only field from the API) is `STATE_STALE` during a Terraform read operation.
+        * `NEVER`: The provider will not automatically refresh the subscription.
+    default_value: 'ON_READ'
+    enum_values:
+      - 'ON_READ'
+      - 'ON_STALE'
+      - 'NEVER'
 parameters:
   - name: 'dataExchangeId'
     type: String

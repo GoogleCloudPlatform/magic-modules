@@ -85,6 +85,5 @@ resource "google_bigquery_analytics_hub_data_exchange_subscription" "{{$.Primary
     }
   }
 
-  refresh_when_apply=true
-  refresh_when_stale=true
+  refresh_policy="ON_READ"
 }
