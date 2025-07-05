@@ -85,18 +85,16 @@ properties:
           type: NestedObject
           properties:
             - name: 'steps'
-              type: Array
+              type: String
               description: |
                 Sub-processing needed to execute the current step.
-              item_type:
-                type: String
-                description: |
-                  This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Step](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.playbooks#step).
-                state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-                validation:
-                  function: 'validation.StringIsJSON'
+
+                This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Step](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.playbooks#step).
+              state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+              custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+              custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+              validation:
+                function: 'validation.StringIsJSON'
             - name: 'text'
               type: String
               description: |
