@@ -41,10 +41,10 @@ func ConvertResource(rdList []*models.FakeResourceDataWithMeta, cfg *transport_t
 
 			for _, asset := range convertedAssets {
 				asset.TfplanAddress = []string{rd.Address()}
-				err := am.SetAncestors(rd, cfg, &asset)
-				if err != nil {
-					return nil, err
-				}
+				// err := am.SetAncestors(rd, cfg, &asset)
+				// if err != nil {
+				// 	return nil, err
+				// }
 				assets = append(assets, asset)
 			}
 		}
