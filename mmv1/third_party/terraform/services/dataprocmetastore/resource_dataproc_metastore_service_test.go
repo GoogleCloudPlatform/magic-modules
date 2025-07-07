@@ -26,7 +26,7 @@ func TestAccDataprocMetastoreService_updateAndImport(t *testing.T) {
 				ResourceName:            "google_dataproc_metastore_service.my_metastore",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletionProtection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccDataprocMetastoreService_updateAndImport(name, tier[1]),
@@ -35,7 +35,7 @@ func TestAccDataprocMetastoreService_updateAndImport(t *testing.T) {
 				ResourceName:            "google_dataproc_metastore_service.my_metastore",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletionProtection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -47,7 +47,7 @@ resource "google_dataproc_metastore_service" "my_metastore" {
 	service_id = "%s"
 	location   = "us-central1"
 	tier       = "%s"
-	deletionProtection = false
+	deletion_protection = false
 
 	hive_metastore_config {
 		version = "2.3.6"
@@ -172,7 +172,7 @@ resource "google_storage_bucket" "bucket" {
 `, context)
 }
 
-func TestAccDataprocMetastoreService_updateLocation_deletionProtection(t *testing.T) {
+func TestAccDataprocMetastoreService_deletionProtection(t *testing.T) {
 	t.Parallel()
 
 	name := "tf-test-metastore-" + acctest.RandString(t, 10)
@@ -183,17 +183,17 @@ func TestAccDataprocMetastoreService_updateLocation_deletionProtection(t *testin
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDataprocMetastoreService_updateLocation_deletionProtection(name, "us-central1", tier[0]),
+				Config: testAccDataprocMetastoreService_deletionProtection(name, "us-central1", tier[0]),
 			},
 			{
 				ResourceName:            "google_dataproc_metastore_service.my_metastore",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletionProtection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config:      testAccDataprocMetastoreService_updateLocation_deletionProtection(name, "us-west2", tier[1]),
-				ExpectError: regexp.MustCompile("deletionProtection"),
+				ExpectError: regexp.MustCompile("deletion_protection"),
 			},
 			{
 				Config: testAccDataprocMetastoreService_updateAndImport(name, tier[0]),
@@ -202,13 +202,13 @@ func TestAccDataprocMetastoreService_updateLocation_deletionProtection(t *testin
 	})
 }
 
-func testAccDataprocMetastoreService_updateLocation_deletionProtection(name, location, tier string) string {
+func testAccDataprocMetastoreService_deletionProtection(name, location, tier string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_metastore_service" "my_metastore" {
         service_id = "%s"
         location   = "%s"
         tier       = "%s"
-        deletionProtection = true
+        deletion_protection = true
         hive_metastore_config {
                 version = "2.3.6"
         }
