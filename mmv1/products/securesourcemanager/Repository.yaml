@@ -98,7 +98,6 @@ properties:
     description: |
       The name of the instance in which the repository is hosted.
     required: true
-    immutable: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - name: 'uid'
     type: String
@@ -141,6 +140,7 @@ properties:
     description: |
       Initial configurations for the repository.
     ignore_read: true
+    immutable: true
     properties:
       - name: 'defaultBranch'
         type: String
