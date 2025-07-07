@@ -30,20 +30,20 @@ package converters
 import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/cai"
 	{{- range $service := $.Products }}
-	  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/services/{{ lower $service.Name }}"
+	  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/services/{{ lower $service.Name }}"
 	{{- end }}
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/services/resourcemanager"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/services/resourcemanager"
 )
 
-var ConverterMap = map[string]cai.ResourceConverter{
+var ConverterMap = map[string]cai.Tfplan2caiConverter{
 	// ####### START handwritten resources ###########
-	"google_project":          resourcemanager.ResourceConverterProject(),
-	"google_compute_instance": compute.ResourceConverterComputeInstance(),
+	"google_project":          resourcemanager.ProjectTfplan2caiConverter(),
+	"google_compute_instance": compute.ComputeInstanceTfplan2caiConverter(),
 	// ####### END handwritten resources ###########
 
 	{{- range $object := $.ResourcesForVersion }}
 		{{- if $object.ResourceName }}
-			"{{ $object.TerraformName }}": {{ $object.ServiceName }}.ResourceConverter{{ $object.ResourceName -}}(),
+			"{{ $object.TerraformName }}": {{ $object.ServiceName }}.{{ $object.ResourceName -}}Tfplan2caiConverter(),
 		{{- end }}
 	{{- end }}
 }

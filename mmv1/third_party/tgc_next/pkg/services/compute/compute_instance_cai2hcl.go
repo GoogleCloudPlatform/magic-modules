@@ -1,43 +1,37 @@
 package compute
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/models"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tgcresource"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	compute "google.golang.org/api/compute/v0.beta"
 )
 
-// ComputeInstanceAssetType is the CAI asset type name for compute instance.
-const ComputeInstanceAssetType string = "compute.googleapis.com/Instance"
-
-// ComputeInstanceSchemaName is the TF resource schema name for compute instance.
-const ComputeInstanceSchemaName string = "google_compute_instance"
-
-// ComputeInstanceConverter for compute instance resource.
-type ComputeInstanceConverter struct {
+// ComputeInstanceCai2hclConverter for compute instance resource.
+type ComputeInstanceCai2hclConverter struct {
 	name   string
 	schema map[string]*schema.Schema
 }
 
-// NewComputeInstanceConverter returns an HCL converter for compute instance.
-func NewComputeInstanceConverter(provider *schema.Provider) models.Converter {
+// NewComputeInstanceCai2hclConverter returns an HCL converter for compute instance.
+func NewComputeInstanceCai2hclConverter(provider *schema.Provider) models.Cai2hclConverter {
 	schema := provider.ResourcesMap[ComputeInstanceSchemaName].Schema
 
-	return &ComputeInstanceConverter{
+	return &ComputeInstanceCai2hclConverter{
 		name:   ComputeInstanceSchemaName,
 		schema: schema,
 	}
 }
 
 // Convert converts asset to HCL resource blocks.
-func (c *ComputeInstanceConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func (c *ComputeInstanceCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
 	var blocks []*models.TerraformResourceBlock
 	block, err := c.convertResourceData(asset)
 	if err != nil {
@@ -47,7 +41,7 @@ func (c *ComputeInstanceConverter) Convert(asset caiasset.Asset) ([]*models.Terr
 	return blocks, nil
 }
 
-func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
@@ -78,7 +72,7 @@ func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*m
 		hclData["tags"] = tpgresource.ConvertStringArrToInterface(instance.Tags.Items)
 	}
 
-	hclData["labels"] = utils.RemoveTerraformAttributionLabel(instance.Labels)
+	hclData["labels"] = tgcresource.RemoveTerraformAttributionLabel(instance.Labels)
 	hclData["service_account"] = flattenServiceAccountsTgc(instance.ServiceAccounts)
 	hclData["resource_policies"] = instance.ResourcePolicies
 
@@ -239,20 +233,4 @@ func flattenScratchDisk(disk *compute.AttachedDisk) map[string]interface{} {
 	result["interface"] = disk.Interface
 
 	return result
-}
-
-func flattenPartnerMetadata(partnerMetadata map[string]compute.StructuredEntries) (map[string]string, error) {
-	partnerMetadataMap := make(map[string]string)
-	for key, value := range partnerMetadata {
-
-		jsonString, err := json.Marshal(&value)
-		if err != nil {
-			return nil, err
-		}
-		if value.Entries != nil {
-			partnerMetadataMap[key] = string(jsonString)
-		}
-
-	}
-	return partnerMetadataMap, nil
 }

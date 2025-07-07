@@ -13,7 +13,7 @@ func ConvertResource(asset caiasset.Asset) ([]*models.TerraformResourceBlock, er
 		return nil, nil
 	}
 
-	var converter models.Converter
+	var converter models.Cai2hclConverter
 	// Normally, one asset type has only one converter.
 	if len(converters) == 1 {
 		for _, converter = range converters {
