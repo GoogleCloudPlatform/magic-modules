@@ -102,6 +102,9 @@ func Get{{ $.ResourceName -}}CaiAssets(d tpgresource.TerraformResourceData, conf
     }
     if obj, err := Get{{ $.ResourceName -}}CaiObject(d, config); err == nil {
         location, _ := tpgresource.GetLocation(d, config)
+        if location == "" && strings.Contains(name, "/global/") {
+            location = "global"
+        }
         return []caiasset.Asset{{"{{"}}
             Name: name,
             Type: {{ $.ApiResourceType -}}AssetType,
