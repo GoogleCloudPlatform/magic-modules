@@ -26,11 +26,8 @@ import (
   "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/verify"
 )
 
-{{- $caiProductBaseUrl := $.CaiProductBaseUrl }}
-{{- $productBackendName := $.CaiProductBackendName $caiProductBaseUrl }}
-
-{{- if not $.ApiResourceTypeKind }}
-const {{ $.ApiResourceType -}}AssetType string = "{{ $productBackendName }}.googleapis.com/{{ $.Name -}}"
+{{ if $.DefineAssetTypeForResourceInProduct -}}
+const {{ $.ResourceName -}}AssetType string = "{{ $.CaiAssetType }}"
 {{- end }}
 
 const {{ $.ResourceName -}}SchemaName string = "{{ $.TerraformName }}"

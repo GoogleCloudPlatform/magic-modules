@@ -1824,6 +1824,31 @@ func (r Resource) CaiProductBackendName(caiProductBaseUrl string) string {
 	return strings.ToLower(backendUrl)
 }
 
+// Returns the asset type for this resource.
+func (r Resource) CaiAssetType() string {
+	baseURL := r.CaiProductBaseUrl()
+	productBackendName := r.CaiProductBackendName(baseURL)
+	assetName := r.Name
+	if r.ApiResourceTypeKind != "" {
+		assetName = r.ApiResourceTypeKind
+	}
+	return fmt.Sprintf("%s.googleapis.com/%s", productBackendName, assetName)
+}
+
+// DefineAssetTypeForResourceInProduct marks the AssetType constant for this resource as defined.
+// It returns true if this is the first time it's been called for this resource,
+// and false otherwise, preventing duplicate definitions.
+func (r Resource) DefineAssetTypeForResourceInProduct() bool {
+	if r.ProductMetadata.ResourcesWithCaiAssetType == nil {
+		r.ProductMetadata.ResourcesWithCaiAssetType = make(map[string]struct{}, 1)
+	}
+	if _, alreadyDefined := r.ProductMetadata.ResourcesWithCaiAssetType[r.Name]; alreadyDefined {
+		return false
+	}
+	r.ProductMetadata.ResourcesWithCaiAssetType[r.Name] = struct{}{}
+	return true
+}
+
 // Gets the Cai asset name template, which could include version
 // For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
 func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
