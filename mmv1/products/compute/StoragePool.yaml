@@ -281,7 +281,6 @@ properties:
     type: KeyValueLabels
     description: |
       Labels to apply to this storage pool. These can be later modified by the setLabels method.
-    update_verb: "POST"
 virtual_fields:
   - name: "deletion_protection"
     type: Boolean
