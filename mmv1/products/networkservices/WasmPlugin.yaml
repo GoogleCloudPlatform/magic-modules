@@ -18,7 +18,7 @@ description: |
 references:
   guides:
     'Configure a route extension': 'https://cloud.google.com/service-extensions/docs/create-plugin'
-  api: 'https://cloud.google.com/service-extensions/docs/reference/rest/v1beta1/projects.locations.wasmPlugins'
+  api: 'https://cloud.google.com/service-extensions/docs/reference/rest/v1/projects.locations.wasmPlugins'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/wasmPlugins'
 self_link: 'projects/{{project}}/locations/{{location}}/wasmPlugins/{{name}}'
