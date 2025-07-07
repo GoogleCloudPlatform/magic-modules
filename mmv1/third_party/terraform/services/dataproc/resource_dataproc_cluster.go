@@ -665,6 +665,7 @@ func ResourceDataprocCluster() *schema.Resource {
 									"metadata": {
 										Type:         schema.TypeMap,
 										Optional:     true,
+										Computed:     true,
 										AtLeastOneOf: gceClusterConfigKeys,
 										Elem:         &schema.Schema{Type: schema.TypeString},
 										ForceNew:     true,
