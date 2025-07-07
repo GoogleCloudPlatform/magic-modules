@@ -12,8 +12,7 @@
 # limitations under the License.
 
 ---
-name: 'function'
-api_resource_type_kind: Function
+name: 'Function'
 description: |
   A Cloud Function that contains user computation executed in response to an event.
 references:
