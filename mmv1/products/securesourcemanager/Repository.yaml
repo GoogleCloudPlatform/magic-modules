@@ -46,6 +46,7 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
     - '{{repository_id}}'
 custom_code:
+  pre_delete: 'templates/terraform/pre_delete/securesourcemanager_repository.go.tmpl'
 examples:
   - name: 'secure_source_manager_repository_basic'
     primary_resource_id: 'default'
@@ -54,10 +55,13 @@ examples:
       repository_id: 'my-repository'
       instance_id: 'my-instance'
       prevent_destroy: 'true'
+      deletion_protection: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
+      'deletion_protection': 'false'
     oics_vars_overrides:
       'prevent_destroy': 'false'
+      'deletion_protection': 'false'
   - name: 'secure_source_manager_repository_initial_config'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
@@ -65,10 +69,13 @@ examples:
       repository_id: 'my-repository'
       instance_id: 'my-instance'
       prevent_destroy: 'true'
+      deletion_protection: 'true'
     test_vars_overrides:
       'prevent_destroy': 'false'
+      'deletion_protection': 'false'
     oics_vars_overrides:
       'prevent_destroy': 'false'
+      'deletion_protection': 'false'
 parameters:
   - name: 'location'
     type: String
@@ -82,6 +89,15 @@ parameters:
       The ID for the Repository.
     url_param_only: true
     required: true
+virtual_fields:
+  - name: 'deletion_protection'
+    type: Boolean
+    default_value: false
+    description: |
+      Whether Terraform will be prevented from destroying the Repository.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the Repository will fail.
+      When the field is set to false, deleting the Repository is allowed.
 properties:
   - name: 'name'
     type: String
