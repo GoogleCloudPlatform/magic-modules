@@ -58,7 +58,7 @@ type Product struct {
 	// base URL. Specific to defining the resource as a CAI asset.
 	CaiBaseUrl string
 
-	// ApiResourceName of resources that already have an AssetType constant defined in the product.
+	// ApiResourceType of resources that already have an AssetType constant defined in the product.
 	ResourcesWithCaiAssetType map[string]struct{}
 
 	// A function reference designed for the rare case where you
