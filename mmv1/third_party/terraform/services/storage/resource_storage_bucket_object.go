@@ -97,7 +97,7 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Default:       false,
 				ForceNew:      true,
 				ConflictsWith: []string{"content_type"},
-				Description:   `Flag to force empty Content-Type.`,
+				Description:   `Flag to set empty Content-Type.`,
 			},
 
 			"content": {
