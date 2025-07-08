@@ -324,11 +324,6 @@ func InsertDiffSteps(c resource.TestCase, temp_file *os.File, releaseProvider st
 	return replacementSteps
 }
 
-// reformConfigWithProvider reformats the config to use the given provider
-// The method matches a regex for the provider block and replaces it with the given provider.
-// For example: ' data "google_compute_network" "default" { provider = "google-local" } '
-// will be reformatted to ' data "google_compute_network" "default" { provider = "google-beta" } '
-
 func ReformConfigWithProvider(config, provider string) string {
 	configBytes := []byte(config)
 	providerReplacement := fmt.Sprintf("provider = %s", provider)
@@ -349,6 +344,10 @@ func ReformConfigWithProvider(config, provider string) string {
 	return string(resourceHeader.ReplaceAll(configBytes, providerReplacementBytes))
 }
 
+// reformConfigWithProvider reformats the config to use the given provider
+// The method matches a regex for the provider block and replaces it with the given provider.
+// For example: ' data "google_compute_network" "default" { provider = "google-local" } '
+// will be reformatted to ' data "google_compute_network" "default" { provider = "google-beta" } '
 // parseReleaseDiffOutput reads the temporary file created during the release diff test and returns the last line of output
 // This is useful for extracting the diff output from the file after the test has run
 
