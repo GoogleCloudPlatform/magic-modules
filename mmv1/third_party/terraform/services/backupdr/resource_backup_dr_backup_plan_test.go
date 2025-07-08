@@ -198,7 +198,7 @@ resource "google_backup_dr_backup_plan" "bp" {
       }
     }
   }
-  backup_rules{
+  backup_rules {
    # Adding a second rule to test weekly schedule
     rule_id                = "rule-2"
     backup_retention_days  = 60 # Different retention for rule-2
