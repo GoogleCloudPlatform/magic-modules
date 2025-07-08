@@ -120,6 +120,8 @@ Description of the change and how users should adjust their configuration (if ne
 
 `instance` has been removed in favor of `instance_name`.
 
+## Resource: `google_notebooks_location` is now removed
+
 ## Resource: `google_storage_bucket`
 
 ### `retention_period` changed to `string` data type
