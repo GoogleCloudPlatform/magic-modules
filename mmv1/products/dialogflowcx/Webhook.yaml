@@ -38,7 +38,11 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/dialogflowcx_webhook.go.tmpl'
 exclude_sweeper: true
 examples:
-  - name: 'dialogflowcx_webhook_full'
+  - name: 'dialogflowcx_webhook_standard'
+    primary_resource_id: 'basic_webhook'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+  - name: 'dialogflowcx_webhook_flexible'
     primary_resource_id: 'basic_webhook'
     vars:
       agent_name: 'dialogflowcx-agent'
