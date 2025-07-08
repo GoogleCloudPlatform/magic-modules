@@ -464,6 +464,33 @@ func TestAccSecretManagerSecret_updateBetweenTtlAndExpireTime(t *testing.T) {
 	})
 }
 
+func TestAccSecretManagerSecret_DeletionProtection(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSecretManagerSecret_deletionprotectionTrue(context),
+			},
+			{
+				ResourceName:            "google_secret_manager_secret.secret-deletionprotection",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels", "deletion_protection"},
+			},
+			{
+				Config: testAccSecretManagerSecret_deletionprotectionFalse(context),
+			},
+		},
+	})
+}
+
 func TestAccSecretManagerSecret_tags(t *testing.T) {
 	t.Parallel()
 
@@ -482,13 +509,16 @@ func TestAccSecretManagerSecret_tags(t *testing.T) {
 		CheckDestroy:             testAccCheckSecretManagerSecretDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSecretManagerSecret_tags(context),
+				Config: testAccSecretManagerSecretTags(context),
 			},
 			{
 				ResourceName:            "google_secret_manager_secret.secret-tags",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels", "tags"},
+				ImportStateVerifyIgnore: []string{"ttl", "labels", "terraform_labels", "deletion_protection", "tags"},
+			},
+			{
+				Config: testAccSecretManagerSecretTagsDeletionProtection(context),
 			},
 		},
 	})
@@ -1251,15 +1281,67 @@ resource "google_secret_manager_secret" "secret-basic" {
 `, context)
 }
 
-func testAccSecretManagerSecret_tags(context map[string]interface{}) string {
+func testAccSecretManagerSecret_deletionprotectionTrue(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_secret_manager_secret" "secret-deletionprotection" {
+	secret_id = "tf-test-secret-%{random_suffix}"
+
+	labels = {
+		label = "my-label"
+	}
+
+	replication {
+		user_managed {
+			replicas {
+				location = "us-central1"
+			}
+			replicas {
+				location = "us-east1"
+			}
+		}
+	}
+
+	ttl = "3600s"
+
+	deletion_protection = true
+}
+`, context)
+}
+
+func testAccSecretManagerSecret_deletionprotectionFalse(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_secret_manager_secret" "secret-deletionprotection" {
+	secret_id = "tf-test-secret-%{random_suffix}"
+
+	labels = {
+		label = "my-label"
+	}
+
+	replication {
+		user_managed {
+			replicas {
+				location = "us-central1"
+			}
+			replicas {
+				location = "us-east1"
+			}
+		}
+	}
+
+	ttl = "3600s"
+
+	deletion_protection = false
+}
+`, context)
+}
+
+func testAccSecretManagerSecretTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-tags" {
   secret_id = "tf-test-secret-%{random_suffix}"
-
   labels = {
     label = "my-label"
   }
-
   replication {
     user_managed {
       replicas {
@@ -1270,11 +1352,36 @@ resource "google_secret_manager_secret" "secret-tags" {
       }
     }
   }
-
   ttl = "3600s"
   tags = {
 	"%{org}/%{tagKey}" = "%{tagValue}"
   }
+}
+`, context)
+}
+
+func testAccSecretManagerSecretTagsDeletionProtection(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_secret_manager_secret" "secret-tags" {
+  secret_id = "tf-test-secret-%{random_suffix}"
+  labels = {
+    label = "my-label"
+  }
+  replication {
+    user_managed {
+      replicas {
+        location = "us-central1"
+      }
+      replicas {
+        location = "us-east1"
+      }
+    }
+  }
+  ttl = "3600s"
+  tags = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+  deletion_protection = false
 }
 `, context)
 }
