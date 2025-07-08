@@ -659,7 +659,7 @@ func matchError(attr, tf interface{}, gcp interface{}) string {
 
 var singleNodeClusterConfig = `
 resource "google_dataproc_cluster" "basic" {
-  name   = "dproc-job-test-%s"
+  name   = "tf-test-dproc-job-%s"
   region = "us-central1"
 
   cluster_config {
@@ -883,7 +883,7 @@ resource "google_dataproc_job" "sparksql" {
 func testAccDataprocJob_presto(rnd, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "basic" {
-  name   = "dproc-job-test-%s"
+  name   = "tf-test-dproc-job-%s"
   region = "us-central1"
 
   cluster_config {
