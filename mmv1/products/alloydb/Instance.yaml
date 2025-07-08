@@ -257,7 +257,6 @@ properties:
   - name: 'observabilityConfig'
     type: NestedObject
     description: 'Configuration for enhanced query insights.'
-    min_version: 'beta'
     default_from_api: true
     properties:
       - name: 'enabled'
