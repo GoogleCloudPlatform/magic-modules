@@ -151,7 +151,11 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 }
 {{- if $.NestedProperties }}
     {{- range $prop := $.NestedProperties }}
+      {{- if $.ResourceMetadata.IsTgcCompiler }}
+      {{ template "flattenTgcPropertyMethod" $prop -}}
+      {{- else }}
       {{ template "flattenPropertyMethod" $prop -}}
+      {{- end }}
     {{- end }}
   {{- end }}
 {{- end }}

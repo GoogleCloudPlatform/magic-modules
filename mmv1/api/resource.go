@@ -1988,7 +1988,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 	for _, tp := range r.VirtualFields {
 		props = append(props, google.Underscore(tp.Name))
 	}
-	for _, tp := range r.AllUserProperties() {
+	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
 		} else if tp.IsMissingInCai {
@@ -2018,4 +2018,8 @@ func (r Resource) ApiResourceType() string {
 	}
 
 	return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.Name)
+}
+
+func (r Resource) IsTgcCompiler() bool {
+	return r.Compiler == "terraformgoogleconversionnext-codegen"
 }
