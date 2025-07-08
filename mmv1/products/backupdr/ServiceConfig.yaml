@@ -38,7 +38,6 @@ async:
 examples:
   - name: "backup_dr_service_config"
     primary_resource_id: "my-service-config"
-    min_version: "beta"
     exclude_import_test: true
     vars:
       resource_type: 'compute.googleapis.com/Instance'
