@@ -72,6 +72,23 @@ examples:
       - 'project'
       - 'etag'
       - 'deletion_policy'
+  - name: 'firestore_database_with_tags'
+    primary_resource_id: 'database'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+      key_short_name: 'keyname'
+      value_short_name: 'valuename'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+      'key_short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
+      'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
   - name: 'firestore_cmek_database'
     primary_resource_id: 'database'
     vars:
