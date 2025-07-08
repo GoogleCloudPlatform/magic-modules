@@ -57,14 +57,6 @@ examples:
       project: 'PROJECT_NAME'
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
-  - name: 'future_reservation_enable_emergent_maintenance'
-    primary_resource_id: 'gce_future_reservation'
-    vars:
-      future_reservation_name: 'gce-future-reservation-emergent-maintenance'
-    test_env_vars:
-      project: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      billing_account: 'BILLING_ACCT'
   - name: 'future_reservation_aggregate_reservation'
     primary_resource_id: 'gce_future_reservation'
     vars:
@@ -561,12 +553,6 @@ properties:
         type: Integer
         description: |
           Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
-  - name: 'enableEmergentMaintenance'
-    type: Boolean
-    description: |
-      Indicates if this group of VMs have emergent maintenance enabled.
-    immutable: true
-    ignore_read: true
   - name: 'aggregateReservation'
     type: NestedObject
     description: |
