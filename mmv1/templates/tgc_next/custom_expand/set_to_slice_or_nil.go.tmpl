@@ -1,0 +1,7 @@
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	vSet := v.(*schema.Set)
+	if vSet.Len() == 0 {
+		return nil, nil
+	}
+	return vSet.List(), nil
+}
