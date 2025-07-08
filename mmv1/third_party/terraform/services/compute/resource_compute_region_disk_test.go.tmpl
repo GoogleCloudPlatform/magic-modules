@@ -466,11 +466,11 @@ resource "google_compute_region_disk" "regiondisk" {
 	size     = 50
 	replica_zones = ["us-central1-a", "us-central1-f"]
 
-	access_mode            = "read_write_many"
+	access_mode            = "READ_WRITE_MANY"
 	provisioned_iops       = 10000
 	provisioned_throughput = 190
 }
-`, diskname, diskname, diskname, refselector)
+`, diskName, diskName, diskName, refSelector)
 }
 
 func testAccComputeRegionDisk_hyperdiskUpdated(diskName, refSelector string) string {
