@@ -158,14 +158,14 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		var dir, _ = os.Getwd()
 		fmt.Printf("current wd: %s\n", dir)
 
-		var regularFailureFile, err = os.Create(filepath.Join("../../../", "regular_failure_file.log"))
+		var regularFailureFile, err = os.Create(filepath.Join("", "regular_failure_file.log"))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
 			return
 		}
 		var diffFailureFile *os.File
 		// todo = get rid of this hardcoding once again is just meant for visibility
-		diffFailureFile, err = os.Create(filepath.Join("../../../", "diff_failure_file.log"))
+		diffFailureFile, err = os.Create(filepath.Join("", "diff_failure_file.log"))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
 			return
