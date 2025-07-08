@@ -17,10 +17,11 @@ description: |-
   ReasoningEngine provides a customizable runtime for models to determine which actions to take and in which order.
 references:
   guides:
+    'Develop and deploy agents on Vertex AI Agent Engine': 'https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/quickstart'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.reasoningEngines/'
 docs:
-base_url: 'projects/{{project}}/locations/{{region}}/reasoningEngines'
-self_link: 'projects/{{project}}/locations/{{region}}/reasoningEngines/{{name}}'
+base_url: '{{name}}'
+self_link: '{{name}}'
 create_url: 'projects/{{project}}/locations/{{region}}/reasoningEngines'
 update_verb: 'PATCH'
 update_mask: true
@@ -41,7 +42,6 @@ examples:
     primary_resource_id: 'reasoning_engine'
     vars:
       name: 'reasoning-engine'
-
   - name: 'vertex_ai_reasoning_engine_full'
     primary_resource_id: 'reasoning_engine'
     vars:
@@ -56,9 +56,11 @@ parameters:
 properties:
   - name: 'name'
     type: String
-    description: The name of the ReasoningEngine.
-    required: true
+    description: |-
+      The name of the ReasoningEngine. Must be in the format
+      'projects/{project}/locations/{location}/reasoningEngines/{reasoningEngine}'
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+    required: true
   - name: 'displayName'
     type: String
     description: The display name of the ReasoningEngine.
@@ -71,9 +73,6 @@ properties:
     description: Used to perform consistent read-modify-write updates.
     ignore_read: true
     output: true
-  - name: 'labels'
-    type: KeyValueLabels
-    description: The labels with user-defined metadata to organize your Indexes.
   - name: 'createTime'
     type: String
     description: The timestamp of when the Index was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
@@ -115,7 +114,6 @@ properties:
                   required: true
                 - name: 'value'
                   type: String
-                  default_value: ""
                   description: |-
                     Variables that reference a $(VAR_NAME) are expanded using the previous defined environment variables in the container and any service environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped references will never be expanded, regardless of whether the variable exists or not.
                   required: true
