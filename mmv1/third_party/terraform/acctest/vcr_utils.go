@@ -255,15 +255,13 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, temp_file *
 		c.ExternalProviders[releaseProvider] = resource.ExternalProvider{}
 	} else {
 		c.ExternalProviders = map[string]resource.ExternalProvider{
-			// TODO: make a github action to get most recent release + current head, this is not a fix just for testing
-			// this should not be hardcoded
 			releaseProvider: {
-				// if left empty fetches most recent release provider, which is actually optimal
+				// if left empty fetches most recent release provider
 			},
 		}
 	}
 
-	// create files to config this step(flag), do this in temp file created within this method? preconfig/postconfig
+	// create files to config this step(flag)
 	localProviderName := "google-local"
 	if c.Providers != nil {
 		c.Providers = map[string]*schema.Provider{
@@ -295,7 +293,6 @@ func InsertDiffSteps(c resource.TestCase, temp_file *os.File, releaseProvider st
 
 	var replacementSteps []resource.TestStep
 	for _, testStep := range c.Steps {
-		// todo: add preconfig - categorize test failures (add flag to steps that if they fail is a diff failure)
 		if testStep.Config != "" {
 			ogConfig := testStep.Config
 			fmt.Fprintf(os.Stdout, "Original config: %s\n", ogConfig)
