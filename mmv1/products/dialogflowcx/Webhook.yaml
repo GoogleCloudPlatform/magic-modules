@@ -327,3 +327,20 @@ properties:
             enum_values:
               - 'STANDARD'
               - 'FLEXIBLE'
+  - name: 'startFlow'
+    type: String
+    description: |
+      Deprecated. Name of the start flow in this agent. A start flow will be automatically created when the agent is created, and can only be deleted by deleting the agent. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+    output: true
+  - name: 'securitySettings'
+    type: String
+    description: |
+      Deprecated. Name of the SecuritySettings reference for the agent. Format: projects/<Project ID>/locations/<Location ID>/securitySettings/<Security Settings ID>.
+  - name: 'enableStackdriverLogging'
+    type: Boolean
+    description: |
+      Deprecated. Determines whether this agent should log conversation queries.
+  - name: 'enableSpellCorrection'
+    type: Boolean
+    description: |
+      Deprecated. Indicates if automatic spell correction is enabled in detect intent requests.
