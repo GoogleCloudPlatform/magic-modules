@@ -1303,7 +1303,7 @@ func ResourceDataprocCluster() *schema.Resource {
 										Type:        schema.TypeList,
 										Description: "Kerberos related configuration",
 										Optional:    true,
-										AtLeastOneOf: []string{
+										ExactlyOneOf: []string{
 											"cluster_config.0.security_config.0.kerberos_config",
 											"cluster_config.0.security_config.0.identity_config",
 										},
@@ -1395,7 +1395,7 @@ by Dataproc`,
 										Type:        schema.TypeList,
 										Description: "Identity related configuration",
 										Optional:    true,
-										AtLeastOneOf: []string{
+										ExactlyOneOf: []string{
 											"cluster_config.0.security_config.0.kerberos_config",
 											"cluster_config.0.security_config.0.identity_config",
 										},
