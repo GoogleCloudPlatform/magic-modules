@@ -114,7 +114,9 @@ func prepareTestData(testName string) (map[string]ResourceTestData, string, erro
 	if err != nil {
 		return nil, "", fmt.Errorf("error writing to file %s: %#v", rawTfFile, err)
 	}
-	defer os.Remove(rawTfFile)
+	if os.Getenv("WRITE_FILES") == "" {
+		defer os.Remove(rawTfFile)
+	}
 
 	rawResourceConfigs, err := parseResourceConfigs(rawTfFile)
 	if err != nil {
@@ -242,7 +244,6 @@ func convertToAssetMap(assets []caiasset.Asset) map[string]caiasset.Asset {
 	assetMap := make(map[string]caiasset.Asset)
 
 	for _, asset := range assets {
-		asset.Resource.Data = nil
 		assetMap[asset.Type] = asset
 	}
 	return assetMap

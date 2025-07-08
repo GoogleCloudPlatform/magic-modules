@@ -230,6 +230,9 @@ type Resource struct {
 	// (i.e. terraform-provider-conversion)
 	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
 
+	// If true, include resource in the new package of TGC (terraform-provider-conversion)
+	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
+
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 
@@ -1977,12 +1980,42 @@ func (r Resource) MarkdownHeader(templatePath string) string {
 	return strings.Replace(r.CodeHeader(templatePath), "//", "#", -1)
 }
 
+// TGC Methods
 // ====================
-// TGC
-// ====================
+// Lists fields that test.BidirectionalConversion should ignore
+func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string {
+	var props []string
+	for _, tp := range r.VirtualFields {
+		props = append(props, google.Underscore(tp.Name))
+	}
+	for _, tp := range r.AllUserProperties() {
+		if tp.UrlParamOnly {
+			props = append(props, google.Underscore(tp.Name))
+		} else if tp.IsMissingInCai {
+			props = append(props, tp.MetadataLineage())
+		}
+	}
+	props = append(props, e.TGCTestIgnoreExtra...)
+
+	slices.Sort(props)
+	return props
+}
+
 // Filters out computed properties during cai2hcl
 func (r Resource) ReadPropertiesForTgc() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
 		return v.Output
 	})
+}
+
+// The API resource type of the resource. Normally, it is the resource name.
+// Rarely, it is the API "resource type kind".
+// For example, the API resource type of "google_compute_autoscaler" is "ComputeAutoscalerAssetType".
+// The API resource type of "google_compute_region_autoscaler" is also "ComputeAutoscalerAssetType".
+func (r Resource) ApiResourceType() string {
+	if r.ApiResourceTypeKind != "" {
+		return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.ApiResourceTypeKind)
+	}
+
+	return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.Name)
 }

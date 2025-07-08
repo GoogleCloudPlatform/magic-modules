@@ -133,15 +133,19 @@ The following arguments are supported:
     ~>**NOTE:** Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
     If the API returns a different value for the same schema, e.g. it
-    switched the order of values or replaced `STRUCT` field type with `RECORD`
-    field type, we currently cannot suppress the recurring diff this causes.
-    As a workaround, we recommend using the schema as returned by the API.
+    switched the order of values or replaced a field data type (`STRUCT` with
+    `RECORD`, `DECIMAL` with `NUMERIC`, etc.), we currently cannot suppress
+    the recurring diff this causes. As a workaround, we recommend using the
+    schema as returned by the API.
 
     ~>**NOTE:**  If you use `external_data_configuration`
     [documented below](#nested_external_data_configuration) and do **not** set
     `external_data_configuration.connection_id`, schemas must be specified
     with `external_data_configuration.schema`. Otherwise, schemas must be
     specified with this top-level field.
+
+* `ignore_schema_changes` - (Optional)  A list of fields which should be ignored for each column in schema.
+    **NOTE:** Right now only `dataPolicies` field is supported. We might support others in the future.
 
 * `schema_foreign_type_info` - (Optional) Specifies metadata of the foreign data
     type definition in field schema. Structure is [documented below](#nested_schema_foreign_type_info).
