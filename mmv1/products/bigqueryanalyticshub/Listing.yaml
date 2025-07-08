@@ -208,6 +208,12 @@ properties:
                 Format: For table: projects/{projectId}/datasets/{datasetId}/tables/{tableId} Example:"projects/test_project/datasets/test_dataset/tables/test_table"
               immutable: true
               diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+            - name: 'routine'
+              type: String
+              description: |
+                Format: For routine: projects/{projectId}/datasets/{datasetId}/routines/{routineId} Example:"projects/test_project/datasets/test_dataset/routines/test_routine"
+              immutable: true
+              diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - name: 'pubsubTopic'
     type: NestedObject
     description: Pub/Sub topic source.
