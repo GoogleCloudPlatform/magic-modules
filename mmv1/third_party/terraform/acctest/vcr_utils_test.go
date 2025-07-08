@@ -7,9 +7,11 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"testing"
 
 	"github.com/dnaeon/go-vcr/cassette"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -448,4 +450,112 @@ func TestReformConfigWithProvider(t *testing.T) {
 			t.Logf("Test Case: %s\nReformed config:\n%s", tc.name, newConfig)
 		})
 	}
+}
+
+func TestDiffTestStepInjection(t *testing.T) {
+	var dummyCase = resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+			},
+			{
+				Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	}
+	temp_file, err := os.CreateTemp("", "release_diff_test_output_*.log")
+	if err != nil {
+		t.Fatalf("Failed to create temp file: %v", err)
+	}
+	var releaseDiffSteps = acctest.InsertDiffSteps(dummyCase, temp_file, "google-beta", "google-local")
+
+	var expectedSteps = []resource.TestStep{
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+		},
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-local
+				}`,
+		},
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+		},
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-local
+				}`,
+		},
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+		},
+
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-local
+				}`,
+		},
+	}
+
+	if len(releaseDiffSteps) != len(expectedSteps) {
+		t.Fatalf("Expected %d steps, but got %d", len(expectedSteps), len(releaseDiffSteps))
+	}
+	for i, step := range releaseDiffSteps {
+		if step.Config != expectedSteps[i].Config {
+			t.Fatalf("Expected step %d config to be:\n%q\nbut got:\n%q", i, expectedSteps[i].Config, step.Config)
+		}
+		if (i % 2) == 1 {
+			if step.ExpectNonEmptyPlan != false {
+				t.Fatalf("Expected step %d to have ExpectNonEmptyPlan set to false, but got true", i)
+			}
+			if step.PlanOnly != true {
+				t.Fatalf("Expected step %d to have PlanOnly set to true, but got false", i)
+			}
+		}
+	}
+	defer os.Remove(temp_file.Name())
+
+}
+func TestParseReleaseDiffOutput(t *testing.T) {
+	temp_file, err := os.CreateTemp("", "test_release_diff_test_output_*.log")
+	if err != nil {
+		t.Fatalf("Failed to create temp file: %v", err)
+	}
+	defer os.Remove(temp_file.Name())
+	// Write some dummy data to the temp file
+	_, err = temp_file.WriteString("This is a test release diff output.\n")
+	if err != nil {
+		t.Fatalf("Failed to write to temp file: %v", err)
+	}
+
+	var expectedOutput = "This is a test release diff output."
+	var output string
+	output, err = acctest.ParseReleaseDiffOutput(temp_file)
+	if err != nil {
+		t.Fatalf("Failed to parse release diff output: %v", err)
+	}
+
+	if output != expectedOutput {
+		t.Fatalf("Expected output to be:\n%q\nbut got:\n%q", expectedOutput, output)
+	}
+	t.Logf("Parsed output:\n%s", output)
 }

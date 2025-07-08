@@ -47,6 +47,8 @@ func IsVcrEnabled() bool {
 	return envPath != "" && vcrMode != ""
 }
 
+var diffRegexpMatch = regexp.MustCompile(`^\[Diff\]`)
+
 var configsLock = sync.RWMutex{}
 var sourcesLock = sync.RWMutex{}
 
