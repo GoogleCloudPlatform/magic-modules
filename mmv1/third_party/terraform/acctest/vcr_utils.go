@@ -149,6 +149,7 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		defer closeRecorder(t)
 	} else if isReleaseDiffEnabled() {
 		// creates temporary file for the individual test, will be a temporary to store the output
+		// this will only be used by the diff weekly teamcity project
 		temp_file, error := os.CreateTemp("", "release_diff_test_output_*.log")
 
 		if error != nil {
@@ -257,7 +258,7 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, temp_file *
 			// TODO: make a github action to get most recent release + current head, this is not a fix just for testing
 			// this should not be hardcoded
 			releaseProvider: {
-				VersionConstraint: "= 6.33.0", // if left empty fetches most recent release provider, which is actually optimal
+				// if left empty fetches most recent release provider, which is actually optimal
 			},
 		}
 	}
