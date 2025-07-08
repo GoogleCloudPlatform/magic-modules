@@ -59,7 +59,6 @@ properties:
     description: |-
       The name of the ReasoningEngine. Must be in the format
       'projects/{project}/locations/{location}/reasoningEngines/{reasoningEngine}'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
     required: true
   - name: 'displayName'
     type: String
