@@ -197,7 +197,9 @@ resource "google_backup_dr_backup_plan" "bp" {
         end_hour_of_day   = 7 # Updated end hour
       }
     }
-    # Adding a second rule to test weekly schedule
+  }
+  backup_rules{
+   # Adding a second rule to test weekly schedule
     rule_id                = "rule-2"
     backup_retention_days  = 60 # Different retention for rule-2
 
