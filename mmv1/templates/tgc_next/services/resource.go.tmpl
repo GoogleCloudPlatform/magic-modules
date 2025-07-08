@@ -27,7 +27,7 @@ import (
 )
 
 {{ if $.DefineAssetTypeForResourceInProduct -}}
-const {{ $.ResourceName -}}AssetType string = "{{ $.CaiAssetType }}"
+const {{ $.ApiResourceType -}}AssetType string = "{{ $.CaiAssetType }}"
 {{- end }}
 
 const {{ $.ResourceName -}}SchemaName string = "{{ $.TerraformName }}"

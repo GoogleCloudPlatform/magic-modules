@@ -1842,10 +1842,10 @@ func (r Resource) DefineAssetTypeForResourceInProduct() bool {
 	if r.ProductMetadata.ResourcesWithCaiAssetType == nil {
 		r.ProductMetadata.ResourcesWithCaiAssetType = make(map[string]struct{}, 1)
 	}
-	if _, alreadyDefined := r.ProductMetadata.ResourcesWithCaiAssetType[r.Name]; alreadyDefined {
+	if _, alreadyDefined := r.ProductMetadata.ResourcesWithCaiAssetType[r.ApiResourceType()]; alreadyDefined {
 		return false
 	}
-	r.ProductMetadata.ResourcesWithCaiAssetType[r.Name] = struct{}{}
+	r.ProductMetadata.ResourcesWithCaiAssetType[r.ApiResourceType()] = struct{}{}
 	return true
 }
 
@@ -2009,7 +2009,13 @@ func (r Resource) MarkdownHeader(templatePath string) string {
 // ====================
 // Lists fields that test.BidirectionalConversion should ignore
 func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string {
-	var props []string
+	props := []string{
+		"depends_on",
+		"count",
+		"for_each",
+		"provider",
+		"lifecycle",
+	}
 	for _, tp := range r.VirtualFields {
 		props = append(props, google.Underscore(tp.Name))
 	}
