@@ -8,8 +8,6 @@ import (
 )
 
 func TestAccBackupDRBackupPlan_fullUpdate(t *testing.T) {
-	// Uses time.Now
-	acctest.SkipIfVcr(t)
 
 	t.Parallel()
 
