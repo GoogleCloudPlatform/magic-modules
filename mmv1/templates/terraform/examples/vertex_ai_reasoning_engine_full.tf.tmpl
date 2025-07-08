@@ -1,5 +1,5 @@
-resource "google_vertexai_reasoning_engine" "{{$.PrimaryResourceId}}" {
-  name         = "{{index $.Vars "name"}}"
+resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
+  name         = "projects/${data.google_project.project.id}/locations/us-central1/reasoningEngines/{{index $.Vars "name"}}"
   display_name = "{{index $.Vars "name"}}"
   description  = "A basic reasoning engine"
   region       = "us-central1"
