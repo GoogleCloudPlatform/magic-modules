@@ -81,6 +81,8 @@ examples:
       value_key_id: 'valuename'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
     ignore_read_extra:
       - 'project'
       - 'etag'
