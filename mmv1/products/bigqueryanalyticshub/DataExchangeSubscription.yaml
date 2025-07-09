@@ -13,6 +13,7 @@
 
 ---
 name: 'DataExchangeSubscription'
+min_version: beta
 api_resource_type_kind: Subscription
 description: A Bigquery Analytics Hub Data Exchange subscription
 references:
