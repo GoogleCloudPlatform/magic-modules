@@ -1,5 +1,5 @@
 package bigqueryanalyticshub_test
-
+{{- if ne $.TargetVersionName "ga" }}
 import (
 	"testing"
 
@@ -17,7 +17,7 @@ func TestAccBigqueryAnalyticsHubDataExchangeSubscription_bigqueryAnalyticshubDat
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckBigqueryAnalyticsHubDataExchangeSubscriptionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
@@ -150,3 +150,4 @@ resource "google_bigquery_analytics_hub_data_exchange_subscription" "subscriptio
 }
 `, context)
 }
+{{- end }}
