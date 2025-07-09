@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -248,21 +249,7 @@ func getAncestryCache(assets []caiasset.Asset) map[string]string {
 func compareHCLFields(map1, map2, ignoredFields map[string]struct{}) []string {
 	var missingKeys []string
 	for key := range map1 {
-		// Check for exact match first.
-		if _, ignored := ignoredFields[key]; ignored {
-			continue
-		}
-
-		// Check for normalized match.
-		parts := strings.Split(key, ".")
-		var normalizedParts []string
-		for _, part := range parts {
-			if _, err := strconv.Atoi(part); err != nil {
-				normalizedParts = append(normalizedParts, part)
-			}
-		}
-		normalizedKey := strings.Join(normalizedParts, ".")
-		if _, ignored := ignoredFields[normalizedKey]; ignored {
+		if isIgnored(key, ignoredFields) {
 			continue
 		}
 
@@ -270,7 +257,40 @@ func compareHCLFields(map1, map2, ignoredFields map[string]struct{}) []string {
 			missingKeys = append(missingKeys, key)
 		}
 	}
+	sort.Strings(missingKeys)
 	return missingKeys
+}
+
+// Returns true if the given key should be ignored according to the given set of ignored fields.
+func isIgnored(key string, ignoredFields map[string]struct{}) bool {
+	// Check for exact match first.
+	if _, ignored := ignoredFields[key]; ignored {
+		return true
+	}
+
+	// Check for partial matches.
+	parts := strings.Split(key, ".")
+	if len(parts) < 2 {
+		return false
+	}
+	var nonIntegerParts []string
+	for _, part := range parts {
+		if _, err := strconv.Atoi(part); err != nil {
+			nonIntegerParts = append(nonIntegerParts, part)
+		}
+	}
+	var partialKey string
+	for _, part := range nonIntegerParts {
+		if partialKey == "" {
+			partialKey = part
+		} else {
+			partialKey += "." + part
+		}
+		if _, ignored := ignoredFields[partialKey]; ignored {
+			return true
+		}
+	}
+	return false
 }
 
 // Converts a tfplan to CAI asset, and then converts the CAI asset into HCL
