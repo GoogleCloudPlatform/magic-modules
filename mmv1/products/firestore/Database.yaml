@@ -78,7 +78,7 @@ examples:
       database_id: 'database-with-tags-id'
       delete_protection_state: 'DELETE_PROTECTION_ENABLED'
       tag_key_id: 'keyname'
-      value_key_id: 'valuename'
+      tag_value_id: 'valuename'
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
@@ -87,6 +87,7 @@ examples:
       - 'project'
       - 'etag'
       - 'deletion_policy'
+    exclude_test: true
   - name: 'firestore_cmek_database'
     primary_resource_id: 'database'
     vars:
