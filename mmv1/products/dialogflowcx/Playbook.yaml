@@ -197,16 +197,23 @@ properties:
                 call the webhook (e.g., to load user data from a database), or both.
               required: true
               properties:
-                - name: channel
-                  type: String
-                  description: |
-                    The channel which the response is associated with. Clients can specify the channel via [QueryParameters.channel](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/QueryParameters#FIELDS.channel), and only associated channel response will be returned.
                 - name: messages
                   type: Array
                   description: The list of rich message responses to present to the user.
                   item_type:
                     type: NestedObject
                     properties:
+                      - name: responseType
+                        type: Enum
+                        description: Response type.
+                        enum_values:
+                          - 'ENTRY_PROMPT'
+                          - 'PARAMETER_PROMPT'
+                          - 'HANDLER_PROMPT'
+                      - name: channel
+                        type: String
+                        description: |
+                          The channel which the response is associated with. Clients can specify the channel via [QueryParameters.channel](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/QueryParameters#FIELDS.channel), and only associated channel response will be returned.
                       - name: playAudio
                         type: NestedObject
                         description: Specifies an audio clip to be played by the client as part of the response.
@@ -944,16 +951,23 @@ properties:
                 call the webhook (e.g., to load user data from a database), or both.
               required: true
               properties:
-                - name: channel
-                  type: String
-                  description: |
-                    The channel which the response is associated with. Clients can specify the channel via [QueryParameters.channel](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/QueryParameters#FIELDS.channel), and only associated channel response will be returned.
                 - name: messages
                   type: Array
                   description: The list of rich message responses to present to the user.
                   item_type:
                     type: NestedObject
                     properties:
+                      - name: responseType
+                        type: Enum
+                        description: Response type.
+                        enum_values:
+                          - 'ENTRY_PROMPT'
+                          - 'PARAMETER_PROMPT'
+                          - 'HANDLER_PROMPT'
+                      - name: channel
+                        type: String
+                        description: |
+                          The channel which the response is associated with. Clients can specify the channel via [QueryParameters.channel](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/QueryParameters#FIELDS.channel), and only associated channel response will be returned.
                       - name: playAudio
                         type: NestedObject
                         description: Specifies an audio clip to be played by the client as part of the response.

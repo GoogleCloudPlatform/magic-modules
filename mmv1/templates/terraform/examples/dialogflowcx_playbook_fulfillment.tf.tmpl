@@ -198,7 +198,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
               }
             }
             case_content {
-              additionalCases = jsonencode({
+              additional_cases = jsonencode({
                 "cases": [
                   {
                     "condition": "$sys.func.RAND() < 0.2",
@@ -377,7 +377,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
               }
             }
             case_content {
-              additionalCases = jsonencode({
+              additional_cases = jsonencode({
                 "cases": [
                   {
                     "condition": "$sys.func.RAND() < 0.2",
