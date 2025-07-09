@@ -77,13 +77,10 @@ examples:
     vars:
       database_id: 'database-with-tags-id'
       delete_protection_state: 'DELETE_PROTECTION_ENABLED'
-      key_short_name: 'keyname'
-      value_short_name: 'valuename'
+      tag_key_id: 'keyname'
+      value_key_id: 'valuename'
     test_env_vars:
       project_id: 'PROJECT_NAME'
-    test_vars_overrides:
-      'key_short_name': '"tf-key-" + acctest.RandString(t, 15)'
-      'value_short_name': '"tf-value-" + acctest.RandString(t, 15)'
     ignore_read_extra:
       - 'project'
       - 'etag'
