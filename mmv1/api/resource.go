@@ -1988,7 +1988,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 	for _, tp := range r.VirtualFields {
 		props = append(props, google.Underscore(tp.Name))
 	}
-	for _, tp := range r.AllUserProperties() {
+	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
 		} else if tp.IsMissingInCai {
@@ -2006,4 +2006,20 @@ func (r Resource) ReadPropertiesForTgc() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
 		return v.Output
 	})
+}
+
+// The API resource type of the resource. Normally, it is the resource name.
+// Rarely, it is the API "resource type kind".
+// For example, the API resource type of "google_compute_autoscaler" is "ComputeAutoscalerAssetType".
+// The API resource type of "google_compute_region_autoscaler" is also "ComputeAutoscalerAssetType".
+func (r Resource) ApiResourceType() string {
+	if r.ApiResourceTypeKind != "" {
+		return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.ApiResourceTypeKind)
+	}
+
+	return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.Name)
+}
+
+func (r Resource) IsTgcCompiler() bool {
+	return r.Compiler == "terraformgoogleconversionnext-codegen"
 }

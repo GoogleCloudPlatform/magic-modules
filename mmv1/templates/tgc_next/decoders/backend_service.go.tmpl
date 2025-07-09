@@ -10,13 +10,22 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	f, err := tpgresource.ParseProjectFieldValue("{{$.ResourceType}}", v.(string), "project", d, config, true)
-	if err != nil {
-		return nil, fmt.Errorf("Invalid value for {{underscore $.Name}}: %s", err)
-	}
-	
-    url := tgcresource.GetComputeSelfLink(config, f.RelativeLink())
 
-    return url, nil
+if v, ok := res["backends"]; ok {
+	backends := v.([]interface{})
+	for _, vBackend := range backends {
+        backend := vBackend.(map[string]interface{})
+		if vCms, ok := backend["customMetrics"]; ok {
+			cms := vCms.([]interface{})
+			for _, vCm := range cms {
+                cm := vCm.(map[string]interface{})
+				if vMu, ok := cm["maxUtilization"]; ok {
+					mu := vMu.(float64)
+					cm["maxUtilization"] = fmt.Sprintf("%.1f", mu)
+				}
+			}
+		}
+	}
 }
+
+return res, nil

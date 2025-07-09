@@ -36,7 +36,12 @@ jobs:
       - name: Check for invalid version guards
         run: |
           cd repo/tools/template-check
-          git diff --name-only --diff-filter=d origin/${{ github.base_ref }} ../../*.tmpl | sed 's=^=../../=g' | go run main.go
+          tmpls=$(git diff --name-only --diff-filter=d origin/${{ github.base_ref }} ../../*.tmpl | sed 's=^=../../=g')
+          tmpls=${tmpls//$'\n'/,}
+          echo $tmpls
+          if [[ -n "$tmpls" ]]; then
+            go run main.go version-guard --file-list $tmpls
+          fi
   lint-yaml:
     runs-on: ubuntu-22.04
     steps:
