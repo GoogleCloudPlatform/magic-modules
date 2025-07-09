@@ -21,7 +21,8 @@ references:
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
-immutable: true
+update_verb: 'PATCH'
+update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
   - '{{repository_id}}'
@@ -31,7 +32,7 @@ timeouts:
   delete_minutes: 20
 autogen_async: true
 async:
-  actions: ['create', 'delete']
+  actions: ['create', 'update', 'delete']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
@@ -72,12 +73,14 @@ examples:
 parameters:
   - name: 'location'
     type: String
+    immutable: true
     description: |
       The location for the Repository.
     url_param_only: true
     required: true
   - name: 'repository_id'
     type: String
+    immutable: true
     description: |
       The ID for the Repository.
     url_param_only: true
@@ -97,6 +100,7 @@ properties:
     description: |
       The name of the instance in which the repository is hosted.
     required: true
+    immutable: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - name: 'uid'
     type: String
@@ -139,13 +143,16 @@ properties:
     description: |
       Initial configurations for the repository.
     ignore_read: true
+    immutable: true
     properties:
       - name: 'defaultBranch'
         type: String
+        immutable: true
         description: |
           Default branch name of the repository.
       - name: 'gitignores'
         type: Array
+        immutable: true
         description: |
           List of gitignore template names user can choose from.
           Valid values can be viewed at https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories#initialconfig.
@@ -153,11 +160,13 @@ properties:
           type: String
       - name: 'license'
         type: String
+        immutable: true
         description: |
           License template name user can choose from.
           Valid values can be viewed at https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories#initialconfig.
       - name: 'readme'
         type: String
+        immutable: true
         description: |
           README template name.
           Valid values can be viewed at https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories#initialconfig.
