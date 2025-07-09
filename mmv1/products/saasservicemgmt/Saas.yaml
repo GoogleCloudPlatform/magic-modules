@@ -1,0 +1,103 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: "Saas"
+description: |
+  Saas is a representation of a SaaS service managed by the Producer.
+references:
+  guides:
+    "Deploy a service instance with SaaS Runtime": "https://cloud.google.com/saas-runtime/docs/deploy-vm"
+  api: "https://cloud.google.com/saas-runtime/docs/reference/rest/v1beta1/projects.locations.saas"
+min_version: "beta"
+
+base_url: "projects/{{project}}/locations/{{location}}/saas"
+self_link: "projects/{{project}}/locations/{{location}}/saas/{{saas_id}}"
+
+immutable: true
+
+create_url: "projects/{{project}}/locations/{{location}}/saas?saasId={{saas_id}}"
+
+examples:
+  - name: "saas_saas_basic"
+    primary_resource_id: "default"
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-saas%s", context["random_suffix"])'
+    vars:
+      saas_id: "my-saas"
+    min_version: "beta"
+
+import_format:
+  - "projects/{{project}}/locations/{{location}}/saas/{{saas_id}}"
+  - "{{saas_id}}"
+
+parameters:
+  - name: "location"
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The location for the Saas.
+  - name: "saas_id"
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The ID for the Saas.
+
+properties:
+  - name: "name"
+    type: String
+    description: |
+      The resource name for the Saas.
+    output: true
+  - name: "locations"
+    type: Array
+    required: true
+    description: |
+      List of locations that the service is available in.
+      Rollout refers to the list to generate a rollout plan.
+    item_type:
+      type: NestedObject
+      required: true
+      properties:
+        - name: "name"
+          type: String
+          description: |
+            Location name.
+  - name: "labels"
+    type: KeyValueLabels
+    description: |-
+      The labels on the resource, which can be used for categorization.
+  - name: "annotations"
+    type: KeyValueAnnotations
+    description: |-
+      Annotations is an unstructured key-value map stored with a resource that may be set by external
+      tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved
+      when modifying objects.
+  - name: "uid"
+    type: String
+    description: |
+      Unique identifier of the Saas.
+    output: true
+  - name: "createTime"
+    type: Time
+    description: |
+      Time the Saas was created in UTC.
+    output: true
+  - name: "updateTime"
+    type: Time
+    description: |
+      Time the Saas was updated in UTC.
+    output: true
