@@ -41,7 +41,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
     }
   }
   handlers {
-    event_handlers {
+    event_handler {
       event = "custom-event"
       fulfillment {
         return_partial_responses = false
@@ -55,7 +55,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
   }
 
   handlers {
-    event_handlers {
+    event_handler {
       event = "sys.no-match-default"
       fulfillment {
         return_partial_responses = false
@@ -69,7 +69,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
   }
 
   handlers {
-    event_handlers {
+    event_handler {
       event = "sys.no-input-default"
       fulfillment {
         return_partial_responses = false
@@ -108,7 +108,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
   }
 
   handlers {
-    event_handlers {
+    event_handler {
       event = "another-event"
       fulfillment {
         return_partial_responses = true
@@ -215,7 +215,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
   }
 
   handlers {
-    lifecycle_handlers {
+    lifecycle_handler {
       lifecycle_stage = "playbook-start"
       fulfillment {
         return_partial_responses = false
@@ -229,7 +229,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
   }
 
   handlers {
-    lifecycle_handlers {
+    lifecycle_handler {
       lifecycle_stage = "playbook-start"
       fulfillment {
         return_partial_responses = false
@@ -243,7 +243,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
   }
 
   handlers {
-    lifecycle_handlers {
+    lifecycle_handler {
       lifecycle_stage = "playbook-start"
       fulfillment {
         return_partial_responses = false
@@ -282,7 +282,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
   }
 
   handlers {
-    lifecycle_handlers {
+    lifecycle_handler {
       lifecycle_stage = "playbook-start"
       fulfillment {
         return_partial_responses = true
