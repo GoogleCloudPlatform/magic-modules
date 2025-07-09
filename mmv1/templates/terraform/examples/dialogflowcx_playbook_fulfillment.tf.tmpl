@@ -175,7 +175,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
 
         conditional_cases {
           cases {
-            condition = "$sys.func.RAND() < 0.5",
+            condition = "$sys.func.RAND() < 0.5"
             caseContent {
               message {
                 text {
@@ -349,7 +349,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
 
         conditional_cases {
           cases {
-            condition = "$sys.func.RAND() < 0.5",
+            condition = "$sys.func.RAND() < 0.5"
             caseContent {
               message {
                 text {
