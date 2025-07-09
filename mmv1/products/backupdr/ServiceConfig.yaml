@@ -14,7 +14,7 @@
 ---
 name: 'ServiceConfig'
 description: |
-  Initializes a Project-level default Backupdr config.
+  Initializes a Project-level default Backupdr config. It creates default Backupvault and default Backup Plan in same project for customers to protect instances.
 references:
   guides:
   api: 'https://cloud.google.com/backup-disaster-recovery/docs/reference/rest/v1/projects.locations.serviceConfig'
@@ -55,5 +55,5 @@ parameters:
 properties:
   - name: 'resourceType'
     type: String
-    required: True
+    required: true
     description: The resource type to which the default service config will be applied.
