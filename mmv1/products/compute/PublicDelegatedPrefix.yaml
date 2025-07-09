@@ -35,6 +35,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+  constants: 'templates/terraform/constants/public_delegated_prefix.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-central1"
@@ -87,7 +88,7 @@ properties:
     description: An optional description of this resource.
   - name: 'isLiveMigration'
     type: Boolean
-    diff_suppress_func: 'tpgresource.TypeDefaultSuppress'
+    diff_suppress_func: 'PublicDelegatedPrefix_IsLiveMigrationDiffSuppress' 
     description: If true, the prefix will be live migrated.
   - name: 'name'
     type: String
@@ -108,7 +109,7 @@ properties:
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - name: 'mode'
     type: Enum
-    diff_suppress_func: 'tpgresource.TypeDefaultSuppress'
+    diff_suppress_func: 'PublicDelegatedPrefix_ModeDiffSuppress' 
     description: |
       Specifies the mode of this IPv6 PDP. MODE must be one of: DELEGATION,
       EXTERNAL_IPV6_FORWARDING_RULE_CREATION and EXTERNAL_IPV6_SUBNETWORK_CREATION.
@@ -145,7 +146,7 @@ properties:
             The name of the sub public delgated prefix.
         - name: 'description'
           type: String
-          diff_suppress_func: 'tpgresource.TypeDefaultSuppress'
+          diff_suppress_func: 'PublicDelegatedSubPrefix_DescriptionDiffSuppress' 
           description: |
             Optional description of this sub public delgated prefix.
         - name: 'region'
@@ -170,12 +171,12 @@ properties:
             The IP address range in the CIDR format represented by this sub prefix.
         - name: 'isAddress'
           type: Boolean
-          diff_suppress_func: 'tpgresource.TypeDefaultSuppress'
+          diff_suppress_func: 'PublicDelegatedSubPrefix_IsAddressDiffSuppress' 
           description: |
             Whether the sub prefix is delegated for address creation.
         - name: 'mode'
           type: Enum
-          diff_suppress_func: 'tpgresource.TypeDefaultSuppress'
+          diff_suppress_func: 'PublicDelegatedSubPrefix_ModeDiffSuppress' 
           description: |
             The PublicDelegatedSubPrefix mode for IPv6 only.
           enum_values:

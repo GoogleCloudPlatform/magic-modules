@@ -1,0 +1,39 @@
+package compute // This package will contain your generated resource code and these helpers.
+
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"strings"
+	// Import the core tpgresource if CompareSelfLinkOrResourceName is truly in it and needed
+	tpgresource "github.com/hashicorp/terraform-provider-google/google/tpgresource"
+)
+
+// PublicDelegatedPrefix_IsLiveMigrationDiffSuppress handles the is_live_migration boolean field.
+// It explicitly treats false and null as equivalent for diffing.
+func PublicDelegatedPrefix_IsLiveMigrationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// API returns 'false' or omits it (reads as null). Config might set false or omit.
+	// We want to suppress if both are effectively 'false' or unset.
+	return (old == "" || old == "false") && (new == "" || new == "false")
+}
+
+// PublicDelegatedPrefix_ModeDiffSuppress handles the 'mode' enum/string field.
+// It explicitly treats empty string "" and null as equivalent for diffing.
+func PublicDelegatedPrefix_ModeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// API returns "" or omits it (reads as null). Config might omit.
+	// We want to suppress if both are effectively unset.
+	return (old == "" || old == "<nil>") && (new == "" || new == "<nil>")
+}
+
+// PublicDelegatedSubPrefix_DescriptionDiffSuppress for nested description.
+func PublicDelegatedSubPrefix_DescriptionDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	return (old == "" || old == "<nil>") && (new == "" || new == "<nil>")
+}
+
+// PublicDelegatedSubPrefix_IsAddressDiffSuppress for nested is_address boolean.
+func PublicDelegatedSubPrefix_IsAddressDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	return (old == "" || old == "false") && (new == "" || new == "false")
+}
+
+// PublicDelegatedSubPrefix_ModeDiffSuppress for nested mode enum/string.
+func PublicDelegatedSubPrefix_ModeDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	return (old == "" || old == "<nil>") && (new == "" || new == "<nil>")
+}
