@@ -6523,6 +6523,10 @@ func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoCon
 		npac.ResourceManagerTags = expandResourceManagerTags(v)
 	}
 
+	if v, ok := config["containerd_config"]; ok {
+	    npac.ContainerdConfig = expandContainerdConfig(v)
+	}
+
 	return npac
 }
 
@@ -7508,8 +7512,22 @@ func flattenNodePoolAutoConfig(c *container.NodePoolAutoConfig) []map[string]int
 			{"cgroup_mode": c.LinuxNodeConfig.CgroupMode},
 		}
 	}
+	if c.ContainerdConfig != nil {
+		result["containerd_config"] = flattenContainerdConfig(c.ContainerdConfig)
+	}
 
 	return []map[string]interface{}{result}
+}
+
+func flattenContainerdConfig(c *container.ContainerdConfig) []map[string]interface{} {
+    if c == nil {
+        return nil
+    }
+    result := make(map[string]interface{})
+    if c.ContainerdConfig != nil {
+        result["containerd_configs"] = c.ContainerdConfig
+    }
+    return []map[string]interface{}{result]
 }
 
 func flattenNodePoolAutoConfigNetworkTags(c *container.NetworkTags) []map[string]interface{} {
