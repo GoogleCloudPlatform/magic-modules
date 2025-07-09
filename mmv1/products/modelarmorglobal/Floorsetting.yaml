@@ -14,8 +14,8 @@
 ---
 name: Floorsetting
 description: |
-  Model Armor floor settings define rules that dictate minimum requirements for all Model Armor templates created at a specific point in the Google Cloud resource hierarchy (that is, at an organization, folder, or project level). 
-  If there are multiple floor settings that conflict with each other, the settings lower in the resource hierarchy take precedence
+  Model Armor floor settings define rules that dictate minimum requirements for all Model Armor templates created at a specific point in the Google Cloud resource hierarchy (that is, at an organization, folder, or project level). If there are 
+  multiple floor settings that conflict with each other, the settings lower in the resource hierarchy take precedence
   For more information, checkout https://cloud.google.com/security-command-center/docs/model_armor_floor_settings
 base_url: '{{parent}}/locations/{{location}}/floorSetting'
 update_mask: true
@@ -135,7 +135,7 @@ properties:
         properties:
           - name: advancedConfig
             type: NestedObject
-            conflicts: 
+            conflicts:
               - basicConfig
             description: Sensitive Data Protection Advanced configuration.
             properties:
@@ -166,7 +166,7 @@ properties:
                   `projects/{project}/locations/{location}/deidentifyTemplates/{deidentify_template}`
           - name: basicConfig
             type: NestedObject
-            conflicts: 
+            conflicts:
               - advancedConfig
             description: Sensitive Data Protection basic configuration.
             properties:
