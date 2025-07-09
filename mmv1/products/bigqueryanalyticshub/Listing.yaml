@@ -212,6 +212,7 @@ properties:
                 - 'table'
                 - 'routine'
             - name: 'routine'
+              min_version: beta
               type: String
               description: |
                 Format: For routine: projects/{projectId}/datasets/{datasetId}/routines/{routineId} Example:"projects/test_project/datasets/test_dataset/routines/test_routine"
