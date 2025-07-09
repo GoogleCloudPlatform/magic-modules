@@ -82,7 +82,6 @@ examples:
     test_env_vars:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
-      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
       'key_short_name': '"tf-key-" + acctest.RandString(t, 15)'
       'value_short_name': '"tf-value-" + acctest.RandString(t, 15)'
     ignore_read_extra:
