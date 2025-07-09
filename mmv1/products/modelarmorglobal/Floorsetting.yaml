@@ -240,7 +240,6 @@ properties:
   - name: floorSettingMetadata
     type: NestedObject
     description: Metadata to enable multi language detection via floor setting.
-    allow_empty_object: true
     properties:
       - name: multiLanguageDetection
         type: NestedObject

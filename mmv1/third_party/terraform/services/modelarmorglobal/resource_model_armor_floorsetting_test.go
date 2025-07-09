@@ -13,7 +13,7 @@ import (
 func TestAccModelArmorGlobalFloorsetting_basic(t *testing.T) {
 
 	basicContext := map[string]interface{}{
-		"project_id":   envvar.GetTestProjectFromEnv(),
+		"project_id": envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
