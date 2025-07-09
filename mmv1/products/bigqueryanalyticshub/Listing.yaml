@@ -90,6 +90,7 @@ examples:
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_pubsub_de%s", context["random_suffix"]),fmt.Sprintf("tf_test_listing%s", context["random_suffix"])'
     region_override: 'US'
+    min_version: beta
     vars:
       data_exchange_id: 'tf_test_data_exchange'
       listing_id: 'tf_test_listing_routine'
