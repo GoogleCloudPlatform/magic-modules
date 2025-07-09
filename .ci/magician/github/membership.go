@@ -17,12 +17,6 @@ package github
 
 import (
 	"fmt"
-	utils "magician/utility"
-	"math/rand"
-	"slices"
-	"time"
-
-	"golang.org/x/exp/maps"
 )
 
 type UserType int64
@@ -77,37 +71,23 @@ func IsCoreContributor(user string) bool {
 }
 
 func IsCoreReviewer(user string) bool {
-	_, isCoreReviewer := reviewerRotation[user]
-	return isCoreReviewer
+	return reviewerRotation.isCoreReviewer(user)
 }
 
-// GetRandomReviewer returns a random available reviewer (optionally excluding some people from the reviewer pool)
 func GetRandomReviewer(excludedReviewers []string) string {
-	availableReviewers := AvailableReviewers(excludedReviewers)
-	reviewer := availableReviewers[rand.Intn(len(availableReviewers))]
-	return reviewer
+	return reviewerRotation.getRandomReviewer(excludedReviewers)
 }
 
 func AvailableReviewers(excludedReviewers []string) []string {
-	return available(time.Now(), reviewerRotation, excludedReviewers)
+	return reviewerRotation.availableReviewers(excludedReviewers)
 }
 
-func available(nowTime time.Time, reviewerRotation map[string]ReviewerConfig, excludedReviewers []string) []string {
-	excludedReviewers = append(excludedReviewers, onVacation(nowTime, reviewerRotation)...)
-	ret := utils.Removes(maps.Keys(reviewerRotation), excludedReviewers)
-	slices.Sort(ret)
-	return ret
+// unused unless exporting hardcoded reviewer rotation to yaml
+func WriteReviewerRotation() ([]byte, error) {
+	return reviewerRotation.write()
 }
 
-func onVacation(nowTime time.Time, reviewerRotation map[string]ReviewerConfig) []string {
-	var onVacationList []string
-	for reviewer, config := range reviewerRotation {
-		for _, v := range config.vacations {
-			if nowTime.Before(v.GetStart(config.timezone)) || nowTime.After(v.GetEnd(config.timezone)) {
-				continue
-			}
-			onVacationList = append(onVacationList, reviewer)
-		}
-	}
-	return onVacationList
+func ReadReviewerRotation(data []byte) error {
+	reviewerRotation.setStartEnd()
+	return reviewerRotation.read(data)
 }
