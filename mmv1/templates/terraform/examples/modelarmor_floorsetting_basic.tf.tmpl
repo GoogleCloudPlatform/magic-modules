@@ -1,5 +1,5 @@
 resource "google_model_armor_floorsetting" "floorsetting-basic" {
-  parent      = "project/{{index $.TestEnvVars "project_id"}}"
+  parent      = "projects/{{index $.TestEnvVars "project_id"}}"
   location    = "global"
 
   filter_config {

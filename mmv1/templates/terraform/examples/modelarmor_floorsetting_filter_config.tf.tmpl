@@ -1,6 +1,6 @@
 resource "google_model_armor_floorsetting" "floorsetting-filter-config" {
   location    = "global"
-  parent      = "project/{{index $.TestEnvVars "project_id"}}"
+  parent      = "projects/{{index $.TestEnvVars "project_id"}}"
 
   filter_config {
     rai_settings {
