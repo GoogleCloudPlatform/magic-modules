@@ -27,6 +27,23 @@ import (
 	"google.golang.org/api/storage/v1"
 )
 
+func corsValidation(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	method, methodOk := d.GetOkExists("cors.0.method")
+	responseHeader, responseHeaderOk := d.GetOkExists("cors.0.response_header")
+	origin, originOk := d.GetOkExists("cors.0.origin")
+
+	if methodOk && len(method.([]interface{})) == 0 {
+		return fmt.Errorf("method cannot be empty")
+	}
+	if responseHeaderOk && len(responseHeader.([]interface{})) == 0 {
+		return fmt.Errorf("response_header cannot be empty")
+	}
+	if originOk && len(origin.([]interface{})) == 0 {
+		return fmt.Errorf("origin cannot be empty")
+	}
+	return nil
+}
+
 func ResourceStorageBucket() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceStorageBucketCreate,
@@ -39,6 +56,7 @@ func ResourceStorageBucket() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			customdiff.ForceNewIfChange("retention_policy.0.is_locked", isPolicyLocked),
 			tpgresource.SetLabelsDiff,
+			corsValidation,
 		),
 
 		Timeouts: &schema.ResourceTimeout{
