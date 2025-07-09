@@ -258,6 +258,7 @@ properties:
                   The client secret provided by the 3rd party platform.  If the
                   `secret_version_for_client_secret` field is set, this field will be
                   ignored.
+                ignore_read: true
               - name: scopes
                 type: Array
                 description: The OAuth scopes to grant.
