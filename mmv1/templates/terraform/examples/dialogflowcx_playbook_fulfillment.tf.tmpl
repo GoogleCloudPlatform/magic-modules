@@ -190,21 +190,25 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
         conditional_cases {
           cases {
             condition = "$sys.func.RAND() < 0.5"
-            caseContent {
+            case_content {
               message {
                 text {
                   text = ["First case"]
                 }
               }
             }
-            caseContent {
+            case_content {
               additionalCases = jsonencode({
-                cases = [
+                "cases": [
                   {
-                    condition = "$sys.func.RAND() < 0.2"
-                    caseContent = [
+                    "condition": "$sys.func.RAND() < 0.2",
+                    "caseContent": [
                       {
-                        message = { text = { text = ["Nested case"] } }
+                        "message": {
+                          "text": {
+                            "text": ["Nested case"]
+                          }
+                        }
                       }
                     ]
                   }
@@ -213,7 +217,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
             }
           }
           cases {
-            caseContent {
+            case_content {
               message {
                 text {
                   text = ["Final case"]
@@ -365,21 +369,25 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
         conditional_cases {
           cases {
             condition = "$sys.func.RAND() < 0.5"
-            caseContent {
+            case_content {
               message {
                 text {
                   text = ["First case"]
                 }
               }
             }
-            caseContent {
+            case_content {
               additionalCases = jsonencode({
-                cases = [
+                "cases": [
                   {
-                    condition = "$sys.func.RAND() < 0.2"
-                    caseContent = [
+                    "condition": "$sys.func.RAND() < 0.2",
+                    "caseContent": [
                       {
-                        message = { text = { text = ["Nested case"] } }
+                        "message": {
+                          "text": {
+                            "text": ["Nested case"]
+                          }
+                        }
                       }
                     ]
                   }
@@ -388,7 +396,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
             }
           }
           cases {
-            caseContent {
+            case_content {
               message {
                 text {
                   text = ["Final case"]
