@@ -12,6 +12,14 @@ resource "google_storage_bucket" "bucket" {
   uniform_bucket_level_access = true
 }
 
+resource "google_dialogflow_cx_webhook" "my_webhook" {
+  parent       = google_dialogflow_cx_agent.agent.id
+  display_name = "MyWebhook"
+  generic_web_service {
+    uri = "https://example.com"
+  }
+}
+
 resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
   parent       = google_dialogflow_cx_agent.agent.id
   display_name = "Example Display Name"
@@ -215,6 +223,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
           }
         }
 
+        webhook = google_dialogflow_cx_webhook.my_webhook.id
         enable_generative_fallback = true
       }
     }
@@ -389,6 +398,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
           }
         }
 
+        webhook = google_dialogflow_cx_webhook.my_webhook.id
         enable_generative_fallback = true
       }
     }
