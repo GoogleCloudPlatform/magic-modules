@@ -1,0 +1,390 @@
+resource "google_dialogflow_cx_agent" "agent" {
+  display_name          = "{{index $.Vars "agent_name"}}"
+  location              = "global"
+  default_language_code = "en"
+  time_zone             = "America/New_York"
+  description           = "Example description."
+}
+
+resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
+  parent       = google_dialogflow_cx_agent.agent.id
+  display_name = "Example Display Name"
+  goal         = "Example Goal"
+  instruction {
+    steps {
+      text = "step 1"
+      steps = jsonencode([
+        {
+          "text": "step 1 1"
+        },
+        {
+          "text": "step 1 2",
+          "steps": [
+            {
+              "text": "step 1 2 1"
+            },
+            {
+              "text": "step 1 2 2"
+            }
+          ]
+        },
+        {
+          "text": "step 1 3"
+        }
+      ])
+    }
+    steps {
+      text = "step 2"
+    }
+    steps {
+      text = "step 3"
+    }
+  }
+  handlers {
+    event_handlers {
+      event = "custom-event"
+      fulfillment {
+        return_partial_responses = false
+        messages {
+          text {
+            text = ["I didn't get that. Can you say it again?"]
+          }
+        }
+      }
+    }
+  }
+
+  handlers {
+    event_handlers {
+      event = "sys.no-match-default"
+      fulfillment {
+        return_partial_responses = false
+        messages {
+          text {
+            text = ["Sorry, could you say that again?"]
+          }
+        }
+      }
+    }
+  }
+
+  handlers {
+    event_handlers {
+      event = "sys.no-input-default"
+      fulfillment {
+        return_partial_responses = false
+        messages {
+          text {
+            text = ["One more time?"]
+          }
+        }
+        advanced_settings {
+          audio_export_gcs_destination {
+            uri = "${google_storage_bucket.bucket.url}/prefix-"
+          }
+          speech_settings {
+            endpointer_sensitivity        = 30
+            no_speech_timeout             = "3.500s"
+            use_timeout_based_endpointing = true
+            models = {
+              name : "wrench"
+              mass : "1.3kg"
+              count : "3"
+            }
+          }
+          dtmf_settings {
+            enabled      = true
+            max_digits   = 1
+            finish_digit = "#"
+          }
+          logging_settings {
+            enable_stackdriver_logging     = true
+            enable_interaction_logging     = true
+            enable_consent_based_redaction = true
+          }
+        }
+      }
+    }
+  }
+
+  handlers {
+    event_handlers {
+      event = "another-event"
+      fulfillment {
+        return_partial_responses = true
+        messages {
+          channel = "some-channel"
+          text {
+            text = ["Some text"]
+          }
+        }
+        messages {
+          payload = <<EOF
+            {"some-key": "some-value", "other-key": ["other-value"]}
+          EOF
+        }
+        messages {
+          conversation_success {
+            metadata = <<EOF
+              {"some-metadata-key": "some-value", "other-metadata-key": 1234}
+            EOF
+          }
+        }
+        messages {
+          output_audio_text {
+            text = "some output text"
+          }
+        }
+        messages {
+          output_audio_text {
+            ssml = <<EOF
+              <speak>Some example <say-as interpret-as="characters">SSML XML</say-as></speak>
+            EOF
+          }
+        }
+        messages {
+          live_agent_handoff {
+            metadata = <<EOF
+              {"some-metadata-key": "some-value", "other-metadata-key": 1234}
+            EOF
+          }
+        }
+        messages {
+          play_audio {
+            audio_uri = "http://example.com/some-audio-file.mp3"
+          }
+        }
+        messages {
+          telephony_transfer_call {
+            phone_number = "1-234-567-8901"
+          }
+        }
+
+        set_parameter_actions {
+          parameter = "some-param"
+          value     = "123.45"
+        }
+        set_parameter_actions {
+          parameter = "another-param"
+          value     = jsonencode("abc")
+        }
+        set_parameter_actions {
+          parameter = "other-param"
+          value     = jsonencode(["foo"])
+        }
+
+        conditional_cases {
+          cases {
+            condition = "$sys.func.RAND() < 0.5",
+            caseContent {
+              message {
+                text {
+                  text = ["First case"]
+                }
+              }
+            }
+            caseContent {
+              additionalCases = jsonencode({
+                cases = [
+                  {
+                    condition = "$sys.func.RAND() < 0.2"
+                    caseContent = [
+                      {
+                        message = { text = { text = ["Nested case"] } }
+                      }
+                    ]
+                  }
+                ]
+              })
+            }
+          }
+          cases {
+            caseContent {
+              message {
+                text {
+                  text = ["Final case"]
+                }
+              }
+            }
+          }
+        }
+
+        enable_generative_fallback = true
+      }
+    }
+  }
+
+  handlers {
+    lifecycle_handlers {
+      lifecycle_stage = "playbook-start"
+      fulfillment {
+        return_partial_responses = false
+        messages {
+          text {
+            text = ["I didn't get that. Can you say it again?"]
+          }
+        }
+      }
+    }
+  }
+
+  handlers {
+    lifecycle_handlers {
+      lifecycle_stage = "playbook-start"
+      fulfillment {
+        return_partial_responses = false
+        messages {
+          text {
+            text = ["Sorry, could you say that again?"]
+          }
+        }
+      }
+    }
+  }
+
+  handlers {
+    lifecycle_handlers {
+      lifecycle_stage = "playbook-start"
+      fulfillment {
+        return_partial_responses = false
+        messages {
+          text {
+            text = ["One more time?"]
+          }
+        }
+        advanced_settings {
+          audio_export_gcs_destination {
+            uri = "${google_storage_bucket.bucket.url}/prefix-"
+          }
+          speech_settings {
+            endpointer_sensitivity        = 30
+            no_speech_timeout             = "3.500s"
+            use_timeout_based_endpointing = true
+            models = {
+              name : "wrench"
+              mass : "1.3kg"
+              count : "3"
+            }
+          }
+          dtmf_settings {
+            enabled      = true
+            max_digits   = 1
+            finish_digit = "#"
+          }
+          logging_settings {
+            enable_stackdriver_logging     = true
+            enable_interaction_logging     = true
+            enable_consent_based_redaction = true
+          }
+        }
+      }
+    }
+  }
+
+  handlers {
+    lifecycle_handlers {
+      lifecycle_stage = "playbook-start"
+      fulfillment {
+        return_partial_responses = true
+        messages {
+          channel = "some-channel"
+          text {
+            text = ["Some text"]
+          }
+        }
+        messages {
+          payload = <<EOF
+            {"some-key": "some-value", "other-key": ["other-value"]}
+          EOF
+        }
+        messages {
+          conversation_success {
+            metadata = <<EOF
+              {"some-metadata-key": "some-value", "other-metadata-key": 1234}
+            EOF
+          }
+        }
+        messages {
+          output_audio_text {
+            text = "some output text"
+          }
+        }
+        messages {
+          output_audio_text {
+            ssml = <<EOF
+              <speak>Some example <say-as interpret-as="characters">SSML XML</say-as></speak>
+            EOF
+          }
+        }
+        messages {
+          live_agent_handoff {
+            metadata = <<EOF
+              {"some-metadata-key": "some-value", "other-metadata-key": 1234}
+            EOF
+          }
+        }
+        messages {
+          play_audio {
+            audio_uri = "http://example.com/some-audio-file.mp3"
+          }
+        }
+        messages {
+          telephony_transfer_call {
+            phone_number = "1-234-567-8901"
+          }
+        }
+
+        set_parameter_actions {
+          parameter = "some-param"
+          value     = "123.45"
+        }
+        set_parameter_actions {
+          parameter = "another-param"
+          value     = jsonencode("abc")
+        }
+        set_parameter_actions {
+          parameter = "other-param"
+          value     = jsonencode(["foo"])
+        }
+
+        conditional_cases {
+          cases {
+            condition = "$sys.func.RAND() < 0.5",
+            caseContent {
+              message {
+                text {
+                  text = ["First case"]
+                }
+              }
+            }
+            caseContent {
+              additionalCases = jsonencode({
+                cases = [
+                  {
+                    condition = "$sys.func.RAND() < 0.2"
+                    caseContent = [
+                      {
+                        message = { text = { text = ["Nested case"] } }
+                      }
+                    ]
+                  }
+                ]
+              })
+            }
+          }
+          cases {
+            caseContent {
+              message {
+                text {
+                  text = ["Final case"]
+                }
+              }
+            }
+          }
+        }
+
+        enable_generative_fallback = true
+      }
+    }
+  }
+}

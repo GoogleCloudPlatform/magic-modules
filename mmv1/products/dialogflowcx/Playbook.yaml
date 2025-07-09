@@ -40,6 +40,10 @@ examples:
     primary_resource_id: "my-playbook"
     vars:
       agent_name: 'dialogflowcx-agent-basic'
+  - name: "dialogflowcx_playbook_fulfillment"
+    primary_resource_id: "my-playbook"
+    vars:
+      agent_name: 'dialogflowcx-agent-basic'
 
 parameters:
   - name: 'parent'
