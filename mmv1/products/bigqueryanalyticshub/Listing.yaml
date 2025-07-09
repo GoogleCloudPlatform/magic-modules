@@ -86,6 +86,14 @@ examples:
       listing_id: 'tf_test_pubsub_listing'
       pubsub_topic_name: 'test_pubsub'
       description: 'Example for pubsub topic source'
+# - name: 'bigquery_analyticshub_listing_multiregion'
+#   primary_resource_id: 'listing'
+#   primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
+#   region_override: 'US'
+#   vars:
+#     data_exchange_id: 'my_data_exchange'
+#     listing_id: 'my_listing'
+#     description: 'example listing for multiregion'
 parameters:
 properties:
   - name: 'name'
@@ -172,7 +180,6 @@ properties:
   - name: 'bigqueryDataset'
     type: NestedObject
     description: Shared dataset i.e. BigQuery dataset source.
-    immutable: true
     exactly_one_of:
       - 'pubsubTopic'
       - 'bigqueryDataset'
@@ -198,6 +205,39 @@ properties:
                 Format: For table: projects/{projectId}/datasets/{datasetId}/tables/{tableId} Example:"projects/test_project/datasets/test_dataset/tables/test_table"
               immutable: true
               diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+      - name: 'replicaLocations'
+        type: Array
+        is_set: true
+        description: |
+          A list of regions where the publisher has created shared dataset replicas.
+        item_type:
+          type: String
+      - name: 'effectiveReplicas'
+        type: Array
+        description: |
+          Server owned effective state of replicas. Contains both primary and secondary replicas.
+          Each replica includes a system-computed (output-only) state and primary designation.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'location'
+              type: String
+              description: |
+                The geographic location where the replica resides.
+              output: true
+            - name: 'replicaState'
+              type: String
+              description: |
+                Output-only. Assigned by Analytics Hub based on real BigQuery replication state.
+                Possible values: REPLICA_STATE_UNSPECIFIED, READY_TO_USE, UNAVAILABLE
+              output: true
+            - name: 'primaryState'
+              type: String
+              description: |
+                Output-only. Indicates that this replica is the primary replica.
+                Possible values: PRIMARY_STATE_UNSPECIFIED, PRIMARY_REPLICA
+              output: true
   - name: 'pubsubTopic'
     type: NestedObject
     description: Pub/Sub topic source.
