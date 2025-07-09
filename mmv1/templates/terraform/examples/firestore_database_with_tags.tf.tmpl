@@ -17,5 +17,7 @@ resource "google_firestore_database" "{{$.PrimaryResourceId}}" {
   type                              = "FIRESTORE_NATIVE"
   delete_protection_state           = "{{index $.Vars "delete_protection_state"}}"
   deletion_policy                   = "DELETE"
-  tags                              = google_tags_tag_key.key.id: google_tags_tag_value.value.id
+  tags = {
+    google_tags_tag_key.key.id = google_tags_tag_value.value.id
+  }
 }
