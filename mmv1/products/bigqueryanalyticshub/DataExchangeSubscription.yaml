@@ -21,8 +21,8 @@ references:
   api: 'https://cloud.google.com/bigquery/docs/reference/analytics-hub/rest/v1/projects.locations.subscriptions'
 docs:
   note: |-
-    When importing the resource with `terraform import`, provide the destination project and location
-    in the format projects/{{destination_project}}/locations/{{destination_location}}/subscriptions/{{subscription_id}}
+    When importing the resource with `terraform import`, provide the destination/subscriber's project and location
+    in the format projects/{{subscriber_project}}/locations/{{subscriber_location}}/subscriptions/{{subscription_id}}
 base_url: 'projects/{{project}}/locations/{{location}}/subscriptions'
 self_link: 'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}'
 create_url: 'projects/{{data_exchange_project}}/locations/{{data_exchange_location}}/dataExchanges/{{data_exchange_id}}:subscribe'
