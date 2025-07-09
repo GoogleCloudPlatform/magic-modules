@@ -45,6 +45,7 @@ references:
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/subnetworks'
 has_self_link: true
+include_in_tgc_next_DO_NOT_USE: true
 immutable: true
 timeouts:
   insert_minutes: 20
@@ -67,6 +68,7 @@ custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/subnetwork.tmpl'
   constants: 'templates/terraform/constants/subnetwork.tmpl'
   post_update: 'templates/terraform/post_update/compute_subnetwork.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/compute_subnetwork.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)'
   - 'sendSecondaryIpRangeIfEmptyDiff'
@@ -325,6 +327,7 @@ properties:
     default_from_api: true
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess'
     update_verb: 'POST'
+    include_empty_value_in_cai: true
   - name: 'privateIpv6GoogleAccess'
     type: String
     description: The private IPv6 google access type for the VMs in this subnet.
@@ -472,6 +475,7 @@ properties:
   - name: 'ipCollection'
     type: String
     ignore_read: true
+    is_missing_in_cai: true
     description: |
       Resource reference of a PublicDelegatedPrefix. The PDP must be a sub-PDP
       in EXTERNAL_IPV6_SUBNETWORK_CREATION mode.
@@ -507,6 +511,7 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
     update_verb: 'PATCH'
     fingerprint_name: 'fingerprint'
+    is_missing_in_cai: true
   - name: 'enableFlowLogs'
     type: Boolean
     description: |
@@ -515,6 +520,7 @@ properties:
       org policy, if there is no org policy specified, then it will default to disabled.
       This field isn't supported if the subnet purpose field is set to REGIONAL_MANAGED_PROXY.
     default_from_api: true
+    include_empty_value_in_cai: true
     deprecation_message: 'This field is being removed in favor of log_config. If log_config is present, flow logs are enabled.'
   - name: 'state'
     type: Enum
