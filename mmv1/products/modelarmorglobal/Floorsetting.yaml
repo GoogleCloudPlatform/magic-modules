@@ -34,33 +34,18 @@ examples:
     # Excluding tests as they modify a singleton resource and hence will result in race conditions
   - name: 'modelarmor_floorsetting_basic'
     primary_resource_id: 'floorsetting-basic'
-    test_vars_overrides:
-      parent: '"projects/ci-test-project-188019"'
-      location: '"global"'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
     exclude_test: true
   - name: 'modelarmor_floorsetting_filter_config'
     primary_resource_id: 'floorsetting-filter-config'
-    test_vars_overrides:
-      location: '"global"'
-      parent: '"projects/ci-test-project-188019"'
-      filter_config_rai_settings_rai_filters_0_filter_type: '"DANGEROUS"'
-      filter_config_rai_settings_rai_filters_0_confidence_level: '"MEDIUM_AND_ABOVE"'
-      sdp_settings_config_type: '"basic_config"'
-      filter_config_sdp_settings_basic_config_filter_enforcement: '"ENABLED"'
-      filter_config_pi_and_jailbreak_filter_settings_filter_enforcement: '"ENABLED"'
-      filter_config_pi_and_jailbreak_filter_settings_confidence_level: '"HIGH"'
-      filter_config_malicious_uri_filter_settings_filter_enforcement: '"ENABLED"'
-      enable_floor_setting_enforcement: true
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
     exclude_test: true
   - name: 'modelarmor_floorsetting_ai_platform_metadata'
     primary_resource_id: 'floorsetting-integrated-metadata'
-    test_vars_overrides:
-      location: '"global"'
-      parent: '"projects/ci-test-project-188019"'
-      ai_platform_floor_setting_enforcement_type_inspect_only: true
-      ai_platform_floor_setting_enable_cloud_logging: true
-      floor_setting_metadata_multi_language_detection: false
-      enable_floor_setting_enforcement: false
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
     exclude_test: true
 parameters:
   - name: location

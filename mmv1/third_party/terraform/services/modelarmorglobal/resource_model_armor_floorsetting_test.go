@@ -11,8 +11,7 @@ import (
 func TestAccModelArmorGlobalFloorsetting_basic(t *testing.T) {
 
 	basicContext := map[string]interface{}{
-		"location": "global",
-		"parent":   "projects/ci-test-project-188019",
+		"project_id": envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -34,8 +33,8 @@ func TestAccModelArmorGlobalFloorsetting_basic(t *testing.T) {
 func testAccModelArmorGlobalFloorsetting_basicContext(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_model_armor_floorsetting" "floorsetting-basic" {
-  parent      = "%{parent}"
-  location    = "%{location}"
+  parent      = "project/%{project_id}"
+  location    = "global"
 
   filter_config {
 
@@ -47,8 +46,7 @@ resource "google_model_armor_floorsetting" "floorsetting-basic" {
 func TestAccModelArmorGlobalFloorsetting_update(t *testing.T) {
 
 	context := map[string]interface{}{
-		"location": "global",
-		"parent":   "projects/ci-test-project-188019",
+		"project_id": envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -80,8 +78,8 @@ func TestAccModelArmorGlobalFloorsetting_update(t *testing.T) {
 func testAccModelArmorGlobalFloorsetting_initial(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_model_armor_floorsetting" "test-resource" {
-  location    = "%{location}"
-  parent      = "%{parent}"
+  location    = "global"
+  parent      = "project/%{project_id}"
 
   filter_config {
     rai_settings {
