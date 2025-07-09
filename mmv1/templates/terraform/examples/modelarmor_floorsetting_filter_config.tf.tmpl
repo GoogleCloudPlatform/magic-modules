@@ -1,27 +1,27 @@
 resource "google_model_armor_floorsetting" "floorsetting-filter-config" {
-  location    = "{{.Vars.location}}"
-  parent      = "{{.Vars.parent}}"
+  location    = "global"
+  parent      = "project/{{index $.TestEnvVars "project_id"}}"
 
   filter_config {
     rai_settings {
       rai_filters {
-        filter_type      = "{{.Vars.filter_config_rai_settings_rai_filters_0_filter_type}}"
-        confidence_level = "{{.Vars.filter_config_rai_settings_rai_filters_0_confidence_level}}"
+        filter_type      = "DANGEROUS"
+        confidence_level = "MEDIUM_AND_ABOVE"
       }
     }
     sdp_settings {
       basic_config {
-          filter_enforcement = "{{.Vars.filter_config_sdp_settings_basic_config_filter_enforcement}}"
+          filter_enforcement = "ENABLED"
       }
     }
     pi_and_jailbreak_filter_settings {
-      filter_enforcement = "{{.Vars.filter_config_pi_and_jailbreak_filter_settings_filter_enforcement}}"
-      confidence_level   = "{{.Vars.filter_config_pi_and_jailbreak_filter_settings_confidence_level}}"
+      filter_enforcement = "ENABLED"
+      confidence_level   = "HIGH"
     }
     malicious_uri_filter_settings {
-      filter_enforcement = "{{.Vars.filter_config_malicious_uri_filter_settings_filter_enforcement}}"
+      filter_enforcement = "ENABLED"
     }
   }
 
-  enable_floor_setting_enforcement = {{.Vars.enable_floor_setting_enforcement}}
+  enable_floor_setting_enforcement = true
 }
