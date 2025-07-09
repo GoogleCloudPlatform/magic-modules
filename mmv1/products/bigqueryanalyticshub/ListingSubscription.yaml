@@ -51,6 +51,19 @@ examples:
       listing_id: 'my_listing'
       destination_dataset_id: 'destination_dataset'
       description: 'example data exchange'
+  # - name: 'bigquery_analyticshub_listing_subscription_multiregion'
+  #   primary_resource_id: 'subscription'
+  #   primary_resource_name: 'fmt.Sprintf(\"tf_test_my_data_exchange%s\",
+  #     context[\"\
+  #     random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\",
+  #     context[\"random_suffix\"\
+  #     ])'
+  #   region_override: 'US'
+  #   vars:
+  #     data_exchange_id: 'my_data_exchange'
+  #     listing_id: 'my_listing'
+  #     destination_dataset_id: 'destination_dataset'
+  #     description: 'example listing multiregion subscription'
 parameters:
   - name: 'dataExchangeId'
     type: String
@@ -112,6 +125,13 @@ properties:
         description: |
           The labels associated with this dataset. You can use these to
           organize and group your datasets.
+      - name: 'replicaLocations'
+        is_set: true
+        type: Array
+        description: |
+          List of regions where the subscriber wants dataset replicas.
+        item_type:
+          type: String
   - name: 'name'
     type: String
     description: |-
