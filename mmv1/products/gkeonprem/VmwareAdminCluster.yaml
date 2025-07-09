@@ -16,7 +16,6 @@ name: "VmwareAdminCluster"
 description: "A Google VMware Admin Cluster."
 references:
   api: 'https://cloud.google.com/kubernetes-engine/distributed-cloud/reference/on-prem-api/rest/v1/projects.locations.vmwareAdminClusters'
-min_version: beta
 base_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters"
 create_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters?vmware_admin_cluster_id={{name}}"
 update_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"
@@ -42,21 +41,18 @@ taint_resource_on_failed_create: true
 examples:
   - name: "gkeonprem_vmware_admin_cluster_basic"
     primary_resource_id: "admin-cluster-basic"
-    min_version: beta
     vars:
       name: "basic"
     test_env_vars:
       project: "fake-backend-360322"
   - name: 'gkeonprem_vmware_admin_cluster_full'
     primary_resource_id: 'admin-cluster-full'
-    min_version: beta
     vars:
       name: 'full'
     test_env_vars:
       project: 'fake-backend-360322'
   - name: 'gkeonprem_vmware_admin_cluster_metallb'
     primary_resource_id: 'admin-cluster-metallb'
-    min_version: beta
     vars:
       name: 'metallb'
     test_env_vars:
