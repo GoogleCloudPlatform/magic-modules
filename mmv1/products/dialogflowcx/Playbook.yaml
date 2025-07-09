@@ -197,6 +197,10 @@ properties:
                 call the webhook (e.g., to load user data from a database), or both.
               required: true
               properties:
+                - name: channel
+                  type: String
+                  description: |
+                    The channel which the response is associated with. Clients can specify the channel via [QueryParameters.channel](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/QueryParameters#FIELDS.channel), and only associated channel response will be returned.
                 - name: messages
                   type: Array
                   description: The list of rich message responses to present to the user.
@@ -940,6 +944,10 @@ properties:
                 call the webhook (e.g., to load user data from a database), or both.
               required: true
               properties:
+                - name: channel
+                  type: String
+                  description: |
+                    The channel which the response is associated with. Clients can specify the channel via [QueryParameters.channel](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/QueryParameters#FIELDS.channel), and only associated channel response will be returned.
                 - name: messages
                   type: Array
                   description: The list of rich message responses to present to the user.
