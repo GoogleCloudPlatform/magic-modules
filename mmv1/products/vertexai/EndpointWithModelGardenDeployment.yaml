@@ -16,9 +16,12 @@ name: EndpointWithModelGardenDeployment
 api_resource_type_kind: Endpoint
 description: Create an Endpoint and deploy a Model Garden model to it.
 references:
-  guides: null
+  guides:
+    'Use models in Model Garden': 'https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/use-models'
+    'Overview of Model Garden': 'https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models'
+    'Overview of self-deployed models': 'https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/self-deployed-models'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations/deploy'
-docs: null
+docs:
 id_format: 'projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}'
 base_url: 'projects/{{project}}/locations/{{location}}:deploy'
 self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}'
