@@ -43,7 +43,8 @@ examples:
   - name: "dialogflowcx_playbook_fulfillment"
     primary_resource_id: "my-playbook"
     vars:
-      agent_name: 'dialogflowcx-agent-basic'
+      agent_name: 'dialogflowcx-agent'
+      bucket_name: 'dialogflowcx-bucket'
 
 parameters:
   - name: 'parent'

@@ -6,6 +6,12 @@ resource "google_dialogflow_cx_agent" "agent" {
   description           = "Example description."
 }
 
+resource "google_storage_bucket" "bucket" {
+  name                        = "{{index $.Vars "bucket_name"}}"
+  location                    = "US"
+  uniform_bucket_level_access = true
+}
+
 resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
   parent       = google_dialogflow_cx_agent.agent.id
   display_name = "Example Display Name"
