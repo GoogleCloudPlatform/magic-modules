@@ -3044,6 +3044,9 @@ func flattenKerberosConfig(d *schema.ResourceData, kfg *dataproc.KerberosConfig)
 }
 
 func flattenIdentityConfig(d *schema.ResourceData, ifg *dataproc.IdentityConfig) []map[string]interface{} {
+	if ifg == nil {
+		return nil
+	}
 	data := map[string]interface{}{
 		"user_service_account_mapping": d.Get("cluster_config.0.security_config.0.identity_config.0.user_service_account_mapping").(map[string]interface{}),
 	}
