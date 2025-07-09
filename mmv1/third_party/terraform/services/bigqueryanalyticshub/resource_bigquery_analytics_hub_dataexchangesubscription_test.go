@@ -55,6 +55,7 @@ func TestAccBigqueryAnalyticsHubDataExchangeSubscription_bigqueryAnalyticshubDat
 func testAccBigqueryAnalyticsHubDataExchangeSubscription_bigqueryAnalyticshubDataexchangeSubscriptionUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigquery_analytics_hub_data_exchange" "subscription" {
+  provider = google-beta
   location            = "us"
   data_exchange_id    = "tf_test_my_test_dataexchange%{random_suffix}"
   display_name        = "tf_test_my_test_dataexchange%{random_suffix}"
@@ -65,6 +66,7 @@ resource "google_bigquery_analytics_hub_data_exchange" "subscription" {
 }
 
 resource "google_bigquery_dataset" "subscription" {
+  provider = google-beta
   dataset_id    = "tf_test_listing_src_dataset%{random_suffix}"
   friendly_name = "tf_test_listing_src_dataset%{random_suffix}"
   description   = "Dataset for Listing"
@@ -72,6 +74,7 @@ resource "google_bigquery_dataset" "subscription" {
 }
 
 resource "google_bigquery_table" "subscription" {
+  provider = google-beta
   deletion_protection = false
   table_id            = "tf_test_listing_src_table%{random_suffix}"
   dataset_id          = google_bigquery_dataset.subscription.dataset_id
@@ -97,6 +100,7 @@ EOF
 }
 
 resource "google_bigquery_analytics_hub_listing" "subscription" {
+  provider = google-beta
   location             = "us"
   data_exchange_id     = google_bigquery_analytics_hub_data_exchange.subscription.data_exchange_id
   listing_id           = "tf_test_my_test_listing%{random_suffix}"
@@ -116,6 +120,7 @@ resource "google_bigquery_analytics_hub_listing" "subscription" {
 }
 
 resource "google_bigquery_analytics_hub_data_exchange_subscription" "subscription" {
+  provider = google-beta
   project                = google_bigquery_dataset.subscription.project #Subscriber's project
   location               = "us"
 
