@@ -168,6 +168,19 @@ func (mr *mockRunner) Run(name string, args []string, env map[string]string) (st
 	return "", nil
 }
 
+func (mr *mockRunner) RunInBash(name string, args []string, env map[string]string) (string, error) {
+	mr.calledMethods["Run"] = append(mr.calledMethods["Run"], ParameterList{mr.cwd, name, args, env})
+	cmd := fmt.Sprintf("%s %s %v %s", mr.cwd, name, args, sortedEnvString(env))
+	if result, ok := mr.cmdResults[cmd]; ok {
+		return result, nil
+	}
+	if mr.notifyError {
+		return "", fmt.Errorf("unknown command %s", cmd)
+	}
+	fmt.Printf("unknown command %s\n", cmd)
+	return "", nil
+}
+
 func (mr *mockRunner) MustRun(name string, args []string, env map[string]string) string {
 	out, err := mr.Run(name, args, env)
 	if err != nil {

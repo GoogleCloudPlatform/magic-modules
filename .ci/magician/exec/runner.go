@@ -16,14 +16,17 @@
 package exec
 
 import (
+	"bytes"
 	"container/list"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	cp "github.com/otiai10/copy"
 )
@@ -135,6 +138,39 @@ func (ar *Runner) Run(name string, args []string, env map[string]string) (string
 		return "", fmt.Errorf("error running %q: %v", name, err)
 	}
 	return string(out), nil
+}
+
+// RunInBash runs the given command inside bash with streaming output
+func (ar *Runner) RunInBash(name string, args []string, env map[string]string) (string, error) {
+	// Build the full command
+	fullCommand := fmt.Sprintf("%s %s", name, strings.Join(args, " "))
+
+	fmt.Println("executing command in bash: ", fullCommand)
+
+	// Create bash command with -c flag (no temp file needed)
+	cmd := exec.Command("/bin/bash", "-c", fullCommand)
+	cmd.Dir = ar.cwd
+
+	// Set environment variables
+	cmd.Env = os.Environ() // Start with current environment
+	for key, val := range env {
+		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, val))
+	}
+
+	// Capture output while streaming to stdout/stderr
+	var outputBuf bytes.Buffer
+	cmd.Stdout = io.MultiWriter(os.Stdout, &outputBuf)
+	cmd.Stderr = io.MultiWriter(os.Stderr, &outputBuf)
+
+	// Run the command
+	err := cmd.Run()
+	capturedOutput := outputBuf.String()
+
+	if err != nil {
+		return capturedOutput, fmt.Errorf("command failed: %v\noutput:\n%s", err, capturedOutput)
+	}
+
+	return capturedOutput, nil
 }
 
 // Run the command and exit if there's an error.
