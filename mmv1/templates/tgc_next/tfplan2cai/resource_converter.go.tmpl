@@ -62,17 +62,19 @@ func Get{{ $.ResourceName -}}CaiAssets(d tpgresource.TerraformResourceData, conf
         if location == "" && strings.Contains(name, "/global/") {
             location = "global"
         }
-        return []caiasset.Asset{{"{{"}}
-            Name: name,
-            Type: {{ $.ApiResourceType -}}AssetType,
-            Resource: &caiasset.AssetResource{
-                Version: "{{ $apiVersion }}",
-                DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/{{ $productBackendName }}/{{ $apiVersion }}/rest",
-                DiscoveryName: "{{ or $.ApiResourceTypeKind $.Name }}",
-                Data: obj,
-                Location:             location,
+        return []caiasset.Asset{
+            {
+                Name: name,
+                Type: {{ $.ApiResourceType -}}AssetType,
+                Resource: &caiasset.AssetResource{
+                    Version: "{{ $apiVersion }}",
+                    DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/{{ $productBackendName }}/{{ $apiVersion }}/rest",
+                    DiscoveryName: "{{ or $.ApiResourceTypeKind $.Name }}",
+                    Data: obj,
+                    Location:             location,
+                },
             },
-        {{"}}"}}, nil
+        }, nil
     } else {
         return []caiasset.Asset{}, err
     }
@@ -124,13 +126,5 @@ func resource{{ $.ResourceName -}}TgcEncoder(d tpgresource.TerraformResourceData
 {{- end}}
 
 {{ range $prop := $.SettableProperties }}
-    {{ if $prop.CustomTgcExpand }}
-    {{- $prop.CustomTemplate $prop.CustomTgcExpand false -}}
-    {{ else if and ($prop.IsA "Array") ($prop.ItemType.IsA "ResourceRef")}}
-    {{- template "expandArrayResourcerefWithValidation" $prop -}}
-    {{ else if ($prop.IsA "ResourceRef") }}
-    {{- template "expandResourcerefWithValidation" $prop -}}
-    {{ else }}
-    {{- template "expandPropertyMethod" $prop -}}
-    {{ end }}
+    {{- template "expandTgcPropertyMethod" $prop -}}
 {{- end}}
