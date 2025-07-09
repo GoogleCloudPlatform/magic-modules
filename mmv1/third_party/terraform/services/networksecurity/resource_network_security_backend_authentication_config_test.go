@@ -1,11 +1,11 @@
 package networksecurity_test
-{{- if ne $.TargetVersionName "ga" }}
+
 import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
-  
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -18,7 +18,7 @@ func TestAccNetworkSecurityBackendAuthenticationConfig_networkSecurityBackendAut
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkSecurityBackendAuthenticationConfig_networkSecurityBackendAuthenticationConfigFullExample_full(context),
@@ -50,7 +50,6 @@ func TestAccNetworkSecurityBackendAuthenticationConfig_networkSecurityBackendAut
 func testAccNetworkSecurityBackendAuthenticationConfig_networkSecurityBackendAuthenticationConfigFullExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_certificate_manager_certificate" "certificate" {
-  provider = google-beta
   name     = "tf-test-my-certificate%{random_suffix}"
   location    = "global"
   self_managed {
@@ -61,7 +60,6 @@ resource "google_certificate_manager_certificate" "certificate" {
 }
 
 resource "google_certificate_manager_trust_config" "trust_config" {
-  provider    = google-beta
   name        = "tf-test-my-trust-config%{random_suffix}"
   description = "sample description for the trust config"
   location    = "global"
@@ -77,7 +75,6 @@ resource "google_certificate_manager_trust_config" "trust_config" {
 }
 
 resource "google_network_security_backend_authentication_config" "default" {
-  provider           = google-beta
   name               = "tf-test-my-backend-authentication-config%{random_suffix}"
   location           = "global"
   description        = "my description"
@@ -90,11 +87,7 @@ resource "google_network_security_backend_authentication_config" "default" {
 
 func testAccNetworkSecurityBackendAuthenticationConfig_networkSecurityBackendAuthenticationConfigFullExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
-  provider = google-beta
-}
 resource "google_certificate_manager_certificate" "certificate" {
-  provider = google-beta
   name     = "tf-test-my-certificate%{random_suffix}"
   location    = "global"
   self_managed {
@@ -105,7 +98,6 @@ resource "google_certificate_manager_certificate" "certificate" {
 }
 
 resource "google_certificate_manager_trust_config" "trust_config" {
-  provider    = google-beta
   name        = "tf-test-my-trust-config%{random_suffix}"
   description = "sample description for the trust config"
   location    = "global"
@@ -121,7 +113,6 @@ resource "google_certificate_manager_trust_config" "trust_config" {
 }
 
 resource "google_network_security_backend_authentication_config" "default" {
-  provider = google-beta
   name     = "tf-test-my-backend-authentication-config%{random_suffix}"
   location           = "global"
   description        = "updated description"
@@ -131,5 +122,3 @@ resource "google_network_security_backend_authentication_config" "default" {
 }
 `, context)
 }
-
-{{ end }}
