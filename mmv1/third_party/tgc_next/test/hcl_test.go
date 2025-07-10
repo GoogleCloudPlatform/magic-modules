@@ -7,11 +7,13 @@ import (
 )
 
 var (
-	basicHCL = `resource "google_project_service" "project" {
+	basicHCL = `
+resource "google_project_service" "project" {
   service = "iam.googleapis.com"
 }
 `
-	nestedBlocksHCL = `resource "google_storage_bucket" "bucket" {
+	nestedBlocksHCL = `
+resource "google_storage_bucket" "bucket" {
   name          = "my-bucket"
   location      = "US"
   force_destroy = true
@@ -26,7 +28,8 @@ var (
   }
 }
 `
-	multipleResourcesHCL = `resource "google_project_service" "project" {
+	multipleResourcesHCL = `
+resource "google_project_service" "project" {
   service = "iam.googleapis.com"
 }
 
@@ -34,7 +37,8 @@ resource "google_storage_bucket" "bucket" {
   name = "my-bucket"
 }
 `
-	listOfNestedObjectsHCL = `resource "google_compute_firewall" "default" {
+	listOfNestedObjectsHCL = `
+resource "google_compute_firewall" "default" {
   name    = "test-firewall"
   network = google_compute_network.default.name
 
@@ -50,7 +54,8 @@ resource "google_storage_bucket" "bucket" {
   source_tags = ["web"]
 }
 `
-	listOfMultiLevelNestedObjectsHCL = `resource "google_compute_firewall" "default" {
+	listOfMultiLevelNestedObjectsHCL = `
+resource "google_compute_firewall" "default" {
   name    = "test-firewall"
   network = google_compute_network.default.name
 
