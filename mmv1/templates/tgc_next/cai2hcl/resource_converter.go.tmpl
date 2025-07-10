@@ -33,6 +33,7 @@ import (
 	"google.golang.org/api/bigtableadmin/v2"
 	"google.golang.org/api/googleapi"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/models"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tgcresource"
@@ -136,22 +137,7 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 }
 
 {{ range $prop := $.ReadPropertiesForTgc }}
-	{{- if $prop.CustomTgcFlatten }}
-{{ $prop.CustomTemplate $prop.CustomTgcFlatten true -}}
-	{{- else if $prop.IsA "KeyValueLabels" }}
-func flatten{{$prop.GetPrefix}}{{$prop.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return tgcresource.RemoveTerraformAttributionLabel(v)
-}
-	{{- else if or (and (eq $prop.Name "zone") $.HasZone) (and (eq $prop.Name "region") $.HasRegion) -}}
-func flatten{{$prop.GetPrefix}}{{$prop.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	if v == nil {
-		return v
-	}
-	return tpgresource.GetResourceNameFromSelfLink(v.(string))
-}
-	{{- else }}
-{{ template "flattenPropertyMethod" $prop -}}
-	{{- end }}
+{{- template "flattenTgcPropertyMethod" $prop -}}
 {{- end }}
 
 {{- if $.CustomCode.TgcDecoder }}
