@@ -115,7 +115,6 @@ examples:
       backend_bucket_name: 'global-ilb-backend-bucket'
       bucket_name: 'global-ilb-bucket'
     exclude_docs: true
-    tgc_skip_test: 'Skip the test temporarily, as it takes time to fix it.'
     tgc_test_ignore_extra:
       - 'project'
 parameters:
@@ -277,6 +276,7 @@ properties:
   - name: 'enableCdn'
     type: Boolean
     description: 'If true, enable Cloud CDN for this BackendBucket.'
+    include_empty_value_in_cai: true
   - name: 'name'
     type: String
     description: |
