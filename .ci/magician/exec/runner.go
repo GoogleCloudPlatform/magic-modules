@@ -24,7 +24,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 
 	cp "github.com/otiai10/copy"
 )
@@ -135,58 +134,6 @@ func (ar *Runner) Run(name string, args []string, env map[string]string) (string
 	if err != nil {
 		return "", fmt.Errorf("error running %q: %v", name, err)
 	}
-	return string(out), nil
-}
-
-// RunInBash runs the given command through bash, mimicking the behavior of Run()
-func (ar *Runner) RunInBash(name string, args []string, env map[string]string) (string, error) {
-	// Build the full command
-	fullCommand := fmt.Sprintf("%s %s", name, strings.Join(args, " "))
-
-	// Try to use script command if available to fake a TTY
-	scriptCommand := fmt.Sprintf("script -qec '%s' /dev/null", fullCommand)
-
-	// Create bash command with -c flag
-	cmd := exec.Command("/bin/bash", "-c", scriptCommand)
-	cmd.Dir = ar.cwd
-
-	// Add environment vars to suppress terminal detection trace logs
-	suppressVars := map[string]string{
-		"TF_IN_AUTOMATION": "true",
-		"NO_COLOR":         "1",
-		"TERM":             "xterm",
-		"CI":               "true",
-		"FORCE_COLOR":      "0",
-		"CLICOLOR":         "0",
-		"CLICOLOR_FORCE":   "0",
-		"COLORTERM":        "",
-	}
-
-	// Add suppression vars first
-	for key, val := range suppressVars {
-		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, val))
-	}
-
-	// Then add user-provided env vars (they can override)
-	for key, val := range env {
-		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, val))
-	}
-
-	// Use CombinedOutput to get both stdout and stderr
-	out, err := cmd.CombinedOutput()
-
-	// Handle errors similar to the original Run function
-	switch typedErr := err.(type) {
-	case *exec.ExitError:
-		return string(out), fmt.Errorf("error running %s: %v\noutput:\n%s", fullCommand, err, out)
-	case *fs.PathError:
-		return "", fmt.Errorf("path error running %s: %v", fullCommand, typedErr)
-	}
-
-	if err != nil {
-		return "", fmt.Errorf("error running %q: %v", fullCommand, err)
-	}
-
 	return string(out), nil
 }
 

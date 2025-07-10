@@ -282,7 +282,7 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 	args:
 %s
 `, printedEnv, strings.Join(args, " "))
-	output, testErr := vt.rnr.RunInBash("go", args, env)
+	output, testErr := vt.rnr.Run("go", args, env)
 	if testErr != nil {
 		// Use error as output for log.
 		output = fmt.Sprintf("Error %s tests:\n%v", opt.Mode.Lower(), testErr)
@@ -416,7 +416,7 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 	for ev, val := range vt.env {
 		env[ev] = val
 	}
-	output, testErr := vt.rnr.RunInBash("go", args, env)
+	output, testErr := vt.rnr.Run("go", args, env)
 	outputs <- output
 	if testErr != nil {
 		// Use error as output for log.
@@ -470,6 +470,7 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 	}
 	lgky := logKey{opts.Mode, opts.Version}
 	logPath, ok := vt.logPaths[lgky]
+	vt.filterTraceFromLogFiles(logPath)
 	if !ok {
 		return fmt.Errorf("no log path found for mode %s and version %s", opts.Mode.Lower(), opts.Version)
 	}

@@ -13,6 +13,5 @@ type ExecRunner interface {
 	WriteFile(name, data string) error
 	Walk(root string, fn filepath.WalkFunc) error
 	Run(name string, args []string, env map[string]string) (string, error)
-	RunInBash(name string, args []string, env map[string]string) (string, error)
 	MustRun(name string, args []string, env map[string]string) string
 }
