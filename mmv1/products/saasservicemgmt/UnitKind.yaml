@@ -99,6 +99,7 @@ properties:
     description: |
       List of inputVariables for this UnitKind that will either be retrieved from a dependency's outputVariables,
       or will be passed on to a dependency's inputVariables. Maximum 100.
+    max_size: 100
     item_type:
       type: NestedObject
       properties:
