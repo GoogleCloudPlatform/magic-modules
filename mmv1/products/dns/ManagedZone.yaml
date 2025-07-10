@@ -116,6 +116,7 @@ examples:
     primary_resource_id: 'cloud-logging-enabled-zone'
     vars:
       zone_name: 'cloud-logging-enabled-zone'
+      dns_name: 'fmt.Sprintf("services.example.com-%s.", context["random_suffix"])'
 virtual_fields:
   - name: 'force_destroy'
     description: 'Set this true to delete all records in the zone.'
