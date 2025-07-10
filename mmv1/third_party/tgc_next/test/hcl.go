@@ -3,6 +3,8 @@ package test
 import (
 	"fmt"
 	"log"
+	"sort"
+	"strings"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/hcl/v2/hclparse"
@@ -94,9 +96,9 @@ func insert(data any, key string, parent map[string]any) {
 	}
 }
 
-func flatten(data interface{}, prefix string, result map[string]struct{}) {
+func flatten(data any, prefix string, result map[string]struct{}) {
 	switch v := data.(type) {
-	case map[string]interface{}:
+	case map[string]any:
 		for key, value := range v {
 			newPrefix := key
 			if prefix != "" {
@@ -104,17 +106,59 @@ func flatten(data interface{}, prefix string, result map[string]struct{}) {
 			}
 			flatten(value, newPrefix, result)
 		}
-	case []interface{}:
-		if len(v) == 0 && prefix != "" {
-			result[prefix] = struct{}{}
-		}
-		for i, value := range v {
-			newPrefix := fmt.Sprintf("%s.%d", prefix, i)
-			flatten(value, newPrefix, result)
-		}
+	case []any:
+		flattenSlice(prefix, v, result)
 	default:
 		if prefix != "" {
 			result[prefix] = struct{}{}
+		}
+	}
+}
+
+func flattenSlice(prefix string, v []any, result map[string]struct{}) {
+	if len(v) == 0 && prefix != "" {
+		result[prefix] = struct{}{}
+		return
+	}
+
+	type sortableElement struct {
+		flatKeys  string
+		flattened map[string]struct{}
+	}
+
+	sortable := make([]sortableElement, len(v))
+	for i, value := range v {
+		flattened := make(map[string]struct{})
+		flatten(value, "", flattened)
+		keys := make([]string, 0, len(flattened))
+		for k := range flattened {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		sortable[i] = sortableElement{
+			flatKeys:  strings.Join(keys, ";"),
+			flattened: flattened,
+		}
+	}
+
+	sort.Slice(sortable, func(i, j int) bool {
+		return sortable[i].flatKeys < sortable[j].flatKeys
+	})
+
+	for i, element := range sortable {
+		newPrefix := fmt.Sprintf("%s.%d", prefix, i)
+		if len(element.flattened) == 0 {
+			if newPrefix != "" {
+				result[newPrefix] = struct{}{}
+			}
+		} else {
+			for k := range element.flattened {
+				newKey := newPrefix
+				if k != "" {
+					newKey = newPrefix + "." + k
+				}
+				result[newKey] = struct{}{}
+			}
 		}
 	}
 }
