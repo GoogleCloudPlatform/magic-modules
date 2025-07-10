@@ -16,11 +16,9 @@
 package exec
 
 import (
-	"bytes"
 	"container/list"
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -140,37 +138,56 @@ func (ar *Runner) Run(name string, args []string, env map[string]string) (string
 	return string(out), nil
 }
 
-// RunInBash runs the given command inside bash with streaming output
+// RunInBash runs the given command through bash, mimicking the behavior of Run()
 func (ar *Runner) RunInBash(name string, args []string, env map[string]string) (string, error) {
 	// Build the full command
 	fullCommand := fmt.Sprintf("%s %s", name, strings.Join(args, " "))
 
-	fmt.Println("executing command in bash: ", fullCommand)
+	// Try to use script command if available to fake a TTY
+	scriptCommand := fmt.Sprintf("script -qec '%s' /dev/null", fullCommand)
 
-	// Create bash command with -c flag (no temp file needed)
-	cmd := exec.Command("/bin/bash", "-c", fullCommand)
+	// Create bash command with -c flag
+	cmd := exec.Command("/bin/bash", "-c", scriptCommand)
 	cmd.Dir = ar.cwd
 
-	// Set environment variables
-	cmd.Env = os.Environ() // Start with current environment
+	// Add environment vars to suppress terminal detection trace logs
+	suppressVars := map[string]string{
+		"TF_IN_AUTOMATION": "true",
+		"NO_COLOR":         "1",
+		"TERM":             "xterm",
+		"CI":               "true",
+		"FORCE_COLOR":      "0",
+		"CLICOLOR":         "0",
+		"CLICOLOR_FORCE":   "0",
+		"COLORTERM":        "",
+	}
+
+	// Add suppression vars first
+	for key, val := range suppressVars {
+		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, val))
+	}
+
+	// Then add user-provided env vars (they can override)
 	for key, val := range env {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", key, val))
 	}
 
-	// Capture output while streaming to stdout/stderr
-	var outputBuf bytes.Buffer
-	cmd.Stdout = io.MultiWriter(os.Stdout, &outputBuf)
-	cmd.Stderr = io.MultiWriter(os.Stderr, &outputBuf)
+	// Use CombinedOutput to get both stdout and stderr
+	out, err := cmd.CombinedOutput()
 
-	// Run the command
-	err := cmd.Run()
-	capturedOutput := outputBuf.String()
-
-	if err != nil {
-		return capturedOutput, fmt.Errorf("command failed: %v\noutput:\n%s", err, capturedOutput)
+	// Handle errors similar to the original Run function
+	switch typedErr := err.(type) {
+	case *exec.ExitError:
+		return string(out), fmt.Errorf("error running %s: %v\noutput:\n%s", fullCommand, err, out)
+	case *fs.PathError:
+		return "", fmt.Errorf("path error running %s: %v", fullCommand, typedErr)
 	}
 
-	return capturedOutput, nil
+	if err != nil {
+		return "", fmt.Errorf("error running %q: %v", fullCommand, err)
+	}
+
+	return string(out), nil
 }
 
 // Run the command and exit if there's an error.
