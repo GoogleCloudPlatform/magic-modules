@@ -48,7 +48,7 @@ func IsVcrEnabled() bool {
 }
 
 // Regex for matching line to start with [Diff]
-var diffRegexpMatch = regexp.MustCompile(`^\[Diff\]`)
+var diffRegexpMatch = regexp.MustCompile(`^\s*\[Diff[|]?\]`)
 
 var configsLock = sync.RWMutex{}
 var sourcesLock = sync.RWMutex{}
@@ -152,7 +152,7 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		// creates temporary file for the individual test, will be a temporary to store the output
 		tempFile, diffFailureFile, regularFailureFile := createFilesForReleaseDiffTest()
 		defer func() {
-			writeOutputFileDeferFunction(tempFile, diffFailureFile, regularFailureFile, t.Failed())
+			writeOutputFileDeferFunction(t, tempFile, diffFailureFile, regularFailureFile, t.Failed())
 		}()
 		c = initializeReleaseDiffTest(c, t.Name(), tempFile)
 
@@ -386,7 +386,7 @@ func ParseReleaseDiffOutput(temp *os.File) (string, string, error) {
 	return lastLine, allContent, nil
 }
 
-func writeOutputFileDeferFunction(tempFile *os.File, regularFailureFile *os.File, diffFailureFile *os.File, failed bool) {
+func writeOutputFileDeferFunction(t *testing.T, tempFile *os.File, regularFailureFile *os.File, diffFailureFile *os.File, failed bool) {
 	if tempFile != nil {
 		// parses the temporary file created during the release diff test and returns the last line of output
 		// This is useful for extracting the diff output from the file after the test has run
@@ -396,9 +396,9 @@ func writeOutputFileDeferFunction(tempFile *os.File, regularFailureFile *os.File
 			fmt.Fprintf(os.Stderr, "Error parsing release diff output: %v\n", err)
 		} else if failed {
 			// Check if the output line starts with "[Diff]"
-			if diffRegexpMatch.MatchString(output) {
-				fmt.Fprintf(diffFailureFile, output)
-				fmt.Fprintf(diffFailureFile, "[Diff] %s\n", lastLine)
+			if diffRegexpMatch.MatchString(lastLine) {
+				fmt.Fprintf(os.Stdout, "Breaking Change at \n%s\n", lastLine)
+				fmt.Fprintf(diffFailureFile, "[Diff] %s\n", output)
 			} else {
 				fmt.Fprintf(regularFailureFile, output)
 				fmt.Fprintf(regularFailureFile, "FAILED --- %s\n", lastLine)
