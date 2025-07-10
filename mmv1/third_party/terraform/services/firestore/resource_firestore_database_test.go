@@ -47,7 +47,7 @@ func testAccFirestoreDatabaseTags(context map[string]interface{}) string {
       delete_protection_state           = "DELETE_PROTECTION_DISABLED"
       deletion_policy                   = "DELETE"
       tags = {
-	      "%{pid}/%{tagKey}" = "%{tagValue}"
+        "%{pid}/%{tagKey}" = "%{tagValue}"
       }
     }
   `, context)
