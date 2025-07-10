@@ -39,11 +39,15 @@ custom_code:
 exclude_sweeper: true
 examples:
   - name: 'dialogflowcx_webhook_standard'
-    primary_resource_id: 'basic_webhook'
+    primary_resource_id: 'standard_webhook'
     vars:
       agent_name: 'dialogflowcx-agent'
   - name: 'dialogflowcx_webhook_flexible'
-    primary_resource_id: 'basic_webhook'
+    primary_resource_id: 'flexible_webhook'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+  - name: 'dialogflowcx_webhook_service_directory'
+    primary_resource_id: 'example_webhook'
     vars:
       agent_name: 'dialogflowcx-agent'
 parameters:
