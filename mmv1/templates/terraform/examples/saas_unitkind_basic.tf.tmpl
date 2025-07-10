@@ -1,0 +1,23 @@
+resource "google_saas_saas" "saas" {
+    provider = google-beta
+    location = "us-central1"
+    saas_id = "{{index $.Vars "unit_kind_id"}}"
+    labels = {
+      "foo" = "bar"
+    }
+
+    locations {
+      name = "us-east1"
+    }
+
+    locations {
+      name = "europe-west1"
+    }
+}
+
+resource "google_saas_unit_kind" "{{$.PrimaryResourceId}}" {
+    provider     = google-beta
+    location     = "us-central1"
+    unit_kind_id = "{{index $.Vars "unit_kind_id"}}"
+    saas         = google_saas_saas.saas.id
+}
