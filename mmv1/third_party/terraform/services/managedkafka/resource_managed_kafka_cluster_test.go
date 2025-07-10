@@ -154,16 +154,6 @@ resource "google_managed_kafka_cluster" "example" {
   }
 }
 
-resource "google_privateca_ca_pool" "ca_pool" {
-  name = "my-ca-pool"
-  location = "us-central1"
-  tier = "ENTERPRISE"
-  publishing_options {
-    publish_ca_cert = true
-    publish_crl = true
-  }
-}
-
 data "google_project" "project" {
 }
 `, context)
