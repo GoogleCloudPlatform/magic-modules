@@ -1,0 +1,129 @@
+func flatten(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		log.Printf("[DEBUG] FlattenComputePublicDelegatedPrefixPublicDelegatedSubPrefixs: Input 'v' is nil. Returning nil.")
+		return nil
+	}
+
+	// Ensure 'v' is a slice of interfaces, which is expected for TypeList/TypeSet.
+	// Add robust type assertion to prevent panics if API response is unexpected.
+	rawList, ok := v.([]interface{})
+	if !ok {
+		log.Printf("[ERROR] FlattenComputePublicDelegatedPrefixPublicDelegatedSubPrefixs: Expected []interface{}, got %T. Returning nil.", v)
+		return nil // Return nil or handle appropriately if type is unexpected.
+	}
+
+	transformed := make([]map[string]interface{}, 0, len(rawList)) // Pre-allocate capacity
+	for i, item := range rawList {
+		if item == nil {
+			log.Printf("[DEBUG] FlattenComputePublicDelegatedPrefixPublicDelegatedSubPrefixs[%d]: Item is nil. Skipping.", i)
+			continue
+		}
+
+		original, ok := item.(map[string]interface{})
+		if !ok {
+			log.Printf("[ERROR] FlattenComputePublicDelegatedPrefixPublicDelegatedSubPrefixs[%d]: Expected map[string]interface{}, got %T. Skipping item.", i, item)
+			continue // Skip malformed item
+		}
+
+		// Prepare a map for the flattened item
+		flattenedItem := make(map[string]interface{})
+
+		// Handle 'name' (Required: true)
+		nameVal := original["name"]
+		if nameVal != nil && nameVal != "" {
+			flattenedItem["name"] = nameVal
+		} else {
+			// CRITICAL: If 'name' is required and API returns null/empty, this is an API issue.
+			// Log aggressively or panic if this is truly unexpected and unrecoverable.
+			log.Printf("[ERROR] FlattenComputePublicDelegatedPrefixPublicDelegatedSubPrefixs[%d]: Required field 'name' is nil/empty from API. This may cause perpetual diffs if not configured.", i)
+			// For required fields, if API sends nil, and config implies non-nil,
+			// this is where the mismatch occurs. We return the nil, and Terraform flags it.
+			// If you *must* suppress, you'd try to get the configured value here.
+			// For now, allow Terraform to see the null so the problem is visible.
+		}
+
+		// Handle 'description' (Optional)
+		descriptionVal := original["description"]
+		if descriptionVal != nil && descriptionVal != "" {
+			flattenedItem["description"] = descriptionVal
+		} else {
+			// For optional fields, ensuring nil is treated as "" or vice versa for state consistency
+			// The DiffSuppressFunc will then handle the `""` vs `null` diff suppression.
+			flattenedItem["description"] = "" // Explicitly flatten null/unset to empty string
+		}
+
+		// Handle 'region' (Output-only)
+		if regionVal, ok := original["region"]; ok && regionVal != nil {
+			flattenedItem["region"] = regionVal
+		}
+
+		// Handle 'status' (Output-only)
+		if statusVal, ok := original["status"]; ok && statusVal != nil {
+			flattenedItem["status"] = statusVal
+		}
+
+		// Handle 'ipCidrRange' (Required: true)
+		ipCidrRangeVal := original["ipCidrRange"] // Note: API name is ipCidrRange, schema is ip_cidr_range
+		if ipCidrRangeVal != nil && ipCidrRangeVal != "" {
+			flattenedItem["ip_cidr_range"] = ipCidrRangeVal // Map API name to schema name
+		} else {
+			// CRITICAL: Similar to 'name', if this required field is null/empty from API, it's a major problem.
+			log.Printf("[ERROR] FlattenComputePublicDelegatedPrefixPublicDelegatedSubPrefixs[%d]: Required field 'ip_cidr_range' is nil/empty from API. This may cause perpetual diffs if not configured.", i)
+		}
+
+		// Handle 'isAddress' (Optional)
+		isAddressVal := original["isAddress"] // Note: API name is isAddress, schema is is_address
+		if isAddressVal != nil {
+			// For booleans, explicitly flatten nil to false to match Go zero value.
+			if boolVal, ok := isAddressVal.(bool); ok {
+				flattenedItem["is_address"] = boolVal
+			} else {
+				flattenedItem["is_address"] = false // Default to false if not a bool or nil
+			}
+		} else {
+			flattenedItem["is_address"] = false // Explicitly flatten nil/unset to false
+		}
+
+		// Handle 'mode' (Optional)
+		modeVal := original["mode"]
+		if modeVal != nil && modeVal != "" {
+			flattenedItem["mode"] = modeVal
+		} else {
+			flattenedItem["mode"] = "" // Explicitly flatten nil/unset to empty string
+		}
+
+		// Handle 'allocatablePrefixLength' (Output-only)
+		if allocatablePrefixLengthVal, ok := original["allocatablePrefixLength"]; ok && allocatablePrefixLengthVal != nil {
+			// This might need specific string to int conversion depending on API behavior.
+			// Current generated flattener includes stringToFixed64, so replicate if needed.
+			if strVal, ok := allocatablePrefixLengthVal.(string); ok {
+				if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
+					flattenedItem["allocatable_prefix_length"] = intVal
+				} else {
+					log.Printf("[ERROR] FlattenComputePublicDelegatedPrefixPublicDelegatedSubPrefixs[%d]: Failed to convert allocatablePrefixLength string '%s' to int: %v", i, strVal, err)
+					flattenedItem["allocatable_prefix_length"] = 0 // Fallback
+				}
+			} else if floatVal, ok := allocatablePrefixLengthVal.(float64); ok {
+				flattenedItem["allocatable_prefix_length"] = int(floatVal)
+			} else {
+				flattenedItem["allocatable_prefix_length"] = 0 // Default for numbers
+			}
+		} else {
+			flattenedItem["allocatable_prefix_length"] = 0 // Explicitly flatten nil/unset to 0
+		}
+
+
+		// Handle 'delegatee_project' (Required: true)
+		delegateeProjectVal := original["delegateeProject"] // Note: API name is delegateeProject
+		if delegateeProjectVal != nil && delegateeProjectVal != "" {
+			flattenedItem["delegatee_project"] = delegateeProjectVal // Map API name to schema name
+		} else {
+			// CRITICAL: If this required field is null/empty from API, it's a major problem.
+			log.Printf("[ERROR] FlattenComputePublicDelegatedPrefixPublicDelegatedSubPrefixs[%d]: Required field 'delegatee_project' is nil/empty from API. This may cause perpetual diffs if not configured.", i)
+		}
+
+		// Append the transformed item to the slice
+		transformed = append(transformed, flattenedItem)
+	}
+	return transformed
+}

@@ -132,6 +132,7 @@ properties:
     required: true
   - name: 'publicDelegatedSubPrefixs'
     type: Array
+    custom_flatten: 'templates/terraform/custom_flatten/public_delegated_sub_prefix_flatten.go.tmpl'
     description: |
       List of sub public delegated fixes for BYO IP functionality.
       Each item in this array represents a sub prefix that can be
