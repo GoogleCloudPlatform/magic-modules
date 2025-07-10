@@ -46,8 +46,8 @@ examples:
     primary_resource_id: 'flexible_webhook'
     vars:
       agent_name: 'dialogflowcx-agent'
-  - name: 'dialogflowcx_webhook_service_directory'
-    primary_resource_id: 'example_webhook'
+  - name: 'dialogflowcx_webhook_service_directory_standard'
+    primary_resource_id: 'standard_webhook'
     vars:
       agent_name: 'dialogflowcx-agent'
 parameters:

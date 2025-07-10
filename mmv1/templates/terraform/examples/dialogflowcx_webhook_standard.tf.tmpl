@@ -18,6 +18,7 @@ resource "google_dialogflow_cx_webhook" "{{$.PrimaryResourceId}}" {
   parent       = google_dialogflow_cx_agent.agent.id
   display_name = "MyFlow"
   generic_web_service {
+    allowed_ca_certs = ["BQA="]
 		uri = "https://example.com"
     request_headers = { "example-key": "example-value" }
     webhook_type = "STANDARD"
