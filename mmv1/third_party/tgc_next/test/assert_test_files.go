@@ -76,6 +76,10 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		log.Printf("%s is not supported in tfplan2cai conversion.", resourceType)
 	}
 
+	if testData.Cai == nil {
+		return fmt.Errorf("cai asset is unavailable for resource %s", testData.ResourceAddress)
+	}
+
 	assets := make([]caiasset.Asset, 0)
 	for assetName, assetData := range testData.Cai {
 		assets = append(assets, assetData.CaiAsset)
@@ -147,7 +151,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	parsedExportConfig := exportResources[0].Attributes
 	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, ignoredFieldSet)
 	if len(missingKeys) > 0 {
-		return fmt.Errorf("missing fields in address %s after cai2hcl conversion:\n%s", testData.ResourceAddress, missingKeys)
+		return fmt.Errorf("missing fields in resource %s after cai2hcl conversion:\n%s", testData.ResourceAddress, missingKeys)
 	}
 	log.Printf("Step 1 passes for resource %s. All of the fields in raw config are in export config", testData.ResourceAddress)
 
