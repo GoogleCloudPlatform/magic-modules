@@ -50,6 +50,10 @@ examples:
     primary_resource_id: 'standard_webhook'
     vars:
       agent_name: 'dialogflowcx-agent'
+  - name: 'dialogflowcx_webhook_service_directory_flexible'
+    primary_resource_id: 'flexible_webhook'
+    vars:
+      agent_name: 'dialogflowcx-agent'
 parameters:
   - name: 'parent'
     type: String
