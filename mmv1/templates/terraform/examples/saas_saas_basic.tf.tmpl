@@ -2,8 +2,13 @@ resource "google_saas_saas" "{{$.PrimaryResourceId}}" {
     provider = google-beta
     location = "us-central1"
     saas_id = "{{index $.Vars "saas_id"}}"
+
     labels = {
       "foo" = "bar"
+    }
+
+    annotations = {
+      "foo" = "baz"
     }
 
     locations {
