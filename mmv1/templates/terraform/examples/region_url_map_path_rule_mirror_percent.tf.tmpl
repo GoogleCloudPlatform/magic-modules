@@ -1,6 +1,7 @@
 resource "google_compute_region_url_map" "{{$.PrimaryResourceId}}" {
   provider    = google-beta
-  name        = "{{index $.Vars "url_map_name"}}"
+  region      = "us-central1"
+  name        = "{{index $.Vars "region_url_map_name"}}"
   description = "Test for path matcher default route action mirror percent"
 
   default_service = google_compute_region_backend_service.home.id
@@ -25,29 +26,32 @@ resource "google_compute_region_url_map" "{{$.PrimaryResourceId}}" {
 
 resource "google_compute_region_backend_service" "home" {
   provider    = google-beta
+  region      = "us-central1"
   name        = "{{index $.Vars "home_backend_service_name"}}"
   port_name   = "http"
   protocol    = "HTTP"
   timeout_sec = 10
-  load_balancing_scheme = "EXTERNAL_MANAGED"
+  load_balancing_scheme = "INTERNAL_MANAGED"
 
-  health_checks = [google_compute_health_check.default.id]
+  health_checks = [google_compute_region_health_check.default.id]
 }
 
 resource "google_compute_region_backend_service" "mirror" {
   provider    = google-beta
+  region      = "us-central1"
   name        = "{{index $.Vars "mirror_backend_service_name"}}"
   port_name   = "http"
   protocol    = "HTTP"
   timeout_sec = 10
-  load_balancing_scheme = "EXTERNAL_MANAGED"
+  load_balancing_scheme = "INTERNAL_MANAGED"
 
-  health_checks = [google_compute_health_check.default.id]
+  health_checks = [google_compute_region_health_check.default.id]
 }
 
-resource "google_compute_health_check" "default" {
-  provider    = google-beta 
-  name               = "{{index $.Vars "health_check_name"}}"
+resource "google_compute_region_health_check" "default" {
+  provider = google-beta 
+  region   = "us-central1"
+  name     = "{{index $.Vars "region_health_check_name"}}"
   http_health_check {
     port = 80
   }
