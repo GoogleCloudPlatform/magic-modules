@@ -83,11 +83,12 @@ examples:
       project_id: 'PROJECT_NAME'
     test_vars_overrides:
       'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+      'tag_key_id': 'acctest.BootstrapSharedTestProjectTagKey(t, "firestore-databases-tagkey", map[string]interface{}{})'
+      'tag_value_id': 'acctest.BootstrapSharedTestProjectTagValue(t, "firestore-databases-tagvalue", acctest.BootstrapSharedTestProjectTagKey(t, "firestore-databases-tagkey", map[string]interface{}{}))'
     ignore_read_extra:
       - 'project'
       - 'etag'
       - 'deletion_policy'
-    exclude_test: true
   - name: 'firestore_cmek_database'
     primary_resource_id: 'database'
     vars:
