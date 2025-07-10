@@ -7,13 +7,11 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
-	"github.com/hashicorp/hcl/v2"
-	"github.com/hashicorp/hcl/v2/hclparse"
-	"github.com/hashicorp/hcl/v2/hclsyntax"
 )
 
 type ResourceMetadata struct {
@@ -37,8 +35,14 @@ type TgcMetadataPayload struct {
 }
 
 type ResourceTestData struct {
-	ParsedRawConfig  map[string]interface{} `json:"parsed_raw_config"`
+	ParsedRawConfig  map[string]struct{} `json:"parsed_raw_config"`
 	ResourceMetadata `json:"resource_metadata"`
+}
+
+type Resource struct {
+	Type       string              `json:"type"`
+	Name       string              `json:"name"`
+	Attributes map[string]struct{} `json:"attributes"`
 }
 
 var (
@@ -86,8 +90,9 @@ func ReadTestsDataFromGcs() (map[string]TgcMetadataPayload, error) {
 			}
 		}
 
-		// Uncomment this line to debug issues locally
-		// writeJSONFile("../../tests_metadata.json", TestsMetadata)
+		if os.Getenv("WRITE_FILES") != "" {
+			writeJSONFile("../../tests_metadata.json", TestsMetadata)
+		}
 		setupDone = true
 	}
 	return TestsMetadata, nil
@@ -140,44 +145,6 @@ func prepareTestData(testName string) (map[string]ResourceTestData, string, erro
 	return resourceTestData, testMetadata.PrimaryResource, nil
 }
 
-type Resource struct {
-	Type       string                 `json:"type"`
-	Name       string                 `json:"name"`
-	Attributes map[string]interface{} `json:"attributes"`
-}
-
-// parseHCLBody recursively parses attributes and nested blocks from an HCL body.
-func parseHCLBody(body hcl.Body, filePath string) (
-	attributes map[string]interface{},
-	diags hcl.Diagnostics,
-) {
-	attributes = make(map[string]interface{})
-	var allDiags hcl.Diagnostics
-
-	if syntaxBody, ok := body.(*hclsyntax.Body); ok {
-		for _, attr := range syntaxBody.Attributes {
-			attributes[attr.Name] = true
-		}
-
-		for _, block := range syntaxBody.Blocks {
-			nestedAttr, diags := parseHCLBody(block.Body, filePath)
-			if diags.HasErrors() {
-				allDiags = append(allDiags, diags...)
-			}
-
-			attributes[block.Type] = nestedAttr
-		}
-	} else {
-		allDiags = append(allDiags, &hcl.Diagnostic{
-			Severity: hcl.DiagWarning,
-			Summary:  "Body type assertion to *hclsyntax.Body failed",
-			Detail:   fmt.Sprintf("Cannot directly parse attributes for body of type %T. Attribute parsing may be incomplete.", body),
-		})
-	}
-
-	return attributes, allDiags
-}
-
 // Parses a Terraform configuation file written with HCL
 func parseResourceConfigs(filePath string) ([]Resource, error) {
 	src, err := os.ReadFile(filePath)
@@ -185,51 +152,29 @@ func parseResourceConfigs(filePath string) ([]Resource, error) {
 		return nil, fmt.Errorf("failed to read file %s: %s", filePath, err)
 	}
 
-	parser := hclparse.NewParser()
-	hclFile, diags := parser.ParseHCL(src, filePath)
-	if diags.HasErrors() {
-		return nil, fmt.Errorf("parse HCL: %w", diags)
-	}
-
-	if hclFile == nil {
-		return nil, fmt.Errorf("parsed HCL file %s is nil cannot proceed", filePath)
+	topLevel, err := parseHCLBytes(src, filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse hcl bytes: %s", err)
 	}
 
 	var allParsedResources []Resource
-
-	for _, block := range hclFile.Body.(*hclsyntax.Body).Blocks {
-		if block.Type == "resource" {
-			if len(block.Labels) != 2 {
-				log.Printf("Skipping address block with unexpected number of labels: %v", block.Labels)
-				continue
-			}
-
-			resType := block.Labels[0]
-			resName := block.Labels[1]
-			attrs, procDiags := parseHCLBody(block.Body, filePath)
-
-			if procDiags.HasErrors() {
-				log.Printf("Diagnostics while processing address %s.%s body in %s:", resType, resName, filePath)
-				for _, diag := range procDiags {
-					log.Printf("  - %s (Severity)", diag.Error())
-				}
-			}
-
-			gr := Resource{
-				Type:       resType,
-				Name:       resName,
-				Attributes: attrs,
-			}
-			allParsedResources = append(allParsedResources, gr)
+	for addr, attrs := range topLevel {
+		addrParts := strings.Split(addr, ".")
+		if len(addrParts) != 2 {
+			return nil, fmt.Errorf("invalid resource address %s", addr)
 		}
+		allParsedResources = append(allParsedResources, Resource{
+			Type:       addrParts[0],
+			Name:       addrParts[1],
+			Attributes: attrs,
+		})
 	}
-
 	return allParsedResources, nil
 }
 
 // Converts the slice to map with resource address as the key
-func convertToConfigMap(resources []Resource) map[string]map[string]interface{} {
-	configMap := make(map[string]map[string]interface{}, 0)
+func convertToConfigMap(resources []Resource) map[string]map[string]struct{} {
+	configMap := make(map[string]map[string]struct{}, 0)
 
 	for _, r := range resources {
 		addr := fmt.Sprintf("%s.%s", r.Type, r.Name)
