@@ -6,6 +6,6 @@ resource "google_firestore_database" "{{$.PrimaryResourceId}}" {
   delete_protection_state           = "{{index $.Vars "delete_protection_state"}}"
   deletion_policy                   = "DELETE"
   tags = {
-    "{{index $.Vars "tag_key_id"}}": "{{index $.Vars "tag_value_id"}}"
+    "{{index $.Vars "tag_key_id"}}" = "{{index $.Vars "tag_value_id"}}"
   }
 }
