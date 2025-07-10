@@ -16,7 +16,7 @@
 name: 'PreviewFeature'
 kind: 'compute#PreviewFeature'
 description: |
-  Represents a single Google Compute Engine preview feature such as Alpha API access, which can be enabled or disabled for a project.  
+  Represents a single Google Compute Engine preview feature such as Alpha API access, which can be enabled or disabled for a project.
 min_version: 'beta'
 references:
   guides:
@@ -50,7 +50,7 @@ examples:
   - name: 'preview_feature_basic'
     primary_resource_id: 'gce_preview_feature'
 
-parameters: 
+parameters:
   - name: 'name'
     type: String
     required: true
