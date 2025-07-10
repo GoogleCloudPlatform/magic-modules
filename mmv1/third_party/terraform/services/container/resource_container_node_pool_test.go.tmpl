@@ -4206,7 +4206,7 @@ resource "google_container_node_pool" "np" {
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
 
-  version = data.google_container_engine_versions.central1a.valid_node_versions[1]
+  version = data.google_container_engine_versions.central1a.valid_node_versions[0]
 }
 `, cluster, networkName, subnetworkName, np)
 }
@@ -4233,7 +4233,7 @@ resource "google_container_node_pool" "np" {
   cluster            = google_container_cluster.cluster.name
   initial_node_count = 1
 
-  version = data.google_container_engine_versions.central1a.valid_node_versions[0]
+  version = data.google_container_engine_versions.central1a.valid_node_versions[1]
 }
 `, cluster, networkName, subnetworkName, np)
 }
