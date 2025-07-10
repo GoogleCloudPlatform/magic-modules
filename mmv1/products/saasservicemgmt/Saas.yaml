@@ -14,7 +14,7 @@
 ---
 name: "Saas"
 description: |
-  Saas is a representation of a SaaS service managed by the Producer.
+  SaaS is a representation of a SaaS service managed by the Producer.
 references:
   guides:
     "Deploy a service instance with SaaS Runtime": "https://cloud.google.com/saas-runtime/docs/deploy-vm"
@@ -47,20 +47,20 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      The location for the Saas.
+      The location for the SaaS.
   - name: "saas_id"
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
-      The ID for the Saas.
+      The ID for the SaaS.
 
 properties:
   - name: "name"
     type: String
     description: |
-      The resource name for the Saas.
+      The resource name for the SaaS.
     output: true
   - name: "locations"
     type: Array
@@ -89,15 +89,15 @@ properties:
   - name: "uid"
     type: String
     description: |
-      Unique identifier of the Saas.
+      Unique identifier of the SaaS.
     output: true
   - name: "createTime"
     type: Time
     description: |
-      Time the Saas was created in UTC.
+      Time the SaaS was created in UTC.
     output: true
   - name: "updateTime"
     type: Time
     description: |
-      Time the Saas was updated in UTC.
+      Time the SaaS was updated in UTC.
     output: true

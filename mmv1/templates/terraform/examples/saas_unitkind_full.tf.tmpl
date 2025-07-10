@@ -59,6 +59,14 @@ resource "google_saas_unit_kind" "{{$.PrimaryResourceId}}" {
   unit_kind_id = "a-{{index $.Vars "unit_kind_id"}}"
   saas         = google_saas_saas.saas.id
 
+    labels = {
+      "foo" = "bar"
+    }
+
+    annotations = {
+      "foo" = "baz"
+    }
+
   dependency {
     unit_kind = google_saas_unit_kind.network-{{$.PrimaryResourceId}}.id
     alias     = "network"

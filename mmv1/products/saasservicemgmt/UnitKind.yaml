@@ -72,7 +72,7 @@ properties:
   - name: "saas"
     type: String
     description: |
-      A reference to the Saas that defines the product (managed service) that
+      A reference to the SaaS that defines the product (managed service) that
       the producer wants to manage with SaaS Runtime.
   - name: "dependency"
     type: Array
