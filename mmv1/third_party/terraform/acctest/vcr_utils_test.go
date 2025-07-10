@@ -549,12 +549,13 @@ func TestParseReleaseDiffOutput(t *testing.T) {
 
 	var expectedOutput = "This is a test release diff output."
 	var output string
-	output, err = acctest.ParseReleaseDiffOutput(temp_file)
+	var lastLine string
+	lastLine, output, err = acctest.ParseReleaseDiffOutput(temp_file)
 	if err != nil {
 		t.Fatalf("Failed to parse release diff output: %v", err)
 	}
 
-	if output != expectedOutput {
+	if lastLine != expectedOutput {
 		t.Fatalf("Expected output to be:\n%q\nbut got:\n%q", expectedOutput, output)
 	}
 	t.Logf("Parsed output:\n%s", output)

@@ -257,7 +257,7 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, tempFile *o
 			// TODO: make a github action to get most recent release + current head, this is not a fix just for testing
 			// this should not be hardcoded
 			releaseProvider: {
-				VersionConstraint: "= 6.33.0", // if left empty fetches most recent release provider, which is actually optimal
+				// if left empty fetches most recent release provider, which is actually optimal
 			},
 		}
 	}
