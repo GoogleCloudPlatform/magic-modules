@@ -451,8 +451,11 @@ If [bootstrapping]({{< ref "#bootstrapping" >}}) doesn't work or isn't an option
 ```go
 import (
   "testing"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
+
+
+  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+  "github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
 )
 func TestAccProductResourceName_update(t *testing.T) {
 	t.Parallel()
@@ -464,6 +467,10 @@ func TestAccProductResourceName_update(t *testing.T) {
 	}
   acctest.VcrTest(t, resource.TestCase{
     // ...
+    // Add ExternalProviders so you can use `time_sleep`
+    ExternalProviders: map[string]resource.ExternalProvider{
+      "time": {},
+    },
     Steps: []resource.TestStep{
       {
         testAccProductResourceName_update1(context),
