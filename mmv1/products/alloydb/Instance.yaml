@@ -312,7 +312,6 @@ properties:
           E.g. "n2-highmem-4", "n2-highmem-8", "c4a-highmem-4-lssd".
           `cpu_count` must match the number of vCPUs in the machine type.
         default_from_api: true
-        min_version: 'beta'
   - name: 'clientConnectionConfig'
     type: NestedObject
     description: |
