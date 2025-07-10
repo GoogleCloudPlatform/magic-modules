@@ -1349,7 +1349,6 @@ func ResourceBigQueryTable() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				ForceNew:    true,
 				Description: `Whether Terraform will be prevent implicitly added columns in schema to show diff.`,
 			},
 
