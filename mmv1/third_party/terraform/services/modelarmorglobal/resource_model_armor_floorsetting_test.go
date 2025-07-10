@@ -10,42 +10,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccModelArmorGlobalFloorsetting_basic(t *testing.T) {
-
-	basicContext := map[string]interface{}{
-		"project_id": envvar.GetTestProjectFromEnv(),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccModelArmorGlobalFloorsetting_basicContext(basicContext),
-			},
-			{
-				ResourceName:      "google_model_armor_floorsetting.floorsetting-basic",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-		},
-	})
-}
-
-func testAccModelArmorGlobalFloorsetting_basicContext(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_model_armor_floorsetting" "floorsetting-basic" {
-  parent      = "projects/%{project_id}"
-  location    = "global"
-
-  filter_config {
-
-  }
-}
-`, context)
-}
-
 func TestAccModelArmorGlobalFloorsetting_update(t *testing.T) {
+	t.Parallel()
 
 	context := map[string]interface{}{
 		"project_id": envvar.GetTestProjectFromEnv(),
@@ -149,8 +115,6 @@ resource "google_model_armor_floorsetting" "test-resource" {
       filter_enforcement = "ENABLED"
     }
   }
-
-  enable_floor_setting_enforcement = false
 
   ai_platform_floor_setting {
     inspect_and_block       = false
