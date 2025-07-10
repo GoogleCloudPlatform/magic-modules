@@ -152,7 +152,7 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		// creates temporary file for the individual test, will be a temporary to store the output
 		tempFile, diffFailureFile, regularFailureFile := createFilesForReleaseDiffTest()
 		defer func() {
-			writeOutputFileDeferFunction(t, tempFile, diffFailureFile, regularFailureFile, t.Failed())
+			writeOutputFileDeferFunction(tempFile, diffFailureFile, regularFailureFile, t.Failed())
 		}()
 		c = initializeReleaseDiffTest(c, t.Name(), tempFile)
 
@@ -386,7 +386,7 @@ func ParseReleaseDiffOutput(temp *os.File) (string, string, error) {
 	return lastLine, allContent, nil
 }
 
-func writeOutputFileDeferFunction(t *testing.T, tempFile *os.File, regularFailureFile *os.File, diffFailureFile *os.File, failed bool) {
+func writeOutputFileDeferFunction(tempFile *os.File, regularFailureFile *os.File, diffFailureFile *os.File, failed bool) {
 	if tempFile != nil {
 		// parses the temporary file created during the release diff test and returns the last line of output
 		// This is useful for extracting the diff output from the file after the test has run
