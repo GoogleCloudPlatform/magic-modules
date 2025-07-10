@@ -486,7 +486,7 @@ properties:
                           This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Value](https://protobuf.dev/reference/protobuf/google.protobuf/#value).
                         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
                         custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
                         validation:
                           function: 'validation.StringIsJSON'
                 - name: conditionalCases
@@ -1240,7 +1240,7 @@ properties:
                           This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Value](https://protobuf.dev/reference/protobuf/google.protobuf/#value).
                         state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
                         custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
                         validation:
                           function: 'validation.StringIsJSON'
                 - name: conditionalCases
