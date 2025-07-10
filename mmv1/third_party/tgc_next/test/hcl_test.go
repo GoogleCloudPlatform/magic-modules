@@ -60,12 +60,18 @@ resource "google_compute_firewall" "default" {
   network = google_compute_network.default.name
 
   allow {
-    protocol = "icmp"
+    protocol = "tcp"
+    ports    = ["80", "8080", "1000-2000"]
   }
 
   allow {
-    protocol = "tcp"
-    ports    = ["80", "8080", "1000-2000"]
+    protocol = "icmp"
+    a_second_level {
+      b = true
+    }
+    a_second_level {
+      a = false
+    }
   }
 
   source_tags = ["web"]
@@ -134,12 +140,14 @@ func TestParseHCLBytes(t *testing.T) {
 			hcl:  listOfMultiLevelNestedObjectsHCL,
 			exp: map[string]map[string]struct{}{
 				"google_compute_firewall.default": {
-					"allow.0.ports":    {}, // "ports" appears in first element due to sorting
-					"allow.0.protocol": {},
-					"allow.1.protocol": {},
-					"name":             {},
-					"network":          {},
-					"source_tags":      {},
+					"allow.0.a_second_level.0.a": {},
+					"allow.0.a_second_level.1.b": {},
+					"allow.0.protocol":           {},
+					"allow.1.ports":              {},
+					"allow.1.protocol":           {},
+					"name":                       {},
+					"network":                    {},
+					"source_tags":                {},
 				},
 			},
 		},
