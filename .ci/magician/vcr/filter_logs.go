@@ -7,7 +7,6 @@ import (
 	"strings"
 )
 
-// Add this function to filter TRACE lines from log files
 func (vt *Tester) filterTraceFromLogFiles(logPath string) error {
 	return vt.rnr.Walk(logPath, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
@@ -39,24 +38,20 @@ func (vt *Tester) filterTraceFromLogFiles(logPath string) error {
 	})
 }
 
-// Add the filterTraceLines function
 func filterTraceLines(output string) string {
 	lines := strings.Split(output, "\n")
 	var filtered []string
 	inTraceBlock := false
-
-	// Pattern to match log timestamps
+	tracePattern := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z \[TRACE\]`)
 	timestampPattern := regexp.MustCompile(`^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z`)
 
 	for _, line := range lines {
-		// Check if this is a new log entry (starts with timestamp)
 		if timestampPattern.MatchString(line) {
-			inTraceBlock = strings.Contains(line, "[TRACE]")
+			inTraceBlock = tracePattern.MatchString(line)
 			if !inTraceBlock {
 				filtered = append(filtered, line)
 			}
 		} else {
-			// This is a continuation line
 			if !inTraceBlock {
 				filtered = append(filtered, line)
 			}
