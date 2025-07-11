@@ -44,34 +44,23 @@ import (
 
 {{- $caiProductBaseUrl := $.CaiProductBaseUrl }}
 {{- $productBackendName := $.CaiProductBackendName $caiProductBaseUrl }}
-{{- $apiVersion := $.CaiApiVersion $productBackendName $caiProductBaseUrl}}
 
-{{- range $prop := $.AllUserProperties }}
-{{template "SchemaSubResource" $prop}}
-{{- end}}
-
-{{- if not $.ApiResourceTypeKind }}
-const {{ $.ApiResourceType -}}AssetType string = "{{ $productBackendName }}.googleapis.com/{{ $.Name -}}"
-{{- end }}
-
-const {{ $.ResourceName -}}SchemaName string = "{{ $.TerraformName }}"
-
-type {{ $.ResourceName -}}Converter struct {
+type {{ $.ResourceName -}}Cai2hclConverter struct {
 	name   string
 	schema map[string]*schema.Schema
 }
 
-func New{{ $.ResourceName -}}Converter(provider *schema.Provider) models.Converter {
+func New{{ $.ResourceName -}}Cai2hclConverter(provider *schema.Provider) models.Cai2hclConverter {
 	schema := provider.ResourcesMap[{{ $.ResourceName -}}SchemaName].Schema
 
-	return &{{ $.ResourceName -}}Converter{
+	return &{{ $.ResourceName -}}Cai2hclConverter{
 		name:   {{ $.ResourceName -}}SchemaName,
 		schema: schema,
 	}
 }
 
 // Convert converts asset to HCL resource blocks.
-func (c *{{ $.ResourceName -}}Converter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func (c *{{ $.ResourceName -}}Cai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
 	var blocks []*models.TerraformResourceBlock
 	block, err := c.convertResourceData(asset)
 	if err != nil {
@@ -81,14 +70,14 @@ func (c *{{ $.ResourceName -}}Converter) Convert(asset caiasset.Asset) ([]*model
 	return blocks, nil
 }
 
-func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
 
 	var err error
 	res := asset.Resource.Data
-	config := utils.NewConfig()
+	config := transport.NewConfig()
 	d := &schema.ResourceData{}
 
 	assetNameParts := strings.Split(asset.Name, "/")
@@ -148,22 +137,7 @@ func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asse
 }
 
 {{ range $prop := $.ReadPropertiesForTgc }}
-	{{- if $prop.CustomTgcFlatten }}
-{{ $prop.CustomTemplate $prop.CustomTgcFlatten true -}}
-	{{- else if $prop.IsA "KeyValueLabels" }}
-func flatten{{$prop.GetPrefix}}{{$prop.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return utils.RemoveTerraformAttributionLabel(v)
-}
-	{{- else if or (and (eq $prop.Name "zone") $.HasZone) (and (eq $prop.Name "region") $.HasRegion) -}}
-func flatten{{$prop.GetPrefix}}{{$prop.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	if v == nil {
-		return v
-	}
-	return tpgresource.GetResourceNameFromSelfLink(v.(string))
-}
-	{{- else }}
-{{ template "flattenPropertyMethod" $prop -}}
-	{{- end }}
+{{- template "flattenTgcPropertyMethod" $prop -}}
 {{- end }}
 
 {{- if $.CustomCode.TgcDecoder }}

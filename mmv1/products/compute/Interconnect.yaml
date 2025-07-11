@@ -434,3 +434,92 @@ properties:
     is_set: true
     item_type:
       type: String
+  - name: 'aaiEnabled'
+    type: Boolean
+    description: |
+      Enable or disable the Application Aware Interconnect(AAI) feature on this interconnect.
+    min_version: beta
+  - name: 'applicationAwareInterconnect'
+    type: NestedObject
+    description: |
+      Configuration that enables Media Access Control security (MACsec) on the Cloud
+      Interconnect connection between Google and your on-premises router.
+    min_version: beta
+    properties:
+      - name: 'profileDescription'
+        type: String
+        description: |
+          A description for the AAI profile on this interconnect.
+        min_version: beta
+      - name: 'strictPriorityPolicy'
+        type: NestedObject
+        allow_empty_object: true
+        description: |
+          Specify configuration for StrictPriorityPolicy.
+        properties: []
+        min_version: beta
+      - name: 'bandwidthPercentagePolicy'
+        type: NestedObject
+        description: |
+          Bandwidth Percentage policy allows you to have granular control over how your Interconnect
+          bandwidth is utilized among your workloads mapping to different traffic classes.
+        min_version: beta
+        properties:
+          - name: bandwidthPercentage
+            type: Array
+            description: |
+              Specify bandwidth percentages for various traffic classes for queuing
+              type Bandwidth Percent.
+            api_name: bandwidthPercentages
+            min_version: beta
+            item_type:
+              type: NestedObject
+              properties:
+                - name: trafficClass
+                  type: Enum
+                  description: |
+                    Enum representing the various traffic classes offered by AAI.
+                  default_value: "TC_UNSPECIFIED"
+                  enum_values:
+                    - 'TC_UNSPECIFIED'
+                    - 'TC1'
+                    - 'TC2'
+                    - 'TC3'
+                    - 'TC4'
+                    - 'TC5'
+                    - 'TC6'
+                  min_version: beta
+                - name: percentage
+                  type: Integer
+                  description: |
+                    Bandwidth percentage for a specific traffic class.
+                  min_version: beta
+      - name: shapeAveragePercentage
+        type: Array
+        description: |
+          Optional field to specify a list of shape average percentages to be
+          applied in conjunction with StrictPriorityPolicy or BandwidthPercentagePolicy
+        min_version: beta
+        api_name: shapeAveragePercentages
+        item_type:
+          type: NestedObject
+          properties:
+            - name: trafficClass
+              type: Enum
+              description: |
+                Enum representing the various traffic classes offered by AAI.
+              default_value: "TC_UNSPECIFIED"
+              enum_values:
+                - 'TC_UNSPECIFIED'
+                - 'TC1'
+                - 'TC2'
+                - 'TC3'
+                - 'TC4'
+                - 'TC5'
+                - 'TC6'
+              min_version: beta
+            - name: percentage
+              type: Integer
+              description: |
+                Bandwidth percentage for a specific traffic class.
+              min_version: beta
