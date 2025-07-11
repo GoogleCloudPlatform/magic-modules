@@ -105,6 +105,7 @@ var safeToLog = map[string]bool{
 	"SA_KEY":                                     false,
 	"TF_ACC":                                     true,
 	"TF_LOG":                                     true,
+	"TF_LOG_CORE":                                true,
 	"TF_LOG_PATH_MASK":                           true,
 	"TF_LOG_SDK_FRAMEWORK":                       true,
 	"TF_SCHEMA_PANIC_ON_ERROR":                   true,
@@ -258,6 +259,7 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 		"GOOGLE_CREDENTIALS":       vt.env["SA_KEY"],
 		"GOOGLE_TEST_DIRECTORY":    strings.Join(opt.TestDirs, " "),
 		"TF_LOG":                   "DEBUG",
+		"TF_LOG_CORE":              "WARN",
 		"TF_LOG_SDK_FRAMEWORK":     "INFO",
 		"TF_LOG_PATH_MASK":         filepath.Join(logPath, "%s.log"),
 		"TF_ACC":                   "1",
@@ -405,6 +407,7 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 		"GOOGLE_CREDENTIALS":       vt.env["SA_KEY"],
 		"GOOGLE_TEST_DIRECTORY":    testDir,
 		"TF_LOG":                   "DEBUG",
+		"TF_LOG_CORE":              "WARN",
 		"TF_LOG_SDK_FRAMEWORK":     "INFO",
 		"TF_LOG_PATH_MASK":         filepath.Join(logPath, "%s.log"),
 		"TF_ACC":                   "1",
@@ -470,7 +473,6 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 	}
 	lgky := logKey{opts.Mode, opts.Version}
 	logPath, ok := vt.logPaths[lgky]
-	vt.filterTraceFromLogFiles(logPath)
 	if !ok {
 		return fmt.Errorf("no log path found for mode %s and version %s", opts.Mode.Lower(), opts.Version)
 	}
