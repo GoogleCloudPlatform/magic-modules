@@ -50,13 +50,16 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/{{location}}/services/{{service_id}}'
     - '{{service_id}}'
-custom_code:
+custom_code: !ruby/object:Provider::Terraform::CustomCode
+  pre_delete: 'templates/terraform/pre_delete/metastore_service.go.tmpl'
 examples:
   - name: 'dataproc_metastore_service_basic'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
     vars:
       metastore_service_name: 'metastore-srv'
+    ignore_read_extra:
+      - 'deletionProtection'
   - name: 'dataproc_metastore_service_deletion_protection'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
@@ -317,7 +320,10 @@ properties:
   - name: 'deletionProtection'
     type: Boolean
     description: |
-      Indicates if the dataproc metastore should be protected against accidental deletions.
+      Indicates if the dataproc metastore should be protected against accidental deletions.Defaults to false.
+      When the field is set to true in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the service will fail.
+    default_value: false
   - name: 'maintenanceWindow'
     type: NestedObject
     description: |
