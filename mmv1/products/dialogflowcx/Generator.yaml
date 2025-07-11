@@ -13,8 +13,8 @@
 
 ---
 name: Generator
-description: 
-  Generators contain prompt to be sent to the LLM model to generate text. 
+description:
+  Generators contain prompt to be sent to the LLM model to generate text.
   The prompt can contain parameters which will be resolved before calling the model.
   It can optionally contain banned phrases to ensure the model responses are safe.
 references:
@@ -63,8 +63,8 @@ properties:
   - name: 'name'
     type: String
     description: |
-      The unique identifier of the Tool.
-      Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/tools/<Tool ID>.
+      The unique identifier of the Generator.
+      Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/generators/<Generator ID>.
     output: true
     custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'displayName'
