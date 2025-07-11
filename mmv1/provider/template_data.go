@@ -199,6 +199,9 @@ func (td *TemplateData) GenerateTGCResourceFile(templatePath, filePath string, r
 		"templates/terraform/schema_subresource.go.tmpl",
 		"templates/terraform/flatten_property_method.go.tmpl",
 		"templates/tgc_next/tfplan2cai/expand_array_resourceref_with_validation.go.tmpl",
+		"templates/tgc_next/tfplan2cai/expand_resourceref_with_validation.go.tmpl",
+		"templates/tgc_next/tfplan2cai/expand_property_method_tgc.go.tmpl",
+		"templates/tgc_next/cai2hcl/flatten_property_method_tgc.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
