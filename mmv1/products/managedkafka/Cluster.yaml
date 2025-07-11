@@ -163,6 +163,7 @@ properties:
     properties:
       - name: 'trustConfig'
         type: NestedObject
+        allow_empty_object: true
         description: "The configuration of the broker truststore. If specified, clients can use mTLS for authentication."
         properties:
           - name: 'casConfigs'
