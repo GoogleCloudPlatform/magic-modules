@@ -126,4 +126,3 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 	}
   `, context)
 }
-

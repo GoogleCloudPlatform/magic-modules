@@ -1,6 +1,6 @@
 resource "google_developer_connect_insights_config" "{{$.PrimaryResourceId}}" {
   location           = "us-central1"
   insights_config_id = "{{index $.Vars "insights_config_name"}}"
-  appHubApplication = "{{index $.TestEnvVars "sdlc-application"}}"
+  app_hub_application = "{{index $.TestEnvVars "sdlc-application"}}"
   project         = "{{index $.TestEnvVars "devconnect-insights-terraform"}}"
 }

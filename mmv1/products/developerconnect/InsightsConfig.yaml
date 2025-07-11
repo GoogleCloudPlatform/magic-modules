@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -85,35 +85,35 @@ properties:
     item_type:
       type: NestedObject
       properties:
-      - name: googleArtifactRegistry
-        type: NestedObject
-        description: Google Artifact Registry configurations.
-        properties:
-        - name: projectId
+        - name: googleArtifactRegistry
+          type: NestedObject
+          description: Google Artifact Registry configurations.
+          properties:
+          - name: projectId
+            type: String
+            description: The host project of Artifact Registry.
+            required: true
+          - name: artifactRegistryPackage
+            type: String
+            description: The name of the artifact registry package.
+            immutable: true
+            required: true
+        - name: googleArtifactAnalysis
+          type: NestedObject
+          description: Google Artifact Analysis configurations.
+          properties:
+          - name: projectId
+            type: String
+            description: The project id of the project where the provenance is stored.
+            required: true
+        - name: uri
           type: String
-          description: The host project of Artifact Registry.
-          required: true
-        - name: artifactRegistryPackage
-          type: String
-          description: The name of the artifact registry package.
+          description: |-
+            The URI of the artifact that is deployed.
+            e.g. `us-docker.pkg.dev/my-project/my-repo/image`.
+            The URI does not include the tag / digest because it captures a lineage of
+            artifacts.
           immutable: true
-          required: true
-      - name: googleArtifactAnalysis
-        type: NestedObject
-        description: Google Artifact Analysis configurations.
-        properties:
-        - name: projectId
-          type: String
-          description: The project id of the project where the provenance is stored.
-          required: true
-      - name: uri
-        type: String
-        description: |-
-          The URI of the artifact that is deployed.
-          e.g. `us-docker.pkg.dev/my-project/my-repo/image`.
-          The URI does not include the tag / digest because it captures a lineage of
-          artifacts.
-        immutable: true
   - name: annotations
     type: KeyValueAnnotations
     description: |-
@@ -143,31 +143,31 @@ properties:
     item_type:
       type: NestedObject
       properties:
-      - name: code
-        type: Integer
-        description: The status code, which should be an enum value of google.rpc.Code.
-        output: true
-      - name: message
-        type: String
-        description: |-
-          A developer-facing error message, which should be in English. Any
-          user-facing error message should be localized and sent in the
-          google.rpc.Status.details field, or localized by the client.
-        output: true
-      - name: details
-        type: Array
-        description: |-
-          A list of messages that carry the error details.  There is a common set of
-          message types for APIs to use.
-        output: true
-        item_type:
-          type: NestedObject
-          properties:
-          - name: detail_message
-            type: String
-            description: |-
-              A message with details about the error.
-            output: true
+        - name: code
+          type: Integer
+          description: The status code, which should be an enum value of google.rpc.Code.
+          output: true
+        - name: message
+          type: String
+          description: |-
+            A developer-facing error message, which should be in English. Any
+            user-facing error message should be localized and sent in the
+            google.rpc.Status.details field, or localized by the client.
+          output: true
+        - name: details
+          type: Array
+          description: |-
+            A list of messages that carry the error details.  There is a common set of
+            message types for APIs to use.
+          output: true
+          item_type:
+            type: NestedObject
+            properties:
+            - name: detail_message
+              type: String
+              description: |-
+                A message with details about the error.
+              output: true
   - name: createTime
     type: String
     description: '[Output only] Create timestamp'
@@ -179,63 +179,63 @@ properties:
     item_type:
       type: NestedObject
       properties:
-      - name: uri
-        type: String
-        description: |-
-          The URI of the runtime configuration.
-          For GKE, this is the cluster name.
-          For Cloud Run, this is the service name.
-        immutable: true
-        required: true
-      - name: state
-        type: String
-        description: |-
-          The state of the Runtime.
-          Possible values:
-          STATE_UNSPECIFIED
-          LINKED
-          UNLINKED
-        output: true
-      - name: gkeWorkload
-        type: NestedObject
-        description: GKEWorkload represents the Google Kubernetes Engine runtime.
-        properties:
-        - name: cluster
+        - name: uri
           type: String
           description: |-
-            The name of the GKE cluster.
-            Format:
-            `projects/{project}/locations/{location}/clusters/{cluster}`.
+            The URI of the runtime configuration.
+            For GKE, this is the cluster name.
+            For Cloud Run, this is the service name.
           immutable: true
           required: true
-        - name: deployment
+        - name: state
           type: String
           description: |-
-            The name of the GKE deployment.
-            Format:
-            `projects/{project}/locations/{location}/clusters/{cluster}/namespaces/{namespace}/deployments/{deployment}`.
+            The state of the Runtime.
+            Possible values:
+            STATE_UNSPECIFIED
+            LINKED
+            UNLINKED
           output: true
-      - name: appHubWorkload
-        type: NestedObject
-        description: AppHubWorkload represents the App Hub Workload.
-        properties:
-        - name: criticality
-          type: String
-          description: The criticality of the App Hub Workload.
-          output: true
-        - name: environment
-          type: String
-          description: The environment of the App Hub Workload.
-          output: true
-        - name: workload
-          type: String
-          description: |-
-            Output only. The name of the App Hub Workload.
-            Format:
-            `projects/{project}/locations/{location}/applications/{application}/workloads/{workload}`.
-          output: true
-          immutable: false
-          required: false
+        - name: gkeWorkload
+          type: NestedObject
+          description: GKEWorkload represents the Google Kubernetes Engine runtime.
+          properties:
+            - name: cluster
+              type: String
+              description: |-
+                The name of the GKE cluster.
+                Format:
+                `projects/{project}/locations/{location}/clusters/{cluster}`.
+              immutable: true
+              required: true
+            - name: deployment
+              type: String
+              description: |-
+                The name of the GKE deployment.
+                Format:
+                `projects/{project}/locations/{location}/clusters/{cluster}/namespaces/{namespace}/deployments/{deployment}`.
+              output: true
+        - name: appHubWorkload
+          type: NestedObject
+          description: AppHubWorkload represents the App Hub Workload.
+          properties:
+            - name: criticality
+              type: String
+              description: The criticality of the App Hub Workload.
+              output: true
+            - name: environment
+              type: String
+              description: The environment of the App Hub Workload.
+              output: true
+            - name: workload
+              type: String
+              description: |-
+                Output only. The name of the App Hub Workload.
+                Format:
+                `projects/{project}/locations/{location}/applications/{application}/workloads/{workload}`.
+              output: true
+              immutable: false
+              required: false
   - name: state
     type: String
     description: |-
