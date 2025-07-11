@@ -1,0 +1,3 @@
+if d.Get("deletionProtection").(bool) {
+    return fmt.Errorf("cannot destroy metastore service without setting deletion_protection=false and running `terraform apply`")
+}
