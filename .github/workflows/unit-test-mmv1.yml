@@ -42,6 +42,32 @@ jobs:
           if [[ -n "$tmpls" ]]; then
             go run main.go version-guard --file-list $tmpls
           fi
+  unused-template-check:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
+        with:
+          path: repo
+          fetch-depth: 0
+      - name: Merge base branch
+        id: pull_request
+        run: |
+          cd repo
+          git config user.name "modular-magician"
+          git config user.email "magic-modules@google.com"
+          git fetch origin ${{ github.base_ref }} # Fetch the base branch
+          git merge --no-ff origin/${{ github.base_ref }} # Merge with the base branch
+      - name: Check new product templates are linked
+        id: new_templates
+        run: |
+          cd repo/tools/template-check
+          newtmplfiles=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }} HEAD -- ../../mmv1 | grep .tmpl | sed 's=^=../../=g')
+          if [ ! -z "$newtmplfiles" ]; then
+            newtmplfiles=${newtmplfiles//$'\n'/,}
+            echo $newtmplfiles
+            go run main.go unused-tmpl --file-list $newtmplfiles
+          fi
   lint-yaml:
     runs-on: ubuntu-22.04
     steps:
