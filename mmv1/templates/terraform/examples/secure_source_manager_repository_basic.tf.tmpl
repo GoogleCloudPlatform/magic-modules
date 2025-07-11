@@ -2,7 +2,8 @@ resource "google_secure_source_manager_instance" "instance" {
     location = "us-central1"
     instance_id = "{{index $.Vars "instance_id"}}"
 
-    deletion_protection = "{{index $.Vars "deletion_protection"}}"
+    # Prevent accidental deletions.
+    deletion_policy = "{{index $.Vars "deletion_policy"}}"
 }
 
 resource "google_secure_source_manager_repository" "{{$.PrimaryResourceId}}" {

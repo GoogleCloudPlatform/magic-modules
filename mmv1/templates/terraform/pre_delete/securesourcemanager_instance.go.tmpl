@@ -1,3 +1,7 @@
-if d.Get("deletion_protection").(bool) {
-	return fmt.Errorf("cannot destroy instance without setting deletion_protection=false and running `terraform apply`")
+deletionPolicy := d.Get("deletion_policy");
+
+if deletionPolicy == "ABANDON" {
+    return nil;
+} else if deletionPolicy == "PREVENT" {
+	return fmt.Errorf(`cannot destroy instance without setting deletion_policy="DELETE"`)
 }
