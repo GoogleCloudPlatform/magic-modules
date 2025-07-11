@@ -799,7 +799,7 @@ properties:
                   properties:
                     - name: audioExportGcsDestination
                       type: NestedObject
-                      ignore_read: true
+                      write_only: true
                       description: |-
                         Google Cloud Storage location for a Dialogflow operation that writes or
                         exports objects (e.g. exported agent or transcripts) outside of Dialogflow.
@@ -866,7 +866,7 @@ properties:
                     - name: loggingSettings
                       type: NestedObject
                       description: Define behaviors on logging.
-                      ignore_read: true
+                      write_only: true
                       properties:
                         - name: enableInteractionLogging
                           type: Boolean
@@ -1555,7 +1555,7 @@ properties:
                   properties:
                     - name: audioExportGcsDestination
                       type: NestedObject
-                      ignore_read: true
+                      write_only: true
                       description: |-
                         Google Cloud Storage location for a Dialogflow operation that writes or
                         exports objects (e.g. exported agent or transcripts) outside of Dialogflow.
@@ -1621,7 +1621,7 @@ properties:
                           description: Endpoint timeout setting for matching dtmf input to regex.
                     - name: loggingSettings
                       type: NestedObject
-                      ignore_read: true
+                      write_only: true
                       description: Define behaviors on logging.
                       properties:
                         - name: enableInteractionLogging
