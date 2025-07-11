@@ -40,11 +40,17 @@ examples:
     primary_resource_id: "my-playbook"
     vars:
       agent_name: 'dialogflowcx-agent-basic'
+    ignore_read_extra:
+      - 'advanced_settings.0.logging_settings'
+      - 'advanced_settings.0.audio_export_gcs_destination'
   - name: "dialogflowcx_playbook_fulfillment"
     primary_resource_id: "my-playbook"
     vars:
       agent_name: 'dialogflowcx-agent'
       bucket_name: 'dialogflowcx-bucket'
+    ignore_read_extra:
+      - 'advanced_settings.0.logging_settings'
+      - 'advanced_settings.0.audio_export_gcs_destination'
 
 parameters:
   - name: 'parent'
@@ -800,7 +806,6 @@ properties:
                     - name: audioExportGcsDestination
                       type: NestedObject
                       ignore_read: true
-                      sensitive: true
                       description: |-
                         Google Cloud Storage location for a Dialogflow operation that writes or
                         exports objects (e.g. exported agent or transcripts) outside of Dialogflow.
@@ -868,7 +873,6 @@ properties:
                       type: NestedObject
                       description: Define behaviors on logging.
                       ignore_read: true
-                      sensitive: true
                       properties:
                         - name: enableInteractionLogging
                           type: Boolean
@@ -1558,7 +1562,6 @@ properties:
                     - name: audioExportGcsDestination
                       type: NestedObject
                       ignore_read: true
-                      sensitive: true
                       description: |-
                         Google Cloud Storage location for a Dialogflow operation that writes or
                         exports objects (e.g. exported agent or transcripts) outside of Dialogflow.
@@ -1625,7 +1628,6 @@ properties:
                     - name: loggingSettings
                       type: NestedObject
                       ignore_read: true
-                      sensitive: true
                       description: Define behaviors on logging.
                       properties:
                         - name: enableInteractionLogging
