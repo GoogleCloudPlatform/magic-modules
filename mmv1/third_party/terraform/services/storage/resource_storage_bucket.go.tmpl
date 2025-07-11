@@ -29,22 +29,21 @@ import (
 
 func corsValidation(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
 	cors, corsOk := d.GetOk("cors")
-	if corsOk && len(cors.([]interface{})) == 0 && cors.([]interface{})[0] == nil {
+	if corsOk && len(cors.([]interface{})) == 0 {
 		return fmt.Errorf("cors cannot be empty")
 	}
 	for _, rule := range cors.([]interface{}) {
-		if rule != nil {
-			log.Printf("value of r %v", rule)
-			r := rule.(map[string]interface{})
-			method := r["method"].([]interface{})
-			responseHeader := r["response_header"].([]interface{})
-			origin := r["origin"].([]interface{})
-
-			if !(len(method) > 0 || len(origin) > 0 || len(responseHeader) > 0) {
-				return fmt.Errorf(" atleast one value should be provided in cors attributes")
-			}
+		if rule == nil {
+			return fmt.Errorf("cors cannot be empty")
 		}
+		r := rule.(map[string]interface{})
+		method := r["method"].([]interface{})
+		responseHeader := r["response_header"].([]interface{})
+		origin := r["origin"].([]interface{})
 
+		if !(len(method) > 0 || len(origin) > 0 || len(responseHeader) > 0) {
+			return fmt.Errorf(" atleast one value should be provided in cors attributes")
+		}
 	}
 
 	return nil
