@@ -2562,8 +2562,8 @@ func flattenDatabaseFlags(databaseFlags []*sqladmin.DatabaseFlags) []map[string]
 func flattenReplicationCluster(replicationCluster *sqladmin.ReplicationCluster, d *schema.ResourceData) []map[string]interface{} {
 	data := make(map[string]interface{})
 	data["psa_write_endpoint"] = ""
-	if replicationCluster != nil && replicationCluster.psaWriteEndpoint != "" {
-		data["psa_write_endpoint"] = replicationCluster.psaWriteEndpoint
+	if replicationCluster != nil && replicationCluster.PsaWriteEndpoint != "" {
+		data["psa_write_endpoint"] = replicationCluster.PsaWriteEndpoint
 	}
 	data["failover_dr_replica_name"] = ""
 	if replicationCluster != nil && replicationCluster.FailoverDrReplicaName != "" {
