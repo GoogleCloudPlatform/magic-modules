@@ -1349,7 +1349,7 @@ func ResourceBigQueryTable() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				Description: `Whether Terraform will be prevent implicitly added columns in schema to show diff.`,
+				Description: `Whether Terraform will prevent implicitly added columns in schema from showing diff.`,
 			},
 
 			// TableConstraints: [Optional] Defines the primary key and foreign keys.
@@ -1634,6 +1634,8 @@ func filterLiveSchemaByConfig(liveSchema *bigquery.TableSchema, configSchema *bi
 		if _, ok := configFieldsMap[liveField.Name]; ok {
 			// ...then it's a field we care about. Add it to our filtered list.
 			filteredFields = append(filteredFields, liveField)
+		} else {
+			log.Printf("[DEBUG] auto-generated column `%s` dropped during Table read.", liveField.Name)
 		}
 	}
 

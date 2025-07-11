@@ -3626,7 +3626,7 @@ resource "google_bigquery_table" "test" {
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
 
-	ignore_auto_generated_schema = true
+  ignore_auto_generated_schema = true
 
   schema = <<EOF
   %s
