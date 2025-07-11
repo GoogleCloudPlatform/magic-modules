@@ -800,13 +800,13 @@ properties:
                     - name: audioExportGcsDestination
                       type: NestedObject
                       ignore_read: true
+                      sensitive: true
                       description: |-
                         Google Cloud Storage location for a Dialogflow operation that writes or
                         exports objects (e.g. exported agent or transcripts) outside of Dialogflow.
                       properties:
                         - name: uri
                           type: String
-                          ignore_read: true
                           description: |-
                             The Google Cloud Storage URI for the exported objects. A URI is of the
                             form:
@@ -868,25 +868,22 @@ properties:
                       type: NestedObject
                       description: Define behaviors on logging.
                       ignore_read: true
+                      sensitive: true
                       properties:
                         - name: enableInteractionLogging
                           type: Boolean
-                          ignore_read: true
                           description: Enables DF Interaction logging.
                         - name: enableConsentBasedRedaction
                           type: Boolean
-                          ignore_read: true
                           description: |-
                             Enables consent-based end-user input redaction, if true, a pre-defined
                             session parameter `$session.params.conversation-redaction` will be
                             used to determine if the utterance should be redacted.
                         - name: disableLogging
                           type: Boolean
-                          ignore_read: true
                           description: If true, DF Interaction logging is currently disabled.
                         - name: enableStackdriverLogging
                           type: Boolean
-                          ignore_read: true
                           description: Enables Google Cloud Logging.
                 - name: enableGenerativeFallback
                   type: Boolean
@@ -1561,13 +1558,13 @@ properties:
                     - name: audioExportGcsDestination
                       type: NestedObject
                       ignore_read: true
+                      sensitive: true
                       description: |-
                         Google Cloud Storage location for a Dialogflow operation that writes or
                         exports objects (e.g. exported agent or transcripts) outside of Dialogflow.
                       properties:
                         - name: uri
                           type: String
-                          ignore_read: true
                           description: |-
                             The Google Cloud Storage URI for the exported objects. A URI is of the
                             form:
@@ -1628,26 +1625,23 @@ properties:
                     - name: loggingSettings
                       type: NestedObject
                       ignore_read: true
+                      sensitive: true
                       description: Define behaviors on logging.
                       properties:
                         - name: enableInteractionLogging
                           type: Boolean
-                          ignore_read: true
                           description: Enables DF Interaction logging.
                         - name: enableConsentBasedRedaction
                           type: Boolean
-                          ignore_read: true
                           description: |-
                             Enables consent-based end-user input redaction, if true, a pre-defined
                             session parameter `$session.params.conversation-redaction` will be
                             used to determine if the utterance should be redacted.
                         - name: disableLogging
                           type: Boolean
-                          ignore_read: true
                           description: If true, DF Interaction logging is currently disabled.
                         - name: enableStackdriverLogging
                           type: Boolean
-                          ignore_read: true
                           description: Enables Google Cloud Logging.
                 - name: enableGenerativeFallback
                   type: Boolean
