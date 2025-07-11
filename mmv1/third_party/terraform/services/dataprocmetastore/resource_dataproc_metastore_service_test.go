@@ -192,7 +192,7 @@ func TestAccDataprocMetastoreService_deletionProtection(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config:      testAccDataprocMetastoreService_updateLocation_deletionProtection(name, "us-west2", tier[1]),
+				Config:      testAccDataprocMetastoreService_deletionProtection(name, "us-west2", tier[1]),
 				ExpectError: regexp.MustCompile("deletion_protection"),
 			},
 			{
