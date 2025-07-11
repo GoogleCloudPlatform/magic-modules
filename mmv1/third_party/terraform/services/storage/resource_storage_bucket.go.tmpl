@@ -2235,12 +2235,9 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	if err := d.Set("location", res.Location); err != nil {
 		return fmt.Errorf("Error setting location: %s", err)
 	}
-	if res.Cors != nil {
-		if err := d.Set("cors", flattenCors(res.Cors)); err != nil {
-            return fmt.Errorf("Error setting cors: %s", err)
-        }
-    }
-
+	if err := d.Set("cors", flattenCors(res.Cors)); err != nil {
+		return fmt.Errorf("Error setting cors: %s", err)
+	}
 	if err := d.Set("default_event_based_hold", res.DefaultEventBasedHold); err != nil {
 		return fmt.Errorf("Error setting default_event_based_hold: %s", err)
 	}
