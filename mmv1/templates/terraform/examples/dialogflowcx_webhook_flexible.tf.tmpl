@@ -19,5 +19,16 @@ resource "google_dialogflow_cx_webhook" "{{$.PrimaryResourceId}}" {
   display_name = "MyFlow"
   generic_web_service {
 		uri = "https://example.com"
+    request_headers = { "example-key": "example-value" }
+    webhook_type = "FLEXIBLE"
+    oauth_config {
+      client_id = "example-client-id"
+      client_secret = "projects/example-proj/secrets/example-secret/versions/example-version"
+      token_endpoint = "https://example.com"
+    }
+    service_agent_auth = "NONE"
+    http_method = "POST"
+    request_body = "{\"example-key\": \"example-value\"}"
+    parameter_mapping = { "example-parameter": "examplePath" }
 	}
 }
