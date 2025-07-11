@@ -1,0 +1,98 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: ConsumerPolicy
+min_version: beta
+base_url: '{{parent}}/consumerPolicies/{{name}}'
+self_link: '{{parent}}/consumerPolicies/{{name}}'
+create_verb: PATCH
+update_verb: PATCH
+delete_verb: PATCH
+description: |
+  Consumer Policy is a set of rules that define what services or service groups can be used for a cloud resource hierarchy.
+references:
+  guides:
+    'QUICKSTART_TITLE': 'QUICKSTART_URL'
+  api: 'https://cloud.google.com/service-usage/docs/reference/rest#rest-resource:-v2alpha.consumerpolicies'
+import_format: ['{{%parent}}/consumerPolicies/{{name}}']
+id_format: '{{parent}}/consumerPolicies/{{name}}'
+async:
+  type: 'OpAsync'
+  actions: ['create', 'update']
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+  decoder: templates/terraform/decoders/serviceusagev2_consumer_policy.go.tmpl
+  constants: templates/terraform/constants/serviceusagev2_consumer_policy.go.tmpl
+  pre_create: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
+  pre_update: templates/terraform/pre_update/serviceusagev2_consumer_policy.go.tmpl
+examples:
+  - min_version: beta
+    name: 'serviceusagev2_consumerpolicy_basic'
+    primary_resource_id: 'default'
+    vars:
+      folder: 'suv2-folder'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      project_id: 'PROJECT_NAME'
+
+parameters:
+  - name: 'parent'
+    type: String
+    description: |
+      The name of the parent. It can be a project, folder or organization in the format of  projects/<project_id or project_number>, folders/<folder_number> or organizations/<org_number> .
+    required: true
+    url_param_only: true
+  - name: 'name'
+    type: String
+    description: |
+      The name of the policy. Currently only the “default” policy name is supported.
+    required: true
+    url_param_only: true
+
+properties:
+  - name: 'enableRules'
+    type: NestedObject
+    required: true
+    description: |
+      The consumer policy rule that defines enabled services. The structure is documented below.
+    properties:
+      - name: 'services'
+        type: Array
+        send_empty_value: true
+        is_set: true
+        description: |
+          (Optional): List of service names to be enabled in the format of services/<service_name>
+        item_type:
+          type: String
+  - name: 'etag'
+    type: Fingerprint
+    description: |
+      Entity tag (ETag) used for optimistic concurrency control as a way to help prevent simultaneous updates from overwriting each other.
+      Used internally during updates.
+
+virtual_fields:
+  - name: 'validate_dependencies'
+    type: Boolean
+    description: |
+      (Optional) Default value is true. If true, this flag enforces dependency management within the consumer policy. When adding a new service, it verifies that all its dependencies are already present/added in the policy. Conversely, when removing a service, it ensures that no other services within the policy depend on the service to be removed. If the validation fails, a comprehensive message will be presented, outlining the missing dependencies and providing instructions on how to address the issue.
+    default_value: true
+
+  - name: 'check_usage_on_remove'
+    type: Boolean
+    description: |
+      (Optional) Default value is false. If true, the usage of the service to be removed will be checked. If the service has been used within the past 30 days or was enabled in the last 3 days, an error will be thrown.
+    default_value: false
