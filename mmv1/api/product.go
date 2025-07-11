@@ -232,6 +232,10 @@ func (p *Product) SetPropertiesBasedOnVersion(version *product.Version) {
 	p.CaiBaseUrl = version.CaiBaseUrl
 }
 
+func (p *Product) AnsibleName() string {
+	return google.Underscore(p.Name)
+}
+
 func (p *Product) TerraformName() string {
 	if p.LegacyName != "" {
 		return google.Underscore(p.LegacyName)
