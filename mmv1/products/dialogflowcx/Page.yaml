@@ -42,6 +42,7 @@ examples:
     primary_resource_id: 'basic_page'
     vars:
       agent_name: 'dialogflowcx-agent'
+      data-store: 'datastore-page-full'
 parameters:
   - name: 'parent'
     type: String
