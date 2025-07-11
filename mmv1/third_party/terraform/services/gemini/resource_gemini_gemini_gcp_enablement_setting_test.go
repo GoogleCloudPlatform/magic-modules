@@ -51,7 +51,6 @@ resource "google_gemini_gemini_gcp_enablement_setting" "example" {
     location = "global"
     labels = {"my_key" = "my_value"}
     enable_customer_data_sharing = true
-	disable_web_grounding = true
 	web_grounding_type = "WEB_GROUNDING_FOR_ENTERPRISE"
 }
 `, context)
@@ -63,7 +62,6 @@ resource "google_gemini_gemini_gcp_enablement_setting" "example" {
     location = "global"
     labels = {"my_key" = "my_value"}
     enable_customer_data_sharing = false
-	disable_web_grounding = false
 	web_grounding_type = "GROUNDING_WITH_GOOGLE_SEARCH"
 }
 `, context)

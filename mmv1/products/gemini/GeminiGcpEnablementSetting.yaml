@@ -72,7 +72,8 @@ properties:
     type: Boolean
     description: |-
       Whether web grounding should be disabled.
-      DEPRECATED: Use web_grounding_type instead.
+    deprecation_message: |-
+      `disable_web_grounding` is deprecated. Use `web_grounding_type` instead.
   - name: webGroundingType
     type: String
     description: |-
