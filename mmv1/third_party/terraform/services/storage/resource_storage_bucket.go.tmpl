@@ -28,19 +28,25 @@ import (
 )
 
 func corsValidation(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	method, methodOk := d.GetOkExists("cors.0.method")
-	responseHeader, responseHeaderOk := d.GetOkExists("cors.0.response_header")
-	origin, originOk := d.GetOkExists("cors.0.origin")
+	cors, corsOk := d.GetOk("cors")
+	if corsOk && len(cors.([]interface{})) == 0 && cors.([]interface{})[0] == nil {
+		return fmt.Errorf("cors cannot be empty")
+	}
+	for _, rule := range cors.([]interface{}) {
+		if rule != nil {
+			log.Printf("value of r %v", rule)
+			r := rule.(map[string]interface{})
+			method := r["method"].([]interface{})
+			responseHeader := r["response_header"].([]interface{})
+			origin := r["origin"].([]interface{})
 
-	if methodOk && len(method.([]interface{})) == 0 {
-		return fmt.Errorf("method cannot be empty")
+			if !(len(method) > 0 || len(origin) > 0 || len(responseHeader) > 0) {
+				return fmt.Errorf(" atleast one value should be provided in cors attributes")
+			}
+		}
+
 	}
-	if responseHeaderOk && len(responseHeader.([]interface{})) == 0 {
-		return fmt.Errorf("response_header cannot be empty")
-	}
-	if originOk && len(origin.([]interface{})) == 0 {
-		return fmt.Errorf("origin cannot be empty")
-	}
+
 	return nil
 }
 
@@ -1343,6 +1349,9 @@ func expandCors(configured []interface{}) []*storage.BucketCors {
 	}
 	corsRules := make([]*storage.BucketCors, 0, len(configured))
 	for _, raw := range configured {
+		if raw == nil {
+			continue
+		}
 		data := raw.(map[string]interface{})
 		corsRule := storage.BucketCors{
 			Origin:         tpgresource.ConvertStringArr(data["origin"].([]interface{})),
@@ -2226,9 +2235,12 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	if err := d.Set("location", res.Location); err != nil {
 		return fmt.Errorf("Error setting location: %s", err)
 	}
-	if err := d.Set("cors", flattenCors(res.Cors)); err != nil {
-		return fmt.Errorf("Error setting cors: %s", err)
-	}
+	if res.Cors != nil {
+		if err := d.Set("cors", flattenCors(res.Cors)); err != nil {
+            return fmt.Errorf("Error setting cors: %s", err)
+        }
+    }
+
 	if err := d.Set("default_event_based_hold", res.DefaultEventBasedHold); err != nil {
 		return fmt.Errorf("Error setting default_event_based_hold: %s", err)
 	}
