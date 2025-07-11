@@ -132,10 +132,14 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   }
   return tpgresource.ConvertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1)
   {{- else if $.IsA "ResourceRef" }}
+    {{- if $.ResourceMetadata.IsTgcCompiler }}
+  {{- template "fullToRelativePath" $ -}}
+    {{- else }}
   if v == nil {
     return v
   }
   return tpgresource.ConvertSelfLinkToV1(v.(string))
+    {{- end }}
   {{- else if $.IsSet }}
   if v == nil {
     return v
