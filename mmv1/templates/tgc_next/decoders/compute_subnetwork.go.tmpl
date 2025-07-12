@@ -15,9 +15,9 @@
 // So set the value to empty string in this case.
 if raw, ok := res["stackType"]; ok {
 	v := raw.(string)
-    if v == "UNSPECIFIED_STACK_TYPE" {
-        res["stackType"] = ""
-    }
+	if v == "UNSPECIFIED_STACK_TYPE" {
+		res["stackType"] = ""
+	}
 }
 
 return res, nil

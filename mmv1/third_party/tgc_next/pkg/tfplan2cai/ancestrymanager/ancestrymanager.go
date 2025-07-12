@@ -387,7 +387,9 @@ func (m *manager) SetAncestors(d tpgresource.TerraformResourceData, config *tran
 		return fmt.Errorf("getting resource ancestry or parent failed: %w", err)
 	}
 
-	cai.Resource.Parent = parent
+	if cai.Resource != nil {
+		cai.Resource.Parent = parent
+	}
 	cai.Ancestors = ancestors
 	return nil
 }
