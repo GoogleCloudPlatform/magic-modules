@@ -62,11 +62,19 @@ custom_code:
   encoder: 'templates/terraform/encoders/disk.tmpl'
   decoder: 'templates/terraform/decoders/disk.tmpl'
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
+  raw_resource_config_validation: 'templates/terraform/validation/compute_region_disk.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
 examples:
   - name: 'region_disk_basic'
+    primary_resource_id: 'regiondisk'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])'
+    vars:
+      region_disk_name: 'my-region-disk'
+      disk_name: 'my-disk'
+      snapshot_name: 'my-snapshot'
+  - name: 'region_disk_disk_encryption_key_wo'
     primary_resource_id: 'regiondisk'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-region-disk%s", context["random_suffix"])'
     vars:
@@ -130,7 +138,6 @@ properties:
       If you do not provide an encryption key when creating the disk, then
       the disk will be encrypted using an automatically generated key and
       you do not need to provide a key to use the disk later.
-    immutable: true
     properties:
       - name: 'rawKey'
         type: String
@@ -138,6 +145,27 @@ properties:
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
         sensitive: true
+        immutable: true
+        custom_flatten: 'templates/terraform/custom_flatten/compute_key_flatten.go.tmpl'
+        conflicts:
+          - 'disk_encryption_key.0.rawKeyWo'
+      - name: 'rawKeyWo'
+        type: String
+        description: |
+          Specifies a 256-bit customer-supplied encryption key, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+        write_only: true
+        required_with:
+          - 'disk_encryption_key.0.rawKeyWoVersion'
+        conflicts:
+          - 'disk_encryption_key.0.rawKey'
+      - name: 'rawKeyWoVersion'
+        type: Integer
+        description: |
+          Triggers update of write-only rawKey
+        ignore_read: true
+        default_value: 0
+        immutable: true
       - name: 'rsaEncryptedKey'
         type: String
         description: |
@@ -154,6 +182,7 @@ properties:
         # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeyName'
         type: String
+        immutable: true
         description: |
           The name of the encryption key that is stored in Google Cloud KMS.
   - name: 'sourceSnapshotEncryptionKey'
