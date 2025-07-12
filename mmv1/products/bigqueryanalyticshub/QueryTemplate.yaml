@@ -1,0 +1,142 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'QueryTemplate'
+description: |
+  Represents a BigQuery Query Template within a Data Exchange.
+  This resource defines a reusable SQL routine (e.g., a TVF) that can be
+  shared or executed via the Data Exchange.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
+  # api: '' #todo
+self_link: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}'
+id_format: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates?queryTemplateId={{query_template_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+examples:
+  - name: 'bigquery_analyticshub_querytemplate_basic'
+    primary_resource_id: 'querytemplate'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_query_template%s", context["random_suffix"])'
+    region_override: 'us'
+    vars:
+      data_exchange_id: 'my_data_exchange'
+      query_template_id: 'qt1'
+      desc: 'example of query template'
+    ignore_read_extra:
+      - 'submit'
+# iam_policy:
+#   method_name_separator: ':'
+#   fetch_iam_policy_verb: 'POST'
+#   parent_resource_attribute: 'query_template_id'
+#   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+#   import_format:
+#     - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}'
+#     - '{{query_template_id}}'
+# IAM policy and exclude sweeper #todo
+custom_code:
+  post_update: 'templates/terraform/post_update/bigquery_analytics_hub_query_template.go.tmpl'
+  pre_update: 'templates/terraform/pre_update/bigquery_analytics_hub_query_template.go.tmpl'
+  post_create: 'templates/terraform/post_update/bigquery_analytics_hub_query_template.go.tmpl'
+virtual_fields:
+  - name: 'submit'
+    type: Boolean
+    description: 'If set to `true`, the QueryTemplate will be submitted for approval and cannot be updated afterwards. This is a one-time action.'
+properties:
+  - name: 'name'
+    type: String
+    description: 'The resource name of the QueryTemplate. e.g. `projects/myproject/locations/us/dataExchanges/123/queryTemplates/456`'
+    output: true
+  - name: 'location'
+    type: String
+    description: 'The name of the location this data exchange query template.'
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: 'data_exchange_id'
+    type: String
+    description: 'The ID of the data exchange. Must contain only Unicode letters, numbers (0-9), underscores (_). Should not use characters that require URL-escaping, or characters outside of ASCII, spaces.'
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: 'query_template_id'
+    type: String
+    description: 'Unique QueryTemplate ID.'
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: 'displayName'
+    type: String
+    description: |
+      Human-readable display name of the QueryTemplate. The display name must
+      contain only Unicode letters, numbers (0-9), underscores (_), dashes (-),
+      spaces ( ), ampersands (&) and can't start or end with spaces. Default
+      value is an empty string.
+    required: true
+    immutable: true
+  - name: 'description'
+    type: String
+    description: |
+      Short description of the QueryTemplate. The description must not contain
+      Unicode non-characters and C0 and C1 control codes except tabs,
+      new lines, carriage returns, and page breaks.
+      Default value is an empty string. Max length: 2000 bytes.
+  - name: 'primaryContact'
+    type: String
+    description: |
+      Email or URL of the primary point of contact of the QueryTemplate.
+  - name: 'documentation'
+    type: String
+    description: 'Documentation describing the QueryTemplate.'
+    immutable: true
+  - name: 'state'
+    type: Enum
+    description: 'The QueryTemplate lifecycle state.'
+    output: true
+    enum_values:
+      - 'STATE_UNSPECIFIED'
+      - 'DRAFTED'
+      - 'PENDING'
+      - 'DELETED'
+      - 'APPROVED'
+  - name: 'routine'
+    type: NestedObject
+    description: 'The routine associated with the QueryTemplate.'
+    properties:
+      - name: 'routineType'
+        type: Enum
+        description: 'Type of routine (e.g., TABLE_VALUED_FUNCTION).'
+        default_value: 'ROUTINE_TYPE_UNSPECIFIED'
+        enum_values:
+          - 'ROUTINE_TYPE_UNSPECIFIED'
+          - 'TABLE_VALUED_FUNCTION'
+      - name: 'definitionBody'
+        type: String
+        description: 'SQL query logic.'
+  - name: 'createTime'
+    type: String
+    description: 'Timestamp when the QueryTemplate was created.'
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: 'Timestamp when the QueryTemplate was last modified.'
+    output: true

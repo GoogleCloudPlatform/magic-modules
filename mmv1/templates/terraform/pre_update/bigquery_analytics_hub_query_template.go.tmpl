@@ -1,0 +1,10 @@
+if d.HasChange("submit") {
+old, new := d.GetChange("submit")
+if !new.(bool) && old.(bool) { // Only trigger if 'submit' goes from true to false
+// throw error if user tries to change submit from true to false as unsubmit is not supported.
+if err := d.Set("submit", true); err != nil {
+    return fmt.Errorf("Error setting 'submit' to false during read: %s", err)
+}
+return fmt.Errorf("Cannot change submit from true to false as unsubmitting is not supported.")
+}
+}
