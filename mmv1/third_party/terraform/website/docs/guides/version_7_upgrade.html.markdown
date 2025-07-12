@@ -122,6 +122,8 @@ Description of the change and how users should adjust their configuration (if ne
 
 ## Resource: `google_notebooks_location` is now removed
 
+This resource is not functional.
+
 ## Resource: `google_storage_bucket`
 
 ### `retention_period` changed to `string` data type
