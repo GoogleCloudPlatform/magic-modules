@@ -97,14 +97,15 @@ examples:
       dataset_id: 'tf_test_dataset'
       routine_id: 'tf_test_routine'
       desc: 'Example for listing with routine'
-# - name: 'bigquery_analyticshub_listing_multiregion'
-#   primary_resource_id: 'listing'
-#   primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
-#   region_override: 'US'
-#   vars:
-#     data_exchange_id: 'my_data_exchange'
-#     listing_id: 'my_listing'
-#     description: 'example listing for multiregion'
+  - name: 'bigquery_analyticshub_listing_multiregion'
+    primary_resource_id: 'listing'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'my_data_exchange'
+      listing_id: 'my_listing'
+      description: 'example listing for multiregion'
+    skip_test: true #Handwritten Create test as replica has to be created through Go BQ client
 parameters:
 properties:
   - name: 'name'

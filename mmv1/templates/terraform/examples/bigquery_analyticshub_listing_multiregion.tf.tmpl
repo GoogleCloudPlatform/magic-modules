@@ -13,7 +13,7 @@ resource "google_bigquery_analytics_hub_listing" "{{$.PrimaryResourceId}}" {
   description      = "{{index $.Vars "description"}}"
 
   bigquery_dataset {
-    dataset = "projects/246075821937/datasets/my_listing_example2"
+    dataset = "projects/project_id/datasets/my_listing_example2"
     replica_locations = ["eu"]
   }
 }

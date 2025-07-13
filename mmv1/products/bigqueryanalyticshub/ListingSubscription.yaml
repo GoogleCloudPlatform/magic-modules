@@ -51,19 +51,20 @@ examples:
       listing_id: 'my_listing'
       destination_dataset_id: 'destination_dataset'
       description: 'example data exchange'
-  # - name: 'bigquery_analyticshub_listing_subscription_multiregion'
-  #   primary_resource_id: 'subscription'
-  #   primary_resource_name: 'fmt.Sprintf(\"tf_test_my_data_exchange%s\",
-  #     context[\"\
-  #     random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\",
-  #     context[\"random_suffix\"\
-  #     ])'
-  #   region_override: 'US'
-  #   vars:
-  #     data_exchange_id: 'my_data_exchange'
-  #     listing_id: 'my_listing'
-  #     destination_dataset_id: 'destination_dataset'
-  #     description: 'example listing multiregion subscription'
+  - name: 'bigquery_analyticshub_listing_subscription_multiregion'
+    primary_resource_id: 'subscription'
+    primary_resource_name: 'fmt.Sprintf(\"tf_test_my_data_exchange%s\",
+      context[\"\
+      random_suffix\"]), fmt.Sprintf(\"tf_test_my_listing%s\",
+      context[\"random_suffix\"\
+      ])'
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'my_data_exchange'
+      listing_id: 'my_listing'
+      destination_dataset_id: 'destination_dataset'
+      description: 'example listing multiregion subscription'
+    skip_test: true #Handwritten Create test as replica has to be created through Go BQ client
 parameters:
   - name: 'dataExchangeId'
     type: String
