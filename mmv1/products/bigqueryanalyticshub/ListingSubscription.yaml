@@ -64,7 +64,7 @@ examples:
       listing_id: 'my_listing'
       destination_dataset_id: 'destination_dataset'
       description: 'example listing multiregion subscription'
-    skip_test: true #Handwritten Create test as replica has to be created through Go BQ client
+    exclude_test: true #Handwritten Create test as replica has to be created through Go BQ client
 parameters:
   - name: 'dataExchangeId'
     type: String

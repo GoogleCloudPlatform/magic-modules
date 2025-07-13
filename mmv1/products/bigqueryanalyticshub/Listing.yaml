@@ -105,7 +105,7 @@ examples:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       description: 'example listing for multiregion'
-    skip_test: true #Handwritten Create test as replica has to be created through Go BQ client
+    exclude_test: true #Handwritten Create test as replica has to be created through Go BQ client
 parameters:
 properties:
   - name: 'name'
