@@ -19,7 +19,7 @@ func TestAccVertexAIEndpointWithModelGardenDeployment_basic(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             nil,
+		CheckDestroy:             nil, // the resource does not yet support deletion
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVertexAIEndpointWithModelGardenDeployment_basic(context),
