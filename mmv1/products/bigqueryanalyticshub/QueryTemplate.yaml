@@ -20,7 +20,6 @@ description: |
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
-  # api: '' #todo
 self_link: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}'
 id_format: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates?queryTemplateId={{query_template_id}}'
@@ -44,15 +43,6 @@ examples:
       desc: 'example of query template'
     ignore_read_extra:
       - 'submit'
-# iam_policy:
-#   method_name_separator: ':'
-#   fetch_iam_policy_verb: 'POST'
-#   parent_resource_attribute: 'query_template_id'
-#   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
-#   import_format:
-#     - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}/queryTemplates/{{query_template_id}}'
-#     - '{{query_template_id}}'
-# IAM policy and exclude sweeper #todo
 custom_code:
   post_update: 'templates/terraform/post_update/bigquery_analytics_hub_query_template.go.tmpl'
   pre_update: 'templates/terraform/pre_update/bigquery_analytics_hub_query_template.go.tmpl'
