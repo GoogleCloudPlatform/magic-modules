@@ -103,7 +103,9 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 		return nil, nil
 	}
 {{ end}}
-
+{{- if $.HasProject -}}
+	hclData["project"] = utils.ParseFieldValue(asset.Name, "projects")
+{{- end}}
 {{ range $prop := $.ReadPropertiesForTgc }}
 	{{ if $prop.FlattenObject -}}
 	// Terraform must set the top level schema field, but since this object contains collapsed properties
