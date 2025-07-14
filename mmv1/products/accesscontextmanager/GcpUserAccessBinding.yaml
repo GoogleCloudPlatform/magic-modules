@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+    # Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -131,12 +131,16 @@ properties:
                 - name: restrictedClientApplication
                   type: NestedObject
                   description: |
-                    Optional. The application that is subject to this binding's scope.
+                    Optional. The application that is subject to this binding's scope. Only one of clientId or name should be specified.
                   properties:
                     - name: clientId
                       type: String
                       description: |
                         The OAuth client ID of the application.
+                    - name: name
+                      type: String
+                      description: |
+                        The name of the application. Example: "Cloud Console"
         - name: 'activeSettings'
           type: NestedObject
           description: |
