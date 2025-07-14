@@ -171,7 +171,7 @@ virtual_fields:
     description: |
       The deletion policy for the instance. Setting `ABANDON` allows the resource
       to be abandoned, rather than deleted. Setting `DELETE` deletes the resource
-      and all its contents. Setting `PREVENT` prevents the resource from being deleted. 
+      and all its contents. Setting `PREVENT` prevents the resource from being deleted.
       Default is `DELETE`.  Possible values are:
         * DELETE
         * PREVENT

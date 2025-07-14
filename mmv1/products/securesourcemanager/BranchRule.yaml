@@ -48,7 +48,7 @@ examples:
       repository_id: 'my-basic-repository'
       instance_id: 'my-basic-instance'
       prevent_destroy: 'true'
-      deletion_policy: 'PREVENT'
+      deletion_policy: '"PREVENT"'
     test_vars_overrides:
       'prevent_destroy': 'false'
       'deletion_policy': '"DELETE"'
