@@ -189,6 +189,9 @@ type Examples struct {
 	// Example: ['RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec'].
 	// "RESOURCE" means that the property is for resource data in CAI asset.
 	TGCTestIgnoreInAsset []string `yaml:"tgc_test_ignore_in_asset,omitempty"`
+	// The reason to skip a test. For example, a link to a ticket explaining the issue that needs to be resolved before
+	// unskipping the test. If this is not empty, the test will be skipped.
+	TGCSkipTest string `yaml:"tgc_skip_test,omitempty"`
 }
 
 // Set default value for fields

@@ -66,10 +66,12 @@ examples:
   - name: 'reservation_source_instance_template'
     primary_resource_id: 'gce_reservation_source_instance_template'
     vars:
+      instance-template: 'instance-template'
       reservation_name: 'gce-reservation-source-instance-template'
   - name: 'reservation_sharing_policy'
     primary_resource_id: 'gce_reservation_sharing_policy'
     vars:
+      instance-template: 'instance-template'
       reservation_name: 'gce-reservation-sharing-policy'
   - name: 'shared_reservation_basic'
     primary_resource_id: 'gce_reservation'
