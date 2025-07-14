@@ -1610,6 +1610,34 @@ func TestAccSqlDatabaseInstance_cloneWithDatabaseNames(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_cloneWithSourceInstanceDeletionTime(t *testing.T) {
+	// Sqladmin client
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":    acctest.RandString(t, 10),
+		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_cloneWithSourceInstanceDeletionTime(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "clone"},
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_pointInTimeRestore(t *testing.T) {
 	// Skipped due to randomness
 	acctest.SkipIfVcr(t)
@@ -1643,6 +1671,7 @@ func TestAccSqlDatabaseInstance_pointInTimeRestore(t *testing.T) {
 				ResourceName:            "google_sql_database_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
+<<<<<<< HEAD
 				ImportStateVerifyIgnore: []string{"deletion_protection", "point_in_time_restore_context"},
 			},
 		},
@@ -1683,6 +1712,7 @@ func TestAccSqlDatabaseInstance_pointInTimeRestoreWithSettings(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "point_in_time_restore_context"},
+
 			},
 		},
 	})
@@ -7029,6 +7059,7 @@ data "google_sql_backup_run" "backup" {
 `, context)
 }
 
+<<<<<<< HEAD
 func testAccSqlDatabaseInstance_pointInTimeRestoreContext(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 // Create service account
@@ -7262,6 +7293,32 @@ resource "google_sql_database_instance" "instance" {
   depends_on = [time_sleep.wait_for_binlog]
 
   deletion_protection 	= false
+=======
+func testAccSqlDatabaseInstance_cloneWithSourceInstanceDeletionTime(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_sql_database_instance" "instance" {
+  name             = "tf-test-%{random_suffix}"
+  database_version = "POSTGRES_11"
+  region           = "us-central1"
+
+  clone {
+    source_instance_name = data.google_sql_backup_run.backup.instance
+    point_in_time = "00:00"
+	source_instance_deletion_time = "01:00"
+  }
+
+  deletion_protection = false
+
+  // Ignore changes, since the most recent backup may change during the test
+  lifecycle{
+	ignore_changes = [clone[0].point_in_time]
+  }
+}
+
+data "google_sql_backup_run" "backup" {
+	instance = "%{original_db_name}"
+	most_recent = true
+>>>>>>> 67a9dbe8b (adding source_instance_deletion_time to google_sql_database_instance)
 }
 `, context)
 }
