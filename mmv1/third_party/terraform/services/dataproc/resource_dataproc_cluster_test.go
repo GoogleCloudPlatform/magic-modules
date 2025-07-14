@@ -2702,7 +2702,7 @@ resource "google_dataproc_cluster" "kerb" {
 func testAccDataprocCluster_withIdentityConfig(rnd, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "identity_config" {
-  name   = "tf-test-dproc-%s"
+  name   = "tf-test-dataproc-identity-%s"
   region = "us-central1"
   cluster_config {
     gce_cluster_config {
@@ -2723,7 +2723,7 @@ resource "google_dataproc_cluster" "identity_config" {
 func testAccDataprocCluster_updateIdentityConfig(rnd, subnetworkName, user, sa string) string {
 	return fmt.Sprintf(`
 resource "google_dataproc_cluster" "identity_config_user_mapping" {
-  name   = "tf-test-dataproc-identity-mapping-%%s"
+  name   = "tf-test-dataproc-update-identity-user-mapping-%s"
   region = "us-central1"
 
   cluster_config {
