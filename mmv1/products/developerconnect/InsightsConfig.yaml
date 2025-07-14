@@ -89,23 +89,23 @@ properties:
           type: NestedObject
           description: Google Artifact Registry configurations.
           properties:
-          - name: projectId
-            type: String
-            description: The host project of Artifact Registry.
-            required: true
-          - name: artifactRegistryPackage
-            type: String
-            description: The name of the artifact registry package.
-            immutable: true
-            required: true
+            - name: projectId
+              type: String
+              description: The host project of Artifact Registry.
+              required: true
+            - name: artifactRegistryPackage
+              type: String
+              description: The name of the artifact registry package.
+              immutable: true
+              required: true
         - name: googleArtifactAnalysis
           type: NestedObject
           description: Google Artifact Analysis configurations.
           properties:
-          - name: projectId
-            type: String
-            description: The project id of the project where the provenance is stored.
-            required: true
+            - name: projectId
+              type: String
+              description: The project id of the project where the provenance is stored.
+              required: true
         - name: uri
           type: String
           description: |-
@@ -163,11 +163,11 @@ properties:
           item_type:
             type: NestedObject
             properties:
-            - name: detail_message
-              type: String
-              description: |-
-                A message with details about the error.
-              output: true
+              - name: detail_message
+                type: String
+                description: |-
+                  A message with details about the error.
+                output: true
   - name: createTime
     type: String
     description: '[Output only] Create timestamp'
