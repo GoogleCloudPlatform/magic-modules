@@ -139,6 +139,11 @@ examples:
       instance_group_name: 'instance_group'
       network_name: 'network'
     exclude_test: true
+  - name: 'region_backend_service_dynamic_forwarding'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      region_backend_service_name: 'region-service'
   - name: 'region_backend_service_ha_policy'
     primary_resource_id: 'default'
     vars:
@@ -341,7 +346,7 @@ properties:
     description: |
       Settings controlling the volume of connections to a backend service. This field
       is applicable only when the `load_balancing_scheme` is set to INTERNAL_MANAGED
-      and the `protocol` is set to HTTP, HTTPS, or HTTP2.
+      and the `protocol` is set to HTTP, HTTPS, HTTP2 or H2C.
     properties:
       - name: 'connectTimeout'
         type: NestedObject
@@ -446,7 +451,7 @@ properties:
       hashing.
       This field only applies when all of the following are true -
         * `load_balancing_scheme` is set to INTERNAL_MANAGED
-        * `protocol` is set to HTTP, HTTPS, or HTTP2
+        * `protocol` is set to HTTP, HTTPS, HTTP2 or H2C
         * `locality_lb_policy` is set to MAGLEV or RING_HASH
     properties:
       - name: 'httpCookie'
@@ -916,7 +921,7 @@ properties:
 
       locality_lb_policy is applicable to either:
 
-      * A regional backend service with the service_protocol set to HTTP, HTTPS, or HTTP2,
+      * A regional backend service with the service_protocol set to HTTP, HTTPS, HTTP2 or H2C,
         and loadBalancingScheme set to INTERNAL_MANAGED.
       * A global backend service with the load_balancing_scheme set to INTERNAL_SELF_MANAGED.
       * A regional backend service with loadBalancingScheme set to EXTERNAL (External Network
@@ -980,7 +985,7 @@ properties:
     description: |
       Settings controlling eviction of unhealthy hosts from the load balancing pool.
       This field is applicable only when the `load_balancing_scheme` is set
-      to INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, or HTTP2.
+      to INTERNAL_MANAGED and the `protocol` is set to HTTP, HTTPS, HTTP2 or H2C.
     properties:
       - name: 'baseEjectionTime'
         type: NestedObject
@@ -1224,22 +1229,21 @@ properties:
   - name: 'protocol'
     type: Enum
     description: |
-      The protocol this RegionBackendService uses to communicate with backends.
-      The default is HTTP. **NOTE**: HTTP2 is only valid for beta HTTP/2 load balancer
-      types and may result in errors if used with the GA API.
+      The protocol this BackendService uses to communicate with backends.
+      The default is HTTP. Possible values are HTTP, HTTPS, HTTP2, H2C, TCP, SSL, UDP
+      or GRPC. Refer to the documentation for the load balancers or for Traffic Director
+      for more information.
     default_from_api: true
-    # This is removed to avoid breaking terraform, as default values cannot be
-    # unspecified. Providers should include this as needed via overrides
-    # default_value: :TCP
     enum_values:
       - 'HTTP'
       - 'HTTPS'
       - 'HTTP2'
-      - 'SSL'
       - 'TCP'
+      - 'SSL'
       - 'UDP'
       - 'GRPC'
       - 'UNSPECIFIED'
+      - 'H2C'
   - name: 'securityPolicy'
     type: String
     description: |
@@ -1444,6 +1448,35 @@ properties:
         required: true
         enum_values:
           - 'CONSISTENT_HASH_SUBSETTING'
+      - name: 'subsetSize'
+        type: Integer
+        description: |
+          The number of backends per backend group assigned to each proxy instance or each service mesh client.
+          An input parameter to the CONSISTENT_HASH_SUBSETTING algorithm. Can only be set if policy is set to
+          CONSISTENT_HASH_SUBSETTING. Can only be set if load balancing scheme is INTERNAL_MANAGED or INTERNAL_SELF_MANAGED.
+          subsetSize is optional for Internal HTTP(S) load balancing and required for Traffic Director.
+          If you do not provide this value, Cloud Load Balancing will calculate it dynamically to optimize the number
+          of proxies/clients visible to each backend and vice versa.
+          Must be greater than 0. If subsetSize is larger than the number of backends/endpoints, then subsetting is disabled.
+  - name: 'dynamicForwarding'
+    type: NestedObject
+    description: |
+      Dynamic forwarding configuration. This field is used to configure the backend service with dynamic forwarding
+      feature which together with Service Extension allows customized and complex routing logic.
+    min_version: beta
+    properties:
+      - name: 'ipPortSelection'
+        type: NestedObject
+        description: |
+          IP:PORT based dynamic forwarding configuration.
+        min_version: beta
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            min_version: beta
+            description: |
+              A boolean flag enabling IP:PORT based dynamic forwarding.
+            immutable: true
   - name: 'haPolicy'
     type: NestedObject
     description: |

@@ -8,7 +8,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/cai"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/models"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"

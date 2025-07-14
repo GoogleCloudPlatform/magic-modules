@@ -56,7 +56,7 @@ examples:
       pool_name: 'test-pool'
       network_name: 'test-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
     ignore_read_extra:
       - 'deletion_policy'
 virtual_fields:
@@ -507,6 +507,7 @@ properties:
     update_mask_fields:
       - 'tiering_policy.cooling_threshold_days'
       - 'tiering_policy.tier_action'
+      - 'tiering_policy.hot_tier_bypass_mode_enabled'
     properties:
       - name: 'coolingThresholdDays'
         type: Integer
@@ -521,3 +522,47 @@ properties:
         enum_values:
           - 'ENABLED'
           - 'PAUSED'
+      - name: 'hotTierBypassModeEnabled'
+        type: Boolean
+        description: |
+          Optional. Flag indicating that the hot tier bypass mode is enabled. Default is false.
+          Only applicable to Flex service level.
+        min_version: 'beta'
+  - name: 'hybridReplicationParameters'
+    type: NestedObject
+    description: |-
+      The Hybrid Replication parameters for the volume.
+    properties:
+      - name: 'replication'
+        type: String
+        description: |
+          Required. Desired name for the replication of this volume.
+      - name: 'peerVolumeName'
+        type: String
+        description: |
+          Required. Name of the user's local source volume to be peered with the destination volume.
+      - name: 'peerClusterName'
+        type: String
+        description: |
+          Required. Name of the user's local source cluster to be peered with the destination cluster.
+      - name: 'peerSvmName'
+        type: String
+        description: |
+          Required. Name of the user's local source vserver svm to be peered with the destination vserver svm.
+      - name: 'peerIpAddresses'
+        type: String
+        description: |
+          Required. List of node ip addresses to be peered with.
+      - name: 'clusterLocation'
+        type: String
+        description: |
+          Optional. Name of source cluster location associated with the Hybrid replication. This is a free-form field for the display purpose only.
+      - name: 'description'
+        type: String
+        description: |
+          Optional. Description of the replication.
+      - name: 'labels'
+        type: KeyValuePairs
+        description: |
+          Optional. Labels to be added to the replication as the key value pairs.
+          An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.

@@ -13,14 +13,15 @@
 
 ---
 name: "VmwareAdminCluster"
-min_version: beta
+description: "A Google VMware Admin Cluster."
+references:
+  api: 'https://cloud.google.com/kubernetes-engine/distributed-cloud/reference/on-prem-api/rest/v1/projects.locations.vmwareAdminClusters'
 base_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters"
 create_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters?vmware_admin_cluster_id={{name}}"
 update_url: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"
 self_link: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"
 update_verb: "PATCH"
 update_mask: true
-description: "A Google VMware Admin Cluster."
 exclude_delete: true
 id_format: "projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"
 import_format: ["projects/{{project}}/locations/{{location}}/vmwareAdminClusters/{{name}}"]
@@ -40,21 +41,18 @@ taint_resource_on_failed_create: true
 examples:
   - name: "gkeonprem_vmware_admin_cluster_basic"
     primary_resource_id: "admin-cluster-basic"
-    min_version: beta
     vars:
       name: "basic"
     test_env_vars:
       project: "fake-backend-360322"
   - name: 'gkeonprem_vmware_admin_cluster_full'
     primary_resource_id: 'admin-cluster-full'
-    min_version: beta
     vars:
       name: 'full'
     test_env_vars:
       project: 'fake-backend-360322'
   - name: 'gkeonprem_vmware_admin_cluster_metallb'
     primary_resource_id: 'admin-cluster-metallb'
-    min_version: beta
     vars:
       name: 'metallb'
     test_env_vars:
@@ -691,3 +689,13 @@ properties:
     name: enableAdvancedCluster
     description: If set, the advanced cluster feature is enabled.
     output: true
+  - type: NestedObject
+    name: privateRegistryConfig
+    description: Configuration for private registry.
+    properties:
+      - type: String
+        name: 'address'
+        description: The registry address.
+      - type: String
+        name: 'caCert'
+        description: The CA certificate public key for private registry.

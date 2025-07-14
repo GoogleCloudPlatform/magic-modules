@@ -340,8 +340,9 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 		return "", err
 	}
 
-	if _, err := rnr.Run("git", []string{"commit", "--signoff", "-m", commitMessage}, nil); err != nil {
-		return "", err
+	_, commitErr := rnr.Run("git", []string{"commit", "--signoff", "-m", commitMessage}, nil)
+	if commitErr != nil && !strings.Contains(commitErr.Error(), "nothing to commit") {
+		return "", commitErr
 	}
 
 	commitSha, err := rnr.Run("git", []string{"rev-parse", "HEAD"}, nil)
@@ -354,8 +355,13 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 
 	// auto-pr's use commitSHA_modular-magician_<repo>_.txt file to communicate commmit hash
 	// across cloudbuild steps. Used in test-tpg to execute unit tests for the HEAD commit
-	if strings.HasPrefix(scratchRepo.Branch, "auto-pr-") && !strings.HasSuffix(scratchRepo.Branch, "-old") {
-		variablePath := fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", scratchRepo.Name)
+	if strings.HasPrefix(scratchRepo.Branch, "auto-pr-") {
+		var variablePath string
+		if strings.HasSuffix(scratchRepo.Branch, "-old") {
+			variablePath = fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", scratchRepo.Name)
+		} else {
+			variablePath = fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", scratchRepo.Name)
+		}
 		fmt.Println("variablePath: ", variablePath)
 		err = rnr.WriteFile(variablePath, commitSha)
 		if err != nil {
@@ -363,7 +369,7 @@ func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner
 		}
 	}
 
-	return commitSha, err
+	return commitSha, commitErr
 }
 
 func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequest, rnr ExecRunner) error {
@@ -374,6 +380,12 @@ func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequ
 	matches := changelogExp.FindStringSubmatch(pullRequest.Body)
 	if matches != nil && matches[1] != "none" {
 		if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
+			return err
+		}
+	}
+	// If changelog entry is missing, add an entry "unknown: <PR title>".
+	if matches == nil {
+		if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), "unknown: "+pullRequest.Title); err != nil {
 			return err
 		}
 	}

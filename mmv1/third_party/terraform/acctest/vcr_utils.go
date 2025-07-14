@@ -148,6 +148,8 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		c = initializeReleaseDiffTest(c, t.Name())
 	}
 
+	c = extendWithTGCData(t, c)
+
 	// terraform_labels is a computed field to which "goog-terraform-provisioned": "true" is always
 	// added by the provider. ImportStateVerify "checks for strict equality and does not respect
 	// DiffSuppressFunc or CustomizeDiff" so any test using ImportStateVerify must ignore
@@ -245,10 +247,10 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string) resource.Te
 	for _, testStep := range c.Steps {
 		if testStep.Config != "" {
 			ogConfig := testStep.Config
-			testStep.Config = reformConfigWithProvider(ogConfig, localProviderName)
+			testStep.Config = ReformConfigWithProvider(ogConfig, localProviderName)
 			if testStep.ExpectError == nil && testStep.PlanOnly == false {
 				newStep := resource.TestStep{
-					Config: reformConfigWithProvider(ogConfig, releaseProvider),
+					Config: ReformConfigWithProvider(ogConfig, releaseProvider),
 				}
 				testStep.PlanOnly = true
 				testStep.ExpectNonEmptyPlan = false
@@ -265,19 +267,23 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string) resource.Te
 	return c
 }
 
-func reformConfigWithProvider(config, provider string) string {
+func ReformConfigWithProvider(config, provider string) string {
 	configBytes := []byte(config)
 	providerReplacement := fmt.Sprintf("provider = %s", provider)
 	providerReplacementBytes := []byte(providerReplacement)
 	providerBlock := regexp.MustCompile(`provider *=.*google-beta.*`)
 
 	if providerBlock.Match(configBytes) {
-		return string(providerBlock.ReplaceAll(configBytes, providerReplacementBytes))
+		out := string(providerBlock.ReplaceAll(configBytes, providerReplacementBytes))
+		return out
 	}
 
-	providerReplacement = fmt.Sprintf("${1}\n\t%s", providerReplacement)
+	providerReplacement = fmt.Sprintf("${1}\n  %s\n", providerReplacement)
 	providerReplacementBytes = []byte(providerReplacement)
-	resourceHeader := regexp.MustCompile(`(resource .*google_.* .*\w+.*\{.*)`)
+	// Match resource and data blocks that use google_ provider
+	// regex matches for labels resource and data blocks that use google_ provider
+
+	resourceHeader := regexp.MustCompile(`((resource|data) .*google_.* .*\w+.*\{ *)`)
 	return string(resourceHeader.ReplaceAll(configBytes, providerReplacementBytes))
 }
 
