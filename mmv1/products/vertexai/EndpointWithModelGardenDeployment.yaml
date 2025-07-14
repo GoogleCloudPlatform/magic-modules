@@ -48,7 +48,6 @@ custom_code:
 examples:
   - name: "vertex_ai_deploy"
     primary_resource_id: "deploy"
-    primary_resource_name: 'fmt.Sprintf("tf_test_example_deploy%s", context["random_suffix"])'
     vars:
       project: "vertex-ai"
       publisher_model_name: "publisher_model_name"
@@ -64,6 +63,7 @@ parameters:
     immutable: true
     url_param_only: true
     required: true
+properties:
   - name: endpoint
     type: String
     description:
@@ -71,7 +71,6 @@ parameters:
       resource within its parent collection as described in https://google.aip.dev/122.
     url_param_only: true
     output: true
-properties:
   - name: publisherModelName
     type: String
     description: |-
