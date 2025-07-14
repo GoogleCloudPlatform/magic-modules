@@ -20,7 +20,7 @@ references:
     "Use models in Model Garden": "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/use-models"
     "Overview of Model Garden": "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models"
     "Overview of self-deployed models": "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/self-deployed-models"
-  api: "https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations/deploy"
+  api: "https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations/deploy"
 docs:
 id_format: "projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}"
 base_url: "projects/{{project}}/locations/{{location}}:deploy"
