@@ -799,6 +799,7 @@ properties:
   - name: deployConfig
     type: NestedObject
     description: The deploy config to use for the deployment.
+    ignore_read: true
     properties:
       - name: systemLabels
         type: KeyValuePairs
