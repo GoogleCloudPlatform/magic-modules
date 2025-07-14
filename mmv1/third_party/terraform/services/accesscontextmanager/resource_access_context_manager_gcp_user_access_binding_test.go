@@ -119,7 +119,6 @@ resource "google_access_context_manager_gcp_user_access_binding" "gcp_user_acces
   		  google_access_context_manager_access_level.tf_test_access_level_id_for_user_access_binding%{random_suffix}.name,
   	  ]
   	  session_settings {
-  		  max_inactivity = "300s"
   		  session_length = "1800s"
   		  session_length_enabled = true
   		  session_reauth_method = "LOGIN"
