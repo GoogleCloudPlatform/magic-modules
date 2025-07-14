@@ -781,6 +781,10 @@ properties:
                 description:
                   The GPU to attach to an instance. See https://cloud.google.com/run/docs/configuring/jobs/gpu for configuring GPU.
                 required: true
+          - name: 'gpuZonalRedundancyDisabled'
+            type: Boolean
+            description: True if GPU zonal redundancy is disabled on this execution.
+            default_from_api: true
   - name: 'observedGeneration'
     type: String
     description: |
