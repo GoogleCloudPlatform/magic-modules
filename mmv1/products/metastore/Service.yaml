@@ -60,7 +60,7 @@ examples:
     vars:
       metastore_service_name: 'metastore-srv'
     ignore_read_extra:
-      - 'deletionProtection'
+      - 'deletion_protection'
   - name: 'dataproc_metastore_service_deletion_protection'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-metastore-srv%s", context["random_suffix"])'
@@ -316,7 +316,7 @@ properties:
         description: |
           A Cloud Storage URI of a folder, in the format gs://<bucket_name>/<path_inside_bucket>. A sub-folder <backup_folder> containing backup files will be stored below it.
         required: true
-  - name: 'deletionProtection'
+  - name: 'deletion_protection'
     type: Boolean
     description: |
       Indicates if the dataproc metastore should be protected against accidental deletions.Defaults to false.
