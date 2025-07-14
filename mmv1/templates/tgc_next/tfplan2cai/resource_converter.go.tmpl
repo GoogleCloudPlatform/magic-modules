@@ -46,51 +46,8 @@ import (
 {{- $productBackendName := $.CaiProductBackendName $caiProductBaseUrl }}
 {{- $apiVersion := $.CaiApiVersion $productBackendName $caiProductBaseUrl}}
 
-{{if $.CustomCode.Constants -}} 
-    {{- $.CustomTemplate $.CustomCode.Constants true -}}
-{{- end}}
-
-{{- if not $.ApiResourceTypeKind }}
-const {{ $.ApiResourceType -}}AssetType string = "{{ $productBackendName }}.googleapis.com/{{ $.Name -}}"
-{{- end }}
-
-func Resource{{ $.ResourceName -}}() *schema.Resource {
-    return &schema.Resource{
-        Schema: map[string]*schema.Schema{
-			{{- range $prop := $.OrderProperties $.AllUserProperties }}
-{{template "SchemaFields" $prop -}}
-			{{- end }}
-            {{- range $prop := $.VirtualFields }}
-{{template "SchemaFields" $prop -}}
-            {{- end }}
-{{- if $.CustomCode.ExtraSchemaEntry }} 
-    {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
-{{- end}}
-{{ if $.HasProject -}}
-            "project": {
-                Type:     schema.TypeString,
-                Optional: true,
-                Computed: true,
-                ForceNew: true,
-            },
-{{- end}}
-{{- if $.HasSelfLink }}
-            "self_link": {
-                Type:     schema.TypeString,
-                Computed: true,
-            },
-{{- end}}
-        },
-        UseJSONNumber: true,
-    }
-}
-
-{{- range $prop := $.AllUserProperties }}
-{{template "SchemaSubResource" $prop}}
-{{- end}}
-
-func ResourceConverter{{ $.ResourceName -}}() cai.ResourceConverter {
-    return cai.ResourceConverter{
+func {{ $.ResourceName -}}Tfplan2caiConverter() cai.Tfplan2caiConverter {
+    return cai.Tfplan2caiConverter{
         Convert: Get{{ $.ResourceName -}}CaiAssets,
     }
 }
@@ -105,17 +62,19 @@ func Get{{ $.ResourceName -}}CaiAssets(d tpgresource.TerraformResourceData, conf
         if location == "" && strings.Contains(name, "/global/") {
             location = "global"
         }
-        return []caiasset.Asset{{"{{"}}
-            Name: name,
-            Type: {{ $.ApiResourceType -}}AssetType,
-            Resource: &caiasset.AssetResource{
-                Version: "{{ $apiVersion }}",
-                DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/{{ $productBackendName }}/{{ $apiVersion }}/rest",
-                DiscoveryName: "{{ or $.ApiResourceTypeKind $.Name }}",
-                Data: obj,
-                Location:             location,
+        return []caiasset.Asset{
+            {
+                Name: name,
+                Type: {{ $.ApiResourceType -}}AssetType,
+                Resource: &caiasset.AssetResource{
+                    Version: "{{ $apiVersion }}",
+                    DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/{{ $productBackendName }}/{{ $apiVersion }}/rest",
+                    DiscoveryName: "{{ or $.ApiResourceTypeKind $.Name }}",
+                    Data: obj,
+                    Location:             location,
+                },
             },
-        {{"}}"}}, nil
+        }, nil
     } else {
         return []caiasset.Asset{}, err
     }
@@ -167,13 +126,5 @@ func resource{{ $.ResourceName -}}TgcEncoder(d tpgresource.TerraformResourceData
 {{- end}}
 
 {{ range $prop := $.SettableProperties }}
-    {{ if $prop.CustomTgcExpand }}
-    {{- $prop.CustomTemplate $prop.CustomTgcExpand false -}}
-    {{ else if and ($prop.IsA "Array") ($prop.ItemType.IsA "ResourceRef")}}
-    {{- template "expandArrayResourcerefWithValidation" $prop -}}
-    {{ else if ($prop.IsA "ResourceRef") }}
-    {{- template "expandResourcerefWithValidation" $prop -}}
-    {{ else }}
-    {{- template "expandPropertyMethod" $prop -}}
-    {{ end }}
+    {{- template "expandTgcPropertyMethod" $prop -}}
 {{- end}}
