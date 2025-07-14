@@ -22,12 +22,20 @@ import (
 
 {{ range $e := $.TestExamples }}
 func TestAcc{{ $e.TestSlug $.ProductMetadata.Name $.Name }}(t *testing.T) {
+	{{- if $e.TGCSkipTest }}
+	t.Skip("{{$e.TGCSkipTest}}")
+	{{- end }}
 	t.Parallel()
 
 	test.BidirectionalConversion(
 		t,
 		[]string{
 {{- range $field := $.TGCTestIgnorePropertiesToStrings $e }}
+	"{{ $field }}",
+{{- end }}
+		},
+		[]string{
+{{- range $field := $e.TGCTestIgnoreInAsset }}
 	"{{ $field }}",
 {{- end }}
 		},

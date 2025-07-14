@@ -43,6 +43,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 iam_policy:
   allowed_iam_role: 'roles/compute.admin'
   parent_resource_attribute: 'name'
@@ -55,6 +56,7 @@ custom_code:
   decoder: 'templates/terraform/decoders/backend_service.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_backend_service_security_policy.go.tmpl'
   post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/backend_service.go.tmpl'
 schema_version: 1
 examples:
   - name: 'backend_service_basic'
@@ -96,12 +98,18 @@ examples:
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
+    tgc_test_ignore_in_asset:
+      - 'RESOURCE.enableCDN' # It has false value in CAI asset
   - name: 'backend_service_traffic_director_ring_hash'
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
+    tgc_test_ignore_extra:
+      - outlier_detection.enforcing_consecutive_gateway_failure # Ignore the 0 value in config
+    tgc_test_ignore_in_asset:
+      - 'RESOURCE.enableCDN' # It has false value in CAI asset
   - name: 'backend_service_stateful_session_affinity'
     primary_resource_id: 'default'
     min_version: 'beta'
@@ -132,7 +140,6 @@ examples:
       network_name: 'network'
   - name: 'backend_service_tls_settings'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
@@ -147,6 +154,8 @@ examples:
     min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
+    tgc_test_ignore_in_asset:
+      - 'RESOURCE.enableCDN' # It has false value in CAI asset
 parameters:
 properties:
   - name: 'affinityCookieTtlSec'
@@ -158,6 +167,7 @@ properties:
       maximum allowed value for TTL is one day.
 
       When the load balancing scheme is INTERNAL, this field is not used.
+    include_empty_value_in_cai: true
   - name: 'backend'
     type: Array
     description: |
@@ -327,6 +337,7 @@ properties:
                 description: |
                   If true, the metric data is collected and reported to Cloud
                   Monitoring, but is not used for load balancing.
+                include_empty_value_in_cai: true
               - name: 'maxUtilization'
                 type: Double
                 description: |
@@ -608,6 +619,7 @@ properties:
               - 'cdn_policy.0.cache_key_policy.0.include_named_cookies'
             item_type:
               type: String
+            custom_tgc_expand: 'templates/tgc_next/custom_expand/set_to_slice_or_nil.go.tmpl'
           - name: 'queryStringWhitelist'
             type: Array
             description: |
@@ -619,6 +631,7 @@ properties:
               delimiters.
             is_set: true
             send_empty_value: true
+            custom_tgc_expand: 'templates/tgc_next/custom_expand/set_to_slice_or_nil.go.tmpl'
             at_least_one_of:
               - 'cdn_policy.0.cache_key_policy.0.include_host'
               - 'cdn_policy.0.cache_key_policy.0.include_protocol'
@@ -677,6 +690,7 @@ properties:
           - 'cdn_policy.0.cache_key_policy'
           - 'cdn_policy.0.signed_url_cache_max_age_sec'
         default_value: 3600
+        custom_tgc_flatten: 'templates/tgc_next/custom_flatten/compute_backend_service_signed_url_cache_max_age_sec.go.tmpl'
       - name: 'defaultTtl'
         type: Integer
         description: |
@@ -795,6 +809,7 @@ properties:
     type: Boolean
     description: |
       If true, enable Cloud CDN for this BackendService.
+    include_empty_value_in_cai: true
   - name: 'healthChecks'
     type: Array
     description: |
@@ -844,6 +859,7 @@ properties:
         ignore_read: true
         sensitive: true
         send_empty_value: true
+        is_missing_in_cai: true
       - name: 'oauth2ClientSecretSha256'
         type: String
         description: |
@@ -1103,6 +1119,7 @@ properties:
           required: true
           description: |
             If true, the metric data is not used for load balancing.
+          include_empty_value_in_cai: true
   - name: 'name'
     type: String
     description: |
@@ -1565,7 +1582,6 @@ properties:
     type: NestedObject
     description: |
       Configuration for Backend Authenticated TLS and mTLS. May only be specified when the backend protocol is SSL, HTTPS or HTTP2.
-    min_version: beta
     properties:
       - name: 'sni'
         type: String
@@ -1660,6 +1676,7 @@ properties:
       Dynamic forwarding configuration. This field is used to configure the backend service with dynamic forwarding
       feature which together with Service Extension allows customized and complex routing logic.
     min_version: beta
+    is_missing_in_cai: true
     properties:
       - name: 'ipPortSelection'
         type: NestedObject

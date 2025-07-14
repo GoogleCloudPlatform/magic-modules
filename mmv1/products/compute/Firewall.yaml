@@ -50,6 +50,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/firewall.tmpl'
   constants: 'templates/terraform/constants/firewall.tmpl'
@@ -70,6 +71,8 @@ examples:
       firewall_name: 'my-firewall-rule'
     test_env_vars:
       project: 'PROJECT_NAME'
+    tgc_test_ignore_extra:
+      - 'project'
 parameters:
 properties:
   # TODO(nelsonjr): [nice to have] Make the format here simpler to use, in
@@ -331,3 +334,20 @@ properties:
       - target_service_accounts
     item_type:
       type: String
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the firewall. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456. The field is ignored when empty.
+          The field is immutable and causes resource replacement when mutated. This field is only
+          set at create time and modifying this field after creation will trigger recreation.
+          To apply tags to an existing resource, see the google_tags_tag_binding resource.
+        ignore_read: true
