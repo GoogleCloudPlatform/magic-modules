@@ -7,6 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+
+	{{- if ne $.TargetVersionName "ga" }}
+	compute "google.golang.org/api/compute/v0.beta"
+	{{- end }}
 )
 
 func TestAccComputeRouter_basic(t *testing.T) {
@@ -211,6 +215,40 @@ func TestAccComputeRouter_addAndUpdateIdentifierRangeBgp(t *testing.T) {
 	})
 }
 
+func TestAccComputeRouter_resourceManagerTags(t *testing.T) {
+
+	t.Parallel()
+
+	var router compute.Router
+	org := envvar.GetTestOrgFromEnv(t)
+
+	suffixName := acctest.RandString(t, 10)
+	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-routers-tagkey", "organizations/"+org, make(map[string]interface{}))
+	sharedTagkey,_ := tagKeyResult["shared_tag_key"]
+	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-routers-tagvalue", sharedTagkey, org)
+	routerName := fmt.Sprintf("tf-test-router-resource-manager-tags-%s", suffixName)
+	context := map[string]interface{}{
+		"router_name": routerName,
+		"tag_key_id": tagKeyResult["name"],
+		"tag_value_id": tagValueResult["name"],
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckComputeRouterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRouter_resourceManagerTags(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeRouterExists(
+						t, "google_compute_router.acc_router_with_resource_manager_tags", &router),
+				),
+			},
+		},
+	})
+}
+
 func testAccComputeRouterBasic(routerName, resourceRegion string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "foobar" {
@@ -387,3 +425,65 @@ resource "google_compute_router" "foobar" {
 }
 `, routerName, routerName)
 }
+
+func testAccCheckComputeRouterExists(t *testing.T, n string, router *compute.Router) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[n]
+		if !ok {
+			return fmt.Errorf("Not found: %s", n)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("No ID is set")
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+		region := rs.Primary.Attributes["region"]
+		router_name := rs.Primary.Attributes["name"]
+
+		found, err := config.NewComputeClient(config.UserAgent).Routers.Get(
+			config.Project, region, router_name).Do()
+		if err != nil {
+			return err
+		}
+
+		if found.Name != router_name {
+			return fmt.Errorf("Router not found")
+		}
+
+		*router = *found
+
+		return nil
+	}
+}
+
+func testAccComputeRouter_resourceManagerTags(context map[string]interface{}) string {
+	return fmt.Sprintf(`
+		resource "google_compute_network" "foobar" {
+		name                    = "%s-net"
+		auto_create_subnetworks = false
+		}
+
+		resource "google_compute_subnetwork" "foobar" {
+		name          = "%s-subnet"
+		network       = google_compute_network.foobar.self_link
+		ip_cidr_range = "10.0.0.0/16"
+		region        = "%s"
+		}
+
+		resource "google_compute_router" "foobar" {
+		name    = "%s"
+		region  = google_compute_subnetwork.foobar.region
+		network = google_compute_network.foobar.name
+		bgp {
+			asn = 4294967294
+			}
+		params {
+			resource_manager_tags = {
+				"%{tag_key_id}" = "%{tag_value_id}"
+				}
+			}
+		}
+		`, context)
+}
+
