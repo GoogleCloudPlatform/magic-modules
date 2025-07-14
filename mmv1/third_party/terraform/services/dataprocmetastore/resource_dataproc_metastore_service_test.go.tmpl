@@ -26,7 +26,7 @@ func TestAccDataprocMetastoreService_updateAndImport(t *testing.T) {
 				ResourceName:      "google_dataproc_metastore_service.my_metastore",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletionProtection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccDataprocMetastoreService_updateAndImport(name, tier[1]),
@@ -35,7 +35,7 @@ func TestAccDataprocMetastoreService_updateAndImport(t *testing.T) {
 				ResourceName:      "google_dataproc_metastore_service.my_metastore",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletionProtection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -47,7 +47,7 @@ resource "google_dataproc_metastore_service" "my_metastore" {
 	service_id = "%s"
 	location   = "us-central1"
 	tier       = "%s"
-	deletionProtection = false
+	deletion_protection = false
 
 	hive_metastore_config {
 		version = "2.3.6"
