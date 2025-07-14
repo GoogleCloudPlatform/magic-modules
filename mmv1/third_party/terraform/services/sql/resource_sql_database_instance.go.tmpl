@@ -1519,7 +1519,7 @@ func expandCloneContext(configured []interface{}) (*sqladmin.CloneContext, strin
 		PreferredZone:    _cloneConfiguration["preferred_zone"].(string),
 		DatabaseNames:    databaseNames,
 		AllocatedIpRange: _cloneConfiguration["allocated_ip_range"].(string),
-		SourceInstanceDeletionTime: _sourceInstanceDeletionTime["source_instance_deletion_time"].(string),
+		SourceInstanceDeletionTime: _cloneConfiguration["source_instance_deletion_time"].(string),
 	}, _cloneConfiguration["source_instance_name"].(string)
 }
 
