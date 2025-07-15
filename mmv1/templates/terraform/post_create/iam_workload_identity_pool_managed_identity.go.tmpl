@@ -1,0 +1,32 @@
+	// create attestation_rules
+	if hasRule {
+		qIdx := strings.Index(url, "?")
+		var basePath string
+		if qIdx != -1 {
+			basePath = url[:qIdx]
+		} else {
+			basePath = url
+		}
+		ruleUrl := basePath + "/" + d.Get("workload_identity_pool_managed_identity_id").(string) + ":setAttestationRules"
+
+		ruleRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+			Config:    config,
+			Method:    "POST",
+			Project:   billingProject,
+			RawURL:    ruleUrl,
+			UserAgent: userAgent,
+			Body:      ruleObj,
+			Timeout:   d.Timeout(schema.TimeoutCreate),
+			Headers:   headers,
+		})
+		if err != nil {
+			return fmt.Errorf("Error creating WorkloadIdentityPoolManagedIdentity %q: %s", d.Id(), err)
+		}
+
+		err = IAMBetaOperationWaitTime(
+			config, ruleRes, project, "Creating WorkloadIdentityPoolManagedIdentity", userAgent,
+			d.Timeout(schema.TimeoutCreate))
+		if err != nil {
+			return fmt.Errorf("Error waiting to create WorkloadIdentityPoolManagedIdentity: %s", err)
+		}
+	}
