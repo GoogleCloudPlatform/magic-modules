@@ -216,6 +216,7 @@ func TestAccComputeRouter_addAndUpdateIdentifierRangeBgp(t *testing.T) {
 	})
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeRouter_resourceManagerTags(t *testing.T) {
 
 	t.Parallel()
@@ -253,6 +254,7 @@ func TestAccComputeRouter_resourceManagerTags(t *testing.T) {
 		},
 	})
 }
+{{- end }}
 
 func testAccComputeRouterBasic(routerName, resourceRegion string) string {
 	return fmt.Sprintf(`
@@ -431,6 +433,7 @@ resource "google_compute_router" "foobar" {
 `, routerName, routerName)
 }
 
+{{- if ne $.TargetVersionName "ga" }}
 func testAccCheckComputeRouterExists(t *testing.T, n string, router *compute.Router) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
@@ -461,6 +464,7 @@ func testAccCheckComputeRouterExists(t *testing.T, n string, router *compute.Rou
 		return nil
 	}
 }
+{{- end }}
 
 func testAccComputeRouter_resourceManagerTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -491,4 +495,3 @@ func testAccComputeRouter_resourceManagerTags(context map[string]interface{}) st
 		}
 		`, context)
 }
-
