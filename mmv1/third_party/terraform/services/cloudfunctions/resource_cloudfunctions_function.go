@@ -508,7 +508,6 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 			"on_deploy_update_policy": {
                                 Type:        schema.TypeList,
 				Optional:    true,
-				Computed:    true,
 				ConflictsWith: []string{"automatic_update_policy"},
 				MaxItems:    1,
 				Description: `Security patches are only applied when a function is redeployed.`,
@@ -516,6 +515,7 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"runtime_version": {
 							Type:        schema.TypeString,
+							Optional:    true,
 							Computed:    true,
 							Description: `The runtime version which was used during latest function deployment.`,
 						},
@@ -622,10 +622,12 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 			"You must specify a trigger when deploying a new function.")
 	}
 
-	if _, ok := d.GetOk("automatic_update_policy"); ok {
-	        function.AutomaticUpdatePolicy = &cloudfunctions.AutomaticUpdatePolicy{}
-	} else if _, ok := d.GetOk("on_deploy_update_policy"); ok {
-	        function.OnDeployUpdatePolicy = &cloudfunctions.OnDeployUpdatePolicy{}
+	if v, ok := d.GetOk("automatic_update_policy"); ok {
+	        function.AutomaticUpdatePolicy = expandAutomaticUpdatePolicy(v.([]interface{}))
+		function.OnDeployUpdatePolicy = nil 
+	} else if v, ok := d.GetOk("on_deploy_update_policy"); ok {
+	        function.OnDeployUpdatePolicy = expandOnDeployUpdatePolicy(v.([]interface{}))
+		function.AutomaticUpdatePolicy = nil
 	}
 
 	if v, ok := d.GetOk("ingress_settings"); ok {
@@ -846,15 +848,23 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 	if err := d.Set("version_id", strconv.FormatInt(function.VersionId, 10)); err != nil {
 		return fmt.Errorf("Error setting version_id: %s", err)
 	}
+	if function.OnDeployUpdatePolicy != nil {
+		if err := d.Set("on_deploy_update_policy", flattenOnDeployUpdatePolicy(function.OnDeployUpdatePolicy)); err != nil {
+			return fmt.Errorf("Error setting on_deploy_update_policy: %s", err)
+		}
+		function.AutomaticUpdatePolicy = nil
+		d.Set("automatic_update_policy", nil)
+	} else {
+		d.Set("on_deploy_update_policy", nil)
+	}
+
 	if function.AutomaticUpdatePolicy != nil {
 	        if err := d.Set("automatic_update_policy", flattenAutomaticUpdatePolicy(function.AutomaticUpdatePolicy)); err != nil {
 			return fmt.Errorf("Error setting automatic_update_policy: %s", err)
 		}
-	}
-	if function.OnDeployUpdatePolicy != nil {
-		if err := d.Set("on_depoly_update_policy", flattenOnDeployUpdatePolicy(function.OnDeployUpdatePolicy)); err != nil {
-			return fmt.Errorf("Error setting on_deploy_update_policy: %s", err)
-		}
+		d.Set("on_deploy_update_policy", nil)
+	} else {
+		d.Set("automatic_update_policy", nil)
 	}
 
 	return nil
@@ -1013,13 +1023,19 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if d.HasChange("automatic_update_policy") {
-		function.AutomaticUpdatePolicy = &cloudfunctions.AutomaticUpdatePolicy{}
-		updateMaskArr = append(updateMaskArr, "AutomaticUpdatePolicy")
+		function.AutomaticUpdatePolicy = expandAutomaticUpdatePolicy(d.Get("automatic_update_policy").([]interface{}))
+		if function.AutomaticUpdatePolicy != nil {
+			function.OnDeployUpdatePolicy = nil
+		}
+		updateMaskArr = append(updateMaskArr, "automatic_update_policy")
 	}
 
 	if d.HasChange("on_deploy_update_policy") {
-	        function.OnDeployUpdatePolicy = &cloudfunctions.OnDeployUpdatePolicy{}
-		updateMaskArr = append(updateMaskArr, "OnDeployUpdatePolicy")
+		function.OnDeployUpdatePolicy = expandOnDeployUpdatePolicy(d.Get("on_deploy_update_policy").([]interface{}))
+		if function.OnDeployUpdatePolicy != nil {
+			function.AutomaticUpdatePolicy = nil
+		}
+		updateMaskArr = append(updateMaskArr, "on_deploy_update_policy")
 	}
 
 	if len(updateMaskArr) > 0 {
@@ -1291,13 +1307,33 @@ func flattenSecretVersion(secretVersions []*cloudfunctions.SecretVersion) []map[
 	return result
 }
 
+func expandAutomaticUpdatePolicy(configured []interface{}) *cloudfunctions.AutomaticUpdatePolicy {
+	log.Printf("automatic_update_policy configured: %s", configured)
+	if len(configured) == 0 {
+		return nil
+	}
+	return &cloudfunctions.AutomaticUpdatePolicy{}
+}
+
 func flattenAutomaticUpdatePolicy(policy *cloudfunctions.AutomaticUpdatePolicy) []map[string]interface{} {
 	result := make([]map[string]interface{}, 0, 1)
 	if policy == nil {
 		return nil
 	}
+	// Have to append an empty element for empty message type
+	result = append(result, map[string]interface{}{})
+	log.Printf("flatten automatic_update_policy to: %s", result)
 	return result
 }
+
+func expandOnDeployUpdatePolicy(configured []interface{}) *cloudfunctions.OnDeployUpdatePolicy {
+	log.Printf("on_deploy_update_policy configued: %s", configured)
+	if len(configured) == 0 {
+		return nil
+	}
+	return &cloudfunctions.OnDeployUpdatePolicy{}
+}
+
 func flattenOnDeployUpdatePolicy(policy *cloudfunctions.OnDeployUpdatePolicy) []map[string]interface{} {
 	result := make([]map[string]interface{}, 0, 1)
 	if policy == nil {
@@ -1307,6 +1343,8 @@ func flattenOnDeployUpdatePolicy(policy *cloudfunctions.OnDeployUpdatePolicy) []
 	result = append(result, map[string]interface{}{
 		"runtime_version": policy.RuntimeVersion,
 	})
+
+	log.Printf("flatten on_deploy_update_policy to: %s", result)
 
 	return result
 }

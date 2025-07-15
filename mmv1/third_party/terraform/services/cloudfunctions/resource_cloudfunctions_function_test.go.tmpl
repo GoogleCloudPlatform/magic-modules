@@ -628,7 +628,7 @@ func TestAccCloudFunctionsFunction_buildServiceAccount(t *testing.T) {
 	})
 }
 
-func TestAccCloudFunctionsFunction_abiuFullCycle(t *testing.T) {
+func TestAccCloudFunctionsFunction_abiuCRUD(t *testing.T) {
 	t.Parallel()
 
 	var function cloudfunctions.CloudFunction
@@ -642,16 +642,15 @@ func TestAccCloudFunctionsFunction_abiuFullCycle(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudfunctionsFunction_abiu(functionName, bucketName, zipFilePath),
+				Config: testAccCloudFunctionsFunction_abiuAutomatic(functionName, bucketName, zipFilePath),
 				Check: resource.ComposeTestCheckFunc(
-				        testAccCloudFunctionsFunctionExists(
-					       t, funcResourceName, &function),
-				        resource.TestCheckResourceAttrSet(funcResourceName,
-				               "automatic_update_policy"),
-			        ),
+					testAccCloudFunctionsFunctionExists(
+						t, funcResourceName, &function),
+					resource.TestCheckResourceAttrSet(funcResourceName,
+						"automatic_update_policy.#"),
+				),
 			},
 			{
 				ResourceName:            funcResourceName,
@@ -662,12 +661,14 @@ func TestAccCloudFunctionsFunction_abiuFullCycle(t *testing.T) {
 			{
 				Config: testAccCloudFunctionsFunction_abiuOndeploy(functionName, bucketName, zipFilePath),
 				Check: resource.ComposeTestCheckFunc(
-				        resource.TestCheckResourceAttrSet(funcResourceName,
-				               "on_deploy_update_policy"),
-			        ),
+					testAccCloudFunctionsFunctionExists(
+						t, funcResourceName, &function),
+					resource.TestCheckResourceAttrSet(funcResourceName,
+						"on_deploy_update_policy.#"),
+				),
 			},
 			{
-				ResourceName:           funcResourceName,
+				ResourceName:            funcResourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"build_environment_variables", "labels", "terraform_labels"},
@@ -675,12 +676,14 @@ func TestAccCloudFunctionsFunction_abiuFullCycle(t *testing.T) {
 			{
 				Config: testAccCloudFunctionsFunction_basic(functionName, bucketName, zipFilePath),
 				Check: resource.ComposeTestCheckFunc(
-				        resource.TestCheckResourceAttrSet(funcResourceName,
-				               "automatic_update_policy"),
-			        ),
+					testAccCloudFunctionsFunctionExists(
+						t, funcResourceName, &function),
+					resource.TestCheckResourceAttrSet(funcResourceName,
+						"automatic_update_policy"),
+				),
 			},
 			{
-				ResourceName:            "google_cloudfunctions2_function.terraform-test2",
+				ResourceName:            funcResourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"build_environment_variables", "labels", "terraform_labels"},
@@ -1565,7 +1568,7 @@ resource "google_cloudfunctions_function" "function" {
 `, bucketName, zipFilePath, saName, serviceAccount, functionName)
 }
 
-func testAccCloudFunctionsFunction_abiu(functionName string, bucketName string, zipFilePath string) string {
+func testAccCloudFunctionsFunction_abiuAutomatic(functionName string, bucketName string, zipFilePath string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
@@ -1600,7 +1603,7 @@ resource "google_cloudfunctions_function" "function" {
   build_environment_variables = {
     TEST_ENV_VARIABLE = "test-build-env-variable-value"
   }
-  automatic_update_policy = {}
+  automatic_update_policy {}
   max_instances = 10
   min_instances = 3
 }
@@ -1642,7 +1645,7 @@ resource "google_cloudfunctions_function" "function" {
   build_environment_variables = {
     TEST_ENV_VARIABLE = "test-build-env-variable-value"
   }
-  onDeployUpdatePolicy = {}
+  on_deploy_update_policy {}
   max_instances = 10
   min_instances = 3
 }

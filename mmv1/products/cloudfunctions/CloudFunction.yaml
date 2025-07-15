@@ -211,8 +211,7 @@ properties:
     exactly_one_of:
       - 'automatic_update_policy'
       - 'on_deploy_update_policy'
-    properties:
-      []
+    properties: []
   - name: 'onDeployUpdatePolicy'
     type: NestedObject
     description: |
