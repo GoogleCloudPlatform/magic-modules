@@ -58,6 +58,9 @@ type Product struct {
 	// base URL. Specific to defining the resource as a CAI asset.
 	CaiBaseUrl string
 
+	// ApiResourceType of resources that already have an AssetType constant defined in the product.
+	ResourcesWithCaiAssetType map[string]struct{}
+
 	// A function reference designed for the rare case where you
 	// need to use retries in operation calls. Used for the service api
 	// as it enables itself (self referential) and can result in occasional
