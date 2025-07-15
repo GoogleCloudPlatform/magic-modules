@@ -1338,7 +1338,10 @@ properties:
   - name: 'developerConnectEventConfig'
     type: NestedObject
     description: |
-      Configuration for triggers that respond to Developer Connect events.
+        Configuration for triggers that respond to Developer Connect events.
+    exactly_one_of:
+      - 'pullRequest'
+      - 'push'
     properties:
       - name: 'gitRepositoryLink'
         type: String
@@ -1362,14 +1365,19 @@ properties:
         type: NestedObject
         description: |
           Filter to match changes in pull requests.
-        exactly_one_of:
-          - 'pullRequest'
-          - 'push'
         properties:
           - name: 'branch'
             type: String
             description: |
               Regex of branches to match.
+          - name: 'commentControl'
+            type: Enum
+            description: |
+              Configure builds to run whether a repository owner or collaborator need to comment `/gcbrun`.
+            enum_values:
+              - 'COMMENTS_DISABLED'
+              - 'COMMENTS_ENABLED'
+              - 'COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY'
           - name: 'invertRegex'
             type: Boolean
             description: |
@@ -1378,19 +1386,19 @@ properties:
         type: NestedObject
         description: |
           Filter to match changes in refs like branches and tags.
-        exactly_one_of:
-          - 'pullRequest'
-          - 'push'
         properties:
-          - name: 'branch'
-            type: String
-            description: |
-              Regex of branches to match.
-          - name: 'tag'
-            type: String
-            description: |
-              Regex of tags to match.
-          - name: 'invertRegex'
-            type: Boolean
-            description: |
-              If true, only trigger a build if the revision regex does NOT match the git_ref regex.
+          exactly_one_of:
+            - 'branch'
+            - 'tag'
+            - name: 'branch'
+              type: String
+              description: |
+                Regex of branches to match.
+            - name: 'tag'
+              type: String
+              description: |
+                Regex of tags to match.
+            - name: 'invertRegex'
+              type: Boolean
+              description: |
+                If true, only trigger a build if the revision regex does NOT match the git_ref regex.
