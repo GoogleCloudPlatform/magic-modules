@@ -1386,20 +1386,19 @@ properties:
         type: NestedObject
         description: |
           Filter to match changes in refs like branches and tags.
+        exactly_one_of:
+          - 'branch'
+          - 'tag'
         properties:
-          exactly_one_of:
-            - 'branch'
-            - 'tag'
-          properties:
-            - name: 'branch'
-              type: String
-              description: |
-                Regex of branches to match.
-            - name: 'tag'
-              type: String
-              description: |
-                Regex of tags to match.
-            - name: 'invertRegex'
-              type: Boolean
-              description: |
-                If true, only trigger a build if the revision regex does NOT match the git_ref regex.
+          - name: 'branch'
+            type: String
+            description: |
+              Regex of branches to match.
+          - name: 'tag'
+            type: String
+            description: |
+              Regex of tags to match.
+          - name: 'invertRegex'
+            type: Boolean
+            description: |
+              If true, only trigger a build if the revision regex does NOT match the git_ref regex.
