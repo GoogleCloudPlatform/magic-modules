@@ -149,6 +149,11 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     {{- else if or ($.ItemType.IsA "String") ($.ItemType.IsA "Enum") }}
   return schema.NewSet(schema.HashString, v.([]interface{}))
     {{- end }}
+  {{- else if and ($.ResourceMetadata.IsTgcCompiler) ($.IsA "Boolean") ($.Required) }}
+	if v == nil {
+		return false
+	}
+	return v
   {{- else }}
   return v
 {{- end }}

@@ -16,12 +16,7 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 	return nil, fmt.Errorf("Invalid value for {{underscore $.Name}}: %s", err)
 	}
 	{{- if $.ResourceMetadata.IsTgcCompiler }}
-	url := f.RelativeLink()
-	if url != "" {
-		if config.UniverseDomain == "" || config.UniverseDomain == "googleapis.com" {
-			url = fmt.Sprintf("%s%s", "{{$.ResourceMetadata.CaiProductLegacyBaseUrl}}", url)
-		}
-	}
+    url := tgcresource.GetFullUrl(config, f.RelativeLink(), "{{$.ResourceMetadata.CaiProductLegacyBaseUrl}}")
 	return url, nil
 	{{- else }}
 	return f.RelativeLink(), nil

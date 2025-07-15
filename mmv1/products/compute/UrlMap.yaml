@@ -261,7 +261,6 @@ properties:
                 header. If true, headerValue is set for the header, discarding any values that
                 were set for that header.
               required: true
-              custom_tgc_flatten: 'templates/tgc_next/custom_flatten/flatten_bool.go.tmpl'
       - name: 'requestHeadersToRemove'
         type: Array
         description: |
@@ -303,7 +302,6 @@ properties:
                 header. If true, headerValue is set for the header, discarding any values that
                 were set for that header.
               required: true
-              custom_tgc_flatten: 'templates/tgc_next/custom_flatten/flatten_bool.go.tmpl'
       - name: 'responseHeadersToRemove'
         type: Array
         description: |
@@ -476,7 +474,6 @@ properties:
                       header. If true, headerValue is set for the header, discarding any values that
                       were set for that header.
                     required: true
-                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/flatten_bool.go.tmpl'
             - name: 'requestHeadersToRemove'
               type: Array
               description: |
@@ -508,7 +505,6 @@ properties:
                       header. If true, headerValue is set for the header, discarding any values that
                       were set for that header.
                     required: true
-                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/flatten_bool.go.tmpl'
             - name: 'responseHeadersToRemove'
               type: Array
               description: |
@@ -666,7 +662,6 @@ properties:
                         description: |
                           If true, specifies the CORS policy is disabled.
                         required: true
-                        custom_tgc_flatten: 'templates/tgc_next/custom_flatten/flatten_bool.go.tmpl'
                       - name: 'exposeHeaders'
                         type: Array
                         description: |
@@ -934,7 +929,6 @@ properties:
                                       header. If true, headerValue is set for the header, discarding any values that
                                       were set for that header.
                                     required: true
-                                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/flatten_bool.go.tmpl'
                             - name: 'requestHeadersToRemove'
                               type: Array
                               description: |
@@ -966,7 +960,6 @@ properties:
                                       header. If true, headerValue is set for the header, discarding any values that
                                       were set for that header.
                                     required: true
-                                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/flatten_bool.go.tmpl'
                             - name: 'responseHeadersToRemove'
                               type: Array
                               description: |
@@ -1054,7 +1047,6 @@ properties:
                       portion of the original URL is retained.
                        This field is required to ensure an empty block is not set. The normal default value is false.
                     required: true
-                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/flatten_bool.go.tmpl'
         - name: 'routeRules'
           type: Array
           description: |
@@ -1132,7 +1124,6 @@ properties:
                             header. If true, headerValue is set for the header, discarding any values that
                             were set for that header.
                           required: true
-                          custom_tgc_flatten: 'templates/tgc_next/custom_flatten/flatten_bool.go.tmpl'
                   - name: 'requestHeadersToRemove'
                     type: Array
                     description: |
@@ -1164,7 +1155,6 @@ properties:
                             header. If true, headerValue is set for the header, discarding any values that
                             were set for that header.
                           required: true
-                          custom_tgc_flatten: 'templates/tgc_next/custom_flatten/flatten_bool.go.tmpl'
                   - name: 'responseHeadersToRemove'
                     type: Array
                     description: |
@@ -1719,7 +1709,6 @@ properties:
                                       header. If true, headerValue is set for the header, discarding any values that
                                       were set for that header.
                                     required: true
-                                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/flatten_bool.go.tmpl'
                             - name: 'requestHeadersToRemove'
                               type: Array
                               description: |
@@ -1751,7 +1740,6 @@ properties:
                                       header. If true, headerValue is set for the header, discarding any values that
                                       were set for that header.
                                     required: true
-                                    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/flatten_bool.go.tmpl'
                             - name: 'responseHeadersToRemove'
                               type: Array
                               description: |
