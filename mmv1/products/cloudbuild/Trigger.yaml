@@ -1338,7 +1338,7 @@ properties:
   - name: 'developerConnectEventConfig'
     type: NestedObject
     description: |
-        Configuration for triggers that respond to Developer Connect events.
+      Configuration for triggers that respond to Developer Connect events.
     exactly_one_of:
       - 'pullRequest'
       - 'push'
@@ -1349,7 +1349,7 @@ properties:
           The Developer Connect Git repository link, formatted as `projects/*/locations/*/connections/*/gitRepositoryLink/*`.
         required: true
       - name: 'gitRepositoryLinkType'
-        type: String
+        type: Enum
         description: |
           The type of DeveloperConnect GitRepositoryLink.
         output: true
@@ -1390,6 +1390,7 @@ properties:
           exactly_one_of:
             - 'branch'
             - 'tag'
+          properties:
             - name: 'branch'
               type: String
               description: |
