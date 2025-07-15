@@ -28,8 +28,7 @@ self_link: "projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}"
 create_url: "projects/{{project}}/locations/{{location}}:deploy"
 immutable: true
 exclude_delete: true  # the resource does not yet support deletion
-import_format:
-  - projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}
+exclude_import: true  # the resource does not support import
 timeouts:
   insert_minutes: 180
 autogen_status: RW5kcG9pbnRXaXRoTW9kZWxHYXJkZW5EZXBsb3ltZW50

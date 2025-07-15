@@ -22,18 +22,6 @@ func TestAccVertexAIEndpointWithModelGardenDeployment_basic(t *testing.T) {
 			{
 				Config: testAccVertexAIEndpointWithModelGardenDeployment_basic(context),
 			},
-			{
-				ResourceName:      "google_vertex_ai_endpoint_with_model_garden_deployment.test",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"etag",
-					"id",
-					"publisher_model_name",
-					"project",
-					"model_config",
-				},
-			},
 		},
 	})
 }
@@ -64,19 +52,6 @@ func TestAccVertexAIEndpointWithModelGardenDeployment_withConfigs(t *testing.T) 
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVertexAIEndpointWithModelGardenDeployment_withConfigs(context),
-			},
-			{
-				ResourceName:      "google_vertex_ai_endpoint_with_model_garden_deployment.test_with_configs",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"etag",
-					"id",
-					"publisher_model_name",
-					"project",
-					"model_config",
-					"deploy_config",
-				},
 			},
 		},
 	})
