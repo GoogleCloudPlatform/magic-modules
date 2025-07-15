@@ -779,6 +779,7 @@ properties:
   - name: endpointConfig
     type: NestedObject
     description: The endpoint config to use for the deployment.
+    ignore_read: true
     properties:
       - name: endpointDisplayName
         type: String
