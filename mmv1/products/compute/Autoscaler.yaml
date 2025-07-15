@@ -42,6 +42,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
 sweeper:
   url_substitutions:

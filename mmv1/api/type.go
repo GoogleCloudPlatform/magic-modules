@@ -293,6 +293,26 @@ type Type struct {
 	// The prefix used as part of the property expand/flatten function name
 	// flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}
 	Prefix string `yaml:"prefix,omitempty"`
+
+	// The field is not present in CAI asset
+	IsMissingInCai bool `yaml:"is_missing_in_cai,omitempty"`
+
+	// A custom expander replaces the default expander for an attribute.
+	// It is called as part of tfplan2cai conversion if
+	// object.input is false.  It can return an object of any type,
+	// so the function header *is* part of the custom code template.
+	// As with flatten, `property` and `prefix` are available.
+	CustomTgcExpand string `yaml:"custom_tgc_expand,omitempty"`
+
+	// A custom flattener replaces the default flattener for an attribute.
+	// It is called as part of cai2hcl conversion. It can return an object of any type,
+	// so the function header *is* a part of the custom code template. To help with
+	// creating the function header, `property` and `prefix` are available,
+	// just as they are in the standard flattener template.
+	CustomTgcFlatten string `yaml:"custom_tgc_flatten,omitempty"`
+
+	// If true, we will include the empty value of this attribute in CAI asset.
+	IncludeEmptyValueInCai bool `yaml:"include_empty_value_in_cai,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -834,6 +854,20 @@ func (t Type) ResourceRef() *Resource {
 	})
 
 	return resources[0]
+}
+
+// Checks if the referenced resource is in the same product or not
+func (t Type) IsResourceRefFound() bool {
+	if !t.IsA("ResourceRef") {
+		return false
+	}
+
+	product := t.ResourceMetadata.ProductMetadata
+	resources := google.Select(product.Objects, func(obj *Resource) bool {
+		return obj.Name == t.Resource
+	})
+
+	return len(resources) != 0
 }
 
 // TODO rewrite: validation
