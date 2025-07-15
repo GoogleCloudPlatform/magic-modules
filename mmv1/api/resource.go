@@ -2034,7 +2034,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 
 // Filters out computed properties during cai2hcl
 func (r Resource) ReadPropertiesForTgc() []*Type {
-	return google.Reject(r.AllNestedProperties(r.RootProperties()), func(v *Type) bool {
+	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
 		return v.Output || v.UrlParamOnly
 	})
 }
