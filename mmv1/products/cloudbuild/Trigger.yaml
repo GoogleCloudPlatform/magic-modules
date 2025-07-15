@@ -1350,6 +1350,14 @@ properties:
         description: |
           The type of DeveloperConnect GitRepositoryLink.
         output: true
+        enum_values:
+          - 'GIT_REPOSITORY_LINK_TYPE_UNSPECIFIED'
+          - 'GITHUB'
+          - 'GITHUB_ENTERPRISE'
+          - 'GITLAB'
+          - 'GITLAB_ENTERPRISE'
+          - 'BITBUCKET_DATA_CENTER'
+          - 'BITBUCKET_CLOUD'
       - name: 'pullRequest'
         type: NestedObject
         description: |
@@ -1366,14 +1374,6 @@ properties:
             type: Boolean
             description: |
               If true, branches that do NOT match the git_ref will trigger a build.
-          - name: 'commentControl'
-            type: Enum
-            description: |
-              Configure builds to run whether a repository owner or collaborator need to comment `/gcbrun`.
-            enum_values:
-              - 'COMMENTS_DISABLED'
-              - 'COMMENTS_ENABLED'
-              - 'COMMENTS_ENABLED_FOR_EXTERNAL_CONTRIBUTORS_ONLY'
       - name: 'push'
         type: NestedObject
         description: |
