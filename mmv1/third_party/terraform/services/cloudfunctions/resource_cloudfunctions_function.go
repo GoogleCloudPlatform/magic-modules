@@ -492,11 +492,43 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 					},
 				},
 			},
+
+			"automatic_update_policy": {
+                                Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				ConflictsWith: []string{"on_deploy_update_policy"},
+				MaxItems:    1,
+				Description: `Security patches are applied automatically to the runtime without requiring the function to be redeployed.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{},
+				},
+			},
+
+			"on_deploy_update_policy": {
+                                Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				ConflictsWith: []string{"automatic_update_policy"},
+				MaxItems:    1,
+				Description: `Security patches are only applied when a function is redeployed.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"runtime_version": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `The runtime version which was used during latest function deployment.`,
+						},
+					},
+				},
+			},
+
 			"status": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: `Describes the current stage of a deployment.`,
 			},
+
 			"version_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -588,6 +620,12 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 	} else {
 		return fmt.Errorf("One of `event_trigger` or `trigger_http` is required: " +
 			"You must specify a trigger when deploying a new function.")
+	}
+
+	if _, ok := d.GetOk("automatic_update_policy"); ok {
+	        function.AutomaticUpdatePolicy = &cloudfunctions.AutomaticUpdatePolicy{}
+	} else if _, ok := d.GetOk("on_deploy_update_policy"); ok {
+	        function.OnDeployUpdatePolicy = &cloudfunctions.OnDeployUpdatePolicy{}
 	}
 
 	if v, ok := d.GetOk("ingress_settings"); ok {
@@ -808,6 +846,16 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 	if err := d.Set("version_id", strconv.FormatInt(function.VersionId, 10)); err != nil {
 		return fmt.Errorf("Error setting version_id: %s", err)
 	}
+	if function.AutomaticUpdatePolicy != nil {
+	        if err := d.Set("automatic_update_policy", flattenAutomaticUpdatePolicy(function.AutomaticUpdatePolicy)); err != nil {
+			return fmt.Errorf("Error setting automatic_update_policy: %s", err)
+		}
+	}
+	if function.OnDeployUpdatePolicy != nil {
+		if err := d.Set("on_depoly_update_policy", flattenOnDeployUpdatePolicy(function.OnDeployUpdatePolicy)); err != nil {
+			return fmt.Errorf("Error setting on_deploy_update_policy: %s", err)
+		}
+	}
 
 	return nil
 }
@@ -962,6 +1010,16 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	if d.HasChange("build_service_account") {
 		function.BuildServiceAccount = d.Get("build_service_account").(string)
 		updateMaskArr = append(updateMaskArr, "buildServiceAccount")
+	}
+
+	if d.HasChange("automatic_update_policy") {
+		function.AutomaticUpdatePolicy = &cloudfunctions.AutomaticUpdatePolicy{}
+		updateMaskArr = append(updateMaskArr, "AutomaticUpdatePolicy")
+	}
+
+	if d.HasChange("on_deploy_update_policy") {
+	        function.OnDeployUpdatePolicy = &cloudfunctions.OnDeployUpdatePolicy{}
+		updateMaskArr = append(updateMaskArr, "OnDeployUpdatePolicy")
 	}
 
 	if len(updateMaskArr) > 0 {
@@ -1230,5 +1288,25 @@ func flattenSecretVersion(secretVersions []*cloudfunctions.SecretVersion) []map[
 			result = append(result, data)
 		}
 	}
+	return result
+}
+
+func flattenAutomaticUpdatePolicy(policy *cloudfunctions.AutomaticUpdatePolicy) []map[string]interface{} {
+	result := make([]map[string]interface{}, 0, 1)
+	if policy == nil {
+		return nil
+	}
+	return result
+}
+func flattenOnDeployUpdatePolicy(policy *cloudfunctions.OnDeployUpdatePolicy) []map[string]interface{} {
+	result := make([]map[string]interface{}, 0, 1)
+	if policy == nil {
+		return nil
+	}
+
+	result = append(result, map[string]interface{}{
+		"runtime_version": policy.RuntimeVersion,
+	})
+
 	return result
 }

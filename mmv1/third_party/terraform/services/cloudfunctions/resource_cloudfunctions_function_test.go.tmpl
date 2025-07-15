@@ -645,7 +645,7 @@ func TestAccCloudFunctionsFunction_abiuFullCycle(t *testing.T) {
 		CheckDestroy: testAccCheckCloudFunctionsFunctionDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCloudfunctionsFunction_abiuAutomatic(functionName, bucketName, zipFilePath),
+				Config: testAccCloudfunctionsFunction_abiu(functionName, bucketName, zipFilePath),
 				Check: resource.ComposeTestCheckFunc(
 				        testAccCloudFunctionsFunctionExists(
 					       t, funcResourceName, &function),
@@ -1565,7 +1565,7 @@ resource "google_cloudfunctions_function" "function" {
 `, bucketName, zipFilePath, saName, serviceAccount, functionName)
 }
 
-func testAccCloudFunctionsFunction_abiuAutomatic(functionName string, bucketName string, zipFilePath string) string {
+func testAccCloudFunctionsFunction_abiu(functionName string, bucketName string, zipFilePath string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
