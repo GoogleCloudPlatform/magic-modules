@@ -714,7 +714,7 @@ func TestAccCloudBuildTrigger_developerConnect_pullRequest(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckCloudBuildTriggerDestroyProducer(t),
+		CheckDestroy:             testAccCheckCloudBuildTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudBuildTrigger_developerConnect_pullRequestConfig(name, connectionName, repoLinkName, location),
@@ -758,7 +758,7 @@ func TestAccCloudBuildTrigger_developerConnect_push(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckCloudBuildTriggerDestroyProducer(t),
+		CheckDestroy:             testAccCheckCloudBuildTriggerDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCloudBuildTrigger_developerConnect_pushConfig(name, connectionName, repoLinkName, location),
