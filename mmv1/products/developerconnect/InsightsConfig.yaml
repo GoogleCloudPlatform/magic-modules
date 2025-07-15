@@ -28,9 +28,9 @@ examples:
     primary_resource_id: 'my_insights_config'
     vars:
       insights_config_name: 'tf_test_ic'
+      appHubApplication: 'APPHUB_APP_NAME'
     test_env_vars:
       project: 'PROJECT_NAME'
-      appHubApplication: 'APPHUB_APP_NAME'
 autogen_async: true
 async:
   operation:
@@ -68,6 +68,7 @@ properties:
       The name of the App Hub Application.
       Format:
       projects/{project}/locations/{location}/applications/{application}
+    required: true
   - name: name
     type: String
     description: |-
