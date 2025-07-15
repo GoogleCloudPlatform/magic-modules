@@ -1480,7 +1480,8 @@ resource "google_memorystore_instance" "instance-tls" {
     network    = google_compute_network.producer_net.id
     project_id = data.google_project.project.project_id
   }
-  location                    = "us-central1"
+  # Until https://github.com/hashicorp/terraform-provider-google/issues/23619 is fixed, use regions other than us-central1 to prevent issues like https://github.com/hashicorp/terraform-provider-google/issues/23543
+  location                    = "us-east1"
   deletion_protection_enabled = false
   maintenance_policy {
     weekly_maintenance_window {

@@ -1288,7 +1288,9 @@ resource "google_redis_cluster" "cluster-tls" {
   psc_configs {
     network = google_compute_network.consumer_net.id
   }
-  region = "us-central1"
+
+  # Until https://github.com/hashicorp/terraform-provider-google/issues/23619 is fixed, use regions other than us-central1 to prevent issues like https://github.com/hashicorp/terraform-provider-google/issues/23543
+  region = "us-east1"
   replica_count = 1
   node_type = "REDIS_SHARED_CORE_NANO"
   transit_encryption_mode = "TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION"
