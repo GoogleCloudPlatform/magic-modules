@@ -377,6 +377,19 @@ properties:
               Subnetwork configuration for workload execution.
             conflicts:
               - environment_config.0.execution_config.0.network_uri
+          - name: 'authenticationConfig'
+            type: NestedObject
+            description: |
+              Authentication configuration for a workload is used to set the default identity for the workload execution.
+            properties:
+              - name: userWorkloadAuthenticationType
+                type: Enum
+                description: |
+                  Authentication type for the user workload running in containers.
+                enum_values:
+                  - AUTHENTICATION_TYPE_UNSPECIFIED
+                  - SERVICE_ACCOUNT
+                  - END_USER_CREDENTIALS
       - name: 'peripheralsConfig'
         type: NestedObject
         description: |
