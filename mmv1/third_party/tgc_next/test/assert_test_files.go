@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -74,6 +76,10 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		log.Printf("%s is not supported in tfplan2cai conversion.", resourceType)
 	}
 
+	if testData.Cai == nil {
+		return fmt.Errorf("cai asset is unavailable for resource %s", testData.ResourceAddress)
+	}
+
 	assets := make([]caiasset.Asset, 0)
 	for assetName, assetData := range testData.Cai {
 		assets = append(assets, assetData.CaiAsset)
@@ -137,15 +143,15 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		return fmt.Errorf("missing hcl after cai2hcl conversion for resource %s", testData.ResourceType)
 	}
 
-	ignoredFieldMap := make(map[string]bool, 0)
+	ignoredFieldSet := make(map[string]struct{}, 0)
 	for _, f := range ignoredFields {
-		ignoredFieldMap[f] = true
+		ignoredFieldSet[f] = struct{}{}
 	}
 
 	parsedExportConfig := exportResources[0].Attributes
-	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, "", ignoredFieldMap)
+	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, ignoredFieldSet)
 	if len(missingKeys) > 0 {
-		return fmt.Errorf("missing fields in address %s after cai2hcl conversion:\n%s", testData.ResourceAddress, missingKeys)
+		return fmt.Errorf("missing fields in resource %s after cai2hcl conversion:\n%s", testData.ResourceAddress, missingKeys)
 	}
 	log.Printf("Step 1 passes for resource %s. All of the fields in raw config are in export config", testData.ResourceAddress)
 
@@ -243,49 +249,52 @@ func getAncestryCache(assets []caiasset.Asset) map[string]string {
 	return ancestryCache
 }
 
-// Compares HCL and finds all of the keys in map1 are in map2
-func compareHCLFields(map1, map2 map[string]interface{}, path string, ignoredFields map[string]bool) []string {
+// Compares HCL and finds all of the keys in map1 that are not in map2
+func compareHCLFields(map1, map2, ignoredFields map[string]struct{}) []string {
 	var missingKeys []string
-	for key, value1 := range map1 {
-		if value1 == nil {
+	for key := range map1 {
+		if isIgnored(key, ignoredFields) {
 			continue
 		}
 
-		currentPath := path + "." + key
-		if path == "" {
-			currentPath = key
-		}
-
-		if ignoredFields[currentPath] {
-			continue
-		}
-
-		value2, ok := map2[key]
-		if !ok || value2 == nil {
-			missingKeys = append(missingKeys, currentPath)
-			continue
-		}
-
-		switch v1 := value1.(type) {
-		case map[string]interface{}:
-			v2, _ := value2.(map[string]interface{})
-			missingKeys = append(missingKeys, compareHCLFields(v1, v2, currentPath, ignoredFields)...)
-		case []interface{}:
-			v2, _ := value2.([]interface{})
-
-			for i := 0; i < len(v1); i++ {
-				nestedMap1, ok1 := v1[i].(map[string]interface{})
-				nestedMap2, ok2 := v2[i].(map[string]interface{})
-				if ok1 && ok2 {
-					keys := compareHCLFields(nestedMap1, nestedMap2, fmt.Sprintf("%s[%d]", currentPath, i), ignoredFields)
-					missingKeys = append(missingKeys, keys...)
-				}
-			}
-		default:
+		if _, ok := map2[key]; !ok {
+			missingKeys = append(missingKeys, key)
 		}
 	}
-
+	sort.Strings(missingKeys)
 	return missingKeys
+}
+
+// Returns true if the given key should be ignored according to the given set of ignored fields.
+func isIgnored(key string, ignoredFields map[string]struct{}) bool {
+	// Check for exact match first.
+	if _, ignored := ignoredFields[key]; ignored {
+		return true
+	}
+
+	// Check for partial matches.
+	parts := strings.Split(key, ".")
+	if len(parts) < 2 {
+		return false
+	}
+	var nonIntegerParts []string
+	for _, part := range parts {
+		if _, err := strconv.Atoi(part); err != nil {
+			nonIntegerParts = append(nonIntegerParts, part)
+		}
+	}
+	var partialKey string
+	for _, part := range nonIntegerParts {
+		if partialKey == "" {
+			partialKey = part
+		} else {
+			partialKey += "." + part
+		}
+		if _, ignored := ignoredFields[partialKey]; ignored {
+			return true
+		}
+	}
+	return false
 }
 
 // Converts a tfplan to CAI asset, and then converts the CAI asset into HCL
