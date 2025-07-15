@@ -1,21 +1,17 @@
 package secretmanager_test
 
 import (
-	"testing"
-
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"testing"
 )
 
 func TestAccSecretManagerSecret_import(t *testing.T) {
 	t.Parallel()
-
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -33,10 +29,8 @@ func TestAccSecretManagerSecret_import(t *testing.T) {
 		},
 	})
 }
-
 func TestAccSecretManagerSecret_cmek(t *testing.T) {
 	t.Parallel()
-
 	kmscentral := acctest.BootstrapKMSKeyInLocation(t, "us-central1")
 	kmseast := acctest.BootstrapKMSKeyInLocation(t, "us-east1")
 	context1 := map[string]interface{}{
@@ -62,14 +56,11 @@ func TestAccSecretManagerSecret_cmek(t *testing.T) {
 		},
 	})
 }
-
 func TestAccSecretManagerSecret_annotationsUpdate(t *testing.T) {
 	t.Parallel()
-
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -105,14 +96,11 @@ func TestAccSecretManagerSecret_annotationsUpdate(t *testing.T) {
 		},
 	})
 }
-
 func TestAccSecretManagerSecret_versionAliasesUpdate(t *testing.T) {
 	t.Parallel()
-
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -157,10 +145,8 @@ func TestAccSecretManagerSecret_versionAliasesUpdate(t *testing.T) {
 		},
 	})
 }
-
 func TestAccSecretManagerSecret_userManagedCmekUpdate(t *testing.T) {
 	t.Parallel()
-
 	kmscentral := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-secret-manager-managed-central-key1")
 	kmseast := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-secret-manager-managed-east-key1")
 	kmscentralother := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-secret-manager-managed-central-key2")
@@ -215,10 +201,8 @@ func TestAccSecretManagerSecret_userManagedCmekUpdate(t *testing.T) {
 		},
 	})
 }
-
 func TestAccSecretManagerSecret_automaticCmekUpdate(t *testing.T) {
 	t.Parallel()
-
 	suffix := acctest.RandString(t, 10)
 	key1 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-secret-manager-automatic-key1")
 	key2 := acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "global", "tf-secret-manager-automatic-key2")
@@ -272,15 +256,12 @@ func TestAccSecretManagerSecret_automaticCmekUpdate(t *testing.T) {
 		},
 	})
 }
-
 func TestAccSecretManagerSecret_rotationPeriodUpdate(t *testing.T) {
 	t.Parallel()
-
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"timestamp":     "2122-11-26T19:58:16Z",
 	}
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -325,14 +306,11 @@ func TestAccSecretManagerSecret_rotationPeriodUpdate(t *testing.T) {
 		},
 	})
 }
-
 func TestAccSecretManagerSecret_ttlUpdate(t *testing.T) {
 	t.Parallel()
-
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -377,14 +355,11 @@ func TestAccSecretManagerSecret_ttlUpdate(t *testing.T) {
 		},
 	})
 }
-
 func TestAccSecretManagerSecret_versionDestroyTtlUpdate(t *testing.T) {
 	t.Parallel()
-
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -420,14 +395,11 @@ func TestAccSecretManagerSecret_versionDestroyTtlUpdate(t *testing.T) {
 		},
 	})
 }
-
 func TestAccSecretManagerSecret_updateBetweenTtlAndExpireTime(t *testing.T) {
 	t.Parallel()
-
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 	}
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -467,12 +439,12 @@ func TestAccSecretManagerSecret_updateBetweenTtlAndExpireTime(t *testing.T) {
 func TestAccSecretManagerSecret_tags(t *testing.T) {
 	t.Parallel()
 
-	tagKey := acctest.BootstrapSharedTestTagKey(t, "secret_manager_secret-tagkey")
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "secret_manager_secret-tagkey", map[string]interface{}{})
 
 	context := map[string]interface{}{
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestTagValue(t, "secret_manager_secret-tagvalue", tagKey),
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "secret_manager_secret-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -483,6 +455,10 @@ func TestAccSecretManagerSecret_tags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecretManagerSecret_tags(context),
+				Check: resource.TestCheckFunc(
+					resource.TestCheckResourceAttrSet(
+						"google_secret_manager_secret.secret-tags", "tags.%"),
+				),
 			},
 			{
 				ResourceName:            "google_secret_manager_secret.secret-tags",
@@ -502,7 +478,6 @@ resource "google_secret_manager_secret" "secret-basic" {
   labels = {
     label = "my-label"
   }
-
   replication {
     user_managed {
       replicas {
@@ -513,13 +488,10 @@ resource "google_secret_manager_secret" "secret-basic" {
       }
     }
   }
-
   ttl = "3600s"
-
 }
 `, context)
 }
-
 func testAccSecretMangerSecret_cmek(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
@@ -557,16 +529,13 @@ resource "google_secret_manager_secret" "secret-basic" {
 }
 `, context)
 }
-
 func testAccSecretManagerSecret_annotationsBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-with-annotations" {
   secret_id = "tf-test-secret-%{random_suffix}"
-
   labels = {
     label = "my-label"
   }
-
   annotations = {
     key1 = "someval"
     key2 = "someval2"
@@ -574,37 +543,31 @@ resource "google_secret_manager_secret" "secret-with-annotations" {
     key4 = "someval4"
     key5 = "someval5"
   }
-
   replication {
     auto {}
   }
 }
 `, context)
 }
-
 func testAccSecretManagerSecret_annotationsUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-with-annotations" {
   secret_id = "tf-test-secret-%{random_suffix}"
-
   labels = {
     label = "my-label"
   }
-
   annotations = {
     key1 = "someval"
     key2update = "someval2"
     key3 = "someval3update"
     key4update = "someval4update"
   }
-
   replication {
     auto {}
   }
 }
 `, context)
 }
-
 func testAccSecretManagerSecret_basicWithSecretVersions(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-basic" {
@@ -613,7 +576,6 @@ resource "google_secret_manager_secret" "secret-basic" {
   labels = {
     label = "my-label"
   }
-
   replication {
     user_managed {
       replicas {
@@ -625,33 +587,24 @@ resource "google_secret_manager_secret" "secret-basic" {
     }
   }
 }
-
 resource "google_secret_manager_secret_version" "secret-version-1" {
   secret = google_secret_manager_secret.secret-basic.id
-
   secret_data = "some-secret-data-%{random_suffix}-1"
 }
-
 resource "google_secret_manager_secret_version" "secret-version-2" {
   secret = google_secret_manager_secret.secret-basic.id
-
   secret_data = "some-secret-data-%{random_suffix}-2"
 }
-
 resource "google_secret_manager_secret_version" "secret-version-3" {
   secret = google_secret_manager_secret.secret-basic.id
-
   secret_data = "some-secret-data-%{random_suffix}-3"
 }
-
 resource "google_secret_manager_secret_version" "secret-version-4" {
   secret = google_secret_manager_secret.secret-basic.id
-
   secret_data = "some-secret-data-%{random_suffix}-4"
 }
 `, context)
 }
-
 func testAccSecretManagerSecret_versionAliasesBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-basic" {
@@ -660,7 +613,6 @@ resource "google_secret_manager_secret" "secret-basic" {
   labels = {
     label = "my-label"
   }
-
   version_aliases = {
     firstalias = "1",
     secondalias = "2",
@@ -668,7 +620,6 @@ resource "google_secret_manager_secret" "secret-basic" {
     otheralias = "2",
     somealias = "3"
   }
-
   replication {
     user_managed {
       replicas {
@@ -680,33 +631,24 @@ resource "google_secret_manager_secret" "secret-basic" {
     }
   }
 }
-
 resource "google_secret_manager_secret_version" "secret-version-1" {
   secret = google_secret_manager_secret.secret-basic.id
-
   secret_data = "some-secret-data-%{random_suffix}-1"
 }
-
 resource "google_secret_manager_secret_version" "secret-version-2" {
   secret = google_secret_manager_secret.secret-basic.id
-
   secret_data = "some-secret-data-%{random_suffix}-2"
 }
-
 resource "google_secret_manager_secret_version" "secret-version-3" {
   secret = google_secret_manager_secret.secret-basic.id
-
   secret_data = "some-secret-data-%{random_suffix}-3"
 }
-
 resource "google_secret_manager_secret_version" "secret-version-4" {
   secret = google_secret_manager_secret.secret-basic.id
-
   secret_data = "some-secret-data-%{random_suffix}-4"
 }
 `, context)
 }
-
 func testAccSecretManagerSecret_versionAliasesUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-basic" {
@@ -715,7 +657,6 @@ resource "google_secret_manager_secret" "secret-basic" {
   labels = {
     label = "my-label"
   }
-
   version_aliases = {
     firstalias = "1",
     secondaliasupdated = "2",
@@ -723,7 +664,6 @@ resource "google_secret_manager_secret" "secret-basic" {
     somealias = "3",
     fourthalias = "4"
   }
-
   replication {
     user_managed {
       replicas {
@@ -735,33 +675,24 @@ resource "google_secret_manager_secret" "secret-basic" {
     }
   }
 }
-
 resource "google_secret_manager_secret_version" "secret-version-1" {
   secret = google_secret_manager_secret.secret-basic.id
-
   secret_data = "some-secret-data-%{random_suffix}-1"
 }
-
 resource "google_secret_manager_secret_version" "secret-version-2" {
   secret = google_secret_manager_secret.secret-basic.id
-
   secret_data = "some-secret-data-%{random_suffix}-2"
 }
-
 resource "google_secret_manager_secret_version" "secret-version-3" {
   secret = google_secret_manager_secret.secret-basic.id
-
   secret_data = "some-secret-data-%{random_suffix}-3"
 }
-
 resource "google_secret_manager_secret_version" "secret-version-4" {
   secret = google_secret_manager_secret.secret-basic.id
-
   secret_data = "some-secret-data-%{random_suffix}-4"
 }
 `, context)
 }
-
 func testAccSecretMangerSecret_userManagedCmekBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
@@ -806,7 +737,6 @@ resource "google_secret_manager_secret" "secret-basic" {
 }
 `, context)
 }
-
 func testAccSecretMangerSecret_userManagedCmekUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
@@ -857,7 +787,6 @@ resource "google_secret_manager_secret" "secret-basic" {
 }
 `, context)
 }
-
 func testAccSecretMangerSecret_userManagedCmekUpdate2(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
@@ -908,7 +837,6 @@ resource "google_secret_manager_secret" "secret-basic" {
 }
 `, context)
 }
-
 func testAccSecretMangerSecret_automaticCmekBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
@@ -940,7 +868,6 @@ resource "google_secret_manager_secret" "secret-basic" {
 }
 `, context)
 }
-
 func testAccSecretMangerSecret_automaticCmekUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
@@ -976,7 +903,6 @@ resource "google_secret_manager_secret" "secret-basic" {
 }
 `, context)
 }
-
 func testAccSecretMangerSecret_automaticCmekUpdate2(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
@@ -1012,24 +938,19 @@ resource "google_secret_manager_secret" "secret-basic" {
 }
 `, context)
 }
-
 func testAccSecretManagerSecret_withoutRotationPeriod(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {}
-
 resource "google_pubsub_topic_iam_member" "secrets_manager_access" {
   topic  = google_pubsub_topic.topic.name
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-secretmanager.iam.gserviceaccount.com"
   role   = "roles/pubsub.publisher"
 }
-
 resource "google_pubsub_topic" "topic" {
   name = "tf-test-topic-%{random_suffix}"
 }
-
 resource "google_secret_manager_secret" "secret-basic" {
   secret_id = "tf-test-secret-%{random_suffix}"
-
   replication {
     user_managed {
       replicas {
@@ -1037,40 +958,32 @@ resource "google_secret_manager_secret" "secret-basic" {
       }
     }
   }
-
   depends_on = [
     google_pubsub_topic_iam_member.secrets_manager_access,
   ]
 }
 `, context)
 }
-
 func testAccSecretManagerSecret_rotationPeriodBasic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {}
-
 resource "google_pubsub_topic_iam_member" "secrets_manager_access" {
   topic  = google_pubsub_topic.topic.name
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-secretmanager.iam.gserviceaccount.com"
   role   = "roles/pubsub.publisher"
 }
-
 resource "google_pubsub_topic" "topic" {
   name = "tf-test-topic-%{random_suffix}"
 }
-
 resource "google_secret_manager_secret" "secret-basic" {
   secret_id = "tf-test-secret-%{random_suffix}"
-
   topics {
     name = google_pubsub_topic.topic.id
   }
-
   rotation {
     rotation_period = "3600s"
     next_rotation_time = "%{timestamp}"
   }
-
   replication {
     user_managed {
       replicas {
@@ -1078,40 +991,32 @@ resource "google_secret_manager_secret" "secret-basic" {
       }
     }
   }
-
   depends_on = [
     google_pubsub_topic_iam_member.secrets_manager_access,
   ]
 }
 `, context)
 }
-
 func testAccSecretManagerSecret_rotationPeriodUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {}
-
 resource "google_pubsub_topic_iam_member" "secrets_manager_access" {
   topic  = google_pubsub_topic.topic.name
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-secretmanager.iam.gserviceaccount.com"
   role   = "roles/pubsub.publisher"
 }
-
 resource "google_pubsub_topic" "topic" {
   name = "tf-test-topic-%{random_suffix}"
 }
-
 resource "google_secret_manager_secret" "secret-basic" {
   secret_id = "tf-test-secret-%{random_suffix}"
-
   topics {
     name = google_pubsub_topic.topic.id
   }
-
   rotation {
     rotation_period = "3700s"
     next_rotation_time = "%{timestamp}"
   }
-
   replication {
     user_managed {
       replicas {
@@ -1119,23 +1024,19 @@ resource "google_secret_manager_secret" "secret-basic" {
       }
     }
   }
-
   depends_on = [
     google_pubsub_topic_iam_member.secrets_manager_access,
   ]
 }
 `, context)
 }
-
 func testAccSecretManagerSecret_withoutTtl(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-basic" {
   secret_id = "tf-test-secret-%{random_suffix}"
-
   labels = {
     label = "my-label"
   }
-
   replication {
     user_managed {
       replicas {
@@ -1149,16 +1050,13 @@ resource "google_secret_manager_secret" "secret-basic" {
 }
 `, context)
 }
-
 func testAccSecretManagerSecret_ttlUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-basic" {
   secret_id = "tf-test-secret-%{random_suffix}"
-
   labels = {
     label = "my-label"
   }
-
   replication {
     user_managed {
       replicas {
@@ -1169,22 +1067,17 @@ resource "google_secret_manager_secret" "secret-basic" {
       }
     }
   }
-
   ttl = "7200s"
-
 }
 `, context)
 }
-
 func testAccSecretManagerSecret_withoutVersionDestroyTtl(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-basic" {
   secret_id = "tf-test-secret-%{random_suffix}"
-
   labels = {
     label = "my-label"
   }
-
   replication {
     user_managed {
       replicas {
@@ -1198,16 +1091,13 @@ resource "google_secret_manager_secret" "secret-basic" {
 }
 `, context)
 }
-
 func testAccSecretManagerSecret_versionDestroyTtlUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-basic" {
   secret_id = "tf-test-secret-%{random_suffix}"
-
   labels = {
     label = "my-label"
   }
-
   replication {
     user_managed {
       replicas {
@@ -1218,22 +1108,17 @@ resource "google_secret_manager_secret" "secret-basic" {
       }
     }
   }
-
   version_destroy_ttl = "86400s"
-
 }
 `, context)
 }
-
 func testAccSecretManagerSecret_expireTime(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-basic" {
   secret_id = "tf-test-secret-%{random_suffix}"
-
   labels = {
     label = "my-label"
   }
-
   replication {
     user_managed {
       replicas {
@@ -1244,9 +1129,7 @@ resource "google_secret_manager_secret" "secret-basic" {
       }
     }
   }
-
   expire_time = "2122-09-26T10:55:55.163240682Z"
-
 }
 `, context)
 }
@@ -1255,11 +1138,12 @@ func testAccSecretManagerSecret_tags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_secret_manager_secret" "secret-tags" {
   secret_id = "tf-test-secret-%{random_suffix}"
-
   labels = {
     label = "my-label"
   }
-
+  tags = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
   replication {
     user_managed {
       replicas {
@@ -1270,11 +1154,7 @@ resource "google_secret_manager_secret" "secret-tags" {
       }
     }
   }
-
   ttl = "3600s"
-  tags = {
-	"%{org}/%{tagKey}" = "%{tagValue}"
-  }
 }
 `, context)
 }
