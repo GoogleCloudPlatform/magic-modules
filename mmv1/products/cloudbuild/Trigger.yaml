@@ -30,7 +30,7 @@ id_format: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/triggers'
 self_link: 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
 update_verb: 'PATCH'
-  # import by default only works with old-style self links ending in a name
+# import by default only works with old-style self links ending in a name
 import_format:
   - 'projects/{{project}}/triggers/{{trigger_id}}'
   - 'projects/{{project}}/locations/{{location}}/triggers/{{trigger_id}}'
