@@ -41,6 +41,8 @@ custom_code:
   post_update: 'templates/terraform/constants/compute_firewall_policy_operation.go.tmpl'
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
+include_in_tgc_next_DO_NOT_USE: true
+tgc_hcl_block_name: 'default'
 examples:
   - name: 'firewall_policy'
     primary_resource_id: 'default'
