@@ -7,7 +7,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+
+	{{- if ne $.TargetVersionName "ga" }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	{{- end }}
 
 	{{- if ne $.TargetVersionName "ga" }}
 	compute "google.golang.org/api/compute/v0.beta"
