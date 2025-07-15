@@ -13,6 +13,9 @@ resource "google_dataproc_batch" "{{$.PrimaryResourceId}}" {
         subnetwork_uri = "{{index $.Vars "subnetwork_name"}}"
         ttl            = "3600s"
         network_tags   = ["tag1"]
+        authentication_config {
+          user_workload_authentication_type = "END_USER_CREDENTIALS"
+        }
       }
     }
 
