@@ -11,6 +11,9 @@ resource "google_apphub_application" "my_apphub_application" {
 resource "google_developer_connect_insights_config" "{{$.PrimaryResourceId}}" {
   location           = "us-central1"
   insights_config_id = "{{index $.Vars "insights_config_name"}}"
-  app_hub_application =  "my_apphub_application"
+  app_hub_application =  format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
+			data.google_project.project.number,
+			google_apphub_application.my_apphub_application.location,
+			google_apphub_application.mmy_apphub_application.application_id)
   project         = "{{index $.TestEnvVars "devconnect-insights-terraform"}}"
 }
