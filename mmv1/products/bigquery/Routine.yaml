@@ -149,6 +149,7 @@ properties:
           enum_values:
             - 'FIXED_TYPE'
             - 'ANY_TYPE'
+            - 'FIXED_TABLE'
         - name: 'mode'
           type: Enum
           description: |
@@ -175,6 +176,31 @@ properties:
           custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
           validation:
             function: 'validation.StringIsJSON'
+        - name: 'tableType'
+          type: NestedObject
+          description: |
+            If argumentKind is FIXED_TABLE, a schema for the table type.
+          properties:
+            - name: 'columns'
+              type: Array
+              description: |
+                The columns in the table type.
+              item_type:
+                type: NestedObject
+                properties:
+                  - name: 'name'
+                    type: String
+                    description: |
+                      The name of the column.
+                  - name: 'type'
+                    type: String
+                    description: |
+                      A JSON schema for the data type of the column.
+                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                    validation:
+                      function: 'validation.StringIsJSON'
   - name: 'returnType'
     type: String
     description: |
