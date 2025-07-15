@@ -201,7 +201,7 @@ properties:
                 enum_values:
                   - AUTHENTICATION_TYPE_UNSPECIFIED
                   - SERVICE_ACCOUNT
-                  - END_USER_CREDENTIALS             
+                  - END_USER_CREDENTIALS
       - name: 'peripheralsConfig'
         type: NestedObject
         description: |
