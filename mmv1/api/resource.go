@@ -233,6 +233,9 @@ type Resource struct {
 	// If true, include resource in the new package of TGC (terraform-provider-conversion)
 	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
 
+	// Name of the hcl resource block used in TGC
+	TgcHclBlockName string `yaml:"tgc_hcl_block_name,omitempty"`
+
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 

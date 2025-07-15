@@ -164,15 +164,6 @@ func (m *manager) fetchAncestors(config *transport_tpg.Config, tfData tpgresourc
 			return nil, fmt.Errorf("organization id not found in terraform data")
 		}
 		key = orgKey
-	case "iam.googleapis.com/Role":
-		// google_organization_iam_custom_role or google_project_iam_custom_role
-		if orgOK {
-			key = orgKey
-		} else if projectKey != "" {
-			key = projectKey
-		} else {
-			return []string{unknownOrg}, nil
-		}
 	case "cloudresourcemanager.googleapis.com/Project", "cloudbilling.googleapis.com/ProjectBillingInfo":
 		// for google_project and google_project_iam resources
 		var ancestors []string
@@ -207,10 +198,16 @@ func (m *manager) fetchAncestors(config *transport_tpg.Config, tfData tpgresourc
 		key = projectKey
 
 	default:
-		if projectKey == "" {
+		switch {
+		case orgOK:
+			key = orgKey
+		case folderOK:
+			key = folderKey
+		case projectKey != "":
+			key = projectKey
+		default:
 			return []string{unknownOrg}, nil
 		}
-		key = projectKey
 	}
 	return m.getAncestorsWithCache(key)
 }
