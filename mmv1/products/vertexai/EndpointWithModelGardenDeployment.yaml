@@ -78,11 +78,17 @@ properties:
       `publishers/{publisher}/models/{publisher_model}@{version_id}`, or
       `publishers/hf-{hugging-face-author}/models/{hugging-face-model-name}@001`.
     ignore_read: true
+    exactly_one_of:
+      - "publisher_model_name"
+      - "hugging_face_model_id"
   - name: huggingFaceModelId
     type: String
     description: |-
       The Hugging Face model to deploy.
       Format: Hugging Face model ID like `google/gemma-2-2b-it`.
+    exactly_one_of:
+      - "publisher_model_name"
+      - "hugging_face_model_id"
   - name: modelConfig
     type: NestedObject
     description: The model config to use for the deployment.
