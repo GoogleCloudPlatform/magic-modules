@@ -42,7 +42,7 @@ custom_code:
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
 include_in_tgc_next_DO_NOT_USE: true
-tgc_hcl_block_name: 'default'
+tgc_hcl_block_name: 'shortName'
 examples:
   - name: 'firewall_policy'
     primary_resource_id: 'default'

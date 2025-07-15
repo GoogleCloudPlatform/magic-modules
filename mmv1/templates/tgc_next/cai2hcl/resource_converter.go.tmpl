@@ -80,12 +80,13 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 	config := transport.NewConfig()
 	d := &schema.ResourceData{}
 
+{{	if $.TgcHclBlockName -}}
+	hclBlockName := res["{{ $.TgcHclBlockName -}}"].(string)
+
+	{{- else -}}
 	assetNameParts := strings.Split(asset.Name, "/")
 	hclBlockName := assetNameParts[len(assetNameParts)-1]
-	
-	if "{{ $.TgcHclBlockName -}}" != "" {
-		hclBlockName = "{{ $.TgcHclBlockName -}}"
-	}
+{{ end}}
 
 	hclData := make(map[string]interface{})
 
