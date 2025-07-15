@@ -26,9 +26,11 @@ examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'developer_connect_insights_config_basic'
     primary_resource_id: 'my_insights_config'
+    app_hub_application_resource_id: 'my_apphub_application'
     vars:
       insights_config_name: 'tf_test_ic'
-      appHubApplication: 'APPHUB_APP_NAME'
+      apphub_application_name: 'tf-test-app'
+      apphub_application_display_name: 'TF Test App'
     test_env_vars:
       project: 'PROJECT_NAME'
 autogen_async: true

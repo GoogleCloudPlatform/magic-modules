@@ -70,7 +70,7 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 	}
 	resource "google_apphub_application" "my_app" {
 		location       = "us-central1"
-		application_id = "tf-test-app-basic%{random_suffix}"
+		application_id = "tf-test-app%{random_suffix}"
 		display_name   = "My Basic App for InsightsConfig"
 		project        = data.google_project.project.project_id
 		scope {
@@ -96,7 +96,7 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 	}
 	resource "google_apphub_application" "my_app" {
 		location       = "us-central1"
-		application_id = "tf-test-app-basic%{random_suffix}"
+		application_id = "tf-test-app%{random_suffix}"
 		display_name   = "My Basic App for InsightsConfig"
 		project        = data.google_project.project.project_id
 		scope {
