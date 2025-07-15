@@ -589,7 +589,7 @@ properties:
       - 'webhook_config'
       - 'source_to_build'
       - 'repository_event_config'
-      - 'developer_connect_event_config'                            
+      - 'developer_connect_event_config'
     properties:
       - name: 'repoSlug'
         type: String
