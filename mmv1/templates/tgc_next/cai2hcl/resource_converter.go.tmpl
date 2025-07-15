@@ -103,6 +103,11 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 		return nil, nil
 	}
 {{ end}}
+
+{{ range $param := $.UserParameters }}
+{{/* Attempt to parse all parameters from asset name. */}}
+	hclData["{{ underscore $param.Name }}"] = utils.ParseFieldValue(asset.Name, "{{ underscore (plural $param.Name) }}")
+{{ end }}
 {{- if $.HasProject -}}
 	hclData["project"] = utils.ParseFieldValue(asset.Name, "projects")
 {{- end}}
