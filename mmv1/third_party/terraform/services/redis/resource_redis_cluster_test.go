@@ -1257,6 +1257,8 @@ func TestAccRedisCluster_redisClusterTlsEnabled(t *testing.T) {
 	context := map[string]interface{}{
 		"deletion_protection_enabled": false,
 		"random_suffix":               acctest.RandString(t, 10),
+		// Until https://github.com/hashicorp/terraform-provider-google/issues/23619 is fixed, use regions other than us-central1 to prevent issues like https://github.com/hashicorp/terraform-provider-google/issues/23543
+		"location": "us-east1",
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1289,8 +1291,7 @@ resource "google_redis_cluster" "cluster-tls" {
     network = google_compute_network.consumer_net.id
   }
 
-  # Until https://github.com/hashicorp/terraform-provider-google/issues/23619 is fixed, use regions other than us-central1 to prevent issues like https://github.com/hashicorp/terraform-provider-google/issues/23543
-  region = "us-east1"
+  region = "%{location}"
   replica_count = 1
   node_type = "REDIS_SHARED_CORE_NANO"
   transit_encryption_mode = "TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION"
@@ -1321,7 +1322,7 @@ resource "google_redis_cluster" "cluster-tls" {
 
 resource "google_network_connectivity_service_connection_policy" "default" {
   name = "tf-test-my-policy%{random_suffix}"
-  location = "us-central1"
+  location = "%{location}"
   service_class = "gcp-memorystore-redis"
   description   = "my basic service connection policy"
   network = google_compute_network.consumer_net.id
@@ -1333,7 +1334,7 @@ resource "google_network_connectivity_service_connection_policy" "default" {
 resource "google_compute_subnetwork" "consumer_subnet" {
   name          = "tf-test-my-subnet%{random_suffix}"
   ip_cidr_range = "10.0.0.248/29"
-  region        = "us-central1"
+  region        = "%{location}"
   network       = google_compute_network.consumer_net.id
 }
 
