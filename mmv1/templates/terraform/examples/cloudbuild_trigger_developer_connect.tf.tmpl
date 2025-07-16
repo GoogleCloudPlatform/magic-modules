@@ -1,3 +1,16 @@
+resource "google_developer_connect_repository_link" "my_repo_link" {
+  project            = "your-gcp-project-id"
+  location           = "us-central1"
+  connection         = "my-connection"
+  repository_link_id = "my-repo"
+  github_config {
+    authorizer_credential {
+      oauth_token_secret_version = "projects/your-gcp-project-id/secrets/your-oauth-secret/versions/1"
+    }
+    repository_full_name = "your-github-org/your-repo-name"
+  }
+}
+
 resource "google_cloudbuild_trigger" "developer-connect-trigger" {
   location = "us-central1"
 
