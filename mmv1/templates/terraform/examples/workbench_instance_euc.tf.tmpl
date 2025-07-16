@@ -22,4 +22,7 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
 
   enable_managed_euc = "true"
 
+  depends_on = [
+       google_service_account_iam_binding.act_as_permission,
+  ]
 }
