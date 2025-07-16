@@ -585,3 +585,7 @@ properties:
     description: |
       Flag that specifies that a notebook can be accessed with third party
       identity provider.
+  - name: 'enableManagedEuc'
+    type: Boolean
+    description: |
+      Flag to enable managed end user credentials for the instance.
