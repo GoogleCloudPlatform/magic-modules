@@ -287,9 +287,11 @@ properties:
   - name: 'discoveryEndpoints'
     type: Array
     description:
-      "Output only. Endpoints clients can connect to the instance through.
-      Currently only one\ndiscovery endpoint is supported. "
-    deprecation_message: '`discovery_endpoints` is deprecated  Use `endpoints` instead.'
+      "Deprecated. Output only. Endpoints clients can connect to the instance through."
+    deprecation_message: 
+      "`discovery_endpoints` is deprecated and is not guaranteed to be populated. \n
+      `endpoints.connections.pscConnection` and `endpoints.connections.pscAutoConnection` \n
+      with connectionType CONNECTION_TYPE_DISCOVERY should be used for discovery instead"
     output: true
     item_type:
       type: NestedObject
