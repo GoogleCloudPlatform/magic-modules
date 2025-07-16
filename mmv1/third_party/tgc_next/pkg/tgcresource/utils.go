@@ -26,15 +26,16 @@ func RemoveTerraformAttributionLabel(raw interface{}) interface{} {
 	return nil
 }
 
-func GetComputeSelfLink(config *transport_tpg.Config, raw interface{}) interface{} {
-	if raw == nil {
-		return nil
+// Gets the full url from relative url
+func GetFullUrl(config *transport_tpg.Config, raw interface{}, baseUrl string) interface{} {
+	if raw == nil || baseUrl == "" {
+		return raw
 	}
 
 	v := raw.(string)
 	if v != "" && !strings.HasPrefix(v, "https://") {
 		if config.UniverseDomain == "" || config.UniverseDomain == "googleapis.com" {
-			return fmt.Sprintf("https://www.googleapis.com/compute/v1/%s", v)
+			return fmt.Sprintf("%s%s", baseUrl, v)
 		}
 	}
 

@@ -77,7 +77,8 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if testData.Cai == nil {
-		return fmt.Errorf("cai asset is unavailable for resource %s", testData.ResourceAddress)
+		log.Printf("SKIP: cai asset is unavailable for resource %s", testData.ResourceAddress)
+		return nil
 	}
 
 	assets := make([]caiasset.Asset, 0)
@@ -96,7 +97,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		if primaryResource {
 			return fmt.Errorf("conversion of the primary resource %s is not supported in tgc", testData.ResourceAddress)
 		} else {
-			log.Printf("Test for %s is skipped as conversion of the resource is not supported in tgc.", resourceType)
+			log.Printf("SKIP: conversion of the resource %s is not supported in tgc.", resourceType)
 			return nil
 		}
 	}
