@@ -149,6 +149,14 @@ examples:
     vars:
       region_backend_service_name: 'region-service'
       network_name: 'rbs-net'
+  - name: 'region_backend_service_ha_policy_manual_leader'
+    primary_resource_id: 'default'
+    vars:
+      region_backend_service_name: 'region-service'
+      network_name: 'rbs-net'
+      subnetwork_name: 'rbs-subnet'
+      instance_name: 'rbs-instance'
+      neg_name: 'rbs-neg'
 parameters:
   - name: 'region'
     type: ResourceRef
