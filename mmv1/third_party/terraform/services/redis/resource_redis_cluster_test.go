@@ -1288,7 +1288,6 @@ resource "google_redis_cluster" "cluster-tls" {
   psc_configs {
     network = google_compute_network.consumer_net.id
   }
-
   region = "us-central1"
   replica_count = 1
   node_type = "REDIS_SHARED_CORE_NANO"
