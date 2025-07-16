@@ -2,7 +2,7 @@ resource "google_cloudbuild_trigger" "developer-connect-trigger" {
   location = "us-central1"
 
   developer_connect_event_config {
-    git_repository_link = "{{$.Vars.git_repository_link}}"
+    git_repository_link = "projects/${google_developer_connect_repository_link.my_repo_link.project}/locations/${google_developer_connect_repository_link.my_repo_link.location}/connections/${google_developer_connect_repository_link.my_repo_link.connection}/gitRepositoryLinks/${google_developer_connect_repository_link.my_repo_link.repository_link_id}"
     push {
       branch = "feature-.*"
     }
