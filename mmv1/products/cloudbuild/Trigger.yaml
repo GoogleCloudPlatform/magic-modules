@@ -134,6 +134,11 @@ examples:
       'installation_id': '31300675'
       'pat_secret': '"projects/gcb-terraform-creds/secrets/github-pat/versions/latest"'
       'repo_uri': '"https://github.com/gcb-repos-robot/tf-demo.git"'
+  - name: 'cloudbuild_trigger_developer_connect'
+    primary_resource_id: 'developer-connect-trigger'
+    vars:
+      cloudbuild_trigger_name: 'developer-connect-trigger'
+      git_repository_link: 'projects/my-project/locations/us-central1/connections/my-connection/gitRepositoryLinks/my-repo'
 parameters:
   - name: 'location'
     type: String
