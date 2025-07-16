@@ -364,7 +364,7 @@ func TestAccBigQueryRoutine_bigqueryRoutineTableTypeUpdate(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-      {
+			{
 				Config: testAccBigQueryRoutine_bigqueryRoutineTableTypeUpdate(context),
 			},
 			{
