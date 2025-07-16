@@ -140,7 +140,6 @@ examples:
       network_name: 'network'
   - name: 'backend_service_tls_settings'
     primary_resource_id: 'default'
-    min_version: 'beta'
     vars:
       backend_service_name: 'backend-service'
       health_check_name: 'health-check'
@@ -1423,7 +1422,6 @@ properties:
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
         resource: 'ClientTlsPolicy'
         imports: 'name'
-        custom_tgc_expand: 'templates/tgc_next/custom_expand/original_value.go.tmpl'
       - name: 'subjectAltNames'
         type: Array
         description: |
@@ -1584,7 +1582,6 @@ properties:
     type: NestedObject
     description: |
       Configuration for Backend Authenticated TLS and mTLS. May only be specified when the backend protocol is SSL, HTTPS or HTTP2.
-    min_version: beta
     properties:
       - name: 'sni'
         type: String
