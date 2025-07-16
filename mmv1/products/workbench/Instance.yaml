@@ -113,6 +113,15 @@ examples:
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
+  - name: 'workbench_instance_euc'
+    primary_resource_id: 'instance'
+    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
+    region_override: 'us-west1-a'
+    vars:
+      instance_name: 'workbench-instance'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+      service_account: 'SERVICE_ACCT'
 virtual_fields:
   - name: 'desired_state'
     description: |
