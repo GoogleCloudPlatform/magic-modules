@@ -233,6 +233,9 @@ type Resource struct {
 	// If true, include resource in the new package of TGC (terraform-provider-conversion)
 	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
 
+	// Name of the hcl resource block used in TGC
+	TgcHclBlockName string `yaml:"tgc_hcl_block_name,omitempty"`
+
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 
@@ -1811,6 +1814,20 @@ func (r Resource) StateUpgradersCount() []int {
 func (r Resource) CaiProductBaseUrl() string {
 	version := r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName)
 	baseUrl := version.CaiBaseUrl
+	if baseUrl == "" {
+		baseUrl = version.BaseUrl
+	}
+	return baseUrl
+}
+
+// Gets the CAI product legacy base url.
+// For example, https://www.googleapis.com/compute/v1/ for compute
+func (r Resource) CaiProductLegacyBaseUrl() string {
+	version := r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName)
+	baseUrl := version.CaiLegacyBaseUrl
+	if baseUrl == "" {
+		baseUrl = version.CaiBaseUrl
+	}
 	if baseUrl == "" {
 		baseUrl = version.BaseUrl
 	}
