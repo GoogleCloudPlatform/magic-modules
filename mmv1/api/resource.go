@@ -233,6 +233,9 @@ type Resource struct {
 	// If true, include resource in the new package of TGC (terraform-provider-conversion)
 	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
 
+	// Name of the hcl resource block used in TGC
+	TgcHclBlockName string `yaml:"tgc_hcl_block_name,omitempty"`
+
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 
@@ -1817,11 +1820,50 @@ func (r Resource) CaiProductBaseUrl() string {
 	return baseUrl
 }
 
+// Gets the CAI product legacy base url.
+// For example, https://www.googleapis.com/compute/v1/ for compute
+func (r Resource) CaiProductLegacyBaseUrl() string {
+	version := r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName)
+	baseUrl := version.CaiLegacyBaseUrl
+	if baseUrl == "" {
+		baseUrl = version.CaiBaseUrl
+	}
+	if baseUrl == "" {
+		baseUrl = version.BaseUrl
+	}
+	return baseUrl
+}
+
 // Returns the Cai product backend name from the version base url
 // base_url: https://accessapproval.googleapis.com/v1/ -> accessapproval
 func (r Resource) CaiProductBackendName(caiProductBaseUrl string) string {
 	backendUrl := strings.Split(strings.Split(caiProductBaseUrl, "://")[1], ".googleapis.com")[0]
 	return strings.ToLower(backendUrl)
+}
+
+// Returns the asset type for this resource.
+func (r Resource) CaiAssetType() string {
+	baseURL := r.CaiProductBaseUrl()
+	productBackendName := r.CaiProductBackendName(baseURL)
+	assetName := r.Name
+	if r.ApiResourceTypeKind != "" {
+		assetName = r.ApiResourceTypeKind
+	}
+	return fmt.Sprintf("%s.googleapis.com/%s", productBackendName, assetName)
+}
+
+// DefineAssetTypeForResourceInProduct marks the AssetType constant for this resource as defined.
+// It returns true if this is the first time it's been called for this resource,
+// and false otherwise, preventing duplicate definitions.
+func (r Resource) DefineAssetTypeForResourceInProduct() bool {
+	if r.ProductMetadata.ResourcesWithCaiAssetType == nil {
+		r.ProductMetadata.ResourcesWithCaiAssetType = make(map[string]struct{}, 1)
+	}
+	if _, alreadyDefined := r.ProductMetadata.ResourcesWithCaiAssetType[r.ApiResourceType()]; alreadyDefined {
+		return false
+	}
+	r.ProductMetadata.ResourcesWithCaiAssetType[r.ApiResourceType()] = struct{}{}
+	return true
 }
 
 // Gets the Cai asset name template, which could include version
@@ -1984,11 +2026,17 @@ func (r Resource) MarkdownHeader(templatePath string) string {
 // ====================
 // Lists fields that test.BidirectionalConversion should ignore
 func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string {
-	var props []string
+	props := []string{
+		"depends_on",
+		"count",
+		"for_each",
+		"provider",
+		"lifecycle",
+	}
 	for _, tp := range r.VirtualFields {
 		props = append(props, google.Underscore(tp.Name))
 	}
-	for _, tp := range r.AllUserProperties() {
+	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
 		} else if tp.IsMissingInCai {
@@ -2004,6 +2052,22 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 // Filters out computed properties during cai2hcl
 func (r Resource) ReadPropertiesForTgc() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
-		return v.Output
+		return v.Output || v.UrlParamOnly
 	})
+}
+
+// The API resource type of the resource. Normally, it is the resource name.
+// Rarely, it is the API "resource type kind".
+// For example, the API resource type of "google_compute_autoscaler" is "ComputeAutoscalerAssetType".
+// The API resource type of "google_compute_region_autoscaler" is also "ComputeAutoscalerAssetType".
+func (r Resource) ApiResourceType() string {
+	if r.ApiResourceTypeKind != "" {
+		return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.ApiResourceTypeKind)
+	}
+
+	return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.Name)
+}
+
+func (r Resource) IsTgcCompiler() bool {
+	return r.Compiler == "terraformgoogleconversionnext-codegen"
 }
