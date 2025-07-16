@@ -27,6 +27,21 @@ var WorkbenchInstanceSettableUnmodifiableDefaultMetadata = []string{
 	    "serial-port-logging-enable",
 }
 
+var WorkbenchInstanceEUCProvidedAdditionalMetadata = []string{
+	"enable-oslogin",
+    "disable-ssh",
+    "ssh-keys",
+    "block-project-ssh-keys",
+    "post-startup-script",
+    "post-startup-script-behavior",
+	"startup-script",
+	"startup-script-url",
+	"gce-container-declaration",
+	"gce-software-declaration",
+	"serial-port-enable",
+	"euc-enabled",
+}
+
 var WorkbenchInstanceProvidedMetadata = []string{
     "agent-health-check-interval-seconds",
     "agent-health-check-path",
@@ -94,6 +109,14 @@ func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.Resourc
 	for _, metadata := range WorkbenchInstanceProvidedMetadata {
 		if key == metadata {
 			return true
+		}
+	}
+	
+	if d.Get("enable_managed_euc").(bool){
+		for _, metadata := range WorkbenchInstanceEUCProvidedAdditionalMetadata {
+			if key == metadata {
+				return true
+			}
 		}
 	}
 
