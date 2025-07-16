@@ -418,5 +418,6 @@ properties:
 
   - name: "space"
     type: String
+    immutable: true
     description: |
       Optional. The resource ID of the parent Space. If not set, the parent resource will be the Organization.
