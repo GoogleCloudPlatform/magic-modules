@@ -310,6 +310,9 @@ type Type struct {
 	// creating the function header, `property` and `prefix` are available,
 	// just as they are in the standard flattener template.
 	CustomTgcFlatten string `yaml:"custom_tgc_flatten,omitempty"`
+
+	// If true, we will include the empty value of this attribute in CAI asset.
+	IncludeEmptyValueInCai bool `yaml:"include_empty_value_in_cai,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -851,6 +854,20 @@ func (t Type) ResourceRef() *Resource {
 	})
 
 	return resources[0]
+}
+
+// Checks if the referenced resource is in the same product or not
+func (t Type) IsResourceRefFound() bool {
+	if !t.IsA("ResourceRef") {
+		return false
+	}
+
+	product := t.ResourceMetadata.ProductMetadata
+	resources := google.Select(product.Objects, func(obj *Resource) bool {
+		return obj.Name == t.Resource
+	})
+
+	return len(resources) != 0
 }
 
 // TODO rewrite: validation

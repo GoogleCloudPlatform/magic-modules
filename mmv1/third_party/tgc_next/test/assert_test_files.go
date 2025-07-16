@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -29,7 +31,7 @@ var (
 	tmpDir     = os.TempDir()
 )
 
-func BidirectionalConversion(t *testing.T, ignoredFields []string) {
+func BidirectionalConversion(t *testing.T, ignoredFields []string, ignoredAssetFields []string) {
 	resourceTestData, primaryResource, err := prepareTestData(t.Name())
 	if err != nil {
 		t.Fatal("Error preparing the input data:", err)
@@ -52,13 +54,13 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 	// Otherwise, test all of the resources in the test.
 	if primaryResource != "" {
 		t.Logf("Test for the primary resource %s begins.", primaryResource)
-		err = testSingleResource(t, t.Name(), resourceTestData[primaryResource], tfDir, ignoredFields, logger, true)
+		err = testSingleResource(t, t.Name(), resourceTestData[primaryResource], tfDir, ignoredFields, ignoredAssetFields, logger, true)
 		if err != nil {
 			t.Fatal("Test fails:", err)
 		}
 	} else {
 		for _, testData := range resourceTestData {
-			err = testSingleResource(t, t.Name(), testData, tfDir, ignoredFields, logger, false)
+			err = testSingleResource(t, t.Name(), testData, tfDir, ignoredFields, ignoredAssetFields, logger, false)
 			if err != nil {
 				t.Fatal("Test fails: ", err)
 			}
@@ -67,11 +69,15 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string) {
 }
 
 // Tests a single resource
-func testSingleResource(t *testing.T, testName string, testData ResourceTestData, tfDir string, ignoredFields []string, logger *zap.Logger, primaryResource bool) error {
+func testSingleResource(t *testing.T, testName string, testData ResourceTestData, tfDir string, ignoredFields []string, ignoredAssetFields []string, logger *zap.Logger, primaryResource bool) error {
 	resourceType := testData.ResourceType
 	var tfplan2caiSupported, cai2hclSupported bool
 	if _, tfplan2caiSupported = tfplan2caiconverters.ConverterMap[resourceType]; !tfplan2caiSupported {
 		log.Printf("%s is not supported in tfplan2cai conversion.", resourceType)
+	}
+
+	if testData.Cai == nil {
+		return fmt.Errorf("cai asset is unavailable for resource %s", testData.ResourceAddress)
 	}
 
 	assets := make([]caiasset.Asset, 0)
@@ -99,9 +105,10 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		return fmt.Errorf("resource %s is supported in either tfplan2cai or cai2hcl within tgc, but not in both", resourceType)
 	}
 
-	// Uncomment these lines when debugging issues locally
-	// assetFile := fmt.Sprintf("%s.json", t.Name())
-	// writeJSONFile(assetFile, assets)
+	if os.Getenv("WRITE_FILES") != "" {
+		assetFile := fmt.Sprintf("%s.json", t.Name())
+		writeJSONFile(assetFile, assets)
+	}
 
 	// Step 1: Use cai2hcl to convert export assets into a Terraform configuration (export config).
 	// Compare all of the fields in raw config are in export config.
@@ -113,13 +120,13 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		return fmt.Errorf("error when converting the export assets into export config: %#v", err)
 	}
 
-	// Uncomment these lines when debugging issues locally
-	// exportTfFile := fmt.Sprintf("%s_export.tf", t.Name())
-	// err = os.WriteFile(exportTfFile, exportConfigData, 0644)
-	// if err != nil {
-	// 	return fmt.Errorf("error writing file %s", exportTfFile)
-	// }
-	// defer os.Remove(exportTfFile)
+	if os.Getenv("WRITE_FILES") != "" {
+		exportTfFile := fmt.Sprintf("%s_export.tf", t.Name())
+		err = os.WriteFile(exportTfFile, exportConfigData, 0644)
+		if err != nil {
+			return fmt.Errorf("error writing file %s", exportTfFile)
+		}
+	}
 
 	exportTfFilePath := fmt.Sprintf("%s/%s_export.tf", tfDir, t.Name())
 	err = os.WriteFile(exportTfFilePath, exportConfigData, 0644)
@@ -136,15 +143,15 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		return fmt.Errorf("missing hcl after cai2hcl conversion for resource %s", testData.ResourceType)
 	}
 
-	ignoredFieldMap := make(map[string]bool, 0)
+	ignoredFieldSet := make(map[string]struct{}, 0)
 	for _, f := range ignoredFields {
-		ignoredFieldMap[f] = true
+		ignoredFieldSet[f] = struct{}{}
 	}
 
 	parsedExportConfig := exportResources[0].Attributes
-	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, "", ignoredFieldMap)
+	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, ignoredFieldSet)
 	if len(missingKeys) > 0 {
-		return fmt.Errorf("missing fields in address %s after cai2hcl conversion:\n%s", testData.ResourceAddress, missingKeys)
+		return fmt.Errorf("missing fields in resource %s after cai2hcl conversion:\n%s", testData.ResourceAddress, missingKeys)
 	}
 	log.Printf("Step 1 passes for resource %s. All of the fields in raw config are in export config", testData.ResourceAddress)
 
@@ -156,7 +163,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 
 	// Convert the export config to roundtrip assets and then convert the roundtrip assets back to roundtrip config
 	ancestryCache := getAncestryCache(assets)
-	roundtripAssets, roundtripConfigData, err := getRoundtripConfig(t, testName, tfDir, ancestryCache, logger)
+	roundtripAssets, roundtripConfigData, err := getRoundtripConfig(t, testName, tfDir, ancestryCache, logger, ignoredAssetFields)
 	if err != nil {
 		return fmt.Errorf("error when converting the round-trip config: %#v", err)
 	}
@@ -166,7 +173,9 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	if err != nil {
 		return fmt.Errorf("error when writing the file %s", roundtripTfFilePath)
 	}
-	defer os.Remove(roundtripTfFilePath)
+	if os.Getenv("WRITE_FILES") == "" {
+		defer os.Remove(roundtripTfFilePath)
+	}
 
 	if diff := cmp.Diff(string(roundtripConfigData), string(exportConfigData)); diff != "" {
 		log.Printf("Roundtrip config is different from the export config.\nroundtrip config:\n%s\nexport config:\n%s", string(roundtripConfigData), string(exportConfigData))
@@ -240,53 +249,56 @@ func getAncestryCache(assets []caiasset.Asset) map[string]string {
 	return ancestryCache
 }
 
-// Compares HCL and finds all of the keys in map1 are in map2
-func compareHCLFields(map1, map2 map[string]interface{}, path string, ignoredFields map[string]bool) []string {
+// Compares HCL and finds all of the keys in map1 that are not in map2
+func compareHCLFields(map1, map2, ignoredFields map[string]struct{}) []string {
 	var missingKeys []string
-	for key, value1 := range map1 {
-		if value1 == nil {
+	for key := range map1 {
+		if isIgnored(key, ignoredFields) {
 			continue
 		}
 
-		currentPath := path + "." + key
-		if path == "" {
-			currentPath = key
-		}
-
-		if ignoredFields[currentPath] {
-			continue
-		}
-
-		value2, ok := map2[key]
-		if !ok || value2 == nil {
-			missingKeys = append(missingKeys, currentPath)
-			continue
-		}
-
-		switch v1 := value1.(type) {
-		case map[string]interface{}:
-			v2, _ := value2.(map[string]interface{})
-			missingKeys = append(missingKeys, compareHCLFields(v1, v2, currentPath, ignoredFields)...)
-		case []interface{}:
-			v2, _ := value2.([]interface{})
-
-			for i := 0; i < len(v1); i++ {
-				nestedMap1, ok1 := v1[i].(map[string]interface{})
-				nestedMap2, ok2 := v2[i].(map[string]interface{})
-				if ok1 && ok2 {
-					keys := compareHCLFields(nestedMap1, nestedMap2, fmt.Sprintf("%s[%d]", currentPath, i), ignoredFields)
-					missingKeys = append(missingKeys, keys...)
-				}
-			}
-		default:
+		if _, ok := map2[key]; !ok {
+			missingKeys = append(missingKeys, key)
 		}
 	}
-
+	sort.Strings(missingKeys)
 	return missingKeys
 }
 
+// Returns true if the given key should be ignored according to the given set of ignored fields.
+func isIgnored(key string, ignoredFields map[string]struct{}) bool {
+	// Check for exact match first.
+	if _, ignored := ignoredFields[key]; ignored {
+		return true
+	}
+
+	// Check for partial matches.
+	parts := strings.Split(key, ".")
+	if len(parts) < 2 {
+		return false
+	}
+	var nonIntegerParts []string
+	for _, part := range parts {
+		if _, err := strconv.Atoi(part); err != nil {
+			nonIntegerParts = append(nonIntegerParts, part)
+		}
+	}
+	var partialKey string
+	for _, part := range nonIntegerParts {
+		if partialKey == "" {
+			partialKey = part
+		} else {
+			partialKey += "." + part
+		}
+		if _, ignored := ignoredFields[partialKey]; ignored {
+			return true
+		}
+	}
+	return false
+}
+
 // Converts a tfplan to CAI asset, and then converts the CAI asset into HCL
-func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCache map[string]string, logger *zap.Logger) ([]caiasset.Asset, []byte, error) {
+func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCache map[string]string, logger *zap.Logger, ignoredAssetFields []string) ([]caiasset.Asset, []byte, error) {
 	fileName := fmt.Sprintf("%s_export", testName)
 
 	// Run terraform init and terraform apply to generate tfplan.json files
@@ -314,9 +326,12 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 		return nil, nil, err
 	}
 
-	// Uncomment these lines when debugging issues locally
-	// roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", t.Name())
-	// writeJSONFile(roundtripAssetFile, roundtripAssets)
+	deleteFieldsFromAssets(roundtripAssets, ignoredAssetFields)
+
+	if os.Getenv("WRITE_FILES") != "" {
+		roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", t.Name())
+		writeJSONFile(roundtripAssetFile, roundtripAssets)
+	}
 
 	roundtripConfig, err := cai2hcl.Convert(roundtripAssets, &cai2hcl.Options{
 		ErrorLogger: logger,
@@ -326,6 +341,80 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 	}
 
 	return roundtripAssets, roundtripConfig, nil
+}
+
+// Example:
+//
+//	data := map[string]interface{}{
+//		"database": map[string]interface{}{
+//			"host": "localhost",
+//			"user": "admin",
+//		},
+//	}
+//
+// Path of "host" in "data" is ["database", "host"]
+type Field struct {
+	Path []string
+}
+
+// Deletes fields from the resource data of CAI assets
+func deleteFieldsFromAssets(assets []caiasset.Asset, ignoredResourceDataFields []string) []caiasset.Asset {
+	// The key is the content type, such as "resource"
+	ignoredFieldsMap := make(map[string][]Field, 0)
+	for _, ignoredField := range ignoredResourceDataFields {
+		parts := strings.Split(ignoredField, ".")
+		if len(parts) <= 1 {
+			continue
+		}
+		if parts[0] == "RESOURCE" {
+			if _, ok := ignoredFieldsMap["RESOURCE"]; !ok {
+				ignoredFieldsMap["RESOURCE"] = make([]Field, 0)
+			}
+			f := Field{Path: parts[1:]}
+			ignoredFieldsMap["RESOURCE"] = append(ignoredFieldsMap["RESOURCE"], f)
+		}
+	}
+
+	for _, asset := range assets {
+		if asset.Resource != nil && asset.Resource.Data != nil {
+			data := asset.Resource.Data
+			for _, ignoredField := range ignoredFieldsMap["RESOURCE"] {
+				path := ignoredField.Path
+				deleteMapFieldByPath(data, path)
+			}
+		}
+	}
+	return assets
+}
+
+// Deletes a field from a map by its path.
+// Example:
+//
+//	data := map[string]interface{}{
+//		"database": map[string]interface{}{
+//			"host": "localhost",
+//			"user": "admin",
+//		},
+//	}
+//
+// path := ["database", "host"]
+func deleteMapFieldByPath(data map[string]interface{}, path []string) {
+	i := 0
+	for i < len(path)-1 {
+		k := path[i]
+		if v, ok := data[k]; ok {
+			if data, ok = v.(map[string]interface{}); ok && data != nil {
+				i++
+			} else {
+				break
+			}
+		} else {
+			break
+		}
+	}
+	if i == len(path)-1 {
+		delete(data, path[i])
+	}
 }
 
 // Compares the asset name in export asset and roundtrip asset and ignores "null" in the name
