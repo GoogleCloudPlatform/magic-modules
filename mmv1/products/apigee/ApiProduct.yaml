@@ -25,8 +25,8 @@ self_link: "{{org_id}}/apiproducts/{{name}}"
 import_format:
   - "{{org_id}}/apiproducts/{{name}}"
   - "{{org_id}}/{{name}}"
-# custom_code:
-#   custom_import: "templates/terraform/custom_import/apigee_api_product.go.tmpl"
+custom_code:
+  custom_import: "templates/terraform/custom_import/apigee_api_product.go.tmpl"
 examples:
   - name: "apigee_api_product_basic"
     vars:
