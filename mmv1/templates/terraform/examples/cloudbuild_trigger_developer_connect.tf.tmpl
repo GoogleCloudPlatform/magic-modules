@@ -1,24 +1,12 @@
-resource "google_developer_connect_repository_link" "my_repo_link" {
-  project            = "your-gcp-project-id"
-  location           = "us-central1"
-  connection         = "my-connection"
-  repository_link_id = "my-repo"
-  github_config {
-    authorizer_credential {
-      oauth_token_secret_version = "projects/your-gcp-project-id/secrets/your-oauth-secret/versions/1"
-    }
-    repository_full_name = "your-github-org/your-repo-name"
-  }
-}
-
-resource "google_cloudbuild_trigger" "developer-connect-trigger" {
-  location = "us-central1"
+resource "google_cloudbuild_trigger" "{{$.PrimaryResourceId}}" {
+  location = "europe-west4"
 
   developer_connect_event_config {
-    git_repository_link = "projects/${google_developer_connect_repository_link.my_repo_link.project}/locations/${google_developer_connect_repository_link.my_repo_link.location}/connections/${google_developer_connect_repository_link.my_repo_link.connection}/gitRepositoryLinks/${google_developer_connect_repository_link.my_repo_link.repository_link_id}"
+    git_repository_link = "test"
     push {
       branch = "feature-.*"
     }
   }
+
   filename = "cloudbuild.yaml"
 }
