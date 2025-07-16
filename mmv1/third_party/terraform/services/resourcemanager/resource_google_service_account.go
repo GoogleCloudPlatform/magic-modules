@@ -122,7 +122,6 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 		ServiceAccount: sa,
 	}
 
-
 	iamClient := config.NewIamClient(userAgent)
 	sa, err = iamClient.Projects.ServiceAccounts.Create("projects/"+project, r).Do()
 	if err != nil {
