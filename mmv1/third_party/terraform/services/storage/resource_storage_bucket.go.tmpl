@@ -32,20 +32,27 @@ func corsValidation(_ context.Context, d *schema.ResourceDiff, meta interface{})
 	if corsOk && len(cors.([]interface{})) == 0 {
 		return fmt.Errorf("cors cannot be empty")
 	}
-	for _, rule := range cors.([]interface{}) {
-		if rule == nil {
+	for _, corsRule := range cors.([]interface{}) {
+		if corsRule == nil {
 			return fmt.Errorf("cors cannot be empty")
 		}
-		r := rule.(map[string]interface{})
-		method := r["method"].([]interface{})
-		responseHeader := r["response_header"].([]interface{})
-		origin := r["origin"].([]interface{})
+		rule := corsRule.(map[string]interface{})
+		maxAgeSeconds := rule["max_age_seconds"].(int)
+		sendMaxAge := rule["send_max_age_seconds_if_zero"].(bool)
+		// if send_max_age_seconds_if_zero is true, max_age_seconds can be zero
+		if sendMaxAge || maxAgeSeconds > 0 {
+			return nil
+		}
 
+		method := rule["method"].([]interface{})
+		responseHeader := rule["response_header"].([]interface{})
+		origin := rule["origin"].([]interface{})
+
+		// check if all cors attributes provided have values
 		if !(len(method) > 0 || len(origin) > 0 || len(responseHeader) > 0) {
-			return fmt.Errorf(" atleast one value should be provided in cors attributes")
+			return fmt.Errorf("cors attributes cannot be empty or use send_max_age_seconds_if_zero flag to send max_age_seconds as zero")
 		}
 	}
-
 	return nil
 }
 
@@ -475,6 +482,11 @@ func ResourceStorageBucket() *schema.Resource {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Description: `The value, in seconds, to return in the Access-Control-Max-Age header used in preflight responses.`,
+						},
+						"send_max_age_seconds_if_zero": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: `While set true, max_age_seconds value will be sent in the request even for zero value of the field. This field is only useful for setting 0 value to the max_age_seconds field. It can be used alone or together with max_age_seconds.`,
 						},
 					},
 				},
@@ -1364,14 +1376,22 @@ func expandCors(configured []interface{}) []*storage.BucketCors {
 	return corsRules
 }
 
-func flattenCors(corsRules []*storage.BucketCors) []map[string]interface{} {
+func flattenCors(d *schema.ResourceData, corsRules []*storage.BucketCors) []map[string]interface{} {
 	corsRulesSchema := make([]map[string]interface{}, 0, len(corsRules))
-	for _, corsRule := range corsRules {
+	for index, corsRule := range corsRules {
 		data := map[string]interface{}{
 			"origin":          corsRule.Origin,
 			"method":          corsRule.Method,
 			"response_header": corsRule.ResponseHeader,
 			"max_age_seconds": corsRule.MaxAgeSeconds,
+		}
+
+		// set send_max_age_seconds_if_zero if available in resource
+		if v, ok := d.GetOk(fmt.Sprintf("cors.%d", index)); ok {
+			corsRule := v.(map[string]interface{})
+			data["send_max_age_seconds_if_zero"] = corsRule["send_max_age_seconds_if_zero"].(bool)
+		} else {
+			data["send_max_age_seconds_if_zero"] = false
 		}
 
 		corsRulesSchema = append(corsRulesSchema, data)
@@ -2235,7 +2255,7 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 		return fmt.Errorf("Error setting location: %s", err)
 	}
 	if res.Cors != nil {
-		if err := d.Set("cors", flattenCors(res.Cors)); err != nil {
+		if err := d.Set("cors", flattenCors(d, res.Cors)); err != nil {
 			return fmt.Errorf("Error setting cors: %s", err)
 		}
 	}
