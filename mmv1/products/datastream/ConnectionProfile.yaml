@@ -40,6 +40,7 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+  constants: 'templates/terraform/constants/datastream_connection_profile.go.tmpl'
 examples:
   - name: 'datastream_connection_profile_basic'
     primary_resource_id: 'default'
@@ -122,6 +123,7 @@ parameters:
     required: false
     immutable: true
     default_value: false
+    diff_suppress_func: 'resourceDataStreamStreamCreateWithoutValidationDiffSuppress'
   - name: 'location'
     type: String
     description: |

@@ -36,7 +36,7 @@ func TestAccDatastreamConnectionProfile_update(t *testing.T) {
 				ResourceName:            "google_datastream_connection_profile.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"connection_profile_id", "location"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "connection_profile_id", "location"},
 			},
 			{
 				Config: testAccDatastreamConnectionProfile_update2(context, true),
@@ -45,7 +45,7 @@ func TestAccDatastreamConnectionProfile_update(t *testing.T) {
 				ResourceName:            "google_datastream_connection_profile.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "postgresql_profile.0.password"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "connection_profile_id", "location", "postgresql_profile.0.password"},
 			},
 			{
 				// Disable prevent_destroy
@@ -58,7 +58,7 @@ func TestAccDatastreamConnectionProfile_update(t *testing.T) {
 				ResourceName:            "google_datastream_connection_profile.mysql_con_profile",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "mysql_profile.0.password"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "connection_profile_id", "location", "mysql_profile.0.password"},
 			},
 			{
 				// run once more to update the password. it should update it in-place
@@ -68,7 +68,7 @@ func TestAccDatastreamConnectionProfile_update(t *testing.T) {
 				ResourceName:            "google_datastream_connection_profile.mysql_con_profile",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "mysql_profile.0.password"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "connection_profile_id", "location", "mysql_profile.0.password"},
 			},
 			{
 				// Disable prevent_destroy
@@ -511,3 +511,58 @@ EOT
 }
 `, context)
 }
+
+// func TestAccDatastreamConnectionProfile_bigqueryImport(t *testing.T) {
+// 	// Generate a unique ID for the connection profile to ensure test isolation
+// 	cpId := fmt.Sprintf("tf-acc-test-%s", acctest.RandString(t, 10))
+// 	// Define the full resource name used in the HCL configuration
+// 	resourceName := "google_datastream_connection_profile.bigquery_destination"
+
+// 	acctest.VcrTest(t, resource.TestCase{
+// 		// PreCheck verifies that the necessary credentials and project details are available
+// 		PreCheck: func() { acctest.AccTestPreCheck(t) },
+// 		// Providers specifies the Terraform providers to use for the test
+// 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+// 		// Steps define the sequence of actions and checks for the test case
+// 		Steps: []resource.TestStep{
+// 			// Step 1: Create the resource using a standard configuration.
+// 			{
+// 				Config: testAccDatastreamConnectionProfile_forBigQuery(cpId),
+// 			},
+
+// 			// Step 2: This step triggers the import operation and verifies the result.
+// 			{
+// 				// The resource to be imported
+// 				ResourceName: resourceName,
+// 				// This flag tells the test framework to perform an import operation
+// 				ImportState: true,
+// 				// This flag is crucial. It runs a 'plan' after the import and fails
+// 				// the test if the resulting plan is not empty. This will catch the
+// 				// "forces replacement" issue you reported.
+// 				ImportStateVerify: true,
+// 			},
+// 		},
+// 	})
+// }
+
+// // Helper function to generate the HCL for creating a BigQuery connection profile.
+// // Using a function makes the test configuration reusable and clean.
+// func testAccDatastreamConnectionProfile_forBigQuery(connectionProfileId string) string {
+// 	return fmt.Sprintf(`
+// resource "google_datastream_connection_profile" "bigquery_destination" {
+//   project               = %[2]q
+//   display_name          = "Terraform Acceptance Test BigQuery Profile"
+//   location              = "us-central1"
+//   connection_profile_id = "%s"
+//   create_without_validation = false
+
+//   // Define the profile type for BigQuery.
+//   // The empty block uses default settings, matching the user's report.
+//   bigquery_profile {}
+
+//   // We are explicitly NOT setting 'create_without_validation' in the configuration.
+//   // The bug occurs when the provider incorrectly detects a change in this computed
+//   // field during the post-import plan.
+// }
+// `, connectionProfileId, "ryanoaksnightly2", "test-id-1231231321")
+// }
