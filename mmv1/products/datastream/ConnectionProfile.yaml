@@ -41,6 +41,7 @@ async:
     resource_inside_response: true
 custom_code:
     constants: 'templates/terraform/constants/datastream_connection_profile.go.tmpl'
+    pre_create: 'templates/terraform/pre_create/datastream_connection_profile.go.tmpl'
 examples:
   - name: 'datastream_connection_profile_basic'
     primary_resource_id: 'default'
