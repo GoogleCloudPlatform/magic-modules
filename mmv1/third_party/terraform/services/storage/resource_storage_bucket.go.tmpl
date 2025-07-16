@@ -41,7 +41,7 @@ func corsValidation(_ context.Context, d *schema.ResourceDiff, meta interface{})
 		sendMaxAge := rule["send_max_age_seconds_if_zero"].(bool)
 		// if send_max_age_seconds_if_zero is true, max_age_seconds can be zero
 		if sendMaxAge || maxAgeSeconds > 0 {
-			return nil
+			continue
 		}
 
 		method := rule["method"].([]interface{})
