@@ -40,6 +40,18 @@ examples:
       billing_account: "BILLING_ACCT"
     exclude_docs: true
     external_providers: ["time"]
+  - name: "apigee_api_product_with_legacy_operation"
+    vars:
+      instance_name: "my-instance"
+      product_name: "my-product"
+    exclude_test: true
+  - name: "apigee_api_product_with_legacy_operation_test"
+    primary_resource_id: "apigee_api_product"
+    test_env_vars:
+      org_id: "ORG_ID"
+      billing_account: "BILLING_ACCT"
+    exclude_docs: true
+    external_providers: ["time"]
   - name: "apigee_api_product_with_attributes"
     vars:
       instance_name: "my-instance"

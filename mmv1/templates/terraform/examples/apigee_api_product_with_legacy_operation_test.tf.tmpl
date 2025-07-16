@@ -75,158 +75,33 @@ resource "google_apigee_instance" "apigee_instance" {
 
 resource "google_apigee_api_product" "{{$.PrimaryResourceId}}" {
   org_id        = google_apigee_organization.apigee_org.id
-  name          = "full-api-product"
-  display_name  = "My full API Product"
+  name          = "legacy-operation-api-product"
+  display_name  = "My legacy operation API Product"
 
   approval_type = "auto"
 
   description   = "This is a sample API Product created with Terraform."
-
-  quota               = "10000"
-  quota_interval      = "1"
-  quota_time_unit     = "day"
-  quota_counter_scope = "PROXY"
-
-  environments = ["dev", "hom"]
-  scopes = [
-    "read:weather",
-    "write:reports"
-  ]
 
   attributes {
     name  = "access"
     value = "private"
   }
 
-  attributes {
-    name  = "custom"
-    value = "value"
-  }
+  environments = ["dev", "hom"]
+  proxies      = ["hello-world"]
+  api_resources = [
+    "/",
+    "/weather/**"
+  ]
+  scopes = [
+    "read:weather",
+    "write:reports"
+  ]
 
-  operation_group {
-    operation_config_type = "proxy"
-
-    operation_configs {
-      api_source = "anoter-proxy"
-
-      operations {
-        resource = "/"
-        methods  = ["POST", "GET"]
-      }
-
-      quota {
-        limit     = "1000"
-        interval  = "5"
-        time_unit = "minute"
-      }
-
-      attributes {
-        name  = "custom"
-        value = "value"
-      }
-    }
-
-    operation_configs {
-      api_source = "hello-world"
-
-      operations {
-        resource = "/test"
-        methods  = ["POST", "GET"]
-      }
-
-      quota {
-        limit     = "10"
-        interval  = "30"
-        time_unit = "second"
-      }
-
-      attributes {
-        name  = "custom"
-        value = "value"
-      }
-    }
-  }
-
-  graphql_operation_group {
-    operation_config_type = "proxy"
-
-    operation_configs {
-      api_source = "hello-world"
-
-      quota {
-        limit     = "30"
-        interval  = "50"
-        time_unit = "second"
-      }
-
-      operations {
-        operation_types = ["QUERY"]
-        operation       = "test"
-      }
-
-      attributes {
-        name  = "custom"
-        value = "value"
-      }
-    }
-
-    operation_configs {
-      api_source = "another-proxy"
-
-      quota {
-        limit     = "50000"
-        interval  = "12"
-        time_unit = "hour"
-      }
-
-      operations {
-        operation_types = ["MUTATION"]
-        operation       = "test"
-      }
-
-      attributes {
-        name  = "custom"
-        value = "value"
-      }
-    }
-  }
-
-  grpc_operation_group {
-
-    operation_configs {
-      api_source = "another-proxy"
-      service    = "grpc another test"
-      methods    = ["method3", "method4"]
-
-      quota {
-        limit     = "1000000"
-        interval  = "1"
-        time_unit = "month"
-      }
-
-      attributes {
-        name  = "graph"
-        value = "value"
-      }
-    }
-
-    operation_configs {
-      api_source = "hello-world"
-      service    = "grpc test"
-      methods    = ["method1", "method2"]
-
-      quota {
-        limit     = "5"
-        interval  = "1"
-        time_unit = "second"
-      }
-
-      attributes {
-        name  = "graph"
-        value = "value"
-      }
-    }
-  }
+  quota               = "10000"
+  quota_interval      = "1"
+  quota_time_unit     = "day"
+  quota_counter_scope = "PROXY"
 
   depends_on = [
     google_apigee_instance.apigee_instance

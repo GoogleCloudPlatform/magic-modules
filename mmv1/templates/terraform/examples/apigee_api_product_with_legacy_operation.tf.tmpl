@@ -32,12 +32,35 @@ resource "google_apigee_instance" "apigee_instance" {
   peering_cidr_range = "SLASH_22"
 }
 
-resource "google_apigee_api_product" "basic_api_product" {
+resource "google_apigee_api_product" "full_api_product" {
   org_id        = google_apigee_organization.apigee_org.id
   name          = "{{index $.Vars "product_name"}}"
-  display_name  = "My Basic API Product"
+  display_name  = "My full API Product"
 
   approval_type = "auto"
+
+  description   = "This is a sample API Product created with Terraform."
+
+  attributes {
+    name  = "access"
+    value = "private"
+  }
+
+  environments = ["dev", "hom"]
+  proxies      = ["hello-world"]
+  api_resources = [
+    "/",
+    "/weather/**"
+  ]
+  scopes = [
+    "read:weather",
+    "write:reports"
+  ]
+
+  quota               = "10000"
+  quota_interval      = "1"
+  quota_time_unit     = "day"
+  quota_counter_scope = "PROXY"
 
   depends_on = [
     google_apigee_instance.apigee_instance

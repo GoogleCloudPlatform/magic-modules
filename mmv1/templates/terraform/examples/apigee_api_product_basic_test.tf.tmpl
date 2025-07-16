@@ -72,3 +72,15 @@ resource "google_apigee_instance" "apigee_instance" {
   org_id             = google_apigee_organization.apigee_org.id
   peering_cidr_range = "SLASH_22"
 }
+
+resource "google_apigee_api_product" "{{$.PrimaryResourceId}}" {
+  org_id       = google_apigee_organization.apigee_org.id
+  name         = "basic-api-product"
+  display_name = "My Basic API Product"
+
+  approval_type = "auto"
+
+  depends_on = [
+    google_apigee_instance.apigee_instance
+  ]
+}
