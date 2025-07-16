@@ -1820,6 +1820,20 @@ func (r Resource) CaiProductBaseUrl() string {
 	return baseUrl
 }
 
+// Gets the CAI product legacy base url.
+// For example, https://www.googleapis.com/compute/v1/ for compute
+func (r Resource) CaiProductLegacyBaseUrl() string {
+	version := r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName)
+	baseUrl := version.CaiLegacyBaseUrl
+	if baseUrl == "" {
+		baseUrl = version.CaiBaseUrl
+	}
+	if baseUrl == "" {
+		baseUrl = version.BaseUrl
+	}
+	return baseUrl
+}
+
 // Returns the Cai product backend name from the version base url
 // base_url: https://accessapproval.googleapis.com/v1/ -> accessapproval
 func (r Resource) CaiProductBackendName(caiProductBaseUrl string) string {
