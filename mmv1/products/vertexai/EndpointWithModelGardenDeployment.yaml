@@ -16,9 +16,9 @@ name: EndpointWithModelGardenDeployment
 api_resource_type_kind: Endpoint
 description: |
   Create an Endpoint and deploy a Model Garden model to it.
-  
+
   ~> **Note:** This resource does not currently support deletion via Terraform and must be manually deleted if not in use.
-  See https://cloud.google.com/vertex-ai/docs/predictions/undeploy-model for instructions on how to undeploy a model and delete an endpoint 
+  See https://cloud.google.com/vertex-ai/docs/predictions/undeploy-model for instructions on how to undeploy a model and delete an endpoint
   via the Google Cloud console.
 references:
   guides:
