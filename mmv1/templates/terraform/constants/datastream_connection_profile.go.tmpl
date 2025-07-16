@@ -14,7 +14,7 @@
 func resourceDataStreamStreamCreateWithoutValidationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// If the old value was "false" and the new value is now unset (empty string),
 	// return true to suppress the diff.
-	if old == "false" && new == "" {
+	if (old == "" && new == "false") || (old == "false" && new == "") {
 		d.Set("create_without_validation", "false")
 		return true
 	}
