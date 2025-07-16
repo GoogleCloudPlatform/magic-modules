@@ -1,0 +1,10 @@
+resource "google_cloudbuild_trigger" "{{$.PrimaryResourceId}}" {
+  location = "us-central1"
+
+  developer_connect_event_config {
+    git_repository_link = "projects/123456789/locations/location/connections/connection_name/gitRepositoryLinks/repo_link_name"
+    push {
+      branch = "feature-.*"
+    }
+  }
+}
