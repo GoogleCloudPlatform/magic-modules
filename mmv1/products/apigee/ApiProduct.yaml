@@ -25,11 +25,12 @@ self_link: "{{org_id}}/apiproducts/{{name}}"
 import_format:
   - "{{org_id}}/apiproducts/{{name}}"
   - "{{org_id}}/{{name}}"
-custom_code:
-  custom_import: "templates/terraform/custom_import/apigee_api_product.go.tmpl"
+# custom_code:
+#   custom_import: "templates/terraform/custom_import/apigee_api_product.go.tmpl"
 examples:
   - name: "apigee_api_product_basic"
     vars:
+      instance_name: "my-instance"
       product_name: "my-product"
     exclude_test: true
   - name: "apigee_api_product_basic_test"
@@ -41,6 +42,7 @@ examples:
     external_providers: ["time"]
   - name: "apigee_api_product_with_attributes"
     vars:
+      instance_name: "my-instance"
       product_name: "my-product"
     exclude_test: true
   - name: "apigee_api_product_with_attributes_test"
@@ -92,6 +94,7 @@ properties:
 
   - name: "attributes"
     type: Array
+    is_set: true
     description: |
       Array of attributes that may be used to extend the default API product profile with customer-specific metadata. You can specify a maximum of 18 attributes.
       Use this property to specify the access level of the API product as either public, private, or internal.
@@ -109,6 +112,7 @@ properties:
 
   - name: "apiResources"
     type: Array
+    is_set: true
     description: |
       Comma-separated list of API resources to be bundled in the API product. By default, the resource paths are mapped from the proxy.pathsuffix variable.
       The proxy path suffix is defined as the URI fragment following the ProxyEndpoint base path. For example, if the apiResources element is defined to be /forecastrss and the base path defined for the API proxy is /weather, then only requests to /weather/forecastrss are permitted by the API product.
@@ -117,6 +121,7 @@ properties:
 
   - name: "environments"
     type: Array
+    is_set: true
     description: |
       Comma-separated list of environment names to which the API product is bound. Requests to environments that are not listed are rejected.
       By specifying one or more environments, you can bind the resources listed in the API product to a specific environment, preventing developers from accessing those resources through API proxies deployed in another environment.
@@ -124,6 +129,7 @@ properties:
       type: String
   - name: "proxies"
     type: Array
+    is_set: true
     description: |
       Comma-separated list of API proxy names to which this API product is bound. By specifying API proxies, you can associate resources in the API product with specific API proxies, preventing developers from accessing those resources through other API proxies.
       Apigee rejects requests to API proxies that are not listed.
@@ -151,7 +157,7 @@ properties:
   - name: "quotaTimeUnit"
     type: String
     description: |
-      Time unit defined for the quotaInterval. Valid values include minute, hour, day, or month.
+      Time unit defined for the quotaInterval. Valid values include second, minute, hour, day, month or year.
 
   - name: "createdAt"
     type: String
@@ -173,6 +179,7 @@ properties:
     properties:
       - name: "operationConfigs"
         type: Array
+        is_set: true
         description: |
           Required. List of operation configurations for either Apigee API proxies or other remote services that are associated with this API product.
         item_type:
@@ -196,6 +203,7 @@ properties:
                       Required. REST resource path associated with the API proxy or remote service.
                   - name: "methods"
                     type: Array
+                    is_set: true
                     description: |
                       Methods refers to the REST verbs, when none specified, all verb types are allowed.
                     item_type:
@@ -216,9 +224,10 @@ properties:
                 - name: "timeUnit"
                   type: String
                   description: |
-                    Time unit defined for the interval. Valid values include minute, hour, day, or month. If limit and interval are valid, the default value is hour; otherwise, the default is null.
+                    Time unit defined for the interval. Valid values include second, minute, hour, day, month or year. If limit and interval are valid, the default value is hour; otherwise, the default is null.
             - name: "attributes"
               type: Array
+              is_set: true
               description: |
                 Custom attributes associated with the operation.
               item_type:
@@ -247,6 +256,7 @@ properties:
     properties:
       - name: "operationConfigs"
         type: Array
+        is_set: true
         description: |
           List of graphQL operation configuration details associated with Apigee API proxies or remote services. Remote services are non-Apigee proxies, such as Istio-Envoy.
         item_type:
@@ -258,6 +268,7 @@ properties:
                 Required. Name of the API proxy endpoint or remote service with which the GraphQL operation and quota are associated.
             - name: "operations"
               type: Array
+              is_set: true
               description: |
                 Required. List of GraphQL name/operation type pairs for the proxy or remote service to which quota will be applied. If only operation types are specified, the quota will be applied to all GraphQL requests irrespective of the GraphQL name.
 
@@ -267,17 +278,16 @@ properties:
                 properties:
                   - name: "operationTypes"
                     type: Array
+                    is_set: true
                     description: |
                       Required. GraphQL operation types. Valid values include query or mutation.
                       Note: Apigee does not currently support subscription types.
                     item_type:
                       type: String
                   - name: "operation"
-                    type: Array
+                    type: String
                     description: |
                       GraphQL operation name. The name and operation type will be used to apply quotas. If no name is specified, the quota will be applied to all GraphQL operations irrespective of their operation names in the payload.
-                    item_type:
-                      type: String
             - name: "quota"
               type: NestedObject
               description: |
@@ -294,9 +304,10 @@ properties:
                 - name: "timeUnit"
                   type: String
                   description: |
-                    Time unit defined for the interval. Valid values include minute, hour, day, or month. If limit and interval are valid, the default value is hour; otherwise, the default is null.
+                    Time unit defined for the interval. Valid values include second, minute, hour, day, month or year. If limit and interval are valid, the default value is hour; otherwise, the default is null.
             - name: "attributes"
               type: Array
+              is_set: true
               description: |
                 Custom attributes associated with the operation.
               item_type:
@@ -325,6 +336,7 @@ properties:
     properties:
       - name: "operationConfigs"
         type: Array
+        is_set: true
         description: |
           Required. List of operation configurations for either Apigee API proxies that are associated with this API product.
         item_type:
@@ -336,6 +348,7 @@ properties:
                 Required. Name of the API proxy with which the gRPC operation and quota are associated.
             - name: "methods"
               type: Array
+              is_set: true
               description: |
                 List of unqualified gRPC method names for the proxy to which quota will be applied. If this field is empty, the Quota will apply to all operations on the gRPC service defined on the proxy.
 
@@ -360,9 +373,10 @@ properties:
                 - name: "timeUnit"
                   type: String
                   description: |
-                    Time unit defined for the interval. Valid values include minute, hour, day, or month. If limit and interval are valid, the default value is hour; otherwise, the default is null.
+                    Time unit defined for the interval. Valid values include second, minute, hour, day, month or year. If limit and interval are valid, the default value is hour; otherwise, the default is null.
             - name: "attributes"
               type: Array
+              is_set: true
               description: |
                 Custom attributes associated with the operation.
               item_type:
