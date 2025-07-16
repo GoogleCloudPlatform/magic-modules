@@ -1381,7 +1381,7 @@ resource "google_secret_manager_secret" "secret-tags" {
   tags = {
 	"%{org}/%{tagKey}" = "%{tagValue}"
   }
-  deletion_protection = true
+  deletion_protection = false
 }
 `, context)
 }
