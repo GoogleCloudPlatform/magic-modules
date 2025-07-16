@@ -12,7 +12,11 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
 
   gce_setup {
     machine_type = "e2-standard-4"
-    
+
+    service_accounts {
+      email = "{{index $.TestEnvVars "service_account"}}"
+    }
+
     metadata = {
       terraform = "true"
     }
