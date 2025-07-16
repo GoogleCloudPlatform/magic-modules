@@ -7,14 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-
-	{{- if ne $.TargetVersionName "ga" }}
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	{{- end }}
-
-	{{- if ne $.TargetVersionName "ga" }}
-	compute "google.golang.org/api/compute/v0.beta"
-	{{- end }}
 )
 
 func TestAccComputeRouter_basic(t *testing.T) {
@@ -221,10 +213,7 @@ func TestAccComputeRouter_addAndUpdateIdentifierRangeBgp(t *testing.T) {
 
 {{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeRouter_resourceManagerTags(t *testing.T) {
-
 	t.Parallel()
-
-	var router compute.Router
 	org := envvar.GetTestOrgFromEnv(t)
 
 	suffixName := acctest.RandString(t, 10)
@@ -249,10 +238,12 @@ func TestAccComputeRouter_resourceManagerTags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeRouter_resourceManagerTags(context),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeRouterExists(
-						t, "google_compute_router.acc_router_with_resource_manager_tags", &router),
-				),
+			},
+			{
+				ResourceName:      "google_compute_router.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"params"},
 			},
 		},
 	})
@@ -436,39 +427,8 @@ resource "google_compute_router" "foobar" {
 `, routerName, routerName)
 }
 
+
 {{- if ne $.TargetVersionName "ga" }}
-func testAccCheckComputeRouterExists(t *testing.T, n string, router *compute.Router) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No ID is set")
-		}
-
-		config := acctest.GoogleProviderConfig(t)
-		region := rs.Primary.Attributes["region"]
-		router_name := rs.Primary.Attributes["name"]
-
-		found, err := config.NewComputeClient(config.UserAgent).Routers.Get(
-			config.Project, region, router_name).Do()
-		if err != nil {
-			return err
-		}
-
-		if found.Name != router_name {
-			return fmt.Errorf("Router not found")
-		}
-
-		*router = *found
-
-		return nil
-	}
-}
-{{- end }}
-
 func testAccComputeRouter_resourceManagerTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 		resource "google_compute_network" "foobar" {
@@ -498,3 +458,4 @@ func testAccComputeRouter_resourceManagerTags(context map[string]interface{}) st
 		}
 		`, context)
 }
+{{- end }}
