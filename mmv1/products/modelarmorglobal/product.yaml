@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,14 +12,15 @@
 # limitations under the License.
 
 ---
-name: 'Compute'
-display_name: 'Compute Engine'
-versions:
-  - name: 'ga'
-    base_url: 'https://compute.googleapis.com/compute/v1/'
-    cai_legacy_base_url: 'https://www.googleapis.com/compute/v1/'
-  - name: 'beta'
-    base_url: 'https://compute.googleapis.com/compute/beta/'
-    cai_legacy_base_url: 'https://www.googleapis.com/compute/v1/'
+name: ModelArmorGlobal
+legacy_name: model_armor
+display_name: Model Armor
 scopes:
-  - 'https://www.googleapis.com/auth/compute'
+ - https://www.googleapis.com/auth/cloud-platform
+versions:
+ - name: ga
+   base_url: 'https://modelarmor.googleapis.com/v1/'
+   cai_base_url: "https://modelarmor.googleapis.com/v1/"
+ - name: beta
+   base_url: 'https://modelarmor.googleapis.com/v1beta/'
+   cai_base_url: "https://modelarmor.googleapis.com/v1beta/"
