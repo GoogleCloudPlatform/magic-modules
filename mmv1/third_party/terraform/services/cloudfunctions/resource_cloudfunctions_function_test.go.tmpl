@@ -679,7 +679,7 @@ func TestAccCloudFunctionsFunction_abiuCRUD(t *testing.T) {
 					testAccCloudFunctionsFunctionExists(
 						t, funcResourceName, &function),
 					resource.TestCheckResourceAttrSet(funcResourceName,
-						"automatic_update_policy"),
+						"automatic_update_policy.#"),
 				),
 			},
 			{
