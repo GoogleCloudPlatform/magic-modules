@@ -1,5 +1,5 @@
 resource "google_apphub_application" "my_apphub_application" {
-  location       = "us-central1"
+  location = "us-central1"
   application_id = "{{index $.Vars "apphub_application_name"}}"
   display_name = "{{index $.Vars "apphub_application_display_name"}}"
   scope {
@@ -9,11 +9,11 @@ resource "google_apphub_application" "my_apphub_application" {
 }
 
 resource "google_developer_connect_insights_config" "{{$.PrimaryResourceId}}" {
-  location           = "us-central1"
+  location = "us-central1"
   insights_config_id = "{{index $.Vars "insights_config_name"}}"
-  app_hub_application =  format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
-			446361771066,
+  app_hub_application = format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
+			"devconnect-insights-terraform",
 			google_apphub_application.my_apphub_application.location,
 			google_apphub_application.my_apphub_application.application_id)
-  project         = "{{index $.TestEnvVars "devconnect-insights-terraform"}}"
+  project = "{{index $.TestEnvVars "devconnect-insights-terraform"}}"
 }
