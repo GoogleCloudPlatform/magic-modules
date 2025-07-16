@@ -2330,10 +2330,9 @@ func AddBigQueryDatasetReplica(projectID string,datasetID string,primaryLocation
 
 	err = datasetRef.Create(ctx, datasetMetadata)
 	if err != nil {
-		log.Printf("failed to create BigQuery dataset '%s': %w", datasetID, err)
-	}
-	else{
-	log.Printf("INFO: Successfully created BigQuery dataset '%s' at location '%s'.", datasetID, primaryLocation)
+    log.Printf("failed to create BigQuery dataset '%s': %w", datasetID, err)
+	} else {
+    log.Printf("INFO: Successfully created BigQuery dataset '%s' at location '%s'.", datasetID, primaryLocation)
 	}
 
 	sqlQuery := fmt.Sprintf(
