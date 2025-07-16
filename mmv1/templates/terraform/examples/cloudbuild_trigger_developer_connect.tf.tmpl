@@ -1,4 +1,4 @@
-resource "google_cloudbuild_trigger" "{{$.PrimaryResourceId}}" {
+resource "google_cloudbuild_trigger" "developer-connect-trigger" {
   location = "us-central1"
 
   developer_connect_event_config {
@@ -7,4 +7,5 @@ resource "google_cloudbuild_trigger" "{{$.PrimaryResourceId}}" {
       branch = "feature-.*"
     }
   }
+  filename = "cloudbuild.yaml"
 }
