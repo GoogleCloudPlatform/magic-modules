@@ -37,6 +37,7 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 examples:
   - name: 'vertex_ai_reasoning_engine_basic'
     primary_resource_id: 'reasoning_engine'
@@ -57,10 +58,9 @@ properties:
   - name: 'name'
     type: String
     description: |-
-      The name of the ReasoningEngine. Must be in the format
+      The generated name of the ReasoningEngine, in the format
       'projects/{project}/locations/{location}/reasoningEngines/{reasoningEngine}'
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
-    required: true
+    output: true
   - name: 'displayName'
     type: String
     description: The display name of the ReasoningEngine.
