@@ -123,7 +123,7 @@ resource "google_bigquery_analytics_hub_listing_subscription" "subscription" {
 func TestAccBigqueryAnalyticsHubListingSubscription_bigqueryAnalyticshubListingSubscriptionMultiregionExample(t *testing.T) {
 	t.Parallel()
 
-	bqdataset, err := acctest.AddBigQueryDatasetReplica(acctest.GoogleProviderConfig(t).Project, "my_listing_example2", "us", "eu")
+	bqdataset, err := acctest.AddBigQueryDatasetReplica(envvar.GetTestProjectFromEnv(), "my_listing_example2", "us", "eu")
 	if err != nil {
 		// If an error occurs, fail the test immediately and log the error.
 		t.Fatalf("Failed to create BigQuery dataset and add replica: %v", err)
@@ -133,7 +133,7 @@ func TestAccBigqueryAnalyticsHubListingSubscription_bigqueryAnalyticshubListingS
 		"bqdataset":     bqdataset,
 	}
 	t.Cleanup(func() {
-		acctest.CleanupBigQueryDatasetAndReplica(acctest.GoogleProviderConfig(t).Project, "my_listing_example2", "eu")
+		acctest.CleanupBigQueryDatasetAndReplica(envvar.GetTestProjectFromEnv(), "my_listing_example2", "eu")
 	})
 
 	acctest.VcrTest(t, resource.TestCase{
