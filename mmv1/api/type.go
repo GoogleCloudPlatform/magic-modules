@@ -434,7 +434,7 @@ func (t Type) Lineage() string {
 // This format is intended for resource metadata, to be used for connecting a Terraform
 // type with a corresponding API type.
 func (t Type) MetadataLineage() string {
-	if t.ParentMetadata == nil {
+	if t.ParentMetadata == nil || t.ParentMetadata.FlattenObject {
 		return google.Underscore(t.Name)
 	}
 
