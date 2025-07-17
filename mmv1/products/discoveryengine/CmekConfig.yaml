@@ -25,7 +25,7 @@ self_link: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_confi
 create_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}?&setDefault={{set_default}}'
 create_verb: 'PATCH'
 update_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
-update_verb: 'PATCH'
+update_verb: 'PUT'
 delete_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
