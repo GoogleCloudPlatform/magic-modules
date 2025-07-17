@@ -22,12 +22,15 @@ func ParseFieldValue(url string, name string) string {
 	return ""
 }
 
-// ParseUrlParamValuesFromAssetName uses the self link as a guide to parsing hcl data from an asset name
-// For example, if self link is projects/{{project}}/datasets/{{dataset_id}},
-// and asset name is //bigquery.googleapis.com/projects/my-project/datasets/my-dataset,
-// hclData should contain [project:my-project dataset_id:my-dataset]
-func ParseUrlParamValuesFromAssetName(assetName string, selfLink string, hclData map[string]any) {
-	fragments := strings.Split(selfLink, "/")
+/*
+	ParseUrlParamValuesFromAssetName uses CaiAssetNameTemplate to parse hclData from assetName
+
+template: //bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}
+assetName: //bigquery.googleapis.com/projects/my-project/datasets/my-dataset
+hclData: [project:my-project dataset_id:my-dataset]
+*/
+func ParseUrlParamValuesFromAssetName(assetName string, template string, hclData map[string]any) {
+	fragments := strings.Split(template, "/")
 	if len(fragments) < 2 {
 		// We need a field and a prefix.
 		return
