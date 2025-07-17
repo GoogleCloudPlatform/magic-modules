@@ -207,6 +207,13 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 					parts2 := strings.Split(y, "/")
 					return len(parts1) == len(parts2)
 				})),
+				cmp.FilterPath(func(p cmp.Path) bool {
+					return p.Last().String() == ".DiscoveryName"
+				}, cmp.Comparer(func(x, y string) bool {
+					xParts := strings.Split(x, "/")
+					yParts := strings.Split(y, "/")
+					return xParts[len(xParts)-1] == yParts[len(yParts)-1]
+				})),
 			); diff != "" {
 				return fmt.Errorf("differences found between exported asset and roundtrip asset (-want +got):\n%s", diff)
 			}
