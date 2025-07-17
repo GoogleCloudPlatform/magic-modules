@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -46,7 +46,7 @@ examples:
 custom_code:
   post_update: 'templates/terraform/post_update/bigquery_analytics_hub_query_template.go.tmpl'
   pre_update: 'templates/terraform/pre_update/bigquery_analytics_hub_query_template.go.tmpl'
-  post_create: 'templates/terraform/post_update/bigquery_analytics_hub_query_template.go.tmpl'
+  post_create: 'templates/terraform/post_create/bigquery_analytics_hub_query_template.go.tmpl'
 virtual_fields:
   - name: 'submit'
     type: Boolean
@@ -99,15 +99,9 @@ properties:
     description: 'Documentation describing the QueryTemplate.'
     immutable: true
   - name: 'state'
-    type: Enum
+    type: String
     description: 'The QueryTemplate lifecycle state.'
     output: true
-    enum_values:
-      - 'STATE_UNSPECIFIED'
-      - 'DRAFTED'
-      - 'PENDING'
-      - 'DELETED'
-      - 'APPROVED'
   - name: 'routine'
     type: NestedObject
     description: 'The routine associated with the QueryTemplate.'
