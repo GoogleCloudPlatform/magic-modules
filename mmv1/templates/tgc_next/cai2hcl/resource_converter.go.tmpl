@@ -112,7 +112,6 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 {{/* Attempt to parse all self-link parameters from asset name. */}}
 	utils.ParseUrlParamValuesFromAssetName(asset.Name, "{{ $.CaiAssetNameTemplate }}", hclData)
 {{ if $.HasProject -}}
-	hclData["project"] = utils.ParseFieldValue(asset.Name, "projects")
 {{- end}}
 {{ range $prop := $.ReadPropertiesForTgc }}
 	{{ if $prop.FlattenObject -}}
