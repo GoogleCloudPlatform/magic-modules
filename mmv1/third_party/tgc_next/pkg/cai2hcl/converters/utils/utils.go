@@ -28,7 +28,7 @@ func ParseFieldValue(url string, name string) string {
 // hclData should contain [project:my-project dataset_id:my-dataset]
 func ParseUrlParamValuesFromAssetName(assetName string, selfLink string, hclData map[string]any) {
 	fragments := strings.Split(selfLink, "/")
-	if len(fragments) > 2 {
+	if len(fragments) < 2 {
 		// We need a field and a prefix.
 		return
 	}
