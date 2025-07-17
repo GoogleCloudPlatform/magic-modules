@@ -912,6 +912,9 @@ func (t Type) UserProperties() []*Type {
 		}
 
 		return google.Reject(t.Properties, func(p *Type) bool {
+			if t.ResourceMetadata.IsTgcCompiler() {
+				return p.Exclude || p.Output
+			}
 			return p.Exclude
 		})
 	}
