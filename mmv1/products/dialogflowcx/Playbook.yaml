@@ -40,21 +40,11 @@ examples:
     primary_resource_id: "my-playbook"
     vars:
       agent_name: 'dialogflowcx-agent-basic'
-    ignore_read_extra:
-      - 'handlers.0.handlers.0.event_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
-      - 'handlers.0.handlers.0.event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
-      - 'handlers.0.handlers.0.lifecycle_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
-      - 'handlers.0.handlers.0.lifecycle_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
   - name: "dialogflowcx_playbook_fulfillment"
     primary_resource_id: "my-playbook"
     vars:
       agent_name: 'dialogflowcx-agent'
       bucket_name: 'dialogflowcx-bucket'
-    ignore_read_extra:
-      - 'handlers.0.handlers.0.event_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
-      - 'handlers.0.handlers.0.event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
-      - 'handlers.0.handlers.0.lifecycle_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
-      - 'handlers.0.handlers.0.lifecycle_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
 
 parameters:
   - name: 'parent'
@@ -168,6 +158,7 @@ properties:
           The custom prompt to use.
   - name: 'handlers'
     type: Array
+    custom_flatten: 'templates/terraform/custom_flatten/dialogflowcx_playbook_handlers.go.tmpl'
     description: |
       A list of registered handlers to execute based on the specified triggers.
     item_type:
