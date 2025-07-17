@@ -23,32 +23,6 @@ func ParseFieldValue(url string, name string) string {
 	return ""
 }
 
-// ParseUrlParamValuesFromAssetName uses the self link as a guide to parsing hcl data from an asset name
-// For example, if self link is projects/{{project}}/datasets/{{dataset_id}},
-// and asset name is //bigquery.googleapis.com/projects/my-project/datasets/my-dataset,
-// hclData should contain [project:my-project dataset_id:my-dataset]
-func ParseUrlParamValuesFromAssetName(assetName string, selfLink string, hclData map[string]any) {
-	fragments := strings.Split(selfLink, "/")
-	if len(fragments) > 2 {
-		// We need a field and a prefix.
-		return
-	}
-	fields := make(map[string]string) // keys are prefixes in URI, values are names of fields
-	for ix, item := range fragments[1:] {
-		if trimmed, ok := strings.CutPrefix(item, "{{"); ok {
-			if trimmed, ok = strings.CutSuffix(trimmed, "}}"); ok {
-				fields[fragments[ix-1]] = trimmed
-			}
-		}
-	}
-	fragments = strings.Split(assetName, "/")
-	for ix, item := range fragments[:len(fragments)-1] {
-		if fieldName, ok := fields[item]; ok {
-			hclData[fieldName] = fragments[ix+1]
-		}
-	}
-}
-
 // DecodeJSON decodes the map object into the target struct.
 func DecodeJSON(data map[string]interface{}, v interface{}) error {
 	b, err := json.Marshal(data)
