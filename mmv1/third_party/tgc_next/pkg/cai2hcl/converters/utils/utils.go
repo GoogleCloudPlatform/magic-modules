@@ -36,7 +36,7 @@ func ParseUrlParamValuesFromAssetName(assetName string, selfLink string, hclData
 	for ix, item := range fragments[1:] {
 		if trimmed, ok := strings.CutPrefix(item, "{{"); ok {
 			if trimmed, ok = strings.CutSuffix(trimmed, "}}"); ok {
-				fields[fragments[ix-1]] = trimmed
+				fields[fragments[ix]] = trimmed // ix is relative to the subslice
 			}
 		}
 	}
