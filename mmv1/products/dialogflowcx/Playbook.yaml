@@ -46,8 +46,10 @@ examples:
       agent_name: 'dialogflowcx-agent'
       bucket_name: 'dialogflowcx-bucket'
     ignore_read_extra:
-      - 'advanced_settings.0.logging_settings'
-      - 'advanced_settings.0.audio_export_gcs_destination'
+      - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
+      - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
+      - 'handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
+      - 'handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
 
 parameters:
   - name: 'parent'
