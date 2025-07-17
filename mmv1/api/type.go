@@ -1006,9 +1006,6 @@ func (t *Type) validateLabelsField() {
 			// https://github.com/hashicorp/terraform-provider-google/issues/16219
 			!(productName == "Edgenetwork" && resourceName == "Subnet") &&
 
-			// "userLabels" is the resource labels field
-			!(productName == "Monitoring" && resourceName == "NotificationChannel") &&
-
 			// The "labels" field has type Array, so skip this resource
 			!(productName == "Monitoring" && resourceName == "MetricDescriptor") {
 			log.Fatalf("Please use type KeyValueLabels for field %s in resource %s/%s", lineage, productName, resourceName)

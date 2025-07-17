@@ -149,3 +149,23 @@ Remove `description` from your configuration after upgrade.
 ### `replication_spec.gcs_data_source.path` Implemented validation to prevent strings from starting with a '/' character, while still permitting empty strings."
 
 ### `replication_spec.gcs_data_sink.path` Implemented validation to prevent strings from starting with a '/' character, while still permitting empty strings."
+
+## Resource: `google_monitoring_notification_channel`
+
+### Three label-related fields are now present
+
+* `labels` field is non-authoritative and only manages the labels defined by
+the users on the resource through Terraform.
+* The new output-only `terraform_labels` field merges the labels defined by the users
+on the resource through Terraform and the default labels configured on the provider.
+* The new output-only `effective_labels` field lists all of labels present on the resource
+in GCP, including the labels configured through Terraform, the system, and other clients.
+
+## Data source: `google_monitoring_notification_channel`
+
+### Three label-related fields are now present
+
+All three of `labels`, `effective_labels` and `terraform_labels` will now be present.
+All of these three fields include all of the labels present on the resource in GCP including
+the labels configured through Terraform, the system, and other clients, equivalent to
+`effective_labels` on the resource.
