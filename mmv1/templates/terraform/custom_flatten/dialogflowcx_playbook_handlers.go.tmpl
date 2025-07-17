@@ -845,7 +845,7 @@ func flattenDialogflowCXPlaybookHandlersEventHandlerFulfillmentAdvancedSettings(
 	return []interface{}{transformed}
 }
 func flattenDialogflowCXPlaybookHandlersEventHandlerFulfillmentAdvancedSettingsAudioExportGcsDestination(v interface{}, d *schema.ResourceData, config *transport_tpg.Config, index int) interface{}  {
-	return d.Get("handlers." + index + ".event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination")
+	return d.Get(fmt.Sprintf("%s%d%s", "handlers.", index, ".event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination"))
 }
 func flattenDialogflowCXPlaybookHandlersEventHandlerFulfillmentAdvancedSettingsAudioExportGcsDestinationUri(v interface{}, d *schema.ResourceData, config *transport_tpg.Config, index int) interface{}  {
 	return v
@@ -954,7 +954,7 @@ func flattenDialogflowCXPlaybookHandlersEventHandlerFulfillmentAdvancedSettingsD
 }
 
 func flattenDialogflowCXPlaybookHandlersEventHandlerFulfillmentAdvancedSettingsLoggingSettings(v interface{}, d *schema.ResourceData, config *transport_tpg.Config, index int) interface{}  {
-	return d.Get("handlers." + index + ".event_handler.0.fulfillment.0.advanced_settings.0.logging_settings")
+	return d.Get(fmt.Sprintf("%s%d%s", "handlers.", index, ".event_handler.0.fulfillment.0.advanced_settings.0.logging_settings"))
 }
 func flattenDialogflowCXPlaybookHandlersEventHandlerFulfillmentAdvancedSettingsLoggingSettingsEnableInteractionLogging(v interface{}, d *schema.ResourceData, config *transport_tpg.Config, index int) interface{}  {
 	return v
@@ -1836,7 +1836,7 @@ func flattenDialogflowCXPlaybookHandlersLifecycleHandlerFulfillmentAdvancedSetti
 	return []interface{}{transformed}
 }
 func flattenDialogflowCXPlaybookHandlersLifecycleHandlerFulfillmentAdvancedSettingsAudioExportGcsDestination(v interface{}, d *schema.ResourceData, config *transport_tpg.Config, index int) interface{}  {
-	return d.Get("handlers." + index + ".lifecycle_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination")
+	return d.Get(fmt.Sprintf("%s%d%s", "handlers.", index, ".lifecycle_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination"))
 }
 func flattenDialogflowCXPlaybookHandlersLifecycleHandlerFulfillmentAdvancedSettingsAudioExportGcsDestinationUri(v interface{}, d *schema.ResourceData, config *transport_tpg.Config, index int) interface{}  {
 	return v
@@ -1945,7 +1945,7 @@ func flattenDialogflowCXPlaybookHandlersLifecycleHandlerFulfillmentAdvancedSetti
 }
 
 func flattenDialogflowCXPlaybookHandlersLifecycleHandlerFulfillmentAdvancedSettingsLoggingSettings(v interface{}, d *schema.ResourceData, config *transport_tpg.Config, index int) interface{}  {
-	return d.Get("handlers." + index + ".lifecycle_handler.0.fulfillment.0.advanced_settings.0.logging_settings")
+	return d.Get(fmt.Sprintf("%s%d%s", "handlers.", index, ".lifecycle_handler.0.fulfillment.0.advanced_settings.0.logging_settings"))
 }
 func flattenDialogflowCXPlaybookHandlersLifecycleHandlerFulfillmentAdvancedSettingsLoggingSettingsEnableInteractionLogging(v interface{}, d *schema.ResourceData, config *transport_tpg.Config, index int) interface{}  {
 	return v
