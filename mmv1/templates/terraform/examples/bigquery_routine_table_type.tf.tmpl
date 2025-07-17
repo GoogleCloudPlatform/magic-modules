@@ -1,5 +1,5 @@
 resource "google_bigquery_dataset" "test" {
-	dataset_id = "{{index $.Vars "dataset_id"}}"
+  dataset_id = "{{index $.Vars "dataset_id"}}"
 }
 
 resource "google_bigquery_routine" "sproc" {

@@ -379,7 +379,7 @@ func TestAccBigQueryRoutine_bigqueryRoutineTableTypeUpdate(t *testing.T) {
 func testAccBigQueryRoutine_bigqueryRoutineTableTypeUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigquery_dataset" "test" {
-	dataset_id = "tf_test_dataset_id%{random_suffix}"
+  dataset_id = "tf_test_dataset_id%{random_suffix}"
 }
 
 resource "google_bigquery_routine" "sproc" {
@@ -398,7 +398,7 @@ resource "google_bigquery_routine" "sproc" {
         name = "year1"
         type = jsonencode({ "typeKind" : "INT64" })
       }
-        columns {
+      columns {
         name = "year2"
         type = jsonencode({ "typeKind" : "INT64" })
       }

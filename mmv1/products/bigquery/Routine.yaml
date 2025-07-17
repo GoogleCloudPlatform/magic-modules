@@ -201,7 +201,7 @@ properties:
                   - name: 'type'
                     type: String
                     description: |
-                      A JSON schema for the data type of the column.Required unless argumentKind = ANY_TYPE.
+                      A JSON schema for the data type of the column. Required unless argumentKind = ANY_TYPE.
                       ~>**NOTE**: Because this field expects a JSON string, any changes to the string
                       will create a diff, even if the JSON itself hasn't changed. If the API returns
                       a different value for the same schema, e.g. it switched the order of values
