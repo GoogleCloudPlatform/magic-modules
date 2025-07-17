@@ -1,10 +1,5 @@
-data "google_project" "project" {
-}
-
 resource "google_discovery_engine_cmek_config" "default" {
   location            = "us"
   cmek_config_id      = "{{index $.Vars "cmek_config_id"}}"
   kms_key             = "{{index $.Vars "kms_key_name"}}"
-  kms_key_version     = "{{index $.Vars "kms_key_name"}}/cryptoKeyVersions/1"
-  set_default         = true
 }

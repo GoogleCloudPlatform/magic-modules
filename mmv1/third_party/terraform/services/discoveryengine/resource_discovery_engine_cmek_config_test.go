@@ -46,30 +46,21 @@ func TestAccDiscoveryEngineCmekConfig_discoveryengineCmekconfigDefaultExample_up
 
 func testAccDiscoveryEngineCmekConfig_discoveryengineCmekconfigDefaultExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
-}
-
 resource "google_discovery_engine_cmek_config" "default" {
   location            = "us"
   cmek_config_id      = "tf-test-cmek-config-id%{random_suffix}"
   kms_key             = "%{kms_key_name}"
-  kms_key_version     = "%{kms_key_name}/cryptoKeyVersions/1"
-  set_default         = true
 }
 `, context)
 }
 
 func testAccDiscoveryEngineCmekConfig_discoveryengineCmekconfigDefaultExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-data "google_project" "project" {
-}
-
 resource "google_discovery_engine_cmek_config" "default" {
   location            = "us"
   cmek_config_id      = "tf-test-cmek-config-id%{random_suffix}"
   kms_key             = "%{kms_key_name}"
-  kms_key_version     = "%{kms_key_name}/cryptoKeyVersions/1"
-  set_default         = true
+  set_default         = false
   single_region_keys { 
     kms_key = "%{single_region_kms_key_name1}"
   }
