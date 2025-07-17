@@ -12,14 +12,15 @@
 # limitations under the License.
 
 ---
-name: ModelArmor
+name: ModelArmorGlobal
+legacy_name: model_armor
 display_name: Model Armor
 scopes:
  - https://www.googleapis.com/auth/cloud-platform
 versions:
  - name: ga
-   base_url: 'https://modelarmor.{{location}}.rep.googleapis.com/v1/'
+   base_url: 'https://modelarmor.googleapis.com/v1/'
    cai_base_url: "https://modelarmor.googleapis.com/v1/"
  - name: beta
-   base_url: 'https://modelarmor.{{location}}.rep.googleapis.com/v1beta/'
+   base_url: 'https://modelarmor.googleapis.com/v1beta/'
    cai_base_url: "https://modelarmor.googleapis.com/v1beta/"
