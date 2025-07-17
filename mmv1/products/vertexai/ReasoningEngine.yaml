@@ -47,7 +47,7 @@ examples:
     primary_resource_id: 'reasoning_engine'
     vars:
       name: 'reasoning-engine'
-      bucket_name: 'fmt.Sprintf("tf-test-my-bucket%s", context["random_suffix"])'
+      bucket_name: 'reasoning-engine'
 parameters:
   - name: 'region'
     type: String

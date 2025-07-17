@@ -19,19 +19,19 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
         value = "value_2"
       }
 
-      secretEnv {
+      secret_env {
         name  = "secret_var_1"
 
-        secretRef {
+        secret_ref {
           secret  = google_secret_manager_secret.secret.secret_id
           version = "latest"
         }
       }
 
-      secretEnv {
+      secret_env {
         name  = "secret_var_2"
 
-        secretRef {
+        secret_ref {
           secret  = google_secret_manager_secret.secret.secret_id
           version = "latest"
         }
@@ -39,10 +39,10 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
     }
 
     package_spec {
-      dependencyFilesGcsUri = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_dependencies_tar_gz.name}"
-      pickleObjectGcsUri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_pkl_txt.name}"
-      python_version        = "3.10"
-      requirementsGcsUri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_requirements_txt.name}"
+      dependency_files_gcs_uri = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_dependency_tar_gz.name}"
+      pickle_object_gcs_uri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_pkl_txt.name}"
+      python_version           = "3.10"
+      requirements_gcs_uri     = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_requirements_txt.name}"
     }
   }
 
@@ -62,42 +62,32 @@ resource "google_secret_manager_secret" "secret" {
 resource "google_secret_manager_secret_iam_member" "secret_access" {
   secret_id  = google_secret_manager_secret.secret.id
   role       = "roles/secretmanager.secretAccessor"
-  member     = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+  member     = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
 }
 
 resource "google_storage_bucket" "bucket" {
   name                        = "{{index $.Vars "bucket_name"}}"
   location                    = "us-central1"
   uniform_bucket_level_access = true
-  force_destroy = true        = true
+  force_destroy               = true
 }
 
 resource "google_storage_bucket_object" "bucket_obj_requirements_txt" {
-  name         = "requirements.txt"
-  content      = "requests"
-  content_type = "text/plain"
-  bucket       = google_storage_bucket.bucket.id
+  name   = "requirements.txt"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/requirements.txt"
 }
 
 resource "google_storage_bucket_object" "bucket_obj_pkl_txt" {
-  name         = "pickled_object.pkl"
-  # {'hello': 'world'}
-  content      = "b'\x80\x04\x95\x15\x00\x00\x00\x00\x00\x00\x00}\x94\x8c\x05hello\x94\x8c\x05world\x94s.'"
-  content_type = "text/plain"
-  bucket       = google_storage_bucket.bucket.id
-}
-
-resource "google_storage_bucket_object" "bucket_obj_dependencies_tar_gz" {
-  name   = "dependencies.tar.gz"
-  source = "./dependencies.tar.gz"
+  name   = "pickled_object.pkl"
   bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/pickled_object.pkl"
 }
 
-data "archive_file" "dependencies_tar_gz" {
-  type             = "tar.gz"
-  source_content   = "extra_packages = None"
-  source_file_name = "test.txt"
-  output_path      = "dependencies.tar.gz"
+resource "google_storage_bucket_object" "bucket_obj_dependency_tar_gz" {
+  name   = "dependency.tar.gz"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/dependency.tar.gz"
 }
 
 data "google_project" "project" {
