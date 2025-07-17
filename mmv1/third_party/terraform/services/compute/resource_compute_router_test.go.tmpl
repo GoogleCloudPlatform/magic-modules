@@ -432,11 +432,13 @@ resource "google_compute_router" "foobar" {
 func testAccComputeRouter_resourceManagerTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 		resource "google_compute_network" "foobar" {
+		provider				= google-beta
 		name                    = "%s-net"
 		auto_create_subnetworks = false
 		}
 
 		resource "google_compute_subnetwork" "foobar" {
+		provider                = google-beta
 		name          = "%s-subnet"
 		network       = google_compute_network.foobar.self_link
 		ip_cidr_range = "10.0.0.0/16"
@@ -444,6 +446,7 @@ func testAccComputeRouter_resourceManagerTags(context map[string]interface{}) st
 		}
 
 		resource "google_compute_router" "foobar" {
+		provider                = google-beta
 		name    = "%s"
 		region  = google_compute_subnetwork.foobar.region
 		network = google_compute_network.foobar.name
