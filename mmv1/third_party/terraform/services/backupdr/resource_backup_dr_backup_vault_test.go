@@ -68,7 +68,7 @@ resource "google_backup_dr_backup_vault" "backup-vault-test" {
   force_update = "true"
   ignore_inactive_datasources = "true"
   access_restriction = "WITHIN_ORGANIZATION"
-  backup_retention_inheritance = 'MATCH_BACKUP_EXPIRE_TIME'
+  backup_retention_inheritance = "MATCH_BACKUP_EXPIRE_TIME"
   ignore_backup_plan_references = "true"
   allow_missing = "true"
 }
@@ -93,7 +93,7 @@ resource "google_backup_dr_backup_vault" "backup-vault-test" {
   }
   force_update = "true"
   access_restriction = "WITHIN_ORGANIZATION"
-  backup_retention_inheritance = 'MATCH_BACKUP_EXPIRE_TIME'
+  backup_retention_inheritance = "MATCH_BACKUP_EXPIRE_TIME"
   ignore_inactive_datasources = "true"
   ignore_backup_plan_references = "true"
   allow_missing = "true"
