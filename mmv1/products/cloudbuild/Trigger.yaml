@@ -136,8 +136,8 @@ examples:
       'repo_uri': '"https://github.com/gcb-repos-robot/tf-demo.git"'
   - name: 'cloudbuild_trigger_developer_connect'
     primary_resource_id: 'developer-connect-trigger'
-    vars:
-      project_id: 'your-gcp-project-id'
+    test_vars_overrides:
+      'project_id': "PROJECT_ID"
 parameters:
   - name: 'location'
     type: String
