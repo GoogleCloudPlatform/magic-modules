@@ -11,8 +11,8 @@
 	limitations under the License.
 */ -}}
 
-
-if !d.Get("create_without_validation").(bool) {
+_, exists := d.GetOk("create_without_validation")
+if !exists {
 	url += "false"
 	d.Set("create_without_validation", false)
 }
