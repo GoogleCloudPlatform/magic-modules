@@ -71,8 +71,6 @@ examples:
       firewall_name: 'my-firewall-rule'
     test_env_vars:
       project: 'PROJECT_NAME'
-    tgc_test_ignore_extra:
-      - 'project'
 parameters:
 properties:
   # TODO(nelsonjr): [nice to have] Make the format here simpler to use, in
