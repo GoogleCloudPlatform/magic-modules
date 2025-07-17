@@ -45,6 +45,9 @@ examples:
     vars:
       agent_name: 'dialogflowcx-agent'
       bucket_name: 'dialogflowcx-bucket'
+    ignore_read_extra:
+      - 'advanced_settings.0.logging_settings'
+      - 'advanced_settings.0.audio_export_gcs_destination'
 
 parameters:
   - name: 'parent'
@@ -800,6 +803,8 @@ properties:
                   properties:
                     - name: audioExportGcsDestination
                       type: NestedObject
+                      # This ignore_read field is for annotation only as a custom flatten is used in the parent handlers.
+                      # custom_flatten: 'templates/terraform/custom_flatten/dialogflowcx_playbook_handlers.go.tmpl'
                       ignore_read: true
                       description: |-
                         Google Cloud Storage location for a Dialogflow operation that writes or
@@ -867,6 +872,8 @@ properties:
                     - name: loggingSettings
                       type: NestedObject
                       description: Define behaviors on logging.
+                      # This ignore_read field is for annotation only as a custom flatten is used in the parent handlers.
+                      # custom_flatten: 'templates/terraform/custom_flatten/dialogflowcx_playbook_handlers.go.tmpl'
                       ignore_read: true
                       properties:
                         - name: enableInteractionLogging
@@ -1556,6 +1563,8 @@ properties:
                   properties:
                     - name: audioExportGcsDestination
                       type: NestedObject
+                      # This ignore_read field is for annotation only as a custom flatten is used in the parent handlers.
+                      # custom_flatten: 'templates/terraform/custom_flatten/dialogflowcx_playbook_handlers.go.tmpl'
                       ignore_read: true
                       description: |-
                         Google Cloud Storage location for a Dialogflow operation that writes or
@@ -1622,6 +1631,8 @@ properties:
                           description: Endpoint timeout setting for matching dtmf input to regex.
                     - name: loggingSettings
                       type: NestedObject
+                      # This ignore_read field is for annotation only as a custom flatten is used in the parent handlers.
+                      # custom_flatten: 'templates/terraform/custom_flatten/dialogflowcx_playbook_handlers.go.tmpl'
                       ignore_read: true
                       description: Define behaviors on logging.
                       properties:
