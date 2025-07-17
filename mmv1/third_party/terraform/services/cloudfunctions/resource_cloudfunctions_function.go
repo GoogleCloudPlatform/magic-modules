@@ -494,23 +494,23 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 			},
 
 			"automatic_update_policy": {
-                                Type:        schema.TypeList,
-				Optional:    true,
-				Computed:    true,
+				Type:          schema.TypeList,
+				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"on_deploy_update_policy"},
-				MaxItems:    1,
-				Description: `Security patches are applied automatically to the runtime without requiring the function to be redeployed.`,
+				MaxItems:      1,
+				Description:   `Security patches are applied automatically to the runtime without requiring the function to be redeployed.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{},
 				},
 			},
 
 			"on_deploy_update_policy": {
-                                Type:        schema.TypeList,
-				Optional:    true,
+				Type:          schema.TypeList,
+				Optional:      true,
 				ConflictsWith: []string{"automatic_update_policy"},
-				MaxItems:    1,
-				Description: `Security patches are only applied when a function is redeployed.`,
+				MaxItems:      1,
+				Description:   `Security patches are only applied when a function is redeployed.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"runtime_version": {
@@ -623,10 +623,10 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	if v, ok := d.GetOk("automatic_update_policy"); ok {
-	        function.AutomaticUpdatePolicy = expandAutomaticUpdatePolicy(v.([]interface{}))
-		function.OnDeployUpdatePolicy = nil 
+		function.AutomaticUpdatePolicy = expandAutomaticUpdatePolicy(v.([]interface{}))
+		function.OnDeployUpdatePolicy = nil
 	} else if v, ok := d.GetOk("on_deploy_update_policy"); ok {
-	        function.OnDeployUpdatePolicy = expandOnDeployUpdatePolicy(v.([]interface{}))
+		function.OnDeployUpdatePolicy = expandOnDeployUpdatePolicy(v.([]interface{}))
 		function.AutomaticUpdatePolicy = nil
 	}
 
@@ -848,6 +848,7 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 	if err := d.Set("version_id", strconv.FormatInt(function.VersionId, 10)); err != nil {
 		return fmt.Errorf("Error setting version_id: %s", err)
 	}
+	// check the on_deploy_update_policy first as it's mutually exclusive to automatice_update_policy, and the latter is system default
 	if function.OnDeployUpdatePolicy != nil {
 		if err := d.Set("on_deploy_update_policy", flattenOnDeployUpdatePolicy(function.OnDeployUpdatePolicy)); err != nil {
 			return fmt.Errorf("Error setting on_deploy_update_policy: %s", err)
@@ -859,7 +860,7 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 	}
 
 	if function.AutomaticUpdatePolicy != nil {
-	        if err := d.Set("automatic_update_policy", flattenAutomaticUpdatePolicy(function.AutomaticUpdatePolicy)); err != nil {
+		if err := d.Set("automatic_update_policy", flattenAutomaticUpdatePolicy(function.AutomaticUpdatePolicy)); err != nil {
 			return fmt.Errorf("Error setting automatic_update_policy: %s", err)
 		}
 		d.Set("on_deploy_update_policy", nil)
