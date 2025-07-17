@@ -387,7 +387,6 @@ properties:
                 description: |
                   Authentication type for the user workload running in containers.
                 enum_values:
-                  - AUTHENTICATION_TYPE_UNSPECIFIED
                   - SERVICE_ACCOUNT
                   - END_USER_CREDENTIALS
       - name: 'peripheralsConfig'
