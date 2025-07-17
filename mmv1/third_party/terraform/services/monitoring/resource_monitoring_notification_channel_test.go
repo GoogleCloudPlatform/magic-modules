@@ -20,17 +20,19 @@ func TestAccMonitoringNotificationChannel_update(t *testing.T) {
 				Config: testAccMonitoringNotificationChannel_update("email", `email_address = "fake_email@blahblah.com"`, "true"),
 			},
 			{
-				ResourceName:      "google_monitoring_notification_channel.update",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_monitoring_notification_channel.update",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccMonitoringNotificationChannel_update("sms", `number = "+16502530000"`, "false"),
 			},
 			{
-				ResourceName:      "google_monitoring_notification_channel.update",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_monitoring_notification_channel.update",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
@@ -53,7 +55,7 @@ func TestAccMonitoringNotificationChannel_updateLabels_slack(t *testing.T) {
 				ResourceName:            "google_monitoring_notification_channel.slack",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.%", "labels.auth_token"},
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.auth_token", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -74,13 +76,13 @@ func TestAccMonitoringNotificationChannel_updateLabels(t *testing.T) {
 				ResourceName:            "google_monitoring_notification_channel.pagerduty",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "sensitive_labels"},
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "sensitive_labels", "labels", "terraform_labels"},
 			},
 			{
 				ResourceName:            "google_monitoring_notification_channel.basicauth",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.%", "labels.password", "sensitive_labels"},
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.password", "sensitive_labels", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -105,7 +107,7 @@ func TestAccMonitoringNotificationChannel_updateSensitiveLabels_slack(t *testing
 				ResourceName:            "google_monitoring_notification_channel.slack",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.%", "sensitive_labels.auth_token"},
+				ImportStateVerifyIgnore: []string{"labels.%", "sensitive_labels.auth_token", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -141,6 +143,10 @@ func TestAccMonitoringNotificationChannel_updateSensitiveLabels(t *testing.T) {
 
 func testAccMonitoringNotificationChannel_update(channel, labels, enabled string) string {
 	return fmt.Sprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
 resource "google_monitoring_notification_channel" "update" {
   display_name = "IntTest Notification Channel"
   type         = "%s"
@@ -156,6 +162,10 @@ resource "google_monitoring_notification_channel" "update" {
 
 func testAccMonitoringNotificationChannel_updateLabels_slack() string {
 	return fmt.Sprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
 resource "google_monitoring_notification_channel" "slack" {
 	display_name = "TFTest Slack Channel"
 	type         = "slack"
@@ -169,7 +179,9 @@ resource "google_monitoring_notification_channel" "slack" {
 
 func testAccMonitoringNotificationChannel_updateLabels() string {
 	return fmt.Sprintf(`
-
+provider "google" {
+  add_terraform_attribution_label = false
+}
 
 resource "google_monitoring_notification_channel" "basicauth" {
 	display_name = "TFTest Basicauth Channel"
@@ -193,6 +205,10 @@ resource "google_monitoring_notification_channel" "pagerduty" {
 
 func testAccMonitoringNotificationChannel_updateSensitiveLabels_slack() string {
 	return fmt.Sprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
 resource "google_monitoring_notification_channel" "slack" {
 	display_name = "TFTest Slack Channel"
 	type         = "slack"
@@ -209,6 +225,9 @@ resource "google_monitoring_notification_channel" "slack" {
 
 func testAccMonitoringNotificationChannel_updateSensitiveLabels() string {
 	return fmt.Sprintf(`
+provider "google" {
+  add_terraform_attribution_label = false
+}
 
 resource "google_monitoring_notification_channel" "basicauth" {
 	display_name = "TFTest Basicauth Channel"

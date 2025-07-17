@@ -1,3 +1,7 @@
+provider "google" {
+  add_terraform_attribution_label = false
+}
+
 resource "google_monitoring_notification_channel" "{{$.PrimaryResourceId}}" {
   display_name = "{{index $.Vars "display_name"}}"
   type         = "email"
