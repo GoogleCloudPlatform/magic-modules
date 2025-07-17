@@ -184,7 +184,7 @@ properties:
     description: |
         How a backup's enforced retention end time is inherited.
     immutable: true
-    default_value: 'BACKUP_RETENTION_INHERITANCE_UNSPECIFIED'
+    required: false
     enum_values:
       - 'BACKUP_RETENTION_INHERITANCE_UNSPECIFIED'
       - 'INHERIT_VAULT_RETENTION'
