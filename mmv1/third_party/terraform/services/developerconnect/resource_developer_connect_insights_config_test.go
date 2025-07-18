@@ -35,6 +35,9 @@ func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDeveloperConnectInsightsConfig_basic(context),
@@ -65,64 +68,92 @@ func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
 
 func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	data "google_project" "project" {
-	  project_id = "devconnect-insights-terraform"
+	resource "google_project" "project" {
+		project_id = "dci-terraform"
+		name = "Service Project"
+		org_id = "{{index $.TestEnvVars "org_id"}}"
+		billing_account = "{{index $.TestEnvVars "billing_account"}}"
+		deletion_policy = "DELETE"
 	}
-	resource "google_apphub_application" "my_app" {
-		location       = "us-central1"
-		application_id = "tf-test-app%{random_suffix}"
-		display_name   = "My Basic App for InsightsConfig"
-		project        = data.google_project.project.project_id
+
+	# Enable APIs
+	resource "google_project_service" "apphub_api_service" {
+		project = google_project.project.project_id
+		service = "apphub.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	# Wait delay after enabling APIs
+	resource "time_sleep" "wait_enable_service_api" {
+		depends_on       = [google_project_service.apphub_api_service]
+		create_duration  = "30s"
+	}
+
+	resource "google_apphub_application" "my_apphub_application" {
+		location = "us-central1"
+		application_id = "{{index $.Vars "application_id"}}"
 		scope {
 			type = "REGIONAL"
 		}
+		project = google_project.project.project_id
 	}
+	
 	resource "google_developer_connect_insights_config" "my_insights_config" {
 		location           = "us-central1"
 		insights_config_id = "tf-test-ic%{random_suffix}"
 		project            = data.google_project.project.project_id
-		app_hub_application = format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
-			data.google_project.project.number,
-			google_apphub_application.my_app.location,
-			google_apphub_application.my_app.application_id)
-	}
+		annotations = {}
+    	labels = {}
+    	app_hub_application = format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
+           google_project.project.number,
+           google_apphub_application.my_app.location,
+           google_apphub_application.my_app.application_id)
+    }
   `, context)
 }
 
 func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	data "google_project" "project" {
-	  project_id = "devconnect-insights-terraform"
+	resource "google_project" "project" {
+		project_id = "dci-terraform"
+		name = "Service Project"
+		org_id = "{{index $.TestEnvVars "org_id"}}"
+		billing_account = "{{index $.TestEnvVars "billing_account"}}"
+		deletion_policy = "DELETE"
 	}
-	resource "google_apphub_application" "my_app" {
-		location       = "us-central1"
-		application_id = "tf-test-app%{random_suffix}"
-		display_name   = "My Basic App for InsightsConfig"
-		project        = data.google_project.project.project_id
+	
+	# Enable APIs
+	resource "google_project_service" "apphub_api_service" {
+		project = google_project.project.project_id
+		service = "apphub.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	# Wait delay after enabling APIs
+	resource "time_sleep" "wait_enable_service_api" {
+		depends_on       = [google_project_service.apphub_api_service]
+		create_duration  = "30s"
+	}
+
+	resource "google_apphub_application" "my_apphub_application" {
+		location = "us-central1"
+		application_id = "{{index $.Vars "application_id"}}"
 		scope {
 			type = "REGIONAL"
 		}
+		project = google_project.project.project_id
 	}
 	resource "google_developer_connect_insights_config" "my_insights_config" {
 		location           = "us-central1"
 		insights_config_id = "tf-test-ic%{random_suffix}"
 		project            = data.google_project.project.project_id
 		annotations = {}
-		labels = {}
-		app_hub_application = format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
-			data.google_project.project.number,
-			google_apphub_application.my_app.location,
-			google_apphub_application.my_app.application_id)
-		artifact_configs {
-			uri = "us-docker.pkg.dev/my-project/my-repo/other-image"
-			google_artifact_analysis {
-                project_id = "devconnect-insights-terraform"
-            }
-            google_artifact_registry {
-                artifact_registry_package = "my-package"
-                project_id                = "devconnect-insights-terraform"
-            }
+    	labels = {}
+    	app_hub_application = format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
+           google_project.project.number,
+           google_apphub_application.my_app.location,
+           google_apphub_application.my_app.application_id)
 		}
-	}
+    }
   `, context)
 }

@@ -25,13 +25,13 @@ import_format:
 examples:
   - !ruby/object:Provider::Terraform::Examples
     name: 'developer_connect_insights_config_basic'
-    primary_resource_id: 'my_insights_config'
+    external_providers: ["time"]
+    primary_resource_id: 'insights_config'
     vars:
-      insights_config_name: 'tf_test_ic'
-      apphub_application_name: 'tf-test-app'
-      apphub_application_display_name: 'TF Test App'
+      application_id: 'tf-test-app'
     test_env_vars:
-      project: 'PROJECT_NAME'
+      org_id: "ORG_ID"
+      billing_account: "BILLING_ACCT"
 autogen_async: true
 async:
   operation:

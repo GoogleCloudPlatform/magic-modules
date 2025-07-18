@@ -1,23 +1,43 @@
-data "google_project" "project" {
-	  project_id = "devconnect-insights-terraform"
-	}
+resource "google_project" "project" {
+  project_id = "dci-terraform"
+  name = "Service Project"
+  org_id = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
+  deletion_policy = "DELETE"
+}
+
+# Grant Permissions
+
+# Enable APIs
+resource "google_project_service" "apphub_api_service" {
+  project = google_project.project.project_id
+  service = "apphub.googleapis.com"
+  depends_on = [google_project.project]
+}
+
+# Wait delay after enabling APIs
+resource "time_sleep" "wait_enable_service_api" {
+  depends_on       = [google_project_service.apphub_api_service]
+  create_duration  = "30s"
+}
 
 resource "google_apphub_application" "my_apphub_application" {
   location = "us-central1"
-  application_id = "{{index $.Vars "apphub_application_name"}}"
-  display_name = "{{index $.Vars "apphub_application_display_name"}}"
+  application_id = "{{index $.Vars 'application_id'}}"
   scope {
     type = "REGIONAL"
   }
-  project = "{{index $.TestEnvVars "devconnect-insights-terraform"}}"
+  project = google_project.project.project_id
 }
 
-resource "google_developer_connect_insights_config" "{{$.PrimaryResourceId}}" {
-  location = "us-central1"
-  insights_config_id = "{{index $.Vars "insights_config_name"}}"
+resource "google_developer_connect_insights_config" "my_insights_config" {
+  location           = "us-central1"
+  insights_config_id = "tf-test-ic%{random_suffix}"
+  project            = data.google_project.project.project_id
+  annotations = {}
+  labels = {}
   app_hub_application = format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
-			data.google_project.project.number,
-			google_apphub_application.my_apphub_application.location,
-			google_apphub_application.my_apphub_application.application_id)
-  project = "{{index $.TestEnvVars "devconnect-insights-terraform"}}"
+        google_project.project.number,
+        google_apphub_application.my_apphub_application.location,
+        google_apphub_application.my_apphub_application.application_id)
 }
