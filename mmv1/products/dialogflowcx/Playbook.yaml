@@ -638,6 +638,7 @@ properties:
                                             output: true
                                       - name: mixedAudio
                                         type: NestedObject
+                                        output: true
                                         description: |-
                                           Represents an audio message that is composed of both segments
                                           synthesized from the Dialogflow agent prompts and ones hosted externally
@@ -1398,6 +1399,7 @@ properties:
                                             output: true
                                       - name: mixedAudio
                                         type: NestedObject
+                                        output: true
                                         description: |-
                                           Represents an audio message that is composed of both segments
                                           synthesized from the Dialogflow agent prompts and ones hosted externally

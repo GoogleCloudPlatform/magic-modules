@@ -184,13 +184,6 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
             phone_number = "1-234-567-8901"
           }
         }
-        messages {
-          tool_call {
-            action           = google_dialogflow_cx_tool.my_tool.display_name
-            input_parameters = "{\"query\": \"example-value\"}"
-            tool             = google_dialogflow_cx_tool.my_tool.id
-          }
-        }
 
         set_parameter_actions {
           parameter = "some-param"
@@ -373,13 +366,6 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
         messages {
           telephony_transfer_call {
             phone_number = "1-234-567-8901"
-          }
-        }
-        messages {
-          tool_call {
-            action           = google_dialogflow_cx_tool.my_tool.display_name
-            input_parameters = "{\"query\": \"example-value\"}"
-            tool             = google_dialogflow_cx_tool.my_tool.id
           }
         }
 
