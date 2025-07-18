@@ -19,7 +19,7 @@
                      }
                   ],
                   "maxRetries":3,
-                  "gpuZonalRedundancyDisabled":true
+                  "gpuZonalRedundancyDisabled":false
                }
             }
          }
