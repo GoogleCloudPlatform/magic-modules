@@ -1379,6 +1379,9 @@ func expandCors(configured []interface{}) []*storage.BucketCors {
 }
 
 func flattenCors(d *schema.ResourceData, corsRules []*storage.BucketCors) []map[string]interface{} {
+	if corsRules == nil {
+		return []map[string]interface{}{}
+	}
 	corsRulesSchema := make([]map[string]interface{}, 0, len(corsRules))
 	for index, corsRule := range corsRules {
 		data := map[string]interface{}{
@@ -2256,10 +2259,8 @@ func setStorageBucket(d *schema.ResourceData, config *transport_tpg.Config, res 
 	if err := d.Set("location", res.Location); err != nil {
 		return fmt.Errorf("Error setting location: %s", err)
 	}
-	if res.Cors != nil {
-		if err := d.Set("cors", flattenCors(d, res.Cors)); err != nil {
-			return fmt.Errorf("Error setting cors: %s", err)
-		}
+	if err := d.Set("cors", flattenCors(d, res.Cors)); err != nil {
+		return fmt.Errorf("Error setting cors: %s", err)
 	}
 	if err := d.Set("default_event_based_hold", res.DefaultEventBasedHold); err != nil {
 		return fmt.Errorf("Error setting default_event_based_hold: %s", err)
