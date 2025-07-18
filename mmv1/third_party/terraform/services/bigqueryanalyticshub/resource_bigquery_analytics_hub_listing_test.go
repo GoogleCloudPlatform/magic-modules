@@ -133,6 +133,13 @@ resource "google_bigquery_analytics_hub_listing" "listing_pubsub" {
 }
 
 func TestAccBigqueryAnalyticsHubListing_bigqueryAnalyticshubListingMultiregionExample(t *testing.T) {
+	// Skip if not running in a acc test environment,
+	// as acc test environment variables needed to get use 
+	// the bigquery client for bootstrapping
+	if v := os.Getenv("TF_ACC"); v == "" {
+		t.Skip("Acceptance tests skipped unless env 'TF_ACC' set")
+	}
+	
 	t.Parallel()
 
 	bqdataset, err := acctest.AddBigQueryDatasetReplica(envvar.GetTestProjectFromEnv(), "my_listing_example2", "us", "eu")
