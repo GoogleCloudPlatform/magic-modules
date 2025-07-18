@@ -20,11 +20,18 @@ resource "google_dialogflow_cx_webhook" "my_webhook" {
   }
 }
 
+resource "google_dialogflow_cx_tool" "my_tool" {
+  parent       = google_dialogflow_cx_agent.agent.id
+  display_name = "Example Tool"
+  description  = "Example Description"
+}
+
 resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
   parent       = google_dialogflow_cx_agent.agent.id
   display_name = "Example Display Name"
   goal         = "Example Goal"
   instruction {
+    guidelines = "Example Guidelines"
     steps {
       text = "step 1"
       steps = jsonencode([
@@ -107,11 +114,14 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
             }
           }
           dtmf_settings {
-            enabled      = true
-            max_digits   = 1
-            finish_digit = "#"
+            enabled                      = true
+            max_digits                   = 1
+            finish_digit                 = "#"
+            endpointing_timeout_duration = "5s"
+            interdigit_timeout_duration  = "5s"
           }
           logging_settings {
+            disable_logging                = false
             enable_stackdriver_logging     = true
             enable_interaction_logging     = true
             enable_consent_based_redaction = true
@@ -124,6 +134,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
   handlers {
     event_handler {
       event = "another-event"
+      condition = "$session.params = 1"
       fulfillment {
         return_partial_responses = true
         messages {
@@ -171,6 +182,13 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
         messages {
           telephony_transfer_call {
             phone_number = "1-234-567-8901"
+          }
+        }
+        messages {
+          tool_call {
+            action           = google_dialogflow_cx_tool.my_tool.display_name
+            input_parameters = "{\"query\": \"example-value\"}"
+            tool             = google_dialogflow_cx_tool.my_tool.id
           }
         }
 
@@ -286,11 +304,14 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
             }
           }
           dtmf_settings {
-            enabled      = true
-            max_digits   = 1
-            finish_digit = "#"
+            enabled                      = true
+            max_digits                   = 1
+            finish_digit                 = "#"
+            endpointing_timeout_duration = "5s"
+            interdigit_timeout_duration  = "5s"
           }
           logging_settings {
+            disable_logging                = false
             enable_stackdriver_logging     = true
             enable_interaction_logging     = true
             enable_consent_based_redaction = true
@@ -303,6 +324,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
   handlers {
     lifecycle_handler {
       lifecycle_stage = "playbook-start"
+      condition = "$session.params = 1"
       fulfillment {
         return_partial_responses = true
         messages {
@@ -350,6 +372,13 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
         messages {
           telephony_transfer_call {
             phone_number = "1-234-567-8901"
+          }
+        }
+        messages {
+          tool_call {
+            action           = google_dialogflow_cx_tool.my_tool.display_name
+            input_parameters = "{\"query\": \"example-value\"}"
+            tool             = google_dialogflow_cx_tool.my_tool.id
           }
         }
 
@@ -407,8 +436,11 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
         }
 
         webhook = google_dialogflow_cx_webhook.my_webhook.id
+        tag = "ExampleTag"
         enable_generative_fallback = true
       }
     }
   }
+
+  referenced_tools = [google_dialogflow_cx_tool.my_tool.id]
 }
