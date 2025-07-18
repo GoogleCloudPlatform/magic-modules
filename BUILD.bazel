@@ -1,0 +1,10 @@
+load("@rules_go//go:def.bzl", "go_binary")
+
+package(
+    default_visibility = ["//visibility:private"]
+)
+
+go_binary(
+    name = "magic-modules",
+    srcs = ["main.go"],
+)
