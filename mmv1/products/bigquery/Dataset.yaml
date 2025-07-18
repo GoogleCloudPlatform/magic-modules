@@ -129,6 +129,7 @@ properties:
     is_set: true
     default_from_api: true
     is_missing_in_cai: true
+    set_hash_func: 'resourceBigqueryDatasetAccessHash'
     item_type:
       type: NestedObject
       properties:
