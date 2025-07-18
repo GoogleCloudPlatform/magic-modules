@@ -224,6 +224,10 @@ func TestAccGKEBackupRestorePlan_tags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccGKEBackupRestorePlanTags(context),
+				Check: resource.TestCheckFunc(
+					resource.TestCheckResourceAttrSet(
+						"google_gke_backup_restore_plan.restore_plan", "tags.%"),
+				),
 			},
 			{
 				ResourceName:            "google_gke_backup_restore_plan.restore_plan",
