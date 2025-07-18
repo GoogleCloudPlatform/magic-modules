@@ -47,6 +47,7 @@ async:
     resource_inside_response: false
 custom_code:
   constants: 'templates/terraform/constants/network_services_gateway.go.tmpl'
+  post_read: 'templates/terraform/post_read/network_services_gateway.go.tmpl'
   post_delete: 'templates/terraform/post_delete/network_services_gateway.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/network_services_gateway.go.tmpl'
 sweeper:
