@@ -46,6 +46,7 @@ examples:
     primary_resource_id: 'data_store_tool'
     vars:
       agent_name: 'dialogflowcx-agent-data-store'
+      data_store: 'datastore-tool'
   - name: 'dialogflowcx_tool_function'
     primary_resource_id: 'function_tool'
     vars:

@@ -1,0 +1,992 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: EndpointWithModelGardenDeployment
+api_resource_type_kind: Endpoint
+description: |
+  Create an Endpoint and deploy a Model Garden model to it.
+
+  ~> **Note:** This resource does not currently support deletion via Terraform and must be manually deleted if not in use.
+  See https://cloud.google.com/vertex-ai/docs/predictions/undeploy-model for instructions on how to undeploy a model and delete an endpoint
+  via the Google Cloud console.
+references:
+  guides:
+    "Use models in Model Garden": "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/use-models"
+    "Overview of Model Garden": "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models"
+    "Overview of self-deployed models": "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/self-deployed-models"
+  api: "https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations/deploy"
+docs:
+id_format: "projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}"
+base_url: "projects/{{project}}/locations/{{location}}:deploy"
+self_link: "projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}"
+create_url: "projects/{{project}}/locations/{{location}}:deploy"
+immutable: true
+exclude_read: true
+exclude_delete: true  # the resource does not yet support deletion
+exclude_import: true  # the resource does not support import
+timeouts:
+  insert_minutes: 180
+autogen_status: RW5kcG9pbnRXaXRoTW9kZWxHYXJkZW5EZXBsb3ltZW50
+async:
+  actions: ["create"]
+  type: "OpAsync"
+  operation:
+    timeouts:
+      insert_minutes: 180
+    base_url: "{{op_id}}"
+  result:
+    resource_inside_response: true
+custom_code:
+  post_create: "templates/terraform/post_create/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl"
+examples:
+  - name: "vertex_ai_deploy"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true
+parameters:
+  - name: location
+    type: String
+    description:
+      Resource ID segment making up resource `location`. It identifies the
+      resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: endpoint
+    type: String
+    description:
+      Resource ID segment making up resource `endpoint`. It identifies the
+      resource within its parent collection as described in https://google.aip.dev/122.
+    url_param_only: true
+    output: true
+  - name: publisherModelName
+    type: String
+    description: |-
+      The Model Garden model to deploy.
+      Format:
+      `publishers/{publisher}/models/{publisher_model}@{version_id}`, or
+      `publishers/hf-{hugging-face-author}/models/{hugging-face-model-name}@001`.
+    exactly_one_of:
+      - "publisher_model_name"
+      - "hugging_face_model_id"
+  - name: huggingFaceModelId
+    type: String
+    description: |-
+      The Hugging Face model to deploy.
+      Format: Hugging Face model ID like `google/gemma-2-2b-it`.
+    exactly_one_of:
+      - "publisher_model_name"
+      - "hugging_face_model_id"
+  - name: modelConfig
+    type: NestedObject
+    description: The model config to use for the deployment.
+    properties:
+      - name: huggingFaceCacheEnabled
+        type: Boolean
+        description: |-
+          If true, the model will deploy with a cached version instead of directly
+          downloading the model artifacts from Hugging Face. This is suitable for
+          VPC-SC users with limited internet access.
+      - name: modelDisplayName
+        type: String
+        description: |-
+          The user-specified display name of the uploaded model. If not
+          set, a default name will be used.
+      - name: containerSpec
+        type: NestedObject
+        description: |-
+          Specification of a container for serving predictions. Some fields in this
+          message correspond to fields in the [Kubernetes Container v1 core
+          specification](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#container-v1-core).
+        properties:
+          - name: ports
+            type: Array
+            description: |-
+              List of ports to expose from the container. Vertex AI sends any
+              prediction requests that it receives to the first port on this list. Vertex
+              AI also sends
+              [liveness and health
+              checks](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#liveness)
+              to this port.
+
+              If you do not specify this field, it defaults to following value:
+
+              ```json
+              [
+              {
+              "containerPort": 8080
+              }
+              ]
+              ```
+
+              Vertex AI does not use ports other than the first one listed. This field
+              corresponds to the `ports` field of the Kubernetes Containers
+              [v1 core
+              API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#container-v1-core).
+            immutable: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: containerPort
+                  type: Integer
+                  description: |-
+                    The number of the port to expose on the pod's IP address.
+                    Must be a valid port number, between 1 and 65535 inclusive.
+          - name: predictRoute
+            type: String
+            description: |-
+              HTTP path on the container to send prediction requests to. Vertex AI
+              forwards requests sent using
+              projects.locations.endpoints.predict to this
+              path on the container's IP address and port. Vertex AI then returns the
+              container's response in the API response.
+
+              For example, if you set this field to `/foo`, then when Vertex AI
+              receives a prediction request, it forwards the request body in a POST
+              request to the `/foo` path on the port of your container specified by the
+              first value of this `ModelContainerSpec`'s
+              ports field.
+
+              If you don't specify this field, it defaults to the following value when
+              you deploy this Model to an Endpoint:/v1/endpoints/ENDPOINT/deployedModels/DEPLOYED_MODEL:predict
+              The placeholders in this value are replaced as follows:
+
+              * ENDPOINT: The last segment (following `endpoints/`)of the
+              Endpoint.name][] field of the Endpoint where this Model has been
+              deployed. (Vertex AI makes this value available to your container code
+              as the [`AIP_ENDPOINT_ID` environment
+              variable](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#aip-variables).)
+
+              * DEPLOYED_MODEL: DeployedModel.id of the `DeployedModel`.
+              (Vertex AI makes this value available to your container code
+              as the [`AIP_DEPLOYED_MODEL_ID` environment
+              variable](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#aip-variables).)
+            immutable: true
+          - name: healthRoute
+            type: String
+            description: |-
+              HTTP path on the container to send health checks to. Vertex AI
+              intermittently sends GET requests to this path on the container's IP
+              address and port to check that the container is healthy. Read more about
+              [health
+              checks](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#health).
+
+              For example, if you set this field to `/bar`, then Vertex AI
+              intermittently sends a GET request to the `/bar` path on the port of your
+              container specified by the first value of this `ModelContainerSpec`'s
+              ports field.
+
+              If you don't specify this field, it defaults to the following value when
+              you deploy this Model to an Endpoint:/v1/endpoints/ENDPOINT/deployedModels/DEPLOYED_MODEL:predict
+              The placeholders in this value are replaced as follows:
+
+              * ENDPOINT: The last segment (following `endpoints/`)of the
+              Endpoint.name][] field of the Endpoint where this Model has been
+              deployed. (Vertex AI makes this value available to your container code
+              as the [`AIP_ENDPOINT_ID` environment
+              variable](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#aip-variables).)
+
+              * DEPLOYED_MODEL: DeployedModel.id of the `DeployedModel`.
+              (Vertex AI makes this value available to your container code as the
+              [`AIP_DEPLOYED_MODEL_ID` environment
+              variable](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#aip-variables).)
+            immutable: true
+          - name: deploymentTimeout
+            type: String
+            description: |-
+              Deployment timeout.
+              Limit for deployment timeout is 2 hours.
+            immutable: true
+          - name: startupProbe
+            type: NestedObject
+            description: |-
+              Probe describes a health check to be performed against a container to
+              determine whether it is alive or ready to receive traffic.
+            properties:
+              - name: exec
+                type: NestedObject
+                description: ExecAction specifies a command to execute.
+                properties:
+                  - name: command
+                    type: Array
+                    description: |-
+                      Command is the command line to execute inside the container, the working
+                      directory for the command is root ('/') in the container's filesystem.
+                      The command is simply exec'd, it is not run inside a shell, so
+                      traditional shell instructions ('|', etc) won't work. To use a shell, you
+                      need to explicitly call out to that shell. Exit status of 0 is treated as
+                      live/healthy and non-zero is unhealthy.
+                    item_type:
+                      type: String
+              - name: httpGet
+                type: NestedObject
+                description: HttpGetAction describes an action based on HTTP Get requests.
+                properties:
+                  - name: path
+                    type: String
+                    description: Path to access on the HTTP server.
+                  - name: port
+                    type: Integer
+                    description: |-
+                      Number of the port to access on the container.
+                      Number must be in the range 1 to 65535.
+                  - name: host
+                    type: String
+                    description: |-
+                      Host name to connect to, defaults to the model serving container's IP.
+                      You probably want to set "Host" in httpHeaders instead.
+                  - name: scheme
+                    type: String
+                    description: |-
+                      Scheme to use for connecting to the host.
+                      Defaults to HTTP. Acceptable values are "HTTP" or "HTTPS".
+                  - name: httpHeaders
+                    type: Array
+                    description:
+                      Custom headers to set in the request. HTTP allows repeated
+                      headers.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: value
+                          type: String
+                          description: The header field value
+                        - name: name
+                          type: String
+                          description: |-
+                            The header field name.
+                            This will be canonicalized upon output, so case-variant names will be
+                            understood as the same header.
+              - name: grpc
+                type: NestedObject
+                description: GrpcAction checks the health of a container using a gRPC service.
+                properties:
+                  - name: port
+                    type: Integer
+                    description:
+                      Port number of the gRPC service. Number must be in the range
+                      1 to 65535.
+                  - name: service
+                    type: String
+                    description: |-
+                      Service is the name of the service to place in the gRPC
+                      HealthCheckRequest. See
+                      https://github.com/grpc/grpc/blob/master/doc/health-checking.md.
+
+                      If this is not specified, the default behavior is defined by gRPC.
+              - name: tcpSocket
+                type: NestedObject
+                description: |-
+                  TcpSocketAction probes the health of a container by opening a TCP socket
+                  connection.
+                properties:
+                  - name: port
+                    type: Integer
+                    description: |-
+                      Number of the port to access on the container.
+                      Number must be in the range 1 to 65535.
+                  - name: host
+                    type: String
+                    description: |-
+                      Optional: Host name to connect to, defaults to the model serving
+                      container's IP.
+              - name: timeoutSeconds
+                type: Integer
+                description: |-
+                  Number of seconds after which the probe times out. Defaults to 1 second.
+                  Minimum value is 1. Must be greater or equal to period_seconds.
+
+                  Maps to Kubernetes probe argument 'timeoutSeconds'.
+              - name: successThreshold
+                type: Integer
+                description: |-
+                  Number of consecutive successes before the probe is considered successful.
+                  Defaults to 1. Minimum value is 1.
+
+                  Maps to Kubernetes probe argument 'successThreshold'.
+              - name: initialDelaySeconds
+                type: Integer
+                description: |-
+                  Number of seconds to wait before starting the probe. Defaults to 0.
+                  Minimum value is 0.
+
+                  Maps to Kubernetes probe argument 'initialDelaySeconds'.
+              - name: periodSeconds
+                type: Integer
+                description: |-
+                  How often (in seconds) to perform the probe. Default to 10 seconds.
+                  Minimum value is 1. Must be less than timeout_seconds.
+
+                  Maps to Kubernetes probe argument 'periodSeconds'.
+              - name: failureThreshold
+                type: Integer
+                description: |-
+                  Number of consecutive failures before the probe is considered failed.
+                  Defaults to 3. Minimum value is 1.
+
+                  Maps to Kubernetes probe argument 'failureThreshold'.
+          - name: healthProbe
+            type: NestedObject
+            description: |-
+              Probe describes a health check to be performed against a container to
+              determine whether it is alive or ready to receive traffic.
+            properties:
+              - name: exec
+                type: NestedObject
+                description: ExecAction specifies a command to execute.
+                properties:
+                  - name: command
+                    type: Array
+                    description: |-
+                      Command is the command line to execute inside the container, the working
+                      directory for the command is root ('/') in the container's filesystem.
+                      The command is simply exec'd, it is not run inside a shell, so
+                      traditional shell instructions ('|', etc) won't work. To use a shell, you
+                      need to explicitly call out to that shell. Exit status of 0 is treated as
+                      live/healthy and non-zero is unhealthy.
+                    item_type:
+                      type: String
+              - name: httpGet
+                type: NestedObject
+                description: HttpGetAction describes an action based on HTTP Get requests.
+                properties:
+                  - name: path
+                    type: String
+                    description: Path to access on the HTTP server.
+                  - name: port
+                    type: Integer
+                    description: |-
+                      Number of the port to access on the container.
+                      Number must be in the range 1 to 65535.
+                  - name: host
+                    type: String
+                    description: |-
+                      Host name to connect to, defaults to the model serving container's IP.
+                      You probably want to set "Host" in httpHeaders instead.
+                  - name: scheme
+                    type: String
+                    description: |-
+                      Scheme to use for connecting to the host.
+                      Defaults to HTTP. Acceptable values are "HTTP" or "HTTPS".
+                  - name: httpHeaders
+                    type: Array
+                    description:
+                      Custom headers to set in the request. HTTP allows repeated
+                      headers.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: name
+                          type: String
+                          description: |-
+                            The header field name.
+                            This will be canonicalized upon output, so case-variant names will be
+                            understood as the same header.
+                        - name: value
+                          type: String
+                          description: The header field value
+              - name: grpc
+                type: NestedObject
+                description: GrpcAction checks the health of a container using a gRPC service.
+                properties:
+                  - name: port
+                    type: Integer
+                    description:
+                      Port number of the gRPC service. Number must be in the range
+                      1 to 65535.
+                  - name: service
+                    type: String
+                    description: |-
+                      Service is the name of the service to place in the gRPC
+                      HealthCheckRequest. See
+                      https://github.com/grpc/grpc/blob/master/doc/health-checking.md.
+
+                      If this is not specified, the default behavior is defined by gRPC.
+              - name: tcpSocket
+                type: NestedObject
+                description: |-
+                  TcpSocketAction probes the health of a container by opening a TCP socket
+                  connection.
+                properties:
+                  - name: port
+                    type: Integer
+                    description: |-
+                      Number of the port to access on the container.
+                      Number must be in the range 1 to 65535.
+                  - name: host
+                    type: String
+                    description: |-
+                      Optional: Host name to connect to, defaults to the model serving
+                      container's IP.
+              - name: timeoutSeconds
+                type: Integer
+                description: |-
+                  Number of seconds after which the probe times out. Defaults to 1 second.
+                  Minimum value is 1. Must be greater or equal to period_seconds.
+
+                  Maps to Kubernetes probe argument 'timeoutSeconds'.
+              - name: successThreshold
+                type: Integer
+                description: |-
+                  Number of consecutive successes before the probe is considered successful.
+                  Defaults to 1. Minimum value is 1.
+
+                  Maps to Kubernetes probe argument 'successThreshold'.
+              - name: initialDelaySeconds
+                type: Integer
+                description: |-
+                  Number of seconds to wait before starting the probe. Defaults to 0.
+                  Minimum value is 0.
+
+                  Maps to Kubernetes probe argument 'initialDelaySeconds'.
+              - name: periodSeconds
+                type: Integer
+                description: |-
+                  How often (in seconds) to perform the probe. Default to 10 seconds.
+                  Minimum value is 1. Must be less than timeout_seconds.
+
+                  Maps to Kubernetes probe argument 'periodSeconds'.
+              - name: failureThreshold
+                type: Integer
+                description: |-
+                  Number of consecutive failures before the probe is considered failed.
+                  Defaults to 3. Minimum value is 1.
+
+                  Maps to Kubernetes probe argument 'failureThreshold'.
+          - name: imageUri
+            type: String
+            description: |-
+              URI of the Docker image to be used as the custom container for serving
+              predictions. This URI must identify an image in Artifact Registry or
+              Container Registry. Learn more about the [container publishing
+              requirements](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#publishing),
+              including permissions requirements for the Vertex AI Service Agent.
+
+              The container image is ingested upon ModelService.UploadModel, stored
+              internally, and this original path is afterwards not used.
+
+              To learn about the requirements for the Docker image itself, see
+              [Custom container
+              requirements](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#).
+
+              You can use the URI to one of Vertex AI's [pre-built container images for
+              prediction](https://cloud.google.com/vertex-ai/docs/predictions/pre-built-containers)
+              in this field.
+            immutable: true
+            required: true
+          - name: command
+            type: Array
+            description: |-
+              Specifies the command that runs when the container starts. This overrides
+              the container's
+              [ENTRYPOINT](https://docs.docker.com/engine/reference/builder/#entrypoint).
+              Specify this field as an array of executable and arguments, similar to a
+              Docker `ENTRYPOINT`'s "exec" form, not its "shell" form.
+
+              If you do not specify this field, then the container's `ENTRYPOINT` runs,
+              in conjunction with the args field or the
+              container's [`CMD`](https://docs.docker.com/engine/reference/builder/#cmd),
+              if either exists. If this field is not specified and the container does not
+              have an `ENTRYPOINT`, then refer to the Docker documentation about [how
+              `CMD` and `ENTRYPOINT`
+              interact](https://docs.docker.com/engine/reference/builder/#understand-how-cmd-and-entrypoint-interact).
+
+              If you specify this field, then you can also specify the `args` field to
+              provide additional arguments for this command. However, if you specify this
+              field, then the container's `CMD` is ignored. See the
+              [Kubernetes documentation about how the
+              `command` and `args` fields interact with a container's `ENTRYPOINT` and
+              `CMD`](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#notes).
+
+              In this field, you can reference [environment variables set by Vertex
+              AI](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#aip-variables)
+              and environment variables set in the env field.
+              You cannot reference environment variables set in the Docker image. In
+              order for environment variables to be expanded, reference them by using the
+              following syntax:$(VARIABLE_NAME)
+              Note that this differs from Bash variable expansion, which does not use
+              parentheses. If a variable cannot be resolved, the reference in the input
+              string is used unchanged. To avoid variable expansion, you can escape this
+              syntax with `$$`; for example:$$(VARIABLE_NAME)
+              This field corresponds to the `command` field of the Kubernetes Containers
+              [v1 core
+              API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#container-v1-core).
+            immutable: true
+            item_type:
+              type: String
+          - name: args
+            type: Array
+            description: |-
+              Specifies arguments for the command that runs when the container starts.
+              This overrides the container's
+              [`CMD`](https://docs.docker.com/engine/reference/builder/#cmd). Specify
+              this field as an array of executable and arguments, similar to a Docker
+              `CMD`'s "default parameters" form.
+
+              If you don't specify this field but do specify the
+              command field, then the command from the
+              `command` field runs without any additional arguments. See the
+              [Kubernetes documentation about how the
+              `command` and `args` fields interact with a container's `ENTRYPOINT` and
+              `CMD`](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#notes).
+
+              If you don't specify this field and don't specify the `command` field,
+              then the container's
+              [`ENTRYPOINT`](https://docs.docker.com/engine/reference/builder/#cmd) and
+              `CMD` determine what runs based on their default behavior. See the Docker
+              documentation about [how `CMD` and `ENTRYPOINT`
+              interact](https://docs.docker.com/engine/reference/builder/#understand-how-cmd-and-entrypoint-interact).
+
+              In this field, you can reference [environment variables
+              set by Vertex
+              AI](https://cloud.google.com/vertex-ai/docs/predictions/custom-container-requirements#aip-variables)
+              and environment variables set in the env field.
+              You cannot reference environment variables set in the Docker image. In
+              order for environment variables to be expanded, reference them by using the
+              following syntax:$(VARIABLE_NAME)
+              Note that this differs from Bash variable expansion, which does not use
+              parentheses. If a variable cannot be resolved, the reference in the input
+              string is used unchanged. To avoid variable expansion, you can escape this
+              syntax with `$$`; for example:$$(VARIABLE_NAME)
+              This field corresponds to the `args` field of the Kubernetes Containers
+              [v1 core
+              API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#container-v1-core).
+            immutable: true
+            item_type:
+              type: String
+          - name: grpcPorts
+            type: Array
+            description: |-
+              List of ports to expose from the container. Vertex AI sends gRPC
+              prediction requests that it receives to the first port on this list. Vertex
+              AI also sends liveness and health checks to this port.
+
+              If you do not specify this field, gRPC requests to the container will be
+              disabled.
+
+              Vertex AI does not use ports other than the first one listed. This field
+              corresponds to the `ports` field of the Kubernetes Containers v1 core API.
+            immutable: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: containerPort
+                  type: Integer
+                  description: |-
+                    The number of the port to expose on the pod's IP address.
+                    Must be a valid port number, between 1 and 65535 inclusive.
+          - name: sharedMemorySizeMb
+            type: String
+            description: |-
+              The amount of the VM memory to reserve as the shared memory for the model
+              in megabytes.
+            immutable: true
+          - name: livenessProbe
+            type: NestedObject
+            description: |-
+              Probe describes a health check to be performed against a container to
+              determine whether it is alive or ready to receive traffic.
+            properties:
+              - name: exec
+                type: NestedObject
+                description: ExecAction specifies a command to execute.
+                properties:
+                  - name: command
+                    type: Array
+                    description: |-
+                      Command is the command line to execute inside the container, the working
+                      directory for the command is root ('/') in the container's filesystem.
+                      The command is simply exec'd, it is not run inside a shell, so
+                      traditional shell instructions ('|', etc) won't work. To use a shell, you
+                      need to explicitly call out to that shell. Exit status of 0 is treated as
+                      live/healthy and non-zero is unhealthy.
+                    item_type:
+                      type: String
+              - name: httpGet
+                type: NestedObject
+                description: HttpGetAction describes an action based on HTTP Get requests.
+                properties:
+                  - name: path
+                    type: String
+                    description: Path to access on the HTTP server.
+                  - name: port
+                    type: Integer
+                    description: |-
+                      Number of the port to access on the container.
+                      Number must be in the range 1 to 65535.
+                  - name: host
+                    type: String
+                    description: |-
+                      Host name to connect to, defaults to the model serving container's IP.
+                      You probably want to set "Host" in httpHeaders instead.
+                  - name: scheme
+                    type: String
+                    description: |-
+                      Scheme to use for connecting to the host.
+                      Defaults to HTTP. Acceptable values are "HTTP" or "HTTPS".
+                  - name: httpHeaders
+                    type: Array
+                    description:
+                      Custom headers to set in the request. HTTP allows repeated
+                      headers.
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: name
+                          type: String
+                          description: |-
+                            The header field name.
+                            This will be canonicalized upon output, so case-variant names will be
+                            understood as the same header.
+                        - name: value
+                          type: String
+                          description: The header field value
+              - name: grpc
+                type: NestedObject
+                description: GrpcAction checks the health of a container using a gRPC service.
+                properties:
+                  - name: service
+                    type: String
+                    description: |-
+                      Service is the name of the service to place in the gRPC
+                      HealthCheckRequest. See
+                      https://github.com/grpc/grpc/blob/master/doc/health-checking.md.
+
+                      If this is not specified, the default behavior is defined by gRPC.
+                  - name: port
+                    type: Integer
+                    description:
+                      Port number of the gRPC service. Number must be in the range
+                      1 to 65535.
+              - name: tcpSocket
+                type: NestedObject
+                description: |-
+                  TcpSocketAction probes the health of a container by opening a TCP socket
+                  connection.
+                properties:
+                  - name: port
+                    type: Integer
+                    description: |-
+                      Number of the port to access on the container.
+                      Number must be in the range 1 to 65535.
+                  - name: host
+                    type: String
+                    description: |-
+                      Optional: Host name to connect to, defaults to the model serving
+                      container's IP.
+              - name: timeoutSeconds
+                type: Integer
+                description: |-
+                  Number of seconds after which the probe times out. Defaults to 1 second.
+                  Minimum value is 1. Must be greater or equal to period_seconds.
+
+                  Maps to Kubernetes probe argument 'timeoutSeconds'.
+              - name: successThreshold
+                type: Integer
+                description: |-
+                  Number of consecutive successes before the probe is considered successful.
+                  Defaults to 1. Minimum value is 1.
+
+                  Maps to Kubernetes probe argument 'successThreshold'.
+              - name: initialDelaySeconds
+                type: Integer
+                description: |-
+                  Number of seconds to wait before starting the probe. Defaults to 0.
+                  Minimum value is 0.
+
+                  Maps to Kubernetes probe argument 'initialDelaySeconds'.
+              - name: periodSeconds
+                type: Integer
+                description: |-
+                  How often (in seconds) to perform the probe. Default to 10 seconds.
+                  Minimum value is 1. Must be less than timeout_seconds.
+
+                  Maps to Kubernetes probe argument 'periodSeconds'.
+              - name: failureThreshold
+                type: Integer
+                description: |-
+                  Number of consecutive failures before the probe is considered failed.
+                  Defaults to 3. Minimum value is 1.
+
+                  Maps to Kubernetes probe argument 'failureThreshold'.
+          - name: env
+            type: Array
+            description: |-
+              List of environment variables to set in the container. After the container
+              starts running, code running in the container can read these environment
+              variables.
+
+              Additionally, the command and
+              args fields can reference these variables. Later
+              entries in this list can also reference earlier entries. For example, the
+              following example sets the variable `VAR_2` to have the value `foo bar`:
+
+              ```json
+              [
+              {
+              "name": "VAR_1",
+              "value": "foo"
+              },
+              {
+              "name": "VAR_2",
+              "value": "$(VAR_1) bar"
+              }
+              ]
+              ```
+
+              If you switch the order of the variables in the example, then the expansion
+              does not occur.
+
+              This field corresponds to the `env` field of the Kubernetes Containers
+              [v1 core
+              API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#container-v1-core).
+            immutable: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: name
+                  type: String
+                  description: Name of the environment variable. Must be a valid C identifier.
+                  required: true
+                - name: value
+                  type: String
+                  description: |-
+                    Variables that reference a $(VAR_NAME) are expanded
+                    using the previous defined environment variables in the container and
+                    any service environment variables. If a variable cannot be resolved,
+                    the reference in the input string will be unchanged. The $(VAR_NAME)
+                    syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped
+                    references will never be expanded, regardless of whether the variable
+                    exists or not.
+                  required: true
+      - name: acceptEula
+        type: Boolean
+        description: |-
+          Whether the user accepts the End User License Agreement (EULA)
+          for the model.
+      - name: huggingFaceAccessToken
+        type: String
+        description: |-
+          The Hugging Face read access token used to access the model
+          artifacts of gated models.
+  - name: endpointConfig
+    type: NestedObject
+    description: The endpoint config to use for the deployment.
+    properties:
+      - name: endpointDisplayName
+        type: String
+        description: |-
+          The user-specified display name of the endpoint. If not set, a
+          default name will be used.
+      - name: dedicatedEndpointEnabled
+        type: Boolean
+        description: |-
+          If true, the endpoint will be exposed through a dedicated
+          DNS [Endpoint.dedicated_endpoint_dns]. Your request to the dedicated DNS
+          will be isolated from other users' traffic and will have better
+          performance and reliability. Note: Once you enabled dedicated endpoint,
+          you won't be able to send request to the shared DNS
+          {region}-aiplatform.googleapis.com. The limitations will be removed soon.
+  - name: deployConfig
+    type: NestedObject
+    description: The deploy config to use for the deployment.
+    properties:
+      - name: systemLabels
+        type: KeyValuePairs
+        description: |-
+          System labels for Model Garden deployments.
+          These labels are managed by Google and for tracking purposes only.
+      - name: dedicatedResources
+        type: NestedObject
+        description: |-
+          A description of resources that are dedicated to a DeployedModel or
+          DeployedIndex, and that need a higher degree of manual configuration.
+        properties:
+          - name: machineSpec
+            type: NestedObject
+            description: Specification of a single machine.
+            required: true
+            properties:
+              - name: reservationAffinity
+                type: NestedObject
+                description: |-
+                  A ReservationAffinity can be used to configure a Vertex AI resource (e.g., a
+                  DeployedModel) to draw its Compute Engine resources from a Shared
+                  Reservation, or exclusively from on-demand capacity.
+                properties:
+                  - name: reservationAffinityType
+                    type: String
+                    description: |-
+                      Specifies the reservation affinity type.
+                      Possible values:
+                      TYPE_UNSPECIFIED
+                      NO_RESERVATION
+                      ANY_RESERVATION
+                      SPECIFIC_RESERVATION
+                    required: true
+                  - name: key
+                    type: String
+                    description: |-
+                      Corresponds to the label key of a reservation resource. To target a
+                      SPECIFIC_RESERVATION by name, use `compute.googleapis.com/reservation-name`
+                      as the key and specify the name of your reservation as its value.
+                  - name: values
+                    type: Array
+                    description: |-
+                      Corresponds to the label values of a reservation resource. This must be the
+                      full resource name of the reservation or reservation block.
+                    item_type:
+                      type: String
+              - name: machineType
+                type: String
+                description: |-
+                  The type of the machine.
+
+                  See the [list of machine types supported for
+                  prediction](https://cloud.google.com/vertex-ai/docs/predictions/configure-compute#machine-types)
+
+                  See the [list of machine types supported for custom
+                  training](https://cloud.google.com/vertex-ai/docs/training/configure-compute#machine-types).
+
+                  For DeployedModel this field is optional, and the default
+                  value is `n1-standard-2`. For BatchPredictionJob or as part of
+                  WorkerPoolSpec this field is required.
+                immutable: true
+              - name: acceleratorType
+                type: String
+                description: |2-
+
+                  Possible values:
+                  ACCELERATOR_TYPE_UNSPECIFIED
+                  NVIDIA_TESLA_K80
+                  NVIDIA_TESLA_P100
+                  NVIDIA_TESLA_V100
+                  NVIDIA_TESLA_P4
+                  NVIDIA_TESLA_T4
+                  NVIDIA_TESLA_A100
+                  NVIDIA_A100_80GB
+                  NVIDIA_L4
+                  NVIDIA_H100_80GB
+                  NVIDIA_H100_MEGA_80GB
+                  NVIDIA_H200_141GB
+                  NVIDIA_B200
+                  TPU_V2
+                  TPU_V3
+                  TPU_V4_POD
+                  TPU_V5_LITEPOD
+              - name: acceleratorCount
+                type: Integer
+                description: The number of accelerators to attach to the machine.
+              - name: tpuTopology
+                type: String
+                description: |-
+                  The topology of the TPUs. Corresponds to the TPU topologies available from
+                  GKE. (Example: tpu_topology: "2x2x1").
+                immutable: true
+              - name: multihostGpuNodeCount
+                type: Integer
+                description: The number of nodes per replica for multihost GPU deployments.
+                immutable: true
+          - name: minReplicaCount
+            type: Integer
+            description: |-
+              The minimum number of machine replicas that will be always deployed on.
+              This value must be greater than or equal to 1.
+
+              If traffic increases, it may dynamically be deployed onto more replicas,
+              and as traffic decreases, some of these extra replicas may be freed.
+            immutable: true
+            required: true
+          - name: maxReplicaCount
+            type: Integer
+            description: |-
+              The maximum number of replicas that may be deployed on when the traffic
+              against it increases. If the requested value is too large, the deployment
+              will error, but if deployment succeeds then the ability to scale to that
+              many replicas is guaranteed (barring service outages). If traffic increases
+              beyond what its replicas at maximum may handle, a portion of the traffic
+              will be dropped. If this value is not provided, will use
+              min_replica_count as the default value.
+
+              The value of this field impacts the charge against Vertex CPU and GPU
+              quotas. Specifically, you will be charged for (max_replica_count *
+              number of cores in the selected machine type) and (max_replica_count *
+              number of GPUs per replica in the selected machine type).
+            immutable: true
+          - name: requiredReplicaCount
+            type: Integer
+            description: |-
+              Number of required available replicas for the deployment to succeed.
+              This field is only needed when partial deployment/mutation is
+              desired. If set, the deploy/mutate operation will succeed once
+              available_replica_count reaches required_replica_count, and the rest of
+              the replicas will be retried. If not set, the default
+              required_replica_count will be min_replica_count.
+          - name: autoscalingMetricSpecs
+            type: Array
+            description: |-
+              The metric specifications that overrides a resource
+              utilization metric (CPU utilization, accelerator's duty cycle, and so on)
+              target value (default to 60 if not set). At most one entry is allowed per
+              metric.
+
+              If machine_spec.accelerator_count is
+              above 0, the autoscaling will be based on both CPU utilization and
+              accelerator's duty cycle metrics and scale up when either metrics exceeds
+              its target value while scale down if both metrics are under their target
+              value. The default target value is 60 for both metrics.
+
+              If machine_spec.accelerator_count is
+              0, the autoscaling will be based on CPU utilization metric only with
+              default target value 60 if not explicitly set.
+
+              For example, in the case of Online Prediction, if you want to override
+              target CPU utilization to 80, you should set
+              autoscaling_metric_specs.metric_name
+              to `aiplatform.googleapis.com/prediction/online/cpu/utilization` and
+              autoscaling_metric_specs.target to `80`.
+            immutable: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: metricName
+                  type: String
+                  description: |-
+                    The resource metric name.
+                    Supported metrics:
+
+                    * For Online Prediction:
+                    * `aiplatform.googleapis.com/prediction/online/accelerator/duty_cycle`
+                    * `aiplatform.googleapis.com/prediction/online/cpu/utilization`
+                  required: true
+                - name: target
+                  type: Integer
+                  description: |-
+                    The target resource utilization in percentage (1% - 100%) for the given
+                    metric; once the real usage deviates from the target by a certain
+                    percentage, the machine replicas change. The default value is 60
+                    (representing 60%) if not provided.
+          - name: spot
+            type: Boolean
+            description: |-
+              If true, schedule the deployment workload on [spot
+              VMs](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms).
+      - name: fastTryoutEnabled
+        type: Boolean
+        description: If true, enable the QMT fast tryout feature for this model if possible.

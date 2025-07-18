@@ -1,0 +1,51 @@
+package firestore
+
+import (
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+)
+
+func DataSourceGoogleFirestoreDocument() *schema.Resource {
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceFirestoreDocument().Schema)
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "collection")
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "document_id")
+	tpgresource.AddRequiredFieldsToSchema(dsSchema, "database")
+	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
+
+	return &schema.Resource{
+		Read:   DataSourceGoogleFirestoreDocumentRead,
+		Schema: dsSchema,
+	}
+}
+
+func DataSourceGoogleFirestoreDocumentRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+
+	collection := d.Get("collection").(string)
+	document_id := d.Get("document_id").(string)
+	database := d.Get("database").(string)
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project: %s", err)
+	}
+
+	name := fmt.Sprintf("projects/%s/databases/%s/documents/%s/%s", project, database, collection, document_id)
+	d.SetId(name)
+	if err = d.Set("name", name); err != nil {
+		return err
+	}
+	err = resourceFirestoreDocumentRead(d, meta)
+	if err != nil {
+		return err
+	}
+
+	if d.Id() == "" {
+		return fmt.Errorf("%s not found", name)
+	}
+
+	return nil
+}
