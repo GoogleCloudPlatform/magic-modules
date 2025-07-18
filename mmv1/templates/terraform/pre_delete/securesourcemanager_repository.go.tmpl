@@ -1,0 +1,7 @@
+deletionPolicy := d.Get("deletion_policy");
+
+if deletionPolicy == "ABANDON" {
+    return nil;
+} else if deletionPolicy == "PREVENT" {
+    return fmt.Errorf(`cannot destroy repository without setting deletion_policy="DELETE"`)
+}
