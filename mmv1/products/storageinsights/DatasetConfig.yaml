@@ -43,7 +43,7 @@ async: !ruby/object:Api::OpAsync
     base_url: '{{op_id}}'
 
 import_format:
-    - 'projects/{{project}}/locations/{{location}}/datasetConfigs/{{dataset_config_id}}'
+  - 'projects/{{project}}/locations/{{location}}/datasetConfigs/{{dataset_config_id}}'
 
 examples:
   - name: 'storage_insights_dataset_config'
