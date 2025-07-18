@@ -289,9 +289,12 @@ properties:
     description:
       "Deprecated. Output only. Endpoints clients can connect to the instance through."
     deprecation_message: 
-      "`discovery_endpoints` is deprecated and is not guaranteed to be populated. \n
+      "`discovery_endpoints` is deprecated. As a result it will not be populated \n
+      if the connections are created using `desired_auto_created_endpoints` \n
+      parameter or `google_memorystore_instance_desired_user_created_endpoints` \n
+      resource. Instead of this parameter, for discovery, use \n
       `endpoints.connections.pscConnection` and `endpoints.connections.pscAutoConnection` \n
-      with connectionType CONNECTION_TYPE_DISCOVERY should be used for discovery instead"
+      with connectionType CONNECTION_TYPE_DISCOVERY. 
     output: true
     item_type:
       type: NestedObject
