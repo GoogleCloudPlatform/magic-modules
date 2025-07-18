@@ -246,6 +246,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
         }
 
         webhook = google_dialogflow_cx_webhook.my_webhook.id
+        tag = "ExampleTag"
         enable_generative_fallback = true
       }
     }
