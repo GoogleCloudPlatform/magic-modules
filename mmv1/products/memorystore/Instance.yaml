@@ -288,7 +288,7 @@ properties:
     type: Array
     description:
       "Deprecated. Output only. Endpoints clients can connect to the instance through."
-    deprecation_message: 
+    deprecation_message:
       "`discovery_endpoints` is deprecated. As a result it will not be populated \n
       if the connections are created using `desired_auto_created_endpoints` \n
       parameter or `google_memorystore_instance_desired_user_created_endpoints` \n
