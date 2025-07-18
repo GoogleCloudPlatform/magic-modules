@@ -23,3 +23,28 @@ func validateDefaultTableExpirationMs(v interface{}, k string) (ws []string, err
 
     return
 }
+
+// bigqueryDatasetAccessHash is a custom hash function for the access block.
+// It normalizes the 'role' field before hashing, treating legacy roles
+// and their modern IAM equivalents as the same.
+func resourceBigqueryDatasetAccessHash(v interface{}) int {
+	m, ok := v.(map[string]interface{})
+	if !ok {
+		return 0
+	}
+	// Make a copy of the map to avoid modifying the underlying data.
+	copy := make(map[string]interface{}, len(m))
+	for k, val := range m {
+		copy[k] = val
+	}
+
+	// Normalize the role if it exists and matches a legacy role.
+	if role, ok := copy["role"].(string); ok {
+		if newRole, ok := bigqueryAccessPrimitiveToRoleMap[role]; ok {
+			copy["role"] = newRole
+		}
+	}
+
+	// Use the default HashResource function on the (potentially modified) copy.
+	return schema.HashResource(bigqueryDatasetAccessSchema())(copy)
+}
