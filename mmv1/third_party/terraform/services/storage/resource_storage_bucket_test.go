@@ -1134,7 +1134,7 @@ func TestAccStorageBucket_cors(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "cors.1.send_max_age_seconds_if_zero"},
 			},
 			{
 				Config: testAccStorageBucket_basic(bucketName),
@@ -2184,10 +2184,11 @@ resource "google_storage_bucket" "bucket" {
   }
 
   cors {
-    origin          = ["ghi", "jkl"]
-    method          = ["z9z"]
-    response_header = ["000"]
-    max_age_seconds = 5
+    origin                       = ["ghi", "jkl"]
+    method                       = ["z9z"]
+    response_header              = ["000"]
+    max_age_seconds              = 0
+    send_max_age_seconds_if_zero = true
   }
 }
 `, bucketName)
