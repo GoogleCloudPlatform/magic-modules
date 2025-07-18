@@ -294,7 +294,7 @@ properties:
       parameter or `google_memorystore_instance_desired_user_created_endpoints` \n
       resource. Instead of this parameter, for discovery, use \n
       `endpoints.connections.pscConnection` and `endpoints.connections.pscAutoConnection` \n
-      with connectionType CONNECTION_TYPE_DISCOVERY. 
+      with connectionType CONNECTION_TYPE_DISCOVERY."
     output: true
     item_type:
       type: NestedObject
