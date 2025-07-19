@@ -21,6 +21,13 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
+	_ "embed"
+)
+
+var (
+	//go:embed data/reviewer_rotation.yaml
+	reviewerRotationData []byte
 )
 
 // requestReviewerCmd represents the requestReviewer command
@@ -48,6 +55,10 @@ var requestReviewerCmd = &cobra.Command{
 			return fmt.Errorf("did not provide GITHUB_TOKEN environment variable")
 		}
 		gh := github.NewClient(githubToken)
+
+		if err := github.ReadReviewerRotation(reviewerRotationData); err != nil {
+			return err
+		}
 		return execRequestReviewer(prNumber, gh)
 	},
 }
