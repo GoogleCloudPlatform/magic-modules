@@ -344,23 +344,23 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 			}
 			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, resourceIdentifier)
 
-			apiResourceType := fmt.Sprintf("%s.%s", service, object.ApiResourceType())
-			if _, ok := resourcesGroupedByApiResourceType[apiResourceType]; !ok {
-				resourcesGroupedByApiResourceType[apiResourceType] = make([]ResourceIdentifier, 0)
+			caiResourceType := fmt.Sprintf("%s.%s", service, object.CaiResourceType())
+			if _, ok := resourcesGroupedByApiResourceType[caiResourceType]; !ok {
+				resourcesGroupedByApiResourceType[caiResourceType] = make([]ResourceIdentifier, 0)
 			}
-			resourcesGroupedByApiResourceType[apiResourceType] = append(resourcesGroupedByApiResourceType[apiResourceType], resourceIdentifier)
+			resourcesGroupedByApiResourceType[caiResourceType] = append(resourcesGroupedByApiResourceType[caiResourceType], resourceIdentifier)
 		}
 	}
 
-	for apiResourceType, resources := range resourcesGroupedByApiResourceType {
+	for caiResourceType, resources := range resourcesGroupedByApiResourceType {
 		// If no other Terraform resources share the API resource type, override the alias name as "Default"
 		if len(resources) == 1 {
 			for _, resourceIdentifier := range resources {
 				resourceIdentifier.AliasName = "Default"
-				tgc.ResourcesGroupedByApiResourceType[apiResourceType] = []ResourceIdentifier{resourceIdentifier}
+				tgc.ResourcesGroupedByApiResourceType[caiResourceType] = []ResourceIdentifier{resourceIdentifier}
 			}
 		} else {
-			tgc.ResourcesGroupedByApiResourceType[apiResourceType] = resources
+			tgc.ResourcesGroupedByApiResourceType[caiResourceType] = resources
 		}
 	}
 }

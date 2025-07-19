@@ -226,16 +226,6 @@ type Resource struct {
 	// If true, resource is not importable
 	ExcludeImport bool `yaml:"exclude_import,omitempty"`
 
-	// If true, exclude resource from Terraform Validator
-	// (i.e. terraform-provider-conversion)
-	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
-
-	// If true, include resource in the new package of TGC (terraform-provider-conversion)
-	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
-
-	// Name of the hcl resource block used in TGC
-	TgcHclBlockName string `yaml:"tgc_hcl_block_name,omitempty"`
-
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 
@@ -362,6 +352,26 @@ type Resource struct {
 
 	ImportPath     string `yaml:"-"`
 	SourceYamlFile string `yaml:"-"`
+
+	// ====================
+	// TGC
+	// ====================
+	// If true, exclude resource from Terraform Validator
+	// (i.e. terraform-provider-conversion)
+	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
+
+	// If true, include resource in the new package of TGC (terraform-provider-conversion)
+	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
+
+	// Name of the hcl resource block used in TGC
+	TgcHclBlockName string `yaml:"tgc_hcl_block_name,omitempty"`
+
+	// The resource kind in CAI.
+	// If this is not set, then :name is used instead.
+	// For example: compute.googleapis.com/Address has Address for CaiResourceKind,
+	// and compute.googleapis.com/GlobalAddress has GlobalAddress for CaiResourceKind.
+	// But they have the same api resource type: address
+	CaiResourceKind string `yaml:"cai_resource_kind,omitempty"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -1846,8 +1856,8 @@ func (r Resource) CaiAssetType() string {
 	baseURL := r.CaiProductBaseUrl()
 	productBackendName := r.CaiProductBackendName(baseURL)
 	assetName := r.Name
-	if r.ApiResourceTypeKind != "" {
-		assetName = r.ApiResourceTypeKind
+	if r.CaiResourceKind != "" {
+		assetName = r.CaiResourceKind
 	}
 	return fmt.Sprintf("%s.googleapis.com/%s", productBackendName, assetName)
 }
@@ -1859,10 +1869,10 @@ func (r Resource) DefineAssetTypeForResourceInProduct() bool {
 	if r.ProductMetadata.ResourcesWithCaiAssetType == nil {
 		r.ProductMetadata.ResourcesWithCaiAssetType = make(map[string]struct{}, 1)
 	}
-	if _, alreadyDefined := r.ProductMetadata.ResourcesWithCaiAssetType[r.ApiResourceType()]; alreadyDefined {
+	if _, alreadyDefined := r.ProductMetadata.ResourcesWithCaiAssetType[r.CaiResourceType()]; alreadyDefined {
 		return false
 	}
-	r.ProductMetadata.ResourcesWithCaiAssetType[r.ApiResourceType()] = struct{}{}
+	r.ProductMetadata.ResourcesWithCaiAssetType[r.CaiResourceType()] = struct{}{}
 	return true
 }
 
@@ -2060,9 +2070,9 @@ func (r Resource) ReadPropertiesForTgc() []*Type {
 // Rarely, it is the API "resource type kind".
 // For example, the API resource type of "google_compute_autoscaler" is "ComputeAutoscalerAssetType".
 // The API resource type of "google_compute_region_autoscaler" is also "ComputeAutoscalerAssetType".
-func (r Resource) ApiResourceType() string {
-	if r.ApiResourceTypeKind != "" {
-		return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.ApiResourceTypeKind)
+func (r Resource) CaiResourceType() string {
+	if r.CaiResourceKind != "" {
+		return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.CaiResourceKind)
 	}
 
 	return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.Name)
