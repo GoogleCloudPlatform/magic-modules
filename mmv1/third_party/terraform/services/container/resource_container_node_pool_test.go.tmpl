@@ -602,6 +602,29 @@ func TestAccContainerNodePool_withKubeletConfig(t *testing.T) {
 	})
 }
 
+func TestAccContainerNodePool_withInvalidKubeletMemoryManager(t *testing.T) {
+	t.Parallel()
+	// Unit test, no interactions
+	acctest.SkipIfVcr(t)
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccContainerNodePool_withKubeletConfig(cluster, np, "dontexist", "100us", networkName, subnetworkName,"TRUE", "", "", "", false, 1024, 2, 70, 75),
+				ExpectError: regexp.MustCompile(`.*to be one of \["?Static"? "?none"? "?"?\].*`),
+			},
+		},
+	})
+}
+
 func TestAccContainerNodePool_withInvalidKubeletCpuManagerPolicy(t *testing.T) {
 	t.Parallel()
 	// Unit test, no interactions

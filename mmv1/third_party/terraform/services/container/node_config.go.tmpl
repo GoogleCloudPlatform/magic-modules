@@ -665,6 +665,40 @@ func schemaNodeConfig() *schema.Schema {
                                 Description: `Defines a comma-separated allowlist of unsafe sysctls or sysctl patterns which can be set on the Pods.`,
 								Elem:        &schema.Schema{Type: schema.TypeString},
                             },
+                            "memory_manager": {
+                                Type: schema.TypeList,
+                                Optional: true,
+                                Description: `Temp`,
+                                Elem: &schema.Resource{
+                                    Schema: map[string]*schema.Schema{
+                                        "policy": {
+                                            Type:        schema.TypeString,
+                                            Optional:    true,
+                                            Description: `Temp`,
+                                        },
+	                                },
+	                            },
+	                        },
+                            "topology_manager": {
+                                Type: schema.TypeList,
+                                Optional: true,
+                                MaxItems: 1,
+                                Description: `Temp`,
+                                Elem: &schema.Resource{
+                                    Schema: map[string]*schema.Schema{
+                                        "policy": {
+                                            Type:        schema.TypeString,
+                                            Optional:    true,
+                                            Description: `Temp`,
+                                        },
+                                        "scope": {
+                                            Type:        schema.TypeString,
+                                            Optional:    true,
+                                            Description: `Temp`,
+                                        },
+                                    },
+                                },
+                            },
 						},
 					},
 				},
@@ -1402,6 +1436,15 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 		    kConfig.AllowedUnsafeSysctls[i] = s.(string)
 		}
     }
+
+	if v, ok := cfg["memory_manager"]; ok {
+		kConfig.MemoryManager = expandMemoryManager(v)
+	}
+
+    if v, ok := cfg["topology_manager"]; ok {
+		kConfig.TopologyManager = expandTopologyManager(v)
+	}
+
 	return kConfig
 }
 
@@ -1498,6 +1541,54 @@ func expandHugepagesConfig(v interface{}) *container.HugepagesConfig {
 	}
 
 	return hugepagesConfig
+}
+
+func expandTopologyManager(v interface{}) *container.TopologyManager {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.TopologyManager{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	topologyManager := &container.TopologyManager{}
+
+	if v, ok := cfg["policy"]; ok {
+		topologyManager.Policy = v.(string)
+	}
+
+	if v, ok := cfg["scope"]; ok {
+		topologyManager.Scope = v.(string)
+	}
+
+	return topologyManager
+}
+
+func expandMemoryManager(v interface{}) *container.MemoryManager {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.MemoryManager{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	memoryManager := &container.MemoryManager{}
+
+	if v, ok := cfg["policy"]; ok {
+		memoryManager.Policy = v.(string)
+	}
+
+	return memoryManager
 }
 
 func expandContainerdConfig(v interface{}) *container.ContainerdConfig {
@@ -2037,6 +2128,8 @@ func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface
 			"image_minimum_gc_age":                   c.ImageMinimumGcAge,
 			"image_maximum_gc_age":                   c.ImageMaximumGcAge,
 			"allowed_unsafe_sysctls":                 c.AllowedUnsafeSysctls,
+			"topology_manager":                       flattenTopologyManager(c.TopologyManager),
+			"memory_manager":                         flattenMemoryManager(c.MemoryManager),
 		})
 	}
 	return result
@@ -2080,6 +2173,27 @@ func flattenHugepagesConfig(c *container.HugepagesConfig) []map[string]interface
 		result = append(result, map[string]interface{}{
 			"hugepage_size_2m": c.HugepageSize2m,
 			"hugepage_size_1g": c.HugepageSize1g,
+		})
+	}
+	return result
+}
+
+func flattenTopologyManager(c *container.TopologyManager)[]map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"policy": c.Policy,
+			"scope": c.Scope,
+		})
+	}
+	return result
+}
+
+func flattenMemoryManager(c *container.MemoryManager)[]map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"policy": c.Policy,
 		})
 	}
 	return result
