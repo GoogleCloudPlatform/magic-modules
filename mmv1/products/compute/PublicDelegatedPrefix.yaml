@@ -35,6 +35,7 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+  constants: 'templates/terraform/constants/public_delegated_prefix.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-central1"
@@ -70,6 +71,11 @@ examples:
     # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
     # resource_compute_public_advertised_prefix_test.go
     exclude_test: true
+  - name: 'compute_public_delegated_sub_prefix'
+    primary_resource_id: 'prefixes'
+    vars:
+      prefixes_name: 'prefix-with-sub-prefixes'
+      sub_prefix_name_1: 'sub-prefix-1'
 parameters:
 properties:
   - name: 'region'
@@ -82,6 +88,7 @@ properties:
     description: An optional description of this resource.
   - name: 'isLiveMigration'
     type: Boolean
+    diff_suppress_func: 'PublicDelegatedPrefix_IsLiveMigrationDiffSuppress' 
     description: If true, the prefix will be live migrated.
   - name: 'name'
     type: String
@@ -102,6 +109,7 @@ properties:
     diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - name: 'mode'
     type: Enum
+    diff_suppress_func: 'PublicDelegatedPrefix_ModeDiffSuppress' 
     description: |
       Specifies the mode of this IPv6 PDP. MODE must be one of: DELEGATION,
       EXTERNAL_IPV6_FORWARDING_RULE_CREATION and EXTERNAL_IPV6_SUBNETWORK_CREATION.
@@ -122,3 +130,67 @@ properties:
       The IP address range, in CIDR format, represented by this public
       delegated prefix.
     required: true
+  - name: 'publicDelegatedSubPrefixs'
+    type: Array
+    custom_flatten: 'templates/terraform/custom_flatten/public_delegated_sub_prefix_flatten.go.tmpl'
+    description: |
+      List of sub public delegated fixes for BYO IP functionality.
+      Each item in this array represents a sub prefix that can be
+      used to create addresses or further allocations.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          required: true
+          description: |
+            The name of the sub public delgated prefix.
+        - name: 'description'
+          type: String
+          diff_suppress_func: 'PublicDelegatedSubPrefix_DescriptionDiffSuppress' 
+          description: |
+            Optional description of this sub public delgated prefix.
+        - name: 'region'
+          type: String
+          output: true
+          description: |
+            Output-only. The region of the sub public delegated prefix if it is regional. If absent, the sub prefix is global.
+        - name: 'status'
+          type: Enum
+          output: true
+          description: |
+            Output-only. The status of the sub public delegated prefix.
+          enum_values:
+            - 'INITIALIZING'
+            - 'READY_TO_ANNOUNCE'
+            - 'ANNOUNCED'
+            - 'DELETING'
+        - name: 'ipCidrRange'
+          type: String
+          required: true
+          description: |
+            The IP address range in the CIDR format represented by this sub prefix.
+        - name: 'isAddress'
+          type: Boolean
+          diff_suppress_func: 'PublicDelegatedSubPrefix_IsAddressDiffSuppress' 
+          description: |
+            Whether the sub prefix is delegated for address creation.
+        - name: 'mode'
+          type: Enum
+          diff_suppress_func: 'PublicDelegatedSubPrefix_ModeDiffSuppress' 
+          description: |
+            The PublicDelegatedSubPrefix mode for IPv6 only.
+          enum_values:
+            - 'DELEGATION'
+            - 'EXTERNAL_IPV6_FORWARDING_RULE_CREATION'
+            - 'EXTERNAL_IPV6_SUBNETWORK_CREATION'
+        - name: 'allocatablePrefixLength'
+          type: Integer
+          output: true
+          description: |
+            The allocatable prefix length supported by this PublicDelegatedSubPrefix.
+        - name: 'delegatee_project'
+          type: String
+          required: true
+          description: |
+            Name of the project scoping this PublicDelegatedSubPrefix.
