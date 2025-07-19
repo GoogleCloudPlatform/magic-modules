@@ -3,7 +3,9 @@ resource "google_oracle_database_odb_network" "{{$.PrimaryResourceId}}"{
   location = "us-west3"
   project = "{{index $.Vars "project"}}"
   network = data.google_compute_network.default.id
-
+  labels = {
+    terraform_created = "true"
+  }
   deletion_protection = "{{index $.Vars "deletion_protection"}}"
 }
 
