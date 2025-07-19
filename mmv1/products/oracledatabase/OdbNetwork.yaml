@@ -13,29 +13,29 @@
 
 ---
 name: 'OdbNetwork'
-description: 'An OdbNetwork resource.'
+description: An OdbNetwork resource.
 base_url: 'projects/{{project}}/locations/{{location}}/odbNetworks'
 immutable: true
 self_link: 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}'
 create_url: 'projects/{{project}}/locations/{{location}}/odbNetworks?odbNetworkId={{odb_network_id}}'
 id_format: 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}'
 import_format:
-- 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}'
+  - 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}'
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/oracledatabase_odbnetwork.go.tmpl'
 examples:
-- name: oracledatabase_odbnetwork
-  primary_resource_id: my-odbnetwork
-  vars:
-    project: my-project
-    odb_network_id: my-odbnetwork
-    deletion_protection: 'true'
-  ignore_read_extra:
-    - 'deletion_protection'
-  test_vars_overrides:
-    deletion_protection: 'false'
-    project: '"oci-terraform-testing-prod"'
-    odb_network_id: 'fmt.Sprintf("tf-test-odbnetwork-%s", acctest.RandString(t, 10))'
+  - name: oracledatabase_odbnetwork
+    primary_resource_id: my-odbnetwork
+    vars:
+      project: my-project
+      odb_network_id: my-odbnetwork
+      deletion_protection: 'true'
+    ignore_read_extra:
+      - 'deletion_protection'
+    test_vars_overrides:
+      deletion_protection: 'false'
+      project: '"oci-terraform-testing-prod"'
+      odb_network_id: 'fmt.Sprintf("tf-test-odbnetwork-%s", acctest.RandString(t, 10))'
 virtual_fields:
   - name: 'deletion_protection'
     type: Boolean
@@ -52,62 +52,62 @@ async:
       delete_minutes: 20
     base_url: '{{op_id}}'
   actions:
-  - create
-  - delete
-  - update
+    - create
+    - delete
+    - update
   type: OpAsync
   result:
     resource_inside_response: true
   include_project: false
 autogen_status: T2RiTmV0d29yaw==
 parameters:
-- name: location
-  type: String
-  description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
-  immutable: true
-  url_param_only: true
-  required: true
-- name: odbNetworkId
-  type: String
-  description: |-
-    The ID of the OdbNetwork to create. This value is restricted
-    to (^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$) and must be a maximum of 63
-    characters in length. The value must start with a letter and end with
-    a letter or a number.
-  immutable: true
-  url_param_only: true
-  required: true
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: odbNetworkId
+    type: String
+    description: |-
+      The ID of the OdbNetwork to create. This value is restricted
+      to (^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$) and must be a maximum of 63
+      characters in length. The value must start with a letter and end with
+      a letter or a number.
+    immutable: true
+    url_param_only: true
+    required: true
 properties:
-- name: createTime
-  type: String
-  description: The date and time that the OdbNetwork was created.
-  output: true
-- name: entitlementId
-  type: String
-  description: The ID of the subscription entitlement associated with the OdbNetwork.
-  output: true
-- name: labels
-  type: KeyValueLabels
-  description: Labels or tags associated with the resource.
-- name: name
-  type: String
-  description: |-
-    Identifier. The name of the OdbNetwork resource in the following format:
-    projects/{project}/locations/{region}/odbNetworks/{odb_network}
-  output: true
-- name: network
-  type: String
-  description: |-
-    The name of the VPC network in the following format:
-    projects/{project}/global/networks/{network}
-  required: true
-- name: state
-  type: String
-  description: |-
-    State of the ODB Network.
-    Possible values:
-    PROVISIONING
-    AVAILABLE
-    TERMINATING
-    FAILED
-  output: true
+  - name: createTime
+    type: String
+    description: The date and time that the OdbNetwork was created.
+    output: true
+  - name: entitlementId
+    type: String
+    description: The ID of the subscription entitlement associated with the OdbNetwork.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels or tags associated with the resource.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The name of the OdbNetwork resource in the following format:
+      projects/{project}/locations/{region}/odbNetworks/{odb_network}
+    output: true
+  - name: network
+    type: String
+    description: |-
+      The name of the VPC network in the following format:
+      projects/{project}/global/networks/{network}
+    required: true
+  - name: state
+    type: String
+    description: |-
+      State of the ODB Network.
+      Possible values:
+      PROVISIONING
+      AVAILABLE
+      TERMINATING
+      FAILED
+    output: true
