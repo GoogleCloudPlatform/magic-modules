@@ -36,6 +36,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
 examples:
   - name: 'url_map_bucket_and_service'
@@ -52,6 +53,8 @@ examples:
       url_map_name: 'urlmap'
       home_backend_service_name: 'home'
       health_check_name: 'health-check'
+    tgc_test_ignore_extra:
+      - 'path_matcher.route_rules.url_redirect.https_redirect'
   - name: 'url_map_traffic_director_route_partial'
     primary_resource_id: 'urlmap'
     vars:
@@ -402,6 +405,7 @@ properties:
                 For example, assume that you configure a rule for 401 (Un-authorized) code, and another for all 4 series error codes (4XX).
                 If the backend service returns a 401, then the rule for 401 will be applied. However if the backend service returns a 403, the rule for 4xx takes effect.
               api_name: errorResponseRules
+              is_missing_in_cai: true
               item_type:
                 type: NestedObject
                 properties:
@@ -562,6 +566,7 @@ properties:
                       For example, assume that you configure a rule for 401 (Un-authorized) code, and another for all 4 series error codes (4XX).
                       If the backend service returns a 401, then the rule for 401 will be applied. However if the backend service returns a 403, the rule for 4xx takes effect.
                     api_name: errorResponseRules
+                    is_missing_in_cai: true
                     item_type:
                       type: NestedObject
                       properties:
@@ -751,6 +756,7 @@ properties:
                         description: |
                           The percentage of requests to be mirrored to backendService.
                           The value must be between 0.0 and 100.0 inclusive.
+                        is_missing_in_cai: true
                         validation:
                           function: 'validation.FloatBetween(0, 100)'
                   - name: 'retryPolicy'
@@ -769,6 +775,7 @@ properties:
                         properties:
                           - name: 'nanos'
                             type: Integer
+                            include_empty_value_in_cai: true
                             description: |
                               Span of time that's a fraction of a second at nanosecond resolution. Durations
                               less than one second are represented with a 0 `seconds` field and a positive
@@ -1865,6 +1872,7 @@ properties:
               - name: 'httpFilterConfigs'
                 type: Array
                 min_version: 'beta'
+                is_missing_in_cai: true
                 description: |
                   Outbound route specific configuration for networkservices.HttpFilter resources enabled by Traffic Director.
                   httpFilterConfigs only applies for load balancers with loadBalancingScheme set to INTERNAL_SELF_MANAGED.
@@ -1892,6 +1900,7 @@ properties:
               - name: 'httpFilterMetadata'
                 type: Array
                 min_version: 'beta'
+                is_missing_in_cai: true
                 description: |
                   Outbound route specific metadata supplied to networkservices.HttpFilter resources enabled by Traffic Director.
                   httpFilterMetadata only applies for load balancers with loadBalancingScheme set to INTERNAL_SELF_MANAGED.
@@ -2237,6 +2246,7 @@ properties:
                 - name: 'mirrorPercent'
                   min_version: beta
                   type: Double
+                  is_missing_in_cai: true
                   description: |
                     The percentage of requests to be mirrored to backendService.
                     The value must be between 0.0 and 100.0 inclusive.
@@ -2378,6 +2388,7 @@ properties:
           For example, assume that you configure a rule for 401 (Un-authorized) code, and another for all 4 series error codes (4XX).
           If the backend service returns a 401, then the rule for 401 will be applied. However if the backend service returns a 403, the rule for 4xx takes effect.
         api_name: errorResponseRules
+        is_missing_in_cai: true
         item_type:
           type: NestedObject
           properties:
@@ -2866,6 +2877,7 @@ properties:
             imports: 'selfLink'
           - name: 'mirrorPercent'
             min_version: beta
+            is_missing_in_cai: true
             type: Double
             description: |
               The percentage of requests to be mirrored to backendService.
