@@ -12,6 +12,13 @@ resource "google_compute_storage_pool" "{{$.PrimaryResourceId}}" {
 
   storage_pool_type = data.google_compute_storage_pool_types.balanced.self_link
 
+  labels = {
+    environment = "test"
+    purpose     = "storage-pool-testing"
+    team        = "infrastructure"
+    cost_center = "engineering"
+  }
+
   deletion_protection = false
 
   zone = "us-central1-a"
