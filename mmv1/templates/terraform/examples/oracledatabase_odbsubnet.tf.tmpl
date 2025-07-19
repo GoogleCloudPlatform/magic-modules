@@ -1,0 +1,26 @@
+resource "google_oracle_database_odb_subnet" "{{$.PrimaryResourceId}}"{
+  odb_subnet_id = "{{index $.Vars "odb_subnet_id"}}"
+  location = "europe-west2"
+  project = "{{index $.Vars "project"}}"
+  odbnetwork = google_oracle_database_odb_network.odbNetworks.odb_network_id
+  cidr_range = "10.1.1.0/24"
+  purpose = "CLIENT_SUBNET"
+  labels = {
+    terraform_created = "true"
+  }
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
+}
+
+resource "google_oracle_database_odb_network" "odbNetworks"{
+  odb_network_id = "{{index $.Vars "odb_network_id"}}"
+  location = "europe-west2"
+  project = "{{index $.Vars "project"}}"
+  network = data.google_compute_network.default.id
+  
+  deletion_protection = "{{index $.Vars "deletion_protection"}}"
+}
+
+data "google_compute_network" "default" {
+  name     = "new"
+  project = "{{index $.Vars "project"}}"
+}

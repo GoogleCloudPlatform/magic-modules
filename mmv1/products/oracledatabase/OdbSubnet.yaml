@@ -1,0 +1,123 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'OdbSubnet'
+description: 'An OdbSubnet resource.'
+base_url: 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbSubnets'
+immutable: true
+self_link: 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbSubnets/{{odb_subnet_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbSubnets?odbSubnetId={{odb_subnet_id}}'
+id_format: 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbSubnets/{{odb_subnet_id}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbSubnets/{{odb_subnet_id}}'
+custom_code:
+  pre_delete: 'templates/terraform/pre_delete/oracledatabase_odbsubnet.go.tmpl'
+examples:
+  - name: oracledatabase_odbsubnet
+    primary_resource_id: my-odbsubnet
+    vars:
+      project: my-project
+      odb_network_id: my-odbnetwork
+      odb_subnet_id: my-odbsubnet
+      deletion_protection: 'true'
+    ignore_read_extra:
+      - 'deletion_protection'
+    test_vars_overrides:
+      deletion_protection: 'false'
+      project: '"oci-terraform-testing-prod"'
+      odb_network_id: 'fmt.Sprintf("tf-test-odbnetwork-for-odbsubnet-%s", acctest.RandString(t, 10))'
+      odb_subnet_id: 'fmt.Sprintf("tf-test-odbsubnet-%s", acctest.RandString(t, 10))'
+virtual_fields:
+  - name: 'deletion_protection'
+    type: Boolean
+    default_value: true
+    description: 'Whether or not to allow Terraform to destroy the instance.
+    Unless this field is set to false in Terraform state, a terraform destroy
+    or terraform apply that would delete the instance will fail.'
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: T2RiU3VibmV0
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: odbnetwork
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: odbSubnetId
+    type: String
+    description: |-
+      The ID of the OdbSubnet to create. This value is restricted
+      to (^[a-z]([a-z0-9-]{0,61}[a-z0-9])?$) and must be a maximum of 63
+      characters in length. The value must start with a letter and end with
+      a letter or a number.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: cidrRange
+    type: String
+    description: The CIDR range of the subnet.
+    required: true
+  - name: createTime
+    type: String
+    description: The date and time that the OdbNetwork was created.
+    output: true
+  - name: labels
+    type: KeyValueLabels
+    description: Labels or tags associated with the resource.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The name of the OdbSubnet resource in the following format:
+      projects/{project}/locations/{location}/odbNetworks/{odb_network}/odbSubnets/{odb_subnet}
+    output: true
+  - name: purpose
+    type: String
+    description: |-
+      Purpose of the subnet.
+      Possible values:
+      CLIENT_SUBNET
+      BACKUP_SUBNET
+    required: true
+  - name: state
+    type: String
+    description: |-
+      State of the ODB Subnet.
+      Possible values:
+      PROVISIONING
+      AVAILABLE
+      TERMINATING
+      FAILED
+    output: true
