@@ -1,0 +1,59 @@
+log.Printf("[DEBUG] Beginning post_create for Vertex AI Endpoint with Model Garden Deployment")
+
+// Log Terraform resource data
+log.Printf("[DEBUG] Terraform Resource Data (d): ID=%s", d.Id())
+for key, val := range d.State().Attributes {
+	log.Printf("[DEBUG] d.State().Attributes[%s] = %s", key, val)
+}
+log.Printf("[DEBUG] d.Get(\"project\") = %v", d.Get("project"))
+log.Printf("[DEBUG] d.Get(\"location\") = %v", d.Get("location"))
+log.Printf("[DEBUG] d.Get(\"publisher_model_name\") = %v", d.Get("publisher_model_name"))
+
+// Log res structure
+log.Printf("[DEBUG] Top-level keys in res:")
+for k := range res {
+	log.Printf("[DEBUG]   - %s", k)
+}
+
+// Declare and populate opRes
+var opRes map[string]interface{}
+err = VertexAIOperationWaitTimeWithResponse(
+	config, res, &opRes, d.Get("project").(string), "Vertex AI deployModel operation", userAgent,
+	d.Timeout(schema.TimeoutCreate),
+)
+if err != nil {
+	d.SetId("")
+	return fmt.Errorf("Error waiting for deploy operation: %s", err)
+}
+
+// Log keys in opRes
+log.Printf("[DEBUG] opRes successfully retrieved. Keys:")
+for k := range opRes {
+	log.Printf("[DEBUG]   - %s", k)
+}
+
+// Extract full endpoint resource name
+endpointFull, ok := opRes["endpoint"].(string)
+if !ok || endpointFull == "" {
+	log.Printf("[ERROR] 'endpoint' not found or empty in opRes. Full opRes: %#v", opRes)
+	return fmt.Errorf("Create response didn't contain 'endpoint'. Create may not have succeeded.")
+}
+log.Printf("[DEBUG] Extracted full endpoint from opRes: %s", endpointFull)
+
+// Check format and extract endpoint name without strict project name match
+parts := strings.Split(endpointFull, "/")
+if len(parts) != 6 || parts[0] != "projects" || parts[2] != "locations" || parts[4] != "endpoints" {
+	log.Printf("[ERROR] Unexpected endpoint format. Got: %s", endpointFull)
+	return fmt.Errorf("unexpected format for endpoint: %s", endpointFull)
+}
+endpoint := parts[5]
+log.Printf("[DEBUG] Parsed endpoint ID: %s", endpoint)
+
+// Set Terraform fields
+if err := d.Set("endpoint", endpoint); err != nil {
+	return fmt.Errorf("Error setting endpoint: %s", err)
+}
+d.SetId(endpointFull)
+log.Printf("[DEBUG] Set Terraform resource ID to: %s", endpointFull)
+
+return nil
