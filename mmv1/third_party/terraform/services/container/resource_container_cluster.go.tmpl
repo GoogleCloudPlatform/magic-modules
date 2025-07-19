@@ -1564,6 +1564,7 @@ func ResourceContainerCluster() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"node_kubelet_config": schemaNodePoolAutoConfigNodeKubeletConfig(),
 						"linux_node_config":   schemaNodePoolAutoConfigLinuxNodeConfig(),
+						"containerd_config": schemaContainerdConfig(),
 						"network_tags": {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -4890,6 +4891,21 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s node pool auto config node_kubelet_config parameters have been updated", d.Id())
 	}
 
+	if d.HasChange("node_pool_auto_config.0.containerd_config") {
+	    if v, ok := d.GetOk("node_pool_auto_config.0.containerd_config"); ok {
+            req := &container.UpdateClusterRequest{
+                Update: &container.ClusterUpdate{
+                    DesiredContainerdConfig: expandContainerdConfig(v),
+                },
+            }
+            updateF := updateFunc(req, "updating GKE containerd config")
+            if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+                return err
+            }
+            log.Printf("[INFO] GKE cluster %s containerd config has been updated to %#v", d.Id(), req.Update.DesiredContainerdConfig)
+    		}
+    	}
+
 	if d.HasChange("node_pool_auto_config.0.network_tags.0.tags") {
 		tags := d.Get("node_pool_auto_config.0.network_tags.0.tags").([]interface{})
 
@@ -6507,6 +6523,10 @@ func expandNodePoolAutoConfig(configured interface{}) *container.NodePoolAutoCon
 		npac.ResourceManagerTags = expandResourceManagerTags(v)
 	}
 
+	if v, ok := config["containerd_config"]; ok {
+	    npac.ContainerdConfig = expandContainerdConfig(v)
+	}
+
 	return npac
 }
 
@@ -7492,8 +7512,22 @@ func flattenNodePoolAutoConfig(c *container.NodePoolAutoConfig) []map[string]int
 			{"cgroup_mode": c.LinuxNodeConfig.CgroupMode},
 		}
 	}
+	if c.ContainerdConfig != nil {
+		result["containerd_config"] = flattenContainerdConfig(c.ContainerdConfig)
+	}
 
 	return []map[string]interface{}{result}
+}
+
+func flattenContainerdConfig(c *container.ContainerdConfig) []map[string]interface{} {
+    if c == nil {
+        return nil
+    }
+    result := make(map[string]interface{})
+    if c.ContainerdConfig != nil {
+        result["containerd_configs"] = c.ContainerdConfig
+    }
+    return []map[string]interface{}{result}
 }
 
 func flattenNodePoolAutoConfigNetworkTags(c *container.NetworkTags) []map[string]interface{} {
