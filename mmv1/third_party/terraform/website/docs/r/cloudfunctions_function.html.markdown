@@ -179,6 +179,10 @@ Please refer to the field 'effective_labels' for all of the labels present on th
 
 * `secret_volumes` - (Optional) Secret volumes configuration. Structure is [documented below](#nested_secret_volumes).
 
+* `automatic_update_policy` - (Optional) Security patches are applied automatically to the runtime without requiring the function to be redeployed. This should be specified as an empty block and cannot be set alongside `on_deploy_update_policy`.
+
+* `on_deploy_update_policy` - (Optional) Security patches are only applied when a function is redeployed. This should be specified as an empty block and cannot be set alongside `automatic_update_policy`.
+
 <a name="nested_event_trigger"></a>The `event_trigger` block supports:
 
 * `event_type` - (Required) The type of event to observe. For example: `"google.storage.object.finalize"`.
