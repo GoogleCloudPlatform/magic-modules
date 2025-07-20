@@ -3,8 +3,8 @@ package networkconnectivity_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -113,14 +113,14 @@ func TestAccNetworkConnectivitySpoke_RouterApplianceHandWritten(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
-      {
-        Config: testAccNetworkConnectivitySpoke_RouterApplianceHandWrittenUpdate1(context),
-        ConfigPlanChecks: resource.ConfigPlanChecks{
-          PreApply: []plancheck.PlanCheck{
-            plancheck.ExpectResourceAction("google_network_connectivity_spoke.primary", plancheck.ResourceActionUpdate),
-          },
-        },
-      },
+			{
+				Config: testAccNetworkConnectivitySpoke_RouterApplianceHandWrittenUpdate1(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_network_connectivity_spoke.primary", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
 			{
 				ResourceName:            "google_network_connectivity_spoke.primary",
 				ImportState:             true,
