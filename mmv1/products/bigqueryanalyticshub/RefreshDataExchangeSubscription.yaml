@@ -1,0 +1,62 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RefreshDataExchangeSubscription'
+description: |
+  Represents a resource to refresh a DataExchange Subscription,
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/bigquery/docs/analytics-hub-introduction'
+create_url: 'projects/{{project}}/locations/{{location}}/subscriptions/{{subscription_id}}:refresh'
+immutable: true
+exclude_delete: true
+exclude_read: true
+exclude_import: true
+exclude_sweeper: true
+min_version: beta
+examples:
+  - name: 'bigquery_analyticshub_refresh_dataexchange_subscription'
+    primary_resource_id: 'refreshdxsubscription'
+    primary_resource_name: 'fmt.Sprintf("tf_test_subscription_%s", context["random_suffix"])'
+    region_override: 'us'
+    vars:
+      data_exchange_id: 'my_test_dataexchange'
+      listing_dataset_id: 'listing_src_dataset'
+      listing_table_id: 'listing_src_table'
+      listing_id: 'my_test_listing'
+      subscription_id: 'my_subscription_id'
+      subscriber_contact_email: 'testuser@example.com'
+      destination_dataset_id: 'subscribed_dest_dataset'
+      destination_dataset_friendly_name: 'Subscribed Destination Dataset'
+    exclude_import_test: true
+custom_code:
+  pre_create: 'templates/terraform/pre_create/bigquery_refresh_dx_subscription.go.tmpl'
+properties:
+  - name: 'location'
+    type: String
+    description: 'The geographic location where the Subscription resides.'
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: 'subscription_id'
+    type: String
+    description: 'The ID of the subscription to be refreshed.'
+    required: true
+    url_param_only: true
+    immutable: true
+  - name: 'refreshTime'
+    type: String
+    description: 'The last time when subscription was refreshed. Set this to timestamp() if refreshing is required otherwise set to a static value'
+    immutable: true
+    url_param_only: true
