@@ -19,7 +19,7 @@ resource "google_developer_connect_connection" "bitbucket_conn" {
 resource "google_developer_connect_git_repository_link" "my_git_repository_link" {
   git_repository_link_id = "{{index $.Vars "git_repository_link_name"}}"
   parent_connection = google_developer_connect_connection.bitbucket_conn.connection_id
-  clone_uri = "https://bitbucket.org/proctor-test/tf-demo.git" # **Update this to your Bitbucket repository's clone URI**
+  clone_uri = "https://bitbucket.org/proctor-test/tf-demo.git"
   location = "us-central1"
   annotations = {}
 }
