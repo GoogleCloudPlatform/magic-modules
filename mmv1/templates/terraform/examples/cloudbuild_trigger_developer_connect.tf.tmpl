@@ -1,8 +1,34 @@
+resource "google_developer_connect_connection" "bitbucket_conn" {
+  location = "us-central1"
+  connection_id = "{{index $.Vars "connection_name"}}" # This will likely be dynamically generated in a real test
+
+  bitbucket_cloud_config {
+    workspace = "proctor-test"
+    webhook_secret_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-webhook/versions/latest"
+
+    read_authorizer_credential {
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-read-token/versions/latest"
+    }
+
+    authorizer_credential {
+      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-auth-token/versions/latest"
+    }
+  }
+}
+
+resource "google_developer_connect_git_repository_link" "my_git_repository_link" {
+  git_repository_link_id = "{{index $.Vars "git_repository_link_name"}}" # This will likely be dynamically generated in a real test
+  parent_connection = google_developer_connect_connection.bitbucket_conn.connection_id
+  clone_uri = "https://bitbucket.org/proctor-test/tf-demo.git" # **Update this to your Bitbucket repository's clone URI**
+  location = "us-central1"
+  annotations = {}
+}
+
 resource "google_cloudbuild_trigger" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
-  
+
   developer_connect_event_config {
-    git_repository_link = "projects/{{index $.TestEnvVars "project_name"}}/locations/us-central1/connections/my_connection/gitRepositoryLinks/{{index $.Vars "repo_name"}}"
+    git_repository_link = google_developer_connect_git_repository_link.my_git_repository_link.id
     push {
       branch = "feature-.*"
     }
