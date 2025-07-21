@@ -2101,11 +2101,6 @@ func TestAccContainerNodePool_fastSocket(t *testing.T) {
 						"node_config.0.fast_socket.0.enabled", "true"),
 				),
 			},
-<!-- 			{
-				ResourceName:      "google_container_node_pool.np",
-				ImportState:       true,
-				ImportStateVerify: true,
-			}, -->
 			{
 				Config: testAccContainerNodePool_fastSocket(cluster, np, networkName, subnetworkName, false),
 				Check: resource.ComposeTestCheckFunc(
@@ -2113,11 +2108,6 @@ func TestAccContainerNodePool_fastSocket(t *testing.T) {
 						"node_config.0.fast_socket.0.enabled", "false"),
 				),
 			},
-<!-- 			{
-				ResourceName:      "google_container_node_pool.np",
-				ImportState:       true,
-				ImportStateVerify: true,
-			}, -->
 		},
 	})
 }
