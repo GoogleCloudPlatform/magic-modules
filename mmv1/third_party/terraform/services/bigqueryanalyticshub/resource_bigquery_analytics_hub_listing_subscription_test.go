@@ -1,8 +1,8 @@
 package bigqueryanalyticshub_test
 
 import (
-	"os"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
