@@ -2075,7 +2075,7 @@ func (r Resource) OutputFieldSetStr() string {
 	fieldNames := make(map[string]struct{})
 	for _, tp := range r.AllUserProperties() {
 		if tp.Output {
-			fieldNames[tp.Name] = struct{}{}
+			fieldNames[google.Underscore(tp.Name)] = struct{}{}
 		}
 	}
 	return fmt.Sprintf("%#v", fieldNames)
