@@ -24,7 +24,7 @@ self_link: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_confi
 # Update API is also used as create API.
 create_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}?&setDefault={{set_default}}'
 create_verb: 'PATCH'
-update_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
+update_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}?&setDefault={{set_default}}'
 update_verb: 'PATCH'
 delete_url: 'projects/{{project}}/locations/{{location}}/cmekConfigs/{{cmek_config_id}}'
 import_format:
