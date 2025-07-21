@@ -92,7 +92,7 @@ properties:
     description: |
       KMS key resource name which will be used to encrypt resources
       `projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{keyId}`.
-    immutable: true
+    required: true
   - name: 'kmsKeyVersion'
     type: String
     description: |
