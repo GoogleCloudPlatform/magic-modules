@@ -89,7 +89,7 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 	# Wait delay after enabling APIs
 	resource "time_sleep" "wait_enable_service_api" {
 		depends_on       = [google_project_service.apphub_api_service]
-		create_duration  = "30s"
+		create_duration  = "120s"
 	}
 
 	resource "google_apphub_application" "my_apphub_application" {
@@ -120,8 +120,8 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 	resource "google_project" "project" {
 		project_id = "dci-terraform"
 		name = "Service Project"
-		org_id = "{{index $.TestEnvVars "org_id"}}"
-		billing_account = "{{index $.TestEnvVars "billing_account"}}"
+		org_id          = "%{org_id}"
+  		billing_account = "%{billing_account}"
 		deletion_policy = "DELETE"
 	}
 	
@@ -135,7 +135,7 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 	# Wait delay after enabling APIs
 	resource "time_sleep" "wait_enable_service_api" {
 		depends_on       = [google_project_service.apphub_api_service]
-		create_duration  = "30s"
+		create_duration  = "120s"
 	}
 
 	resource "google_apphub_application" "my_apphub_application" {
