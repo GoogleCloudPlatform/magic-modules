@@ -1,36 +1,32 @@
-resource "google_developer_connect_connection" "bitbucket_conn" {
+resource "google_developer_connect_connection" "my-connection" {
   location = "us-central1"
-  connection_id = "{{index $.Vars "connection_name"}}"
+  name = "{{index $.Vars "cloudbuildv2_connection_name"}}"
 
-  bitbucket_cloud_config {
-    workspace = "proctor-test"
-    webhook_secret_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-webhook/versions/latest"
-
-    read_authorizer_credential {
-      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-read-token/versions/latest"
-    }
-
+  github_config {
+    github_app = "DEVELOPER_CONNECT"
+    app_installation_id = {{index $.Vars "installation_id"}}
     authorizer_credential {
-      user_token_secret_version = "projects/devconnect-terraform-creds/secrets/bbc-auth-token/versions/latest"
+      oauth_token_secret_version = "{{index $.Vars "pat_secret"}}"
     }
   }
 }
 
-resource "google_developer_connect_git_repository_link" "my_git_repository_link" {
-  git_repository_link_id = "{{index $.Vars "git_repository_link_name"}}"
-  parent_connection = google_developer_connect_connection.bitbucket_conn.connection_id
-  clone_uri = "https://bitbucket.org/proctor-test/tf-demo.git"
+resource "google_developer_connect_git_repository_link" "my-repository" {
   location = "us-central1"
-  annotations = {}
+  git_repository_link_id = "my-repo"
+  parent_connection = google_developer_connect_connection.my-connection.connection_id
+  remote_uri = "https://github.com/myuser/myrepo.git"
 }
 
-resource "google_cloudbuild_trigger" "{{$.PrimaryResourceId}}" {
+
+resource "google_cloudbuild_trigger" "my_trigger" {
+  name     = "my-github-trigger-via-dev-connect"
   location = "us-central1"
 
   developer_connect_event_config {
-    git_repository_link = google_developer_connect_git_repository_link.my_git_repository_link.id
+    git_repository_link = google_developer_connect_git_repository_link.my-repository.id
     push {
-      branch = "feature-.*"
+      branch = "main"
     }
   }
 
