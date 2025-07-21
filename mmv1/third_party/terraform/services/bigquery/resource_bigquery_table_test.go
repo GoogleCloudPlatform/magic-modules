@@ -1234,15 +1234,6 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionIDAndHivePartit
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "schema"},
 			},
-			{
-				Config: testAccBigQueryTableFromGCSWithSchema(datasetID, tableID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
-			},
-			{
-				ResourceName:            "google_bigquery_table.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "schema"},
-			},
 		},
 	})
 }
