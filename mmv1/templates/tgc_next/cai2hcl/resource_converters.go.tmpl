@@ -51,7 +51,7 @@ var ConverterMap = map[string]map[string]models.Cai2hclConverter{
 	},
 	// ####### END handwritten resources ###########
 
-	{{- range $resourceType, $resources := $.ResourcesGroupedByApiResourceType }}
+	{{- range $resourceType, $resources := $.ResourcesByCaiResourceType}}
 	{{ $resourceType }}AssetType: {
 	{{- range $object := $resources }}
 		"{{ $object.AliasName }}": {{ $object.ServiceName }}.New{{ $object.ResourceName -}}Cai2hclConverter(provider),
