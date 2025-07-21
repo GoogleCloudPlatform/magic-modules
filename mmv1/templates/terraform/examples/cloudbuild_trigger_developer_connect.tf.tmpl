@@ -1,6 +1,6 @@
 resource "google_developer_connect_connection" "bitbucket_conn" {
   location = "us-central1"
-  connection_id = "{{index $.Vars "connection_name"}}" # This will likely be dynamically generated in a real test
+  connection_id = "{{index $.Vars "connection_name"}}"
 
   bitbucket_cloud_config {
     workspace = "proctor-test"
@@ -17,7 +17,7 @@ resource "google_developer_connect_connection" "bitbucket_conn" {
 }
 
 resource "google_developer_connect_git_repository_link" "my_git_repository_link" {
-  git_repository_link_id = "{{index $.Vars "git_repository_link_name"}}" # This will likely be dynamically generated in a real test
+  git_repository_link_id = "{{index $.Vars "git_repository_link_name"}}"
   parent_connection = google_developer_connect_connection.bitbucket_conn.connection_id
   clone_uri = "https://bitbucket.org/proctor-test/tf-demo.git" # **Update this to your Bitbucket repository's clone URI**
   location = "us-central1"
