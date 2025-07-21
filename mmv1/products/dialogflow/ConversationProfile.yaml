@@ -222,32 +222,6 @@ properties:
                               - CUSTOMER_SATISFACTION
                               - ENTITIES
                     - type: NestedObject
-                      name: 'knowledgeBaseQuerySource'
-                      description: |
-                        Query from knowledgebase.
-                        This feature is only supported for types: ARTICLE_SUGGESTION, FAQ.
-                      properties:
-                        - type: Array
-                          name: 'knowledgeBases'
-                          required: true
-                          description: |
-                            Knowledge bases to query. Format: projects/<Project ID>/locations/<Location ID>/knowledgeBases/<Knowledge Base ID>.
-                          item_type:
-                            type: String
-                    - type: NestedObject
-                      name: 'documentQuerySource'
-                      description: |
-                        Query from knowledge base document.
-                        This feature is supported for types: SMART_REPLY, SMART_COMPOSE.
-                      properties:
-                        - type: Array
-                          name: 'documents'
-                          required: true
-                          description: |
-                            Knowledge documents to query from. Format: projects/<Project ID>/locations/<Location ID>/knowledgeBases/<KnowledgeBase ID>/documents/<Document ID>.
-                          item_type:
-                            type: String
-                    - type: NestedObject
                       name: 'dialogflowQuerySource'
                       description: |
                         Query from Dialogflow agent.
