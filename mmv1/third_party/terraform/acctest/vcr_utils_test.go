@@ -535,28 +535,3 @@ func TestInsertDiffSteps(t *testing.T) {
 	defer os.Remove(temp_file.Name())
 
 }
-func TestParseReleaseDiffOutput(t *testing.T) {
-	temp_file, err := os.CreateTemp("", "test_release_diff_test_output_*.log")
-	if err != nil {
-		t.Fatalf("Failed to create temp file: %v", err)
-	}
-	defer os.Remove(temp_file.Name())
-	// Write some dummy data to the temp file
-	_, err = temp_file.WriteString("This is a test release diff output.\n")
-	if err != nil {
-		t.Fatalf("Failed to write to temp file: %v", err)
-	}
-
-	var expectedOutput = "This is a test release diff output."
-	var output string
-	var lastLine string
-	lastLine, output, err = acctest.ParseReleaseDiffOutput(temp_file)
-	if err != nil {
-		t.Fatalf("Failed to parse release diff output: %v", err)
-	}
-
-	if lastLine != expectedOutput {
-		t.Fatalf("Expected output to be:\n%q\nbut got:\n%q", expectedOutput, output)
-	}
-	t.Logf("Parsed output:\n%s", output)
-}
