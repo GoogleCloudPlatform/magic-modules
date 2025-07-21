@@ -99,8 +99,9 @@ func dataSourceGoogleComputeSubnetworksRead(d *schema.ResourceData, meta interfa
 			"description":              subnet.Description,
 			"ip_cidr_range":            subnet.IpCidrRange,
 			"name":                     subnet.Name,
-			"network_self_link":        filepath.Base(subnet.Network),
+			"network_self_link":        filepath.Base(subnet.Network), // TODO: remove in next major release (7.0.0) also from docs
 			"network":                  subnet.Network,
+			"network_name":             filepath.Base(subnet.Network),
 			"private_ip_google_access": subnet.PrivateIpGoogleAccess,
 			"self_link":                subnet.SelfLink,
 		})
