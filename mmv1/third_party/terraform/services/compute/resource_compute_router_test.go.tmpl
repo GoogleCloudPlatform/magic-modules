@@ -211,6 +211,7 @@ func TestAccComputeRouter_addAndUpdateIdentifierRangeBgp(t *testing.T) {
 	})
 }
 
+
 {{- if ne $.TargetVersionName "ga" }}
 func TestAccComputeRouter_resourceManagerTags(t *testing.T) {
 	t.Parallel()
@@ -233,7 +234,7 @@ func TestAccComputeRouter_resourceManagerTags(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		CheckDestroy:             testAccCheckComputeRouterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
