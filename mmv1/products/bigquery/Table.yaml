@@ -277,12 +277,10 @@ properties:
                 Definition of the foreign data type.
                 Only valid for top-level schema fields (not nested fields).
                 If the type is FOREIGN, this field is required.
-              min_version: beta
   - name: 'schemaForeignTypeInfo'
     type: NestedObject
     description: |
       Specifies metadata of the foreign data type definition in field schema.
-    min_version: beta
     properties:
       - name: 'typeSystem'
         type: Enum
@@ -291,7 +289,6 @@ properties:
         required: true
         enum_values:
           - 'HIVE'
-        min_version: beta
   - name: 'encryptionConfiguration'
     type: NestedObject
     description: Custom encryption configuration
@@ -577,51 +574,43 @@ properties:
     type: NestedObject
     description: |
       Options defining open source compatible table.
-    min_version: beta
     properties:
       - name: 'parameters'
         type: KeyValuePairs
         description: |
           A map of key value pairs defining the parameters and properties of the open source table.
           Corresponds with hive meta store table parameters. Maximum size of 4Mib.
-        min_version: beta
       - name: 'storageDescriptor'
         type: NestedObject
         description: |
           A storage descriptor containing information about the physical storage of this table.
-        min_version: beta
         properties:
           - name: 'storageUri'
             type: String
             description: |
               The physical location of the table (e.g. `gs://spark-dataproc-data/pangea-data/case_sensitive/`
               or `gs://spark-dataproc-data/pangea-data/*`). The maximum length is 2056 bytes.
-            min_version: beta
           - name: 'inputFormat'
             type: String
             description: |
               Specifies the fully qualified class name of the InputFormat
               (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcInputFormat").
               The maximum length is 128 characters.
-            min_version: beta
           - name: 'outputFormat'
             type: String
             description: |
               Specifies the fully qualified class name of the OutputFormat
               (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat").
               The maximum length is 128 characters.
-            min_version: beta
           - name: 'serdeInfo'
             type: NestedObject
             description: |
               Serializer and deserializer information.
-            min_version: beta
             properties:
               - name: 'name'
                 type: String
                 description: |
                   Name of the SerDe. The maximum length is 256 characters.
-                min_version: beta
               - name: 'serializationLibrary'
                 type: String
                 description: |
@@ -630,13 +619,11 @@ properties:
                   underlying low-level input and output format structures.
                   The maximum length is 256 characters.
                 required: true
-                min_version: beta
               - name: 'parameters'
                 type: KeyValuePairs
                 description: |
                   Key-value pairs that define the initialization parameters for the serialization
                   library. Maximum size 10 Kib.
-                min_version: beta
       - name: 'connectionId'
         type: String
         description: |
@@ -644,7 +631,6 @@ properties:
           Azure Blob, Cloud Storage, or S3. The connection is needed to read the open source table
           from BigQuery Engine. The connection_id can have the form `<project_id>.<location_id>.<connection_id>`
           or `projects/<project_id>/locations/<location_id>/connections/<connection_id>`.
-        min_version: beta
 virtual_fields:
   - name: 'table_metadata_view'
     type: String

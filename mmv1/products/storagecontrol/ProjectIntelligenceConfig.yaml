@@ -14,6 +14,7 @@
 ---
 # API resource name
 name: 'ProjectIntelligenceConfig'
+api_resource_type_kind: 'IntelligenceConfig'
 kind: 'storagecontrol#intelligenceconfig'
 # Resource description for the provider documentation.
 description: |
@@ -24,15 +25,16 @@ description: |
 docs:
   warning: |
     Storage Intelligence Config is a singleton resource which cannot be created or deleted. A single instance of Storage Intelligence Config exist for each GCP Project. Terraform does not create or destroy this resource.
-    Terraform resource creation for this resource is simply an update operation on existing resource with specified properties. Terraform deletion won't have any effect on this resource rather it will only remove it from the state file.
+    Terraform resource creation for this resource is simply an update operation on existing resource with specified properties, absence of any optional field in the create operation will result in clearance of that field. Terraform deletion won't have any effect on this resource rather it will only remove it from the state file.
 
 # URL for the resource's standard Get method. https://google.aip.dev/131
 self_link: 'projects/{{name}}/locations/global/intelligenceConfig'
 
 custom_code:
-  custom_create: 'templates/terraform/custom_create/storage_control_project_intelligence.go.tmpl'
+  pre_create: templates/terraform/pre_create/storage_control_intelligence_config.go.tmpl
   constants: 'templates/terraform/constants/storage_control_intelligence.go.tmpl'
 
+create_verb: 'PATCH'
 # The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
 update_verb: 'PATCH'
 # If true, the resource sets an `updateMask` query parameter listing modified
@@ -48,6 +50,14 @@ import_format:
 # the resource. If false, that code is not generated.
 autogen_async: false
 
+examples:
+  - name: storage_control_project_intelligence_config_basic
+    primary_resource_id: example
+    vars:
+      project_id: "test-project"
+    exclude_test: true
+    exclude_import_test: true
+
 properties:
   - name: 'name'
     type: String
@@ -61,7 +71,7 @@ properties:
     required: false
     default_from_api: true
     description: |
-      Edition configuration of the Storage Intelligence resource. Valid values are INHERIT, DISABLED and STANDARD.
+      Edition configuration of the Storage Intelligence resource. Valid values are INHERIT, TRIAL, DISABLED and STANDARD.
   - name: 'updateTime'
     type: String
     output: true
@@ -177,3 +187,14 @@ properties:
         output: true
         description: |
           The `StorageIntelligence` edition that is applicable for the resource.
+  - name: 'trialConfig'
+    output: true
+    description: |
+      The trial configuration of the Storage Intelligence resource.
+    type: NestedObject
+    properties:
+      - name: expireTime
+        type: String
+        output: true
+        description: |
+          The time at which the trial expires.

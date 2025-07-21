@@ -8,9 +8,6 @@ description: |-
 
 Get the value and metadata from a Parameter Manager Parameter version. For more information see the [official documentation](https://cloud.google.com/secret-manager/parameter-manager/docs/overview)  and [API](https://cloud.google.com/secret-manager/parameter-manager/docs/reference/rest/v1/projects.locations.parameters.versions).
 
-~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta datasources.
-
 ## Example Usage
 
 ```hcl
@@ -45,4 +42,6 @@ The following attributes are exported:
 
 * `update_time` - The time at which the Parameter Version was last updated.
 
-* `disabled` -  The current state of the Parameter Version. 
+* `disabled` -  The current state of the Parameter Version.
+
+* `kms_key_version` - The resource name of the Cloud KMS CryptoKeyVersion used to decrypt parameter version payload. Format `projects/{{project}}/locations/global/keyRings/{{key_ring}}/cryptoKeys/{{crypto_key}}/cryptoKeyVersions/{{crypto_key_version}}`

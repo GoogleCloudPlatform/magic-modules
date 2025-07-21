@@ -13,6 +13,8 @@
 
 ---
 name: 'Brand'
+deprecation_message: >-
+  after July 2025, the `google_iap_brand` Terraform resource will no longer function as intended due to the deprecation of the IAP OAuth Admin API
 description: |
   OAuth brand data. Only "Organization Internal" brands can be created
   programmatically via API. To convert it into an external brands
@@ -50,7 +52,6 @@ async:
 identity:
   - name
 custom_code:
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/iap_brand.go.tmpl'
 examples:
   - name: 'iap_brand'

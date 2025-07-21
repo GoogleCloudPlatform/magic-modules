@@ -13,6 +13,8 @@
 
 ---
 name: 'Source'
+api_variant_patterns:
+  - 'organizations/{organization}/sources/{source}'
 description: |
   A Cloud Security Command Center's (Cloud SCC) finding source. A finding
   source is an entity or a mechanism that can produce a finding. A source is
@@ -42,7 +44,6 @@ iam_policy:
     - 'organizations/{{organization}}/sources/{{source}}'
     - '{{source}}'
 custom_code:
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/scc_source_self_link_as_name_set_organization.go.tmpl'
 examples:
   - name: 'scc_source_basic'

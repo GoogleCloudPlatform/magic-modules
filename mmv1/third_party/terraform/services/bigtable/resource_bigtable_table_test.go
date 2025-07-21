@@ -147,6 +147,97 @@ func TestAccBigtableTable_familyType(t *testing.T) {
 	})
 }
 
+func TestAccBigtableTable_testTableWithRowKeySchema(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigtableTable_rowKeySchema(instanceName, tableName, family, `{
+					"structType": {
+						"fields": [{
+							"fieldName": "myfield",
+							"type": {
+								"stringType": { "encoding": { "utf8Bytes": { } } }
+							}
+						}],
+						"encoding": { "orderedCodeBytes": { } }
+					}
+				}`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBigtableRowKeySchemaExists(t, "google_bigtable_table.table", true),
+				),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				// In-place modification is not accepted
+				Config: testAccBigtableTable_rowKeySchema(instanceName, tableName, family, `{
+					"structType": {
+						"fields": [{
+							"fieldName": "newfieldname",
+							"type": {
+								"stringType": { "encoding": { "utf8Bytes": { } } }
+							}
+						}],
+						"encoding": { "orderedCodeBytes": { } }
+					}
+				}`),
+				ExpectError: regexp.MustCompile(".*Row key schema in-place modification is not allowed.*"),
+			},
+			{
+				// Removing the schema is ok
+				Config: testAccBigtableTable_family(instanceName, tableName, family),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBigtableRowKeySchemaExists(t, "google_bigtable_table.table", false),
+				),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Set the schema to a new one is ok
+			{
+				Config: testAccBigtableTable_rowKeySchema(instanceName, tableName, family, `{
+					"structType": {
+						"fields": [
+						    {
+								"fieldName": "mystringfield",
+								"type": {
+									"stringType": { "encoding": { "utf8Bytes": { } } }
+								}
+							},
+							{
+								"fieldName": "myintfield",
+								"type": {
+									"int64Type": { "encoding": { "bigEndianBytes": { } } }
+								}
+							}
+						],
+						"encoding": { "delimitedBytes": { "delimiter": "Iw==" } }
+					}
+				}`),
+				Check: resource.ComposeTestCheckFunc(
+					testAccBigtableRowKeySchemaExists(t, "google_bigtable_table.table", true),
+				),
+			},
+		},
+	})
+}
+
 func TestAccBigtableTable_deletion_protection_protected(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	acctest.SkipIfVcr(t)
@@ -329,7 +420,7 @@ func TestAccBigtableTable_change_stream_enable(t *testing.T) {
 	})
 }
 
-func TestAccBigtableTable_automated_backups_enable(t *testing.T) {
+func TestAccBigtableTable_automated_backups(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	acctest.SkipIfVcr(t)
 	t.Parallel()
@@ -343,9 +434,82 @@ func TestAccBigtableTable_automated_backups_enable(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
 		Steps: []resource.TestStep{
+			// Creating a table with automated backup disabled
+			{
+				Config: testAccBigtableTable_no_automated_backup_policy(instanceName, tableName, family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, false)),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Update with explicit disabling of automated backup
+			{
+				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "0", "0", family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, false)),
+			},
+			{
+				ResourceName:            "google_bigtable_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"automated_backup_policy"}, // ImportStateVerify doesn't use the CustomizeDiff function
+			},
+			// Update other table properties, leave automated backup policy untouched
+			{
+				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "PROTECTED", family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, false)),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Update other table properties, leave automated backup policy untouched
+			{
+				Config: testAccBigtableTable_deletion_protection(instanceName, tableName, "UNPROTECTED", family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, false)),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Enable automated backup
+			{
+				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "72h0m0s", "24h0m0s", family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, true)),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Disable automated backup
+			{
+				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "0", "0", family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, false)),
+			},
+			{
+				ResourceName:            "google_bigtable_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"automated_backup_policy"}, // ImportStateVerify doesn't use the CustomizeDiff function
+			},
+			// it is possible to delete the table when automated backup is disabled
+			{
+				Config: testAccBigtableTable_destroyTable(instanceName),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"},
+			},
 			// Creating a table with automated backups enabled
 			{
 				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "72h0m0s", "24h0m0s", family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, true)),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
@@ -355,6 +519,7 @@ func TestAccBigtableTable_automated_backups_enable(t *testing.T) {
 			// Changing automated backup retention period value
 			{
 				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "72h0m0s", "", family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, true)),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
@@ -364,6 +529,7 @@ func TestAccBigtableTable_automated_backups_enable(t *testing.T) {
 			// Changing automated backup frequency value
 			{
 				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "", "24h0m0s", family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, true)),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
@@ -373,20 +539,70 @@ func TestAccBigtableTable_automated_backups_enable(t *testing.T) {
 			// Changing both automated backup retention period and frequency values
 			{
 				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "72h0m0s", "24h0m0s", family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, true)),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			// Disable automated backups
+			// Disabling automated backup explicitly
 			{
 				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "0", "0", family),
-				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsDisabled(t)),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, false)),
 			},
-			// Renable automated backups
+			{
+				ResourceName:            "google_bigtable_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"automated_backup_policy"}, // ImportStateVerify doesn't use CustomizeDiff function
+			},
+			// Removing automated backup policy field has no effect (i.e. keeps automated backup disabled).
+			{
+				Config: testAccBigtableTable_no_automated_backup_policy(instanceName, tableName, family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, false)),
+			},
+			{
+				ResourceName:            "google_bigtable_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"automated_backup_policy"}, // ImportStateVerify doesn't use CustomizeDiff function
+			},
+			// Renable automated backup
 			{
 				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "72h0m0s", "24h0m0s", family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, true)),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Removing automated backup policy field has no effect (i.e. automated backup remains enabled)
+			{
+				Config: testAccBigtableTable_no_automated_backup_policy(instanceName, tableName, family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, true)),
+			},
+			{
+				ResourceName:      "google_bigtable_table.table",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Disabling automated backup
+			{
+				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "0", "0", family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, false)),
+			},
+			{
+				ResourceName:            "google_bigtable_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"automated_backup_policy"}, // ImportStateVerify doesn't use CustomizeDiff function
+			},
+			// Renable automated backup
+			{
+				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "72h0m0s", "24h0m0s", family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, true)),
 			},
 			{
 				ResourceName:      "google_bigtable_table.table",
@@ -394,6 +610,45 @@ func TestAccBigtableTable_automated_backups_enable(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			// it is possible to delete the table when automated backups is enabled
+			{
+				Config: testAccBigtableTable_destroyTable(instanceName),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"},
+			},
+		},
+	})
+}
+
+func TestAccBigtableTable_automated_backups_explicitly_disabled_on_create(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tableName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	family := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableTableDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Creating a table with automated backup explicitly disabled
+			{
+				Config: testAccBigtableTable_automated_backups(instanceName, tableName, "0", "0", family),
+				Check:  resource.ComposeTestCheckFunc(verifyBigtableAutomatedBackupsEnablementState(t, false)),
+			},
+			{
+				ResourceName:            "google_bigtable_table.table",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"automated_backup_policy"}, // ImportStateVerify doesn't use CustomizeDiff function
+			},
+			// it is possible to delete the table when automated backup is disabled
 			{
 				Config: testAccBigtableTable_destroyTable(instanceName),
 			},
@@ -528,6 +783,35 @@ func testAccBigtableColumnFamilyExists(t *testing.T, table_name_space, family st
 	}
 }
 
+func testAccBigtableRowKeySchemaExists(t *testing.T, table_name_space string, expected_has_schema bool) resource.TestCheckFunc {
+	ctx := context.Background()
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[table_name_space]
+		if !ok {
+			return fmt.Errorf("Table not found during schema check: %v", table_name_space)
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+		c, err := config.BigTableClientFactory(config.UserAgent).NewAdminClient(config.Project, rs.Primary.Attributes["instance_name"])
+		if err != nil {
+			return fmt.Errorf("Error starting admin client %s", err)
+		}
+		defer c.Close()
+
+		table, err := c.TableInfo(ctx, rs.Primary.Attributes["name"])
+		if err != nil {
+			return fmt.Errorf("Error retrieving table. Could not find %s in %s", rs.Primary.Attributes["name"], rs.Primary.Attributes["instance_name"])
+		}
+
+		actual_has_schema := (table.RowKeySchema != nil)
+		if actual_has_schema != expected_has_schema {
+			return fmt.Errorf("expecting table to have row key schema to be %v, got %v", expected_has_schema, actual_has_schema)
+		}
+
+		return nil
+	}
+}
+
 func testAccBigtableChangeStreamDisabled(t *testing.T) resource.TestCheckFunc {
 	var ctx = context.Background()
 	return func(s *terraform.State) error {
@@ -557,7 +841,7 @@ func testAccBigtableChangeStreamDisabled(t *testing.T) resource.TestCheckFunc {
 	}
 }
 
-func verifyBigtableAutomatedBackupsDisabled(t *testing.T) resource.TestCheckFunc {
+func verifyBigtableAutomatedBackupsEnablementState(t *testing.T, expectEnabled bool) resource.TestCheckFunc {
 	var ctx = context.Background()
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources["google_bigtable_table.table"]
@@ -577,8 +861,11 @@ func verifyBigtableAutomatedBackupsDisabled(t *testing.T) resource.TestCheckFunc
 		if err != nil {
 			return fmt.Errorf("Error retrieving table. Could not find %s in %s.", rs.Primary.Attributes["name"], rs.Primary.Attributes["instance_name"])
 		}
-		if table.AutomatedBackupConfig != nil {
-			return fmt.Errorf("Automated Backups are expected to be disabled but they are not: %v", table)
+		if table.AutomatedBackupConfig != nil && !expectEnabled {
+			return fmt.Errorf("Automated backup is expected to be disabled but it is not: %v", table)
+		}
+		if table.AutomatedBackupConfig == nil && expectEnabled {
+			return fmt.Errorf("Automated backup is expected to be enabled but it is not: %v", table)
 		}
 
 		return nil
@@ -679,6 +966,35 @@ EOF
 `, instanceName, instanceName, tableName, family, familyType)
 }
 
+func testAccBigtableTable_rowKeySchema(instanceName, tableName, family, rowKeySchema string) string {
+	return fmt.Sprintf(`
+resource "google_bigtable_instance" "instance" {
+  name = "%s"
+
+  cluster {
+    cluster_id = "%s"
+    zone       = "us-central1-b"
+  }
+
+  instance_type = "DEVELOPMENT"
+  deletion_protection = false
+}
+
+resource "google_bigtable_table" "table" {
+  name          = "%s"
+  instance_name = google_bigtable_instance.instance.name
+
+  column_family {
+    family = "%s"
+  }
+
+  row_key_schema = <<EOF
+%s 
+EOF
+}
+`, instanceName, instanceName, tableName, family, rowKeySchema)
+}
+
 func testAccBigtableTable_deletion_protection(instanceName, tableName, deletionProtection, family string) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
@@ -765,7 +1081,7 @@ resource "google_bigtable_table" "table" {
 	return config
 }
 
-func testAccBigtableTable_disable_automated_backups(instanceName, tableName, family string) string {
+func testAccBigtableTable_no_automated_backup_policy(instanceName, tableName, family string) string {
 	return fmt.Sprintf(`
 resource "google_bigtable_instance" "instance" {
 	name = "%s"

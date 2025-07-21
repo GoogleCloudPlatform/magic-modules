@@ -5,10 +5,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+// ExternalCredentialsModel contains the information necessary to retrieve external credentials (like Workload Identity Federation credentials) using the user-defined function retrieval method (https://pkg.go.dev/golang.org/x/oauth2/google/externalaccount)
+type ExternalCredentialsModel struct {
+	Audience            types.String `tfsdk:"audience"`
+	ServiceAccountEmail types.String `tfsdk:"service_account_email"`
+	IdentityToken       types.String `tfsdk:"identity_token"`
+}
+
 // ProviderModel maps provider schema data to a Go type.
 // When the plugin-framework provider is configured, the Configure function receives data about
 // the provider block in the configuration. That data is used to populate this struct.
 type ProviderModel struct {
+	ExternalCredentials                       []ExternalCredentialsModel `tfsdk:"external_credentials"`
 	Credentials                               types.String `tfsdk:"credentials"`
 	AccessToken                               types.String `tfsdk:"access_token"`
 	ImpersonateServiceAccount                 types.String `tfsdk:"impersonate_service_account"`

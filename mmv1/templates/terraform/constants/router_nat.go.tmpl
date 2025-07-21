@@ -84,7 +84,7 @@ func computeRouterNatSubnetworkHash(v interface{}) int {
 		}
 	}
 	
-	return schema.HashString(tpgresource.NameFromSelfLinkStateFunc(name)) + sourceIpRangesHash + secondaryIpRangeHash
+	return schema.HashString(tpgresource.GetResourceNameFromSelfLink(name.(string))) + sourceIpRangesHash + secondaryIpRangeHash
 }
 
 func computeRouterNatIPsHash(v interface{}) int {
@@ -96,11 +96,9 @@ func computeRouterNatIPsHash(v interface{}) int {
 	return schema.HashString(tpgresource.GetResourceNameFromSelfLink(val))
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func computeRouterNatRulesSubnetHash(v interface{}) int {
 	return computeRouterNatIPsHash(v)
 }
-{{- end }}
 
 func computeRouterNatRulesHash(v interface{}) int {
 	obj := v.(map[string]interface{})
@@ -116,10 +114,8 @@ func computeRouterNatRulesHash(v interface{}) int {
 
 	sourceNatActiveIpHash := 0
 	sourceNatDrainIpHash := 0
-	{{- if ne $.TargetVersionName "ga" }}
 	sourceNatActiveRangeHash := 0
 	sourceNatDrainRangeHash := 0
-	{{- end }}
 	routerNatRulesHash := 0
 
 	if obj["action"] != nil {
@@ -145,7 +141,6 @@ func computeRouterNatRulesHash(v interface{}) int {
 				}
 			}
 
-			{{ if ne $.TargetVersionName `ga` -}}
 			sourceNatActiveRanges := action["source_nat_active_ranges"]
 			if sourceNatActiveRanges != nil {
 				sourceNatActiveRangesSet := sourceNatActiveRanges.(*schema.Set)
@@ -163,13 +158,9 @@ func computeRouterNatRulesHash(v interface{}) int {
 					sourceNatDrainRangeHash += schema.HashString(sourceNatDrainRangeStr)
 				}
 			}
-			{{- end }}
 		}
 	}
 
-	routerNatRulesHash = ruleNumber + descriptionHash + schema.HashString(match) + sourceNatActiveIpHash + sourceNatDrainIpHash
-	{{- if ne $.TargetVersionName "ga" }}
-	routerNatRulesHash += sourceNatActiveRangeHash + sourceNatDrainRangeHash
-	{{- end }}
+	routerNatRulesHash = ruleNumber + descriptionHash + schema.HashString(match) + sourceNatActiveIpHash + sourceNatDrainIpHash + sourceNatActiveRangeHash + sourceNatDrainRangeHash
 	return routerNatRulesHash
 }

@@ -14,6 +14,8 @@
 ---
 name: 'Trigger'
 api_resource_type_kind: BuildTrigger
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/triggers/{trigger}'
 description: |
   Configuration for an automated build in response to source repository changes.
 references:
@@ -80,6 +82,8 @@ examples:
       cloudbuild_trigger_name: 'manual-trigger'
   - name: 'cloudbuild_trigger_manual_github_enterprise'
     primary_resource_id: 'manual-ghe-trigger'
+    vars:
+      cloudbuild_trigger_name: 'my-trigger'
     exclude_test: true
   - name: 'cloudbuild_trigger_manual_bitbucket_server'
     primary_resource_id: 'manual-bitbucket-trigger'

@@ -14,6 +14,7 @@
 ---
 name: 'function'
 api_resource_type_kind: Function
+cai_resource_kind: Function
 description: |
   A Cloud Function that contains user computation executed in response to an event.
 references:
@@ -32,6 +33,7 @@ timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
+include_in_tgc_next_DO_NOT_USE: true
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -264,7 +266,7 @@ examples:
       project: 'my-project-name'
  # this example file will cause IAM conflicts between tests if used to make a test
     exclude_test: true
-  - name: 'cloudfunctions2_abiu'
+  - name: 'cloudfunctions2_automatic_base_image_update'
     primary_resource_id: 'function'
     min_version: 'beta'
     vars:
@@ -283,7 +285,7 @@ examples:
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
-  - name: 'cloudfunctions2_abiu_on_deploy'
+  - name: 'cloudfunctions2_on_deploy_base_image_update'
     primary_resource_id: 'function'
     min_version: 'beta'
     vars:
@@ -653,6 +655,10 @@ properties:
                     description: |
                       Relative path of the file under the mount path where the secret value for this version will be fetched and made available. For example, setting the mountPath as '/etc/secrets' and path as secret_foo would mount the secret value file at /etc/secrets/secret_foo.
                     required: true
+      - name: 'binaryAuthorizationPolicy'
+        type: String
+        description: |
+          The binary authorization policy to be checked when deploying the Cloud Run service.
   - name: 'eventTrigger'
     type: NestedObject
     description: |

@@ -97,8 +97,9 @@ self_link: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
 ### `immutable`
 
 If true, the resource and all its fields are considered immutable - that is,
-only creatable, not updatable. Individual fields can override this if they
-have a custom update method in the API.
+only creatable, not updatable. Individual fields can override this for themselves and
+their subfields with [`update_url`]({{< ref "/reference/field#update_url" >}})
+if they have a custom update method in the API.
 
 See [Best practices: Immutable fields]({{< ref "/best-practices/immutable-fields/" >}}) for more information.
 
@@ -325,6 +326,140 @@ Example:
 mutex: 'alloydb/instance/{{name}}'
 ```
 
+## Sweeper
+
+Sweepers are a testing infrastructure mechanism that automatically clean up resources created during tests. They run before tests start and can be run manually to clean up dangling resources. Sweepers help prevent test failures due to resource quota limits and reduce cloud infrastructure costs by removing test resources that were not properly cleaned up.
+
+Sweeper generation is enabled by default, except in the following conditions which require customization here:
+
+- Resources with custom deletion code
+- Resources with parent-child relationships (unless the parent relationship is configured)
+- Resources with complex URL parameters that aren't simple region/project parameters
+
+Define the sweeper block in a resource to override these exclusions and enable sweeper generation for that resource.
+
+### `exclude_sweeper`
+
+If set to `true`, no sweeper will be generated for this resource. This is useful for resources that cannot or should not be automatically cleaned up.
+
+Default: `false`
+
+Example:
+
+```yaml
+exclude_sweeper: true
+```
+
+### `sweeper`
+
+Configures how test resources are swept (cleaned up) after tests. The sweeper system helps ensure resources created during tests are properly removed, even when tests fail unexpectedly. All fields within the `sweeper` block are optional, with reasonable defaults provided when not specified. See [sweeper.go ↗](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/api/resource/sweeper.go) for the implementation.
+
+- `identifier_field`: Specifies which field in the API resource object should be used to identify resources for deletion. If not specified, defaults to "name" if present in the resource, otherwise falls back to "id".
+
+- `prefixes`: Specifies name prefixes that identify resources eligible for sweeping. Resources whose names start with any of these prefixes will be deleted. By default, resources with the `tf-test-` prefix are automatically eligible for sweeping even if no prefixes are specified.
+
+- `url_substitutions`: Allows customizing URL parameters when listing resources. Each map entry represents a set of key-value pairs to substitute in the URL template. This is commonly used to specify regions to sweep in. If not specified, the sweeper will only run in the default region (us-central1) and zone (us-central1-a).
+
+- `dependencies`: Lists other resource types that must be swept before this one. This ensures proper cleanup order for resources with dependencies. If not specified, no dependencies are assumed.
+
+- `parent`: Configures sweeping for resources that depend on parent resources (like a nodepool that belongs to a cluster).
+
+  Required fields:
+  - `resource_type`: The type of the parent resource (for example, "google_container_cluster")
+  - `child_field`: The field in your resource that references the parent (for example, "cluster")
+  - At least one of `parent_field` or `template` is required
+
+  Options for getting parent reference:
+  - `parent_field`: The field from parent to use (typically "name" or "id")
+  - `template`: A template string like "projects/{{project}}/locations/{{location}}/clusters/{{value}}" 
+  
+  Options for processing the parent field value:
+  - `parent_field_extract_name`: When set to true, extracts just the resource name from a self_link URL by taking the portion after the last slash. This is useful when the parent field contains a fully-qualified resource URL (like "https://www.googleapis.com/compute/v1/projects/my-project/global/networks/my-network" or "projects/my-project/zones/us-central1-a/instances/my-instance") but you only need the final resource name component ("my-network" or "my-instance").
+  
+  - `parent_field_regex`: A regex pattern with a capture group to extract a specific portion of the parent field value. This is useful when you need more control over extracting parts of complex resource identifiers. The pattern must contain at least one capture group (in parentheses), and the first capture group's match will be used as the extracted value.
+
+- `query_string`: Allows appending additional query parameters to the resource's delete URL when performing delete operations. Format should include the starting character, for example, "?force=true" or "&verbose=true". If not specified, no additional query parameters are added.
+
+- `ensure_value`: Specifies a field that must be set to a specific value before deletion. Used for resources that have fields like 'deletionProtectionEnabled' that must be explicitly disabled before the resource can be deleted. All fields within the `ensure_value` block are required except `include_full_resource`:
+  
+  - `field`: The API field name that needs to be updated before deletion. Can include dot notation for nested fields (for example, "settings.deletionProtectionEnabled").
+  
+  - `value`: The required value that `field` must be set to before deletion. For boolean fields use "true" or "false", for integers use string representation, for string fields use the exact string value required.
+  
+  - `include_full_resource`: Determines whether to send the entire resource object with the updated field (true) or to send just the field that needs updating (false). Some APIs require the full resource to be sent in update operations. Default: `false`.
+
+Examples:
+
+Basic sweeper configuration:
+
+```yaml
+sweeper:
+  prefixes:
+    - "tf-test-"
+    - "tmp-"
+```
+
+Sweeper with parent-child relationship (basic):
+
+```yaml
+sweeper:
+  dependencies: # sweep google_compute_instance before attempting to sweep this resource
+    - "google_compute_instance"
+  parent:
+    resource_type: "google_container_cluster"
+    parent_field: "name"
+    child_field: "cluster"
+```
+
+Sweeper with parent_field_extract_name:
+
+```yaml
+sweeper:
+  parent:
+    resource_type: "google_compute_network"
+    parent_field: "selfLink"  # Contains: "projects/my-project/global/networks/my-network"
+    parent_field_extract_name: true  # Extracts just "my-network"
+    child_field: "network"
+```
+
+Sweeper with parent template and pre-deletion field update:
+
+```yaml
+sweeper:
+  parent:
+    resource_type: "google_container_cluster"
+    template: "projects/{{project}}/locations/{{location}}/clusters/{{value}}"
+    parent_field: "displayName"  # Provides the value for {{value}}
+    child_field: "cluster"
+  ensure_value:
+    field: "deletionProtection"
+    value: "false"
+    include_full_resource: false
+
+```
+
+Sweeper with URL substitutions for multiple regions:
+
+```yaml
+sweeper:
+  url_substitutions:
+    - collection_id: default_collection
+      region: global
+    - collection_id: default_collection
+      region: eu
+```
+
+Sweeper with URL substitutions specifying only regions:
+
+```yaml
+sweeper:
+  identifier_field: "displayName"
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "europe-west1"
+```
+
 ## Fields
 
 ### `virtual_fields`
@@ -365,14 +500,14 @@ attributes – for a full reference, see
   Configuration files should reference this to avoid getting out of sync. For example:
   `resource "google_compute_address" ""{{$.PrimaryResourceId}}" {`
 - `bootstrap_iam`: specify member/role pairs that should always exist. `{project_number}` will be replaced with the
-  default project's project number, and `{organization_id}` will be replaced with the test organization's ID. This avoids race conditions when modifying the IAM permissions for the default test project.
+  default project's project number, and `{organization_id}` will be replaced with the "target" test organization's ID. This avoids race conditions when modifying the global IAM permissions.
   Permissions attached to resources created _in_ a test should instead be provisioned with standard terraform resources.
 - `vars`: Key/value pairs of variables to inject into the configuration file. These can be referenced in the configuration file
   with `{{index $.Vars "key"}}`. All resource IDs (even for resources not under test) should be declared with variables that
   contain a `-` or `_`; this will ensure that, in tests, the resources are created with a `tf-test` prefix to allow automatic cleanup of dangling resources and a random suffix to avoid name collisions.
 - `test_env_vars`: Key/value pairs of variable names and special values indicating variables that should be pulled from the
   environment during tests. These will receive a neutral default value in documentation. Common special values include:
-  `PROJECT_NAME`, `REGION`, `ORG_ID`, `BILLING_ACCT`, `SERVICE_ACCT` (the test runner service account).
+  `PROJECT_NAME`, `REGION`, `ORG_ID`, `ORG_TARGET` (a separate test org for testing certain org-level resources such as IAM), `BILLING_ACCT`, `SERVICE_ACCT` (the test runner service account).
 - `test_vars_overrides`: Key/value pairs of literal overrides for variables used in tests. This can be used to call functions to
   generate or determine a variable's value.
 - `min_version`: Set this to `beta` if the resource is in the `google` provider but the example will only work with the

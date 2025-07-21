@@ -236,6 +236,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Compute",
         "path" to "./google/services/compute"
     ),
+    "contactcenterinsights" to mapOf(
+        "name" to "contactcenterinsights",
+        "displayName" to "Contact Center AI Insights",
+        "path" to "./google/services/contactcenterinsights"
+    ),
     "container" to mapOf(
         "name" to "container",
         "displayName" to "Container",
@@ -521,6 +526,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Looker",
         "path" to "./google/services/looker"
     ),
+    "lustre" to mapOf(
+        "name" to "lustre",
+        "displayName" to "GoogleCloudManagedLustre",
+        "path" to "./google/services/lustre"
+    ),
     "managedkafka" to mapOf(
         "name" to "managedkafka",
         "displayName" to "Managedkafka",
@@ -545,6 +555,16 @@ var ServicesListGa = mapOf(
         "name" to "mlengine",
         "displayName" to "Mlengine",
         "path" to "./google/services/mlengine"
+    ),
+    "modelarmor" to mapOf(
+        "name" to "modelarmor",
+        "displayName" to "ModelArmor",
+        "path" to "./google/services/modelarmor"
+    ),
+    "modelarmorglobal" to mapOf(
+        "name" to "modelarmorglobal",
+        "displayName" to "ModelArmorGlobal",
+        "path" to "./google/services/modelarmorglobal"
     ),
     "monitoring" to mapOf(
         "name" to "monitoring",
@@ -661,6 +681,11 @@ var ServicesListGa = mapOf(
         "displayName" to "Resourcemanager",
         "path" to "./google/services/resourcemanager"
     ),
+    "resourcemanager3" to mapOf(
+        "name" to "resourcemanager3",
+        "displayName" to "Resourcemanager3",
+        "path" to "./google/services/resourcemanager3"
+    ),
     "runtimeconfig" to mapOf(
         "name" to "runtimeconfig",
         "displayName" to "Runtimeconfig",
@@ -755,6 +780,11 @@ var ServicesListGa = mapOf(
         "name" to "storage",
         "displayName" to "Storage",
         "path" to "./google/services/storage"
+    ),
+    "storagebatchoperations" to mapOf(
+        "name" to "storagebatchoperations",
+        "displayName" to "StorageBatchOperations",
+        "path" to "./google/services/storagebatchoperations"
     ),
     "storagecontrol" to mapOf(
         "name" to "storagecontrol",

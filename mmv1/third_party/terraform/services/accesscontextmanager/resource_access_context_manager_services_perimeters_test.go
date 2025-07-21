@@ -260,10 +260,11 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
     	ingress_policies {
     		title = "ingress policy title 2"
     		ingress_from {
-    			identities = ["user:test@google.com"]
+    			identities = ["group:test@google.com"]
     		}
     		ingress_to {
     			resources = ["*"]
+          roles = ["roles/bigquery.admin"]
     		}
     	}
     
@@ -285,10 +286,11 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
     	egress_policies {
     		title = "egress policy title 2"
     		egress_from {
-    			identities = ["user:test@google.com"]
+    			identities = ["group:test@google.com"]
     		}
     		egress_to {
     			resources = ["*"]
+          roles = ["roles/bigquery.admin"]
     		}
     	}
       egress_policies {
@@ -348,10 +350,11 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
       ingress_policies {
         title = "ingress policy title 2"
         ingress_from {
-          identities = ["user:test@google.com"]
+          identities = ["group:test@google.com"]
         }
         ingress_to {
           resources = ["*"]
+          roles = ["roles/bigquery.admin"]
         }
       }
 
@@ -373,20 +376,25 @@ resource "google_access_context_manager_service_perimeters" "test-access" {
       egress_policies {
         title = "egress policy title 2"
         egress_from {
-          identities = ["user:test@google.com"]
+          identities = ["group:test@google.com"]
         }
         egress_to {
           resources = ["*"]
         }
       }
       egress_policies {
-    		egress_from {
-    			sources {
+        egress_from {
+          identity_type = "ANY_IDENTITY"
+          sources {
             resource = "projects/%s"
           }
           source_restriction = "SOURCE_RESTRICTION_ENABLED"
-    		}
-    	}
+        }
+        egress_to {
+          resources = ["*"]
+          roles = ["roles/bigquery.admin"]
+        }
+      }
     }
   }
 }

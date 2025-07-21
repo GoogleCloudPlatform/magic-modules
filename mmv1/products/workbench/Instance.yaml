@@ -56,6 +56,8 @@ sweeper:
   url_substitutions:
     - region: "us-central1-a"
     - region: "us-west1-a"
+custom_diff:
+  - 'workbenchMetadataCustomizeDiff'
 examples:
   - name: 'workbench_instance_basic'
     primary_resource_id: 'instance'
@@ -105,6 +107,12 @@ examples:
       - 'gce_setup.0.vm_image'
       - 'gce_setup.0.boot_disk.0.disk_type'
       - 'gce_setup.0.data_disks.0.disk_type'
+  - name: 'workbench_instance_confidential_compute'
+    primary_resource_id: 'instance'
+    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
+    region_override: 'us-west1-a'
+    vars:
+      instance_name: 'workbench-instance'
 virtual_fields:
   - name: 'desired_state'
     description: |
@@ -441,6 +449,18 @@ properties:
           Optional. Flag to enable ip forwarding or not, default false/off.
           https://cloud.google.com/vpc/docs/using-routes#canipforward
         immutable: true
+      - name: 'confidentialInstanceConfig'
+        type: NestedObject
+        immutable: true
+        description: |
+          Confidential instance configuration.
+        properties:
+          - name: 'confidentialInstanceType'
+            type: Enum
+            description: |
+              Defines the type of technology used by the confidential instance.
+            enum_values:
+              - 'SEV'
   - name: 'proxyUri'
     type: String
     description: |

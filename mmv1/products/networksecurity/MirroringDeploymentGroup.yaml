@@ -138,3 +138,26 @@ properties:
     description: |-
       User-provided description of the deployment group.
       Used as additional context for the deployment group.
+  - name: locations
+    type: Array
+    is_set: true
+    description: |-
+      The list of locations where the deployment group is present.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: location
+          type: String
+          description: |-
+            The cloud location, e.g. `us-central1-a` or `asia-south1-b`.
+          output: true
+        - name: state
+          type: String
+          description: |-
+            The current state of the association in this location.
+            Possible values:
+            STATE_UNSPECIFIED
+            ACTIVE
+            OUT_OF_SYNC
+          output: true

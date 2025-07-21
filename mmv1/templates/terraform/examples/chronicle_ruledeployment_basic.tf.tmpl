@@ -1,5 +1,4 @@
 resource "google_chronicle_rule" "my-rule" {
- provider = "google-beta"
  location = "us"
  instance = "{{index $.TestEnvVars "chronicle_id"}}"
  text = <<-EOT
@@ -8,7 +7,6 @@ resource "google_chronicle_rule" "my-rule" {
 }
 
 resource "google_chronicle_rule_deployment" "{{$.PrimaryResourceId}}" {
- provider = "google-beta"
  location = "us"
  instance = "{{index $.TestEnvVars "chronicle_id"}}"
  rule = element(split("/", resource.google_chronicle_rule.my-rule.name), length(split("/", resource.google_chronicle_rule.my-rule.name)) - 1)

@@ -1,0 +1,65 @@
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return nil
+	}
+	// if automated_backup_config is not defined 
+	if original["automatedBackupMode"] == "DISABLED" {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["fixed_frequency_schedule"] =
+		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencySchedule(original["fixedFrequencySchedule"], d, config)
+	transformed["retention"] =
+		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}Retention(original["retention"], d, config)
+	return []interface{}{transformed}
+}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencySchedule(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["start_time"] =
+		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTime(original["startTime"], d, config)
+	return []interface{}{transformed}
+}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTime(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	original := v.(map[string]interface{})
+	if len(original) == 0 {
+		return nil
+	}
+	transformed := make(map[string]interface{})
+	transformed["hours"] =
+		flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeHours(original["hours"], d, config)
+	return []interface{}{transformed}
+}
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}FixedFrequencyScheduleStartTimeHours(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	// Handles the string fixed64 format
+	if strVal, ok := v.(string); ok {
+		if intVal, err := tpgresource.StringToFixed64(strVal); err == nil {
+			return intVal
+		}
+	}
+
+	// number values are represented as float64
+	if floatVal, ok := v.(float64); ok {
+		intVal := int(floatVal)
+		return intVal
+	}
+
+	return v // let terraform core handle it otherwise
+}
+
+func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}Retention(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}

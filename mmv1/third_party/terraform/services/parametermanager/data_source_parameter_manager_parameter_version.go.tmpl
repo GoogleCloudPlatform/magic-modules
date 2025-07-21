@@ -1,5 +1,4 @@
 package parametermanager
-{{- if ne $.TargetVersionName "ga" }}
 
 import (
 	"encoding/base64"
@@ -50,6 +49,10 @@ func DataSourceParameterManagerParameterVersion() *schema.Resource {
 			},
 			"disabled": {
 				Type:     schema.TypeBool,
+				Computed: true,
+			},
+			"kms_key_version": {
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
@@ -146,6 +149,12 @@ func dataSourceParameterManagerParameterVersionRead(d *schema.ResourceData, meta
 		return fmt.Errorf("error setting create_time: %s", err)
 	}
 
+	if parameterVersion["kmsKeyVersion"] != nil {
+		if err := d.Set("kms_key_version", parameterVersion["kmsKeyVersion"].(string)); err != nil {
+			return fmt.Errorf("error setting kms_key_version: %s", err)
+		}
+	}
+
 	data := parameterVersion["payload"].(map[string]interface{})
 	parameterData, err := base64.StdEncoding.DecodeString(data["data"].(string))
 	if err != nil {
@@ -158,5 +167,3 @@ func dataSourceParameterManagerParameterVersionRead(d *schema.ResourceData, meta
 	d.SetId(nameValue.(string))
 	return nil
 }
-
-{{ end }}

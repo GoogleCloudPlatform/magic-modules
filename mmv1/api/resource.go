@@ -13,17 +13,23 @@
 package api
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"maps"
+	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
+	"text/template"
+
+	"github.com/golang/glog"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/utils"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
-	"golang.org/x/exp/slices"
 )
 
 const RELATIVE_MAGICIAN_LOCATION = "mmv1/"
@@ -220,10 +226,6 @@ type Resource struct {
 	// If true, resource is not importable
 	ExcludeImport bool `yaml:"exclude_import,omitempty"`
 
-	// If true, exclude resource from Terraform Validator
-	// (i.e. terraform-provider-conversion)
-	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
-
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 
@@ -340,8 +342,40 @@ type Resource struct {
 	// fine-grained resources and legacy resources.
 	ApiResourceTypeKind string `yaml:"api_resource_type_kind,omitempty"`
 
+	// The API URL patterns used by this resource that represent variants e.g.,
+	// "folders/{folder}/feeds/{feed}". Each pattern must match the value
+	// defined in the API exactly. The use of `api_variant_patterns` is only
+	// meaningful when the resource type has multiple parent types available.
+	// This is commonly used for resources that have a project, folder, and
+	// organization variant, however most resources do not need it.
+	ApiVariantPatterns []string `yaml:"api_variant_patterns,omitempty"`
+
 	ImportPath     string `yaml:"-"`
 	SourceYamlFile string `yaml:"-"`
+
+	// ====================
+	// TGC
+	// ====================
+	TGCResource `yaml:",inline"`
+}
+
+type TGCResource struct {
+	// If true, exclude resource from Terraform Validator
+	// (i.e. terraform-provider-conversion)
+	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
+
+	// If true, include resource in the new package of TGC (terraform-provider-conversion)
+	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
+
+	// Name of the hcl resource block used in TGC
+	TgcHclBlockName string `yaml:"tgc_hcl_block_name,omitempty"`
+
+	// The resource kind in CAI.
+	// If this is not set, then :name is used instead.
+	// For example: compute.googleapis.com/Address has Address for CaiResourceKind,
+	// and compute.googleapis.com/GlobalAddress has GlobalAddress for CaiResourceKind.
+	// But they have the same api resource type: address
+	CaiResourceKind string `yaml:"cai_resource_kind,omitempty"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -1202,6 +1236,40 @@ func (r Resource) GetIdFormat() string {
 	return idFormat
 }
 
+// Returns true if the Type is in the ID format and false otherwise.
+func (r Resource) InPostCreateComputed(prop Type) bool {
+	fields := map[string]struct{}{}
+	for _, f := range r.ExtractIdentifiers(r.GetIdFormat()) {
+		fields[f] = struct{}{}
+	}
+	for _, f := range r.ExtractIdentifiers(r.SelfLinkUri()) {
+		fields[f] = struct{}{}
+	}
+	_, ok := fields[google.Underscore(prop.Name)]
+	return ok
+}
+
+// Returns true if at least one of the fields in the ID format is computed
+func (r Resource) HasPostCreateComputedFields() bool {
+	fields := map[string]struct{}{}
+	for _, f := range r.ExtractIdentifiers(r.GetIdFormat()) {
+		fields[f] = struct{}{}
+	}
+	for _, f := range r.ExtractIdentifiers(r.SelfLinkUri()) {
+		fields[f] = struct{}{}
+	}
+	for _, p := range r.GettableProperties() {
+		// Skip fields not in the id format
+		if _, ok := fields[google.Underscore(p.Name)]; !ok {
+			continue
+		}
+		if (p.Output || p.DefaultFromApi) && !p.IgnoreRead {
+			return true
+		}
+	}
+	return false
+}
+
 // ====================
 // Template Methods
 // ====================
@@ -1362,13 +1430,27 @@ func (r Resource) IamSelfLinkIdentifiers() []string {
 	return r.ExtractIdentifiers(selfLink)
 }
 
-// Returns the resource properties that are idenfifires in the selflink url
-func (r Resource) IamSelfLinkProperties() []*Type {
-	params := r.IamSelfLinkIdentifiers()
+// Returns the resource properties that are idenfifires in Iam resource when generating the docs.
+// The "project" and "organization" properties are excluded, as they are handled seperated in the docs.
+func (r Resource) IamResourceProperties() []*Type {
+	urlProperties := make([]*Type, 0)
+	for _, param := range r.IamResourceParams() {
+		if param == "project" || param == "organization" {
+			continue
+		}
 
-	urlProperties := google.Select(r.AllUserProperties(), func(p *Type) bool {
-		return slices.Contains(params, p.Name)
-	})
+		found := false
+		for _, p := range r.AllUserProperties() {
+			if param == google.Underscore(p.Name) {
+				urlProperties = append(urlProperties, p)
+				found = true
+				break
+			}
+		}
+		if !found {
+			urlProperties = append(urlProperties, &Type{Name: param})
+		}
+	}
 
 	return urlProperties
 }
@@ -1557,11 +1639,43 @@ func (r Resource) FormatDocDescription(desc string, indent bool) string {
 }
 
 func (r Resource) CustomTemplate(templatePath string, appendNewline bool) string {
-	output := resource.ExecuteTemplate(&r, templatePath, appendNewline)
+	output := ExecuteTemplate(&r, templatePath, appendNewline)
 	if !appendNewline {
 		output = strings.TrimSuffix(output, "\n")
 	}
 	return output
+}
+
+func ExecuteTemplate(e any, templatePath string, appendNewline bool) string {
+	templates := []string{
+		templatePath,
+		"templates/terraform/expand_resource_ref.tmpl",
+		"templates/terraform/custom_flatten/bigquery_table_ref.go.tmpl",
+		"templates/terraform/flatten_property_method.go.tmpl",
+		"templates/terraform/expand_property_method.go.tmpl",
+		"templates/terraform/update_mask.go.tmpl",
+		"templates/terraform/nested_query.go.tmpl",
+		"templates/terraform/unordered_list_customize_diff.go.tmpl",
+	}
+	templateFileName := filepath.Base(templatePath)
+
+	tmpl, err := template.New(templateFileName).Funcs(google.TemplateFunctions).ParseFiles(templates...)
+	if err != nil {
+		glog.Exit(err)
+	}
+
+	contents := bytes.Buffer{}
+	if err = tmpl.ExecuteTemplate(&contents, templateFileName, e); err != nil {
+		glog.Exit(err)
+	}
+
+	rs := contents.String()
+
+	if !strings.HasSuffix(rs, "\n") && appendNewline {
+		rs = fmt.Sprintf("%s\n", rs)
+	}
+
+	return rs
 }
 
 // Returns the key of the list of resources in the List API response
@@ -1720,11 +1834,50 @@ func (r Resource) CaiProductBaseUrl() string {
 	return baseUrl
 }
 
+// Gets the CAI product legacy base url.
+// For example, https://www.googleapis.com/compute/v1/ for compute
+func (r Resource) CaiProductLegacyBaseUrl() string {
+	version := r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName)
+	baseUrl := version.CaiLegacyBaseUrl
+	if baseUrl == "" {
+		baseUrl = version.CaiBaseUrl
+	}
+	if baseUrl == "" {
+		baseUrl = version.BaseUrl
+	}
+	return baseUrl
+}
+
 // Returns the Cai product backend name from the version base url
 // base_url: https://accessapproval.googleapis.com/v1/ -> accessapproval
 func (r Resource) CaiProductBackendName(caiProductBaseUrl string) string {
 	backendUrl := strings.Split(strings.Split(caiProductBaseUrl, "://")[1], ".googleapis.com")[0]
 	return strings.ToLower(backendUrl)
+}
+
+// Returns the asset type for this resource.
+func (r Resource) CaiAssetType() string {
+	baseURL := r.CaiProductBaseUrl()
+	productBackendName := r.CaiProductBackendName(baseURL)
+	assetName := r.Name
+	if r.CaiResourceKind != "" {
+		assetName = r.CaiResourceKind
+	}
+	return fmt.Sprintf("%s.googleapis.com/%s", productBackendName, assetName)
+}
+
+// DefineAssetTypeForResourceInProduct marks the AssetType constant for this resource as defined.
+// It returns true if this is the first time it's been called for this resource,
+// and false otherwise, preventing duplicate definitions.
+func (r Resource) DefineAssetTypeForResourceInProduct() bool {
+	if r.ProductMetadata.ResourcesWithCaiAssetType == nil {
+		r.ProductMetadata.ResourcesWithCaiAssetType = make(map[string]struct{}, 1)
+	}
+	if _, alreadyDefined := r.ProductMetadata.ResourcesWithCaiAssetType[r.CaiResourceType()]; alreadyDefined {
+		return false
+	}
+	r.ProductMetadata.ResourcesWithCaiAssetType[r.CaiResourceType()] = struct{}{}
+	return true
 }
 
 // Gets the Cai asset name template, which could include version
@@ -1841,6 +1994,10 @@ func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {
 }
 
 func (r Resource) ShouldGenerateSweepers() bool {
+	if !r.ExcludeSweeper && !utils.IsEmpty(r.Sweeper) {
+		return true
+	}
+
 	allowedKeys := []string{"project", "region", "location", "zone", "billing_account"}
 	if !urlContainsOnlyAllowedKeys(r.ListUrlTemplate(), allowedKeys) {
 		return false
@@ -1877,4 +2034,54 @@ func (r Resource) CodeHeader(templatePath string) string {
 
 func (r Resource) MarkdownHeader(templatePath string) string {
 	return strings.Replace(r.CodeHeader(templatePath), "//", "#", -1)
+}
+
+// TGC Methods
+// ====================
+// Lists fields that test.BidirectionalConversion should ignore
+func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string {
+	props := []string{
+		"depends_on",
+		"count",
+		"for_each",
+		"provider",
+		"lifecycle",
+	}
+	for _, tp := range r.VirtualFields {
+		props = append(props, google.Underscore(tp.Name))
+	}
+	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
+		if tp.UrlParamOnly {
+			props = append(props, google.Underscore(tp.Name))
+		} else if tp.IsMissingInCai {
+			props = append(props, tp.MetadataLineage())
+		}
+	}
+	props = append(props, e.TGCTestIgnoreExtra...)
+
+	slices.Sort(props)
+	return props
+}
+
+// Filters out computed properties during cai2hcl
+func (r Resource) ReadPropertiesForTgc() []*Type {
+	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
+		return v.Output || v.UrlParamOnly
+	})
+}
+
+// The API resource type of the resource. Normally, it is the resource name.
+// Rarely, it is the API "resource type kind".
+// For example, the API resource type of "google_compute_autoscaler" is "ComputeAutoscalerAssetType".
+// The API resource type of "google_compute_region_autoscaler" is also "ComputeAutoscalerAssetType".
+func (r Resource) CaiResourceType() string {
+	if r.CaiResourceKind != "" {
+		return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.CaiResourceKind)
+	}
+
+	return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.Name)
+}
+
+func (r Resource) IsTgcCompiler() bool {
+	return r.Compiler == "terraformgoogleconversionnext-codegen"
 }

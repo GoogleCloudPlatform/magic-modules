@@ -99,7 +99,7 @@ examples:
   - name: 'artifact_registry_repository_remote_apt'
     primary_resource_id: 'my-repo'
     vars:
-      repository_id: 'debian-buster'
+      repository_id: 'debian-stable'
       desc: 'example remote apt repository'
   - name: 'artifact_registry_repository_remote_yum'
     primary_resource_id: 'my-repo'
@@ -483,12 +483,13 @@ properties:
               - name: 'repositoryBase'
                 type: Enum
                 description: |-
-                  A common public repository base for Apt, e.g. `"debian/dists/buster"`
+                  A common public repository base for Apt, e.g. `"debian/dists/stable"`
                 required: true
                 immutable: true
                 enum_values:
                   - 'DEBIAN'
                   - 'UBUNTU'
+                  - 'DEBIAN_SNAPSHOT'
               - name: 'repositoryPath'
                 type: String
                 description: |-

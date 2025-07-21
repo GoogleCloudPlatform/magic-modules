@@ -1,12 +1,19 @@
+// Retrohunt create operations don't return the resource data in the response field; instead, it is in the
+// "metadata" field. Luckily, this is the case even for the first operation returned (prior to create completion)
+// so we can pull it from there.
+// Removing this post_create logic would require https://github.com/hashicorp/terraform-provider-google/issues/22392
 metadata := res["metadata"].(map[string]interface{})
 retrohunt := metadata["retrohunt"].(string)
 parts := strings.Split(retrohunt, "/")
 retrohunt_id := parts[len(parts)-1]
-
-log.Printf("[DEBUG] Setting retrohunt id to %s", retrohunt_id) 
-
-// retrohunt value is set by API response and required to GET the connection
-// it is set by extracting id from the "retrohunt" field in the response metadata rather than a field in the response
+log.Printf("[DEBUG] Setting retrohunt to %s", retrohunt_id)
 if err := d.Set("retrohunt", retrohunt_id); err != nil {
-	return fmt.Errorf("Error reading Retrohunt ID: %s", err)
+	return fmt.Errorf("Error setting Retrohunt ID: %s", err)
 }
+
+// This may have caused the ID to update - update it if so.
+id, err = tpgresource.ReplaceVars(d, config, "projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/instances/{{"{{"}}instance{{"}}"}}/rules/{{"{{"}}rule{{"}}"}}/retrohunts/{{"{{"}}retrohunt{{"}}"}}")
+if err != nil {
+	return fmt.Errorf("Error constructing id: %s", err)
+}
+d.SetId(id)
