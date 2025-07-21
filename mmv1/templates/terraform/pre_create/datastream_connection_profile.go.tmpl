@@ -12,7 +12,7 @@
 */ -}}
 
 if d.Get("create_without_validation").(bool) {
-		url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "true"})
-	} else {
-		url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "false"})
-	}
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "true"})
+} else {
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "false"})
+}
