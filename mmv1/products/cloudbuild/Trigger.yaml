@@ -138,9 +138,6 @@ examples:
     primary_resource_id: 'developer-connect-trigger'
     test_env_vars:
       project_name: 'PROJECT_NAME'
-      location: 'GOOGLE_REGION'
-      connection_name: 'CONNECTION'
-      repo_name: "REPO_NAME"
 parameters:
   - name: 'location'
     type: String
