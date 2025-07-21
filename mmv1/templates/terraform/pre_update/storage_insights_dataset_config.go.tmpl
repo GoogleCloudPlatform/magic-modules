@@ -68,13 +68,8 @@ if d.HasChange("link_dataset") {
     if new_link_dataset == false {
         linkAPIEndPoint = "unlinkDataset"
     }
-    // linkUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}StorageInsightsBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/datasetConfigs/{{"{{"}}dataset_config_id{{"}}"}}:{{"{{"}}linkAPIEndPoint{{"}}"}}")
-    // if err != nil {
-       // return err
-    // }
 
     linkUrl := fmt.Sprintf("%s:%s", url, linkAPIEndPoint)
-    log.Printf("[DEBUG] %s DatasetConfig %q", linkAPIEndPoint, d.Id())
 
     // err == nil indicates that the billing_project value was found
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {

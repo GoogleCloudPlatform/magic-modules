@@ -1,10 +1,7 @@
-log.Printf("[DEBUG] Post Create Checker")
-
 _, ok := d.GetOkExists("link_dataset")
 if ok && d.Get("link_dataset") == true {
 
     linkUrl := strings.Replace(url, "?datasetConfigId=", "/", 1) + ":linkDataset"
-    log.Printf("[DEBUG] Link Url: %s", linkUrl)
 
     // err == nil indicates that the billing_project value was found
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {

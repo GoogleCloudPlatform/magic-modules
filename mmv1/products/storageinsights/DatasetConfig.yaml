@@ -58,6 +58,12 @@ virtual_fields:
     description: |
       A boolean terraform only flag to link/unlink dataset.
 
+      -> **Note** This is a virtual terraform only field used to link/unlink a dataset config.
+      This field is not part of the actual terraform resource.<br>
+      Setting this field to true while creation will automatically link the created dataset as an additional functionality.<br>
+      A dataset config resource can only be destroyed once it is unlinked,
+      so users must set this field to false to unlink the dataset and destroy the dataset config resource.
+
 parameters:
   - name: 'location'
     type: String
@@ -126,7 +132,9 @@ properties:
         type: Boolean
         output: true
         description: |
-          State of the linked DatasetConfig.
+          State of the linked DatasetConfig.<br>
+
+          -> **Note** This can be toggled between true/false using the virtual field link_dataset.
   - name: 'identity'
     type: NestedObject
     description: |
