@@ -1,10 +1,9 @@
 resource "google_developer_connect_connection" "my-connection" {
-  location = "us-central1"
-  name = "{{index $.Vars "cloudbuildv2_connection_name"}}"
-  connection_id = "my-connection"
-
+  location      = "us-central1"
+  connection_id = "my-connection" # This is what you should use for identification
+  
   github_config {
-    github_app = "DEVELOPER_CONNECT"
+    github_app          = "DEVELOPER_CONNECT"
     app_installation_id = {{index $.Vars "installation_id"}}
     authorizer_credential {
       oauth_token_secret_version = "{{index $.Vars "pat_secret"}}"
