@@ -36,7 +36,7 @@ examples:
     test_vars_overrides:
       deletion_protection: 'false'
       project: '"oci-terraform-testing-prod"'
-      odb_network_id: 'fmt.Sprintf("tf-test-odbnetwork-for-odbsubnet-%s", acctest.RandString(t, 10))'
+      odb_network_id: '"tf-test-permanent-odbnetwork"'
       odb_subnet_id: 'fmt.Sprintf("tf-test-odbsubnet-%s", acctest.RandString(t, 10))'
 virtual_fields:
   - name: 'deletion_protection'
@@ -49,9 +49,9 @@ autogen_async: true
 async:
   operation:
     timeouts:
-      insert_minutes: 20
-      update_minutes: 20
-      delete_minutes: 20
+      insert_minutes: 60
+      update_minutes: 60
+      delete_minutes: 60
     base_url: '{{op_id}}'
   actions:
     - create
