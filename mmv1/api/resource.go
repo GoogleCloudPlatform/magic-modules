@@ -2070,6 +2070,17 @@ func (r Resource) ReadPropertiesForTgc() []*Type {
 	})
 }
 
+// OutputFieldSetStr returns a string representation of the set of output fields for later filtering.
+func (r Resource) OutputFieldSetStr() string {
+	fieldNames := make(map[string]struct{})
+	for _, tp := range r.AllUserProperties() {
+		if tp.Output {
+			fieldNames[tp.Name] = struct{}{}
+		}
+	}
+	return fmt.Sprintf("%#v", fieldNames)
+}
+
 // The API resource type of the resource. Normally, it is the resource name.
 // Rarely, it is the API "resource type kind".
 // For example, the API resource type of "google_compute_autoscaler" is "ComputeAutoscalerAssetType".

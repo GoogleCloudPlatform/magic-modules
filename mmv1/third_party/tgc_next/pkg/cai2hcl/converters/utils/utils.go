@@ -51,6 +51,15 @@ func ParseUrlParamValuesFromAssetName(assetName string, template string, hclData
 	}
 }
 
+// DeleteOutputFields deletes the given outputFields from the given hclData.
+func DeleteOutputFields(outputFields map[string]struct{}, hclData map[string]any) {
+	for field := range hclData {
+		if _, isOutput := outputFields[field]; isOutput {
+			delete(hclData, field)
+		}
+	}
+}
+
 // DecodeJSON decodes the map object into the target struct.
 func DecodeJSON(data map[string]interface{}, v interface{}) error {
 	b, err := json.Marshal(data)

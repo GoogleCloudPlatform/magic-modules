@@ -111,6 +111,8 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 
 {{/* Attempt to parse all self-link parameters from asset name. */}}
 	utils.ParseUrlParamValuesFromAssetName(asset.Name, "{{ $.CaiAssetNameTemplate $productBackendName }}", hclData)
+{{/* Delete output only fields parsed from asset name. */}}
+	utils.DeleteOutputFields({{ $.OutputFieldSetStr }}, hclData)
 {{ range $prop := $.ReadPropertiesForTgc }}
 	{{ if $prop.FlattenObject -}}
 	if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
