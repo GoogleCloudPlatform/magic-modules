@@ -23,7 +23,7 @@ docs:
 id_format: 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles'
 self_link: 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}&force={{create_without_validation}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
