@@ -23,6 +23,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
@@ -30,6 +31,8 @@ func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
+		"org_id": envvar.GetTestOrgFromEnv(t),
+		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -71,8 +74,8 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 	resource "google_project" "project" {
 		project_id = "dci-terraform"
 		name = "Service Project"
-		org_id = "{{index $.TestEnvVars "org_id"}}"
-		billing_account = "{{index $.TestEnvVars "billing_account"}}"
+		org_id          = "%{org_id}"
+  		billing_account = "%{billing_account}"
 		deletion_policy = "DELETE"
 	}
 
@@ -91,7 +94,7 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 
 	resource "google_apphub_application" "my_apphub_application" {
 		location = "us-central1"
-		application_id = "{{index $.Vars "application_id"}}"
+		application_id = "tf-test-example-application%{random_suffix}"
 		scope {
 			type = "REGIONAL"
 		}
@@ -101,13 +104,13 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 	resource "google_developer_connect_insights_config" "my_insights_config" {
 		location           = "us-central1"
 		insights_config_id = "tf-test-ic%{random_suffix}"
-		project            = data.google_project.project.project_id
+		project            = google_project.project.project_id
 		annotations = {}
     	labels = {}
     	app_hub_application = format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
            google_project.project.number,
-           google_apphub_application.my_app.location,
-           google_apphub_application.my_app.application_id)
+           google_apphub_application.my_apphub_application.location,
+           google_apphub_application.my_apphub_application.application_id)
     }
   `, context)
 }
@@ -146,13 +149,13 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 	resource "google_developer_connect_insights_config" "my_insights_config" {
 		location           = "us-central1"
 		insights_config_id = "tf-test-ic%{random_suffix}"
-		project            = data.google_project.project.project_id
+		project            = google_project.project.project_id
 		annotations = {}
     	labels = {}
     	app_hub_application = format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
            google_project.project.number,
-           google_apphub_application.my_app.location,
-           google_apphub_application.my_app.application_id)
+           google_apphub_application.my_apphub_application.location,
+           google_apphub_application.my_apphub_application.application_id)
 		}
     }
   `, context)
