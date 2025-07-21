@@ -335,32 +335,36 @@ func ReformConfigWithProvider(config, provider string) string {
 // parseReleaseDiffOutput reads the temporary file created during the release diff test and returns the last line of output
 // This is useful for extracting the diff output from the file after the test has run
 
-func ParseReleaseDiffOutput(temp *os.File) (string, string, error) {
+func ParseReleaseDiffOutput(temp *os.File) (bool, string, error) {
+	var isDiff = false
 	if temp == nil {
-		return "", "", errors.New("temporary file is nil")
+		return isDiff, "", errors.New("temporary file is nil")
 	}
 	_, err := temp.Seek(0, io.SeekStart)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to seek to beginning of temporary file: %w", err)
+		return isDiff, "", fmt.Errorf("failed to seek to beginning of temporary file: %w", err)
 	}
 	var lastLine string
-	var allContentBuffer bytes.Buffer
+	var testOutputBuffer bytes.Buffer
 	scanner := bufio.NewScanner(temp)
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		lastLine = line
-		allContentBuffer.WriteString(line)
-		allContentBuffer.WriteByte('\n')
+		testOutputBuffer.WriteString(line)
+		testOutputBuffer.WriteByte('\n')
+	}
+	if strings.HasPrefix(lastLine, "[Diff]") {
+		isDiff = true
 	}
 	if err := scanner.Err(); err != nil {
-		return "", "", fmt.Errorf("error reading temporary file: %w", err)
+		return isDiff, "", fmt.Errorf("error reading temporary file: %w", err)
 	}
-	allContent := allContentBuffer.String()
-	if len(allContent) > 0 && allContent[len(allContent)-1] == '\n' {
-		allContent = allContent[:len(allContent)-1]
+	testOutput := testOutputBuffer.String()
+	if len(testOutput) > 0 && testOutput[len(testOutput)-1] == '\n' {
+		testOutput = testOutput[:len(testOutput)-1]
 	}
-	return lastLine, allContent, nil
+	return isDiff, testOutput, nil
 }
 
 func writeOutputFileDeferFunction(tempFile *os.File, failed bool) {
@@ -379,17 +383,17 @@ func writeOutputFileDeferFunction(tempFile *os.File, failed bool) {
 		fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
 		return
 	}
-	var lastLine, output, error = ParseReleaseDiffOutput(tempFile)
+	var isDiff, testOutput, error = ParseReleaseDiffOutput(tempFile)
 	if error != nil {
 		fmt.Fprintf(os.Stderr, "Error parsing release diff output: %v\n", err)
 	} else if failed {
 		// Check if the output line starts with "[Diff]"
-		if strings.HasPrefix(lastLine, "[Diff]") {
-			fmt.Fprintf(os.Stdout, "Breaking Change at \n%s\n", lastLine)
-			fmt.Fprintf(diffFailureFile, "[Diff] %s\n", output)
+		if isDiff {
+			fmt.Fprintf(os.Stdout, "Breaking Change Detected \n")
+			fmt.Fprintf(diffFailureFile, "[Diff] %s\n", testOutput)
 		} else {
-			fmt.Fprintf(regularFailureFile, output)
-			fmt.Fprintf(regularFailureFile, "FAILED --- %s\n", lastLine)
+			fmt.Fprintf(regularFailureFile, testOutput)
+			fmt.Fprintf(regularFailureFile, "FAILED --- %s\n", testOutput)
 		}
 	}
 	tempFile.Close() // Close the file handle
