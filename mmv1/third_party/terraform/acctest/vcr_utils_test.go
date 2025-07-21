@@ -452,7 +452,7 @@ func TestReformConfigWithProvider(t *testing.T) {
 	}
 }
 
-func TestDiffTestStepInjection(t *testing.T) {
+func TestInsertDiffSteps(t *testing.T) {
 	var dummyCase = resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),

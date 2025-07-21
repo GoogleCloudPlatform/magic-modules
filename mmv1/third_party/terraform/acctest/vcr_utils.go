@@ -47,9 +47,6 @@ func IsVcrEnabled() bool {
 	return envPath != "" && vcrMode != ""
 }
 
-// Regex for matching line to start with [Diff]
-var diffRegexpMatch = regexp.MustCompile(`^\s*\[Diff[|]?\]`)
-
 var configsLock = sync.RWMutex{}
 var sourcesLock = sync.RWMutex{}
 
@@ -150,11 +147,11 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		defer closeRecorder(t)
 	} else if isReleaseDiffEnabled() {
 		// creates temporary file for the individual test, will be a temporary to store the output
-		tempFile, diffFailureFile, regularFailureFile := createFilesForReleaseDiffTest()
+		tempOutputFile := createTemporaryFile()
 		defer func() {
-			writeOutputFileDeferFunction(tempFile, diffFailureFile, regularFailureFile, t.Failed())
+			writeOutputFileDeferFunction(tempOutputFile, t.Failed())
 		}()
-		c = initializeReleaseDiffTest(c, t.Name(), tempFile)
+		c = initializeReleaseDiffTest(c, t.Name(), tempOutputFile)
 
 	}
 
@@ -176,28 +173,17 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 
 }
 
-func createFilesForReleaseDiffTest() (*os.File, *os.File, *os.File) {
+func createTemporaryFile() *os.File {
 	// creates temporary file for the individual test, will be a temporary to store the output
-	var tempFile *os.File
+	var tempOutputFile *os.File
 	var err error
-	tempFile, err = os.CreateTemp("", "release_diff_test_output_*.log")
+	tempOutputFile, err = os.CreateTemp("", "release_diff_test_output_*.log")
 	if err != nil {
-		log.Fatalf("Error creating temporary file: %v", err)
-		return nil, nil, nil
+		fmt.Fprintf(os.Stdout, "Error creating temporary file: %v", err)
+		return nil
 	}
-	var regularFailureFile *os.File
-	regularFailureFile, err = os.Create(filepath.Join("", "regular_failure_file.log"))
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
-		return nil, nil, nil
-	}
-	var diffFailureFile *os.File
-	diffFailureFile, err = os.Create(filepath.Join("", "diff_failure_file.log"))
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
-		return nil, nil, nil
-	}
-	return tempFile, regularFailureFile, diffFailureFile
+
+	return tempOutputFile
 }
 
 // We need to explicitly close the VCR recorder to save the cassette
@@ -254,8 +240,6 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, tempFile *o
 		c.ExternalProviders[releaseProvider] = resource.ExternalProvider{}
 	} else {
 		c.ExternalProviders = map[string]resource.ExternalProvider{
-			// TODO: make a github action to get most recent release + current head, this is not a fix just for testing
-			// this should not be hardcoded
 			releaseProvider: {
 				// if left empty fetches most recent release provider, which is actually optimal
 			},
@@ -281,7 +265,8 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, tempFile *o
 			},
 		}
 	}
-
+	// InsertDiffSteps adds modified steps to the test that run with an external provider
+	// these steps do the actual infrastructure provisioning, and c.Steps is updated to have these modified steps
 	c.Steps = InsertDiffSteps(c, tempFile, releaseProvider, localProviderName)
 
 	return c
@@ -294,6 +279,7 @@ func InsertDiffSteps(c resource.TestCase, tempFile *os.File, releaseProvider str
 
 	var replacementSteps []resource.TestStep
 	for _, testStep := range c.Steps {
+		countSteps++
 		// todo: add preconfig - categorize test failures (add flag to steps that if they fail is a diff failure)
 		if testStep.Config != "" {
 			ogConfig := testStep.Config
@@ -309,7 +295,6 @@ func InsertDiffSteps(c resource.TestCase, tempFile *os.File, releaseProvider str
 				newStep := resource.TestStep{
 					PreConfig: func() {
 						fmt.Fprintf(tempFile, "Step %d\n", countSteps)
-						countSteps++
 					},
 					Config: ReformConfigWithProvider(ogConfig, releaseProvider),
 				}
@@ -330,7 +315,6 @@ func ReformConfigWithProvider(config, provider string) string {
 	providerReplacement := fmt.Sprintf("provider = %s", provider)
 	providerReplacementBytes := []byte(providerReplacement)
 	providerBlock := regexp.MustCompile(`provider *=.*google-beta.*`)
-
 	if providerBlock.Match(configBytes) {
 		out := string(providerBlock.ReplaceAll(configBytes, providerReplacementBytes))
 		return out
@@ -340,7 +324,6 @@ func ReformConfigWithProvider(config, provider string) string {
 	providerReplacementBytes = []byte(providerReplacement)
 	// Match resource and data blocks that use google_ provider
 	// regex matches for labels resource and data blocks that use google_ provider
-
 	resourceHeader := regexp.MustCompile(`((resource|data) .*google_.* .*\w+.*\{ *)`)
 	return string(resourceHeader.ReplaceAll(configBytes, providerReplacementBytes))
 }
@@ -356,12 +339,10 @@ func ParseReleaseDiffOutput(temp *os.File) (string, string, error) {
 	if temp == nil {
 		return "", "", errors.New("temporary file is nil")
 	}
-
 	_, err := temp.Seek(0, io.SeekStart)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to seek to beginning of temporary file: %w", err) // Updated return
+		return "", "", fmt.Errorf("failed to seek to beginning of temporary file: %w", err)
 	}
-
 	var lastLine string
 	var allContentBuffer bytes.Buffer
 	scanner := bufio.NewScanner(temp)
@@ -372,43 +353,49 @@ func ParseReleaseDiffOutput(temp *os.File) (string, string, error) {
 		allContentBuffer.WriteString(line)
 		allContentBuffer.WriteByte('\n')
 	}
-
 	if err := scanner.Err(); err != nil {
 		return "", "", fmt.Errorf("error reading temporary file: %w", err)
 	}
-
 	allContent := allContentBuffer.String()
-
 	if len(allContent) > 0 && allContent[len(allContent)-1] == '\n' {
 		allContent = allContent[:len(allContent)-1]
 	}
-
 	return lastLine, allContent, nil
 }
 
-func writeOutputFileDeferFunction(tempFile *os.File, regularFailureFile *os.File, diffFailureFile *os.File, failed bool) {
-	if tempFile != nil {
-		// parses the temporary file created during the release diff test and returns the last line of output
-		// This is useful for extracting the diff output from the file after the test has run
-
-		var lastLine, output, err = ParseReleaseDiffOutput(tempFile)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error parsing release diff output: %v\n", err)
-		} else if failed {
-			// Check if the output line starts with "[Diff]"
-			if diffRegexpMatch.MatchString(lastLine) {
-				fmt.Fprintf(os.Stdout, "Breaking Change at \n%s\n", lastLine)
-				fmt.Fprintf(diffFailureFile, "[Diff] %s\n", output)
-			} else {
-				fmt.Fprintf(regularFailureFile, output)
-				fmt.Fprintf(regularFailureFile, "FAILED --- %s\n", lastLine)
-			}
+func writeOutputFileDeferFunction(tempFile *os.File, failed bool) {
+	if tempFile == nil {
+		return
+	}
+	// parses the temporary file created during the release diff test and returns the last line of output
+	// This is useful for extracting the diff output from the file after the test has run
+	regularFailureFile, err := os.Create(filepath.Join("", "regular_failure_file.log"))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
+		return
+	}
+	diffFailureFile, err := os.Create(filepath.Join("", "diff_failure_file.log"))
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
+		return
+	}
+	var lastLine, output, error = ParseReleaseDiffOutput(tempFile)
+	if error != nil {
+		fmt.Fprintf(os.Stderr, "Error parsing release diff output: %v\n", err)
+	} else if failed {
+		// Check if the output line starts with "[Diff]"
+		if strings.HasPrefix(lastLine, "[Diff]") {
+			fmt.Fprintf(os.Stdout, "Breaking Change at \n%s\n", lastLine)
+			fmt.Fprintf(diffFailureFile, "[Diff] %s\n", output)
+		} else {
+			fmt.Fprintf(regularFailureFile, output)
+			fmt.Fprintf(regularFailureFile, "FAILED --- %s\n", lastLine)
 		}
-		tempFile.Close() // Close the file handle
-		err = os.Remove(tempFile.Name())
-		if err != nil {
-			fmt.Fprintf(os.Stdout, "Test passed, but failed to delete log file: %v\n", err)
-		}
+	}
+	tempFile.Close() // Close the file handle
+	err = os.Remove(tempFile.Name())
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "Test passed, but failed to delete log file: %v\n", err)
 	}
 }
 
