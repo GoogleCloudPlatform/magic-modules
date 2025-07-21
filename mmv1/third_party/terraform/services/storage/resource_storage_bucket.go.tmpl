@@ -72,7 +72,6 @@ func ResourceStorageBucket() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: `The name of the bucket.`,
-				ValidateFunc: verify.ValidateGCSName,
 			},
 
 			"encryption": {
