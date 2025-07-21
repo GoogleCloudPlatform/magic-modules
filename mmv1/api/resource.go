@@ -356,6 +356,10 @@ type Resource struct {
 	// ====================
 	// TGC
 	// ====================
+	TGCResource `yaml:",inline"`
+}
+
+type TGCResource struct {
 	// If true, exclude resource from Terraform Validator
 	// (i.e. terraform-provider-conversion)
 	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
