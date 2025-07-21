@@ -23,13 +23,13 @@ func ParseFieldValue(url string, name string) string {
 }
 
 /*
-	ParseUrlParamValuesFromAssetName uses CaiAssetNameTemplate to parse hclData from assetName
+	ParseUrlParamValuesFromAssetName uses CaiAssetNameTemplate to parse hclData from assetName, filtering out all outputFields
 
 template: //bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}
 assetName: //bigquery.googleapis.com/projects/my-project/datasets/my-dataset
 hclData: [project:my-project dataset_id:my-dataset]
 */
-func ParseUrlParamValuesFromAssetName(assetName string, template string, hclData map[string]any) {
+func ParseUrlParamValuesFromAssetName(assetName, template string, outputFields map[string]struct{}, hclData map[string]any) {
 	fragments := strings.Split(template, "/")
 	if len(fragments) < 2 {
 		// We need a field and a prefix.
@@ -46,16 +46,9 @@ func ParseUrlParamValuesFromAssetName(assetName string, template string, hclData
 	fragments = strings.Split(assetName, "/")
 	for ix, item := range fragments[:len(fragments)-1] {
 		if fieldName, ok := fields[item]; ok {
-			hclData[fieldName] = fragments[ix+1]
-		}
-	}
-}
-
-// DeleteOutputFields deletes the given outputFields from the given hclData.
-func DeleteOutputFields(outputFields map[string]struct{}, hclData map[string]any) {
-	for field := range hclData {
-		if _, isOutput := outputFields[field]; isOutput {
-			delete(hclData, field)
+			if _, isOutput := outputFields[fieldName]; !isOutput {
+				hclData[fieldName] = fragments[ix+1]
+			}
 		}
 	}
 }
