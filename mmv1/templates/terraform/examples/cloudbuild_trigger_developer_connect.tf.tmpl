@@ -2,7 +2,7 @@ resource "google_cloudbuild_trigger" "{{$.PrimaryResourceId}}" {
   location = "us-central1"
   
   developer_connect_event_config {
-    git_repository_link = "projects/{{index $.TestEnvVars "project_name"}}/locations/us-central1/connections/my_connection/gitRepositoryLinks/my-repo"
+    git_repository_link = "projects/{{index $.TestEnvVars "project_name"}}/locations/us-central1/connections/my_connection/gitRepositoryLinks/{{index $.Vars "repo_name"}}"
     push {
       branch = "feature-.*"
     }
