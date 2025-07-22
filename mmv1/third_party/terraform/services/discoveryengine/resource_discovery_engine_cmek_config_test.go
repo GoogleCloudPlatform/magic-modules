@@ -11,7 +11,7 @@ func TestAccDiscoveryEngineCmekConfig_discoveryengineCmekconfigDefaultExample_up
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"kms_key_name":                acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-4").CryptoKey.Name,
+		"kms_key_name":                acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-6").CryptoKey.Name,
 		"single_region_kms_key_name1": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tftest-shared-key-us-east1").CryptoKey.Name,
 		"single_region_kms_key_name2": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tftest-shared-key-us-central1").CryptoKey.Name,
 		"single_region_kms_key_name3": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-west1", "tftest-shared-key-us-west1").CryptoKey.Name,

@@ -45,6 +45,8 @@ async:
       delete_minutes: 60
   result:
     resource_inside_response: true
+custom_code:
+  update_encoder: 'templates/terraform/update_encoder/discoveryengine_cmekconfig_kmskey.go.tmpl'
 examples:
   - name: 'discoveryengine_cmekconfig_default'
     primary_resource_id: 'default'
@@ -93,6 +95,7 @@ properties:
       KMS key resource name which will be used to encrypt resources
       `projects/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{keyId}`.
     required: true
+    immutable: true
   - name: 'kmsKeyVersion'
     type: String
     description: |
