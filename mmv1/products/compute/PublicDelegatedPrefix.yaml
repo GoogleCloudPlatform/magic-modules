@@ -103,6 +103,7 @@ properties:
       The URL of parent prefix. Either PublicAdvertisedPrefix or
       PublicDelegatedPrefix.
     required: true
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
   - name: 'mode'
     type: Enum
     description: |
