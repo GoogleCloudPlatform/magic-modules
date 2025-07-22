@@ -19,55 +19,48 @@ package {{ lower $.ProductMetadata.Name }}
 import (
 {{/* We list all the v2 imports here and unstable imports, because we run 'goimports' to guess the correct
      set of imports, which will never guess the major version correctly. */ -}}
-  "github.com/apparentlymart/go-cidr/cidr"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-  "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
-  "google.golang.org/api/bigtableadmin/v2"
-  "google.golang.org/api/googleapi"
+	"github.com/apparentlymart/go-cidr/cidr"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/id"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"google.golang.org/api/bigtableadmin/v2"
+	"google.golang.org/api/googleapi"
 
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tgcresource"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
-  transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
-  "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/verify"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/models"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tgcresource"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/verify"
 )
 
 {{- $caiProductBaseUrl := $.CaiProductBaseUrl }}
 {{- $productBackendName := $.CaiProductBackendName $caiProductBaseUrl }}
-{{- $apiVersion := $.CaiApiVersion $productBackendName $caiProductBaseUrl}}
 
-{{- range $prop := $.AllUserProperties }}
-{{template "SchemaSubResource" $prop}}
-{{- end}}
-
-const {{ $.ResourceName -}}AssetType string = "{{ $productBackendName }}.googleapis.com/{{ $.Name -}}"
-const {{ $.ResourceName -}}SchemaName string = "{{ $.TerraformName }}"
-
-type {{ $.ResourceName -}}Converter struct {
+type {{ $.ResourceName -}}Cai2hclConverter struct {
 	name   string
 	schema map[string]*schema.Schema
 }
 
-func New{{ $.ResourceName -}}Converter(provider *schema.Provider) models.Converter {
+func New{{ $.ResourceName -}}Cai2hclConverter(provider *schema.Provider) models.Cai2hclConverter {
 	schema := provider.ResourcesMap[{{ $.ResourceName -}}SchemaName].Schema
 
-	return &{{ $.ResourceName -}}Converter{
+	return &{{ $.ResourceName -}}Cai2hclConverter{
 		name:   {{ $.ResourceName -}}SchemaName,
 		schema: schema,
 	}
 }
 
 // Convert converts asset to HCL resource blocks.
-func (c *{{ $.ResourceName -}}Converter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
+func (c *{{ $.ResourceName -}}Cai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
 	var blocks []*models.TerraformResourceBlock
 	block, err := c.convertResourceData(asset)
 	if err != nil {
@@ -77,43 +70,62 @@ func (c *{{ $.ResourceName -}}Converter) Convert(asset caiasset.Asset) ([]*model
 	return blocks, nil
 }
 
-func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
+func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
 
 	var err error
 	res := asset.Resource.Data
-	config := utils.NewConfig()
+	config := transport.NewConfig()
 	d := &schema.ResourceData{}
+
+{{	if $.TgcHclBlockName -}}
+	hclBlockName := res["{{ $.TgcHclBlockName -}}"].(string)
+
+	{{- else -}}
+	assetNameParts := strings.Split(asset.Name, "/")
+	hclBlockName := assetNameParts[len(assetNameParts)-1]
+{{ end}}
 
 	hclData := make(map[string]interface{})
 
 {{ if $.CustomCode.TgcDecoder -}}
-    res, err = resource{{ $.ResourceName -}}TgcDecoder(d, config, res)
-    if err != nil {
-        return nil, err
-    }
+	res, err = resource{{ $.ResourceName -}}TgcDecoder(d, config, res)
+	if err != nil {
+		return nil, err
+	}
 {{ end}}
 
 {{ if $.CustomCode.Decoder -}}
-    res, err = resource{{ $.ResourceName -}}Decoder(d, config, res)
-    if err != nil {
-        return nil, err
-    }
+	res, err = resource{{ $.ResourceName -}}Decoder(d, config, res)
+	if err != nil {
+		return nil, err
+	}
 
-    if res == nil {
-        // Decoding the object has resulted in it being gone. It may be marked deleted.
-        return nil, nil
-    }
+	if res == nil {
+		// Decoding the object has resulted in it being gone. It may be marked deleted.
+		return nil, nil
+	}
 {{ end}}
 
+{{ range $param := $.UserParameters }}
+{{/* Attempt to parse all parameters from asset name. */}}
+	hclData["{{ underscore $param.Name }}"] = utils.ParseFieldValue(asset.Name, "{{ underscore (plural $param.Name) }}")
+{{ end }}
+{{- if $.HasProject -}}
+	hclData["project"] = utils.ParseFieldValue(asset.Name, "projects")
+{{- end}}
 {{ range $prop := $.ReadPropertiesForTgc }}
-{{   if $prop.FlattenObject -}}
-{{/* TODO */}}
-{{-    else -}}
-    hclData["{{ underscore $prop.Name -}}"] = flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)
-{{-    end}}
+	{{ if $prop.FlattenObject -}}
+	if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
+		if err := tgcresource.MergeFlattenedProperties(hclData, flattenedProp); err != nil {
+			return nil, fmt.Errorf("error merging flattened properties from {{ $prop.Name }}: %s", err)
+		}
+	}
+	{{- else -}}
+	hclData["{{ underscore $prop.Name -}}"] = flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}(res["{{ $prop.ApiName -}}"], d, config)
+	{{- end}}
 {{- end}}
 
 	ctyVal, err := utils.MapToCtyValWithSchema(hclData, c.schema)
@@ -121,31 +133,23 @@ func (c *{{ $.ResourceName -}}Converter) convertResourceData(asset caiasset.Asse
 		return nil, err
 	}
 	return &models.TerraformResourceBlock{
-		Labels: []string{c.name, res["name"].(string)},
+		Labels: []string{c.name, hclBlockName},
 		Value:  ctyVal,
 	}, nil
 }
 
-{{- range $prop := $.ReadPropertiesForTgc }}
-    {{ if $prop.IsA "KeyValueLabels" }}
-func flatten{{$prop.GetPrefix}}{{$prop.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-  return utils.RemoveTerraformAttributionLabel(v)
-}
-    {{ else if $prop.CustomTgcFlatten }}
-        {{- $prop.CustomTemplate $prop.CustomTgcFlatten false -}}
-    {{ else }}
-        {{ template "flattenPropertyMethod" $prop -}}
-    {{- end }}
+{{ range $prop := $.ReadPropertiesForTgc }}
+{{- template "flattenTgcPropertyMethod" $prop -}}
 {{- end }}
 
 {{- if $.CustomCode.TgcDecoder }}
 func resource{{ $.ResourceName -}}TgcDecoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
-    {{ $.CustomTemplate $.CustomCode.TgcDecoder false -}}
+	{{ $.CustomTemplate $.CustomCode.TgcDecoder false -}}
 }
 {{- end }}
 
 {{- if $.CustomCode.Decoder }}
 func resource{{ $.ResourceName -}}Decoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
-    {{ $.CustomTemplate $.CustomCode.Decoder false -}}
+	{{ $.CustomTemplate $.CustomCode.Decoder false -}}
 }
 {{- end }}

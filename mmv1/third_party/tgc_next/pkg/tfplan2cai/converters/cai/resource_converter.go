@@ -14,7 +14,7 @@ type ConvertFunc func(d tpgresource.TerraformResourceData, config *transport_tpg
 // by Terraform, like IAM policies managed with member/binding resources.
 type FetchFullResourceFunc func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (caiasset.Asset, error)
 
-type ResourceConverter struct {
+type Tfplan2caiConverter struct {
 	Convert           ConvertFunc
 	FetchFullResource FetchFullResourceFunc
 }
