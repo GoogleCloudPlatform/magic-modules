@@ -146,6 +146,8 @@ func schemaNodeConfig() *schema.Schema {
 					Description:  `Type of the disk attached to each node. Such as pd-standard, pd-balanced or pd-ssd`,
 				},
 
+				"boot_disk": schemaBootDiskConfig(),
+
 				"guest_accelerator": {
 					Type:     schema.TypeList,
 					Optional: true,
@@ -899,6 +901,46 @@ func schemaNodeConfig() *schema.Schema {
 	}
 }
 
+
+func schemaBootDiskConfig() *schema.Schema {
+	return &schema.Schema{
+		Type: schema.TypeList,
+		Optional: true,
+		Computed: true,
+		MaxItems: 1,
+		Description: `Boot disk configuration for node pools nodes.`,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"disk_type": {
+					Type:         schema.TypeString,
+					Optional:     true,
+					Computed:     true,
+					Description:  `Type of the disk attached to each node. Such as pd-standard, pd-balanced or pd-ssd`,
+				},
+				"size_gb": {
+					Type:         schema.TypeInt,
+					Optional:     true,
+					Computed:     true,
+					ValidateFunc: validation.IntAtLeast(10),
+					Description:  `Size of the disk attached to each node, specified in GB. The smallest allowed disk size is 10GB.`,
+				},
+				"provisioned_iops": {
+					Type:         schema.TypeInt,
+					Optional:     true,
+					Computed:     true,
+					Description:  `Configured IOPs provisioning. Only valid with disk type hyperdisk-balanced.`,
+				},
+				"provisioned_throughput": {
+					Type:         schema.TypeInt,
+					Optional:     true,
+					Computed:     true,
+					Description:  `Configured throughput provisioning. Only valid with disk type hyperdisk-balanced.`,
+				},
+			},
+		},
+	}
+}
+
 // Separate since this currently only supports a single value -- a subset of
 // the overall NodeKubeletConfig
 func schemaNodePoolAutoConfigNodeKubeletConfig() *schema.Schema {
@@ -1032,6 +1074,10 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 
 	if v, ok := nodeConfig["disk_type"]; ok {
 		nc.DiskType = v.(string)
+	}
+
+	if v, ok := nodeConfig["boot_disk"]; ok {
+		nc.BootDisk = expandBootDiskConfig(v)
 	}
 
 	if v, ok := nodeConfig["local_ssd_count"]; ok {
@@ -1305,6 +1351,36 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 	}
 
 	return nc
+}
+
+func expandBootDiskConfig(v interface{}) *container.BootDisk {
+	bd := &container.BootDisk{}
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	if v, ok := cfg["disk_type"]; ok {
+		bd.DiskType = v.(string)
+	}
+
+	if v, ok := cfg["size_gb"]; ok {
+		bd.SizeGb = int64(v.(int))
+	}
+
+	if v, ok := cfg["provisioned_iops"]; ok {
+		bd.ProvisionedIops = int64(v.(int))
+	}
+
+	if v, ok := cfg["provisioned_throughput"]; ok {
+		bd.ProvisionedThroughput = int64(v.(int))
+	}
+
+	return bd
 }
 
 func expandResourceManagerTags(v interface{}) *container.ResourceManagerTags {
@@ -1688,11 +1764,12 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"containerd_config":        flattenContainerdConfig(c.ContainerdConfig),
 		"disk_size_gb":             c.DiskSizeGb,
 		"disk_type":                c.DiskType,
+		"boot_disk":                flattenBootDiskConfig(c.BootDisk),
 		"guest_accelerator":        flattenContainerGuestAccelerators(c.Accelerators),
 		"local_ssd_count":          c.LocalSsdCount,
 		"logging_variant":          flattenLoggingVariant(c.LoggingConfig),
 {{- if ne $.TargetVersionName "ga" }}
-		"ephemeral_storage_config":  flattenEphemeralStorageConfig(c.EphemeralStorageConfig),
+		"ephemeral_storage_config": flattenEphemeralStorageConfig(c.EphemeralStorageConfig),
 {{- end }}
 		"local_nvme_ssd_block_config": flattenLocalNvmeSsdBlockConfig(c.LocalNvmeSsdBlockConfig),
 		"ephemeral_storage_local_ssd_config": flattenEphemeralStorageLocalSsdConfig(c.EphemeralStorageLocalSsdConfig),
@@ -1738,6 +1815,22 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		config[0]["oauth_scopes"] = schema.NewSet(tpgresource.StringScopeHashcode, tpgresource.ConvertStringArrToInterface(c.OauthScopes))
 	}
 
+	return config
+}
+
+func flattenBootDiskConfig(c *container.BootDisk) []map[string]interface{} {
+	config := []map[string]interface{}{}
+
+	if c == nil {
+		return config
+	}
+
+	config = append(config, map[string]interface{}{
+		"disk_type": c.DiskType,
+		"size_gb": c.SizeGb,
+		"provisioned_iops": c.ProvisionedIops,
+		"provisioned_throughput": c.ProvisionedThroughput,
+	})
 	return config
 }
 
