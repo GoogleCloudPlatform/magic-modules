@@ -52,6 +52,12 @@ func DataSourceGoogleComputeSubnetworks() *schema.Resource {
 						"network_self_link": {
 							Type:     schema.TypeString,
 							Computed: true,
+							// TODO: remove in next major release (7.0.0) also from docs and implementation below
+							Deprecated: "Use `network_name` instead. This field will be removed in a future major release.",
+						},
+						"network_name": {
+							Type:     schema.TypeString,
+							Computed: true,
 						},
 						"private_ip_google_access": {
 							Type:     schema.TypeBool,
@@ -99,7 +105,7 @@ func dataSourceGoogleComputeSubnetworksRead(d *schema.ResourceData, meta interfa
 			"description":              subnet.Description,
 			"ip_cidr_range":            subnet.IpCidrRange,
 			"name":                     subnet.Name,
-			"network_self_link":        filepath.Base(subnet.Network), // TODO: remove in next major release (7.0.0) also from docs
+			"network_self_link":        filepath.Base(subnet.Network),
 			"network":                  subnet.Network,
 			"network_name":             filepath.Base(subnet.Network),
 			"private_ip_google_access": subnet.PrivateIpGoogleAccess,
