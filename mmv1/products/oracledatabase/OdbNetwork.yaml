@@ -17,10 +17,6 @@ description: An OdbNetwork resource which represents a private network providing
 references:
   guides:
     'OracleDatabase@Google Cloud': https://cloud.google.com/oracle/database/docs/overview'
-docs:
-  note: |
-    An ODB network provides connectivity between Oracle Database@Google Cloud resources in the OCI child site and your Google Cloud VPC network.
-    The ODB network maps OCI network resources, such as Virtual Cloud Networks (VCNs), and their related subnets back to Google Cloud.
 base_url: 'projects/{{project}}/locations/{{location}}/odbNetworks'
 immutable: true
 self_link: 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odb_network_id}}'
