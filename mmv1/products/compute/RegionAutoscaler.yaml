@@ -14,7 +14,6 @@
 ---
 name: 'RegionAutoscaler'
 api_resource_type_kind: Autoscaler
-cai_resource_kind: Autoscaler
 api_variant_patterns:
   - 'projects/{project}/regions/{region}/autoscalers/{autoscaler}'
 kind: 'compute#autoscaler'

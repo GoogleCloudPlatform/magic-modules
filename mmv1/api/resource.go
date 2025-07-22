@@ -1859,11 +1859,7 @@ func (r Resource) CaiProductBackendName(caiProductBaseUrl string) string {
 func (r Resource) CaiAssetType() string {
 	baseURL := r.CaiProductBaseUrl()
 	productBackendName := r.CaiProductBackendName(baseURL)
-	assetName := r.Name
-	if r.CaiResourceKind != "" {
-		assetName = r.CaiResourceKind
-	}
-	return fmt.Sprintf("%s.googleapis.com/%s", productBackendName, assetName)
+	return fmt.Sprintf("%s.googleapis.com/%s", productBackendName, r.CaiResourceName())
 }
 
 // DefineAssetTypeForResourceInProduct marks the AssetType constant for this resource as defined.
@@ -2070,27 +2066,24 @@ func (r Resource) ReadPropertiesForTgc() []*Type {
 	})
 }
 
-// OutputFieldSetStr returns a string representation of the set of output fields for later filtering.
-func (r Resource) OutputFieldSetStr() string {
-	fieldNames := make(map[string]struct{})
-	for _, tp := range r.AllUserProperties() {
-		if tp.Output {
-			fieldNames[google.Underscore(tp.Name)] = struct{}{}
-		}
-	}
-	return fmt.Sprintf("%#v", fieldNames)
+// For example, the CAI resource type with product of "google_compute_autoscaler" is "ComputeAutoscalerAssetType".
+// The CAI resource type with product of "google_compute_region_autoscaler" is also "ComputeAutoscalerAssetType".
+func (r Resource) CaiResourceType() string {
+	return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.CaiResourceName())
 }
 
 // The API resource type of the resource. Normally, it is the resource name.
-// Rarely, it is the API "resource type kind".
-// For example, the API resource type of "google_compute_autoscaler" is "ComputeAutoscalerAssetType".
-// The API resource type of "google_compute_region_autoscaler" is also "ComputeAutoscalerAssetType".
-func (r Resource) CaiResourceType() string {
+// Rarely, it is the API "resource type kind" or CAI "resource kind"
+// For example, the CAI resource type of "google_compute_autoscaler" is "Autoscaler".
+// The CAI resource type of "google_compute_region_autoscaler" is also "Autoscaler".
+func (r Resource) CaiResourceName() string {
 	if r.CaiResourceKind != "" {
-		return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.CaiResourceKind)
+		return r.CaiResourceKind
 	}
-
-	return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.Name)
+	if r.ApiResourceTypeKind != "" {
+		return r.ApiResourceTypeKind
+	}
+	return r.Name
 }
 
 func (r Resource) IsTgcCompiler() bool {
