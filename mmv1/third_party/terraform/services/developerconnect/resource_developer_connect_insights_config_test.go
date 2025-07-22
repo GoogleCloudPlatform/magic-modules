@@ -89,7 +89,7 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 	# Wait delay after enabling APIs
 	resource "time_sleep" "wait_enable_service_api" {
 		depends_on       = [google_project_service.apphub_api_service]
-		create_duration  = "1200s"
+		create_duration  = "120s"
 	}
 
 	resource "google_apphub_application" "my_apphub_application" {
@@ -99,6 +99,7 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 			type = "REGIONAL"
 		}
 		project = google_project.project.project_id
+		depends_on = [google_project_service.apphub_api_service]
 	}
 	
 	resource "google_developer_connect_insights_config" "my_insights_config" {
@@ -135,7 +136,7 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 	# Wait delay after enabling APIs
 	resource "time_sleep" "wait_enable_service_api" {
 		depends_on       = [google_project_service.apphub_api_service]
-		create_duration  = "1200s"
+		create_duration  = "120s"
 	}
 
 	resource "google_apphub_application" "my_apphub_application" {
@@ -145,6 +146,7 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 			type = "REGIONAL"
 		}
 		project = google_project.project.project_id
+		depends_on = [google_project_service.apphub_api_service]
 	}
 	resource "google_developer_connect_insights_config" "my_insights_config" {
 		location           = "us-central1"

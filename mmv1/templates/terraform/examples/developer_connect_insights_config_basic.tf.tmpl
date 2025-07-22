@@ -18,7 +18,7 @@ resource "google_project_service" "apphub_api_service" {
 # Wait delay after enabling APIs
 resource "time_sleep" "wait_enable_service_api" {
   depends_on       = [google_project.project]
-  create_duration  = "1200s"
+  create_duration  = "120s"
 }
 
 resource "google_apphub_application" "my_apphub_application" {
@@ -28,6 +28,7 @@ resource "google_apphub_application" "my_apphub_application" {
     type = "REGIONAL"
   }
   project = google_project.project.project_id
+  depends_on = [google_project_service.apphub_api_service]
 }
 
 resource "google_developer_connect_insights_config" "my_insights_config" {
