@@ -1,6 +1,7 @@
 package bigqueryanalyticshub_test
 
 import (
+	"fmt"
 	"os"
 	"testing"
 
