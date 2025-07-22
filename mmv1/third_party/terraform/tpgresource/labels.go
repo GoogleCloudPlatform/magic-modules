@@ -233,6 +233,77 @@ func SetMetadataLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta inter
 	return nil
 }
 
+func SetNestedLabelsDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	l := d.Get("node_config").([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	// Fix the bug that the computed and nested "labels" field disappears from the terraform plan.
+	// https://github.com/hashicorp/terraform-provider-google/issues/17756
+	// The bug is introduced by SetNew on "metadata" field with the object including terraform_labels and effective_labels.
+	// "terraform_labels" and "effective_labels" cannot be set directly due to a bug that SetNew doesn't work on nested fields
+	// in terraform sdk.
+	// https://github.com/hashicorp/terraform-plugin-sdk/issues/459
+	values := d.GetRawPlan().GetAttr("node_config").AsValueSlice()
+	if len(values) > 0 && !values[0].GetAttr("labels").IsWhollyKnown() {
+		return nil
+	}
+
+	raw := d.Get("node_config.0.resource_labels")
+	if raw == nil {
+		return nil
+	}
+
+	if d.Get("node_config.0.terraform_labels") == nil {
+		return fmt.Errorf("`node_config.0.terraform_labels` field is not present in the resource schema")
+	}
+
+	if d.Get("node_config.0.effective_resource_labels") == nil {
+		return fmt.Errorf("`node_config.0.effective_resource_labels` field is not present in the resource schema")
+	}
+
+	config := meta.(*transport_tpg.Config)
+
+	// Merge provider default labels with the user defined labels in the resource to get terraform managed labels
+	terraformLabels := make(map[string]string)
+	for k, v := range config.DefaultLabels {
+		terraformLabels[k] = v
+	}
+
+	labels := raw.(map[string]interface{})
+	for k, v := range labels {
+		terraformLabels[k] = v.(string)
+	}
+
+	original := l[0].(map[string]interface{})
+
+	original["terraform_labels"] = terraformLabels
+	if err := d.SetNew("node_config", []interface{}{original}); err != nil {
+		return fmt.Errorf("error setting new node_config diff: %w", err)
+	}
+
+	o, n := d.GetChange("node_config.0.terraform_labels")
+	effectiveLabels := d.Get("node_config.0.effective_resource_labels").(map[string]interface{})
+
+	for k, v := range n.(map[string]interface{}) {
+		effectiveLabels[k] = v.(string)
+	}
+
+	for k := range o.(map[string]interface{}) {
+		if _, ok := n.(map[string]interface{})[k]; !ok {
+			delete(effectiveLabels, k)
+		}
+	}
+
+	original["effective_resource_labels"] = effectiveLabels
+	if err := d.SetNew("node_config", []interface{}{original}); err != nil {
+		return fmt.Errorf("error setting new node_config diff: %w", err)
+	}
+
+	return nil
+}
+
 // Upgrade the field "labels" in the state to exclude the labels with the labels prefix
 // and the field "effective_labels" to have all of labels, including the labels with the labels prefix
 func LabelsStateUpgrade(rawState map[string]interface{}, labesPrefix string) (map[string]interface{}, error) {
