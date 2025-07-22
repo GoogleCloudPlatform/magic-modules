@@ -15,6 +15,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"crypto/sha256"
 	"encoding/base64"
@@ -307,6 +308,14 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Computed:    true,
 				Description: `A url reference to download this object.`,
 			},
+
+			"deletion_policy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: `The deletion policy for the object. Setting ABANDON allows the resource
+				to be abandoned rather than deleted. Possible values are: "ABANDON".`,
+				ValidateFunc: validation.StringInSlice([]string{"ABANDON"}, false),
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -569,6 +578,12 @@ func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{})
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
+	}
+
+	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
+		log.Printf("[WARN] Object %q deletion_policy is set to 'ABANDON', skip deleting object in the bucket", d.Id())
+		d.SetId("")
+		return nil
 	}
 
 	bucket := d.Get("bucket").(string)
