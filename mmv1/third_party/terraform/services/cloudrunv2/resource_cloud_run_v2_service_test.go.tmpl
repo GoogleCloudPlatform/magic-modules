@@ -1380,7 +1380,7 @@ resource "google_cloud_run_v2_service" "default" {
   annotations = {
     generated-by = "magic-modules"
   }
-  multiRegionSettings = {
+  multi_region_settings = {
     regions = [
       "us-central1",
       "us-east1",
@@ -1395,7 +1395,7 @@ resource "google_cloud_run_v2_service" "default" {
   client_version = "client-version-1"
   template {
     containers {
-      image = "us-docker.pkg.dev/cloudrun/container/hello"
+      image = "us-dgitocker.pkg.dev/cloudrun/container/hello"
     }
   }
 }
