@@ -1,5 +1,5 @@
 resource "google_project" "project" {
-  project_id = "dci-terraform"
+  project_id = "dci-tf-%{random_suffix}"
   name = "Service Project"
   org_id = "{{index $.TestEnvVars "org_id"}}"
   billing_account = "{{index $.TestEnvVars "billing_account"}}"

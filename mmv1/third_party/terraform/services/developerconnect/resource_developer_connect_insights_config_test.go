@@ -72,7 +72,7 @@ func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
 func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_project" "project" {
-		project_id = "dci-terraform"
+		project_id = "dci-tf-%{random_suffix}"
 		name = "Service Project"
 		org_id          = "%{org_id}"
   		billing_account = "%{billing_account}"
@@ -118,7 +118,7 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_project" "project" {
-		project_id = "dci-terraform"
+		project_id = "dci-tf-%{random_suffix}"
 		name = "Service Project"
 		org_id          = "%{org_id}"
   		billing_account = "%{billing_account}"
@@ -140,7 +140,7 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 
 	resource "google_apphub_application" "my_apphub_application" {
 		location = "us-central1"
-		application_id = "{{index $.Vars "application_id"}}"
+		application_id = "tf-test-example-application%{random_suffix}"
 		scope {
 			type = "REGIONAL"
 		}

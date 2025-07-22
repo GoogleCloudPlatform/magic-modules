@@ -26,8 +26,6 @@ examples:
   - name: 'developer_connect_insights_config_basic'
     external_providers: ["time"]
     primary_resource_id: 'insights_config'
-    vars:
-      application_id: 'tf-test-app'
     test_env_vars:
       org_id: "ORG_ID"
       billing_account: "BILLING_ACCT"
