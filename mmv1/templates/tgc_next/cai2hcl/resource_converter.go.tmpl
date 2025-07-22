@@ -80,8 +80,13 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 	config := transport.NewConfig()
 	d := &schema.ResourceData{}
 
+{{	if $.TgcHclBlockName -}}
+	hclBlockName := res["{{ $.TgcHclBlockName -}}"].(string)
+
+	{{- else -}}
 	assetNameParts := strings.Split(asset.Name, "/")
 	hclBlockName := assetNameParts[len(assetNameParts)-1]
+{{ end}}
 
 	hclData := make(map[string]interface{})
 
@@ -103,24 +108,19 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 		return nil, nil
 	}
 {{ end}}
+
+{{ range $param := $.UserParameters }}
+{{/* Attempt to parse all parameters from asset name. */}}
+	hclData["{{ underscore $param.Name }}"] = utils.ParseFieldValue(asset.Name, "{{ underscore (plural $param.Name) }}")
+{{ end }}
 {{- if $.HasProject -}}
 	hclData["project"] = utils.ParseFieldValue(asset.Name, "projects")
 {{- end}}
 {{ range $prop := $.ReadPropertiesForTgc }}
 	{{ if $prop.FlattenObject -}}
-	// Terraform must set the top level schema field, but since this object contains collapsed properties
-	// it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
 	if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
-		flattenedPropSlice, ok := flattenedProp.([]interface{})
-		if !ok || len(flattenedPropSlice) == 0 {
-			return nil, fmt.Errorf("unexpected type returned from flattener: %T", flattenedProp)
-		}
-		flattedPropMap, ok := flattenedPropSlice[0].(map[string]interface{})
-		if !ok || len(flattedPropMap) == 0 {
-			return nil, fmt.Errorf("unexpected type returned from flattener: %T", flattenedPropSlice)
-		}
-		for k, v := range flattedPropMap {
-			hclData[k] = v
+		if err := tgcresource.MergeFlattenedProperties(hclData, flattenedProp); err != nil {
+			return nil, fmt.Errorf("error merging flattened properties from {{ $prop.Name }}: %s", err)
 		}
 	}
 	{{- else -}}
