@@ -13,7 +13,13 @@
 
 ---
 name: 'OdbSubnet'
-description: 'An OdbSubnet resource.'
+description: 'An OdbSubnet resource which represents a subnet under an OdbNetwork.'
+references:
+  guides:
+    'OracleDatabase@Google Cloud': https://cloud.google.com/oracle/database/docs/overview'
+docs:
+  note: |
+    An ODB subnet provides connectivity between Oracle Database@Google Cloud resources in the OCI child site and your Google Cloud VPC network.
 base_url: 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbSubnets'
 immutable: true
 self_link: 'projects/{{project}}/locations/{{location}}/odbNetworks/{{odbnetwork}}/odbSubnets/{{odb_subnet_id}}'
