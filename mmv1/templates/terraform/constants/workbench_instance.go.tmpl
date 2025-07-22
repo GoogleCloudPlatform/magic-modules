@@ -24,7 +24,22 @@ func WorkbenchInstanceLabelsDiffSuppress(k, old, new string, d *schema.ResourceD
 
 
 var WorkbenchInstanceSettableUnmodifiableDefaultMetadata = []string{
-	    "serial-port-logging-enable",
+	"serial-port-logging-enable",
+}
+
+var WorkbenchInstanceEUCProvidedAdditionalMetadata = []string{
+	"enable-oslogin",
+	"disable-ssh",
+	"ssh-keys",
+	"block-project-ssh-keys",
+	"post-startup-script",
+	"post-startup-script-behavior",
+	"startup-script",
+	"startup-script-url",
+	"gce-container-declaration",
+	"gce-software-declaration",
+	"serial-port-enable",
+	"euc-enabled",
 }
 
 var WorkbenchInstanceProvidedMetadata = []string{
@@ -45,6 +60,7 @@ var WorkbenchInstanceProvidedMetadata = []string{
     "dataproc-region",
     "dataproc-service-account",
     "disable-check-xsrf",
+    "enable-euc",
     "framework",
     "generate-diagnostics-bucket",
     "generate-diagnostics-file",
@@ -94,6 +110,14 @@ func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.Resourc
 	for _, metadata := range WorkbenchInstanceProvidedMetadata {
 		if key == metadata {
 			return true
+		}
+	}
+	
+	if d.Get("enable_managed_euc").(bool){
+		for _, metadata := range WorkbenchInstanceEUCProvidedAdditionalMetadata {
+			if key == metadata {
+				return true
+			}
 		}
 	}
 
