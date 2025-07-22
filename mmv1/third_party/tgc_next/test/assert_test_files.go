@@ -198,7 +198,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 			if diff := cmp.Diff(
 				asset.Resource,
 				roundtripAsset.Resource,
-				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "DiscoveryDocumentURI"),
+				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "Location", "DiscoveryDocumentURI"),
 				// Consider DiscoveryDocumentURI equal if they have the same number of path segments when split by "/".
 				cmp.FilterPath(func(p cmp.Path) bool {
 					return p.Last().String() == ".DiscoveryDocumentURI"

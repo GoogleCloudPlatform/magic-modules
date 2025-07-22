@@ -1859,11 +1859,7 @@ func (r Resource) CaiProductBackendName(caiProductBaseUrl string) string {
 func (r Resource) CaiAssetType() string {
 	baseURL := r.CaiProductBaseUrl()
 	productBackendName := r.CaiProductBackendName(baseURL)
-	assetName := r.Name
-	if r.CaiResourceKind != "" {
-		assetName = r.CaiResourceKind
-	}
-	return fmt.Sprintf("%s.googleapis.com/%s", productBackendName, assetName)
+	return fmt.Sprintf("%s.googleapis.com/%s", productBackendName, r.CaiResourceName())
 }
 
 // DefineAssetTypeForResourceInProduct marks the AssetType constant for this resource as defined.
@@ -2070,16 +2066,24 @@ func (r Resource) ReadPropertiesForTgc() []*Type {
 	})
 }
 
-// The API resource type of the resource. Normally, it is the resource name.
-// Rarely, it is the API "resource type kind".
-// For example, the API resource type of "google_compute_autoscaler" is "ComputeAutoscalerAssetType".
-// The API resource type of "google_compute_region_autoscaler" is also "ComputeAutoscalerAssetType".
+// For example, the CAI resource type with product of "google_compute_autoscaler" is "ComputeAutoscalerAssetType".
+// The CAI resource type with product of "google_compute_region_autoscaler" is also "ComputeAutoscalerAssetType".
 func (r Resource) CaiResourceType() string {
-	if r.CaiResourceKind != "" {
-		return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.CaiResourceKind)
-	}
+	return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.CaiResourceName())
+}
 
-	return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.Name)
+// The API resource type of the resource. Normally, it is the resource name.
+// Rarely, it is the API "resource type kind" or CAI "resource kind"
+// For example, the CAI resource type of "google_compute_autoscaler" is "Autoscaler".
+// The CAI resource type of "google_compute_region_autoscaler" is also "Autoscaler".
+func (r Resource) CaiResourceName() string {
+	if r.CaiResourceKind != "" {
+		return r.CaiResourceKind
+	}
+	if r.ApiResourceTypeKind != "" {
+		return r.ApiResourceTypeKind
+	}
+	return r.Name
 }
 
 func (r Resource) IsTgcCompiler() bool {
