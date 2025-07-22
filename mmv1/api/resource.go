@@ -2008,10 +2008,6 @@ func (r Resource) ShouldGenerateSweepers() bool {
 	return true
 }
 
-func (r Resource) ShouldGenerateSingularDataSource() bool {
-	return true
-}
-
 func (r Resource) GithubURL() string {
 	return GITHUB_BASE_URL + r.SourceYamlFile
 }

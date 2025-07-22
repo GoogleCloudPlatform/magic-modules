@@ -151,22 +151,6 @@ func (t *Terraform) GenerateResourceMetadata(object api.Resource, templateData T
 	templateData.GenerateMetadataFile(targetFilePath, object)
 }
 
-func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData TemplateData, outputFolder string) {
-	if !object.ShouldGenerateSingularDataSource() {
-		return
-	}
-
-	productName := t.Product.ApiName
-	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
-	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
-		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
-	}
-
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s.go", t.ResourceGoFilename(object)))
-	templateData.GenerateDataSourceFile(targetFilePath, object)
-
-}
-
 func (t *Terraform) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
 	eligibleExample := false
 	for _, example := range object.Examples {
@@ -202,6 +186,21 @@ func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData Te
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_sweeper.go", t.ResourceGoFilename(object)))
 	templateData.GenerateSweeperFile(targetFilePath, object)
+}
+
+func (t *Terraform) GenerateSingularDataSource(object api.SingularDataSource, templateData TemplateData, outputFolder string) {
+	if !object.ShouldGenerateSingularDataSource() {
+		return
+	}
+
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	// todo - individual name structure
+	targetFilePath := path.Join(targetFolder, "data_source.go")
+	templateData.GenerateDataSourceFile(targetFilePath, object)
 }
 
 // GenerateProduct creates the product.go file for a given service directory.
