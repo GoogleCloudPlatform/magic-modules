@@ -122,7 +122,6 @@ properties:
     description: |
       Details of the linked DatasetConfig.
     output: true
-    immutable: true
     properties:
       - name: 'dataset'
         type: String
@@ -254,14 +253,15 @@ properties:
               type: String
               description: |
                 The list of cloud storage bucket names to include in the DatasetConfig.
+
+                -> **Note** This field has conflict with bucketPrefixRegex and exactly one of the bucketName and bucketPrefixRegex should be specified.
             - name: bucketPrefixRegex
               type: String
               description: |
                 The list of regex patterns for bucket names matching the regex.
                 Regex should follow the syntax specified in google/re2 on GitHub.
-        exactly_one_of:
-          - 'bucketName'
-          - 'bucketPrefixRegex'
+
+                -> **Note** This field has conflict with bucketName and exactly one of the bucketName and bucketPrefixRegex should be specified.
     conflicts:
       - 'exclude_cloud_storage_buckets'
   - name: 'excludeCloudStorageBuckets'
@@ -281,13 +281,14 @@ properties:
               type: String
               description: |
                 The list of cloud storage bucket names to exclude in the DatasetConfig.
+
+                -> **Note** This field has conflict with bucketPrefixRegex and exactly one of the bucketName and bucketPrefixRegex should be specified.
             - name: bucketPrefixRegex
               type: String
               description: |
                 The list of regex patterns for bucket names matching the regex.
                 Regex should follow the syntax specified in google/re2 on GitHub.
-        exactly_one_of:
-          - 'bucketName'
-          - 'bucketPrefixRegex'
+
+                -> **Note** This field has conflict with bucketName and exactly one of the bucketName and bucketPrefixRegex should be specified.
     conflicts:
       - 'include_cloud_storage_buckets'
