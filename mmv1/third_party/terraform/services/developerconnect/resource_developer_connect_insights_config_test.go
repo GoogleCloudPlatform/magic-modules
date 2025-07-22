@@ -78,6 +78,13 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
   		billing_account = "%{billing_account}"
 		deletion_policy = "DELETE"
 	}
+	
+	# Grant Permissions
+	resource "google_project_iam_member" "apphub_permissions" {
+		project = google_project.project.project_id
+		role = "roles/apphub.admin"
+		member = "serviceAccount:hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com"
+	}
 
 	# Enable APIs
 	resource "google_project_service" "apphub_api_service" {
@@ -99,7 +106,10 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 			type = "REGIONAL"
 		}
 		project = google_project.project.project_id
-		depends_on = [google_project_service.apphub_api_service]
+		depends_on = [
+			google_project_service.apphub_api_service,
+			google_project_iam_member.apphub_permissions
+		]
 	}
 	
 	resource "google_developer_connect_insights_config" "my_insights_config" {
@@ -126,6 +136,13 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 		deletion_policy = "DELETE"
 	}
 	
+	# Grant Permissions
+	resource "google_project_iam_member" "apphub_permissions" {
+		project = google_project.project.project_id
+		role = "roles/apphub.admin"
+		member = "serviceAccount:hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com"
+	}
+	
 	# Enable APIs
 	resource "google_project_service" "apphub_api_service" {
 		project = google_project.project.project_id
@@ -146,7 +163,10 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 			type = "REGIONAL"
 		}
 		project = google_project.project.project_id
-		depends_on = [google_project_service.apphub_api_service]
+		depends_on = [
+			google_project_service.apphub_api_service,
+			google_project_iam_member.apphub_permissions
+		]
 	}
 	resource "google_developer_connect_insights_config" "my_insights_config" {
 		location           = "us-central1"
