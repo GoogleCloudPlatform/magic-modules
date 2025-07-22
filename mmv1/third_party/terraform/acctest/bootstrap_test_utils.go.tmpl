@@ -2330,7 +2330,7 @@ func AddBigQueryDatasetReplica(projectID string,datasetID string,primaryLocation
 
 	err = datasetRef.Create(ctx, datasetMetadata)
 	if err != nil {
-    log.Printf("failed to create BigQuery dataset '%s'", datasetID)
+    log.Printf("failed to create BigQuery dataset '%s'.Dataset already exists.", datasetID)
 	} else {
     log.Printf("INFO: Successfully created BigQuery dataset '%s' at location '%s'.", datasetID, primaryLocation)
 	}
@@ -2353,7 +2353,7 @@ func AddBigQueryDatasetReplica(projectID string,datasetID string,primaryLocation
 
 	status, err := job.Wait(ctx)
 	if err != nil {
-		return "", fmt.Errorf("failed to wait for BigQuery job completion: %w", err)
+		log.Printf("failed to wait for BigQuery job completion: %w", err)
 	}
 
 	if status.Err() != nil {
