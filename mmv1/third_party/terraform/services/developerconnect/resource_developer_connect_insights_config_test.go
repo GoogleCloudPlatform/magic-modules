@@ -89,7 +89,7 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 	# Wait delay after enabling APIs
 	resource "time_sleep" "wait_enable_service_api" {
 		depends_on       = [google_project_service.apphub_api_service]
-		create_duration  = "600s"
+		create_duration  = "1200s"
 	}
 
 	resource "google_apphub_application" "my_apphub_application" {
@@ -135,7 +135,7 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 	# Wait delay after enabling APIs
 	resource "time_sleep" "wait_enable_service_api" {
 		depends_on       = [google_project_service.apphub_api_service]
-		create_duration  = "600s"
+		create_duration  = "1200s"
 	}
 
 	resource "google_apphub_application" "my_apphub_application" {
