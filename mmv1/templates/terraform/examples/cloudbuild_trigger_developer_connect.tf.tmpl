@@ -15,7 +15,8 @@ resource "google_developer_connect_git_repository_link" "my-repository" {
   location = "us-central1"
   git_repository_link_id = "my-repo"
   parent_connection = google_developer_connect_connection.my-connection.connection_id
-  remote_uri = "https://github.com/myuser/myrepo.git"
+  clone_uri        = "https://github.com/gcb-developerconnect-robot/tf-demo.git"
+  annotations       = {}
 }
 
 
