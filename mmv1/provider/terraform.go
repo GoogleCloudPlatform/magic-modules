@@ -188,7 +188,7 @@ func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData Te
 	templateData.GenerateSweeperFile(targetFilePath, object)
 }
 
-func (t *Terraform) GenerateSingularDataSource(object api.SingularDataSource, templateData TemplateData, outputFolder string) {
+func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData TemplateData, outputFolder string) {
 	if !object.ShouldGenerateSingularDataSource() {
 		return
 	}

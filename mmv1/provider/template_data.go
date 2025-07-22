@@ -93,7 +93,7 @@ func (td *TemplateData) GenerateMetadataFile(filePath string, resource api.Resou
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
-func (td *TemplateData) GenerateDataSourceFile(filePath string, resource api.SingularDataSource) {
+func (td *TemplateData) GenerateDataSourceFile(filePath string, resource api.Resource) {
 	templatePath := "templates/terraform/singular_datasource.yaml"
 	templates := []string{
 		templatePath,

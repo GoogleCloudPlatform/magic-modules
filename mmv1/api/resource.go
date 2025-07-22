@@ -1993,6 +1993,9 @@ func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {
 	return true
 }
 
+func (r Resource) ShouldGenerateSingularDataSource() bool {
+	return true
+}
 func (r Resource) ShouldGenerateSweepers() bool {
 	if !r.ExcludeSweeper && !utils.IsEmpty(r.Sweeper) {
 		return true
