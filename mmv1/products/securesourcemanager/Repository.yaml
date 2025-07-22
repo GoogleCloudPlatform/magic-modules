@@ -47,7 +47,7 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
     - '{{repository_id}}'
 custom_code:
-  pre_delete: 'templates/terraform/pre_delete/securesourcemanager_repository.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/securesourcemanager_deletion_policy.go.tmpl'
 examples:
   - name: 'secure_source_manager_repository_basic'
     primary_resource_id: 'default'
@@ -92,7 +92,8 @@ virtual_fields:
     description: |
       The deletion policy for the repository. Setting `ABANDON` allows the resource
       to be abandoned, rather than deleted. Setting `DELETE` deletes the resource
-      and all its contents. Setting `PREVENT` prevents the resource from being deleted.
+      and all its contents. Setting `PREVENT` prevents the resource from accidental deletion
+      by erroring out during plan.
       Default is `DELETE`.  Possible values are:
         * DELETE
         * PREVENT
