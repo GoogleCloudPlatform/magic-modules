@@ -1,0 +1,11 @@
+resource "google_firestore_database" "{{$.PrimaryResourceId}}" {
+  project                           = "{{index $.TestEnvVars "project_id"}}"
+  name                              = "{{index $.Vars "database_id"}}"
+  location_id                       = "nam5"
+  type                              = "FIRESTORE_NATIVE"
+  delete_protection_state           = "{{index $.Vars "delete_protection_state"}}"
+  deletion_policy                   = "DELETE"
+  tags = {
+    "{{index $.Vars "tag_key_id"}}" = "{{index $.Vars "tag_value_id"}}"
+  }
+}

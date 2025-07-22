@@ -132,10 +132,14 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   }
   return tpgresource.ConvertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1)
   {{- else if $.IsA "ResourceRef" }}
+    {{- if $.ResourceMetadata.IsTgcCompiler }}
+  {{- template "fullToRelativePath" $ -}}
+    {{- else }}
   if v == nil {
     return v
   }
   return tpgresource.ConvertSelfLinkToV1(v.(string))
+    {{- end }}
   {{- else if $.IsSet }}
   if v == nil {
     return v
@@ -145,13 +149,22 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     {{- else if or ($.ItemType.IsA "String") ($.ItemType.IsA "Enum") }}
   return schema.NewSet(schema.HashString, v.([]interface{}))
     {{- end }}
+  {{- else if and ($.ResourceMetadata.IsTgcCompiler) ($.IsA "Boolean") ($.Required) }}
+	if v == nil {
+		return false
+	}
+	return v
   {{- else }}
   return v
 {{- end }}
 }
 {{- if $.NestedProperties }}
     {{- range $prop := $.NestedProperties }}
+      {{- if $.ResourceMetadata.IsTgcCompiler }}
+      {{ template "flattenTgcPropertyMethod" $prop -}}
+      {{- else }}
       {{ template "flattenPropertyMethod" $prop -}}
+      {{- end }}
     {{- end }}
   {{- end }}
 {{- end }}

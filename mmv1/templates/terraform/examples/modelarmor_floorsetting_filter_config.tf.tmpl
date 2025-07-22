@@ -1,0 +1,27 @@
+resource "google_model_armor_floorsetting" "floorsetting-filter-config" {
+  location    = "global"
+  parent      = "project/{{index $.TestEnvVars "project_id"}}"
+
+  filter_config {
+    rai_settings {
+      rai_filters {
+        filter_type      = "DANGEROUS"
+        confidence_level = "MEDIUM_AND_ABOVE"
+      }
+    }
+    sdp_settings {
+      basic_config {
+          filter_enforcement = "ENABLED"
+      }
+    }
+    pi_and_jailbreak_filter_settings {
+      filter_enforcement = "ENABLED"
+      confidence_level   = "HIGH"
+    }
+    malicious_uri_filter_settings {
+      filter_enforcement = "ENABLED"
+    }
+  }
+
+  enable_floor_setting_enforcement = true
+}

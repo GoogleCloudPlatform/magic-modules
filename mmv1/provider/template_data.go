@@ -194,14 +194,27 @@ func (td *TemplateData) GenerateTGCResourceFile(templatePath, filePath string, r
 	templates := []string{
 		templatePath,
 		"templates/terraform/expand_property_method.go.tmpl",
+		"templates/terraform/expand_resource_ref.tmpl",
 		"templates/terraform/schema_property.go.tmpl",
 		"templates/terraform/schema_subresource.go.tmpl",
+		"templates/terraform/flatten_property_method.go.tmpl",
+		"templates/tgc_next/tfplan2cai/expand_property_method_tgc.go.tmpl",
+		"templates/tgc_next/cai2hcl/flatten_property_method_tgc.go.tmpl",
+		"templates/tgc_next/cai2hcl/full_to_relative_path.go.tmpl",
 	}
 	td.GenerateFile(filePath, templatePath, resource, true, templates...)
 }
 
 func (td *TemplateData) GenerateTGCIamResourceFile(filePath string, resource api.Resource) {
 	templatePath := "templates/tgc/resource_converter_iam.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
+func (td *TemplateData) GenerateTGCNextTestFile(filePath string, resource api.Resource) {
+	templatePath := "templates/tgc_next/test/test_file.go.tmpl"
 	templates := []string{
 		templatePath,
 	}

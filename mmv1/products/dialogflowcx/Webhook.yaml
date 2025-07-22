@@ -38,8 +38,20 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/dialogflowcx_webhook.go.tmpl'
 exclude_sweeper: true
 examples:
-  - name: 'dialogflowcx_webhook_full'
-    primary_resource_id: 'basic_webhook'
+  - name: 'dialogflowcx_webhook_standard'
+    primary_resource_id: 'standard_webhook'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+  - name: 'dialogflowcx_webhook_flexible'
+    primary_resource_id: 'flexible_webhook'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+  - name: 'dialogflowcx_webhook_service_directory_standard'
+    primary_resource_id: 'standard_webhook'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+  - name: 'dialogflowcx_webhook_service_directory_flexible'
+    primary_resource_id: 'flexible_webhook'
     vars:
       agent_name: 'dialogflowcx-agent'
 parameters:
@@ -71,27 +83,134 @@ properties:
     type: Boolean
     description: |
       Indicates whether the webhook is disabled.
-  - name: 'genericWebService'
+  - name: genericWebService
     type: NestedObject
-    description: |
-      Configuration for a generic web service.
+    description: Represents configuration for a generic web service.
     properties:
-      - name: 'uri'
-        type: String
-        description: |
-          Whether to use speech adaptation for speech recognition.
-        required: true
-      - name: 'requestHeaders'
-        type: KeyValuePairs
-        description: |
-          The HTTP request headers to send together with webhook requests.
-        immutable: true
-      - name: 'allowedCaCerts'
+      - name: allowedCaCerts
         type: Array
-        description: |
-          Specifies a list of allowed custom CA certificates (in DER format) for HTTPS verification.
+        description: |-
+          Specifies a list of allowed custom CA certificates (in DER format) for
+          HTTPS verification. This overrides the default SSL trust store. If this
+          is empty or unspecified, Dialogflow will use Google's default trust store
+          to verify certificates.
+          N.B. Make sure the HTTPS server certificates are signed with "subject alt
+          name". For instance a certificate can be self-signed using the following
+          command,
+          openssl x509 -req -days 200 -in example.com.csr \
+          -signkey example.com.key \
+          -out example.com.crt \
+          -extfile <(printf "\nsubjectAltName='DNS:www.example.com'")
         item_type:
           type: String
+      - name: httpMethod
+        type: Enum
+        description: |-
+          HTTP method for the flexible webhook calls. Standard webhook always uses
+          POST.
+        enum_values:
+          - 'POST'
+          - 'GET'
+          - 'HEAD'
+          - 'PUT'
+          - 'DELETE'
+          - 'PATCH'
+          - 'OPTIONS'
+      - name: oauthConfig
+        type: NestedObject
+        description: |-
+          Represents configuration of OAuth client credential flow for 3rd party
+          API authentication.
+        properties:
+          - name: clientId
+            type: String
+            description: The client ID provided by the 3rd party platform.
+            required: true
+          - name: clientSecret
+            type: String
+            description: |-
+              The client secret provided by the 3rd party platform.  If the
+              `secret_version_for_client_secret` field is set, this field will be
+              ignored.
+            ignore_read: true
+          - name: scopes
+            type: Array
+            description: The OAuth scopes to grant.
+            item_type:
+              type: String
+          - name: secretVersionForClientSecret
+            type: String
+            description: |-
+              The name of the SecretManager secret version resource storing the
+              client secret. If this field is set, the `client_secret` field will be
+              ignored.
+              Format: `projects/{project}/secrets/{secret}/versions/{version}`
+          - name: tokenEndpoint
+            type: String
+            description: |-
+              The token endpoint provided by the 3rd party platform to exchange an
+              access token.
+            required: true
+      - name: parameterMapping
+        type: KeyValuePairs
+        description: |-
+          Maps the values extracted from specific fields of the flexible webhook
+          response into session parameters.
+          - Key: session parameter name
+          - Value: field path in the webhook response
+      - name: requestBody
+        type: String
+        description: Defines a custom JSON object as request body to send to flexible webhook.
+      - name: requestHeaders
+        type: KeyValuePairs
+        description: The HTTP request headers to send together with webhook requests.
+      - name: secretVersionForUsernamePassword
+        type: String
+        description: |-
+          The SecretManager secret version resource storing the username:password
+          pair for HTTP Basic authentication.
+          Format: `projects/{project}/secrets/{secret}/versions/{version}`
+      - name: secretVersionsForRequestHeaders
+        type: Map
+        description: |-
+          The HTTP request headers to send together with webhook requests. Header
+          values are stored in SecretManager secret versions.
+
+          When the same header name is specified in both `request_headers` and
+          `secret_versions_for_request_headers`, the value in
+          `secret_versions_for_request_headers` will be used.
+        key_name: 'key'
+        value_type:
+          name: 'secretVersionsForRequestHeader'
+          type: NestedObject
+          properties:
+            - name: secretVersion
+              type: String
+              description: |
+                The SecretManager secret version resource storing the header value.
+                Format: `projects/{project}/secrets/{secret}/versions/{version}`
+              required: true
+      - name: serviceAgentAuth
+        type: Enum
+        description: |-
+          Indicate the auth token type generated from the [Diglogflow service
+          agent](https://cloud.google.com/iam/docs/service-agents#dialogflow-service-agent).
+          The generated token is sent in the Authorization header.
+        enum_values:
+          - 'NONE'
+          - 'ID_TOKEN'
+          - 'ACCESS_TOKEN'
+      - name: uri
+        type: String
+        description: The webhook URI for receiving POST requests. It must use https protocol.
+        required: true
+      - name: webhookType
+        type: Enum
+        description: |-
+          Type of the webhook.
+        enum_values:
+          - 'STANDARD'
+          - 'FLEXIBLE'
   - name: 'serviceDirectory'
     type: NestedObject
     description: |
@@ -102,42 +221,148 @@ properties:
         description: |
           The name of Service Directory service.
         required: true
-      - name: 'genericWebService'
+      - name: genericWebService
         type: NestedObject
-        description: |
-          The name of Service Directory service.
-        required: true
+        description: Represents configuration for a generic web service.
         properties:
-          - name: 'uri'
-            type: String
-            description: |
-              Whether to use speech adaptation for speech recognition.
-            required: true
-          - name: 'requestHeaders'
-            type: KeyValuePairs
-            description: |
-              The HTTP request headers to send together with webhook requests.
-            immutable: true
-          - name: 'allowedCaCerts'
+          - name: allowedCaCerts
             type: Array
-            description: |
-              Specifies a list of allowed custom CA certificates (in DER format) for HTTPS verification.
+            description: |-
+              Specifies a list of allowed custom CA certificates (in DER format) for
+              HTTPS verification. This overrides the default SSL trust store. If this
+              is empty or unspecified, Dialogflow will use Google's default trust store
+              to verify certificates.
+              N.B. Make sure the HTTPS server certificates are signed with "subject alt
+              name". For instance a certificate can be self-signed using the following
+              command,
+              openssl x509 -req -days 200 -in example.com.csr \
+              -signkey example.com.key \
+              -out example.com.crt \
+              -extfile <(printf "\nsubjectAltName='DNS:www.example.com'")
             item_type:
               type: String
+          - name: httpMethod
+            type: Enum
+            description: |-
+              HTTP method for the flexible webhook calls. Standard webhook always uses
+              POST.
+            enum_values:
+              - 'POST'
+              - 'GET'
+              - 'HEAD'
+              - 'PUT'
+              - 'DELETE'
+              - 'PATCH'
+              - 'OPTIONS'
+          - name: oauthConfig
+            type: NestedObject
+            description: |-
+              Represents configuration of OAuth client credential flow for 3rd party
+              API authentication.
+            properties:
+              - name: clientId
+                type: String
+                description: The client ID provided by the 3rd party platform.
+                required: true
+              - name: clientSecret
+                type: String
+                description: |-
+                  The client secret provided by the 3rd party platform.  If the
+                  `secret_version_for_client_secret` field is set, this field will be
+                  ignored.
+                ignore_read: true
+              - name: scopes
+                type: Array
+                description: The OAuth scopes to grant.
+                item_type:
+                  type: String
+              - name: secretVersionForClientSecret
+                type: String
+                description: |-
+                  The name of the SecretManager secret version resource storing the
+                  client secret. If this field is set, the `client_secret` field will be
+                  ignored.
+                  Format: `projects/{project}/secrets/{secret}/versions/{version}`
+              - name: tokenEndpoint
+                type: String
+                description: |-
+                  The token endpoint provided by the 3rd party platform to exchange an
+                  access token.
+                required: true
+          - name: parameterMapping
+            type: KeyValuePairs
+            description: |-
+              Maps the values extracted from specific fields of the flexible webhook
+              response into session parameters.
+              - Key: session parameter name
+              - Value: field path in the webhook response
+          - name: requestBody
+            type: String
+            description: Defines a custom JSON object as request body to send to flexible webhook.
+          - name: requestHeaders
+            type: KeyValuePairs
+            description: The HTTP request headers to send together with webhook requests.
+          - name: secretVersionForUsernamePassword
+            type: String
+            description: |-
+              The SecretManager secret version resource storing the username:password
+              pair for HTTP Basic authentication.
+              Format: `projects/{project}/secrets/{secret}/versions/{version}`
+          - name: secretVersionsForRequestHeaders
+            type: Map
+            description: |-
+              The HTTP request headers to send together with webhook requests. Header
+              values are stored in SecretManager secret versions.
+
+              When the same header name is specified in both `request_headers` and
+              `secret_versions_for_request_headers`, the value in
+              `secret_versions_for_request_headers` will be used.
+            key_name: 'key'
+            value_type:
+              name: 'secretVersionsForRequestHeader'
+              type: NestedObject
+              properties:
+                - name: secretVersion
+                  type: String
+                  description: |
+                    The SecretManager secret version resource storing the header value.
+                    Format: `projects/{project}/secrets/{secret}/versions/{version}`
+                  required: true
+          - name: serviceAgentAuth
+            type: Enum
+            description: |-
+              Indicate the auth token type generated from the [Diglogflow service
+              agent](https://cloud.google.com/iam/docs/service-agents#dialogflow-service-agent).
+              The generated token is sent in the Authorization header.
+            enum_values:
+              - 'NONE'
+              - 'ID_TOKEN'
+              - 'ACCESS_TOKEN'
+          - name: uri
+            type: String
+            description: The webhook URI for receiving POST requests. It must use https protocol.
+            required: true
+          - name: webhookType
+            type: Enum
+            description: |-
+              Type of the webhook.
+            enum_values:
+              - 'STANDARD'
+              - 'FLEXIBLE'
   - name: 'startFlow'
     type: String
     description: |
-      Name of the start flow in this agent. A start flow will be automatically created when the agent is created, and can only be deleted by deleting the agent. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
+      Deprecated. Name of the start flow in this agent. A start flow will be automatically created when the agent is created, and can only be deleted by deleting the agent. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
     output: true
   - name: 'securitySettings'
     type: String
     description: |
-      Name of the SecuritySettings reference for the agent. Format: projects/<Project ID>/locations/<Location ID>/securitySettings/<Security Settings ID>.
+      Deprecated. Name of the SecuritySettings reference for the agent. Format: projects/<Project ID>/locations/<Location ID>/securitySettings/<Security Settings ID>.
   - name: 'enableStackdriverLogging'
     type: Boolean
     description: |
-      Determines whether this agent should log conversation queries.
+      Deprecated. Determines whether this agent should log conversation queries.
   - name: 'enableSpellCorrection'
     type: Boolean
     description: |
-      Indicates if automatic spell correction is enabled in detect intent requests.
+      Deprecated. Indicates if automatic spell correction is enabled in detect intent requests.

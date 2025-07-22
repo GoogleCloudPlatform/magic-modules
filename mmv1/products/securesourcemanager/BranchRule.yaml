@@ -48,10 +48,13 @@ examples:
       repository_id: 'my-basic-repository'
       instance_id: 'my-basic-instance'
       prevent_destroy: 'true'
+      deletion_policy: '"PREVENT"'
     test_vars_overrides:
       'prevent_destroy': 'false'
+      'deletion_policy': '"DELETE"'
     oics_vars_overrides:
       'prevent_destroy': 'false'
+      'deletion_policy': '"DELETE"'
   - name: 'secure_source_manager_branch_rule_with_fields'
     primary_resource_id: 'default'
     vars:
@@ -59,10 +62,13 @@ examples:
       repository_id: 'my-initial-repository'
       instance_id: 'my-initial-instance'
       prevent_destroy: 'true'
+      deletion_policy: '"PREVENT"'
     test_vars_overrides:
       'prevent_destroy': 'false'
+      'deletion_policy': '"DELETE"'
     oics_vars_overrides:
       'prevent_destroy': 'false'
+      'deletion_policy': '"DELETE"'
 parameters:
   - name: 'branch_rule_id'
     type: String

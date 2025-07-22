@@ -10,6 +10,7 @@ resource "google_memorystore_instance" "{{$.PrimaryResourceId}}" {
   node_type               = "SHARED_CORE_NANO"
   transit_encryption_mode = "TRANSIT_ENCRYPTION_DISABLED"
   authorization_mode      = "AUTH_DISABLED"
+  kms_key                 = "{{index $.Vars "kms_key_name"}}"
   engine_configs = {
     maxmemory-policy = "volatile-ttl"
   }

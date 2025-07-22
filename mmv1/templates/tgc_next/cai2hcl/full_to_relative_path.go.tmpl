@@ -1,0 +1,10 @@
+{{- define "fullToRelativePath" }}
+	if v == nil {
+		return v
+	}
+	relative, err := tpgresource.GetRelativePath(v.(string))
+	if err != nil {
+		return v
+	}
+	return relative
+{{- end }}

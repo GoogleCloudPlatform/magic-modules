@@ -93,14 +93,6 @@ The following arguments are supported:
 	{{- end }}
 {{- end }}
 {{ "" }}
-{{- range $p := $.AllUserProperties }}
-	{{- if $p.Required }}
-{{- trimTemplate "nested_property_documentation.html.markdown.tmpl" $p -}}
-	{{- end}}
-{{- end }}
-- - -
-{{ "" }}
-{{ "" }}
 {{- range $p := $.RootProperties }}
 	{{- if and (not $p.Required) (not $p.Output) (not $p.WriteOnly) }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
@@ -119,6 +111,12 @@ The following arguments are supported:
 {{- end }}
 {{- if $.Docs.OptionalProperties }}
 {{ $.Docs.OptionalProperties }}
+{{- end }}
+{{ "" }}
+{{- range $p := $.AllUserProperties }}
+	{{- if $p.Required }}
+{{- trimTemplate "nested_property_documentation.html.markdown.tmpl" $p -}}
+	{{- end}}
 {{- end }}
 {{- range $p := $.AllUserProperties }}
 	{{- if and (not $p.Required) (not $p.Output) }}

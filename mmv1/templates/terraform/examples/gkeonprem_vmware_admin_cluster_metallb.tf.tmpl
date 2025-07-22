@@ -1,5 +1,4 @@
 resource "google_gkeonprem_vmware_admin_cluster" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   name = "{{index $.Vars "name"}}"
   location = "us-west1"
   description = "test admin cluster"
@@ -35,5 +34,9 @@ resource "google_gkeonprem_vmware_admin_cluster" "{{$.PrimaryResourceId}}" {
     metal_lb_config {
       enabled = true
     }
+  }
+  private_registry_config {
+    address = "test-address"
+    ca_cert = "test-ca-cert"
   }
 }

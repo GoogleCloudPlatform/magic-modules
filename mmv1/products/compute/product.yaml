@@ -17,7 +17,9 @@ display_name: 'Compute Engine'
 versions:
   - name: 'ga'
     base_url: 'https://compute.googleapis.com/compute/v1/'
+    cai_legacy_base_url: 'https://www.googleapis.com/compute/v1/'
   - name: 'beta'
     base_url: 'https://compute.googleapis.com/compute/beta/'
+    cai_legacy_base_url: 'https://www.googleapis.com/compute/v1/'
 scopes:
   - 'https://www.googleapis.com/auth/compute'

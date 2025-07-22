@@ -63,7 +63,7 @@ func (cai2hcl CaiToTerraformConversion) CopyCommonFiles(outputFolder string, gen
 	if !generateCode {
 		return
 	}
-	log.Printf("Coping cai2hcl common files")
+	log.Print("Copying cai2hcl common files")
 
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))

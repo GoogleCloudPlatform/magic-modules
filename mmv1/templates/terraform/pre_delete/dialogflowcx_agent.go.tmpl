@@ -1,0 +1,20 @@
+// Extract engine ID from the gen_app_builder_settings field of the Agent
+s := d.Get("gen_app_builder_settings")
+log.Printf("[DEBUG] gen_app_builder_settings: %v", s)
+settings, ok := s.([]interface{})
+if !ok {
+	return fmt.Errorf("Error converting gen_app_builder_settings %s to  []interface{}", s)
+}
+
+engineID := ""
+if len(settings) > 0 {
+	// An engine is linked to the Agent. Delete it.
+	engineIDIntf, ok := settings[0].(map[string]interface{})["engine"]
+	if !ok {
+			return fmt.Errorf("Expected key 'engine' in map %+v", settings[0])
+	}
+	engineID, ok = engineIDIntf.(string)
+	if !ok {
+		return fmt.Errorf("Can convert engine ID %s to string", engineIDIntf)
+	}
+}

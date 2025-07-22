@@ -1,0 +1,29 @@
+resource "google_iam_workload_identity_pool" "pool" {
+  provider = google-beta
+
+  workload_identity_pool_id = "{{index $.Vars "workload_identity_pool_id"}}"
+  mode                      = "TRUST_DOMAIN"
+}
+
+resource "google_iam_workload_identity_pool_namespace" "ns" {
+  provider = google-beta
+
+  workload_identity_pool_id           = google_iam_workload_identity_pool.pool.workload_identity_pool_id
+  workload_identity_pool_namespace_id = "{{index $.Vars "workload_identity_pool_namespace_id"}}"
+}
+
+resource "google_iam_workload_identity_pool_managed_identity" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+
+  workload_identity_pool_id                  = google_iam_workload_identity_pool.pool.workload_identity_pool_id
+  workload_identity_pool_namespace_id        = google_iam_workload_identity_pool_namespace.ns.workload_identity_pool_namespace_id
+  workload_identity_pool_managed_identity_id = "{{index $.Vars "workload_identity_pool_managed_identity_id"}}"
+  description                                = "Example Managed Identity in a Workload Identity Pool Namespace"
+  disabled                                   = true
+  attestation_rules {
+    google_cloud_resource = "//compute.googleapis.com/projects/{{index $.TestEnvVars "project"}}/uid/zones/us-central1-a/instances/12345678"
+  }
+  attestation_rules {
+    google_cloud_resource = "//run.googleapis.com/projects/{{index $.TestEnvVars "project"}}/name/locations/us-east1/services/my-service"
+  }
+}

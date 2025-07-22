@@ -64,8 +64,8 @@ var (
 		"BBBmau": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 4, 7),
-					endDate:   newDate(2025, 4, 11),
+					startDate: newDate(2025, 7, 1),
+					endDate:   newDate(2025, 7, 17),
 				},
 			},
 		},
@@ -81,7 +81,12 @@ var (
 			vacations: []Vacation{},
 		},
 		"melinath": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 6, 26),
+					endDate:   newDate(2025, 7, 7),
+				},
+			},
 		},
 		"NickElliot": {
 			vacations: []Vacation{},
@@ -95,7 +100,12 @@ var (
 			},
 		},
 		"roaks3": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 7, 1),
+					endDate:   newDate(2025, 7, 14),
+				},
+			},
 		},
 		"ScottSuarez": {
 			vacations: []Vacation{},
@@ -103,8 +113,8 @@ var (
 		"shuyama1": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 3, 26),
-					endDate:   newDate(2025, 4, 1),
+					startDate: newDate(2025, 5, 23),
+					endDate:   newDate(2025, 5, 30),
 				},
 			},
 		},
@@ -117,7 +127,12 @@ var (
 			},
 		},
 		"slevenick": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 5, 22),
+					endDate:   newDate(2025, 6, 7),
+				},
+			},
 		},
 		"trodge": {
 			vacations: []Vacation{},

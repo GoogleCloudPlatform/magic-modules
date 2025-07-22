@@ -96,6 +96,16 @@ examples:
       # Resource creation race
     skip_vcr: true
     external_providers: ["time"]
+  - name: 'apigee_environment_client_ip_resolution_config_test'
+    primary_resource_id: 'apigee_environment'
+    primary_resource_name: 'fmt.Sprintf("organizations/tf-test%s", context["random_suffix"]), fmt.Sprintf("tf-test%s", context["random_suffix"])'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+      # Resource creation race
+    skip_vcr: true
+    external_providers: ["time"]
 parameters:
   - name: 'orgId'
     type: String
@@ -213,3 +223,25 @@ properties:
               type: String
               description: |
                 The property value.
+  - name: 'clientIpResolutionConfig'
+    type: NestedObject
+    description: |
+      The algorithm to resolve IP. This will affect Analytics, API Security, and other features that use the client ip. To remove a client ip resolution config, update the field to an empty value. Example: '{ "clientIpResolutionConfig" = {} }' For more information, see: https://cloud.google.com/apigee/docs/api-platform/system-administration/client-ip-resolution
+    properties:
+      - name: 'headerIndexAlgorithm'
+        type: NestedObject
+        description: |
+          Resolves the client ip based on a custom header.
+        exactly_one_of:
+          - client_ip_resolution_config.0.header_index_algorithm
+        properties:
+          - name: ipHeaderName
+            type: String
+            description: |
+              The name of the header to extract the client ip from. We are currently only supporting the X-Forwarded-For header.
+            required: true
+          - name: ipHeaderIndex
+            type: Integer
+            description: |
+              The index of the ip in the header. Positive indices 0, 1, 2, 3 chooses indices from the left (first ips). Negative indices -1, -2, -3 chooses indices from the right (last ips).
+            required: true
