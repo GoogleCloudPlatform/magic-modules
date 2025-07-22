@@ -2066,6 +2066,20 @@ func (r Resource) ReadPropertiesForTgc() []*Type {
 	})
 }
 
+// OutputFieldSetStr returns a Go-syntax string representation of a set
+// containing all the output properties for a resource.
+// The property names are converted to snake_case.
+// This is useful for generating code that requires a map literal of field names.
+func (r Resource) OutputFieldSetStr() string {
+	fieldNames := make(map[string]struct{})
+	for _, tp := range r.AllUserProperties() {
+		if tp.Output {
+			fieldNames[google.Underscore(tp.Name)] = struct{}{}
+		}
+	}
+	return fmt.Sprintf("%#v", fieldNames)
+}
+
 // For example, the CAI resource type with product of "google_compute_autoscaler" is "ComputeAutoscalerAssetType".
 // The CAI resource type with product of "google_compute_region_autoscaler" is also "ComputeAutoscalerAssetType".
 func (r Resource) CaiResourceType() string {
