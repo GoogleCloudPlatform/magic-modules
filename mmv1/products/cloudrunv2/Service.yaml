@@ -172,6 +172,14 @@ examples:
       'zip_path': '"./test-fixtures/function-source.zip"'
     ignore_read_extra:
       - 'deletion_protection'
+  - name: 'cloudrunv2_service_invokeriam'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-srv%s", context["random_suffix"])'
+    min_version: 'beta'
+    vars:
+      cloud_run_service_name: 'cloudrun-service'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'cloudrunv2_service_iap'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-iap-service%s", context["random_suffix"])'
