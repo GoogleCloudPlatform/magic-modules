@@ -1380,7 +1380,7 @@ resource "google_cloud_run_v2_service" "default" {
   annotations = {
     generated-by = "magic-modules"
   }
-  multi_region_settings = {
+  multi_region_settings {
     regions = [
       "us-central1",
       "us-east1",
