@@ -6949,9 +6949,6 @@ resource "google_container_cluster" "primary" {
     gcp_filestore_csi_driver_config {
       enabled = true
     }
-    cloudrun_config {
-      disabled = true
-    }
     dns_cache_config {
       enabled = true
     }
@@ -6992,46 +6989,6 @@ resource "google_container_cluster" "primary" {
     }
 {{- end }}
 	}
-  network    = "%s"
-  subnetwork = "%s"
-
-  deletion_protection = false
-}
-`, projectID, clusterName, networkName, subnetworkName)
-}
-
-func testAccContainerCluster_withInternalLoadBalancer(projectID string, clusterName, networkName, subnetworkName string) string {
-	return fmt.Sprintf(`
-data "google_project" "project" {
-  project_id = "%s"
-}
-
-resource "google_container_cluster" "primary" {
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 1
-
-  min_master_version = "latest"
-
-  workload_identity_config {
-    workload_pool = "${data.google_project.project.project_id}.svc.id.goog"
-  }
-
-  addons_config {
-    http_load_balancing {
-      disabled = false
-    }
-    horizontal_pod_autoscaling {
-      disabled = false
-    }
-    network_policy_config {
-      disabled = false
-    }
-    cloudrun_config {
-      disabled           = false
-      load_balancer_type = "LOAD_BALANCER_TYPE_INTERNAL"
-    }
-  }
   network    = "%s"
   subnetwork = "%s"
 
