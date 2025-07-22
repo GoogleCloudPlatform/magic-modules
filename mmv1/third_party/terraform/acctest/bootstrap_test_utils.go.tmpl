@@ -2353,7 +2353,7 @@ func AddBigQueryDatasetReplica(projectID string,datasetID string,primaryLocation
 
 	status, err := job.Wait(ctx)
 	if err != nil {
-		log.Printf("failed to wait for BigQuery job completion: %w", err)
+		log.Printf("failed to wait for BigQuery job completion: %v", err)
 	}
 
 	if status.Err() != nil {
