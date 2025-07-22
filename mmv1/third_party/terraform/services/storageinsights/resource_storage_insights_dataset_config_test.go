@@ -243,7 +243,6 @@ func testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_ful
 resource "google_storage_insights_dataset_config" "config" {
     location = "us-central1"
     dataset_config_id = "tf_test_my_config%{random_suffix}"
-    organization_number = 12345
     retention_period_days = 1
     source_projects {
         project_numbers = ["123", "456", "789"]
@@ -260,7 +259,6 @@ func testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_ful
 resource "google_storage_insights_dataset_config" "config" {
     location = "us-central1"
     dataset_config_id = "tf_test_my_config%{random_suffix}"
-    organization_number = 12345
     retention_period_days = 1
     source_folders {
         folder_numbers = ["123", "456", "789"]
@@ -277,7 +275,6 @@ func testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_ful
 resource "google_storage_insights_dataset_config" "config" {
     location = "us-central1"
     dataset_config_id = "tf_test_my_config%{random_suffix}"
-    organization_number = 12345
     retention_period_days = 1
     organization_scope = true
     identity {
@@ -292,7 +289,6 @@ func testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 resource "google_storage_insights_dataset_config" "config" {
     location = "us-central1"
     dataset_config_id = "tf_test_my_config%{random_suffix}"
-    organization_number = 12345
     retention_period_days = 2
     source_projects {
 		project_numbers = ["123", "456"]
@@ -311,7 +307,6 @@ func testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 resource "google_storage_insights_dataset_config" "config" {
     location = "us-central1"
     dataset_config_id = "tf_test_my_config%{random_suffix}"
-    organization_number = 12345
     retention_period_days = 2
     source_folders {
 		folder_numbers = ["123", "456"]
@@ -341,7 +336,6 @@ func testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 resource "google_storage_insights_dataset_config" "config" {
     location = "us-central1"
     dataset_config_id = "tf_test_my_config%{random_suffix}"
-    organization_number = 12345
     retention_period_days = 2
     organization_scope = true
     identity {

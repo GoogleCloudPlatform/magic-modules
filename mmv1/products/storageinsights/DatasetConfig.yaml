@@ -106,7 +106,8 @@ properties:
     description: |
       Organization resource ID that the source projects should belong to.
       Projects that do not belong to the provided organization are not considered when creating the dataset.
-    required: true
+    default_from_api: true
+    immutable: true
   - name: 'includeNewlyCreatedBuckets'
     type: Boolean
     description: |

@@ -8,10 +8,6 @@ if d.HasChange("retention_period_days") {
 	updateMask = append(updateMask, "retentionPeriodDays")
 }
 
-if d.HasChange("organization_number") {
-	updateMask = append(updateMask, "organizationNumber")
-}
-
 if d.HasChange("description") {
 	updateMask = append(updateMask, "description")
 }
@@ -50,13 +46,6 @@ if d.HasChange("organization_scope") {
 	_, new_organization_scope := d.GetChange("organization_scope")
     if new_organization_scope == true {
         updateMask = append(updateMask, "organizationScope")
-
-        organizationNumberProp, err := expandStorageInsightsDatasetConfigOrganizationNumber(d.Get("organization_number"), d, config)
-	    if err != nil {
-		    return err
-	    } else if v, ok := d.GetOkExists("organization_number"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, organizationNumberProp)) {
-		    obj["organizationNumber"] = organizationNumberProp
-	    }
     }
 }
 
