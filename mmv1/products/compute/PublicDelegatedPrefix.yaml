@@ -69,17 +69,6 @@ examples:
     # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
     # resource_compute_public_advertised_prefix_test.go
     exclude_test: true
-  # - name: "compute_public_delegated_prefix_with_sub_prefix"
-  #   primary_resource_id: 'prefixes'
-  #   vars:
-  #     prefixes_name: 'prefix-with-sub-prefixes'
-  #     sub_prefix_name_1: 'sub-prefix-1'
-  #     project: 'tf-static-byoip'
-  #     parent_pdp_id: 'projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp'
-  #   test_vars_overrides:
-  #     project: '"tf-static-byoip"'
-  #     parent_pdp_id: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
-  #   exclude_test: true
 parameters:
 properties:
   - name: 'region'
@@ -134,7 +123,6 @@ properties:
     required: true
   - name: 'publicDelegatedSubPrefixs'
     type: Array
-    output: true
     description: |
       List of sub public delegated fixes for BYO IP functionality.
       Each item in this array represents a sub prefix that can be
@@ -174,7 +162,7 @@ properties:
         - name: 'isAddress'
           type: Boolean
           description: |
-            Whether the sub prefix is delegated for address creation. 
+            Whether the sub prefix is delegated for address creation.
         - name: 'mode'
           type: Enum
           description: |
@@ -192,4 +180,3 @@ properties:
           required: true
           description: |
             Name of the project scoping this PublicDelegatedSubPrefix.
-        
