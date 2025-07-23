@@ -29,7 +29,6 @@ import (
 	// "github.com/golang/glog"
 )
 
-
 type Steps struct {
 	Config string `yaml:"config,omitempty"`
 

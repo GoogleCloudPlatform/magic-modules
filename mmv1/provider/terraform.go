@@ -165,8 +165,6 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 		return
 	}
 
-
-
 	productName := t.Product.ApiName
 	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
@@ -181,7 +179,7 @@ func (t *Terraform) GenerateResourceTests(object api.Resource, templateData Temp
 		targetNewFilePath := path.Join(targetFolder, fmt.Sprintf("resource_%s_generated_test.go", t.ResourceGoFilename(object)))
 		templateData.GenerateNewTestFile(targetNewFilePath, object)
 	}
-	
+
 }
 
 func (t *Terraform) GenerateResourceSweeper(object api.Resource, templateData TemplateData, outputFolder string) {

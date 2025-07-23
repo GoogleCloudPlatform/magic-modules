@@ -206,7 +206,6 @@ type Resource struct {
 	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
 
 	TestCustomCode string `yaml:"test_custom_code,omitempty"`
-	
 
 	Docs resource.Docs `yaml:"docs,omitempty"`
 
@@ -1820,7 +1819,6 @@ func (r Resource) TestSamples() []resource.Samples {
 	})
 }
 
-
 func (r Resource) TestSteps() []resource.Steps {
 
 	res := make(map[string]resource.Steps)
@@ -1837,7 +1835,6 @@ func (r Resource) TestSteps() []resource.Steps {
 	for _, val := range res {
 		ret = append(ret, val)
 	}
-
 
 	return ret
 }
