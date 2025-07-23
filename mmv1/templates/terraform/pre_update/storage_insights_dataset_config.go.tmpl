@@ -13,19 +13,31 @@ if d.HasChange("description") {
 }
 
 if d.HasChange("include_cloud_storage_locations") {
-	updateMask = append(updateMask, "includeCloudStorageLocations")
+	_, new_storage_locations := d.GetChange("include_cloud_storage_locations")
+	if new_locations, ok := new_storage_locations.([]interface{}); ok && len(new_locations) > 0 {
+        updateMask = append(updateMask, "includeCloudStorageLocations")
+    }
 }
 
 if d.HasChange("exclude_cloud_storage_locations") {
-	updateMask = append(updateMask, "excludeCloudStorageLocations")
+	_, new_storage_locations := d.GetChange("exclude_cloud_storage_locations")
+	if new_locations, ok := new_storage_locations.([]interface{}); ok && len(new_locations) > 0 {
+        updateMask = append(updateMask, "excludeCloudStorageLocations")
+    }
 }
 
 if d.HasChange("include_cloud_storage_buckets") {
-	updateMask = append(updateMask, "includeCloudStorageBuckets")
+	_, new_storage_buckets := d.GetChange("include_cloud_storage_buckets")
+	if new_buckets, ok := new_storage_buckets.([]interface{}); ok && len(new_buckets) > 0 {
+        updateMask = append(updateMask, "includeCloudStorageBuckets")
+    }
 }
 
 if d.HasChange("exclude_cloud_storage_buckets") {
-	updateMask = append(updateMask, "excludeCloudStorageBuckets")
+	_, new_storage_buckets := d.GetChange("exclude_cloud_storage_buckets")
+	if new_buckets, ok := new_storage_buckets.([]interface{}); ok && len(new_buckets) > 0 {
+        updateMask = append(updateMask, "excludeCloudStorageBuckets")
+    }
 }
 
 if d.HasChange("source_projects") {

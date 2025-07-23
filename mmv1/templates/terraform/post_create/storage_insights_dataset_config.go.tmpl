@@ -1,5 +1,4 @@
-_, ok := d.GetOkExists("link_dataset")
-if ok && d.Get("link_dataset") == true {
+if d.Get("link_dataset") == true {
 
     linkUrl := strings.Replace(url, "?datasetConfigId=", "/", 1) + ":linkDataset"
 
