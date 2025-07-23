@@ -182,6 +182,7 @@ properties:
   - name: 'backupRetentionInheritance'
     type: Enum
     immutable: true
+    default_from_api: true
     description: |
         How a backup's enforced retention end time is inherited. Default value is `INHERIT_VAULT_RETENTION` if not provided during creation.
     enum_values:
