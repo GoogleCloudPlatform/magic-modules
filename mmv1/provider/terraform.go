@@ -107,7 +107,7 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 			// log.Printf("Generating %s tests", object.Name)
 			t.GenerateResourceTests(object, *templateData, outputFolder)
 			t.GenerateResourceSweeper(object, *templateData, outputFolder)
-			//t.GenerateSingularDataSource(object, *templateData, outputFolder)
+			t.GenerateSingularDataSource(object, *templateData, outputFolder)
 			// log.Printf("Generating %s metadata", object.Name)
 			t.GenerateResourceMetadata(object, *templateData, outputFolder)
 		}
@@ -200,7 +200,7 @@ func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
 	// todo - individual name structure
-	targetFilePath := path.Join(targetFolder, "data_source.go")
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s_generated.go", t.ResourceGoFilename(object)))
 	templateData.GenerateDataSourceFile(targetFilePath, object)
 }
 

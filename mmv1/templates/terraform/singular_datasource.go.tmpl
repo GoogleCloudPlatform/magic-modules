@@ -16,6 +16,43 @@
 // SPDX-License-Identifier: MPL-2.0
 
 {{$.CodeHeader TemplatePath}}
+package {{ lower $.ProductMetadata.Name }}
 
+import (
 
-;
+    "fmt"
+    "log"
+    "net/http"
+    "reflect"
+{{- if $.SupportsIndirectUserProjectOverride }}
+    "regexp"
+{{- end }}
+{{- if or (and (not $.Immutable) ($.UpdateMask)) $.LegacyLongFormProject }}
+    "strings"
+{{- end }}
+    "time"
+
+{{/*     # We list all the v2 imports here, because we run 'goimports' to guess the correct */}}
+{{/*     # set of imports, which will never guess the major version correctly. */}}
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+    "github.com/hashicorp/go-cty/cty"
+
+    "{{ $.ImportPath }}/tpgresource"
+    transport_tpg "{{ $.ImportPath }}/transport"
+    "{{ $.ImportPath }}/verify"
+
+{{ if $.FlattenedProperties }}
+    "google.golang.org/api/googleapi"
+{{- end}}
+)
+
+func DataSourceGoogleCloud{{ $.ResourceName -}}() *schema.Resource {
+  return nil
+}
