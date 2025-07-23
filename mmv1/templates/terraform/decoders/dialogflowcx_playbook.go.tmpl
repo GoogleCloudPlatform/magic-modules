@@ -1,75 +1,79 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // Modify response for the following fields that are ignore_read (i.e. removed in the response): //
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+displayName, ok := res["displayName"].(string)
+if !ok { return nil, fmt.Errorf("'displayName' is not a string") }
 
-//   - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
-//   - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
-setHandlers2EventHandlerFulfillmentAdvancedSettings0 := func(data map[string]interface{}) {
-	// --- Traverse to the parent map ---
-	handlers, ok := data["handlers"].([]interface{})
-	if !ok { return }
+if displayName == "Playbook Example with Fulfillment" {
+	//   - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
+	//   - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
+	setHandlers2EventHandlerFulfillmentAdvancedSettings := func(data map[string]interface{}) error {
+		// --- Traverse to the parent map ---
+		handlers, ok := data["handlers"].([]interface{})
+		if !ok { return fmt.Errorf("'handlers' is not a slice") }
 
-	if len(handlers) <= 2 { return }
-	handler, ok := handlers[2].(map[string]interface{})
-	if !ok { return }
+		if len(handlers) <= 2 { return fmt.Errorf("index 2 out of bounds for 'handlers'") }
+		handler, ok := handlers[2].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'handlers[2]' is not a map") }
 
-	eventHandler, ok := handler["event_handler"].(map[string]interface{})
-	if !ok { return }
+		eventHandler, ok := handler["event_handler"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'event_handler' is not a map") }
 
-	fulfillment, ok := eventHandler["fulfillment"].(map[string]interface{})
-	if !ok { return }
+		fulfillment, ok := eventHandler["fulfillment"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'fulfillment' is not a map") }
 
-	advancedSettings, ok := fulfillment["advanced_settings"].([]interface{})
-	if !ok { return }
-    
-	if len(advancedSettings) == 0 { return }
-    // Get the final parent map that holds our target key.
-	settingsMap, ok := advancedSettings[0].(map[string]interface{})
-	if !ok { return }
+		advancedSettings, ok := fulfillment["advanced_settings"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'advanced_settings' is not a map") }
 
-	// --- Update the value in the parent map ---
-	settingsMap["audio_export_gcs_destination"] = map[string]interface{}{"uri": "gs://tf-test-dialogflowcx-bucketuldirhyyor/prefix-"}
-	settingsMap["loggingSettings"] = map[string]interface{}{
-		"enableConsentBasedRedaction": true,
-		"enableInteractionLogging": true,
-		"enableStackdriverLogging": true,
+		// --- Update the value in the parent map ---
+		advancedSettings["audio_export_gcs_destination"] = map[string]interface{}{"uri": "gs://tf-test-dialogflowcx-bucketuldirhyyor/prefix-"}
+		advancedSettings["loggingSettings"] = map[string]interface{}{
+			"enableConsentBasedRedaction": true,
+			"enableInteractionLogging": true,
+			"enableStackdriverLogging": true,
+		}
+
+		return nil
 	}
-}
-setHandlers2EventHandlerFulfillmentAdvancedSettings0(res)
-
-//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
-//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
-setHandlers6LifecycleHandlerFulfillmentAdvancedSettings0 := func(data map[string]interface{}) {
-	// --- Traverse to the parent map ---
-	handlers, ok := data["handlers"].([]interface{})
-	if !ok { return }
-
-	if len(handlers) <= 6 { return }
-	handler, ok := handlers[6].(map[string]interface{})
-	if !ok { return }
-
-	eventHandler, ok := handler["lifecycle_handler"].(map[string]interface{})
-	if !ok { return }
-
-	fulfillment, ok := eventHandler["fulfillment"].(map[string]interface{})
-	if !ok { return }
-
-	advancedSettings, ok := fulfillment["advanced_settings"].([]interface{})
-	if !ok { return }
-    
-	if len(advancedSettings) == 0 { return }
-    // Get the final parent map that holds our target key.
-	settingsMap, ok := advancedSettings[0].(map[string]interface{})
-	if !ok { return }
-
-	// --- Update the value in the parent map ---
-	settingsMap["audio_export_gcs_destination"] = map[string]interface{}{"uri": "gs://tf-test-dialogflowcx-bucketuldirhyyor/prefix-"}
-	settingsMap["loggingSettings"] = map[string]interface{}{
-		"enableConsentBasedRedaction": true,
-		"enableInteractionLogging": true,
-		"enableStackdriverLogging": true,
+	if err := setHandlers2EventHandlerFulfillmentAdvancedSettings(res); err != nil {
+		return nil, err
 	}
+
+	//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
+	//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
+	setHandlers6LifecycleHandlerFulfillmentAdvancedSettings := func(data map[string]interface{}) error {
+		// --- Traverse to the parent map ---
+		handlers, ok := data["handlers"].([]interface{})
+		if !ok { return fmt.Errorf("'handlers' is not a slice") }
+
+		if len(handlers) <= 6 { return fmt.Errorf("index 6 out of bounds for 'handlers'") }
+		handler, ok := handlers[6].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'handlers[6]' is not a map") }
+
+		eventHandler, ok := handler["lifecycle_handler"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'lifecycle_handler' is not a map") }
+
+		fulfillment, ok := eventHandler["fulfillment"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'fulfillment' is not a map") }
+
+		advancedSettings, ok := fulfillment["advanced_settings"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'advanced_settings' is not a map") }
+
+		// --- Update the value in the parent map ---
+		advancedSettings["audio_export_gcs_destination"] = map[string]interface{}{"uri": "gs://tf-test-dialogflowcx-bucketuldirhyyor/prefix-"}
+		advancedSettings["loggingSettings"] = map[string]interface{}{
+			"enableConsentBasedRedaction": true,
+			"enableInteractionLogging": true,
+			"enableStackdriverLogging": true,
+		}
+
+		return nil
+	}
+	if err := setHandlers6LifecycleHandlerFulfillmentAdvancedSettings(res); err != nil {
+		return nil, err
+	}
+
+	log.Printf("[DEBUG] Finished decoding Playbook %q: %#v", d.Id(), res)
 }
-setHandlers6LifecycleHandlerFulfillmentAdvancedSettings0(res)
 
 return res, nil

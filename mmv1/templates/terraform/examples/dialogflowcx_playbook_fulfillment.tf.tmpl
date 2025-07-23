@@ -28,7 +28,7 @@ resource "google_dialogflow_cx_tool" "my_tool" {
 
 resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
   parent       = google_dialogflow_cx_agent.agent.id
-  display_name = "Example Display Name"
+  display_name = "Playbook Example with Fulfillment"
   goal         = "Example Goal"
   instruction {
     guidelines = "Example Guidelines"
