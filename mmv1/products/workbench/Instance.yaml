@@ -625,4 +625,3 @@ properties:
     type: Boolean
     description: |
       Flag to enable managed end user credentials for the instance.
-    min_version: beta
