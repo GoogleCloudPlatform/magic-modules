@@ -149,7 +149,7 @@ properties:
           Name of the identity.
       - name: 'type'
         type: Enum
-        default_value: 'IDENTITY_TYPE_PER_CONFIG'
+        required: true
         description: |
           Type of identity to use for the DatasetConfig.
         enum_values:
