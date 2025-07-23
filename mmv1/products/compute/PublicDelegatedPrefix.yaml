@@ -69,11 +69,17 @@ examples:
     # PAPs have very low quota limits and a shared testing range so serialized tests exist in:
     # resource_compute_public_advertised_prefix_test.go
     exclude_test: true
-  # - name: 'compute_public_delegated_sub_prefix'
+  # - name: "compute_public_delegated_prefix_with_sub_prefix"
   #   primary_resource_id: 'prefixes'
   #   vars:
   #     prefixes_name: 'prefix-with-sub-prefixes'
   #     sub_prefix_name_1: 'sub-prefix-1'
+  #     project: 'tf-static-byoip'
+  #     parent_pdp_id: 'projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp'
+  #   test_vars_overrides:
+  #     project: '"tf-static-byoip"'
+  #     parent_pdp_id: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
+  #   exclude_test: true
 parameters:
 properties:
   - name: 'region'
@@ -138,12 +144,11 @@ properties:
       properties:
         - name: 'name'
           type: String
-          output: true
+          required: true
           description: |
             The name of the sub public delgated prefix.
         - name: 'description'
           type: String
-          output: true
           description: |
             Optional description of this sub public delgated prefix.
         - name: 'region'
@@ -163,17 +168,15 @@ properties:
             - 'DELETING'
         - name: 'ipCidrRange'
           type: String
-          output: true
+          required: true
           description: |
             The IP address range in the CIDR format represented by this sub prefix.
         - name: 'isAddress'
           type: Boolean
-          output: true
           description: |
-            Whether the sub prefix is delegated for address creation.
+            Whether the sub prefix is delegated for address creation. 
         - name: 'mode'
           type: Enum
-          output: true
           description: |
             The PublicDelegatedSubPrefix mode for IPv6 only.
           enum_values:
@@ -182,11 +185,11 @@ properties:
             - 'EXTERNAL_IPV6_SUBNETWORK_CREATION'
         - name: 'allocatablePrefixLength'
           type: Integer
-          output: true
           description: |
             The allocatable prefix length supported by this PublicDelegatedSubPrefix.
         - name: 'delegatee_project'
           type: String
-          output: true
+          required: true
           description: |
             Name of the project scoping this PublicDelegatedSubPrefix.
+        
