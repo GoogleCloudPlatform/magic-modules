@@ -74,9 +74,6 @@ parameters:
     immutable: true
     url_param_only: true
 properties:
-  - name: description
-    type: String
-    description: Optional. Description of the ApiHub instance.
   - name: name
     type: String
     description: |-
