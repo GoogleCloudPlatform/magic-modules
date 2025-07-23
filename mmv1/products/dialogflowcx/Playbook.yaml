@@ -34,6 +34,7 @@ custom_code:
   pre_update: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   pre_delete: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   custom_import: 'templates/terraform/custom_import/dialogflowcx_playbook.go.tmpl'
+  decoder: 'templates/terraform/decoder/dialogflowcx_playbook.go.tmpl'
 
 examples:
   - name: "dialogflowcx_playbook_basic"
@@ -163,7 +164,6 @@ properties:
           The custom prompt to use.
   - name: 'handlers'
     type: Array
-    custom_flatten: 'templates/terraform/custom_flatten/dialogflowcx_playbook_handlers.go.tmpl'
     description: |
       A list of registered handlers to execute based on the specified triggers.
     item_type:
@@ -806,9 +806,6 @@ properties:
                   properties:
                     - name: audioExportGcsDestination
                       type: NestedObject
-                      # This ignore_read field is for annotation only as a custom flatten is used in the parent handlers.
-                      # custom_flatten: 'templates/terraform/custom_flatten/dialogflowcx_playbook_handlers.go.tmpl'
-                      ignore_read: true
                       description: |-
                         Google Cloud Storage location for a Dialogflow operation that writes or
                         exports objects (e.g. exported agent or transcripts) outside of Dialogflow.
@@ -875,9 +872,6 @@ properties:
                     - name: loggingSettings
                       type: NestedObject
                       description: Define behaviors on logging.
-                      # This ignore_read field is for annotation only as a custom flatten is used in the parent handlers.
-                      # custom_flatten: 'templates/terraform/custom_flatten/dialogflowcx_playbook_handlers.go.tmpl'
-                      ignore_read: true
                       properties:
                         - name: enableInteractionLogging
                           type: Boolean
@@ -1567,9 +1561,6 @@ properties:
                   properties:
                     - name: audioExportGcsDestination
                       type: NestedObject
-                      # This ignore_read field is for annotation only as a custom flatten is used in the parent handlers.
-                      # custom_flatten: 'templates/terraform/custom_flatten/dialogflowcx_playbook_handlers.go.tmpl'
-                      ignore_read: true
                       description: |-
                         Google Cloud Storage location for a Dialogflow operation that writes or
                         exports objects (e.g. exported agent or transcripts) outside of Dialogflow.
@@ -1635,9 +1626,6 @@ properties:
                           description: Endpoint timeout setting for matching dtmf input to regex.
                     - name: loggingSettings
                       type: NestedObject
-                      # This ignore_read field is for annotation only as a custom flatten is used in the parent handlers.
-                      # custom_flatten: 'templates/terraform/custom_flatten/dialogflowcx_playbook_handlers.go.tmpl'
-                      ignore_read: true
                       description: Define behaviors on logging.
                       properties:
                         - name: enableInteractionLogging
