@@ -34,7 +34,7 @@ custom_code:
   pre_update: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   pre_delete: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   custom_import: 'templates/terraform/custom_import/dialogflowcx_playbook.go.tmpl'
-  decoder: 'templates/terraform/decoder/dialogflowcx_playbook.go.tmpl'
+  decoder: 'templates/terraform/decoders/dialogflowcx_playbook.go.tmpl'
 
 examples:
   - name: "dialogflowcx_playbook_basic"
