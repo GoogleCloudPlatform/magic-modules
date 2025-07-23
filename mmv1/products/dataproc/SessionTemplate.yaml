@@ -165,6 +165,14 @@ properties:
             type: String
             description: |
               The Cloud KMS key to use for encryption.
+          - name: 'idleTtl'
+            type: String
+            description: |
+              The duration to keep the session alive while it's idling.
+              Exceeding this threshold causes the session to terminate. Minimum value is 10 minutes; maximum value is 14 day.
+              Defaults to 1 hour if not set. If both ttl and idleTtl are specified for an interactive session, the conditions
+              are treated as OR conditions: the workload will be terminated when it has been idle for idleTtl or when ttl has
+              been exceeded, whichever occurs first.
           - name: 'ttl'
             type: String
             description: |
