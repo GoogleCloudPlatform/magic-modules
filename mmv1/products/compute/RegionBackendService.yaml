@@ -144,6 +144,13 @@ examples:
     min_version: 'beta'
     vars:
       region_backend_service_name: 'region-service'
+  - name: 'region_backend_lb_neg_backend'
+    primary_resource_id: 'default'
+    min_version: 'beta'
+    vars:
+      environment: 'dev'
+      region_backend_service_name: 'region-service'
+      project_id: 'my-project'
 parameters:
   - name: 'region'
     type: ResourceRef
