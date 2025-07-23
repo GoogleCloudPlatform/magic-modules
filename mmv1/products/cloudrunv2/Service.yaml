@@ -50,6 +50,42 @@ iam_policy:
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/cloudrunv2_service_deletion_policy.go.tmpl'
 taint_resource_on_failed_create: true
+test_custom_code: 'templates/terraform/test_custom/cloudrunv2_service.go.tmpl'
+samples:
+  - name: cloudrunv2_service_basic_test1
+    primary_resource_id: 'default'
+    steps:
+      - config: 'cloudrunv2_service_basic'
+        
+        # primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
+        vars:
+          cloud_run_service_name: 'cloudrun-service'
+        # ignore_read_extra:
+        #   - 'deletion_protection'
+      - config: 'cloudrunv2_service_update'
+        
+        # primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
+        vars:
+          cloud_run_service_name: 'cloudrun-service'
+        # ignore_read_extra:
+        #   - 'deletion_protection'
+  - name: cloudrunv2_service_basic_test2
+    primary_resource_id: 'default'
+    steps:
+      - config: 'cloudrunv2_service_update'
+        
+        # primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
+        vars:
+          cloud_run_service_name: 'cloudrun-service'
+        # ignore_read_extra:
+        #   - 'deletion_protection'
+      - config: 'cloudrunv2_service_update'
+        
+        # primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
+        vars:
+          cloud_run_service_name: 'cloudrun-service'
+        # ignore_read_extra:
+        #   - 'deletion_protection'
 examples:
   - name: 'cloudrunv2_service_basic'
     primary_resource_id: 'default'
