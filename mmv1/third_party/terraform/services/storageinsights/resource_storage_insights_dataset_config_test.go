@@ -171,7 +171,8 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"org_id":        envvar.GetTestOrgTargetFromEnv(t),
+		"org_id":        envvar.GetTestOrgFromEnv(t),
+		"project_id": envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -217,6 +218,7 @@ resource "google_storage_insights_dataset_config" "config" {
     }
 	link_dataset = true
 	organization_number = "%{org_id}"
+	project = "%{project_id}"
 }
 `, context)
 }
@@ -232,6 +234,7 @@ resource "google_storage_insights_dataset_config" "config" {
         type = "IDENTITY_TYPE_PER_CONFIG"
     }
 	link_dataset = false
+	project = "%{project_id}"
 }
 `, context)
 }
