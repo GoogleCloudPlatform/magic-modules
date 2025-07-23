@@ -56,14 +56,12 @@ samples:
     primary_resource_id: 'default'
     steps:
       - config: 'cloudrunv2_service_basic'
-        
         # primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
         vars:
           cloud_run_service_name: 'cloudrun-service'
         # ignore_read_extra:
         #   - 'deletion_protection'
       - config: 'cloudrunv2_service_update'
-        
         # primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
         vars:
           cloud_run_service_name: 'cloudrun-service'
@@ -73,14 +71,12 @@ samples:
     primary_resource_id: 'default'
     steps:
       - config: 'cloudrunv2_service_update'
-        
         # primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
         vars:
           cloud_run_service_name: 'cloudrun-service'
         # ignore_read_extra:
         #   - 'deletion_protection'
       - config: 'cloudrunv2_service_update'
-        
         # primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-service%s", context["random_suffix"])'
         vars:
           cloud_run_service_name: 'cloudrun-service'
