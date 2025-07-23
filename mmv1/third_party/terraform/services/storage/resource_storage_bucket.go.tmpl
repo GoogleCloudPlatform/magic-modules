@@ -27,11 +27,21 @@ import (
 	"google.golang.org/api/storage/v1"
 )
 
-func corsValidation(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+func corsValidationCustomDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	return ValidateCors(d)
+}
+
+func ValidateCors(d tpgresource.TerraformResourceDiff) error {
+	_, newCount := d.GetChange("cors.#")
+	if newCount == 0 {
+		return nil
+	}
+
 	cors, corsOk := d.GetOk("cors")
 	if corsOk && len(cors.([]interface{})) == 0 {
 		return fmt.Errorf("cors cannot be empty")
 	}
+
 	for _, corsRule := range cors.([]interface{}) {
 		if corsRule == nil {
 			return fmt.Errorf("cors cannot be empty")
@@ -68,7 +78,7 @@ func ResourceStorageBucket() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			customdiff.ForceNewIfChange("retention_policy.0.is_locked", isPolicyLocked),
 			tpgresource.SetLabelsDiff,
-			corsValidation,
+			corsValidationCustomDiff,
 		),
 
 		Timeouts: &schema.ResourceTimeout{

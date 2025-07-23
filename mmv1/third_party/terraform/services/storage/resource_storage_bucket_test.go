@@ -8,12 +8,16 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/storage"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/storage/v1"
@@ -2958,4 +2962,168 @@ resource "google_storage_bucket" "bucket" {
   force_destroy = true
 }
 `, bucketName)
+}
+
+type Cors struct {
+	method            []interface{}
+	origin            []interface{}
+	responseHeader    []interface{}
+	maxAgeSeconds     int
+	sendMaxAgeSeconds bool
+}
+
+func TestCorsValidationCustomDiff(t *testing.T) {
+	t.Parallel()
+
+	d := &tpgresource.ResourceDiffMock{
+		Before: map[string]interface{}{
+			"cors.#": 0,
+		},
+		After: map[string]interface{}{
+			"cors.#": 1,
+			"cors":   []interface{}{nil},
+		},
+	}
+
+	err := storage.ValidateCors(d)
+	assert.Error(t, err)
+
+	corsBefore := Cors{
+		method:            []interface{}{},
+		origin:            []interface{}{},
+		responseHeader:    []interface{}{},
+		maxAgeSeconds:     0,
+		sendMaxAgeSeconds: false,
+	}
+	cases := map[string]struct {
+		ExpectError bool
+		Before      Cors
+		After       Cors
+	}{
+		"EmptyCors": {
+			Before:      corsBefore,
+			After:       Cors{},
+			ExpectError: true,
+		},
+		"SendMaxAgeSecondsTrue": {
+			Before: corsBefore,
+			After: Cors{
+				maxAgeSeconds:     0,
+				sendMaxAgeSeconds: true,
+				method:            []interface{}{},
+				origin:            []interface{}{},
+				responseHeader:    []interface{}{},
+			},
+			ExpectError: false,
+		},
+		"EmptyMethod": {
+			Before: corsBefore,
+			After: Cors{
+				maxAgeSeconds:     0,
+				sendMaxAgeSeconds: false,
+				method:            []interface{}{},
+				origin:            []interface{}{"*"},
+				responseHeader:    []interface{}{"x-google-header"},
+			},
+			ExpectError: false,
+		},
+		"AllEmptyAttributes": {
+			Before: corsBefore,
+			After: Cors{
+				maxAgeSeconds:     0,
+				sendMaxAgeSeconds: false,
+				method:            []interface{}{},
+				origin:            []interface{}{},
+				responseHeader:    []interface{}{},
+			},
+			ExpectError: true,
+		},
+	}
+
+	for _, tc := range cases {
+		d := &tpgresource.ResourceDiffMock{
+			Before: map[string]interface{}{
+				"cors.#": 0,
+			},
+			After: map[string]interface{}{
+				"cors.#": 1,
+				"cors": []interface{}{
+					map[string]interface{}{
+						"method":                       tc.After.method,
+						"max_age_seconds":              tc.After.maxAgeSeconds,
+						"send_max_age_seconds_if_zero": tc.After.sendMaxAgeSeconds,
+						"response_header":              tc.After.responseHeader,
+						"origin":                       tc.After.origin,
+					},
+				},
+			},
+		}
+		err := storage.ValidateCors(d)
+		if tc.ExpectError {
+			assert.Error(t, err)
+		} else {
+			assert.NoError(t, err)
+		}
+	}
+}
+
+func TestCorsValidationCustomDiff_RemoveCors(t *testing.T) {
+	cases := map[string]struct {
+		ExpectError bool
+		Before      []Cors
+		After       Cors
+	}{
+		"RemoveExistingCors": {
+			Before: []Cors{
+				{
+					maxAgeSeconds:     0,
+					sendMaxAgeSeconds: true,
+					method:            []interface{}{"*"},
+					origin:            []interface{}{},
+					responseHeader:    []interface{}{},
+				},
+				{
+					maxAgeSeconds:     0,
+					sendMaxAgeSeconds: false,
+					method:            []interface{}{"*"},
+					origin:            []interface{}{"*"},
+					responseHeader:    []interface{}{"GET"},
+				},
+			},
+			ExpectError: false,
+		},
+	}
+
+	for _, tc := range cases {
+		d := &tpgresource.ResourceDiffMock{
+			After: map[string]interface{}{
+				"cors.#": 0,
+			},
+			Before: map[string]interface{}{
+				"cors.#": 1,
+				"cors": []interface{}{
+					map[string]interface{}{
+						"method":                       tc.Before[0].method,
+						"max_age_seconds":              tc.Before[0].maxAgeSeconds,
+						"send_max_age_seconds_if_zero": tc.Before[0].sendMaxAgeSeconds,
+						"response_header":              tc.Before[0].responseHeader,
+						"origin":                       tc.Before[0].origin,
+					},
+					map[string]interface{}{
+						"method":                       tc.Before[1].method,
+						"max_age_seconds":              tc.Before[1].maxAgeSeconds,
+						"send_max_age_seconds_if_zero": tc.Before[1].sendMaxAgeSeconds,
+						"response_header":              tc.Before[1].responseHeader,
+						"origin":                       tc.Before[1].origin,
+					},
+				},
+			},
+		}
+		err := storage.ValidateCors(d)
+		if tc.ExpectError {
+			assert.Error(t, err)
+		} else {
+			assert.NoError(t, err)
+		}
+	}
 }
