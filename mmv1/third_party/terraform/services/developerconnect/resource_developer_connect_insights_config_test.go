@@ -151,7 +151,7 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 	}
 
 	# Wait delay after enabling APIs and granting permissions
-	resource "time_sleep" "wait_permissions_apis" {
+	resource "time_sleep" "wait_for_propagation" {
 	depends_on = [
 		google_project_iam_member.apphub_permissions,
 		google_project_service.apphub_api_service
