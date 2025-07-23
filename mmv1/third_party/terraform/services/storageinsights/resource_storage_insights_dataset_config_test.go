@@ -172,7 +172,7 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"org_id":        envvar.GetTestOrgFromEnv(t),
-		"project_id": envvar.GetTestProjectFromEnv(),
+		"project_id":    envvar.GetTestProjectFromEnv(),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
