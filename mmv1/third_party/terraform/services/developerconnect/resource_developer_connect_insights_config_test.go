@@ -94,7 +94,7 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 	}
 
 	# Wait delay after enabling APIs and granting permissions
-	resource "time_sleep" "wait_permissions_apis" {
+	resource "time_sleep" "wait_for_propagation" {
 	depends_on = [
 		google_project_iam_member.apphub_permissions,
 		google_project_service.apphub_api_service
@@ -109,10 +109,7 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 			type = "REGIONAL"
 		}
 		project = google_project.project.project_id
-		depends_on = [
-			google_project_service.apphub_api_service,
-			google_project_iam_member.apphub_permissions
-		]
+		depends_on = [time_sleep.wait_for_propagation]
 	}
 	
 	resource "google_developer_connect_insights_config" "my_insights_config" {
@@ -169,10 +166,7 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 			type = "REGIONAL"
 		}
 		project = google_project.project.project_id
-		depends_on = [
-			google_project_service.apphub_api_service,
-			google_project_iam_member.apphub_permissions
-		]
+		depends_on = [time_sleep.wait_for_propagation]
 	}
 	resource "google_developer_connect_insights_config" "my_insights_config" {
 		location           = "us-central1"
