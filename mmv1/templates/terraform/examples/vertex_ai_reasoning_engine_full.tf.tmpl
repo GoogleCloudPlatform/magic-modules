@@ -4,7 +4,7 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
   region       = "us-central1"
 
   spec {
-    agent_framework = "google-adk"
+    agent_framework = "langchain"
     class_methods   = []
 
     deployment_spec {
@@ -20,7 +20,7 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
       }
 
       secret_env {
-        name  = "secret_var_1"
+        name = "secret_var_1"
 
         secret_ref {
           secret  = google_secret_manager_secret.secret.secret_id
@@ -29,7 +29,7 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
       }
 
       secret_env {
-        name  = "secret_var_2"
+        name = "secret_var_2"
 
         secret_ref {
           secret  = google_secret_manager_secret.secret.secret_id
@@ -39,16 +39,22 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
     }
 
     package_spec {
-      dependency_files_gcs_uri = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_dependency_tar_gz.name}"
-      pickle_object_gcs_uri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_pkl_txt.name}"
-      python_version           = "3.10"
+      dependency_files_gcs_uri = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_dependencies_tar_gz.name}"
+      pickle_object_gcs_uri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_code_pkl.name}"
+      python_version           = "3.11"
       requirements_gcs_uri     = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_requirements_txt.name}"
     }
   }
 
   depends_on = [
-    google_secret_manager_secret_iam_member.secret_access
+    google_secret_manager_secret_iam_member.secret_access,
+    google_secret_manager_secret_version.secret_version
   ]
+}
+
+resource "google_secret_manager_secret_version" "secret_version" {
+  secret      = google_secret_manager_secret.secret.id
+  secret_data = "test"
 }
 
 resource "google_secret_manager_secret" "secret" {
@@ -78,16 +84,16 @@ resource "google_storage_bucket_object" "bucket_obj_requirements_txt" {
   source = "./test-fixtures/requirements.txt"
 }
 
-resource "google_storage_bucket_object" "bucket_obj_pkl_txt" {
-  name   = "pickled_object.pkl"
+resource "google_storage_bucket_object" "bucket_obj_code_pkl" {
+  name   = "code.pkl"
   bucket = google_storage_bucket.bucket.id
-  source = "./test-fixtures/pickled_object.pkl"
+  source = "./test-fixtures/code.pkl"
 }
 
-resource "google_storage_bucket_object" "bucket_obj_dependency_tar_gz" {
-  name   = "dependency.tar.gz"
+resource "google_storage_bucket_object" "bucket_obj_dependencies_tar_gz" {
+  name   = "dependencies.tar.gz"
   bucket = google_storage_bucket.bucket.id
-  source = "./test-fixtures/dependency.tar.gz"
+  source = "./test-fixtures/dependencies.tar.gz"
 }
 
 data "google_project" "project" {

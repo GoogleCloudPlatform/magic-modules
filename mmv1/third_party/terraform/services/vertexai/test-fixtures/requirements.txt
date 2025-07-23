@@ -1,1 +1,4 @@
-setuptools
+google-cloud-aiplatform[agent_engines,langchain]
+cloudpickle==3.0.0
+pydantic>=2.10
+requests
