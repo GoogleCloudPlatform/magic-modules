@@ -1,3 +1,5 @@
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
 package dataprocmetastore_test
 
 import (
@@ -61,6 +63,10 @@ func TestAccMetastoreFederation_tags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMetastoreFederationTags(context),
+				Check: resource.TestCheckFunc(
+					resource.TestCheckResourceAttrSet(
+						"google_dataproc_metastore_federation.default", "tags.%"),
+				),
 			},
 			{
 				ResourceName:            "google_dataproc_metastore_federation.default",
