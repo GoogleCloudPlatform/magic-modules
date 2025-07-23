@@ -205,6 +205,9 @@ type Resource struct {
 
 	CustomCode resource.CustomCode `yaml:"custom_code,omitempty"`
 
+	TestCustomCode string `yaml:"test_custom_code,omitempty"`
+	
+
 	Docs resource.Docs `yaml:"docs,omitempty"`
 
 	// This block inserts entries into the customdiff.All() block in the
@@ -219,6 +222,10 @@ type Resource struct {
 	// Examples in documentation. Backed by generated tests, and have
 	// corresponding OiCS walkthroughs.
 	Examples []resource.Examples
+
+	Samples []resource.Samples
+
+	Steps []resource.Steps
 
 	// If true, generates product operation handling logic.
 	AutogenAsync bool `yaml:"autogen_async,omitempty"`
@@ -1803,6 +1810,36 @@ func (r Resource) TestExamples() []resource.Examples {
 	}), func(e resource.Examples) bool {
 		return e.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, e.MinVersion)
 	})
+}
+
+func (r Resource) TestSamples() []resource.Samples {
+	return google.Reject(google.Reject(r.Samples, func(s resource.Samples) bool {
+		return s.ExcludeTest
+	}), func(s resource.Samples) bool {
+		return s.MinVersion != "" && slices.Index(product.ORDER, r.TargetVersionName) < slices.Index(product.ORDER, s.MinVersion)
+	})
+}
+
+
+func (r Resource) TestSteps() []resource.Steps {
+
+	res := make(map[string]resource.Steps)
+	for _, sample := range r.Samples {
+		for _, step := range sample.Steps {
+			if step.Config != "" {
+				res[step.Config] = step
+			}
+		}
+
+	}
+
+	var ret []resource.Steps
+	for _, val := range res {
+		ret = append(ret, val)
+	}
+
+
+	return ret
 }
 
 func (r Resource) VersionedProvider(exampleVersion string) bool {
