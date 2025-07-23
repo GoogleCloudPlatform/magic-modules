@@ -154,7 +154,7 @@ properties:
   - name: 'allocationOptions'
     type: NestedObject
     description: |
-      Opions for automatically allocating a free range with a size given by prefixLength.
+      Options for automatically allocating a free range with a size given by prefixLength.
     immutable: true
     properties:
       - name: 'allocationStrategy'
@@ -166,6 +166,7 @@ properties:
           - 'FIRST_SMALLEST_FITTING'
         description: |
           Optional. Sets the strategy used to automatically find a free range of a size given by prefixLength. Can be set only when trying to create a reservation that automatically finds the free range to reserve.
+        immutable: true
       - name: 'firstAvailableRangesLookupSize'
         type: Integer
         description: |
@@ -173,6 +174,7 @@ properties:
           in other words it sets the N in the RANDOM_FIRST_N_AVAILABLE.
         validation:
           function: 'validation.IntAtLeast(1)'
+        immutable: true
   - name: 'users'
     type: Array
     description: |
