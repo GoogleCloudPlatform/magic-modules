@@ -159,7 +159,7 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 		google_project_iam_member.apphub_permissions,
 		google_project_service.apphub_api_service
 	]
-	create_duration  = "130s"
+	create_duration  = "120s"
 	}
 
 	resource "google_apphub_application" "my_apphub_application" {
