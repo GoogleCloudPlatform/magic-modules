@@ -93,10 +93,13 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 		depends_on = [google_project.project]
 	}
 
-	# Wait delay after enabling APIs
-	resource "time_sleep" "wait_enable_service_api" {
-		depends_on       = [google_project_service.apphub_api_service]
-		create_duration  = "120s"
+	# Wait delay after enabling APIs and granting permissions
+	resource "time_sleep" "wait_permissions_apis" {
+	depends_on = [
+		google_project_iam_member.apphub_permissions,
+		google_project_service.apphub_api_service
+	]
+	create_duration  = "120s"
 	}
 
 	resource "google_apphub_application" "my_apphub_application" {
@@ -150,10 +153,13 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 		depends_on = [google_project.project]
 	}
 
-	# Wait delay after enabling APIs
-	resource "time_sleep" "wait_enable_service_api" {
-		depends_on       = [google_project_service.apphub_api_service]
-		create_duration  = "120s"
+	# Wait delay after enabling APIs and granting permissions
+	resource "time_sleep" "wait_permissions_apis" {
+	depends_on = [
+		google_project_iam_member.apphub_permissions,
+		google_project_service.apphub_api_service
+	]
+	create_duration  = "120s"
 	}
 
 	resource "google_apphub_application" "my_apphub_application" {
