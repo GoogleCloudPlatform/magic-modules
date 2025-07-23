@@ -1,7 +1,6 @@
 package acctest
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -143,11 +142,16 @@ func vcrFileName(name string) string {
 // Can be called when VCR is not enabled, and it will behave as normal
 func VcrTest(t *testing.T, c resource.TestCase) {
 	t.Helper()
+
 	if IsVcrEnabled() {
 		defer closeRecorder(t)
 	} else if isReleaseDiffEnabled() {
 		// creates temporary file for the individual test, will be a temporary to store the output
-		tempOutputFile := createTemporaryFile()
+		tempOutputFile, err := createTemporaryFile()
+		if err != nil {
+			fmt.Printf("Error creating temporary file %s", err)
+			t.Fail()
+		}
 		defer func() {
 			writeOutputFileDeferFunction(tempOutputFile, t.Failed())
 		}()
@@ -170,20 +174,17 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 	c.Steps = steps
 
 	resource.Test(t, c)
-
 }
 
-func createTemporaryFile() *os.File {
+func createTemporaryFile() (*os.File, error) {
 	// creates temporary file for the individual test, will be a temporary to store the output
-	var tempOutputFile *os.File
-	var err error
-	tempOutputFile, err = os.CreateTemp("", "release_diff_test_output_*.log")
+	tempOutputFile, err := os.CreateTemp("", "release_diff_test_output_*.log")
 	if err != nil {
 		fmt.Fprintf(os.Stdout, "Error creating temporary file: %v", err)
-		return nil
+		return nil, err
 	}
 
-	return tempOutputFile
+	return tempOutputFile, nil
 }
 
 // We need to explicitly close the VCR recorder to save the cassette
@@ -283,10 +284,9 @@ func InsertDiffSteps(c resource.TestCase, tempFile *os.File, releaseProvider str
 		// todo: add preconfig - categorize test failures (add flag to steps that if they fail is a diff failure)
 		if testStep.Config != "" {
 			ogConfig := testStep.Config
-			fmt.Fprintf(tempFile, "Original config: %s\n", ogConfig)
-			fmt.Fprintf(tempFile, "Reformatting config to use provider: %s\n", localProviderName)
+			fmt.Fprintf(tempFile, "[DEBUG] Original config: %s\n", ogConfig)
 			testStep.Config = ReformConfigWithProvider(ogConfig, localProviderName)
-			fmt.Fprintf(tempFile, "Reformatted config: %s\n", testStep.Config)
+			fmt.Fprintf(tempFile, "[DEBUG] Reformatted config: %s\n", testStep.Config)
 			testStep.PreConfig = func() {
 				fmt.Fprintf(tempFile, "[Diff] Step %d\n", countSteps)
 				countSteps++
@@ -294,7 +294,7 @@ func InsertDiffSteps(c resource.TestCase, tempFile *os.File, releaseProvider str
 			if testStep.ExpectError == nil && !testStep.PlanOnly {
 				newStep := resource.TestStep{
 					PreConfig: func() {
-						fmt.Fprintf(tempFile, "Step %d\n", countSteps)
+						fmt.Fprintf(tempFile, "Regular Step %d\n", countSteps)
 					},
 					Config: ReformConfigWithProvider(ogConfig, releaseProvider),
 				}
@@ -335,36 +335,39 @@ func ReformConfigWithProvider(config, provider string) string {
 // parseReleaseDiffOutput reads the temporary file created during the release diff test and returns the last line of output
 // This is useful for extracting the diff output from the file after the test has run
 
-func ParseReleaseDiffOutput(temp *os.File) (bool, string, error) {
-	var isDiff = false
-	if temp == nil {
-		return isDiff, "", errors.New("temporary file is nil")
+func ReadDiffOutput(f *os.File) (string, error) {
+	if f == nil {
+		return "", fmt.Errorf("file handle is nil")
 	}
-	_, err := temp.Seek(0, io.SeekStart)
-	if err != nil {
-		return isDiff, "", fmt.Errorf("failed to seek to beginning of temporary file: %w", err)
-	}
-	var lastLine string
-	var testOutputBuffer bytes.Buffer
-	scanner := bufio.NewScanner(temp)
 
-	for scanner.Scan() {
-		line := scanner.Text()
-		lastLine = line
-		testOutputBuffer.WriteString(line)
-		testOutputBuffer.WriteByte('\n')
+	// Seek to the beginning of the file in case it was just written to.
+	if _, err := f.Seek(0, io.SeekStart); err != nil {
+		return "", fmt.Errorf("failed to seek to beginning of file: %w", err)
 	}
-	if strings.HasPrefix(lastLine, "[Diff]") {
-		isDiff = true
+
+	// Read the entire file content.
+	content, err := os.ReadFile(f.Name())
+	if err != nil {
+		return "", fmt.Errorf("failed to read file: %w", err)
 	}
-	if err := scanner.Err(); err != nil {
-		return isDiff, "", fmt.Errorf("error reading temporary file: %w", err)
+
+	return string(content), nil
+}
+
+// parseReleaseDiffOutput reads the temporary file created during the release diff test and returns whether the last line has a [Diff] flag, the test output, and any errors
+func ParseReleaseDiffOutput(output string) (isDiff bool) {
+	// Trim whitespace from the overall output to handle trailing newlines.
+	trimmedOutput := strings.TrimSpace(output)
+	if trimmedOutput == "" {
+		return false
 	}
-	testOutput := testOutputBuffer.String()
-	if len(testOutput) > 0 && testOutput[len(testOutput)-1] == '\n' {
-		testOutput = testOutput[:len(testOutput)-1]
-	}
-	return isDiff, testOutput, nil
+
+	lines := strings.Split(trimmedOutput, "\n")
+	lastLine := lines[len(lines)-1]
+
+	isDiff = strings.HasPrefix(lastLine, "[Diff]")
+
+	return isDiff
 }
 
 func writeOutputFileDeferFunction(tempFile *os.File, failed bool) {
@@ -373,6 +376,18 @@ func writeOutputFileDeferFunction(tempFile *os.File, failed bool) {
 	}
 	// parses the temporary file created during the release diff test and returns the last line of output
 	// This is useful for extracting the diff output from the file after the test has run
+
+	testOutput, err := ReadDiffOutput(tempFile)
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "Error reading temporary file: %v\n", err)
+		return
+	}
+	isDiff := ParseReleaseDiffOutput(testOutput)
+	tempFile.Close() // Close the file handle
+	err = os.Remove(tempFile.Name())
+	if err != nil {
+		fmt.Fprintf(os.Stdout, "Temporary File Deletion Error: %v\n", err)
+	}
 	regularFailureFile, err := os.Create(filepath.Join("", "regular_failure_file.log"))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
@@ -383,10 +398,7 @@ func writeOutputFileDeferFunction(tempFile *os.File, failed bool) {
 		fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
 		return
 	}
-	var isDiff, testOutput, error = ParseReleaseDiffOutput(tempFile)
-	if error != nil {
-		fmt.Fprintf(os.Stderr, "Error parsing release diff output: %v\n", err)
-	} else if failed {
+	if failed {
 		// Check if the output line starts with "[Diff]"
 		if isDiff {
 			fmt.Fprintf(os.Stdout, "Breaking Change Detected \n")
@@ -395,11 +407,6 @@ func writeOutputFileDeferFunction(tempFile *os.File, failed bool) {
 			fmt.Fprintf(regularFailureFile, testOutput)
 			fmt.Fprintf(regularFailureFile, "FAILED --- %s\n", testOutput)
 		}
-	}
-	tempFile.Close() // Close the file handle
-	err = os.Remove(tempFile.Name())
-	if err != nil {
-		fmt.Fprintf(os.Stdout, "Test passed, but failed to delete log file: %v\n", err)
 	}
 }
 
