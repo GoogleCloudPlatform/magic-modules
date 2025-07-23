@@ -60,6 +60,10 @@ var reassignReviewerCmd = &cobra.Command{
 		if len(args) > 2 {
 			newPrimaryReviewer = args[2]
 		}
+
+		if err := github.ReadReviewerRotation(reviewerRotationData); err != nil {
+			return err
+		}
 		return execReassignReviewer(prNumber, newPrimaryReviewer, gh)
 	},
 }
