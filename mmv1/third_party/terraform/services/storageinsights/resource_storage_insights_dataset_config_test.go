@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
-func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_scope(t *testing.T) {
+func TestAccStorageInsightsDatasetConfigExample_update_scope(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -24,7 +24,7 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_project(context),
+				Config: testAccStorageInsightsDatasetConfigExample_update_project(context),
 			},
 			{
 				ResourceName:            "google_storage_insights_dataset_config.config",
@@ -33,7 +33,7 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 				ImportStateVerifyIgnore: []string{"dataset_config_id", "location"},
 			},
 			{
-				Config: testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_org(context),
+				Config: testAccStorageInsightsDatasetConfigExample_update_org(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_storage_insights_dataset_config.config", plancheck.ResourceActionUpdate),
@@ -47,7 +47,7 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 				ImportStateVerifyIgnore: []string{"dataset_config_id", "location"},
 			},
 			{
-				Config: testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_folder(context),
+				Config: testAccStorageInsightsDatasetConfigExample_update_folder(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_storage_insights_dataset_config.config", plancheck.ResourceActionUpdate),
@@ -61,7 +61,7 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 				ImportStateVerifyIgnore: []string{"dataset_config_id", "location"},
 			},
 			{
-				Config: testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_org(context),
+				Config: testAccStorageInsightsDatasetConfigExample_update_org(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_storage_insights_dataset_config.config", plancheck.ResourceActionUpdate),
@@ -75,7 +75,7 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 				ImportStateVerifyIgnore: []string{"dataset_config_id", "location"},
 			},
 			{
-				Config: testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_project(context),
+				Config: testAccStorageInsightsDatasetConfigExample_update_project(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_storage_insights_dataset_config.config", plancheck.ResourceActionUpdate),
@@ -89,7 +89,7 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 				ImportStateVerifyIgnore: []string{"dataset_config_id", "location"},
 			},
 			{
-				Config: testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_folder(context),
+				Config: testAccStorageInsightsDatasetConfigExample_update_folder(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_storage_insights_dataset_config.config", plancheck.ResourceActionUpdate),
@@ -103,7 +103,7 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 				ImportStateVerifyIgnore: []string{"dataset_config_id", "location"},
 			},
 			{
-				Config: testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_project(context),
+				Config: testAccStorageInsightsDatasetConfigExample_update_project(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_storage_insights_dataset_config.config", plancheck.ResourceActionUpdate),
@@ -120,7 +120,7 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 	})
 }
 
-func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_filters(t *testing.T) {
+func testAccStorageInsightsDatasetConfigExample_update_filters(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -132,7 +132,7 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_full_filters(context),
+				Config: testAccStorageInsightsDatasetConfigExample_full_filters(context),
 			},
 			{
 				ResourceName:            "google_storage_insights_dataset_config.config",
@@ -141,7 +141,7 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 				ImportStateVerifyIgnore: []string{"dataset_config_id", "location"},
 			},
 			{
-				Config: testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_filters(context),
+				Config: testAccStorageInsightsDatasetConfigExample_update_filters(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_storage_insights_dataset_config.config", plancheck.ResourceActionUpdate),
@@ -158,7 +158,7 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 	})
 }
 
-func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_link(t *testing.T) {
+func testAccStorageInsightsDatasetConfigExample_update_link(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -172,7 +172,7 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_full_link(context),
+				Config: testAccStorageInsightsDatasetConfigExample_full_link(context),
 			},
 			{
 				ResourceName:            "google_storage_insights_dataset_config.config",
@@ -181,7 +181,7 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 				ImportStateVerifyIgnore: []string{"dataset_config_id", "location", "link_dataset"},
 			},
 			{
-				Config: testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_unlink(context),
+				Config: testAccStorageInsightsDatasetConfigExample_update_unlink(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_storage_insights_dataset_config.config", plancheck.ResourceActionUpdate),
@@ -198,7 +198,7 @@ func TestAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_upd
 	})
 }
 
-func testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_project(context map[string]interface{}) string {
+func testAccStorageInsightsDatasetConfigExample_update_project(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_insights_dataset_config" "config" {
     location = "us-central1"
@@ -214,7 +214,7 @@ resource "google_storage_insights_dataset_config" "config" {
 `, context)
 }
 
-func testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_folder(context map[string]interface{}) string {
+func testAccStorageInsightsDatasetConfigExample_update_folder(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_insights_dataset_config" "config" {
     location = "us-central1"
@@ -230,7 +230,7 @@ resource "google_storage_insights_dataset_config" "config" {
 `, context)
 }
 
-func testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_org(context map[string]interface{}) string {
+func testAccStorageInsightsDatasetConfigExample_update_org(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_insights_dataset_config" "config" {
     location = "us-central1"
@@ -244,7 +244,7 @@ resource "google_storage_insights_dataset_config" "config" {
 `, context)
 }
 
-func testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_full_link(context map[string]interface{}) string {
+func testAccStorageInsightsDatasetConfigExample_full_link(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_insights_dataset_config" "config" {
     location = "us-central1"
@@ -261,7 +261,7 @@ resource "google_storage_insights_dataset_config" "config" {
 `, context)
 }
 
-func testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_unlink(context map[string]interface{}) string {
+func testAccStorageInsightsDatasetConfigExample_update_unlink(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_insights_dataset_config" "config" {
     location = "us-central1"
@@ -277,7 +277,7 @@ resource "google_storage_insights_dataset_config" "config" {
 `, context)
 }
 
-func testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_full_filters(context map[string]interface{}) string {
+func testAccStorageInsightsDatasetConfigExample_full_filters(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_insights_dataset_config" "config" {
     location = "us-central1"
@@ -304,7 +304,7 @@ resource "google_storage_insights_dataset_config" "config" {
 `, context)
 }
 
-func testAccStorageInsightsDatasetConfig_storageInsightsDatasetConfigExample_update_filters(context map[string]interface{}) string {
+func testAccStorageInsightsDatasetConfigExample_update_filters(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_storage_insights_dataset_config" "config" {
     location = "us-central1"
