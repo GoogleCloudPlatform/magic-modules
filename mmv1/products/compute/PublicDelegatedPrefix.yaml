@@ -123,6 +123,7 @@ properties:
     required: true
   - name: 'publicDelegatedSubPrefixs'
     type: Array
+    output: true
     description: |
       List of sub public delegated fixes for BYO IP functionality.
       Each item in this array represents a sub prefix that can be
@@ -132,11 +133,13 @@ properties:
       properties:
         - name: 'name'
           type: String
-          required: true
+          output: true
+          # required: true
           description: |
             The name of the sub public delgated prefix.
         - name: 'description'
           type: String
+          output: true
           description: |
             Optional description of this sub public delgated prefix.
         - name: 'region'
@@ -156,15 +159,18 @@ properties:
             - 'DELETING'
         - name: 'ipCidrRange'
           type: String
-          required: true
+          output: true
+          # required: true
           description: |
             The IP address range in the CIDR format represented by this sub prefix.
         - name: 'isAddress'
           type: Boolean
+          output: true
           description: |
             Whether the sub prefix is delegated for address creation.
         - name: 'mode'
           type: Enum
+          output: true
           description: |
             The PublicDelegatedSubPrefix mode for IPv6 only.
           enum_values:
@@ -173,10 +179,12 @@ properties:
             - 'EXTERNAL_IPV6_SUBNETWORK_CREATION'
         - name: 'allocatablePrefixLength'
           type: Integer
+          output: true
           description: |
             The allocatable prefix length supported by this PublicDelegatedSubPrefix.
         - name: 'delegatee_project'
           type: String
-          required: true
+          output: true
+          # required: true
           description: |
             Name of the project scoping this PublicDelegatedSubPrefix.
