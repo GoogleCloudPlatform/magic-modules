@@ -29,7 +29,11 @@ if displayName == "Playbook Example with Fulfillment" {
 
 		// --- Update the value to use the original ---
 		advancedSettings["audioExportGcsDestination"] = d.Get("handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination.0").(map[string]interface{})
-		advancedSettings["loggingSettings"] = d.Get("handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.logging_settings.0").(map[string]interface{})
+		advancedSettings["loggingSettings"] = map[string]interface{}{
+			"enableConsentBasedRedaction": true,
+			"enableInteractionLogging": true,
+			"enableStackdriverLogging": true,
+		}
 
 		return nil
 	}
@@ -59,7 +63,11 @@ if displayName == "Playbook Example with Fulfillment" {
 
 		// --- Update the value to use the original ---
 		advancedSettings["audioExportGcsDestination"] = d.Get("handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination.0").(map[string]interface{})
-		advancedSettings["loggingSettings"] = d.Get("handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.logging_settings.0").(map[string]interface{})
+		advancedSettings["loggingSettings"] = map[string]interface{}{
+			"enableConsentBasedRedaction": true,
+			"enableInteractionLogging": true,
+			"enableStackdriverLogging": true,
+		}
 
 		return nil
 	}
