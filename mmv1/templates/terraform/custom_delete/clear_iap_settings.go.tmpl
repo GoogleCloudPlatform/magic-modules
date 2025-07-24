@@ -3,13 +3,10 @@ if err != nil {
 	return err
 }
 
-name := d.Get("name").(string)
-re := regexp.MustCompile("projects/([^/]+)")
-match := re.FindStringSubmatch(name)
-if len(match) < 2 {
-	return fmt.Errorf("could not parse project from name %q", name)
+billingProject := ""
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+	billingProject = bp
 }
-project := match[1]
 
 headers := make(http.Header)
 
@@ -20,7 +17,7 @@ log.Printf("[DEBUG] Updating Settings %q: %#v", d.Id(), obj)
 res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 	Config:    config,
 	Method:    "PATCH",
-	Project:   project,
+	Project:   billingProject,
 	RawURL:    url,
 	UserAgent: userAgent,
 	Body:      obj,
