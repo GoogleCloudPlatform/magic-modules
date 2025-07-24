@@ -45,7 +45,7 @@ examples:
       dataset_id: 'dataset_id'
       table_id: 'table_id'
 parameters:
-  # TODO(alexstephen): Remove once we have support for placing
+  # TODO: Remove once we have support for placing
   # nested object fields in URL
   - name: 'dataset'
     type: String
