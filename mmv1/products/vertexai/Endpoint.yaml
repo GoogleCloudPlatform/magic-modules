@@ -21,7 +21,7 @@ description:
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
-  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/PrivateServiceConnectConfig'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.endpoints'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/endpoints'
 self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
