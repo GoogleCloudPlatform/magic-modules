@@ -247,7 +247,7 @@ properties:
             - 'SCSI'
             - 'NVME'
         # Ignoring kind - It's a constant and we don't need it.
-        # TODO(alexstephen): Place in licenses - it's a Array of
+        # TODO: Place in licenses - it's a Array of
         # ResourceRefs
         - name: 'mode'
           type: Enum
@@ -298,7 +298,7 @@ properties:
           description: |
             The number of the guest accelerator cards exposed to this
             instance.
-        # TODO(alexstephen): Change to ResourceRef once AcceleratorType is
+        # TODO: Change to ResourceRef once AcceleratorType is
         # created.
         - name: 'acceleratorType'
           type: String
@@ -334,7 +334,7 @@ properties:
       Labels to apply to this instance.  A list of key->value pairs.
     update_url: 'projects/{{project}}/zones/{{zone}}/instances/{{name}}/setLabels'
     update_verb: 'POST'
-  # TODO(nelsonjr): Implement updating metadata *after* resource is created.
+  # TODO: Implement updating metadata *after* resource is created.
 
   # Expose instance 'metadata' as a simple name/value pair hash. However the API
   # defines metadata as a NestedObject with the following layout:
@@ -365,7 +365,7 @@ properties:
     description: 'A reference to a machine type which defines VM kind.'
     update_url: 'projects/{{project}}/zones/{{zone}}/instances/{{name}}/setMachineType'
     update_verb: 'POST'
-    # TODO(alexstephen): Add metadata
+    # TODO: Add metadata
     custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
     resource: 'MachineType'
     imports: 'selfLink'
@@ -670,7 +670,7 @@ properties:
       by the setTags method. Each tag within the list must comply with
       RFC1035.
     properties:
-      # TODO(alexstephen) Investigate bytes type
+      # TODO Investigate bytes type
       - name: 'fingerprint'
         type: String
         description: |

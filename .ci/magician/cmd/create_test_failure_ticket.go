@@ -521,7 +521,7 @@ func init() {
 }
 
 var (
-	// TODO(shuyama1): add all mismatch resource names
+	// TODO: add all mismatch resource names
 	resourceNameConverter = map[string]string{
 		"google_iam3_projects_policy_binding":        "google_iam_projects_policy_binding",
 		"google_iam3_organizations_policy_binding":   "google_iam_organizations_policy_binding",
