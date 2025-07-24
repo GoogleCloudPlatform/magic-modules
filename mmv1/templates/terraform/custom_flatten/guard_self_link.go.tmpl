@@ -16,7 +16,5 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	if v == nil {
 		return v
 	}
-	val := v.(string)
-	val = strings.TrimPrefix(val, "https://www.googleapis.com/compute/v1/")
-	return tpgresource.ConvertSelfLinkToV1(val)
+	return tpgresource.ConvertSelfLinkToV1(v.(string))
 }
