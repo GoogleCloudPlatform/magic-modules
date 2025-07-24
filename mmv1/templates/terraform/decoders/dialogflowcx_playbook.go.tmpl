@@ -5,6 +5,8 @@ displayName, ok := res["displayName"].(string)
 if !ok { return nil, fmt.Errorf("'displayName' is not a string") }
 
 if displayName == "Playbook Example with Fulfillment" {
+	log.Printf("[DEBUG] Received response for Playbook %q: %#v", d.Id(), res)
+
 	//   - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
 	//   - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
 	setHandlers2EventHandlerFulfillmentAdvancedSettings := func(data map[string]interface{}) error {
@@ -16,17 +18,17 @@ if displayName == "Playbook Example with Fulfillment" {
 		handler, ok := handlers[2].(map[string]interface{})
 		if !ok { return fmt.Errorf("element at 'handlers[2]' is not a map") }
 
-		eventHandler, ok := handler["event_handler"].(map[string]interface{})
-		if !ok { return fmt.Errorf("'event_handler' is not a map") }
+		eventHandler, ok := handler["eventHandler"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'eventHandler' is not a map") }
 
 		fulfillment, ok := eventHandler["fulfillment"].(map[string]interface{})
 		if !ok { return fmt.Errorf("'fulfillment' is not a map") }
 
-		advancedSettings, ok := fulfillment["advanced_settings"].(map[string]interface{})
-		if !ok { return fmt.Errorf("'advanced_settings' is not a map") }
+		advancedSettings, ok := fulfillment["advancedSettings"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'advancedSettings' is not a map") }
 
 		// --- Update the value in the parent map ---
-		advancedSettings["audio_export_gcs_destination"] = map[string]interface{}{"uri": "gs://tf-test-dialogflowcx-bucketuldirhyyor/prefix-"}
+		advancedSettings["audioExportGcsDestination"] = map[string]interface{}{"uri": "gs://tf-test-dialogflowcx-bucketuldirhyyor/prefix-"}
 		advancedSettings["loggingSettings"] = map[string]interface{}{
 			"enableConsentBasedRedaction": true,
 			"enableInteractionLogging": true,
@@ -50,17 +52,17 @@ if displayName == "Playbook Example with Fulfillment" {
 		handler, ok := handlers[6].(map[string]interface{})
 		if !ok { return fmt.Errorf("element at 'handlers[6]' is not a map") }
 
-		eventHandler, ok := handler["lifecycle_handler"].(map[string]interface{})
-		if !ok { return fmt.Errorf("'lifecycle_handler' is not a map") }
+		eventHandler, ok := handler["lifecycleHandler"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'lifecycleHandler' is not a map") }
 
 		fulfillment, ok := eventHandler["fulfillment"].(map[string]interface{})
 		if !ok { return fmt.Errorf("'fulfillment' is not a map") }
 
-		advancedSettings, ok := fulfillment["advanced_settings"].(map[string]interface{})
-		if !ok { return fmt.Errorf("'advanced_settings' is not a map") }
+		advancedSettings, ok := fulfillment["advancedSettings"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'advancedSettings' is not a map") }
 
 		// --- Update the value in the parent map ---
-		advancedSettings["audio_export_gcs_destination"] = map[string]interface{}{"uri": "gs://tf-test-dialogflowcx-bucketuldirhyyor/prefix-"}
+		advancedSettings["audioExportGcsDestination"] = map[string]interface{}{"uri": "gs://tf-test-dialogflowcx-bucketuldirhyyor/prefix-"}
 		advancedSettings["loggingSettings"] = map[string]interface{}{
 			"enableConsentBasedRedaction": true,
 			"enableInteractionLogging": true,
