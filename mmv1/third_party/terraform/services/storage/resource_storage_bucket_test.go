@@ -8,14 +8,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	servicestorage "github.com/hashicorp/terraform-provider-google/google/services/storage"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 
 	"google.golang.org/api/googleapi"
@@ -2971,7 +2971,7 @@ type Cors struct {
 	sendMaxAgeSeconds bool
 }
 
-func TestCorsValidationCustomDiff(t *testing.T) {
+func TestCorsValidation(t *testing.T) {
 	t.Parallel()
 
 	d := &tpgresource.ResourceDiffMock{
@@ -2984,7 +2984,7 @@ func TestCorsValidationCustomDiff(t *testing.T) {
 		},
 	}
 
-	err := storage.ValidateCors(d)
+	err := servicestorage.ValidateCors(d)
 	assert.Error(t, err)
 
 	corsBefore := Cors{
@@ -3057,7 +3057,7 @@ func TestCorsValidationCustomDiff(t *testing.T) {
 				},
 			},
 		}
-		err := storage.ValidateCors(d)
+		err := servicestorage.ValidateCors(d)
 		if tc.ExpectError {
 			assert.Error(t, err)
 		} else {
@@ -3066,7 +3066,9 @@ func TestCorsValidationCustomDiff(t *testing.T) {
 	}
 }
 
-func TestCorsValidationCustomDiff_RemoveCors(t *testing.T) {
+func TestRemoveCors(t *testing.T) {
+	t.Parallel()
+
 	cases := map[string]struct {
 		ExpectError bool
 		Before      []Cors
@@ -3118,7 +3120,7 @@ func TestCorsValidationCustomDiff_RemoveCors(t *testing.T) {
 				},
 			},
 		}
-		err := storage.ValidateCors(d)
+		err := servicestorage.ValidateCors(d)
 		if tc.ExpectError {
 			assert.Error(t, err)
 		} else {
