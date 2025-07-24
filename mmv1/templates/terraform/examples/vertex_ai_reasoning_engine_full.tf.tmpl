@@ -4,7 +4,7 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
   region       = "us-central1"
 
   spec {
-    agent_framework = "langchain"
+    agent_framework = "google-adk"
     class_methods   = []
 
     deployment_spec {
