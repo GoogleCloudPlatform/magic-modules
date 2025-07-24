@@ -150,7 +150,7 @@ func TestAccBigqueryAnalyticsHubListing_bigqueryAnalyticshubListingMarketplaceUp
 				ResourceName:            "google_bigquery_analytics_hub_listing.listing",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"data_exchange_id", "listing_id", "location","delete_commercial"},
+				ImportStateVerifyIgnore: []string{"data_exchange_id", "listing_id", "location", "delete_commercial"},
 			},
 			{
 				Config: testAccBigqueryAnalyticsHubListing_bigqueryAnalyticshubListingMarketplaceUpdate(context),
@@ -162,7 +162,7 @@ func TestAccBigqueryAnalyticsHubListing_bigqueryAnalyticshubListingMarketplaceUp
 				ResourceName:            "google_bigquery_analytics_hub_listing.listing",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"data_exchange_id", "listing_id", "location","delete_commercial"},
+				ImportStateVerifyIgnore: []string{"data_exchange_id", "listing_id", "location", "delete_commercial"},
 			},
 		},
 	})
