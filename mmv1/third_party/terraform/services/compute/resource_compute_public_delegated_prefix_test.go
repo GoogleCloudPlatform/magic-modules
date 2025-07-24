@@ -17,7 +17,7 @@ func TestAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPref
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"parent_pdp_id": "projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp",
+		"parent_pdp_id": "projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-project-delegation-mode-pdp",
 		"project":       "tf-static-byoip",
 		"random_suffix": acctest.RandString(t, 10),
 	}
@@ -59,7 +59,7 @@ resource "google_compute_public_delegated_prefix" "prefixes" {
   name = "tf-test-prefix-with-sub-prefixes%{random_suffix}"
   region = "us-central1"
   description = "Public delegated prefix with sub prefix for testing "
-  ip_cidr_range = "2600:1901:4457:100::/64"
+  ip_cidr_range = "2600:1901:4457:2::/64"
   parent_prefix = "%{parent_pdp_id}"
   project = "%{project}"
   mode = "DELEGATION"
@@ -71,7 +71,7 @@ resource "google_compute_public_delegated_prefix" "subprefix" {
   name = "tf-test-sub-prefix-1%{random_suffix}"
   description = "A nested address"
   region = "us-central1"
-  ip_cidr_range = "2600:1901:4457:100::/96"
+  ip_cidr_range = "2600:1901:4457:1:2::/96"
   parent_prefix = google_compute_public_delegated_prefix.prefixes.id
   mode = "DELEGATION"
   allocatable_prefix_length = 64
