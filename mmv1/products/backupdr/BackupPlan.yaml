@@ -236,3 +236,7 @@ properties:
                   description: |
                     The hour of the day (1-24) when the window ends, for example, if the value of end hour of the day is 10, that means the backup window end time is 10:00.
                     The end hour of the day should be greater than the start
+  - name: 'logRetentionDays'
+    type: Integer
+    description: |
+      This is only applicable for CloudSql resource. Days for which logs will be stored. This value should be greater than or equal to minimum enforced log retention duration of the backup vault.
