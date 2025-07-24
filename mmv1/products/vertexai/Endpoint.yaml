@@ -21,7 +21,7 @@ description:
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
-  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.endpoints'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.endpoints'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/endpoints'
 self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
@@ -458,6 +458,7 @@ properties:
           description:
             'A list of Projects from which the forwarding rule will target the service attachment.'
       - name: 'enableSecurePrivateServiceConnect'
+        min_version: 'beta'
         type: Boolean
         description:
           'If set to true, enable secure private service connect with IAM authorization. Otherwise, private service connect will be done without authorization. Note latency will be slightly increased if authorization is enabled.'
