@@ -106,6 +106,8 @@ examples:
       data_exchange_id: 'my_data_exchange'
       listing_id: 'my_listing'
       desc: 'example data exchange'
+    ignore_read_extra:
+      - 'delete_commercial'
 virtual_fields:
   - name: 'delete_commercial'
     type: Boolean
