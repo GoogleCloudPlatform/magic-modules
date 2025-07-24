@@ -12,7 +12,6 @@ resource "google_vertex_ai_endpoint" "{{$.PrimaryResourceId}}" {
     project_allowlist = [
       "${data.google_project.project.project_id}"
     ]
-    enable_secure_private_service_connect = false
   }
 }
 
