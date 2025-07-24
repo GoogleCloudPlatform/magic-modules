@@ -510,6 +510,10 @@ func TestAccSecretManagerSecret_tags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecretManagerSecretTags(context),
+				Check: resource.TestCheckFunc(
+					resource.TestCheckResourceAttrSet(
+						"google_secret_manager_secret.secret-tags", "tags.%"),
+				),
 			},
 			{
 				ResourceName:            "google_secret_manager_secret.secret-tags",
