@@ -26,7 +26,7 @@ data "google_storage_insights_dataset_config" "sample-config" {
 
 The following arguments are supported:
 
-* `project` - (Required) The name of the GCP project in which dataset config exists. Can be configured through config as well.
+* `project` - (Optional) The name of the GCP project in which dataset config exists. Can be configured through config as well.
 * `location` - (Required) The location of the Dataset Config.
 * `dataset_config_id` - (Required) The user-defined ID of the DatasetConfig
 

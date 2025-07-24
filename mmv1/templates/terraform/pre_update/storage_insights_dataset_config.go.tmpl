@@ -15,64 +15,64 @@ if d.HasChange("description") {
 if d.HasChange("include_cloud_storage_locations") {
 	_, new_storage_locations := d.GetChange("include_cloud_storage_locations")
 	if new_locations, ok := new_storage_locations.([]interface{}); ok && len(new_locations) > 0 {
-        updateMask = append(updateMask, "includeCloudStorageLocations")
-    }
+		updateMask = append(updateMask, "includeCloudStorageLocations")
+	}
 }
 
 if d.HasChange("exclude_cloud_storage_locations") {
 	_, new_storage_locations := d.GetChange("exclude_cloud_storage_locations")
 	if new_locations, ok := new_storage_locations.([]interface{}); ok && len(new_locations) > 0 {
-        updateMask = append(updateMask, "excludeCloudStorageLocations")
-    }
+		updateMask = append(updateMask, "excludeCloudStorageLocations")
+	}
 }
 
 if d.HasChange("include_cloud_storage_buckets") {
 	_, new_storage_buckets := d.GetChange("include_cloud_storage_buckets")
 	if new_buckets, ok := new_storage_buckets.([]interface{}); ok && len(new_buckets) > 0 {
-        updateMask = append(updateMask, "includeCloudStorageBuckets")
-    }
+		updateMask = append(updateMask, "includeCloudStorageBuckets")
+	}
 }
 
 if d.HasChange("exclude_cloud_storage_buckets") {
 	_, new_storage_buckets := d.GetChange("exclude_cloud_storage_buckets")
 	if new_buckets, ok := new_storage_buckets.([]interface{}); ok && len(new_buckets) > 0 {
-        updateMask = append(updateMask, "excludeCloudStorageBuckets")
-    }
+		updateMask = append(updateMask, "excludeCloudStorageBuckets")
+	}
 }
 
 if d.HasChange("source_projects") {
-    _, new_source_projects := d.GetChange("source_projects")
-    if new_project_numbers, ok := new_source_projects.([]interface{}); ok && len(new_project_numbers) > 0 {
-        updateMask = append(updateMask, "sourceProjects")
-    }
+	_, new_source_projects := d.GetChange("source_projects")
+	if new_project_numbers, ok := new_source_projects.([]interface{}); ok && len(new_project_numbers) > 0 {
+		updateMask = append(updateMask, "sourceProjects")
+	}
 }
 
 if d.HasChange("source_folders") {
 	_, new_source_folders := d.GetChange("source_folders")
-    if new_folder_numbers, ok := new_source_folders.([]interface{}); ok && len(new_folder_numbers) > 0 {
-        updateMask = append(updateMask, "sourceFolders")
-    }
+	if new_folder_numbers, ok := new_source_folders.([]interface{}); ok && len(new_folder_numbers) > 0 {
+		updateMask = append(updateMask, "sourceFolders")
+	}
 }
 
 if d.HasChange("organization_scope") {
 	_, new_organization_scope := d.GetChange("organization_scope")
-    if new_organization_scope == true {
-        updateMask = append(updateMask, "organizationScope")
-    }
+	if new_organization_scope == true {
+		updateMask = append(updateMask, "organizationScope")
+	}
 }
 
 
 // Link or Unlink a dataset if required
 if d.HasChange("link_dataset") {
-    _, new_link_dataset := d.GetChange("link_dataset")
-    linkAPIEndPoint := "linkDataset"
-    if new_link_dataset == false {
-        linkAPIEndPoint = "unlinkDataset"
-    }
+	_, new_link_dataset := d.GetChange("link_dataset")
+	linkAPIEndPoint := "linkDataset"
+	if new_link_dataset == false {
+		linkAPIEndPoint = "unlinkDataset"
+	}
 
-    linkUrl := fmt.Sprintf("%s:%s", url, linkAPIEndPoint)
+	linkUrl := fmt.Sprintf("%s:%s", url, linkAPIEndPoint)
 
-    // err == nil indicates that the billing_project value was found
+	// err == nil indicates that the billing_project value was found
 	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
 		billingProject = bp
 	}
@@ -105,7 +105,7 @@ if d.HasChange("link_dataset") {
 
 // if updateMask is empty we are not updating anything so skip the post
 if len(updateMask) == 0 {
-    return resourceStorageInsightsDatasetConfigRead(d, meta)
+	return resourceStorageInsightsDatasetConfigRead(d, meta)
 }
 
 // updateMask is a URL parameter but not present in the schema, so ReplaceVars

@@ -46,10 +46,14 @@ import_format:
   - 'projects/{{project}}/locations/{{location}}/datasetConfigs/{{dataset_config_id}}'
 
 examples:
-  - name: 'storage_insights_dataset_config'
-    primary_resource_id: 'config'
+  - name: 'storage_insights_dataset_config_includes'
+    primary_resource_id: 'config_includes'
     vars:
-      dataset_config_id: 'my_config'
+      dataset_config_id: 'my_config_includes'
+  - name: 'storage_insights_dataset_config_excludes'
+    primary_resource_id: 'config_excludes'
+    vars:
+      dataset_config_id: 'my_config_excludes'
 
 virtual_fields:
   - name: 'link_dataset'
@@ -58,10 +62,8 @@ virtual_fields:
     description: |
       A boolean terraform only flag to link/unlink dataset.
 
-      -> **Note** This is a virtual terraform only field used to link/unlink a dataset config.
-      This field is not part of the actual terraform resource.<br>
-      Setting this field to true while creation will automatically link the created dataset as an additional functionality.<br>
-      A dataset config resource can only be destroyed once it is unlinked,
+      Setting this field to true while creation will automatically link the created dataset as an additional functionality.
+      -> **Note** A dataset config resource can only be destroyed once it is unlinked,
       so users must set this field to false to unlink the dataset and destroy the dataset config resource.
 
 parameters:
@@ -132,9 +134,7 @@ properties:
         type: Boolean
         output: true
         description: |
-          State of the linked DatasetConfig.<br>
-
-          -> **Note** This can be toggled between true/false using the virtual field link_dataset.
+          State of the linked DatasetConfig.
   - name: 'identity'
     type: NestedObject
     description: |
@@ -253,15 +253,13 @@ properties:
               type: String
               description: |
                 The list of cloud storage bucket names to include in the DatasetConfig.
-
-                -> **Note** This field has conflict with bucketPrefixRegex and exactly one of the bucketName and bucketPrefixRegex should be specified.
+                Exactly one of the bucket_name and bucket_prefix_regex should be specified.
             - name: bucketPrefixRegex
               type: String
               description: |
                 The list of regex patterns for bucket names matching the regex.
                 Regex should follow the syntax specified in google/re2 on GitHub.
-
-                -> **Note** This field has conflict with bucketName and exactly one of the bucketName and bucketPrefixRegex should be specified.
+                Exactly one of the bucket_name and bucket_prefix_regex should be specified.
     conflicts:
       - 'exclude_cloud_storage_buckets'
   - name: 'excludeCloudStorageBuckets'
@@ -281,14 +279,12 @@ properties:
               type: String
               description: |
                 The list of cloud storage bucket names to exclude in the DatasetConfig.
-
-                -> **Note** This field has conflict with bucketPrefixRegex and exactly one of the bucketName and bucketPrefixRegex should be specified.
+                Exactly one of the bucket_name and bucket_prefix_regex should be specified.
             - name: bucketPrefixRegex
               type: String
               description: |
                 The list of regex patterns for bucket names matching the regex.
                 Regex should follow the syntax specified in google/re2 on GitHub.
-
-                -> **Note** This field has conflict with bucketName and exactly one of the bucketName and bucketPrefixRegex should be specified.
+                Exactly one of the bucket_name and bucket_prefix_regex should be specified.
     conflicts:
       - 'include_cloud_storage_buckets'
