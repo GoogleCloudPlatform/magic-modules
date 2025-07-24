@@ -53,6 +53,22 @@ import (
 {{- end}}
 )
 
-func DataSourceGoogleCloud{{ $.ResourceName -}}() *schema.Resource {
-  return nil
+func DataSourceGoogleCompute{{ $.ResourceName -}}() *schema.Resource {
+    dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(Resource{{ $.ResourceName -}}().Schema)
+
+    return &schema.Resource{
+		Read:   dataSourceGoogle{{ $.ResourceName -}}Read,
+		Schema: dsSchema,
+	}
+
+
+}
+
+func dataSourceGoogle{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
+  config := meta.(*transport_tpg.Config)
+  //this is the problem - need to figure out the url params
+  id, err := tpgresource.ReplaceVars(d, config, "DUMMY URL")
+	if err != nil {
+		return fmt.Errorf("Error constructing id: %s", err)
+	}
 }
