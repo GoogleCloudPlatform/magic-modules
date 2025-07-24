@@ -603,6 +603,10 @@ func TestAccSecretManagerRegionalRegionalSecret_tags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccSecretManagerRegionalSecretTags(context),
+				Check: resource.TestCheckFunc(
+					resource.TestCheckResourceAttrSet(
+						"google_secret_manager_regional_secret.regional-secret-basic", "tags.%"),
+				),
 			},
 			{
 				ResourceName:            "google_secret_manager_regional_secret.regional-secret-basic",
