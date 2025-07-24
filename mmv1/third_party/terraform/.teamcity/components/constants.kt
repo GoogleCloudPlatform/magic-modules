@@ -20,8 +20,8 @@ const val DefaultParallelism = 6
 // this is updated semi-regularly
 const val DefaultTerraformCoreVersion = "1.11.0"
 
-// This represents a cron view of days of the week - we skip saturday to allow release diff tests to run
-const val DefaultDaysOfWeek = "1-6"
+// This represents a cron view of days of the week
+const val DefaultDaysOfWeek = "*"
 
 // Cron value for any day of month
 const val DefaultDaysOfMonth = "*"
