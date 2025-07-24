@@ -86,6 +86,12 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 		member = "serviceAccount:hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com"
 	}
 
+	resource "google_project_iam_member" "insights_agent" {
+		project = google_project.project.project_id
+		role = "roles/developerconnect.insightsAgent"
+		member = "serviceAccount:66214305248-compute@developer.gserviceaccount.com"
+	}
+
 	# Enable APIs
 	resource "google_project_service" "apphub_api_service" {
 		project = google_project.project.project_id
@@ -93,13 +99,71 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 		depends_on = [google_project.project]
 	}
 
+	resource "google_project_service" "containeranalysis_api" {
+		project = google_project.project.project_id
+		service = "containeranalysis.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	resource "google_project_service" "containerscanning_api" {
+		project = google_project.project.project_id
+		service = "containerscanning.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	resource "google_project_service" "container_api" {
+		project = google_project.project.project_id
+		service = "container.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	resource "google_project_service" "artifactregistry_api" {
+		project = google_project.project.project_id
+		service = "artifactregistry.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	resource "google_project_service" "cloudbuild_api" {
+		project = google_project.project.project_id
+		service = "cloudbuild.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	resource "google_project_service" "cloudasset_api" {
+		project = google_project.project.project_id
+		service = "cloudasset.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	resource "google_project_service" "compute_api" {
+		project = google_project.project.project_id
+		service = "compute.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	resource "google_project_service" "devconnect_api" {
+		project = google_project.project.project_id
+		service = "staging-developerconnect.sandbox.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
 	# Wait delay after enabling APIs and granting permissions
 	resource "time_sleep" "wait_for_propagation" {
-	depends_on = [
-		google_project_iam_member.apphub_permissions,
-		google_project_service.apphub_api_service
-	]
-	create_duration  = "120s"
+		depends_on = [
+			google_project_iam_member.apphub_permissions,
+			google_project_iam_member.insights_agent,
+			google_project_service.apphub_api_service,
+			google_project_service.containeranalysis_api,
+			google_project_service.containerscanning_api,
+			google_project_service.container_api,
+			google_project_service.artifactregistry_api,
+			google_project_service.artifactregistry_api,
+			google_project_service.cloudbuild_api,
+			google_project_service.cloudasset_api,
+			google_project_service.compute_api,
+			google_project_service.devconnect_api,
+		]
+		create_duration  = "120s"
 	}
 
 	resource "google_apphub_application" "my_apphub_application" {
@@ -122,6 +186,8 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
            google_project.project.number,
            google_apphub_application.my_apphub_application.location,
            google_apphub_application.my_apphub_application.application_id)
+		
+		depends_on = [time_sleep.wait_for_propagation]
     }
   `, context)
 }
@@ -142,7 +208,13 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 		role = "roles/apphub.admin"
 		member = "serviceAccount:hashicorp-test-runner@ci-test-project-188019.iam.gserviceaccount.com"
 	}
-	
+
+	resource "google_project_iam_member" "insights_agent" {
+		project = google_project.project.project_id
+		role = "roles/developerconnect.insightsAgent"
+		member = "serviceAccount:66214305248-compute@developer.gserviceaccount.com"
+	}
+
 	# Enable APIs
 	resource "google_project_service" "apphub_api_service" {
 		project = google_project.project.project_id
@@ -150,13 +222,71 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 		depends_on = [google_project.project]
 	}
 
+	resource "google_project_service" "containeranalysis_api" {
+		project = google_project.project.project_id
+		service = "containeranalysis.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	resource "google_project_service" "containerscanning_api" {
+		project = google_project.project.project_id
+		service = "containerscanning.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	resource "google_project_service" "container_api" {
+		project = google_project.project.project_id
+		service = "container.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	resource "google_project_service" "artifactregistry_api" {
+		project = google_project.project.project_id
+		service = "artifactregistry.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	resource "google_project_service" "cloudbuild_api" {
+		project = google_project.project.project_id
+		service = "cloudbuild.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	resource "google_project_service" "cloudasset_api" {
+		project = google_project.project.project_id
+		service = "cloudasset.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	resource "google_project_service" "compute_api" {
+		project = google_project.project.project_id
+		service = "compute.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
+	resource "google_project_service" "devconnect_api" {
+		project = google_project.project.project_id
+		service = "staging-developerconnect.sandbox.googleapis.com"
+		depends_on = [google_project.project]
+	}
+
 	# Wait delay after enabling APIs and granting permissions
 	resource "time_sleep" "wait_for_propagation" {
-	depends_on = [
-		google_project_iam_member.apphub_permissions,
-		google_project_service.apphub_api_service
-	]
-	create_duration  = "120s"
+		depends_on = [
+			google_project_iam_member.apphub_permissions,
+			google_project_iam_member.insights_agent,
+			google_project_service.apphub_api_service,
+			google_project_service.containeranalysis_api,
+			google_project_service.containerscanning_api,
+			google_project_service.container_api,
+			google_project_service.artifactregistry_api,
+			google_project_service.artifactregistry_api,
+			google_project_service.cloudbuild_api,
+			google_project_service.cloudasset_api,
+			google_project_service.compute_api,
+			google_project_service.devconnect_api,
+		]
+		create_duration  = "120s"
 	}
 
 	resource "google_apphub_application" "my_apphub_application" {
@@ -178,7 +308,8 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
            google_project.project.number,
            google_apphub_application.my_apphub_application.location,
            google_apphub_application.my_apphub_application.application_id)
-		}
+		
+		depends_on = [time_sleep.wait_for_propagation]
     }
   `, context)
 }
