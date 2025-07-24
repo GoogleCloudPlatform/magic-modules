@@ -5,7 +5,8 @@ import (
 	"testing"
 
 	newProvider "google/provider/new/google/provider"
-
+	newTpgresource "google/provider/new/google/tpgresource"
+	oldTpgresource "google/provider/new/google/tpgresource"
 	newVerify "google/provider/new/google/verify"
 	oldProvider "google/provider/old/google/provider"
 	oldVerify "google/provider/old/google/verify"
@@ -577,6 +578,73 @@ func TestFieldChanged(t *testing.T) {
 			expectChanged: true,
 		},
 
+		"DiffSuppressFunc added": {
+			oldField: &schema.Schema{},
+			newField: &schema.Schema{
+				DiffSuppressFunc: newTpgresource.CaseDiffSuppress,
+			},
+			expectChanged: true,
+		},
+		"DiffSuppressFunc removed": {
+			oldField: &schema.Schema{
+				DiffSuppressFunc: oldTpgresource.CaseDiffSuppress,
+			},
+			newField:      &schema.Schema{},
+			expectChanged: true,
+		},
+		"DiffSuppressFunc remains set": {
+			oldField: &schema.Schema{
+				DiffSuppressFunc: oldTpgresource.CaseDiffSuppress,
+			},
+			newField: &schema.Schema{
+				DiffSuppressFunc: newTpgresource.CaseDiffSuppress,
+			},
+			expectChanged: false,
+		},
+		"Elem DiffSuppressFunc added": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					DiffSuppressFunc: oldTpgresource.CaseDiffSuppress,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem DiffSuppressFunc removed": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					DiffSuppressFunc: newTpgresource.CaseDiffSuppress,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem DiffSuppressFunc remains set": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					DiffSuppressFunc: newTpgresource.CaseDiffSuppress,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					DiffSuppressFunc: oldTpgresource.CaseDiffSuppress,
+				},
+			},
+			expectChanged: false,
+		},
+
 		"DefaultFunc added": {
 			oldField: &schema.Schema{},
 			newField: &schema.Schema{
@@ -706,6 +774,73 @@ func TestFieldChanged(t *testing.T) {
 				Elem: &schema.Schema{
 					Type:      schema.TypeString,
 					StateFunc: testStateFunc2,
+				},
+			},
+			expectChanged: false,
+		},
+
+		"Set added": {
+			oldField: &schema.Schema{},
+			newField: &schema.Schema{
+				Set: newTpgresource.SelfLinkRelativePathHash,
+			},
+			expectChanged: true,
+		},
+		"Set removed": {
+			oldField: &schema.Schema{
+				Set: oldTpgresource.SelfLinkRelativePathHash,
+			},
+			newField:      &schema.Schema{},
+			expectChanged: true,
+		},
+		"Set remains set": {
+			oldField: &schema.Schema{
+				Set: oldTpgresource.SelfLinkRelativePathHash,
+			},
+			newField: &schema.Schema{
+				Set: newTpgresource.SelfLinkRelativePathHash,
+			},
+			expectChanged: false,
+		},
+		"Elem Set added": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					Set:  newTpgresource.SelfLinkRelativePathHash,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem Set removed": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					Set:  oldTpgresource.SelfLinkRelativePathHash,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			expectChanged: true,
+		},
+		"Elem Set remains set": {
+			oldField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					Set:  oldTpgresource.SelfLinkRelativePathHash,
+				},
+			},
+			newField: &schema.Schema{
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					Set:  newTpgresource.SelfLinkRelativePathHash,
 				},
 			},
 			expectChanged: false,

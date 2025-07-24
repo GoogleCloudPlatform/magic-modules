@@ -2,7 +2,6 @@ package diff
 
 import (
 	"reflect"
-	"sort"
 	"strings"
 
 	"github.com/google/go-cmp/cmp"
@@ -354,44 +353,4 @@ func (rd ResourceDiff) IsFieldInNewNestedStructure(fieldPath string) bool {
 	_, parentExistsInNew := rd.FlattenedSchema.New[parentPath]
 
 	return !parentExistsInOld && parentExistsInNew
-}
-
-func sliceToSet(slice []string) FieldSet {
-	set := make(FieldSet)
-	for _, s := range slice {
-		if s != "" {
-			set[s] = struct{}{}
-		}
-	}
-	return set
-}
-
-func sliceToSetRemoveZeroPadding(slice []string) FieldSet {
-	set := make(FieldSet)
-	for _, s := range slice {
-		if s != "" {
-			set[strings.ReplaceAll(s, ".0", "")] = struct{}{}
-		}
-	}
-	return set
-}
-
-func setToSortedSlice(set FieldSet) []string {
-	slice := make([]string, 0, len(set))
-	for k := range set {
-		slice = append(slice, k)
-	}
-	sort.Strings(slice)
-	return slice
-}
-
-func union[T any](a, b map[string]T) map[string]struct{} {
-	c := make(map[string]struct{})
-	for k := range a {
-		c[k] = struct{}{}
-	}
-	for k := range b {
-		c[k] = struct{}{}
-	}
-	return c
 }
