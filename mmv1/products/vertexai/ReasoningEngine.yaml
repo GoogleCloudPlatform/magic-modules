@@ -41,6 +41,7 @@ custom_code:
 examples:
   - name: 'vertex_ai_reasoning_engine_basic'
     primary_resource_id: 'reasoning_engine'
+    exclude_docs: true
     vars:
       name: 'reasoning-engine'
   - name: 'vertex_ai_reasoning_engine_full'
