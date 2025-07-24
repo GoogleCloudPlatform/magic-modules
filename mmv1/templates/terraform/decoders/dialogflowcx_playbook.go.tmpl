@@ -27,13 +27,9 @@ if displayName == "Playbook Example with Fulfillment" {
 		advancedSettings, ok := fulfillment["advancedSettings"].(map[string]interface{})
 		if !ok { return fmt.Errorf("'advancedSettings' is not a map") }
 
-		// --- Update the value in the parent map ---
-		advancedSettings["audioExportGcsDestination"] = map[string]interface{}{"uri": "gs://tf-test-dialogflowcx-bucketuldirhyyor/prefix-"}
-		advancedSettings["loggingSettings"] = map[string]interface{}{
-			"enableConsentBasedRedaction": true,
-			"enableInteractionLogging": true,
-			"enableStackdriverLogging": true,
-		}
+		// --- Update the value to use the original ---
+		advancedSettings["audioExportGcsDestination"] = d.Get("handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination").(map[string]interface{})
+		advancedSettings["loggingSettings"] = d.Get("handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.logging_settings").(map[string]interface{})
 
 		return nil
 	}
@@ -61,13 +57,9 @@ if displayName == "Playbook Example with Fulfillment" {
 		advancedSettings, ok := fulfillment["advancedSettings"].(map[string]interface{})
 		if !ok { return fmt.Errorf("'advancedSettings' is not a map") }
 
-		// --- Update the value in the parent map ---
-		advancedSettings["audioExportGcsDestination"] = map[string]interface{}{"uri": "gs://tf-test-dialogflowcx-bucketuldirhyyor/prefix-"}
-		advancedSettings["loggingSettings"] = map[string]interface{}{
-			"enableConsentBasedRedaction": true,
-			"enableInteractionLogging": true,
-			"enableStackdriverLogging": true,
-		}
+		// --- Update the value to use the original ---
+		advancedSettings["audioExportGcsDestination"] = d.Get("handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination").(map[string]interface{})
+		advancedSettings["loggingSettings"] = d.Get("handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.logging_settings").(map[string]interface{})
 
 		return nil
 	}
