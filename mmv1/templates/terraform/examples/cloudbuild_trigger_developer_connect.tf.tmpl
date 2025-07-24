@@ -1,31 +1,9 @@
-resource "google_developer_connect_connection" "my-connection" {
-  location      = "us-central1"
-  connection_id = "my-connection" # This is what you should use for identification
-  
-  github_config {
-    github_app          = "DEVELOPER_CONNECT"
-    app_installation_id = {{index $.Vars "installation_id"}}
-    authorizer_credential {
-      oauth_token_secret_version = "{{index $.Vars "pat_secret"}}"
-    }
-  }
-}
-
-resource "google_developer_connect_git_repository_link" "my-repository" {
-  location = "us-central1"
-  git_repository_link_id = "my-repo"
-  parent_connection = google_developer_connect_connection.my-connection.connection_id
-  clone_uri        = "https://github.com/gcb-developerconnect-robot/tf-demo.git"
-  annotations       = {}
-}
-
-
 resource "google_cloudbuild_trigger" "my_trigger" {
   name     = "my-github-trigger-via-dev-connect"
   location = "us-central1"
 
   developer_connect_event_config {
-    git_repository_link = google_developer_connect_git_repository_link.my-repository.id
+    git_repository_link = projects/gcb-terraform-creds/locations/us-central1/connections/developer-connect-connection/gitRepositoryLinks/gcb-repos-robot-tf-demo
     push {
       branch = "main"
     }
