@@ -148,9 +148,12 @@ examples:
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
-      environment: 'dev'
-      region_backend_service_name: 'region-service'
-      project_id: 'my-project'
+      ilb-network-endpoint: "ilb-network-endpoint-group-zonal"
+      ilb-health-check-zonal: "ilb-health-check-zonal" 
+      ilb-backend-service-zonal: "ilb-backend-service-zonal"
+      ilb-url-map-zonal: "ilb-url-map-zonal"
+      ilb-target-http-proxy-zonal: "ilb-target-http-proxy-zonal"
+      ilb-global-forwarding-rule-zonal: "ilb-global-forwarding-rule-zonal"     
 parameters:
   - name: 'region'
     type: ResourceRef
