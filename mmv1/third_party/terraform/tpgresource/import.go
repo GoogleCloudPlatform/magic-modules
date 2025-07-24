@@ -50,8 +50,10 @@ func ParseImportId(idRegexes []string, d TerraformResourceData, config *transpor
 					if err = d.Set(fieldName, fieldValue); err != nil {
 						return err
 					}
-					if err = identity.Set(fieldName, fieldValue); err != nil {
-						return err
+					if identity != nil {
+						if err = identity.Set(fieldName, fieldValue); err != nil {
+							return err
+						}
 					}
 				} else if _, ok := val.(int); ok {
 					if intVal, atoiErr := strconv.Atoi(fieldValue); atoiErr == nil {
@@ -60,8 +62,10 @@ func ParseImportId(idRegexes []string, d TerraformResourceData, config *transpor
 						if err = d.Set(fieldName, intVal); err != nil {
 							return err
 						}
-						if err = identity.Set(fieldName, intVal); err != nil {
-							return err
+						if identity != nil {
+							if err = identity.Set(fieldName, intVal); err != nil {
+								return err
+							}
 						}
 					} else {
 						return fmt.Errorf("%s appears to be an integer, but %v cannot be parsed as an int", fieldName, fieldValue)
@@ -99,6 +103,9 @@ func ParseImportId(idRegexes []string, d TerraformResourceData, config *transpor
 }
 
 func identityImport(re *regexp.Regexp, identity *schema.IdentityData, idFormat string, d TerraformResourceData) error {
+	if identity == nil {
+		return nil
+	}
 	log.Print("[DEBUG] Using IdentitySchema to import resource")
 	namedGroups := re.SubexpNames()
 	log.Printf("[DEBUG] Named Groups %v", namedGroups)
