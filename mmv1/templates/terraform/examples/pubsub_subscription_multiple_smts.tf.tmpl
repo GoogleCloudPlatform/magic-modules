@@ -28,8 +28,10 @@ EOF
   ]
 }
 
-resource "google_pubsub_topic" "topic" {
-  name = "example-topic"
+resource "google_pubsub_subscription" "{{$.PrimaryResourceId}}" {
+  name  = "{{index $.Vars "subscription_name"}}"
+  topic = google_pubsub_topic.{{$.PrimaryResourceId}}.id
+
   dynamic "message_transforms" {
     for_each = local.smts
 
