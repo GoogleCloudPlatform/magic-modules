@@ -19,12 +19,8 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Resou
 		return nil, nil
 	}
 	val := v.(string)
-
-	// If the value already has a fully qualified URL, return it unchanged
 	if strings.HasPrefix(val, "https://www.googleapis.com/compute/v1/") {
 		return val, nil
 	}
-
-	// Otherwise, prepend the standard API prefix
 	return "https://www.googleapis.com/compute/v1/" + val, nil
 }
