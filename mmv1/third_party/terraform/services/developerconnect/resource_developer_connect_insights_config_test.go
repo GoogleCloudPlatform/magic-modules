@@ -143,7 +143,7 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 
 	resource "google_project_service" "devconnect_api" {
 		project = google_project.project.project_id
-		service = "staging-developerconnect.sandbox.googleapis.com"
+		service = "developerconnect.googleapis.com"
 		depends_on = [google_project.project]
 	}
 
@@ -266,7 +266,7 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 
 	resource "google_project_service" "devconnect_api" {
 		project = google_project.project.project_id
-		service = "staging-developerconnect.sandbox.googleapis.com"
+		service = "developerconnect.googleapis.com"
 		depends_on = [google_project.project]
 	}
 
