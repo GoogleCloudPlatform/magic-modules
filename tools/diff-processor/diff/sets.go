@@ -1,7 +1,5 @@
 package diff
 
-
-
 // FieldSet is a set of strings representing fields.
 type FieldSet map[string]struct{}
 

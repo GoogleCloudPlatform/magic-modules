@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	newProvider "google/provider/new/google/provider"
-	
+
 	newVerify "google/provider/new/google/verify"
 	oldProvider "google/provider/old/google/provider"
 	oldVerify "google/provider/old/google/verify"
@@ -577,8 +577,6 @@ func TestFieldChanged(t *testing.T) {
 			expectChanged: true,
 		},
 
-		
-
 		"DefaultFunc added": {
 			oldField: &schema.Schema{},
 			newField: &schema.Schema{
@@ -712,8 +710,6 @@ func TestFieldChanged(t *testing.T) {
 			},
 			expectChanged: false,
 		},
-
-		
 
 		"ValidateFunc added": {
 			oldField: &schema.Schema{},

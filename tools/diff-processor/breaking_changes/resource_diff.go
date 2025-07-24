@@ -146,7 +146,7 @@ func isContainedInNewOptionalAncestor(field string, diff diff.ResourceDiff) bool
 	if !ok {
 		return false
 	}
-	
+
 	isAncestorNew := ancestorDiff.Old == nil && ancestorDiff.New != nil
 	isAncestorOptional := ancestorDiff.New != nil && ancestorDiff.New.Optional
 
