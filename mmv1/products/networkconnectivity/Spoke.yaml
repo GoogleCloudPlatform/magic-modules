@@ -226,7 +226,6 @@ properties:
         type: Array
         description: The list of router appliance instances
         required: true
-        immutable: true
         item_type:
           description: The list of router appliance instances
           type: NestedObject
@@ -234,13 +233,11 @@ properties:
             - name: 'virtualMachine'
               type: String
               description: The URI of the virtual machine resource
-              immutable: true
               required: true
               diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
             - name: 'ipAddress'
               type: String
               description: The IP address on the VM to use for peering.
-              immutable: true
               required: true
       - name: 'siteToSiteDataTransfer'
         type: Boolean
