@@ -3,10 +3,13 @@ if err != nil {
 	return err
 }
 
-project, err := tpgresource.GetProject(d, config)
-if err != nil {
-	return fmt.Errorf("Error fetching project for Settings: %s", err)
+name := d.Get("name").(string)
+re := regexp.MustCompile("projects/([^/]+)")
+match := re.FindStringSubmatch(name)
+if len(match) < 2 {
+	return fmt.Errorf("could not parse project from name %q", name)
 }
+project := match[1]
 
 headers := make(http.Header)
 
