@@ -96,48 +96,56 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 	resource "google_project_service" "apphub_api_service" {
 		project = google_project.project.project_id
 		service = "apphub.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
 	resource "google_project_service" "containeranalysis_api" {
 		project = google_project.project.project_id
 		service = "containeranalysis.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
 	resource "google_project_service" "containerscanning_api" {
 		project = google_project.project.project_id
 		service = "containerscanning.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
 	resource "google_project_service" "container_api" {
 		project = google_project.project.project_id
 		service = "container.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
 	resource "google_project_service" "artifactregistry_api" {
 		project = google_project.project.project_id
 		service = "artifactregistry.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
 	resource "google_project_service" "cloudbuild_api" {
 		project = google_project.project.project_id
 		service = "cloudbuild.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
 	resource "google_project_service" "cloudasset_api" {
 		project = google_project.project.project_id
 		service = "cloudasset.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
 	resource "google_project_service" "compute_api" {
 		project = google_project.project.project_id
 		service = "compute.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
@@ -216,51 +224,59 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 	}
 
 	# Enable APIs
-	resource "google_project_service" "apphub_api_service" {
+		resource "google_project_service" "apphub_api_service" {
 		project = google_project.project.project_id
 		service = "apphub.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
 	resource "google_project_service" "containeranalysis_api" {
 		project = google_project.project.project_id
 		service = "containeranalysis.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
 	resource "google_project_service" "containerscanning_api" {
 		project = google_project.project.project_id
 		service = "containerscanning.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
 	resource "google_project_service" "container_api" {
 		project = google_project.project.project_id
 		service = "container.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
 	resource "google_project_service" "artifactregistry_api" {
 		project = google_project.project.project_id
 		service = "artifactregistry.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
 	resource "google_project_service" "cloudbuild_api" {
 		project = google_project.project.project_id
 		service = "cloudbuild.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
 	resource "google_project_service" "cloudasset_api" {
 		project = google_project.project.project_id
 		service = "cloudasset.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
 	resource "google_project_service" "compute_api" {
 		project = google_project.project.project_id
 		service = "compute.googleapis.com"
+		disable_dependent_services=true
 		depends_on = [google_project.project]
 	}
 
