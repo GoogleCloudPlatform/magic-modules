@@ -1831,6 +1831,7 @@ func flattenBootDiskConfig(c *container.BootDisk) []map[string]interface{} {
 		"provisioned_iops": c.ProvisionedIops,
 		"provisioned_throughput": c.ProvisionedThroughput,
 	})
+
 	return config
 }
 
@@ -2427,6 +2428,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 			d.HasChange("node_config.0.machine_type") ||
 			d.HasChange("node_config.0.storage_pools") ||
 			d.HasChange("node_config.0.boot_disk") {
+
 			req := &container.UpdateNodePoolRequest{
 				Name:        name,
 				DiskSizeGb:  int64(d.Get("node_config.0.disk_size_gb").(int)),
@@ -2443,8 +2445,33 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				}
 				req.StoragePools = storagePools
 			}
+
 			if v, ok := d.GetOk("node_config.0.boot_disk"); ok {
-				req.BootDisk = expandBootDiskConfig(v)
+				bd := expandBootDiskConfig(v)
+				req.BootDisk = bd
+
+				// The following checks are to ensure that the migrating fields are handled properly.
+				// Migrating fields are disk_type -> boot_disk.disk_type and disk_size_gb -> boot_disk.size_gb
+				// If the legacy (top level) disk_type field is not changing, nil it out to allow the API to fill it in.
+				legacyDiskTypeOld, legacyDiskTypeNew := d.GetChange("node_config.0.disk_type")
+				if legacyDiskTypeOld == legacyDiskTypeNew {
+					req.DiskType = ""
+				}
+				// If the new boot disk configuration disk_filed is not changing, nil it out to allow the API to fill it in.
+				bootDiskTypeOld, bootDiskTypeNew := d.GetChange("node_config.0.boot_disk.0.disk_type")
+				if bootDiskTypeOld == bootDiskTypeNew {
+					req.BootDisk.DiskType = ""
+				}
+				// If the legacy (top level) disk_size_gb field is not changing, nil it out to allow the API to fill it in.
+				legacyDiskSizeGbOld, legacyDiskSizeGbNew := d.GetChange("node_config.0.disk_size_gb")
+				if legacyDiskSizeGbOld == legacyDiskSizeGbNew {
+					req.DiskSizeGb = 0
+				}
+				// if the new boot disk configuration size_gb field is not changing, nit it out to allow the API to fill it in.
+				bootDiskSizeGbOld, bootDiskSizeGbNew := d.GetChange("node_config.0.boot_disk.0.size_gb")
+				if bootDiskSizeGbOld == bootDiskSizeGbNew {
+					req.BootDisk.SizeGb = 0
+				}
 			}
 
 			updateF := func() error {
