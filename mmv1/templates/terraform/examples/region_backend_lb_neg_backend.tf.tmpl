@@ -1,20 +1,14 @@
 data "google_compute_network_endpoint_group" "ilb_network_endpoint_group_zonal" {
-  count   = {{ if or (eq (index $.Vars "environment") "qa") (eq (index $.Vars "environment") "test") (eq (index $.Vars "environment") "dev") }}1{{ else }}0{{ end }}
-  name    = "name-{{index $.Vars "environment"}}-jira-neg"
-  project = "{{index $.Vars "project_id"}}"
+  name    = "{{index $.Vars "ilb-network-endpoint"}}"
   zone    = "us-central1-a"
-
   depends_on = [
     helm_release.jira
   ]
 }
 
 resource "google_compute_region_health_check" "ilb_health_check_zonal" {
-  count   = {{ if or (eq (index $.Vars "environment") "qa") (eq (index $.Vars "environment") "test") (eq (index $.Vars "environment") "dev") }}1{{ else }}0{{ end }}
-  name    = "name-{{index $.Vars "environment"}}-ilb-health-check"
-  project = "{{index $.Vars "project_id"}}"
+  name    = "{{index $.Vars "ilb-health-check-zonal"}}"
   region  = "us-central1"
-  
   timeout_sec         = 5
   check_interval_sec  = 5
   healthy_threshold   = 2
@@ -28,9 +22,7 @@ resource "google_compute_region_health_check" "ilb_health_check_zonal" {
 }
 
 resource "google_compute_region_backend_service" "ilb_backend_service_zonal" {
-  count                 = {{ if or (eq (index $.Vars "environment") "dev") (eq (index $.Vars "environment") "test") (eq (index $.Vars "environment") "qa") }}1{{ else }}0{{ end }}
-  name                  = "name-{{index $.Vars "environment"}}-ilb-backend-service"
-  project               = "{{index $.Vars "project_id"}}"
+  name                  = "{{index $.Vars "ilb-backend-service-zonal"}}"
   region                = "us-central1"
   health_checks         = [google_compute_region_health_check.ilb_health_check_zonal[0].id]
   protocol              = "HTTP"
@@ -53,25 +45,19 @@ resource "google_compute_region_backend_service" "ilb_backend_service_zonal" {
 }
 
 resource "google_compute_region_url_map" "ilb_url_map_zonal" {
-  count           = {{ if or (eq (index $.Vars "environment") "dev") (eq (index $.Vars "environment") "test") (eq (index $.Vars "environment") "qa") }}1{{ else }}0{{ end }}
-  name            = "name-{{index $.Vars "environment"}}-ilb-url-map"
-  project         = "{{index $.Vars "project_id"}}"
+  name            = "{{index $.Vars "ilb-url-map-zonal"}}"
   region          = "us-central1"
   default_service = google_compute_region_backend_service.ilb_backend_service_zonal[0].id
 }
 
 resource "google_compute_region_target_http_proxy" "ilb_target_http_proxy_zonal" {
-  count   = {{ if or (eq (index $.Vars "environment") "dev") (eq (index $.Vars "environment") "test") (eq (index $.Vars "environment") "qa") }}1{{ else }}0{{ end }}
-  name    = "name-{{index $.Vars "environment"}}-ilb-https-proxy"
-  project = "{{index $.Vars "project_id"}}"
+  name    = "{{index $.Vars "ilb-target-http-proxy-zonal"}}"
   region  = "us-central1"
   url_map = google_compute_region_url_map.ilb_url_map_zonal[0].id
 }
 
 resource "google_compute_forwarding_rule" "ilb_global_forwarding_rule_zonal" {
-  count                 = {{ if or (eq (index $.Vars "environment") "dev") (eq (index $.Vars "environment") "test") (eq (index $.Vars "environment") "qa") }}1{{ else }}0{{ end }}
-  name                  = "name-{{index $.Vars "environment"}}-ilb-global-forwarding-rule"
-  project               = "{{index $.Vars "project_id"}}"
+  name                  = "{{index $.Vars "ilb-global-forwarding-rule-zonal"}}"
   region                = "us-central1"
   network               = data.google_compute_network.network.self_link
   subnetwork            = data.google_compute_subnetwork.subnet.self_link
