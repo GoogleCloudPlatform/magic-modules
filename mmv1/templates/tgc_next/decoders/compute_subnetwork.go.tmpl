@@ -10,14 +10,14 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-{{- define "expandResourcerefWithValidation" }}
-func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	f, err := tpgresource.ParseProjectFieldValue("{{$.ResourceType}}", v.(string), "project", d, config, true)
-	if err != nil {
-		return nil, fmt.Errorf("Invalid value for {{underscore $.Name}}: %s", err)
+// In the GET API response, the field stackType is not present.
+// In CAI asset,  "stackType" has value "UNSPECIFIED_STACK_TYPE"
+// So set the value to empty string in this case.
+if raw, ok := res["stackType"]; ok {
+	v := raw.(string)
+	if v == "UNSPECIFIED_STACK_TYPE" {
+		res["stackType"] = ""
 	}
-
-	fullUrl := tgcresource.GetComputeSelfLink(config, f.RelativeLink())
-	return fullUrl, nil
 }
-{{- end }}
+
+return res, nil

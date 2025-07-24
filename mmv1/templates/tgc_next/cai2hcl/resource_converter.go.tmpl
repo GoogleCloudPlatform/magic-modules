@@ -33,6 +33,7 @@ import (
 	"google.golang.org/api/bigtableadmin/v2"
 	"google.golang.org/api/googleapi"
 
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/models"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tgcresource"
@@ -79,8 +80,13 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 	config := transport.NewConfig()
 	d := &schema.ResourceData{}
 
+{{	if $.TgcHclBlockName -}}
+	hclBlockName := res["{{ $.TgcHclBlockName -}}"].(string)
+
+	{{- else -}}
 	assetNameParts := strings.Split(asset.Name, "/")
 	hclBlockName := assetNameParts[len(assetNameParts)-1]
+{{ end}}
 
 	hclData := make(map[string]interface{})
 
@@ -103,21 +109,14 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 	}
 {{ end}}
 
+{{/* Attempt to parse all self-link parameters from asset name. */}}
+	outputFields := {{ $.OutputFieldSetStr }}
+	utils.ParseUrlParamValuesFromAssetName(asset.Name, "{{ $.CaiAssetNameTemplate $productBackendName }}", outputFields, hclData)
 {{ range $prop := $.ReadPropertiesForTgc }}
 	{{ if $prop.FlattenObject -}}
-	// Terraform must set the top level schema field, but since this object contains collapsed properties
-	// it's difficult to know what the top level should be. Instead we just loop over the map returned from flatten.
 	if flattenedProp := flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config); flattenedProp != nil {
-		flattenedPropSlice, ok := flattenedProp.([]interface{})
-		if !ok || len(flattenedPropSlice) == 0 {
-			return nil, fmt.Errorf("unexpected type returned from flattener: %T", flattenedProp)
-		}
-		flattedPropMap, ok := flattenedPropSlice[0].(map[string]interface{})
-		if !ok || len(flattedPropMap) == 0 {
-			return nil, fmt.Errorf("unexpected type returned from flattener: %T", flattenedPropSlice)
-		}
-		for k, v := range flattedPropMap {
-			hclData[k] = v
+		if err := tgcresource.MergeFlattenedProperties(hclData, flattenedProp); err != nil {
+			return nil, fmt.Errorf("error merging flattened properties from {{ $prop.Name }}: %s", err)
 		}
 	}
 	{{- else -}}
@@ -136,22 +135,7 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 }
 
 {{ range $prop := $.ReadPropertiesForTgc }}
-	{{- if $prop.CustomTgcFlatten }}
-{{ $prop.CustomTemplate $prop.CustomTgcFlatten true -}}
-	{{- else if $prop.IsA "KeyValueLabels" }}
-func flatten{{$prop.GetPrefix}}{{$prop.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	return tgcresource.RemoveTerraformAttributionLabel(v)
-}
-	{{- else if or (and (eq $prop.Name "zone") $.HasZone) (and (eq $prop.Name "region") $.HasRegion) -}}
-func flatten{{$prop.GetPrefix}}{{$prop.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-	if v == nil {
-		return v
-	}
-	return tpgresource.GetResourceNameFromSelfLink(v.(string))
-}
-	{{- else }}
-{{ template "flattenPropertyMethod" $prop -}}
-	{{- end }}
+{{- template "flattenTgcPropertyMethod" $prop -}}
 {{- end }}
 
 {{- if $.CustomCode.TgcDecoder }}

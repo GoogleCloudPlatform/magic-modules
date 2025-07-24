@@ -566,6 +566,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "ModelArmor",
         "path" to "./google-beta/services/modelarmor"
     ),
+    "modelarmorglobal" to mapOf(
+        "name" to "modelarmorglobal",
+        "displayName" to "ModelArmorGlobal",
+        "path" to "./google-beta/services/modelarmorglobal"
+    ),
     "monitoring" to mapOf(
         "name" to "monitoring",
         "displayName" to "Monitoring",
