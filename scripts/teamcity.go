@@ -78,6 +78,8 @@ func (test *TeamCityTest) FormatTestOutput() string {
 
 	if test.Diff {
 		output.WriteString(fmt.Sprintf(TeamCityTestDiffFailed, now, test.Name))
+		// have to fail so that teamcity catches failure correctly
+		output.WriteString(fmt.Sprintf(TeamCityTestFailedPanic, now, test.Name))
 		output.WriteString(fmt.Sprintf(TeamCityTestFinished, now, test.Name))
 		return output.String()
 
@@ -105,7 +107,7 @@ func (test *TeamCityTest) FormatTestOutput() string {
 		return output.String()
 	}
 
-	output.WriteString(fmt.Sprintf(TeamCityTestFailedPanic, now, test.Name))
+	// test passes if no diff, even if failure (failure artifacts will be in regular_failure_file.log)
 	output.WriteString(fmt.Sprintf(TeamCityTestFinished, now, test.Name))
 
 	return output.String()
