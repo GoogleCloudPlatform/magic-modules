@@ -3,6 +3,7 @@ package dataprocmetastore_test
 import (
 	"fmt"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -164,6 +165,65 @@ resource "google_dataproc_metastore_service" "backup" {
 resource "google_storage_bucket" "bucket" {
   name     = "tf-test-backup%{random_suffix}"
   location = "us-central1"
+}
+`, context)
+}
+
+func TestAccMetastoreService_tags(t *testing.T) {
+	t.Parallel()
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "metastore-service-tagkey", map[string]interface{}{})
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "metastore-service-tagvalue", tagKey),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocMetastoreServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccMetastoreServiceTags(context),
+				Check: resource.TestCheckFunc(
+					resource.TestCheckResourceAttrSet(
+						"google_dataproc_metastore_service.default", "tags.%"),
+				),
+			},
+			{
+				ResourceName:            "google_dataproc_metastore_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"service_id", "location", "labels", "terraform_labels", "tags"},
+			},
+		},
+	})
+}
+
+func testAccMetastoreServiceTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dataproc_metastore_service" "default" {
+  service_id   = "tf-test-my-service-%{random_suffix}"
+  location   = "us-central1"
+  port       = 9080
+  tier       = "DEVELOPER"
+
+  maintenance_window {
+    hour_of_day = 2
+    day_of_week = "SUNDAY"
+   }
+
+  hive_metastore_config {
+    version = "2.3.6"
+  }
+
+  labels = {
+    env = "test"
+  }
+  tags = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
 }
 `, context)
 }
