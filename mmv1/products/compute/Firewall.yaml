@@ -73,7 +73,7 @@ examples:
       project: 'PROJECT_NAME'
 parameters:
 properties:
-  # TODO(nelsonjr): [nice to have] Make the format here simpler to use, in
+  # TODO: [nice to have] Make the format here simpler to use, in
   # the form of # 22/tcp, [12345-23456]/tcp. It requires a conversion
   # function to the # final JSON format expected by the API for this
   # proposal to work.
