@@ -1,0 +1,4 @@
+// Always force-send `kms_key` value. This field is immutable and required.
+// In update operation, the immutable value of this field is ignored and not found, generating generating error: "Field \"kms_key_name\" is a required field, but no value is found."
+obj["kmsKey"] = d.Get("kms_key")
+return obj, nil

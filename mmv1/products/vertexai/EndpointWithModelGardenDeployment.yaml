@@ -16,10 +16,6 @@ name: EndpointWithModelGardenDeployment
 api_resource_type_kind: Endpoint
 description: |
   Create an Endpoint and deploy a Model Garden model to it.
-
-  ~> **Note:** This resource does not currently support deletion via Terraform and must be manually deleted if not in use.
-  See https://cloud.google.com/vertex-ai/docs/predictions/undeploy-model for instructions on how to undeploy a model and delete an endpoint
-  via the Google Cloud console.
 references:
   guides:
     "Use models in Model Garden": "https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/use-models"
@@ -33,10 +29,10 @@ self_link: "projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}"
 create_url: "projects/{{project}}/locations/{{location}}:deploy"
 immutable: true
 exclude_read: true
-exclude_delete: true  # the resource does not yet support deletion
 exclude_import: true  # the resource does not support import
 timeouts:
   insert_minutes: 180
+  delete_minutes: 20
 autogen_status: RW5kcG9pbnRXaXRoTW9kZWxHYXJkZW5EZXBsb3ltZW50
 async:
   actions: ["create"]
@@ -49,15 +45,48 @@ async:
     resource_inside_response: true
 custom_code:
   post_create: "templates/terraform/post_create/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl"
+  custom_delete: "templates/terraform/custom_delete/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl"
 examples:
-  - name: "vertex_ai_deploy"
+  - name: "vertex_ai_deploy_basic"
     primary_resource_id: "deploy"
     vars:
       project: "vertex-ai"
       publisher_model_name: "publisher_model_name"
     ignore_read_extra:
       - "project"
-    exclude_test: true
+    exclude_test: true  # handwritten test required since resource does not support import
+  - name: "vertex_ai_deploy_huggingface_model"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
+  - name: "vertex_ai_deploy_with_configs"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
+  - name: "vertex_ai_deploy_multiple_models_in_parallel"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
+  - name: "vertex_ai_deploy_multiple_models_in_sequence"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
 parameters:
   - name: location
     type: String
@@ -74,6 +103,19 @@ properties:
       Resource ID segment making up resource `endpoint`. It identifies the
       resource within its parent collection as described in https://google.aip.dev/122.
     url_param_only: true
+    output: true
+  - name: deployedModelId
+    type: String
+    description: |
+      Output only. The unique numeric ID that Vertex AI assigns to the model at the time it is deployed to the endpoint.
+      It is required to undeploy the model from the endpoint during resource deletion as described in
+      https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.endpoints/undeployModel.
+    output: true
+  - name: deployedModelDisplayName
+    type: String
+    description: |
+      Output only. The display name assigned to the model deployed to the endpoint.
+      This is not required to delete the resource but is used for debug logging.
     output: true
   - name: publisherModelName
     type: String

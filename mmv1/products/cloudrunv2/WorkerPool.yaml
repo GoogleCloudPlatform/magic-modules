@@ -299,6 +299,7 @@ properties:
         type: Integer
         description: |
           The total number of instances in manual scaling mode.
+        send_empty_value: true
   - name: 'template'
     type: NestedObject
     description: |

@@ -55,7 +55,7 @@ examples:
     vars:
       repository_id: 'my-repository'
       instance_id: 'my-instance'
-      deletion_policy: '"PREVENT"'
+      deletion_policy: 'PREVENT'
     test_vars_overrides:
       'deletion_policy': '"DELETE"'
     oics_vars_overrides:
@@ -66,7 +66,7 @@ examples:
     vars:
       repository_id: 'my-repository'
       instance_id: 'my-instance'
-      deletion_policy: '"PREVENT"'
+      deletion_policy: 'PREVENT'
     test_vars_overrides:
       'deletion_policy': '"DELETE"'
     oics_vars_overrides:

@@ -47,7 +47,7 @@ examples:
       branch_rule_id: 'my-basic-branchrule'
       repository_id: 'my-basic-repository'
       instance_id: 'my-basic-instance'
-      deletion_policy: '"PREVENT"'
+      deletion_policy: 'PREVENT'
     test_vars_overrides:
       'deletion_policy': '"DELETE"'
     oics_vars_overrides:
@@ -58,7 +58,7 @@ examples:
       branch_rule_id: 'my-initial-branchrule'
       repository_id: 'my-initial-repository'
       instance_id: 'my-initial-instance'
-      deletion_policy: '"PREVENT"'
+      deletion_policy: 'PREVENT'
     test_vars_overrides:
       'deletion_policy': '"DELETE"'
     oics_vars_overrides:

@@ -56,4 +56,59 @@ if err := d.Set("endpoint", endpoint); err != nil {
 d.SetId(endpointFull)
 log.Printf("[DEBUG] Set Terraform resource ID to: %s", endpointFull)
 
-return nil
+// Extract deployedModelId and deployedModelDisplayName of model deployed to the endpoint
+// Make API call to read the endpoint and retrieve deployed model ID and display name
+readUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}")
+if err != nil {
+    return err
+}
+readHeaders := make(http.Header)
+
+readRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions {
+    Config:    config,
+    Method:    "GET",
+    Project:   billingProject,
+    RawURL:    readUrl,
+    UserAgent: userAgent,
+    Headers:   readHeaders,
+})
+if err != nil {
+    return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("VertexAIEndpointWithModelGardenDeployment %q", d.Id()))
+}
+
+//  Access the 'deployedModels' attribute from the response.
+deployedModelsRaw, ok := readRes["deployedModels"]
+if !ok || deployedModelsRaw == nil {
+    log.Printf("[ERROR] No deployed models found in the endpoint response")
+    return fmt.Errorf("Error creating EndpointWithModelGardenDeployment: No deployed models found in the endpoint response.")
+}
+
+deployedModels, ok := deployedModelsRaw.([]interface{})
+if !ok {
+    log.Printf("[ERROR] 'deployedModels' field of endpoint response is not an array as expected")
+    return fmt.Errorf("Error creating EndpointWithModelGardenDeployment: 'deployedModels' field is not an array as expected.")
+}
+
+// Access first (and only) deployed model at endpoint
+deployedModelRaw := deployedModels[0]
+
+deployedModel, ok := deployedModelRaw.(map[string]interface{})
+if !ok {
+	return fmt.Errorf("Error creating EndpointWithModelGardenDeployment: model in 'deployedModels' field of endpoint response is not a map as expected.")
+}
+
+// Extract deployed model ID and display name and set Terraform fields
+if deployedModelId, ok := deployedModel["id"].(string); ok {
+	log.Printf("[DEBUG] ID of deployed model: %s", deployedModelId)
+	
+	if err := d.Set("deployed_model_id", deployedModelId); err != nil {
+		return fmt.Errorf("Error setting deployedModelId: %s", err)
+	}
+}
+if deployedModelDisplayName, ok := deployedModel["displayName"].(string); ok {
+	log.Printf("[DEBUG] Display name of deployed model: %s", deployedModelDisplayName)
+	
+	if err := d.Set("deployed_model_display_name", deployedModelDisplayName); err != nil {
+		return fmt.Errorf("Error setting deployedModelDisplayName: %s", err)
+	}
+}
