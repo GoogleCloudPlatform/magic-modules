@@ -226,13 +226,6 @@ type Resource struct {
 	// If true, resource is not importable
 	ExcludeImport bool `yaml:"exclude_import,omitempty"`
 
-	// If true, exclude resource from Terraform Validator
-	// (i.e. terraform-provider-conversion)
-	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
-
-	// If true, include resource in the new package of TGC (terraform-provider-conversion)
-	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
-
 	// If true, skip sweeper generation for this resource
 	ExcludeSweeper bool `yaml:"exclude_sweeper,omitempty"`
 
@@ -359,6 +352,30 @@ type Resource struct {
 
 	ImportPath     string `yaml:"-"`
 	SourceYamlFile string `yaml:"-"`
+
+	// ====================
+	// TGC
+	// ====================
+	TGCResource `yaml:",inline"`
+}
+
+type TGCResource struct {
+	// If true, exclude resource from Terraform Validator
+	// (i.e. terraform-provider-conversion)
+	ExcludeTgc bool `yaml:"exclude_tgc,omitempty"`
+
+	// If true, include resource in the new package of TGC (terraform-provider-conversion)
+	IncludeInTGCNext bool `yaml:"include_in_tgc_next_DO_NOT_USE,omitempty"`
+
+	// Name of the hcl resource block used in TGC
+	TgcHclBlockName string `yaml:"tgc_hcl_block_name,omitempty"`
+
+	// The resource kind in CAI.
+	// If this is not set, then :name is used instead.
+	// For example: compute.googleapis.com/Address has Address for CaiResourceKind,
+	// and compute.googleapis.com/GlobalAddress has GlobalAddress for CaiResourceKind.
+	// But they have the same api resource type: address
+	CaiResourceKind string `yaml:"cai_resource_kind,omitempty"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -1891,11 +1908,46 @@ func (r Resource) CaiProductBaseUrl() string {
 	return baseUrl
 }
 
+// Gets the CAI product legacy base url.
+// For example, https://www.googleapis.com/compute/v1/ for compute
+func (r Resource) CaiProductLegacyBaseUrl() string {
+	version := r.ProductMetadata.VersionObjOrClosest(r.TargetVersionName)
+	baseUrl := version.CaiLegacyBaseUrl
+	if baseUrl == "" {
+		baseUrl = version.CaiBaseUrl
+	}
+	if baseUrl == "" {
+		baseUrl = version.BaseUrl
+	}
+	return baseUrl
+}
+
 // Returns the Cai product backend name from the version base url
 // base_url: https://accessapproval.googleapis.com/v1/ -> accessapproval
 func (r Resource) CaiProductBackendName(caiProductBaseUrl string) string {
 	backendUrl := strings.Split(strings.Split(caiProductBaseUrl, "://")[1], ".googleapis.com")[0]
 	return strings.ToLower(backendUrl)
+}
+
+// Returns the asset type for this resource.
+func (r Resource) CaiAssetType() string {
+	baseURL := r.CaiProductBaseUrl()
+	productBackendName := r.CaiProductBackendName(baseURL)
+	return fmt.Sprintf("%s.googleapis.com/%s", productBackendName, r.CaiResourceName())
+}
+
+// DefineAssetTypeForResourceInProduct marks the AssetType constant for this resource as defined.
+// It returns true if this is the first time it's been called for this resource,
+// and false otherwise, preventing duplicate definitions.
+func (r Resource) DefineAssetTypeForResourceInProduct() bool {
+	if r.ProductMetadata.ResourcesWithCaiAssetType == nil {
+		r.ProductMetadata.ResourcesWithCaiAssetType = make(map[string]struct{}, 1)
+	}
+	if _, alreadyDefined := r.ProductMetadata.ResourcesWithCaiAssetType[r.CaiResourceType()]; alreadyDefined {
+		return false
+	}
+	r.ProductMetadata.ResourcesWithCaiAssetType[r.CaiResourceType()] = struct{}{}
+	return true
 }
 
 // Gets the Cai asset name template, which could include version
@@ -2058,11 +2110,17 @@ func (r Resource) MarkdownHeader(templatePath string) string {
 // ====================
 // Lists fields that test.BidirectionalConversion should ignore
 func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string {
-	var props []string
+	props := []string{
+		"depends_on",
+		"count",
+		"for_each",
+		"provider",
+		"lifecycle",
+	}
 	for _, tp := range r.VirtualFields {
 		props = append(props, google.Underscore(tp.Name))
 	}
-	for _, tp := range r.AllUserProperties() {
+	for _, tp := range r.AllNestedProperties(r.RootProperties()) {
 		if tp.UrlParamOnly {
 			props = append(props, google.Underscore(tp.Name))
 		} else if tp.IsMissingInCai {
@@ -2078,6 +2136,44 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 // Filters out computed properties during cai2hcl
 func (r Resource) ReadPropertiesForTgc() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
-		return v.Output
+		return v.Output || v.UrlParamOnly
 	})
+}
+
+// OutputFieldSetStr returns a Go-syntax string representation of a set
+// containing all the output properties for a resource.
+// The property names are converted to snake_case.
+// This is useful for generating code that requires a map literal of field names.
+func (r Resource) OutputFieldSetStr() string {
+	fieldNames := make(map[string]struct{})
+	for _, tp := range r.AllUserProperties() {
+		if tp.Output {
+			fieldNames[google.Underscore(tp.Name)] = struct{}{}
+		}
+	}
+	return fmt.Sprintf("%#v", fieldNames)
+}
+
+// For example, the CAI resource type with product of "google_compute_autoscaler" is "ComputeAutoscalerAssetType".
+// The CAI resource type with product of "google_compute_region_autoscaler" is also "ComputeAutoscalerAssetType".
+func (r Resource) CaiResourceType() string {
+	return fmt.Sprintf("%s%s", r.ProductMetadata.Name, r.CaiResourceName())
+}
+
+// The API resource type of the resource. Normally, it is the resource name.
+// Rarely, it is the API "resource type kind" or CAI "resource kind"
+// For example, the CAI resource type of "google_compute_autoscaler" is "Autoscaler".
+// The CAI resource type of "google_compute_region_autoscaler" is also "Autoscaler".
+func (r Resource) CaiResourceName() string {
+	if r.CaiResourceKind != "" {
+		return r.CaiResourceKind
+	}
+	if r.ApiResourceTypeKind != "" {
+		return r.ApiResourceTypeKind
+	}
+	return r.Name
+}
+
+func (r Resource) IsTgcCompiler() bool {
+	return r.Compiler == "terraformgoogleconversionnext-codegen"
 }

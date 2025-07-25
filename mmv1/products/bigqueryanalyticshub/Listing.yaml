@@ -86,6 +86,17 @@ examples:
       listing_id: 'tf_test_pubsub_listing'
       pubsub_topic_name: 'test_pubsub'
       description: 'Example for pubsub topic source'
+  - name: 'bigquery_analyticshub_listing_dcr_routine'
+    primary_resource_id: 'listing'
+    primary_resource_name: 'fmt.Sprintf("tf_test_pubsub_de%s", context["random_suffix"]),fmt.Sprintf("tf_test_listing%s", context["random_suffix"])'
+    region_override: 'US'
+    min_version: beta
+    vars:
+      data_exchange_id: 'tf_test_data_exchange'
+      listing_id: 'tf_test_listing_routine'
+      dataset_id: 'tf_test_dataset'
+      routine_id: 'tf_test_routine'
+      desc: 'Example for listing with routine'
 parameters:
 properties:
   - name: 'name'
@@ -198,6 +209,19 @@ properties:
                 Format: For table: projects/{projectId}/datasets/{datasetId}/tables/{tableId} Example:"projects/test_project/datasets/test_dataset/tables/test_table"
               immutable: true
               diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+              exactly_one_of:
+                - 'table'
+                - 'routine'
+            - name: 'routine'
+              min_version: beta
+              type: String
+              description: |
+                Format: For routine: projects/{projectId}/datasets/{datasetId}/routines/{routineId} Example:"projects/test_project/datasets/test_dataset/routines/test_routine"
+              immutable: true
+              diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+              exactly_one_of:
+                - 'table'
+                - 'routine'
   - name: 'pubsubTopic'
     type: NestedObject
     description: Pub/Sub topic source.
@@ -240,5 +264,4 @@ properties:
   - name: 'logLinkedDatasetQueryUserEmail'
     type: Boolean
     description:
-      If true, subscriber email logging is enabled and all queries on the linked dataset will log the email address of the querying user.
-    immutable: true
+      If true, subscriber email logging is enabled and all queries on the linked dataset will log the email address of the querying user. Once enabled, this setting cannot be turned off.

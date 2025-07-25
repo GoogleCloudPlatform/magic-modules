@@ -556,6 +556,16 @@ var ServicesListGa = mapOf(
         "displayName" to "Mlengine",
         "path" to "./google/services/mlengine"
     ),
+    "modelarmor" to mapOf(
+        "name" to "modelarmor",
+        "displayName" to "ModelArmor",
+        "path" to "./google/services/modelarmor"
+    ),
+    "modelarmorglobal" to mapOf(
+        "name" to "modelarmorglobal",
+        "displayName" to "ModelArmorGlobal",
+        "path" to "./google/services/modelarmorglobal"
+    ),
     "monitoring" to mapOf(
         "name" to "monitoring",
         "displayName" to "Monitoring",

@@ -26,32 +26,30 @@ var wg sync.WaitGroup
 // TODO rewrite: additional flags
 
 // Example usage: --output $GOPATH/src/github.com/terraform-providers/terraform-provider-google-beta
-var outputPath = flag.String("output", "", "path to output generated files to")
+var outputPathFlag = flag.String("output", "", "path to output generated files to")
 
 // Example usage: --version beta
-var version = flag.String("version", "", "optional version name. If specified, this version is preferred for resource generation when applicable")
+var versionFlag = flag.String("version", "", "optional version name. If specified, this version is preferred for resource generation when applicable")
 
-var overrideDirectory = flag.String("overrides", "", "directory containing yaml overrides")
+var overrideDirectoryFlag = flag.String("overrides", "", "directory containing yaml overrides")
 
-var product = flag.String("product", "", "optional product name. If specified, the resources under the specific product will be generated. Otherwise, resources under all products will be generated.")
+var productFlag = flag.String("product", "", "optional product name. If specified, the resources under the specific product will be generated. Otherwise, resources under all products will be generated.")
 
-var resourceToGenerate = flag.String("resource", "", "optional resource name. Limits generation to the specified resource within a particular product.")
+var resourceFlag = flag.String("resource", "", "optional resource name. Limits generation to the specified resource within a particular product.")
 
 var doNotGenerateCode = flag.Bool("no-code", false, "do not generate code")
 
 var doNotGenerateDocs = flag.Bool("no-docs", false, "do not generate docs")
 
-var forceProvider = flag.String("provider", "", "optional provider name. If specified, a non-default provider will be used.")
+var providerFlag = flag.String("provider", "", "optional provider name. If specified, a non-default provider will be used.")
 
 var openapiGenerate = flag.Bool("openapi-generate", false, "Generate MMv1 YAML from openapi directory (Experimental)")
 
-// Example usage: --yaml
-var yamlMode = flag.Bool("yaml", false, "copy text over from ruby yaml to go yaml")
-
-var showImportDiffs = flag.Bool("show-import-diffs", false, "write go import diffs to stdout")
+var showImportDiffsFlag = flag.Bool("show-import-diffs", false, "write go import diffs to stdout")
 
 func main() {
 
+	// Handle all flags in main. Other functions must not access flag values directly.
 	flag.Parse()
 
 	if *openapiGenerate {
@@ -60,24 +58,25 @@ func main() {
 		return
 	}
 
-	if outputPath == nil || *outputPath == "" {
+	if *outputPathFlag == "" {
 		log.Printf("No output path specified, exiting")
 		return
 	}
 
-	if version == nil || *version == "" {
-		log.Printf("No version specified, assuming ga")
-		*version = "ga"
-	}
+	GenerateProducts(*productFlag, *resourceFlag, *providerFlag, *versionFlag, *outputPathFlag, *overrideDirectoryFlag, !*doNotGenerateCode, !*doNotGenerateDocs, *showImportDiffsFlag)
+}
 
-	var generateCode = !*doNotGenerateCode
-	var generateDocs = !*doNotGenerateDocs
+func GenerateProducts(product, resource, providerName, version, outputPath, overrideDirectory string, generateCode, generateDocs, showImportDiffs bool) {
+	if version == "" {
+		log.Printf("No version specified, assuming ga")
+		version = "ga"
+	}
 	var productsToGenerate []string
 	var allProducts = false
-	if product == nil || *product == "" {
+	if product == "" {
 		allProducts = true
 	} else {
-		var productToGenerate = fmt.Sprintf("products/%s", *product)
+		var productToGenerate = fmt.Sprintf("products/%s", product)
 		productsToGenerate = []string{productToGenerate}
 	}
 
@@ -92,26 +91,26 @@ func main() {
 		allProductFiles = append(allProductFiles, fmt.Sprintf("products/%s", filepath.Base(dir)))
 	}
 
-	if *overrideDirectory != "" {
-		log.Printf("Using override directory %s", *overrideDirectory)
+	if overrideDirectory != "" {
+		log.Printf("Using override directory %s", overrideDirectory)
 
 		// Normalize override dir to a path that is relative to the magic-modules directory
 		// This is needed for templates that concatenate pwd + override dir + path
-		if filepath.IsAbs(*overrideDirectory) {
+		if filepath.IsAbs(overrideDirectory) {
 			wd, err := os.Getwd()
 			if err != nil {
 				panic(err)
 			}
-			*overrideDirectory, err = filepath.Rel(wd, *overrideDirectory)
-			log.Printf("Override directory normalized to relative path %s", *overrideDirectory)
+			overrideDirectory, err = filepath.Rel(wd, overrideDirectory)
+			log.Printf("Override directory normalized to relative path %s", overrideDirectory)
 		}
 
-		overrideFiles, err := filepath.Glob(fmt.Sprintf("%s/products/**/product.yaml", *overrideDirectory))
+		overrideFiles, err := filepath.Glob(fmt.Sprintf("%s/products/**/product.yaml", overrideDirectory))
 		if err != nil {
 			panic(err)
 		}
 		for _, filePath := range overrideFiles {
-			product, err := filepath.Rel(*overrideDirectory, filePath)
+			product, err := filepath.Rel(overrideDirectory, filePath)
 			if err != nil {
 				panic(err)
 			}
@@ -132,18 +131,17 @@ func main() {
 	}
 
 	startTime := time.Now()
-	providerName := "default (terraform)"
-	if *forceProvider != "" {
-		providerName = *forceProvider
+	if providerName == "" {
+		providerName = "default (terraform)"
 	}
-	log.Printf("Generating MM output to '%s'", *outputPath)
-	log.Printf("Building %s version", *version)
+	log.Printf("Generating MM output to '%s'", outputPath)
+	log.Printf("Building %s version", version)
 	log.Printf("Building %s provider", providerName)
 
 	productsForVersionChannel := make(chan *api.Product, len(allProductFiles))
 	for _, productFile := range allProductFiles {
 		wg.Add(1)
-		go GenerateProduct(productFile, productsForVersionChannel, startTime, productsToGenerate, *resourceToGenerate, *overrideDirectory, generateCode, generateDocs)
+		go GenerateProduct(version, providerName, productFile, outputPath, productsForVersionChannel, startTime, productsToGenerate, resource, overrideDirectory, generateCode, generateDocs)
 	}
 	wg.Wait()
 
@@ -159,17 +157,17 @@ func main() {
 
 	// In order to only copy/compile files once per provider this must be called outside
 	// of the products loop. Create an MMv1 provider with an arbitrary product (the first loaded).
-	providerToGenerate := newProvider(*forceProvider, *version, productsForVersion[0], startTime)
-	providerToGenerate.CopyCommonFiles(*outputPath, generateCode, generateDocs)
+	providerToGenerate := newProvider(providerName, version, productsForVersion[0], startTime)
+	providerToGenerate.CopyCommonFiles(outputPath, generateCode, generateDocs)
 
 	if generateCode {
-		providerToGenerate.CompileCommonFiles(*outputPath, productsForVersion, "")
+		providerToGenerate.CompileCommonFiles(outputPath, productsForVersion, "")
 	}
 
-	provider.FixImports(*outputPath, *showImportDiffs)
+	provider.FixImports(outputPath, showImportDiffs)
 }
 
-func GenerateProduct(productName string, productsForVersionChannel chan *api.Product, startTime time.Time, productsToGenerate []string, resourceToGenerate, overrideDirectory string, generateCode, generateDocs bool) {
+func GenerateProduct(version, providerName, productName, outputPath string, productsForVersionChannel chan *api.Product, startTime time.Time, productsToGenerate []string, resourceToGenerate, overrideDirectory string, generateCode, generateDocs bool) {
 	defer wg.Done()
 
 	productYamlPath := path.Join(productName, "product.yaml")
@@ -207,8 +205,8 @@ func GenerateProduct(productName string, productsForVersionChannel chan *api.Pro
 
 	var resources []*api.Resource = make([]*api.Resource, 0)
 
-	if !productApi.ExistsAtVersionOrLower(*version) {
-		log.Printf("%s does not have a '%s' version, skipping", productName, *version)
+	if !productApi.ExistsAtVersionOrLower(version) {
+		log.Printf("%s does not have a '%s' version, skipping", productName, version)
 		return
 	}
 
@@ -236,7 +234,7 @@ func GenerateProduct(productName string, productsForVersionChannel chan *api.Pro
 		api.Compile(resourceYamlPath, resource, overrideDirectory)
 		resource.SourceYamlFile = resourceYamlPath
 
-		resource.TargetVersionName = *version
+		resource.TargetVersionName = version
 		resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
 		resource.SetDefault(productApi)
 		resource.Validate()
@@ -269,7 +267,7 @@ func GenerateProduct(productName string, productsForVersionChannel chan *api.Pro
 				api.Compile(overrideYamlPath, resource, overrideDirectory)
 			}
 
-			resource.TargetVersionName = *version
+			resource.TargetVersionName = version
 			resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
 			resource.SetDefault(productApi)
 			resource.Validate()
@@ -286,7 +284,7 @@ func GenerateProduct(productName string, productsForVersionChannel chan *api.Pro
 	productApi.Objects = resources
 	productApi.Validate()
 
-	providerToGenerate := newProvider(*forceProvider, *version, productApi, startTime)
+	providerToGenerate := newProvider(providerName, version, productApi, startTime)
 	productsForVersionChannel <- productApi
 
 	if !slices.Contains(productsToGenerate, productName) {
@@ -296,7 +294,7 @@ func GenerateProduct(productName string, productsForVersionChannel chan *api.Pro
 
 	log.Printf("%s: Generating files", productName)
 
-	providerToGenerate.Generate(*outputPath, productName, resourceToGenerate, generateCode, generateDocs)
+	providerToGenerate.Generate(outputPath, productName, resourceToGenerate, generateCode, generateDocs)
 }
 
 func newProvider(providerName, version string, productApi *api.Product, startTime time.Time) provider.Provider {
