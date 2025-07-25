@@ -70,12 +70,12 @@ resource "google_certificate_manager_dns_authorization" "default" {
 
 func TestAccCertificateManagerDnsAuthorization_tags(t *testing.T) {
 	t.Parallel()
-	tagKey := acctest.BootstrapSharedTestTagKey(t, "certificate-manager-dns-auth-tagkey")
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "certificate-manager-dns-auth-tagkey", map[string]interface{}{})
 
 	context := map[string]interface{}{
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestTagValue(t, "certificate-manager-dns-auth-tagvalue", tagKey),
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "certificate-manager-dns-auth-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
