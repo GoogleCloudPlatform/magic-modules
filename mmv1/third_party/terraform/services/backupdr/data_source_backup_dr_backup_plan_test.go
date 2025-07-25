@@ -121,7 +121,7 @@ resource "google_backup_dr_backup_vault" "my-backup-vault-csql" {
 }
 
 
-resource "google_backup_dr_backup_plan_csql" "test" { 
+resource "google_backup_dr_backup_plan" "csql_test" { 
   location = "us-central1" 
   backup_plan_id = "bp-test-%{random_suffix}"
   resource_type= "sqladmin.googleapis.com/Instance"
@@ -146,10 +146,10 @@ resource "google_backup_dr_backup_plan_csql" "test" {
 	}
 }
 
-data "google_backup_dr_backup_plan_csql" "fetch-bp" {
+data "google_backup_dr_backup_plan" "fetch-bp" {
   location =  "us-central1"
   backup_plan_id="bp-test-%{random_suffix}"
-  depends_on= [ google_backup_dr_backup_plan_csql.test ]
+  depends_on= [ google_backup_dr_backup_plan.test ]
   }
 `, context)
 }
