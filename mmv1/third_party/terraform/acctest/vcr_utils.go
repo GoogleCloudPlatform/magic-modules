@@ -281,7 +281,6 @@ func InsertDiffSteps(c resource.TestCase, tempOutputFile *os.File, releaseProvid
 	var replacementSteps []resource.TestStep
 	for _, testStep := range c.Steps {
 		countSteps++
-		// todo: add preconfig - categorize test failures (add flag to steps that if they fail is a diff failure)
 		if testStep.Config != "" {
 			ogConfig := testStep.Config
 			fmt.Fprintf(tempOutputFile, "[DEBUG] Original config: %s\n", ogConfig)
