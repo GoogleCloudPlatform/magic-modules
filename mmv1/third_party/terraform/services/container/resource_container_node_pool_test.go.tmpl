@@ -4193,6 +4193,7 @@ resource "google_container_node_pool" "np" {
 	    hugepage_size_2m = %d
 	    hugepage_size_1g = %d
 	  }
+	  transparent_hugepage_enabled = "TRANSPARENT_HUGEPAGE_ENABLED_NEVER"
     }
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
