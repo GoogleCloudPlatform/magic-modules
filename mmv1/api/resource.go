@@ -790,9 +790,7 @@ func buildWriteOnlyVersionField(name string, parent *Type, writeOnlyField *Type)
 
 func (r *Resource) addWriteOnlyFields(props []*Type, parent *Type, propWithWoConfigured *Type) []*Type {
 	writeOnlyField := buildWriteOnlyField(fmt.Sprintf("%sWo", propWithWoConfigured.Name), parent, propWithWoConfigured)
-	writeOnlyField.SetDefault(r)
 	writeOnlyVersionField := buildWriteOnlyVersionField(fmt.Sprintf("%sVersion", writeOnlyField.Name), parent, writeOnlyField)
-	writeOnlyVersionField.SetDefault(r)
 	props = append(props, writeOnlyField, writeOnlyVersionField)
 	return props
 }
@@ -817,6 +815,10 @@ func (r *Resource) AddExtraFields(props []*Type, parent *Type) []*Type {
 			p.Properties = r.AddExtraFields(p.AllProperties(), p)
 		}
 	}
+
+	for _, p := range props {
+		p.SetDefault(r)
+	}
 	return props
 }
 
@@ -832,9 +834,7 @@ func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []
 	}
 
 	terraformLabelsField := buildTerraformLabelsField("labels", parent, labels)
-	terraformLabelsField.SetDefault(r)
 	effectiveLabelsField := buildEffectiveLabelsField("labels", labels)
-	effectiveLabelsField.SetDefault(r)
 
 	props = append(props, terraformLabelsField, effectiveLabelsField)
 
@@ -872,7 +872,6 @@ func (r *Resource) addAnnotationsFields(props []*Type, parent *Type, annotations
 	}
 
 	effectiveAnnotationsField := buildEffectiveLabelsField("annotations", annotations)
-	effectiveAnnotationsField.SetDefault(r)
 
 	props = append(props, effectiveAnnotationsField)
 	return props
