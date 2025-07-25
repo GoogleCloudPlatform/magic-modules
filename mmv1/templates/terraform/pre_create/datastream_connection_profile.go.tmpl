@@ -1,6 +1,6 @@
 {{/*
 	The license inside this block applies to this file
-	Copyright 2025 Google Inc.
+	Copyright 2024 Google Inc.
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
 	You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -10,14 +10,9 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-{{- define "expandResourcerefWithValidation" }}
-func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	f, err := tpgresource.ParseProjectFieldValue("{{$.ResourceType}}", v.(string), "project", d, config, true)
-	if err != nil {
-		return nil, fmt.Errorf("Invalid value for {{underscore $.Name}}: %s", err)
-	}
 
-	fullUrl := tgcresource.GetComputeSelfLink(config, f.RelativeLink())
-	return fullUrl, nil
+if d.Get("create_without_validation").(bool) {
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "true"})
+} else {
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"force": "false"})
 }
-{{- end }}

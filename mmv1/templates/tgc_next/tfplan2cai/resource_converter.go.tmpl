@@ -59,13 +59,13 @@ func Get{{ $.ResourceName -}}CaiAssets(d tpgresource.TerraformResourceData, conf
     }
     if obj, err := Get{{ $.ResourceName -}}CaiObject(d, config); err == nil {
         location, _ := tpgresource.GetLocation(d, config)
-        if location == "" && strings.Contains(name, "/global/") {
+        if location == "" {
             location = "global"
         }
         return []caiasset.Asset{
             {
                 Name: name,
-                Type: {{ $.ApiResourceType -}}AssetType,
+                Type: {{ $.CaiResourceType -}}AssetType,
                 Resource: &caiasset.AssetResource{
                     Version: "{{ $apiVersion }}",
                     DiscoveryDocumentURI: "https://www.googleapis.com/discovery/v1/apis/{{ $productBackendName }}/{{ $apiVersion }}/rest",
