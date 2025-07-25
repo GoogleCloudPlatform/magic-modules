@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 )
 
 func TestAccApiGatewayGateway_apigatewayGatewayBasicExampleUpdated(t *testing.T) {
@@ -25,6 +26,11 @@ func TestAccApiGatewayGateway_apigatewayGatewayBasicExampleUpdated(t *testing.T)
 			},
 			{
 				Config: testAccApiGatewayGateway_apigatewayGatewayBasicExampleUpdated(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_api_gateway_gateway.api_gw", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 		},
 	})
@@ -34,16 +40,13 @@ func testAccApiGatewayGateway_apigatewayGatewayBasicExampleUpdated(context map[s
 	return acctest.Nprintf(`
 resource "google_api_gateway_api" "api_gw" {
   provider = google-beta
-  api_id = "tf-test-api-gw%{random_suffix}"
+  api_id = "tf-test-my-api%{random_suffix}"
 }
 
 resource "google_api_gateway_api_config" "api_gw" {
   provider = google-beta
   api = google_api_gateway_api.api_gw.api_id
-  api_config_id = "tf-test-api-gw%{random_suffix}"
-	lifecycle {
-    create_before_destroy = true
-  }
+  api_config_id = "tf-test-my-config%{random_suffix}"
 
   openapi_documents {
     document {
@@ -51,12 +54,15 @@ resource "google_api_gateway_api_config" "api_gw" {
       contents = filebase64("test-fixtures/openapi.yaml")
     }
   }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "google_api_gateway_gateway" "api_gw" {
   provider = google-beta
   api_config = google_api_gateway_api_config.api_gw.id
-  gateway_id = "tf-test-api-gw%{random_suffix}"
+  gateway_id = "tf-test-my-gateway%{random_suffix}"
   display_name = "MM Dev API Gateway"
   labels = {
     environment = "dev"
