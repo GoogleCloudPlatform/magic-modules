@@ -1,0 +1,32 @@
+func resourceDiscoveryTypeDCRDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
+    // We only want to suppress if 'new' is the default private type
+    // and a DCR config is actively being used.
+    if new != "DISCOVERY_TYPE_PRIVATE" && new != "" {
+        return false // Not suppressing if the new value isn't the default or empty
+    }
+
+    // Check if sharing_environment_config is set
+    sharingEnvConfig, sharingEnvOk := d.GetOk("sharing_environment_config")
+    if !sharingEnvOk || sharingEnvConfig == nil {
+        return false // No sharing_environment_config, so no DCR conflict to consider
+    }
+
+    // sharing_environment_config is a TypeList with MaxItems: 1
+    l := sharingEnvConfig.([]interface{})
+    if len(l) == 0 || l[0] == nil {
+        return false // No actual block within sharing_environment_config
+    }
+
+    sharingConfigMap := l[0].(map[string]interface{})
+
+    // Check if dcr_exchange_config is present and not empty
+    dcrConfig, dcrConfigOk := sharingConfigMap["dcr_exchange_config"]
+    if !dcrConfigOk || dcrConfig == nil {
+        return false // dcr_exchange_config block not found or is empty
+    }
+
+    // If we reach here, it means 'dcr_exchange_config' is present.
+    // We suppress the diff for 'discovery_type' because for DCRs,
+    // the discovery type cannot be set and the API ignores it.
+    return true
+}
