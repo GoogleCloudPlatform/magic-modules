@@ -75,8 +75,8 @@ if displayName == "Playbook Example with Fulfillment" {
 		return nil, err
 	}
 
-	//   - 'handlers.2.event_handler.0.fulfillment.0.messages.1'
-	setHandlers2EventHandlerFulfillmentMessages1 := func(data map[string]interface{}) error {
+	//   - 'handlers.2.event_handler.0.fulfillment.0.messages.1.tool_call'
+	setHandlers2EventHandlerFulfillmentMessages1ToolCall := func(data map[string]interface{}) error {
 		// --- Traverse to the parent map ---
 		handlers, ok := data["handlers"].([]interface{})
 		if !ok { return fmt.Errorf("'handlers' is not a slice") }
@@ -93,21 +93,21 @@ if displayName == "Playbook Example with Fulfillment" {
 
 		messages, ok := fulfillment["messages"].([]interface{})
 		if !ok { return fmt.Errorf("'messages' is not a slice") }
-		if len(messages) != 1 { return fmt.Errorf("incorrect length for 'messages'") }
 
-		toolCallMessage := d.Get("handlers.2.event_handler.0.fulfillment.0.messages.1").(map[string]interface{})
-		messages = append(messages, toolCallMessage)
-		
-		fulfillment["messages"] = messages
+		if len(messages) <= 1 { return fmt.Errorf("index 1 out of bounds for 'messages'") }
+		message, ok := messages[1].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'messages[1]' is not a map") }
+
+		message["toolCall"] = d.Get("handlers.2.event_handler.0.fulfillment.0.messages.1.tool_call.0").(map[string]interface{})
 
 		return nil
 	}
-	if err := setHandlers2EventHandlerFulfillmentMessages1(res); err != nil {
+	if err := setHandlers2EventHandlerFulfillmentMessages1ToolCall(res); err != nil {
 		return nil, err
 	}
 
 	//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.messages.1'
-	setHandlers6LifecycleHandlerFulfillmentMessages1 := func(data map[string]interface{}) error {
+	setHandlers6LifecycleHandlerFulfillmentMessages1ToolCall := func(data map[string]interface{}) error {
 		// --- Traverse to the parent map ---
 		handlers, ok := data["handlers"].([]interface{})
 		if !ok { return fmt.Errorf("'handlers' is not a slice") }
@@ -124,16 +124,16 @@ if displayName == "Playbook Example with Fulfillment" {
 
 		messages, ok := fulfillment["messages"].([]interface{})
 		if !ok { return fmt.Errorf("'messages' is not a slice") }
-		if len(messages) != 1 { return fmt.Errorf("incorrect length for 'messages'") }
 
-		toolCallMessage := d.Get("handlers.6.lifecycle_handler.0.fulfillment.0.messages.1").(map[string]interface{})
-		messages = append(messages, toolCallMessage)
-		
-		fulfillment["messages"] = messages
+		if len(messages) <= 1 { return fmt.Errorf("index 1 out of bounds for 'messages'") }
+		message, ok := messages[1].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'messages[1]' is not a map") }
+
+		message["toolCall"] = d.Get("handlers.6.lifecycle_handler.0.fulfillment.0.messages.1.tool_call.0").(map[string]interface{})
 
 		return nil
 	}
-	if err := setHandlers6LifecycleHandlerFulfillmentMessages1(res); err != nil {
+	if err := setHandlers6LifecycleHandlerFulfillmentMessages1ToolCall(res); err != nil {
 		return nil, err
 	}
 
