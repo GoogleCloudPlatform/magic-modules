@@ -14,10 +14,27 @@
 {{/* For fields that expect fully-qualified URLs but allow relative paths in config,
 we need to manually define this expander to ensure consistent behavior. */}}
 
-func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) (interface{}, error) {
+func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	if v == nil {
 		return nil, nil
 	}
 	val := v.(string)
-	return tpgresource.ExpandRegionalField(val, d, config, "instanceGroups")
+	if strings.HasPrefix(val, "https://") || strings.HasPrefix(val, "projects/") {
+		return val, nil
+	}
+	regionRaw, ok := d.GetOk("region")
+	if !ok || regionRaw.(string) == "" {
+		return nil, fmt.Errorf("region must be set")
+	}
+	region := regionRaw.(string)
+	var project string
+	if pRaw, ok := d.GetOk("project"); ok && pRaw.(string) != "" {
+		project = pRaw.(string)
+	} else {
+		project = config.Project
+	}
+	if strings.Contains(val, "/networkEndpointGroups/") {
+		return fmt.Sprintf("projects/%s/%s", project, val), nil
+	}
+	return fmt.Sprintf("projects/%s/regions/%s/instanceGroups/%s", project, region, val), nil
 }
