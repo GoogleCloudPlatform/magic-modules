@@ -317,6 +317,61 @@ func TestAccContainerNodePool_withNodeConfig(t *testing.T) {
 	})
 }
 
+
+func TestAccContainerNodePool_withClusterBootDisk(t *testing.T) {
+	t.Parallel()
+
+	cluster := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckContainerNodePoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerNodePool_withClusterBootDisk(cluster, networkName, subnetworkName),
+			},
+			{
+				ResourceName:      "google_container_cluster.cluster",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+
+func testAccContainerNodePool_withClusterBootDisk(cluster, networkName, subnetworkName string) string {
+	return fmt.Sprintf(`
+provider "google" {
+  alias                 = "user-project-override"
+  user_project_override = true
+}
+resource "google_container_cluster" "cluster" {
+  provider            = google.user-project-override
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 3
+  deletion_protection = false
+  network             = "%s"
+  subnetwork          = "%s"
+
+  node_config {
+    machine_type = "c3-standard-4"
+    boot_disk {
+      size_gb                = 100
+      disk_type              = "hyperdisk-balanced"
+      provisioned_iops       = 3456
+      provisioned_throughput = 234
+    }
+  }
+}
+`, cluster, networkName, subnetworkName)
+}
+
 func TestAccContainerNodePool_withNodeConfigWithBootDiskConfig(t *testing.T) {
 	t.Parallel()
 
