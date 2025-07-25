@@ -69,7 +69,7 @@ resource "google_compute_public_delegated_prefix" "subprefix" {
   name = "tf-test-sub-prefix-1%{random_suffix}"
   description = "A nested address"
   region = "us-central1"
-  ip_cidr_range = "2600:1901:4500:1:2::/96"
+  ip_cidr_range = "2600:1901:4500:1:2::/64"
   parent_prefix = "%{parent_pdp_id}"
   mode = "DELEGATION"
   allocatable_prefix_length = 64
