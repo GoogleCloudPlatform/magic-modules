@@ -1,3 +1,23 @@
+resource "google_compute_reservation" "gpu_reservation" {
+  name     = "{{index $.Vars "reservation_name"}}"
+  zone     = "us-central1-a"
+
+  specific_reservation {
+    count = 1
+    
+    instance_properties {
+      machine_type = "n1-standard-1"
+      
+      guest_accelerators {
+        accelerator_type  = "nvidia-tesla-t4"
+        accelerator_count = 1
+      }
+    }
+  }
+
+  specific_reservation_required = false
+}
+
 resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "instance_name"}}"
   location = "us-central1-a"
@@ -11,5 +31,13 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
       project      = "cloud-notebooks-managed"
       family       = "workbench-instances"
     }
+    reservation_affinity {
+      consume_reservation_type = "RESERVATION_ANY"
+    }
   }
+
+  depends_on = [
+    google_compute_reservation.gpu_reservation
+  ]
+
 }
