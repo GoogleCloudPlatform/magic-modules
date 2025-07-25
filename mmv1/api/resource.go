@@ -742,9 +742,8 @@ func buildFieldPath(parent *Type, fieldName string) string {
 
 func buildWriteOnlyField(name string, parent *Type, originalField *Type) *Type {
 	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(originalField.Description))
-	conflictsWith := buildFieldPath(parent, originalField.TerraformLineage())
-	exactlyOneOfOriginalField := buildFieldPath(parent, originalField.TerraformLineage())
-	exactlyOneOfWriteOnlyField := buildFieldPath(parent, google.Underscore(name))
+	fieldPathOriginalField := buildFieldPath(parent, originalField.TerraformLineage())
+	fieldPathCurrentField := buildFieldPath(parent, google.Underscore(name))
 
 	apiName := originalField.ApiName
 	if apiName == "" {
@@ -758,11 +757,12 @@ func buildWriteOnlyField(name string, parent *Type, originalField *Type) *Type {
 		propertyWithWriteOnly(true),
 		propertyWithApiName(apiName),
 		propertyWithIgnoreRead(true),
-		propertyWithConflicts([]string{conflictsWith}),
 	}
 
 	if originalField.Required {
-		options = append(options, propertyWithExactlyOneOf([]string{exactlyOneOfOriginalField, exactlyOneOfWriteOnlyField}))
+		options = append(options, propertyWithExactlyOneOf([]string{fieldPathOriginalField, fieldPathCurrentField}))
+	} else {
+		propertyWithConflicts([]string{fieldPathOriginalField})
 	}
 
 	return NewProperty(name, originalField.ApiName, options)
