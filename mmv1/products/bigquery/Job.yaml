@@ -239,13 +239,13 @@ properties:
               properties:
                 - name: 'resourceUri'
                   type: String
-                  # TODO (mbang): exactly_one_of: resourceUri, inlineCode
+                  # TODO: exactly_one_of: resourceUri, inlineCode
                   description:
                     'A code resource to load from a Google Cloud Storage URI
                     (gs://bucket/path).'
                 - name: 'inlineCode'
                   type: String
-                  # TODO (mbang): exactly_one_of: resourceUri, inlineCode
+                  # TODO: exactly_one_of: resourceUri, inlineCode
                   description: |
                     An inline resource that contains code for a user-defined function (UDF).
                     Providing a inline code resource is equivalent to providing a URI for a file containing the same code.

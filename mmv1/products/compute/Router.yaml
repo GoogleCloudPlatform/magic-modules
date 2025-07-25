@@ -159,7 +159,7 @@ properties:
 
           This enum field has the one valid value: ALL_SUBNETS
         send_empty_value: true
- # TODO(#324): enum?
+ # TODO: #324 enum?
         item_type:
           type: String
       - name: 'advertisedIpRanges'
