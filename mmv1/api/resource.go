@@ -731,9 +731,6 @@ func (r Resource) GetIdentity() []*Type {
 }
 
 func buildFieldPath(parent *Type, fieldName string) string {
-	// TODO doesn't seem to work for deeper nested fields, such as "http_check.0.auth_info.0.password" in monitoring uptime check
-	// parent.TerraformLineage() just returns "auth_info" for the above example resulting in "auth_info.0.password" instead of "http_check.0.auth_info.0.password"
-	// tried to look through other available methods, but couldn't find a better one yet -> looking for input, otherwise will need to implement a custom one
 	if parent != nil {
 		return parent.TerraformLineage() + ".0." + fieldName
 	}
@@ -785,7 +782,9 @@ func buildWriteOnlyVersionField(name string, parent *Type, writeOnlyField *Type)
 
 func (r *Resource) addWriteOnlyFields(props []*Type, parent *Type, propWithWoConfigured *Type) []*Type {
 	writeOnlyField := buildWriteOnlyField(fmt.Sprintf("%sWo", propWithWoConfigured.Name), parent, propWithWoConfigured)
+	writeOnlyField.SetDefault(r)
 	writeOnlyVersionField := buildWriteOnlyVersionField(fmt.Sprintf("%sVersion", writeOnlyField.Name), parent, writeOnlyField)
+	writeOnlyVersionField.SetDefault(r)
 	props = append(props, writeOnlyField, writeOnlyVersionField)
 	return props
 }
@@ -822,7 +821,10 @@ func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []
 	}
 
 	terraformLabelsField := buildTerraformLabelsField("labels", parent, labels)
+	terraformLabelsField.SetDefault(r)
 	effectiveLabelsField := buildEffectiveLabelsField("labels", labels)
+	effectiveLabelsField.SetDefault(r)
+
 	props = append(props, terraformLabelsField, effectiveLabelsField)
 
 	// The effective_labels field is used to write to API, instead of the labels field.
@@ -859,6 +861,8 @@ func (r *Resource) addAnnotationsFields(props []*Type, parent *Type, annotations
 	}
 
 	effectiveAnnotationsField := buildEffectiveLabelsField("annotations", annotations)
+	effectiveAnnotationsField.SetDefault(r)
+
 	props = append(props, effectiveAnnotationsField)
 	return props
 }
