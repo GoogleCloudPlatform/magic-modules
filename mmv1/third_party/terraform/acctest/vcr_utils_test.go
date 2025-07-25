@@ -492,6 +492,8 @@ func TestInsertDiffSteps(t *testing.T) {
 			Config: `resource "google_new_resource" {
 					provider = google-local
 				}`,
+			ExpectNonEmptyPlan: false,
+			PlanOnly:           true,
 		},
 		{
 			Config: `resource "google_new_resource" {
@@ -502,6 +504,8 @@ func TestInsertDiffSteps(t *testing.T) {
 			Config: `resource "google_new_resource" {
 					provider = google-local
 				}`,
+			ExpectNonEmptyPlan: false,
+			PlanOnly:           true,
 		},
 		{
 			Config: `resource "google_new_resource" {
@@ -513,6 +517,8 @@ func TestInsertDiffSteps(t *testing.T) {
 			Config: `resource "google_new_resource" {
 					provider = google-local
 				}`,
+			ExpectNonEmptyPlan: false,
+			PlanOnly:           true,
 		},
 	}
 

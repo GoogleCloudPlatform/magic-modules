@@ -155,7 +155,7 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		defer func() {
 			writeOutputFileDeferFunction(tempOutputFile, t.Failed())
 		}()
-		c = initializeReleaseDiffTest(c, t.Name(), tempOutputFile)
+		initializeReleaseDiffTest(c, t.Name(), tempOutputFile)
 
 	}
 
@@ -228,7 +228,7 @@ func isReleaseDiffEnabled() bool {
 	return releaseDiff != ""
 }
 
-func initializeReleaseDiffTest(c resource.TestCase, testName string, tempOutputFile *os.File) resource.TestCase {
+func initializeReleaseDiffTest(c resource.TestCase, testName string, tempOutputFile *os.File) {
 	var releaseProvider string
 	packagePath := fmt.Sprint(reflect.TypeOf(transport_tpg.Config{}).PkgPath())
 	if strings.Contains(packagePath, "google-beta") {
@@ -270,7 +270,7 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, tempOutputF
 	// these steps do the actual infrastructure provisioning, and c.Steps is updated to have these modified steps
 	c.Steps = InsertDiffSteps(c, tempOutputFile, releaseProvider, localProviderName)
 
-	return c
+	return
 }
 
 // InsertDiffSteps inserts a new step into the test case that reformats the config to use the release provider - this allows us to see the diff
@@ -397,6 +397,8 @@ func writeOutputFileDeferFunction(tempOutputFile *os.File, failed bool) {
 		fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
 		return
 	}
+	defer regularFailureFile.Close()
+	defer diffFailureFile.Close()
 	if failed {
 		// Check if the output line starts with "[Diff]"
 		if isDiff {
