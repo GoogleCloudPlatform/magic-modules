@@ -71,6 +71,7 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 		bucket := client.Bucket(bucketName)
 
 		var allErrs error
+		retriesRemaining := 30
 		for i := 0; i < len(TestsMetadata); i++ {
 			metadata, err := readTestsDataFromGCSForRun(ctx, currentDate, bucketName, bucket)
 			if err != nil {
@@ -83,6 +84,10 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 			if metadata == nil {
 				// Keep looking until we find a date with metadata.
 				i--
+				retriesRemaining--
+				if retriesRemaining < 0 {
+					return nil, fmt.Errorf("too many retries, %v", allErrs)
+				}
 			} else {
 				TestsMetadata[i] = NightlyRun{
 					MetadataByTest: metadata,
