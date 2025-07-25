@@ -240,6 +240,7 @@ properties:
           required: true
           diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           custom_flatten: 'templates/terraform/custom_flatten/guard_self_link.go.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/region_backend_service_valide_group_url.go.tmpl'
         - name: 'maxConnections'
           type: Integer
           description: |
