@@ -1308,7 +1308,6 @@ func flattenSecretVersion(secretVersions []*cloudfunctions.SecretVersion) []map[
 }
 
 func expandAutomaticUpdatePolicy(configured []interface{}) *cloudfunctions.AutomaticUpdatePolicy {
-	log.Printf("automatic_update_policy configured: %s", configured)
 	if len(configured) == 0 {
 		return nil
 	}
@@ -1322,12 +1321,10 @@ func flattenAutomaticUpdatePolicy(policy *cloudfunctions.AutomaticUpdatePolicy) 
 	}
 	// Have to append an empty element for empty message type
 	result = append(result, map[string]interface{}{})
-	log.Printf("flatten automatic_update_policy to: %s", result)
 	return result
 }
 
 func expandOnDeployUpdatePolicy(configured []interface{}) *cloudfunctions.OnDeployUpdatePolicy {
-	log.Printf("on_deploy_update_policy configued: %s", configured)
 	if len(configured) == 0 {
 		return nil
 	}
