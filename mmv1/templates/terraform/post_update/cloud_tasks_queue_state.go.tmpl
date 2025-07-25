@@ -1,0 +1,35 @@
+// Handle desired state changes
+if d.HasChange("desired_state") {
+  old, new := d.GetChange("desired_state")
+
+  if old.(string) != new.(string) {
+    var action string
+
+    actionUrl, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}CloudTasksBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/queues/{{"{{"}}name{{"}}"}}")
+		if err != nil {
+			return err
+		}
+
+    if new.(string) == "PAUSED" {
+      actionUrl = fmt.Sprintf("%s:pause", actionUrl)
+      action = "pausing"
+    } else if new.(string) == "RUNNING" {
+      actionUrl = fmt.Sprintf("%s:resume", actionUrl)
+      action = "resuming"
+    }
+
+    if actionUrl != "" {
+      _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+        Config:    config,
+        Method:    "POST",
+        Project:   billingProject,
+        RawURL:    actionUrl,
+        UserAgent: userAgent,
+      })
+            
+      if err != nil {
+        return fmt.Errorf("Error %s queue %q: %s", action, d.Id(), err)
+      }
+    }
+  }
+}
