@@ -314,8 +314,16 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 settings.backup_configuration.enabled is set to true.
 For MySQL instances, ensure that settings.backup_configuration.binary_log_enabled is set to true.
 For Postgres instances, ensure that settings.backup_configuration.point_in_time_recovery_enabled
-is set to true. Defaults to ZONAL.`,
-							DiffSuppressFunc: availabilityTypeDiffSuppress,
+is set to true. Defaults to ZONAL.
+For read pool instances, this field is read-only. The availability type is changed by specifying
+the number of nodes (node_count).`,
+						},
+						"effective_availability_type": {
+							Type:         schema.TypeString,
+							Computed:     true,
+							Description: `The availability type of the Cloud SQL instance, high availability
+(REGIONAL) or single zone (ZONAL). This field always contains the value that is reported by the
+API (for read pools, effective_availability_type may differ from availability_type).`,
 						},
 						"backup_configuration": {
 							Type:     schema.TypeList,
@@ -883,7 +891,6 @@ is set to true. Defaults to ZONAL.`,
 				Computed:         true,
 				Optional:         true,
 				Description:      `For a read pool instance, the number of nodes in the read pool.`,
-				DiffSuppressFunc: nodeCountDiffSuppress,
 			},
 
 			"replica_configuration": {
@@ -1861,6 +1868,14 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("settings", flattenSettings(instance.Settings, d)); err != nil {
 		log.Printf("[WARN] Failed to set SQL Database Instance Settings")
 	}
+	// For read pools, availability type is server managed. In
+	// flattenSettings above we pull it from the old TF resource so that
+	// it never shows a diff. Now, here, for non-pool instances, we
+	// overwrite it with the value obtained from the API (which would be
+	// the typical way to populate the field).
+	if instance.InstanceType != "READ_POOL_INSTANCE" {
+		d.Set("settings.0.availability_type", instance.Settings.AvailabilityType)
+	}
 
 	if instance.DiskEncryptionConfiguration != nil {
 		if err := d.Set("encryption_key_name", instance.DiskEncryptionConfiguration.KmsKeyName); err != nil {
@@ -2302,29 +2317,6 @@ func databaseVersionDiffSuppress(_, oldVersion, newVersion string, _ *schema.Res
 	return false
 }
 
-func availabilityTypeDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
-	// For Read Pool instances, suppress the diff because
-	// availability_type is not set by the client but managed by Cloud
-	// SQL (it can change whenever the node_count is modified).
-	instance_type := d.Get("instance_type").(string)
-	if instance_type == "READ_POOL_INSTANCE" {
-		log.Printf("[DEBUG] Instance is a read pool. Suppressing diff for availability_type (%s => %s)", old, new)
-		return true
-	}
-	return false
-}
-
-func nodeCountDiffSuppress(_, old, new string, d *schema.ResourceData) bool {
-	// Node count will only be supplied for read pool instances, it
-	// should be ignored for non-pool instances.
-	instance_type := d.Get("instance_type").(string)
-	if instance_type != "READ_POOL_INSTANCE" {
-		log.Printf("[DEBUG] Instance is not a read pool. Suppressing diff for node_count (%s => %s)", old, new)
-		return true
-	}
-	return false
-}
-
 func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
@@ -2401,7 +2393,8 @@ func flattenSettings(settings *sqladmin.Settings, d *schema.ResourceData) []map[
 		"tier":                             settings.Tier,
 		"edition":                          flattenEdition(settings.Edition),
 		"activation_policy":                settings.ActivationPolicy,
-		"availability_type":                settings.AvailabilityType,
+		"availability_type":                d.Get("settings.0.availability_type"),
+		"effective_availability_type":      settings.AvailabilityType,
 		"collation":                        settings.Collation,
 		"connector_enforcement":            settings.ConnectorEnforcement,
 		"disk_type":                        settings.DataDiskType,
