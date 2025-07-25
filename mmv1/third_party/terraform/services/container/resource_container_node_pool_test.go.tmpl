@@ -337,9 +337,6 @@ func TestAccContainerNodePool_withNodeConfigWithBootDiskConfig(t *testing.T) {
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
-				// autoscaling.# = 0 is equivalent to no autoscaling at all,
-				// but will still cause an import diff
-				ImportStateVerifyIgnore: []string{"autoscaling.#", "node_config.0.taint"},
 			},
 			{
 				Config: testAccContainerNodePool_withBootDiskUpdate(cluster, nodePool, networkName, subnetworkName),
@@ -348,9 +345,6 @@ func TestAccContainerNodePool_withNodeConfigWithBootDiskConfig(t *testing.T) {
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
-				// autoscaling.# = 0 is equivalent to no autoscaling at all,
-				// but will still cause an import diff
-				ImportStateVerifyIgnore: []string{"autoscaling.#", "node_config.0.taint"},
 			},
 		},
 	})
@@ -376,9 +370,6 @@ func TestAccContainerNodePool_withNodeConfigWithBootDiskConfigChangeType(t *test
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
-				// autoscaling.# = 0 is equivalent to no autoscaling at all,
-				// but will still cause an import diff
-				ImportStateVerifyIgnore: []string{"autoscaling.#", "node_config.0.taint"},
 			},
 			{
 				Config: testAccContainerNodePool_withBootDiskTypeChangeUpdate(cluster, nodePool, networkName, subnetworkName),
@@ -387,9 +378,6 @@ func TestAccContainerNodePool_withNodeConfigWithBootDiskConfigChangeType(t *test
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
-				// autoscaling.# = 0 is equivalent to no autoscaling at all,
-				// but will still cause an import diff
-				ImportStateVerifyIgnore: []string{"autoscaling.#", "node_config.0.taint"},
 			},
 		},
 	})
@@ -415,9 +403,6 @@ func TestAccContainerNodePool_withNodeConfigWithBootDiskConfigChangeTypeLegacy(t
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
-				// autoscaling.# = 0 is equivalent to no autoscaling at all,
-				// but will still cause an import diff
-				ImportStateVerifyIgnore: []string{"autoscaling.#", "node_config.0.taint"},
 			},
 			{
 				Config: testAccContainerNodePool_withBootDiskTypeChangeUpdateLegacy(cluster, nodePool, networkName, subnetworkName),
@@ -426,9 +411,6 @@ func TestAccContainerNodePool_withNodeConfigWithBootDiskConfigChangeTypeLegacy(t
 				ResourceName:      "google_container_node_pool.np",
 				ImportState:       true,
 				ImportStateVerify: true,
-				// autoscaling.# = 0 is equivalent to no autoscaling at all,
-				// but will still cause an import diff
-				ImportStateVerifyIgnore: []string{"autoscaling.#", "node_config.0.taint"},
 			},
 		},
 	})
