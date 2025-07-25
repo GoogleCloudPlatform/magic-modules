@@ -46,7 +46,7 @@ func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
 				Config: testAccDeveloperConnectInsightsConfig_basic(context),
 			},
 			{
-				ResourceName:            "google_developer_connect_insights_config.my_insights_config",
+				ResourceName:            "google_developer_connect_insights_config.insights_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"insights_config_id", "labels", "location", "terraform_labels", "workload"},
@@ -55,12 +55,12 @@ func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
 				Config: testAccDeveloperConnectInsightsConfig_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_developer_connect_insights_config.my_insights_config", plancheck.ResourceActionDestroyBeforeCreate),
+						plancheck.ExpectResourceAction("google_developer_connect_insights_config.insights_config", plancheck.ResourceActionUpdate),
 					},
 				},
 			},
 			{
-				ResourceName:            "google_developer_connect_insights_config.my_insights_config",
+				ResourceName:            "google_developer_connect_insights_config.insights_config",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"insights_config_id", "location", "labels", "terraform_labels", "workload"},
