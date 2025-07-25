@@ -228,7 +228,7 @@ func isReleaseDiffEnabled() bool {
 	return releaseDiff != ""
 }
 
-func initializeReleaseDiffTest(c resource.TestCase, testName string, tempFile *os.File) resource.TestCase {
+func initializeReleaseDiffTest(c resource.TestCase, testName string, tempOutputFile *os.File) resource.TestCase {
 	var releaseProvider string
 	packagePath := fmt.Sprint(reflect.TypeOf(transport_tpg.Config{}).PkgPath())
 	if strings.Contains(packagePath, "google-beta") {
@@ -268,14 +268,14 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, tempFile *o
 	}
 	// InsertDiffSteps adds modified steps to the test that run with an external provider
 	// these steps do the actual infrastructure provisioning, and c.Steps is updated to have these modified steps
-	c.Steps = InsertDiffSteps(c, tempFile, releaseProvider, localProviderName)
+	c.Steps = InsertDiffSteps(c, tempOutputFile, releaseProvider, localProviderName)
 
 	return c
 }
 
 // InsertDiffSteps inserts a new step into the test case that reformats the config to use the release provider - this allows us to see the diff
 // between the local provider and the release provider. for a certain test, this will be used to see the diff between the local provider and the release provider.
-func InsertDiffSteps(c resource.TestCase, tempFile *os.File, releaseProvider string, localProviderName string) []resource.TestStep {
+func InsertDiffSteps(c resource.TestCase, tempOutputFile *os.File, releaseProvider string, localProviderName string) []resource.TestStep {
 	var countSteps = 0
 
 	var replacementSteps []resource.TestStep
@@ -284,17 +284,17 @@ func InsertDiffSteps(c resource.TestCase, tempFile *os.File, releaseProvider str
 		// todo: add preconfig - categorize test failures (add flag to steps that if they fail is a diff failure)
 		if testStep.Config != "" {
 			ogConfig := testStep.Config
-			fmt.Fprintf(tempFile, "[DEBUG] Original config: %s\n", ogConfig)
+			fmt.Fprintf(tempOutputFile, "[DEBUG] Original config: %s\n", ogConfig)
 			testStep.Config = ReformConfigWithProvider(ogConfig, localProviderName)
-			fmt.Fprintf(tempFile, "[DEBUG] Reformatted config: %s\n", testStep.Config)
+			fmt.Fprintf(tempOutputFile, "[DEBUG] Reformatted config: %s\n", testStep.Config)
 			testStep.PreConfig = func() {
-				fmt.Fprintf(tempFile, "[Diff] Step %d\n", countSteps)
+				fmt.Fprintf(tempOutputFile, "[Diff] Step %d\n", countSteps)
 				countSteps++
 			}
 			if testStep.ExpectError == nil && !testStep.PlanOnly {
 				newStep := resource.TestStep{
 					PreConfig: func() {
-						fmt.Fprintf(tempFile, "Regular Step %d\n", countSteps)
+						fmt.Fprintf(tempOutputFile, "Regular Step %d\n", countSteps)
 					},
 					Config: ReformConfigWithProvider(ogConfig, releaseProvider),
 				}
@@ -370,21 +370,21 @@ func ParseReleaseDiffOutput(output string) (isDiff bool) {
 	return isDiff
 }
 
-func writeOutputFileDeferFunction(tempFile *os.File, failed bool) {
-	if tempFile == nil {
+func writeOutputFileDeferFunction(tempOutputFile *os.File, failed bool) {
+	if tempOutputFile == nil {
 		return
 	}
 	// parses the temporary file created during the release diff test and returns the last line of output
 	// This is useful for extracting the diff output from the file after the test has run
 
-	testOutput, err := ReadDiffOutput(tempFile)
+	testOutput, err := ReadDiffOutput(tempOutputFile)
 	if err != nil {
 		fmt.Fprintf(os.Stdout, "Error reading temporary file: %v\n", err)
 		return
 	}
 	isDiff := ParseReleaseDiffOutput(testOutput)
-	tempFile.Close() // Close the file handle
-	err = os.Remove(tempFile.Name())
+	tempOutputFile.Close() // Close the file handle
+	err = os.Remove(tempOutputFile.Name())
 	if err != nil {
 		fmt.Fprintf(os.Stdout, "Temporary File Deletion Error: %v\n", err)
 	}
