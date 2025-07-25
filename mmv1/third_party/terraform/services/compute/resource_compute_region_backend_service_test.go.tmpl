@@ -475,7 +475,144 @@ func TestAccComputeRegionBackendService_withDynamicBackendCount(t *testing.T) {
 		},
 	})
 }
+func TestAccComputeRegionBackendService_zonalILB(t *testing.T) {
+	t.Parallel()
 
+	serviceName := fmt.Sprintf("tf-test-ilb-bs-%s", acctest.RandString(t, 10))
+	checkName := fmt.Sprintf("tf-test-ilb-hc-%s", acctest.RandString(t, 10))
+	checkName2 := fmt.Sprintf("tf-test-ilb-hc2-%s", acctest.RandString(t, 10))
+	// The name for the network endpoint group was missing.
+	negName := fmt.Sprintf("tf-test-ilb-neg-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionBackendServiceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionBackendService_zonalILB(serviceName, checkName, negName),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionBackendService_zonalILBModified(serviceName, checkName, checkName2, negName),
+			},
+			{
+				ResourceName:      "google_compute_region_backend_service.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionBackendService_zonalILB(serviceName, checkName, negName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "default" {
+  name = "tf-test-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "tf-test-subnet"
+  ip_cidr_range = "10.10.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
+}
+
+// FIX: Changed resource type to google_compute_region_health_check
+resource "google_compute_region_health_check" "hc1" {
+  name   = "%s"
+  region = "us-central1"
+
+  http_health_check {
+    port         = 8080
+    request_path = "/status"
+  }
+}
+
+resource "google_compute_network_endpoint_group" "neg" {
+  name                  = "%s"
+  network               = google_compute_network.default.id
+  subnetwork            = google_compute_subnetwork.default.id
+  zone                  = "us-central1-a"
+  network_endpoint_type = "GCE_VM_IP_PORT"
+}
+
+resource "google_compute_region_backend_service" "test" {
+  name                  = "%s"
+  region                = "us-central1"
+  protocol              = "HTTP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  health_checks         = [google_compute_region_health_check.hc1.id]
+
+  backend {
+    group                 = google_compute_network_endpoint_group.neg.id
+    balancing_mode        = "RATE"
+    max_rate_per_endpoint = 100
+    capacity_scaler       = 1.0
+  }
+
+  session_affinity   = "CLIENT_IP"
+  locality_lb_policy = "ROUND_ROBIN"
+}
+`, checkName, negName, serviceName)
+}
+
+func testAccComputeRegionBackendService_zonalILBModified(serviceName, checkName, _ string, negName string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "default" {
+  name = "tf-test-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+  name          = "tf-test-subnet"
+  ip_cidr_range = "10.10.0.0/16"
+  region        = "us-central1"
+  network       = google_compute_network.default.id
+}
+
+resource "google_compute_region_health_check" "hc1" {
+  name   = "%s"
+  region = "us-central1"
+
+  http_health_check {
+    port         = 8080
+    request_path = "/status"
+  }
+}
+
+resource "google_compute_network_endpoint_group" "neg" {
+  name                  = "%s"
+  network               = google_compute_network.default.id
+  subnetwork            = google_compute_subnetwork.default.id
+  zone                  = "us-central1-a"
+  network_endpoint_type = "GCE_VM_IP_PORT"
+}
+
+resource "google_compute_region_backend_service" "test" {
+  name                  = "%s"
+  region                = "us-central1"
+  protocol              = "HTTP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  health_checks         = [google_compute_region_health_check.hc1.id]
+
+  backend {
+    group                 = google_compute_network_endpoint_group.neg.id
+    balancing_mode        = "RATE"
+    max_rate_per_endpoint = 300
+    capacity_scaler       = 0.5
+  }
+
+  session_affinity   = "NONE"
+  locality_lb_policy = "LEAST_REQUEST"
+}
+`, checkName, negName, serviceName)
+}
 func testAccComputeRegionBackendService_withDynamicBackendCount(serviceName, netName, hcName, igName string) string {
 	return fmt.Sprintf(`
 locals {
