@@ -1,5 +1,5 @@
 data "google_compute_network_endpoint_group" "ilb_network_endpoint_group_zonal" {
-  name    = "{{index $.Vars "ilb-network-endpoint"}}"
+  name    = "ilb-network-endpoint-group-zonal"
   zone    = "us-central1-a"
   depends_on = [
     helm_release.jira
@@ -7,7 +7,7 @@ data "google_compute_network_endpoint_group" "ilb_network_endpoint_group_zonal" 
 }
 
 resource "google_compute_region_health_check" "ilb_health_check_zonal" {
-  name    = "{{index $.Vars "ilb-health-check-zonal"}}"
+  name    = "ilb-health-check-zonal"
   region  = "us-central1"
   timeout_sec         = 5
   check_interval_sec  = 5
@@ -22,7 +22,7 @@ resource "google_compute_region_health_check" "ilb_health_check_zonal" {
 }
 
 resource "google_compute_region_backend_service" "ilb_backend_service_zonal" {
-  name                  = "{{index $.Vars "ilb-backend-service-zonal"}}"
+  name                  = "ilb-backend-service-zonal"
   region                = "us-central1"
   health_checks         = [google_compute_region_health_check.ilb_health_check_zonal[0].id]
   protocol              = "HTTP"
@@ -45,19 +45,19 @@ resource "google_compute_region_backend_service" "ilb_backend_service_zonal" {
 }
 
 resource "google_compute_region_url_map" "ilb_url_map_zonal" {
-  name            = "{{index $.Vars "ilb-url-map-zonal"}}"
+  name            = "ilb-url-map-zonal"
   region          = "us-central1"
   default_service = google_compute_region_backend_service.ilb_backend_service_zonal[0].id
 }
 
 resource "google_compute_region_target_http_proxy" "ilb_target_http_proxy_zonal" {
-  name    = "{{index $.Vars "ilb-target-http-proxy-zonal"}}"
+  name    = "ilb-target-http-proxy-zonal"
   region  = "us-central1"
   url_map = google_compute_region_url_map.ilb_url_map_zonal[0].id
 }
 
 resource "google_compute_forwarding_rule" "ilb_global_forwarding_rule_zonal" {
-  name                  = "{{index $.Vars "ilb-global-forwarding-rule-zonal"}}"
+  name                  = "ilb-global-forwarding-rule-zonal"
   region                = "us-central1"
   network               = data.google_compute_network.network.self_link
   subnetwork            = data.google_compute_subnetwork.subnet.self_link
