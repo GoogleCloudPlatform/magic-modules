@@ -10,11 +10,11 @@ import (
 
 func TestAccCertificateManagerCertificate_tags(t *testing.T) {
 	t.Parallel()
-	tagKey := acctest.BootstrapSharedTestTagKey(t, "certificate_manager_certificate-tagkey")
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "certificate_manager_certificate-tagkey", map[string]interface{}{})
 	context := map[string]interface{}{
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestTagValue(t, "certificate_manager_certificate-tagvalue", tagKey),
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "certificate_manager_certificate-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 	acctest.VcrTest(t, resource.TestCase{
