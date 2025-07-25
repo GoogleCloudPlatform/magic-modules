@@ -552,7 +552,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 		)
 
 		props := []*Type{writeOnlyProp}
-		result := resource.AddExtraFields(props, nil)
+		result := resource.AddExtraFields(props, nil, "")
 
 		if len(result) != 3 {
 			t.Errorf("Expected 3 properties after adding WriteOnly fields, got %d", len(result))
@@ -600,7 +600,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 		}
 
 		props := []*Type{labelsType}
-		result := resource.AddExtraFields(props, nil)
+		result := resource.AddExtraFields(props, nil, "")
 
 		if len(result) != 3 {
 			t.Errorf("Expected 3 properties after adding labels fields, got %d", len(result))
@@ -654,7 +654,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 		}
 
 		props := []*Type{labelsType}
-		resource.AddExtraFields(props, nil)
+		resource.AddExtraFields(props, nil, "")
 
 		expectedDiff := "tpgresource.SetLabelsDiffWithoutAttributionLabel"
 		if !slices.Contains(resource.CustomDiff, expectedDiff) {
@@ -674,7 +674,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 		}
 
 		props := []*Type{labelsType}
-		resource.AddExtraFields(props, parent)
+		resource.AddExtraFields(props, parent, "")
 
 		expectedDiff := "tpgresource.SetMetadataLabelsDiff"
 		if !slices.Contains(resource.CustomDiff, expectedDiff) {
@@ -693,7 +693,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 		}
 
 		props := []*Type{annotationsType}
-		result := resource.AddExtraFields(props, nil)
+		result := resource.AddExtraFields(props, nil, "")
 
 		if len(result) != 2 {
 			t.Errorf("Expected 2 properties after adding annotations fields, got %d", len(result))
@@ -732,7 +732,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 		nestedObject := createTestType("config", "NestedObject", withProperties([]*Type{nestedWriteOnly}))
 
 		props := []*Type{nestedObject}
-		result := resource.AddExtraFields(props, nil)
+		result := resource.AddExtraFields(props, nil, "")
 
 		if len(result) != 1 {
 			t.Errorf("Expected 1 top-level property, got %d", len(result))
@@ -754,7 +754,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 		emptyNestedObject := createTestType("config", "NestedObject", withProperties([]*Type{}))
 
 		props := []*Type{emptyNestedObject}
-		result := resource.AddExtraFields(props, nil)
+		result := resource.AddExtraFields(props, nil, "")
 
 		if len(result) != 1 {
 			t.Errorf("Expected 1 property, got %d", len(result))
@@ -771,7 +771,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 		woProperty := createTestType("passwordWo", "String", withWriteOnly(true))
 
 		props := []*Type{woProperty}
-		result := resource.AddExtraFields(props, nil)
+		result := resource.AddExtraFields(props, nil, "")
 
 		if len(result) != 1 {
 			t.Errorf("Expected 1 property for Wo-suffixed field, got %d", len(result))
@@ -789,7 +789,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 		regularProp := createTestType("name", "String", withRequired(true))
 
 		props := []*Type{regularProp}
-		result := resource.AddExtraFields(props, nil)
+		result := resource.AddExtraFields(props, nil, "")
 
 		if len(result) != 1 {
 			t.Errorf("Expected 1 property for regular field, got %d", len(result))
@@ -813,7 +813,7 @@ func TestResourceAddExtraFields(t *testing.T) {
 		labelsType := &Type{Name: "labels", Type: "KeyValueLabels"}
 
 		props := []*Type{regularProp, writeOnlyProp, labelsType}
-		result := resource.AddExtraFields(props, nil)
+		result := resource.AddExtraFields(props, nil, "")
 
 		// Should have: name + password + passwordWo + passwordWoVersion + labels + terraformLabels + effectiveLabels = 7
 		if len(result) != 7 {
