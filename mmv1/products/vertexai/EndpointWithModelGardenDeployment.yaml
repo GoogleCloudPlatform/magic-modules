@@ -33,8 +33,8 @@ self_link: "projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}"
 create_url: "projects/{{project}}/locations/{{location}}:deploy"
 immutable: true
 exclude_read: true
-exclude_delete: true  # the resource does not yet support deletion
-exclude_import: true  # the resource does not support import
+exclude_delete: true # the resource does not yet support deletion
+exclude_import: true # the resource does not support import
 timeouts:
   insert_minutes: 180
 autogen_status: RW5kcG9pbnRXaXRoTW9kZWxHYXJkZW5EZXBsb3ltZW50
@@ -74,6 +74,16 @@ properties:
       Resource ID segment making up resource `endpoint`. It identifies the
       resource within its parent collection as described in https://google.aip.dev/122.
     url_param_only: true
+    output: true
+  - name: deployedModelIds
+    type: Array
+    item_type:
+      type: String
+    description: |
+      Output only. The numeric ID of all models deployed in this endpoint.
+      Vertex AI assigns this unique numeric ID to each model at the moment it is deployed to an endpoint,
+      and it is required to make API calls to undeploy the model as described in
+      https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.endpoints/undeployModel
     output: true
   - name: publisherModelName
     type: String
