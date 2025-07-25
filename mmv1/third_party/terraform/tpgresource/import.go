@@ -108,7 +108,6 @@ func identityImport(re *regexp.Regexp, identity *schema.IdentityData, idFormat s
 	}
 	log.Print("[DEBUG] Using IdentitySchema to import resource")
 	namedGroups := re.SubexpNames()
-	log.Printf("[DEBUG] Named Groups %v", namedGroups)
 	for _, group := range namedGroups {
 		if val, ok := d.GetOk(group); ok && group != "" {
 			log.Printf("[DEBUG] Group %s = %s Identity Group", group, val)
