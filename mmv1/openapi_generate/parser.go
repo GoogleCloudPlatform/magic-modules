@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"maps"
 	"os"
 	"path"
 	"path/filepath"
@@ -162,7 +163,7 @@ func buildProduct(filePath, output string, root *openapi3.T, header []byte) stri
 	apiVersion := &product.Version{}
 
 	apiVersion.BaseUrl = fmt.Sprintf("%s/%s/", server, version)
-	// TODO(slevenick) figure out how to tell the API version
+	// TODO figure out how to tell the API version
 	apiVersion.Name = "ga"
 	apiProduct.Versions = []*product.Version{apiVersion}
 
@@ -304,7 +305,7 @@ func parseOpenApi(resourcePath, resourceName string, root *openapi3.T) []any {
 		if strings.TrimSpace(description) == "" {
 			description = "No description"
 		}
-		paramObj.Description = trimSpacesFromDescription(description)
+		paramObj.Description = trimDescription(description)
 
 		if param.Value.Name == "requestId" || param.Value.Name == "validateOnly" || paramObj.Name == "" {
 			continue
@@ -357,6 +358,9 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		if len(obj.Value.Enum) > 0 {
 			var enums []string
 			for _, enum := range obj.Value.Enum {
+				if strings.HasSuffix(fmt.Sprintf("%v", enum), "_UNSPECIFIED") {
+					continue
+				}
 				enums = append(enums, fmt.Sprintf("%v", enum))
 			}
 			additionalDescription = fmt.Sprintf("\n Possible values:\n %s", strings.Join(enums, "\n"))
@@ -410,7 +414,7 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		description = "No description"
 	}
 
-	field.Description = trimSpacesFromDescription(description)
+	field.Description = trimDescription(description)
 
 	if urlParam {
 		field.UrlParamOnly = true
@@ -439,7 +443,8 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 
 func buildProperties(props openapi3.Schemas, required []string) []*api.Type {
 	properties := []*api.Type{}
-	for k, prop := range props {
+	for _, k := range slices.Sorted(maps.Keys(props)) {
+		prop := props[k]
 		propObj := writeObject(k, prop, propType(prop), false)
 		if slices.Contains(required, k) {
 			propObj.Required = true
@@ -451,7 +456,12 @@ func buildProperties(props openapi3.Schemas, required []string) []*api.Type {
 
 // Trims whitespace from the ends of lines in a description to force multiline
 // formatting for strings with newlines present
-func trimSpacesFromDescription(description string) string {
+// Also trim "Output only." and "Required." from descriptions as this gets duplicated
+func trimDescription(description string) string {
+	description, _ = strings.CutPrefix(description, "Optional. ")
+	description, _ = strings.CutPrefix(description, "Output only. ")
+	description, _ = strings.CutPrefix(description, "Required. ")
+	description, _ = strings.CutPrefix(description, "Immutable. ")
 	lines := strings.Split(description, "\n")
 	var trimmedDescription []string
 	for _, line := range lines {

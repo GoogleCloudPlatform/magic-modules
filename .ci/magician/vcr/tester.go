@@ -13,10 +13,13 @@ import (
 )
 
 type Result struct {
-	PassedTests  []string
-	SkippedTests []string
-	FailedTests  []string
-	Panics       []string
+	PassedTests     []string
+	SkippedTests    []string
+	FailedTests     []string
+	PassedSubtests  []string
+	SkippedSubtests []string
+	FailedSubtests  []string
+	Panics          []string
 }
 
 type Mode int
@@ -66,6 +69,8 @@ const replayingTimeout = "240m"
 
 var testResultsExpression = regexp.MustCompile(`(?m:^--- (PASS|FAIL|SKIP): (TestAcc\w+))`)
 
+var subtestResultsExpression = regexp.MustCompile(`(?m:^    --- (PASS|FAIL|SKIP): (TestAcc\w+)/(\w+))`)
+
 var testPanicExpression = regexp.MustCompile(`^panic: .*`)
 
 var safeToLog = map[string]bool{
@@ -100,6 +105,7 @@ var safeToLog = map[string]bool{
 	"SA_KEY":                                     false,
 	"TF_ACC":                                     true,
 	"TF_LOG":                                     true,
+	"TF_LOG_CORE":                                true,
 	"TF_LOG_PATH_MASK":                           true,
 	"TF_LOG_SDK_FRAMEWORK":                       true,
 	"TF_SCHEMA_PANIC_ON_ERROR":                   true,
@@ -253,6 +259,7 @@ func (vt *Tester) Run(opt RunOptions) (Result, error) {
 		"GOOGLE_CREDENTIALS":       vt.env["SA_KEY"],
 		"GOOGLE_TEST_DIRECTORY":    strings.Join(opt.TestDirs, " "),
 		"TF_LOG":                   "DEBUG",
+		"TF_LOG_CORE":              "WARN",
 		"TF_LOG_SDK_FRAMEWORK":     "INFO",
 		"TF_LOG_PATH_MASK":         filepath.Join(logPath, "%s.log"),
 		"TF_ACC":                   "1",
@@ -400,6 +407,7 @@ func (vt *Tester) runInParallel(mode Mode, version provider.Version, testDir, te
 		"GOOGLE_CREDENTIALS":       vt.env["SA_KEY"],
 		"GOOGLE_TEST_DIRECTORY":    testDir,
 		"TF_LOG":                   "DEBUG",
+		"TF_LOG_CORE":              "WARN",
 		"TF_LOG_SDK_FRAMEWORK":     "INFO",
 		"TF_LOG_PATH_MASK":         filepath.Join(logPath, "%s.log"),
 		"TF_ACC":                   "1",
@@ -482,8 +490,10 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 		fmt.Sprintf("%sbuild-log/%s_test%s.log", bucketPath, opts.Mode.Lower(), suffix),
 	}
 	fmt.Println("Uploading build log:\n", "gsutil", strings.Join(args, " "))
-	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+	if out, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 		fmt.Println("Error uploading build log: ", err)
+	} else {
+		fmt.Println("gsutil output: ", out)
 	}
 	if opts.Parallel {
 		args := []string{
@@ -512,9 +522,11 @@ func (vt *Tester) UploadLogs(opts UploadLogsOptions) error {
 		fmt.Sprintf("%s%s%s/", bucketPath, opts.Mode.Lower(), suffix),
 	}
 	fmt.Println("Uploading logs:\n", "gsutil", strings.Join(args, " "))
-	if _, err := vt.rnr.Run("gsutil", args, nil); err != nil {
+	if out, err := vt.rnr.Run("gsutil", args, nil); err != nil {
 		fmt.Println("Error uploading logs: ", err)
 		vt.printLogs(logPath)
+	} else {
+		fmt.Println("gsutil output: ", out)
 	}
 	return nil
 }
@@ -599,19 +611,39 @@ func collectResult(output string) Result {
 		}
 		resultSets[submatches[1]][submatches[2]] = struct{}{}
 	}
+	matches = subtestResultsExpression.FindAllStringSubmatch(output, -1)
+	subtestResultSets := make(map[string]map[string]struct{}, 4)
+	for _, submatches := range matches {
+		if len(submatches) != 4 {
+			fmt.Printf("Warning: unexpected regex match found in test output: %v", submatches)
+			continue
+		}
+		if _, ok := subtestResultSets[submatches[1]]; !ok {
+			subtestResultSets[submatches[1]] = make(map[string]struct{})
+		}
+		subtestResultSets[submatches[1]][fmt.Sprintf("%s__%s", submatches[2], submatches[3])] = struct{}{}
+	}
 	results := make(map[string][]string, 4)
 	results["PANIC"] = testPanicExpression.FindAllString(output, -1)
 	sort.Strings(results["PANIC"])
+	subtestResults := make(map[string][]string, 3)
 	for _, kind := range []string{"FAIL", "PASS", "SKIP"} {
 		for test := range resultSets[kind] {
 			results[kind] = append(results[kind], test)
 		}
 		sort.Strings(results[kind])
+		for subtest := range subtestResultSets[kind] {
+			subtestResults[kind] = append(subtestResults[kind], subtest)
+		}
+		sort.Strings(subtestResults[kind])
 	}
 	return Result{
-		FailedTests:  results["FAIL"],
-		PassedTests:  results["PASS"],
-		SkippedTests: results["SKIP"],
-		Panics:       results["PANIC"],
+		FailedTests:     results["FAIL"],
+		PassedTests:     results["PASS"],
+		SkippedTests:    results["SKIP"],
+		FailedSubtests:  subtestResults["FAIL"],
+		PassedSubtests:  subtestResults["PASS"],
+		SkippedSubtests: subtestResults["SKIP"],
+		Panics:          results["PANIC"],
 	}
 }

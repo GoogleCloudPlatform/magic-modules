@@ -293,6 +293,9 @@ region are guaranteed to support the same version.
     [PodSecurityPolicy](https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies) feature.
     Structure is [documented below](#nested_pod_security_policy_config).
 
+* `pod_autoscaling` - (Optional) Configuration for the
+    Structure is [documented below](#nested_pod_autoscaling).
+
 * `secret_manager_config` - (Optional) Configuration for the
     [SecretManagerConfig](https://cloud.google.com/secret-manager/docs/secret-manager-managed-csi-component) feature.
     Structure is [documented below](#nested_secret_manager_config).
@@ -300,6 +303,8 @@ region are guaranteed to support the same version.
 * `authenticator_groups_config` - (Optional) Configuration for the
     [Google Groups for GKE](https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control#groups-setup-gsuite) feature.
     Structure is [documented below](#nested_authenticator_groups_config).
+
+* `user_managed_keys_config` - (Optional) The custom keys configuration of the cluster Structure is [documented below](#nested_control_plane_endpoints_config).
 
 * `control_plane_endpoints_config` - (Optional) Configuration for all of the cluster's control plane endpoints.
     Structure is [documented below](#nested_control_plane_endpoints_config).
@@ -324,6 +329,10 @@ the default version for a channel. Note that removing the `release_channel`
 field from your config will cause Terraform to stop managing your cluster's
 release channel, but will not unenroll it. Instead, use the `"UNSPECIFIED"`
 channel. Structure is [documented below](#nested_release_channel).
+
+* `gke_auto_upgrade_config` - (Optional)
+Configuration options for the auto-upgrade patch type feature, which provide more control over the speed of automatic upgrades of your GKE clusters.
+Structure is [documented below](#nested_gke_auto_upgrade_config).
 
 * `remove_default_node_pool` - (Optional) If `true`, deletes the default node
     pool upon cluster creation. If you're using `google_container_node_pool`
@@ -369,6 +378,9 @@ subnetwork in which the cluster's instances are launched.
 * `enable_l4_ilb_subsetting` - (Optional)
     Whether L4ILB Subsetting is enabled for this cluster.
 
+* `disable_l4_lb_firewall_reconciliation` - (Optional)
+    Disable L4 load balancer VPC firewalls to enable firewall policies.
+
 * `enable_multi_networking` - (Optional)
     Whether multi-networking is enabled for this cluster.
 
@@ -380,6 +392,9 @@ subnetwork in which the cluster's instances are launched.
 
 * `datapath_provider` - (Optional)
     The desired datapath provider for this cluster. This is set to `LEGACY_DATAPATH` by default, which uses the IPTables-based kube-proxy implementation. Set to `ADVANCED_DATAPATH` to enable Dataplane v2.
+
+* `in_transit_encryption_config` - (Optional)
+    Defines the config of in-transit encryption. Valid values are `IN_TRANSIT_ENCRYPTION_DISABLED` and `IN_TRANSIT_ENCRYPTION_INTER_NODE_TRANSPARENT`.
 
 * `enable_cilium_clusterwide_network_policy` - (Optional)
     Whether CiliumClusterWideNetworkPolicy is enabled on this cluster. Defaults to false.
@@ -407,6 +422,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 
 * `enterprise_config` - (Optional)
   Configuration for [Enterprise edition].(https://cloud.google.com/kubernetes-engine/enterprise/docs/concepts/gke-editions). Structure is [documented below](#nested_enterprise_config).
+
+* `anonymous_authentication_config` - (Optional)
+  Configuration for [anonymous authentication restrictions](https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#restrict-anon-access). Structure is [documented below](#anonymous_authentication_config).
 
 
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
@@ -565,8 +583,8 @@ in addition to node auto-provisioning. Structure is [documented below](#nested_r
 GKE Autopilot clusters.
 Structure is [documented below](#nested_auto_provisioning_defaults).
 
-* `auto_provisioning_locations` - (Optional) The list of Google Compute Engine 
-[zones](https://cloud.google.com/compute/docs/zones#available) in which the 
+* `auto_provisioning_locations` - (Optional) The list of Google Compute Engine
+[zones](https://cloud.google.com/compute/docs/zones#available) in which the
 NodePool's nodes can be created by NAP.
 
 * `autoscaling_profile` - (Optional) Configuration
@@ -582,7 +600,7 @@ for a list of types.
 
 * `minimum` - (Optional) Minimum amount of the resource in the cluster.
 
-* `maximum` - (Optional) Maximum amount of the resource in the cluster.
+* `maximum` - (Required) Maximum amount of the resource in the cluster.
 
 <a name="nested_auto_provisioning_defaults"></a>The `auto_provisioning_defaults` block supports:
 
@@ -595,7 +613,7 @@ as "Intel Haswell" or "Intel Sandy Bridge".
 
 -> `monitoring.write` is always enabled regardless of user input.  `monitoring` and `logging.write` may also be enabled depending on the values for `monitoring_service` and `logging_service`.
 
-* `service_account` - (Optional) The Google Cloud Platform Service Account to be used by the node VMs created by GKE Autopilot or NAP.
+* `service_account` - (Optional) The `email` of the Google Cloud Platform Service Account to be used by the node VMs created by GKE Autopilot or NAP.
 
 * `boot_disk_kms_key` - (Optional) The Customer Managed Encryption Key used to encrypt the boot disk attached to each node in the node pool. This should be of the form projects/[KEY_PROJECT_ID]/locations/[LOCATION]/keyRings/[RING_NAME]/cryptoKeys/[KEY_NAME]. For more information about protecting resources with Cloud KMS Keys please see: https://cloud.google.com/compute/docs/disks/customer-managed-encryption
 
@@ -654,7 +672,7 @@ This block also contains several computed attributes, documented below.
 
 <a name="nested_monitoring_config"></a>The `monitoring_config` block supports:
 
-*  `enable_components` - (Optional) The GKE components exposing metrics. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `SCHEDULER`, `CONTROLLER_MANAGER`, `STORAGE`, `HPA`, `POD`, `DAEMONSET`, `DEPLOYMENT`, `STATEFULSET`, `KUBELET`, `CADVISOR` and `DCGM`. In beta provider, `WORKLOADS` is supported on top of those 12 values. (`WORKLOADS` is deprecated and removed in GKE 1.24.) `KUBELET` and `CADVISOR` are only supported in GKE 1.29.3-gke.1093000 and above.
+*  `enable_components` - (Optional) The GKE components exposing metrics. Supported values include: `SYSTEM_COMPONENTS`, `APISERVER`, `SCHEDULER`, `CONTROLLER_MANAGER`, `STORAGE`, `HPA`, `POD`, `DAEMONSET`, `DEPLOYMENT`, `STATEFULSET`, `KUBELET`, `CADVISOR`, `DCGM` and `JOBSET`. In beta provider, `WORKLOADS` is supported on top of those 12 values. (`WORKLOADS` is deprecated and removed in GKE 1.24.) `KUBELET` and `CADVISOR` are only supported in GKE 1.29.3-gke.1093000 and above. `JOBSET` is only supported in GKE 1.32.1-gke.1357001 and above.
 
 *  `managed_prometheus` - (Optional) Configuration for Managed Service for Prometheus. Structure is [documented below](#nested_managed_prometheus).
 
@@ -663,6 +681,11 @@ This block also contains several computed attributes, documented below.
 <a name="nested_managed_prometheus"></a>The `managed_prometheus` block supports:
 
 * `enabled` - (Required) Whether or not the managed collection is enabled.
+* `auto_monitoring_config` - (Optional) Configuration options for GKE Auto-Monitoring.
+
+<a name="auto_monitoring_config"></a>The `auto_monitoring_config` block supports:
+
+* `scope` - (Required) Whether or not to enable GKE Auto-Monitoring. Supported values include: `ALL`, `NONE`.
 
 <a name="nested_advanced_datapath_observability_config"></a>The `advanced_datapath_observability_config` block supports:
 
@@ -818,14 +841,14 @@ This block also contains several computed attributes, documented below.
 * `gcp_public_cidrs_access_enabled` - (Optional) Whether Kubernetes master is
     accessible via Google Compute Engine Public IPs.
 
+* `private_endpoint_enforcement_enabled` - (Optional) Whether authorized networks is enforced on the private endpoint or not.
+
 The `master_authorized_networks_config.cidr_blocks` block supports:
 
 * `cidr_block` - (Optional) External network that can access Kubernetes master through HTTPS.
     Must be specified in CIDR notation.
 
 * `display_name` - (Optional) Field for users to identify CIDR blocks.
-
-* `private_endpoint_enforcement_enabled` - (Optional) Whether authorized networks is enforced on the private endpoint or not.
 
 <a name="nested_network_policy"></a>The `network_policy` block supports:
 
@@ -841,7 +864,7 @@ The `master_authorized_networks_config.cidr_blocks` block supports:
     in GB. The smallest allowed disk size is 10GB. Defaults to 100GB.
 
 * `disk_type` - (Optional) Type of the disk attached to each node
-    (e.g. 'pd-standard', 'pd-balanced' or 'pd-ssd'). If unspecified, the default disk type is 'pd-standard'
+    (e.g. 'pd-standard', 'pd-balanced' or 'pd-ssd'). If unspecified, the default disk type is 'pd-balanced'
 
 * `enable_confidential_storage` - (Optional) Enabling Confidential Storage will create boot disk with confidential mode. It is disabled by default.
 
@@ -904,7 +927,7 @@ gvnic {
 
 * `guest_accelerator` - (Optional) List of the type and count of accelerator cards attached to the instance.
     Structure [documented below](#nested_guest_accelerator).
-    **Note**: As of 6.0.0, [argument syntax](https://developer.hashicorp.com/terraform/language/syntax/configuration#arguments) 
+    **Note**: As of 6.0.0, [argument syntax](https://developer.hashicorp.com/terraform/language/syntax/configuration#arguments)
     is no longer supported for this field in favor of [block syntax](https://developer.hashicorp.com/terraform/language/syntax/configuration#blocks).
     To dynamically set a list of guest accelerators, use [dynamic blocks](https://developer.hashicorp.com/terraform/language/expressions/dynamic-blocks).
     To set an empty list, use a single `guest_accelerator` block with `count = 0`.
@@ -918,8 +941,14 @@ gvnic {
 * `resource_labels` - (Optional) The GCP labels (key/value pairs) to be applied to each node. Refer [here](https://cloud.google.com/kubernetes-engine/docs/how-to/creating-managing-labels)
     for how these labels are applied to clusters, node pools and nodes.
 
+* `max_run_duration` - (Optional) The runtime of each node in the node pool in seconds, terminated by 's'. Example: "3600s".
+
+* `flex_start` - (Optional) Enables Flex Start provisioning model for the node pool.
+
 * `local_ssd_count` - (Optional) The amount of local SSD disks that will be
     attached to each cluster node. Defaults to 0.
+
+* `network_performance_config` - (Optional) Network bandwidth tier configuration. Structure is [documented below](#network_performance_config).
 
 * `machine_type` - (Optional) The name of a Google Compute Engine machine type.
     Defaults to `e2-medium`. To create a custom machine type, value should be set as specified
@@ -996,6 +1025,15 @@ kubelet_config {
 
 * `linux_node_config` - (Optional) Parameters that can be configured on Linux nodes. Structure is [documented below](#nested_linux_node_config).
 
+* `windows_node_config` - (Optional)
+Windows node configuration, currently supporting OSVersion [attribute](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1/NodeConfig#osversion). The value must be one of [OS_VERSION_UNSPECIFIED, OS_VERSION_LTSC2019, OS_VERSION_LTSC2022]. For example:
+
+```hcl
+windows_node_config {
+  osversion = "OS_VERSION_LTSC2019"
+}
+```
+
 * `containerd_config` - (Optional) Parameters to customize containerd runtime. Structure is [documented below](#nested_containerd_config).
 
 * `node_group` - (Optional) Setting this field will assign instances of this pool to run on the specified node group. This is useful for running workloads on [sole tenant nodes](https://cloud.google.com/compute/docs/nodes/sole-tenant-nodes).
@@ -1021,6 +1059,9 @@ sole_tenant_config {
 * `enabled` (Required) - Enable Confidential GKE Nodes for this node pool, to
     enforce encryption of data in-use.
 
+* `confidential_instance_type` (Optional) - Defines the type of technology used
+    by the confidential node.
+
 <a name="nested_node_affinity"></a>The `node_affinity` block supports:
 
 * `key` (Required) - The default or custom node affinity label key name.
@@ -1035,6 +1076,8 @@ sole_tenant_config {
 
 * `enable_nested_virtualization`- (Optional) Defines whether the instance should have nested virtualization enabled. Defaults to false.
 
+* `performance_monitoring_unit` - (Optional) Defines the performance monitoring unit [PMU](https://cloud.google.com/compute/docs/pmu-overview) level. Valid values are `ARCHITECTURAL`, `STANDARD`, or `ENHANCED`. Defaults to off.
+
 <a name="nested_ephemeral_storage_config"></a>The `ephemeral_storage_config` block supports:
 
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
@@ -1042,6 +1085,8 @@ sole_tenant_config {
 <a name="nested_ephemeral_storage_local_ssd_config"></a>The `ephemeral_storage_local_ssd_config` block supports:
 
 * `local_ssd_count` (Required) - Number of local SSDs to use to back ephemeral storage. Uses NVMe interfaces. Each local SSD is 375 GB in size. If zero, it means to disable using local SSDs as ephemeral storage.
+
+* `data_cache_count` (Optional) - Number of raw-block local NVMe SSD disks to be attached to the node utilized for GKE Data Cache. If zero, then GKE Data Cache will not be enabled in the nodes.
 
 <a name="nasted_fast_socket"></a>The `fast_socket` block supports:
 
@@ -1082,7 +1127,7 @@ sole_tenant_config {
 
 * `gpu_driver_version` (Required) - Mode for how the GPU driver is installed.
     Accepted values are:
-    * `"GPU_DRIVER_VERSION_UNSPECIFIED"`: Default value is to not install any GPU driver.
+    * `"GPU_DRIVER_VERSION_UNSPECIFIED"`: Default value is to install the "Default" GPU driver. Before GKE `1.30.1-gke.1156000`, the default value is to not install any GPU driver.
     * `"INSTALLATION_DISABLED"`: Disable GPU driver auto installation and needs manual installation.
     * `"DEFAULT"`: "Default" GPU driver in COS and Ubuntu.
     * `"LATEST"`: "Latest" GPU driver in COS.
@@ -1095,6 +1140,10 @@ sole_tenant_config {
     * `"MPS"`: Enable co-operative multi-process CUDA workloads to run concurrently on a single GPU device with [MPS](https://cloud.google.com/kubernetes-engine/docs/how-to/nvidia-mps-gpus)
 
 * `max_shared_clients_per_gpu` (Required) - The maximum number of containers that can share a GPU.
+
+<a name="network_performance_config"></a>The `network_performance_config` block supports:
+
+* `total_egress_bandwidth_tier` (Required) - Specifies the total network bandwidth tier for NodePools in the cluster.
 
 <a name="nested_workload_identity_config"></a> The `workload_identity_config` block supports:
 
@@ -1167,31 +1216,64 @@ notification_config {
 
 <a name="nested_notification_filter"></a> The `filter` block supports:
 
-* `event_type` (Optional) - Can be used to filter what notifications are sent. Accepted values are `UPGRADE_AVAILABLE_EVENT`, `UPGRADE_EVENT` and `SECURITY_BULLETIN_EVENT`. See [Filtering notifications](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-notifications#filtering) for more details.
+* `event_type` (Optional) - Can be used to filter what notifications are sent. Accepted values are `UPGRADE_AVAILABLE_EVENT`, `UPGRADE_EVENT`, `SECURITY_BULLETIN_EVENT` and `UPGRADE_INFO_EVENT`. See [Filtering notifications](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-notifications#filtering) for more details.
 
 <a name="nested_confidential_nodes"></a> The `confidential_nodes` block supports:
 
 * `enabled` (Required) - Enable Confidential GKE Nodes for this cluster, to
     enforce encryption of data in-use.
 
+* `confidential_instance_type` (Optional) - Defines the type of technology used
+    by the confidential node.
+
 <a name="nested_pod_security_policy_config"></a>The `pod_security_policy_config` block supports:
 
 * `enabled` (Required) - Enable the PodSecurityPolicy controller for this cluster.
     If enabled, pods must be valid under a PodSecurityPolicy to be created.
 
+<a name="nested_pod_autoscaling"></a>The `pod_autoscaling` block supports:
+
+* `hpa_profile` (Required) - Enable the Horizontal Pod Autoscaling profile for this cluster.
+    Acceptable values are:
+    * `"NONE"`: Customers explicitly opt-out of HPA profiles.
+    * `"PERFORMANCE"`: PERFORMANCE is used when customers opt-in to the performance HPA profile. In this profile we support a higher number of HPAs per cluster and faster metrics collection for workload autoscaling.
+    See [HPAProfile](https://cloud.google.com/kubernetes-engine/docs/reference/rest/v1beta1/projects.locations.clusters#hpaprofile) for more details.
+
 <a name="nested_secret_manager_config"></a>The `secret_manager_config` block supports:
 
 * `enabled` (Required) - Enable the Secret Manager add-on for this cluster.
+* `rotation_config` (Optional, Beta) - config for secret manager auto rotation. Structure is [docuemented below](#rotation_config)
+
+<a name="rotation_config"></a>The `rotation_config` block supports:
+
+* `enabled` (Optional) - Enable the roation in Secret Manager add-on for this cluster.
+* `rotation_interval` (Optional) - The interval between two consecutive rotations. Default rotation interval is 2 minutes.
+
+<a name="nested_user_managed_keys_config"></a>The `user_managed_keys_config` block supports:
+
+* `cluster_ca` - (Optional) The Certificate Authority Service caPool to use for the cluster CA in this cluster.
+* `etcd_api_ca` - (Optional) The Certificate Authority Service caPool to use for the etcd API CA in this cluster.
+* `etcd_peer_ca` - (Optional) The Certificate Authority Service caPool to use for the etcd peer CA in this cluster.
+* `aggregation_ca` - (Optional) The Certificate Authority Service caPool to use for the aggreation CA in this cluster.
+* `service_account_signing_keys` - (Optional) The Cloud KMS cryptoKeyVersions to use for signing service account JWTs issued by this cluster.
+* `service_account_verification_keys` - (Optional) The Cloud KMS cryptoKeyVersions to use for verifying service account JWTs issued by this cluster.
+* `control_plane_disk_encryption_key` - (Optional) The Cloud KMS cryptoKey to use for Confidential Hyperdisk on the control plane nodes.
+* `gkeops_etcd_backup_encryption_key` - (Optional) Resource path of the Cloud KMS cryptoKey to use for encryption of internal etcd backups.
 
 <a name="nested_control_plane_endpoints_config"></a>The `control_plane_endpoints_config` block supports:
 
 * `dns_endpoint_config` - (Optional) DNS endpoint configuration.
+* `ip_endpoints_config` - (Optional) IP endpoint configuration.
 
 The `control_plane_endpoints_config.dns_endpoint_config` block supports:
 
 * `endpoint` - (Output) The cluster's DNS endpoint.
 
 * `allow_external_traffic` - (Optional) Controls whether user traffic is allowed over this endpoint. Note that GCP-managed services may still use the endpoint even if this is false.
+
+The `control_plane_endpoints_config.ip_endpoints_config` block supports:
+
+* `enabled` - (Optional) Controls whether to allow direct IP access. Defaults to `true`.
 
 <a name="nested_private_cluster_config"></a>The `private_cluster_config` block supports:
 
@@ -1266,6 +1348,12 @@ not.
     * STABLE: Every few months upgrade cadence; Production users who need stability above all else, and for whom frequent upgrades are too risky.
     * EXTENDED: GKE provides extended support for Kubernetes minor versions through the Extended channel. With this channel, you can stay on a minor version for up to 24 months.
 
+<a name="nested_gke_auto_upgrade_config"></a>The `gke_auto_upgrade_config` block supports:
+
+* `patch_mode` - (Required) The selected patch mode.
+    Accepted values are:
+    * ACCELERATED: Upgrades to the latest available patch version in a given minor and release channel.
+
 <a name="nested_cost_management_config"></a>The `cost_management_config` block supports:
 
 * `enabled` (Optional) - Whether to enable the [cost allocation](https://cloud.google.com/kubernetes-engine/docs/how-to/cost-allocations) feature.
@@ -1327,7 +1415,7 @@ Enables monitoring and attestation of the boot integrity of the instance. The at
 * `cpu_manager_policy` - (Optional) The CPU management policy on the node. See
 [K8S CPU Management Policies](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/).
 One of `"none"` or `"static"`. If unset (or set to the empty string `""`), the API will treat the field as if set to "none".
-Prior to the 6.4.0 this field was marked as required. The workaround for the required field 
+Prior to the 6.4.0 this field was marked as required. The workaround for the required field
 is setting the empty string `""`, which will function identically to not setting this field.
 
 * `cpu_cfs_quota` - (Optional) If true, enables CPU CFS quota enforcement for
@@ -1341,6 +1429,24 @@ such as `"300ms"`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m",
 * `insecure_kubelet_readonly_port_enabled` - (Optional) Controls whether the kubelet read-only port is enabled. It is strongly recommended to set this to `FALSE`. Possible values: `TRUE`, `FALSE`.
 
 * `pod_pids_limit` - (Optional) Controls the maximum number of processes allowed to run in a pod. The value must be greater than or equal to 1024 and less than 4194304.
+
+* `container_log_max_size` - (Optional) Defines the maximum size of the
+  container log file before it is rotated. Specified as a positive number and a
+  unit suffix, such as `"100Ki"`, `"10Mi"`. Valid units are "Ki", "Mi", "Gi".
+  The value must be between `"10Mi"` and `"500Mi"`, inclusive. And the total container log size
+  (`container_log_max_size` * `container_log_max_files`) cannot exceed 1% of the total storage of the node.
+
+* `container_log_max_files` - (Optional) Defines the maximum number of container log files that can be present for a container. The integer must be between 2 and 10, inclusive.
+
+* `image_gc_low_threshold_percent` - (Optional) Defines the percent of disk usage before which image garbage collection is never run. Lowest disk usage to garbage collect to. The integer must be between 10 and 85, inclusive.
+
+* `image_gc_high_threshold_percent` - (Optional) Defines the percent of disk usage after which image garbage collection is always run. The integer must be between 10 and 85, inclusive.
+
+* `image_minimum_gc_age` - (Optional) Defines the minimum age for an unused image before it is garbage collected. Specified as a sequence of decimal numbers, each with optional fraction and a unit suffix, such as `"300s"`, `"1.5m"`. The value cannot be greater than "2m".
+
+* `image_maximum_gc_age` - (Optional) Defines the maximum age an image can be unused before it is garbage collected. Specified as a sequence of decimal numbers, each with optional fraction and a unit suffix, such as `"300s"`, `"1.5m"`, and `"2h45m"`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h". The value must be a positive duration.
+
+* `allowed_unsafe_sysctls` - (Optional) Defines a comma-separated allowlist of unsafe sysctls or sysctl patterns which can be set on the Pods. The allowed sysctl groups are `kernel.shm*`, `kernel.msg*`, `kernel.sem`, `fs.mqueue.*`, and `net.*`.
 
 <a name="nested_linux_node_config"></a>The `linux_node_config` block supports:
 
@@ -1378,7 +1484,7 @@ linux_node_config {
 
   * `enabled` (Required) - Enables private registry config. If set to false, all other fields in this object must not be set.
 
-  * `certificate_authority_domain_config` (Optional) - List of configuration objects for CA and domains. Each object identifies a certificate and its assigned domains. See [how to configure for private container registries](https://cloud.google.com/kubernetes-engine/docs/how-to/access-private-registries-private-certificates) for more detail. Example: 
+  * `certificate_authority_domain_config` (Optional) - List of configuration objects for CA and domains. Each object identifies a certificate and its assigned domains. See [how to configure for private container registries](https://cloud.google.com/kubernetes-engine/docs/how-to/access-private-registries-private-certificates) for more detail. Example:
   ```hcl
   certificate_authority_domain_config {
     fqdns = [
@@ -1402,7 +1508,7 @@ linux_node_config {
 
 * `cluster_dns` - (Optional) Which in-cluster DNS provider should be used. `PROVIDER_UNSPECIFIED` (default) or `PLATFORM_DEFAULT` or `CLOUD_DNS`.
 
-* `cluster_dns_scope` - (Optional) The scope of access to cluster DNS records. `DNS_SCOPE_UNSPECIFIED` (default) or `CLUSTER_SCOPE` or `VPC_SCOPE`.
+* `cluster_dns_scope` - (Optional) The scope of access to cluster DNS records. `DNS_SCOPE_UNSPECIFIED` or `CLUSTER_SCOPE` or `VPC_SCOPE`. If the `cluster_dns` field is set to `CLOUD_DNS`, `DNS_SCOPE_UNSPECIFIED` and empty/null behave like `CLUSTER_SCOPE`.
 
 * `cluster_dns_domain` - (Optional) The suffix used for all cluster service records.
 
@@ -1422,7 +1528,7 @@ linux_node_config {
 
 <a name="nested_security_posture_config"></a>The `security_posture_config` block supports:
 
-**Note:** `ENTERPRISE` and `VULNERABILITY_ENTERPRISE` are only available for [GKE Enterprise](http://cloud/kubernetes-engine/enterprise/docs/concepts/overview) projects.  
+**Note:** `ENTERPRISE` and `VULNERABILITY_ENTERPRISE` are only available for [GKE Enterprise](http://cloud/kubernetes-engine/enterprise/docs/concepts/overview) projects.
 
 * `mode` - (Optional) Sets the mode of the Kubernetes security posture API's off-cluster features. Available options include `DISABLED`, `BASIC`, and `ENTERPRISE`.
 
@@ -1440,6 +1546,10 @@ linux_node_config {
 <a name="nested_enterprise_config"></a>The `enterprise_config` block supports:
 
 * `desired_tier` - (Optional) Sets the tier of the cluster. Available options include `STANDARD` and `ENTERPRISE`.
+
+<a name="anonymous_authentication_config"></a>The `anonymous_authentication_config` block supports:
+
+* `mode` - (Optional) Sets or removes authentication restrictions. Available options include `LIMITED` and `ENABLED`.
 
 
 ## Attributes Reference

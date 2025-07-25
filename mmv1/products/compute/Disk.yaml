@@ -50,6 +50,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 iam_policy:
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
@@ -63,6 +64,7 @@ custom_code:
   update_encoder: 'templates/terraform/update_encoder/hyper_disk.go.tmpl'
   decoder: 'templates/terraform/decoders/disk.tmpl'
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
+  tgc_encoder: 'templates/tgc_next/encoders/compute_disk.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
@@ -73,7 +75,7 @@ examples:
     vars:
       disk_name: 'test-disk'
   - name: 'disk_async'
-    primary_resource_id: 'primary'
+    primary_resource_id: 'secondary'
     primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
     vars:
       disk_name: 'async-test-disk'
@@ -128,7 +130,7 @@ properties:
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
-        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+        # TODO Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeySelfLink'
         type: String
         description: |
@@ -144,6 +146,27 @@ properties:
         description: |
           The service account used for the encryption request for the given KMS key.
           If absent, the Compute Engine Service Agent service account is used.
+  - name: 'sourceInstantSnapshot'
+    type: String
+    description: |
+      The source instant snapshot used to create this disk. You can provide this as a partial or full URL to the resource.
+      For example, the following are valid values:
+
+      * `https://www.googleapis.com/compute/v1/projects/project/zones/zone/instantSnapshots/instantSnapshot`
+      * `projects/project/zones/zone/instantSnapshots/instantSnapshot`
+      * `zones/zone/instantSnapshots/instantSnapshot`
+    resource: 'Snapshot'
+    imports: 'selfLink'
+    diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+  - name: 'sourceInstantSnapshotId'
+    type: String
+    description: |
+      The unique ID of the instant snapshot used to create this disk. This value identifies
+      the exact instant snapshot that was used to create this persistent disk.
+      For example, if you created the persistent disk from an instant snapshot that was later
+      deleted and recreated under the same name, the source instant snapshot ID would identify
+      the exact version of the instant snapshot that was used.
+    output: true
   - name: 'sourceImageId'
     type: String
     description: |
@@ -217,7 +240,7 @@ properties:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
-        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+        # TODO Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeySelfLink'
         type: String
         description: |
@@ -249,7 +272,15 @@ properties:
       snapshot ID would identify the exact version of the snapshot that was
       used.
     output: true
-
+  - name: 'sourceStorageObject'
+    type: String
+    description: |
+      The full Google Cloud Storage URI where the disk image is stored.
+      This file must be a gzip-compressed tarball whose name ends in .tar.gz or virtual machine disk whose name ends in vmdk.
+      Valid URIs may start with gs:// or https://storage.googleapis.com/.
+      This flag is not optimized for creating multiple disks from a source storage object.
+      To create many disks from a source storage object, use gcloud compute images import instead.
+    ignore_read: true
   - name: 'labelFingerprint'
     type: Fingerprint
     description: |
@@ -294,6 +325,8 @@ properties:
       character, which cannot be a dash.
     required: true
     immutable: true
+    validation:
+      function: 'verify.ValidateGCEName'
   - name: 'size'
     type: Integer
     description: |
@@ -427,6 +460,7 @@ properties:
       Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true
     required: false
     default_from_api: true
+    include_empty_value_in_cai: true
   - name: 'multiWriter'
     type: Boolean
     description: |
@@ -460,6 +494,26 @@ properties:
         description: |
           Primary disk for asynchronous disk replication.
         required: true
+  - name: 'architecture'
+    ignore_read: true
+    type: String
+    description: |
+      The architecture of the disk. Values include `X86_64`, `ARM64`.
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the disk. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true
   - name: 'guestOsFeatures'
     type: Array
     description: |
@@ -504,13 +558,26 @@ properties:
   - name: 'accessMode'
     type: String
     description: |
-      The accessMode of the disk.
+      The access mode of the disk.
       For example:
-      * READ_WRITE_SINGLE
-      * READ_WRITE_MANY
-      * READ_ONLY_SINGLE
+        * READ_WRITE_SINGLE: The default AccessMode, means the disk can be attached to single instance in RW mode.
+        * READ_WRITE_MANY: The AccessMode means the disk can be attached to multiple instances in RW mode.
+        * READ_ONLY_SINGLE: The AccessMode means the disk can be attached to multiple instances in RO mode.
+      The AccessMode is only valid for Hyperdisk disk types.
     required: false
     immutable: false
     default_from_api: true
     update_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}?paths=accessMode'
     update_verb: 'PATCH'
+virtual_fields:
+  - name: 'create_snapshot_before_destroy'
+    type: Boolean
+    default_value: false
+    description: |
+      If set to true, a snapshot of the disk will be created before it is destroyed.
+      If your disk is encrypted with customer managed encryption keys these will be reused for the snapshot creation.
+      The name of the snapshot by default will be `{{disk-name}}-YYYYMMDD-HHmm`
+  - name: 'create_snapshot_before_destroy_prefix'
+    type: String
+    description: |
+      This will set a custom name prefix for the snapshot that's created when the disk is deleted.

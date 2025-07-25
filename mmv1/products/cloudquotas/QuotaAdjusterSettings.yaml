@@ -14,7 +14,7 @@
 ---
 name: 'QuotaAdjusterSettings'
 description: |
-  QuotaAdjusterSettings represents the preferred quota configuration specified for a project, folder or organization. There is only one QuotaAdjusterSettings resource for a quota value targeting a unique set of dimensions.
+  QuotaAdjusterSettings resource represents your quota adjuster settings for a particular project. When enabled, the quota adjuster monitors your usage for the specified resources and issues quota adjustment requests when resource usage approaches its quota value.
 min_version: beta
 references:
   guides:
@@ -49,13 +49,11 @@ examples:
 parameters:
   - name: 'parent'
     type: String
-    description: The parent of the quota preference. Allowed parents are "projects/[project-id / number]" or "folders/[folder-id / number]" or "organizations/[org-id / number]".
+    description: The parent of the quota preference. Allowed parent format is "projects/[project-id / number]".
     url_param_only: true
     required: true
     immutable: true
     default_from_api: true
-    validation:
-      regex: '^(projects|folders|organizations)/([^/]+)$'
 properties:
   - name: 'enablement'
     type: Enum
@@ -68,16 +66,26 @@ properties:
   - name: 'effectiveContainer'
     type: String
     description: |
-      Fields to capture the hierarchy enablement.
-      The container (org/folder/project) that determines if the quota adjuster is set for this project/folder/org. We use the nearest-ancestor to determine the effective container.
-      The nearest ancestor (including this container) with `enabled` set (either true or false) will be returned.
+      The resource container that determines if the quota adjuster is set for this project.
     output: true
   - name: 'effectiveEnablement'
     type: Enum
     description: |
-      Based on the effective container`s setting above, determines Whether this container has the quota adjuster enabled.
+      Based on the effective container`s setting above, determines Whether this resource container has the quota adjuster enabled.
     output: true
     enum_values:
       - 'DEFAULT'
       - 'ENABLED'
       - 'DISABLED'
+  - name: 'inherited'
+    type: Boolean
+    description: |
+      Indicates whether the setting is inherited or explicitly specified.
+    output: true
+  - name: 'inheritedFrom'
+    type: String
+    description: |
+      The resource container from which the setting is inherited. This refers to the  nearest ancestor with enablement set (either ENABLED or DISABLED).
+      The value can be `organizations/{organization_id}`, `folders/{folder_id}`, or can be `default` if no ancestor exists with enablement set.
+      The value will be empty when `enablement` is specified on this resource container.
+    output: true

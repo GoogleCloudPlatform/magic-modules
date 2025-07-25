@@ -12,11 +12,11 @@
 # limitations under the License.
 
 name: 'BackupPlanAssociation'
-min_version: beta
 base_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations
 create_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations/?backup_plan_association_id={{backup_plan_association_id}}
 self_link: projects/{{project}}/locations/{{location}}/backupPlanAssociations/{{backup_plan_association_id}}
-immutable: true
+update_verb: 'PATCH'
+update_mask: true
 delete_url: projects/{{project}}/locations/{{location}}/backupPlanAssociations/{{backup_plan_association_id}}
 description: A Backup and DR BackupPlanAssociation.
 import_format:
@@ -28,10 +28,10 @@ references:
 autogen_async: true
 timeouts:
   insert_minutes: 60
+  update_minutes: 20
   delete_minutes: 60
 examples:
-  - min_version: beta
-    name: 'backup_dr_bpa'
+  - name: 'backup_dr_bpa'
     primary_resource_id: 'my-backup-plan-association'
     vars:
       backup_plan_association_id: "my-bpa"
@@ -70,12 +70,16 @@ properties:
     type: String
     description: |
       The BP with which resource needs to be created
+      Note:
+      - A Backup Plan configured for 'compute.googleapis.com/Instance', can only protect instance type resources.
+      - A Backup Plan configured for 'compute.googleapis.com/Disk' can be used to protect both standard Disks and Regional Disks resources.
     required: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - name: 'resourceType'
     type: String
     description: |
-      The resource type of workload on which backupplan is applied
+      The resource type of workload on which backupplan is applied.
+      Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", and "compute.googleapis.com/RegionDisk"
     required: true
   - name: 'createTime'
     type: String

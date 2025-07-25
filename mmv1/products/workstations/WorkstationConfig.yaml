@@ -340,7 +340,7 @@ properties:
             properties:
               - name: 'enableConfidentialCompute'
                 type: Boolean
-                # TODO(esu): Change this to required in next breaking release.
+                # TODO: Change this to required in next breaking release.
                 description: |
                   Whether the instance has confidential compute enabled.
                 min_version: 'beta'
@@ -469,7 +469,6 @@ properties:
               description: |
                 The type of the persistent disk for the home directory. Defaults to `pd-standard`.
               min_version: 'beta'
-              immutable: true
               default_from_api: true
             - name: 'sizeGb'
               type: Integer
@@ -477,7 +476,6 @@ properties:
                 The GB capacity of a persistent home directory for each workstation created with this configuration. Must be empty if `sourceSnapshot` is set.
                 Valid values are `10`, `50`, `100`, `200`, `500`, or `1000`. Defaults to `200`. If less than `200` GB, the `diskType` must be `pd-balanced` or `pd-ssd`.
               min_version: 'beta'
-              immutable: true
               default_from_api: true
             - name: 'reclaimPolicy'
               type: Enum
@@ -492,7 +490,7 @@ properties:
               description: |
                 Name of the snapshot to use as the source for the disk. This can be the snapshot's `self_link`, `id`, or a string in the format of `projects/{project}/global/snapshots/{snapshot}`. If set, `sizeGb` and `fsType` must be empty. Can only be updated if it has an existing value.
               min_version: 'beta'
-              # TODO(esu): Add conflicting fields once complex lists are supported.
+              # TODO: Add conflicting fields once complex lists are supported.
   - name: 'ephemeralDirectories'
     type: Array
     description: |

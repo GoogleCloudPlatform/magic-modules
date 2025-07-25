@@ -1,0 +1,4 @@
+// Forcefully delete Schema and Connectors associated with the Service.
+if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "FORCE" {
+    url = url + "?force=true"
+}

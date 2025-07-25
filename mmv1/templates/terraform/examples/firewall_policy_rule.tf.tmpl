@@ -37,7 +37,6 @@ resource "google_compute_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
     dest_threat_intelligences = ["iplist-known-malicious-ips"]
     src_address_groups        = []
     dest_address_groups       = [google_network_security_address_group.basic_global_networksecurity_address_group.id]
-    dest_network_scope        = "INTERNET"
 
     layer4_configs {
       ip_protocol = "tcp"
@@ -49,4 +48,21 @@ resource "google_compute_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
       ports       = [22]
     }
   }
+}
+
+resource "google_tags_tag_key" "basic_key" {
+  description = "For keyname resources."
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  purpose     = "GCE_FIREWALL"
+  short_name  = "{{index $.Vars "tag_key"}}"
+
+  purpose_data = {
+    organization = "auto"
+  }
+}
+
+resource "google_tags_tag_value" "basic_value" {
+  description = "For valuename resources."
+  parent      = google_tags_tag_key.basic_key.id
+  short_name  = "{{index $.Vars "tag_value"}}"
 }

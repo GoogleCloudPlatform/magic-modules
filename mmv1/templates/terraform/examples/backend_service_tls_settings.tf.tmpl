@@ -1,0 +1,28 @@
+resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
+  name          = "{{index $.Vars "backend_service_name"}}"
+  health_checks = [google_compute_health_check.default.id]
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+  protocol = "HTTPS"
+  tls_settings {
+    sni = "example.com"
+    subject_alt_names {
+        dns_name = "example.com"
+    }
+    subject_alt_names {
+        uniform_resource_identifier = "https://example.com"
+    }
+    authentication_config = "//networksecurity.googleapis.com/${google_network_security_backend_authentication_config.default.id}"
+  }
+}
+
+resource "google_compute_health_check" "default" {
+  name = "{{index $.Vars "health_check_name"}}"
+  http_health_check {
+    port = 80
+  }
+}
+
+resource "google_network_security_backend_authentication_config" "default" {
+  name             = "{{index $.Vars "authentication_name"}}"
+  well_known_roots = "PUBLIC_ROOTS"
+}

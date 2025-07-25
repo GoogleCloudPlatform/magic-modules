@@ -116,14 +116,24 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+  encoder: 'templates/terraform/encoders/redis_cluster.go.tmpl'
+  decoder: 'templates/terraform/decoders/redis_cluster.go.tmpl'
+sweeper:
+  ensure_value:
+    field: deletionProtectionEnabled
+    value: false
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "europe-west1"
 examples:
   - name: 'redis_cluster_ha'
     primary_resource_id: 'cluster-ha'
     vars:
       cluster_name: 'ha-cluster'
-      policy_name: 'mypolicy'
-      subnet_name: 'mysubnet'
-      network_name: 'mynetwork'
+      policy_name: 'my-policy'
+      subnet_name: 'my-subnet'
+      network_name: 'my-network'
       deletion_protection_enabled: 'true'
     test_vars_overrides:
       'deletion_protection_enabled': 'false'
@@ -133,9 +143,9 @@ examples:
     primary_resource_id: 'cluster-ha-single-zone'
     vars:
       cluster_name: 'ha-cluster-single-zone'
-      policy_name: 'mypolicy'
-      subnet_name: 'mysubnet'
-      network_name: 'mynetwork'
+      policy_name: 'my-policy'
+      subnet_name: 'my-subnet'
+      network_name: 'my-network'
       deletion_protection_enabled: 'true'
     test_vars_overrides:
       'deletion_protection_enabled': 'false'
@@ -163,9 +173,9 @@ examples:
     primary_resource_id: "cluster-rdb"
     vars:
       cluster_name: "rdb-cluster"
-      policy_name: "mypolicy"
-      subnet_name: "mysubnet"
-      network_name: "mynetwork"
+      policy_name: "my-policy"
+      subnet_name: "my-subnet"
+      network_name: "my-network"
       deletion_protection_enabled: 'true'
     test_vars_overrides:
       'deletion_protection_enabled': 'false'
@@ -175,12 +185,30 @@ examples:
     primary_resource_id: "cluster-aof"
     vars:
       cluster_name: "aof-cluster"
-      policy_name: "mypolicy"
-      subnet_name: "mysubnet"
-      network_name: "mynetwork"
+      policy_name: "my-policy"
+      subnet_name: "my-subnet"
+      network_name: "my-network"
       deletion_protection_enabled: 'true'
     test_vars_overrides:
       'deletion_protection_enabled': 'false'
+    oics_vars_overrides:
+      'deletion_protection_enabled': 'false'
+  - name: "redis_cluster_cmek"
+    primary_resource_id: "cluster-cmek"
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@cloud-redis.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+    vars:
+      cluster_name: "cmek-cluster"
+      policy_name: "my-policy"
+      subnet_name: "my-subnet"
+      network_name: "my-network"
+      kms_key_name: "my-key"
+      kms_ring_name: "my-key-ring"
+      deletion_protection_enabled: 'true'
+    test_vars_overrides:
+      'deletion_protection_enabled': 'false'
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     oics_vars_overrides:
       'deletion_protection_enabled': 'false'
 parameters:
@@ -227,6 +255,75 @@ properties:
     description: |
       System assigned, unique identifier for the cluster.
     output: true
+  - name: 'gcsSource'
+    type: NestedObject
+    description: |
+     Backups stored in Cloud Storage buckets. The Cloud Storage buckets need to be the same region as the clusters.
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - managedBackupSource
+    properties:
+      - name: 'uris'
+        type: Array
+        is_set: true
+        description: |
+         URIs of the GCS objects to import. Example: gs://bucket1/object1, gs://bucket2/folder2/object2
+        required: true
+        immutable: true
+        item_type:
+          type: String
+  - name: 'managedBackupSource'
+    type: NestedObject
+    description: "Backups that generated and managed by memorystore."
+    immutable: true
+    ignore_read: true
+    conflicts:
+      - gcsSource
+    properties:
+      - name: 'backup'
+        type: String
+        description: |
+         Example: `projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backup}`.
+        required: true
+        immutable: true
+  - name: 'backupCollection'
+    type: String
+    description: |
+     The backup collection full resource name.
+     Example: projects/{project}/locations/{location}/backupCollections/{collection}
+    output: true
+  - name: 'automatedBackupConfig'
+    type: NestedObject
+    description: "The automated backup config for a instance."
+    custom_flatten: 'templates/terraform/custom_flatten/redis_cluster_automated_backup_config.go.tmpl'
+    custom_expand: 'templates/terraform/custom_expand/redis_cluster_automated_backup_config.go.tmpl'
+    properties:
+      - name: 'fixedFrequencySchedule'
+        type: NestedObject
+        description: "Trigger automated backups at a fixed frequency."
+        required: true
+        properties:
+          - name: 'startTime'
+            type: NestedObject
+            description: |
+              The start time of every automated backup in UTC.
+              It must be set to the start of an hour. This field is required.
+            required: true
+            properties:
+              - name: 'hours'
+                type: Integer
+                description: |
+                  Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or equal to 23.
+                  An API may choose to allow the value "24:00:00" for scenarios like business closing time.
+                required: true
+      - name: 'retention'
+        type: String
+        description: |
+            How long to keep automated backups before the backups are deleted.
+            The value should be between 1 day and 365 days. If not specified, the default value is 35 days.
+            A duration in seconds with up to nine fractional digits, ending with 's'. Example: "3.5s".
+        required: true
   - name: 'authorizationMode'
     type: Enum
     description: |
@@ -256,7 +353,6 @@ properties:
       The nodeType for the Redis cluster.
       If not provided, REDIS_HIGHMEM_MEDIUM will be used as default
     required: false
-    immutable: true
     default_from_api: true
     enum_values:
       - 'REDIS_SHARED_CORE_NANO'
@@ -713,3 +809,24 @@ properties:
             - 'CONNECTION_TYPE_PRIMARY'
             - 'CONNECTION_TYPE_DISCOVERY'
           description: Type of a PSC connection targeting this service attachment.
+  - name: 'kmsKey'
+    type: String
+    description: The KMS key used to encrypt the at-rest data of the cluster.
+  - name: 'managedServerCa'
+    type: NestedObject
+    output: true
+    description: Cluster's Certificate Authority. This field will only be populated if Redis Cluster's transit_encryption_mode is TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION
+    properties:
+      - name: 'caCerts'
+        type: Array
+        output: true
+        description: The PEM encoded CA certificate chains for redis managed server authentication
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'certificates'
+              type: Array
+              output: true
+              description: The certificates that form the CA chain, from leaf to root order
+              item_type:
+                type: String

@@ -57,6 +57,15 @@ examples:
     ignore_read_extra:
       - 'etag'
       - 'status.0.state'
+  - name: 'bigquery_job_query_continuous'
+    exclude_docs: true
+    primary_resource_id: 'job'
+    vars:
+      job_id: 'job_query_continuous'
+    ignore_read_extra:
+      - 'etag'
+      - 'status.0.state'
+    min_version: beta
   - name: 'bigquery_job_query_table_reference'
     primary_resource_id: 'job'
     vars:
@@ -230,13 +239,13 @@ properties:
               properties:
                 - name: 'resourceUri'
                   type: String
-                  # TODO (mbang): exactly_one_of: resourceUri, inlineCode
+                  # TODO: exactly_one_of: resourceUri, inlineCode
                   description:
                     'A code resource to load from a Google Cloud Storage URI
                     (gs://bucket/path).'
                 - name: 'inlineCode'
                   type: String
-                  # TODO (mbang): exactly_one_of: resourceUri, inlineCode
+                  # TODO: exactly_one_of: resourceUri, inlineCode
                   description: |
                     An inline resource that contains code for a user-defined function (UDF).
                     Providing a inline code resource is equivalent to providing a URI for a file containing the same code.
@@ -392,6 +401,11 @@ properties:
                 enum_values:
                   - 'LAST'
                   - 'FIRST_SELECT'
+          - name: 'continuous'
+            type: Boolean
+            description: |
+              Whether to run the query as continuous or a regular query.
+            min_version: beta
       - name: 'load'
         type: NestedObject
         description: 'Configures a load job.'

@@ -183,7 +183,7 @@ properties:
             - 'REDIRECT_HTTP_RESPONSE_CODE_307'
         - name: 'script'
           type: NestedObject
-          # TODO (mbang): Exactly one of script, staticFiles, or apiEndpoint must be set
+          # TODO: Exactly one of script, staticFiles, or apiEndpoint must be set
           description: |
             Executes a script to handle the requests that match this URL pattern.
             Only the auto value is supported for Node.js in the App Engine standard environment, for example "script:" "auto".
@@ -195,7 +195,7 @@ properties:
               required: true
         - name: 'staticFiles'
           type: NestedObject
-          # TODO (mbang): Exactly one of script, staticFiles, or apiEndpoint must be set
+          # TODO: Exactly one of script, staticFiles, or apiEndpoint must be set
           description: |
             Files served directly to the user for a given URL, such as images, CSS stylesheets, or JavaScript source files. Static file handlers describe which files in the application directory are static files, and which URLs serve them.
           properties:
@@ -407,6 +407,9 @@ properties:
             type: Integer
             description: |
               Maximum number of instances to run for this version. Set to zero to disable maxInstances configuration.
+
+              **Note:** Starting from March 2025, App Engine sets the maxInstances default for standard environment deployments to 20. This change doesn't impact existing apps. To override the default, specify a new value between 0 and 2147483647, and deploy a new version or redeploy over an existing version. To disable the maxInstances default configuration setting, specify the maximum permitted value 2147483647.
+            default_from_api: true
   - name: 'basicScaling'
     type: NestedObject
     description: |

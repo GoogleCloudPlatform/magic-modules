@@ -210,7 +210,7 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 - - -
 
 
-* `labels` -
+- `labels` -
   (Optional)
   Set of label tags associated with the TcpRoute resource.
   **Note**: This field is non-authoritative, and will only manage the labels present in your configuration.

@@ -13,6 +13,8 @@
 
 ---
 name: 'Endpoint'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/endpoints/{endpoint}'
 description:
   'Models are deployed into it, and afterwards Endpoint is called to obtain
   predictions and explanations.'
@@ -137,7 +139,7 @@ properties:
                     training](https://cloud.google.com/vertex-ai/docs/training/configure-compute#machine-types).
                     For DeployedModel this field is optional, and the default
                     value is `n1-standard-2`. For BatchPredictionJob or as part
-                    of WorkerPoolSpec this field is required. TODO(rsurowka):
+                    of WorkerPoolSpec this field is required. TODO:
                     Try to better unify the required vs optional.'
                   output: true
                 - name: 'acceleratorType'

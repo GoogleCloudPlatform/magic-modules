@@ -246,7 +246,7 @@ resource "google_compute_instance_template" "confidential_instance_template" {
   }
 
   disk {
-    source_image = "ubuntu-os-cloud/ubuntu-2004-lts"
+    source_image = "ubuntu-os-cloud/ubuntu-2204-lts"
   }
 
   network_interface {
@@ -330,6 +330,9 @@ The following arguments are supported:
 * `machine_type` - (Required) The machine type to create.
 
     To create a machine with a [custom type](https://cloud.google.com/dataproc/docs/concepts/compute/custom-machine-types) (such as extended memory), format the value like `custom-VCPUS-MEM_IN_MB` like `custom-6-20480` for 6 vCPU and 20GB of RAM.
+
+    More advanced machine types like [z3](https://cloud.google.com/compute/docs/storage-optimized-machines) will
+    create disks that cannot be managed by Terraform by default. You can account for that by using `lifecycle.ignore_changes` or adding these disks into your config.
 
 - - -
 * `name` - (Optional) The name of the instance template. If you leave
@@ -448,6 +451,8 @@ The following arguments are supported:
 
 * `resource_manager_tags` - (Optional) A set of key/value resource manager tag pairs to bind to this disk. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456.
 
+* `guest_os_features` - (optional) A list of features to enable on the guest operating system. Applicable only for bootable images. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
+
 * `source_image` - (Optional) The image from which to
     initialize this disk. This can be one of: the image's `self_link`,
     `projects/{project}/global/images/{image}`,
@@ -481,6 +486,8 @@ The following arguments are supported:
     or READ_ONLY. If you are attaching or creating a boot disk, this must
     read-write mode.
 
+* `architecture` - (Optional) The architecture of the attached disk. Valid values are `ARM64` or `x86_64`.
+
 * `source` - (Optional) The name (**not self_link**)
     of the disk (such as those managed by `google_compute_disk`) to attach.
 ~> **Note:** Either `source`, `source_image`, or `source_snapshot` is **required** in a disk block unless the disk type is `local-ssd`. Check the API [docs](https://cloud.google.com/compute/docs/reference/rest/v1/instanceTemplates/insert) for details.
@@ -512,23 +519,49 @@ The following arguments are supported:
 
 <a name="nested_source_image_encryption_key"></a>The `source_image_encryption_key` block supports:
 
+* `raw_key` - (Optional)  A 256-bit [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption),
+    encoded in [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
+    to decrypt the given image. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
+
+* `rsa_encrypted_key` - (Optional) Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption) to decrypt the given image. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
+
 * `kms_key_service_account` - (Optional) The service account being used for the
     encryption request for the given KMS key. If absent, the Compute Engine
     default service account is used.
 
 * `kms_key_self_link` - (Required) The self link of the encryption key that is
-    stored in Google Cloud KMS.
+    stored in Google Cloud KMS. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
 
 <a name="nested_source_snapshot_encryption_key"></a>The `source_snapshot_encryption_key` block supports:
 
+* `raw_key` - (Optional) A 256-bit [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption),
+    encoded in [RFC 4648 base64](https://tools.ietf.org/html/rfc4648#section-4)
+    to decrypt this snapshot. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
+
+* `rsa_encrypted_key` - (Optional) Specifies an RFC 4648 base64 encoded, RSA-wrapped 2048-bit [customer-supplied encryption key]
+    (https://cloud.google.com/compute/docs/disks/customer-supplied-encryption) to decrypt this snapshot. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
+
 * `kms_key_service_account` - (Optional) The service account being used for the
     encryption request for the given KMS key. If absent, the Compute Engine
     default service account is used.
 
 * `kms_key_self_link` - (Required) The self link of the encryption key that is
-    stored in Google Cloud KMS.
+    stored in Google Cloud KMS. Only one of `kms_key_self_link`, `rsa_encrypted_key` and `raw_key`
+    may be set.
 
 <a name="nested_disk_encryption_key"></a>The `disk_encryption_key` block supports:
+
+* `kms_key_service_account` - (Optional) The service account being used for the
+    encryption request for the given KMS key. If absent, the Compute Engine
+    default service account is used.
 
 * `kms_key_self_link` - (Required) The self link of the encryption key that is stored in Google Cloud KMS
 
@@ -639,6 +672,8 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 
 * `instance_termination_action` - (Optional) Describe the type of termination action for `SPOT` VM. Can be `STOP` or `DELETE`.  Read more on [here](https://cloud.google.com/compute/docs/instances/create-use-spot)
 
+* `termination_time` - (Optional) Specifies the timestamp, when the instance will be terminated, in RFC3339 text format. If specified, the instance termination action will be performed at the termination time.
+
 * `availability_domain` - (Optional) Specifies the availability domain to place the instance in. The value must be a number between 1 and the number of availability domains specified in the spread placement policy attached to the instance.
 
 * `max_run_duration` -  (Optional) The duration of the instance. Instance will run and be terminated after then, the termination action could be defined in `instance_termination_action`. Structure is [documented below](#nested_max_run_duration).
@@ -650,6 +685,25 @@ specified, then this instance will have no external IPv6 Internet access. Struct
 * `maintenance_interval` - (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the frequency of planned maintenance events. The accepted values are: `PERIODIC`.
 
 * `local_ssd_recovery_timeout` -  (Optional) (https://terraform.io/docs/providers/google/guides/provider_versions.html) Specifies the maximum amount of time a Local Ssd Vm should wait while recovery of the Local Ssd state is attempted. Its value should be in between 0 and 168 hours with hour granularity and the default value being 1 hour. Structure is [documented below](#nested_local_ssd_recovery_timeout).
+
+* `graceful_shutdown` -  (Optional) [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html) Settings for the instance to perform a graceful shutdown. Structure is [documented below](#nested_graceful_shutdown).
+
+<a name="nested_graceful_shutdown"></a>The `graceful_shutdown` block supports:
+
+* `enabled` - (Required) Opts-in for graceful shutdown.
+
+* `max_duration` (Optional) The time allotted for the instance to gracefully shut down.
+    If the graceful shutdown isn't complete after this time, then the instance
+    transitions to the STOPPING state. Structure is documented below:
+
+    * `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
+        resolution. Durations less than one second are represented with a 0
+        `seconds` field and a positive `nanos` field. Must be from 0 to
+        999,999,999 inclusive.
+
+    * `seconds` - (Required) Span of time at a resolution of a second.
+        The value must be between 1 and 3600, which is 3,600 seconds (one hour).`
+
 <a name="nested_local_ssd_recovery_timeout"></a>The `local_ssd_recovery_timeout` block supports:
 
 * `nanos` - (Optional) Span of time that's a fraction of a second at nanosecond
@@ -744,6 +798,8 @@ exported:
 * `id` - an identifier for the resource with format `projects/{{project}}/global/instanceTemplates/{{name}}`
 
 * `creation_timestamp` - Creation timestamp in RFC3339 text format.
+
+* `numeric_id` - numeric identifier of the resource.
 
 * `metadata_fingerprint` - The unique fingerprint of the metadata.
 

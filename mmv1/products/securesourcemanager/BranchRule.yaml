@@ -17,6 +17,7 @@ description: 'BranchRule is the protection rule to enforce pre-defined rules on 
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/secure-source-manager/docs/overview'
+  api: 'https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories.branchRules'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules/{{branch_rule_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}/branchRules?branch_rule_id={{branch_rule_id}}'
@@ -46,22 +47,22 @@ examples:
       branch_rule_id: 'my-basic-branchrule'
       repository_id: 'my-basic-repository'
       instance_id: 'my-basic-instance'
-      prevent_destroy: 'true'
+      deletion_policy: '"PREVENT"'
     test_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_policy': '"DELETE"'
     oics_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_policy': '"DELETE"'
   - name: 'secure_source_manager_branch_rule_with_fields'
     primary_resource_id: 'default'
     vars:
       branch_rule_id: 'my-initial-branchrule'
       repository_id: 'my-initial-repository'
       instance_id: 'my-initial-instance'
-      prevent_destroy: 'true'
+      deletion_policy: '"PREVENT"'
     test_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_policy': '"DELETE"'
     oics_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_policy': '"DELETE"'
 parameters:
   - name: 'branch_rule_id'
     type: String

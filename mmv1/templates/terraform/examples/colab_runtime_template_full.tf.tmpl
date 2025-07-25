@@ -41,11 +41,11 @@ resource "google_colab_runtime_template" "{{$.PrimaryResourceId}}" {
   }
 
   euc_config {
-    euc_disabled = true
+    euc_disabled = false
   }
 
   shielded_vm_config {
-    enable_secure_boot = true
+    enable_secure_boot = false
   }
 
   network_tags = ["abc", "def"]

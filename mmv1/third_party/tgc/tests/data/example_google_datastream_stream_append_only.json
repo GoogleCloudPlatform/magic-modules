@@ -42,7 +42,6 @@
                         "binaryLogEnabled": true,
                         "enabled": true
                     },
-                    "dataDiskType": "PD_SSD",
                     "ipConfiguration": {
                         "authorizedNetworks": [
                             {
@@ -146,6 +145,7 @@
                     },
                     "oracleSourceConfig": null,
                     "postgresqlSourceConfig": null,
+                    "salesforceSourceConfig": null,
                     "sqlServerSourceConfig": null
                 }
             }

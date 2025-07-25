@@ -14,7 +14,10 @@
 ---
 name: 'ProjectsPolicyBinding'
 api_resource_type_kind: PolicyBinding
-description: A policy binding to a Project
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/policyBindings/{policyBinding}'
+description: |
+  A policy binding to a project. This is a Terraform resource, and maps to a policy binding resource in GCP.
 references:
   guides:
     'Apply a policy binding': 'https://cloud.google.com/iam/docs/principal-access-boundary-policies-create#create_binding'
@@ -43,13 +46,14 @@ async:
     resource_inside_response: true
 examples:
   - name: 'iam_projects_policy_binding'
-    primary_resource_id: 'my-project-binding'
+    primary_resource_id: 'binding-for-all-project-principals'
+    external_providers: ["time"]
     test_env_vars:
       org_id: 'ORG_ID'
     vars:
       pab_policy_id: 'my-pab-policy'
-      display_name: 'test project binding'
-      project_binding_id: 'test-project-binding'
+      display_name: 'binding for all principals in the project'
+      project_binding_id: 'binding-for-all-project-principals'
 parameters:
   - name: 'location'
     type: String
@@ -98,8 +102,13 @@ properties:
       - name: 'principalSet'
         type: String
         description: |
-          Required. Immutable. The resource name of the policy to be bound.
-          The binding parent and policy must belong to the same Organization (or Project).
+          Required. Immutable. Full Resource Name of the principal set used for principal access boundary policy bindings.
+          Examples for each one of the following supported principal set types:
+          * Project:
+            * `//cloudresourcemanager.googleapis.com/projects/PROJECT_NUMBER`
+            * `//cloudresourcemanager.googleapis.com/projects/PROJECT_ID`
+          * Workload Identity Pool: `//iam.googleapis.com/projects/PROJECT_NUMBER/locations/LOCATION/workloadIdentityPools/WORKLOAD_POOL_ID`
+          It must be parent by the policy binding's parent (the project).
         immutable: true
   - name: 'policyKind'
     type: String

@@ -1,5 +1,3 @@
-//{{- if ne $.TargetVersionName "ga" }}
-
 // Implementation for cluster upgrade
 if d.HasChange("database_version") && !tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("database_version"))) {
     upgradeUrl := strings.Split(url, "?updateMask")[0] + ":upgrade"
@@ -54,10 +52,6 @@ if d.HasChange("database_version") && !tpgresource.IsEmptyValue(reflect.ValueOf(
         log.Printf("[DEBUG] Finished upgrading cluster %q: %#v", d.Id(), res)
     }
 }
-
-//{{- end }}
-
-
 
 
 

@@ -1,8 +1,18 @@
 resource: '{{ $.TerraformName }}'
 generation_type: 'mmv1'
+source_file: '{{ $.SourceYamlFile }}'
 api_service_name: '{{ $.ProductMetadata.ServiceName }}'
 api_version: '{{ or $.ProductMetadata.ServiceVersion $.ServiceVersion }}'
 api_resource_type_kind: '{{ or $.ApiResourceTypeKind $.Name }}'
+{{- if gt (len $.ApiVariantPatterns) 0 }}
+api_variant_patterns:
+  {{- range $v := $.ApiVariantPatterns }}
+  - '{{ $v }}'
+  {{- end }}
+{{- end }}
+{{- if $.AutogenStatus }}
+autogen_status: true
+{{- end }}
 fields:
 {{- range $p := $.LeafProperties }}
   - field: '{{ $p.MetadataLineage }}'

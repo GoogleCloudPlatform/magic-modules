@@ -22,7 +22,7 @@ jobs:
         uses: actions-ecosystem/action-regex-match@d50fd2e7a37d0e617aea3d7ada663bd56862b9cc # v2.0.2
         with:
           text: ${{ github.event.comment.body }}
-          regex: '^@modular-magician reassign-reviewer ?@?([a-zA-Z0-9-]+)?$'
+          regex: '.*@modular-magician (re)?assign[- ]review(er)? ?@?([a-zA-Z0-9-_]*).*'
       - name: Checkout Repository
         if: steps.read-comment.outputs.match != ''
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.2
@@ -33,8 +33,6 @@ jobs:
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
         with:
           go-version: '^1.21'
-          # Disable caching for now due to issues with large provider dependency caches
-          cache: false
       - name: Build magician
         if: steps.read-comment.outputs.match != ''
         run: |
@@ -42,4 +40,4 @@ jobs:
           go build .
       - name: Run command
         if: steps.read-comment.outputs.match != ''
-        run: .ci/magician/magician reassign-reviewer ${{ github.event.issue.number }} ${{ steps.read-comment.outputs.group1 }}
+        run: .ci/magician/magician reassign-reviewer ${{ github.event.issue.number }} ${{ github.event.comment.user.login }} ${{ steps.read-comment.outputs.group1 }}

@@ -236,6 +236,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Compute",
         "path" to "./google-beta/services/compute"
     ),
+    "contactcenterinsights" to mapOf(
+        "name" to "contactcenterinsights",
+        "displayName" to "Contact Center AI Insights",
+        "path" to "./google-beta/services/contactcenterinsights"
+    ),
     "container" to mapOf(
         "name" to "container",
         "displayName" to "Container",
@@ -401,10 +406,20 @@ var ServicesListBeta = mapOf(
         "displayName" to "Firebaseappcheck",
         "path" to "./google-beta/services/firebaseappcheck"
     ),
+    "firebaseapphosting" to mapOf(
+        "name" to "firebaseapphosting",
+        "displayName" to "Firebase App Hosting",
+        "path" to "./google-beta/services/firebaseapphosting"
+    ),
     "firebasedatabase" to mapOf(
         "name" to "firebasedatabase",
         "displayName" to "Firebasedatabase",
         "path" to "./google-beta/services/firebasedatabase"
+    ),
+    "firebasedataconnect" to mapOf(
+        "name" to "firebasedataconnect",
+        "displayName" to "Firebasedataconnect",
+        "path" to "./google-beta/services/firebasedataconnect"
     ),
     "firebaseextensions" to mapOf(
         "name" to "firebaseextensions",
@@ -516,6 +531,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Looker",
         "path" to "./google-beta/services/looker"
     ),
+    "lustre" to mapOf(
+        "name" to "lustre",
+        "displayName" to "GoogleCloudManagedLustre",
+        "path" to "./google-beta/services/lustre"
+    ),
     "managedkafka" to mapOf(
         "name" to "managedkafka",
         "displayName" to "Managedkafka",
@@ -540,6 +560,16 @@ var ServicesListBeta = mapOf(
         "name" to "mlengine",
         "displayName" to "Mlengine",
         "path" to "./google-beta/services/mlengine"
+    ),
+    "modelarmor" to mapOf(
+        "name" to "modelarmor",
+        "displayName" to "ModelArmor",
+        "path" to "./google-beta/services/modelarmor"
+    ),
+    "modelarmorglobal" to mapOf(
+        "name" to "modelarmorglobal",
+        "displayName" to "ModelArmorGlobal",
+        "path" to "./google-beta/services/modelarmorglobal"
     ),
     "monitoring" to mapOf(
         "name" to "monitoring",
@@ -590,6 +620,11 @@ var ServicesListBeta = mapOf(
         "name" to "osconfig",
         "displayName" to "Osconfig",
         "path" to "./google-beta/services/osconfig"
+    ),
+    "osconfigv2" to mapOf(
+        "name" to "osconfigv2",
+        "displayName" to "Osconfigv2",
+        "path" to "./google-beta/services/osconfigv2"
     ),
     "oslogin" to mapOf(
         "name" to "oslogin",
@@ -650,6 +685,11 @@ var ServicesListBeta = mapOf(
         "name" to "resourcemanager",
         "displayName" to "Resourcemanager",
         "path" to "./google-beta/services/resourcemanager"
+    ),
+    "resourcemanager3" to mapOf(
+        "name" to "resourcemanager3",
+        "displayName" to "Resourcemanager3",
+        "path" to "./google-beta/services/resourcemanager3"
     ),
     "runtimeconfig" to mapOf(
         "name" to "runtimeconfig",
@@ -745,6 +785,16 @@ var ServicesListBeta = mapOf(
         "name" to "storage",
         "displayName" to "Storage",
         "path" to "./google-beta/services/storage"
+    ),
+    "storagebatchoperations" to mapOf(
+        "name" to "storagebatchoperations",
+        "displayName" to "StorageBatchOperations",
+        "path" to "./google-beta/services/storagebatchoperations"
+    ),
+    "storagecontrol" to mapOf(
+        "name" to "storagecontrol",
+        "displayName" to "Storagecontrol",
+        "path" to "./google-beta/services/storagecontrol"
     ),
     "storageinsights" to mapOf(
         "name" to "storageinsights",

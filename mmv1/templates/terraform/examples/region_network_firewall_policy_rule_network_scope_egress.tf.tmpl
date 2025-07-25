@@ -1,4 +1,5 @@
 resource "google_compute_region_network_firewall_policy" "basic_regional_network_firewall_policy" {
+  provider = google-beta
   name        = "{{index $.Vars "fw_policy"}}"
   description = "Sample regional network firewall policy"
   project     = "{{index $.TestEnvVars "project_name"}}"
@@ -6,6 +7,7 @@ resource "google_compute_region_network_firewall_policy" "basic_regional_network
 }
 
 resource "google_compute_region_network_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
   action          = "allow"
   description     = "This is a simple rule description"
   direction       = "EGRESS"

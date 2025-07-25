@@ -13,6 +13,8 @@
 
 ---
 name: 'DataStore'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/collections/{collection}/dataStores/{dataStore}'
 description: |
   Data store is a collection of websites and documents used to find answers for
   end-user's questions in Discovery Engine (a.k.a. Vertex AI Search and
@@ -34,7 +36,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
-autogen_async: true
+autogen_async: false
 async:
   actions: ['create', 'delete']
   type: 'OpAsync'
@@ -43,12 +45,25 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+sweeper:
+  dependencies:
+    - 'google_discovery_engine_chat_engine'
+  url_substitutions:
+    - region: "eu"
+    - region: "global"
 examples:
   - name: 'discoveryengine_datastore_basic'
     primary_resource_id: 'basic'
     primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: 'data-store-id'
+  - name: 'discoveryengine_datastore_kms_key_name'
+    primary_resource_id: 'kms_key_name'
+    vars:
+      data_store_id: 'data-store-id'
+      kms_key_name: 'kms-key'
+    test_vars_overrides:
+      kms_key_name: 'acctest.BootstrapKMSKeyInLocation(t, "us").CryptoKey.Name'
   - name: 'discoveryengine_datastore_document_processing_config'
     primary_resource_id: 'document_processing_config'
     primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
@@ -62,6 +77,12 @@ examples:
     exclude_docs: true
   - name: 'discoveryengine_datastore_document_processing_config_layout'
     primary_resource_id: 'document_processing_config_layout'
+    primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
+    vars:
+      data_store_id: 'data-store-id'
+    exclude_docs: true
+  - name: 'discoveryengine_datastore_document_processing_config_layout_full'
+    primary_resource_id: 'document_processing_config_layout_full'
     primary_resource_name: 'fmt.Sprintf("tf_test_data_store%s", context["random_suffix"])'
     vars:
       data_store_id: 'data-store-id'
@@ -177,6 +198,17 @@ properties:
         type: Boolean
         description: If set true, automatic refresh is disabled for the DataStore.
         required: false
+  - name: 'kmsKeyName'
+    type: String
+    description: |
+      KMS key resource name which will be used to encrypt resources:
+      `/{project}/locations/{location}/keyRings/{keyRing}/cryptoKeys/{keyId}`
+      The KMS key to be used to protect this DataStore at creation time. Must be
+      set for requests that need to comply with CMEK Org Policy protections.
+      If this field is set and processed successfully, the DataStore will be
+      protected by the KMS key, as indicated in the cmek_config field.
+    required: false
+    ignore_read: true
   - name: 'documentProcessingConfig'
     type: NestedObject
     description: |
@@ -266,7 +298,44 @@ properties:
               - 'default_parsing_config.0.ocr_parsing_config'
               - 'default_parsing_config.0.layout_parsing_config'
             properties:
-              []
+              - name: 'enableTableAnnotation'
+                type: Boolean
+                description: |
+                  If true, the LLM based annotation is added to the table during parsing.
+                required: false
+              - name: 'enableImageAnnotation'
+                type: Boolean
+                description: |
+                  If true, the LLM based annotation is added to the image during parsing.
+                required: false
+              - name: 'structuredContentTypes'
+                type: Array
+                description: |
+                  Contains the required structure types to extract from the document. Supported values: `shareholder-structure`.
+                required: false
+                item_type:
+                  type: String
+              - name: 'excludeHtmlElements'
+                type: Array
+                description: |
+                  List of HTML elements to exclude from the parsed content.
+                required: false
+                item_type:
+                  type: String
+              - name: 'excludeHtmlClasses'
+                type: Array
+                description: |
+                  List of HTML classes to exclude from the parsed content.
+                required: false
+                item_type:
+                  type: String
+              - name: 'excludeHtmlIds'
+                type: Array
+                description: |
+                  List of HTML ids to exclude from the parsed content.
+                required: false
+                item_type:
+                  type: String
       - name: 'parsingConfigOverrides'
         type: Map
         description: |
@@ -319,7 +388,44 @@ properties:
                 - 'default_parsing_config.0.ocr_parsing_config'
                 - 'default_parsing_config.0.layout_parsing_config'
               properties:
-                []
+                - name: 'enableTableAnnotation'
+                  type: Boolean
+                  description: |
+                    If true, the LLM based annotation is added to the table during parsing.
+                  required: false
+                - name: 'enableImageAnnotation'
+                  type: Boolean
+                  description: |
+                    If true, the LLM based annotation is added to the image during parsing.
+                  required: false
+                - name: 'structuredContentTypes'
+                  type: Array
+                  description: |
+                    Contains the required structure types to extract from the document. Supported values: `shareholder-structure`.
+                  required: false
+                  item_type:
+                    type: String
+                - name: 'excludeHtmlElements'
+                  type: Array
+                  description: |
+                    List of HTML elements to exclude from the parsed content.
+                  required: false
+                  item_type:
+                    type: String
+                - name: 'excludeHtmlClasses'
+                  type: Array
+                  description: |
+                    List of HTML classes to exclude from the parsed content.
+                  required: false
+                  item_type:
+                    type: String
+                - name: 'excludeHtmlIds'
+                  type: Array
+                  description: |
+                    List of HTML ids to exclude from the parsed content.
+                  required: false
+                  item_type:
+                    type: String
   - name: 'createTime'
     type: Time
     description: |

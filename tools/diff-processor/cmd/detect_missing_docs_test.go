@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/detector"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/google/go-cmp/cmp"
 
@@ -13,10 +14,12 @@ import (
 
 func TestDetectMissingDocs(t *testing.T) {
 	cases := []struct {
-		name           string
-		oldResourceMap map[string]*schema.Resource
-		newResourceMap map[string]*schema.Resource
-		want           []MissingDocsInfo
+		name             string
+		oldResourceMap   map[string]*schema.Resource
+		newResourceMap   map[string]*schema.Resource
+		oldDataSourceMap map[string]*schema.Resource
+		newDataSourceMap map[string]*schema.Resource
+		want             MissingDocsSummary
 	}{
 		{
 			name: "no new fields",
@@ -36,7 +39,26 @@ func TestDetectMissingDocs(t *testing.T) {
 					},
 				},
 			},
-			want: []MissingDocsInfo{},
+			oldDataSourceMap: map[string]*schema.Resource{
+				"google_data_x": {
+					Schema: map[string]*schema.Schema{
+						"field-a": {Description: "beep", Computed: true, Optional: true},
+						"field-b": {Description: "beep", Computed: true},
+					},
+				},
+			},
+			newDataSourceMap: map[string]*schema.Resource{
+				"google_data_x": {
+					Schema: map[string]*schema.Schema{
+						"field-a": {Description: "beep", Computed: true, Optional: true},
+						"field-b": {Description: "beep", Computed: true},
+					},
+				},
+			},
+			want: MissingDocsSummary{
+				Resource:   []detector.MissingDocDetails{},
+				DataSource: []detector.MissingDocDetails{},
+			},
 		},
 		{
 			name:           "multiple new fields missing doc",
@@ -49,11 +71,33 @@ func TestDetectMissingDocs(t *testing.T) {
 					},
 				},
 			},
-			want: []MissingDocsInfo{
-				{
-					Name:     "google_x",
-					FilePath: "/website/docs/r/x.html.markdown",
-					Fields:   []string{"field-a", "field-b"},
+			oldDataSourceMap: map[string]*schema.Resource{},
+			newDataSourceMap: map[string]*schema.Resource{
+				"google_data_y": {
+					Schema: map[string]*schema.Schema{
+						"field-a": {Description: "beep"},
+					},
+				},
+			},
+			want: MissingDocsSummary{
+				Resource: []detector.MissingDocDetails{
+					{
+						Name:     "google_x",
+						FilePath: "/website/docs/r/x.html.markdown",
+						Fields: []string{
+							"field-a",
+							"field-b",
+						},
+					},
+				},
+				DataSource: []detector.MissingDocDetails{
+					{
+						Name:     "google_data_y",
+						FilePath: "/website/docs/d/data_y.html.markdown",
+						Fields: []string{
+							"field-a",
+						},
+					},
 				},
 			},
 		},
@@ -66,8 +110,10 @@ func TestDetectMissingDocs(t *testing.T) {
 				computeSchemaDiff: func() diff.SchemaDiff {
 					return diff.ComputeSchemaDiff(tc.oldResourceMap, tc.newResourceMap)
 				},
-				newResourceSchema: tc.newResourceMap,
-				stdout:            &buf,
+				stdout: &buf,
+				computeDatasourceSchemaDiff: func() diff.SchemaDiff {
+					return diff.ComputeSchemaDiff(tc.oldDataSourceMap, tc.newDataSourceMap)
+				},
 			}
 
 			err := o.run([]string{t.TempDir()})
@@ -78,13 +124,13 @@ func TestDetectMissingDocs(t *testing.T) {
 			out := make([]byte, buf.Len())
 			buf.Read(out)
 
-			var got []MissingDocsInfo
+			var got MissingDocsSummary
 			if err = json.Unmarshal(out, &got); err != nil {
 				t.Fatalf("Failed to unmarshall output: %s", err)
 			}
 
 			if diff := cmp.Diff(tc.want, got); diff != "" {
-				t.Errorf("Unexpected result. Want %+v, got %+v. ", tc.want, got)
+				t.Errorf("Unexpected result, diff(-want, got) = %s", diff)
 			}
 		})
 	}

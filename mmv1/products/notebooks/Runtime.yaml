@@ -13,7 +13,11 @@
 
 ---
 name: 'Runtime'
-api_resource_type_kind: NotebookRuntime
+# This resource should not be removed until the 2025 major release or later.
+# Check instance availability first before fully removing.
+deprecation_message: >-
+  `google_notebook_runtime` is deprecated and will be removed in a future major release.
+  Use `google_workbench_instance` instead.
 description: |
   A Cloud AI Platform Notebook runtime.
 

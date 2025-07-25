@@ -36,6 +36,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
 examples:
   - name: 'url_map_bucket_and_service'
@@ -52,6 +53,8 @@ examples:
       url_map_name: 'urlmap'
       home_backend_service_name: 'home'
       health_check_name: 'health-check'
+    tgc_test_ignore_extra:
+      - 'path_matcher.route_rules.url_redirect.https_redirect'
   - name: 'url_map_traffic_director_route_partial'
     primary_resource_id: 'urlmap'
     vars:
@@ -86,6 +89,56 @@ examples:
       service_a_backend_service_name: 'service-a'
       service_b_backend_service_name: 'service-b'
       health_check_name: 'health-check'
+  - name: 'url_map_default_mirror_percent'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    vars:
+      url_map_name: 'urlmap'
+      home_backend_service_name: 'home'
+      mirror_backend_service_name: 'mirror'
+      health_check_name: 'health-check'
+  - name: 'url_map_path_matcher_default_mirror_percent'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    vars:
+      url_map_name: 'urlmap'
+      home_backend_service_name: 'home'
+      mirror_backend_service_name: 'mirror'
+      health_check_name: 'health-check'
+  - name: 'url_map_path_rule_mirror_percent'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    vars:
+      url_map_name: 'urlmap'
+      home_backend_service_name: 'home'
+      mirror_backend_service_name: 'mirror'
+      health_check_name: 'health-check'
+  - name: 'url_map_route_rule_mirror_percent'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    vars:
+      url_map_name: 'urlmap'
+      home_backend_service_name: 'home'
+      mirror_backend_service_name: 'mirror'
+      health_check_name: 'health-check'
+  - name: 'url_map_test_headers'
+    primary_resource_id: 'urlmap'
+    vars:
+      url_map_name: 'urlmap'
+      backend_service_name: 'backend'
+      health_check_name: 'health-check'
+  - name: 'url_map_test_expected_output_url'
+    primary_resource_id: 'urlmap'
+    vars:
+      url_map_name: 'urlmap'
+      backend_service_name: 'backend'
+      health_check_name: 'health-check'
+  - name: 'url_map_test_redirect_response_code'
+    primary_resource_id: 'urlmap'
+    vars:
+      url_map_name: 'urlmap'
+      backend_service_name: 'backend'
+      health_check_name: 'health-check'
   - name: 'external_http_lb_mig_backend'
     primary_resource_id: 'default'
     vars:
@@ -115,13 +168,29 @@ examples:
       storage_bucket_name: 'static-asset-bucket'
   - name: 'url_map_custom_error_response_policy'
     primary_resource_id: 'urlmap'
-    min_version: 'beta'
     vars:
       url_map_name: 'urlmap'
       backend_service_name: 'login'
       http_health_check_name: 'health-check'
       storage_bucket_name: 'static-asset-bucket'
       error_backend_bucket_name: 'error-backend-bucket'
+  - name: 'url_map_http_filter_configs'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    vars:
+      url_map_name: 'urlmap'
+      default_backend_service_name: 'default-backend'
+      service_a_backend_service_name: 'service-a-backend'
+      health_check_name: 'health-check'
+  - name: 'url_map_http_filter_metadata'
+    primary_resource_id: 'urlmap'
+    min_version: 'beta'
+    vars:
+      url_map_name: 'urlmap'
+      default_backend_service_name: 'default-backend'
+      service_a_backend_service_name: 'service-a-backend'
+      service_b_backend_service_name: 'service-b-backend'
+      health_check_name: 'health-check'
 parameters:
 properties:
   - name: 'creationTimestamp'
@@ -327,7 +396,6 @@ properties:
             When used in conjunction with pathMatcher.defaultRouteAction.retryPolicy, retries take precedence. Only once all retries are exhausted, the defaultCustomErrorResponsePolicy is applied. While attempting a retry, if load balancer is successful in reaching the service, the defaultCustomErrorResponsePolicy is ignored and the response from the service is returned to the client.
 
             defaultCustomErrorResponsePolicy is supported only for global external Application Load Balancers.
-          min_version: 'beta'
           properties:
             - name: 'errorResponseRule'
               type: Array
@@ -337,6 +405,7 @@ properties:
                 For example, assume that you configure a rule for 401 (Un-authorized) code, and another for all 4 series error codes (4XX).
                 If the backend service returns a 401, then the rule for 401 will be applied. However if the backend service returns a 403, the rule for 4xx takes effect.
               api_name: errorResponseRules
+              is_missing_in_cai: true
               item_type:
                 type: NestedObject
                 properties:
@@ -488,7 +557,6 @@ properties:
                   A PathRule for /coming_soon/ is configured for the error code 404.
                   If the request is for www.myotherdomain.com and a 404 is encountered, the policy under UrlMap.defaultCustomErrorResponsePolicy takes effect. If a 404 response is encountered for the request www.example.com/current_events/, the pathMatcher's policy takes effect. If however, the request for www.example.com/coming_soon/ encounters a 404, the policy in PathRule.customErrorResponsePolicy takes effect. If any of the requests in this example encounter a 500 error code, the policy at UrlMap.defaultCustomErrorResponsePolicy takes effect.
                   customErrorResponsePolicy is supported only for global external Application Load Balancers.
-                min_version: 'beta'
                 properties:
                   - name: 'errorResponseRule'
                     type: Array
@@ -498,6 +566,7 @@ properties:
                       For example, assume that you configure a rule for 401 (Un-authorized) code, and another for all 4 series error codes (4XX).
                       If the backend service returns a 401, then the rule for 401 will be applied. However if the backend service returns a 403, the rule for 4xx takes effect.
                     api_name: errorResponseRules
+                    is_missing_in_cai: true
                     item_type:
                       type: NestedObject
                       properties:
@@ -681,6 +750,15 @@ properties:
                         custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
                         resource: 'BackendService'
                         imports: 'selfLink'
+                      - name: 'mirrorPercent'
+                        min_version: beta
+                        type: Double
+                        description: |
+                          The percentage of requests to be mirrored to backendService.
+                          The value must be between 0.0 and 100.0 inclusive.
+                        is_missing_in_cai: true
+                        validation:
+                          function: 'validation.FloatBetween(0, 100)'
                   - name: 'retryPolicy'
                     type: NestedObject
                     description: |
@@ -697,6 +775,7 @@ properties:
                         properties:
                           - name: 'nanos'
                             type: Integer
+                            include_empty_value_in_cai: true
                             description: |
                               Span of time that's a fraction of a second at nanosecond resolution. Durations
                               less than one second are represented with a 0 `seconds` field and a positive
@@ -741,6 +820,28 @@ properties:
                       the request is has been fully processed (i.e. end-of-stream) up until the
                       response has been completely processed. Timeout includes all retries. If not
                       specified, the default value is 15 seconds.
+                    properties:
+                      - name: 'nanos'
+                        type: Integer
+                        description: |
+                          Span of time that's a fraction of a second at nanosecond resolution. Durations
+                          less than one second are represented with a 0 `seconds` field and a positive
+                          `nanos` field. Must be from 0 to 999,999,999 inclusive.
+                      - name: 'seconds'
+                        type: String
+                        description: |
+                          Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
+                          inclusive.
+                        required: true
+                  - name: 'maxStreamDuration'
+                    type: NestedObject
+                    description: |
+                      Specifies the maximum duration (timeout) for streams on the selected route.
+                      Unlike the `Timeout` field where the timeout duration starts from the time the request
+                      has been fully processed (known as end-of-stream), the duration in this field
+                      is computed from the beginning of the stream until the response has been processed,
+                      including all retries. A stream that does not complete in this duration is closed.
+                    default_from_api: true
                     properties:
                       - name: 'nanos'
                         type: Integer
@@ -1411,6 +1512,14 @@ properties:
                         custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
                         resource: 'BackendService'
                         imports: 'selfLink'
+                      - name: 'mirrorPercent'
+                        min_version: beta
+                        type: Double
+                        description: |
+                          The percentage of requests to be mirrored to backendService.
+                          The value must be between 0.0 and 100.0 inclusive.
+                        validation:
+                          function: 'validation.FloatBetween(0, 100)'
                   - name: 'retryPolicy'
                     type: NestedObject
                     description: |
@@ -1474,6 +1583,28 @@ properties:
                       the request is has been fully processed (i.e. end-of-stream) up until the
                       response has been completely processed. Timeout includes all retries. If not
                       specified, the default value is 15 seconds.
+                    properties:
+                      - name: 'nanos'
+                        type: Integer
+                        description: |
+                          Span of time that's a fraction of a second at nanosecond resolution. Durations
+                          less than one second are represented with a 0 `seconds` field and a positive
+                          `nanos` field. Must be from 0 to 999,999,999 inclusive.
+                      - name: 'seconds'
+                        type: String
+                        description: |
+                          Span of time at a resolution of a second. Must be from 0 to 315,576,000,000
+                          inclusive.
+                        required: true
+                  - name: 'maxStreamDuration'
+                    type: NestedObject
+                    description: |
+                      Specifies the maximum duration (timeout) for streams on the selected route.
+                      Unlike the `Timeout` field where the timeout duration starts from the time the request
+                      has been fully processed (known as end-of-stream), the duration in this field
+                      is computed from the beginning of the stream until the response has been processed,
+                      including all retries. A stream that does not complete in this duration is closed.
+                    default_from_api: true
                     properties:
                       - name: 'nanos'
                         type: Integer
@@ -1685,6 +1816,115 @@ properties:
                       prior to redirecting the request. If set to false, the query portion of the
                       original URL is retained. Defaults to false.
                     default_value: false
+              - name: 'customErrorResponsePolicy'
+                type: NestedObject
+                description: |
+                  customErrorResponsePolicy specifies how the Load Balancer returns error responses when BackendService or BackendBucket responds with an error.
+                properties:
+                  - name: 'errorResponseRule'
+                    type: Array
+                    description: |
+                      Specifies rules for returning error responses.
+                      In a given policy, if you specify rules for both a range of error codes as well as rules for specific error codes then rules with specific error codes have a higher priority.
+                      For example, assume that you configure a rule for 401 (Un-authorized) code, and another for all 4 series error codes (4XX).
+                      If the backend service returns a 401, then the rule for 401 will be applied. However if the backend service returns a 403, the rule for 4xx takes effect.
+                    api_name: errorResponseRules
+                    item_type:
+                      type: NestedObject
+                      properties:
+                        - name: 'matchResponseCodes'
+                          type: Array
+                          description: |
+                            Valid values include:
+
+                            - A number between 400 and 599: For example 401 or 503, in which case the load balancer applies the policy if the error code exactly matches this value.
+                            - 5xx: Load Balancer will apply the policy if the backend service responds with any response code in the range of 500 to 599.
+                            - 4xx: Load Balancer will apply the policy if the backend service responds with any response code in the range of 400 to 499.
+
+                            Values must be unique within matchResponseCodes and across all errorResponseRules of CustomErrorResponsePolicy.
+                          item_type:
+                            type: String
+                        - name: 'path'
+                          type: String
+                          description: |
+                            The full path to a file within backendBucket . For example: /errors/defaultError.html
+                            path must start with a leading slash. path cannot have trailing slashes.
+                            If the file is not available in backendBucket or the load balancer cannot reach the BackendBucket, a simple Not Found Error is returned to the client.
+                            The value must be from 1 to 1024 characters
+                        - name: 'overrideResponseCode'
+                          type: Integer
+                          description: |
+                            The HTTP status code returned with the response containing the custom error content.
+                            If overrideResponseCode is not supplied, the same response code returned by the original backend bucket or backend service is returned to the client.
+                  - name: 'errorService'
+                    type: ResourceRef
+                    description: |
+                      The full or partial URL to the BackendBucket resource that contains the custom error content. Examples are:
+
+                      https://www.googleapis.com/compute/v1/projects/project/global/backendBuckets/myBackendBucket
+                      compute/v1/projects/project/global/backendBuckets/myBackendBucket
+                      global/backendBuckets/myBackendBucket
+
+                      If errorService is not specified at lower levels like pathMatcher, pathRule and routeRule, an errorService specified at a higher level in the UrlMap will be used. If UrlMap.defaultCustomErrorResponsePolicy contains one or more errorResponseRules[], it must specify errorService.
+                      If load balancer cannot reach the backendBucket, a simple Not Found Error will be returned, with the original response code (or overrideResponseCode if configured).
+                    resource: 'BackendBucket'
+                    imports: 'selfLink'
+              - name: 'httpFilterConfigs'
+                type: Array
+                min_version: 'beta'
+                is_missing_in_cai: true
+                description: |
+                  Outbound route specific configuration for networkservices.HttpFilter resources enabled by Traffic Director.
+                  httpFilterConfigs only applies for load balancers with loadBalancingScheme set to INTERNAL_SELF_MANAGED.
+                  See ForwardingRule for more details.
+
+                  Not supported when the URL map is bound to a target gRPC proxy that has validateForProxyless field set to true.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'filterName'
+                      type: String
+                      description: |
+                        Name of the networkservices.HttpFilter resource this configuration belongs to.
+                        This name must be known to the xDS client. Example: envoy.wasm
+                    - name: 'configTypeUrl'
+                      type: String
+                      description: |
+                        The fully qualified versioned proto3 type url of the protobuf that the filter expects for its contextual settings,
+                        for example: type.googleapis.com/google.protobuf.Struct
+                    - name: 'config'
+                      type: String
+                      description: |
+                        The configuration needed to enable the networkservices.HttpFilter resource.
+                        The configuration must be YAML formatted and only contain fields defined in the protobuf identified in configTypeUrl
+              - name: 'httpFilterMetadata'
+                type: Array
+                min_version: 'beta'
+                is_missing_in_cai: true
+                description: |
+                  Outbound route specific metadata supplied to networkservices.HttpFilter resources enabled by Traffic Director.
+                  httpFilterMetadata only applies for load balancers with loadBalancingScheme set to INTERNAL_SELF_MANAGED.
+                  See ForwardingRule for more details.
+
+                  Not supported when the URL map is bound to a target gRPC proxy that has validateForProxyless field set to true.
+                item_type:
+                  type: NestedObject
+                  properties:
+                    - name: 'filterName'
+                      type: String
+                      description: |
+                        Name of the networkservices.HttpFilter resource this configuration belongs to.
+                        This name must be known to the xDS client. Example: envoy.wasm
+                    - name: 'configTypeUrl'
+                      type: String
+                      description: |
+                        The fully qualified versioned proto3 type url of the protobuf that the filter expects for its contextual settings,
+                        for example: type.googleapis.com/google.protobuf.Struct
+                    - name: 'config'
+                      type: String
+                      description: |
+                        The configuration needed to enable the networkservices.HttpFilter resource.
+                        The configuration must be YAML formatted and only contain fields defined in the protobuf identified in configTypeUrl
         - name: 'defaultUrlRedirect'
           type: NestedObject
           # TODO: (mbang) won't work for array path matchers yet, uncomment here once they are supported.
@@ -1916,6 +2156,27 @@ properties:
                   description: |
                     Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented
                     with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+            - name: 'maxStreamDuration'
+              type: NestedObject
+              description: |
+                Specifies the maximum duration (timeout) for streams on the selected route.
+                Unlike the `Timeout` field where the timeout duration starts from the time the request
+                has been fully processed (known as end-of-stream), the duration in this field
+                is computed from the beginning of the stream until the response has been processed,
+                including all retries. A stream that does not complete in this duration is closed.
+              default_from_api: true
+              properties:
+                - name: 'nanos'
+                  type: Integer
+                  description: |
+                    Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented
+                    with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+                - name: 'seconds'
+                  type: String
+                  description: |
+                    Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+                    Note: these bounds are computed from: 60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
+                  required: true
             - name: 'retryPolicy'
               type: NestedObject
               description: |
@@ -1982,6 +2243,15 @@ properties:
                   custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
                   resource: 'BackendService'
                   imports: 'selfLink'
+                - name: 'mirrorPercent'
+                  min_version: beta
+                  type: Double
+                  is_missing_in_cai: true
+                  description: |
+                    The percentage of requests to be mirrored to backendService.
+                    The value must be between 0.0 and 100.0 inclusive.
+                  validation:
+                    function: 'validation.FloatBetween(0, 100)'
             - name: 'corsPolicy'
               type: NestedObject
               description: |
@@ -2109,7 +2379,6 @@ properties:
       When used in conjunction with pathMatcher.defaultRouteAction.retryPolicy, retries take precedence. Only once all retries are exhausted, the defaultCustomErrorResponsePolicy is applied. While attempting a retry, if load balancer is successful in reaching the service, the defaultCustomErrorResponsePolicy is ignored and the response from the service is returned to the client.
 
       defaultCustomErrorResponsePolicy is supported only for global external Application Load Balancers.
-    min_version: 'beta'
     properties:
       - name: 'errorResponseRule'
         type: Array
@@ -2119,6 +2388,7 @@ properties:
           For example, assume that you configure a rule for 401 (Un-authorized) code, and another for all 4 series error codes (4XX).
           If the backend service returns a 401, then the rule for 401 will be applied. However if the backend service returns a 403, the rule for 4xx takes effect.
         api_name: errorResponseRules
+        is_missing_in_cai: true
         item_type:
           type: NestedObject
           properties:
@@ -2181,13 +2451,45 @@ properties:
           description: |
             Path portion of the URL.
           required: true
+        - name: 'headers'
+          type: Array
+          description: |
+            HTTP headers for this request.
+          item_type:
+            type: NestedObject
+            properties:
+              - name: 'name'
+                type: String
+                description: |
+                  Header name.
+                required: true
+              - name: 'value'
+                type: String
+                description: |
+                  Header value.
+                required: true
         - name: 'service'
           type: ResourceRef
           description: The backend service or backend bucket link that should be matched by this test.
-          required: true
           custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
           resource: 'BackendService'
           imports: 'selfLink'
+        - name: 'expectedOutputUrl'
+          type: String
+          description: |
+            The expected output URL evaluated by the load balancer containing the scheme, host, path and query parameters.
+
+            For rules that forward requests to backends, the test passes only when expectedOutputUrl matches the request forwarded by the load balancer to backends. For rules with urlRewrite, the test verifies that the forwarded request matches hostRewrite and pathPrefixRewrite in the urlRewrite action. When service is specified, expectedOutputUrl`s scheme is ignored.
+
+            For rules with urlRedirect, the test passes only if expectedOutputUrl matches the URL in the load balancer's redirect response. If urlRedirect specifies httpsRedirect, the test passes only if the scheme in expectedOutputUrl is also set to HTTPS. If urlRedirect specifies stripQuery, the test passes only if expectedOutputUrl does not contain any query parameters.
+
+            expectedOutputUrl is optional when service is specified.
+        - name: 'expectedRedirectResponseCode'
+          type: Integer
+          description: |
+            For rules with urlRedirect, the test passes only if expectedRedirectResponseCode matches the HTTP status code in load balancer's redirect response.
+
+            expectedRedirectResponseCode cannot be set when service is set.
   - name: 'defaultUrlRedirect'
     type: NestedObject
     description: |
@@ -2452,6 +2754,27 @@ properties:
             at_least_one_of:
               - 'default_route_action.0.timeout.0.seconds'
               - 'default_route_action.0.timeout.0.nanos'
+      - name: 'maxStreamDuration'
+        type: NestedObject
+        description: |
+          Specifies the maximum duration (timeout) for streams on the selected route.
+          Unlike the `Timeout` field where the timeout duration starts from the time the request
+          has been fully processed (known as end-of-stream), the duration in this field
+          is computed from the beginning of the stream until the response has been processed,
+          including all retries. A stream that does not complete in this duration is closed.
+        default_from_api: true
+        properties:
+          - name: 'nanos'
+            type: Integer
+            description: |
+              Span of time that's a fraction of a second at nanosecond resolution. Durations less than one second are represented
+              with a 0 seconds field and a positive nanos field. Must be from 0 to 999,999,999 inclusive.
+          - name: 'seconds'
+            type: String
+            description: |
+              Span of time at a resolution of a second. Must be from 0 to 315,576,000,000 inclusive.
+              Note: these bounds are computed from: 60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
+            required: true
       - name: 'retryPolicy'
         type: NestedObject
         description: |
@@ -2552,6 +2875,15 @@ properties:
             custom_expand: 'templates/terraform/custom_expand/reference_to_backend.tmpl'
             resource: 'BackendService'
             imports: 'selfLink'
+          - name: 'mirrorPercent'
+            min_version: beta
+            is_missing_in_cai: true
+            type: Double
+            description: |
+              The percentage of requests to be mirrored to backendService.
+              The value must be between 0.0 and 100.0 inclusive.
+            validation:
+              function: 'validation.FloatBetween(0, 100)'
       - name: 'corsPolicy'
         type: NestedObject
         description: |

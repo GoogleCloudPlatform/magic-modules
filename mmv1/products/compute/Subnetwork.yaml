@@ -45,6 +45,7 @@ references:
 docs:
 base_url: 'projects/{{project}}/regions/{{region}}/subnetworks'
 has_self_link: true
+include_in_tgc_next_DO_NOT_USE: true
 immutable: true
 timeouts:
   insert_minutes: 20
@@ -67,9 +68,22 @@ custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/subnetwork.tmpl'
   constants: 'templates/terraform/constants/subnetwork.tmpl'
   post_update: 'templates/terraform/post_update/compute_subnetwork.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/compute_subnetwork.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("ip_cidr_range", IsShrinkageIpCidr)'
   - 'sendSecondaryIpRangeIfEmptyDiff'
+sweeper:
+  dependencies:
+    - "google_compute_forwarding_rule"
+  url_substitutions:
+    - region: "us-west2"
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "europe-west4"
+    - region: "europe-west1"
+    - region: "southamerica-west1"
+    - region: "us-west1"
+    - region: "us-south1"
 examples:
   - name: 'subnetwork_basic'
     primary_resource_id: 'network-with-private-secondary-ip-ranges'
@@ -130,6 +144,15 @@ examples:
     vars:
       subnetwork_name: 'subnet-ipv6-only'
       network_name: 'network-ipv6-only'
+  - name: 'subnetwork_with_subnet_mode_pdp'
+    primary_resource_id: 'subnetwork-with-subnet-mode-pdp'
+    exclude_docs: true
+    vars:
+      subnetwork_name: 'subnet-mode-pdp-subnet'
+      network_name: 'network-byoipv6-external'
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
+    test_vars_overrides:
+      ip_collection_url: '"projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-subnet-mode-pdp"'
   - name: 'subnetwork_ipv6_only_external'
     primary_resource_id: 'subnetwork-ipv6-only'
     exclude_docs: true
@@ -217,15 +240,19 @@ properties:
   - name: 'purpose'
     type: String
     description: |
-      The purpose of the resource. This field can be either `PRIVATE`, `REGIONAL_MANAGED_PROXY`, `GLOBAL_MANAGED_PROXY`, `PRIVATE_SERVICE_CONNECT` or `PRIVATE_NAT`([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
+      The purpose of the resource. This field can be either `PRIVATE`, `REGIONAL_MANAGED_PROXY`, `GLOBAL_MANAGED_PROXY`, `PRIVATE_SERVICE_CONNECT`, `PEER_MIGRATION` or `PRIVATE_NAT`([Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)).
       A subnet with purpose set to `REGIONAL_MANAGED_PROXY` is a user-created subnetwork that is reserved for regional Envoy-based load balancers.
       A subnetwork in a given region with purpose set to `GLOBAL_MANAGED_PROXY` is a proxy-only subnet and is shared between all the cross-regional Envoy-based load balancers.
       A subnetwork with purpose set to `PRIVATE_SERVICE_CONNECT` reserves the subnet for hosting a Private Service Connect published service.
+      A subnetwork with purpose set to `PEER_MIGRATION` is a user created subnetwork that is reserved for migrating resources from one peered network to another.
       A subnetwork with purpose set to `PRIVATE_NAT` is used as source range for Private NAT gateways.
       Note that `REGIONAL_MANAGED_PROXY` is the preferred setting for all regional Envoy load balancers.
       If unspecified, the purpose defaults to `PRIVATE`.
-    immutable: true
     default_from_api: true
+    update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
+    update_verb: 'PATCH'
+    update_id: 'purpose'
+    fingerprint_name: 'fingerprint'
   - name: 'role'
     type: Enum
     description: |
@@ -300,6 +327,7 @@ properties:
     default_from_api: true
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess'
     update_verb: 'POST'
+    include_empty_value_in_cai: true
   - name: 'privateIpv6GoogleAccess'
     type: String
     description: The private IPv6 google access type for the VMs in this subnet.
@@ -332,6 +360,7 @@ properties:
     fingerprint_name: 'fingerprint'
     custom_flatten: 'templates/terraform/custom_flatten/subnetwork_log_config.go.tmpl'
     custom_expand: 'templates/terraform/custom_expand/subnetwork_log_config.go.tmpl'
+    diff_suppress_func: 'subnetworkLogConfigDiffSuppress'
     properties:
       - name: 'aggregationInterval'
         type: Enum
@@ -443,6 +472,32 @@ properties:
     description: |
       The range of external IPv6 addresses that are owned by this subnetwork.
     default_from_api: true
+  - name: 'ipCollection'
+    type: String
+    ignore_read: true
+    is_missing_in_cai: true
+    description: |
+      Resource reference of a PublicDelegatedPrefix. The PDP must be a sub-PDP
+      in EXTERNAL_IPV6_SUBNETWORK_CREATION mode.
+      Use one of the following formats to specify a sub-PDP when creating an
+      IPv6 NetLB forwarding rule using BYOIP:
+      Full resource URL, as in:
+        * `https://www.googleapis.com/compute/v1/projects/{{projectId}}/regions/{{region}}/publicDelegatedPrefixes/{{sub-pdp-name}}`
+      Partial URL, as in:
+        * `projects/{{projectId}}/regions/region/publicDelegatedPrefixes/{{sub-pdp-name}}`
+        * `regions/{{region}}/publicDelegatedPrefixes/{{sub-pdp-name}}`
+  - name: 'ipv6GceEndpoint'
+    type: Enum
+    description: |
+      Possible endpoints of this subnetwork. It can be one of the following:
+        * VM_ONLY: The subnetwork can be used for creating instances and IPv6 addresses with VM endpoint type. Such a subnetwork
+        gets external IPv6 ranges from a public delegated prefix and cannot be used to create NetLb.
+        * VM_AND_FR: The subnetwork can be used for creating both VM instances and Forwarding Rules. It can also be used to reserve
+        IPv6 addresses with both VM and FR endpoint types. Such a subnetwork gets its IPv6 range from Google IP Pool directly.
+    output: true
+    enum_values:
+      - 'VM_AND_FR'
+      - 'VM_ONLY'
   - name: 'allowSubnetCidrRoutesOverlap'
     type: Boolean
     description: |
@@ -456,3 +511,40 @@ properties:
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}'
     update_verb: 'PATCH'
     fingerprint_name: 'fingerprint'
+    is_missing_in_cai: true
+  - name: 'enableFlowLogs'
+    type: Boolean
+    description: |
+      Whether to enable flow logging for this subnetwork. If this field is not explicitly set,
+      it will not appear in get listings. If not set the default behavior is determined by the
+      org policy, if there is no org policy specified, then it will default to disabled.
+      This field isn't supported if the subnet purpose field is set to REGIONAL_MANAGED_PROXY.
+    default_from_api: true
+    include_empty_value_in_cai: true
+    deprecation_message: 'This field is being removed in favor of log_config. If log_config is present, flow logs are enabled.'
+  - name: 'state'
+    type: Enum
+    description: |
+     'The state of the subnetwork, which can be one of the following values:
+      READY: Subnetwork is created and ready to use DRAINING: only applicable to subnetworks that have the purpose
+      set to INTERNAL_HTTPS_LOAD_BALANCER and indicates that connections to the load balancer are being drained.
+      A subnetwork that is draining cannot be used or modified until it reaches a status of READY'
+    output: true
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the subnetwork. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456. The field is ignored when empty.
+          The field is immutable and causes resource replacement when mutated. This field is only
+          set at create time and modifying this field after creation will trigger recreation.
+          To apply tags to an existing resource, see the google_tags_tag_binding resource.
+        ignore_read: true
+        immutable: true

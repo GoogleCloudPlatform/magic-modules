@@ -50,6 +50,8 @@ examples:
       address_group: 'address-group'
       folder: 'folder'
       fw_policy: 'fw-policy'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
     test_env_vars:
       org_id: 'ORG_ID'
       service_acct: 'SERVICE_ACCT'
@@ -59,6 +61,18 @@ examples:
       folder: 'folder'
       fw_policy: 'fw-policy'
       network: 'network'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    min_version: beta
+  - name: 'firewall_policy_rule_secure_tags'
+    primary_resource_id: 'primary'
+    vars:
+      folder: 'folder'
+      fw_policy: 'fw-policy'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:
@@ -220,6 +234,27 @@ properties:
           Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic source.
         item_type:
           type: String
+      - name: 'srcSecureTags'
+        type: Array
+        send_empty_value: true
+        description: |
+          List of secure tag values, which should be matched at the source of the traffic. For INGRESS rule, if all the srcSecureTag are INEFFECTIVE, and there is no srcIpRange, this rule will be ignored. Maximum number of source tag values allowed is 256.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'name'
+              type: String
+              description: |
+                Name of the secure tag, created with TagManager's TagValue API.
+              diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+            - name: 'state'
+              type: Enum
+              description: |
+                State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
+              output: true
+              enum_values:
+                - 'EFFECTIVE'
+                - 'INEFFECTIVE'
   - name: 'action'
     type: String
     description: 'The Action to perform when the client connection triggers the rule. Valid actions are "allow", "deny", "goto_next" and "apply_security_profile_group".'
@@ -273,8 +308,32 @@ properties:
       A list of service accounts indicating the sets of instances that are applied with this rule.
     item_type:
       type: String
+  - name: 'targetSecureTags'
+    type: Array
+    send_empty_value: true
+    description: |
+      A list of secure tags that controls which instances the firewall rule applies to.
+      If targetSecureTag are specified, then the firewall rule applies only to instances in the VPC network that have one of those EFFECTIVE secure tags, if all the targetSecureTag are in INEFFECTIVE state, then this rule will be ignored.
+      targetSecureTag may not be set at the same time as targetServiceAccounts. If neither targetServiceAccounts nor targetSecureTag are specified, the firewall rule applies to all instances on the specified network. Maximum number of target secure tags allowed is 256.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: |
+            Name of the secure tag, created with TagManager's TagValue API.
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+        - name: 'state'
+          type: Enum
+          description: |
+            State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
+          output: true
+          enum_values:
+            - 'EFFECTIVE'
+            - 'INEFFECTIVE'
   - name: 'disabled'
     type: Boolean
+    send_empty_value: true
     description: |
       Denotes whether the firewall policy rule is disabled.
       When set to true, the firewall policy rule is not enforced and traffic behaves as if it did not exist.

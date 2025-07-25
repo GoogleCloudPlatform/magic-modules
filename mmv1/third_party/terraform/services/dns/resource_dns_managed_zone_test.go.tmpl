@@ -661,3 +661,171 @@ resource "google_dns_managed_zone" "foobar" {
 }
 `, suffix, suffix, description, project)
 }
+
+func TestAccDNSManagedZone_privateForwardingWithDomainNameUpdate(t *testing.T) {
+	t.Parallel()
+
+	zoneSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDNSManagedZoneDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDnsManagedZone_privateForwardingWithDomainNameUpdate(zoneSuffix, "dns.infra.foo.com.", "private"),
+			},
+			{
+				ResourceName:      "google_dns_managed_zone.private",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccDnsManagedZone_privateForwardingWithDomainNameUpdate(zoneSuffix, "dns.infra.goo.com.", "default"),
+			},
+			{
+				ResourceName:      "google_dns_managed_zone.private",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccDnsManagedZone_privateForwardingWithDomainNameUpdate(suffix, domain_name, forwarding_path string) string {
+	return fmt.Sprintf(`
+resource "google_dns_managed_zone" "private" {
+  name        = "private-zone-%s"
+  dns_name    = "private.example.com."
+  description = "Example private DNS zone"
+  visibility  = "private"
+  private_visibility_config {
+    networks {
+      network_url = google_compute_network.network-1.self_link
+    }
+  }
+
+  forwarding_config {
+    target_name_servers {
+      domain_name = "%s"
+      forwarding_path = "%s"
+    }
+  }
+}
+
+resource "google_compute_network" "network-1" {
+  name                    = "tf-test-net-1-%s"
+  auto_create_subnetworks = false
+}
+`, suffix, domain_name, forwarding_path, suffix)
+}
+
+{{ if not (or (eq $.TargetVersionName ``) (eq $.TargetVersionName `ga`)) }}
+func TestAccDNSManagedZone_dnsManagedZoneUpdateWithServiceDirectory(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckDNSManagedZoneDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDNSManagedZone_dnsManagedZoneWithServiceDirectory(context),
+			},
+			{
+				ResourceName:            "google_dns_managed_zone.sd-zone",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+			{
+				Config: testAccDNSManagedZone_dnsManagedZoneWithServiceDirectoryUpdate(context),
+			},
+			{
+				ResourceName:            "google_dns_managed_zone.sd-zone",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccDNSManagedZone_dnsManagedZoneWithServiceDirectory(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dns_managed_zone" "sd-zone" {
+  provider = google-beta
+
+  name        = "tf-test-peering-zone%{random_suffix}"
+  dns_name    = "services.example.com."
+  description = "Example private DNS Service Directory zone"
+
+  visibility = "private"
+
+  service_directory_config {
+    namespace {
+      namespace_url = google_service_directory_namespace.example.id
+    }
+  }
+}
+
+resource "google_service_directory_namespace" "example" {
+  provider = google-beta
+
+  namespace_id = "tf-test-example%{random_suffix}"
+  location     = "us-central1"
+}
+
+resource "google_compute_network" "network" {
+  provider = google-beta
+
+  name                    = "tf-test-network%{random_suffix}"
+  auto_create_subnetworks = false
+}
+`, context)
+}
+
+func testAccDNSManagedZone_dnsManagedZoneWithServiceDirectoryUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_dns_managed_zone" "sd-zone" {
+  provider = google-beta
+
+  name        = "tf-test-peering-zone%{random_suffix}"
+  dns_name    = "services.example.com."
+  description = "Example private DNS Service Directory zone"
+
+  visibility = "private"
+
+  private_visibility_config {
+    networks {
+      network_url = google_compute_network.network.id
+    }
+  }
+
+  service_directory_config {
+    namespace {
+      namespace_url = google_service_directory_namespace.example.id
+    }
+  }
+}
+
+resource "google_service_directory_namespace" "example" {
+  provider = google-beta
+
+  namespace_id = "tf-test-example%{random_suffix}"
+  location     = "us-central1"
+}
+
+resource "google_compute_network" "network" {
+  provider = google-beta
+
+  name                    = "tf-test-network%{random_suffix}"
+  auto_create_subnetworks = false
+}
+`, context)
+}
+{{- end }}

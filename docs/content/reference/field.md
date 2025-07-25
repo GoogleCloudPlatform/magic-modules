@@ -27,10 +27,17 @@ is present in provider.yaml. Do not use if an ancestor field (or the overall
 resource) is already marked as beta-only.
 
 ### `immutable`
-If true, the field (and any subfields) are considered immutable - that is,
-only settable on create. If unset or false, the field is still considered
-immutable if any ancestor field (or the overall resource) is immutable,
-unless `update_url` is set.
+If true, the field is considered immutable - that is, only settable on create. If
+unset or false, the field is considered to support update-in-place.
+
+Immutability is not inherited from field to field: subfields are still considered to
+be updatable in place by default. However, if the overall resource has
+[`immutable`]({{< ref "/reference/resource#immutable" >}}) set to true, all its
+fields are considered immutable.  Individual fields can override this for themselves
+and their subfields with [`update_url`]({{< ref "/reference/field#update_url" >}})
+if they have a custom update method in the API.
+
+See [Best practices: Immutable fields]({{< ref "/best-practices/immutable-fields/" >}}) for more information.
 
 Example:
 
@@ -40,8 +47,10 @@ immutable: true
 
 ### `update_url`
 If set, changes to the field's value trigger a separate call to a specific
-API method for updating the field's value. The field is not considered
-immutable even if an ancestor field (or the overall resource) is immutable.
+API method for updating the field's value. Even if the overall resource is marked
+immutable, the field and its subfields are not considered immutable unless explicitly
+marked as such.
+
 Terraform field names enclosed in double curly braces are replaced with the
 field values from the resource at runtime.
 
@@ -98,32 +107,36 @@ Example:
 sensitive: true
 ```
 
+### `write_only`
+If true, the field is considered "write-only", which means that its value will
+be obscured in Terraform output as well as not be stored in state. This field is meant to replace `sensitive` as it doesn't store the value in state.
+See [Ephemerality in Resources - Use Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral/write-only)
+for more information.
+
+Write-only fields are only supported in Terraform v1.11+. Because the provider supports earlier Terraform versions, write only fields must be paired with (mutually exclusive) `sensitive` fields covering the same functionality for compatibility with those older versions.
+This field cannot be used in conjuction with `immutable` or `sensitive`.
+
+**Note**: Due to write-only not being read from the API, it is not possible to update the field directly unless a sidecar field is used. (e.g. `password` as a write-only field and `password_wo_version` as an immutable field meant for updating).
+
+Example:
+
+```yaml
+write_only: true
+```
+
 ### `ignore_read`
 If true, the provider sets the field's value in the resource state based only
 on the user's configuration. If false or unset, the provider sets the field's
 value in the resource state based on the API response. Only use this attribute
 if the field cannot be read from GCP due to either API or provider constraints.
 
-Nested fields currently
-[do not support `ignore_read`](https://github.com/hashicorp/terraform-provider-google/issues/12410)
-but can replicate the behavior by implementing a
-[`custom_flatten`]({{< ref "/develop/custom-code#custom_flatten" >}})
-that always ignores the value returned by the API. [Example](https://github.com/GoogleCloudPlatform/magic-modules/blob/5923d4cb878396a04bed9beaf22a8478e8b1e6a5/mmv1/templates/terraform/custom_flatten/source_representation_instance_configuration_password.go.tmpl).
-Any fields using a custom flatten also need to be added to `ignore_read_extra`
-for any examples where the field is set.
+`ignore_read` is current not supported inside arrays of nested objects. See [tpg#23630](https://github.com/hashicorp/terraform-provider-google/issues/23630)
+for details and workarounds.
 
 Example: YAML
 
 ```yaml
 ignore_read: true
-```
-
-Example: Custom flatten
-
-```go
-func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-  return d.Get("password")
-}
 ```
 
 ### `default_value`
@@ -148,7 +161,6 @@ value for the field. This attribute is useful for complex or
 frequently-changed API-side defaults, but provides less useful information at
 plan time than `default_value` and causes the provider to ignore user
 configurations that explicitly set the field to an "empty" value.
-`default_from_api` and `send_empty_value` cannot both be true on the same field.
 
 Example:
 
@@ -163,7 +175,10 @@ strings) to the API if set explicitly in the user's configuration. If false,
 This attribute is useful for fields where the API would behave differently
 for an "empty" value vs no value for a particular field - for example,
 boolean fields that have an API-side default of true.
-`send_empty_value` and `default_from_api` cannot both be true on the same field.
+
+If true simulataneously with `default_from_api`, the provider will send empty values
+explicitly set in configuration. If the field is unset, the provider will
+accept API values as the default as usual with `default_from_api`.
 
 Due to a [bug](https://github.com/hashicorp/terraform-provider-google/issues/13201),
 NestedObject fields will currently be sent as `null` if unset (rather than being
@@ -259,6 +274,8 @@ Example:
 ```
 
 ### `validation`
+In many cases, it is better to avoid client-side validation. See [Best practices: Validation]({{< ref "/best-practices/validation" >}}) for more information.
+
 Controls the value set for the field's [`ValidateFunc`](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc).
 
 For Enum fields, this will override the default validation (that the provided value is one of the enum [`values`](#values)).
@@ -301,6 +318,29 @@ Example: Regex
     regex: '^[a-zA-Z][a-zA-Z0-9_]*$'
 ```
 
+### `is_set`
+If true, the field is a Set rather than an Array. Set fields represent an
+unordered set of unique elements. `set_hash_func` may be used to customize the
+hash function used to index elements in the set, otherwise the schema default
+function will be used. Adding this property to an existing field is usually a
+breaking change.
+
+```yaml
+- name: 'fieldOne'
+  type: Array
+  is_set: true
+```
+
+### `set_hash_func`
+Specifies a function for hashing elements in a Set field. If unspecified,
+`schema.HashString` will be used if the elements are strings, otherwise
+`schema.HashSchema`. The hash function should be defined in
+`custom_code.constants`.
+
+```yaml
+set_hash_func: functionName
+```
+
 ### `api_name`
 Specifies a name to use for communication with the API that is different than
 the name of the field in Terraform. In general, setting an `api_name` is not
@@ -326,10 +366,11 @@ url_param_only: true
 ## `Enum` properties
 
 ### `enum_values`
-Enum only. If the allowed values change frequently, use a String field instead
-to allow better forwards-compatibility, and link to API documentation
-stating the current allowed values in the String field's description. Do not
-include UNSPECIFIED values in this list.
+Enum only. If the allowed values may change in the future, use a String field instead and link to API documentation
+stating the current allowed values in the String field's description. 
+See [Best practices: Validation]({{< ref "/best-practices/validation" >}}) for more information.
+
+Do not include UNSPECIFIED values in this list.
 
 Enums will validate that the provided field is in the allowed list unless a
 custom [`validation`]({{<ref "#validation" >}}) is provided.
@@ -382,6 +423,8 @@ item_type:
 ### `item_validation`
 Array only. Controls the [`ValidateFunc`](https://developer.hashicorp.com/terraform/plugin/sdkv2/schemas/schema-behaviors#validatefunc)
 used to validate individual items in the array. Behaves like [`validation`]({{<ref "#validation" >}}).
+
+In many cases, it is better to avoid client-side validation. See [Best practices: Validation]({{< ref "/best-practices/validation" >}}) for more information.
 
 For arrays of enums, this will override the default validation (that the provided value is one of the enum [`values`](#values)).
 If you need additional validation on top of an enum, ensure that the supplied validation func also verifies the enum

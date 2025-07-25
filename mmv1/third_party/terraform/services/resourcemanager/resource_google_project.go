@@ -800,7 +800,7 @@ func ListCurrentlyEnabledServices(project, billingProject, userAgent string, con
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			ctx := context.Background()
-			call := config.NewServiceUsageClient(userAgent).Services.List(fmt.Sprintf("projects/%s", project))
+			call := config.NewServiceUsageClient(userAgent).Services.List(fmt.Sprintf("projects/%s", project)).PageSize(200)
 			if config.UserProjectOverride && billingProject != "" {
 				call.Header().Add("X-Goog-User-Project", billingProject)
 			}
@@ -810,16 +810,13 @@ func ListCurrentlyEnabledServices(project, billingProject, userAgent string, con
 						// services are returned as "projects/{{project}}/services/{{name}}"
 						name := tpgresource.GetResourceNameFromSelfLink(v.Name)
 
-						// if name not in ignoredProjectServicesSet
-						if _, ok := ignoredProjectServicesSet[name]; !ok {
-							apiServices[name] = struct{}{}
+						apiServices[name] = struct{}{}
 
-							// if a service has been renamed, set both. We'll deal
-							// with setting the right values later.
-							if v, ok := renamedServicesByOldAndNewServiceNames[name]; ok {
-								log.Printf("[DEBUG] Adding service alias for %s to enabled services: %s", name, v)
-								apiServices[v] = struct{}{}
-							}
+						// if a service has been renamed, set both. We'll deal
+						// with setting the right values later.
+						if v, ok := renamedServicesByOldAndNewServiceNames[name]; ok {
+							log.Printf("[DEBUG] Adding service alias for %s to enabled services: %s", name, v)
+							apiServices[v] = struct{}{}
 						}
 					}
 					return nil
