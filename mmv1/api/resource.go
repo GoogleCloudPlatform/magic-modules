@@ -768,13 +768,13 @@ func buildWriteOnlyField(name string, parent *Type, originalField *Type) *Type {
 	return NewProperty(name, originalField.ApiName, options)
 }
 
-func buildWriteOnlyVersionField(name string, parent *Type, writeOnlyField *Type, immutable bool) *Type {
+func buildWriteOnlyVersionField(name string, parent *Type, writeOnlyField *Type) *Type {
 	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(writeOnlyField.Name))
 	requiredWith := buildFieldPath(parent, writeOnlyField.TerraformLineage())
 
 	options := []func(*Type){
 		propertyWithType("String"),
-		propertyWithImmutable(immutable),
+		propertyWithImmutable(true),
 		propertyWithDescription(description),
 		propertyWithDefault(0),
 		propertyWithRequiredWith([]string{requiredWith}),
@@ -785,14 +785,7 @@ func buildWriteOnlyVersionField(name string, parent *Type, writeOnlyField *Type,
 
 func (r *Resource) addWriteOnlyFields(props []*Type, parent *Type, propWithWoConfigured *Type) []*Type {
 	writeOnlyField := buildWriteOnlyField(fmt.Sprintf("%sWo", propWithWoConfigured.Name), parent, propWithWoConfigured)
-	// TODO: remove this field right before the next major release which is 7.0.0
-	// temporary solution to support bigquerydatatransfer being already mutable (not introducing a breaking change)
-	// https://github.com/hashicorp/terraform-provider-google/issues/23214
-	immutableVersionField := true
-	if propWithWoConfigured.MarkWriteOnlyVersionMutable {
-		immutableVersionField = false
-	}
-	writeOnlyVersionField := buildWriteOnlyVersionField(fmt.Sprintf("%sVersion", writeOnlyField.Name), parent, writeOnlyField, immutableVersionField)
+	writeOnlyVersionField := buildWriteOnlyVersionField(fmt.Sprintf("%sVersion", writeOnlyField.Name), parent, writeOnlyField)
 	props = append(props, writeOnlyField, writeOnlyVersionField)
 	return props
 }
