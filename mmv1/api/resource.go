@@ -757,9 +757,16 @@ func buildWriteOnlyField(name string, parent *Type, originalField *Type) *Type {
 	}
 
 	if originalField.Required {
-		options = append(options, propertyWithExactlyOneOf([]string{fieldPathOriginalField, fieldPathCurrentField}))
+		exactlyOneOf := append(originalField.ExactlyOneOf, fieldPathOriginalField, fieldPathCurrentField)
+		options = append(options, propertyWithExactlyOneOf(exactlyOneOf))
 	} else {
-		propertyWithConflicts([]string{fieldPathOriginalField})
+		conflicts := append(originalField.Conflicts, fieldPathOriginalField)
+		options = append(options, propertyWithConflicts(conflicts))
+	}
+
+	if len(originalField.AtLeastOneOf) > 0 {
+		atLeastOneOf := append(originalField.AtLeastOneOf, fieldPathOriginalField, fieldPathCurrentField)
+		options = append(options, propertyWithAtLeastOneOf(atLeastOneOf))
 	}
 
 	return NewProperty(name, originalField.ApiName, options)
@@ -793,6 +800,9 @@ func (r *Resource) addWriteOnlyFields(props []*Type, parent *Type, propWithWoCon
 func (r *Resource) AddExtraFields(props []*Type, parent *Type) []*Type {
 	for _, p := range props {
 		if p.WriteOnly && !strings.HasSuffix(p.Name, "Wo") {
+			if len(p.RequiredWith) > 0 {
+				log.Fatalf("WriteOnly property '%s' in resource '%s' cannot have RequiredWith set. This combination is not supported.", p.Name, r.Name)
+			}
 			props = r.addWriteOnlyFields(props, parent, p)
 			// the generated field will have WriteOnly set to true, so we need to adjust the original
 			p.WriteOnly = false

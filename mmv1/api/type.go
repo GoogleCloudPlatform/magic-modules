@@ -1040,6 +1040,12 @@ func propertyWithExactlyOneOf(exactlyOneOf []string) func(*Type) {
 	}
 }
 
+func propertyWithAtLeastOneOf(atLeastOneOf []string) func(*Type) {
+	return func(p *Type) {
+		p.AtLeastOneOf = atLeastOneOf
+	}
+}
+
 func propertyWithDefault(defaultValue interface{}) func(*Type) {
 	return func(p *Type) {
 		p.DefaultValue = defaultValue
