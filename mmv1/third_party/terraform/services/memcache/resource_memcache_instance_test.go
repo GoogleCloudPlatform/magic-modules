@@ -125,7 +125,13 @@ func TestAccMemcacheInstance_deletionprotection(t *testing.T) {
 				ExpectError: regexp.MustCompile("deletion_protection"),
 			},
 			{
-				Config: testAccMemcacheInstance_update(prefix, name, network),
+				Config: testAccMemcacheInstance_deletionprotectionFalse(prefix, name, network, "us-central1"),
+			},
+			{
+				ResourceName:            "google_memcache_instance.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"reserved_ip_range_id", "deletion_protection"},
 			},
 		},
 	})
@@ -138,6 +144,32 @@ resource "google_memcache_instance" "test" {
   region = "%s"
   authorized_network = data.google_compute_network.memcache_network.id
   deletion_protection = true
+  node_config {
+    cpu_count      = 1
+    memory_size_mb = 1024
+  }
+  node_count = 1
+  memcache_parameters {
+    params = {
+      "listen-backlog" = "2048"
+      "max-item-size" = "8388608"
+    }
+  }
+  reserved_ip_range_id = ["tf-bootstrap-addr-memcache-instance-update-1"]
+}
+data "google_compute_network" "memcache_network" {
+  name = "%s"
+}
+`, name, region, network)
+}
+
+func testAccMemcacheInstance_deletionprotection(prefix, name, network, region string) string {
+	return fmt.Sprintf(`
+resource "google_memcache_instance" "test" {
+  name = "%s"
+  region = "%s"
+  authorized_network = data.google_compute_network.memcache_network.id
+  deletion_protection = false
   node_config {
     cpu_count      = 1
     memory_size_mb = 1024
