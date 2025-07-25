@@ -441,13 +441,13 @@ provider "google" {
   user_project_override = true
 }
 resource "google_container_cluster" "cluster" {
-  provider           = google.user-project-override
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 3
+  provider            = google.user-project-override
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 3
   deletion_protection = false
-  network    = "%s"
-  subnetwork    = "%s"
+  network             = "%s"
+  subnetwork          = "%s"
 }
 
 resource "google_container_node_pool" "np" {
@@ -458,13 +458,13 @@ resource "google_container_node_pool" "np" {
   initial_node_count = 3
 
   node_config {
-	machine_type    = "c3-standard-4"
-	boot_disk {
+    machine_type = "c3-standard-4"
+    boot_disk {
       size_gb                = 100
       disk_type              = "hyperdisk-balanced"
-	  provisioned_iops       = 3456
-	  provisioned_throughput = 234
-	}
+      provisioned_iops       = 3456
+      provisioned_throughput = 234
+    }
   }
 }
 `, cluster, networkName, subnetworkName, np)
@@ -477,13 +477,13 @@ provider "google" {
   user_project_override = true
 }
 resource "google_container_cluster" "cluster" {
-  provider           = google.user-project-override
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 3
+  provider            = google.user-project-override
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 3
   deletion_protection = false
-  network    = "%s"
-  subnetwork    = "%s"
+  network             = "%s"
+  subnetwork          = "%s"
 }
 
 resource "google_container_node_pool" "np" {
@@ -494,13 +494,13 @@ resource "google_container_node_pool" "np" {
   initial_node_count = 3
 
   node_config {
-	machine_type    = "c3-standard-4"
-	boot_disk {
+    machine_type = "c3-standard-4"
+    boot_disk {
       size_gb                = 200
       disk_type              = "hyperdisk-balanced"
-	  provisioned_iops       = 4567
-	  provisioned_throughput = 345
-	}
+      provisioned_iops       = 4567
+      provisioned_throughput = 345
+    }
   }
 }
 `, cluster, networkName, subnetworkName, np)
@@ -514,13 +514,13 @@ provider "google" {
   user_project_override = true
 }
 resource "google_container_cluster" "cluster" {
-  provider           = google.user-project-override
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 3
+  provider            = google.user-project-override
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 3
   deletion_protection = false
-  network    = "%s"
-  subnetwork    = "%s"
+  network             = "%s"
+  subnetwork          = "%s"
 }
 
 resource "google_container_node_pool" "np" {
@@ -531,11 +531,11 @@ resource "google_container_node_pool" "np" {
   initial_node_count = 3
 
   node_config {
-	machine_type    = "c3-standard-4"
-	boot_disk {
-      size_gb                = 201
-      disk_type              = "pd-balanced"
-	}
+    machine_type = "c3-standard-4"
+    boot_disk {
+      size_gb   = 201
+      disk_type = "pd-balanced"
+    }
   }
 }
 `, cluster, networkName, subnetworkName, np)
@@ -549,13 +549,13 @@ provider "google" {
   user_project_override = true
 }
 resource "google_container_cluster" "cluster" {
-  provider           = google.user-project-override
-  name               = "%s"
-  location           = "us-central1-a"
-  initial_node_count = 3
+  provider            = google.user-project-override
+  name                = "%s"
+  location            = "us-central1-a"
+  initial_node_count  = 3
   deletion_protection = false
-  network    = "%s"
-  subnetwork    = "%s"
+  network             = "%s"
+  subnetwork          = "%s"
 }
 
 resource "google_container_node_pool" "np" {
@@ -566,9 +566,10 @@ resource "google_container_node_pool" "np" {
   initial_node_count = 3
 
   node_config {
-    disk_type = "pd-balance"
+    disk_type    = "pd-balanced"
     disk_size_gb = 202
   }
+}
 `, cluster, networkName, subnetworkName, np)
 }
 
