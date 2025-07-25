@@ -133,4 +133,4 @@ properties:
       Resource manager tag keys and values have the same definition as resource manager tags.
       Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_key_value}.
     immutable: true
-    ignore_read: true            
+    ignore_read: true
