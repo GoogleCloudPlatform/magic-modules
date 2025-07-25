@@ -36,6 +36,9 @@ func TestAccDialogflowConversationProfile_update(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccDialogflowConversationProfile_dialogflowAgentFull1(context),
@@ -87,36 +90,45 @@ func testAccDialogflowConversationProfile_dialogflowAgentFull1(context map[strin
 		project = "${google_project.agent_project.id}"
 	}
 
+	resource "google_project_iam_member" "agent_create_kyle" {
+		role    = "roles/dialogflow.admin"
+		member  = "user:kmathews@gryphonnetworks.com"
+		project = "${google_project.agent_project.id}"
+	}
 	resource "google_dialogflow_agent" "agent" {
 		display_name = "tf-test-agent-%{random_suffix}"
 		default_language_code = "en-us"
 		time_zone = "America/New_York"
-		depends_on = [google_project_iam_member.agent_create]
-		project = google_project.agent_project.id
+		project = google_project.agent_project.name
 	}
 
 	resource "google_pubsub_topic" "topic" {
 		name = "tf-test-topic-%{random_suffix}"
-		project = "${google_project.agent_project.id}"
-		depends_on = [google_project.agent_project]
+		project = google_project.agent_project.project_id
+		depends_on = [google_project.agent_project, time_sleep.wait_120_seconds]
+		message_retention_duration = "8000s"
 	}
 	resource "google_dialogflow_cx_security_settings" "security_setting" {
 		display_name          = "tf-test-setting-%{random_suffix}"
 		location              = "global"
 		purge_data_types      = []
 		retention_window_days = 7
-		#project = "${google_project.agent_project.id}"
+		#project = google_project.agent_project.project_id
 		depends_on = [google_dialogflow_agent.agent]
 	}
 
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_dialogflow_agent.agent]
+}
 	resource "google_dialogflow_conversation_profile" "profile" {
-		depends_on    = [google_dialogflow_agent.agent, google_dialogflow_cx_security_settings.security_setting]
-		project       = google_project.agent_project.id
+		depends_on    = [google_dialogflow_agent.agent, google_dialogflow_cx_security_settings.security_setting,time_sleep.wait_120_seconds]
+		project       = google_project.agent_project.project_id
 		display_name  = "tf-test-conversation-profile-%{random_suffix}"
 		location = "global"
 		language_code = "en-US"
 		automated_agent_config {
-			agent = "projects/${google_project.agent_project.id}/locations/global/agent/environments/draft"
+			agent = "projects/${google_project.agent_project.name}/locations/global/agent/environments/draft"
 			session_ttl = "30s"
 		}
 		human_agent_assistant_config {
@@ -276,6 +288,7 @@ func testAccDialogflowConversationProfile_dialogflowAgentFull2(context map[strin
 	resource "google_pubsub_topic" "topic_diff" {
 		name = "tf-test-topic-%{random_suffix}-diff"
 		project = "${google_project.agent_project.id}"
+		depends_on = [time_sleep.wait_120_seconds]
 	}
 	resource "google_dialogflow_cx_security_settings" "security_setting_diff" {
 		display_name          = "tf-test-setting-%{random_suffix}-diff"
@@ -285,8 +298,13 @@ func testAccDialogflowConversationProfile_dialogflowAgentFull2(context map[strin
 		project = "${google_project.agent_project.id}"
 	}
 
+resource "time_sleep" "wait_120_seconds" {
+  create_duration = "120s"
+  depends_on = [google_dialogflow_agent.agent]
+}
+
 	resource "google_dialogflow_conversation_profile" "profile" {
-		depends_on    = [google_dialogflow_agent.agent, google_dialogflow_cx_security_settings.security_setting_diff]
+		depends_on    = [google_dialogflow_agent.agent, google_dialogflow_cx_security_settings.security_setting_diff, time_sleep.wait_120_seconds]
 		project = "${google_project.agent_project.id}"
 		display_name  = "tf-test-conversation-profile-%{random_suffix}-new"
 		location = "global"
