@@ -1,9 +1,10 @@
 package backupdr_test
 
 import (
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"testing"
 )
 
 func TestAccDataSourceGoogleBackupDRBackupPlan_basic(t *testing.T) {
@@ -39,8 +40,7 @@ func TestAccDataSourceGoogleBackupDRBackupPlan_csql(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBackupDRBackupPlan_csql(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceState("data.
-          google_backup_dr_backup_plan.fetch-bp", "google_backup_dr_backup_plan_csql.test"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.google_backup_dr_backup_plan.fetch-bp", "google_backup_dr_backup_plan.csql-test"),
 				),
 			},
 		},
@@ -121,7 +121,7 @@ resource "google_backup_dr_backup_vault" "my-backup-vault-csql" {
 }
 
 
-resource "google_backup_dr_backup_plan" "csql_test" { 
+resource "google_backup_dr_backup_plan" "csql-test" { 
   location = "us-central1" 
   backup_plan_id = "bp-test-%{random_suffix}"
   resource_type= "sqladmin.googleapis.com/Instance"
@@ -149,7 +149,7 @@ resource "google_backup_dr_backup_plan" "csql_test" {
 data "google_backup_dr_backup_plan" "fetch-bp" {
   location =  "us-central1"
   backup_plan_id="bp-test-%{random_suffix}"
-  depends_on= [ google_backup_dr_backup_plan.test ]
+  depends_on= [ google_backup_dr_backup_plan.csql-test ]
   }
 `, context)
 }
