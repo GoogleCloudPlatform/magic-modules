@@ -1,0 +1,360 @@
+[
+  {
+    "ancestors": [
+      "projects/307841421122",
+      "folders/1004165107538",
+      "folders/422052295010",
+      "folders/23774682723",
+      "folders/134336129404",
+      "folders/376645683816",
+      "organizations/433637338589"
+    ],
+    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/test1",
+    "resource": {
+      "data": {
+        "createTime": "2025-07-24T16:46:13.408561125Z",
+        "description": "my description",
+        "mtlsPolicy": {
+          "clientValidationMode": "REJECT_INVALID",
+          "clientValidationTrustConfig": "projects/307841421122/locations/global/trustConfigs/id-4adf7779-1e9f-4124-9438-652c80886074"
+        },
+        "name": "projects/ccm-breakit/locations/global/serverTlsPolicies/test1",
+        "updateTime": "2025-07-24T16:46:21.433462748Z"
+      },
+      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discoveryName": "ServerTlsPolicy",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-07-24T18:00:00Z"
+  },
+  {
+    "ancestors": [
+      "projects/307841421122",
+      "folders/1004165107538",
+      "folders/422052295010",
+      "folders/23774682723",
+      "folders/134336129404",
+      "folders/376645683816",
+      "organizations/433637338589"
+    ],
+    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/test2",
+    "resource": {
+      "data": {
+        "createTime": "2025-07-24T16:46:13.407962461Z",
+        "description": "my description",
+        "labels": {
+          "foo": "bar",
+          "goog-terraform-provisioned": "true"
+        },
+        "mtlsPolicy": {
+          "clientValidationCa": [
+            {
+              "certificateProviderInstance": {
+                "pluginInstance": "google_cloud_private_spiffe"
+              }
+            }
+          ]
+        },
+        "name": "projects/ccm-breakit/locations/global/serverTlsPolicies/test2",
+        "serverCertificate": {
+          "certificateProviderInstance": {
+            "pluginInstance": "google_cloud_private_spiffe"
+          }
+        },
+        "updateTime": "2025-07-24T16:46:20.145890894Z"
+      },
+      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discoveryName": "ServerTlsPolicy",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-07-24T18:00:00Z"
+  },
+  {
+    "ancestors": [
+      "projects/307841421122",
+      "folders/1004165107538",
+      "folders/422052295010",
+      "folders/23774682723",
+      "folders/134336129404",
+      "folders/376645683816",
+      "organizations/433637338589"
+    ],
+    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/test3",
+    "resource": {
+      "data": {
+        "createTime": "2025-07-24T16:46:13.44787428Z",
+        "description": "my description",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "name": "projects/ccm-breakit/locations/global/serverTlsPolicies/test3",
+        "serverCertificate": {
+          "grpcEndpoint": {
+            "targetUri": "unix:mypath"
+          }
+        },
+        "updateTime": "2025-07-24T16:46:17.064444627Z"
+      },
+      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discoveryName": "ServerTlsPolicy",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-07-24T18:00:00Z"
+  },
+  {
+    "ancestors": [
+      "projects/307841421122",
+      "folders/1004165107538",
+      "folders/422052295010",
+      "folders/23774682723",
+      "folders/134336129404",
+      "folders/376645683816",
+      "organizations/433637338589"
+    ],
+    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/test4",
+    "resource": {
+      "data": {
+        "createTime": "2025-07-24T16:46:13.365354989Z",
+        "mtlsPolicy": {
+          "clientValidationMode": "REJECT_INVALID",
+          "clientValidationTrustConfig": "projects/307841421122/locations/global/trustConfigs/id-4adf7779-1e9f-4124-9438-652c80886074"
+        },
+        "name": "projects/ccm-breakit/locations/global/serverTlsPolicies/test4",
+        "updateTime": "2025-07-24T16:46:19.340874386Z"
+      },
+      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discoveryName": "ServerTlsPolicy",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-07-24T18:00:00Z"
+  },
+  {
+    "ancestors": [
+      "projects/307841421122",
+      "folders/1004165107538",
+      "folders/422052295010",
+      "folders/23774682723",
+      "folders/134336129404",
+      "folders/376645683816",
+      "organizations/433637338589"
+    ],
+    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/test5",
+    "resource": {
+      "data": {
+        "createTime": "2025-07-24T16:46:13.447654052Z",
+        "description": "my description",
+        "mtlsPolicy": {
+          "clientValidationMode": "REJECT_INVALID",
+          "clientValidationTrustConfig": "projects/307841421122/locations/global/trustConfigs/id-4adf7779-1e9f-4124-9438-652c80886074"
+        },
+        "name": "projects/ccm-breakit/locations/global/serverTlsPolicies/test5",
+        "updateTime": "2025-07-24T16:46:21.59942121Z"
+      },
+      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discoveryName": "ServerTlsPolicy",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-07-24T18:00:00Z"
+  },
+  {
+    "ancestors": [
+      "projects/307841421122",
+      "folders/1004165107538",
+      "folders/422052295010",
+      "folders/23774682723",
+      "folders/134336129404",
+      "folders/376645683816",
+      "organizations/433637338589"
+    ],
+    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/us-central1/serverTlsPolicies/test6",
+    "resource": {
+      "data": {
+        "createTime": "2025-07-24T16:46:13.411409318Z",
+        "description": "my description",
+        "mtlsPolicy": {
+          "clientValidationMode": "REJECT_INVALID",
+          "clientValidationTrustConfig": "projects/307841421122/locations/us-central1/trustConfigs/tsmx-20250609-tc1"
+        },
+        "name": "projects/ccm-breakit/locations/us-central1/serverTlsPolicies/test6",
+        "updateTime": "2025-07-24T16:46:15.884639219Z"
+      },
+      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discoveryName": "ServerTlsPolicy",
+      "location": "us-central1",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-07-24T18:00:00Z"
+  },
+  {
+    "ancestors": [
+      "projects/307841421122",
+      "folders/1004165107538",
+      "folders/422052295010",
+      "folders/23774682723",
+      "folders/134336129404",
+      "folders/376645683816",
+      "organizations/433637338589"
+    ],
+    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/test7",
+    "resource": {
+      "data": {
+        "createTime": "2025-07-24T16:46:13.015321983Z",
+        "description": "my description",
+        "mtlsPolicy": {
+          "clientValidationMode": "ALLOW_INVALID_OR_MISSING_CLIENT_CERT"
+        },
+        "name": "projects/ccm-breakit/locations/global/serverTlsPolicies/test7",
+        "updateTime": "2025-07-24T16:46:15.338886322Z"
+      },
+      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discoveryName": "ServerTlsPolicy",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-07-24T18:00:00Z"
+  },
+  {
+    "ancestors": [
+      "projects/307841421122",
+      "folders/1004165107538",
+      "folders/422052295010",
+      "folders/23774682723",
+      "folders/134336129404",
+      "folders/376645683816",
+      "organizations/433637338589"
+    ],
+    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/test8",
+    "resource": {
+      "data": {
+        "allowOpen": true,
+        "createTime": "2025-07-24T16:46:13.361709474Z",
+        "description": "my description",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "mtlsPolicy": {
+          "clientValidationCa": [
+            {
+              "certificateProviderInstance": {
+                "pluginInstance": "google_cloud_private_spiffe"
+              }
+            }
+          ]
+        },
+        "name": "projects/ccm-breakit/locations/global/serverTlsPolicies/test8",
+        "serverCertificate": {
+          "grpcEndpoint": {
+            "targetUri": "unix:mypath"
+          }
+        },
+        "updateTime": "2025-07-24T16:46:20.777903521Z"
+      },
+      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discoveryName": "ServerTlsPolicy",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-07-24T18:00:00Z"
+  },
+  {
+    "ancestors": [
+      "projects/307841421122",
+      "folders/1004165107538",
+      "folders/422052295010",
+      "folders/23774682723",
+      "folders/134336129404",
+      "folders/376645683816",
+      "organizations/433637338589"
+    ],
+    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/test9",
+    "resource": {
+      "data": {
+        "createTime": "2025-07-24T16:46:13.322641211Z",
+        "description": "my description",
+        "labels": {
+          "goog-terraform-provisioned": "true"
+        },
+        "name": "projects/ccm-breakit/locations/global/serverTlsPolicies/test9",
+        "serverCertificate": {
+          "certificateProviderInstance": {
+            "pluginInstance": "google_cloud_private_spiffe"
+          }
+        },
+        "updateTime": "2025-07-24T16:46:20.145274497Z"
+      },
+      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discoveryName": "ServerTlsPolicy",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-07-24T18:00:00Z"
+  },
+  {
+    "ancestors": [
+      "projects/307841421122",
+      "folders/1004165107538",
+      "folders/422052295010",
+      "folders/23774682723",
+      "folders/134336129404",
+      "folders/376645683816",
+      "organizations/433637338589"
+    ],
+    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/test10",
+    "resource": {
+      "data": {
+        "createTime": "2025-07-24T16:46:12.916186194Z",
+        "description": "my description",
+        "labels": {
+          "foo": "bar",
+          "goog-terraform-provisioned": "true"
+        },
+        "mtlsPolicy": {
+          "clientValidationCa": [
+            {
+              "grpcEndpoint": {
+                "targetUri": "unix:mypath"
+              }
+            }
+          ]
+        },
+        "name": "projects/ccm-breakit/locations/global/serverTlsPolicies/test10",
+        "serverCertificate": {
+          "certificateProviderInstance": {
+            "pluginInstance": "google_cloud_private_spiffe"
+          }
+        },
+        "updateTime": "2025-07-24T16:46:16.539295201Z"
+      },
+      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discoveryName": "ServerTlsPolicy",
+      "location": "global",
+      "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
+      "version": "v1"
+    },
+    "updateTime": "2025-07-24T18:00:00Z"
+  }
+]
