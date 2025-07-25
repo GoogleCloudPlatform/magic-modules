@@ -504,6 +504,7 @@ properties:
         description: |
           Name of the service associated with a Function.
         default_from_api: true
+        output: true
       - name: 'timeoutSeconds'
         type: Integer
         description: |
