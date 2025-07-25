@@ -23,6 +23,10 @@ func TestAccCertificateManagerCertificate_tags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCertificateManagerCertificateTags(context),
+				Check: resource.TestCheckFunc(
+					resource.TestCheckResourceAttrSet(
+						"google_certificate_manager_certificate.certificate", "tags.%"),
+				),
 			},
 			{
 				ResourceName:            "google_certificate_manager_certificate.certificate",
