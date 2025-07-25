@@ -19,8 +19,5 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Resou
 		return nil, nil
 	}
 	val := v.(string)
-	if strings.HasPrefix(val, "https://www.googleapis.com/compute/v1/") {
-		return val, nil
-	}
-	return "https://www.googleapis.com/compute/v1/" + val, nil
+	return tpgresource.ExpandRegionalField(val, d, config, "instanceGroups")
 }
