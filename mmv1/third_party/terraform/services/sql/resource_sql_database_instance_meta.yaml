@@ -47,6 +47,7 @@ fields:
   - field: 'restore_backup_context.backup_run_id'
   - field: 'restore_backup_context.instance_id'
   - field: 'restore_backup_context.project'
+  - field: 'backupdr_backup'
   - field: 'root_password'
   - field: 'self_link'
   - field: 'server_ca_cert.cert'
