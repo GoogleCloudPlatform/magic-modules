@@ -50,10 +50,13 @@ type Resource struct {
 	Attributes map[string]struct{} `json:"attributes"`
 }
 
-const ymdFormat = "2006-01-02"
+const (
+	ymdFormat  = "2006-01-02"
+	maxRetries = 30
+)
 
 var (
-	TestsMetadata = make([]NightlyRun, 30)
+	TestsMetadata = make([]NightlyRun, maxRetries)
 	setupDone     = false
 )
 
@@ -71,7 +74,7 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 		bucket := client.Bucket(bucketName)
 
 		var allErrs error
-		retriesRemaining := 30
+		retries := 0
 		for i := 0; i < len(TestsMetadata); i++ {
 			metadata, err := readTestsDataFromGCSForRun(ctx, currentDate, bucketName, bucket)
 			if err != nil {
@@ -84,8 +87,9 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 			if metadata == nil {
 				// Keep looking until we find a date with metadata.
 				i--
-				retriesRemaining--
-				if retriesRemaining < 0 {
+				retries++
+				if retries > maxRetries {
+					// Stop looking when we find maxRetries dates with no metadata.
 					return nil, fmt.Errorf("too many retries, %v", allErrs)
 				}
 			} else {
