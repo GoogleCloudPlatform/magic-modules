@@ -56,4 +56,67 @@ if err := d.Set("endpoint", endpoint); err != nil {
 d.SetId(endpointFull)
 log.Printf("[DEBUG] Set Terraform resource ID to: %s", endpointFull)
 
-return nil
+
+// Make API call to read the endpoint and retrieve deployed model IDs
+read_url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}")
+if err != nil {
+	return err
+}
+
+read_headers := make(http.Header)
+read_res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+	Config:    config,
+	Method:    "GET",
+	Project:   billingProject,
+	RawURL:    read_url,
+	UserAgent: userAgent,
+	Headers:   read_headers,
+})
+if err != nil {
+	return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("VertexAIEndpointWithModelGardenDeployment %q", d.Id()))
+}
+
+//  Access the 'deployedModels' attribute from the response.
+deployedModelsRaw, ok := read_res["deployedModels"]
+if !ok || deployedModelsRaw == nil {
+	log.Printf("[ERROR] No deployed models found in the endpoint response")
+	return fmt.Errorf("Error creating EndpointWithModelGardenDeployment: No deployed models found in the endpoint response.")
+}
+
+// Assert the type to a slice of interfaces
+deployedModels, ok := deployedModelsRaw.([]interface{})
+if !ok {
+	log.Printf("[ERROR] 'deployedModels' field of endpoint response is not an array as expected")
+	return fmt.Errorf("Error creating EndpointWithModelGardenDeployment: 'deployedModels' field is not an array as expected.")
+}
+
+// Log the number of deployed models for debugging purposes
+log.Printf("[DEBUG] Found %d deployed model(s).", len(deployedModels))
+
+// Retrieve deployed model IDs of all deployed models
+var deployedModelIds []string
+
+for i := 0; i < len(deployedModels); i++ {
+	deployedModelRaw := deployedModels[i]
+
+	// Assert each deployed model to a map so ID field can be retrieved
+	deployedModel, ok := deployedModelRaw.(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("Error creating EndpointWithModelGardenDeployment: model in 'deployedModels' field of endpoint response is not a map as expected.")
+	}
+
+	// Retrieve and Log model ID with display name for debugging purposes
+	if modelId, ok := deployedModel["id"].(string); ok {
+		deployedModelIds = append(deployedModelIds, modelId)
+		log.Printf("[DEBUG] Retrieved ID of deployed model %d: %s", i, modelId)
+	}
+
+	if displayName, ok := deployedModel["displayName"].(string); ok {
+		log.Printf("[DEBUG] Display name of deployed model %d: %s", i, displayName)
+	}
+}
+
+// set Terraform field for deployed model IDs
+if err := d.Set("deployed_model_ids", tpgresource.ConvertStringArrToInterface(deployedModelIds)); err != nil {
+	return fmt.Errorf("Error creating EndpointWithModelGardenDeployment: %s", err)
+}
