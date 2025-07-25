@@ -52,10 +52,10 @@ if displayName == "Playbook Example with Fulfillment" {
 		handler, ok := handlers[6].(map[string]interface{})
 		if !ok { return fmt.Errorf("element at 'handlers[6]' is not a map") }
 
-		eventHandler, ok := handler["lifecycleHandler"].(map[string]interface{})
+		lifecycleHandler, ok := handler["lifecycleHandler"].(map[string]interface{})
 		if !ok { return fmt.Errorf("'lifecycleHandler' is not a map") }
 
-		fulfillment, ok := eventHandler["fulfillment"].(map[string]interface{})
+		fulfillment, ok := lifecycleHandler["fulfillment"].(map[string]interface{})
 		if !ok { return fmt.Errorf("'fulfillment' is not a map") }
 
 		advancedSettings, ok := fulfillment["advancedSettings"].(map[string]interface{})
@@ -72,6 +72,68 @@ if displayName == "Playbook Example with Fulfillment" {
 		return nil
 	}
 	if err := setHandlers6LifecycleHandlerFulfillmentAdvancedSettings(res); err != nil {
+		return nil, err
+	}
+
+	//   - 'handlers.2.event_handler.0.fulfillment.0.messages.1'
+	setHandlers2EventHandlerFulfillmentMessages1 := func(data map[string]interface{}) error {
+		// --- Traverse to the parent map ---
+		handlers, ok := data["handlers"].([]interface{})
+		if !ok { return fmt.Errorf("'handlers' is not a slice") }
+
+		if len(handlers) <= 2 { return fmt.Errorf("index 2 out of bounds for 'handlers'") }
+		handler, ok := handlers[2].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'handlers[2]' is not a map") }
+
+		eventHandler, ok := handler["eventHandler"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'eventHandler' is not a map") }
+
+		fulfillment, ok := eventHandler["fulfillment"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'fulfillment' is not a map") }
+
+		messages, ok := fulfillment["messages"].([]interface{})
+		if !ok { return fmt.Errorf("'messages' is not a slice") }
+		if len(messages) != 1 { return fmt.Errorf("incorrect length for 'messages'") }
+
+		toolCallMessage := d.Get("handlers.2.event_handler.0.fulfillment.0.messages.1").(map[string]interface{})
+		messages = append(messages, toolCallMessage)
+		
+		fulfillment["messages"] = messages
+
+		return nil
+	}
+	if err := setHandlers2EventHandlerFulfillmentMessages1(res); err != nil {
+		return nil, err
+	}
+
+	//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.messages.1'
+	setHandlers6LifecycleHandlerFulfillmentMessages1 := func(data map[string]interface{}) error {
+		// --- Traverse to the parent map ---
+		handlers, ok := data["handlers"].([]interface{})
+		if !ok { return fmt.Errorf("'handlers' is not a slice") }
+
+		if len(handlers) <= 6 { return fmt.Errorf("index 6 out of bounds for 'handlers'") }
+		handler, ok := handlers[6].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'handlers[6]' is not a map") }
+
+		lifecycleHandler, ok := handler["lifecycleHandler"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'lifecycleHandler' is not a map") }
+
+		fulfillment, ok := lifecycleHandler["fulfillment"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'fulfillment' is not a map") }
+
+		messages, ok := fulfillment["messages"].([]interface{})
+		if !ok { return fmt.Errorf("'messages' is not a slice") }
+		if len(messages) != 1 { return fmt.Errorf("incorrect length for 'messages'") }
+
+		toolCallMessage := d.Get("handlers.6.lifecycle_handler.0.fulfillment.0.messages.1").(map[string]interface{})
+		messages = append(messages, toolCallMessage)
+		
+		fulfillment["messages"] = messages
+
+		return nil
+	}
+	if err := setHandlers6LifecycleHandlerFulfillmentMessages1(res); err != nil {
 		return nil, err
 	}
 
