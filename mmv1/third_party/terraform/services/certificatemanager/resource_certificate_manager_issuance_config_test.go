@@ -25,6 +25,10 @@ func TestAccCertificateManagerIssuanceConfig_tags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCertificateManagerIssuanceConfigTags(context),
+				Check: resource.TestCheckFunc(
+					resource.TestCheckResourceAttrSet(
+						"google_certificate_manager_certificate_issuance_config.issuanceconfig", "tags.%"),
+				),
 			},
 			{
 				ResourceName:            "google_certificate_manager_certificate_issuance_config.issuanceconfig",
