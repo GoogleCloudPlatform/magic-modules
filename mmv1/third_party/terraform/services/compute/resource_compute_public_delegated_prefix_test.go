@@ -72,7 +72,6 @@ resource "google_compute_public_delegated_prefix" "subprefix" {
   ip_cidr_range = "2600:1901:4500:2::/64"
   parent_prefix = "%{parent_pdp_id}"
   mode = "DELEGATION"
-  allocatable_prefix_length = 64
 }
 `, context)
 }
