@@ -5,11 +5,11 @@ resource "google_artifact_registry_repository" "{{$.PrimaryResourceId}}" {
   format        = "APT"
   mode          = "REMOTE_REPOSITORY"
   remote_repository_config {
-    description = "Debian buster remote repository"
+    description = "Debian stable remote repository"
     apt_repository {
       public_repository {
         repository_base = "DEBIAN"
-        repository_path = "debian/dists/buster"
+        repository_path = "debian/dists/stable"
       }
     }
   }
