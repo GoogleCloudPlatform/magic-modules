@@ -98,6 +98,14 @@ examples:
       dataset_id: 'tf_test_dataset'
       routine_id: 'tf_test_routine'
       desc: 'Example for listing with routine'
+  - name: 'bigquery_analyticshub_public_listing'
+    primary_resource_id: 'listing'
+    primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'my_data_exchange'
+      listing_id: 'my_listing'
+      desc: 'example public listing'
   - name: 'bigquery_analyticshub_listing_marketplace'
     primary_resource_id: 'listing'
     primary_resource_name: 'fmt.Sprintf("tf_test_my_data_exchange%s", context["random_suffix"]), fmt.Sprintf("tf_test_my_listing%s", context["random_suffix"])'
@@ -281,6 +289,22 @@ properties:
     type: Boolean
     description:
       If true, subscriber email logging is enabled and all queries on the linked dataset will log the email address of the querying user. Once enabled, this setting cannot be turned off.
+  - name: 'state'
+    type: String
+    description: |-
+      Current state of the listing.
+    output: true
+  - name: 'discoveryType'
+    type: Enum
+    enum_values:
+      - 'DISCOVERY_TYPE_PRIVATE'
+      - 'DISCOVERY_TYPE_PUBLIC'
+    default_value: 'DISCOVERY_TYPE_PRIVATE'
+    description: Specifies the type of discovery on the discovery page. Note that this does not control the visibility of the exchange/listing which is defined by IAM permission.
+  - name: 'allowOnlyMetadataSharing'
+    type: Boolean
+    immutable: true
+    description: If true, the listing is only available to get the resource metadata. Listing is non subscribable.
   - name: 'commercialInfo'
     type: NestedObject
     description: |
