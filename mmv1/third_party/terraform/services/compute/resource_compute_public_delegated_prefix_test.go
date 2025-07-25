@@ -16,13 +16,13 @@ import (
 func TestAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPrefixExample(t *testing.T) {
 	t.Parallel()
 	subPrefixResourceName := "google_compute_public_delegated_prefix.subprefix"
-	parentProject := "byoipv6-fr-prober"
+	parentProject := "tf-static-byoip"
 	parentRegion := "us-central1"
 	parentName := "tf-test-delegation-mode-sub-pdp"
 
 	context := map[string]interface{}{
 		"parent_pdp_id": "projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-delegation-mode-sub-pdp",
-		"project":       "byoipv6-fr-prober",
+		"project":       "tf-static-byoip",
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
