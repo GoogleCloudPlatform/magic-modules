@@ -172,6 +172,7 @@ resource "google_bigquery_analytics_hub_data_exchange" "listing" {
   data_exchange_id = "tf_test_my_data_exchange%{random_suffix}"
   display_name     = "tf_test_my_data_exchange%{random_suffix}"
   description      = "example public listing%{random_suffix}"
+	discovery_type   = "DISCOVERY_TYPE_PRIVATE"
 }
 
 resource "google_bigquery_analytics_hub_listing" "listing" {
