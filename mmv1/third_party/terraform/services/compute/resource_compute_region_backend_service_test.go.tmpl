@@ -475,13 +475,13 @@ func TestAccComputeRegionBackendService_withDynamicBackendCount(t *testing.T) {
 		},
 	})
 }
+
 func TestAccComputeRegionBackendService_zonalILB(t *testing.T) {
 	t.Parallel()
 
 	serviceName := fmt.Sprintf("tf-test-ilb-bs-%s", acctest.RandString(t, 10))
 	checkName := fmt.Sprintf("tf-test-ilb-hc-%s", acctest.RandString(t, 10))
 	checkName2 := fmt.Sprintf("tf-test-ilb-hc2-%s", acctest.RandString(t, 10))
-	// The name for the network endpoint group was missing.
 	negName := fmt.Sprintf("tf-test-ilb-neg-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -512,7 +512,7 @@ func TestAccComputeRegionBackendService_zonalILB(t *testing.T) {
 func testAccComputeRegionBackendService_zonalILB(serviceName, checkName, negName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "default" {
-  name = "tf-test-net"
+  name                    = "tf-test-net"
   auto_create_subnetworks = false
 }
 
@@ -523,7 +523,6 @@ resource "google_compute_subnetwork" "default" {
   network       = google_compute_network.default.id
 }
 
-// FIX: Changed resource type to google_compute_region_health_check
 resource "google_compute_region_health_check" "hc1" {
   name   = "%s"
   region = "us-central1"
@@ -565,7 +564,7 @@ resource "google_compute_region_backend_service" "test" {
 func testAccComputeRegionBackendService_zonalILBModified(serviceName, checkName, _ string, negName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "default" {
-  name = "tf-test-net"
+  name                    = "tf-test-net"
   auto_create_subnetworks = false
 }
 
@@ -613,6 +612,7 @@ resource "google_compute_region_backend_service" "test" {
 }
 `, checkName, negName, serviceName)
 }
+
 func testAccComputeRegionBackendService_withDynamicBackendCount(serviceName, netName, hcName, igName string) string {
 	return fmt.Sprintf(`
 locals {
