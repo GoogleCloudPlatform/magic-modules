@@ -99,8 +99,8 @@ if displayName == "Playbook Example with Fulfillment" {
 		if !ok { return fmt.Errorf("element at 'messages[1]' is not a map") }
 
 		message["toolCall"] = d.Get("handlers.2.event_handler.0.fulfillment.0.messages.1.tool_call.0").(map[string]interface{})
-		delete(message["toolCall"], "input_parameters")
-		message["toolCall"]["inputParameters"] = "{\"query\":\"example-value\"}"
+		delete(message["toolCall"].(map[string]interface{}), "input_parameters")
+		message["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
 
 		return nil
 	}
@@ -132,8 +132,8 @@ if displayName == "Playbook Example with Fulfillment" {
 		if !ok { return fmt.Errorf("element at 'messages[1]' is not a map") }
 
 		message["toolCall"] = d.Get("handlers.6.lifecycle_handler.0.fulfillment.0.messages.1.tool_call.0").(map[string]interface{})
-		delete(message["toolCall"], "input_parameters")
-		message["toolCall"]["inputParameters"] = "{\"query\":\"example-value\"}"
+		delete(message["toolCall"].(map[string]interface{}), "input_parameters")
+		message["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
 
 		return nil
 	}
