@@ -108,7 +108,7 @@ if displayName == "Playbook Example with Fulfillment" {
 		return nil, err
 	}
 
-	//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.messages.1'
+	//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.messages.1.tool_call'
 	setHandlers6LifecycleHandlerFulfillmentMessages1ToolCall := func(data map[string]interface{}) error {
 		// --- Traverse to the parent map ---
 		handlers, ok := data["handlers"].([]interface{})
