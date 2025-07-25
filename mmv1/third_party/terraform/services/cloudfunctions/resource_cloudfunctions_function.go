@@ -515,7 +515,6 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"runtime_version": {
 							Type:        schema.TypeString,
-							Optional:    true,
 							Computed:    true,
 							Description: `The runtime version which was used during latest function deployment.`,
 						},

@@ -200,30 +200,3 @@ properties:
         type: String
         description: |
           The hostname of the service that should be observed.
-  - name: 'automaticUpdatePolicy'
-    type: NestedObject
-    description: |
-      Security patches are applied automatically to the runtime without requiring
-      the function to be redeployed.
-    default_from_api: true
-    send_empty_value: true
-    allow_empty_object: true
-    exactly_one_of:
-      - 'automatic_update_policy'
-      - 'on_deploy_update_policy'
-    properties: []
-  - name: 'onDeployUpdatePolicy'
-    type: NestedObject
-    description: |
-      Security patches are only applied when a function is redeployed.
-    send_empty_value: true
-    allow_empty_object: true
-    exactly_one_of:
-      - 'automatic_update_policy'
-      - 'on_deploy_update_policy'
-    properties:
-      - name: 'runtimeVersion'
-        type: String
-        description: |
-          The runtime version which was used during latest function deployment.
-        output: true
