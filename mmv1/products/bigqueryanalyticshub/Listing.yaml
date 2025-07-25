@@ -299,6 +299,7 @@ properties:
     enum_values:
       - 'DISCOVERY_TYPE_PRIVATE'
       - 'DISCOVERY_TYPE_PUBLIC'
+    default_value: 'DISCOVERY_TYPE_PRIVATE'
     description: Specifies the type of discovery on the discovery page. Note that this does not control the visibility of the exchange/listing which is defined by IAM permission.
   - name: 'allowOnlyMetadataSharing'
     type: Boolean

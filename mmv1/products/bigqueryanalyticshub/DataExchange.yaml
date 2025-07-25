@@ -158,6 +158,7 @@ properties:
     enum_values:
       - 'DISCOVERY_TYPE_PRIVATE'
       - 'DISCOVERY_TYPE_PUBLIC'
+    default_value: 'DISCOVERY_TYPE_PRIVATE'
     description: Type of discovery on the discovery page for all the listings under this exchange. Updating this field also updates (overwrites) the discoveryType field for all the listings under this exchange.
   - name: 'logLinkedDatasetQueryUserEmail'
     type: Boolean
