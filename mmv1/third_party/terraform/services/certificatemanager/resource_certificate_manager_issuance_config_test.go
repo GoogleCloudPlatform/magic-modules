@@ -11,11 +11,11 @@ import (
 func TestAccCertificateManagerIssuanceConfig_tags(t *testing.T) {
 	t.Parallel()
 
-	tagKey := acctest.BootstrapSharedTestTagKey(t, "certificate_manager_issuance_config-tagkey")
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "certificate_manager_issuance_config-tagkey", map[string]interface{}{})
 	context := map[string]interface{}{
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestTagValue(t, "certificate_manager_issuance_config-tagvalue", tagKey),
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "certificate_manager_issuance_config-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
