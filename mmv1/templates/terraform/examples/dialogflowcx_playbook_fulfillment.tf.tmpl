@@ -99,6 +99,13 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
             text = ["One more time?"]
           }
         }
+        messages {
+          tool_call {
+            action           = google_dialogflow_cx_tool.my_tool.display_name
+            input_parameters = "{\"query\": \"example-value\"}"
+            tool             = google_dialogflow_cx_tool.my_tool.id
+          }
+        }
         advanced_settings {
           audio_export_gcs_destination {
             uri = "${google_storage_bucket.bucket.url}/prefix-"
@@ -281,6 +288,13 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
         messages {
           text {
             text = ["One more time?"]
+          }
+        }
+        messages {
+          tool_call {
+            action           = google_dialogflow_cx_tool.my_tool.display_name
+            input_parameters = "{\"query\": \"example-value\"}"
+            tool             = google_dialogflow_cx_tool.my_tool.id
           }
         }
         advanced_settings {
