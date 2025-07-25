@@ -143,7 +143,7 @@ examples:
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
-      region_backend_service_name: 'region-service'  
+      region_backend_service_name: 'region-service'
 parameters:
   - name: 'region'
     type: ResourceRef
