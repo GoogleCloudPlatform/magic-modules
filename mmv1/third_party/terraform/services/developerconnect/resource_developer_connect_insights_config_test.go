@@ -191,9 +191,9 @@ func testAccDeveloperConnectInsightsConfig_basic(context map[string]interface{})
 		annotations = {}
     	labels = {}
     	app_hub_application = format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
-           google_project.project.number,
-           google_apphub_application.my_apphub_application.location,
-           google_apphub_application.my_apphub_application.application_id)
+			google_project.project.number,
+        	google_apphub_application.my_apphub_application.location,
+        	google_apphub_application.my_apphub_application.application_id)
 		
 		depends_on = [time_sleep.wait_for_propagation]
     }
@@ -321,10 +321,19 @@ func testAccDeveloperConnectInsightsConfig_update(context map[string]interface{}
 		annotations = {}
     	labels = {}
     	app_hub_application = format("//apphub.googleapis.com/projects/%s/locations/%s/applications/%s",
-           google_project.project.number,
-           google_apphub_application.my_apphub_application.location,
-           google_apphub_application.my_apphub_application.application_id)
-		
+        	google_project.project.number,
+        	google_apphub_application.my_apphub_application.location,
+        	google_apphub_application.my_apphub_application.application_id)
+		artifact_configs {
+			google_artifact_analysis {
+				project_id = google_project.project.project_id
+			}
+			google_artifact_registry {
+				artifact_registry_package = "my-package"
+				project_id                = google_project.project.project_id
+			}
+			uri = "us-docker.pkg.dev/my-project/my-repo/my-image"
+		}
 		depends_on = [time_sleep.wait_for_propagation]
     }
   `, context)
