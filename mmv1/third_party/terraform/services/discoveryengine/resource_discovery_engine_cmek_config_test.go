@@ -11,7 +11,7 @@ func TestAccDiscoveryEngineCmekConfig_discoveryengineCmekconfigDefaultExample_up
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"kms_key_name":                acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-3").CryptoKey.Name,
+		"kms_key_name":                acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-4").CryptoKey.Name,
 		"single_region_kms_key_name1": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tftest-shared-key-us-east1").CryptoKey.Name,
 		"single_region_kms_key_name2": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tftest-shared-key-us-central1").CryptoKey.Name,
 		"single_region_kms_key_name3": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-west1", "tftest-shared-key-us-west1").CryptoKey.Name,
@@ -50,6 +50,7 @@ resource "google_discovery_engine_cmek_config" "default" {
   location            = "us"
   cmek_config_id      = "tf-test-cmek-config-id%{random_suffix}"
   kms_key             = "%{kms_key_name}"
+  set_default         = false
 }
 `, context)
 }
@@ -60,6 +61,7 @@ resource "google_discovery_engine_cmek_config" "default" {
   location            = "us"
   cmek_config_id      = "tf-test-cmek-config-id%{random_suffix}"
   kms_key             = "%{kms_key_name}"
+  set_default         = false
   single_region_keys { 
     kms_key = "%{single_region_kms_key_name1}"
   }

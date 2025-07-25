@@ -2,4 +2,5 @@ resource "google_discovery_engine_cmek_config" "default" {
   location            = "us"
   cmek_config_id      = "{{index $.Vars "cmek_config_id"}}"
   kms_key             = "{{index $.Vars "kms_key_name"}}"
+  set_default         = false
 }
