@@ -55,7 +55,7 @@ func TestAccDeveloperConnectInsightsConfig_update(t *testing.T) {
 				Config: testAccDeveloperConnectInsightsConfig_update(context),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
-						plancheck.ExpectResourceAction("google_developer_connect_insights_config.insights_config", plancheck.ResourceActionUpdate),
+						plancheck.ExpectResourceAction("google_developer_connect_insights_config.insights_config", plancheck.ResourceActionDestroyBeforeCreate),
 					},
 				},
 			},
