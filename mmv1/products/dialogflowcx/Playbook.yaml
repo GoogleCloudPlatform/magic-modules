@@ -49,8 +49,10 @@ examples:
     ignore_read_extra:
       - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
       - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
+      - 'handlers.2.event_handler.0.fulfillment.0.messages.1.tool_call'
       - 'handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
       - 'handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
+      - 'handlers.6.lifecycle_handler.0.fulfillment.0.messages.1.tool_call'
 
 parameters:
   - name: 'parent'
