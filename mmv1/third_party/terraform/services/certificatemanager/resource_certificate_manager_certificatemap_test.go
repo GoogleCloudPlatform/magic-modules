@@ -23,6 +23,10 @@ func TestAccCertificateManagerCertificateMap_tags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCertificateManagerCertificateMapTags(context),
+				Check: resource.TestCheckFunc(
+					resource.TestCheckResourceAttrSet(
+						"google_certificate_manager_certificate_map.certificatemap", "tags.%"),
+				),
 			},
 			{
 				ResourceName:            "google_certificate_manager_certificate_map.certificatemap",
