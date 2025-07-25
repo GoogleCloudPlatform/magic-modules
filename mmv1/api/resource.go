@@ -17,6 +17,7 @@ import (
 	"fmt"
 	"log"
 	"maps"
+	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -1989,6 +1990,13 @@ func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {
 	return true
 }
 
+func (r Resource) ShouldGenerateSingularDataSource() bool {
+	if r.Name == "Cluster" {
+		fmt.Fprintf(os.Stdout, "Name starts with R: %s\n", r.Name)
+		return true
+	}
+	return false
+}
 func (r Resource) ShouldGenerateSweepers() bool {
 	if !r.ExcludeSweeper && !utils.IsEmpty(r.Sweeper) {
 		return true
