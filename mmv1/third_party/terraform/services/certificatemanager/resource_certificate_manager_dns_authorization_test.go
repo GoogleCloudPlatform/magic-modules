@@ -86,6 +86,10 @@ func TestAccCertificateManagerDnsAuthorization_tags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCertificateManagerDnsAuthorizationTags(context),
+				Check: resource.TestCheckFunc(
+					resource.TestCheckResourceAttrSet(
+						"google_certificate_manager_dns_authorization.default", "tags.%"),
+				),
 			},
 			{
 				ResourceName:            "google_certificate_manager_dns_authorization.default",
