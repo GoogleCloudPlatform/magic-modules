@@ -68,6 +68,7 @@ examples:
       database_name: 'my-database'
     ignore_read_extra:
       - 'deletion_protection'
+      - 'default_time_zone'
       # Randomness due to spanner instance
     skip_vcr: true
 virtual_fields:
@@ -81,6 +82,11 @@ virtual_fields:
       When the field is set to false, deleting the database is allowed.
     type: Boolean
     default_value: true
+  - name: 'default_time_zone'
+    description: |
+      The default time zone for the database. The default time zone must be a valid name
+      from the tz database. Default value is "America/Los_angeles".
+    type: String
 parameters:
   - name: 'instance'
     type: ResourceRef

@@ -24,6 +24,8 @@ provider changes to the `google` and `google-beta` Terraform providers.
   + [Adding custom resource code]({{< ref "/develop/custom-code" >}}).
   + [Promoting a resource to GA]({{< ref "/develop/promote-to-ga" >}}).
 
+By default, running a full `make provider` command cleans the output directory (`OUTPUT_PATH`) before generating code to prevent sync issues. This will override and delete any changes to that directory. See the [`make` commands reference]({{< ref "/reference/make-commands" >}}) for details on advanced usage.
+
 ## Generate a provider change
 
 1. Clone the `google` and `google-beta` provider repositories with the following commands:
@@ -33,32 +35,15 @@ provider changes to the `google` and `google-beta` Terraform providers.
    git clone https://github.com/hashicorp/terraform-provider-google-beta.git $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
    ```
 1. Generate changes for the `google` provider:
-   ```bash
-   make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=[PRODUCT_NAME]
-   ```
-    Where `[PRODUCT_NAME]` is one of the folder names in
-    https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products.
-  
-    For example, if your product is `bigqueryanalyticshub`, the command would be
-    the following:
-
-     ```bash
-     make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google" PRODUCT=bigqueryanalyticshub
-     ```
+    ```bash
+    make provider VERSION=ga OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google"
+    ```
 
 1. Generate changes for the `google-beta` provider:
-   ```bash
-   make provider VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta" PRODUCT=[PRODUCT_NAME]
-   ```
+    ```bash
+    make provider VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta"
+    ```
 
-    Where `[PRODUCT_NAME]` is one of the folder names in https://github.com/GoogleCloudPlatform/magic-modules/tree/main/mmv1/products.
-   
-    For example, if your product name is `bigqueryanalyticshub`, the command would be the following:
-
-     ```bash
-     make provider VERSION=beta OUTPUT_PATH="$GOPATH/src/github.com/hashicorp/terraform-provider-google-beta" PRODUCT=bigqueryanalyticshub
-     ```
- 
 1. Confirm that the expected changes were generated:
    ```bash
    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
@@ -69,11 +54,8 @@ provider changes to the `google` and `google-beta` Terraform providers.
 
 
    {{< hint info >}}
-   **Note**: There may be additional changes present due to specifying a
-   `PRODUCT=` value or due to the `magic-modules` repository being out of sync
-   with the provider repositories.
+   **Note**: You might see additional changes in your `git diff` output beyond your own. This can happen if your `magic-modules` repository is out of sync with the provider repositories, causing the generator to also apply any pending updates from `magic-modules`.
    {{< /hint >}}
-
 
 ## Troubleshoot
 

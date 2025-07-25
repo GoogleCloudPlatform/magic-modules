@@ -226,7 +226,6 @@ properties:
         type: Array
         description: The list of router appliance instances
         required: true
-        immutable: true
         item_type:
           description: The list of router appliance instances
           type: NestedObject
@@ -234,13 +233,11 @@ properties:
             - name: 'virtualMachine'
               type: String
               description: The URI of the virtual machine resource
-              immutable: true
               required: true
               diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
             - name: 'ipAddress'
               type: String
               description: The IP address on the VM to use for peering.
-              immutable: true
               required: true
       - name: 'siteToSiteDataTransfer'
         type: Boolean
@@ -329,3 +326,19 @@ properties:
       - 'CREATING'
       - 'ACTIVE'
       - 'DELETING'
+  - name: 'reasons'
+    type: Array
+    output: true
+    description: The reasons for the current state in the lifecycle
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'code'
+          type: String
+          description: The code associated with this reason.
+        - name: 'message'
+          type: String
+          description: Human-readable details about this reason.
+        - name: 'userDetails'
+          type: String
+          description: Additional information provided by the user in the RejectSpoke call.

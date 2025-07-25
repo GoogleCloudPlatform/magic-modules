@@ -13,8 +13,8 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
 
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
 
 	"go.uber.org/zap"
 )
@@ -164,15 +164,6 @@ func (m *manager) fetchAncestors(config *transport_tpg.Config, tfData tpgresourc
 			return nil, fmt.Errorf("organization id not found in terraform data")
 		}
 		key = orgKey
-	case "iam.googleapis.com/Role":
-		// google_organization_iam_custom_role or google_project_iam_custom_role
-		if orgOK {
-			key = orgKey
-		} else if projectKey != "" {
-			key = projectKey
-		} else {
-			return []string{unknownOrg}, nil
-		}
 	case "cloudresourcemanager.googleapis.com/Project", "cloudbilling.googleapis.com/ProjectBillingInfo":
 		// for google_project and google_project_iam resources
 		var ancestors []string
@@ -207,10 +198,16 @@ func (m *manager) fetchAncestors(config *transport_tpg.Config, tfData tpgresourc
 		key = projectKey
 
 	default:
-		if projectKey == "" {
+		switch {
+		case orgOK:
+			key = orgKey
+		case folderOK:
+			key = folderKey
+		case projectKey != "":
+			key = projectKey
+		default:
 			return []string{unknownOrg}, nil
 		}
-		key = projectKey
 	}
 	return m.getAncestorsWithCache(key)
 }
@@ -387,7 +384,9 @@ func (m *manager) SetAncestors(d tpgresource.TerraformResourceData, config *tran
 		return fmt.Errorf("getting resource ancestry or parent failed: %w", err)
 	}
 
-	cai.Resource.Parent = parent
+	if cai.Resource != nil {
+		cai.Resource.Parent = parent
+	}
 	cai.Ancestors = ancestors
 	return nil
 }

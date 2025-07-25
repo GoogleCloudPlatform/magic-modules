@@ -143,6 +143,14 @@ var (
                 }
                 return false
 	})
+
+	suppressDiffForConfidentialNodes = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+		k = strings.Replace(k, "confidential_instance_type", "enabled", 1)
+		if v, _ := d.Get(k).(bool); v {
+			return oldValue == "SEV" && newValue == ""
+		}
+		return false
+	})
 )
 
 // Defines default nodel pool settings for the entire cluster. These settings are
@@ -1410,6 +1418,14 @@ func ResourceContainerCluster() *schema.Resource {
 							ForceNew:    true,
 							Description: `Whether Confidential Nodes feature is enabled for all nodes in this cluster.`,
 						},
+						"confidential_instance_type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							DiffSuppressFunc: suppressDiffForConfidentialNodes,
+							Description: `Defines the type of technology used by the confidential node.`,
+							ValidateFunc: validation.StringInSlice([]string{"SEV", "SEV_SNP", "TDX"}, false),
+						},
 					},
 				},
 			},
@@ -1597,7 +1613,7 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-
+{{- end }}
 			"pod_autoscaling": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1620,7 +1636,6 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
-{{- end }}
 			"secret_manager_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -1634,6 +1649,30 @@ func ResourceContainerCluster() *schema.Resource {
 							Required:    true,
 							Description: `Enable the Secret manager csi component.`,
 						},
+						{{- if ne $.TargetVersionName "ga" }}
+						"rotation_config" : {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: `Configuration for Secret Manager auto rotation.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Enable the Secret manager auto rotation.`,
+									},
+									"rotation_interval": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										Description: `The interval between two consecutive rotations. Default rotation interval is 2 minutes`,
+									},
+								},
+							},
+						},
+						{{- end }}
 					},
 				},
 			},
@@ -1732,7 +1771,6 @@ func ResourceContainerCluster() *schema.Resource {
 						"stack_type": {
 							Type:             schema.TypeString,
 							Optional:    	  true,
-							ForceNew:         true,
 							Default:          "IPV4",
 							ValidateFunc:     validation.StringInSlice([]string{"IPV4", "IPV4_IPV6"}, false),
 							Description: 	  `The IP Stack type of the cluster. Choose between IPV4 and IPV4_IPV6. Default type is IPV4 Only if not set`,
@@ -2093,6 +2131,24 @@ func ResourceContainerCluster() *schema.Resource {
 				},
 			},
 
+			"gke_auto_upgrade_config": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				Description: `Configuration options for the auto-upgrade patch type feature, which provide more control over the speed of automatic upgrades of your GKE clusters.`,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"patch_mode": {
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      `The selected auto-upgrade patch type. Accepted values are:
+* ACCELERATED: Upgrades to the latest available patch version in a given minor and release channel.`,
+						},
+					},
+				},
+			},
+
 			"tpu_ipv4_cidr_block": {
 				Computed:    true,
 				Type:        schema.TypeString,
@@ -2173,7 +2229,6 @@ func ResourceContainerCluster() *schema.Resource {
 			"enable_multi_networking": {
 			   Type: schema.TypeBool,
 			   Optional: true,
-			   ForceNew: true,
 			   Description: `Whether multi-networking is enabled for this cluster.`,
 			   Default: false,
 			},
@@ -2431,6 +2486,47 @@ func ResourceContainerCluster() *schema.Resource {
 					},
 				},
 			},
+			"in_transit_encryption_config": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `Defines the config of in-transit encryption`,
+				ValidateFunc: validation.StringInSlice([]string{"IN_TRANSIT_ENCRYPTION_CONFIG_UNSPECIFIED", "IN_TRANSIT_ENCRYPTION_DISABLED", "IN_TRANSIT_ENCRYPTION_INTER_NODE_TRANSPARENT"}, false),
+			},
+			"network_performance_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: `Network bandwidth tier configuration.`,
+				Elem:        &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"total_egress_bandwidth_tier": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `Specifies the total network bandwidth tier for NodePools in the cluster.`,
+						},
+					},
+				},
+			},
+			"anonymous_authentication_config": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Computed:    true,
+				Description: `AnonymousAuthenticationConfig allows users to restrict or enable anonymous access to the cluster.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"mode": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"ENABLED", "LIMITED"}, false),
+							Description:  `Setting this to LIMITED will restrict authentication of anonymous users to health check endpoints only.
+ Accepted values are:
+* ENABLED: Authentication of anonymous users is enabled for all endpoints.
+* LIMITED: Anonymous access is only allowed for health check endpoints.`,
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -2568,8 +2664,8 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 		IpAllocationPolicy:      ipAllocationBlock,
 {{- if ne $.TargetVersionName "ga" }}
 		PodSecurityPolicyConfig: expandPodSecurityPolicyConfig(d.Get("pod_security_policy_config")),
-		PodAutoscaling: expandPodAutoscaling(d.Get("pod_autoscaling")),
 {{- end }}
+		PodAutoscaling: expandPodAutoscaling(d.Get("pod_autoscaling")),
 		SecretManagerConfig: 	 expandSecretManagerConfig(d.Get("secret_manager_config")),
 		Autoscaling:             expandClusterAutoscaling(d.Get("cluster_autoscaling"), d),
 		BinaryAuthorization:     expandBinaryAuthorization(d.Get("binary_authorization")),
@@ -2579,6 +2675,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			ForceSendFields: []string{"Enabled"},
 		},
 		ReleaseChannel:          expandReleaseChannel(d.Get("release_channel")),
+		GkeAutoUpgradeConfig: expandGkeAutoUpgradeConfig(d.Get("gke_auto_upgrade_config")),
 {{- if ne $.TargetVersionName "ga" }}
 		ClusterTelemetry: expandClusterTelemetry(d.Get("cluster_telemetry")),
 {{- end }}
@@ -2589,6 +2686,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			DatapathProvider:                     d.Get("datapath_provider").(string),
 			EnableCiliumClusterwideNetworkPolicy: d.Get("enable_cilium_clusterwide_network_policy").(bool),
 			PrivateIpv6GoogleAccess:              d.Get("private_ipv6_google_access").(string),
+			InTransitEncryptionConfig:            d.Get("in_transit_encryption_config").(string),
 			EnableL4ilbSubsetting:                d.Get("enable_l4_ilb_subsetting").(bool),
 			DisableL4LbFirewallReconciliation:    d.Get("disable_l4_lb_firewall_reconciliation").(bool),
 			DnsConfig:                            expandDnsConfig(d.Get("dns_config")),
@@ -2596,6 +2694,7 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 			EnableMultiNetworking:                d.Get("enable_multi_networking").(bool),
 			DefaultEnablePrivateNodes:            expandDefaultEnablePrivateNodes(d),
 			EnableFqdnNetworkPolicy:              d.Get("enable_fqdn_network_policy").(bool),
+			NetworkPerformanceConfig:          	  expandNetworkPerformanceConfig(d.Get("network_performance_config")),
 	    },
 		MasterAuth:     expandMasterAuth(d.Get("master_auth")),
 		NotificationConfig: expandNotificationConfig(d.Get("notification_config")),
@@ -2756,6 +2855,10 @@ func resourceContainerClusterCreate(d *schema.ResourceData, meta interface{}) er
 	if v, ok := d.GetOk("enterprise_config"); ok {
 		cluster.EnterpriseConfig = expandEnterpriseConfig(v)
 	}
+
+    if v, ok := d.GetOk("anonymous_authentication_config"); ok {
+        cluster.AnonymousAuthenticationConfig = expandAnonymousAuthenticationConfig(v)
+    }
 
   needUpdateAfterCreate := false
 
@@ -3137,6 +3240,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("release_channel", flattenReleaseChannel(cluster.ReleaseChannel)); err != nil {
 		return err
 	}
+	if err := d.Set("gke_auto_upgrade_config", flattenGkeAutoUpgradeConfig(cluster.GkeAutoUpgradeConfig)); err != nil {
+		return err
+	}
 	if err := d.Set("notification_config", flattenNotificationConfig(cluster.NotificationConfig)); err != nil {
 		return err
 	}
@@ -3178,6 +3284,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	}
 	if err := d.Set("private_ipv6_google_access", cluster.NetworkConfig.PrivateIpv6GoogleAccess); err != nil {
 		return fmt.Errorf("Error setting private_ipv6_google_access: %s", err)
+	}
+	if err := d.Set("in_transit_encryption_config", cluster.NetworkConfig.InTransitEncryptionConfig); err != nil {
+		return fmt.Errorf("Error setting in_transit_encryption_config: %s", err)
 	}
 	if err := d.Set("authenticator_groups_config", flattenAuthenticatorGroupsConfig(cluster.AuthenticatorGroupsConfig)); err != nil {
 		return err
@@ -3252,11 +3361,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 	if err := d.Set("cluster_telemetry", flattenClusterTelemetry(cluster.ClusterTelemetry)); err != nil {
 		return err
 	}
-
+{{- end }}
 	if err := d.Set("pod_autoscaling", flattenPodAutoscaling(cluster.PodAutoscaling)); err != nil {
 		return err
 	}
-{{- end }}
 
 	if err := d.Set("secret_manager_config", flattenSecretManagerConfig(cluster.SecretManagerConfig)); err != nil {
 		return err
@@ -3282,6 +3390,9 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 		return err
 	}
 	if err := d.Set("gateway_api_config", flattenGatewayApiConfig(cluster.NetworkConfig.GatewayApiConfig)); err != nil {
+		return err
+	}
+	if err := d.Set("network_performance_config", flattenNetworkPerformanceConfig(cluster.NetworkConfig.NetworkPerformanceConfig)); err != nil {
 		return err
 	}
 	if err := d.Set("fleet", flattenFleet(cluster.Fleet)); err != nil {
@@ -3326,6 +3437,10 @@ func resourceContainerClusterRead(d *schema.ResourceData, meta interface{}) erro
 {{- end }}
 
 	if err := d.Set("enterprise_config", flattenEnterpriseConfig(cluster.EnterpriseConfig)); err != nil {
+		return err
+	}
+
+	if err := d.Set("anonymous_authentication_config", flattenAnonymousAuthenticationConfig(cluster.AnonymousAuthenticationConfig)); err != nil {
 		return err
 	}
 
@@ -3411,6 +3526,24 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		log.Printf("[INFO] GKE cluster %s's default enable private nodes has been updated to %v", d.Id(), enabled)
+	}
+
+	if d.HasChange("ip_allocation_policy.0.stack_type") {
+		if stackType, ok := d.GetOk("ip_allocation_policy.0.stack_type"); ok {
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredStackType: stackType.(string),
+				},
+			}
+
+			updateF := updateFunc(req, "updating GKE cluster stack type")
+			// Call update serially.
+			if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] GKE cluster %s stack type has been updated", d.Id())
+		}
 	}
 
 	if d.HasChange("addons_config") {
@@ -3547,6 +3680,38 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		log.Printf("[INFO] GKE cluster %s Release Channel has been updated to %#v", d.Id(), req.Update.DesiredReleaseChannel)
+	}
+
+	if d.HasChange("gke_auto_upgrade_config") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				GkeAutoUpgradeConfig: expandGkeAutoUpgradeConfig(d.Get("gke_auto_upgrade_config")),
+			},
+		}
+		updateF := func() error {
+			log.Println("[DEBUG] updating gke_auto_upgrade_config")
+			name := containerClusterFullName(project, location, clusterName)
+			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			if config.UserProjectOverride {
+				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
+			}
+			op, err := clusterUpdateCall.Do()
+			if err != nil {
+				return err
+			}
+
+			// Wait until it's updated
+			err = ContainerOperationWait(config, op, project, location, "updating GKE Auto Upgrade Config", userAgent, d.Timeout(schema.TimeoutUpdate))
+			log.Println("[DEBUG] done updating gke_auto_upgrade_config")
+			return err
+		}
+
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s GKE Auto Upgrade Config has been updated to %#v", d.Id(), req.Update.GkeAutoUpgradeConfig)
 	}
 
 	if d.HasChange("enable_intranode_visibility") {
@@ -3686,6 +3851,57 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		log.Printf("[INFO] GKE cluster %s Disable L4 LB Firewall Reconciliation has been updated to %v", d.Id(), enabled)
+	}
+
+	if d.HasChange("in_transit_encryption_config") {
+		inTransitConfig := d.Get("in_transit_encryption_config").(string)
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredInTransitEncryptionConfig: inTransitConfig,
+				ForceSendFields:                          []string{"DesiredInTransitEncryptionConfig"},
+			},
+		}
+		updateF := func() error {
+			log.Println("[DEBUG] updating in_transit_encryption_config")
+			name := containerClusterFullName(project, location, clusterName)
+			clusterUpdateCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.Update(name, req)
+			if config.UserProjectOverride {
+				clusterUpdateCall.Header().Add("X-Goog-User-Project", project)
+			}
+			op, err := clusterUpdateCall.Do()
+			if err != nil {
+				return err
+			}
+
+			// Wait until it's updated
+			err = ContainerOperationWait(config, op, project, location, "updating In-Transit Encryption Config", userAgent, d.Timeout(schema.TimeoutUpdate))
+			log.Println("[DEBUG] done updating in_transit_encryption_config")
+			return err
+		}
+
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s In-Transit Encryption Config has been updated to %v", d.Id(), inTransitConfig)
+	}
+	if d.HasChange("enable_multi_networking") {
+		enabled := d.Get("enable_multi_networking").(bool)
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredEnableMultiNetworking: enabled,
+				ForceSendFields:              []string{"DesiredEnableMultiNetworking"},
+
+			},
+		}
+		updateF := updateFunc(req, "updating multi networking")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s Multi Networking has been updated to %v", d.Id(), enabled)
 	}
 
 	if d.HasChange("enable_fqdn_network_policy") {
@@ -4252,6 +4468,7 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 		log.Printf("[INFO] GKE cluster %s pod security policy config has been updated", d.Id())
 	}
+{{- end }}
 
 	if d.HasChange("pod_autoscaling") {
 		c := d.Get("pod_autoscaling")
@@ -4279,8 +4496,6 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 		log.Printf("[INFO] GKE cluster %s horizontal pod autoscaling profile has been updated", d.Id())
 	}
-
-{{- end }}
 
 	if d.HasChange("secret_manager_config") {
 		c := d.Get("secret_manager_config")
@@ -4462,6 +4677,24 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 			return err
 		}
 		log.Printf("[INFO] GKE cluster %s resource usage export config has been updated", d.Id())
+	}
+
+	if d.HasChange("network_performance_config") {
+		if npc, ok := d.GetOk("network_performance_config"); ok {
+			req := &container.UpdateClusterRequest{
+				Update: &container.ClusterUpdate{
+					DesiredNetworkPerformanceConfig: expandNetworkPerformanceConfig(npc),
+				},
+			}
+
+			updateF := updateFunc(req, "updating GKE Network Performance Config")
+			// Call update serially.
+			if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+				return err
+			}
+
+			log.Printf("[INFO] GKE cluster %s Network Performance Config has been updated", d.Id())
+		}
 	}
 
 	if d.HasChange("gateway_api_config") {
@@ -4729,6 +4962,21 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		}
 
 		log.Printf("[INFO] GKE cluster %s Enterprise Config has been updated to %#v", d.Id(), req.Update.DesiredSecurityPostureConfig)
+	}
+
+	if d.HasChange("anonymous_authentication_config") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredAnonymousAuthenticationConfig: expandAnonymousAuthenticationConfig(
+					d.Get("anonymous_authentication_config"),
+				),
+			},
+		}
+		updateF := updateFunc(req, "updating anonymous authentication config")
+		// Call update serially.
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
 	}
 
 	d.Partial(false)
@@ -5496,6 +5744,15 @@ func flattenEnterpriseConfig(ec *container.EnterpriseConfig) []map[string]interf
 	return []map[string]interface{}{result}
 }
 
+func flattenAnonymousAuthenticationConfig(aac *container.AnonymousAuthenticationConfig) []map[string]interface{} {
+	if aac == nil {
+		return nil
+	}
+	result := make(map[string]interface{})
+	result["mode"] = aac.Mode
+	return []map[string]interface{}{result}
+}
+
 func flattenAdditionalPodRangesConfig(ipAllocationPolicy *container.IPAllocationPolicy) []map[string]interface{} {
 	if ipAllocationPolicy == nil {
 		return nil
@@ -5621,6 +5878,23 @@ func expandMasterAuthorizedNetworksConfig(d *schema.ResourceData) *container.Mas
 		result.ForceSendFields = append(result.ForceSendFields, "PrivateEndpointEnforcementEnabled")
 	}
 	return result
+}
+
+func expandAnonymousAuthenticationConfig(configured interface{}) *container.AnonymousAuthenticationConfig {
+	l, ok := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil || !ok {
+		return nil
+	}
+
+	anonAuthConfig := l[0].(map[string]interface{})
+	result := container.AnonymousAuthenticationConfig{}
+
+	if v, ok := anonAuthConfig["mode"]; ok {
+		if mode, ok := v.(string); ok && mode != "" {
+			result.Mode = mode
+		}
+	}
+	return &result
 }
 
 func expandManCidrBlocks(configured interface{}) []*container.CidrBlock {
@@ -5803,6 +6077,17 @@ func expandReleaseChannel(configured interface{}) *container.ReleaseChannel {
 	}
 }
 
+func expandGkeAutoUpgradeConfig(configured interface{}) *container.GkeAutoUpgradeConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+	config := l[0].(map[string]interface{})
+	return &container.GkeAutoUpgradeConfig{
+		PatchMode: config["patch_mode"].(string),
+	}
+}
+
 {{ if ne $.TargetVersionName `ga` -}}
 func expandClusterTelemetry(configured interface{}) *container.ClusterTelemetry {
 	l := configured.([]interface{})
@@ -5869,7 +6154,7 @@ func expandPodSecurityPolicyConfig(configured interface{}) *container.PodSecurit
 		ForceSendFields: []string{"Enabled"},
 	}
 }
-
+{{- end }}
 func expandPodAutoscaling(configured interface{}) *container.PodAutoscaling {
 	if configured == nil {
 		return nil
@@ -5891,7 +6176,6 @@ func expandPodAutoscaling(configured interface{}) *container.PodAutoscaling {
 
 	return podAutoscaling
 }
-{{- end }}
 
 func expandSecretManagerConfig(configured interface{}) *container.SecretManagerConfig {
 	l := configured.([]interface{})
@@ -5900,10 +6184,30 @@ func expandSecretManagerConfig(configured interface{}) *container.SecretManagerC
 	}
 
 	config := l[0].(map[string]interface{})
-	return &container.SecretManagerConfig{
+	sc := &container.SecretManagerConfig{
 		Enabled:         config["enabled"].(bool),
 		ForceSendFields: []string{"Enabled"},
 	}
+	{{- if ne $.TargetVersionName "ga" }}
+	if autoRotation, ok := config["rotation_config"]; ok {
+		if autoRotationList, ok := autoRotation.([]interface{}); ok {
+			if len(autoRotationList) > 0 {
+				autoRotationConfig := autoRotationList[0].(map[string]interface{})
+				if rotationInterval, ok := autoRotationConfig["rotation_interval"].(string); ok && rotationInterval != "" {
+					sc.RotationConfig = &container.RotationConfig{
+						Enabled:         autoRotationConfig["enabled"].(bool),
+						RotationInterval: rotationInterval,
+					}
+				} else {
+					sc.RotationConfig = &container.RotationConfig{
+						Enabled:         autoRotationConfig["enabled"].(bool),
+					}
+				}
+		    }
+		}
+	}
+		{{- end }}
+	return sc
 }
 
 func expandDefaultMaxPodsConstraint(v interface{}) *container.MaxPodsConstraint {
@@ -5971,6 +6275,18 @@ func expandDnsConfig(configured interface{}) *container.DNSConfig {
 		ClusterDns:       			config["cluster_dns"].(string),
 		ClusterDnsScope:  			config["cluster_dns_scope"].(string),
 		ClusterDnsDomain: 			config["cluster_dns_domain"].(string),
+	}
+}
+
+func expandNetworkPerformanceConfig(configured interface{}) *container.ClusterNetworkPerformanceConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	config := l[0].(map[string]interface{})
+	return &container.ClusterNetworkPerformanceConfig{
+		TotalEgressBandwidthTier: config["total_egress_bandwidth_tier"].(string),
 	}
 }
 
@@ -6543,6 +6859,21 @@ func flattenReleaseChannel(c *container.ReleaseChannel) []map[string]interface{}
 	return result
 }
 
+func flattenGkeAutoUpgradeConfig(c *container.GkeAutoUpgradeConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+
+	result := []map[string]interface{}{}
+	if c.PatchMode != "" {
+		result = append(result, map[string]interface{}{
+			"patch_mode": c.PatchMode,
+		})
+	}
+
+	return result
+}
+
 {{ if ne $.TargetVersionName `ga` -}}
 
 func flattenClusterTelemetry(c *container.ClusterTelemetry) []map[string]interface{} {
@@ -6863,7 +7194,7 @@ func flattenPodSecurityPolicyConfig(c *container.PodSecurityPolicyConfig) []map[
 		},
 	}
 }
-
+{{ end }}
 func flattenPodAutoscaling(c *container.PodAutoscaling) []map[string]interface{} {
 	config := make([]map[string]interface{}, 0, 1)
 
@@ -6877,8 +7208,6 @@ func flattenPodAutoscaling(c *container.PodAutoscaling) []map[string]interface{}
 	return config
 }
 
-{{ end }}
-
 func flattenSecretManagerConfig(c *container.SecretManagerConfig) []map[string]interface{} {
 	if c == nil {
 		return []map[string]interface{}{
@@ -6887,11 +7216,25 @@ func flattenSecretManagerConfig(c *container.SecretManagerConfig) []map[string]i
 			},
 		}
 	}
-	return []map[string]interface{}{
-		{
-			"enabled": c.Enabled,
-		},
+
+	result := make(map[string]interface{})
+
+	result["enabled"] = c.Enabled
+
+	{{- if ne $.TargetVersionName "ga" }}
+	rotationList := []map[string]interface{}{}
+	if c.RotationConfig != nil {
+		rotationConfigMap := map[string]interface{}{
+			"enabled": c.RotationConfig.Enabled,
+		}
+		if c.RotationConfig.RotationInterval != "" {
+			rotationConfigMap["rotation_interval"] = c.RotationConfig.RotationInterval
+		}
+		rotationList = append(rotationList, rotationConfigMap)
 	}
+	result["rotation_config"] = rotationList
+	{{- end }}
+	return []map[string]interface{}{result}
 }
 
 
@@ -6971,6 +7314,17 @@ func flattenDnsConfig(c *container.DNSConfig) []map[string]interface{} {
 			"cluster_dns":        				c.ClusterDns,
 			"cluster_dns_scope":  				c.ClusterDnsScope,
 			"cluster_dns_domain": 				c.ClusterDnsDomain,
+		},
+	}
+}
+
+func flattenNetworkPerformanceConfig(c *container.ClusterNetworkPerformanceConfig) []map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+	return []map[string]interface{}{
+		{
+			"total_egress_bandwidth_tier": c.TotalEgressBandwidthTier,
 		},
 	}
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters/cai"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/models"
 
-	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -33,6 +33,7 @@ func ConvertResource(rdList []*models.FakeResourceDataWithMeta, cfg *transport_t
 				if errors.Cause(err) == cai.ErrNoConversion {
 					continue
 				}
+				return assets, err
 			}
 
 			// TODO: combine assets and fetch full policy for IAM bindings/members

@@ -16,7 +16,7 @@ package models
 import (
 	"testing"
 
-	provider "github.com/hashicorp/terraform-provider-google-beta/google-beta/provider"
+	provider "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/provider"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,38 +24,34 @@ func TestFakeResourceDataWithMeta_kind(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
-		"name":                      "test-disk",
-		"type":                      "pd-ssd",
-		"zone":                      "us-central1-a",
-		"image":                     "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
-		"physical_block_size_bytes": 4096,
+		"name":       "test-project",
+		"org_id":     "529579013760",
+		"project_id": "tf-test-872899419570852129",
 	}
 	d := NewFakeResourceDataWithMeta(
-		"google_compute_disk",
-		p.ResourcesMap["google_compute_disk"].Schema,
+		"google_project",
+		p.ResourcesMap["google_project"].Schema,
 		values,
 		false,
-		"google_compute_disk.test-disk",
+		"google_project.test-project",
 	)
-	assert.Equal(t, "google_compute_disk", d.Kind())
+	assert.Equal(t, "google_project", d.Kind())
 }
 
 func TestFakeResourceDataWithMeta_id(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
-		"name":                      "test-disk",
-		"type":                      "pd-ssd",
-		"zone":                      "us-central1-a",
-		"image":                     "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
-		"physical_block_size_bytes": 4096,
+		"name":       "test-project",
+		"org_id":     "529579013760",
+		"project_id": "tf-test-872899419570852129",
 	}
 	d := NewFakeResourceDataWithMeta(
-		"google_compute_disk",
-		p.ResourcesMap["google_compute_disk"].Schema,
+		"google_project",
+		p.ResourcesMap["google_project"].Schema,
 		values,
 		false,
-		"google_compute_disk.test-disk",
+		"google_project.test-project",
 	)
 	assert.Equal(t, d.Id(), "")
 }
@@ -64,41 +60,37 @@ func TestFakeResourceDataWithMeta_get(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
-		"name":                      "test-disk",
-		"type":                      "pd-ssd",
-		"zone":                      "us-central1-a",
-		"image":                     "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
-		"physical_block_size_bytes": 4096,
+		"name":       "test-project",
+		"org_id":     "529579013760",
+		"project_id": "tf-test-872899419570852129",
 	}
 	d := NewFakeResourceDataWithMeta(
-		"google_compute_disk",
-		p.ResourcesMap["google_compute_disk"].Schema,
+		"google_project",
+		p.ResourcesMap["google_project"].Schema,
 		values,
 		false,
-		"google_compute_disk.test-disk",
+		"google_project.test-project",
 	)
-	assert.Equal(t, d.Get("name"), "test-disk")
+	assert.Equal(t, d.Get("name"), "test-project")
 }
 
 func TestFakeResourceDataWithMeta_getOkOk(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
-		"name":                      "test-disk",
-		"type":                      "pd-ssd",
-		"zone":                      "us-central1-a",
-		"image":                     "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
-		"physical_block_size_bytes": 4096,
+		"name":       "test-project",
+		"org_id":     "529579013760",
+		"project_id": "tf-test-872899419570852129",
 	}
 	d := NewFakeResourceDataWithMeta(
-		"google_compute_disk",
-		p.ResourcesMap["google_compute_disk"].Schema,
+		"google_project",
+		p.ResourcesMap["google_project"].Schema,
 		values,
 		false,
-		"google_compute_disk.test-disk",
+		"google_project.test-project",
 	)
 	res, ok := d.GetOk("name")
-	assert.Equal(t, "test-disk", res)
+	assert.Equal(t, "test-project", res)
 	assert.True(t, ok)
 }
 
@@ -106,18 +98,16 @@ func TestFakeResourceDataWithMeta_getOkNonexistentField(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
-		"name":                      "test-disk",
-		"type":                      "pd-ssd",
-		"zone":                      "us-central1-a",
-		"image":                     "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
-		"physical_block_size_bytes": 4096,
+		"name":       "test-project",
+		"org_id":     "529579013760",
+		"project_id": "tf-test-872899419570852129",
 	}
 	d := NewFakeResourceDataWithMeta(
-		"google_compute_disk",
-		p.ResourcesMap["google_compute_disk"].Schema,
+		"google_project",
+		p.ResourcesMap["google_project"].Schema,
 		values,
 		false,
-		"google_compute_disk.test-disk",
+		"google_project.test-project",
 	)
 	res, ok := d.GetOk("incorrect")
 	assert.Nil(t, res)
@@ -128,20 +118,19 @@ func TestFakeResourceDataWithMeta_getOkEmptyString(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
-		"name":                      "test-disk",
-		"type":                      "pd-ssd",
-		"zone":                      "us-central1-a",
-		"image":                     "",
-		"physical_block_size_bytes": 4096,
+		"name":            "test-project",
+		"org_id":          "529579013760",
+		"project_id":      "tf-test-872899419570852129",
+		"billing_account": "",
 	}
 	d := NewFakeResourceDataWithMeta(
-		"google_compute_disk",
-		p.ResourcesMap["google_compute_disk"].Schema,
+		"google_project",
+		p.ResourcesMap["google_project"].Schema,
 		values,
 		false,
-		"google_compute_disk.test-disk",
+		"google_project.test-project",
 	)
-	res, ok := d.GetOk("image")
+	res, ok := d.GetOk("billing_account")
 	assert.Equal(t, "", res)
 	assert.False(t, ok)
 }
@@ -150,28 +139,18 @@ func TestFakeResourceDataWithMeta_getOkUnsetString(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
-		"name":     "my-node-pool",
-		"location": "us-central1",
-		"cluster":  "projects/my-project-id/global/clusters/my-gke-cluster",
-		"config": map[string]interface{}{
-			"machineType": "n1-standard-1",
-			"metadata": map[string]string{
-				"disable-legacy-endpoints": "true",
-			},
-			"oauthScopes": []string{
-				"https://www.googleapis.com/auth/cloud-platform",
-			},
-			"preemptible": true,
-		},
+		"name":       "test-project",
+		"org_id":     "529579013760",
+		"project_id": "tf-test-872899419570852129",
 	}
 	d := NewFakeResourceDataWithMeta(
-		"google_container_cluster",
-		p.ResourcesMap["google_container_cluster"].Schema,
+		"google_project",
+		p.ResourcesMap["google_project"].Schema,
 		values,
 		false,
-		"google_container_cluster.my-node-pool",
+		"google_project.test-project",
 	)
-	res, ok := d.GetOk("subnetwork")
+	res, ok := d.GetOk("billing_account")
 	assert.Equal(t, "", res)
 	assert.False(t, ok)
 }
@@ -353,18 +332,16 @@ func TestFakeResourceDataWithMeta_isDelelted(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
-		"name":                      "test-disk",
-		"type":                      "pd-ssd",
-		"zone":                      "us-central1-a",
-		"image":                     "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
-		"physical_block_size_bytes": 4096,
+		"name":       "test-project",
+		"org_id":     "529579013760",
+		"project_id": "tf-test-872899419570852129",
 	}
 	d := NewFakeResourceDataWithMeta(
-		"google_compute_disk",
-		p.ResourcesMap["google_compute_disk"].Schema,
+		"google_project",
+		p.ResourcesMap["google_project"].Schema,
 		values,
 		true,
-		"google_compute_disk.test-disk",
+		"google_project.test-project",
 	)
 	assert.Equal(t, true, d.IsDeleted())
 }
@@ -373,18 +350,16 @@ func TestFakeResourceDataWithMeta_address(t *testing.T) {
 	p := provider.Provider()
 
 	values := map[string]interface{}{
-		"name":                      "test-disk",
-		"type":                      "pd-ssd",
-		"zone":                      "us-central1-a",
-		"image":                     "projects/debian-cloud/global/images/debian-8-jessie-v20170523",
-		"physical_block_size_bytes": 4096,
+		"name":       "test-project",
+		"org_id":     "529579013760",
+		"project_id": "tf-test-872899419570852129",
 	}
 	d := NewFakeResourceDataWithMeta(
-		"google_compute_disk",
-		p.ResourcesMap["google_compute_disk"].Schema,
+		"google_project",
+		p.ResourcesMap["google_project"].Schema,
 		values,
-		true,
-		"google_compute_disk.test-disk",
+		false,
+		"google_project.test-project",
 	)
-	assert.Equal(t, "google_compute_disk.test-disk", d.Address())
+	assert.Equal(t, "google_project.test-project", d.Address())
 }

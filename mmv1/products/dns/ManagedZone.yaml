@@ -116,6 +116,9 @@ examples:
     primary_resource_id: 'cloud-logging-enabled-zone'
     vars:
       zone_name: 'cloud-logging-enabled-zone'
+      dns_name: 'services.example.com.'
+    test_vars_overrides:
+      'dns_name': '"services.example.com-" + acctest.RandString(t, 10) + "."'
 virtual_fields:
   - name: 'force_destroy'
     description: 'Set this true to delete all records in the zone.'
@@ -314,7 +317,7 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
+            # TODO: Make 'networkUrl' a ResourceRef once cross-module references
             # are possible.
             - name: 'networkUrl'
               type: String
@@ -358,7 +361,6 @@ properties:
             - name: 'domainName'
               type: String
               description: 'Fully qualified domain name for the forwarding target.'
-              min_version: 'beta'
             - name: 'forwardingPath'
               type: Enum
               description: |
@@ -382,7 +384,7 @@ properties:
         description: 'The network with which to peer.'
         required: true
         properties:
-          # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
+          # TODO: Make 'networkUrl' a ResourceRef once cross-module references
           # are possible.
           - name: 'networkUrl'
             type: String
@@ -403,7 +405,8 @@ properties:
     min_version: 'beta'
     immutable: true
     custom_flatten: 'templates/terraform/custom_flatten/object_to_bool.go.tmpl'
-    custom_expand: 'templates/terraform/custom_expand/bool_to_object.go.tmpl'
+    # THIS TEMPLATE IS DEPRECATED, DO NOT USE FOR NEW FIELDS
+    custom_expand: 'templates/terraform/custom_expand/deprecated_bool_to_object.go.tmpl'
   - name: 'serviceDirectoryConfig'
     type: NestedObject
     description:
