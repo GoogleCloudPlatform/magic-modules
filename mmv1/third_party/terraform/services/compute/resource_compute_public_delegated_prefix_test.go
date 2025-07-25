@@ -79,35 +79,28 @@ resource "google_compute_public_delegated_prefix" "subprefix" {
 
 func testAccCheckParentHasSubPrefix(t *testing.T, project, region, parentName, subPrefixResourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		// Find the newly created sub-prefix resource in the Terraform state
 		rs, ok := s.RootModule().Resources[subPrefixResourceName]
 		if !ok {
 			return fmt.Errorf("Not found: %s", subPrefixResourceName)
 		}
 		newSubPrefixName := rs.Primary.Attributes["name"]
 
-		// Get the authenticated GCP client from the test helper
 		config := acctest.GoogleProviderConfig(t)
-		computeService, err := config.NewComputeClient(config.UserAgent)
-		if err != nil {
-			return err
-		}
 
-		// Make a direct API call to GCP to get the parent's details
+		// This is the corrected line
+		computeService := config.NewComputeClient(config.UserAgent)
+
 		parent, err := computeService.PublicDelegatedPrefixes.Get(project, region, parentName).Do()
 		if err != nil {
 			return err
 		}
 
-		// Loop through the list of sub-prefixes returned by the API
 		for _, sub := range parent.PublicDelegatedSubPrefixs {
 			if sub.Name == newSubPrefixName {
-				// Success! We found the new sub-prefix in the parent's list.
 				return nil
 			}
 		}
 
-		// If the loop finishes without finding the sub-prefix, return an error.
 		return fmt.Errorf("sub-prefix %q not found in parent %q's sub-prefix list", newSubPrefixName, parentName)
 	}
 }
