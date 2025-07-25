@@ -80,6 +80,7 @@ parameters:
       if one is not specified.
     url_param_only: true
     default_value: true
+    immutable: true
 properties:
   - name: 'name'
     type: String
