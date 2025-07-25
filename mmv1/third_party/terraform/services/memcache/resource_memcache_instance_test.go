@@ -102,12 +102,12 @@ data "google_compute_network" "memcache_network" {
 func TestAccMemcacheInstance_tags(t *testing.T) {
 	t.Parallel()
 
-	tagKey := acctest.BootstrapSharedTestTagKey(t, "memcache_instance-tagkey")
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "memcache_instance-tagkey", map[string]interface{}{})
 
 	context := map[string]interface{}{
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestTagValue(t, "memcache_instance-tagvalue", tagKey),
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "memcache_instance-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -118,6 +118,10 @@ func TestAccMemcacheInstance_tags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMemcacheInstanceTags(context),
+				Check: resource.TestCheckFunc(
+					resource.TestCheckResourceAttrSet(
+						"google_memcache_instance.test", "tags.%"),
+				),
 			},
 			{
 				ResourceName:            "google_memcache_instance.test",
@@ -132,7 +136,6 @@ func TestAccMemcacheInstance_tags(t *testing.T) {
 func testAccMemcacheInstanceTags(context map[string]interface{}) string {
 
 	return acctest.Nprintf(`
-
 provider "google" {
   project                 = "kshitij-memcached-test"
   user_project_override   = true
