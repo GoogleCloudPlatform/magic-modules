@@ -317,7 +317,7 @@ properties:
         item_type:
           type: NestedObject
           properties:
-            # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
+            # TODO: Make 'networkUrl' a ResourceRef once cross-module references
             # are possible.
             - name: 'networkUrl'
               type: String
@@ -384,7 +384,7 @@ properties:
         description: 'The network with which to peer.'
         required: true
         properties:
-          # TODO(drebes): Make 'networkUrl' a ResourceRef once cross-module references
+          # TODO: Make 'networkUrl' a ResourceRef once cross-module references
           # are possible.
           - name: 'networkUrl'
             type: String

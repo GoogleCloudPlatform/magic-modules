@@ -10,13 +10,14 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-// TODO: https://github.com/GoogleCloudPlatform/magic-modules/issues/184 Handle fingerprint consistently
-obj["fingerprint"] = d.Get("fingerprint")
 
-// TODO: https://github.com/GoogleCloudPlatform/magic-modules/issues/183 Can we generalize this
-// Send a null fields if customFeatures is empty.
-if v, ok := obj["customFeatures"]; ok && len(v.([]interface{})) == 0 {
-	obj["customFeatures"] = nil
+func resourceDataStreamStreamCreateWithoutValidationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// If the old value was "false" and the new value is now unset (empty string),
+	// return true to suppress the diff.
+	if (old == "" && new == "false") || (old == "false" && new == "") {
+		return true
+	}
+
+	// Otherwise, do not suppress the diff.
+	return false
 }
-
-return obj, nil
