@@ -730,17 +730,10 @@ func (r Resource) GetIdentity() []*Type {
 	})
 }
 
-func buildFieldPath(parent *Type, fieldName string) string {
-	if parent != nil {
-		return parent.TerraformLineage() + ".0." + fieldName
-	}
-	return fieldName
-}
-
-func buildWriteOnlyField(name string, parent *Type, originalField *Type) *Type {
+func buildWriteOnlyField(name string, originalField *Type, originalFieldLineage string) *Type {
 	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(originalField.Description))
-	fieldPathOriginalField := buildFieldPath(parent, originalField.Name)
-	fieldPathCurrentField := buildFieldPath(parent, google.Underscore(name))
+	fieldPathOriginalField := originalFieldLineage
+	fieldPathCurrentField := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
 
 	apiName := originalField.ApiName
 	if apiName == "" {
@@ -772,9 +765,9 @@ func buildWriteOnlyField(name string, parent *Type, originalField *Type) *Type {
 	return NewProperty(name, originalField.ApiName, options)
 }
 
-func buildWriteOnlyVersionField(name string, parent *Type, writeOnlyField *Type) *Type {
+func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type, originalFieldLineage string) *Type {
 	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(writeOnlyField.Name))
-	requiredWith := buildFieldPath(parent, writeOnlyField.TerraformLineage())
+	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
 
 	options := []func(*Type){
 		propertyWithType("String"),
@@ -788,23 +781,28 @@ func buildWriteOnlyVersionField(name string, parent *Type, writeOnlyField *Type)
 	return NewProperty(name, name, options)
 }
 
-func (r *Resource) addWriteOnlyFields(props []*Type, parent *Type, propWithWoConfigured *Type) []*Type {
-	writeOnlyField := buildWriteOnlyField(fmt.Sprintf("%sWo", propWithWoConfigured.Name), parent, propWithWoConfigured)
-	writeOnlyVersionField := buildWriteOnlyVersionField(fmt.Sprintf("%sVersion", writeOnlyField.Name), parent, writeOnlyField)
+func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type, propWithWoConfiguredLineagePath string) []*Type {
+	writeOnlyField := buildWriteOnlyField(fmt.Sprintf("%sWo", propWithWoConfigured.Name), propWithWoConfigured, propWithWoConfiguredLineagePath)
+	writeOnlyVersionField := buildWriteOnlyVersionField(fmt.Sprintf("%sVersion", writeOnlyField.Name), propWithWoConfigured, writeOnlyField, propWithWoConfiguredLineagePath)
 	props = append(props, writeOnlyField, writeOnlyVersionField)
 	return props
 }
 
-func (r *Resource) AddExtraFields(props []*Type, parent *Type) []*Type {
+func (r *Resource) AddExtraFields(props []*Type, parent *Type, lineage string) []*Type {
 	for _, p := range props {
+		var currentPropLineage string
+		if lineage == "" {
+			currentPropLineage = google.Underscore(p.Name)
+		} else {
+			currentPropLineage = fmt.Sprintf("%s.0.%s", lineage, google.Underscore(p.Name))
+		}
+
 		if p.WriteOnly && !strings.HasSuffix(p.Name, "Wo") {
 			if len(p.RequiredWith) > 0 {
 				log.Fatalf("WriteOnly property '%s' in resource '%s' cannot have RequiredWith set. This combination is not supported.", p.Name, r.Name)
 			}
-			props = r.addWriteOnlyFields(props, parent, p)
-			// the generated field will have WriteOnly set to true, so we need to adjust the original
+			props = r.addWriteOnlyFields(props, p, currentPropLineage)
 			p.WriteOnly = false
-			// the generated field will have ExactlyOneOf referring the original field, so the original must be false
 			p.Required = false
 		}
 		if p.IsA("KeyValueLabels") {
@@ -812,16 +810,11 @@ func (r *Resource) AddExtraFields(props []*Type, parent *Type) []*Type {
 		} else if p.IsA("KeyValueAnnotations") {
 			props = r.addAnnotationsFields(props, parent, p)
 		} else if p.IsA("NestedObject") && len(p.AllProperties()) > 0 {
-			p.Properties = r.AddExtraFields(p.AllProperties(), p)
+			p.Properties = r.AddExtraFields(p.AllProperties(), p, currentPropLineage)
 		}
-	}
-
-	for _, p := range props {
-		p.SetDefault(r)
 	}
 	return props
 }
-
 func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []*Type {
 	if parent == nil || parent.FlattenObject {
 		if r.ExcludeAttributionLabel {
