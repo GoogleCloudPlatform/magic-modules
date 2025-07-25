@@ -143,17 +143,7 @@ examples:
     primary_resource_id: 'default'
     min_version: 'beta'
     vars:
-      region_backend_service_name: 'region-service'
-  - name: 'region_backend_lb_neg_backend'
-    primary_resource_id: 'default'
-    min_version: 'beta'
-    vars:
-      ilb-network-endpoint: "ilb-network-endpoint-group-zonal"
-      ilb-health-check-zonal: "ilb-health-check-zonal" 
-      ilb-backend-service-zonal: "ilb-backend-service-zonal"
-      ilb-url-map-zonal: "ilb-url-map-zonal"
-      ilb-target-http-proxy-zonal: "ilb-target-http-proxy-zonal"
-      ilb-global-forwarding-rule-zonal: "ilb-global-forwarding-rule-zonal"     
+      region_backend_service_name: 'region-service'  
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -250,6 +240,7 @@ properties:
           required: true
           diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
           custom_flatten: 'templates/terraform/custom_flatten/guard_self_link.go.tmpl'
+          custom_expand: 'templates/terraform/custom_expand/region_backend_service_valide_group_url.go.tmpl'
         - name: 'maxConnections'
           type: Integer
           description: |
