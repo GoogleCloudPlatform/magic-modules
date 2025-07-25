@@ -39,7 +39,8 @@ func TestAccDataSourceGoogleBackupDRBackupPlan_csql(t *testing.T) {
 			{
 				Config: testAccDataSourceGoogleBackupDRBackupPlan_csql(context),
 				Check: resource.ComposeTestCheckFunc(
-					acctest.CheckDataSourceStateMatchesResourceState("data.google_backup_dr_backup_plan_csql.fetch-bp", "google_backup_dr_backup_plan_csql.test"),
+					acctest.CheckDataSourceStateMatchesResourceState("data.
+          google_backup_dr_backup_plan.fetch-bp", "google_backup_dr_backup_plan_csql.test"),
 				),
 			},
 		},
@@ -131,15 +132,15 @@ resource "google_backup_dr_backup_plan_csql" "test" {
   }
   log_retention_days = 5
   backup_rules {
-	rule_id = "rule-1"
-	backup_retention_days = 5
-	standard_schedule {
-	  recurrence_type = "HOURLY"
-	   hourly_frequency = 6
-	    time_zone = "UTC"
-	     backup_window{
-		start_hour_of_day = 0
-		end_hour_of_day = 24
+    rule_id = "rule-1"
+    backup_retention_days = 5
+    standard_schedule {
+      recurrence_type = "HOURLY"
+      hourly_frequency = 6
+      time_zone = "UTC"
+      backup_window{
+        start_hour_of_day = 0
+        end_hour_of_day = 24
       }
     }
 	}
