@@ -99,12 +99,12 @@ resource "google_certificate_manager_trust_config" "default" {
 func TestAccCertificateManagerTrustConfig_tags(t *testing.T) {
 	t.Parallel()
 
-	tagKey := acctest.BootstrapSharedTestTagKey(t, "certificate-manager-trust-config-tagkey")
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "certificate-manager-trust-config-tagkey", map[string]interface{}{})
 
 	context := map[string]interface{}{
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestTagValue(t, "certificate-manager-trust-config-tagvalue", tagKey),
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "certificate-manager-trust-config-tagvalue", tagKey),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -115,6 +115,10 @@ func TestAccCertificateManagerTrustConfig_tags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCertificateManagerTrustConfigTags(context),
+				Check: resource.TestCheckFunc(
+					resource.TestCheckResourceAttrSet(
+						"google_certificate_manager_trust_config.default", "tags.%"),
+				),
 			},
 			{
 				ResourceName:            "google_certificate_manager_trust_config.default",
