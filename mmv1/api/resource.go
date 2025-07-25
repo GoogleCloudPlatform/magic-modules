@@ -773,7 +773,7 @@ func buildWriteOnlyVersionField(name string, parent *Type, writeOnlyField *Type,
 	requiredWith := buildFieldPath(parent, writeOnlyField.TerraformLineage())
 
 	options := []func(*Type){
-		propertyWithType("Integer"),
+		propertyWithType("String"),
 		propertyWithImmutable(immutable),
 		propertyWithDescription(description),
 		propertyWithDefault(0),
