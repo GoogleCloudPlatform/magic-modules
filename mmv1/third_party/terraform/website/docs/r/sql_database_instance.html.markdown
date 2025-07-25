@@ -461,7 +461,7 @@ The optional `settings.ip_configuration.psc_config` sublist supports:
 
 * `allowed_consumer_projects` - (Optional) List of consumer projects that are allow-listed for PSC connections to this instance. This instance can be connected to with PSC from any network in these projects. Each consumer project in this list may be represented by a project number (numeric) or by a project id (alphanumeric).
 
-* The optional `psc_config.psc_auto_connections` subblock - (Optional) A comma-separated list of networks or a comma-separated list of network-project pairs. Each project in this list is represented by a project number (numeric) or by a project ID (alphanumeric). This allows Private Service Connect connections to be created automatically for the specified networks.
+The optional `psc_config.psc_auto_connections` subblock - (Optional) A comma-separated list of networks or a comma-separated list of network-project pairs. Each project in this list is represented by a project number (numeric) or by a project ID (alphanumeric). This allows Private Service Connect connections to be created automatically for the specified networks.
 
 * `consumer_network` - "The consumer network of this consumer endpoint. This must be a resource path that includes both the host project and the network name. For example, `projects/project1/global/networks/network1`. The consumer host project of this network might be different from the consumer service project."
 
@@ -661,6 +661,12 @@ performing filtering in a Terraform config.
 * `instance_type` - The type of the instance. The supported values are `SQL_INSTANCE_TYPE_UNSPECIFIED`, `CLOUD_SQL_INSTANCE`, `ON_PREMISES_INSTANCE` and `READ_REPLICA_INSTANCE`.
 
 ~> **NOTE:** Users can upgrade a read replica instance to a stand-alone Cloud SQL instance with the help of `instance_type`. To promote, users have to set the `instance_type` property as `CLOUD_SQL_INSTANCE` and remove/unset `master_instance_name` and `replica_configuration` from instance configuration. This operation might cause your instance to restart.
+
+* `settings.ip_configuration.psc_config.psc_auto_connections.consumer_network_status` - The connection policy status of the consumer network.
+
+* `settings.ip_configuration.psc_config.psc_auto_connections.ip_address` - The IP address of the consumer endpoint.
+
+* `settings.ip_configuration.psc_config.psc_auto_connections.status` - The connection status of the consumer endpoint.
 
 * `settings.version` - Used to make sure changes to the `settings` block are
     atomic.
