@@ -2869,7 +2869,6 @@ func expandRestoreBackupContext(configured []interface{}) *sqladmin.RestoreBacku
 
 func sqlDatabaseInstanceRestoreFromBackup(d *schema.ResourceData, config *transport_tpg.Config, userAgent, project, instanceId string, r interface{}, backupdrBackup interface{}) error {
 	log.Printf("[DEBUG] Initiating SQL database instance backup restore")
-	restoreContext := r.([]interface{})
 
 	backupRequest := &sqladmin.InstancesRestoreBackupRequest{}
 
