@@ -85,14 +85,14 @@ func testAccCheckParentHasSubPrefix(t *testing.T, project, region, parentName, s
 		newSubPrefixName := rs.Primary.Attributes["name"]
 
 		config := acctest.GoogleProviderConfig(t)
-
-		// This is the corrected line
 		computeService := config.NewComputeClient(config.UserAgent)
 
 		parent, err := computeService.PublicDelegatedPrefixes.Get(project, region, parentName).Do()
 		if err != nil {
 			return err
 		}
+
+		t.Logf("Checking for sub-prefix %q inside parent %q. Found sub-prefixes: %v", newSubPrefixName, parentName, parent.PublicDelegatedSubPrefixs)
 
 		for _, sub := range parent.PublicDelegatedSubPrefixs {
 			if sub.Name == newSubPrefixName {
