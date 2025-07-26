@@ -315,7 +315,7 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 				"Run": {
 					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-m", "-q", "cp", "gs://ci-vcr-cassettes/beta/fixtures/*", "/mock/dir/magic-modules/.ci/magician/cassettes/beta"}, map[string]string(nil)},
 					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-m", "-q", "cp", "/mock/dir/magic-modules/.ci/magician/cassettes/beta/*", "gs://vcr-nightly/beta/2024-07-08/buildID/main_cassettes_backup/fixtures/"}, map[string]string(nil)},
-					{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "https://hashicorp:token@github.com/hashicorp/terraform-provider-google-beta", "gopath/src/github.com/hashicorp/terraform-provider-google-beta"}, map[string]string(nil)},
+					{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "https://hashicorp@github.com/hashicorp/terraform-provider-google-beta", "gopath/src/github.com/hashicorp/terraform-provider-google-beta"}, map[string]string(nil)},
 					{"gopath/src/github.com/hashicorp/terraform-provider-google-beta", "go", []string{"list", "./..."}, map[string]string(nil)},
 					{"gopath/src/github.com/hashicorp/terraform-provider-google-beta", "go", []string{"test", "", "-parallel", "32", "-v", "-run=TestAcc", "-timeout", "240m", "-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc", "-vet=off"}, map[string]string{
 						"ACCTEST_PARALLELISM":            "32",
@@ -348,7 +348,7 @@ func TestExecVCRCassetteUpdate(t *testing.T) {
 					// replay
 					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-m", "-q", "cp", "gs://ci-vcr-cassettes/beta/fixtures/*", "/mock/dir/magic-modules/.ci/magician/cassettes/beta"}, map[string]string(nil)},
 					{"/mock/dir/magic-modules/.ci/magician", "gsutil", []string{"-m", "-q", "cp", "/mock/dir/magic-modules/.ci/magician/cassettes/beta/*", "gs://vcr-nightly/beta/2024-07-08/buildID/main_cassettes_backup/fixtures/"}, map[string]string(nil)},
-					{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "https://hashicorp:token@github.com/hashicorp/terraform-provider-google-beta", "gopath/src/github.com/hashicorp/terraform-provider-google-beta"}, map[string]string(nil)},
+					{"/mock/dir/magic-modules/.ci/magician", "git", []string{"clone", "https://hashicorp@github.com/hashicorp/terraform-provider-google-beta", "gopath/src/github.com/hashicorp/terraform-provider-google-beta"}, map[string]string(nil)},
 					{"gopath/src/github.com/hashicorp/terraform-provider-google-beta", "go", []string{"list", "./..."}, map[string]string(nil)},
 					{"gopath/src/github.com/hashicorp/terraform-provider-google-beta", "go", []string{"test", "", "-parallel", "32", "-v", "-run=TestAcc", "-timeout", "240m", "-ldflags=-X=github.com/hashicorp/terraform-provider-google-beta/version.ProviderVersion=acc", "-vet=off"}, map[string]string{
 						"ACCTEST_PARALLELISM":            "32",
