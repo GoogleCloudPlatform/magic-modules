@@ -182,7 +182,7 @@ resource "google_bigquery_analytics_hub_listing" "listing" {
   display_name     = "tf_test_my_listing%{random_suffix}"
   description      = "example public listing%{random_suffix}"
   discovery_type   = "DISCOVERY_TYPE_PRIVATE"
-	allow_only_metadata_sharing= false
+  allow_only_metadata_sharing= false
 
   bigquery_dataset {
     dataset = google_bigquery_dataset.listing.id
