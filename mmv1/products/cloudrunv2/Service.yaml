@@ -1217,6 +1217,22 @@ properties:
         type: String
         description: |-
           Service account to be used for building the container. The format of this field is `projects/{projectId}/serviceAccounts/{serviceAccountEmail}`.
+  - name: 'multiRegionSettings'
+    type: NestedObject
+    description: |-
+      Settings for creating a Multi-Region Service. Make sure to use region = 'global' when using them. For more information, visit https://cloud.google.com/run/docs/multiple-regions#deploy
+    properties:
+      - name: 'regions'
+        type: Array
+        item_type:
+          type: String
+        description: |-
+          The list of regions to deploy the multi-region Service.
+      - name: 'multiRegionId'
+        type: String
+        description: |-
+          System-generated unique id for the multi-region Service.
+        output: true
   - name: 'reconciling'
     type: Boolean
     description: |
