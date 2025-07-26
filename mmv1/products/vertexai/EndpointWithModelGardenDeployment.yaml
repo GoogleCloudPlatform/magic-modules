@@ -75,16 +75,6 @@ properties:
       resource within its parent collection as described in https://google.aip.dev/122.
     url_param_only: true
     output: true
-  - name: deployedModelIds
-    type: Array
-    item_type:
-      type: String
-    description: |
-      Output only. The numeric ID of all models deployed in this endpoint.
-      Vertex AI assigns this unique numeric ID to each model at the moment it is deployed to an endpoint,
-      and it is required to make API calls to undeploy the model as described in
-      https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.endpoints/undeployModel
-    output: true
   - name: publisherModelName
     type: String
     description: |-
