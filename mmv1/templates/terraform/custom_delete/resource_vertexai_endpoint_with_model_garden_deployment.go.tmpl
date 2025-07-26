@@ -80,7 +80,7 @@ for i := 0; i < len(deployedModels); i++ {
     undeploy_body := map[string]interface{}{}
     undeploy_body["deployedModelId"] = deployedModelId
 
-    log.Printf("[DEBUG] Undeploying model %s from EndpointWithModelGardenDeployment %q", i, d.Id())
+    log.Printf("[DEBUG] Undeploying model %d from EndpointWithModelGardenDeployment %q", i, d.Id())
 
     undeploy_res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
     Config:    config,
