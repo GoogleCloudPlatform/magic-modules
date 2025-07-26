@@ -42,7 +42,7 @@ func TestAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPref
 				),
 			},
 			{
-				ResourceName:            "google_compute_public_delegated_prefix.prefixes",
+				ResourceName:            "google_compute_public_delegated_prefix.subprefix",
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"region"},
