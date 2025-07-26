@@ -77,7 +77,7 @@ parameters:
     type: Boolean
     description: |
       Set the following CmekConfig as the default to be used for child resources
-      if one is not specified. The default value is true. 
+      if one is not specified. The default value is true.
     url_param_only: true
     default_value: true
     immutable: true
