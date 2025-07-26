@@ -1,0 +1,6 @@
+if modelName, ok := res["model"].(string); ok && modelName != "" {
+	res["name"] = modelName
+}
+
+
+return res, nil
