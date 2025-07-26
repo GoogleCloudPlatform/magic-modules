@@ -146,7 +146,11 @@ func flattenDatasourceGoogleDatabaseInstancesList(fetchedInstances []*sqladmin.D
 		instance["available_maintenance_versions"] = rawInstance.AvailableMaintenanceVersions
 		instance["instance_type"] = rawInstance.InstanceType
 		instance["service_account_email_address"] = rawInstance.ServiceAccountEmailAddress
-		instance["settings"] = flattenSettings(rawInstance.Settings, d)
+		settings := flattenSettings(rawInstance.Settings, d)
+		if rawInstance.InstanceType != "READ_POOL_INSTANCE" {
+			settings[0]["availability_type"] = rawInstance.Settings.AvailabilityType
+		}
+		instance["settings"] = settings
 
 		if rawInstance.DiskEncryptionConfiguration != nil {
 			instance["encryption_key_name"] = rawInstance.DiskEncryptionConfiguration.KmsKeyName
