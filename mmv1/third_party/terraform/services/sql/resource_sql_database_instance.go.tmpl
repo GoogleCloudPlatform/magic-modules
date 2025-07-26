@@ -1865,18 +1865,18 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 			return fmt.Errorf("Error setting node_count: %s", err)
 		}
 	}
-	if err := d.Set("settings", flattenSettings(instance.Settings, d)); err != nil {
-		log.Printf("[WARN] Failed to set SQL Database Instance Settings")
-	}
+	settings := flattenSettings(instance.Settings, d)
 	// For read pools, availability type is server managed. In
 	// flattenSettings above we pull it from the old TF resource so that
 	// it never shows a diff. Now, here, for non-pool instances, we
 	// overwrite it with the value obtained from the API (which would be
 	// the typical way to populate the field).
 	if instance.InstanceType != "READ_POOL_INSTANCE" {
-		d.Set("settings.0.availability_type", instance.Settings.AvailabilityType)
+		settings[0]["availability_type"] = instance.Settings.AvailabilityType
 	}
-
+	if err := d.Set("settings", settings); err != nil {
+		log.Printf("[WARN] Failed to set SQL Database Instance Settings")
+	}
 	if instance.DiskEncryptionConfiguration != nil {
 		if err := d.Set("encryption_key_name", instance.DiskEncryptionConfiguration.KmsKeyName); err != nil {
 			return fmt.Errorf("Error setting encryption_key_name: %s", err)
@@ -2409,6 +2409,10 @@ func flattenSettings(settings *sqladmin.Settings, d *schema.ResourceData) []map[
 		"time_zone":                        settings.TimeZone,
 		"deletion_protection_enabled":      settings.DeletionProtectionEnabled,
 		"retain_backups_on_delete":         settings.RetainBackupsOnDelete,
+	}
+
+	if data["availability_type"] == "" {
+		data["availability_type"] = "ZONAL"
 	}
 
 	if settings.ActiveDirectoryConfig != nil {
