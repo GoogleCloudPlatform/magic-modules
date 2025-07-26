@@ -94,12 +94,12 @@ for i := 0; i < len(deployedModels); i++ {
 })
 
 err = VertexAIOperationWaitTime(
-    config, undeploy_res, project, fmt.Sprintf("Undeploying model %s from EndpointWithModelGardenDeployment", i), userAgent,
+    config, undeploy_res, project, fmt.Sprintf("Undeploying model %d from EndpointWithModelGardenDeployment", i), userAgent,
     d.Timeout(schema.TimeoutDelete))
 
 if err != nil {
     // The model could not be undeployed
-    return fmt.Errorf("Error waiting to undeploy model %s from EndpointWithModelGardenDeployment: %s", i, err)
+    return fmt.Errorf("Error waiting to undeploy model %d from EndpointWithModelGardenDeployment: %s", i, err)
 }
 
 log.Printf("[DEBUG] Finished undeploying model %d with ID %s from EndpointWithModelGardenDeployment %q: %#v", i, deployedModelId, d.Id(), undeploy_res)
