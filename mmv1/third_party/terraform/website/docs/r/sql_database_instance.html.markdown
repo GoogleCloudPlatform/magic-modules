@@ -327,11 +327,17 @@ The `settings` block supports:
     active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
 
 * `availability_type` - (Optional) The availability type of the Cloud SQL
-  instance, high availability (`REGIONAL`) or single zone (`ZONAL`).' For all instances, ensure that
+  instance, high availability (`REGIONAL`) or single zone (`ZONAL`). For all instances, ensure that
   `settings.backup_configuration.enabled` is set to `true`.
   For MySQL instances, ensure that `settings.backup_configuration.binary_log_enabled` is set to `true`.
   For Postgres and SQL Server instances, ensure that `settings.backup_configuration.point_in_time_recovery_enabled`
   is set to `true`. Defaults to `ZONAL`.
+  For read pool instances, this field is read-only. The availability type is changed by specifying
+  the number of nodes (`node_count`).
+
+* `effective_availability_type` - (Computed) The availability type of the Cloud SQL instance, high availability
+  (REGIONAL) or single zone (ZONAL). This field always contains the value that is reported by the
+  API (for read pools, `effective_availability_type` may differ from `availability_type`).
 
 * `collation` - (Optional) The name of server instance collation.
 
