@@ -33,7 +33,6 @@ self_link: "projects/{{project}}/locations/{{location}}/endpoints/{{endpoint}}"
 create_url: "projects/{{project}}/locations/{{location}}:deploy"
 immutable: true
 exclude_read: true
-exclude_delete: true # the resource does not yet support deletion
 exclude_import: true # the resource does not support import
 timeouts:
   insert_minutes: 180
@@ -49,6 +48,7 @@ async:
     resource_inside_response: true
 custom_code:
   post_create: "templates/terraform/post_create/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl"
+  custom_delete: "templates/terraform/custom_delete/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl"
 examples:
   - name: "vertex_ai_deploy"
     primary_resource_id: "deploy"

@@ -1,0 +1,168 @@
+log.Printf("[DEBUG] Beginning custom_delete for Vertex AI Endpoint with Model Garden Deployment")
+
+// Log resource ID
+log.Printf("[DEBUG] Resource ID: %s", d.Id())
+
+// Log fields using d.Get
+log.Printf("[DEBUG] Values retrieved using d.Get():")
+for _, key := range []string{
+	"project", "location", "endpoint", "publisher_model_name", "model_id", "deployed_model_id",
+} {
+	valRaw, ok := d.GetOk(key)
+	if ok {
+		log.Printf("[DEBUG] d.Get(%q) = %#v", key, valRaw)
+	} else {
+		log.Printf("[DEBUG] d.Get(%q) = <not found>", key)
+	}
+}
+
+// Log raw state attributes
+log.Printf("[DEBUG] Raw state attributes (d.State().Attributes):")
+for key, val := range d.State().Attributes {
+	log.Printf("[DEBUG] d.State().Attributes[%q] = %q", key, val)
+}
+
+// Log deployed model ID (assuming only one deployed model)
+if idVal, ok := d.State().Attributes["deployed_models.0.id"]; ok {
+	log.Printf("[DEBUG] deployedModels[0].id = %s", idVal)
+} else {
+	log.Printf("[DEBUG] deployedModels.0.id not found in state attributes")
+}
+
+// Surpress userAgent not used error
+log.Printf("[DEBUG] userAgent for deletion: %s", userAgent)
+
+
+
+
+// Continue with actual deletion logic here (undeploy model, delete endpoint, etc.)
+
+billingProject := ""
+
+project, err := tpgresource.GetProject(d, config)
+if err != nil {
+    return fmt.Errorf("Error fetching project for EndpointWithModelGardenDeployment: %s", err)
+}
+billingProject = project
+
+// err == nil indicates that the billing_project value was found
+if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+    billingProject = bp
+}
+
+headers := make(http.Header)
+
+
+// Undeploy all Models from Endpoint
+// Make API call to read the endpoint and retrieve deployed model IDs
+read_url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}")
+if err != nil {
+    return err
+}
+
+read_headers := make(http.Header)
+read_res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions {
+    Config:    config,
+    Method:    "GET",
+    Project:   billingProject,
+    RawURL:    read_url,
+    UserAgent: userAgent,
+    Headers:   read_headers,
+})
+if err != nil {
+    return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("VertexAIEndpointWithModelGardenDeployment %q", d.Id()))
+}
+
+//  Access the 'deployedModels' attribute from the response.
+deployedModelsRaw, ok := read_res["deployedModels"]
+if !ok || deployedModelsRaw == nil {
+    log.Printf("[ERROR] No deployed models found in the endpoint response")
+    return fmt.Errorf("Error deleting EndpointWithModelGardenDeployment: No deployed models found in the endpoint response.")
+}
+
+// Assert the type to a slice of interfaces
+deployedModels, ok := deployedModelsRaw.([]interface{})
+if !ok {
+    log.Printf("[ERROR] 'deployedModels' field of endpoint response is not an array as expected")
+    return fmt.Errorf("Error deleting EndpointWithModelGardenDeployment: 'deployedModels' field is not an array as expected.")
+}
+
+// Log the number of deployed models for debugging purposes
+log.Printf("[DEBUG] Found %d deployed model(s) to undeploy.", len(deployedModels))
+
+// Retrieve deployed model IDs and undeploy all models
+undeploy_url, err := tpgresource.ReplaceVars(d, config,  "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}:undeployModel")
+if err != nil {
+    return err
+}
+
+for i := 0; i < len(deployedModels); i++ {
+    deployedModelRaw := deployedModels[i]
+
+    deployedModel, ok := deployedModelRaw.(map[string]interface{})
+    if !ok {
+        return fmt.Errorf("Error deleting EndpointWithModelGardenDeployment: model in 'deployedModels' field of endpoint response is not a map as expected.")
+    }
+
+    var deployedModelId string
+    if id, ok := deployedModel["id"].(string); ok {
+        log.Printf("[DEBUG] ID of deployed model %d: %s", i, id)
+        deployedModelId = id
+    }
+
+    undeploy_body := map[string]interface{}{}
+    undeploy_body["deployedModelId"] = deployedModelId
+
+    log.Printf("[DEBUG] Undeploying model %s from EndpointWithModelGardenDeployment %q", deployedModelId, d.Id())
+
+    undeploy_res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "POST",
+    Project:   billingProject,
+    RawURL:    undeploy_url,
+    UserAgent: userAgent,
+    Body:      undeploy_body,
+    Timeout:   d.Timeout(schema.TimeoutDelete),
+    Headers:   headers,
+})
+
+err = VertexAIOperationWaitTime(
+    config, undeploy_res, project, fmt.Sprintf("Undeploying model %s from EndpointWithModelGardenDeployment", deployedModelId), userAgent,
+    d.Timeout(schema.TimeoutDelete))
+
+if err != nil {
+    // The model could not be undeployed
+    return fmt.Errorf("Error waiting to undeploy model %s from EndpointWithModelGardenDeployment: %s", deployedModelId, err)
+}
+
+log.Printf("[DEBUG] Finished undeploying model with ID %s from EndpointWithModelGardenDeployment %q: %#v", deployedModelId, d.Id(), undeploy_res)
+}
+
+
+
+// Delete Endpoint
+delete_url, err := tpgresource.ReplaceVars(d, config, "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/endpoints/{{"{{"}}endpoint{{"}}"}}")
+if err != nil {
+    return err
+}
+
+var delete_body map[string]interface{}
+
+
+log.Printf("[DEBUG] Deleting EndpointWithModelGardenDeployment %q", d.Id())
+delete_res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "DELETE",
+    Project:   billingProject,
+    RawURL:    delete_url,
+    UserAgent: userAgent,
+    Body:      delete_body,
+    Timeout:   d.Timeout(schema.TimeoutDelete),
+    Headers:   headers,
+})
+if err != nil {
+    return transport_tpg.HandleNotFoundError(err, d, "EndpointWithModelGardenDeployment")
+}
+
+log.Printf("[DEBUG] Finished deleting EndpointWithModelGardenDeployment %q: %#v", d.Id(), delete_res)
+return nil
