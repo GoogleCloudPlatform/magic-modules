@@ -80,14 +80,14 @@ properties:
     type: String
     description: |
       Output only. The unique numeric ID that Vertex AI assigns to the model at the time it is deployed to the endpoint.
-      It is required to undeploy the model from the endpoint during resource deletion as described in 
+      It is required to undeploy the model from the endpoint during resource deletion as described in
       https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.endpoints/undeployModel.
     output: true
   - name: deployedModelDisplayName
     type: String
     description: |
       Output only. The display name assigned to the model deployed to the endpoint.
-      This is not required to delete the resource but is used for debug logging. 
+      This is not required to delete the resource but is used for debug logging.
     output: true
   - name: publisherModelName
     type: String
