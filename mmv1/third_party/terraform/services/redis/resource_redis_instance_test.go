@@ -428,7 +428,7 @@ func TestAccRedisInstance_tags(t *testing.T) {
 				Config: testAccRedisInstanceTags(context),
 				Check: resource.TestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"google_redis_instance.test", "tags.%", "1"),
+						"google_redis_instance.test", fmt.Sprintf("tags.%s/%s", context["org"], context["tagKey"]), fmt.Sprintf("%s", context
 				),
 			},
 			{
