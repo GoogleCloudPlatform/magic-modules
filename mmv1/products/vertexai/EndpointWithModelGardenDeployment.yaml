@@ -36,6 +36,7 @@ exclude_read: true
 exclude_import: true  # the resource does not support import
 timeouts:
   insert_minutes: 180
+  delete_minutes: 20
 autogen_status: RW5kcG9pbnRXaXRoTW9kZWxHYXJkZW5EZXBsb3ltZW50
 async:
   actions: ["create"]
