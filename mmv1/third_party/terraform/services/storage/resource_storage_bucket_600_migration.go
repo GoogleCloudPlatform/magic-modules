@@ -1073,11 +1073,10 @@ func resourceStorageBucketV3() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				Description:  `The name of the bucket.`,
-				ValidateFunc: verify.ValidateGCSName,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: `The name of the bucket.`,
 			},
 
 			"encryption": {
