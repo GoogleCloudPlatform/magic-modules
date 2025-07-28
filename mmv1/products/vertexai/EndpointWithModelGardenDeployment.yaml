@@ -51,14 +51,46 @@ custom_code:
   post_create: "templates/terraform/post_create/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl"
   custom_delete: "templates/terraform/custom_delete/resource_vertexai_endpoint_with_model_garden_deployment.go.tmpl"
 examples:
-  - name: "vertex_ai_deploy"
+  - name: "vertex_ai_deploy_basic"
     primary_resource_id: "deploy"
     vars:
       project: "vertex-ai"
       publisher_model_name: "publisher_model_name"
     ignore_read_extra:
       - "project"
-    exclude_test: true  # handwritten test required as resource does not support import
+    exclude_test: true  # handwritten test required since resource does not support import
+  - name: "vertex_ai_deploy_huggingface_model"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
+  - name: "vertex_ai_deploy_with_configs"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
+  - name: "vertex_ai_deploy_multiple_models_in_parallel"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
+  - name: "vertex_ai_deploy_multiple_models_in_sequence"
+    primary_resource_id: "deploy"
+    vars:
+      project: "vertex-ai"
+      publisher_model_name: "publisher_model_name"
+    ignore_read_extra:
+      - "project"
+    exclude_test: true  # handwritten test required since resource does not support import
 parameters:
   - name: location
     type: String
