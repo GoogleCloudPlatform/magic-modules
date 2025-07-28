@@ -17,7 +17,6 @@ import (
 	"fmt"
 	"log"
 	"maps"
-	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -1995,8 +1994,7 @@ func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {
 }
 
 func (r Resource) ShouldGenerateSingularDataSource() bool {
-	if r.Name == "Cluster" {
-		fmt.Fprintf(os.Stdout, "Name starts with R: %s\n", r.Name)
+	if r.HasSelfLink || r.Name == "Cluster" {
 		return true
 	}
 	return false
