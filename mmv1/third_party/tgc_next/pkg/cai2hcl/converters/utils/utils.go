@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
 	hashicorpcty "github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zclconf/go-cty/cty"
@@ -23,23 +22,35 @@ func ParseFieldValue(url string, name string) string {
 	return ""
 }
 
-// Remove the Terraform attribution label "goog-terraform-provisioned" from labels
-func RemoveTerraformAttributionLabel(raw interface{}) interface{} {
-	if raw == nil {
-		return nil
-	}
+/*
+	ParseUrlParamValuesFromAssetName uses CaiAssetNameTemplate to parse hclData from assetName, filtering out all outputFields
 
-	if labels, ok := raw.(map[string]string); ok {
-		delete(labels, "goog-terraform-provisioned")
-		return labels
+template: //bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}
+assetName: //bigquery.googleapis.com/projects/my-project/datasets/my-dataset
+hclData: [project:my-project dataset_id:my-dataset]
+*/
+func ParseUrlParamValuesFromAssetName(assetName, template string, outputFields map[string]struct{}, hclData map[string]any) {
+	fragments := strings.Split(template, "/")
+	if len(fragments) < 2 {
+		// We need a field and a prefix.
+		return
 	}
-
-	if labels, ok := raw.(map[string]interface{}); ok {
-		delete(labels, "goog-terraform-provisioned")
-		return labels
+	fields := make(map[string]string) // keys are prefixes in URI, values are names of fields
+	for ix, item := range fragments[1:] {
+		if trimmed, ok := strings.CutPrefix(item, "{{"); ok {
+			if trimmed, ok = strings.CutSuffix(trimmed, "}}"); ok {
+				fields[fragments[ix]] = trimmed // ix is relative to the subslice
+			}
+		}
 	}
-
-	return nil
+	fragments = strings.Split(assetName, "/")
+	for ix, item := range fragments[:len(fragments)-1] {
+		if fieldName, ok := fields[item]; ok {
+			if _, isOutput := outputFields[fieldName]; !isOutput {
+				hclData[fieldName] = fragments[ix+1]
+			}
+		}
+	}
 }
 
 // DecodeJSON decodes the map object into the target struct.
@@ -88,10 +99,6 @@ func hashicorpCtyTypeToZclconfCtyType(t hashicorpcty.Type) (cty.Type, error) {
 		return cty.NilType, err
 	}
 	return ret, nil
-}
-
-func NewConfig() *transport_tpg.Config {
-	return &transport_tpg.Config{}
 }
 
 // normalizeFlattenedObj traverses the output map recursively, removes fields which are

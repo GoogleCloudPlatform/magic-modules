@@ -423,6 +423,9 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 * `enterprise_config` - (Optional)
   Configuration for [Enterprise edition].(https://cloud.google.com/kubernetes-engine/enterprise/docs/concepts/gke-editions). Structure is [documented below](#nested_enterprise_config).
 
+* `anonymous_authentication_config` - (Optional)
+  Configuration for [anonymous authentication restrictions](https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#restrict-anon-access). Structure is [documented below](#anonymous_authentication_config).
+
 
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
 
@@ -509,6 +512,15 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
    It is disabled by default for Standard clusters; set `enabled = true` to enable.
    It is enabled by default for Autopilot clusters with version 1.29 or later; set `enabled = true` to enable it explicitly.
    See [Enable the Parallelstore CSI driver](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/parallelstore-csi-new-volume#enable) for more information.
+
+*  `lustre_csi_driver_config` - (Optional) The status of the Lustre CSI driver addon,
+   which allows the usage of a Lustre instances as volumes.
+   It is disabled by default for Standard clusters; set `enabled = true` to enable.
+   It is disabled by default for Autopilot clusters; set `enabled = true` to enable.
+   Lustre CSI Driver Config has optional subfield
+   `enable_legacy_lustre_port` which allows the Lustre CSI driver to initialize LNet (the virtual networklayer for Lustre kernel module) using port 6988. 
+   This flag is required to workaround a port conflict with the gke-metadata-server on GKE nodes.
+   See [Enable Lustre CSI driver](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/lustre-csi-driver-new-volume) for more information.
 
 This example `addons_config` disables two addons:
 
@@ -1239,6 +1251,12 @@ notification_config {
 <a name="nested_secret_manager_config"></a>The `secret_manager_config` block supports:
 
 * `enabled` (Required) - Enable the Secret Manager add-on for this cluster.
+* `rotation_config` (Optional, Beta) - config for secret manager auto rotation. Structure is [docuemented below](#rotation_config)
+
+<a name="rotation_config"></a>The `rotation_config` block supports:
+
+* `enabled` (Optional) - Enable the roation in Secret Manager add-on for this cluster.
+* `rotation_interval` (Optional) - The interval between two consecutive rotations. Default rotation interval is 2 minutes.
 
 <a name="nested_user_managed_keys_config"></a>The `user_managed_keys_config` block supports:
 
@@ -1537,6 +1555,10 @@ linux_node_config {
 <a name="nested_enterprise_config"></a>The `enterprise_config` block supports:
 
 * `desired_tier` - (Optional) Sets the tier of the cluster. Available options include `STANDARD` and `ENTERPRISE`.
+
+<a name="anonymous_authentication_config"></a>The `anonymous_authentication_config` block supports:
+
+* `mode` - (Optional) Sets or removes authentication restrictions. Available options include `LIMITED` and `ENABLED`.
 
 
 ## Attributes Reference

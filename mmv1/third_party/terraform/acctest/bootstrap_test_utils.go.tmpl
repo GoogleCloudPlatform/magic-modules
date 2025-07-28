@@ -11,12 +11,9 @@ import (
 	"time"
 	"net/http"
 
-{{ if ne $.TargetVersionName `ga` -}}
-	// For beta tests only
 	resourceManagerV3 "google.golang.org/api/cloudresourcemanager/v3"
 	tpgservicusage "github.com/hashicorp/terraform-provider-google/google/services/serviceusage"
 	"github.com/hashicorp/terraform-provider-google/google/services/kms"
-{{- end }}
 
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/services/tags"
@@ -41,14 +38,9 @@ import (
 
 var SharedKeyRing = "tftest-shared-keyring-1"
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 var DefaultKeyHandleName = "eed58b7b-20ad-4da8-ad85-ba78a0d5ab87"
 var DefaultKeyHandleResourceType = "compute.googleapis.com/Disk"
 var CloudKmsSrviceName = "cloudkms.googleapis.com"
-
-{{- end }}
-
 
 var SharedCryptoKey = map[string]string{
 	"ENCRYPT_DECRYPT":    "tftest-shared-key-1",
@@ -90,8 +82,6 @@ func BootstrapKMSKeyWithPurpose(t *testing.T, purpose string) BootstrappedKMS {
 func BootstrapKMSKeyWithPurposeInLocation(t *testing.T, purpose, locationID string) BootstrappedKMS {
 	return BootstrapKMSKeyWithPurposeInLocationAndName(t, purpose, locationID, SharedCryptoKey[purpose])
 }
-
-{{ if ne $.TargetVersionName `ga` -}}
 
 type BootstrappedKMSAutokey struct {
     *cloudkms.AutokeyConfig
@@ -327,8 +317,6 @@ func setPolicy(crmService *resourceManagerV3.Service, resourceType string, resou
 	return nil
 }
 
-{{- end }}
-
 func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, locationID, keyShortName string) BootstrappedKMS {
 	config := BootstrapConfig(t)
 	if config == nil {
@@ -397,7 +385,7 @@ func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, location
 		t.Fatalf("Unable to bootstrap KMS key. CryptoKey is nil!")
 	}
 
-	// TODO(b/372305432): Use the pagination properly.
+	// TODO: b/372305432 Use the pagination properly.
 	ckvResp, err := kmsClient.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(keyName).Do()
 	if err != nil {
 		t.Fatalf("Unable to list cryptoKeyVersions: %v", err)
@@ -883,8 +871,6 @@ func BootstrapServicePerimeterProjects(t *testing.T, desiredProjects int) []*clo
 	return projects
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
-
 // BootstrapFolder creates or get a folder having a input folderDisplayName within a TestOrgEnv
 func BootstrapFolder(t *testing.T, folderDisplayName string) *resourceManagerV3.Folder {
 	config := BootstrapConfig(t)
@@ -933,8 +919,6 @@ func BootstrapFolder(t *testing.T, folderDisplayName string) *resourceManagerV3.
 	}
 	return folder
 }
-
-{{- end }}
 
 // BootstrapProject will create or get a project named
 // "<projectIDPrefix><projectIDSuffix>" that will persist across test runs,
