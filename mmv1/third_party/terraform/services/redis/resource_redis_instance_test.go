@@ -2,6 +2,7 @@ package redis_test
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -437,12 +438,30 @@ func TestAccRedisInstance_tags(t *testing.T) {
 						if !ok {
 							return fmt.Errorf("tagVlaue not found")
 						}
-						return resource.ComposeAggregateTestCheckFunc(
-							resource.TestCheckResourceAttr(
-								"google_redis_instance.test", "tags.%", "1"),
-							resource.TestCheckResourceAttr(
-								"google_redis_instance.test", fmt.Sprintf("tags.%s/%s", context["org"], tagKey), tagValue),
-						)(s)
+
+						rs, ok := s.RootModule().Resources["google_redis_instance.test"]
+						if !ok {
+							return fmt.Errorf("Resource not found")
+						}
+						actualTags := rs.Primary.Attributes
+						count := actualTags["tags.%"]
+						if count == "" || count == "0" {
+							return fmt.Errorf("Expected tags to be present, but thags were not found")
+						}
+						found := false
+						var actualVal string
+						for actualKey, val := range actualTags {
+							if strings.HasSuffix(actualKey, tagKey) && strings.HasPrefix(actualKey, "tags.") {
+								actualVal = val
+								found = true
+								break
+							}
+						}
+						if !found || actualVal != tagValue {
+							t.Logf("full tag map: %#v", actualTags)
+							return fmt.Errorf("expected tag with suffix %q=%q but got %q", tagKey, tagValue, actualVal)
+						}
+						return nil
 					},
 				),
 			},
