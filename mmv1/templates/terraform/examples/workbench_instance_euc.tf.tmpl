@@ -1,0 +1,16 @@
+resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
+  name = "{{index $.Vars "instance_name"}}"
+  location = "us-central1-a"
+
+  gce_setup {
+    machine_type = "e2-standard-4"
+    
+    metadata = {
+      terraform = "true"
+    }
+  }
+
+  instance_owners  = ["example@example.com"]
+
+  enable_managed_euc = "true"
+}
