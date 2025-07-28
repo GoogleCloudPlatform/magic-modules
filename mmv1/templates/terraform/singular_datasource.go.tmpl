@@ -56,11 +56,15 @@ import (
 func DataSourceGoogleCompute{{ $.ResourceName -}}() *schema.Resource { 
   rs := Resource{{ $.ResourceName -}}().Schema
     
-  ds := tpgresource.DatasourceSchemaFromResourceSchema(rs)
+  dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(rs)
+
+  {{if $.CustomCode.CustomDatasourceRead -}} 
+    {{- $.CustomTemplate $.CustomCode.CustomDatasourceSchemaUpdate false -}}
+  {{- end}}
 
   return &schema.Resource{
 		Read:   dataSourceGoogle{{ $.ResourceName -}}ReadGenerated,
-		Schema: ds,
+		Schema: dsSchema,
 	}
 }
 

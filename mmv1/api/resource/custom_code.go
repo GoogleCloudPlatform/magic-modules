@@ -105,9 +105,12 @@ type CustomCode struct {
 	// false.
 	PostUpdate string `yaml:"post_update"`
 
-	// This code allows manual overrides of urls and any other extra logic for the DataSource read functions
+	// This code allows manual overrides of urls and any other extra logic for singular DataSource read functions
 	// It is placed in the dataSource{ResourceName}Read function in data_source_*_generated.go files
 	CustomDatasourceRead string `yaml:"custom_datasource_read"`
+
+	// This code allows required fields to be toggled and schema alterations for singular DataSource schema definitions
+	CustomDatasourceSchemaUpdate string `yaml:"custom_datasource_schema_update"`
 
 	// This code replaces the entire contents of the Update call. It
 	// should be used for resources that don't have normal update

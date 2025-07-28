@@ -16,7 +16,7 @@ func DatasourceSchemaFromResourceSchema(rs map[string]*schema.Schema) map[string
 		dv := &schema.Schema{
 			Computed:    true,
 			ForceNew:    false,
-			Required:    v.Required,
+			Required:    false,
 			Description: v.Description,
 			Type:        v.Type,
 		}
