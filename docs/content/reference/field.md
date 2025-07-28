@@ -130,26 +130,13 @@ on the user's configuration. If false or unset, the provider sets the field's
 value in the resource state based on the API response. Only use this attribute
 if the field cannot be read from GCP due to either API or provider constraints.
 
-Nested fields currently
-[do not support `ignore_read`](https://github.com/hashicorp/terraform-provider-google/issues/12410)
-but can replicate the behavior by implementing a
-[`custom_flatten`]({{< ref "/develop/custom-code#custom_flatten" >}})
-that always ignores the value returned by the API. [Example](https://github.com/GoogleCloudPlatform/magic-modules/blob/5923d4cb878396a04bed9beaf22a8478e8b1e6a5/mmv1/templates/terraform/custom_flatten/source_representation_instance_configuration_password.go.tmpl).
-Any fields using a custom flatten also need to be added to `ignore_read_extra`
-for any examples where the field is set.
+`ignore_read` is current not supported inside arrays of nested objects. See [tpg#23630](https://github.com/hashicorp/terraform-provider-google/issues/23630)
+for details and workarounds.
 
 Example: YAML
 
 ```yaml
 ignore_read: true
-```
-
-Example: Custom flatten
-
-```go
-func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-  return d.Get("password")
-}
 ```
 
 ### `default_value`
@@ -174,7 +161,6 @@ value for the field. This attribute is useful for complex or
 frequently-changed API-side defaults, but provides less useful information at
 plan time than `default_value` and causes the provider to ignore user
 configurations that explicitly set the field to an "empty" value.
-`default_from_api` and `send_empty_value` cannot both be true on the same field.
 
 Example:
 
@@ -189,7 +175,10 @@ strings) to the API if set explicitly in the user's configuration. If false,
 This attribute is useful for fields where the API would behave differently
 for an "empty" value vs no value for a particular field - for example,
 boolean fields that have an API-side default of true.
-`send_empty_value` and `default_from_api` cannot both be true on the same field.
+
+If true simulataneously with `default_from_api`, the provider will send empty values
+explicitly set in configuration. If the field is unset, the provider will
+accept API values as the default as usual with `default_from_api`.
 
 Due to a [bug](https://github.com/hashicorp/terraform-provider-google/issues/13201),
 NestedObject fields will currently be sent as `null` if unset (rather than being
