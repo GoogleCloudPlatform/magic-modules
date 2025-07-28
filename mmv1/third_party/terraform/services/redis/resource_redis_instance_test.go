@@ -446,7 +446,7 @@ func TestAccRedisInstance_tags(t *testing.T) {
 						actualTags := rs.Primary.Attributes
 						count := actualTags["tags.%"]
 						if count == "" || count == "0" {
-							return fmt.Errorf("Expected tags to be present, but thags were not found")
+							return fmt.Errorf("Expected tags to be present, but tags were not found")
 						}
 						found := false
 						var actualVal string
