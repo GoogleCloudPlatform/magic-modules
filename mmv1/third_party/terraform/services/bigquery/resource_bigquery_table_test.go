@@ -3294,6 +3294,7 @@ resource "google_storage_bucket" "test" {
   name          = "%s"
   location      = "US"
   force_destroy = true
+  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "test" {
@@ -3842,6 +3843,9 @@ resource "google_bigquery_table" "test" {
   deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
+
+  ignore_auto_generated_schema = true
+
   schema = <<EOF
   %s
   EOF
