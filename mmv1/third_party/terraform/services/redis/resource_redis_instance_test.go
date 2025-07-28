@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -426,9 +427,23 @@ func TestAccRedisInstance_tags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccRedisInstanceTags(context),
-				Check: resource.TestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"google_redis_instance.test", fmt.Sprintf("tags.%s/%s", context["org"], context["tagKey"]), fmt.Sprintf("%s", context["tagValue"])),
+				Check: resource.ComposeTestCheckFunc(
+					func(s *terraform.State) error {
+						tagKey, ok := context["tagKey"].(string)
+						if !ok {
+							return fmt.Errorf("tagKey not found")
+						}
+						tagValue, ok := context["tagValue"].(string)
+						if !ok {
+							return fmt.Errorf("tagVlaue not found")
+						}
+						return resource.ComposeAggregateTestCheckFunc(
+							resource.TestCheckResourceAttr(
+								"google_redis_instance.test", "tags.%", "1"),
+							resource.TestCheckResourceAttr(
+								"google_redis_instance.test", fmt.Sprintf("tags.%s/%s", context["org"], tagKey), tagValue),
+						)(s)
+					},
 				),
 			},
 			{
