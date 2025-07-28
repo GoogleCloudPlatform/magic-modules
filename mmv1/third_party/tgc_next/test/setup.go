@@ -52,7 +52,7 @@ type Resource struct {
 
 const (
 	ymdFormat  = "2006-01-02"
-	maxRetries = 30
+	maxRetries = 3
 )
 
 var (
