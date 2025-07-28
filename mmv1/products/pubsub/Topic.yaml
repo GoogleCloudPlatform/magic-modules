@@ -52,9 +52,10 @@ iam_policy:
 custom_code:
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/pubsub_topic.tmpl'
+  tgc_encoder: 'templates/tgc_next/encoders/pubsub_topic.go.tmpl'
 error_retry_predicates:
-
   - 'transport_tpg.PubsubTopicProjectNotReady'
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'pubsub_topic_basic'
     primary_resource_id: 'example'
@@ -150,10 +151,12 @@ properties:
           operations on this topic and subscribe operations on any subscription
           attached to this topic in any region that is not in `allowedPersistenceRegions`.
         required: false
+        is_missing_in_cai: true
   - name: 'schemaSettings'
     type: NestedObject
     description: |
       Settings for validating messages published against a schema.
+    is_missing_in_cai: true
     properties:
       - name: 'schema'
         type: String
@@ -182,6 +185,7 @@ properties:
       set, message retention is controlled by settings on individual subscriptions.
       The rotation period has the format of a decimal number, followed by the
       letter `s` (seconds). Cannot be more than 31 days or less than 10 minutes.
+    is_missing_in_cai: true
   - name: 'ingestionDataSourceSettings'
     type: NestedObject
     description: |
