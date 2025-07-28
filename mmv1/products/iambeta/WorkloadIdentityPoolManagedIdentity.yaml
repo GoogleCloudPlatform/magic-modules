@@ -32,6 +32,9 @@ autogen_async: true
 custom_code:
   constants: 'templates/terraform/constants/iam_workload_identity_pool_managed_identity.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
+  post_create: 'templates/terraform/post_create/iam_workload_identity_pool_managed_identity.go.tmpl'
+  post_read: 'templates/terraform/post_read/iam_workload_identity_pool_managed_identity.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/iam_workload_identity_pool_managed_identity.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workload_identity_pool_managed_identity.go.tmpl'
 examples:
   - name: 'iam_workload_identity_pool_managed_identity_basic'
@@ -46,6 +49,8 @@ examples:
       workload_identity_pool_id: 'example-pool'
       workload_identity_pool_namespace_id: 'example-namespace'
       workload_identity_pool_managed_identity_id: 'example-managed-identity'
+    test_env_vars:
+      project: 'PROJECT_NUMBER'
 parameters:
   - name: 'workload_identity_pool_id'
     type: String
@@ -84,6 +89,8 @@ parameters:
 
 
       The prefix `gcp-` will be reserved for future uses.
+    validation:
+      function: 'ValidateWorkloadIdentityPoolManagedIdentityId'
 properties:
   - name: 'name'
     type: String
@@ -113,3 +120,21 @@ properties:
     description: |
       Whether the managed identity is disabled. If disabled, credentials may no longer be issued for
       the identity, however existing credentials will still be accepted until they expire.
+  - name: 'attestationRules'
+    type: Array
+    description: |
+      Defines which workloads can receive an identity within a pool. When an AttestationRule is
+      defined under a managed identity, matching workloads may receive that identity. A maximum of
+      50 AttestationRules can be set.
+    update_url: 'projects/{{project}}/locations/global/workloadIdentityPools/{{workload_identity_pool_id}}/namespaces/{{workload_identity_pool_namespace_id}}/managedIdentities/{{workload_identity_pool_managed_identity_id}}:setAttestationRules'
+    update_verb: 'POST'
+    is_set: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'googleCloudResource'
+          type: String
+          description: |
+            A single workload operating on Google Cloud. For example:
+            `//compute.googleapis.com/projects/123/uid/zones/us-central1-a/instances/12345678`.
+          required: true
