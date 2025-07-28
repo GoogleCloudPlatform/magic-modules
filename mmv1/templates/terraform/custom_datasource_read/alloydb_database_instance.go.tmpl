@@ -1,0 +1,18 @@
+// Get fields for setting cluster field in resource
+	cluster_id := d.Get("cluster_id").(string)
+
+	location, err := tpgresource.GetLocation(d, config)
+	if err != nil {
+		return err
+	}
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+	instance_id := d.Get("instance_id").(string)
+    // format for tpg.ReplaceVars within template files
+    id = fmt.Sprintf("projects/%s/locations/%s/clusters/%s/instances/%s", project, location, cluster_id, instance_id)
+	d.SetId(id)
+
+	// Setting cluster field as this is set as a required field in instance resource
+	d.Set("cluster", fmt.Sprintf("projects/%s/locations/%s/clusters/%s", project, location, cluster_id))

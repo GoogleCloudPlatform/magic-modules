@@ -59,20 +59,23 @@ func DataSourceGoogleCompute{{ $.ResourceName -}}() *schema.Resource {
   ds := tpgresource.DatasourceSchemaFromResourceSchema(rs)
 
   return &schema.Resource{
-		Read:   dataSourceGoogle{{ $.ResourceName -}}Read,
+		Read:   dataSourceGoogle{{ $.ResourceName -}}ReadGenerated,
 		Schema: ds,
 	}
 }
 
-func dataSourceGoogle{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
+func dataSourceGoogle{{ $.ResourceName -}}ReadGenerated(d *schema.ResourceData, meta interface{}) error {
   config := meta.(*transport_tpg.Config)
 
-  //this is the problem - need to figure out the url params
   id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLink}}")
     if err != nil {
         return err
     }
   d.SetId(id)
+
+  {{if $.CustomCode.CustomDatasourceRead -}} 
+    {{- $.CustomTemplate $.CustomCode.CustomDatasourceRead false -}}
+  {{- end}}
 
   err = resource{{ $.ResourceName -}}Read(d, meta)
 	if err != nil {
