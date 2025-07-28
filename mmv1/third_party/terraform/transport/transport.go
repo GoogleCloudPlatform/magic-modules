@@ -190,60 +190,71 @@ func IsApiNotEnabledError(err error) bool {
 	return false
 }
 
-func PluralDataSourceGetList(d *schema.ResourceData, config *Config, billingProject *string, userAgent string, u string, listFlattener func(config *Config, res interface{}) ([]interface{}, error), params map[string]string, resourecToList string) ([]interface{}, error) {
-	if params == nil {
-		params = make(map[string]string)
+type PluralDataSourceGetListOptions struct {
+	D              *schema.ResourceData
+	Config         *Config
+	BillingProject *string
+	UserAgent      string
+	URL            string
+	ListFlattener  func(config *Config, res interface{}) ([]interface{}, error)
+	Params         map[string]string
+	ResourceToList string
+}
+
+func PluralDataSourceGetList(opt PluralDataSourceGetListOptions) ([]interface{}, error) {
+	if opt.Params == nil {
+		opt.Params = make(map[string]string)
 	}
 
 	items := make([]interface{}, 0)
 	for {
-		// Depending on previous iterations, params might contain a pageToken param
-		url, err := AddQueryParams(u, params)
+		// Depending on previous iterations, opt.Params might contain a pageToken param
+		url, err := AddQueryParams(opt.URL, opt.Params)
 		if err != nil {
 			return nil, err
 		}
 
 		headers := make(http.Header)
 		opts := SendRequestOptions{
-			Config:               config,
+			Config:               opt.Config,
 			Method:               "GET",
 			RawURL:               url,
-			UserAgent:            userAgent,
+			UserAgent:            opt.UserAgent,
 			Headers:              headers,
 			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
 		}
-		if billingProject != nil {
-			opts.Project = *billingProject
+		if opt.BillingProject != nil {
+			opts.Project = *opt.BillingProject
 		}
 		res, err := SendRequest(opts)
 		if err != nil {
-			return nil, HandleNotFoundError(err, d, fmt.Sprintf("%s %q", resourecToList, d.Id()))
+			return nil, HandleNotFoundError(err, opt.D, fmt.Sprintf("%s %q", opt.ResourceToList, opt.D.Id()))
 		}
 
 		if res == nil {
-			log.Printf("[DEBUG] Removing %s because it no longer exists.", resourecToList)
-			d.SetId("")
+			log.Printf("[DEBUG] Removing %s because it no longer exists.", opt.ResourceToList)
+			opt.D.SetId("")
 			return nil, nil
 		}
 
 		var newItems []interface{}
-		if listFlattener != nil {
-			if res[resourecToList] != nil {
-				flattened, err := listFlattener(config, res[resourecToList])
+		if opt.ListFlattener != nil {
+			if res[opt.ResourceToList] != nil {
+				flattened, err := opt.ListFlattener(opt.Config, res[opt.ResourceToList])
 				if err != nil {
 					return nil, err
 				}
 				newItems = flattened
 			}
 		} else {
-			if v, ok := res[resourecToList].([]interface{}); ok {
+			if v, ok := res[opt.ResourceToList].([]interface{}); ok {
 				newItems = v
 			}
 		}
 		items = append(items, newItems...)
 
 		if v, ok := res["nextPageToken"]; ok && v != nil && v.(string) != "" {
-			params["pageToken"] = v.(string)
+			opt.Params["pageToken"] = v.(string)
 		} else {
 			break
 		}
@@ -251,52 +262,63 @@ func PluralDataSourceGetList(d *schema.ResourceData, config *Config, billingProj
 	return items, nil
 }
 
-func PluralDataSourceGetListMap(d *schema.ResourceData, config *Config, billingProject *string, userAgent string, u string, listFlattener func(config *Config, res interface{}) ([]map[string]interface{}, error), params map[string]string, resourecToList string) ([]map[string]interface{}, error) {
-	if params == nil {
-		params = make(map[string]string)
+type PluralDataSourceGetListMapOptions struct {
+	D              *schema.ResourceData
+	Config         *Config
+	BillingProject *string
+	UserAgent      string
+	URL            string
+	ListFlattener  func(config *Config, res interface{}) ([]map[string]interface{}, error)
+	Params         map[string]string
+	ResourceToList string
+}
+
+func PluralDataSourceGetListMap(opt PluralDataSourceGetListMapOptions) ([]map[string]interface{}, error) {
+	if opt.Params == nil {
+		opt.Params = make(map[string]string)
 	}
 
 	items := make([]map[string]interface{}, 0)
 	for {
-		url, err := AddQueryParams(u, params)
+		url, err := AddQueryParams(opt.URL, opt.Params)
 		if err != nil {
 			return nil, err
 		}
 
 		headers := make(http.Header)
 		opts := SendRequestOptions{
-			Config:               config,
+			Config:               opt.Config,
 			Method:               "GET",
 			RawURL:               url,
-			UserAgent:            userAgent,
+			UserAgent:            opt.UserAgent,
 			Headers:              headers,
 			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
 		}
-		if billingProject != nil {
-			opts.Project = *billingProject
+		if opt.BillingProject != nil {
+			opts.Project = *opt.BillingProject
 		}
 		res, err := SendRequest(opts)
 		if err != nil {
-			return nil, HandleNotFoundError(err, d, fmt.Sprintf("%s %q", resourecToList, d.Id()))
+			return nil, HandleNotFoundError(err, opt.D, fmt.Sprintf("%s %q", opt.ResourceToList, opt.D.Id()))
 		}
 
 		if res == nil {
-			log.Printf("[DEBUG] Removing %s because it no longer exists.", resourecToList)
-			d.SetId("")
+			log.Printf("[DEBUG] Removing %s because it no longer exists.", opt.ResourceToList)
+			opt.D.SetId("")
 			return nil, nil
 		}
 
 		var newItems []map[string]interface{}
-		if listFlattener != nil {
-			if res[resourecToList] != nil {
-				flattened, err := listFlattener(config, res[resourecToList])
+		if opt.ListFlattener != nil {
+			if res[opt.ResourceToList] != nil {
+				flattened, err := opt.ListFlattener(opt.Config, res[opt.ResourceToList])
 				if err != nil {
 					return nil, err
 				}
 				newItems = flattened
 			}
 		} else {
-			if v, ok := res[resourecToList].([]interface{}); ok {
+			if v, ok := res[opt.ResourceToList].([]interface{}); ok {
 				for _, item := range v {
 					if m, ok := item.(map[string]interface{}); ok {
 						newItems = append(newItems, m)
@@ -309,7 +331,7 @@ func PluralDataSourceGetListMap(d *schema.ResourceData, config *Config, billingP
 		items = append(items, newItems...)
 
 		if v, ok := res["nextPageToken"]; ok && v != nil && v.(string) != "" {
-			params["pageToken"] = v.(string)
+			opt.Params["pageToken"] = v.(string)
 		} else {
 			break
 		}
