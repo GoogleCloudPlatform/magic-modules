@@ -1,0 +1,7 @@
+resource "google_vertex_ai_endpoint_with_model_garden_deployment" "{{$.PrimaryResourceId}}" {
+  hugging_face_model_id = "Qwen/Qwen3-0.6B"
+  location             = "us-central1"
+  model_config {
+    accept_eula = true
+  }
+}

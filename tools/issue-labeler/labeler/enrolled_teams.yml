@@ -184,6 +184,8 @@ service/compute-instances:
 service/compute-interconnect:
   resources:
   - google_compute_interconnect.*
+  - google_compute_wire_group
+  - google_compute_cross_site_network
 service/compute-ipam:
   resources:
   - google_compute_address
@@ -326,6 +328,7 @@ service/dataproc:
   - google_dataproc_job.*
   - google_dataproc_workflow_template
   - google_dataproc_batch
+  - google_dataproc_session_template
 service/dataprocgdc:
   resources:
   - google_dataproc_gdc_.*
@@ -489,6 +492,9 @@ service/metastore:
 service/migrationcenter:
   resources:
   - google_migration_center_.*
+service/modelarmor:
+  resources:
+  - google_model_armor_.*
 service/monitoring-alerting:
   resources:
   - google_monitoring_notification_channel
