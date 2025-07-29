@@ -1271,10 +1271,18 @@ func testAccDataprocCluster_withClusterTier(rnd, subnetworkName, tier string) st
 	if tier != "" {
 		tierConfig = fmt.Sprintf(`cluster_tier = "%s"`, tier)
 	}
+	clusterName := fmt.Sprintf("tf-test-dproc-tier-%s", rnd)
+	bucketName := clusterName + "-temp-bucket"
 
 	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = "true"
+}
+
 resource "google_dataproc_cluster" "tier_cluster" {
-  name   = "tf-test-dproc-tier-%s"
+  name   = "%s"
   region = "us-central1"
 
   cluster_config {
@@ -1285,10 +1293,12 @@ resource "google_dataproc_cluster" "tier_cluster" {
     gce_cluster_config {
       subnetwork = "%s"
     }
+	staging_bucket = google_storage_bucket.bucket.name
+	temp_bucket = google_storage_bucket.bucket.name
     %s
   }
 }
-`, rnd, subnetworkName, tierConfig)
+`, bucketName, clusterName, subnetworkName, tierConfig)
 }
 
 func testAccCheckDataprocClusterDestroy(t *testing.T) resource.TestCheckFunc {
