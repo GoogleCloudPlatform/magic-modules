@@ -26,45 +26,6 @@ import (
 	"google.golang.org/api/storage/v1"
 )
 
-func corsValidationCustomDiff(_ context.Context, d *schema.ResourceDiff, meta interface{}) error {
-	return ValidateCors(d)
-}
-
-func ValidateCors(d tpgresource.TerraformResourceDiff) error {
-	_, newCount := d.GetChange("cors.#")
-	if newCount == 0 {
-		return nil
-	}
-
-	cors, corsOk := d.GetOk("cors")
-	if corsOk && len(cors.([]interface{})) == 0 {
-		return fmt.Errorf("cors cannot be empty")
-	}
-
-	for _, corsRule := range cors.([]interface{}) {
-		if corsRule == nil {
-			return fmt.Errorf("cors cannot be empty")
-		}
-		rule := corsRule.(map[string]interface{})
-		maxAgeSeconds := rule["max_age_seconds"].(int)
-		sendMaxAge := rule["send_max_age_seconds_if_zero"].(bool)
-		// if send_max_age_seconds_if_zero is true, max_age_seconds can be zero
-		if sendMaxAge || maxAgeSeconds > 0 {
-			continue
-		}
-
-		method := rule["method"].([]interface{})
-		responseHeader := rule["response_header"].([]interface{})
-		origin := rule["origin"].([]interface{})
-
-		// check if all cors attributes provided have values
-		if !(len(method) > 0 || len(origin) > 0 || len(responseHeader) > 0) {
-			return fmt.Errorf("cors attributes cannot be empty or use send_max_age_seconds_if_zero flag to send max_age_seconds as zero")
-		}
-	}
-	return nil
-}
-
 func ResourceStorageBucket() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceStorageBucketCreate,
@@ -77,7 +38,6 @@ func ResourceStorageBucket() *schema.Resource {
 		CustomizeDiff: customdiff.All(
 			customdiff.ForceNewIfChange("retention_policy.0.is_locked", isPolicyLocked),
 			tpgresource.SetLabelsDiff,
-			corsValidationCustomDiff,
 		),
 
 		Timeouts: &schema.ResourceTimeout{
@@ -1369,14 +1329,34 @@ func expandCors(configured []interface{}) []*storage.BucketCors {
 	corsRules := make([]*storage.BucketCors, 0, len(configured))
 	for _, raw := range configured {
 		if raw == nil {
+			corsRule := storage.BucketCors{}
+			corsRules = append(corsRules, &corsRule)
 			continue
 		}
 		data := raw.(map[string]interface{})
-		corsRule := storage.BucketCors{
-			Origin:         tpgresource.ConvertStringArr(data["origin"].([]interface{})),
-			Method:         tpgresource.ConvertStringArr(data["method"].([]interface{})),
-			ResponseHeader: tpgresource.ConvertStringArr(data["response_header"].([]interface{})),
-			MaxAgeSeconds:  int64(data["max_age_seconds"].(int)),
+		corsRule := storage.BucketCors{}
+		if v, ok := data["method"].([]interface{}); ok {
+			methods := make([]string, 0, len(v))
+			for _, m := range v {
+				methods = append(methods, m.(string))
+			}
+			corsRule.Method = methods
+		}
+
+		if v, ok := data["origin"].([]interface{}); ok {
+			origins := make([]string, 0, len(v))
+			for _, o := range v {
+				origins = append(origins, o.(string))
+			}
+			corsRule.Origin = origins
+		}
+
+		if v, ok := data["response_header"].([]interface{}); ok {
+			headers := make([]string, 0, len(v))
+			for _, h := range v {
+				headers = append(headers, h.(string))
+			}
+			corsRule.ResponseHeader = headers
 		}
 		if data["send_max_age_seconds_if_zero"].(bool) {
 			corsRule.ForceSendFields = append(corsRule.ForceSendFields, "MaxAgeSeconds")
