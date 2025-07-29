@@ -182,7 +182,16 @@ func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}
 	}
 
 	cryptoKeyVersions := make([]interface{}, 0)
-	cryptoKeyVersions, err = transport_tpg.PluralDataSourceGetList(d, config, &billingProject, userAgent, url, nil, params, "cryptoKeyVersions")
+	opts := transport_tpg.GetPaginatedItemsSliceOptions{
+		ResourceData:   d,
+		Config:         config,
+		BillingProject: &billingProject,
+		UserAgent:      userAgent,
+		URL:            url,
+		ResourceToList: "cryptoKeyVersions",
+		Params:         params,
+	}
+	cryptoKeyVersions, err = transport_tpg.GetPaginatedItemsSlice(opts)
 	if err != nil {
 		return nil, err
 	}

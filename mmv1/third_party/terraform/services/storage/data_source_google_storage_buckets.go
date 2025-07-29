@@ -80,7 +80,15 @@ func datasourceGoogleStorageBucketsRead(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	buckets, err := transport_tpg.PluralDataSourceGetListMap(d, config, nil, userAgent, url, flattenDatasourceGoogleBucketsList, params, "items")
+	opts := transport_tpg.GetPaginatedItemsMapOptions{
+		ResourceData:   d,
+		Config:         config,
+		BillingProject: nil,
+		UserAgent:      userAgent,
+		URL:            url,
+		ResourceToList: "items",
+	}
+	buckets, err := transport_tpg.GetPaginatedItemsMap(opts)
 	if err != nil {
 		return fmt.Errorf("Error retrieving buckets: %s", err)
 	}

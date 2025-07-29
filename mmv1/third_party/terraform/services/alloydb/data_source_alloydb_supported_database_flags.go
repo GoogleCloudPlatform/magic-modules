@@ -139,7 +139,15 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 	if err != nil {
 		return fmt.Errorf("Error setting api endpoint")
 	}
-	result, err := transport_tpg.PluralDataSourceGetList(d, config, &billingProject, userAgent, url, nil, nil, "supportedDatabaseFlags")
+	opts := transport_tpg.GetPaginatedItemsSliceOptions{
+		ResourceData:   d,
+		Config:         config,
+		BillingProject: &billingProject,
+		UserAgent:      userAgent,
+		URL:            url,
+		ResourceToList: "supportedDatabaseFlags",
+	}
+	result, err := transport_tpg.GetPaginatedItemsSlice(opts)
 	if err != nil {
 		return err
 	}

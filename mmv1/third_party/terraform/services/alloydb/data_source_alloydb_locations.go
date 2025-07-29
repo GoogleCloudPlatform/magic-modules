@@ -87,7 +87,16 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error setting api endpoint")
 	}
 
-	listedLocations, err := transport_tpg.PluralDataSourceGetList(d, config, &billingProject, userAgent, url, nil, nil, "locations")
+	opts := transport_tpg.GetPaginatedItemsSliceOptions{
+		ResourceData:   d,
+		Config:         config,
+		BillingProject: &billingProject,
+		UserAgent:      userAgent,
+		URL:            url,
+		ResourceToList: "locations",
+		Params:         map[string]string{"filter": "name:projects/{{project}}/locations/*"},
+	}
+	listedLocations, err := transport_tpg.GetPaginatedItemsSlice(opts)
 	if err != nil {
 		return err
 	}
