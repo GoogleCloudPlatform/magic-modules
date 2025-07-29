@@ -231,12 +231,6 @@ func GetPaginatedItemsSlice(paginationOptions GetPaginatedItemsSliceOptions) ([]
 			return nil, HandleNotFoundError(err, paginationOptions.ResourceData, fmt.Sprintf("%s %q", paginationOptions.ResourceToList, paginationOptions.ResourceData.Id()))
 		}
 
-		if res == nil {
-			log.Printf("[DEBUG] Removing %s because it no longer exists.", paginationOptions.ResourceToList)
-			paginationOptions.ResourceData.SetId("")
-			return nil, nil
-		}
-
 		var newItems []interface{}
 		if paginationOptions.ListFlattener != nil {
 			if res[paginationOptions.ResourceToList] != nil {
@@ -300,12 +294,6 @@ func GetPaginatedItemsMap(paginationOptions GetPaginatedItemsMapOptions) ([]map[
 		res, err := SendRequest(opts)
 		if err != nil {
 			return nil, HandleNotFoundError(err, paginationOptions.ResourceData, fmt.Sprintf("%s %q", paginationOptions.ResourceToList, paginationOptions.ResourceData.Id()))
-		}
-
-		if res == nil {
-			log.Printf("[DEBUG] Removing %s because it no longer exists.", paginationOptions.ResourceToList)
-			paginationOptions.ResourceData.SetId("")
-			return nil, nil
 		}
 
 		var newItems []map[string]interface{}
