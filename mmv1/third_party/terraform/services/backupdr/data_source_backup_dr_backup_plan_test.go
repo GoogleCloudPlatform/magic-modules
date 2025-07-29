@@ -130,7 +130,7 @@ resource "google_backup_dr_backup_plan" "csql-test" {
   lifecycle {
     ignore_changes = [backup_vault]
   }
-  log_retention_days = 5
+  log_retention_days = 4
   backup_rules {
     rule_id = "rule-1"
     backup_retention_days = 5
@@ -143,7 +143,7 @@ resource "google_backup_dr_backup_plan" "csql-test" {
         end_hour_of_day = 24
       }
     }
-	}
+  }
 }
 
 data "google_backup_dr_backup_plan" "fetch-bp" {
