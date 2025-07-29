@@ -39,7 +39,7 @@ resource "google_pubsub_subscription" "{{$.PrimaryResourceId}}" {
     for_each = local.smts
 
     content {
-      disabled = each.value.disabled ? each.value.disabled : null
+      lookup(each.value, "disabled", null)
       javascript_udf {
         function_name = each.value.function_name
         code = each.value.code
