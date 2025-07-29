@@ -285,14 +285,6 @@ properties:
                             description: |-
                               Transfer the call to a phone number
                               in [E.164 format](https://en.wikipedia.org/wiki/E.164).
-                          - name: sipUri
-                            type: String
-                            description: Transfer the call to a SIP endpoint.
-                          - name: useOriginatingTrunk
-                            type: Boolean
-                            description: |-
-                              Whether to use the originating SIP trunk of the incoming call to make the
-                              outbound call for the transfer.
                       - name: knowledgeInfoCard
                         type: NestedObject
                         description: |-
@@ -684,14 +676,6 @@ properties:
                                             description: |-
                                               Transfer the call to a phone number
                                               in [E.164 format](https://en.wikipedia.org/wiki/E.164).
-                                          - name: sipUri
-                                            type: String
-                                            description: Transfer the call to a SIP endpoint.
-                                          - name: useOriginatingTrunk
-                                            type: Boolean
-                                            description: |-
-                                              Whether to use the originating SIP trunk of the incoming call to make the
-                                              outbound call for the transfer.
                                       - name: knowledgeInfoCard
                                         type: NestedObject
                                         description: |-
@@ -1040,14 +1024,6 @@ properties:
                             description: |-
                               Transfer the call to a phone number
                               in [E.164 format](https://en.wikipedia.org/wiki/E.164).
-                          - name: sipUri
-                            type: String
-                            description: Transfer the call to a SIP endpoint.
-                          - name: useOriginatingTrunk
-                            type: Boolean
-                            description: |-
-                              Whether to use the originating SIP trunk of the incoming call to make the
-                              outbound call for the transfer.
                       - name: knowledgeInfoCard
                         type: NestedObject
                         description: |-
@@ -1439,14 +1415,6 @@ properties:
                                             description: |-
                                               Transfer the call to a phone number
                                               in [E.164 format](https://en.wikipedia.org/wiki/E.164).
-                                          - name: sipUri
-                                            type: String
-                                            description: Transfer the call to a SIP endpoint.
-                                          - name: useOriginatingTrunk
-                                            type: Boolean
-                                            description: |-
-                                              Whether to use the originating SIP trunk of the incoming call to make the
-                                              outbound call for the transfer.
                                       - name: knowledgeInfoCard
                                         type: NestedObject
                                         description: |-
