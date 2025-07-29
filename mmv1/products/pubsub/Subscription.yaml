@@ -116,12 +116,12 @@ examples:
       subscription_name: 'example-subscription'
       bucket_name: 'example-bucket'
       service_account_id: 'example-stw'
-  - name: 'pubsub_subscription_using_single_smt'
+  - name: 'pubsub_subscription_single_smt'
     primary_resource_id: 'example'
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
-  - name: 'pubsub_subscription_using_multiple_smts'
+  - name: 'pubsub_subscription_multiple_smts'
     primary_resource_id: 'example'
     vars:
       topic_name: 'example-topic'
