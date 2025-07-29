@@ -1358,6 +1358,11 @@ func expandCors(configured []interface{}) []*storage.BucketCors {
 			}
 			corsRule.ResponseHeader = headers
 		}
+
+		if v, ok := data["max_age_seconds"].(int); ok {
+			corsRule.MaxAgeSeconds = int64(v)
+		}
+		
 		if data["send_max_age_seconds_if_zero"].(bool) {
 			corsRule.ForceSendFields = append(corsRule.ForceSendFields, "MaxAgeSeconds")
 		}
