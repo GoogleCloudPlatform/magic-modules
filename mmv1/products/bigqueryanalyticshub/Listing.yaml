@@ -41,7 +41,6 @@ iam_policy:
     - '{{listing_id}}'
 custom_code:
   pre_update: 'templates/terraform/pre_update/bigqueryanalyticshub_listing.go.tmpl'
-  constants: 'templates/terraform/constants/bigquery_analyticshub_listing.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/bigquery_analytics_hub_listing.go.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true

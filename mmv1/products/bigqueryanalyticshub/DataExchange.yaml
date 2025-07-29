@@ -41,7 +41,6 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/dataExchanges/{{data_exchange_id}}'
     - '{{data_exchange_id}}'
 custom_code:
-  constants: 'templates/terraform/constants/bigquery_analyticshub_dataexchange.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "US"
