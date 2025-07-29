@@ -190,8 +190,8 @@ func IsApiNotEnabledError(err error) bool {
 	return false
 }
 
-type PluralDataSourceGetListOptions struct {
-	D              *schema.ResourceData
+type GetPaginatedItemsSliceOptions struct {
+	ResourceData   *schema.ResourceData
 	Config         *Config
 	BillingProject *string
 	UserAgent      string
@@ -201,60 +201,60 @@ type PluralDataSourceGetListOptions struct {
 	ResourceToList string
 }
 
-func PluralDataSourceGetList(opt PluralDataSourceGetListOptions) ([]interface{}, error) {
-	if opt.Params == nil {
-		opt.Params = make(map[string]string)
+func GetPaginatedItemsSlice(paginationOptions GetPaginatedItemsSliceOptions) ([]interface{}, error) {
+	if paginationOptions.Params == nil {
+		paginationOptions.Params = make(map[string]string)
 	}
 
 	items := make([]interface{}, 0)
 	for {
 		// Depending on previous iterations, opt.Params might contain a pageToken param
-		url, err := AddQueryParams(opt.URL, opt.Params)
+		url, err := AddQueryParams(paginationOptions.URL, paginationOptions.Params)
 		if err != nil {
 			return nil, err
 		}
 
 		headers := make(http.Header)
 		opts := SendRequestOptions{
-			Config:               opt.Config,
+			Config:               paginationOptions.Config,
 			Method:               "GET",
 			RawURL:               url,
-			UserAgent:            opt.UserAgent,
+			UserAgent:            paginationOptions.UserAgent,
 			Headers:              headers,
 			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
 		}
-		if opt.BillingProject != nil {
-			opts.Project = *opt.BillingProject
+		if paginationOptions.BillingProject != nil {
+			opts.Project = *paginationOptions.BillingProject
 		}
 		res, err := SendRequest(opts)
 		if err != nil {
-			return nil, HandleNotFoundError(err, opt.D, fmt.Sprintf("%s %q", opt.ResourceToList, opt.D.Id()))
+			return nil, HandleNotFoundError(err, paginationOptions.ResourceData, fmt.Sprintf("%s %q", paginationOptions.ResourceToList, paginationOptions.ResourceData.Id()))
 		}
 
 		if res == nil {
-			log.Printf("[DEBUG] Removing %s because it no longer exists.", opt.ResourceToList)
-			opt.D.SetId("")
+			log.Printf("[DEBUG] Removing %s because it no longer exists.", paginationOptions.ResourceToList)
+			paginationOptions.ResourceData.SetId("")
 			return nil, nil
 		}
 
 		var newItems []interface{}
-		if opt.ListFlattener != nil {
-			if res[opt.ResourceToList] != nil {
-				flattened, err := opt.ListFlattener(opt.Config, res[opt.ResourceToList])
+		if paginationOptions.ListFlattener != nil {
+			if res[paginationOptions.ResourceToList] != nil {
+				flattened, err := paginationOptions.ListFlattener(paginationOptions.Config, res[paginationOptions.ResourceToList])
 				if err != nil {
 					return nil, err
 				}
 				newItems = flattened
 			}
 		} else {
-			if v, ok := res[opt.ResourceToList].([]interface{}); ok {
+			if v, ok := res[paginationOptions.ResourceToList].([]interface{}); ok {
 				newItems = v
 			}
 		}
 		items = append(items, newItems...)
 
 		if v, ok := res["nextPageToken"]; ok && v != nil && v.(string) != "" {
-			opt.Params["pageToken"] = v.(string)
+			paginationOptions.Params["pageToken"] = v.(string)
 		} else {
 			break
 		}
@@ -262,8 +262,8 @@ func PluralDataSourceGetList(opt PluralDataSourceGetListOptions) ([]interface{},
 	return items, nil
 }
 
-type PluralDataSourceGetListMapOptions struct {
-	D              *schema.ResourceData
+type GetPaginatedItemsMapOptions struct {
+	ResourceData   *schema.ResourceData
 	Config         *Config
 	BillingProject *string
 	UserAgent      string
@@ -273,52 +273,52 @@ type PluralDataSourceGetListMapOptions struct {
 	ResourceToList string
 }
 
-func PluralDataSourceGetListMap(opt PluralDataSourceGetListMapOptions) ([]map[string]interface{}, error) {
-	if opt.Params == nil {
-		opt.Params = make(map[string]string)
+func GetPaginatedItemsMap(paginationOptions GetPaginatedItemsMapOptions) ([]map[string]interface{}, error) {
+	if paginationOptions.Params == nil {
+		paginationOptions.Params = make(map[string]string)
 	}
 
 	items := make([]map[string]interface{}, 0)
 	for {
-		url, err := AddQueryParams(opt.URL, opt.Params)
+		url, err := AddQueryParams(paginationOptions.URL, paginationOptions.Params)
 		if err != nil {
 			return nil, err
 		}
 
 		headers := make(http.Header)
 		opts := SendRequestOptions{
-			Config:               opt.Config,
+			Config:               paginationOptions.Config,
 			Method:               "GET",
 			RawURL:               url,
-			UserAgent:            opt.UserAgent,
+			UserAgent:            paginationOptions.UserAgent,
 			Headers:              headers,
 			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
 		}
-		if opt.BillingProject != nil {
-			opts.Project = *opt.BillingProject
+		if paginationOptions.BillingProject != nil {
+			opts.Project = *paginationOptions.BillingProject
 		}
 		res, err := SendRequest(opts)
 		if err != nil {
-			return nil, HandleNotFoundError(err, opt.D, fmt.Sprintf("%s %q", opt.ResourceToList, opt.D.Id()))
+			return nil, HandleNotFoundError(err, paginationOptions.ResourceData, fmt.Sprintf("%s %q", paginationOptions.ResourceToList, paginationOptions.ResourceData.Id()))
 		}
 
 		if res == nil {
-			log.Printf("[DEBUG] Removing %s because it no longer exists.", opt.ResourceToList)
-			opt.D.SetId("")
+			log.Printf("[DEBUG] Removing %s because it no longer exists.", paginationOptions.ResourceToList)
+			paginationOptions.ResourceData.SetId("")
 			return nil, nil
 		}
 
 		var newItems []map[string]interface{}
-		if opt.ListFlattener != nil {
-			if res[opt.ResourceToList] != nil {
-				flattened, err := opt.ListFlattener(opt.Config, res[opt.ResourceToList])
+		if paginationOptions.ListFlattener != nil {
+			if res[paginationOptions.ResourceToList] != nil {
+				flattened, err := paginationOptions.ListFlattener(paginationOptions.Config, res[paginationOptions.ResourceToList])
 				if err != nil {
 					return nil, err
 				}
 				newItems = flattened
 			}
 		} else {
-			if v, ok := res[opt.ResourceToList].([]interface{}); ok {
+			if v, ok := res[paginationOptions.ResourceToList].([]interface{}); ok {
 				for _, item := range v {
 					if m, ok := item.(map[string]interface{}); ok {
 						newItems = append(newItems, m)
@@ -331,7 +331,7 @@ func PluralDataSourceGetListMap(opt PluralDataSourceGetListMapOptions) ([]map[st
 		items = append(items, newItems...)
 
 		if v, ok := res["nextPageToken"]; ok && v != nil && v.(string) != "" {
-			opt.Params["pageToken"] = v.(string)
+			paginationOptions.Params["pageToken"] = v.(string)
 		} else {
 			break
 		}

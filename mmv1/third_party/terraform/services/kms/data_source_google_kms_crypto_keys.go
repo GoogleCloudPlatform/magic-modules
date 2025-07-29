@@ -124,7 +124,16 @@ func dataSourceKMSCryptoKeysList(d *schema.ResourceData, meta interface{}, keyRi
 		params["filter"] = filter.(string)
 	}
 
-	resp, err := transport_tpg.PluralDataSourceGetList(d, config, &billingProject, userAgent, url, nil, params, "cryptoKeys")
+	opt := transport_tpg.PluralDataSourceGetListOptions{
+		ResourceData:   d,
+		Config:         config,
+		BillingProject: &billingProject,
+		UserAgent:      userAgent,
+		URL:            url,
+		Params:         params,
+		ResourceToList: "cryptoKeys",
+	}
+	resp, err := transport_tpg.PluralDataSourceGetList(opt)
 	if err != nil {
 		return nil, err
 	}
