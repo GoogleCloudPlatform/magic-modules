@@ -9,6 +9,13 @@ resource "google_compute_storage_pool" "{{$.PrimaryResourceId}}" {
 
   zone = "us-central1-a"
 
+  labels = {
+    environment = "test"
+    purpose     = "storage-pool-testing"
+    team        = "infrastructure"
+    cost_center = "engineering"
+  }
+
   deletion_protection = false
 }
 
