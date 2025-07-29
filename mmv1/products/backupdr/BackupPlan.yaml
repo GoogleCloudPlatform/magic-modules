@@ -47,6 +47,7 @@ examples:
       project: :PROJECT_NAME
   - name: 'backup_dr_backup_plan_for_csql_resource'
     primary_resource_id: 'my-csql-backup-plan-1'
+    min_version: 'beta'
     vars:
       backup_vault_id: 'backup-vault-csql-test'
       backup_plan_id: 'backup-plan-csql-test'
@@ -103,7 +104,7 @@ properties:
     type: String
     description: |
       The resource type to which the `BackupPlan` will be applied.
-      Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", and "storage.googleapis.com/Bucket".
+      Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", "sqladmin.googleapis.com/Instance" and "storage.googleapis.com/Bucket".
     required: true
   - name: 'createTime'
     type: String
