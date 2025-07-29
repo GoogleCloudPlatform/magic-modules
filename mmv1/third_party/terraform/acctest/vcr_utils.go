@@ -53,6 +53,8 @@ var configs map[string]*transport_tpg.Config
 
 var sources map[string]VcrSource
 
+var diffFlag = "[Diff]"
+
 // VcrSource is a source for a given VCR test with the value that seeded it
 type VcrSource struct {
 	seed   int64
@@ -150,7 +152,6 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		tempOutputFile, err := createTemporaryFile()
 		if err != nil {
 			t.Errorf("creating temporary file %v", err)
-			t.Fail()
 		}
 		defer func() {
 			writeOutputFileDeferFunction(tempOutputFile, t.Failed())
@@ -265,15 +266,14 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, tempOutputF
 		}
 	}
 	// InsertDiffSteps adds modified steps to the test that run with an external provider
-	// these steps do the actual infrastructure provisioning, and c.Steps is updated to have these modified steps
-	c.Steps = InsertDiffSteps(c, tempOutputFile, releaseProvider, localProviderName)
-
+	// these steps do the actual infrastructure provisioning, and c.Steps is updated in the method to have the modified steps
+	InsertDiffSteps(c, tempOutputFile, releaseProvider, localProviderName)
 	return
 }
 
 // InsertDiffSteps inserts a new step into the test case that reformats the config to use the release provider - this allows us to see the diff
 // between the local provider and the release provider
-func InsertDiffSteps(c resource.TestCase, tempOutputFile *os.File, releaseProvider string, localProviderName string) []resource.TestStep {
+func InsertDiffSteps(c resource.TestCase, tempOutputFile *os.File, releaseProvider string, localProviderName string) {
 	var countSteps = 0
 
 	var replacementSteps []resource.TestStep
@@ -285,7 +285,7 @@ func InsertDiffSteps(c resource.TestCase, tempOutputFile *os.File, releaseProvid
 			testStep.Config = ReformConfigWithProvider(ogConfig, localProviderName)
 			fmt.Fprintf(tempOutputFile, "[DEBUG] Reformatted config: %s\n", testStep.Config)
 			testStep.PreConfig = func() {
-				fmt.Fprintf(tempOutputFile, "[Diff] Step %d\n", countSteps)
+				fmt.Fprintf(tempOutputFile, "%s Step %d\n", diffFlag, countSteps)
 			}
 			if testStep.ExpectError == nil && !testStep.PlanOnly {
 				newStep := resource.TestStep{
@@ -303,7 +303,7 @@ func InsertDiffSteps(c resource.TestCase, tempOutputFile *os.File, releaseProvid
 			replacementSteps = append(replacementSteps, testStep)
 		}
 	}
-	return replacementSteps
+	c.Steps = replacementSteps
 }
 
 // reformConfigWithProvider reformats the config to use the given provider
@@ -315,6 +315,7 @@ func ReformConfigWithProvider(config, provider string) string {
 	providerReplacement := fmt.Sprintf("provider = %s", provider)
 	providerReplacementBytes := []byte(providerReplacement)
 	providerBlock := regexp.MustCompile(`provider *=.*google-beta.*`)
+
 	if providerBlock.Match(configBytes) {
 		out := string(providerBlock.ReplaceAll(configBytes, providerReplacementBytes))
 		return out
@@ -324,6 +325,7 @@ func ReformConfigWithProvider(config, provider string) string {
 	providerReplacementBytes = []byte(providerReplacement)
 	// Match resource and data blocks that use google_ provider
 	// regex matches for labels resource and data blocks that use google_ provider
+
 	resourceHeader := regexp.MustCompile(`((resource|data) .*google_.* .*\w+.*\{ *)`)
 	return string(resourceHeader.ReplaceAll(configBytes, providerReplacementBytes))
 }
@@ -358,7 +360,7 @@ func ParseReleaseDiffOutput(output string) (isDiff bool) {
 	lines := strings.Split(trimmedOutput, "\n")
 	lastLine := lines[len(lines)-1]
 
-	isDiff = strings.HasPrefix(lastLine, "[Diff]")
+	isDiff = strings.HasPrefix(lastLine, diffFlag)
 
 	return isDiff
 }
@@ -372,32 +374,32 @@ func writeOutputFileDeferFunction(tempOutputFile *os.File, failed bool) {
 
 	testOutput, err := ReadDiffOutput(tempOutputFile)
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "Error reading temporary file: %v\n", err)
+		fmt.Printf("Error reading temporary file: %v\n", err)
 		return
 	}
 	isDiff := ParseReleaseDiffOutput(testOutput)
 	tempOutputFile.Close()
 	err = os.Remove(tempOutputFile.Name())
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "Temporary File Deletion Error: %v\n", err)
+		fmt.Printf("Temporary File Deletion Error: %v\n", err)
 	}
 	regularFailureFile, err := os.Create(filepath.Join("", "regular_failure_file.log"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
+		fmt.Printf("Error creating file: %v\n", err)
 		return
 	}
 	defer regularFailureFile.Close()
 	diffFailureFile, err := os.Create(filepath.Join("", "diff_failure_file.log"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error creating file: %v\n", err)
+		fmt.Printf("Error creating file: %v\n", err)
 		return
 	}
 	defer diffFailureFile.Close()
 	if failed {
 		// Check if the output line starts with "[Diff]"
 		if isDiff {
-			fmt.Fprintf(os.Stdout, "[Diff] Breaking Change Detected] \n")
-			fmt.Fprintf(diffFailureFile, "[Diff] %s\n", testOutput)
+			fmt.Fprintf(os.Stdout, "%s Breaking Change Detected] \n", diffFlag)
+			fmt.Fprintf(diffFailureFile, "%s %s\n", diffFlag, testOutput)
 		} else {
 			fmt.Fprintf(regularFailureFile, testOutput)
 			fmt.Fprintf(regularFailureFile, "FAILED --- %s\n", testOutput)

@@ -529,15 +529,14 @@ func TestInsertDiffSteps(t *testing.T) {
 		if step.Config != expectedSteps[i].Config {
 			t.Fatalf("Expected step %d config to be:\n%q\nbut got:\n%q", i, expectedSteps[i].Config, step.Config)
 		}
-		if (i % 2) == 1 {
-			if step.ExpectNonEmptyPlan != false {
-				t.Fatalf("Expected step %d to have ExpectNonEmptyPlan set to false, but got true", i)
-			}
-			if step.PlanOnly != true {
-				t.Fatalf("Expected step %d to have PlanOnly set to true, but got false", i)
-			}
+		if step.ExpectNonEmptyPlan != expectedSteps[i].ExpectNonEmptyPlan {
+			t.Fatalf("Expected step %d to have ExpectNonEmptyPlan set to %v, but got %v", i, expectedSteps[i].ExpectNonEmptyPlan, step.ExpectNonEmptyPlan)
+		}
+		if step.PlanOnly != expectedSteps[i].PlanOnly {
+			t.Fatalf("Expected step %d to have PlanOnly set to %v, but got %v", i, expectedSteps[i].PlanOnly, step.PlanOnly)
 		}
 	}
+
 	defer os.Remove(temp_file.Name())
 
 }
