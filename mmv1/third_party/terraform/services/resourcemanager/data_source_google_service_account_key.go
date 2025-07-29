@@ -32,6 +32,7 @@ func DataSourceGoogleServiceAccountKey() *schema.Resource {
 			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Deprecated:  "`project` is deprecated and will be removed in a future major release. This field is non-functional and can be removed from your configuration safely.",
 			},
 			"key_algorithm": {
 				Type:     schema.TypeString,
