@@ -310,10 +310,9 @@ func ResourceStorageBucketObject() *schema.Resource {
 			},
 
 			"deletion_policy": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Description: `The deletion policy for the object. Setting ABANDON allows the resource
-				to be abandoned rather than deleted. Possible values are: "ABANDON".`,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  `The deletion policy for the object. Setting ABANDON allows the resource to be abandoned rather than deleted.`,
 				ValidateFunc: validation.StringInSlice([]string{"ABANDON"}, false),
 			},
 		},
@@ -581,7 +580,7 @@ func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{})
 	}
 
 	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
-		log.Printf("[WARN] Object %q deletion_policy is set to 'ABANDON', skip deleting object in the bucket", d.Id())
+		log.Printf("[WARN] Object %q deletion_policy is set to 'ABANDON', object deletion has been abandoned", d.Id())
 		d.SetId("")
 		return nil
 	}

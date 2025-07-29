@@ -629,6 +629,15 @@ func TestAccStorageObject_objectDeletionPolicy(t *testing.T) {
 			{
 				Config: testGoogleStorageBucketsObjectDeletionPolicy(bucketName, "samplecontent"),
 			},
+			{
+				Config: testGoogleStorageBucketsObjectAbandon(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageObjectExists(t, bucketName),
+				),
+			},
+			{
+				Config: testGoogleStorageBucketsObjectAbandon(bucketName),
+			},
 		},
 	})
 }
@@ -1103,7 +1112,6 @@ func testGoogleStorageBucketsObjectDeletionPolicy(bucketName string, customConte
 resource "google_storage_bucket" "bucket" {
   name          = "%s"
   location      = "US"
-  force_destroy = true
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -1113,4 +1121,27 @@ resource "google_storage_bucket_object" "object" {
   deletion_policy = "ABANDON"
 }
 `, bucketName, objectName, customContent)
+}
+
+func testGoogleStorageBucketsObjectAbandon(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+`, bucketName)
+}
+
+func testAccCheckStorageObjectExists(t *testing.T, bucketName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+
+		config := acctest.GoogleProviderConfig(t)
+
+		_, err := config.NewStorageClient(config.UserAgent).Objects.Get(bucketName, objectName).Do()
+		if err != nil {
+			return err
+		}
+		return nil
+	}
 }
