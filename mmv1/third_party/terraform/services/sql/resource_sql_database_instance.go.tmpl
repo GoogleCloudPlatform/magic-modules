@@ -1412,11 +1412,13 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	// Perform a backup restore if the backup context exists
 	if r, ok := d.GetOk("restore_backup_context"); ok {
+	log.Printf("[DEBUG] Restoring instance %s from backup context: %v", name, r)
 		err = sqlDatabaseInstanceRestoreFromBackup(d, config, userAgent, project, name, r, "")
 		if err != nil {
 			return err
 		}
 	} else if b, ok := d.GetOk("backupdr_backup"); ok && b.(string) != "" {
+	log.Printf("[DEBUG] Restoring instance %s from BackupDR backup: %s", name, b.(string))
 		err = sqlDatabaseInstanceRestoreFromBackup(d, config, userAgent, project, name, nil, b)
 		if err != nil {
 			return err

@@ -1319,7 +1319,7 @@ func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 	})
 }
 
-//	this test cannot be ran locally without seeding your environment with a backup vault and scheduling the backup of a compute instance 
+//	this test cannot be ran locally without seeding your environment with a backup vault and scheduling the backup of a sql instance 
 //	to generate a unique datasourceId, that this test would need to be modified to use. the values in this test correspond to those used
 //	in our testing processes.
 func TestAccSqlDatabaseInstance_restoreFromBackupdrBackup(t *testing.T) {
@@ -5905,7 +5905,6 @@ data "google_backup_dr_backup" "foo" {
   backup_vault_id = "%{backup_vault_id}"
   data_source_id = "%{data_source_id}"
 }
-
 `, context)
 }
 
