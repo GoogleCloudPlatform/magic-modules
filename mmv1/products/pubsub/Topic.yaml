@@ -99,6 +99,14 @@ examples:
     primary_resource_id: 'example'
     vars:
       topic_name: 'example-topic'
+  - name: 'pubsub_topic_using_single_smt'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+  - name: 'pubsub_topic_using_multiple_smts'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
 parameters:
 properties:
   - name: 'name'
