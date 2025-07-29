@@ -92,11 +92,9 @@ func testAccCheckParentHasSubPrefix(t *testing.T, project, region, parentName, s
 			return err
 		}
 
-		t.Logf("Checking for sub-prefix %q inside parent %q. Found sub-prefixes: %v", newSubPrefixName, parentName, parent.PublicDelegatedSubPrefixs)
-
 		for _, sub := range parent.PublicDelegatedSubPrefixs {
 			if sub.Name == newSubPrefixName {
-				return nil
+				return fmt.Errorf("SUCCESS (for debugging): Found match for %q. Full list: %v", newSubPrefixName, parent.PublicDelegatedSubPrefixs)
 			}
 		}
 
