@@ -55,11 +55,15 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'displayName'
+  - name: 'shortName'
     type: String
     description: |
-      A textual name of the security policy.
-    min_version: 'beta'
+      User-provided name of the organization security policy. The name should be unique in the organization
+      in which the security policy is created. This should only be used when SecurityPolicyType is CLOUD_ARMOR.
+      The name must be 1-63 characters long, and comply with https://www.ietf.org/rfc/rfc1035.txt. Specifically,
+      the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])? which means
+      the first character must be a lowercase letter, and all following characters must be a dash, lowercase letter,
+      or digit, except the last character, which cannot be a dash.
     required: true
     immutable: true
   - name: 'description'
@@ -83,6 +87,7 @@ properties:
     output: true
   - name: 'type'
     type: Enum
+    default_from_api: true
     description: |
       The type indicates the intended use of the security policy.
 
