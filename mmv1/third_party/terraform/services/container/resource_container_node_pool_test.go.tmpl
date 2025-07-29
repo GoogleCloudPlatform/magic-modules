@@ -346,6 +346,7 @@ func TestAccContainerNodePool_withClusterBootDisk(t *testing.T) {
 				ResourceName:      "google_container_cluster.cluster",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
