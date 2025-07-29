@@ -253,17 +253,20 @@ properties:
                         properties:
                           - name: segments
                             type: Array
+                            output: true
                             description: Segments this audio response is composed of.
                             item_type:
                               type: NestedObject
                               properties:
                                 - name: audio
                                   type: String
+                                  output: true
                                   description: |-
                                     Raw audio synthesized from the Dialogflow agent's response using
                                     the output config specified in the request.
                                 - name: uri
                                   type: String
+                                  output: true
                                   description: |-
                                     Client-specific URI that points to an audio clip accessible to the
                                     client. Dialogflow does not impose any validation on it.
@@ -644,17 +647,20 @@ properties:
                                         properties:
                                           - name: segments
                                             type: Array
+                                            output: true
                                             description: Segments this audio response is composed of.
                                             item_type:
                                               type: NestedObject
                                               properties:
                                                 - name: audio
                                                   type: String
+                                                  output: true
                                                   description: |-
                                                     Raw audio synthesized from the Dialogflow agent's response using
                                                     the output config specified in the request.
                                                 - name: uri
                                                   type: String
+                                                  output: true
                                                   description: |-
                                                     Client-specific URI that points to an audio clip accessible to the
                                                     client. Dialogflow does not impose any validation on it.
@@ -992,17 +998,20 @@ properties:
                         properties:
                           - name: segments
                             type: Array
+                            output: true
                             description: Segments this audio response is composed of.
                             item_type:
                               type: NestedObject
                               properties:
                                 - name: audio
                                   type: String
+                                  output: true
                                   description: |-
                                     Raw audio synthesized from the Dialogflow agent's response using
                                     the output config specified in the request.
                                 - name: uri
                                   type: String
+                                  output: true
                                   description: |-
                                     Client-specific URI that points to an audio clip accessible to the
                                     client. Dialogflow does not impose any validation on it.
@@ -1383,17 +1392,20 @@ properties:
                                         properties:
                                           - name: segments
                                             type: Array
+                                            output: true
                                             description: Segments this audio response is composed of.
                                             item_type:
                                               type: NestedObject
                                               properties:
                                                 - name: audio
                                                   type: String
+                                                  output: true
                                                   description: |-
                                                     Raw audio synthesized from the Dialogflow agent's response using
                                                     the output config specified in the request.
                                                 - name: uri
                                                   type: String
+                                                  output: true
                                                   description: |-
                                                     Client-specific URI that points to an audio clip accessible to the
                                                     client. Dialogflow does not impose any validation on it.
