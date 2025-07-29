@@ -1239,14 +1239,6 @@ func TestAccDataprocCluster_withClusterTier(t *testing.T) {
 		CheckDestroy:             testAccCheckDataprocClusterDestroy(t),
 		Steps: []resource.TestStep{
 			{
-				// Test with default value (CLUSTER_TIER_UNSPECIFIED)
-				Config: testAccDataprocCluster_withClusterTier(rnd, subnetworkName, ""),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckDataprocClusterExists(t, "google_dataproc_cluster.tier_cluster", &cluster),
-					resource.TestCheckResourceAttr("google_dataproc_cluster.tier_cluster", "cluster_config.0.cluster_tier", "CLUSTER_TIER_UNSPECIFIED"),
-				),
-			},
-			{
 				// Set tier to CLUSTER_TIER_STANDARD
 				Config: testAccDataprocCluster_withClusterTier(rnd, subnetworkName, "CLUSTER_TIER_STANDARD"),
 				Check: resource.ComposeTestCheckFunc(

@@ -560,7 +560,6 @@ func ResourceDataprocCluster() *schema.Resource {
 							AtLeastOneOf: clusterConfigKeys,
 							ForceNew:     true,
 							ValidateFunc: validation.StringInSlice([]string{"CLUSTER_TIER_UNSPECIFIED", "CLUSTER_TIER_STANDARD", "CLUSTER_TIER_PREMIUM"}, false),
-							Default:      "CLUSTER_TIER_UNSPECIFIED",
 						},
 						"staging_bucket": {
 							Type:         schema.TypeString,
