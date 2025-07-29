@@ -53,10 +53,37 @@ import (
 {{- end}}
 )
 
-func DataSourceGoogleCompute{{ $.ResourceName -}}() *schema.Resource { 
-  rs := Resource{{ $.ResourceName -}}().Schema
-    
-  dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(rs)
+func DataSourceGoogleCompute{{ .ResourceName -}}() *schema.Resource {
+	rs := Resource{{ .ResourceName -}}().Schema
+
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(rs)
+	uriParts := strings.Split("{{.SelfLinkUri}}", "/")
+	allFields := []string{}
+	for _, part := range uriParts {
+		if strings.HasPrefix(part, {{ `"{{"` }}) && strings.HasSuffix(part, {{ `"}}"` }}) {
+			field := strings.TrimSuffix(strings.TrimPrefix(part, {{ `"{{"` }}), {{ `"}}"` }})
+			allFields = append(allFields, field)
+		}
+	}
+
+
+  requiredFields := []string{}
+  optionalFields := []string{}
+
+  for _, field := range allFields {
+    // Treat "region" and any field containing "location" as optional
+    if field == "region" || field == "project" {
+      optionalFields = append(optionalFields, field)
+    } else {
+      requiredFields = append(requiredFields, field)
+    }
+  }
+
+  // Set 'Required' schema elements
+  tpgresource.AddRequiredFieldsToSchema(dsSchema, requiredFields...)
+
+  // Set 'Optional' schema elements
+  tpgresource.AddOptionalFieldsToSchema(dsSchema, optionalFields...)
 
   {{if $.CustomCode.CustomDatasourceRead -}} 
     {{- $.CustomTemplate $.CustomCode.CustomDatasourceSchemaUpdate false -}}
@@ -71,15 +98,11 @@ func DataSourceGoogleCompute{{ $.ResourceName -}}() *schema.Resource {
 func dataSourceGoogle{{ $.ResourceName -}}ReadGenerated(d *schema.ResourceData, meta interface{}) error {
   config := meta.(*transport_tpg.Config)
 
-  id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLink}}")
+  id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
     if err != nil {
         return err
     }
   d.SetId(id)
-
-  {{if $.CustomCode.CustomDatasourceRead -}} 
-    {{- $.CustomTemplate $.CustomCode.CustomDatasourceRead false -}}
-  {{- end}}
 
   err = resource{{ $.ResourceName -}}Read(d, meta)
 	if err != nil {
