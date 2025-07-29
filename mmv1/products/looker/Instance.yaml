@@ -411,7 +411,6 @@ properties:
       - LOOKER_CORE_TRIAL_STANDARD: A standard trial edition of Looker (Google Cloud core) product.
       - LOOKER_CORE_TRIAL_ENTERPRISE: An enterprise trial edition of Looker (Google Cloud core) product.
       - LOOKER_CORE_TRIAL_EMBED: An embed trial edition of Looker (Google Cloud core) product.
-      
     immutable: true
     default_value: "LOOKER_CORE_TRIAL"
     enum_values:
