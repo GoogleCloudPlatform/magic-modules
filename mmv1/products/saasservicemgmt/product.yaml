@@ -15,11 +15,9 @@
 name: SaasRuntime
 display_name: SaaS Runtime
 scopes:
-- https://www.googleapis.com/auth/cloud-platform
+  - https://www.googleapis.com/auth/cloud-platform
 versions:
-  - name: 'beta'
-    base_url: https://saasservicemgmt.googleapis.com/v1beta1/
-  - name: 'ga'
+  - name: "beta"
     base_url: https://saasservicemgmt.googleapis.com/v1beta1/
 caibaseurl: ""
 resourceswithcaiassettype: {}
