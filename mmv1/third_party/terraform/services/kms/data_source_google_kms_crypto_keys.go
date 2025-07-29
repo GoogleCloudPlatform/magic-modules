@@ -133,7 +133,7 @@ func dataSourceKMSCryptoKeysList(d *schema.ResourceData, meta interface{}, keyRi
 		Params:         params,
 		ResourceToList: "cryptoKeys",
 	}
-	resp, err := transport_tpg.PluralDataSourceGetList(opt)
+	resp, err := transport_tpg.GetPaginatedItemsSlice(opt)
 	if err != nil {
 		return nil, err
 	}

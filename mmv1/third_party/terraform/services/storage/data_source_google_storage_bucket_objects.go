@@ -73,7 +73,17 @@ func datasourceGoogleStorageBucketObjectsRead(d *schema.ResourceData, meta inter
 	if err != nil {
 		return err
 	}
-	bucketObjects, err = transport_tpg.PluralDataSourceGetListMap(d, config, nil, userAgent, url, flattenDatasourceGoogleBucketObjectsList, params, "items")
+
+	opt := transport_tpg.GetPaginatedItemsMapOptions{
+		ResourceData:   d,
+		Config:         config,
+		UserAgent:      userAgent,
+		URL:            url,
+		Params:         params,
+		ResourceToList: "items",
+		ListFlattener:  flattenDatasourceGoogleBucketObjectsList,
+	}
+	bucketObjects, err = transport_tpg.GetPaginatedItemsMap(opt)
 
 	if err := d.Set("bucket_objects", bucketObjects); err != nil {
 		return fmt.Errorf("Error retrieving bucket_objects: %s", err)
