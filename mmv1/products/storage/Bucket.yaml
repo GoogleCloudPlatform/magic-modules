@@ -392,8 +392,6 @@ properties:
   - name: 'name'
     type: String
     description: 'The name of the bucket'
-    validation:
-      function: 'verify.ValidateGCSName'
   - name: 'owner'
     type: NestedObject
     description: |

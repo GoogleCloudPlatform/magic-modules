@@ -434,7 +434,7 @@ func (t Type) Lineage() string {
 // This format is intended for resource metadata, to be used for connecting a Terraform
 // type with a corresponding API type.
 func (t Type) MetadataLineage() string {
-	if t.ParentMetadata == nil {
+	if t.ParentMetadata == nil || t.ParentMetadata.FlattenObject {
 		return google.Underscore(t.Name)
 	}
 
@@ -1225,7 +1225,7 @@ func (t *Type) ProviderOnly() bool {
 // fields still need to be included, ie:
 // flattenedField > newParent > renameMe should be passed to this function as
 // flattened_field.0.new_parent.0.im_renamed
-// TODO(emilymye): Change format of input for
+// TODO: Change format of input for
 // exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
 // convert to snake in this method
 func (t *Type) GetPropertySchemaPath(schemaPath string) string {
