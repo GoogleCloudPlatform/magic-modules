@@ -12,9 +12,12 @@ function redactSSN(message, metadata) {
 EOF
     },
     {
-      function_name = "largerSMT",
-      # you can retrieve the definitions from files too
-      code = file("./path/to/my/function/definition.js")
+      function_name = "otherFunc",
+      code = <<EOF
+function otherFunc(message, metadata) {
+  return null;
+}
+EOF
     },
     {
       function_name = "someSMTWeDisabled",
