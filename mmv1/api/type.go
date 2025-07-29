@@ -1201,6 +1201,13 @@ func (t *Type) IsForceNew() bool {
 	return !(parent.FlattenObject && t.IsA("KeyValueLabels"))
 }
 
+func (t *Type) ApiNameWithWo() string {
+	if t.WriteOnly {
+		return fmt.Sprintf("%sWo", t.ApiName)
+	}
+	return t.ApiName
+}
+
 // Returns true if the type does not correspond to an API type
 func (t *Type) ProviderOnly() bool {
 	// These are special case fields created by the generator which have no API counterpart

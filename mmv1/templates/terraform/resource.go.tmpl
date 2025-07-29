@@ -170,13 +170,7 @@ func resource{{ $.ResourceName }}{{ camelize $prop.Name "upper" }}SetStyleDiff(_
 }
 {{- end}}
 
-{{- $hasWriteOnlyProp := false -}}
-{{- range $prop := $.SettableProperties -}}
-    {{- if $prop.WriteOnly -}}
-        {{- $hasWriteOnlyProp = true -}}
-    {{- end -}}
-{{ end }}
-{{- if $hasWriteOnlyProp -}}
+{{- if $.HasWriteOnlyProp -}}
 func resource{{ $.ResourceName -}}GetRawConfigAttributeAsString(d *schema.ResourceData, key string) string {
     if v := d.GetRawConfig().GetAttr(key); !v.IsNull() {
         return v.AsString()
@@ -201,17 +195,17 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     obj := make(map[string]interface{})
 
 {{- range $prop := $.SettableProperties }}
-    {{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}({{ if $prop.FlattenObject }}nil{{ else if $prop.WriteOnly }}resource{{ $.ResourceName -}}GetRawConfigAttributeAsString(d, "{{ underscore $prop.Name }}"){{ else }}d.Get("{{ underscore $prop.Name }}"){{ end }}, d, config)
+    {{ $prop.ApiNameWithWo -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}({{ if $prop.FlattenObject }}nil{{ else if $prop.WriteOnly }}resource{{ $.ResourceName -}}GetRawConfigAttributeAsString(d, "{{ underscore $prop.Name }}"){{ else }}d.Get("{{ underscore $prop.Name }}"){{ end }}, d, config)
     if err != nil {
         return err
 {{- if $prop.SendEmptyValue -}}
-    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop) {
+    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiNameWithWo -}}Prop) {
 {{-      else if $prop.FlattenObject -}}
-    } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop)) {
+    } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiNameWithWo -}}Prop)) {
 {{-      else -}}
-    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop)) {
+    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiNameWithWo -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiNameWithWo -}}Prop)) {
 {{- end}}
-        obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop
+        obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiNameWithWo -}}Prop
     }
 {{- end}}
 

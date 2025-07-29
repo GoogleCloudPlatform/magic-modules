@@ -81,18 +81,18 @@ func Get{{ $.ResourceName -}}ApiObject(d tpgresource.TerraformResourceData, conf
     obj := make(map[string]interface{})
 {{- range $prop := $.SettableProperties }}
 {{- if $prop.FlattenObject }}
-    {{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(nil, d, config)
+    {{ $prop.ApiNameWithWo -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(nil, d, config)
 {{- else }}
-    {{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(d.Get("{{underscore $prop.Name}}"), d, config)
+    {{ $prop.ApiNameWithWo -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(d.Get("{{underscore $prop.Name}}"), d, config)
 {{- end}}
     if err != nil {
         return nil, err
 {{- if not $prop.SendEmptyValue }}
-    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop)) {
+    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiNameWithWo -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiNameWithWo -}}Prop)) {
 {{- else }}
-    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop) {
+    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiNameWithWo -}}Prop) {
 {{- end }}
-        obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}{{if $prop.WriteOnly -}}Wo{{- end}}Prop
+        obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiNameWithWo -}}Prop
     }
 {{- end}}
 

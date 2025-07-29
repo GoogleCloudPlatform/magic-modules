@@ -887,6 +887,15 @@ func (r Resource) MinVersionObj() *product.Version {
 	}
 }
 
+func (r Resource) HasWriteOnlyProp() bool {
+	for _, prop := range r.AllUserProperties() {
+		if prop.WriteOnly {
+			return true
+		}
+	}
+	return false
+}
+
 func (r Resource) NotInVersion(version *product.Version) bool {
 	return version.CompareTo(r.MinVersionObj()) < 0
 }
