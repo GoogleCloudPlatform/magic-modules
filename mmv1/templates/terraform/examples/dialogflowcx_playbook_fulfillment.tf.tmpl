@@ -26,6 +26,22 @@ resource "google_dialogflow_cx_tool" "my_tool" {
   description  = "Example Description"
 }
 
+resource "google_dialogflow_cx_generator" "my_generator" {
+  parent = google_dialogflow_cx_agent.agent.id
+  language_code = "fr"
+  display_name = "TF Prompt generator"
+  llm_model_settings {
+    model = "gemini-2.0-flash-001"
+    prompt_text = "Return me some great results"
+  }
+  prompt_text {
+    text = "Send me great results in french"
+  }
+  model_parameter {
+    temperature = 0.55
+  }
+}
+
 resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
   parent       = google_dialogflow_cx_agent.agent.id
   display_name = "Playbook Example with Fulfillment"
@@ -60,6 +76,10 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
     steps {
       text = "step 3"
     }
+  }
+  llm_model_settings {
+    model = "gemini-2.0-flash-001"
+    prompt_text = "Return me some great results"
   }
   handlers {
     event_handler {
@@ -106,6 +126,34 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
             tool             = google_dialogflow_cx_tool.my_tool.id
           }
         }
+        messages {
+          knowledge_info_card {
+            maximum_snippets = 1
+          }
+        }
+        messages {
+          mixed_audio {
+            segments {
+              audio = "SGVsbG8gV29ybGQh"
+            }
+          }
+        }
+        messages {
+          mixed_audio {
+            segments {
+              uri   = "https://example.com"
+            }
+          }
+        }
+        generators {
+          generator        = google_dialogflow_cx_generator.my_generator.id
+          input_parameters = {
+              name : "wrench"
+              mass : "1.3kg"
+              count : "3"
+            }
+          output_parameter = "name"
+        }
         advanced_settings {
           audio_export_gcs_destination {
             uri = "${google_storage_bucket.bucket.url}/prefix-"
@@ -145,6 +193,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
       fulfillment {
         return_partial_responses = true
         messages {
+          response_type = "ENTRY_PROMPT"
           channel = "some-channel"
           text {
             text = ["Some text"]
@@ -297,6 +346,34 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
             tool             = google_dialogflow_cx_tool.my_tool.id
           }
         }
+        messages {
+          knowledge_info_card {
+            maximum_snippets = 1
+          }
+        }
+        messages {
+          mixed_audio {
+            segments {
+              audio = "SGVsbG8gV29ybGQh"
+            }
+          }
+        }
+        messages {
+          mixed_audio {
+            segments {
+              uri   = "https://example.com"
+            }
+          }
+        }
+        generators {
+          generator        = google_dialogflow_cx_generator.my_generator.id
+          input_parameters = {
+              name : "wrench"
+              mass : "1.3kg"
+              count : "3"
+            }
+          output_parameter = "name"
+        }
         advanced_settings {
           audio_export_gcs_destination {
             uri = "${google_storage_bucket.bucket.url}/prefix-"
@@ -336,6 +413,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
       fulfillment {
         return_partial_responses = true
         messages {
+          response_type = "ENTRY_PROMPT"
           channel = "some-channel"
           text {
             text = ["Some text"]
