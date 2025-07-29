@@ -480,7 +480,8 @@ func TestInsertDiffSteps(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp file: %v", err)
 	}
-	var releaseDiffSteps = acctest.InsertDiffSteps(dummyCase, temp_file, "google-beta", "google-local")
+	acctest.InsertDiffSteps(dummyCase, temp_file, "google-beta", "google-local")
+	var releaseDiffSteps = dummyCase.Steps
 
 	var expectedSteps = []resource.TestStep{
 		{
