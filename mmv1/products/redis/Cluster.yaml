@@ -191,10 +191,8 @@ examples:
       deletion_protection_enabled: 'true'
     test_vars_overrides:
       'deletion_protection_enabled': 'false'
-      'allow_fewer_zones_deployment': 'true'
     oics_vars_overrides:
       'deletion_protection_enabled': 'false'
-      'allow_fewer_zones_deployment': 'true'
   - name: "redis_cluster_cmek"
     primary_resource_id: "cluster-cmek"
     bootstrap_iam:
