@@ -14,7 +14,7 @@ resource "google_memorystore_instance" "{{$.PrimaryResourceId}}" {
   engine_configs = {     
     maxmemory-policy           = "volatile-ttl"
   }
-  allow_fewer_zones_deployment = "{{index $.Vars "allow_fewer_zone"}}"
+  allow_fewer_zones_deployment = true
   zone_distribution_config {
     mode                       = "SINGLE_ZONE"
     zone                       = "us-central1-b"
