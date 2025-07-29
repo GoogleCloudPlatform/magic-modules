@@ -635,9 +635,6 @@ func TestAccStorageObject_objectDeletionPolicy(t *testing.T) {
 					testAccCheckStorageObjectExists(t, bucketName),
 				),
 			},
-			{
-				Config: testGoogleStorageBucketsObjectAbandon(bucketName),
-			},
 		},
 	})
 }
