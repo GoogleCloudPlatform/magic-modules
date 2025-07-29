@@ -189,7 +189,6 @@ examples:
       subnet_name: "my-subnet"
       network_name: "my-network"
       deletion_protection_enabled: 'true'
-      allow_fewer_zones_deployment: 'true'
     test_vars_overrides:
       'deletion_protection_enabled': 'false'
       'allow_fewer_zones_deployment': 'true'
