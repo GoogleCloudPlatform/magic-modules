@@ -151,8 +151,6 @@ properties:
         exactly_one_of:
           - 'sharing_environment_config.0.default_exchange_config'
           - 'sharing_environment_config.0.dcr_exchange_config'
-        conflicts:
-          - 'discovery_type'
         properties:
           []
   - name: 'discoveryType'

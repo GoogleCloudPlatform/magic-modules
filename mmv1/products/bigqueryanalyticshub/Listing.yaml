@@ -276,8 +276,6 @@ properties:
         type: Boolean
         description:
           If true, enable restricted export.
-        conflicts:
-          - 'discovery_type'
       - name: 'restrictDirectTableAccess'
         type: Boolean
         description:
