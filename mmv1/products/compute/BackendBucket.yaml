@@ -272,7 +272,9 @@ properties:
       client when the resource is created.
   - name: 'enableCdn'
     type: Boolean
-    description: 'If true, enable Cloud CDN for this BackendBucket.'
+    description:  | 
+      If true, enable Cloud CDN for this BackendBucket.
+      Note: This cannot be set to true when loadBalancingScheme is set to INTERNAL_MANAGED.
   - name: 'name'
     type: String
     description: |
@@ -292,6 +294,7 @@ properties:
     description: |
       The value can only be INTERNAL_MANAGED for cross-region internal layer 7 load balancer.
       If loadBalancingScheme is not specified, the backend bucket can be used by classic global external load balancers, or global application external load balancers, or both.
+      Important: CDN cannot be enabled (enableCdn cannot be set to true) when loadBalancingScheme is set to INTERNAL_MANAGED.
     enum_values:
       - 'INTERNAL_MANAGED'
     send_empty_value: true
