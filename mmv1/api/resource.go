@@ -782,25 +782,29 @@ func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField
 }
 
 func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type, propWithWoConfiguredLineagePath string) []*Type {
+	if len(propWithWoConfigured.RequiredWith) > 0 {
+		log.Fatalf("WriteOnly property '%s' in resource '%s' cannot have RequiredWith set. This combination is not supported.", propWithWoConfigured.Name, r.Name)
+	}
 	writeOnlyField := buildWriteOnlyField(fmt.Sprintf("%sWo", propWithWoConfigured.Name), propWithWoConfigured, propWithWoConfiguredLineagePath)
 	writeOnlyVersionField := buildWriteOnlyVersionField(fmt.Sprintf("%sVersion", writeOnlyField.Name), propWithWoConfigured, writeOnlyField, propWithWoConfiguredLineagePath)
 	props = append(props, writeOnlyField, writeOnlyVersionField)
 	return props
 }
 
+func (r *Resource) buildCurrentPropLineage(p *Type, lineage string) string {
+	underscoreName := google.Underscore(p.Name)
+	if lineage == "" {
+		return underscoreName
+	}
+	return fmt.Sprintf("%s.0.%s", lineage, underscoreName)
+}
+
+// AddExtraFields processes properties and adds supplementary fields based on property types.
+// It handles write-only properties, labels, and annotations.
 func (r *Resource) AddExtraFields(props []*Type, parent *Type, lineage string) []*Type {
 	for _, p := range props {
-		var currentPropLineage string
-		if lineage == "" {
-			currentPropLineage = google.Underscore(p.Name)
-		} else {
-			currentPropLineage = fmt.Sprintf("%s.0.%s", lineage, google.Underscore(p.Name))
-		}
-
+		currentPropLineage := r.buildCurrentPropLineage(p, lineage)
 		if p.WriteOnly && !strings.HasSuffix(p.Name, "Wo") {
-			if len(p.RequiredWith) > 0 {
-				log.Fatalf("WriteOnly property '%s' in resource '%s' cannot have RequiredWith set. This combination is not supported.", p.Name, r.Name)
-			}
 			props = r.addWriteOnlyFields(props, p, currentPropLineage)
 			p.WriteOnly = false
 			p.Required = false
@@ -815,6 +819,7 @@ func (r *Resource) AddExtraFields(props []*Type, parent *Type, lineage string) [
 	}
 	return props
 }
+
 func (r *Resource) addLabelsFields(props []*Type, parent *Type, labels *Type) []*Type {
 	if parent == nil || parent.FlattenObject {
 		if r.ExcludeAttributionLabel {
