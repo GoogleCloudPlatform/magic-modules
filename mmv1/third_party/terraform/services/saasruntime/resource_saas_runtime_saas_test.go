@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccSaasRuntimeSaas_saasRuntimeSaasBasicExample(t *testing.T) {
+func TestAccSaasRuntimeSaas_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -20,7 +21,7 @@ func TestAccSaasRuntimeSaas_saasRuntimeSaasBasicExample(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSaasRuntimeSaas_saasRuntimeSaasBasicExample_basic(context),
+				Config: testAccSaasRuntimeSaas_basic(context),
 			},
 			{
 				ResourceName:            "google_saas_runtime_saas.example",
@@ -29,7 +30,12 @@ func TestAccSaasRuntimeSaas_saasRuntimeSaasBasicExample(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "saas_id", "terraform_labels"},
 			},
 			{
-				Config: testAccSaasRuntimeSaas_saasRuntimeSaasBasicExample_update(context),
+				Config: testAccSaasRuntimeSaas_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_saas_runtime_saas.example", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_saas_runtime_saas.example",
@@ -41,7 +47,7 @@ func TestAccSaasRuntimeSaas_saasRuntimeSaasBasicExample(t *testing.T) {
 	})
 }
 
-func testAccSaasRuntimeSaas_saasRuntimeSaasBasicExample_basic(context map[string]interface{}) string {
+func testAccSaasRuntimeSaas_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example" {
   provider = google-beta
@@ -58,13 +64,12 @@ resource "google_saas_runtime_saas" "example" {
 `, context)
 }
 
-func testAccSaasRuntimeSaas_saasRuntimeSaasBasicExample_update(context map[string]interface{}) string {
+func testAccSaasRuntimeSaas_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_saas_runtime_saas" "example" {
   provider = google-beta
   saas_id  = "tf-test-test-saas%{random_suffix}"
   location = "global"
-
   locations {
     name = "us-central1"
   }
@@ -75,10 +80,10 @@ resource "google_saas_runtime_saas" "example" {
     name = "us-east1"
   }
   labels = {
-    "label-one": "value-one"
+    "label-one": "foo"
   }
   annotations = {
-    "annotation-one": "value-one"
+    "annotation-one": "bar"
   }
 }
 `, context)
