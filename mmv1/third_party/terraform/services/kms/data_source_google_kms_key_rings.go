@@ -105,10 +105,19 @@ func dataSourceGoogleKmsKeyRingsRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	keyRings, err = transport_tpg.PluralDataSourceGetList(d, config, &billingProject, userAgent, url, flattenKMSKeyRingsList, params, "keyRings")
+	opts := transport_tpg.GetPaginatedItemsSliceOptions{
+		ResourceData:   d,
+		Config:         config,
+		BillingProject: &billingProject,
+		UserAgent:      userAgent,
+		URL:            url,
+		ResourceToList: "keyRings",
+		Params:         params,
+		ListFlattener:  flattenKMSKeyRingsList,
+	}
+	keyRings, err = transport_tpg.GetPaginatedItemsSlice(opts)
 	if err != nil {
 		return fmt.Errorf("Error retrieving key rings: %s", err)
-	}
 
 	log.Printf("[DEBUG] Found %d key rings", len(keyRings))
 	if err := d.Set("key_rings", keyRings); err != nil {
