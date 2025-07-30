@@ -203,7 +203,7 @@ if displayName == "Playbook Example with Fulfillment" {
 		caseContent8, ok := caseContent[8].(map[string]interface{})
 		if !ok { return fmt.Errorf("element at 'caseContent[8]' is not a map") }
 
-		messagcaseContent8e1["toolCall"] = d.Get("handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.tool_call.0").(map[string]interface{})
+		caseContent8["toolCall"] = d.Get("handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.tool_call.0").(map[string]interface{})
 		delete(caseContent8["toolCall"].(map[string]interface{}), "input_parameters")
 		caseContent8["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
 
@@ -257,7 +257,7 @@ if displayName == "Playbook Example with Fulfillment" {
 		caseContent8, ok := caseContent[8].(map[string]interface{})
 		if !ok { return fmt.Errorf("element at 'caseContent[8]' is not a map") }
 
-		messagcaseContent8e1["toolCall"] = d.Get("handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.tool_call.0").(map[string]interface{})
+		caseContent8["toolCall"] = d.Get("handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.tool_call.0").(map[string]interface{})
 		delete(caseContent8["toolCall"].(map[string]interface{}), "input_parameters")
 		caseContent8["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
 
