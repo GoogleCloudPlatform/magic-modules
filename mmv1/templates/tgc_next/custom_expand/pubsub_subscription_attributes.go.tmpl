@@ -1,8 +1,8 @@
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	if v == nil {
-		return map[string]string{}, nil
-	}
 	m := make(map[string]string)
+	if v == nil {
+		return m, nil
+	}
 
 	// The default value is present in CAI asset
 	if len(m) == 0 {
@@ -10,7 +10,11 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 		return m, nil
 	}
 
-	for k, val := range v.(map[string]interface{}) {
+	vMap, ok := v.(map[string]interface{})
+	if !ok {
+		return m, fmt.Errorf("non-map v: %v (%T)", v, v)
+	}
+	for k, val := range vMap {
 		m[k] = val.(string)
 	}
 	return m, nil
