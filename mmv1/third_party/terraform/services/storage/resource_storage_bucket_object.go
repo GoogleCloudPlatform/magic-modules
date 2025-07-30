@@ -312,7 +312,7 @@ func ResourceStorageBucketObject() *schema.Resource {
 			"deletion_policy": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  `The deletion policy for the object. Setting ABANDON allows the resource to be abandoned rather than deleted.`,
+				Description:  `The deletion policy for the object. Setting ABANDON allows the resource to be abandoned rather than deleted when removed from your Terraform configuration.`,
 				ValidateFunc: validation.StringInSlice([]string{"ABANDON"}, false),
 			},
 		},
