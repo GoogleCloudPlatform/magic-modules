@@ -51,6 +51,15 @@ resource "google_discovery_engine_cmek_config" "default" {
   cmek_config_id      = "tf-test-cmek-config-id%{random_suffix}"
   kms_key             = "%{kms_key_name}"
   set_default         = false
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
+}
+
+data "google_project" "project" {}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = "%{kms_key_name}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-discoveryengine.iam.gserviceaccount.com"
 }
 `, context)
 }
@@ -71,7 +80,33 @@ resource "google_discovery_engine_cmek_config" "default" {
   single_region_keys { 
     kms_key = "%{single_region_kms_key_name3}"
   }
+  depends_on = [google_kms_crypto_key_iam_member.crypto_key]
+}
 
+data "google_project" "project" {}
+
+resource "google_kms_crypto_key_iam_member" "crypto_key" {
+  crypto_key_id = "%{kms_key_name1}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "single_region_crypto_key1" {
+  crypto_key_id = "%{single_region_kms_key_name1}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-discoveryengine.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "single_region_crypto_key2" {
+  crypto_key_id = "%{single_region_kms_key_name2}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-discoveryengine.iam.gserviceaccount.com"
+}
+
+resource "google_kms_crypto_key_iam_member" "single_region_crypto_key3" {
+  crypto_key_id = "%{single_region_kms_key_name3}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-discoveryengine.iam.gserviceaccount.com"
 }
 `, context)
 }
