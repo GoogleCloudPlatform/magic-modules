@@ -11,9 +11,6 @@
 	limitations under the License.
 */ -}}
 
-{{/* For fields that expect fully-qualified URLs but allow relative paths in config,
-we need to manually define this expander to ensure consistent behavior. */}}
-
 func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
 	if v == nil {
 		return nil, nil
@@ -35,6 +32,9 @@ func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.T
 	}
 	if strings.Contains(val, "/networkEndpointGroups/") {
 		return fmt.Sprintf("projects/%s/%s", project, val), nil
+	}
+	if zoneRaw, ok := d.GetOk("zone"); ok && zoneRaw.(string) != "" {
+		return fmt.Sprintf("projects/%s/zones/%s/networkEndpointGroups/%s", project, zoneRaw.(string), val), nil
 	}
 	return fmt.Sprintf("projects/%s/regions/%s/instanceGroups/%s", project, region, val), nil
 }
