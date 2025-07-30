@@ -51,6 +51,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
   constants: 'templates/terraform/constants/health_check.tmpl'
   encoder: 'templates/terraform/encoders/health_check_type.tmpl'
@@ -113,11 +114,13 @@ examples:
     min_version: 'beta'
     vars:
       health_check_name: 'grpc-with-tls-health-check'
+    tgc_skip_test: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
   - name: 'health_check_grpc_with_tls_full'
     primary_resource_id: 'grpc-with-tls-health-check'
     min_version: 'beta'
     vars:
       health_check_name: 'grpc-with-tls-health-check'
+    tgc_skip_test: 'grpcTlsHealthCheck is not in CAI asset, but is required in this test.'
   - name: 'health_check_with_logging'
     primary_resource_id: 'health-check-with-logging'
     min_version: 'beta'
@@ -202,6 +205,7 @@ properties:
       type: String
     min_size: 3
     max_size: 3
+    is_missing_in_cai: true
   - name: 'unhealthyThreshold'
     type: Integer
     description: |
@@ -895,6 +899,7 @@ properties:
       - 'grpc_health_check'
       - 'grpc_tls_health_check'
     diff_suppress_func: 'portDiffSuppress'
+    is_missing_in_cai: true
     properties:
       - name: 'port'
         type: Integer

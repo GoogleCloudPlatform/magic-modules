@@ -147,6 +147,8 @@ The following arguments are supported:
 * `ignore_schema_changes` - (Optional)  A list of fields which should be ignored for each column in schema.
     **NOTE:** Right now only `dataPolicies` field is supported. We might support others in the future.
 
+* `ignore_auto_generated_schema` - (Optional)  If true, Terraform will prevent columns added by the server(e.g. hive partitioned columns) in schema from showing diff.
+
 * `schema_foreign_type_info` - (Optional) Specifies metadata of the foreign data
     type definition in field schema. Structure is [documented below](#nested_schema_foreign_type_info).
 
@@ -424,6 +426,8 @@ The following arguments are supported:
 
 * `use_legacy_sql` - (Optional) Specifies whether to use BigQuery's legacy SQL for this view.
     The default value is true. If set to false, the view will use BigQuery's standard SQL.
+    -> **Note**: Starting in provider version `7.0.0`, no default value is
+    provided for this field unless explicitly set in the configuration.
 
 <a name="nested_materialized_view"></a>The `materialized_view` block supports:
 

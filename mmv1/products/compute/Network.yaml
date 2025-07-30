@@ -36,6 +36,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 sweeper:
   dependencies:
     # - "google_network_security_intercept_endpoint_group" (beta only)
@@ -176,6 +177,7 @@ properties:
         enum_values:
           - 'LEGACY'
           - 'STANDARD'
+        is_missing_in_cai: true
       - name: 'bgpAlwaysCompareMed'
         type: Boolean
         description: |
@@ -185,6 +187,7 @@ properties:
         default_from_api: true
         update_url: 'projects/{{project}}/global/networks/{{name}}'
         update_verb: 'PATCH'
+        is_missing_in_cai: true
       - name: 'bgpInterRegionCost'
         type: Enum
         description: |
@@ -196,6 +199,7 @@ properties:
         enum_values:
           - 'DEFAULT'
           - 'ADD_COST_TO_MED'
+        is_missing_in_cai: true
   - name: 'mtu'
     type: Integer
     description: |

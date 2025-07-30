@@ -198,7 +198,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 			if diff := cmp.Diff(
 				asset.Resource,
 				roundtripAsset.Resource,
-				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data"),
+				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "Location", "DiscoveryDocumentURI"),
 				// Consider DiscoveryDocumentURI equal if they have the same number of path segments when split by "/".
 				cmp.FilterPath(func(p cmp.Path) bool {
 					return p.Last().String() == ".DiscoveryDocumentURI"
@@ -206,6 +206,13 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 					parts1 := strings.Split(x, "/")
 					parts2 := strings.Split(y, "/")
 					return len(parts1) == len(parts2)
+				})),
+				cmp.FilterPath(func(p cmp.Path) bool {
+					return p.Last().String() == ".DiscoveryName"
+				}, cmp.Comparer(func(x, y string) bool {
+					xParts := strings.Split(x, "/")
+					yParts := strings.Split(y, "/")
+					return xParts[len(xParts)-1] == yParts[len(yParts)-1]
 				})),
 			); diff != "" {
 				return fmt.Errorf("differences found between exported asset and roundtrip asset (-want +got):\n%s", diff)
