@@ -31,7 +31,7 @@ func DataSourceSqlDatabaseInstanceLatestRecoveryTime() *schema.Resource {
 			},
 			"source_instance_deletion_time": {
 				Type:		schema.TypeString,
-				Optional:	true
+				Optional:	true,
                 Description: `Timestamp, identifies when the source instance was deleted. If this instance is deleted, then you must set the timestamp.`,
             },
 		},
