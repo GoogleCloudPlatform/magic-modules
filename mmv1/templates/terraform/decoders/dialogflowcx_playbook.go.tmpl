@@ -159,8 +159,8 @@ if displayName == "Playbook Example with Fulfillment" {
 		return nil, err
 	}
 
-	//   - 'handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.1.knowledge_info_card'
-	//   - 'handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.tool_call'
+	//   - 'handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.1.message.0.knowledge_info_card'
+	//   - 'handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.message.0.tool_call'
 	setHandlers3EventHandlerFulfillmentConditionalCases1Cases0 := func(data map[string]interface{}) error {
 		// --- Traverse to the parent map ---
 		handlers, ok := data["handlers"].([]interface{})
@@ -197,15 +197,21 @@ if displayName == "Playbook Example with Fulfillment" {
 		caseContent1, ok := caseContent[1].(map[string]interface{})
 		if !ok { return fmt.Errorf("element at 'caseContent[1]' is not a map") }
 
-		caseContent1["knowledgeInfoCard"] = map[string]interface{}{"maximumSnippets": 1}
+		caseContent1Message, ok := caseContent1["message"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'message' is not a map") }
+
+		caseContent1Message["knowledgeInfoCard"] = map[string]interface{}{"maximumSnippets": 1}
 
 		if len(caseContent) <= 8 { return fmt.Errorf("index 8 out of bounds for 'caseContent'") }
 		caseContent8, ok := caseContent[8].(map[string]interface{})
 		if !ok { return fmt.Errorf("element at 'caseContent[8]' is not a map") }
 
-		caseContent8["toolCall"] = d.Get("handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.tool_call.0").(map[string]interface{})
-		delete(caseContent8["toolCall"].(map[string]interface{}), "input_parameters")
-		caseContent8["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
+		caseContent8Message, ok := caseContent8["message"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'message' is not a map") }
+
+		caseContent8Message["toolCall"] = d.Get("handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.message.0.tool_call.0").(map[string]interface{})
+		delete(caseContent8Message["toolCall"].(map[string]interface{}), "input_parameters")
+		caseContent8Message["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
 
 		return nil
 	}
@@ -213,8 +219,8 @@ if displayName == "Playbook Example with Fulfillment" {
 		return nil, err
 	}
 
-	//   - 'handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.1.knowledge_info_card'
-	//   - 'handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.tool_call'
+	//   - 'handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.1.message.0.knowledge_info_card'
+	//   - 'handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.message.0.tool_call'
 	setHandlers7LifecycleHandlerFulfillmentConditionalCases1Cases0 := func(data map[string]interface{}) error {
 		// --- Traverse to the parent map ---
 		handlers, ok := data["handlers"].([]interface{})
@@ -251,15 +257,21 @@ if displayName == "Playbook Example with Fulfillment" {
 		caseContent1, ok := caseContent[1].(map[string]interface{})
 		if !ok { return fmt.Errorf("element at 'caseContent[1]' is not a map") }
 
-		caseContent1["knowledgeInfoCard"] = map[string]interface{}{"maximumSnippets": 1}
+		caseContent1Message, ok := caseContent1["message"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'message' is not a map") }
+
+		caseContent1Message["knowledgeInfoCard"] = map[string]interface{}{"maximumSnippets": 1}
 
 		if len(caseContent) <= 8 { return fmt.Errorf("index 8 out of bounds for 'caseContent'") }
 		caseContent8, ok := caseContent[8].(map[string]interface{})
 		if !ok { return fmt.Errorf("element at 'caseContent[8]' is not a map") }
 
-		caseContent8["toolCall"] = d.Get("handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.tool_call.0").(map[string]interface{})
-		delete(caseContent8["toolCall"].(map[string]interface{}), "input_parameters")
-		caseContent8["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
+		caseContent8Message, ok := caseContent8["message"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'message' is not a map") }
+
+		caseContent8Message["toolCall"] = d.Get("handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.message.0.tool_call.0").(map[string]interface{})
+		delete(caseContent8Message["toolCall"].(map[string]interface{}), "input_parameters")
+		caseContent8Message["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
 
 		return nil
 	}
