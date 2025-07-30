@@ -1278,6 +1278,11 @@ resource "google_dataproc_cluster" "tier_cluster" {
   region = "us-central1"
 
   cluster_config {
+	staging_bucket = google_storage_bucket.bucket.name
+	temp_bucket = google_storage_bucket.bucket.name
+
+	%s
+
     software_config {
       image_version = "2.3.4-debian12"
     }
@@ -1285,12 +1290,9 @@ resource "google_dataproc_cluster" "tier_cluster" {
     gce_cluster_config {
       subnetwork = "%s"
     }
-	staging_bucket = google_storage_bucket.bucket.name
-	temp_bucket = google_storage_bucket.bucket.name
-    %s
   }
 }
-`, bucketName, clusterName, subnetworkName, tierConfig)
+`, bucketName, clusterName, tierConfig, subnetworkName)
 }
 
 func testAccCheckDataprocClusterDestroy(t *testing.T) resource.TestCheckFunc {
