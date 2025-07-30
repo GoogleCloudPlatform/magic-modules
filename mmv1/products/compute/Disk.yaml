@@ -64,6 +64,7 @@ custom_code:
   update_encoder: 'templates/terraform/update_encoder/hyper_disk.go.tmpl'
   decoder: 'templates/terraform/decoders/disk.tmpl'
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
+  tgc_encoder: 'templates/tgc_next/encoders/compute_disk.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
@@ -129,7 +130,7 @@ properties:
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
-        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+        # TODO Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeySelfLink'
         type: String
         description: |
@@ -239,7 +240,7 @@ properties:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
-        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+        # TODO Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeySelfLink'
         type: String
         description: |
