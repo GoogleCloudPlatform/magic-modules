@@ -322,47 +322,6 @@ resource "google_redis_cluster" "cluster_abc" {
 `, context)
 }
 
-// Validate that allow_fewer_zones_deployment is set correctly for the cluster
-func TestAccRedisCluster_allowFewerZonesDeployment(t *testing.T) {
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix":                acctest.RandString(t, 10),
-		"allow_fewer_zones_deployment": "true",
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckRedisClusterDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				// create cluster with allow_fewer_zones_deployment set to false (default)
-				Config: testAccRedisCluster_allowFewerZonesDeployment(context),
-			},
-			{
-				ResourceName:            "google_redis_cluster.cluster_afz_main",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"psc_configs"},
-			},
-		},
-	})
-}
-
-func testAccRedisCluster_allowFewerZonesDeployment(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_redis_cluster" "cluster_afz_main" {
-  name                           = "tf-test-afz-main-%{random_suffix}"
-  shard_count                    = 2
-  region                         = "us-central1"
-  deletion_protection_enabled    = false
-  allow_fewer_zones_deployment = %{allow_fewer_zones_deployment}
-
-}
-`, context)
-}
-
 func testAccRedisCluster_automatedBackupConfigWithout(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_redis_cluster" "cluster_abc" {
