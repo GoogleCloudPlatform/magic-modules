@@ -72,7 +72,7 @@ func DataSourceGoogleCompute{{ .ResourceName -}}() *schema.Resource {
 
   for _, field := range allFields {
     // Treat "region" and any field containing "location" as optional
-    if field == "region" || field == "project" {
+    if field == "region" || field == "project" || field == "zone" {
       optionalFields = append(optionalFields, field)
     } else {
       requiredFields = append(requiredFields, field)

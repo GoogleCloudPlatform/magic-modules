@@ -1994,7 +1994,8 @@ func urlContainsOnlyAllowedKeys(templateURL string, allowedKeys []string) bool {
 }
 
 func (r Resource) ShouldGenerateSingularDataSource() bool {
-	if r.HasSelfLink || r.Name == "Cluster" || r.Name == "Instance" {
+
+	if r.ProductMetadata.Name == "Alloydb" || r.Name == "Cluster" {
 		return true
 	}
 	return false
