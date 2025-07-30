@@ -49,6 +49,7 @@ examples:
     vars:
       agent_name: 'dialogflowcx-agent'
       bucket_name: 'dialogflowcx-bucket'
+      data-store: 'datastore-flow-full'
   - name: 'dialogflowcx_flow_default_start_flow'
     primary_resource_id: 'default_start_flow'
     vars:

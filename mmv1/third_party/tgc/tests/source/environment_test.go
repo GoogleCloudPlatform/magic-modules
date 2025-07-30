@@ -18,7 +18,7 @@ const (
 	defaultOrganizationDomain = "meep.test.com"
 	defaultOrganizationTarget = "13579"
 	defaultProject            = "foobar"
-	defaultProviderVersion    = "5.5.0" // if dev override is enabled, the provider version is ignored in terraform execution
+	defaultProviderVersion    = "6.14.0" // if dev override is enabled, the provider version is ignored in terraform execution
 	defaultRegion             = "us-central1"
 	defaultServiceAccount     = "meep@foobar.iam.gserviceaccount.com"
 )
