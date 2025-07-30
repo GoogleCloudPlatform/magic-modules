@@ -118,7 +118,7 @@ func dataSourceGoogleKmsKeyRingsRead(d *schema.ResourceData, meta interface{}) e
 	keyRings, err = transport_tpg.GetPaginatedItemsSlice(opts)
 	if err != nil {
 		return fmt.Errorf("Error retrieving key rings: %s", err)
-
+	}
 	log.Printf("[DEBUG] Found %d key rings", len(keyRings))
 	if err := d.Set("key_rings", keyRings); err != nil {
 		return fmt.Errorf("error setting key rings: %s", err)
