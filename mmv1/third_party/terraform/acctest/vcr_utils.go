@@ -156,10 +156,10 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		defer func() {
 			writeOutputFileDeferFunction(tempOutputFile, t.Failed())
 		}()
-		initializeReleaseDiffTest(c, t.Name(), tempOutputFile)
+		c = initializeReleaseDiffTest(c, t.Name(), tempOutputFile)
 	}
 
-	c = extendWithTGCData(t, c)
+	//c = extendWithTGCData(t, c)
 
 	// terraform_labels is a computed field to which "goog-terraform-provisioned": "true" is always
 	// added by the provider. ImportStateVerify "checks for strict equality and does not respect
@@ -228,7 +228,7 @@ func isReleaseDiffEnabled() bool {
 	return releaseDiff != ""
 }
 
-func initializeReleaseDiffTest(c resource.TestCase, testName string, tempOutputFile *os.File) {
+func initializeReleaseDiffTest(c resource.TestCase, testName string, tempOutputFile *os.File) resource.TestCase {
 	var releaseProvider string
 	packagePath := fmt.Sprint(reflect.TypeOf(transport_tpg.Config{}).PkgPath())
 	if strings.Contains(packagePath, "google-beta") {
@@ -267,13 +267,13 @@ func initializeReleaseDiffTest(c resource.TestCase, testName string, tempOutputF
 	}
 	// InsertDiffSteps adds modified steps to the test that run with an external provider
 	// these steps do the actual infrastructure provisioning, and c.Steps is updated in the method to have the modified steps
-	InsertDiffSteps(c, tempOutputFile, releaseProvider, localProviderName)
-	return
+	c = InsertDiffSteps(c, tempOutputFile, releaseProvider, localProviderName)
+	return c
 }
 
 // InsertDiffSteps inserts a new step into the test case that reformats the config to use the release provider - this allows us to see the diff
 // between the local provider and the release provider
-func InsertDiffSteps(c resource.TestCase, tempOutputFile *os.File, releaseProvider string, localProviderName string) {
+func InsertDiffSteps(c resource.TestCase, tempOutputFile *os.File, releaseProvider string, localProviderName string) resource.TestCase {
 	var countSteps = 0
 
 	var replacementSteps []resource.TestStep
@@ -304,6 +304,7 @@ func InsertDiffSteps(c resource.TestCase, tempOutputFile *os.File, releaseProvid
 		}
 	}
 	c.Steps = replacementSteps
+	return c
 }
 
 // reformConfigWithProvider reformats the config to use the given provider
