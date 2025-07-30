@@ -9,9 +9,10 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
 
     deployment_spec {
 
+      # This is references inside the pickle file.
       env {
-        name  = "var_1"
-        value = "value_1"
+        name  = "PROJECT_ID"
+        value = data.google_project.project.id
       }
 
       env {
