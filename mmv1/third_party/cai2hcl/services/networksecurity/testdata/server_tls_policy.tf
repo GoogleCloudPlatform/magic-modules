@@ -1,5 +1,5 @@
 resource "google_network_security_server_tls_policy" "lb_mtls_policy" {
-  allow_open  = "false"
+  allow_open  = false
   description = "my description"
 
   labels = {
@@ -17,7 +17,7 @@ resource "google_network_security_server_tls_policy" "lb_mtls_policy" {
 }
 
 resource "google_network_security_server_tls_policy" "td_mtls_policy" {
-  allow_open  = "false"
+  allow_open  = false
   description = "my description"
 
   labels = {
@@ -44,7 +44,7 @@ resource "google_network_security_server_tls_policy" "td_mtls_policy" {
 }
 
 resource "google_network_security_server_tls_policy" "td_with_server_cert_policy" {
-  allow_open  = "false"
+  allow_open  = false
   description = "my description"
   location    = "global"
   name        = "td_with_server_cert_policy"
@@ -57,7 +57,7 @@ resource "google_network_security_server_tls_policy" "td_with_server_cert_policy
 }
 
 resource "google_network_security_server_tls_policy" "empty_description_policy" {
-  allow_open = "false"
+  allow_open = false
 
   labels = {
     foo = "bar"
@@ -74,7 +74,7 @@ resource "google_network_security_server_tls_policy" "empty_description_policy" 
 }
 
 resource "google_network_security_server_tls_policy" "empty_labels_policy" {
-  allow_open  = "false"
+  allow_open  = false
   description = "my description"
   location    = "global"
 
@@ -87,7 +87,7 @@ resource "google_network_security_server_tls_policy" "empty_labels_policy" {
 }
 
 resource "google_network_security_server_tls_policy" "regional_location_policy" {
-  allow_open  = "false"
+  allow_open  = false
   description = "my description"
 
   labels = {
@@ -105,7 +105,7 @@ resource "google_network_security_server_tls_policy" "regional_location_policy" 
 }
 
 resource "google_network_security_server_tls_policy" "lb_mtls_allow_invalid_cert_policy" {
-  allow_open  = "false"
+  allow_open  = false
   description = "my description"
 
   labels = {
@@ -122,7 +122,7 @@ resource "google_network_security_server_tls_policy" "lb_mtls_allow_invalid_cert
 }
 
 resource "google_network_security_server_tls_policy" "td_allow_open_policy" {
-  allow_open  = "true"
+  allow_open  = true
   description = "my description"
   location    = "global"
 
@@ -144,7 +144,7 @@ resource "google_network_security_server_tls_policy" "td_allow_open_policy" {
 }
 
 resource "google_network_security_server_tls_policy" "td_with_cert_provider_policy" {
-  allow_open  = "false"
+  allow_open  = false
   description = "my description"
   location    = "global"
   name        = "td_with_cert_provider_policy"
@@ -157,7 +157,7 @@ resource "google_network_security_server_tls_policy" "td_with_cert_provider_poli
 }
 
 resource "google_network_security_server_tls_policy" "td_mtls_client_validation_grpc_policy" {
-  allow_open  = "false"
+  allow_open  = false
   description = "my description"
 
   labels = {

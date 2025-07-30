@@ -15,6 +15,9 @@
       "data": {
         "createTime": "2025-07-29T16:00:11.184079186Z",
         "description": "my description",
+        "labels": {
+          "foo": "bar"
+        },
         "mtlsPolicy": {
           "clientValidationMode": "REJECT_INVALID",
           "clientValidationTrustConfig": "projects/307841421122/locations/global/trustConfigs/id-4adf7779-1e9f-4124-9438-652c80886074"
@@ -47,8 +50,7 @@
         "createTime": "2025-07-29T16:00:12.082558809Z",
         "description": "my description",
         "labels": {
-          "foo": "bar",
-          "goog-terraform-provisioned": "true"
+          "foo": "bar"
         },
         "mtlsPolicy": {
           "clientValidationCa": [
@@ -91,9 +93,6 @@
       "data": {
         "createTime": "2025-07-29T16:00:12.040588118Z",
         "description": "my description",
-        "labels": {
-          "goog-terraform-provisioned": "true"
-        },
         "name": "projects/ccm-breakit/locations/global/serverTlsPolicies/td_with_server_cert_policy",
         "serverCertificate": {
           "grpcEndpoint": {
@@ -125,6 +124,9 @@
     "resource": {
       "data": {
         "createTime": "2025-07-29T16:00:11.660089355Z",
+        "labels": {
+          "foo": "bar"
+        },
         "mtlsPolicy": {
           "clientValidationMode": "REJECT_INVALID",
           "clientValidationTrustConfig": "projects/307841421122/locations/global/trustConfigs/id-4adf7779-1e9f-4124-9438-652c80886074"
@@ -187,6 +189,9 @@
       "data": {
         "createTime": "2025-07-29T16:00:12.162242768Z",
         "description": "my description",
+        "labels": {
+          "foo": "bar"
+        },
         "mtlsPolicy": {
           "clientValidationMode": "REJECT_INVALID",
           "clientValidationTrustConfig": "projects/307841421122/locations/us-central1/trustConfigs/tsmx-20250609-tc1"
@@ -218,6 +223,9 @@
       "data": {
         "createTime": "2025-07-29T16:00:12.078450339Z",
         "description": "my description",
+        "labels": {
+          "foo": "bar"
+        },
         "mtlsPolicy": {
           "clientValidationMode": "ALLOW_INVALID_OR_MISSING_CLIENT_CERT"
         },
@@ -249,9 +257,6 @@
         "allowOpen": true,
         "createTime": "2025-07-29T16:00:11.930403186Z",
         "description": "my description",
-        "labels": {
-          "goog-terraform-provisioned": "true"
-        },
         "mtlsPolicy": {
           "clientValidationCa": [
             {
@@ -293,9 +298,6 @@
       "data": {
         "createTime": "2025-07-29T16:00:12.122393281Z",
         "description": "my description",
-        "labels": {
-          "goog-terraform-provisioned": "true"
-        },
         "name": "projects/ccm-breakit/locations/global/serverTlsPolicies/td_with_cert_provider_policy",
         "serverCertificate": {
           "certificateProviderInstance": {
@@ -329,8 +331,7 @@
         "createTime": "2025-07-29T16:00:12.000713965Z",
         "description": "my description",
         "labels": {
-          "foo": "bar",
-          "goog-terraform-provisioned": "true"
+          "foo": "bar"
         },
         "mtlsPolicy": {
           "clientValidationCa": [
