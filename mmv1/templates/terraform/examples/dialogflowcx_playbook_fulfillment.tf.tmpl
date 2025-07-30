@@ -279,6 +279,66 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
           }
         }
 
+        conditional_cases {
+          cases {
+            case_content {
+              message {
+                conversation_success {
+                  metadata = <<EOF
+                    {"some-metadata-key": "some-value", "other-metadata-key": 1234}
+                  EOF
+                }
+              }
+              message {
+                knowledge_info_card {
+                  maximum_snippets = 1
+                }
+              }
+              message {
+                live_agent_handoff {
+                  metadata = <<EOF
+                    {"some-metadata-key": "some-value", "other-metadata-key": 1234}
+                  EOF
+                }
+              }
+              message {
+                output_audio_text {
+                  text = "some output text"
+                }
+              }
+              message {
+                output_audio_text {
+                  ssml = <<EOF
+                    <speak>Some example <say-as interpret-as="characters">SSML XML</say-as></speak>
+                  EOF
+                }
+              }
+              message {
+                payload = <<EOF
+                  {"some-key": "some-value", "other-key": ["other-value"]}
+                EOF
+              }
+              message {
+                play_audio {
+                  audio_uri = "http://example.com/some-audio-file.mp3"
+                }
+              }
+              message {
+                telephony_transfer_call {
+                  phone_number = "1-234-567-8901"
+                }
+              }
+              message {
+                tool_call {
+                  action           = google_dialogflow_cx_tool.my_tool.display_name
+                  input_parameters = "{\"query\": \"example-value\"}"
+                  tool             = google_dialogflow_cx_tool.my_tool.id
+                }
+              }
+            }
+          }
+        }
+
         webhook = google_dialogflow_cx_webhook.my_webhook.id
         tag = "ExampleTag"
         enable_generative_fallback = true
@@ -479,6 +539,66 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
               message {
                 text {
                   text = ["Final case"]
+                }
+              }
+            }
+          }
+        }
+
+        conditional_cases {
+          cases {
+            case_content {
+              message {
+                conversation_success {
+                  metadata = <<EOF
+                    {"some-metadata-key": "some-value", "other-metadata-key": 1234}
+                  EOF
+                }
+              }
+              message {
+                knowledge_info_card {
+                  maximum_snippets = 1
+                }
+              }
+              message {
+                live_agent_handoff {
+                  metadata = <<EOF
+                    {"some-metadata-key": "some-value", "other-metadata-key": 1234}
+                  EOF
+                }
+              }
+              message {
+                output_audio_text {
+                  text = "some output text"
+                }
+              }
+              message {
+                output_audio_text {
+                  ssml = <<EOF
+                    <speak>Some example <say-as interpret-as="characters">SSML XML</say-as></speak>
+                  EOF
+                }
+              }
+              message {
+                payload = <<EOF
+                  {"some-key": "some-value", "other-key": ["other-value"]}
+                EOF
+              }
+              message {
+                play_audio {
+                  audio_uri = "http://example.com/some-audio-file.mp3"
+                }
+              }
+              message {
+                telephony_transfer_call {
+                  phone_number = "1-234-567-8901"
+                }
+              }
+              message {
+                tool_call {
+                  action           = google_dialogflow_cx_tool.my_tool.display_name
+                  input_parameters = "{\"query\": \"example-value\"}"
+                  tool             = google_dialogflow_cx_tool.my_tool.id
                 }
               }
             }
