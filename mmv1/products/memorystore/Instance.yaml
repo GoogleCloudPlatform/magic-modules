@@ -524,7 +524,7 @@ properties:
       instance in less than 3 zones. Once set, if there is a zonal outage during
       the instance creation, the instance will only be deployed in 2 zones, and
       stay within the 2 zones for its lifecycle.
-    default_value: false
+    immutable: true
   - name: 'deletionProtectionEnabled'
     type: Boolean
     description: "Optional. If set to true deletion of the instance will fail. "
