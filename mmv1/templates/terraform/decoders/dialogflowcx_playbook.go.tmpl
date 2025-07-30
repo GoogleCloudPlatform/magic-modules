@@ -75,8 +75,10 @@ if displayName == "Playbook Example with Fulfillment" {
 		return nil, err
 	}
 
+	//   - 'handlers.2.event_handler.0.fulfillment.0.messages.1.response_type'
 	//   - 'handlers.2.event_handler.0.fulfillment.0.messages.1.tool_call'
-	setHandlers2EventHandlerFulfillmentMessages1ToolCall := func(data map[string]interface{}) error {
+	//   - 'handlers.2.event_handler.0.fulfillment.0.messages.2.knowledge_info_card'
+	setHandlers2EventHandlerFulfillmentMessages := func(data map[string]interface{}) error {
 		// --- Traverse to the parent map ---
 		handlers, ok := data["handlers"].([]interface{})
 		if !ok { return fmt.Errorf("'handlers' is not a slice") }
@@ -95,21 +97,30 @@ if displayName == "Playbook Example with Fulfillment" {
 		if !ok { return fmt.Errorf("'messages' is not a slice") }
 
 		if len(messages) <= 1 { return fmt.Errorf("index 1 out of bounds for 'messages'") }
-		message, ok := messages[1].(map[string]interface{})
+		message1, ok := messages[1].(map[string]interface{})
 		if !ok { return fmt.Errorf("element at 'messages[1]' is not a map") }
 
-		message["toolCall"] = d.Get("handlers.2.event_handler.0.fulfillment.0.messages.1.tool_call.0").(map[string]interface{})
-		delete(message["toolCall"].(map[string]interface{}), "input_parameters")
-		message["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
+		message1["toolCall"] = d.Get("handlers.2.event_handler.0.fulfillment.0.messages.1.tool_call.0").(map[string]interface{})
+		delete(message1["toolCall"].(map[string]interface{}), "input_parameters")
+		message1["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
+		message1["responseType"] = "ENTRY_PROMPT"
+
+		if len(messages) <= 2 { return fmt.Errorf("index 2 out of bounds for 'messages'") }
+		message2, ok := messages[2].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'messages[2]' is not a map") }
+
+		message2["knowledgeInfoCard"] = map[string]interface{}{"maximumSnippets": 1}
 
 		return nil
 	}
-	if err := setHandlers2EventHandlerFulfillmentMessages1ToolCall(res); err != nil {
+	if err := setHandlers2EventHandlerFulfillmentMessages(res); err != nil {
 		return nil, err
 	}
 
+	//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.messages.1.response_type'
 	//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.messages.1.tool_call'
-	setHandlers6LifecycleHandlerFulfillmentMessages1ToolCall := func(data map[string]interface{}) error {
+	//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.messages.2.knowledge_info_card'
+	setHandlers6LifecycleHandlerFulfillmentMessages := func(data map[string]interface{}) error {
 		// --- Traverse to the parent map ---
 		handlers, ok := data["handlers"].([]interface{})
 		if !ok { return fmt.Errorf("'handlers' is not a slice") }
@@ -128,16 +139,23 @@ if displayName == "Playbook Example with Fulfillment" {
 		if !ok { return fmt.Errorf("'messages' is not a slice") }
 
 		if len(messages) <= 1 { return fmt.Errorf("index 1 out of bounds for 'messages'") }
-		message, ok := messages[1].(map[string]interface{})
+		message1, ok := messages[1].(map[string]interface{})
 		if !ok { return fmt.Errorf("element at 'messages[1]' is not a map") }
 
-		message["toolCall"] = d.Get("handlers.6.lifecycle_handler.0.fulfillment.0.messages.1.tool_call.0").(map[string]interface{})
-		delete(message["toolCall"].(map[string]interface{}), "input_parameters")
-		message["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
+		message1["toolCall"] = d.Get("handlers.6.lifecycle_handler.0.fulfillment.0.messages.1.tool_call.0").(map[string]interface{})
+		delete(message1["toolCall"].(map[string]interface{}), "input_parameters")
+		message1["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
+		message1["responseType"] = "ENTRY_PROMPT"
+
+		if len(messages) <= 2 { return fmt.Errorf("index 2 out of bounds for 'messages'") }
+		message2, ok := messages[2].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'messages[2]' is not a map") }
+
+		message2["knowledgeInfoCard"] = map[string]interface{}{"maximumSnippets": 1}
 
 		return nil
 	}
-	if err := setHandlers6LifecycleHandlerFulfillmentMessages1ToolCall(res); err != nil {
+	if err := setHandlers6LifecycleHandlerFulfillmentMessages(res); err != nil {
 		return nil, err
 	}
 

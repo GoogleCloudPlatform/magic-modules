@@ -119,6 +119,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
           }
         }
         messages {
+          response_type = "ENTRY_PROMPT"
           tool_call {
             action           = google_dialogflow_cx_tool.my_tool.display_name
             input_parameters = "{\"query\": \"example-value\"}"
@@ -178,7 +179,6 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
       fulfillment {
         return_partial_responses = true
         messages {
-          response_type = "ENTRY_PROMPT"
           channel = "some-channel"
           text {
             text = ["Some text"]
@@ -325,6 +325,7 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
           }
         }
         messages {
+          response_type = "ENTRY_PROMPT"
           tool_call {
             action           = google_dialogflow_cx_tool.my_tool.display_name
             input_parameters = "{\"query\": \"example-value\"}"
@@ -384,7 +385,6 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
       fulfillment {
         return_partial_responses = true
         messages {
-          response_type = "ENTRY_PROMPT"
           channel = "some-channel"
           text {
             text = ["Some text"]
