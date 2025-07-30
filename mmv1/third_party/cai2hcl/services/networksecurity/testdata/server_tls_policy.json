@@ -9,7 +9,7 @@
       "folders/376645683816",
       "organizations/433637338589"
     ],
-    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "asset_type": "networksecurity.googleapis.com/ServerTlsPolicy",
     "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/lb_mtls_policy",
     "resource": {
       "data": {
@@ -22,8 +22,8 @@
         "name": "projects/ccm-breakit/locations/global/serverTlsPolicies/lb_mtls_policy",
         "updateTime": "2025-07-29T16:00:15.415731403Z"
       },
-      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
-      "discoveryName": "ServerTlsPolicy",
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "ServerTlsPolicy",
       "location": "global",
       "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
       "version": "v1"
@@ -40,7 +40,7 @@
       "folders/376645683816",
       "organizations/433637338589"
     ],
-    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "asset_type": "networksecurity.googleapis.com/ServerTlsPolicy",
     "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/td_mtls_policy",
     "resource": {
       "data": {
@@ -67,8 +67,8 @@
         },
         "updateTime": "2025-07-29T16:00:15.692522561Z"
       },
-      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
-      "discoveryName": "ServerTlsPolicy",
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "ServerTlsPolicy",
       "location": "global",
       "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
       "version": "v1"
@@ -85,7 +85,7 @@
       "folders/376645683816",
       "organizations/433637338589"
     ],
-    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "asset_type": "networksecurity.googleapis.com/ServerTlsPolicy",
     "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/td_with_server_cert_policy",
     "resource": {
       "data": {
@@ -102,8 +102,8 @@
         },
         "updateTime": "2025-07-29T16:00:15.680321984Z"
       },
-      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
-      "discoveryName": "ServerTlsPolicy",
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "ServerTlsPolicy",
       "location": "global",
       "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
       "version": "v1"
@@ -120,7 +120,7 @@
       "folders/376645683816",
       "organizations/433637338589"
     ],
-    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "asset_type": "networksecurity.googleapis.com/ServerTlsPolicy",
     "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/empty_description_policy",
     "resource": {
       "data": {
@@ -132,8 +132,8 @@
         "name": "projects/ccm-breakit/locations/global/serverTlsPolicies/empty_description_policy",
         "updateTime": "2025-07-29T16:00:16.847799545Z"
       },
-      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
-      "discoveryName": "ServerTlsPolicy",
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "ServerTlsPolicy",
       "location": "global",
       "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
       "version": "v1"
@@ -150,7 +150,7 @@
       "folders/376645683816",
       "organizations/433637338589"
     ],
-    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "asset_type": "networksecurity.googleapis.com/ServerTlsPolicy",
     "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/empty_labels_policy",
     "resource": {
       "data": {
@@ -163,8 +163,8 @@
         "name": "projects/ccm-breakit/locations/global/serverTlsPolicies/empty_labels_policy",
         "updateTime": "2025-07-29T16:00:16.309813819Z"
       },
-      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
-      "discoveryName": "ServerTlsPolicy",
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "ServerTlsPolicy",
       "location": "global",
       "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
       "version": "v1"
@@ -181,7 +181,7 @@
       "folders/376645683816",
       "organizations/433637338589"
     ],
-    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "asset_type": "networksecurity.googleapis.com/ServerTlsPolicy",
     "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/us-central1/serverTlsPolicies/regional_location_policy",
     "resource": {
       "data": {
@@ -194,8 +194,8 @@
         "name": "projects/ccm-breakit/locations/us-central1/serverTlsPolicies/regional_location_policy",
         "updateTime": "2025-07-29T16:00:15.08724113Z"
       },
-      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
-      "discoveryName": "ServerTlsPolicy",
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "ServerTlsPolicy",
       "location": "us-central1",
       "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
       "version": "v1"
@@ -212,7 +212,7 @@
       "folders/376645683816",
       "organizations/433637338589"
     ],
-    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "asset_type": "networksecurity.googleapis.com/ServerTlsPolicy",
     "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/lb_mtls_allow_invalid_cert_policy",
     "resource": {
       "data": {
@@ -224,8 +224,8 @@
         "name": "projects/ccm-breakit/locations/global/serverTlsPolicies/lb_mtls_allow_invalid_cert_policy",
         "updateTime": "2025-07-29T16:00:16.300643457Z"
       },
-      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
-      "discoveryName": "ServerTlsPolicy",
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "ServerTlsPolicy",
       "location": "global",
       "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
       "version": "v1"
@@ -242,7 +242,7 @@
       "folders/376645683816",
       "organizations/433637338589"
     ],
-    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "asset_type": "networksecurity.googleapis.com/ServerTlsPolicy",
     "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/td_allow_open_policy",
     "resource": {
       "data": {
@@ -269,8 +269,8 @@
         },
         "updateTime": "2025-07-29T16:00:15.644106332Z"
       },
-      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
-      "discoveryName": "ServerTlsPolicy",
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "ServerTlsPolicy",
       "location": "global",
       "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
       "version": "v1"
@@ -287,7 +287,7 @@
       "folders/376645683816",
       "organizations/433637338589"
     ],
-    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "asset_type": "networksecurity.googleapis.com/ServerTlsPolicy",
     "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/td_with_cert_provider_policy",
     "resource": {
       "data": {
@@ -304,8 +304,8 @@
         },
         "updateTime": "2025-07-29T16:00:15.720820072Z"
       },
-      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
-      "discoveryName": "ServerTlsPolicy",
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "ServerTlsPolicy",
       "location": "global",
       "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
       "version": "v1"
@@ -322,7 +322,7 @@
       "folders/376645683816",
       "organizations/433637338589"
     ],
-    "assetType": "networksecurity.googleapis.com/ServerTlsPolicy",
+    "asset_type": "networksecurity.googleapis.com/ServerTlsPolicy",
     "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/serverTlsPolicies/td_mtls_client_validation_grpc_policy",
     "resource": {
       "data": {
@@ -349,8 +349,8 @@
         },
         "updateTime": "2025-07-29T16:00:15.701713898Z"
       },
-      "discoveryDocumentUri": "https://networksecurity.googleapis.com/$discovery/rest",
-      "discoveryName": "ServerTlsPolicy",
+      "discovery_document_uri": "https://networksecurity.googleapis.com/$discovery/rest",
+      "discovery_name": "ServerTlsPolicy",
       "location": "global",
       "parent": "//cloudresourcemanager.googleapis.com/projects/307841421122",
       "version": "v1"
