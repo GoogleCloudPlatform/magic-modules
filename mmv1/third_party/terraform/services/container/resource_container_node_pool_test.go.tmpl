@@ -3494,11 +3494,11 @@ resource "google_container_node_pool" "with_kubelet_config" {
       eviction_max_pod_grace_period_seconds  = 200
       eviction_soft {
         memory_available = "100Mi"
-	nodefs_available = "50%"
-        nodefs_inodes_free = "40%"
-        imagefs_available = "30%"
-        imagefs_inodes_free = "20%"
-        pid_available = "10%"
+	nodefs_available = "50%%"
+        nodefs_inodes_free = "40%%"
+        imagefs_available = "30%%"
+        imagefs_inodes_free = "20%%"
+        pid_available = "10%%"
       }
       eviction_soft_grace_period {
         memory_available = "5m"
@@ -3509,12 +3509,12 @@ resource "google_container_node_pool" "with_kubelet_config" {
         pid_available = "3m2.6s"
       }
       eviction_minimum_reclaim {
-        memory_available = "10%"
-        nodefs_available = "8.5%"
-        nodefs_inodes_free = "5.0%"
-        imagefs_available = "3%"
-        imagefs_inodes_free = "9%"
-        pid_available = "5%"
+        memory_available = "10%%"
+        nodefs_available = "8.5%%"
+        nodefs_inodes_free = "5.0%%"
+        imagefs_available = "3%%"
+        imagefs_inodes_free = "9%%"
+        pid_available = "5%%"
       }
     }
     oauth_scopes = [
