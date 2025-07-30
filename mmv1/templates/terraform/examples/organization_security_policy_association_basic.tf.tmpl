@@ -6,9 +6,9 @@ resource "google_folder" "security_policy_target" {
 }
 
 resource "google_compute_organization_security_policy" "policy" {
-  provider = google-beta
-  display_name = "tf-test%{random_suffix}"
-  parent       = google_folder.security_policy_target.name
+  provider   = google-beta
+  short_name = "tf-test%{random_suffix}"
+  parent     = google_folder.security_policy_target.name
 }
 
 resource "google_compute_organization_security_policy_rule" "{{$.PrimaryResourceId}}" {
