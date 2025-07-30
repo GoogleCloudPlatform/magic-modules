@@ -1320,34 +1320,34 @@ func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 }
 
 //	this test cannot be ran locally without seeding your environment with a backup vault and scheduling the backup of a sql instance 
-//	to generate a unique datasourceId, that this test would need to be modified to use. the values in this test correspond to those used
+//	to generate a unique datasourceId and an enhanced backup, that this test would need to be modified to use. the values in this test correspond to those used
 //	in our testing processes.
-func TestAccSqlDatabaseInstance_restoreFromBackupdrBackup(t *testing.T) {
+func TestAccSqlDatabaseInstance_createFromBackupDR(t *testing.T) {
+	// This test requires a BackupDR backup to exist.
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	project := envvar.GetTestProjectFromEnv()
-	location := "us-central1"
-	backupVaultId := "bv-test"
-	{{ if ne $.TargetVersionName "ga" -}}
-	dataSourceId := "ds-test"
-	{{ else -}}
-	dataSourceId := "56b93b14529b77d764b21b2251e1ea8f0006e8dd"
-	{{- end }}
-	
-	name :=	fmt.Sprintf("projects/%s/locations/%s/backupVaults/%s/dataSources/%s/backups", project, location, backupVaultId, dataSourceId)
+	// The backupDR_backup_name is a placeholder and should be replaced with an actual BackupDR backup name.
+	backupDr_backup_name := "projects/csql-bug-bash2/locations/us-central1/backupVaults/bv-test/dataSources/42010760156c39e824144281a07b93fed08498b9/backups/f3c56a5a-e03d-484b-a3b0-83d35dfd300e"
 
-    context := map[string]interface{}{
-        "backup_vault_id":	backupVaultId,
-		"data_source_id":	dataSourceId,
-    }
+	context := map[string]interface{}{
+		"random_suffix":    acctest.RandString(t, 10),
+		"backupdr_backup_name": backupDr_backup_name,
+	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccSqlDatabaseInstance_restoreFromBackupdrBackup(context),
-				Check:  resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr("data.google_backup_dr_backup.foo", "name", name)),
+				Config: testAccSqlDatabaseInstance_restoreFromBackupDR(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "backupdr_backup"},
 			},
 		},
 	})
@@ -1385,6 +1385,50 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "restore_backup_context"},
+			},
+		},
+	})
+}
+
+//	this test cannot be ran locally without seeding your environment with a backup vault and scheduling the backup of a sql instance 
+//	to generate a unique datasourceId and an enhanced backup, that this test would need to be modified to use. the values in this test correspond to those used
+//	in our testing processes.
+func TestAccSqlDatabaseInstance_BackupDRUpdate(t *testing.T) {
+	// This test requires a BackupDR backup to exist.
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	// The backupDR_backup_name is a placeholder and should be replaced with an actual BackupDR backup name.
+	backupDr_backup_name := "projects/csql-bug-bash2/locations/us-central1/backupVaults/bv-test/dataSources/42010760156c39e824144281a07b93fed08498b9/backups/f3c56a5a-e03d-484b-a3b0-83d35dfd300e"
+
+	context := map[string]interface{}{
+		"random_suffix":    acctest.RandString(t, 10),
+		"backupdr_backup_name": backupDr_backup_name,
+	}
+
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_beforeBackup(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_restoreFromBackupDR(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "backupdr_backup"},
 			},
 		},
 	})
@@ -5894,16 +5938,20 @@ data "google_sql_backup_run" "backup" {
 `, context)
 }
 
-func testAccSqlDatabaseInstance_restoreFromBackupdrBackup(context map[string]interface{}) string {
-    return acctest.Nprintf(`
-data "google_project" "project" {
-}
+func testAccSqlDatabaseInstance_restoreFromBackupDR(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_sql_database_instance" "instance" {
+  name             = "tf-test-%{random_suffix}"
+  database_version = "MYSQL_8_0"
+  region           = "us-central1"
 
-data "google_backup_dr_backup" "foo" {
-  project = data.google_project.project.project_id
-  location      = "us-central1"
-  backup_vault_id = "%{backup_vault_id}"
-  data_source_id = "%{data_source_id}"
+  settings {
+    tier = "db-g1-small"
+  }
+
+  backupdr_backup = "%{backupdr_backup_name}"
+
+  deletion_protection = false
 }
 `, context)
 }
