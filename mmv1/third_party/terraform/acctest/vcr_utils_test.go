@@ -480,8 +480,7 @@ func TestInsertDiffSteps(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create temp file: %v", err)
 	}
-	acctest.InsertDiffSteps(dummyCase, temp_file, "google-beta", "google-local")
-	var releaseDiffSteps = dummyCase.Steps
+	dummyCase = acctest.InsertDiffSteps(dummyCase, temp_file, "google-beta", "google-local")
 
 	var expectedSteps = []resource.TestStep{
 		{
@@ -523,10 +522,10 @@ func TestInsertDiffSteps(t *testing.T) {
 		},
 	}
 
-	if len(releaseDiffSteps) != len(expectedSteps) {
-		t.Fatalf("Expected %d steps, but got %d", len(expectedSteps), len(releaseDiffSteps))
+	if len(dummyCase.Steps) != len(expectedSteps) {
+		t.Fatalf("Expected %d steps, but got %d", len(expectedSteps), len(dummyCase.Steps))
 	}
-	for i, step := range releaseDiffSteps {
+	for i, step := range dummyCase.Steps {
 		if step.Config != expectedSteps[i].Config {
 			t.Fatalf("Expected step %d config to be:\n%q\nbut got:\n%q", i, expectedSteps[i].Config, step.Config)
 		}
