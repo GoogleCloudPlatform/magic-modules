@@ -289,11 +289,15 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
                   EOF
                 }
               }
+            }
+            case_content {
               message {
                 knowledge_info_card {
                   maximum_snippets = 1
                 }
               }
+            }
+            case_content {
               message {
                 live_agent_handoff {
                   metadata = <<EOF
@@ -301,11 +305,15 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
                   EOF
                 }
               }
+            }
+            case_content {
               message {
                 output_audio_text {
                   text = "some output text"
                 }
               }
+            }
+            case_content {
               message {
                 output_audio_text {
                   ssml = <<EOF
@@ -313,21 +321,29 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
                   EOF
                 }
               }
+            }
+            case_content {
               message {
                 payload = <<EOF
                   {"some-key": "some-value", "other-key": ["other-value"]}
                 EOF
               }
+            }
+            case_content {
               message {
                 play_audio {
                   audio_uri = "http://example.com/some-audio-file.mp3"
                 }
               }
+            }
+            case_content {
               message {
                 telephony_transfer_call {
                   phone_number = "1-234-567-8901"
                 }
               }
+            }
+            case_content {
               message {
                 tool_call {
                   action           = google_dialogflow_cx_tool.my_tool.display_name
@@ -555,11 +571,15 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
                   EOF
                 }
               }
+            }
+            case_content {
               message {
                 knowledge_info_card {
                   maximum_snippets = 1
                 }
               }
+            }
+            case_content {
               message {
                 live_agent_handoff {
                   metadata = <<EOF
@@ -567,11 +587,15 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
                   EOF
                 }
               }
+            }
+            case_content {
               message {
                 output_audio_text {
                   text = "some output text"
                 }
               }
+            }
+            case_content {
               message {
                 output_audio_text {
                   ssml = <<EOF
@@ -579,21 +603,29 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
                   EOF
                 }
               }
+            }
+            case_content {
               message {
                 payload = <<EOF
                   {"some-key": "some-value", "other-key": ["other-value"]}
                 EOF
               }
+            }
+            case_content {
               message {
                 play_audio {
                   audio_uri = "http://example.com/some-audio-file.mp3"
                 }
               }
+            }
+            case_content {
               message {
                 telephony_transfer_call {
                   phone_number = "1-234-567-8901"
                 }
               }
+            }
+            case_content {
               message {
                 tool_call {
                   action           = google_dialogflow_cx_tool.my_tool.display_name
