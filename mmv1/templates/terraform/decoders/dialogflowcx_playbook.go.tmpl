@@ -159,6 +159,114 @@ if displayName == "Playbook Example with Fulfillment" {
 		return nil, err
 	}
 
+	//   - 'handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.1.knowledge_info_card'
+	//   - 'handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.tool_call'
+	setHandlers3EventHandlerFulfillmentConditionalCases1Cases0 := func(data map[string]interface{}) error {
+		// --- Traverse to the parent map ---
+		handlers, ok := data["handlers"].([]interface{})
+		if !ok { return fmt.Errorf("'handlers' is not a slice") }
+
+		if len(handlers) <= 3 { return fmt.Errorf("index 3 out of bounds for 'handlers'") }
+		handler, ok := handlers[3].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'handlers[3]' is not a map") }
+
+		eventHandler, ok := handler["eventHandler"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'eventHandler' is not a map") }
+
+		fulfillment, ok := eventHandler["fulfillment"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'fulfillment' is not a map") }
+
+		conditionalCases, ok := fulfillment["conditionalCases"].([]interface{})
+		if !ok { return fmt.Errorf("'conditionalCases' is not a slice") }
+
+		if len(conditionalCases) <= 1 { return fmt.Errorf("index 1 out of bounds for 'conditionalCases'") }
+		conditionalCase, ok := conditionalCases[1].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'conditionalCases[1]' is not a map") }
+
+		cases, ok := conditionalCase["cases"].([]interface{})
+		if !ok { return fmt.Errorf("'cases' is not a slice") }
+
+		if len(cases) <= 0 { return fmt.Errorf("index 0 out of bounds for 'cases'") }
+		case0, ok := cases[0].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'cases[0]' is not a map") }
+
+		caseContent, ok := case0["caseContent"].([]interface{})
+		if !ok { return fmt.Errorf("'cases' is not a slice") }
+
+		if len(caseContent) <= 1 { return fmt.Errorf("index 1 out of bounds for 'caseContent'") }
+		caseContent1, ok := caseContent[1].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'caseContent[1]' is not a map") }
+
+		caseContent1["knowledgeInfoCard"] = map[string]interface{}{"maximumSnippets": 1}
+
+		if len(caseContent) <= 8 { return fmt.Errorf("index 8 out of bounds for 'caseContent'") }
+		caseContent8, ok := caseContent[8].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'caseContent[8]' is not a map") }
+
+		messagcaseContent8e1["toolCall"] = d.Get("handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.tool_call.0").(map[string]interface{})
+		delete(caseContent8["toolCall"].(map[string]interface{}), "input_parameters")
+		caseContent8["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
+
+		return nil
+	}
+	if err := setHandlers3EventHandlerFulfillmentConditionalCases1Cases0(res); err != nil {
+		return nil, err
+	}
+
+	//   - 'handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.1.knowledge_info_card'
+	//   - 'handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.tool_call'
+	setHandlers7LifecycleHandlerFulfillmentConditionalCases1Cases0 := func(data map[string]interface{}) error {
+		// --- Traverse to the parent map ---
+		handlers, ok := data["handlers"].([]interface{})
+		if !ok { return fmt.Errorf("'handlers' is not a slice") }
+
+		if len(handlers) <= 7 { return fmt.Errorf("index 7 out of bounds for 'handlers'") }
+		handler, ok := handlers[7].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'handlers[7]' is not a map") }
+
+		lifecycleHandler, ok := handler["lifecycleHandler"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'lifecycleHandler' is not a map") }
+
+		fulfillment, ok := lifecycleHandler["fulfillment"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'fulfillment' is not a map") }
+
+		conditionalCases, ok := fulfillment["conditionalCases"].([]interface{})
+		if !ok { return fmt.Errorf("'conditionalCases' is not a slice") }
+
+		if len(conditionalCases) <= 1 { return fmt.Errorf("index 1 out of bounds for 'conditionalCases'") }
+		conditionalCase, ok := conditionalCases[1].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'conditionalCases[1]' is not a map") }
+
+		cases, ok := conditionalCase["cases"].([]interface{})
+		if !ok { return fmt.Errorf("'cases' is not a slice") }
+
+		if len(cases) <= 0 { return fmt.Errorf("index 0 out of bounds for 'cases'") }
+		case0, ok := cases[0].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'cases[0]' is not a map") }
+
+		caseContent, ok := case0["caseContent"].([]interface{})
+		if !ok { return fmt.Errorf("'cases' is not a slice") }
+
+		if len(caseContent) <= 1 { return fmt.Errorf("index 1 out of bounds for 'caseContent'") }
+		caseContent1, ok := caseContent[1].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'caseContent[1]' is not a map") }
+
+		caseContent1["knowledgeInfoCard"] = map[string]interface{}{"maximumSnippets": 1}
+
+		if len(caseContent) <= 8 { return fmt.Errorf("index 8 out of bounds for 'caseContent'") }
+		caseContent8, ok := caseContent[8].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'caseContent[8]' is not a map") }
+
+		messagcaseContent8e1["toolCall"] = d.Get("handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.tool_call.0").(map[string]interface{})
+		delete(caseContent8["toolCall"].(map[string]interface{}), "input_parameters")
+		caseContent8["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
+
+		return nil
+	}
+	if err := setHandlers7LifecycleHandlerFulfillmentConditionalCases1Cases0(res); err != nil {
+		return nil, err
+	}
+
 	log.Printf("[DEBUG] Finished decoding Playbook %q: %#v", d.Id(), res)
 }
 
