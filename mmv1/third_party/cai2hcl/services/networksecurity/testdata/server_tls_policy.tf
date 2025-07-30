@@ -1,10 +1,5 @@
-################################################################################
-# Core Usecases
-################################################################################
-
-# Load Balancer mTLS
-resource "google_network_security_server_tls_policy" "test1" {
-  name                   = "test1"
+resource "google_network_security_server_tls_policy" "lb_mtls_policy" {
+  name                   = "lb_mtls_policy"
   description            = "my description"
   location               = "global"
   labels                 = {
@@ -16,9 +11,8 @@ resource "google_network_security_server_tls_policy" "test1" {
   }
 }
 
-# Traffic Director mTLS
-resource "google_network_security_server_tls_policy" "test2" {
-  name                   = "test2"
+resource "google_network_security_server_tls_policy" "td_mtls_policy" {
+  name                   = "td_mtls_policy"
   description            = "my description"
   location               = "global"
   labels                 = {
@@ -39,9 +33,8 @@ resource "google_network_security_server_tls_policy" "test2" {
   }
 }
 
-# Traffic Director with server certificate 
-resource "google_network_security_server_tls_policy" "test3" {
-  name                   = "test3"
+resource "google_network_security_server_tls_policy" "td_with_server_cert_policy" {
+  name                   = "td_with_server_cert_policy"
   description            = "my description"
   location               = "global"
   allow_open             = "false"
@@ -52,13 +45,8 @@ resource "google_network_security_server_tls_policy" "test3" {
   }
 }
 
-################################################################################
-# Enumerating other possible configurations
-################################################################################
-
-# Empty description
-resource "google_network_security_server_tls_policy" "test4" {
-  name                   = "test4"
+resource "google_network_security_server_tls_policy" "empty_description_policy" {
+  name                   = "empty_description_policy"
   location               = "global"
   labels                 = {
     foo = "bar"
@@ -69,9 +57,8 @@ resource "google_network_security_server_tls_policy" "test4" {
   }
 }
 
-# Empty labels
-resource "google_network_security_server_tls_policy" "test5" {
-  name                   = "test5"
+resource "google_network_security_server_tls_policy" "empty_labels_policy" {
+  name                   = "empty_labels_policy"
   description            = "my description"
   location               = "global"
   mtls_policy {
@@ -80,9 +67,8 @@ resource "google_network_security_server_tls_policy" "test5" {
   }
 }
 
-# Regional location
-resource "google_network_security_server_tls_policy" "test6" {
-  name                   = "test6"
+resource "google_network_security_server_tls_policy" "regional_location_policy" {
+  name                   = "regional_location_policy"
   description            = "my description"
   location               = "us-central1"
   labels                 = {
@@ -94,9 +80,8 @@ resource "google_network_security_server_tls_policy" "test6" {
   }
 }
 
-# Load Balancer mTLS but allowing invalid or missing client certificates
-resource "google_network_security_server_tls_policy" "test7" {
-  name                   = "test7"
+resource "google_network_security_server_tls_policy" "lb_mtls_allow_invalid_cert_policy" {
+  name                   = "lb_mtls_allow_invalid_cert_policy"
   labels                 = {
     foo = "bar"
   }
@@ -107,9 +92,8 @@ resource "google_network_security_server_tls_policy" "test7" {
   }
 }
 
-# Traffic Director with allow_open true
-resource "google_network_security_server_tls_policy" "test8" {
-  name                   = "test8"
+resource "google_network_security_server_tls_policy" "td_allow_open_policy" {
+  name                   = "td_allow_open_policy"
   description            = "my description"
   location               = "global"
   allow_open             = "true"
@@ -127,9 +111,8 @@ resource "google_network_security_server_tls_policy" "test8" {
   }
 }
 
-# Traffic Director with certificate provider instance
-resource "google_network_security_server_tls_policy" "test9" {
-  name                   = "test9"
+resource "google_network_security_server_tls_policy" "td_with_cert_provider_policy" {
+  name                   = "td_with_cert_provider_policy"
   description            = "my description"
   location               = "global"
   server_certificate {
@@ -139,9 +122,8 @@ resource "google_network_security_server_tls_policy" "test9" {
   }
 }
 
-# Traffic Director mTLS with ClientValidation CA: gRPC endpoint
-resource "google_network_security_server_tls_policy" "test10" {
-  name                   = "test10"
+resource "google_network_security_server_tls_policy" "td_mtls_client_validation_grpc_policy" {
+  name                   = "td_mtls_client_validation_grpc_policy"
   description            = "my description"
   location               = "global"
   labels                 = {
