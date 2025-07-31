@@ -1274,3 +1274,13 @@ func (t Type) GetPropertySchemaPathList(propertyList []string) []string {
 	}
 	return list
 }
+
+func (t Type) CoversDescendants() bool {
+	if t.CustomFlatten == "templates/terraform/custom_flatten/json_schema.tmpl" {
+		return true
+	}
+	if t.CustomExpand == "templates/terraform/custom_expand/json_schema.tmpl" || t.CustomExpand == "templates/terraform/custom_expand/json_value.tmpl" {
+		return true
+	}
+	return false
+}
