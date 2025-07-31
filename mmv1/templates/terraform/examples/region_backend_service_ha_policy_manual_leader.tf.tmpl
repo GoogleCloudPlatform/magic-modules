@@ -40,33 +40,33 @@ resource "google_compute_instance" "endpoint-instance" {
 }
 
 resource "google_compute_network_endpoint_group" "neg" {
-  name         					= "{{index $.Vars "neg_name"}}"
-	network_endpoint_type = "GCE_VM_IP"
-  network     					= google_compute_network.default.id
-  subnetwork   					= google_compute_subnetwork.default.id
-  zone         					= "us-central1-a"
+  name                  = "{{index $.Vars "neg_name"}}"
+  network_endpoint_type = "GCE_VM_IP"
+  network               = google_compute_network.default.id
+  subnetwork            = google_compute_subnetwork.default.id
+  zone                  = "us-central1-a"
 }
 
 resource "google_compute_region_backend_service" "{{$.PrimaryResourceId}}" {
-  region                					= "us-central1"
-  name                  					= "{{index $.Vars "region_backend_service_name"}}"
-  protocol              					= "UDP"
-  load_balancing_scheme 					= "EXTERNAL"
-  network               					= google_compute_network.default.id
-	backend {
-		group													= google_compute_network_endpoint_group.neg.self_link
-		balancing_mode								= "CONNECTION"
-	}
-	ha_policy	{
-		fast_ip_move									= "GARP_RA"
-		leader {
-			backend_group								= google_compute_network_endpoint_group.neg.self_link
-			network_endpoint {
-  			instance									= google_compute_instance.endpoint-instance.name
-			}
-		}
-	}
-	// Must explicitly disable connection draining to override default value.
-	connection_draining_timeout_sec = 0
+  region                          = "us-central1"
+  name                            = "{{index $.Vars "region_backend_service_name"}}"
+  protocol                        = "UDP"
+  load_balancing_scheme           = "EXTERNAL"
+  network                         = google_compute_network.default.id
+  backend {
+    group                         = google_compute_network_endpoint_group.neg.self_link
+    balancing_mode                = "CONNECTION"
+  }
+  ha_policy  {
+    fast_ip_move                  = "GARP_RA"
+    leader {
+      backend_group               = google_compute_network_endpoint_group.neg.self_link
+      network_endpoint {
+        instance                  = google_compute_instance.endpoint-instance.name
+      }
+    }
+  }
+  // Must explicitly disable connection draining to override default value.
+  connection_draining_timeout_sec = 0
 }
 
