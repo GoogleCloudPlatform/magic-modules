@@ -455,29 +455,6 @@ func TestReformConfigWithProvider(t *testing.T) {
 }
 
 func TestInsertDiffSteps(t *testing.T) {
-	// Placeholders for undefined variables and functions from the provided snippets.
-	var rName = "test-resource"
-	var context = map[string]interface{}{}
-	// Dummy test configuration functions
-	testAccExampleResource := func(name string) string {
-		return fmt.Sprintf(`provider = google-beta
-resource "google_example_widget" "foo" {
-	name = "%s"
-}`, name)
-	}
-
-	testAccExampleResourceLocal := func(name string) string {
-		return fmt.Sprintf(`provider = google-local
-resource "google_example_widget" "foo" {
-	name = "%s"
-}`, name)
-	}
-
-	testAccAlloydbClusterAndInstanceAndBackup_OnlyOneSourceAllowed := func(ctx map[string]interface{}) string {
-		return `provider = "google-local"
-// ... configuration that is expected to cause an error
-`
-	}
 
 	var dummyCase = resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -500,13 +477,18 @@ resource "google_example_widget" "foo" {
 				ImportStateVerifyIgnore: []string{"topic"},
 			},
 			{
-				Config: testAccExampleResource(rName),
+				Config: `resource "google_example_widget" "foo" {
+					name = "dummy"
+					provider = google-beta
+				}`,
 				Check: resource.ComposeTestCheckFunc(
 					func(*terraform.State) error { return nil },
 				),
 			},
 			{
-				Config:      testAccAlloydbClusterAndInstanceAndBackup_OnlyOneSourceAllowed(context),
+				Config: `provider = "google-local"
+						// ... configuration that is expected to cause an error
+					`,
 				ExpectError: regexp.MustCompile(`"restore_continuous_backup_source": conflicts with restore_backup_source`),
 			},
 		},
@@ -549,13 +531,19 @@ resource "google_example_widget" "foo" {
 			ResourceName: "google_pubsub_subscription.example", // No config, so no diff step added
 		},
 		{
-			Config: testAccExampleResource(rName),
+			Config: `resource "google_example_widget" "foo" {
+					name = "dummy"
+					provider = google-beta
+				}`,
 			Check: resource.ComposeTestCheckFunc(
 				func(*terraform.State) error { return nil },
 			),
 		},
 		{
-			Config: testAccExampleResourceLocal(rName),
+			Config: `resource "google_example_widget" "foo" {
+					name = "dummy"
+					provider = google-local
+				}`,
 			Check: resource.ComposeTestCheckFunc(
 				func(*terraform.State) error { return nil },
 			),
@@ -563,7 +551,9 @@ resource "google_example_widget" "foo" {
 			PlanOnly:           true,
 		},
 		{
-			Config: testAccAlloydbClusterAndInstanceAndBackup_OnlyOneSourceAllowed(context), // ExpectError is set, so no diff step added
+			Config: `provider = "google-local"
+						// ... configuration that is expected to cause an error
+					`, // expect error means we don't do a second step
 		},
 	}
 
