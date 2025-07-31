@@ -1278,10 +1278,9 @@ resource "google_dataproc_cluster" "tier_cluster" {
   region = "us-central1"
 
   cluster_config {
+	%s
 	staging_bucket = google_storage_bucket.bucket.name
 	temp_bucket = google_storage_bucket.bucket.name
-
-	%s
 
     software_config {
       image_version = "2.3.4-debian12"

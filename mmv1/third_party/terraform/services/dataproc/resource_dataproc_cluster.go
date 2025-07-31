@@ -556,6 +556,7 @@ func ResourceDataprocCluster() *schema.Resource {
 						"cluster_tier": {
 							Type:         schema.TypeString,
 							Optional:     true,
+							Computed:     true,
 							Description:  `Specifies the tier of the cluster created.`,
 							AtLeastOneOf: clusterConfigKeys,
 							ForceNew:     true,
