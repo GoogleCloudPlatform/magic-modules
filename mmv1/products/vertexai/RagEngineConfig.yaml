@@ -99,7 +99,7 @@ properties:
           - 'rag_managed_db_config.0.basic'
           - 'rag_managed_db_config.0.unprovisioned'
         description: |
-          Disables the RAG Engine service and deletes all your data held within this service. This will halt the billing of the service. 
+          Disables the RAG Engine service and deletes all your data held within this service. This will halt the billing of the service.
           NOTE: Once deleted the data cannot be recovered. To start using RAG Engine again, you will need to update the tier by calling the UpdateRagEngineConfig API.
         allow_empty_object: true
         send_empty_value: true
