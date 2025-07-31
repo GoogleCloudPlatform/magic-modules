@@ -1,0 +1,110 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'RagEngineConfig'
+description: |
+  Vertex AI RAG Engine lets you scale your RagManagedDb instance based on your usage and performance requirements using a choice of two tiers, and optionally, lets you delete your Vertex AI RAG Engine data using a third tier. The tier is a project-level setting that's available in the RagEngineConfig resource that impacts all RAG corpora using RagManagedDb. The following tiers are available in RagEngineConfig: Basic, Scaled and Unprovisioned.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/generative-ai/docs/rag-engine/understanding-ragmanageddb'
+  api: 'https://cloud.google.com/vertex-ai/generative-ai/docs/reference/rest/v1/RagEngineConfig'
+docs:
+id_format: 'projects/{{project}}/locations/{{region}}/ragEngineConfig'
+base_url: 'projects/{{project}}/locations/{{region}}/ragEngineConfig'
+self_link: 'projects/{{project}}/locations/{{region}}/ragEngineConfig'
+create_url: 'projects/{{project}}/locations/{{region}}/ragEngineConfig'
+# This is a singleton resource that is already created, so create
+# is really an update, and therefore should be PATCHed.
+create_verb: 'PATCH'
+update_url: 'projects/{{project}}/locations/{{region}}/ragEngineConfig'
+update_verb: 'PATCH'
+delete_url: 'projects/{{project}}/locations/{{region}}/ragEngineConfig'
+delete_verb: 'PATCH'
+import_format:
+  - 'projects/{{project}}/locations/{{region}}/ragEngineConfig'
+update_mask: false
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+  custom_delete: "templates/terraform/custom_delete/vertex_ai_rag_engine_config.go.tmpl"
+examples:
+  - name: 'vertex_ai_rag_engine_config_basic'
+    exclude_test: true
+  - name: 'vertex_ai_rag_engine_config_scaled'
+    exclude_test: true
+  - name: 'vertex_ai_rag_engine_config_unprovisioned'
+    exclude_test: true
+parameters:
+  - name: 'region'
+    type: String
+    description: The region of the RagEngineConfig. eg us-central1
+    url_param_only: true
+    immutable: true
+    default_from_api: true
+properties:
+  - name: 'ragManagedDbConfig'
+    type: NestedObject
+    description: |
+      Required. The config of the RagManagedDb used by RagEngine.
+    required: true
+    properties:
+      - name: 'scaled'
+        type: NestedObject
+        exactly_one_of:
+          - 'rag_managed_db_config.0.scaled'
+          - 'rag_managed_db_config.0.basic'
+          - 'rag_managed_db_config.0.unprovisioned'
+        description: |
+          Scaled tier offers production grade performance along with autoscaling functionality. It is suitable for customers with large amounts of data or performance sensitive workloads.
+        allow_empty_object: true
+        send_empty_value: true
+        properties: []
+      - name: 'basic'
+        type: NestedObject
+        exactly_one_of:
+          - 'rag_managed_db_config.0.scaled'
+          - 'rag_managed_db_config.0.basic'
+          - 'rag_managed_db_config.0.unprovisioned'
+        description: |
+          Basic tier is a cost-effective and low compute tier suitable for the following cases: Experimenting with RagManagedDb, Small data size, Latency insensitive workload, Only using RAG Engine with external vector DBs.
+          NOTE: This is the default tier if not explicitly chosen.
+        allow_empty_object: true
+        send_empty_value: true
+        properties: []
+      - name: 'unprovisioned'
+        type: NestedObject
+        exactly_one_of:
+          - 'rag_managed_db_config.0.scaled'
+          - 'rag_managed_db_config.0.basic'
+          - 'rag_managed_db_config.0.unprovisioned'
+        description: |
+          Disables the RAG Engine service and deletes all your data held within this service. This will halt the billing of the service. 
+          NOTE: Once deleted the data cannot be recovered. To start using RAG Engine again, you will need to update the tier by calling the UpdateRagEngineConfig API.
+        allow_empty_object: true
+        send_empty_value: true
+        properties: []
+  - name: 'name'
+    type: String
+    description: The resource name of the Dataset. This value is set by Google.
+    output: true
