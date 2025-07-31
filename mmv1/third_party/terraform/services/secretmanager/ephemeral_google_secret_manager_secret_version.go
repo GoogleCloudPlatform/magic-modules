@@ -37,8 +37,8 @@ type ephemeralSecretManagerSecretVersionModel struct {
 }
 
 func (p *googleEphemeralSecretManagerSecretVersion) Schema(ctx context.Context, req ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
-	resp.Schema.Description = "This ephemeral resource provides access to a Google Secret Manager secret version, which can be combined with a write-only attribute."
-	resp.Schema.MarkdownDescription = "This ephemeral resource provides access to a Google Secret Manager secret version, which can be combined with a write-only attribute."
+	resp.Schema.Description = "This ephemeral resource provides access to a Google Secret Manager secret version."
+	resp.Schema.MarkdownDescription = "This ephemeral resource provides access to a Google Secret Manager secret version."
 
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
