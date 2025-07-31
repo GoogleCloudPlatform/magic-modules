@@ -292,6 +292,7 @@ properties:
     validation:
       regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
   - name: 'loadBalancingScheme'
+    is_missing_in_cai: true
     type: Enum
     description: |
       The value can only be INTERNAL_MANAGED for cross-region internal layer 7 load balancer.
