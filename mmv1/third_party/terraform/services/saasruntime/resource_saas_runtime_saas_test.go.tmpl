@@ -1,5 +1,7 @@
 package saasruntime_test
 
+{{ if ne $.TargetVersionName `ga` -}}
+
 import (
 	"testing"
 
@@ -88,3 +90,4 @@ resource "google_saas_runtime_saas" "example" {
 }
 `, context)
 }
+{{- end }}
