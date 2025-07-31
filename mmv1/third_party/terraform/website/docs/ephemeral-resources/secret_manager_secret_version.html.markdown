@@ -1,7 +1,7 @@
 ---
 subcategory: "Cloud Platform"
 description: |-
-    Produces an ephemeral source for a secret version of a Secret Manager secret
+    Produces an ephemeral resource for a secret version of a Secret Manager secret
 ---
 
 # google_secret_manager_secret_version
@@ -9,7 +9,7 @@ This ephemeral resource provides a [Secret Manager secret version](https://cloud
 
 ## Example Usage
 
-Use an ephemeral resource to pass through secret data to a resource with write-only attributes, such as `google_monitoring_uptime_check_config`:
+Use an ephemeral resource to pass through secret data to a resource with write-only arguments, such as `google_monitoring_uptime_check_config`:
 
 ```hcl
 ephemeral "google_secret_manager_secret_version" "example" {
