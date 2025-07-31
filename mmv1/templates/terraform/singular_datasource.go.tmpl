@@ -53,7 +53,7 @@ import (
 {{- end}}
 )
 
-func DataSourceGoogleCompute{{ .ResourceName -}}() *schema.Resource {
+func DataSource{{ .ResourceName -}}Generated() *schema.Resource {
 	rs := Resource{{ .ResourceName -}}().Schema
 
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(rs)
@@ -90,12 +90,12 @@ func DataSourceGoogleCompute{{ .ResourceName -}}() *schema.Resource {
   {{- end}}
 
   return &schema.Resource{
-		Read:   dataSourceGoogle{{ $.ResourceName -}}ReadGenerated,
+		Read:   dataSource{{ $.ResourceName -}}ReadGenerated,
 		Schema: dsSchema,
 	}
 }
 
-func dataSourceGoogle{{ $.ResourceName -}}ReadGenerated(d *schema.ResourceData, meta interface{}) error {
+func dataSource{{ $.ResourceName -}}ReadGenerated(d *schema.ResourceData, meta interface{}) error {
   config := meta.(*transport_tpg.Config)
 
   id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
