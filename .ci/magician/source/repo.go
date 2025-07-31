@@ -50,15 +50,26 @@ func (gc Controller) SetPath(repo *Repo) {
 }
 
 func (gc Controller) URL(repo *Repo) string {
+	return gc.repoURL(repo, true)
+}
+
+func (gc Controller) URLWithoutToken(repo *Repo) string {
+	return gc.repoURL(repo, false)
+}
+
+func (gc Controller) repoURL(repo *Repo, withToken bool) string {
 	owner := repo.Owner
 	if owner == "" {
 		owner = gc.username
 	}
-	return fmt.Sprintf("https://%s:%s@github.com/%s/%s", gc.username, gc.token, owner, repo.Name)
+	if withToken {
+		return fmt.Sprintf("https://%s:%s@github.com/%s/%s", gc.username, gc.token, owner, repo.Name)
+	}
+	return fmt.Sprintf("https://%s@github.com/%s/%s", gc.username, owner, repo.Name)
 }
 
 func (gc Controller) Clone(repo *Repo) error {
-	url := gc.URL(repo)
+	url := gc.URLWithoutToken(repo)
 	var err error
 	if repo.Branch == "" {
 		_, err = gc.rnr.Run("git", []string{"clone", url, repo.Path}, nil)
@@ -88,7 +99,7 @@ func (gc Controller) Fetch(repo *Repo, branch string) error {
 		return err
 	}
 	if _, err := gc.rnr.Run("git", []string{"fetch", "origin", branch}, nil); err != nil {
-		return fmt.Errorf("error fetching branch %s in repo %s: %v\n", branch, repo.Name, err)
+		return fmt.Errorf("error fetching branch %s in repo %s: %v", branch, repo.Name, err)
 	}
 	return gc.rnr.PopDir()
 }
