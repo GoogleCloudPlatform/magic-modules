@@ -1149,6 +1149,38 @@ func TestAccStorageBucket_cors(t *testing.T) {
 	})
 }
 
+func TestAccStorageBucket_emptyCors(t *testing.T) {
+	t.Parallel()
+
+	bucketName := fmt.Sprintf("tf-test-acl-bucket-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleStorageBucketsCors(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy", "cors.1.send_max_age_seconds_if_zero"},
+			},
+			{
+				Config: testGoogleStorageBucketsEmptyCors(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
 func TestAccStorageBucket_defaultEventBasedHold(t *testing.T) {
 	t.Parallel()
 
@@ -2189,6 +2221,23 @@ resource "google_storage_bucket" "bucket" {
     response_header              = ["000"]
     max_age_seconds              = 0
     send_max_age_seconds_if_zero = true
+  }
+}
+`, bucketName)
+}
+
+func testGoogleStorageBucketsEmptyCors(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+  uniform_bucket_level_access=true
+  cors {
+    origin          = []
+    method          = []
+    response_header = []
+    max_age_seconds = 0
   }
 }
 `, bucketName)
