@@ -58,7 +58,7 @@ func (p *googleEphemeralSecretManagerSecretVersion) Schema(ctx context.Context, 
 				Optional:    true,
 			},
 			"is_secret_data_base64": schema.BoolAttribute{
-				Description: "If true, the secret data will be returned as a base64 encoded string. Defaults to false.",
+				Description: "If true, the secret data returned will not get base64 decoded. Defaults to false.",
 				Optional:    true,
 			},
 			// Attributes
