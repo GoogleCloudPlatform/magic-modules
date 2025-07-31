@@ -287,9 +287,14 @@ properties:
   - name: 'discoveryEndpoints'
     type: Array
     description:
-      "Output only. Endpoints clients can connect to the instance through.
-      Currently only one\ndiscovery endpoint is supported. "
-    deprecation_message: '`discovery_endpoints` is deprecated  Use `endpoints` instead.'
+      "Deprecated. Output only. Endpoints clients can connect to the instance through."
+    deprecation_message:
+      This field is deprecated. As a result it will not be populated
+      if the connections are created using `desired_auto_created_endpoints`
+      parameter or `google_memorystore_instance_desired_user_created_endpoints`
+      resource. Instead of this parameter, for discovery, use
+      `endpoints.connections.pscConnection` and `endpoints.connections.pscAutoConnection`
+      with `connectionType` CONNECTION_TYPE_DISCOVERY.
     output: true
     item_type:
       type: NestedObject
@@ -813,3 +818,21 @@ properties:
     type: String
     description: The KMS key used to encrypt the at-rest data of the cluster
     immutable: true
+  - name: 'managedServerCa'
+    type: NestedObject
+    output: true
+    description: Instance's Certificate Authority. This field will only be populated if instance's transit_encryption_mode is SERVER_AUTHENTICATION
+    properties:
+      - name: 'caCerts'
+        type: Array
+        output: true
+        description: The PEM encoded CA certificate chains for managed server authentication
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'certificates'
+              type: Array
+              output: true
+              description: The certificates that form the CA chain, from leaf to root order
+              item_type:
+                type: String
