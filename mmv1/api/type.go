@@ -1046,12 +1046,6 @@ func propertyWithAtLeastOneOf(atLeastOneOf []string) func(*Type) {
 	}
 }
 
-func propertyWithDefault(defaultValue interface{}) func(*Type) {
-	return func(p *Type) {
-		p.DefaultValue = defaultValue
-	}
-}
-
 func propertyWithApiName(apiName string) func(*Type) {
 	return func(p *Type) {
 		p.ApiName = apiName
