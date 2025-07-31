@@ -245,5 +245,6 @@ properties:
                     The end hour of the day should be greater than the start
   - name: 'logRetentionDays'
     type: Integer
+    immutable: true
     description: |
       This is only applicable for CloudSql resource. Days for which logs will be stored. This value should be greater than or equal to minimum enforced log retention duration of the backup vault.

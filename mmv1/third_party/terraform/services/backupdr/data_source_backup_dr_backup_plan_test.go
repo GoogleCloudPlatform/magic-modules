@@ -104,7 +104,7 @@ func testAccDataSourceGoogleBackupDRBackupPlan_csql(context map[string]interface
 	return acctest.Nprintf(`
 resource "google_backup_dr_backup_vault" "my-backup-vault-csql" {
     location ="us-central1"
-    backup_vault_id    = "bv-%{random_suffix}"
+    backup_vault_id    = "tf-test-bv-%{random_suffix}"
     description = "This is a backup vault built by Terraform for cloudsql."
     backup_minimum_enforced_retention_duration = "100000s"
     labels = {
@@ -123,7 +123,7 @@ resource "google_backup_dr_backup_vault" "my-backup-vault-csql" {
 
 resource "google_backup_dr_backup_plan" "csql-test" { 
   location = "us-central1" 
-  backup_plan_id = "bp-test-%{random_suffix}"
+  backup_plan_id = "tf-test-bp-%{random_suffix}"
   resource_type= "sqladmin.googleapis.com/Instance"
   backup_vault = google_backup_dr_backup_vault.my-backup-vault-csql.name
   depends_on=[ google_backup_dr_backup_vault.my-backup-vault-csql ]
@@ -148,7 +148,7 @@ resource "google_backup_dr_backup_plan" "csql-test" {
 
 data "google_backup_dr_backup_plan" "fetch-bp" {
   location =  "us-central1"
-  backup_plan_id="bp-test-%{random_suffix}"
+  backup_plan_id=google_backup_dr_backup_plan.csql-test.backup_plan_id
   depends_on= [ google_backup_dr_backup_plan.csql-test ]
   }
 `, context)
