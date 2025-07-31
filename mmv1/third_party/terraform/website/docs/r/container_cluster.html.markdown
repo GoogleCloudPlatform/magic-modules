@@ -426,6 +426,8 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 * `anonymous_authentication_config` - (Optional)
   Configuration for [anonymous authentication restrictions](https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#restrict-anon-access). Structure is [documented below](#anonymous_authentication_config).
 
+* `rbac_binding_config` - (Optional)
+  RBACBindingConfig allows user to restrict ClusterRoleBindings an RoleBindings that can be created. Structure is [documented below](#nested_rbac_binding_config).
 
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
 
@@ -512,6 +514,15 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
    It is disabled by default for Standard clusters; set `enabled = true` to enable.
    It is enabled by default for Autopilot clusters with version 1.29 or later; set `enabled = true` to enable it explicitly.
    See [Enable the Parallelstore CSI driver](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/parallelstore-csi-new-volume#enable) for more information.
+
+*  `lustre_csi_driver_config` - (Optional) The status of the Lustre CSI driver addon,
+   which allows the usage of a Lustre instances as volumes.
+   It is disabled by default for Standard clusters; set `enabled = true` to enable.
+   It is disabled by default for Autopilot clusters; set `enabled = true` to enable.
+   Lustre CSI Driver Config has optional subfield
+   `enable_legacy_lustre_port` which allows the Lustre CSI driver to initialize LNet (the virtual networklayer for Lustre kernel module) using port 6988. 
+   This flag is required to workaround a port conflict with the gke-metadata-server on GKE nodes.
+   See [Enable Lustre CSI driver](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/lustre-csi-driver-new-volume) for more information.
 
 This example `addons_config` disables two addons:
 
@@ -1550,6 +1561,11 @@ linux_node_config {
 <a name="anonymous_authentication_config"></a>The `anonymous_authentication_config` block supports:
 
 * `mode` - (Optional) Sets or removes authentication restrictions. Available options include `LIMITED` and `ENABLED`.
+
+<a name="nested_rbac_binding_config"></a>The `rbac_binding_config` block supports:
+
+* `enable_insecure_binding_system_unauthenticated` - (Optional) Setting this to true will allow any ClusterRoleBinding and RoleBinding with subjects system:anonymous or system:unauthenticated.
+* `enable_insecure_binding_system_authenticated` - (Optional) Setting this to true will allow any ClusterRoleBinding and RoleBinding with subjects system:authenticated.
 
 
 ## Attributes Reference

@@ -1,6 +1,6 @@
 resource "google_dns_managed_zone" "{{$.PrimaryResourceId}}" {
   name        = "{{index $.Vars "zone_name"}}"
-  dns_name    = "services.example.com."
+  dns_name    = "{{index $.Vars "dns_name"}}"
   description = "Example cloud logging enabled DNS zone"
   labels = {
     foo = "bar"

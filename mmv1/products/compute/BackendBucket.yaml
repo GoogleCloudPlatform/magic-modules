@@ -72,6 +72,7 @@ examples:
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
+    tgc_test_ignore_in_asset: ['RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec']
   - name: 'backend_bucket_query_string_whitelist'
     primary_resource_id: 'image_backend'
     vars:
@@ -275,6 +276,7 @@ properties:
     description:  | 
       If true, enable Cloud CDN for this BackendBucket.
       Note: This cannot be set to true when loadBalancingScheme is set to INTERNAL_MANAGED.
+    include_empty_value_in_cai: true
   - name: 'name'
     type: String
     description: |
@@ -290,6 +292,7 @@ properties:
     validation:
       regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
   - name: 'loadBalancingScheme'
+    is_missing_in_cai: true
     type: Enum
     description: |
       The value can only be INTERNAL_MANAGED for cross-region internal layer 7 load balancer.

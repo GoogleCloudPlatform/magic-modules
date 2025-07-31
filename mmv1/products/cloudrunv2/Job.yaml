@@ -126,7 +126,6 @@ examples:
     ignore_read_extra:
       - 'deletion_protection'
   - name: 'cloudrunv2_job_gpu'
-    min_version: 'beta'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-job%s", context["random_suffix"])'
     vars:
@@ -774,7 +773,6 @@ properties:
             send_empty_value: true
             default_value: 3
           - name: 'nodeSelector'
-            min_version: beta
             type: NestedObject
             description: Node Selector describes the hardware requirements of the resources.
             properties:
@@ -783,6 +781,9 @@ properties:
                 description:
                   The GPU to attach to an instance. See https://cloud.google.com/run/docs/configuring/jobs/gpu for configuring GPU.
                 required: true
+          - name: 'gpuZonalRedundancyDisabled'
+            type: Boolean
+            description: True if GPU zonal redundancy is disabled on this execution.
   - name: 'observedGeneration'
     type: String
     description: |

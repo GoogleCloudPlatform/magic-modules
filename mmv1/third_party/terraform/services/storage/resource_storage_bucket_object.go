@@ -15,6 +15,7 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"crypto/sha256"
 	"encoding/base64"
@@ -83,11 +84,20 @@ func ResourceStorageBucketObject() *schema.Resource {
 			},
 
 			"content_type": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Computed:    true,
-				Description: `Content-Type of the object data. Defaults to "application/octet-stream" or "text/plain; charset=utf-8".`,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				Computed:      true,
+				ConflictsWith: []string{"force_empty_content_type"},
+				Description:   `Content-Type of the object data. Defaults to "application/octet-stream" or "text/plain; charset=utf-8".`,
+			},
+
+			"force_empty_content_type": {
+				Type:          schema.TypeBool,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"content_type"},
+				Description:   `Flag to set empty Content-Type.`,
 			},
 
 			"content": {
@@ -298,6 +308,13 @@ func ResourceStorageBucketObject() *schema.Resource {
 				Computed:    true,
 				Description: `A url reference to download this object.`,
 			},
+
+			"deletion_policy": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  `The deletion policy for the object. Setting ABANDON allows the resource to be abandoned rather than deleted when removed from your Terraform configuration.`,
+				ValidateFunc: validation.StringInSlice([]string{"ABANDON"}, false),
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -379,7 +396,11 @@ func resourceStorageBucketObjectCreate(d *schema.ResourceData, meta interface{})
 
 	insertCall := objectsService.Insert(bucket, object)
 	insertCall.Name(name)
-	insertCall.Media(media)
+	if v, ok := d.GetOk("force_empty_content_type"); ok && v.(bool) {
+		insertCall.Media(media, googleapi.ContentType(""))
+	} else {
+		insertCall.Media(media)
+	}
 
 	// This is done late as we need to add headers to enable customer encryption
 	if v, ok := d.GetOk("customer_encryption"); ok {
@@ -556,6 +577,12 @@ func resourceStorageBucketObjectDelete(d *schema.ResourceData, meta interface{})
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
+	}
+
+	if deletionPolicy := d.Get("deletion_policy"); deletionPolicy == "ABANDON" {
+		log.Printf("[WARN] Object %q deletion_policy is set to 'ABANDON', object deletion has been abandoned", d.Id())
+		d.SetId("")
+		return nil
 	}
 
 	bucket := d.Get("bucket").(string)
