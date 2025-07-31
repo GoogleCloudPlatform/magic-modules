@@ -2,8 +2,8 @@ package secretmanager
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/ephemeral/schema"
@@ -44,37 +44,38 @@ func (p *googleEphemeralSecretManagerSecretVersion) Schema(ctx context.Context, 
 		Attributes: map[string]schema.Attribute{
 			// Arguments
 			"project": schema.StringAttribute{
-				Description: "",
-				Required:    true,
+				Description: "The project to get the secret version for. If it is not provided, the provider project is used.",
+				Optional:    true,
+				Computed:    true,
 			},
 			"secret": schema.StringAttribute{
-				Description: "The name of the secret to access (e.g. `projects/my-project/secrets/my-secret`)",
+				Description: "The secret to get the secret version for.",
 				Required:    true,
 			},
 			"version": schema.StringAttribute{
-				Description: "The version of the secret to access (e.g. `latest` or `1`). If not specified, the latest version is retrieved.",
+				Description: "The version of the secret to get. If it is not provided, the latest version is retrieved.",
 				Optional:    true,
 			},
 			// Attributes
 			"secret_data": schema.StringAttribute{
-				Description: "The secret data of the specified secret version.",
+				Description: "The secret data. No larger than 64KiB.",
 				Computed:    true,
 				Sensitive:   true,
 			},
 			"name": schema.StringAttribute{
-				Description: "The resource name of the secret version.",
+				Description: "The resource name of the SecretVersion. Format: `projects/{{project}}/secrets/{{secret_id}}/versions/{{version}}`.",
 				Computed:    true,
 			},
 			"create_time": schema.StringAttribute{
-				Description: "The time at which the secret version was created.",
+				Description: "The time at which the Secret was created.",
 				Computed:    true,
 			},
 			"destroy_time": schema.StringAttribute{
-				Description: "The time at which the secret version was destroyed, if applicable.",
+				Description: "The time at which the Secret was destroyed. Only present if state is DESTROYED.",
 				Computed:    true,
 			},
 			"enabled": schema.BoolAttribute{
-				Description: "Indicates whether the secret version is enabled.",
+				Description: "True if the current state of the SecretVersion is enabled.",
 				Computed:    true,
 			},
 		},
@@ -108,7 +109,65 @@ func (p *googleEphemeralSecretManagerSecretVersion) Open(ctx context.Context, re
 		return
 	}
 
-	// TODO(ramon): Implement the logic to retrieve the secret version data.
+	config := p.providerConfig
+	userAgent := p.providerConfig.UserAgent
+
+	secret := data.Secret.ValueString()
+	project := data.Project.ValueString()
+	version := data.Version.ValueString()
+
+	if project == "" {
+		project = config.Project
+	}
+
+	var url string
+	if version != "" {
+		url = fmt.Sprintf("%s%s/versions/%s", config.SecretManagerBasePath, secret, version)
+	} else {
+		url = fmt.Sprintf("%s%s/versions/latest", config.SecretManagerBasePath, secret)
+	}
+
+	versionResp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Error retrieving secret version", err.Error())
+		return
+	}
+
+	accessURL := fmt.Sprintf("%s%s:access", config.SecretManagerBasePath, versionResp["name"])
+	accessResp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    accessURL,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		resp.Diagnostics.AddError("Error accessing secret data", err.Error())
+		return
+	}
+
+	payload := accessResp["payload"].(map[string]interface{})
+	payloadData, err := base64.StdEncoding.DecodeString(payload["data"].(string))
+	if err != nil {
+		resp.Diagnostics.AddError("Error decoding secret data", err.Error())
+		return
+	}
+
+	data.SecretData = types.StringValue(string(payloadData))
+	data.Name = types.StringValue(versionResp["name"].(string))
+	data.CreateTime = types.StringValue(versionResp["createTime"].(string))
+	data.Project = types.StringValue(project)
+	data.Enabled = types.BoolValue(true)
+
+	if destroyTime, ok := versionResp["destroyTime"]; ok {
+		data.DestroyTime = types.StringValue(destroyTime.(string))
+	}
 
 	resp.Diagnostics.Append(resp.Result.Set(ctx, data)...)
 }
