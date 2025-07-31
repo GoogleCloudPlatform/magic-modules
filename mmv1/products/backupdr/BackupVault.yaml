@@ -179,3 +179,12 @@ properties:
       - 'WITHIN_ORGANIZATION'
       - 'UNRESTRICTED'
       - 'WITHIN_ORG_BUT_UNRESTRICTED_FOR_BA'
+  - name: 'backupRetentionInheritance'
+    type: Enum
+    ignore_read: true
+    description: |
+        How a backup's enforced retention end time is inherited. Default value is `INHERIT_VAULT_RETENTION` if not provided during creation.
+    enum_values:
+      - 'BACKUP_RETENTION_INHERITANCE_UNSPECIFIED'
+      - 'INHERIT_VAULT_RETENTION'
+      - 'MATCH_BACKUP_EXPIRE_TIME'
