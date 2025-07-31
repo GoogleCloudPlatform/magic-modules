@@ -1275,7 +1275,7 @@ func (t Type) GetPropertySchemaPathList(propertyList []string) []string {
 	return list
 }
 
-func (t Type) CoversDescendants() bool {
+func (t Type) IsJsonField() bool {
 	if t.CustomFlatten == "templates/terraform/custom_flatten/json_schema.tmpl" {
 		return true
 	}

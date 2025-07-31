@@ -14,5 +14,5 @@ fields:
   - field: 'name'
   - field: 'project'
   - field: 'row_key_schema'
-    api_field: 'row_key_schema.*'
+    json: true
   - field: 'split_keys'

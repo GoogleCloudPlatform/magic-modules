@@ -16,8 +16,11 @@ autogen_status: true
 fields:
 {{- range $p := $.LeafProperties }}
   - field: '{{ $p.MetadataLineage }}'
-    {{- if and (or (ne $p.MetadataLineage $p.MetadataApiLineage) $p.CoversDescendants) (not $p.ProviderOnly) }}
-    api_field: '{{ $p.MetadataApiLineage }}{{ if $p.CoversDescendants }}.*{{ end }}'
+    {{- if and (ne $p.MetadataLineage $p.MetadataApiLineage) (not $p.ProviderOnly) }}
+    api_field: '{{ $p.MetadataApiLineage }}'
+    {{- end }}
+    {{- if $p.IsJsonField }}
+    json: true
     {{- end }}
     {{- if $p.ProviderOnly }}
     provider_only: true
