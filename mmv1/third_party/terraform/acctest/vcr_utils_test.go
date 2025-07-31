@@ -7,9 +7,11 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"testing"
 
 	"github.com/dnaeon/go-vcr/cassette"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -448,4 +450,187 @@ func TestReformConfigWithProvider(t *testing.T) {
 			t.Logf("Test Case: %s\nReformed config:\n%s", tc.name, newConfig)
 		})
 	}
+}
+func TestReformConfigWithProvider(t *testing.T) {
+
+	type testCase struct {
+		name             string
+		initialConfig    string
+		providerToInsert string
+		expectedConfig   string
+	}
+
+	cases := map[string]testCase{
+		"replaces_google_beta_with_local": {
+			name: "Replaces 'google-beta' provider with 'google-local'",
+			initialConfig: `resource "google_new_resource" {
+      provider = google-beta
+}`,
+			providerToInsert: "google-local",
+			expectedConfig: `resource "google_new_resource" {
+      provider = google-local
+}`,
+		},
+		"inserts_local_provider_into_empty_config": {
+			name: "Inserts 'google-local' provider when no provider block exists",
+			initialConfig: `resource "google_alloydb_cluster" "default" {
+    location   = "us-central1"
+    network_config {
+        network = google_compute_network.default.id
+    }
+}`,
+			providerToInsert: "google-local",
+			expectedConfig: `resource "google_alloydb_cluster" "default" {
+  provider = google-local
+
+    location   = "us-central1"
+    network_config {
+        network = google_compute_network.default.id
+    }
+}`,
+		},
+		"no_change_if_target_provider_already_present": {
+			name: "Does not change config if target provider is already present",
+			initialConfig: `resource "google_new_resource" {
+      provider = google-local
+}`,
+			providerToInsert: "google-local",
+			expectedConfig: `resource "google_new_resource" {
+      provider = google-local
+}`,
+		},
+		"inserts_provider_with_other_attributes": {
+			name: "Inserts provider into a resource block with other attributes but no existing provider",
+			initialConfig: `resource "google_compute_instance" "test" {
+  name         = "test-instance"
+  machine_type = "e2-medium"
+}`,
+			providerToInsert: "google-local",
+			expectedConfig: `resource "google_compute_instance" "test" {
+  provider = google-local
+
+  name         = "test-instance"
+  machine_type = "e2-medium"
+}`,
+		},
+	}
+
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			newConfig := acctest.ReformConfigWithProvider(tc.initialConfig, tc.providerToInsert)
+
+			if newConfig != tc.expectedConfig {
+				t.Fatalf("Test Case: %s\nExpected config to be reformatted to:\n%q\nbut got:\n%q", tc.name, tc.expectedConfig, newConfig)
+			}
+			t.Logf("Test Case: %s\nReformed config:\n%s", tc.name, newConfig)
+		})
+	}
+}
+
+func TestDiffTestStepInjection(t *testing.T) {
+	var dummyCase = resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+			},
+			{
+				Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+				ExpectNonEmptyPlan: true,
+			},
+			{
+				Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+				ExpectNonEmptyPlan: true,
+			},
+		},
+	}
+	temp_file, err := os.CreateTemp("", "release_diff_test_output_*.log")
+	if err != nil {
+		t.Fatalf("Failed to create temp file: %v", err)
+	}
+	var releaseDiffSteps = acctest.InsertDiffSteps(dummyCase, temp_file, "google-beta", "google-local")
+
+	var expectedSteps = []resource.TestStep{
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+		},
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-local
+				}`,
+		},
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+		},
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-local
+				}`,
+		},
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-beta
+				}`,
+		},
+
+		{
+			Config: `resource "google_new_resource" {
+					provider = google-local
+				}`,
+		},
+	}
+
+	if len(releaseDiffSteps) != len(expectedSteps) {
+		t.Fatalf("Expected %d steps, but got %d", len(expectedSteps), len(releaseDiffSteps))
+	}
+	for i, step := range releaseDiffSteps {
+		if step.Config != expectedSteps[i].Config {
+			t.Fatalf("Expected step %d config to be:\n%q\nbut got:\n%q", i, expectedSteps[i].Config, step.Config)
+		}
+		if (i % 2) == 1 {
+			if step.ExpectNonEmptyPlan != false {
+				t.Fatalf("Expected step %d to have ExpectNonEmptyPlan set to false, but got true", i)
+			}
+			if step.PlanOnly != true {
+				t.Fatalf("Expected step %d to have PlanOnly set to true, but got false", i)
+			}
+		}
+	}
+	defer os.Remove(temp_file.Name())
+
+}
+func TestParseReleaseDiffOutput(t *testing.T) {
+	temp_file, err := os.CreateTemp("", "test_release_diff_test_output_*.log")
+	if err != nil {
+		t.Fatalf("Failed to create temp file: %v", err)
+	}
+	defer os.Remove(temp_file.Name())
+	// Write some dummy data to the temp file
+	_, err = temp_file.WriteString("This is a test release diff output.\n")
+	if err != nil {
+		t.Fatalf("Failed to write to temp file: %v", err)
+	}
+
+	var expectedOutput = "This is a test release diff output."
+	var output string
+	output, err = acctest.ParseReleaseDiffOutput(temp_file)
+	if err != nil {
+		t.Fatalf("Failed to parse release diff output: %v", err)
+	}
+
+	if output != expectedOutput {
+		t.Fatalf("Expected output to be:\n%q\nbut got:\n%q", expectedOutput, output)
+	}
+	t.Logf("Parsed output:\n%s", output)
 }
