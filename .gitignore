@@ -59,3 +59,4 @@ tpgtools/serialization.go
 # ignore leftover testlogs and cassettes
 .ci/magician/testlogs
 .ci/magician/cassettes
+build/
