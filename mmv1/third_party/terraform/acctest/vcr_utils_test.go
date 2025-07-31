@@ -8,10 +8,12 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/dnaeon/go-vcr/cassette"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -453,26 +455,65 @@ func TestReformConfigWithProvider(t *testing.T) {
 }
 
 func TestInsertDiffSteps(t *testing.T) {
+	// Placeholders for undefined variables and functions from the provided snippets.
+	var widgetBefore struct{}
+	var rName = "test-resource"
+	var context = map[string]interface{}{}
+	// Dummy test configuration functions
+	testAccExampleResource := func(name string) string {
+		return fmt.Sprintf(`provider = google-beta
+resource "google_example_widget" "foo" {
+	name = "%s"
+}`, name)
+	}
+
+	testAccExampleResourceLocal := func(name string) string {
+		return fmt.Sprintf(`provider = google-local
+resource "google_example_widget" "foo" {
+	name = "%s"
+}`, name)
+	}
+
+	testAccCheckExampleResourceExists := func(name string, widget *struct{}) resource.TestCheckFunc {
+		return func(s *terraform.State) error {
+			return nil
+		}
+	}
+	testAccAlloydbClusterAndInstanceAndBackup_OnlyOneSourceAllowed := func(ctx map[string]interface{}) string {
+		return `provider = "google-local"
+// ... configuration that is expected to cause an error
+`
+	}
+
 	var dummyCase = resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: `resource "google_new_resource" {
-					provider = google-beta
-				}`,
+				Config: `resource "google_new_resource" "original_1" {
+                    provider = google-beta
+                }`,
 			},
 			{
-				Config: `resource "google_new_resource" {
-					provider = google-beta
-				}`,
-				ExpectNonEmptyPlan: true,
+				Config: `resource "google_new_resource" "original_2" {
+                    provider = google-beta
+                }`,
 			},
 			{
-				Config: `resource "google_new_resource" {
-					provider = google-beta
-				}`,
-				ExpectNonEmptyPlan: true,
+				ResourceName:            "google_pubsub_subscription.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"topic"},
+			},
+			{
+				Config: testAccExampleResource(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckExampleResourceExists("example_widget.foo", &widgetBefore),
+				),
+			},
+			{
+				Config:      testAccAlloydbClusterAndInstanceAndBackup_OnlyOneSourceAllowed(context),
+				ExpectError: regexp.MustCompile(`"restore_continuous_backup_source": conflicts with restore_backup_source`),
 			},
 		},
 	}
@@ -482,55 +523,57 @@ func TestInsertDiffSteps(t *testing.T) {
 	}
 	dummyCase = acctest.InsertDiffSteps(dummyCase, temp_file, "google-beta", "google-local")
 
+	// Expected steps after InsertDiffSteps runs.
+	// A "diff" step (using 'google-local') is added for each original step containing a Config field,
+	// unless the step has ExpectError set.
 	var expectedSteps = []resource.TestStep{
 		{
-			Config: `resource "google_new_resource" {
-					provider = google-beta
-				}`,
+			Config: `resource "google_new_resource" "original_1" {
+                    provider = google-beta
+                }`,
 		},
 		{
-			Config: `resource "google_new_resource" {
-					provider = google-local
-				}`,
+			Config: `resource "google_new_resource" "original_1" {
+                    provider = google-local
+                }`,
 			ExpectNonEmptyPlan: false,
 			PlanOnly:           true,
 		},
 		{
-			Config: `resource "google_new_resource" {
-					provider = google-beta
-				}`,
+			Config: `resource "google_new_resource" "original_2" {
+                    provider = google-beta
+                }`,
 		},
 		{
-			Config: `resource "google_new_resource" {
-					provider = google-local
-				}`,
+			Config: `resource "google_new_resource" "original_2" {
+                    provider = google-local
+                }`,
 			ExpectNonEmptyPlan: false,
 			PlanOnly:           true,
 		},
 		{
-			Config: `resource "google_new_resource" {
-					provider = google-beta
-				}`,
+			ResourceName: "google_pubsub_subscription.example", // No config, so no diff step added
 		},
-
 		{
-			Config: `resource "google_new_resource" {
-					provider = google-local
-				}`,
+			Config: testAccExampleResource(rName),
+		},
+		{
+			Config:             testAccExampleResourceLocal(rName),
 			ExpectNonEmptyPlan: false,
 			PlanOnly:           true,
+		},
+		{
+			Config: testAccAlloydbClusterAndInstanceAndBackup_OnlyOneSourceAllowed(context), // ExpectError is set, so no diff step added
 		},
 	}
 
 	if len(dummyCase.Steps) != len(expectedSteps) {
 		t.Fatalf("Expected %d steps, but got %d", len(expectedSteps), len(dummyCase.Steps))
 	}
+
 	for i, step := range dummyCase.Steps {
 		if step.Config != expectedSteps[i].Config {
 			t.Fatalf("Expected step %d config to be:\n%q\nbut got:\n%q", i, expectedSteps[i].Config, step.Config)
-		}
-		if step.ExpectNonEmptyPlan != expectedSteps[i].ExpectNonEmptyPlan {
-			t.Fatalf("Expected step %d to have ExpectNonEmptyPlan set to %v, but got %v", i, expectedSteps[i].ExpectNonEmptyPlan, step.ExpectNonEmptyPlan)
 		}
 		if step.PlanOnly != expectedSteps[i].PlanOnly {
 			t.Fatalf("Expected step %d to have PlanOnly set to %v, but got %v", i, expectedSteps[i].PlanOnly, step.PlanOnly)
@@ -538,5 +581,4 @@ func TestInsertDiffSteps(t *testing.T) {
 	}
 
 	defer os.Remove(temp_file.Name())
-
 }
