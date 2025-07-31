@@ -26,14 +26,15 @@ func (p *googleEphemeralSecretManagerSecretVersion) Metadata(ctx context.Context
 }
 
 type ephemeralSecretManagerSecretVersionModel struct {
-	Project     types.String `tfsdk:"project"`
-	Secret      types.String `tfsdk:"secret"`
-	Version     types.String `tfsdk:"version"`
-	SecretData  types.String `tfsdk:"secret_data"`
-	Name        types.String `tfsdk:"name"`
-	CreateTime  types.String `tfsdk:"create_time"`
-	DestroyTime types.String `tfsdk:"destroy_time"`
-	Enabled     types.Bool   `tfsdk:"enabled"`
+	Project            types.String `tfsdk:"project"`
+	Secret             types.String `tfsdk:"secret"`
+	Version            types.String `tfsdk:"version"`
+	IsSecretDataBase64 types.Bool   `tfsdk:"is_secret_data_base64"`
+	SecretData         types.String `tfsdk:"secret_data"`
+	Name               types.String `tfsdk:"name"`
+	CreateTime         types.String `tfsdk:"create_time"`
+	DestroyTime        types.String `tfsdk:"destroy_time"`
+	Enabled            types.Bool   `tfsdk:"enabled"`
 }
 
 func (p *googleEphemeralSecretManagerSecretVersion) Schema(ctx context.Context, req ephemeral.SchemaRequest, resp *ephemeral.SchemaResponse) {
@@ -54,6 +55,10 @@ func (p *googleEphemeralSecretManagerSecretVersion) Schema(ctx context.Context, 
 			},
 			"version": schema.StringAttribute{
 				Description: "The version of the secret to get. If it is not provided, the latest version is retrieved.",
+				Optional:    true,
+			},
+			"is_secret_data_base64": schema.BoolAttribute{
+				Description: "If true, the secret data will be returned as a base64 encoded string. Defaults to false.",
 				Optional:    true,
 			},
 			// Attributes
@@ -152,14 +157,22 @@ func (p *googleEphemeralSecretManagerSecretVersion) Open(ctx context.Context, re
 		return
 	}
 
+	// This check seems counterintuitive, but read docs on the `google_secret_manager_secret_version` resource.
+	// It states: "If set to 'true', the secret data is expected to be base64-encoded string and would be sent as is."
 	payload := accessResp["payload"].(map[string]interface{})
-	payloadData, err := base64.StdEncoding.DecodeString(payload["data"].(string))
-	if err != nil {
-		resp.Diagnostics.AddError("Error decoding secret data", err.Error())
-		return
+	var payloadData string
+	if data.IsSecretDataBase64.ValueBool() {
+		payloadData = payload["data"].(string)
+	} else {
+		decoded, err := base64.StdEncoding.DecodeString(payload["data"].(string))
+		if err != nil {
+			resp.Diagnostics.AddError("Error decoding secret data", err.Error())
+			return
+		}
+		payloadData = string(decoded)
 	}
 
-	data.SecretData = types.StringValue(string(payloadData))
+	data.SecretData = types.StringValue(payloadData)
 	data.Name = types.StringValue(versionResp["name"].(string))
 	data.CreateTime = types.StringValue(versionResp["createTime"].(string))
 	data.Project = types.StringValue(project)
