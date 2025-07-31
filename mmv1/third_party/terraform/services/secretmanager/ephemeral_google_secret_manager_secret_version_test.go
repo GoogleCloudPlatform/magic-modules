@@ -1,4 +1,3 @@
-// filepath: /Users/ramon/projects/personal/magic-modules/mmv1/third_party/terraform/services/secretmanager/ephemeral_google_secret_manager_secret_version_test.go
 package secretmanager_test
 
 import (
