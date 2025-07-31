@@ -1998,6 +1998,9 @@ func (r Resource) ShouldGenerateSingularDataSource() bool {
 	if (r.ProductMetadata.Name == "Alloydb" || r.ProductMetadata.Name == "Redis") && r.Name == "Cluster" {
 		return true
 	}
+	if r.ProductMetadata.Name == "Iap" && r.Name == "Client" {
+		return true
+	}
 	return false
 }
 func (r Resource) ShouldGenerateSweepers() bool {
