@@ -773,7 +773,6 @@ func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField
 		propertyWithType("String"),
 		propertyWithImmutable(true),
 		propertyWithDescription(description),
-		propertyWithDefault(0),
 		propertyWithRequiredWith([]string{requiredWith}),
 		propertyWithClientSide(true),
 	}
