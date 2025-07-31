@@ -1146,6 +1146,38 @@ is set to true. Defaults to ZONAL.`,
 					},
 				},
 			},
+			"point_in_time_restore": {
+				Type:         schema.TypeList,
+				Optional:     true,
+				Computed:     false,
+				Description:  `Configuration for creating a new instance using point-in-time-restore from backupdr backup.`,
+				MaxItems:     1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"datasource": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: `The Google Cloud Backup and Disaster Recovery Datasource URI. For example: "projects/my-project/locations/us-central1/datasources/my-datasource".`,
+						},
+						"point_in_time": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							DiffSuppressFunc: tpgresource.TimestampDiffSuppress(time.RFC3339Nano),
+							Description:      `The date and time to which you want to restore the instance.`,
+						},
+						"preferred_zone": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `Point-in-time recovery of an instance to the specified zone. If no zone is specified, then clone to the same primary zone as the source instance.`,
+						},
+						"allocated_ip_range": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: `The name of the allocated IP range for the internal IP Cloud SQL instance. For example: "google-managed-services-default". If you set this, then Cloud SQL creates the IP address for the cloned instance in the allocated range. This range must comply with [RFC 1035](https://tools.ietf.org/html/rfc1035) standards. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.`,
+						},
+					},
+				},
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -1408,6 +1440,14 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	// Perform a backup restore if the backup context exists
 	if r, ok := d.GetOk("restore_backup_context"); ok {
 		err = sqlDatabaseInstanceRestoreFromBackup(d, config, userAgent, project, name, r)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Perform a point-in-time restore of an instance managed by Google Cloud Backup and Disaster Recovery.
+	if r, ok := d.GetOk("point_in_time_restore"); ok {
+		err = sqlDatabaseInstancePointInTimeRestore(d, config, userAgent, project, name, r)
 		if err != nil {
 			return err
 		}
@@ -2230,6 +2270,16 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
+	// Perform a point-in-time-restore if the instance is managed by gcbdr and point-in-time-restore context exists and has changed
+	if r, ok := d.GetOk("point_in_time_restore"); ok {
+		if d.HasChange("point_in_time_restore") {
+			err = sqlDatabaseInstancePointInTimeRestore(d, config, userAgent, project, d.Get("name").(string), r)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
         // Check if timezone is updated
         if d.HasChange("settings.0.time_zone") {
           timezone := d.Get("settings.0.time_zone").(string)
@@ -2872,6 +2922,50 @@ func sqlDatabaseInstanceRestoreFromBackup(d *schema.ResourceData, config *transp
 	}
 
 	err = SqlAdminOperationWaitTime(config, op, project, "Restore Backup", userAgent, d.Timeout(schema.TimeoutUpdate))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func expandPointInTimeRestoreContext(configured []interface{}) *sqladmin.PointInTimeRestoreContext {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	_pitrc := configured[0].(map[string]interface{})
+	return &sqladmin.PointInTimeRestoreContext{
+		PointInTime: int64(_pitrc["point_in_time"].(string)),
+		PreferredZone:  _pitrc["preferred_zone"].(string),
+		Datasource:     _pitrc["datasource"].(string),
+		AllocatedIpRange: _pitrc["allocated_ip_range"].(string),
+	}
+}
+
+func sqlDatabaseInstancePointInTimeRestore(d *schema.ResourceData, config *transport_tpg.Config, userAgent, project, instanceId string, r interface{}) error {
+	log.Printf("[DEBUG] Initiating GCBDR managed SQL database instance backup point in time restore")
+	pointInTimeRestoreContext := r.([]interface{})
+
+	pointInTimeRestoreRequest := &sqladmin.InstancesPointInTimeRestoreRequest{
+		PointInTimeRestoreBackupContext: expandPointInTimeRestoreContext(pointInTimeRestoreContext),
+	}
+	parent := fmt.Sprintf("projects/%s", project)
+
+	var op *sqladmin.Operation
+	err := transport_tpg.Retry(transport_tpg.RetryOptions{
+		RetryFunc: func() (operr error) {
+			op, operr = config.NewSqlAdminClient(userAgent).Instances.PointInTimeRestore(parent, pointInTimeRestoreRequest).Do()
+			return operr
+		},
+		Timeout:              d.Timeout(schema.TimeoutUpdate),
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+	})
+	if err != nil {
+		return fmt.Errorf("Error, failed to point in restore an instance %s: %s", instanceId, err)
+	}
+
+	err = SqlAdminOperationWaitTime(config, op, project, "Point in Time Restore", userAgent, d.Timeout(schema.TimeoutUpdate))
 	if err != nil {
 		return err
 	}

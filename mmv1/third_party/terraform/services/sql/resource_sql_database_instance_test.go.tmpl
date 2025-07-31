@@ -1356,6 +1356,39 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 	})
 }
 
+//	this test cannot be ran locally without seeding your environment with a backup vault and scheduling the backup of a sql instance 
+//	to generate a unique datasourceId and an enhanced backup, that this test would need to be modified to use. the values in this test correspond to those used
+//	in our testing processes.
+func TestAccSqlDatabaseInstance_createFromPointInTimeRestore(t *testing.T) {
+	// Sqladmin client
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	// The backupDR_backup_name is a placeholder and should be replaced with an actual BackupDR backup name.
+	datasource_id := "projects/csql-bug-bash2/locations/us-central1/backupVaults/bv-test/dataSources/42010760156c39e824144281a07b93fed08498b9"
+
+	context := map[string]interface{}{
+		"random_suffix":    acctest.RandString(t, 10),
+		"datasource_id": datasource_id,
+	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: estAccSqlDatabaseInstance_pointInTimeRestore(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "point_in_time_restore"},
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_basicClone(t *testing.T) {
 	// Sqladmin client
 	acctest.SkipIfVcr(t)
@@ -5856,6 +5889,30 @@ resource "google_sql_database_instance" "instance" {
 data "google_sql_backup_run" "backup" {
 	instance = "%{original_db_name}"
 	most_recent = true
+}
+`, context)
+}
+
+func testAccSqlDatabaseInstance_pointInTimeRestore(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_sql_database_instance" "instance" {
+  name             = "tf-test-%{random_suffix}"
+  database_version = "POSTGRES_11"
+  region           = "us-central1"
+
+  settings {
+	tier = "db-g1-small"
+	backup_configuration {
+		enabled            = "false"
+	}
+  }
+
+  point_in_time_restore_context {
+    datasource = "%{datasource_id}"
+    point_in_time = "2025-07-31T00:52:15+00:00"
+  }
+
+  deletion_protection = false
 }
 `, context)
 }
