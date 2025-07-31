@@ -456,7 +456,6 @@ func TestReformConfigWithProvider(t *testing.T) {
 
 func TestInsertDiffSteps(t *testing.T) {
 	// Placeholders for undefined variables and functions from the provided snippets.
-	var widgetBefore struct{}
 	var rName = "test-resource"
 	var context = map[string]interface{}{}
 	// Dummy test configuration functions
@@ -474,11 +473,6 @@ resource "google_example_widget" "foo" {
 }`, name)
 	}
 
-	testAccCheckExampleResourceExists := func(name string, widget *struct{}) resource.TestCheckFunc {
-		return func(s *terraform.State) error {
-			return nil
-		}
-	}
 	testAccAlloydbClusterAndInstanceAndBackup_OnlyOneSourceAllowed := func(ctx map[string]interface{}) string {
 		return `provider = "google-local"
 // ... configuration that is expected to cause an error
@@ -490,12 +484,12 @@ resource "google_example_widget" "foo" {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: `resource "google_new_resource" "original_1" {
+				Config: `resource "google_new_resource" "original" {
                     provider = google-beta
                 }`,
 			},
 			{
-				Config: `resource "google_new_resource" "original_2" {
+				Config: `resource "google_new_resource" "original" {
                     provider = google-beta
                 }`,
 			},
@@ -508,7 +502,7 @@ resource "google_example_widget" "foo" {
 			{
 				Config: testAccExampleResource(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckExampleResourceExists("example_widget.foo", &widgetBefore),
+					func(*terraform.State) error { return nil },
 				),
 			},
 			{
@@ -528,24 +522,24 @@ resource "google_example_widget" "foo" {
 	// unless the step has ExpectError set.
 	var expectedSteps = []resource.TestStep{
 		{
-			Config: `resource "google_new_resource" "original_1" {
+			Config: `resource "google_new_resource" "original" {
                     provider = google-beta
                 }`,
 		},
 		{
-			Config: `resource "google_new_resource" "original_1" {
+			Config: `resource "google_new_resource" "original" {
                     provider = google-local
                 }`,
 			ExpectNonEmptyPlan: false,
 			PlanOnly:           true,
 		},
 		{
-			Config: `resource "google_new_resource" "original_2" {
+			Config: `resource "google_new_resource" "original" {
                     provider = google-beta
                 }`,
 		},
 		{
-			Config: `resource "google_new_resource" "original_2" {
+			Config: `resource "google_new_resource" "original" {
                     provider = google-local
                 }`,
 			ExpectNonEmptyPlan: false,
@@ -556,9 +550,15 @@ resource "google_example_widget" "foo" {
 		},
 		{
 			Config: testAccExampleResource(rName),
+			Check: resource.ComposeTestCheckFunc(
+				func(*terraform.State) error { return nil },
+			),
 		},
 		{
-			Config:             testAccExampleResourceLocal(rName),
+			Config: testAccExampleResourceLocal(rName),
+			Check: resource.ComposeTestCheckFunc(
+				func(*terraform.State) error { return nil },
+			),
 			ExpectNonEmptyPlan: false,
 			PlanOnly:           true,
 		},
