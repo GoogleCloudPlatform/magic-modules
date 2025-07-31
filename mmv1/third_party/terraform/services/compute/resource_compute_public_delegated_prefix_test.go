@@ -94,7 +94,8 @@ func testAccCheckParentHasSubPrefix(t *testing.T, project, region, parentName, s
 
 		for _, sub := range parent.PublicDelegatedSubPrefixs {
 			if sub.Name == newSubPrefixName {
-				return fmt.Errorf("SUCCESS (for debugging): Found match for %q. Full list: %v", newSubPrefixName, parent.PublicDelegatedSubPrefixs)
+				fmt.Printf("[CI DEBUG] Found sub-prefix %q. Full list in parent: %+v", newSubPrefixName, parent.PublicDelegatedSubPrefixs)
+				return nil
 			}
 		}
 
