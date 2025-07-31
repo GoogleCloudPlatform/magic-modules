@@ -26,6 +26,7 @@ fields:
   - field: 'name'
   - field: 'point_in_time_restore.allocated_ip_range'
   - field: 'point_in_time_restore.datasource'
+  - field: 'point_in_time_restore.target_instance'
   - field: 'point_in_time_restore.point_in_time'
   - field: 'point_in_time_restore.preferred_zone'
   - field: 'private_ip_address'

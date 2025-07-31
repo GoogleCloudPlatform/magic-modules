@@ -1357,19 +1357,22 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 }
 
 //	this test cannot be ran locally without seeding your environment with a backup vault and scheduling the backup of a sql instance 
-//	to generate a unique datasourceId and an enhanced backup, that this test would need to be modified to use. the values in this test correspond to those used
+//	to generate a unique datasourceId and create an enhanced backup, that this test would need to be modified to use. the values in this test correspond to those used
 //	in our testing processes.
 func TestAccSqlDatabaseInstance_createFromPointInTimeRestore(t *testing.T) {
 	// Sqladmin client
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
-	// The backupDR_backup_name is a placeholder and should be replaced with an actual BackupDR backup name.
+	// The datasource_id and time_stamp is a placeholder and should be replaced with an actual BackupDR datasource name and timestamp.
 	datasource_id := "projects/csql-bug-bash2/locations/us-central1/backupVaults/bv-test/dataSources/42010760156c39e824144281a07b93fed08498b9"
+	point_in_time := "2025-07-31T00:52:15+00:00"
 
 	context := map[string]interface{}{
-		"random_suffix":    acctest.RandString(t, 10),
-		"datasource_id": datasource_id,
+		"random_suffix":   acctest.RandString(t, 10),
+		"datasource_id":   datasource_id,
+		"point_in_time":   point_in_time,
+		"project_id":     envvar.GetTestProjectFromEnv(),
 	}
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1377,13 +1380,13 @@ func TestAccSqlDatabaseInstance_createFromPointInTimeRestore(t *testing.T) {
 		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: estAccSqlDatabaseInstance_pointInTimeRestore(context),
+				Config: testAccSqlDatabaseInstance_pointInTimeRestore(context),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "point_in_time_restore"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "point_in_time_restore_context"},
 			},
 		},
 	})
@@ -5897,7 +5900,7 @@ func testAccSqlDatabaseInstance_pointInTimeRestore(context map[string]interface{
 	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
-  database_version = "POSTGRES_11"
+  database_version = "MYSQL_8_0"
   region           = "us-central1"
 
   settings {
@@ -5909,7 +5912,8 @@ resource "google_sql_database_instance" "instance" {
 
   point_in_time_restore_context {
     datasource = "%{datasource_id}"
-    point_in_time = "2025-07-31T00:52:15+00:00"
+    point_in_time = "%{point_in_time}"
+	target_instance = "%{project_id}:tf-test-%{random_suffix}-new"
   }
 
   deletion_protection = false
