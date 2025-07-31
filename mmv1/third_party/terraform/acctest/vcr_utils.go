@@ -159,7 +159,7 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 		c = initializeReleaseDiffTest(c, t.Name(), tempOutputFile)
 	}
 
-	//c = extendWithTGCData(t, c)
+	c = extendWithTGCData(t, c)
 
 	// terraform_labels is a computed field to which "goog-terraform-provisioned": "true" is always
 	// added by the provider. ImportStateVerify "checks for strict equality and does not respect
