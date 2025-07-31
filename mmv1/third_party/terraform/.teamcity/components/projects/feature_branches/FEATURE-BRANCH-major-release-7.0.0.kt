@@ -71,7 +71,7 @@ fun featureBranchMajorRelease700_Project(allConfig: AllContextParameters): Proje
                         gaConfig,
                         NightlyTriggerConfiguration(
                             branch = "refs/heads/${branchName}", // Make triggered builds use the feature branch
-                            daysOfWeek = "5"     // Thursday for GA, TeamCity numbers days Sun=1...Sat=7
+                            daysOfWeek = "4"     // Wednesday for GA, TeamCity numbers days Sun=1...Sat=7
                         ), 
                     )
                 )
@@ -91,7 +91,7 @@ fun featureBranchMajorRelease700_Project(allConfig: AllContextParameters): Proje
                         betaConfig,
                         NightlyTriggerConfiguration(
                             branch = "refs/heads/${branchName}", // Make triggered builds use the feature branch
-                            daysOfWeek="6"       // Friday for Beta, TeamCity numbers days Sun=1...Sat=7
+                            daysOfWeek="4"       // Wednesday for Beta, TeamCity numbers days Sun=1...Sat=7
                         ),
                     )
                 )
