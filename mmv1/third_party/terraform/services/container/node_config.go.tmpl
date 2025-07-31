@@ -2467,7 +2467,7 @@ func nodePoolNodeConfigUpdate(d *schema.ResourceData, config *transport_tpg.Conf
 				if legacyDiskSizeGbOld == legacyDiskSizeGbNew {
 					req.DiskSizeGb = 0
 				}
-				// if the new boot disk configuration size_gb field is not changing, nit it out to allow the API to fill it in.
+				// if the new boot disk configuration size_gb field is not changing, nil it out to allow the API to fill it in.
 				bootDiskSizeGbOld, bootDiskSizeGbNew := d.GetChange("node_config.0.boot_disk.0.size_gb")
 				if bootDiskSizeGbOld == bootDiskSizeGbNew {
 					req.BootDisk.SizeGb = 0
