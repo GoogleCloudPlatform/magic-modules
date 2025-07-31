@@ -29,11 +29,7 @@ func NewProjectCai2hclConverter(provider *tfschema.Provider) models.Cai2hclConve
 }
 
 // Convert converts asset resource data.
-<<<<<<<< HEAD:mmv1/third_party/tgc_next/pkg/cai2hcl/converters/services/resourcemanager/project.go
-func (c *ProjectConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
-========
 func (c *ProjectCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
->>>>>>>> 4dd5624b9bd5d9fb7d39acf94deb53127832f1d1:mmv1/third_party/tgc_next/pkg/services/resourcemanager/project_cai2hcl.go
 	var blocks []*models.TerraformResourceBlock
 	block, err := c.convertResourceData(asset)
 	if err != nil {
@@ -43,11 +39,7 @@ func (c *ProjectCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.Terra
 	return blocks, nil
 }
 
-<<<<<<<< HEAD:mmv1/third_party/tgc_next/pkg/cai2hcl/converters/services/resourcemanager/project.go
-func (c *ProjectConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
-========
 func (c *ProjectCai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
->>>>>>>> 4dd5624b9bd5d9fb7d39acf94deb53127832f1d1:mmv1/third_party/tgc_next/pkg/services/resourcemanager/project_cai2hcl.go
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}

@@ -32,11 +32,7 @@ func NewComputeInstanceCai2hclConverter(provider *schema.Provider) models.Cai2hc
 }
 
 // Convert converts asset to HCL resource blocks.
-<<<<<<<< HEAD:mmv1/third_party/tgc_next/pkg/cai2hcl/converters/services/compute/compute_instance.go
-func (c *ComputeInstanceConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
-========
 func (c *ComputeInstanceCai2hclConverter) Convert(asset caiasset.Asset) ([]*models.TerraformResourceBlock, error) {
->>>>>>>> 4dd5624b9bd5d9fb7d39acf94deb53127832f1d1:mmv1/third_party/tgc_next/pkg/services/compute/compute_instance_cai2hcl.go
 	var blocks []*models.TerraformResourceBlock
 	block, err := c.convertResourceData(asset)
 	if err != nil {
@@ -46,11 +42,7 @@ func (c *ComputeInstanceCai2hclConverter) Convert(asset caiasset.Asset) ([]*mode
 	return blocks, nil
 }
 
-<<<<<<<< HEAD:mmv1/third_party/tgc_next/pkg/cai2hcl/converters/services/compute/compute_instance.go
-func (c *ComputeInstanceConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
-========
 func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Asset) (*models.TerraformResourceBlock, error) {
->>>>>>>> 4dd5624b9bd5d9fb7d39acf94deb53127832f1d1:mmv1/third_party/tgc_next/pkg/services/compute/compute_instance_cai2hcl.go
 	if asset.Resource == nil || asset.Resource.Data == nil {
 		return nil, fmt.Errorf("asset resource data is nil")
 	}
@@ -81,11 +73,7 @@ func (c *ComputeInstanceCai2hclConverter) convertResourceData(asset caiasset.Ass
 		hclData["tags"] = tpgresource.ConvertStringArrToInterface(instance.Tags.Items)
 	}
 
-<<<<<<<< HEAD:mmv1/third_party/tgc_next/pkg/cai2hcl/converters/services/compute/compute_instance.go
-	hclData["labels"] = utils.RemoveTerraformAttributionLabel(instance.Labels)
-========
 	hclData["labels"] = tgcresource.RemoveTerraformAttributionLabel(instance.Labels)
->>>>>>>> 4dd5624b9bd5d9fb7d39acf94deb53127832f1d1:mmv1/third_party/tgc_next/pkg/services/compute/compute_instance_cai2hcl.go
 	hclData["service_account"] = flattenServiceAccountsTgc(instance.ServiceAccounts)
 	hclData["resource_policies"] = instance.ResourcePolicies
 
