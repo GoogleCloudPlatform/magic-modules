@@ -85,10 +85,6 @@ func DataSource{{ .ResourceName -}}Generated() *schema.Resource {
   // Set 'Optional' schema elements
   tpgresource.AddOptionalFieldsToSchema(dsSchema, optionalFields...)
 
-  {{if $.CustomCode.CustomDatasourceRead -}} 
-    {{- $.CustomTemplate $.CustomCode.CustomDatasourceSchemaUpdate false -}}
-  {{- end}}
-
   return &schema.Resource{
 		Read:   dataSource{{ $.ResourceName -}}ReadGenerated,
 		Schema: dsSchema,
