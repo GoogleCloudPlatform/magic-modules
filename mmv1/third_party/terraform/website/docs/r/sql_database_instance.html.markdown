@@ -327,11 +327,17 @@ The `settings` block supports:
     active. Can be either `ALWAYS`, `NEVER` or `ON_DEMAND`.
 
 * `availability_type` - (Optional) The availability type of the Cloud SQL
-  instance, high availability (`REGIONAL`) or single zone (`ZONAL`).' For all instances, ensure that
+  instance, high availability (`REGIONAL`) or single zone (`ZONAL`). For all instances, ensure that
   `settings.backup_configuration.enabled` is set to `true`.
   For MySQL instances, ensure that `settings.backup_configuration.binary_log_enabled` is set to `true`.
   For Postgres and SQL Server instances, ensure that `settings.backup_configuration.point_in_time_recovery_enabled`
   is set to `true`. Defaults to `ZONAL`.
+  For read pool instances, this field is read-only. The availability type is changed by specifying
+  the number of nodes (`node_count`).
+
+* `effective_availability_type` - (Computed) The availability type of the Cloud SQL instance, high availability
+  (REGIONAL) or single zone (ZONAL). This field always contains the value that is reported by the
+  API (for read pools, `effective_availability_type` may differ from `availability_type`).
 
 * `collation` - (Optional) The name of server instance collation.
 
@@ -656,9 +662,11 @@ performing filtering in a Terraform config.
 
 * `psc_service_attachment_link` - the URI that points to the service attachment of the instance.
 
-* `instance_type` - The type of the instance. The supported values are `SQL_INSTANCE_TYPE_UNSPECIFIED`, `CLOUD_SQL_INSTANCE`, `ON_PREMISES_INSTANCE` and `READ_REPLICA_INSTANCE`.
+* `instance_type` - The type of the instance. See [API reference for SqlInstanceType](https://cloud.google.com/sql/docs/mysql/admin-api/rest/v1/instances#SqlInstanceType) for supported values.
 
 ~> **NOTE:** Users can upgrade a read replica instance to a stand-alone Cloud SQL instance with the help of `instance_type`. To promote, users have to set the `instance_type` property as `CLOUD_SQL_INSTANCE` and remove/unset `master_instance_name` and `replica_configuration` from instance configuration. This operation might cause your instance to restart.
+
+* `node_count` - For a read pool instance, the number of nodes in the read pool.
 
 * `settings.version` - Used to make sure changes to the `settings` block are
     atomic.
