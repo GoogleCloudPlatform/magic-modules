@@ -1779,6 +1779,7 @@ properties:
   - name: 'playbookType'
     type: Enum
     description: Type of the playbook.
+    ignore_read: true
     enum_values:
       - 'PLAYBOOK_TYPE_UNSPECIFIED'
       - 'TASK'
