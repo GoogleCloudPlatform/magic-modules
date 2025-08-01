@@ -7,9 +7,10 @@ resource "google_dialogflow_cx_agent" "agent" {
 }
 
 resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
-  parent       = google_dialogflow_cx_agent.agent.id
-  display_name = "Example Display Name"
-  goal         = "Example Goal"
+  parent        = google_dialogflow_cx_agent.agent.id
+  display_name  = "Example Display Name"
+  goal          = "Example Goal"
+  playbook_type = "ROUTINE"
   instruction {
     steps {
       text = "step 1"
