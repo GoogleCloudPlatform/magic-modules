@@ -82,7 +82,7 @@ examples:
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -96,7 +96,7 @@ examples:
       alloydb_secondary_instance_name: 'alloydb-secondary-instance'
       network_name: 'alloydb-secondary-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     ignore_read_extra:
       - 'reconciling'
       - 'update_time'
@@ -443,6 +443,13 @@ properties:
         type: Boolean
         description: |
           Enabling outbound public ip for the instance.
+      - name: 'allocatedIpRangeOverride'
+        type: String
+        immutable: true
+        description: |
+          Name of the allocated IP range for the private IP AlloyDB instance, for example: "google-managed-services-default".
+          If set, the instance IPs will be created from this allocated range and will override the IP range used by the parent cluster.
+          The range name must comply with RFC 1035. Specifically, the name must be 1-63 characters long and match the regular expression [a-z]([-a-z0-9]*[a-z0-9])?.
   - name: 'publicIpAddress'
     type: String
     description: |

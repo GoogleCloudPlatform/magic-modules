@@ -75,7 +75,7 @@ examples:
       pool_name: 'test-pool'
       network_name: 'test-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-2", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog"))'
     exclude_docs: true
   - name: 'Storage_pool_create_doc'
     primary_resource_id: 'test_pool'
@@ -180,7 +180,6 @@ properties:
     description: |
       Optional. True if the storage pool supports Auto Tiering enabled volumes. Default is false.
       Auto-tiering can be enabled after storage pool creation but it can't be disabled once enabled.
-    immutable: true
   - name: 'customPerformanceEnabled'
     type: Boolean
     description: |
@@ -194,3 +193,17 @@ properties:
     type: String
     description: |
       Optional. Custom Performance Total IOPS of the pool If not provided, it will be calculated based on the totalThroughputMibps
+  - name: 'hotTierSizeGib'
+    type: String
+    description: |
+      Total hot tier capacity for the Storage Pool. It is applicable only to Flex service level.
+      It should be less than the minimum storage pool size and cannot be more than the current storage pool size. It cannot be decreased once set.
+    min_version: 'beta'
+  - name: 'enableHotTierAutoResize'
+    type: Boolean
+    send_empty_value: true
+    ignore_read: true
+    description: |
+      Flag indicating that the hot-tier threshold will be auto-increased by 10% of the hot-tier when it hits 100%. Default is true.
+      The increment will kick in only if the new size after increment is still less than or equal to storage pool size.
+    min_version: 'beta'
