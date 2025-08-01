@@ -47,6 +47,9 @@ async:
     resource_inside_response: true
 custom_code:
   update_encoder: 'templates/terraform/update_encoder/discoveryengine_cmekconfig_kmskey.go.tmpl'
+sweeper:
+  url_substitutions:
+    - location: "us"
 examples:
   - name: 'discoveryengine_cmekconfig_default'
     primary_resource_id: 'default'
