@@ -301,4 +301,3 @@ properties:
     enum_values:
       - 'INTERNAL_MANAGED'
     send_empty_value: true
-    
