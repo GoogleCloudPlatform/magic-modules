@@ -426,6 +426,8 @@ Fleet configuration for the cluster. Structure is [documented below](#nested_fle
 * `anonymous_authentication_config` - (Optional)
   Configuration for [anonymous authentication restrictions](https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#restrict-anon-access). Structure is [documented below](#anonymous_authentication_config).
 
+* `rbac_binding_config` - (Optional)
+  RBACBindingConfig allows user to restrict ClusterRoleBindings an RoleBindings that can be created. Structure is [documented below](#nested_rbac_binding_config).
 
 <a name="nested_default_snat_status"></a>The `default_snat_status` block supports
 
@@ -822,10 +824,20 @@ Possible values are `IPV4` and `IPV4_IPV6`.
 the cluster level. Used for Autopilot clusters and Standard clusters with which control of the
 secondary Pod IP address assignment to node pools isn't needed. Structure is [documented below](#nested_additional_pod_ranges_config).
 
+* `additional_ip_ranges_config` - (Optional) The configuration for individual additional subnetworks attached to the cluster.
+Structure is [documented below](#nested_additional_ip_ranges_config).
+
 
 <a name="nested_additional_pod_ranges_config"></a>The `additional_pod_ranges_config` block supports:
 
 * `pod_range_names` - (Required) The names of the Pod ranges to add to the cluster.
+
+
+<a name="nested_additional_ip_ranges_config"></a>The `additional_ip_ranges_config` block supports:
+
+* `subnetwork` - (Required) Name of the subnetwork. This can be the full path of the subnetwork or just the name.
+
+* `pod_ipv4_range_names`- (Required) List of secondary ranges names within this subnetwork that can be used for pod IPs.
 
 
 <a name="nested_master_auth"></a>The `master_auth` block supports:
@@ -1559,6 +1571,11 @@ linux_node_config {
 <a name="anonymous_authentication_config"></a>The `anonymous_authentication_config` block supports:
 
 * `mode` - (Optional) Sets or removes authentication restrictions. Available options include `LIMITED` and `ENABLED`.
+
+<a name="nested_rbac_binding_config"></a>The `rbac_binding_config` block supports:
+
+* `enable_insecure_binding_system_unauthenticated` - (Optional) Setting this to true will allow any ClusterRoleBinding and RoleBinding with subjects system:anonymous or system:unauthenticated.
+* `enable_insecure_binding_system_authenticated` - (Optional) Setting this to true will allow any ClusterRoleBinding and RoleBinding with subjects system:authenticated.
 
 
 ## Attributes Reference
