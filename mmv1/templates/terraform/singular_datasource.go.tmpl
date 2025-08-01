@@ -53,7 +53,7 @@ import (
 {{- end}}
 )
 
-func DataSource{{ .ResourceName -}}Generated() *schema.Resource {
+func DataSource{{ .ResourceName -}}() *schema.Resource {
 	rs := Resource{{ .ResourceName -}}().Schema
 
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(rs)
@@ -86,12 +86,12 @@ func DataSource{{ .ResourceName -}}Generated() *schema.Resource {
   tpgresource.AddOptionalFieldsToSchema(dsSchema, optionalFields...)
 
   return &schema.Resource{
-		Read:   dataSource{{ $.ResourceName -}}ReadGenerated,
+		Read:   dataSource{{ $.ResourceName -}}Read,
 		Schema: dsSchema,
 	}
 }
 
-func dataSource{{ $.ResourceName -}}ReadGenerated(d *schema.ResourceData, meta interface{}) error {
+func dataSource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
   config := meta.(*transport_tpg.Config)
 
   id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
