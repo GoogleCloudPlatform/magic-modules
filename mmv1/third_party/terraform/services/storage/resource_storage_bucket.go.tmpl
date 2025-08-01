@@ -420,6 +420,44 @@ func ResourceStorageBucket() *schema.Resource {
 			"cors": {
 				Type:     schema.TypeList,
 				Optional: true,
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					if d.HasChange("cors") && (k == "cors.#") {
+						o, n := d.GetChange("cors")
+						oldVal := o.([]interface{})
+						newVal := n.([]interface{})
+						isOldEmpty := oldVal == nil || reflect.ValueOf(oldVal).Len() == 0
+						count := 0
+						for _, corsRule := range n.([]interface{}) {
+							if corsRule == nil {
+								continue
+							}
+							rule := corsRule.(map[string]interface{})
+							maxAgeSeconds := rule["max_age_seconds"].(int)
+							sendMaxAge := rule["send_max_age_seconds_if_zero"].(bool)
+							// if send_max_age_seconds_if_zero is true, max_age_seconds can be zero
+							if sendMaxAge || maxAgeSeconds > 0 {
+								count++
+							}
+
+							method := rule["method"].([]interface{})
+							responseHeader := rule["response_header"].([]interface{})
+							origin := rule["origin"].([]interface{})
+
+							// check if all cors attributes provided have values
+							if len(method) > 0 || len(origin) > 0 || len(responseHeader) > 0 {
+								count++
+							}
+						}
+
+						isNewEmpty := count == 0 || reflect.ValueOf(newVal).Len() == 0
+
+						// If both are considered empty, suppress the diff.
+						if isOldEmpty && isNewEmpty {
+							return true
+						}
+					}
+					return false
+				},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"origin": {
