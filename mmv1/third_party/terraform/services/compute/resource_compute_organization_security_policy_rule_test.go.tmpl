@@ -58,18 +58,9 @@ resource "google_compute_organization_security_policy_rule" "policy" {
   policy_id = google_compute_organization_security_policy.policy.id
   action = "allow"
 
-  direction = "INGRESS"
-  enable_logging = true
   match {
     config {
-      src_ip_ranges = ["192.168.0.0/16", "10.0.0.0/8"]
-      layer4_config {
-        ip_protocol = "tcp"
-        ports = ["22"]
-      }
-      layer4_config {
-        ip_protocol = "icmp"
-      }
+      src_ip_ranges = ["192.168.0.0/16", "10.0.0.0/16"]
     }
   }
   priority = 100
@@ -94,16 +85,10 @@ resource "google_compute_organization_security_policy_rule" "policy" {
   policy_id = google_compute_organization_security_policy.policy.id
   action = "deny"
 
-  direction = "INGRESS"
-  enable_logging = false
   description = "Updated description"
   match {
     config {
-      src_ip_ranges = ["172.16.0.0/12"]
-      layer4_config {
-        ip_protocol = "udp"
-        ports = ["53"]
-      }
+      src_ip_ranges = ["172.16.0.0/16"]
     }
   }
   priority = 100

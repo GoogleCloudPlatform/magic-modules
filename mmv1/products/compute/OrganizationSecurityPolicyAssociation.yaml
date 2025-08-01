@@ -69,9 +69,9 @@ properties:
       The resource that the security policy is attached to.
     min_version: 'beta'
     required: true
-  - name: 'displayName'
+  - name: 'shortName'
     type: String
     description: |
-      The display name of the security policy of the association.
+      The short name of the security policy of the association.
     min_version: 'beta'
     output: true
