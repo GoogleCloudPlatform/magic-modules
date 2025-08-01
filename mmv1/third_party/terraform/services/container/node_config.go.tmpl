@@ -243,8 +243,25 @@ func schemaNodeConfig() *schema.Schema {
 					Type:             schema.TypeMap,
 					Optional:         true,
 					Elem:             &schema.Schema{Type: schema.TypeString},
-					DiffSuppressFunc: containerNodePoolResourceLabelsDiffSuppress,
-					Description:      `The GCE resource labels (a map of key/value pairs) to be applied to the node pool.`,
+					// DiffSuppressFunc: containerNodePoolResourceLabelsDiffSuppress,
+					Description:      `The GCE resource labels (a map of key/value pairs) to be applied to the node pool.
+			
+					**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+					Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
+				},
+
+				"terraform_labels": {
+					Type:        schema.TypeMap,
+					Computed:    true,
+					Description: `The combination of labels configured directly on the resource and default labels configured on the provider.`,
+					Elem:        &schema.Schema{Type: schema.TypeString},
+				},
+
+				"effective_resource_labels": {
+					Type:        schema.TypeMap,
+					Computed:    true,
+					Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
+					Elem:        &schema.Schema{Type: schema.TypeString},
 				},
 
 				"local_ssd_count": {
@@ -1666,7 +1683,7 @@ func flattenNodeConfigDefaults(c *container.NodeConfigDefaults) []map[string]int
 }
 
 // v == old state of `node_config`
-func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]interface{} {
+func flattenNodeConfig(c *container.NodeConfig, v interface{}, d *schema.ResourceData, prefix string) []map[string]interface{} {
 	config := make([]map[string]interface{}, 0, 1)
 
 	if c == nil {
@@ -1703,7 +1720,9 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 		"metadata":                 c.Metadata,
 		"image_type":               c.ImageType,
 		"labels":                   c.Labels,
-		"resource_labels":          c.ResourceLabels,
+		"resource_labels":          flattenNodeConfigResourceLabels(c.ResourceLabels, d, prefix + ".0.resource_labels"),
+		"terraform_labels":         flattenNodeConfigResourceLabels(c.ResourceLabels, d, prefix + ".0.terraform_labels"),
+		"effective_resource_labels":c.ResourceLabels,
 		"tags":                     c.Tags,
 		"preemptible":              c.Preemptible,
 		"secondary_boot_disks":     flattenSecondaryBootDisks(c.SecondaryBootDisks),
@@ -1739,6 +1758,21 @@ func flattenNodeConfig(c *container.NodeConfig, v interface{}) []map[string]inte
 	}
 
 	return config
+}
+
+func flattenNodeConfigResourceLabels(v interface{}, d *schema.ResourceData, rLabels string) interface{} {
+	if v == nil {
+		return v
+	}
+
+	transformed := make(map[string]string)
+	if l, ok := d.GetOkExists(rLabels); ok {
+		for k := range l.(map[string]interface{}) {
+			transformed[k] = v.(map[string]string)[k]
+		}
+	}
+
+	return transformed
 }
 
 func flattenResourceManagerTags(c *container.ResourceManagerTags) map[string]interface{} {
