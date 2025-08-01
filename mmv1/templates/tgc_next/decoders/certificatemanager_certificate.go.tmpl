@@ -1,0 +1,15 @@
+if v, ok := res["selfManaged"]; ok {
+  sm := v.(map[string]interface{})
+  if sm["pemCertificate"] == "" {
+    sm["pemCertificate"] = sm["certificatePem"]
+  }
+  if sm["pemPrivateKey"] == "" {
+    sm["pemPrivateKey"] = sm["privateKeyPem"]
+  }
+}
+if v, ok := res["location"]; ok && v.(string) != "global" {
+  if _, ok := res["scope"]; !ok {
+    res["scope"] = "DEFAULT"
+  }
+}
+return res, nil
