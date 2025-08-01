@@ -23,5 +23,8 @@ fields:
     {{- if ne $p.MetadataLineage $p.MetadataDefaultLineage }}
     field: '{{ $p.MetadataLineage }}'
     {{- end}}
+    {{- if $p.IsJsonField }}
+    json: true
+    {{- end }}
   {{- end}}
 {{- end }}
