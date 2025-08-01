@@ -39,6 +39,7 @@ async:
     resource_inside_response: false
 custom_code:
   constants: 'templates/terraform/constants/cert_manager.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/certificatemanager_certificate.go.tmpl'
 schema_version: 1
 state_upgraders: true
 sweeper:
@@ -75,10 +76,12 @@ examples:
     primary_resource_id: 'default'
     vars:
       cert_name: 'self-managed-cert'
+    tgc_test_ignore_extra: ['self_managed.pem_certificate', 'self_managed.pem_private_key']
   - name: 'certificate_manager_self_managed_certificate_regional'
     primary_resource_id: 'default'
     vars:
       cert_name: 'self-managed-cert'
+    tgc_test_ignore_extra: ['self_managed.pem_certificate', 'self_managed.pem_private_key']
   - name: 'certificate_manager_google_managed_certificate_issuance_config_all_regions'
     primary_resource_id: 'default'
     vars:
@@ -100,10 +103,12 @@ examples:
       dns_auth_name: 'dns-auth'
       dns_auth_subdomain: 'subdomain'
       cert_name: 'dns-cert'
+    tgc_test_ignore_extra: ['scope']
   - name: 'certificate_manager_client_auth_certificate'
     primary_resource_id: 'default'
     vars:
       cert_name: 'client-auth-cert'
+    tgc_test_ignore_extra: ['description', 'scope', 'self_managed.pem_certificate', 'self_managed.pem_private_key']
 parameters:
   - name: 'name'
     type: String
@@ -175,6 +180,7 @@ properties:
           Leaf certificate comes first, followed by intermediate ones if any.
         immutable: true
         sensitive: true
+        is_missing_in_cai: true
         exactly_one_of:
           - 'self_managed.0.certificate_pem'
           - 'self_managed.0.pem_certificate'
@@ -185,6 +191,7 @@ properties:
           The private key of the leaf certificate in PEM-encoded form.
         immutable: true
         sensitive: true
+        is_missing_in_cai: true
         exactly_one_of:
           - 'self_managed.0.private_key_pem'
           - 'self_managed.0.pem_private_key'
@@ -196,6 +203,7 @@ properties:
 
           Leaf certificate comes first, followed by intermediate ones if any.
         immutable: true
+        is_missing_in_cai: true
         exactly_one_of:
           - 'self_managed.0.certificate_pem'
           - 'self_managed.0.pem_certificate'
@@ -205,6 +213,7 @@ properties:
           The private key of the leaf certificate in PEM-encoded form.
         immutable: true
         sensitive: true
+        is_missing_in_cai: true
         exactly_one_of:
           - 'self_managed.0.private_key_pem'
           - 'self_managed.0.pem_private_key'
