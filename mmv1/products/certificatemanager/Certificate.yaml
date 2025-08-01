@@ -50,7 +50,7 @@ sweeper:
     - region: "us-west1"
   dependencies:
     - "google_compute_region_target_https_proxy"
-    - "google_network_security_backend_authentication_config"
+    # - "google_network_security_backend_authentication_config" (beta only)
     - "google_network_services_gateway"
     - "google_compute_target_https_proxy"
     - "google_compute_network"
@@ -300,3 +300,11 @@ properties:
                 address the configuration issues.
                 Not guaranteed to be stable. For programmatic access use `failure_reason` field.
               output: true
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      A map of resource manager tags.
+      Resource manager tag keys and values have the same definition as resource manager tags.
+      Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/{tag_key_value}.
+    immutable: true
+    ignore_read: true
