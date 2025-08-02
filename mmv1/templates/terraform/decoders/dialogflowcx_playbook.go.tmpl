@@ -279,86 +279,77 @@ if displayName == "Playbook Example with Fulfillment" {
 		return nil, err
 	}
 
-	//   - 'input_parameter_definitions.0'
-	//   - 'input_parameter_definitions.1'
-	//   - 'input_parameter_definitions.2'
-	//   - 'output_parameter_definitions.0'
-	//   - 'output_parameter_definitions.1'
-	//   - 'output_parameter_definitions.2'
+	//   - 'input_parameter_definitions'
+	//   - 'output_parameter_definitions'
 	setInputOutputParameterDefinitions := func(data map[string]interface{}) error {
-		inputParameterDefinitions, ok := data["inputParameterDefinitions"].([]interface{})
-		if !ok { return fmt.Errorf("'inputParameterDefinitions' is not a slice") }
-
-		outputParameterDefinitions, ok := data["outputParameterDefinitions"].([]interface{})
-		if !ok { return fmt.Errorf("'outputParameterDefinitions' is not a slice") }
-
-		if len(inputParameterDefinitions) <= 2 { return fmt.Errorf("index 2 out of bounds for 'inputParameterDefinitions'") }
-		if len(outputParameterDefinitions) <= 2 { return fmt.Errorf("index 2 out of bounds for 'outputParameterDefinitions'") }
-
-		inputParameterDefinitions[0] = map[string]interface{}{
-			"description": "An example description.",
-			"name": "schema-reference-example",
-			"typeSchema": map[string]interface{}{
-				"schemaReference": map[string]interface{}{
-					"schema": "example-schema",
-					"tool": d.Get("input_parameter_definitions.0.type_schema.0.schema_reference.0.tool.0").(string),
-				},
-			},
-		}
-		inputParameterDefinitions[1] = map[string]interface{}{
-			"description": "An example description.",
-			"name": "inline-schema-string-example",
-			"typeSchema": map[string]interface{}{
-				"inlineSchema": map[string]interface{}{
-					"type": "STRING",
-				},
-			},
-		}
-		inputParameterDefinitions[2] = map[string]interface{}{
-			"description": "An example description.",
-			"name": "inline-schema-number-array-example",
-			"typeSchema": map[string]interface{}{
-				"inlineSchema": map[string]interface{}{
-					"items": map[string]interface{}{
-						"inlineSchema": map[string]interface{}{
-							"type": "NUMBER",
-						},
+		data["inputParameterDefinitions"] = []interface{}{
+			map[string]interface{}{
+				"description": "An example description.",
+				"name": "schema-reference-example",
+				"typeSchema": map[string]interface{}{
+					"schemaReference": map[string]interface{}{
+						"schema": "example-schema",
+						"tool": d.Get("input_parameter_definitions.0.type_schema.0.schema_reference.0.tool.0").(string),
 					},
-					"type": "ARRAY",
+				},
+			},
+			map[string]interface{}{
+				"description": "An example description.",
+				"name": "inline-schema-string-example",
+				"typeSchema": map[string]interface{}{
+					"inlineSchema": map[string]interface{}{
+						"type": "STRING",
+					},
+				},
+			},
+			map[string]interface{}{
+				"description": "An example description.",
+				"name": "inline-schema-number-array-example",
+				"typeSchema": map[string]interface{}{
+					"inlineSchema": map[string]interface{}{
+						"items": map[string]interface{}{
+							"inlineSchema": map[string]interface{}{
+								"type": "NUMBER",
+							},
+						},
+						"type": "ARRAY",
+					},
 				},
 			},
 		}
 
-		outputParameterDefinitions[0] = map[string]interface{}{
-			"description": "An example description.",
-			"name": "schema-reference-example",
-			"typeSchema": map[string]interface{}{
-				"schemaReference": map[string]interface{}{
-					"schema": "example-schema",
-					"tool": d.Get("output_parameter_definitions.0.type_schema.0.schema_reference.0.tool.0").(string),
-				},
-			},
-		}
-		outputParameterDefinitions[1] = map[string]interface{}{
-			"description": "An example description.",
-			"name": "inline-schema-string-example",
-			"typeSchema": map[string]interface{}{
-				"inlineSchema": map[string]interface{}{
-					"type": "STRING",
-				},
-			},
-		}
-		outputParameterDefinitions[2] = map[string]interface{}{
-			"description": "An example description.",
-			"name": "inline-schema-number-array-example",
-			"typeSchema": map[string]interface{}{
-				"inlineSchema": map[string]interface{}{
-					"items": map[string]interface{}{
-						"inlineSchema": map[string]interface{}{
-							"type": "NUMBER",
-						},
+		data["outputParameterDefinitions"] = []interface{}{
+			map[string]interface{}{
+				"description": "An example description.",
+				"name": "schema-reference-example",
+				"typeSchema": map[string]interface{}{
+					"schemaReference": map[string]interface{}{
+						"schema": "example-schema",
+						"tool": d.Get("output_parameter_definitions.0.type_schema.0.schema_reference.0.tool.0").(string),
 					},
-					"type": "ARRAY",
+				},
+			},
+			map[string]interface{}{
+				"description": "An example description.",
+				"name": "inline-schema-string-example",
+				"typeSchema": map[string]interface{}{
+					"inlineSchema": map[string]interface{}{
+						"type": "STRING",
+					},
+				},
+			},
+			map[string]interface{}{
+				"description": "An example description.",
+				"name": "inline-schema-number-array-example",
+				"typeSchema": map[string]interface{}{
+					"inlineSchema": map[string]interface{}{
+						"items": map[string]interface{}{
+							"inlineSchema": map[string]interface{}{
+								"type": "NUMBER",
+							},
+						},
+						"type": "ARRAY",
+					},
 				},
 			},
 		}
