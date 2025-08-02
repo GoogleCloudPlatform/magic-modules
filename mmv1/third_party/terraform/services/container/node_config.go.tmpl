@@ -719,12 +719,12 @@ func schemaNodeConfig() *schema.Schema {
 							"transparent_hugepage_defrag": {
                             	Type:        schema.TypeString,
                             	Optional:    true,
-                            	Description: `Defines the maximum age an image can be unused before it is garbage collected.`,
+                            	Description: `Defines the transparent hugepage defrag configuration on the node. VM hugepage allocation can be managed by either limiting defragmentation for delayed allocation or skipping it entirely for immediate allocation only. See https://docs.kernel.org/admin-guide/mm/transhuge.html for more details.`,
                             },
 							"transparent_hugepage_enabled": {
                             	Type:        schema.TypeString,
                             	Optional:    true,
-                            	Description: `Defines the maximum age an image can be unused before it is garbage collected.`,
+                            	Description: `Transparent hugepage support for anonymous memory can be entirely disabled (mostly for debugging purposes) or only enabled inside MADV_HUGEPAGE regions (to avoid the risk of consuming more memory resources) or enabled system wide. See https://docs.kernel.org/admin-guide/mm/transhuge.html for more details.`,
                             },
 						},
 					},
