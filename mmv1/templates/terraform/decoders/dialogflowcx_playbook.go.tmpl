@@ -302,8 +302,8 @@ if displayName == "Playbook Example with Fulfillment" {
 				"schemaReference": map[string]interface{}{
 					"schema": "example-schema",
 					"tool": d.Get("input_parameter_definitions.0.type_schema.0.schema_reference.0.tool.0").(string),
-				}
-			}
+				},
+			},
 		}
 		inputParameterDefinitions[1] = map[string]interface{}{
 			"description": "An example description.",
@@ -311,8 +311,8 @@ if displayName == "Playbook Example with Fulfillment" {
 			"typeSchema": map[string]interface{}{
 				"inlineSchema": map[string]interface{}{
 					"type": "STRING",
-				}
-			}
+				},
+			},
 		}
 		inputParameterDefinitions[2] = map[string]interface{}{
 			"description": "An example description.",
@@ -325,8 +325,8 @@ if displayName == "Playbook Example with Fulfillment" {
 						},
 					},
 					"type": "ARRAY",
-				}
-			}
+				},
+			},
 		}
 
 		outputParameterDefinitions[0] = map[string]interface{}{
@@ -336,8 +336,8 @@ if displayName == "Playbook Example with Fulfillment" {
 				"schemaReference": map[string]interface{}{
 					"schema": "example-schema",
 					"tool": d.Get("output_parameter_definitions.0.type_schema.0.schema_reference.0.tool.0").(string),
-				}
-			}
+				},
+			},
 		}
 		outputParameterDefinitions[1] = map[string]interface{}{
 			"description": "An example description.",
@@ -345,8 +345,8 @@ if displayName == "Playbook Example with Fulfillment" {
 			"typeSchema": map[string]interface{}{
 				"inlineSchema": map[string]interface{}{
 					"type": "STRING",
-				}
-			}
+				},
+			},
 		}
 		outputParameterDefinitions[2] = map[string]interface{}{
 			"description": "An example description.",
@@ -359,8 +359,8 @@ if displayName == "Playbook Example with Fulfillment" {
 						},
 					},
 					"type": "ARRAY",
-				}
-			}
+				},
+			},
 		}
 	}
 	if err := setInputOutputParameterDefinitions(res); err != nil {
