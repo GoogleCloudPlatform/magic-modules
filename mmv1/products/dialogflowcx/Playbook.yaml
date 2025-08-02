@@ -55,6 +55,8 @@ examples:
       - 'handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
       - 'handlers.6.lifecycle_handler.0.fulfillment.0.messages.1.tool_call'
       - 'handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.message.0.tool_call'
+      - 'input_parameter_definitions.0.type_schema.0.schema_reference.0.tool'
+      - 'output_parameter_definitions.0.type_schema.0.schema_reference.0.tool'
 
 parameters:
   - name: 'parent'
