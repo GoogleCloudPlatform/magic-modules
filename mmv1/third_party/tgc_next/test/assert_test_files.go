@@ -37,42 +37,46 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, ignoredAssetF
 	retries := 0
 	flakyAction := func(ctx context.Context) error {
 		log.Printf("Starting the retry %d", retries)
-		resourceTestData, primaryResource, err := prepareTestData(t.Name(), retries)
+		testData, err := prepareTestData(t.Name(), retries)
 		retries++
 		if err != nil {
 			return fmt.Errorf("error preparing the input data: %v", err)
 		}
 
-		if resourceTestData == nil {
+		if len(testData) == 0 {
 			return retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
 		}
 
-		// Create a temporary directory for running terraform.
-		tfDir, err := os.MkdirTemp(tmpDir, "terraform")
-		if err != nil {
-			return err
-		}
-		defer os.RemoveAll(tfDir)
-
-		logger := zaptest.NewLogger(t)
-
-		// If the primary resource is specified, only test the primary resource.
-		// Otherwise, test all of the resources in the test.
-		if primaryResource != "" {
-			t.Logf("Test for the primary resource %s begins.", primaryResource)
-			err = testSingleResource(t, t.Name(), resourceTestData[primaryResource], tfDir, ignoredFields, ignoredAssetFields, logger, true)
+		for _, step := range testData {
+			// Create a temporary directory for running terraform.
+			tfDir, err := os.MkdirTemp(tmpDir, "terraform")
 			if err != nil {
 				return err
 			}
-		} else {
-			for _, testData := range resourceTestData {
-				err = testSingleResource(t, t.Name(), testData, tfDir, ignoredFields, ignoredAssetFields, logger, false)
+			defer os.RemoveAll(tfDir)
+
+			logger := zaptest.NewLogger(t)
+
+			// If the primary resource is specified, only test the primary resource.
+			// Otherwise, test all of the resources in the test.
+			primaryResource := step.PrimaryResource
+			resourceTestData := step.ResourceTestData
+			tName := fmt.Sprintf("%s_step%d", t.Name(), step.StepNumber)
+			if primaryResource != "" {
+				t.Logf("Test for the primary resource %s begins.", primaryResource)
+				err = testSingleResource(t, tName, resourceTestData[primaryResource], tfDir, ignoredFields, ignoredAssetFields, logger, true)
 				if err != nil {
 					return err
 				}
+			} else {
+				for _, testData := range resourceTestData {
+					err = testSingleResource(t, tName, testData, tfDir, ignoredFields, ignoredAssetFields, logger, false)
+					if err != nil {
+						return err
+					}
+				}
 			}
 		}
-
 		return nil
 	}
 
@@ -108,7 +112,8 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 		assets = append(assets, assetData.CaiAsset)
 		assetType := assetData.CaiAsset.Type
 		if assetType == "" {
-			return fmt.Errorf("cai asset is unavailable for %s", assetName)
+			log.Printf("cai asset is unavailable for %s", assetName)
+			return retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
 		}
 		if _, cai2hclSupported = cai2hclconverters.ConverterMap[assetType]; !cai2hclSupported {
 			log.Printf("%s is not supported in cai2hcl conversion.", assetType)
@@ -129,7 +134,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if os.Getenv("WRITE_FILES") != "" {
-		assetFile := fmt.Sprintf("%s.json", t.Name())
+		assetFile := fmt.Sprintf("%s.json", testName)
 		writeJSONFile(assetFile, assets)
 	}
 
@@ -144,14 +149,14 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if os.Getenv("WRITE_FILES") != "" {
-		exportTfFile := fmt.Sprintf("%s_export.tf", t.Name())
+		exportTfFile := fmt.Sprintf("%s_export.tf", testName)
 		err = os.WriteFile(exportTfFile, exportConfigData, 0644)
 		if err != nil {
 			return fmt.Errorf("error writing file %s", exportTfFile)
 		}
 	}
 
-	exportTfFilePath := fmt.Sprintf("%s/%s_export.tf", tfDir, t.Name())
+	exportTfFilePath := fmt.Sprintf("%s/%s_export.tf", tfDir, testName)
 	err = os.WriteFile(exportTfFilePath, exportConfigData, 0644)
 	if err != nil {
 		return fmt.Errorf("error when writing the file %s", exportTfFilePath)
@@ -362,7 +367,7 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 	deleteFieldsFromAssets(roundtripAssets, ignoredAssetFields)
 
 	if os.Getenv("WRITE_FILES") != "" {
-		roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", t.Name())
+		roundtripAssetFile := fmt.Sprintf("%s_roundtrip.json", testName)
 		writeJSONFile(roundtripAssetFile, roundtripAssets)
 	}
 
