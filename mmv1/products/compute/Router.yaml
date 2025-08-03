@@ -159,7 +159,7 @@ properties:
 
           This enum field has the one valid value: ALL_SUBNETS
         send_empty_value: true
- # TODO(#324): enum?
+ # TODO: #324 enum?
         item_type:
           type: String
       - name: 'advertisedIpRanges'
@@ -233,3 +233,19 @@ properties:
         description: |
           Value of the key used for MD5 authentication.
         required: true
+  - name: 'params'
+    type: NestedObject
+    min_version: 'beta'
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the router. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true

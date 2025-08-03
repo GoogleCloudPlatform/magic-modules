@@ -92,6 +92,20 @@ examples:
     test_env_vars:
       project_name: 'PROJECT_NAME'
     exclude_docs: true
+  - name: 'dataplex_datascan_basic_discovery'
+    primary_resource_id: 'basic_discovery'
+    vars:
+      datascan_name: 'datadiscovery-basic'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+      location: 'REGION'
+  - name: 'dataplex_datascan_full_discovery'
+    primary_resource_id: 'full_discovery'
+    vars:
+      datascan_name: 'datadiscovery-full'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+      location: 'REGION'
 parameters:
   - name: 'location'
     type: String
@@ -170,7 +184,7 @@ properties:
         type: String
         description: |
           The service-qualified full resource name of the cloud resource for a DataScan job to scan against. The field could be:
-          (Cloud Storage bucket for DataDiscoveryScan)BigQuery table of type "TABLE" for DataProfileScan/DataQualityScan.
+          Cloud Storage bucket (//storage.googleapis.com/projects/PROJECT_ID/buckets/BUCKET_ID) for DataDiscoveryScan OR BigQuery table of type "TABLE" (/bigquery.googleapis.com/projects/PROJECT_ID/datasets/DATASET_ID/tables/TABLE_ID) for DataProfileScan/DataQualityScan.
         immutable: true
         exactly_one_of:
           - 'data.0.entity'
@@ -242,6 +256,7 @@ properties:
       - 'DATA_SCAN_TYPE_UNSPECIFIED'
       - 'DATA_QUALITY'
       - 'DATA_PROFILE'
+      - 'DATA_DISCOVERY'
   - name: 'dataQualitySpec'
     type: NestedObject
     description: |
@@ -249,6 +264,7 @@ properties:
     exactly_one_of:
       - 'data_quality_spec'
       - 'data_profile_spec'
+      - 'data_discovery_spec'
     properties:
       - name: 'samplingPercent'
         type: Double
@@ -335,7 +351,7 @@ properties:
             - name: 'dimension'
               type: String
               description: |
-                The dimension a rule belongs to. Results are also aggregated at the dimension level. Supported dimensions are ["COMPLETENESS", "ACCURACY", "CONSISTENCY", "VALIDITY", "UNIQUENESS", "INTEGRITY"]
+                The dimension name a rule belongs to. Custom dimension name is supported with all uppercase letters and maximum length of 30 characters.
               required: true
             - name: 'threshold'
               type: Double
@@ -349,6 +365,11 @@ properties:
                 The maximum length is 63 characters.
                 Must start with a letter.
                 Must end with a number or a letter.
+            - name: 'suspended'
+              type: Boolean
+              description: |
+                Whether the Rule is active or suspended. Default = false.
+              default_value: false
             - name: 'description'
               type: String
               description: |
@@ -498,6 +519,7 @@ properties:
     exactly_one_of:
       - 'data_quality_spec'
       - 'data_profile_spec'
+      - 'data_discovery_spec'
     properties:
       - name: 'samplingPercent'
         type: Double
@@ -552,3 +574,94 @@ properties:
               For instance, if 'x' is of nested field type, listing 'x' is supported but 'x.y.z' is not supported. Here 'y' and 'y.z' are nested fields of 'x'.
             item_type:
               type: String
+  - name: 'dataDiscoverySpec'
+    type: NestedObject
+    description: |
+      DataDiscoveryScan related setting.
+    send_empty_value: true
+    allow_empty_object: true
+    exactly_one_of:
+      - 'data_quality_spec'
+      - 'data_profile_spec'
+      - 'data_discovery_spec'
+    properties:
+      - name: 'bigqueryPublishingConfig'
+        type: NestedObject
+        description: |
+          Configuration for metadata publishing.
+        properties:
+          - name: tableType
+            type: Enum
+            description: |
+              Determines whether to publish discovered tables as BigLake external tables or non-BigLake external tables.
+            enum_values:
+              - TABLE_TYPE_UNSPECIFIED
+              - EXTERNAL
+              - BIGLAKE
+          - name: connection
+            type: String
+            description: |
+              The BigQuery connection used to create BigLake tables. Must be in the form `projects/{projectId}/locations/{locationId}/connections/{connection_id}`.
+          - name: location
+            type: String
+            description: |
+              The location of the BigQuery dataset to publish BigLake external or non-BigLake external tables to.
+          - name: project
+            type: String
+            description: |
+              The project of the BigQuery dataset to publish BigLake external or non-BigLake external tables to. If not specified, the project of the Cloud Storage bucket will be used. The format is "projects/{project_id_or_number}".
+      - name: 'storageConfig'
+        type: NestedObject
+        description: |
+          Configurations related to Cloud Storage as the data source.
+        properties:
+          - name: includePatterns
+            type: Array
+            description: |
+              Defines the data to include during discovery when only a subset of the data should be considered. Provide a list of patterns that identify the data to include. For Cloud Storage bucket assets, these patterns are interpreted as glob patterns used to match object names. For BigQuery dataset assets, these patterns are interpreted as patterns to match table names.
+            item_type:
+              type: String
+          - name: excludePatterns
+            type: Array
+            description: |
+              Defines the data to exclude during discovery. Provide a list of patterns that identify the data to exclude. For Cloud Storage bucket assets, these patterns are interpreted as glob patterns used to match object names. For BigQuery dataset assets, these patterns are interpreted as patterns to match table names.
+            item_type:
+              type: String
+          - name: csvOptions
+            type: NestedObject
+            description: |
+              Configuration for CSV data.
+            properties:
+              - name: headerRows
+                type: Integer
+                description: |
+                  The number of rows to interpret as header rows that should be skipped when reading data rows.
+              - name: delimiter
+                type: String
+                description: |
+                  The delimiter that is used to separate values. The default is `,` (comma).
+              - name: encoding
+                type: String
+                description: |
+                  The character encoding of the data. The default is UTF-8.
+              - name: typeInferenceDisabled
+                type: Boolean
+                description: |
+                  Whether to disable the inference of data types for CSV data. If true, all columns are registered as strings.
+              - name: quote
+                type: String
+                description: |
+                  The character used to quote column values. Accepts `"` (double quotation mark) or `'` (single quotation mark). If unspecified, defaults to `"` (double quotation mark).
+          - name: jsonOptions
+            type: NestedObject
+            description: |
+              Configuration for JSON data.
+            properties:
+              - name: encoding
+                type: String
+                description: |
+                  The character encoding of the data. The default is UTF-8.
+              - name: typeInferenceDisabled
+                type: Boolean
+                description: |
+                  Whether to disable the inference of data types for JSON data. If true, all columns are registered as their primitive types (strings, number, or boolean).

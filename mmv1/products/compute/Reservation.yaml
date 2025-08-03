@@ -58,6 +58,21 @@ examples:
     primary_resource_id: 'gce_reservation'
     vars:
       reservation_name: 'gce-reservation'
+  - name: 'reservation_basic_beta'
+    primary_resource_id: 'gce_reservation'
+    vars:
+      reservation_name: 'gce-reservation'
+    min_version: 'beta'
+  - name: 'reservation_source_instance_template'
+    primary_resource_id: 'gce_reservation_source_instance_template'
+    vars:
+      instance-template: 'instance-template'
+      reservation_name: 'gce-reservation-source-instance-template'
+  - name: 'reservation_sharing_policy'
+    primary_resource_id: 'gce_reservation_sharing_policy'
+    vars:
+      instance-template: 'instance-template'
+      reservation_name: 'gce-reservation-sharing-policy'
   - name: 'shared_reservation_basic'
     primary_resource_id: 'gce_reservation'
     vars:
@@ -69,6 +84,18 @@ examples:
     exclude_docs: true
       # Resource creation race
     skip_vcr: true
+  - name: 'shared_reservation_beta'
+    primary_resource_id: 'gce_reservation'
+    vars:
+      reservation_name: 'gce-shared-reservation-beta'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+      # Resource creation race
+    skip_vcr: true
+    min_version: 'beta'
 parameters:
   - name: 'zone'
     type: ResourceRef
@@ -154,6 +181,13 @@ properties:
               type: String
               description: |
                 The project id/number, should be same as the key of this project config in the project map.
+      - name: 'projects'
+        type: Array
+        description: |
+          List of project IDs with which the reservation is shared.
+        item_type:
+          type: String
+        min_version: 'beta'
   - name: 'specificReservation'
     type: NestedObject
     description: |
@@ -178,8 +212,11 @@ properties:
         type: NestedObject
         description: |
           The instance properties for the reservation.
-        required: true
         immutable: true
+        default_from_api: true
+        exactly_one_of:
+          - 'specific_reservation.0.instance_properties'
+          - 'specific_reservation.0.source_instance_template'
         properties:
           - name: 'machineType'
             type: String
@@ -245,3 +282,73 @@ properties:
                     The size of the disk in base-2 GB.
                   required: true
                   immutable: true
+          - name: 'maintenanceInterval'
+            type: Enum
+            description: |
+              Specifies the frequency of planned maintenance events.
+            enum_values:
+              - 'AS_NEEDED'
+              - 'PERIODIC'
+              - 'RECURRENT'
+            min_version: 'beta'
+            immutable: true
+      - name: 'sourceInstanceTemplate'
+        type: String
+        description: |
+          Specifies the instance template to create the reservation. If you use this field, you must exclude the
+          instanceProperties field.
+        exactly_one_of:
+          - 'specific_reservation.0.instance_properties'
+          - 'specific_reservation.0.source_instance_template'
+  - name: 'deleteAtTime'
+    type: String
+    description: |
+      Absolute time in future when the reservation will be auto-deleted by Compute Engine. Timestamp is represented in RFC3339 text format.
+      Cannot be used with delete_after_duration.
+    immutable: true
+    default_from_api: true
+    conflicts:
+      - 'delete_after_duration.0.seconds'
+      - 'delete_after_duration.0.nanos'
+  - name: 'deleteAfterDuration'
+    type: NestedObject
+    description: |
+      Duration after which the reservation will be auto-deleted by Compute Engine. Cannot be used with delete_at_time.
+    ignore_read: true
+    properties:
+      - name: 'seconds'
+        type: String
+        description: |
+          Number of seconds for the auto-delete duration.
+        immutable: true
+        conflicts:
+          - 'delete_at_time'
+      - name: 'nanos'
+        type: Integer
+        description: |
+          Number of nanoseconds for the auto-delete duration.
+        immutable: true
+        conflicts:
+          - 'delete_at_time'
+  - name: 'reservationSharingPolicy'
+    type: NestedObject
+    description: |
+      Sharing policy for reservations with Google Cloud managed services.
+    default_from_api: true
+    properties:
+      - name: 'serviceShareType'
+        type: Enum
+        description: |
+          Sharing config for all Google Cloud services.
+        enum_values:
+          - 'ALLOW_ALL'
+          - 'DISALLOW_ALL'
+        default_from_api: true
+        immutable: true
+  - name: 'enableEmergentMaintenance'
+    type: Boolean
+    description: |
+      Indicates if this group of VMs have emergent maintenance enabled.
+    immutable: true
+    ignore_read: true
+    min_version: 'beta'

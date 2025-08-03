@@ -173,9 +173,6 @@ cluster.
 * `queued_provisioning` - (Optional) Specifies node pool-level settings of queued provisioning.
     Structure is [documented below](#nested_queued_provisioning).
 
-* `reservation_affinity` (Optional) The configuration of the desired reservation which instances could take capacity from.
-    Structure is [documented below](#nested_reservation_affinity).
-
 <a name="nested_autoscaling"></a>The `autoscaling` block supports (either total or per zone limits are required):
 
 * `min_node_count` - (Optional) Minimum number of nodes per zone in the NodePool.
@@ -223,6 +220,8 @@ cluster.
 * `pod_cidr_overprovision_config` - (Optional) Configuration for node-pool level pod cidr overprovision. If not set, the cluster level setting will be inherited. Structure is [documented below](#pod_cidr_overprovision_config).
 
 * `network_performance_config` - (Optional) Network bandwidth tier configuration. Structure is [documented below](#network_performance_config).
+
+* `subnetwork` - (Optional) The subnetwork path for the node pool. Format: `projects/{project}/regions/{region}/subnetworks/{subnetwork}`. If the cluster is associated with multiple subnetworks, the subnetwork for the node pool is picked based on the IP utilization during node pool creation and is immutable
 
 <a name="nested_additional_node_network_configs"></a>The `additional_node_network_configs` block supports:
 

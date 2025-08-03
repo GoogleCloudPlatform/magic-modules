@@ -23,6 +23,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
@@ -31,9 +32,17 @@ import (
 	"github.com/otiai10/copy"
 )
 
-// This proivder is for both tfplan2cai and cai2hcl conversions,
+// TerraformGoogleConversionNext is for both tfplan2cai and cai2hcl conversions
 // and copying other files, such as transport.go
 type TerraformGoogleConversionNext struct {
+	ResourceCount int
+
+	ResourcesForVersion []ResourceIdentifier
+
+	// Multiple Terraform resources can share the same CAI resource type.
+	// For example, "google_compute_region_autoscaler" and "google_region_autoscaler"
+	ResourcesByCaiResourceType map[string][]ResourceIdentifier
+
 	TargetVersionName string
 
 	Version product.Version
@@ -43,12 +52,20 @@ type TerraformGoogleConversionNext struct {
 	StartTime time.Time
 }
 
+type ResourceIdentifier struct {
+	ServiceName   string
+	TerraformName string
+	ResourceName  string
+	AliasName     string // It can be "Default" or the same with ResourceName
+}
+
 func NewTerraformGoogleConversionNext(product *api.Product, versionName string, startTime time.Time) TerraformGoogleConversionNext {
 	t := TerraformGoogleConversionNext{
-		Product:           product,
-		TargetVersionName: versionName,
-		Version:           *product.VersionObjOrClosest(versionName),
-		StartTime:         startTime,
+		Product:                    product,
+		TargetVersionName:          versionName,
+		Version:                    *product.VersionObjOrClosest(versionName),
+		StartTime:                  startTime,
+		ResourcesByCaiResourceType: make(map[string][]ResourceIdentifier),
 	}
 
 	t.Product.SetPropertiesBasedOnVersion(&t.Version)
@@ -75,37 +92,33 @@ func (tgc TerraformGoogleConversionNext) Generate(outputFolder, productPath, res
 }
 
 func (tgc TerraformGoogleConversionNext) GenerateObject(object api.Resource, outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
-	if object.ExcludeTgc {
-		log.Printf("Skipping fine-grained resource %s", object.Name)
-		return
-	}
-
-	// TODO: remove it after supporting most of resources.
-	supportList := map[string]bool{
-		"ComputeAddress": true,
-	}
-
-	if ok := supportList[object.ResourceName()]; !ok {
+	if !object.IncludeInTGCNext {
 		return
 	}
 
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
 
 	if !object.IsExcluded() {
-		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs, "tfplan2cai")
-		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs, "cai2hcl")
+		tgc.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
+		tgc.GenerateResourceTests(object, *templateData, outputFolder)
 	}
 }
 
-func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool, converter string) {
+func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
 	productName := tgc.Product.ApiName
-	conveterFolder := fmt.Sprintf("pkg/%s/converters/services", converter)
-	targetFolder := path.Join(outputFolder, conveterFolder, productName)
+	targetFolder := path.Join(outputFolder, "pkg/services", productName)
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
 
-	templatePath := fmt.Sprintf("templates/tgc_next/%s/resource_converter.go.tmpl", converter)
+	converters := []string{"tfplan2cai", "cai2hcl"}
+	for _, converter := range converters {
+		templatePath := fmt.Sprintf("templates/tgc_next/%s/resource_converter.go.tmpl", converter)
+		targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_%s.go", productName, google.Underscore(object.Name), converter))
+		templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
+	}
+
+	templatePath := "templates/tgc_next/services/resource.go.tmpl"
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s.go", productName, google.Underscore(object.Name)))
 	templateData.GenerateTGCResourceFile(templatePath, targetFilePath, object)
 }
@@ -113,7 +126,32 @@ func (tgc TerraformGoogleConversionNext) GenerateResource(object api.Resource, t
 func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, resourceToGenerate string, generateCode, generateDocs bool) {
 }
 
+func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+	eligibleExample := false
+	for _, example := range object.Examples {
+		if !example.ExcludeTest {
+			if object.ProductMetadata.VersionObjOrClosest(tgc.Version.Name).CompareTo(object.ProductMetadata.VersionObjOrClosest(example.MinVersion)) >= 0 {
+				eligibleExample = true
+				break
+			}
+		}
+	}
+	if !eligibleExample {
+		return
+	}
+
+	productName := tgc.Product.ApiName
+	targetFolder := path.Join(outputFolder, "test", "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("%s_%s_generated_test.go", productName, google.Underscore(object.Name)))
+	templateData.GenerateTGCNextTestFile(targetFilePath, object)
+}
+
 func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string, products []*api.Product, overridePath string) {
+	tgc.generateResourcesForVersion(products)
+
 	resourceConverters := map[string]string{
 		// common
 		"pkg/transport/config.go":                        "third_party/terraform/transport/config.go.tmpl",
@@ -121,15 +159,17 @@ func (tgc TerraformGoogleConversionNext) CompileCommonFiles(outputFolder string,
 		"pkg/tpgresource/common_diff_suppress.go":        "third_party/terraform/tpgresource/common_diff_suppress.go",
 		"pkg/provider/provider.go":                       "third_party/terraform/provider/provider.go.tmpl",
 		"pkg/provider/provider_validators.go":            "third_party/terraform/provider/provider_validators.go",
+		"pkg/provider/provider_mmv1_resources.go":        "templates/tgc_next/provider/provider_mmv1_resources.go.tmpl",
+
+		// services
+		"pkg/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
+		"pkg/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
 
 		// tfplan2cai
-		"pkg/tfplan2cai/converters/resource_converters.go":                       "templates/tgc_next/tfplan2cai/resource_converters.go.tmpl",
-		"pkg/tfplan2cai/converters/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
-		"pkg/tfplan2cai/converters/services/compute/metadata.go":                 "third_party/terraform/services/compute/metadata.go.tmpl",
+		"pkg/tfplan2cai/converters/resource_converters.go": "templates/tgc_next/tfplan2cai/resource_converters.go.tmpl",
 
 		// cai2hcl
-		"pkg/cai2hcl/converters/resource_converters.go":                       "templates/tgc_next/cai2hcl/resource_converters.go.tmpl",
-		"pkg/cai2hcl/converters/services/compute/compute_instance_helpers.go": "third_party/terraform/services/compute/compute_instance_helpers.go.tmpl",
+		"pkg/cai2hcl/converters/resource_converters.go": "templates/tgc_next/cai2hcl/resource_converters.go.tmpl",
 	}
 
 	templateData := NewTemplateData(outputFolder, tgc.TargetVersionName)
@@ -200,9 +240,9 @@ func (tgc TerraformGoogleConversionNext) CopyCommonFiles(outputFolder string, ge
 		"pkg/verify/path_or_contents.go":           "third_party/terraform/verify/path_or_contents.go",
 		"pkg/version/version.go":                   "third_party/terraform/version/version.go",
 
-		// tfplan2cai
-		"pkg/tfplan2cai/converters/services/compute/image.go":     "third_party/terraform/services/compute/image.go",
-		"pkg/tfplan2cai/converters/services/compute/disk_type.go": "third_party/terraform/services/compute/disk_type.go",
+		// services
+		"pkg/services/compute/image.go":     "third_party/terraform/services/compute/image.go",
+		"pkg/services/compute/disk_type.go": "third_party/terraform/services/compute/disk_type.go",
 	}
 	tgc.CopyFileList(outputFolder, resourceConverters)
 }
@@ -267,6 +307,61 @@ func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target 
 	err = os.WriteFile(targetFile, sourceByte, 0644)
 	if err != nil {
 		log.Fatalf("Cannot write file %s to replace import path: %s", target, err)
+	}
+}
+
+// Generates the list of resources, and gets the count of resources.
+// The resource object has the format
+//
+//	{
+//	   terraform_name:
+//	   resource_name:
+//	}
+//
+// The variable resources_for_version is used to generate resources in file
+// mmv1/templates/tgc_next/provider/provider_mmv1_resources.go.tmpl
+func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products []*api.Product) {
+	resourcesByCaiResourceType := make(map[string][]ResourceIdentifier)
+
+	for _, productDefinition := range products {
+		service := strings.ToLower(productDefinition.Name)
+		for _, object := range productDefinition.Objects {
+			if object.Exclude || object.NotInVersion(productDefinition.VersionObjOrClosest(tgc.TargetVersionName)) {
+				continue
+			}
+
+			if !object.IncludeInTGCNext {
+				continue
+			}
+
+			tgc.ResourceCount++
+
+			resourceIdentifier := ResourceIdentifier{
+				ServiceName:   service,
+				TerraformName: object.TerraformName(),
+				ResourceName:  object.ResourceName(),
+				AliasName:     object.ResourceName(),
+			}
+			tgc.ResourcesForVersion = append(tgc.ResourcesForVersion, resourceIdentifier)
+
+			caiResourceType := fmt.Sprintf("%s.%s", service, object.CaiResourceType())
+			if _, ok := resourcesByCaiResourceType[caiResourceType]; !ok {
+				resourcesByCaiResourceType[caiResourceType] = make([]ResourceIdentifier, 0)
+			}
+			resourcesByCaiResourceType[caiResourceType] = append(resourcesByCaiResourceType[caiResourceType], resourceIdentifier)
+		}
+	}
+
+	for caiResourceType, resources := range resourcesByCaiResourceType {
+		// If no other Terraform resources share the API resource type, override the alias name as "Default"
+		if len(resources) == 1 {
+			for _, resourceIdentifier := range resources {
+				resourceIdentifier.AliasName = "Default"
+				tgc.ResourcesByCaiResourceType[caiResourceType] = []ResourceIdentifier{resourceIdentifier}
+			}
+		} else {
+			tgc.ResourcesByCaiResourceType[caiResourceType] = resources
+		}
 	}
 }
 

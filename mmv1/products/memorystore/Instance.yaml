@@ -56,14 +56,21 @@ examples:
       'prevent_destroy': 'false'
   - name: 'memorystore_instance_full'
     primary_resource_id: 'instance-full'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-memorystore.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
       instance_name: 'full-instance'
       policy_name: 'my-policy'
       subnet_name: 'my-subnet'
       network_name: 'my-network'
       prevent_destroy: 'true'
+      kms_key_name: 'my-key'
     test_vars_overrides:
       'prevent_destroy': 'false'
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
+    ignore_read_extra:
+      - 'update_time'
   - name: 'memorystore_instance_persistence_aof'
     primary_resource_id: 'instance-persistence-aof'
     vars:
@@ -126,7 +133,6 @@ virtual_fields:
     description: "Immutable. User inputs for the auto-created
       endpoints connections. "
     type: Array
-    # is_set: true
     immutable: true
     conflicts:
       - desiredPscAutoConnections
@@ -259,6 +265,7 @@ properties:
       "Optional. Number of replica nodes per shard. If omitted the default
       is 0 replicas. "
     default_from_api: true
+    send_empty_value: true
   - name: 'authorizationMode'
     type: String
     description:
@@ -280,9 +287,14 @@ properties:
   - name: 'discoveryEndpoints'
     type: Array
     description:
-      "Output only. Endpoints clients can connect to the instance through.
-      Currently only one\ndiscovery endpoint is supported. "
-    deprecation_message: '`discovery_endpoints` is deprecated  Use `endpoints` instead.'
+      "Deprecated. Output only. Endpoints clients can connect to the instance through."
+    deprecation_message:
+      This field is deprecated. As a result it will not be populated
+      if the connections are created using `desired_auto_created_endpoints`
+      parameter or `google_memorystore_instance_desired_user_created_endpoints`
+      resource. Instead of this parameter, for discovery, use
+      `endpoints.connections.pscConnection` and `endpoints.connections.pscAutoConnection`
+      with `connectionType` CONNECTION_TYPE_DISCOVERY.
     output: true
     item_type:
       type: NestedObject
@@ -505,6 +517,14 @@ properties:
         enum_values:
           - 'MULTI_ZONE'
           - 'SINGLE_ZONE'
+  - name: 'allowFewerZonesDeployment'
+    type: Boolean
+    description: |
+      Allows customers to specify if they are okay with deploying a multi-zone
+      instance in less than 3 zones. Once set, if there is a zonal outage during
+      the instance creation, the instance will only be deployed in 2 zones, and
+      stay within the 2 zones for its lifecycle.
+    immutable: true
   - name: 'deletionProtectionEnabled'
     type: Boolean
     description: "Optional. If set to true deletion of the instance will fail. "
@@ -802,3 +822,25 @@ properties:
       The backup collection full resource name.
       Example: projects/{project}/locations/{location}/backupCollections/{collection}
     output: true
+  - name: kmsKey
+    type: String
+    description: The KMS key used to encrypt the at-rest data of the cluster
+    immutable: true
+  - name: 'managedServerCa'
+    type: NestedObject
+    output: true
+    description: Instance's Certificate Authority. This field will only be populated if instance's transit_encryption_mode is SERVER_AUTHENTICATION
+    properties:
+      - name: 'caCerts'
+        type: Array
+        output: true
+        description: The PEM encoded CA certificate chains for managed server authentication
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'certificates'
+              type: Array
+              output: true
+              description: The certificates that form the CA chain, from leaf to root order
+              item_type:
+                type: String

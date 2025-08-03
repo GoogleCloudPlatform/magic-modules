@@ -50,6 +50,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 iam_policy:
   parent_resource_attribute: 'name'
   base_url: 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
@@ -63,6 +64,7 @@ custom_code:
   update_encoder: 'templates/terraform/update_encoder/hyper_disk.go.tmpl'
   decoder: 'templates/terraform/decoders/disk.tmpl'
   pre_delete: 'templates/terraform/pre_delete/detach_disk.tmpl'
+  tgc_encoder: 'templates/tgc_next/encoders/compute_disk.go.tmpl'
 custom_diff:
   - 'customdiff.ForceNewIfChange("size", IsDiskShrinkage)'
   - 'hyperDiskIopsUpdateDiffSuppress'
@@ -73,7 +75,7 @@ examples:
     vars:
       disk_name: 'test-disk'
   - name: 'disk_async'
-    primary_resource_id: 'primary'
+    primary_resource_id: 'secondary'
     primary_resource_name: 'fmt.Sprintf("tf-test-test-disk%s", context["random_suffix"])'
     vars:
       disk_name: 'async-test-disk'
@@ -128,7 +130,7 @@ properties:
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
-        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+        # TODO Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeySelfLink'
         type: String
         description: |
@@ -238,7 +240,7 @@ properties:
         description: |
           Specifies a 256-bit customer-supplied encryption key, encoded in
           RFC 4648 base64 to either encrypt or decrypt this resource.
-        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+        # TODO Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeySelfLink'
         type: String
         description: |
@@ -458,6 +460,7 @@ properties:
       Note: Only supported on hyperdisk skus, disk_encryption_key is required when setting to true
     required: false
     default_from_api: true
+    include_empty_value_in_cai: true
   - name: 'multiWriter'
     type: Boolean
     description: |
@@ -555,11 +558,12 @@ properties:
   - name: 'accessMode'
     type: String
     description: |
-      The accessMode of the disk.
+      The access mode of the disk.
       For example:
-      * READ_WRITE_SINGLE
-      * READ_WRITE_MANY
-      * READ_ONLY_SINGLE
+        * READ_WRITE_SINGLE: The default AccessMode, means the disk can be attached to single instance in RW mode.
+        * READ_WRITE_MANY: The AccessMode means the disk can be attached to multiple instances in RW mode.
+        * READ_ONLY_SINGLE: The AccessMode means the disk can be attached to multiple instances in RO mode.
+      The AccessMode is only valid for Hyperdisk disk types.
     required: false
     immutable: false
     default_from_api: true
