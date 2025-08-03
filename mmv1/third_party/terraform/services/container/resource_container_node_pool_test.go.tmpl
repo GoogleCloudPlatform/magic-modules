@@ -1965,7 +1965,7 @@ func TestAccContainerNodePool_withSoleTenantConfig(t *testing.T) {
 	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
-	minNodeCpus := 5
+	minNodeCpus := 1
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -4894,6 +4894,7 @@ resource "google_compute_node_template" "soletenant-tmpl" {
   name      = "tf-test-soletenant-tmpl"
   region    = "us-central1"
   node_type = "n1-node-96-624"
+  cpu_overcommit_type = "ENABLED"
 }
 
 resource "google_compute_node_group" "nodes" {
