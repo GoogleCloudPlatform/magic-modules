@@ -730,10 +730,11 @@ func (r Resource) GetIdentity() []*Type {
 	})
 }
 
-func buildWriteOnlyField(name string, originalField *Type, originalFieldLineage string) *Type {
-	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(originalField.Description))
+func buildWriteOnlyField(name string, versionFieldName string, originalField *Type, originalFieldLineage string) *Type {
+	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", originalField.Description)
 	fieldPathOriginalField := originalFieldLineage
 	fieldPathCurrentField := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
+	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(versionFieldName))
 
 	apiName := originalField.ApiName
 	if apiName == "" {
@@ -747,6 +748,7 @@ func buildWriteOnlyField(name string, originalField *Type, originalFieldLineage 
 		propertyWithWriteOnly(true),
 		propertyWithApiName(apiName),
 		propertyWithIgnoreRead(true),
+		propertyWithRequiredWith([]string{requiredWith}),
 	}
 
 	if originalField.Required {
@@ -784,8 +786,10 @@ func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type,
 	if len(propWithWoConfigured.RequiredWith) > 0 {
 		log.Fatalf("WriteOnly property '%s' in resource '%s' cannot have RequiredWith set. This combination is not supported.", propWithWoConfigured.Name, r.Name)
 	}
-	writeOnlyField := buildWriteOnlyField(fmt.Sprintf("%sWo", propWithWoConfigured.Name), propWithWoConfigured, propWithWoConfiguredLineagePath)
-	writeOnlyVersionField := buildWriteOnlyVersionField(fmt.Sprintf("%sVersion", writeOnlyField.Name), propWithWoConfigured, writeOnlyField, propWithWoConfiguredLineagePath)
+	woFieldName := fmt.Sprintf("%sWo", propWithWoConfigured.Name)
+	woVersionFieldName := fmt.Sprintf("%sVersion", woFieldName)
+	writeOnlyField := buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured, propWithWoConfiguredLineagePath)
+	writeOnlyVersionField := buildWriteOnlyVersionField(woVersionFieldName, propWithWoConfigured, writeOnlyField, propWithWoConfiguredLineagePath)
 	props = append(props, writeOnlyField, writeOnlyVersionField)
 	return props
 }
