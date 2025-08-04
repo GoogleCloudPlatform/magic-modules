@@ -760,7 +760,7 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 	}
 
 	if len(originalField.AtLeastOneOf) > 0 {
-		atLeastOneOf := append(originalField.AtLeastOneOf, fieldPathOriginalField, fieldPathCurrentField)
+		atLeastOneOf := append(originalField.AtLeastOneOf, fieldPathCurrentField)
 		options = append(options, propertyWithAtLeastOneOf(atLeastOneOf))
 	}
 
