@@ -94,7 +94,7 @@ func (td *TemplateData) GenerateMetadataFile(filePath string, resource api.Resou
 }
 
 func (td *TemplateData) GenerateDataSourceFile(filePath string, resource api.Resource) {
-	templatePath := "templates/terraform/singular_datasource.go.tmpl"
+	templatePath := "templates/terraform/datasource.go.tmpl"
 	templates := []string{
 		templatePath,
 	}
