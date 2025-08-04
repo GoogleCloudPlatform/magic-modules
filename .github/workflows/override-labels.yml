@@ -1,7 +1,6 @@
 name: override-labels
 
-permissions:
-  issues: write
+permissions: read-all
 
 on:
   pull_request:
@@ -12,6 +11,8 @@ jobs:
   override-breaking-change:
     runs-on: ubuntu-22.04
     if: github.event.label.name == 'override-breaking-change'
+    permissions:
+      statuses: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       STATE: "${{ github.event.action == 'labeled' && 'success' || 'failure' }}"
