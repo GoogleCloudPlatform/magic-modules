@@ -3,7 +3,7 @@ name: override-labels
 permissions: read-all
 
 on:
-  pull_request:
+  pull_request_target:
     types: [labeled, unlabeled]
 
 
