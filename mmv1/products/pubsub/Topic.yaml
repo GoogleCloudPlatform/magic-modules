@@ -108,6 +108,7 @@ examples:
     primary_resource_id: 'example'
     vars:
       topic_name: 'example-topic'
+    tgc_skip_test: 'The dynamic block is in test configuration. The test takes time to fix.'
 parameters:
 properties:
   - name: 'name'
