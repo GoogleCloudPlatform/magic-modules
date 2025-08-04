@@ -182,7 +182,7 @@ resource "google_network_management_vpc_flow_logs_config" "example" {
 	return fmt.Sprintf("%s\n\n%s\n\n", vpcFlowLogsCfg, testAccNetworkManagementVpcFlowLogsConfig_baseResources(context))
 }
 
-{{- if ne $.TargetVersionName "ga" -}}
+{{ if ne $.TargetVersionName "ga" -}}
 func TestAccNetworkManagementVpcFlowLogsConfig_network(t *testing.T) {
 	t.Parallel()
 
