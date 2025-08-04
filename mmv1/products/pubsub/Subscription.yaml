@@ -130,6 +130,7 @@ examples:
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
+    tgc_skip_test: 'The dynamic block is in test configuration. The test takes time to fix.'
 parameters:
 properties:
   - name: 'name'
