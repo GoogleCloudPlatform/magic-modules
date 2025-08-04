@@ -4,12 +4,13 @@ permissions:
   issues: write
 
 on:
-  pull_request_target:
+  pull_request:
     types: [labeled, unlabeled]
 
 
 jobs:
   override-breaking-change:
+    runs-on: ubuntu-22.04
     if: github.event.label.name == 'override-breaking-change'
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
