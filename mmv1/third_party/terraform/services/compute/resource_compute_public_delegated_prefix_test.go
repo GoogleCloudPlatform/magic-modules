@@ -1,9 +1,7 @@
 package compute_test
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"strings"
 	"testing"
 
@@ -96,16 +94,6 @@ func testAccCheckParentHasSubPrefix(t *testing.T, project, region, parentName, s
 
 		for _, sub := range parent.PublicDelegatedSubPrefixs {
 			if sub.Name == newSubPrefixName {
-
-				jsonOutput, err := json.MarshalIndent(parent.PublicDelegatedSubPrefixs, "", "  ")
-				if err != nil {
-
-					log.Printf("[CI DEBUG] Error converting sub-prefixes to JSON: %v", err)
-				} else {
-
-					log.Printf("[CI DEBUG] Found sub-prefix %q. Full list in parent:\n%s", newSubPrefixName, string(jsonOutput))
-				}
-
 				return nil
 			}
 		}
