@@ -13,7 +13,8 @@ resource "google_network_security_server_tls_policy" "lb_mtls_policy" {
     client_validation_trust_config = "projects/307841421122/locations/global/trustConfigs/id-4adf7779-1e9f-4124-9438-652c80886074"
   }
 
-  name = "lb_mtls_policy"
+  name    = "lb_mtls_policy"
+  project = "ccm-breakit"
 }
 
 resource "google_network_security_server_tls_policy" "td_mtls_policy" {
@@ -34,7 +35,8 @@ resource "google_network_security_server_tls_policy" "td_mtls_policy" {
     }
   }
 
-  name = "td_mtls_policy"
+  name    = "td_mtls_policy"
+  project = "ccm-breakit"
 
   server_certificate {
     certificate_provider_instance {
@@ -48,6 +50,7 @@ resource "google_network_security_server_tls_policy" "td_with_server_cert_policy
   description = "my description"
   location    = "global"
   name        = "td_with_server_cert_policy"
+  project     = "ccm-breakit"
 
   server_certificate {
     grpc_endpoint {
@@ -70,7 +73,8 @@ resource "google_network_security_server_tls_policy" "empty_description_policy" 
     client_validation_trust_config = "projects/307841421122/locations/global/trustConfigs/id-4adf7779-1e9f-4124-9438-652c80886074"
   }
 
-  name = "empty_description_policy"
+  name    = "empty_description_policy"
+  project = "ccm-breakit"
 }
 
 resource "google_network_security_server_tls_policy" "empty_labels_policy" {
@@ -83,7 +87,8 @@ resource "google_network_security_server_tls_policy" "empty_labels_policy" {
     client_validation_trust_config = "projects/307841421122/locations/global/trustConfigs/id-4adf7779-1e9f-4124-9438-652c80886074"
   }
 
-  name = "empty_labels_policy"
+  name    = "empty_labels_policy"
+  project = "ccm-breakit"
 }
 
 resource "google_network_security_server_tls_policy" "regional_location_policy" {
@@ -101,7 +106,8 @@ resource "google_network_security_server_tls_policy" "regional_location_policy" 
     client_validation_trust_config = "projects/307841421122/locations/us-central1/trustConfigs/tsmx-20250609-tc1"
   }
 
-  name = "regional_location_policy"
+  name    = "regional_location_policy"
+  project = "ccm-breakit"
 }
 
 resource "google_network_security_server_tls_policy" "lb_mtls_allow_invalid_cert_policy" {
@@ -118,7 +124,8 @@ resource "google_network_security_server_tls_policy" "lb_mtls_allow_invalid_cert
     client_validation_mode = "ALLOW_INVALID_OR_MISSING_CLIENT_CERT"
   }
 
-  name = "lb_mtls_allow_invalid_cert_policy"
+  name    = "lb_mtls_allow_invalid_cert_policy"
+  project = "ccm-breakit"
 }
 
 resource "google_network_security_server_tls_policy" "td_allow_open_policy" {
@@ -134,7 +141,8 @@ resource "google_network_security_server_tls_policy" "td_allow_open_policy" {
     }
   }
 
-  name = "td_allow_open_policy"
+  name    = "td_allow_open_policy"
+  project = "ccm-breakit"
 
   server_certificate {
     grpc_endpoint {
@@ -148,6 +156,7 @@ resource "google_network_security_server_tls_policy" "td_with_cert_provider_poli
   description = "my description"
   location    = "global"
   name        = "td_with_cert_provider_policy"
+  project     = "ccm-breakit"
 
   server_certificate {
     certificate_provider_instance {
@@ -174,7 +183,8 @@ resource "google_network_security_server_tls_policy" "td_mtls_client_validation_
     }
   }
 
-  name = "td_mtls_client_validation_grpc_policy"
+  name    = "td_mtls_client_validation_grpc_policy"
+  project = "ccm-breakit"
 
   server_certificate {
     certificate_provider_instance {

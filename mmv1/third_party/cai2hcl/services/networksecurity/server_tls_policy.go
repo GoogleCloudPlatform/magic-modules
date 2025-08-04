@@ -87,8 +87,9 @@ func flattenServerTLSPolicy(resource *caiasset.AssetResource) (map[string]any, e
 	result["allow_open"] = serverTLSPolicy.AllowOpen
 	result["server_certificate"] = flattenServerCertificate(serverTLSPolicy.ServerCertificate)
 	result["mtls_policy"] = flattenMTLSPolicy(serverTLSPolicy.MtlsPolicy)
+	result["project"] = flattenProjectName(serverTLSPolicy.Name)
 
-	result["location"] = resource.Location // TODO depends on https://github.com/GoogleCloudPlatform/terraform-google-conversion/pull/4237
+	result["location"] = resource.Location
 
 	return result, nil
 }
@@ -161,4 +162,12 @@ func flattenClientValidationCA(cas []*netsecapi.ValidationCA) []map[string]any {
 	}
 
 	return result
+}
+
+func flattenProjectName(name string) string {
+	tokens := strings.Split(name, "/")
+	if len(tokens) < 2 || tokens[0] != "projects" {
+		return ""
+	}
+	return tokens[1]
 }
