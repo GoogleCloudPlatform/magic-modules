@@ -1319,11 +1319,7 @@ func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 	})
 }
 
-//	this test cannot be ran locally without seeding your environment with a backup vault and scheduling the backup of a sql instance 
-//	to generate a unique datasourceId and an enhanced backup, that this test would need to be modified to use. the values in this test correspond to those used
-//	in our testing processes.
 func TestAccSqlDatabaseInstance_createFromBackupDR(t *testing.T) {
-	// This test requires a BackupDR backup to exist.
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
@@ -1390,11 +1386,7 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 	})
 }
 
-//	this test cannot be ran locally without seeding your environment with a backup vault and scheduling the backup of a sql instance 
-//	to generate a unique datasourceId and an enhanced backup, that this test would need to be modified to use. the values in this test correspond to those used
-//	in our testing processes.
 func TestAccSqlDatabaseInstance_BackupDRUpdate(t *testing.T) {
-	// This test requires a BackupDR backup to exist.
 	acctest.SkipIfVcr(t)
 	t.Parallel()
 
