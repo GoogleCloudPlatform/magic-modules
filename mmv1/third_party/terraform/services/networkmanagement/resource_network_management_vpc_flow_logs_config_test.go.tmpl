@@ -267,11 +267,6 @@ resource "google_network_management_vpc_flow_logs_config" "network-test" {
 }
 `, context)
 }
-{{- else }}
-func TestAccNetworkManagementVpcFlowLogsConfig_network(t *testing.T) {
-	t.Skip("Test skipped for GA provider: network field is beta-only")
-}
-{{- end }}
 
 func TestAccNetworkManagementVpcFlowLogsConfig_subnet(t *testing.T) {
 	t.Parallel()
