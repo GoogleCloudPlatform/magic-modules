@@ -97,7 +97,6 @@ func testAccCheckParentHasSubPrefix(t *testing.T, project, region, parentName, s
 			if sub.Name == newSubPrefixName {
 				jsonOutput, err := json.MarshalIndent(parent.PublicDelegatedSubPrefixs, "", "  ")
 
-				// Prepare the debug message
 				var debugMessage string
 				if err != nil {
 					// If converting to JSON fails, report that error
