@@ -68,6 +68,7 @@
 &lt;li>is linked to a GitHub issue or an internal bug
 &lt;ul>
 &lt;li>if not, check the &lt;a href="https://github.com/hashicorp/terraform-provider-google/issues">issue tracker&lt;/a> to see whether the feature has already been requested and add the issues in the description, if any.&lt;/li>
+&lt;li>&amp;ldquo;Fixes {github_issue_link}&amp;rdquo; is preferred if an external issue is available because it will &lt;a href="https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue">auto-close the issue&lt;/a> when the PR is merged. However, there&amp;rsquo;s no need to create an external issue solely for this purpose.&lt;/li>
 &lt;/ul>
 &lt;/li>
 &lt;li>establishes clear context itself via title or description.&lt;/li>
