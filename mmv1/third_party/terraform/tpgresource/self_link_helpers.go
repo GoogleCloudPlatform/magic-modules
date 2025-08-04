@@ -30,21 +30,23 @@ func canonicalizeSelfLink(link string) string {
 		return ""
 	}
 
-
+	// Remove "https://…/compute/v1/" ou "https://…/compute/beta/"
 	path := rePrefix.ReplaceAllString(link, "/")
 
-
+	// Garante "/" inicial
 	if !strings.HasPrefix(path, "/") {
 		path = "/" + path
 	}
 
+	// Colapsa "//"
 	path = reDuplicateSlashes.ReplaceAllString(path, "/")
 
-
+	// Remove "/" final
 	path = strings.TrimSuffix(path, "/")
 
 	return strings.ToLower(path)
 }
+
 // Compare only the relative path of two self links.
 func CompareSelfLinkRelativePathsIgnoreProjectId(unused1, old, new string, unused2 *schema.ResourceData) bool {
 	oldStripped, err := GetRelativePath(old)
