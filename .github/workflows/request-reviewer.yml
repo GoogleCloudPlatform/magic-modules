@@ -37,5 +37,9 @@ jobs:
           cd .ci/magician
           go build .
       - name: Request reviewer
+        if: ${{ github.event.issue.user.login }} != 'copybara-service'
         run: .ci/magician/magician request-reviewer ${{ github.event.pull_request.number || github.event.issue.number }}
+      - name: Request reviewer (copybara)
+        if: ${{ github.event.issue.user.login }} == 'copybara-service'
+        run: gh pr edit ${{ github.event.pull_request.number || github.event.issue.number }} --add-reviewer "@ScottSuarez"
 
