@@ -21,6 +21,9 @@ func TestAccVertexAIRagEngineConfig_basic(t *testing.T) {
 			{
 				Config: testAccVertexAIRagEngineConfig_basic(context),
 			},
+			{
+				Config: testAccVertexAIRagEngineConfig_unprovisioned(context),
+			},
 		},
 	})
 }
@@ -31,6 +34,17 @@ resource "google_vertex_ai_rag_engine_config" "test" {
   region = "us-central1"
   rag_managed_db_config {
     basic {}
+  }
+}
+`, context)
+}
+
+func testAccVertexAIRagEngineConfig_unprovisioned(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_vertex_ai_rag_engine_config" "test" {
+  region = "us-central1"
+  rag_managed_db_config {
+    unprovisioned {}
   }
 }
 `, context)
