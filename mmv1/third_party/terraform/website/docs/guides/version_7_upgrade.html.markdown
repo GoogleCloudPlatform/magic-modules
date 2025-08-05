@@ -177,3 +177,25 @@ Remove `template.containers.depends_on` from your configuration after upgrade.
 ## Resource: `google_vertex_ai_endpoint`
 
 ### `enable_secure_private_service_connect` is removed as it is not available in the GA version of the API, only in the beta version.
+
+## Resource: `google_organization_security_policy` (beta)
+
+`display_name` has been removed in favor of `short_name`.
+`type` is now required.
+
+## Resource: `google_organization_security_policy_association` (beta)
+
+`display_name` has been removed in favor of `short_name`.
+
+## Resource: `google_organization_security_policy_rule` (beta)
+
+`display_name` has been removed in favor of `short_name`.
+`direction` has been removed from the beta provider (deprecated in API).
+`enable_logging` has been removed from the beta provider (deprecated in API).
+`match.config.dest_ip_ranges` has been removed from the beta provider (deprecated in API).
+`match.config.layer4_config.ip_protocol` has been removed from the beta provider (deprecated in API).
+`match.config.layer4_config.ports` has been removed from the beta provider (deprecated in API).
+`match.config.layer4_config` has been removed from the beta provider (deprecated in API).
+`match.versioned_expr` it's default value changed from `FIREWALL` to `SRC_IPS_V1` (deprecated in API).
+`target_resources` has been removed from the beta provider (deprecated in API).
+`target_service_accounts` has been removed from the beta provider (deprecated in API).
