@@ -636,7 +636,6 @@ func schemaNodeConfig() *schema.Schema {
 								Optional:    true,
 								Computed:    true,
 								Description: `Set the maximum number of image pulls in parallel.`,
-								ValidateFunc: validation.IntBetween(2, 5),
 							},
 							"container_log_max_size": {
 							        Type:        schema.TypeString,
@@ -647,7 +646,6 @@ func schemaNodeConfig() *schema.Schema {
 							        Type:        schema.TypeInt,
 								Optional:    true,
 								Description: `Defines the maximum number of container log files that can be present for a container.`,
-								ValidateFunc: validation.IntBetween(2, 10),
 							},
 							"image_gc_low_threshold_percent": {
 							        Type:        schema.TypeInt,
@@ -812,6 +810,7 @@ func schemaNodeConfig() *schema.Schema {
 					Type:     schema.TypeList,
 					Optional: true,
 					MaxItems: 1,
+					Computed: true,
 					Description: `Parameters that can be configured on Linux nodes.`,
 					Elem: &schema.Resource{
 						Schema: map[string]*schema.Schema{
@@ -840,7 +839,6 @@ func schemaNodeConfig() *schema.Schema {
 							"transparent_hugepage_defrag": {
 								Type:             schema.TypeString,
 								Optional:         true,
-								Computed:         true,
 								ValidateFunc:     validation.StringInSlice([]string{"TRANSPARENT_HUGEPAGE_DEFRAG_ALWAYS", "TRANSPARENT_HUGEPAGE_DEFRAG_DEFER", "TRANSPARENT_HUGEPAGE_DEFRAG_DEFER_WITH_MADVISE", "TRANSPARENT_HUGEPAGE_DEFRAG_MADVISE", "TRANSPARENT_HUGEPAGE_DEFRAG_NEVER", "TRANSPARENT_HUGEPAGE_DEFRAG_UNSPECIFIED"}, false),
 								Description:      `The Linux kernel transparent hugepage defrag setting.`,
 								DiffSuppressFunc: tpgresource.EmptyOrDefaultStringSuppress("TRANSPARENT_HUGEPAGE_DEFRAG_UNSPECIFIED"),
