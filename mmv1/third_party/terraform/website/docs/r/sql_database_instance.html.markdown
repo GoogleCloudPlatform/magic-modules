@@ -335,10 +335,6 @@ The `settings` block supports:
   For read pool instances, this field is read-only. The availability type is changed by specifying
   the number of nodes (`node_count`).
 
-* `effective_availability_type` - (Computed) The availability type of the Cloud SQL instance, high availability
-  (REGIONAL) or single zone (ZONAL). This field always contains the value that is reported by the
-  API (for read pools, `effective_availability_type` may differ from `availability_type`).
-
 * `collation` - (Optional) The name of server instance collation.
 
 * `connector_enforcement` - (Optional) Control the enforcement of Cloud SQL Auth Proxy or Cloud SQL connectors for all the connections, can be `REQUIRED` or `NOT_REQUIRED`. If enabled, all the direct connections are rejected.
@@ -670,6 +666,12 @@ performing filtering in a Terraform config.
 
 * `settings.version` - Used to make sure changes to the `settings` block are
     atomic.
+
+* `settings.0.effective_availability_type` - (Computed) The availability type of
+  the Cloud SQL instance, high availability (REGIONAL) or single zone
+  (ZONAL). This field always contains the value that is reported by the API (for
+  read pools, `settings.0.effective_availability_type` may differ from
+  `settings.0.availability_type`).
 
 * `server_ca_cert.0.cert` - The CA Certificate used to connect to the SQL Instance via SSL.
 

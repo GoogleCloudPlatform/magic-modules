@@ -3073,8 +3073,7 @@ func TestAccSqlDatabaseInstance_MysqlReadPoolEnableDisableSuccess(t *testing.T) 
 				ResourceName:            "google_sql_database_instance.original-read-pool",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				// node_count is no longer populated after disable pool
-				ImportStateVerifyIgnore: []string{"deletion_protection", "node_count"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})

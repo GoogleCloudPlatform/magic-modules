@@ -1860,10 +1860,8 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("instance_type", instance.InstanceType); err != nil {
 		return fmt.Errorf("Error setting instance_type: %s", err)
 	}
-	if instance.NodeCount != 0 {
-		if err := d.Set("node_count", instance.NodeCount); err != nil {
-			return fmt.Errorf("Error setting node_count: %s", err)
-		}
+	if err := d.Set("node_count", instance.NodeCount); err != nil {
+		return fmt.Errorf("Error setting node_count: %s", err)
 	}
 	if err := d.Set("settings", flattenSettings(instance.Settings, instance.InstanceType, d)); err != nil {
 		log.Printf("[WARN] Failed to set SQL Database Instance Settings")
