@@ -1,0 +1,12 @@
+resource "google_colab_runtime_template" "{{$.PrimaryResourceId}}" {
+  display_name = "Runtime template no name"
+  location = "us-central1"
+
+  machine_spec {
+    machine_type     = "e2-standard-4"
+  }
+
+  network_spec {
+    enable_internet_access = true
+  }
+}

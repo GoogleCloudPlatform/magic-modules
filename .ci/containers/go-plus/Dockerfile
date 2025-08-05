@@ -1,5 +1,5 @@
 # Stage 1: Download go module cache for builds
-FROM golang:1.20-bullseye AS builder
+FROM golang:1.23-bullseye AS builder
 ENV GOCACHE=/go/cache
 
 RUN apt-get update && apt-get install -y unzip
@@ -12,7 +12,7 @@ WORKDIR /app1/magic-modules-main/.ci/magician
 RUN go build -o /dev/null .
 
 # Stage 2: Creating the final image
-FROM golang:1.20-bullseye
+FROM golang:1.23-bullseye
 SHELL ["/bin/bash", "-c"]
 ENV GOCACHE=/go/cache
 
@@ -20,12 +20,8 @@ ENV GOCACHE=/go/cache
 COPY --from=builder /go/pkg/mod /go/pkg/mod
 COPY --from=builder /go/cache /go/cache
 
-# Set up Github SSH cloning.
-RUN ssh-keyscan github.com >> /known_hosts
-RUN echo "UserKnownHostsFile /known_hosts" >> /etc/ssh/ssh_config
-
 RUN apt-get update && \
-    apt-get install -y git jq unzip parallel curl && \
+    apt-get install -y git jq unzip zip parallel curl && \
     echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
     curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg  add - && \
     apt-get update -y && \
@@ -33,7 +29,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN wget https://releases.hashicorp.com/terraform/1.2.5/terraform_1.2.5_linux_amd64.zip \
-    && unzip terraform_1.2.5_linux_amd64.zip \
-    && rm terraform_1.2.5_linux_amd64.zip \
+RUN wget https://releases.hashicorp.com/terraform/1.11.0/terraform_1.11.0_linux_amd64.zip \
+    && unzip terraform_1.11.0_linux_amd64.zip \
+    && rm terraform_1.11.0_linux_amd64.zip \
     && mv ./terraform /bin/terraform

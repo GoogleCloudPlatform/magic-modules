@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 type LocationDescriber interface {
-	GetLocationDescription(providerConfig *fwtransport.FrameworkProviderConfig) LocationDescription
+	GetLocationDescription(providerConfig *transport_tpg.Config) LocationDescription
 }
 
 type LocationDescription struct {
@@ -70,7 +70,7 @@ func (ld *LocationDescription) GetLocation() (types.String, error) {
 }
 
 func (ld *LocationDescription) GetRegion() (types.String, error) {
-	// TODO(SarahFrench): Make empty strings not ignored, see https://github.com/hashicorp/terraform-provider-google/issues/14447
+	// TODO: Make empty strings not ignored, see https://github.com/hashicorp/terraform-provider-google/issues/14447
 	// For all checks in this function body
 
 	// Region from resource config
@@ -104,7 +104,7 @@ func (ld *LocationDescription) GetRegion() (types.String, error) {
 }
 
 func (ld *LocationDescription) GetZone() (types.String, error) {
-	// TODO(SarahFrench): Make empty strings not ignored, see https://github.com/hashicorp/terraform-provider-google/issues/14447
+	// TODO: Make empty strings not ignored, see https://github.com/hashicorp/terraform-provider-google/issues/14447
 	// For all checks in this function body
 
 	if !ld.ResourceZone.IsNull() && !ld.ResourceZone.IsUnknown() && !ld.ResourceZone.Equal(types.StringValue("")) {

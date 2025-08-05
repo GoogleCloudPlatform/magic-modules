@@ -4,7 +4,9 @@ description: |-
   Get URLs for a given project's container registry repository.
 ---
 
-# google\_container\_registry\_repository
+# google_container_registry_repository
+
+-> **Warning**: Container Registry is deprecated. Effective March 18, 2025, Container Registry is shut down and writing images to Container Registry is unavailable. Resource will be removed in future major release.
 
 This data source fetches the project name, and provides the appropriate URLs to use for container registry for this project.
 

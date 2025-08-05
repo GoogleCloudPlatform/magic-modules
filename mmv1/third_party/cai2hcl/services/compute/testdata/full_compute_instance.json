@@ -115,6 +115,15 @@
           },
           {
             "subnetwork": "projects/test-subnetwork_project/regions/us-central1/subnetworks/test-subnetwork"
+          },
+          {
+            "ipv6AccessConfigs": [
+              {
+                "externalIpv6": "0000:00000:00000:00000:00000:00000:00000:1",
+                "externalIpv6PrefixLength": 96,
+                "networkTier": "PREMIUM"
+              }
+            ]
           }
         ],
         "scheduling": {

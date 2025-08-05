@@ -41,7 +41,7 @@ func ResourceServiceNetworkingConnection() *schema.Resource {
 				DiffSuppressFunc: tpgresource.CompareSelfLinkOrResourceName,
 				Description:      `Name of VPC network connected with service producers using VPC peering.`,
 			},
-			// NOTE(craigatgoogle): This field is weird, it's required to make the Insert/List calls as a parameter
+			// TODO: This field is weird, it's required to make the Insert/List calls as a parameter
 			// named "parent", however it's also defined in the response as an output field called "peering", which
 			// uses "-" as a delimiter instead of ".". To alleviate user confusion I've opted to model the gcloud
 			// CLI's approach, calling the field "service" and accepting the same format as the CLI with the "."
@@ -68,6 +68,11 @@ func ResourceServiceNetworkingConnection() *schema.Resource {
 			"peering": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"update_on_creation_fail": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: `When set to true, enforce an update of the reserved peering ranges on the existing service networking connection in case of a new connection creation failure.`,
 			},
 		},
 		UseJSONNumber: true,
@@ -117,8 +122,22 @@ func resourceServiceNetworkingConnectionCreate(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	if err := ServiceNetworkingOperationWaitTime(config, op, "Create Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
-		return err
+	if err := ServiceNetworkingOperationWaitTimeHW(config, op, "Create Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
+		if strings.Contains(err.Error(), "Cannot modify allocated ranges in CreateConnection.") && d.Get("update_on_creation_fail").(bool) {
+			patchCall := config.NewServiceNetworkingClient(userAgent).Services.Connections.Patch(parentService+"/connections/-", connection).UpdateMask("reservedPeeringRanges").Force(true)
+			if config.UserProjectOverride {
+				patchCall.Header().Add("X-Goog-User-Project", project)
+			}
+			op, err := patchCall.Do()
+			if err != nil {
+				return err
+			}
+			if err := ServiceNetworkingOperationWaitTimeHW(config, op, "Update Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutUpdate)); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
 	}
 
 	connectionId := &connectionId{
@@ -246,7 +265,7 @@ func resourceServiceNetworkingConnectionUpdate(d *schema.ResourceData, meta inte
 		if err != nil {
 			return err
 		}
-		if err := ServiceNetworkingOperationWaitTime(config, op, "Update Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutUpdate)); err != nil {
+		if err := ServiceNetworkingOperationWaitTimeHW(config, op, "Update Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutUpdate)); err != nil {
 			return err
 		}
 	}
@@ -297,7 +316,7 @@ func resourceServiceNetworkingConnectionDelete(d *schema.ResourceData, meta inte
 		return err
 	}
 
-	if err := ServiceNetworkingOperationWaitTime(config, op, "Delete Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
+	if err := ServiceNetworkingOperationWaitTimeHW(config, op, "Delete Service Networking Connection", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return errwrap.Wrapf("Unable to remove Service Networking Connection, err: {{err}}", err)
 	}
 
@@ -322,7 +341,7 @@ func resourceServiceNetworkingConnectionImportState(d *schema.ResourceData, meta
 	return []*schema.ResourceData{d}, nil
 }
 
-// NOTE(craigatgoogle): The Connection resource in this API doesn't have an Id field, so inorder
+// TODO: The Connection resource in this API doesn't have an Id field, so inorder
 // to support the Read method, we create an Id using the tuple(Network, Service).
 type connectionId struct {
 	Network string
@@ -360,7 +379,7 @@ func parseConnectionId(id string) (*connectionId, error) {
 	}, nil
 }
 
-// NOTE(craigatgoogle): An out of band aspect of this API is that it uses a unique formatting of network
+// TODO: An out of band aspect of this API is that it uses a unique formatting of network
 // different from the standard self_link URI. It requires a call to the resource manager to get the project
 // number for the current project.
 func RetrieveServiceNetworkingNetworkName(d *schema.ResourceData, config *transport_tpg.Config, network, userAgent string) (string, error) {
@@ -403,7 +422,7 @@ func RetrieveServiceNetworkingNetworkName(d *schema.ResourceData, config *transp
 
 const parentServicePattern = "^services/.+$"
 
-// NOTE(craigatgoogle): An out of band aspect of this API is that it requires the service name to be
+// TODO: An out of band aspect of this API is that it requires the service name to be
 // formatted as "services/<serviceName>"
 func formatParentService(service string) string {
 	r := regexp.MustCompile(parentServicePattern)

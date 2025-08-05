@@ -4,7 +4,7 @@ description: |-
   Get a network within GCE.
 ---
 
-# google\_compute\_network
+# google_compute_network
 
 Get a network within GCE from its name.
 
@@ -36,9 +36,15 @@ In addition to the arguments listed above, the following attributes are exported
 
 * `description` - Description of this network.
 
+* `network_id` - The numeric unique identifier for the resource.
+
+* `numeric_id` - (Deprecated) The numeric unique identifier for the resource. `numeric_id` is deprecated and will be removed in a future major release. Use `network_id` instead.
+
 * `gateway_ipv4` - The IP address of the gateway.
 
 * `internal_ipv6_range` - The ula internal ipv6 range assigned to this network.
+
+* `network_profile` - A full or partial URL of the network profile to apply to this network.
 
 * `subnetworks_self_links` - the list of subnetworks which belong to the network
 

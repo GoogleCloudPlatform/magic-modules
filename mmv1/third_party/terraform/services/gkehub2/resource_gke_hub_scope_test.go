@@ -3,7 +3,7 @@ package gkehub2_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
@@ -47,6 +47,11 @@ func testAccGKEHub2Scope_gkehubScopeBasicExample_basic(context map[string]interf
 	return acctest.Nprintf(`
 resource "google_gke_hub_scope" "scope" {
   scope_id = "tf-test-scope%{random_suffix}"
+  namespace_labels = {
+    keyb = "valueb"
+    keya = "valuea"
+    keyc = "valuec" 
+  }
   labels = {
     keyb = "valueb"
     keya = "valuea"
@@ -60,6 +65,11 @@ func testAccGKEHub2Scope_gkehubScopeBasicExample_update(context map[string]inter
 	return acctest.Nprintf(`
 resource "google_gke_hub_scope" "scope" {
   scope_id = "tf-test-scope%{random_suffix}"
+  namespace_labels = {
+    updated_keyb = "updated_valueb"
+    updated_keya = "updated_valuea"
+    updated_keyc = "updated_valuec" 
+  }
   labels = {
     updated_keyb = "updated_valueb"
     updated_keya = "updated_valuea"

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// This file is controlled by MMv1, any changes made here will be overwritten
+// This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
 
 package projects
 
@@ -18,6 +18,8 @@ import generated.ServicesListBeta
 import generated.ServicesListGa
 import jetbrains.buildServer.configs.kotlin.Project
 import jetbrains.buildServer.configs.kotlin.sharedResource
+import projects.feature_branches.featureBranchResourceIdentitySubProject
+import projects.feature_branches.featureBranchMajorRelease700_Project
 
 // googleCloudRootProject returns a root project that contains a subprojects for the GA and Beta version of the
 // Google provider. There are also resources to help manage the test projects used for acceptance tests.
@@ -57,9 +59,16 @@ fun googleCloudRootProject(allConfig: AllContextParameters): Project {
             }
         }
 
+        // Projects required for nightly testing, testing MM upstreams, and sweepers
         subProject(googleSubProjectGa(allConfig))
         subProject(googleSubProjectBeta(allConfig))
         subProject(projectSweeperSubProject(allConfig))
+        subProject(featureBranchResourceIdentitySubProject(allConfig))
+
+        // Feature branch-testing projects - these will be added and removed as needed
+
+        // Feature branch testing
+        subProject(featureBranchMajorRelease700_Project(allConfig)) // FEATURE-BRANCH-major-release-7.0.0
 
         params {
             readOnlySettings()

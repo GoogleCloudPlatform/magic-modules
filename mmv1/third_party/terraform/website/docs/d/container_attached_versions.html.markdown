@@ -4,7 +4,7 @@ description: |-
   Provides lists of available platform versions for the Container Attached resources.
 ---
 
-# google\_container\_attached\_versions
+# google_container_attached_versions
 
 Provides access to available platform versions in a location for a given project.
 
@@ -18,7 +18,7 @@ data "google_container_attached_versions" "uswest" {
 
 
 output "first_available_version" {
-  value = data.google_container_attached_versions.versions.valid_versions[0]
+  value = data.google_container_attached_versions.uswest.valid_versions[0]
 }
 ```
 

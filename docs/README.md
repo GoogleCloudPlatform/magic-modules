@@ -2,10 +2,37 @@ The docsite is generated using [Hugo](https://gohugo.io/) and hosted using Githu
 
 To view locally:
 
-1. [Install Hugo](https://gohugo.io/installation/)
-2. Run `hugo server` inside the `docs` directory
-3. Visit http://localhost:1313/magic-modules/ to view the docs
+1. Ensure you've installed [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git),
+   [Go](https://go.dev/doc/install), and [Dart Sass](https://gohugo.io/hugo-pipes/transpile-sass-to-css/#dart-sass).
+   You require these prerequisites for installing Hugo.
 
+1. Install Hugo v0.136.5:
+   ```bash
+   CGO_ENABLED=1 go install -tags extended github.com/gohugoio/hugo@v0.136.5
+   ```
+
+1. Restart your terminal.
+
+1. Clone the `magic-modules` GitHub repository:
+   ```bash
+   git clone https://github.com/GoogleCloudPlatform/magic-modules.git
+   ```
+1. Navigate to the `docs` directory inside the `magic-modules` repository:
+   ```bash
+   cd magic-modules/docs/
+   ```
+
+1. Start Hugo's development server to view the Magic Modules site:
+   ```bash
+   hugo server
+   ```
+
+1. View the docs by visiting the following URL in a browser window:
+   ```bash
+   http://localhost:1313/magic-modules/
+   ```
+
+You can press `Ctrl+C` to stop Hugo's development server.
 
 If you are having deployment issues, try to reset your hugo module cache.
 * `hugo mod clean`

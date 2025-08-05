@@ -6,16 +6,16 @@ package netapp_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
-func TestAccNetappVolumeReplication_netappVolumeReplicationCreateExample_update(t *testing.T) {
+func TestAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-1", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -25,7 +25,7 @@ func TestAccNetappVolumeReplication_netappVolumeReplicationCreateExample_update(
 		CheckDestroy:             testAccCheckNetappVolumeReplicationDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_basic(context),
+				Config: testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_basic(context),
 			},
 			{
 				ResourceName:            "google_netapp_volume_replication.test_replication",
@@ -34,7 +34,7 @@ func TestAccNetappVolumeReplication_netappVolumeReplicationCreateExample_update(
 				ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_stop(context),
+				Config: testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_stop(context),
 			},
 			{
 				ResourceName:            "google_netapp_volume_replication.test_replication",
@@ -43,7 +43,7 @@ func TestAccNetappVolumeReplication_netappVolumeReplicationCreateExample_update(
 				ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_resume(context),
+				Config: testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_resume(context),
 			},
 			{
 				ResourceName:            "google_netapp_volume_replication.test_replication",
@@ -52,7 +52,7 @@ func TestAccNetappVolumeReplication_netappVolumeReplicationCreateExample_update(
 				ImportStateVerifyIgnore: []string{"destination_volume_parameters", "location", "volume_name", "name", "delete_destination_volume", "replication_enabled", "force_stopping", "wait_for_mirror", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_update(context),
+				Config: testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_update(context),
 			},
 			{
 				ResourceName:            "google_netapp_volume_replication.test_replication",
@@ -65,7 +65,7 @@ func TestAccNetappVolumeReplication_netappVolumeReplicationCreateExample_update(
 }
 
 // Basic replication
-func testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_basic(context map[string]interface{}) string {
+func testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
@@ -85,6 +85,7 @@ resource "google_netapp_storage_pool" "destination_pool" {
   service_level = "PREMIUM"
   capacity_gib  = 2048
   network       = data.google_compute_network.default.id
+  allow_auto_tiering = true
 }
 
 resource "google_netapp_volume" "source_volume" {
@@ -112,6 +113,10 @@ resource "google_netapp_volume_replication" "test_replication" {
     # simplifies implementing client failover concepts
     share_name  = "tf-test-source-volume%{random_suffix}"
     description = "This is a replicated volume"
+    tiering_policy {
+      cooling_threshold_days = 20
+      tier_action = "ENABLED"
+    }
   }
   delete_destination_volume = true
   wait_for_mirror = true
@@ -120,7 +125,7 @@ resource "google_netapp_volume_replication" "test_replication" {
 }
 
 // Update parameters
-func testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_update(context map[string]interface{}) string {
+func testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
@@ -140,6 +145,7 @@ resource "google_netapp_storage_pool" "destination_pool" {
   service_level = "PREMIUM"
   capacity_gib  = 2048
   network       = data.google_compute_network.default.id
+  allow_auto_tiering = true
 }
 
 resource "google_netapp_volume" "source_volume" {
@@ -172,6 +178,10 @@ resource "google_netapp_volume_replication" "test_replication" {
     # simplifies implementing client failover concepts
     share_name  = "tf-test-source-volume%{random_suffix}"
     description = "This is a replicated volume"
+    tiering_policy {
+      cooling_threshold_days = 20
+      tier_action = "ENABLED"
+    }
   }
   replication_enabled = true
   delete_destination_volume = true
@@ -182,7 +192,7 @@ resource "google_netapp_volume_replication" "test_replication" {
 }
 
 // Stop replication
-func testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_stop(context map[string]interface{}) string {
+func testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_stop(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
@@ -202,6 +212,7 @@ resource "google_netapp_storage_pool" "destination_pool" {
   service_level = "PREMIUM"
   capacity_gib  = 2048
   network       = data.google_compute_network.default.id
+  allow_auto_tiering = true
 }
 
 resource "google_netapp_volume" "source_volume" {
@@ -234,6 +245,10 @@ resource "google_netapp_volume_replication" "test_replication" {
     # simplifies implementing client failover concepts
     share_name  = "tf-test-source-volume%{random_suffix}"
     description = "This is a replicated volume"
+    tiering_policy {
+      cooling_threshold_days = 20
+      tier_action = "ENABLED"
+    }
   }
   replication_enabled = false
   delete_destination_volume = true
@@ -244,7 +259,7 @@ resource "google_netapp_volume_replication" "test_replication" {
 }
 
 // resume replication
-func testAccNetappVolumeReplication_netappVolumeReplicationCreateExample_resume(context map[string]interface{}) string {
+func testAccNetappVolumeReplication_NetappVolumeReplicationCreateExample_resume(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_network" "default" {
   name = "%{network_name}"
@@ -264,6 +279,7 @@ resource "google_netapp_storage_pool" "destination_pool" {
   service_level = "PREMIUM"
   capacity_gib  = 2048
   network       = data.google_compute_network.default.id
+  allow_auto_tiering = true
 }
 
 resource "google_netapp_volume" "source_volume" {
@@ -296,6 +312,10 @@ resource "google_netapp_volume_replication" "test_replication" {
     # simplifies implementing client failover concepts
     share_name  = "tf-test-source-volume%{random_suffix}"
     description = "This is a replicated volume"
+    tiering_policy {
+      cooling_threshold_days = 20
+      tier_action = "ENABLED"
+    }
   }
   replication_enabled = true
   delete_destination_volume = true

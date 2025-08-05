@@ -4,7 +4,7 @@ description: |-
   Creates a new Transfer Job in Google Cloud Storage Transfer.
 ---
 
-# google\_storage\_transfer\_job
+# google_storage_transfer_job
 
 Creates a new Transfer Job in Google Cloud Storage Transfer.
 
@@ -104,6 +104,17 @@ resource "google_storage_transfer_job" "s3-bucket-nightly-backup" {
     payload_format = "JSON"
   }
 
+   logging_config {
+    log_actions       = [
+      "COPY",
+      "DELETE"
+    ]
+    log_action_states = [
+      "SUCCEEDED",
+      "FAILED"
+    ]
+  }
+
   depends_on = [google_storage_bucket_iam_member.s3-backup-bucket, google_pubsub_topic_iam_member.notification_config]
 }
 ```
@@ -116,7 +127,9 @@ The following arguments are supported:
 
 * `description` - (Required) Unique description to identify the Transfer Job.
 
-* `transfer_spec` - (Required) Transfer specification. Structure [documented below](#nested_transfer_spec).
+* `transfer_spec` - (Optional) Transfer specification. Structure [documented below](#nested_transfer_spec). One of `transfer_spec`, or `replication_spec` can be specified.
+
+* `replication_spec` - (Optional) Replication specification. Structure [documented below](#nested_replication_spec). User should not configure `schedule`, `event_stream` with this argument. One of `transfer_spec`, or `replication_spec` must be specified.
 
 - - -
 
@@ -130,6 +143,8 @@ The following arguments are supported:
 * `status` - (Optional) Status of the job. Default: `ENABLED`. **NOTE: The effect of the new job status takes place during a subsequent job run. For example, if you change the job status from ENABLED to DISABLED, and an operation spawned by the transfer is running, the status change would not affect the current operation.**
 
 * `notification_config` - (Optional) Notification configuration. This is not supported for transfers involving PosixFilesystem. Structure [documented below](#nested_notification_config).
+
+* `logging_config` - (Optional) Logging configuration. Structure [documented below](#nested_logging_config).
 
 <a name="nested_transfer_spec"></a>The `transfer_spec` block supports:
 
@@ -154,6 +169,18 @@ The following arguments are supported:
 * `http_data_source` - (Optional) A HTTP URL data source. Structure [documented below](#nested_http_data_source).
 
 * `azure_blob_storage_data_source` - (Optional) An Azure Blob Storage data source. Structure [documented below](#nested_azure_blob_storage_data_source).
+
+* `hdfs_data_source` - (Optional) An HDFS data source. Structure [documented below](#nested_hdfs_data_source).
+
+<a name="nested_replication_spec"></a>The `replication_spec` block supports:
+
+* `gcs_data_sink` - (Optional) A Google Cloud Storage data sink. Structure [documented below](#nested_gcs_data_sink).
+
+* `gcs_data_source` - (Optional) A Google Cloud Storage data source. Structure [documented below](#nested_gcs_data_source).
+
+* `object_conditions` - (Optional) Only objects that satisfy these object conditions are included in the set of data source and data sink objects. Object conditions based on objects' `last_modification_time` do not exclude objects in a data sink. Structure [documented below](#nested_object_conditions).
+
+* `transfer_options` - (Optional) Characteristics of how to treat files from datasource and sink during job. If the option `delete_objects_unique_in_sink` is true, object conditions based on objects' `last_modification_time` are ignored and do not exclude objects in a data source or a data sink. Structure [documented below](#nested_transfer_options).
 
 <a name="nested_schedule"></a>The `schedule` block supports:
 
@@ -219,6 +246,10 @@ A duration in seconds with up to nine fractional digits, terminated by 's'. Exam
 
 * `root_directory` - (Required) Root directory path to the filesystem.
 
+<a name="nested_hdfs_data_source"></a>The `hdfs_data_source` block supports:
+
+* `path` - (Required) Root directory path to the filesystem.
+
 <a name="nested_aws_s3_data_source"></a>The `aws_s3_data_source` block supports:
 
 * `bucket_name` - (Required) S3 Bucket name.
@@ -228,6 +259,8 @@ A duration in seconds with up to nine fractional digits, terminated by 's'. Exam
 * `aws_access_key` - (Optional) AWS credentials block.
 
 * `role_arn` - (Optional) The Amazon Resource Name (ARN) of the role to support temporary credentials via 'AssumeRoleWithWebIdentity'. For more information about ARNs, see [IAM ARNs](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns). When a role ARN is provided, Transfer Service fetches temporary credentials for the session using a 'AssumeRoleWithWebIdentity' call for the provided role using the [GoogleServiceAccount][] for this project.
+
+* `managed_private_network` - (Optional) Egress bytes over a Google-managed private network. This network is shared between other users of Storage Transfer Service.
 
 The `aws_access_key` block supports:
 
@@ -247,7 +280,9 @@ The `aws_access_key` block supports:
 
 * `path` - (Required) Root path to transfer objects. Must be an empty string or full path name that ends with a '/'. This field is treated as an object prefix. As such, it should generally not begin with a '/'.
 
-* `azure_credentials` - (Required) Credentials used to authenticate API requests to Azure block.
+* `credentials_secret` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Full Resource name of a secret in Secret Manager containing [SAS Credentials in JSON form](https://cloud.google.com/storage-transfer/docs/reference/rest/v1/TransferSpec#azureblobstoragedata:~:text=begin%20with%20a%20%27/%27.-,credentialsSecret,-string). Service Agent for Storage Transfer must have permissions to access secret. If credentials_secret is specified, do not specify azure_credentials.`,
+
+* `azure_credentials` - (Required in GA, Optional in [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) Credentials used to authenticate API requests to Azure block.
 
 The `azure_credentials` block supports:
 
@@ -278,6 +313,17 @@ The `azure_credentials` block supports:
 * `event_types` - (Optional) Event types for which a notification is desired. If empty, send notifications for all event types. The valid types are "TRANSFER_OPERATION_SUCCESS", "TRANSFER_OPERATION_FAILED", "TRANSFER_OPERATION_ABORTED".
 
 * `payload_format` - (Required) The desired format of the notification message payloads. One of "NONE" or "JSON".
+
+<a name="nested_logging_config"></a>The `loggin_config` block supports:
+
+* `log_actions` - (Optional) A list of actions to be logged. If empty, no logs are generated. Not supported for transfers with PosixFilesystem data sources; use enableOnpremGcsTransferLogs instead. 
+Each action may be one of `FIND`, `DELETE`, and `COPY`.
+
+* `log_action_states` - (Optional) A list of loggable action states. If empty, no logs are generated. Not supported for transfers with PosixFilesystem data sources; use enableOnpremGcsTransferLogs instead.
+Each action state may be one of `SUCCEEDED`, and `FAILED`.
+
+* `enable_on_prem_gcs_transfer` - (Optional) For transfers with a PosixFilesystem source, this option enables the Cloud Storage transfer logs for this transfer. 
+Defaults to false.
 
 ## Attributes Reference
 

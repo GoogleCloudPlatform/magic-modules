@@ -1,3 +1,18 @@
+/*
+* Copyright 2025 Google LLC. All Rights Reserved.
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+ */
 package cmd
 
 import (
@@ -15,12 +30,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var changelogExp = regexp.MustCompile("(?s)```release-note.*?```")
+var changelogExp = regexp.MustCompile("(?s)```release-note:(?P<noteType>[a-zA-Z]+).*```")
 
 var gdEnvironmentVariables = [...]string{
 	"BASE_BRANCH",
-	"GITHUB_TOKEN",
 	"GOPATH",
+}
+
+var gdTokenEnvironmentVariables = [...]string{
+	"GITHUB_TOKEN_CLASSIC",
+	"GITHUB_TOKEN_DOWNSTREAMS",
+	"GITHUB_TOKEN",
 }
 
 var generateDownstreamCmd = &cobra.Command{
@@ -36,31 +56,47 @@ var generateDownstreamCmd = &cobra.Command{
 
 	The following environment variables should be set:
 ` + listGDEnvironmentVariables(),
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		env := make(map[string]string, len(gdEnvironmentVariables))
 		for _, ev := range gdEnvironmentVariables {
 			val, ok := os.LookupEnv(ev)
 			if !ok {
-				fmt.Printf("Did not provide %s environment variable\n", ev)
-				os.Exit(1)
+				return fmt.Errorf("did not provide %s environment variable", ev)
 			}
 			env[ev] = val
 		}
 
-		gh := github.NewClient()
+		var githubToken string
+		for _, ev := range gdTokenEnvironmentVariables {
+			val, ok := os.LookupEnv(ev)
+			if ok {
+				env[ev] = val
+				githubToken = val
+				break
+			}
+		}
+
+		gh := github.NewClient(githubToken)
 		rnr, err := exec.NewRunner()
 		if err != nil {
-			fmt.Println("Error creating a runner: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error creating a runner: %w", err)
 		}
-		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN"], rnr)
+		ctlr := source.NewController(env["GOPATH"], "modular-magician", githubToken, rnr)
+		oldToken := os.Getenv("GITHUB_TOKEN")
+		if err := os.Setenv("GITHUB_TOKEN", githubToken); err != nil {
+			return fmt.Errorf("error setting GITHUB_TOKEN environment variable: %w", err)
+		}
+		defer func() {
+			if err := os.Setenv("GITHUB_TOKEN", oldToken); err != nil {
+				fmt.Println("Error setting GITHUB_TOKEN environment variable: ", err)
+			}
+		}()
 
 		if len(args) != 4 {
-			fmt.Printf("Wrong number of arguments %d, expected 4\n", len(args))
-			os.Exit(1)
+			return fmt.Errorf("wrong number of arguments %d, expected 4", len(args))
 		}
 
-		execGenerateDownstream(env["BASE_BRANCH"], args[0], args[1], args[2], args[3], gh, rnr, ctlr)
+		return execGenerateDownstream(env["BASE_BRANCH"], args[0], args[1], args[2], args[3], gh, rnr, ctlr)
 	},
 }
 
@@ -72,16 +108,34 @@ func listGDEnvironmentVariables() string {
 	return result
 }
 
-func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) {
+func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) error {
 	if baseBranch == "" {
 		baseBranch = "main"
+	}
+	if command == "downstream" {
+		var syncBranchPrefix string
+		if repo == "terraform" {
+			if version == "beta" {
+				syncBranchPrefix = "tpgb-sync"
+			} else if version == "ga" {
+				syncBranchPrefix = "tpg-sync"
+			}
+		} else if repo == "terraform-google-conversion" {
+			syncBranchPrefix = "tgc-sync"
+		} else if repo == "tf-oics" {
+			syncBranchPrefix = "tf-oics-sync"
+		}
+		syncBranch := getSyncBranch(syncBranchPrefix, baseBranch)
+		if syncBranchHasCommit(ref, syncBranch, rnr) {
+			fmt.Printf("Sync branch %s already has commit %s, skipping generation\n", syncBranch, ref)
+			os.Exit(0)
+		}
 	}
 
 	mmLocalPath := filepath.Join(rnr.GetCWD(), "..", "..")
 	mmCopyPath := filepath.Join(mmLocalPath, "..", fmt.Sprintf("mm-%s-%s-%s", repo, version, command))
 	if _, err := rnr.Run("cp", []string{"-rp", mmLocalPath, mmCopyPath}, nil); err != nil {
-		fmt.Println("Error copying magic modules: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error copying magic modules: %w", err)
 	}
 	mmRepo := &source.Repo{
 		Name: "magic-modules",
@@ -90,56 +144,52 @@ func execGenerateDownstream(baseBranch, command, repo, version, ref string, gh G
 
 	downstreamRepo, scratchRepo, commitMessage, err := cloneRepo(mmRepo, baseBranch, repo, version, command, ref, rnr, ctlr)
 	if err != nil {
-		fmt.Println("Error cloning repo: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error cloning repo: %w", err)
 	}
 
 	if err := rnr.PushDir(mmCopyPath); err != nil {
-		fmt.Println("Error changing directory to copied magic modules: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error changing directory to copied magic modules: %w", err)
 	}
 
 	if err := setGitConfig(rnr); err != nil {
-		fmt.Println("Error setting config: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error setting config: %w", err)
 	}
 
 	if err := runMake(downstreamRepo, command, rnr); err != nil {
-		fmt.Println("Error running make: ", err)
-		os.Exit(1)
-	}
-
-	commitErr := createCommit(scratchRepo, commitMessage, rnr)
-	if commitErr != nil {
-		fmt.Println("Error creating commit: ", commitErr)
+		return fmt.Errorf("error running make: %w", err)
 	}
 
 	var pullRequest *github.PullRequest
-	if commitErr == nil && command == "downstream" {
+	if command == "downstream" {
 		pullRequest, err = getPullRequest(baseBranch, ref, gh)
 		if err != nil {
-			fmt.Println("Error getting pull request: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error getting pull request: %w", err)
 		}
 		if repo == "terraform" {
-			if err := addChangelogEntry(pullRequest, rnr); err != nil {
-				fmt.Println("Error adding changelog entry: ", err)
-				os.Exit(1)
+			if err := addChangelogEntry(scratchRepo, pullRequest, rnr); err != nil {
+				return fmt.Errorf("error adding changelog entry: %w", err)
 			}
 		}
 	}
 
+	scratchCommitSha, commitErr := createCommit(scratchRepo, commitMessage, rnr)
+	if commitErr != nil {
+		fmt.Println("Error creating commit: ", commitErr)
+		if !strings.Contains(commitErr.Error(), "nothing to commit") {
+			return fmt.Errorf("error creating commit: %w", commitErr)
+		}
+	}
+
 	if _, err := rnr.Run("git", []string{"push", ctlr.URL(scratchRepo), scratchRepo.Branch, "-f"}, nil); err != nil {
-		fmt.Println("Error pushing commit: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error pushing commit: %w", err)
 	}
 
 	if commitErr == nil && command == "downstream" {
-		if err := mergePullRequest(downstreamRepo, scratchRepo, pullRequest, rnr, gh); err != nil {
-			fmt.Println("Error merging pull request: ", err)
-			os.Exit(1)
+		if err := mergePullRequest(downstreamRepo, scratchRepo, scratchCommitSha, pullRequest, rnr, gh); err != nil {
+			return fmt.Errorf("error merging pull request: %w", err)
 		}
 	}
+	return nil
 }
 
 func cloneRepo(mmRepo *source.Repo, baseBranch, repo, version, command, ref string, rnr ExecRunner, ctlr *source.Controller) (*source.Repo, *source.Repo, string, error) {
@@ -250,9 +300,11 @@ func runMake(downstreamRepo *source.Repo, command string, rnr ExecRunner) error 
 			return err
 		}
 	case "terraform":
+		// --- legacy -- can be cleaned up after go/mm-pull/13722 is submitted
 		if _, err := rnr.Run("make", []string{"clean-provider", "OUTPUT_PATH=" + downstreamRepo.Path}, nil); err != nil {
 			return err
 		}
+		// -------------------------------------------------------------------
 		if _, err := rnr.Run("make", []string{"provider", "OUTPUT_PATH=" + downstreamRepo.Path, fmt.Sprintf("VERSION=%s", downstreamRepo.Version)}, nil); err != nil {
 			return err
 		}
@@ -273,43 +325,74 @@ func getPullRequest(baseBranch, ref string, gh GithubClient) (*github.PullReques
 	return nil, fmt.Errorf("no pr found with merge commit sha %s and base branch %s", ref, baseBranch)
 }
 
-func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner) error {
+func createCommit(scratchRepo *source.Repo, commitMessage string, rnr ExecRunner) (string, error) {
 	if err := rnr.PushDir(scratchRepo.Path); err != nil {
-		return err
+		return "", err
 	}
 	if err := setGitConfig(rnr); err != nil {
-		return err
+		return "", err
 	}
 
 	if _, err := rnr.Run("git", []string{"add", "."}, nil); err != nil {
-		return err
+		return "", err
 	}
 	if _, err := rnr.Run("git", []string{"checkout", "-b", scratchRepo.Branch}, nil); err != nil {
-		return err
+		return "", err
 	}
 
-	if _, err := rnr.Run("git", []string{"commit", "--signoff", "-m", commitMessage}, nil); err != nil {
-		return err
+	_, commitErr := rnr.Run("git", []string{"commit", "--signoff", "-m", commitMessage}, nil)
+	if commitErr != nil && !strings.Contains(commitErr.Error(), "nothing to commit") {
+		return "", commitErr
 	}
 
-	return nil
+	commitSha, err := rnr.Run("git", []string{"rev-parse", "HEAD"}, nil)
+	if err != nil {
+		return "", fmt.Errorf("error retrieving commit sha: %w", err)
+	}
+
+	commitSha = strings.TrimSpace(commitSha)
+	fmt.Printf("Commit sha on the branch is: `%s`\n", commitSha)
+
+	// auto-pr's use commitSHA_modular-magician_<repo>_.txt file to communicate commmit hash
+	// across cloudbuild steps. Used in test-tpg to execute unit tests for the HEAD commit
+	if strings.HasPrefix(scratchRepo.Branch, "auto-pr-") {
+		var variablePath string
+		if strings.HasSuffix(scratchRepo.Branch, "-old") {
+			variablePath = fmt.Sprintf("/workspace/commitSHA_modular-magician_%s-old.txt", scratchRepo.Name)
+		} else {
+			variablePath = fmt.Sprintf("/workspace/commitSHA_modular-magician_%s.txt", scratchRepo.Name)
+		}
+		fmt.Println("variablePath: ", variablePath)
+		err = rnr.WriteFile(variablePath, commitSha)
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+	}
+
+	return commitSha, commitErr
 }
 
-func addChangelogEntry(pullRequest *github.PullRequest, rnr ExecRunner) error {
+func addChangelogEntry(downstreamRepo *source.Repo, pullRequest *github.PullRequest, rnr ExecRunner) error {
+	if err := rnr.PushDir(downstreamRepo.Path); err != nil {
+		return err
+	}
 	rnr.Mkdir(".changelog")
-	if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
-		return err
+	matches := changelogExp.FindStringSubmatch(pullRequest.Body)
+	if matches != nil && matches[1] != "none" {
+		if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), strings.Join(changelogExp.FindAllString(pullRequest.Body, -1), "\n")); err != nil {
+			return err
+		}
 	}
-	if _, err := rnr.Run("git", []string{"add", "."}, nil); err != nil {
-		return err
+	// If changelog entry is missing, add an entry "unknown: <PR title>".
+	if matches == nil {
+		if err := rnr.WriteFile(filepath.Join(".changelog", fmt.Sprintf("%d.txt", pullRequest.Number)), "unknown: "+pullRequest.Title); err != nil {
+			return err
+		}
 	}
-	if _, err := rnr.Run("git", []string{"commit", "--signoff", "--amend", "--no-edit"}, nil); err != nil {
-		return err
-	}
-	return nil
+	return rnr.PopDir()
 }
 
-func mergePullRequest(downstreamRepo, scratchRepo *source.Repo, pullRequest *github.PullRequest, rnr ExecRunner, gh GithubClient) error {
+func mergePullRequest(downstreamRepo, scratchRepo *source.Repo, scratchRepoSha string, pullRequest *github.PullRequest, rnr ExecRunner, gh GithubClient) error {
 	fmt.Printf(`Base: %s:%s
 Head: %s:%s
 `, downstreamRepo.Owner, downstreamRepo.Branch, scratchRepo.Owner, scratchRepo.Branch)
@@ -340,7 +423,7 @@ Head: %s:%s
 	// Wait a few seconds, then merge the PR.
 	time.Sleep(5 * time.Second)
 	fmt.Println("Merging PR ", newPRURL)
-	if err := gh.MergePullRequest(downstreamRepo.Owner, downstreamRepo.Name, newPRNumber); err != nil {
+	if err := gh.MergePullRequest(downstreamRepo.Owner, downstreamRepo.Name, newPRNumber, scratchRepoSha); err != nil {
 		return err
 	}
 	return nil

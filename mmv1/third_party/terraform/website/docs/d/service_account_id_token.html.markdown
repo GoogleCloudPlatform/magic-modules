@@ -4,7 +4,7 @@ description: |-
   Produces OpenID Connect token for service accounts
 ---
 
-# google\_service\_account\_id\_token
+# google_service_account_id_token
 
 This data source provides a Google OpenID Connect (`oidc`) `id_token`.  Tokens issued from this data source are typically used to call external services that accept OIDC tokens for authentication (e.g. [Google Cloud Run](https://cloud.google.com/run/docs/authenticating/service-to-service)).
 
@@ -25,7 +25,7 @@ For more information see
   ```
 
 ## Example Usage - Service Account Impersonation.
-  `google_service_account_access_token` will use background impersonated credentials provided by [google_service_account_access_token](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/service_account_access_token).
+  `google_service_account_id_token` will use background impersonated credentials provided by [google_service_account_access_token](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/service_account_access_token).
 
   Note: to use the following, you must grant `target_service_account` the
   `roles/iam.serviceAccountTokenCreator` role on itself.

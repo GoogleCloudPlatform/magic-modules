@@ -3,18 +3,16 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// This file is controlled by MMv1, any changes made here will be overwritten
+// This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
 
 package projects
 
 import ProviderNameBeta
-import builds.AllContextParameters
-import builds.getBetaAcceptanceTestConfig
-import builds.getVcrAcceptanceTestConfig
-import builds.readOnlySettings
+import builds.*
 import jetbrains.buildServer.configs.kotlin.Project
 import projects.reused.mmUpstream
 import projects.reused.nightlyTests
+import projects.reused.weeklyDiffTests
 import projects.reused.vcrRecording
 import replaceCharsId
 import vcs_roots.HashiCorpVCSRootBeta
@@ -23,7 +21,7 @@ import vcs_roots.ModularMagicianVCSRootBeta
 // googleSubProjectBeta returns a subproject that is used for testing terraform-provider-google-beta (Beta)
 fun googleSubProjectBeta(allConfig: AllContextParameters): Project {
 
-    var betaId = replaceCharsId("GOOGLE_BETA")
+    val betaId = replaceCharsId("GOOGLE_BETA")
 
     // Get config for using the Beta and VCR identities
     val betaConfig = getBetaAcceptanceTestConfig(allConfig)
@@ -35,14 +33,17 @@ fun googleSubProjectBeta(allConfig: AllContextParameters): Project {
         description = "Subproject containing builds for testing the Beta version of the Google provider"
 
         // Nightly Test project that uses hashicorp/terraform-provider-google-beta
-        subProject(nightlyTests(betaId, ProviderNameBeta, HashiCorpVCSRootBeta, betaConfig))
+        subProject(nightlyTests(betaId, ProviderNameBeta, HashiCorpVCSRootBeta, betaConfig, NightlyTriggerConfiguration(daysOfWeek="1-3,5-7"))) // All nights except Wednesday (4) for Beta; feature branch testing happens on Wednesdays and TeamCity numbers days Sun=1...Sat=7
 
         // MM Upstream project that uses modular-magician/terraform-provider-google-beta
-        subProject(mmUpstream(betaId, ProviderNameBeta, ModularMagicianVCSRootBeta, vcrConfig))
+        subProject(mmUpstream(betaId, ProviderNameBeta, ModularMagicianVCSRootBeta, HashiCorpVCSRootBeta, vcrConfig, NightlyTriggerConfiguration()))
 
         // VCR recording project that allows VCR recordings to be made using hashicorp/terraform-provider-google-beta OR modular-magician/terraform-provider-google-beta
         // This is only present for the Beta provider, as only TPGB VCR recordings are used.
         subProject(vcrRecording(betaId, ProviderNameBeta, HashiCorpVCSRootBeta, ModularMagicianVCSRootBeta, vcrConfig))
+
+        // Beta Diff Test project that uses hashicorp/terraform-provider-google-beta-diff-test
+        subProject(weeklyDiffTests(betaId + "_DIFF_TEST", ProviderNameBeta, HashiCorpVCSRootBeta, betaConfig, NightlyTriggerConfiguration(daysOfWeek = "SAT", nightlyTestsEnabled = false)))
 
         params {
             readOnlySettings()

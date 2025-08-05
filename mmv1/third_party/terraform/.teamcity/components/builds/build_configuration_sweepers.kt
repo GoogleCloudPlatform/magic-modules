@@ -3,13 +3,17 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-// This file is controlled by MMv1, any changes made here will be overwritten
+// This file is maintained in the GoogleCloudPlatform/magic-modules repository and copied into the downstream provider repositories. Any changes to this file in the downstream will be overwritten.
 
 package builds
 
+import ArtifactRules
 import DefaultBuildTimeoutDuration
 import DefaultParallelism
+import jetbrains.buildServer.configs.kotlin.buildFeatures.GolangFeature
 import jetbrains.buildServer.configs.kotlin.BuildType
+import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnText
+import jetbrains.buildServer.configs.kotlin.failureConditions.failOnText
 import jetbrains.buildServer.configs.kotlin.sharedResources
 import jetbrains.buildServer.configs.kotlin.vcs.GitVcsRoot
 import replaceCharsId
@@ -57,6 +61,7 @@ class SweeperDetails(private val sweeperName: String, private val parentProjectN
         // These hardcoded values affect the sweeper CLI command's behaviour
         val testPrefix = "TestAcc"
         val testTimeout = "12"
+        val releaseDiffTest = "false"
 
         return BuildType {
 
@@ -78,7 +83,9 @@ class SweeperDetails(private val sweeperName: String, private val parentProjectN
             }
 
             features {
-                golang()
+                feature(GolangFeature {
+                    testFormat = "json"
+                })
                 if (sharedResources.isNotEmpty()) {
                     sharedResources {
                         // When the build runs, it locks the value(s) below
@@ -91,20 +98,29 @@ class SweeperDetails(private val sweeperName: String, private val parentProjectN
 
             params {
                 configureGoogleSpecificTestParameters(environmentVariables)
-                acceptanceTestBuildParams(parallelism, testPrefix, testTimeout)
+                acceptanceTestBuildParams(parallelism, testPrefix, testTimeout, releaseDiffTest)
                 sweeperParameters(sweeperRegions, sweeperRun)
-                terraformLoggingParameters(providerName)
+                terraformLoggingParameters(environmentVariables, providerName)
                 terraformCoreBinaryTesting()
                 terraformShouldPanicForSchemaErrors()
                 readOnlySettings()
                 workingDirectory(path)
             }
 
-            artifactRules = "%teamcity.build.checkoutDir%/debug*.txt"
+            artifactRules = ArtifactRules
 
             failureConditions {
                 errorMessage = true
                 executionTimeoutMin = buildTimeout
+
+                // Stop builds if the branch does not exist
+                failOnText {
+                  conditionType = BuildFailureOnText.ConditionType.CONTAINS
+                  pattern = "which does not correspond to any branch monitored by the build VCS roots"
+                  failureMessage = "Error: The branch %teamcity.build.branch% does not exist"
+                  reverse = false
+                  stopBuildOnFailure = true
+                }
             }
 
         }

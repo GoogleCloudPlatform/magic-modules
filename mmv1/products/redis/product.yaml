@@ -1,4 +1,4 @@
-# Copyright 2018 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,21 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Product
-name: Redis
-display_name: Memorystore (Redis)
+---
+name: 'Redis'
+display_name: 'Memorystore (Redis)'
 versions:
-  - !ruby/object:Api::Product::Version
-    name: ga
-    base_url: https://redis.googleapis.com/v1/
-  - !ruby/object:Api::Product::Version
-    name: beta
-    base_url: https://redis.googleapis.com/v1beta1/
+  - name: 'ga'
+    base_url: 'https://redis.googleapis.com/v1/'
+  - name: 'beta'
+    base_url: 'https://redis.googleapis.com/v1beta1/'
 scopes:
-  - https://www.googleapis.com/auth/cloud-platform
-async: !ruby/object:Api::OpAsync
-  # Overrides which API calls return operations. Default: ['create',
-  # 'update', 'delete']
-  # actions: ['create', 'update', 'delete']
-  operation: !ruby/object:Api::OpAsync::Operation
+  - 'https://www.googleapis.com/auth/cloud-platform'
+async:
+  type: "OpAsync"
+  operation:
     base_url: '{{op_id}}'
+  result:
+    resource_inside_response: false

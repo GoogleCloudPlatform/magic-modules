@@ -24,7 +24,7 @@ These resources are intended to convert the permissions system for BigQuery data
 
 ~> **Note:** `google_bigquery_dataset_iam_binding` resources **can be** used in conjunction with `google_bigquery_dataset_iam_member` resources **only if** they do not grant privilege to the same role.
 
-## google\_bigquery\_dataset\_iam\_policy
+## google_bigquery_dataset_iam_policy
 
 ```hcl
 data "google_iam_policy" "owner" {
@@ -47,7 +47,7 @@ resource "google_bigquery_dataset" "dataset" {
 }
 ```
 
-## google\_bigquery\_dataset\_iam\_binding
+## google_bigquery_dataset_iam_binding
 
 ```hcl
 resource "google_bigquery_dataset_iam_binding" "reader" {
@@ -64,7 +64,7 @@ resource "google_bigquery_dataset" "dataset" {
 }
 ```
 
-## google\_bigquery\_dataset\_iam\_member
+## google_bigquery_dataset_iam_member
 
 ```hcl
 resource "google_bigquery_dataset_iam_member" "editor" {
@@ -91,6 +91,9 @@ The following arguments are supported:
   * **domain:{domain}**: A G Suite domain (primary, instead of alias) name that represents all the users of that domain. For example, google.com or example.com.
   * **group:{emailid}**: An email address that represents a Google group. For example, admins@example.com.
   * **iamMember:{principal}**: Some other type of member that appears in the IAM Policy but isn't a user, group, domain, or special group. This is used for example for workload/workforce federated identities (principal, principalSet).
+  * **projectOwners**: A special identifier that represents the Owners of the project of the dataset.
+  * **projectReaders**: A special identifier that represents the Viewers of the project of the dataset.
+  * **projectWriters**: A special identifier that represents the Editors of the project of the dataset.
   * **serviceAccount:{emailid}**: An email address that represents a service account. For example, my-other-app@appspot.gserviceaccount.com.
   * **user:{emailid}**: An email address that represents a specific Google account. For example, alice@gmail.com or joe@example.com.
 

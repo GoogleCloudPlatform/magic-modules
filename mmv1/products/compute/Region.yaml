@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,55 +11,62 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Region'
 kind: 'compute#region'
-base_url: projects/{{project}}/regions
-collection_url_key: 'items'
-has_self_link: true
-readonly: true
 description: |
   Represents a Region resource. A region is a specific geographical
   location where you can run your resources. Each region has one or more
   zones
 # Used as a resource reference
 exclude: true
+readonly: true
+docs:
+base_url: 'projects/{{project}}/regions'
+has_self_link: true
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+collection_url_key: 'items'
+custom_code:
+parameters:
 properties:
-  - !ruby/object:Api::Type::Time
-    name: 'creationTimestamp'
+  - name: 'creationTimestamp'
+    type: Time
     description: 'Creation timestamp in RFC3339 text format.'
     output: true
-  - !ruby/object:Api::Type::NestedObject
-    name: 'deprecated'
+  - name: 'deprecated'
+    type: NestedObject
     description: 'The deprecation state of this resource.'
     output: true
     properties:
-      - !ruby/object:Api::Type::Time
-        name: 'deleted'
+      - name: 'deleted'
+        type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to DELETED.
-      - !ruby/object:Api::Type::Time
-        name: 'deprecated'
+      - name: 'deprecated'
+        type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to DEPRECATED.
         output: true
-      - !ruby/object:Api::Type::Time
-        name: 'obsolete'
+      - name: 'obsolete'
+        type: Time
         description: |
           An optional RFC3339 timestamp on or after which the deprecation state
           of this resource will be changed to OBSOLETE.
         output: true
-      - !ruby/object:Api::Type::String
-        name: 'replacement'
+      - name: 'replacement'
+        type: String
         description: |
           The URL of the suggested replacement for a deprecated resource. The
           suggested replacement resource must be the same kind of resource as
           the deprecated resource.
         output: true
-      - !ruby/object:Api::Type::Enum
-        name: 'state'
+      - name: 'state'
+        type: Enum
         description: |
           The deprecation state of this resource. This can be DEPRECATED,
           OBSOLETE, or DELETED. Operations which create a new resource using a
@@ -67,56 +74,58 @@ properties:
           indicating the deprecated resource and recommending its replacement.
           Operations which use OBSOLETE or DELETED resources will be rejected
           and result in an error.
-        values:
-          - :DEPRECATED
-          - :OBSOLETE
-          - :DELETED
         output: true
-  - !ruby/object:Api::Type::String
-    name: 'description'
+        enum_values:
+          - 'DEPRECATED'
+          - 'OBSOLETE'
+          - 'DELETED'
+  - name: 'description'
+    type: String
     description: 'An optional description of this resource.'
     output: true
-  - !ruby/object:Api::Type::Integer
-    name: 'id'
+  - name: 'id'
+    type: Integer
     description: 'The unique identifier for the resource.'
     output: true
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: 'Name of the resource.'
-  - !ruby/object:Api::Type::Array
-    name: 'quotas'
+  - name: 'quotas'
+    type: Array
     description: 'Quotas assigned to this region.'
     output: true
-    item_type: !ruby/object:Api::Type::NestedObject
+    item_type:
+      type: NestedObject
       properties:
-        - !ruby/object:Api::Type::String
-          name: 'metric'
+        - name: 'metric'
+          type: String
           description: 'Name of the quota metric.'
           output: true
-        - !ruby/object:Api::Type::Double
-          name: 'limit'
+        - name: 'limit'
+          type: Double
           description: 'Quota limit for this metric.'
           output: true
-        - !ruby/object:Api::Type::Double
-          name: 'usage'
+        - name: 'usage'
+          type: Double
           description: 'Current usage of this metric.'
           output: true
-        - !ruby/object:Api::Type::String
-          name: 'owner'
+        - name: 'owner'
+          type: String
           description:
             'Owning resource. This is the resource on which this quota is
             applied.'
           output: true
-  - !ruby/object:Api::Type::Enum
-    name: 'status'
+  - name: 'status'
+    type: Enum
     description: |
       Status of the region, either UP or DOWN.
-    values:
-      - :UP
-      - :DOWN
     output: true
-  - !ruby/object:Api::Type::Array
-    name: 'zones'
+    enum_values:
+      - 'UP'
+      - 'DOWN'
+  - name: 'zones'
+    type: Array
     description: 'List of zones within the region'
-    item_type: Api::Type::String
     output: true
+    item_type:
+      type: String

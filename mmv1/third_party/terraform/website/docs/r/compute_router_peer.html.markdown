@@ -5,7 +5,7 @@ description: |-
   establish BGP peering.
 ---
 
-# google\_compute\_router\_peer
+# google_compute_router_peer
 
 BGP information that must be configured into the routing stack to
 establish BGP peering. This information must specify the peer ASN
@@ -66,6 +66,34 @@ resource "google_compute_router_peer" "peer" {
     multiplier                  = 5
     session_initialization_mode = "ACTIVE"
   }
+}
+```
+## Example Usage - Router Zero Custom Learend Route Priority
+
+
+```hcl
+resource "google_compute_router_peer" "peer" {
+  name                      = "my-router-peer"
+  router                    = "my-router"
+  region                    = "us-central1"
+  interface                 = "interface-1"
+  peer_asn                  = 65513
+  custom_learned_route_priority = 0
+  zero_custom_learned_route_priority = true
+}
+```
+## Example Usage - Router Zero Advertised Route Priority
+
+
+```hcl
+resource "google_compute_router_peer" "peer" {
+  name                      = "my-router-peer"
+  router                    = "my-router"
+  region                    = "us-central1"
+  interface                 = "interface-1"
+  peer_asn                  = 65513
+  advertised_route_priority = 0
+  zero_advertised_route_priority = true
 }
 ```
 <div class = "oics-button" style="float: right; margin: 0 0 -15px">
@@ -183,6 +211,160 @@ resource "google_compute_router_peer" "peer" {
 }
 ```
 
+## Example Usage - Router Peer md5 authentication key
+
+
+```hcl
+  resource "google_compute_router_peer" "foobar" {
+    name                      = "%s-peer"
+    router                    = google_compute_router.foobar.name
+    region                    = google_compute_router.foobar.region
+    peer_asn                  = 65515
+    advertised_route_priority = 100
+    interface                 = google_compute_router_interface.foobar.name
+    peer_ip_address           = "169.254.3.2"
+    md5_authentication_key {
+      name = "%s-peer-key"
+      key = "%s-peer-key-value"
+    }
+  }
+```
+
+## Example Usage - Router peer export and import policies
+
+```hcl
+  resource "google_compute_network" "network" {
+  provider = google-beta
+  name = "my-router-net"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnetwork" {
+  provider = google-beta
+  name          = "my-router-subnet"
+  network       = google_compute_network.network.self_link
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "us-central1"
+}
+
+resource "google_compute_address" "address" {
+  provider = google-beta
+  name   = "my-router"
+  region = google_compute_subnetwork.subnetwork.region
+}
+
+resource "google_compute_ha_vpn_gateway" "vpn_gateway" {
+  provider = google-beta
+  name    = "my-router-gateway"
+  network = google_compute_network.network.self_link
+  region  = google_compute_subnetwork.subnetwork.region
+}
+
+resource "google_compute_external_vpn_gateway" "external_gateway" {
+  provider = google-beta
+  name            = "my-router-external-gateway"
+  redundancy_type = "SINGLE_IP_INTERNALLY_REDUNDANT"
+  description     = "An externally managed VPN gateway"
+  interface {
+    id         = 0
+    ip_address = "8.8.8.8"
+  }
+}
+
+resource "google_compute_router" "router" {
+  provider = google-beta
+  name    = "my-router"
+  region  = google_compute_subnetwork.subnetwork.region
+  network = google_compute_network.network.self_link
+  bgp {
+    asn = 64514
+  }
+}
+
+resource "google_compute_vpn_tunnel" "vpn_tunnel" {
+  provider = google-beta
+  name               = "my-router"
+  region             = google_compute_subnetwork.subnetwork.region
+  vpn_gateway = google_compute_ha_vpn_gateway.vpn_gateway.id
+  peer_external_gateway           = google_compute_external_vpn_gateway.external_gateway.id
+  peer_external_gateway_interface = 0  
+  shared_secret      = "unguessable"
+  router             = google_compute_router.router.name
+  vpn_gateway_interface           = 0
+}
+
+resource "google_compute_router_interface" "router_interface" {
+  provider = google-beta
+  name       = "my-router"
+  router     = google_compute_router.router.name
+  region     = google_compute_router.router.region
+  vpn_tunnel = google_compute_vpn_tunnel.vpn_tunnel.name
+}
+
+resource "google_compute_router_route_policy" "rp-export" {
+  provider = google-beta
+	name = "my-router-rp-export"
+  router = google_compute_router.router.name
+  region = google_compute_router.router.region
+  type = "ROUTE_POLICY_TYPE_EXPORT"
+	terms {
+    priority = 2
+    match {
+      expression = "destination == '10.0.0.0/12'"
+      title      = "export_expression"
+      description = "acceptance expression for export"
+    }
+    actions {
+      expression = "accept()"
+    }
+  }
+  depends_on = [
+    google_compute_router_interface.router_interface
+  ]
+}
+
+resource "google_compute_router_route_policy" "rp-import" {
+  provider = google-beta
+  name = "my-router-rp-import"
+  router = google_compute_router.router.name
+  region = google_compute_router.router.region
+	type = "ROUTE_POLICY_TYPE_IMPORT"
+  terms {
+    priority = 1
+    match {
+      expression = "destination == '10.0.0.0/12'"
+      title      = "import_expression"
+      description = "acceptance expression for import"
+	  }
+    actions {
+      expression = "accept()"
+    }
+  }
+  depends_on = [
+    google_compute_router_interface.router_interface, google_compute_router_route_policy.rp-export
+  ]
+}
+
+resource "google_compute_router_peer" "router_peer" {
+  provider = google-beta
+  name                      = "my-router-peer"
+  router                    = google_compute_router.router.name
+  region                    = google_compute_router.router.region
+  peer_asn                  = 65515
+  advertised_route_priority = 100
+  interface                 = google_compute_router_interface.router_interface.name
+  md5_authentication_key {
+    name = "my-router-peer-key"
+    key = "my-router-peer-key-value"
+  }
+  import_policies           = [google_compute_router_route_policy.rp-import.name]
+  export_policies           = [google_compute_router_route_policy.rp-export.name]
+  depends_on = [
+    google_compute_router_route_policy.rp-export, google_compute_router_route_policy.rp-import, google_compute_router_interface.router_interface
+  ]
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -230,6 +412,11 @@ The following arguments are supported:
   Where there is more than one matching route of maximum
   length, the routes with the lowest priority value win.
 
+* `zero_advertised_route_priority` -
+  (Optional)
+  The user-defined zero-advertised-route-priority for a advertised-route-priority in BGP session.
+  This value has to be set true to force the advertised_route_priority to be 0.
+
 * `advertise_mode` -
   (Optional)
   User-specified flag to indicate which mode to use for advertisement.
@@ -259,6 +446,25 @@ The following arguments are supported:
   Leave this field blank to advertise no custom IP ranges.
   Structure is [documented below](#nested_advertised_ip_ranges).
 
+* `custom_learned_route_priority` -
+  (Optional)
+  The user-defined custom learned route priority for a BGP session.
+  This value is applied to all custom learned route ranges for the session.
+  You can choose a value from 0 to 65335. If you don't provide a value,
+  Google Cloud assigns a priority of 100 to the ranges.
+
+* `zero_custom_learned_route_priority` -
+  (Optional)
+  The user-defined zero-custom-learned-route-priority for a custom-learned-route-priority in BGP session.
+  This value has to be set true to force the custom_learned_route_priority to be 0.
+
+* `custom_learned_ip_ranges` -
+  (Optional)
+  The custom learned route IP address range. Must be a valid CIDR-formatted prefix.
+  If an IP address is provided without a subnet mask, it is interpreted as, for IPv4,
+  a /32 singular IP address range, and, for IPv6, /128.
+  Structure is [documented below](#nested_custom_learned_ip_ranges).
+
 * `bfd` -
   (Optional)
   BFD configuration for the BGP peering.
@@ -282,6 +488,10 @@ The following arguments are supported:
   (Optional)
   Enable IPv6 traffic over BGP Peer. If not specified, it is disabled by default.
 
+* `enable_ipv4` -
+  (Optional)
+  Enable IPv4 traffic over BGP Peer. It is enabled by default if the peerIpAddress is version 4.
+
 * `ipv6_nexthop_address` -
   (Optional)
   IPv6 address of the interface inside Google Cloud Platform.
@@ -289,12 +499,30 @@ The following arguments are supported:
   If you do not specify the next hop addresses, Google Cloud automatically
   assigns unused addresses from the 2600:2d00:0:2::/64 or 2600:2d00:0:3::/64 range for you.
 
+* `ipv4_nexthop_address` -
+  (Optional)
+  IPv4 address of the interface inside Google Cloud Platform.
+
 * `peer_ipv6_nexthop_address` -
   (Optional)
   IPv6 address of the BGP interface outside Google Cloud Platform.
   The address must be in the range 2600:2d00:0:2::/64 or 2600:2d00:0:3::/64.
   If you do not specify the next hop addresses, Google Cloud automatically
   assigns unused addresses from the 2600:2d00:0:2::/64 or 2600:2d00:0:3::/64 range for you.
+
+* `peer_ipv4_nexthop_address` -
+  (Optional)
+  IPv4 address of the BGP interface outside Google Cloud Platform.
+
+*  `export_policies` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) 
+  routers.list of export policies applied to this peer, in the order they must be evaluated. 
+  The name must correspond to an existing policy that has ROUTE_POLICY_TYPE_EXPORT type.
+
+*  `import_policies` -
+  (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) 
+  routers.list of import policies applied to this peer, in the order they must be evaluated. 
+  The name must correspond to an existing policy that has ROUTE_POLICY_TYPE_IMPORT type.
 
 * `region` -
   (Optional)
@@ -304,6 +532,8 @@ The following arguments are supported:
 * `project` - (Optional) The ID of the project in which the resource belongs.
     If it is not provided, the provider project is used.
 
+* `md5_authentication_key` - (Optional) Configuration for MD5 authentication on the BGP session.
+  Structure is [documented below](#nested_md5_authentication_key).
 
 <a name="nested_advertised_ip_ranges"></a>The `advertised_ip_ranges` block supports:
 
@@ -315,6 +545,13 @@ The following arguments are supported:
 * `description` -
   (Optional)
   User-specified description for the IP range.
+
+<a name="nested_custom_learned_ip_ranges"></a>The `custom_learned_ip_ranges` block supports:
+
+* `range` -
+  (Required)
+  The IP range to learn. The value must be a
+  CIDR-formatted string.
 
 <a name="nested_bfd"></a>The `bfd` block supports:
 
@@ -348,6 +585,16 @@ The following arguments are supported:
   The number of consecutive BFD packets that must be missed before
   BFD declares that a peer is unavailable. If set, the value must
   be a value between 5 and 16.
+
+<a name="nested_md5_authentication_key"></a>The `md5_authentication_key` block supports:
+
+* `name` -
+  (Required)
+  Name used to identify the key. Must be unique within a router. Must comply with RFC1035.
+
+* `key` -
+  (Required, Input Only)
+  The MD5 authentication key for this BGP peer. Maximum length is 80 characters. Can only contain printable ASCII characters
 
 ## Attributes Reference
 

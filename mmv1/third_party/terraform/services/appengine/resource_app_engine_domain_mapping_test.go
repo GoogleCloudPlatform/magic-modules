@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -25,7 +25,7 @@ func TestAccAppEngineDomainMapping_update(t *testing.T) {
 				ResourceName:            "google_app_engine_domain_mapping.domain_mapping",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"override_strategy"},
+				ImportStateVerifyIgnore: []string{"override_strategy", "ssl_settings.0.ssl_management_type"},
 			},
 			{
 				Config: testAccAppEngineDomainMapping_update(domainName),
@@ -34,7 +34,7 @@ func TestAccAppEngineDomainMapping_update(t *testing.T) {
 				ResourceName:            "google_app_engine_domain_mapping.domain_mapping",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"override_strategy"},
+				ImportStateVerifyIgnore: []string{"override_strategy", "ssl_settings.0.ssl_management_type"},
 			},
 		},
 	})

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
@@ -45,6 +45,8 @@ func testAccDataSourceGoogleNetworkCheck(data_source_name string, resource_name 
 		network_attrs_to_test := []string{
 			"id",
 			"name",
+			"network_id",
+			"numeric_id",
 			"description",
 			"internal_ipv6_range",
 		}

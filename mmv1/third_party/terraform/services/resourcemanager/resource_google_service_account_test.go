@@ -2,12 +2,16 @@ package resourcemanager_test
 
 import (
 	"fmt"
+	"maps"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/google/go-cmp/cmp"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	tpgresourcemanager "github.com/hashicorp/terraform-provider-google/google/services/resourcemanager"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 )
 
 // Test that a service account resource can be created, updated, and destroyed
@@ -119,10 +123,54 @@ func TestAccServiceAccount_createIgnoreAlreadyExists(t *testing.T) {
 			},
 			// The second step creates a new resource that duplicates with the existing service account.
 			{
-				Config: testAccServiceAccountCreateIgnoreAlreadyExists(accountId, displayName, desc),
+				Config: testAccServiceAccountDuplicateIgnoreAlreadyExists(accountId, displayName, desc),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"google_service_account.duplicate", "member", "serviceAccount:"+expectedEmail),
+				),
+			},
+		},
+	})
+}
+
+// Test setting create_ignore_already_exists on an existing resource
+func TestAccServiceAccount_existingResourceCreateIgnoreAlreadyExists(t *testing.T) {
+	t.Parallel()
+
+	project := envvar.GetTestProjectFromEnv()
+	accountId := "a" + acctest.RandString(t, 10)
+	displayName := "Terraform Test"
+	desc := "test description"
+
+	expectedEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountId, project)
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			// The first step creates a new resource with create_ignore_already_exists=false
+			{
+				Config: testAccServiceAccountCreateIgnoreAlreadyExists(accountId, displayName, desc, false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_service_account.acceptance", "project", project),
+					resource.TestCheckResourceAttr(
+						"google_service_account.acceptance", "member", "serviceAccount:"+expectedEmail),
+				),
+			},
+			{
+				ResourceName:            "google_service_account.acceptance",
+				ImportStateId:           fmt.Sprintf("projects/%s/serviceAccounts/%s", project, expectedEmail),
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"create_ignore_already_exists"}, // Import leaves this field out when false
+			},
+			// The second step updates the resource to have create_ignore_already_exists=true
+			{
+				Config: testAccServiceAccountCreateIgnoreAlreadyExists(accountId, displayName, desc, true),
+				Check: resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr(
+					"google_service_account.acceptance", "project", project),
+					resource.TestCheckResourceAttr(
+						"google_service_account.acceptance", "member", "serviceAccount:"+expectedEmail),
 				),
 			},
 		},
@@ -207,7 +255,18 @@ resource "google_service_account" "acceptance" {
 `, account, name, desc)
 }
 
-func testAccServiceAccountCreateIgnoreAlreadyExists(account, name, desc string) string {
+func testAccServiceAccountCreateIgnoreAlreadyExists(account, name, desc string, ignore_already_exists bool) string {
+	return fmt.Sprintf(`
+resource "google_service_account" "acceptance" {
+  account_id   = "%v"
+  display_name = "%v"
+  description  = "%v"
+  create_ignore_already_exists = %t
+}
+`, account, name, desc, ignore_already_exists)
+}
+
+func testAccServiceAccountDuplicateIgnoreAlreadyExists(account, name, desc string) string {
 	return fmt.Sprintf(`
 resource "google_service_account" "acceptance" {
   account_id   = "%v"
@@ -243,4 +302,108 @@ resource "google_service_account" "acceptance" {
   disabled      = "%t"
 }
 `, account, name, desc, disabled)
+}
+
+func TestResourceServiceAccountCustomDiff(t *testing.T) {
+	t.Parallel()
+
+	accountId := "a" + acctest.RandString(t, 10)
+	project := envvar.GetTestProjectFromEnv()
+	if project == "" {
+		project = "test-project"
+	}
+	expectedEmail := fmt.Sprintf("%s@%s.iam.gserviceaccount.com", accountId, project)
+	expectedMember := "serviceAccount:" + expectedEmail
+
+	cases := []struct {
+		name       string
+		before     map[string]interface{}
+		after      map[string]interface{}
+		wantEmail  string
+		wantMember string
+	}{
+		{
+			name:   "normal (new)",
+			before: map[string]interface{}{},
+			after: map[string]interface{}{
+				"account_id": accountId,
+				"name":       "", // Empty name indicates a new resource
+				"project":    project,
+			},
+			wantEmail:  expectedEmail,
+			wantMember: expectedMember,
+		},
+		{
+			name: "no change",
+			before: map[string]interface{}{
+				"account_id": accountId,
+				"email":      "dontchange",
+				"member":     "dontchange",
+				"project":    project,
+			},
+			after: map[string]interface{}{
+				"account_id": accountId,
+				"name":       "unimportant",
+				"project":    project,
+			},
+			wantEmail:  "",
+			wantMember: "",
+		},
+		{
+			name: "recreate (new)",
+			before: map[string]interface{}{
+				"account_id": "recreate-account",
+				"email":      "recreate-email",
+				"member":     "recreate-member",
+				"project":    project,
+			},
+			after: map[string]interface{}{
+				"account_id": accountId,
+				"name":       "",
+				"project":    project,
+			},
+			wantEmail:  expectedEmail,
+			wantMember: expectedMember,
+		},
+		{
+			name:   "missing account_id (new)",
+			before: map[string]interface{}{},
+			after: map[string]interface{}{
+				"account_id": "",
+				"name":       "",
+				"project":    project,
+			},
+			wantEmail:  "",
+			wantMember: "",
+		},
+		{
+			name:   "missing project (new)",
+			before: map[string]interface{}{},
+			after: map[string]interface{}{
+				"account_id": accountId,
+				"name":       "",
+				"project":    "",
+			},
+			wantEmail:  "",
+			wantMember: "",
+		},
+	}
+	for _, tc := range cases {
+		result := maps.Clone(tc.after)
+		if tc.wantEmail != "" || tc.wantMember != "" {
+			result["email"] = tc.wantEmail
+			result["member"] = tc.wantMember
+		}
+		t.Run(tc.name, func(t *testing.T) {
+			diff := &tpgresource.ResourceDiffMock{
+				Before: tc.before,
+				After:  tc.after,
+				Schema: tpgresourcemanager.ResourceGoogleServiceAccount().Schema,
+			}
+			tpgresourcemanager.ResourceServiceAccountCustomDiffFunc(diff)
+			if d := cmp.Diff(result, diff.After); d != "" {
+				t.Fatalf("got unexpected change: %v expected: %v", diff.After, result)
+			}
+		})
+	}
 }

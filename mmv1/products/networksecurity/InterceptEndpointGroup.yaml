@@ -1,0 +1,203 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'InterceptEndpointGroup'
+description: |-
+  An endpoint group is a consumer frontend for a deployment group (backend).
+  In order to configure intercept for a network, consumers must create:
+  - An association between their network and the endpoint group.
+  - A security profile that points to the endpoint group.
+  - A firewall rule that references the security profile (group).
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/interceptEndpointGroups/{{intercept_endpoint_group_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/interceptEndpointGroups'
+self_link: 'projects/{{project}}/locations/{{location}}/interceptEndpointGroups/{{intercept_endpoint_group_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/interceptEndpointGroups?interceptEndpointGroupId={{intercept_endpoint_group_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/interceptEndpointGroups/{{intercept_endpoint_group_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+custom_code:
+sweeper:
+  dependencies:
+    - 'google_network_security_security_profile'
+  url_substitutions:
+    - region: 'global'
+examples:
+  - name: 'network_security_intercept_endpoint_group_basic'
+    config_path: 'templates/terraform/examples/network_security_intercept_endpoint_group_basic.tf.tmpl'
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'example-network'
+      deployment_group_id: 'example-dg'
+      endpoint_group_id: 'example-eg'
+parameters:
+  - name: 'location'
+    type: String
+    description: |-
+      The cloud location of the endpoint group, currently restricted to `global`.
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'interceptEndpointGroupId'
+    type: String
+    description: |-
+      The ID to use for the endpoint group, which will become the final component
+      of the endpoint group's resource name.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |-
+      The resource name of this endpoint group, for example:
+      `projects/123456789/locations/global/interceptEndpointGroups/my-eg`.
+      See https://google.aip.dev/122 for more details.
+    output: true
+  - name: 'createTime'
+    type: String
+    description: |-
+      The timestamp when the resource was created.
+      See https://google.aip.dev/148#timestamps.
+    output: true
+  - name: 'updateTime'
+    type: String
+    description: |-
+      The timestamp when the resource was most recently updated.
+      See https://google.aip.dev/148#timestamps.
+    output: true
+  - name: 'labels'
+    type: KeyValueLabels
+    description: |-
+      Labels are key/value pairs that help to organize and filter resources.
+  - name: 'interceptDeploymentGroup'
+    type: String
+    description: |-
+      The deployment group that this endpoint group is connected to, for example:
+      `projects/123456789/locations/global/interceptDeploymentGroups/my-dg`.
+      See https://google.aip.dev/124.
+    required: true
+    immutable: true
+  - name: 'state'
+    type: String
+    description: |-
+      The current state of the endpoint group.
+      See https://google.aip.dev/216.
+      Possible values:
+      STATE_UNSPECIFIED
+      ACTIVE
+      CLOSED
+      CREATING
+      DELETING
+      OUT_OF_SYNC
+      DELETE_FAILED
+    output: true
+  - name: 'reconciling'
+    type: Boolean
+    description: |-
+      The current state of the resource does not match the user's intended state,
+      and the system is working to reconcile them. This is part of the normal
+      operation (e.g. adding a new association to the group).
+      See https://google.aip.dev/128.
+    output: true
+  - name: description
+    type: String
+    description: |-
+      User-provided description of the endpoint group.
+      Used as additional context for the endpoint group.
+  - name: associations
+    type: Array
+    is_set: true
+    description: |-
+      List of associations to this endpoint group.
+    output: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: name
+          type: String
+          description: |-
+            The connected association's resource name, for example:
+            `projects/123456789/locations/global/interceptEndpointGroupAssociations/my-ega`.
+            See https://google.aip.dev/124.
+          output: true
+        - name: network
+          type: String
+          description: |-
+            The associated network, for example:
+            projects/123456789/global/networks/my-network.
+            See https://google.aip.dev/124.
+          output: true
+        - name: state
+          type: String
+          description: |-
+            Most recent known state of the association.
+            Possible values:
+            STATE_UNSPECIFIED
+            ACTIVE
+            CREATING
+            DELETING
+            CLOSED
+            OUT_OF_SYNC
+            DELETE_FAILED
+          output: true
+  - name: connectedDeploymentGroup
+    type: NestedObject
+    description: |-
+      The endpoint group's view of a connected deployment group.
+    output: true
+    properties:
+      - name: name
+        type: String
+        description: |-
+          The connected deployment group's resource name, for example:
+          `projects/123456789/locations/global/interceptDeploymentGroups/my-dg`.
+          See https://google.aip.dev/124.
+        output: true
+      - name: locations
+        type: Array
+        is_set: true
+        description: |-
+          The list of locations where the deployment group is present.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: location
+              type: String
+              description: |-
+                The cloud location, e.g. `us-central1-a` or `asia-south1-b`.
+              output: true
+            - name: state
+              type: String
+              description: |-
+                The current state of the association in this location.
+                Possible values:
+                STATE_UNSPECIFIED
+                ACTIVE
+                OUT_OF_SYNC
+              output: true

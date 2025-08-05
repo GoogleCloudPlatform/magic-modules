@@ -17,83 +17,139 @@ package github
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	utils "magician/utility"
+
+	gh "github.com/google/go-github/v68/github"
 )
 
-func (gh *Client) PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/statuses/%s", commitSha)
-
-	postBody := map[string]string{
-		"context":    title,
-		"state":      state,
-		"target_url": targetURL,
+// PostBuildStatus creates a commit status for a specific SHA
+func (c *Client) PostBuildStatus(prNumber, title, state, targetURL, commitSha string) error {
+	repoStatus := &gh.RepoStatus{
+		Context:   gh.Ptr(title),
+		State:     gh.Ptr(state),
+		TargetURL: gh.Ptr(targetURL),
 	}
 
-	err := utils.RequestCall(url, "POST", gh.token, nil, postBody)
+	_, _, err := c.gh.Repositories.CreateStatus(c.ctx, defaultOwner, defaultRepo, commitSha, repoStatus)
 	if err != nil {
 		return err
 	}
 
 	fmt.Printf("Successfully posted build status to pull request %s\n", prNumber)
-
 	return nil
 }
 
-func (gh *Client) PostComment(prNumber, comment string) error {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/comments", prNumber)
-
-	body := map[string]string{
-		"body": comment,
+// PostComment adds a comment to a pull request
+func (c *Client) PostComment(prNumber, comment string) error {
+	num, err := strconv.Atoi(prNumber)
+	if err != nil {
+		return err
 	}
 
-	err := utils.RequestCall(url, "POST", gh.token, nil, body)
+	issueComment := &gh.IssueComment{
+		Body: gh.Ptr(comment),
+	}
+
+	_, _, err = c.gh.Issues.CreateComment(c.ctx, defaultOwner, defaultRepo, num, issueComment)
 	if err != nil {
 		return err
 	}
 
 	fmt.Printf("Successfully posted comment to pull request %s\n", prNumber)
-
 	return nil
 }
 
-func (gh *Client) RequestPullRequestReviewer(prNumber, assignee string) error {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/pulls/%s/requested_reviewers", prNumber)
-
-	body := map[string][]string{
-		"reviewers":      {assignee},
-		"team_reviewers": {},
+// UpdateComment updates an existing comment
+func (c *Client) UpdateComment(prNumber, comment string, id int) error {
+	issueComment := &gh.IssueComment{
+		Body: gh.Ptr(comment),
 	}
 
-	err := utils.RequestCall(url, "POST", gh.token, nil, body)
+	_, _, err := c.gh.Issues.EditComment(c.ctx, defaultOwner, defaultRepo, int64(id), issueComment)
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Successfully added reviewer %s to pull request %s\n", assignee, prNumber)
-
+	fmt.Printf("Successfully updated comment %d in pull request %s\n", id, prNumber)
 	return nil
 }
 
-func (gh *Client) AddLabel(prNumber, label string) error {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/labels", prNumber)
-
-	body := map[string][]string{
-		"labels": {label},
+// RequestPullRequestReviewers adds reviewers to a pull request
+func (c *Client) RequestPullRequestReviewers(prNumber string, reviewers []string) error {
+	if len(reviewers) == 0 {
+		return nil
 	}
-	err := utils.RequestCall(url, "POST", gh.token, nil, body)
 
+	num, err := strconv.Atoi(prNumber)
 	if err != nil {
-		return fmt.Errorf("failed to add %s label: %s", label, err)
+		return err
+	}
+
+	// Create the reviewers request
+	reviewersRequest := gh.ReviewersRequest{
+		Reviewers: reviewers,
+	}
+
+	_, _, err = c.gh.PullRequests.RequestReviewers(c.ctx, defaultOwner, defaultRepo, num, reviewersRequest)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Successfully added reviewers %v to pull request %s\n", reviewers, prNumber)
+	return nil
+}
+
+// RemovePullRequestReviewers removes reviewers from a pull request
+func (c *Client) RemovePullRequestReviewers(prNumber string, reviewers []string) error {
+	if len(reviewers) == 0 {
+		return nil
+	}
+
+	num, err := strconv.Atoi(prNumber)
+	if err != nil {
+		return err
+	}
+
+	reviewersRequest := gh.ReviewersRequest{
+		Reviewers: reviewers,
+	}
+
+	_, err = c.gh.PullRequests.RemoveReviewers(c.ctx, defaultOwner, defaultRepo, num, reviewersRequest)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Successfully removed reviewers %v from pull request %s\n", reviewers, prNumber)
+	return nil
+}
+
+// AddLabels adds labels to an issue or pull request
+func (c *Client) AddLabels(prNumber string, labels []string) error {
+	num, err := strconv.Atoi(prNumber)
+	if err != nil {
+		return err
+	}
+
+	_, _, err = c.gh.Issues.AddLabelsToIssue(c.ctx, defaultOwner, defaultRepo, num, labels)
+	if err != nil {
+		return fmt.Errorf("failed to add %q labels: %s", labels, err)
 	}
 
 	return nil
-
 }
 
-func (gh *Client) RemoveLabel(prNumber, label string) error {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/issues/%s/labels/%s", prNumber, label)
-	err := utils.RequestCall(url, "DELETE", gh.token, nil, nil)
+// RemoveLabel removes a label from an issue or pull request
+func (c *Client) RemoveLabel(prNumber, label string) error {
+	num, err := strconv.Atoi(prNumber)
+	if err != nil {
+		return err
+	}
 
+	_, err = c.gh.Issues.RemoveLabelForIssue(c.ctx, defaultOwner, defaultRepo, num, label)
 	if err != nil {
 		return fmt.Errorf("failed to remove %s label: %s", label, err)
 	}
@@ -101,33 +157,60 @@ func (gh *Client) RemoveLabel(prNumber, label string) error {
 	return nil
 }
 
-func (gh *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
-	url := fmt.Sprintf("https://api.github.com/repos/GoogleCloudPlatform/magic-modules/actions/workflows/%s/dispatches", workflowFileName)
-	err := utils.RequestCall(url, "POST", gh.token, nil, map[string]any{
-		"ref":    "main",
-		"inputs": inputs,
-	})
+// CreateWorkflowDispatchEvent triggers a workflow run
+func (c *Client) CreateWorkflowDispatchEvent(workflowFileName string, inputs map[string]any) error {
+	stringInputs := make(map[string]interface{})
+	for k, v := range inputs {
+		stringInputs[k] = v
+	}
 
+	event := gh.CreateWorkflowDispatchEventRequest{
+		Ref:    "main",
+		Inputs: stringInputs,
+	}
+
+	_, err := c.gh.Actions.CreateWorkflowDispatchEventByFileName(c.ctx, defaultOwner, defaultRepo, workflowFileName, event)
 	if err != nil {
 		return fmt.Errorf("failed to create workflow dispatch event: %s", err)
 	}
 
 	fmt.Printf("Successfully created workflow dispatch event for %s with inputs %v\n", workflowFileName, inputs)
-
 	return nil
 }
 
-func (gh *Client) MergePullRequest(owner, repo, prNumber string) error {
+func (gh *Client) MergePullRequest(owner, repo, prNumber, commitSha string) error {
 	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/pulls/%s/merge", owner, repo, prNumber)
-	err := utils.RequestCall(url, "PUT", gh.token, nil, map[string]any{
+
+	err := utils.RequestCallWithRetry(url, "PUT", gh.token, nil, map[string]any{
 		"merge_method": "squash",
+		"sha":          commitSha,
 	})
 
 	if err != nil {
-		return fmt.Errorf("failed to merge pull request: %s", err)
+		// Check if the error is "Merge already in progress" (405)
+		if strings.Contains(err.Error(), "Merge already in progress") {
+			fmt.Printf("Pull request %s is already being merged\n", prNumber)
+			// This status does not indicate that the Pull Request was merged
+			// Try again after 20s
+			time.Sleep(20 * time.Second)
+			return gh.MergePullRequest(owner, repo, prNumber, commitSha)
+		}
+		// Check if the PR is already merged (returns 405 Pull Request is not mergeable)
+		if strings.Contains(err.Error(), "Pull Request is not mergeable") {
+			fmt.Printf("Pull request %s is not mergeable; checking if it was already merged\n", prNumber)
+			pr, err := gh.GetPullRequest(prNumber)
+			if err != nil {
+				return fmt.Errorf("failed to check if PR was already merged: %w", err)
+			}
+			if pr.Merged {
+				fmt.Printf("Pull request %s was already merged\n", prNumber)
+				return nil
+			}
+			fmt.Printf("Pull request %s wasn't already merged\n", prNumber)
+		}
+		return fmt.Errorf("failed to merge pull request: %w", err)
 	}
 
 	fmt.Printf("Successfully merged pull request %s\n", prNumber)
-
 	return nil
 }

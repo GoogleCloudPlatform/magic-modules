@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -29,11 +29,6 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_basicTest(t *testi
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyTitle, perimeterTitle),
-			},
-			{
-				ResourceName:      "google_access_context_manager_service_perimeter.test-access",
-				ImportState:       true,
-				ImportStateVerify: true,
 			},
 			{
 				Config: testAccAccessContextManagerServicePerimeterIngressPolicy_destroy(org, policyTitle, perimeterTitle),
@@ -96,6 +91,7 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyT
 
 resource "google_access_context_manager_service_perimeter_ingress_policy" "test-access1" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
+	title = "ingress policy title"
 	ingress_from {
 		identity_type = "ANY_IDENTITY"
 	}
@@ -131,6 +127,10 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 	perimeter = google_access_context_manager_service_perimeter.test-access.name
 	ingress_from {
 		identity_type = "ANY_IDENTITY"
+	}
+	ingress_to {
+		resources = ["*"]
+		roles = ["roles/bigquery.admin"]
 	}
 }
 

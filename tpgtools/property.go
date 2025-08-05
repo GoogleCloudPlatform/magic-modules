@@ -67,6 +67,7 @@ type Property struct {
 	Optional  bool
 	Computed  bool
 	Sensitive bool
+	WriteOnly bool
 
 	ForceNew    bool
 	Description string
@@ -95,6 +96,11 @@ type Property struct {
 	// the field being unset and being set to false.
 	EnumBool bool
 
+	// Whether this field is only used as a url parameter
+	Parameter bool
+	// Whether this field has long form behavior in the DCL
+	HasLongForm bool
+
 	// An IdentityGetter is a function to retrieve the value of an "identity" field
 	// from state. Identity fields will sometimes allow retrieval from multiple
 	// fields or from the user's environment variables.
@@ -106,6 +112,10 @@ type Property struct {
 
 	// Sub-properties of nested objects or arrays with nested objects
 	Properties []Property
+
+	// If this is a complex map type, this string represents the name of the
+	// field that the key to the map can be set with
+	ComplexMapKeyName string
 
 	// Reference to the parent resource.
 	// note: "Properties" will not be available.
@@ -198,11 +208,22 @@ func (p Property) ObjectType() string {
 }
 
 func (p Property) IsArray() bool {
-	return (p.Type.String() == SchemaTypeList || p.Type.String() == SchemaTypeSet) && !p.Type.IsObject()
+	return (p.Type.String() == SchemaTypeList || p.Type.String() == SchemaTypeSet) && !p.Type.IsObject() && !p.IsComplexMap()
 }
 
 func (t Type) IsSet() bool {
 	return t.String() == SchemaTypeSet
+}
+
+// Complex map is for maps of string --> object that are supported in DCL but
+// not in Terraform. We handle this by adding a field in the Terraform schema
+// for the key in the map. This must be added via a COMPLEX_MAP_KEY_NAME
+// override
+func (t Type) IsComplexMap() bool {
+	if t.typ.AdditionalProperties != nil {
+		return t.typ.AdditionalProperties.Type != "string"
+	}
+	return false
 }
 
 // ShouldGenerateNestedSchema returns true if an object's nested schema function should be generated.
@@ -226,7 +247,7 @@ func (p Property) ChangeStateGetter() string {
 }
 
 // Builds a Getter for constructing a shallow
-// version of the object for destory purposes
+// version of the object for destroy purposes
 func (p Property) StateGetterForDestroyTest() string {
 	pullValueFromState := fmt.Sprintf(`rs.Primary.Attributes["%s"]`, p.Name())
 
@@ -278,6 +299,9 @@ func buildGetter(p Property, rawGetter string) string {
 		if p.Type.IsEnumArray() {
 			return fmt.Sprintf("expand%s%sArray(%s)", p.resource.PathType(), p.PackagePath(), rawGetter)
 		}
+		if p.Type.IsComplexMap() {
+			return fmt.Sprintf("expand%s%sMap(%s)", p.resource.PathType(), p.PackagePath(), rawGetter)
+		}
 		if p.Type.typ.Items != nil && p.Type.typ.Items.Type == "string" {
 			return fmt.Sprintf("tpgdclresource.ExpandStringArray(%s)", rawGetter)
 		}
@@ -317,6 +341,9 @@ func (p Property) DefaultStateSetter() string {
 
 		return fmt.Sprintf("d.Set(%q, res.%s)", p.Name(), p.PackageName)
 	case SchemaTypeList, SchemaTypeSet:
+		if p.IsComplexMap() {
+			return fmt.Sprintf("d.Set(%q, flatten%s%sMap(res.%s))", p.Name(), p.resource.PathType(), p.PackagePath(), p.PackageName)
+		}
 		if p.typ.Items != nil && ((p.typ.Items.Type == "string" && len(p.typ.Items.Enum) == 0) || p.typ.Items.Type == "integer") {
 			return fmt.Sprintf("d.Set(%q, res.%s)", p.Name(), p.PackageName)
 		}
@@ -365,6 +392,9 @@ func (p Property) flattenGetterWithParent(parent string) string {
 		if p.Type.IsEnumArray() {
 			return fmt.Sprintf("flatten%s%sArray(obj.%s)", p.resource.PathType(), p.PackagePath(), p.PackageName)
 		}
+		if p.Type.IsComplexMap() {
+			return fmt.Sprintf("flatten%s%sMap(%s.%s)", p.resource.PathType(), p.PackagePath(), parent, p.PackageName)
+		}
 		if p.Type.typ.Items != nil && p.Type.typ.Items.Type == "integer" {
 			return fmt.Sprintf("%s.%s", parent, p.PackageName)
 		}
@@ -376,7 +406,6 @@ func (p Property) flattenGetterWithParent(parent string) string {
 			return fmt.Sprintf("flatten%s%sArray(%s.%s)", p.resource.PathType(), p.PackagePath(), parent, p.PackageName)
 		}
 	}
-
 	if p.typ.Type == "object" {
 		return fmt.Sprintf("flatten%s%s(%s.%s)", p.resource.PathType(), p.PackagePath(), parent, p.PackageName)
 	}
@@ -450,6 +479,10 @@ func (p Property) IsResourceLabels() bool {
 
 func (p Property) IsResourceAnnotations() bool {
 	return p.Name() == "annotations" && p.parent == nil
+}
+
+func (p Property) IsTopLevel() bool {
+	return p.parent == nil
 }
 
 func (p Property) ShouldShowUpInSamples() bool {
@@ -570,7 +603,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 
 		if v, ok := v.Extension["x-dcl-conflicts"].([]interface{}); ok {
 			// NOTE: DCL not label x-dcl-conflicts for reused types
-			// TODO(shuya): handle nested field when b/213503595 got fixed
+			// TODO: handle nested field when b/213503595 got fixed
 
 			if parent == nil {
 				for _, ci := range v {
@@ -594,6 +627,9 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				p.StateGetter = &sg
 			}
 		}
+
+		p.Parameter, _ = v.Extension["x-dcl-parameter"].(bool)
+		p.HasLongForm, _ = v.Extension["x-dcl-has-long-form"].(bool)
 
 		// Handle object properties
 		if len(v.Properties) > 0 {
@@ -650,6 +686,38 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 				p.Elem = &e
 				p.ElemIsBasicType = true
 			}
+		}
+		// Complex maps are represented as TypeSet but don't have v.Items set.
+		// Use AdditionalProperties instead, and add an additional `name` field
+		// that represents the key in the map
+		if p.Type.IsComplexMap() {
+			props, err := createPropertiesFromSchema(p.Type.typ.AdditionalProperties, typeFetcher, overrides, resource, &p, location)
+			if err != nil {
+				return nil, err
+			}
+			cm := ComplexMapKeyDetails{}
+			cmOk, err := overrides.PropertyOverrideWithDetails(ComplexMapKey, p, &cm, location)
+			if err != nil {
+				return nil, fmt.Errorf("failed to decode complex map key name details")
+			}
+			if !cmOk {
+				return nil, fmt.Errorf("failed to find complex map key name for map named: %s", p.Name())
+			}
+			keyProp := Property{
+				title:       cm.KeyName,
+				Type:        Type{&openapi.Schema{Type: "string"}},
+				resource:    resource,
+				parent:      &p,
+				Required:    true,
+				Description: "The name for the key in the map for which this object is mapped to in the API",
+			}
+			props = append([]Property{keyProp}, props...)
+
+			p.Properties = props
+			e := fmt.Sprintf("%s%sSchema()", resource.PathType(), p.PackagePath())
+			p.Elem = &e
+			p.ElemIsBasicType = false
+			p.ComplexMapKeyName = cm.KeyName
 		}
 
 		if !p.Computed {
@@ -779,7 +847,7 @@ func createPropertiesFromSchema(schema *openapi.Schema, typeFetcher *TypeFetcher
 			p.ValidateFunc = &vf.Function
 		}
 
-		if p.Type.String() == SchemaTypeSet {
+		if p.Type.IsSet() {
 			shf := SetHashFuncDetails{}
 			shfOk, err := overrides.PropertyOverrideWithDetails(SetHashFunc, p, &shf, location)
 			if err != nil {

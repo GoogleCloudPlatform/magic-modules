@@ -1,0 +1,30 @@
+[
+    {
+        "name": "//compute.googleapis.com/projects/{{.Provider.project}}/global/healthChecks/http-health-check",
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
+        "asset_type": "compute.googleapis.com/HealthCheck",
+        "resource": {
+            "version": "beta",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/beta/rest",
+            "discovery_name": "HealthCheck",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "checkIntervalSec": 1,
+                "description": "",
+                "healthyThreshold": 2,
+                "httpHealthCheck": {
+                    "port": 80,
+                    "proxyHeader": "NONE",
+                    "requestPath": "/"
+                },
+                "name": "http-health-check",
+                "timeoutSec": 1,
+                "type": "HTTP",
+                "unhealthyThreshold": 2
+            }
+        },
+        "ancestors": [
+            "organizations/{{.OrgID}}"
+        ]
+    }
+]

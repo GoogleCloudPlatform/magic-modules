@@ -46,6 +46,9 @@ type Sample struct {
 	// in the testcase. (if the test doesn't have a ga version of the test)
 	HasGAEquivalent bool
 
+	// LongForm is whether this sample is a copy with long form fields expanded to include `/`
+	LongForm bool
+
 	// SamplesPath is the path to the directory where the original sample data is stored
 	SamplesPath Filepath
 
@@ -72,6 +75,9 @@ type Sample struct {
 
 	// ExtraDependencies are the additional golang dependencies the injected code may require
 	ExtraDependencies []string `yaml:"extra_dependencies"`
+
+	// ExternalProviders are the external providers needed for tests
+	ExternalProviders []string `yaml:"external_providers"`
 
 	// Type is the resource type.
 	Type string `yaml:"type"`
@@ -158,14 +164,14 @@ func findDCLReferencePackage(product SnakeCaseProductName) (DCLPackageName, erro
 
 	// Otherwise, just return an error.
 	var productOverrideKeys []Filepath
-	for k, _ := range productOverrides {
+	for k := range productOverrides {
 		productOverrideKeys = append(productOverrideKeys, k)
 	}
 	return DCLPackageName(""), fmt.Errorf("can't find %q in the overrides map, which contains %v", product, productOverrideKeys)
 }
 
 // BuildDependency produces a Dependency using a file and filename
-func BuildDependency(fileName string, product SnakeCaseProductName, localname, version string, hasGAEquivalent bool, b []byte) (*Dependency, error) {
+func BuildDependency(fileName string, product SnakeCaseProductName, localname, version string, hasGAEquivalent, makeLongForm bool, b []byte) (*Dependency, error) {
 	// Miscellaneous name rather than "resource name" because this is the name in the sample json file - which might not match the TF name!
 	// we have to account for that.
 	var resourceName miscellaneousNameSnakeCase
@@ -194,7 +200,7 @@ func BuildDependency(fileName string, product SnakeCaseProductName, localname, v
 		return nil, fmt.Errorf("Error generating sample dependency reference %s: %s", fileName, err)
 	}
 
-	block, err := ConvertSampleJSONToHCL(packageName, resourceName, version, hasGAEquivalent, b)
+	block, err := ConvertSampleJSONToHCL(packageName, resourceName, version, hasGAEquivalent, makeLongForm, b)
 	if err != nil {
 		glog.Errorf("failed to convert %q", fileName)
 		return nil, fmt.Errorf("Error generating sample dependency %s: %s", fileName, err)
@@ -223,7 +229,7 @@ func (s *Sample) generateSampleDependencyWithName(fileName, localname string) De
 	dependencyBytes, err := ioutil.ReadFile(path.Join(string(s.SamplesPath), fileName))
 	version := s.resourceReference.versionMetadata.V
 	product := s.resourceReference.productMetadata.ProductName
-	d, err := BuildDependency(fileName, product, localname, version, s.HasGAEquivalent, dependencyBytes)
+	d, err := BuildDependency(fileName, product, localname, version, s.HasGAEquivalent, s.LongForm, dependencyBytes)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -331,7 +337,7 @@ func (s *Sample) EnumerateWithUpdateSamples() []Sample {
 	for i, update := range s.Updates {
 		newSample := *s
 		primaryResource := update.Resource
-		// TODO(magic-modules-eng): Consume new dependency list.
+		// TODO: Consume new dependency list.
 		newSample.PrimaryResource = &primaryResource
 		if !newSample.isNativeHCL() {
 			var newDeps []Dependency

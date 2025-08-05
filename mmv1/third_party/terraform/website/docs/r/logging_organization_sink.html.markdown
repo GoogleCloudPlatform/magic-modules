@@ -4,7 +4,7 @@ description: |-
   Manages a organization-level logging sink.
 ---
 
-# google\_logging\_organization\_sink
+# google_logging_organization_sink
 
 Manages a organization-level logging sink. For more information see:
 * [API documentation](https://cloud.google.com/logging/docs/reference/v2/rest/v2/organizations.sinks)
@@ -66,6 +66,9 @@ The following arguments are supported:
 
 * `include_children` - (Optional) Whether or not to include children organizations in the sink export. If true, logs
     associated with child projects are also exported; otherwise only logs relating to the provided organization are included.
+
+* `intercept_children` - (Optional) Whether or not to intercept logs from child projects. If true, matching logs will not
+   match with sinks in child resources, except _Required sinks. This sink will be visible to child resources when listing sinks.
 
 * `bigquery_options` - (Optional) Options that affect sinks exporting data to BigQuery. Structure [documented below](#nested_bigquery_options).
 

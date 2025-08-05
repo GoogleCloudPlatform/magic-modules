@@ -6,3 +6,6 @@ rules:
   # because we want indentation to look
   # proper in unindentented versions
   comments: disable
+  indentation:
+    # Autogen YAML files have different indentation for arrays
+    indent-sequences: consistent

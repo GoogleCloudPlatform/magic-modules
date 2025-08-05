@@ -1,0 +1,41 @@
+[
+    {
+        "name": "//cloudresourcemanager.googleapis.com/folders/placeholder-1mV6asRD",
+        "asset_type": "cloudresourcemanager.googleapis.com/Folder",
+        "resource": {
+            "version": "v1",
+            "discovery_document_uri": "https://www.googleapis.com/discovery/v1/apis/compute/v1/rest",
+            "discovery_name": "Folder",
+            "parent": "//cloudresourcemanager.googleapis.com/organizations/{{.OrgID}}",
+            "data": {
+                "display_name": "some-folder-name",
+                "parent": "organizations/{{.OrgID}}"
+            }
+        },
+        "ancestry_path": "organization/{{.OrgID}}"
+    },
+    {
+        "name": "//logging.googleapis.com/projects/{{.Provider.project}}/locations/global/buckets/_Default",
+        "asset_type": "logging.googleapis.com/LogBucket",
+        "resource": {
+            "version": "v2",
+            "discovery_document_uri": "https://logging.googleapis.com/$discovery/rest?version=v2",
+            "discovery_name": "LogBucket",
+            "parent": "//cloudresourcemanager.googleapis.com/projects/{{.Provider.project}}",
+            "data": {
+                "bucketId": "_Default",
+                "id": "folders//locations/global/buckets/_Default",
+                "indexConfigs": [
+                    {
+                        "fieldPath": "jsonPayload.request.status",
+                        "type": "INDEX_TYPE_STRING"
+                    }
+                ],
+                "location": "global",
+                "retentionDays": 30
+            }
+        },
+        "ancestors": ["organizations/{{.OrgID}}"],
+        "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}"
+    }
+]

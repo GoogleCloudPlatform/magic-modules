@@ -4,7 +4,7 @@ description: |-
   List the Secret Manager Secrets.
 ---
 
-# google\_secret\_manager\_secrets
+# google_secret_manager_secrets
 
 Use this data source to list the Secret Manager Secrets
 
@@ -42,6 +42,8 @@ exported:
 * `annotations` - Custom metadata about the secret.
 
 * `version_aliases` - Mapping from version alias to version name.
+
+* `version_destroy_ttl` - The version destroy ttl for the secret version.
 
 * `topics` -
   A list of up to 10 Pub/Sub topics to which messages are published when control plane operations are called on the secret or its versions.

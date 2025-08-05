@@ -8,6 +8,10 @@ Contents:
 * [Editing configuration files](#editing-configuration-files)
 * [Pushing configuration changes to TeamCity](#pushing-configuration-changes-to-teamcity)
 
+## Permissions
+
+Actions in this file require Project Administrator permissions - ask for these if you are unsure if you have them.
+
 
 ## Using configuration files for the first time in a project
 
@@ -47,7 +51,7 @@ The next step is provide some input values that the configuration needs to fully
 * Click on the `Context Parameters` tab at the top of the page
     * On this page you can add key:value pairs, which are used as input to the configuration in `.teamcity/settings.kts`
 * First, we need to enter credentials information in a special way that keeps the values secure. Here is the process for the credentials to the GA nightly test project:
-    * Find the credentials JSON file for that project, ensure that the value has no newlines
+    * Find the credentials JSON file for that project, ensure that the value has no newlines (Running `cat CREDENTIALS.json | tr -s '\n' ' '` will remove newline characters from your JSON key file)
     * Click the dropdown menu next to `Actions` in the top right and click `Generate token for a secure value...`
     * Paste the credentials JSON string into the `Secure value` field nd click `Generate Token`.
     * Copy the value shown below the field, which should look like `credentialsJSON:<uuid>`
@@ -85,15 +89,18 @@ The next step is provide some input values that the configuration needs to fully
 | identityUserGa | Used to set the [GOOGLE_IDENTITY_USER](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L58-L63) environment variable in acceptance tests - GA specific |
 | identityUserBeta | Used to set the [GOOGLE_IDENTITY_USER](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L58-L63) environment variable in acceptance tests - Beta specific |
 | identityUserVcr | Used to set the [GOOGLE_IDENTITY_USER](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L58-L63) environment variable in acceptance tests - VCR specific |
-| firestoreProjectGa | Used to set the [GOOGLE_FIRESTORE_PROJECT](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L32-L34) environment variable in acceptance tests - GA specific |
-| firestoreProjectBeta | Used to set the [GOOGLE_FIRESTORE_PROJECT](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L32-L34) environment variable in acceptance tests - Beta specific |
-| firestoreProjectVcr | Used to set the [GOOGLE_FIRESTORE_PROJECT](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L32-L34) environment variable in acceptance tests - VCR specific |
 | masterBillingAccountGa | Used to set the [GOOGLE_MASTER_BILLING_ACCOUNT](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L87-L91) environment variable in acceptance tests - GA specific |
 | masterBillingAccountBeta | Used to set the [GOOGLE_MASTER_BILLING_ACCOUNT](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L87-L91) environment variable in acceptance tests - Beta specific |
 | masterBillingAccountVcr | Used to set the [GOOGLE_MASTER_BILLING_ACCOUNT](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L87-L91) environment variable in acceptance tests - VCR specific |
 | org2Ga | Used to set the [GOOGLE_ORG_2](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L73-L75) environment variable in acceptance tests - GA specific |
 | org2Beta | Used to set the [GOOGLE_ORG_2](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L73-L75) environment variable in acceptance tests - Beta specific |
 | org2Vcr | Used to set the [GOOGLE_ORG_2](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L73-L75) environment variable in acceptance tests - VCR specific |
+| chronicleInstanceIdGa | Used to set the [GOOGLE_CHRONICLE_INSTANCE_ID](https://github.com/GoogleCloudPlatform/magic-modules/blob/03a313d13c5d31f8e8fc71cb32d06157bc260f78/mmv1/third_party/terraform/envvar/envvar_utils.go#L107-L112) environment variable in acceptance tests - GA specific |
+| chronicleInstanceIdBeta | Used to set the [GOOGLE_CHRONICLE_INSTANCE_ID](https://github.com/GoogleCloudPlatform/magic-modules/blob/03a313d13c5d31f8e8fc71cb32d06157bc260f78/mmv1/third_party/terraform/envvar/envvar_utils.go#L107-L112) environment variable in acceptance tests - Beta specific |
+| chronicleInstanceIdVcr | Used to set the [GOOGLE_CHRONICLE_INSTANCE_ID](https://github.com/GoogleCloudPlatform/magic-modules/blob/03a313d13c5d31f8e8fc71cb32d06157bc260f78/mmv1/third_party/terraform/envvar/envvar_utils.go#L107-L112) environment variable in acceptance tests - VCR specific |
+| vmwareengineProjectGa | Used to set the [GOOGLE_VMWAREENGINE_PROJECT](https://github.com/GoogleCloudPlatform/magic-modules/blob/415b35bae8e1e92e6949d472b987105f369be650/mmv1/third_party/terraform/envvar/envvar_utils.go#L118-L122) environment variable in acceptance tests - GA specific |
+| vmwareengineProjectBeta | Used to set the [GOOGLE_VMWAREENGINE_PROJECT](https://github.com/GoogleCloudPlatform/magic-modules/blob/415b35bae8e1e92e6949d472b987105f369be650/mmv1/third_party/terraform/envvar/envvar_utils.go#L118-L122) environment variable in acceptance tests - Beta specific |
+| vmwareengineProjectVcr | Used to set the [GOOGLE_VMWAREENGINE_PROJECT](https://github.com/GoogleCloudPlatform/magic-modules/blob/415b35bae8e1e92e6949d472b987105f369be650/mmv1/third_party/terraform/envvar/envvar_utils.go#L118-L122) environment variable in acceptance tests - VCR specific |
 | billingAccount | Used to set the [GOOGLE_BILLING_ACCOUNT](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L81-L85) ALL environment variable in acceptance tests |
 | billingAccount2 | Used to set the [GOOGLE_BILLING_ACCOUNT_2](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/services/resourcemanager/resource_google_project_test.go#L78-L79) environment variable in ALL acceptance tests |
 | custId | Used to set the [GOOGLE_CUST_ID](https://github.com/GoogleCloudPlatform/magic-modules/blob/94a3f91d75ee823c521a0d8d3984a1493fa0926a/mmv1/third_party/terraform/envvar/envvar_utils.go#L52-L56) environment variable in ALL acceptance tests |

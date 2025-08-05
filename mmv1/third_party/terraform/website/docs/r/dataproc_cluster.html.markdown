@@ -4,7 +4,7 @@ description: |-
   Manages a Cloud Dataproc cluster resource.
 ---
 
-# google\_dataproc\_cluster
+# google_dataproc_cluster
 
 Manages a Cloud Dataproc cluster resource within GCP.
 
@@ -44,6 +44,8 @@ resource "google_dataproc_cluster" "mycluster" {
 
   cluster_config {
     staging_bucket = "dataproc-staging-bucket"
+
+    cluster_tier = "CLUSTER_TIER_STANDARD"
 
     master_config {
       num_instances = 1
@@ -214,7 +216,7 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 
         kubernetes_software_config {
           component_version = {
-            "SPARK" : "3.1-dataproc-7"
+            "SPARK" : "3.5-dataproc-17"
           }
 
           properties = {
@@ -341,6 +343,8 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
    and jobs data, such as Spark and MapReduce history files.
    Note: If you don't explicitly specify a `temp_bucket` then GCP will auto create / assign one for you.
 
+* `cluster_tier` - (Optional) The tier of the cluster.
+
 * `gce_cluster_config` (Optional) Common config settings for resources of Google Compute Engine cluster
    instances, applicable to all instances in the cluster. Structure [defined below](#nested_gce_cluster_config).
 
@@ -448,6 +452,9 @@ resource "google_dataproc_cluster" "accelerated_cluster" {
 * `node_group_affinity` - (Optional) Node Group Affinity for sole-tenant clusters.
     * `node_group_uri` - (Required) The URI of a sole-tenant node group resource that the cluster will be created on.
 
+* `confidential_instance_config` - (Optional) Confidential Instance Config for clusters using [Confidential VMs](https://cloud.google.com/dataproc/docs/concepts/configuring-clusters/confidential-compute)
+    * `enable_confidential_compute` - (Optional) Defines whether the instance should have confidential compute enabled.
+
 * `shielded_instance_config` (Optional) Shielded Instance Config for clusters using [Compute Engine Shielded VMs](https://cloud.google.com/security/shielded-cloud/shielded-vm).
 
 - - -
@@ -521,6 +528,11 @@ cluster_config {
 
 	* `num_local_ssds` - (Optional) The amount of local SSD disks that will be
 	attached to each master cluster node. Defaults to 0.
+
+	* `local_ssd_interface` - Optional. Interface type of local SSDs (default is "scsi").
+	Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile
+	Memory Express). See
+	[local SSD performance](https://cloud.google.com/compute/docs/disks/local-ssd#performance).
 
 * `accelerators` (Optional) The Compute Engine accelerator (GPU) configuration for these instances. Can be specified multiple times.
 
@@ -620,6 +632,10 @@ cluster_config {
         machine_types = ["n2d-standard-2"]
         rank          = 3
       }
+      provisioning_model_mix {
+        standard_capacity_base = 1
+        standard_capacity_percent_above_base = 50
+      }
     }
   }
 }
@@ -658,6 +674,10 @@ will be set for you based on whatever was set for the `worker_config.machine_typ
 
       * `rank` - (Optional) Preference of this instance selection. A lower number means higher preference. Dataproc will first try to create a VM based on the machine-type with priority rank and fallback to next rank based on availability. Machine types and instance selections with the same priority have the same preference.
 
+    * `provisioning_model_mix` - (Optional) Defines how the Group selects the provisioning model to ensure required reliability.
+      * `standard_capacity_base` - (Optional) The base capacity that will always use Standard VMs to avoid risk of more preemption than the minimum capacity you need. Dataproc will create only standard VMs until it reaches standardCapacityBase, then it will start using standardCapacityPercentAboveBase to mix Spot with Standard VMs. eg. If 15 instances are requested and standardCapacityBase is 5, Dataproc will create 5 standard VMs and then start mixing spot and standard VMs for remaining 10 instances.
+
+      * `standard_capacity_percent_above_base` - (Optional) The percentage of target capacity that should use Standard VM. The remaining percentage will use Spot VMs. The percentage applies only to the capacity above standardCapacityBase. eg. If 15 instances are requested and standardCapacityBase is 5 and standardCapacityPercentAboveBase is 30, Dataproc will create 5 standard VMs and then start mixing spot and standard VMs for remaining 10 instances. The mix will be 30% standard and 70% spot.
 - - -
 
 <a name="nested_software_config"></a>The `cluster_config.software_config` block supports:
@@ -700,11 +720,17 @@ cluster_config {
       kms_key_uri = "projects/projectId/locations/locationId/keyRings/keyRingId/cryptoKeys/keyId"
       root_principal_password_uri = "bucketId/o/objectId"
     }
+    identity_config {
+      user_service_account_mapping = {
+        "user@company.com" = "service-account@iam.gserviceaccounts.com"
+      }
+    }
   }
 }
 ```
 
-* `kerberos_config` (Required) Kerberos Configuration
+* `kerberos_config` (Optional) Kerberos Configuration. At least one of `identity_config`
+       or `kerberos_config` is required.
 
     * `cross_realm_trust_admin_server` - (Optional) The admin server (IP or hostname) for the
        remote trusted realm in a cross realm trust relationship.
@@ -751,6 +777,12 @@ cluster_config {
 
     * `truststore_uri` - (Optional) The Cloud Storage URI of the truststore file used for
        SSL encryption. If not provided, Dataproc will provide a self-signed certificate.
+
+* `identity_config` (Optional) Identity Configuration. At least one of `identity_config`
+       or `kerberos_config` is required.
+
+    * `user_service_account_mapping` - (Required) The end user to service account mappings
+       in a service account based multi-tenant cluster
 
 - - -
 
@@ -926,7 +958,7 @@ cluster_config {
 ```hcl
 cluster_config {
   endpoint_config {
-    enable_http_port_access = "true"
+    enable_http_port_access = true
   }
 }
 ```

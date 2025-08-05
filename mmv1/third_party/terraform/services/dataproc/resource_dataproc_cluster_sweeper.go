@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	sweeper.AddTestSweepers("DataprocCluster", testSweepDataprocCluster)
+	sweeper.AddTestSweepersLegacy("DataprocCluster", testSweepDataprocCluster)
 }
 
 // At the time of writing, the CI only passes us-central1 as the region
@@ -66,7 +66,7 @@ func testSweepDataprocCluster(region string) error {
 		return nil
 	}
 
-	resourceList, ok := res["policies"]
+	resourceList, ok := res["clusters"]
 	if !ok {
 		log.Printf("[INFO][SWEEPER_LOG] Nothing found in response.")
 		return nil

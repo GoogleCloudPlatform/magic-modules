@@ -4,7 +4,7 @@ description: |-
   List forwarding rules in a region of a Google Cloud project.
 ---
 
-# google\_compute\_forwarding\_rules
+# google_compute_forwarding_rules
 
 List all networks in a specified Google Cloud project.
 
@@ -25,7 +25,7 @@ The following arguments are supported:
 
 * `region`  - (Optional) The region you want to get the forwarding rules from.
 
-These arguments must be set in either the provider or the resouce in order for the information to be queried.
+These arguments must be set in either the provider or the resource in order for the information to be queried.
 
 ## Attributes Reference
 

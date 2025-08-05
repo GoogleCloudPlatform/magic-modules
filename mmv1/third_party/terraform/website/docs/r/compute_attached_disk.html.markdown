@@ -4,7 +4,7 @@ description: |-
   Resource that allows attaching existing persistent disks to compute instances.
 ---
 
-# google\_compute\_attached\_disk
+# google_compute_attached_disk
 
 Persistent disks can be attached to a compute instance using [the `attached_disk`
 section within the compute instance configuration](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance#attached_disk).
@@ -100,6 +100,18 @@ The following arguments are supported:
 	Possible values:
 	  "READ_ONLY"
 	  "READ_WRITE"
+
+* `interface` -
+  (Optional)
+  The disk interface used for attaching this disk.
+
+	This field is only used for specific cases, please don't specify
+	this field without advice from Google. Not specifying the field
+	will allow the the server to assign the correct interface.
+
+	Possible values:
+	  "SCSI"
+	  "NVME"
 
 ## Attributes Reference
 

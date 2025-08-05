@@ -1,0 +1,9 @@
+{{- define "expandResourceRef" }}
+{{- if contains $.ResourceRef.BaseUrl "{{region}}" -}}
+tpgresource.ParseRegionalFieldValue("{{$.ResourceType}}", {{$.VarName}}, "project", "region", "zone", d, config, true)
+{{- else if contains $.ResourceRef.BaseUrl "{{zone}}" -}}
+tpgresource.ParseZonalFieldValue("{{$.ResourceType}}", {{$.VarName}}, "project", "zone", d, config, true)
+{{- else -}}
+tpgresource.ParseGlobalFieldValue("{{$.ResourceType}}", {{$.VarName}}, "project", d, config, true)
+{{- end -}}
+{{- end}}

@@ -65,6 +65,7 @@
             ]
           }
         ],
+        "description": "",
         "disabled": false,
         "logConfig": {
           "enable": false
@@ -102,6 +103,7 @@
             "IPProtocol": "icmp"
           }
         ],
+        "description": "",
         "disabled": false,
         "logConfig": {
           "enable": false

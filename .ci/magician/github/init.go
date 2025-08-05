@@ -16,21 +16,74 @@
 package github
 
 import (
-	"fmt"
-	"os"
+	"bytes"
+	"context"
+	"io"
+	"net/http"
+
+	utils "magician/utility"
+
+	gh "github.com/google/go-github/v68/github"
 )
 
 // Client for GitHub interactions.
 type Client struct {
 	token string
+	gh    *gh.Client
+	ctx   context.Context
 }
 
-func NewClient() *Client {
-	githubToken, ok := os.LookupEnv("GITHUB_TOKEN")
-	if !ok {
-		fmt.Println("Did not provide GITHUB_TOKEN environment variable")
-		os.Exit(1)
+// retryTransport is a custom RoundTripper that adds retry and logging
+type retryTransport struct {
+	underlyingTransport http.RoundTripper
+	token               string
+}
+
+func NewClient(token string) *Client {
+	ctx := context.Background()
+
+	// Create a custom transport with retry logic
+	rt := &retryTransport{
+		underlyingTransport: http.DefaultTransport,
+		token:               token,
 	}
 
-	return &Client{token: githubToken}
+	// Use this custom transport with OAuth2
+	tc := &http.Client{Transport: rt}
+
+	// Create the GitHub client with our custom transport
+	ghClient := gh.NewClient(tc)
+
+	return &Client{
+		gh:    ghClient,
+		token: token,
+		ctx:   ctx,
+	}
+}
+
+// RoundTrip implements the http.RoundTripper interface
+func (rt *retryTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// Extract information from the request
+	method := req.Method
+	urlStr := req.URL.String()
+
+	// Read and log the request body if present
+	var bodyBytes []byte
+	if req.Body != nil {
+		bodyBytes, _ = io.ReadAll(req.Body)
+		req.Body.Close()
+		req.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+	}
+
+	resp, respBody, err := utils.RequestCallWithRetryRaw(urlStr, method, rt.token, bodyBytes)
+	if err != nil {
+		return nil, err
+	}
+
+	// Replace the response body with our captured body
+	resp.Body.Close() // Close the original body
+	resp.Body = io.NopCloser(bytes.NewReader(respBody))
+	resp.ContentLength = int64(len(respBody))
+
+	return resp, nil
 }

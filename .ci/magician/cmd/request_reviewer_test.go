@@ -17,13 +17,17 @@
 package cmd
 
 import (
-	"github.com/stretchr/testify/assert"
 	"magician/github"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestExecRequestReviewer(t *testing.T) {
-	availableReviewers := github.AvailableReviewers()
+	availableReviewers := github.AvailableReviewers(nil)
+	if len(availableReviewers) < 3 {
+		t.Fatalf("not enough available reviewers (%v) to run TestExecRequestReviewer (need at least 3)", availableReviewers)
+	}
 	cases := map[string]struct {
 		pullRequest             github.PullRequest
 		requestedReviewers      []string
@@ -86,12 +90,15 @@ func TestExecRequestReviewer(t *testing.T) {
 			execRequestReviewer("1", gh)
 
 			actualReviewers := []string{}
-			for _, args := range gh.calledMethods["RequestPullRequestReviewer"] {
-				actualReviewers = append(actualReviewers, args[1].(string))
+			for _, args := range gh.calledMethods["RequestPullRequestReviewers"] {
+				actualReviewers = append(actualReviewers, args[1].([]string)...)
 			}
 
 			if tc.expectSpecificReviewers != nil {
 				assert.ElementsMatch(t, tc.expectSpecificReviewers, actualReviewers)
+				if len(tc.expectSpecificReviewers) == 0 {
+					assert.Len(t, gh.calledMethods["RequestPullRequestReviewers"], 0)
+				}
 			}
 			if tc.expectReviewersFromList != nil {
 				for _, reviewer := range actualReviewers {

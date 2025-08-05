@@ -1,0 +1,11 @@
+resource "google_secure_source_manager_instance" "{{$.PrimaryResourceId}}" {
+    location = "us-central1"
+    instance_id = "{{index $.Vars "instance_id"}}"
+
+    workforce_identity_federation_config {
+      enabled = true
+    }
+
+    # Prevent accidental deletions.
+    deletion_policy = "{{index $.Vars "deletion_policy"}}"
+}

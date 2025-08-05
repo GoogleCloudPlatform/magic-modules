@@ -1,0 +1,7 @@
+# meta.yaml
+# this is a shared config file that all the tests merge with
+#
+# The firestore_release test uses the default Firestore instance, which can have an existing Rules deployment for whatever reason.
+# However, the firestore_release_additional test was sufficient because Rules deployment doesn't care about whether it's the default Firestore instance
+test_hide:
+  - firestore_release.tf.tmpl

@@ -2,25 +2,36 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+	"regexp"
+	"sort"
+	"strings"
+	"text/template"
+
+	"github.com/spf13/cobra"
+
 	"magician/exec"
 	"magician/github"
 	"magician/provider"
 	"magician/source"
 	"magician/vcr"
-	"os"
-	"path/filepath"
-	"strings"
 
-	"github.com/spf13/cobra"
+	_ "embed"
 )
 
-var ttvEnvironmentVariables = [...]string{
-	"GITHUB_TOKEN",
+var (
+	//go:embed templates/vcr/post_replay.tmpl
+	postReplayTmplText string
+	//go:embed templates/vcr/record_replay.tmpl
+	recordReplayTmplText string
+)
+
+var ttvRequiredEnvironmentVariables = [...]string{
 	"GOCACHE",
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
 	"GOOGLE_CUST_ID",
-	"GOOGLE_FIRESTORE_PROJECT",
 	"GOOGLE_IDENTITY_USER",
 	"GOOGLE_MASTER_BILLING_ACCOUNT",
 	"GOOGLE_ORG",
@@ -31,7 +42,6 @@ var ttvEnvironmentVariables = [...]string{
 	"GOOGLE_REGION",
 	"GOOGLE_SERVICE_ACCOUNT",
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
-	"GOOGLE_TPU_V2_VM_RUNTIME_VERSION",
 	"GOOGLE_ZONE",
 	"HOME",
 	"PATH",
@@ -39,19 +49,76 @@ var ttvEnvironmentVariables = [...]string{
 	"USER",
 }
 
+var ttvOptionalEnvironmentVariables = [...]string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
+	"GOOGLE_VMWAREENGINE_PROJECT",
+}
+
+type postReplay struct {
+	RunFullVCR       bool
+	AffectedServices []string
+	NotRunBetaTests  []string
+	NotRunGATests    []string
+	ReplayingResult  vcr.Result
+	ReplayingErr     error
+	LogBucket        string
+	Version          string
+	Head             string
+	BuildID          string
+}
+
+type recordReplay struct {
+	RecordingResult               vcr.Result
+	ReplayingAfterRecordingResult vcr.Result
+	HasTerminatedTests            bool
+	RecordingErr                  error
+	AllRecordingPassed            bool
+	LogBucket                     string
+	Version                       string
+	Head                          string
+	BuildID                       string
+	LogBaseUrl                    string
+	BrowseLogBaseUrl              string
+}
+
 var testTerraformVCRCmd = &cobra.Command{
 	Use:   "test-terraform-vcr",
 	Short: "Run vcr tests for affected packages",
-	Long:  `This command runs on new pull requests to replay VCR cassettes and re-record failing cassettes.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		env := make(map[string]string, len(ttvEnvironmentVariables))
-		for _, ev := range ttvEnvironmentVariables {
+	Long: `This command runs on new pull requests to replay VCR cassettes and re-record failing cassettes.
+
+It expects the following arguments:
+	1. PR number
+	2. SHA of the latest magic-modules commit
+	3. Build ID
+	4. Project ID where Cloud Builds are located
+	5. Build step number
+	
+The following environment variables are required:
+` + listTTVRequiredEnvironmentVariables(),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		env := make(map[string]string)
+		for _, ev := range ttvRequiredEnvironmentVariables {
 			val, ok := os.LookupEnv(ev)
 			if !ok {
-				fmt.Printf("Did not provide %s environment variable\n", ev)
-				os.Exit(1)
+				return fmt.Errorf("did not provide %s environment variable", ev)
 			}
 			env[ev] = val
+		}
+		for _, ev := range ttvOptionalEnvironmentVariables {
+			val, ok := os.LookupEnv(ev)
+			if ok {
+				env[ev] = val
+			} else {
+				fmt.Printf("🟡 Did not provide %s environment variable\n", ev)
+			}
+		}
+
+		for _, tokenName := range []string{"GITHUB_TOKEN_DOWNSTREAMS", "GITHUB_TOKEN_MAGIC_MODULES"} {
+			val, ok := lookupGithubTokenOrFallback(tokenName)
+			if !ok {
+				return fmt.Errorf("did not provide %s or GITHUB_TOKEN environment variable", tokenName)
+			}
+			env[tokenName] = val
 		}
 
 		baseBranch := os.Getenv("BASE_BRANCH")
@@ -59,242 +126,320 @@ var testTerraformVCRCmd = &cobra.Command{
 			baseBranch = "main"
 		}
 
-		gh := github.NewClient()
+		gh := github.NewClient(env["GITHUB_TOKEN_MAGIC_MODULES"])
 		rnr, err := exec.NewRunner()
 		if err != nil {
-			fmt.Println("Error creating a runner: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error creating a runner: %w", err)
 		}
-		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN"], rnr)
+		ctlr := source.NewController(env["GOPATH"], "modular-magician", env["GITHUB_TOKEN_DOWNSTREAMS"], rnr)
 
-		vt, err := vcr.NewTester(env, rnr)
+		vt, err := vcr.NewTester(env, "ci-vcr-cassettes", "ci-vcr-logs", rnr)
 		if err != nil {
-			fmt.Println("Error creating VCR tester: ", err)
+			return fmt.Errorf("error creating VCR tester: %w", err)
 		}
 
 		if len(args) != 5 {
-			fmt.Printf("Wrong number of arguments %d, expected 5\n", len(args))
-			os.Exit(1)
+			return fmt.Errorf("wrong number of arguments %d, expected 5", len(args))
 		}
 
-		execTestTerraformVCR(args[0], args[1], args[2], args[3], args[4], baseBranch, gh, rnr, ctlr, vt)
+		return execTestTerraformVCR(args[0], args[1], args[2], args[3], args[4], baseBranch, gh, rnr, ctlr, vt)
 	},
 }
 
-func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) {
+func listTTVRequiredEnvironmentVariables() string {
+	var result string
+	for i, ev := range ttvRequiredEnvironmentVariables {
+		result += fmt.Sprintf("\t%2d. %s\n", i+1, ev)
+	}
+	return result
+}
+
+func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, baseBranch string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller, vt *vcr.Tester) error {
 	newBranch := "auto-pr-" + prNumber
 	oldBranch := newBranch + "-old"
-	repo := &source.Repo{
+
+	tpgRepo := &source.Repo{
+		Name:   "terraform-provider-google",
+		Owner:  "modular-magician",
+		Branch: newBranch,
+	}
+	tpgbRepo := &source.Repo{
 		Name:   "terraform-provider-google-beta",
 		Owner:  "modular-magician",
 		Branch: newBranch,
 	}
-	ctlr.SetPath(repo)
-	if err := ctlr.Clone(repo); err != nil {
-		fmt.Println("Error cloning repo: ", err)
-		os.Exit(1)
+	// Initialize repos
+	for _, repo := range []*source.Repo{tpgRepo, tpgbRepo} {
+		ctlr.SetPath(repo)
+		if err := ctlr.Clone(repo); err != nil {
+			return fmt.Errorf("error cloning repo: %w", err)
+		}
+		if err := ctlr.Fetch(repo, oldBranch); err != nil {
+			return fmt.Errorf("failed to fetch old branch: %w", err)
+		}
+		changedFiles, err := ctlr.DiffNameOnly(repo, oldBranch, newBranch)
+		if err != nil {
+			return fmt.Errorf("failed to compute name-only diff: %w", err)
+		}
+		repo.ChangedFiles = changedFiles
+		repo.UnifiedZeroDiff, err = ctlr.DiffUnifiedZero(repo, oldBranch, newBranch)
+		if err != nil {
+			return fmt.Errorf("failed to compute unified=0 diff: %w", err)
+		}
 	}
 
-	vt.SetRepoPath(provider.Beta, repo.Path)
+	vt.SetRepoPath(provider.Beta, tpgbRepo.Path)
 
-	if err := rnr.PushDir(repo.Path); err != nil {
-		fmt.Println("Error changing to repo dir: ", err)
-		os.Exit(1)
+	if err := rnr.PushDir(tpgbRepo.Path); err != nil {
+		return fmt.Errorf("error changing to tpgbRepo dir: %w", err)
 	}
 
-	services, runFullVCR, err := modifiedPackages(newBranch, oldBranch, rnr)
-	if err != nil {
-		fmt.Println("Error getting modified packages: ", err)
-		os.Exit(1)
-	}
-
+	services, runFullVCR := modifiedPackages(tpgbRepo.ChangedFiles, provider.Beta)
 	if len(services) == 0 && !runFullVCR {
-		fmt.Println("Skipping tests: No go files changed")
-		os.Exit(0)
+		fmt.Println("Skipping tests: No go files or test fixtures changed")
+		return nil
 	}
-	fmt.Println("Running tests: Go files changed")
+	fmt.Println("Running tests: Go files or test fixtures changed")
 
-	if err := vt.FetchCassettes(provider.Beta, baseBranch, prNumber); err != nil {
-		fmt.Println("Error fetching cassettes: ", err)
-		os.Exit(1)
+	if err := vt.FetchCassettes(provider.Beta, baseBranch, newBranch); err != nil {
+		return fmt.Errorf("error fetching cassettes: %w", err)
 	}
 
 	buildStatusTargetURL := fmt.Sprintf("https://console.cloud.google.com/cloud-build/builds;region=global/%s;step=%s?project=%s", buildID, buildStep, projectID)
 	if err := gh.PostBuildStatus(prNumber, "VCR-test", "pending", buildStatusTargetURL, mmCommitSha); err != nil {
-		fmt.Println("Error posting pending status: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error posting pending status: %w", err)
 	}
 
-	replayingResult, affectedServicesComment, testDirs, replayingErr := runReplaying(runFullVCR, services, vt)
+	replayingResult, testDirs, replayingErr := runReplaying(runFullVCR, provider.Beta, services, vt)
 	testState := "success"
 	if replayingErr != nil {
 		testState = "failure"
 	}
 
-	if err := vt.UploadLogs("ci-vcr-logs", prNumber, buildID, false, false, vcr.Replaying, provider.Beta); err != nil {
-		fmt.Println("Error uploading replaying logs: ", err)
-		os.Exit(1)
+	if err := vt.UploadLogs(vcr.UploadLogsOptions{
+		Head:    newBranch,
+		BuildID: buildID,
+		Mode:    vcr.Replaying,
+		Version: provider.Beta,
+	}); err != nil {
+		return fmt.Errorf("error uploading replaying logs: %w", err)
 	}
 
 	if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, replayingResult, vcr.Replaying, gh); err != nil {
-		fmt.Println("Error handling panics: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error handling panics: %w", err)
 	} else if hasPanics {
-		os.Exit(0)
+		return nil
 	}
 
-	failedTestsPattern := strings.Join(replayingResult.FailedTests, "|")
+	var servicesArr []string
+	for s := range services {
+		servicesArr = append(servicesArr, s)
+	}
 
-	comment := `#### Tests analytics
-Total tests: ` + fmt.Sprintf("`%d`", len(replayingResult.PassedTests)+len(replayingResult.SkippedTests)+len(replayingResult.FailedTests)) + `
-Passed tests: ` + fmt.Sprintf("`%d`", len(replayingResult.PassedTests)) + `
-Skipped tests: ` + fmt.Sprintf("`%d`", len(replayingResult.SkippedTests)) + `
-Affected tests: ` + fmt.Sprintf("`%d`", len(replayingResult.FailedTests)) + `
+	notRunBeta, notRunGa := notRunTests(tpgRepo.UnifiedZeroDiff, tpgbRepo.UnifiedZeroDiff, replayingResult)
 
-<details><summary>Click here to see the affected service packages</summary><blockquote>` + affectedServicesComment + `</blockquote></details>
+	postReplayData := postReplay{
+		RunFullVCR:       runFullVCR,
+		AffectedServices: sort.StringSlice(servicesArr),
+		NotRunBetaTests:  notRunBeta,
+		NotRunGATests:    notRunGa,
+		ReplayingResult:  subtestResult(replayingResult),
+		ReplayingErr:     replayingErr,
+		LogBucket:        "ci-vcr-logs",
+		Version:          provider.Beta.String(),
+		Head:             newBranch,
+		BuildID:          buildID,
+	}
 
-`
+	comment, err := formatPostReplay(postReplayData)
+	if err != nil {
+		return fmt.Errorf("error formatting post replay comment: %w", err)
+	}
+	if err := gh.PostComment(prNumber, comment); err != nil {
+		return fmt.Errorf("error posting comment: %w", err)
+	}
 	if len(replayingResult.FailedTests) > 0 {
-		comment += fmt.Sprintf(`#### Action taken
-<details> <summary>Found %d affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Click here to see the affected tests</summary><blockquote>%s </blockquote></details>
-
-[Get to know how VCR tests work](https://googlecloudplatform.github.io/magic-modules/docs/getting-started/contributing/#general-contributing-steps)`, len(replayingResult.FailedTests), failedTestsPattern)
-
-		if err := gh.PostComment(prNumber, comment); err != nil {
-			fmt.Println("Error posting comment: ", err)
-			os.Exit(1)
-		}
-
-		recordingResult, recordingErr := vt.RunParallel(vcr.Recording, provider.Beta, testDirs, replayingResult.FailedTests)
+		recordingResult, recordingErr := vt.RunParallel(vcr.RunOptions{
+			Mode:     vcr.Recording,
+			Version:  provider.Beta,
+			TestDirs: testDirs,
+			Tests:    replayingResult.FailedTests,
+		})
 		if recordingErr != nil {
 			testState = "failure"
 		} else {
 			testState = "success"
 		}
 
-		if err := vt.UploadCassettes("ci-vcr-cassettes", prNumber, provider.Beta); err != nil {
-			fmt.Println("Error uploading cassettes: ", err)
-			os.Exit(1)
+		if err := vt.UploadCassettes(newBranch, provider.Beta); err != nil {
+			return fmt.Errorf("error uploading cassettes: %w", err)
 		}
 
-		if err := vt.UploadLogs("ci-vcr-logs", prNumber, buildID, true, false, vcr.Recording, provider.Beta); err != nil {
-			fmt.Println("Error uploading recording logs: ", err)
-			os.Exit(1)
+		if err := vt.UploadLogs(vcr.UploadLogsOptions{
+			Head:     newBranch,
+			BuildID:  buildID,
+			Parallel: true,
+			Mode:     vcr.Recording,
+			Version:  provider.Beta,
+		}); err != nil {
+			return fmt.Errorf("error uploading recording logs: %w", err)
 		}
 
 		if hasPanics, err := handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha, recordingResult, vcr.Recording, gh); err != nil {
-			fmt.Println("Error handling panics: ", err)
-			os.Exit(1)
+			return fmt.Errorf("error handling panics: %w", err)
 		} else if hasPanics {
-			os.Exit(0)
+			return nil
 		}
 
-		comment = ""
+		replayingAfterRecordingResult := vcr.Result{}
+		var replayingAfterRecordingErr error
 		if len(recordingResult.PassedTests) > 0 {
-			comment += "$\\textcolor{green}{\\textsf{Tests passed during RECORDING mode:}}$\n"
-			for _, passedTest := range recordingResult.PassedTests {
-				comment += fmt.Sprintf("`%s`[[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/recording/%s.log)]\n", passedTest, prNumber, buildID, passedTest)
-			}
-			comment += "\n\n"
-
-			replayingAfterRecordingResult, replayingAfterRecordingErr := vt.RunParallel(vcr.Replaying, provider.Beta, testDirs, recordingResult.PassedTests)
+			replayingAfterRecordingResult, replayingAfterRecordingErr = vt.RunParallel(vcr.RunOptions{
+				Mode:     vcr.Replaying,
+				Version:  provider.Beta,
+				TestDirs: testDirs,
+				Tests:    recordingResult.PassedTests,
+			})
 			if replayingAfterRecordingErr != nil {
 				testState = "failure"
 			}
 
-			if err := vt.UploadLogs("ci-vcr-logs", prNumber, buildID, true, true, vcr.Replaying, provider.Beta); err != nil {
-				fmt.Println("Error uploading recording logs: ", err)
-				os.Exit(1)
+			if err := vt.UploadLogs(vcr.UploadLogsOptions{
+				Head:           newBranch,
+				BuildID:        buildID,
+				AfterRecording: true,
+				Parallel:       true,
+				Mode:           vcr.Replaying,
+				Version:        provider.Beta,
+			}); err != nil {
+				return fmt.Errorf("error uploading recording logs: %w", err)
 			}
-
-			if len(replayingAfterRecordingResult.FailedTests) > 0 {
-				comment += "$\\textcolor{red}{\\textsf{Tests failed when rerunning REPLAYING mode:}}$\n"
-				for _, failedTest := range replayingAfterRecordingResult.FailedTests {
-					comment += fmt.Sprintf("`%s`[[Error message](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/replaying_build_after_recording/%s_replaying_test.log)] [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/replaying_after_recording/%s.log)]\n", failedTest, prNumber, buildID, failedTest, prNumber, buildID, failedTest)
-				}
-				comment += "\n\n"
-				comment += `Tests failed due to non-determinism or randomness when the VCR replayed the response after the HTTP request was made.
-
-Please fix these to complete your PR. If you believe these test failures to be incorrect or unrelated to your change, or if you have any questions, please raise the concern with your reviewer.
-`
-			} else {
-				comment += "$\\textcolor{green}{\\textsf{No issues found for passed tests after REPLAYING rerun.}}$\n"
-			}
-			comment += "\n---\n"
 
 		}
 
-		if len(recordingResult.FailedTests) > 0 {
-			comment += "$\\textcolor{red}{\\textsf{Tests failed during RECORDING mode:}}$\n"
-			for _, failedTest := range recordingResult.FailedTests {
-				comment += fmt.Sprintf("`%s`[[Error message](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/recording_build/%s_recording_test.log)] [[Debug log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/recording/%s.log)]\n", failedTest, prNumber, buildID, failedTest, prNumber, buildID, failedTest)
-			}
-			comment += "\n\n"
-			if len(recordingResult.PassedTests)+len(recordingResult.FailedTests) < len(replayingResult.FailedTests) {
-				comment += "$\\textcolor{red}{\\textsf{Several tests got terminated during RECORDING mode.}}$\n"
-			}
-			comment += "$\\textcolor{red}{\\textsf{Please fix these to complete your PR.}}$\n"
-		} else {
-			if len(recordingResult.PassedTests)+len(recordingResult.FailedTests) < len(replayingResult.FailedTests) {
-				comment += "$\\textcolor{red}{\\textsf{Several tests got terminated during RECORDING mode.}}$\n"
-			} else if recordingErr != nil {
-				// Check for any uncaught errors in RECORDING mode.
-				comment += "$\\textcolor{red}{\\textsf{Errors occurred during RECORDING mode. Please fix them to complete your PR.}}$\n"
-			} else {
-				comment += "$\\textcolor{green}{\\textsf{All tests passed!}}$\n"
-			}
-		}
+		hasTerminatedTests := (len(recordingResult.PassedTests) + len(recordingResult.FailedTests)) < len(replayingResult.FailedTests)
+		allRecordingPassed := len(recordingResult.FailedTests) == 0 && !hasTerminatedTests && recordingErr == nil
 
-		comment += fmt.Sprintf("View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/recording_test.log) or the [debug log](https://console.cloud.google.com/storage/browser/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/recording) for each test", prNumber, buildID, prNumber, buildID)
-
-		if err := gh.PostComment(prNumber, comment); err != nil {
-			fmt.Println("Error posting comment: ", err)
-			os.Exit(1)
+		recordReplayData := recordReplay{
+			RecordingResult:               subtestResult(recordingResult),
+			ReplayingAfterRecordingResult: subtestResult(replayingAfterRecordingResult),
+			RecordingErr:                  recordingErr,
+			HasTerminatedTests:            hasTerminatedTests,
+			AllRecordingPassed:            allRecordingPassed,
+			LogBucket:                     "ci-vcr-logs",
+			Version:                       provider.Beta.String(),
+			Head:                          newBranch,
+			BuildID:                       buildID,
 		}
-	} else {
-		if replayingErr != nil {
-			// Check for any uncaught errors in REPLAYING mode.
-			comment += "$\\textcolor{red}{\\textsf{Errors occurred during RECORDING mode. Please fix them to complete your PR.}}$\n"
-		} else {
-			comment += "$\\textcolor{green}{\\textsf{All tests passed!}}$\n"
+		recordReplayComment, err := formatRecordReplay(recordReplayData)
+		if err != nil {
+			return fmt.Errorf("error formatting record replay comment: %w", err)
 		}
-		comment += fmt.Sprintf("View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/replaying_test.log)", prNumber, buildID)
-
-		if err := gh.PostComment(prNumber, comment); err != nil {
-			fmt.Println("Error posting comment: ", err)
-			os.Exit(1)
+		if err := gh.PostComment(prNumber, recordReplayComment); err != nil {
+			return fmt.Errorf("error posting comment: %w", err)
 		}
 	}
 
 	if err := gh.PostBuildStatus(prNumber, "VCR-test", testState, buildStatusTargetURL, mmCommitSha); err != nil {
-		fmt.Println("Error posting build status: ", err)
-		os.Exit(1)
+		return fmt.Errorf("error posting build status: %w", err)
+	}
+	return nil
+}
+
+var addedTestsRegexp = regexp.MustCompile(`(?m)^\+func (TestAcc\w+)\(t \*testing.T\) {`)
+
+func notRunTests(gaDiff, betaDiff string, result vcr.Result) ([]string, []string) {
+	fmt.Println("Checking for new acceptance tests that were not run")
+	addedGaTests := addedTestsRegexp.FindAllStringSubmatch(gaDiff, -1)
+	addedBetaTests := addedTestsRegexp.FindAllStringSubmatch(betaDiff, -1)
+
+	if len(addedGaTests) == 0 && len(addedBetaTests) == 0 {
+		return []string{}, []string{}
+	}
+
+	// Consider tests "run" only if they passed or failed.
+	runTests := map[string]struct{}{}
+	for _, t := range result.PassedTests {
+		runTests[t] = struct{}{}
+	}
+	for _, t := range result.FailedTests {
+		runTests[t] = struct{}{}
+	}
+
+	notRunBeta := []string{}
+	for _, t := range addedBetaTests {
+		if _, ok := runTests[t[1]]; !ok {
+			notRunBeta = append(notRunBeta, t[1])
+		}
+	}
+	// Always count GA-only tests because we never run GA tests
+	notRunGa := []string{}
+	addedBetaTestsMap := map[string]struct{}{}
+	for _, t := range addedBetaTests {
+		addedBetaTestsMap[t[1]] = struct{}{}
+	}
+	for _, t := range addedGaTests {
+		if _, ok := addedBetaTestsMap[t[1]]; !ok {
+			notRunGa = append(notRunGa, t[1])
+		}
+	}
+
+	sort.Strings(notRunBeta)
+	sort.Strings(notRunGa)
+	return notRunBeta, notRunGa
+}
+
+func subtestResult(original vcr.Result) vcr.Result {
+	return vcr.Result{
+		PassedTests:  excludeCompoundTests(original.PassedTests, original.PassedSubtests),
+		FailedTests:  excludeCompoundTests(original.FailedTests, original.FailedSubtests),
+		SkippedTests: excludeCompoundTests(original.SkippedTests, original.SkippedSubtests),
+		Panics:       original.Panics,
 	}
 }
 
-func modifiedPackages(newBranch, oldBranch string, rnr ExecRunner) (map[string]struct{}, bool, error) {
-	fmt.Println("Checking for modified go files")
-
-	if _, err := rnr.Run("git", []string{"fetch", "origin", fmt.Sprintf("%s:%s", oldBranch, oldBranch), "--depth", "1"}, nil); err != nil {
-
+// Returns the name of the compound test that the given subtest belongs to.
+func compoundTest(subtest string) string {
+	parts := strings.Split(subtest, "__")
+	if len(parts) != 2 {
+		return subtest
 	}
-	diffs, err := rnr.Run("git", []string{"diff", newBranch, oldBranch, "--name-only"}, nil)
-	if err != nil {
-		return nil, false, err
+	return parts[0]
+}
+
+// Returns subtests and tests that are not compound tests.
+func excludeCompoundTests(allTests, subtests []string) []string {
+	res := make([]string, 0, len(allTests)+len(subtests))
+	compoundTests := make(map[string]struct{}, len(subtests))
+	for _, subtest := range subtests {
+		if compound := compoundTest(subtest); compound != subtest {
+			compoundTests[compound] = struct{}{}
+			res = append(res, subtest)
+		}
 	}
+	for _, test := range allTests {
+		if _, ok := compoundTests[test]; !ok {
+			res = append(res, test)
+		}
+	}
+	sort.Strings(res)
+	return res
+}
+
+func modifiedPackages(changedFiles []string, version provider.Version) (map[string]struct{}, bool) {
 	var goFiles []string
-	for _, line := range strings.Split(diffs, "\n") {
-		if strings.HasSuffix(line, ".go") || line == "go.mod" || line == "go.sum" {
+	for _, line := range changedFiles {
+		if strings.HasSuffix(line, ".go") || strings.Contains(line, "test-fixtures") || strings.HasSuffix(line, "go.mod") || strings.HasSuffix(line, "go.sum") {
 			goFiles = append(goFiles, line)
 		}
 	}
 	services := make(map[string]struct{})
 	runFullVCR := false
 	for _, file := range goFiles {
-		if strings.HasPrefix(file, "google-beta/services/") {
+		if strings.HasPrefix(file, version.ProviderName()+"/services/") {
 			fileParts := strings.Split(file, "/")
 			services[fileParts[2]] = struct{}{}
-		} else if file == "google-beta/provider/provider_mmv1_resources.go" || file == "google-beta/provider/provider_dcl_resources.go" {
+		} else if file == version.ProviderName()+"/provider/provider_mmv1_resources.go" || file == version.ProviderName()+"/provider/provider_dcl_resources.go" {
 			fmt.Println("ignore changes in ", file)
 		} else {
 			fmt.Println("run full tests ", file)
@@ -302,26 +447,30 @@ func modifiedPackages(newBranch, oldBranch string, rnr ExecRunner) (map[string]s
 			break
 		}
 	}
-	return services, runFullVCR, nil
+	return services, runFullVCR
 }
 
-func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester) (*vcr.Result, string, []string, error) {
-	var result *vcr.Result
-	affectedServicesComment := "None"
+func runReplaying(runFullVCR bool, version provider.Version, services map[string]struct{}, vt *vcr.Tester) (vcr.Result, []string, error) {
+	result := vcr.Result{}
 	var testDirs []string
 	var replayingErr error
 	if runFullVCR {
-		fmt.Println("run full VCR tests")
-		affectedServicesComment = "all service packages are affected"
-		result, replayingErr = vt.Run(vcr.Replaying, provider.Beta, nil)
+		fmt.Println("runReplaying: full VCR tests")
+		result, replayingErr = vt.Run(vcr.RunOptions{
+			Mode:    vcr.Replaying,
+			Version: version,
+		})
 	} else if len(services) > 0 {
-		affectedServicesComment = "<ul>"
-		result = &vcr.Result{}
+		fmt.Printf("runReplaying: %d specific services: %v\n", len(services), services)
 		for service := range services {
-			servicePath := "./" + filepath.Join("google-beta", "services", service)
+			servicePath := "./" + filepath.Join(version.ProviderName(), "services", service)
 			testDirs = append(testDirs, servicePath)
 			fmt.Println("run VCR tests in ", service)
-			serviceResult, serviceReplayingErr := vt.Run(vcr.Replaying, provider.Beta, []string{servicePath})
+			serviceResult, serviceReplayingErr := vt.Run(vcr.RunOptions{
+				Mode:     vcr.Replaying,
+				Version:  version,
+				TestDirs: []string{servicePath},
+			})
 			if serviceReplayingErr != nil {
 				replayingErr = serviceReplayingErr
 			}
@@ -329,19 +478,19 @@ func runReplaying(runFullVCR bool, services map[string]struct{}, vt *vcr.Tester)
 			result.SkippedTests = append(result.SkippedTests, serviceResult.SkippedTests...)
 			result.FailedTests = append(result.FailedTests, serviceResult.FailedTests...)
 			result.Panics = append(result.Panics, serviceResult.Panics...)
-			affectedServicesComment += fmt.Sprintf("<li>%s</li>", service)
 		}
-		affectedServicesComment += "</ul>"
+	} else {
+		fmt.Println("runReplaying: no impacted services")
 	}
 
-	return result, affectedServicesComment, testDirs, replayingErr
+	return result, testDirs, replayingErr
 }
 
-func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result *vcr.Result, mode vcr.Mode, gh GithubClient) (bool, error) {
+func handlePanics(prNumber, buildID, buildStatusTargetURL, mmCommitSha string, result vcr.Result, mode vcr.Mode, gh GithubClient) (bool, error) {
 	if len(result.Panics) > 0 {
-		comment := fmt.Sprintf(`$\textcolor{red}{\textsf{The provider crashed while running the VCR tests in %s mode}}$
-$\textcolor{red}{\textsf{Please fix it to complete your PR}}$
-View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)`, mode.Upper(), prNumber, buildID, mode.Lower())
+		comment := color("red", fmt.Sprintf("The provider crashed while running the VCR tests in %s mode\n", mode.Upper()))
+		comment += fmt.Sprintf(`Please fix it to complete your PR.
+View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/heads/auto-pr-%s/artifacts/%s/build-log/%s_test.log)`, prNumber, buildID, mode.Lower())
 		if err := gh.PostComment(prNumber, comment); err != nil {
 			return true, fmt.Errorf("error posting comment: %v", err)
 		}
@@ -355,4 +504,37 @@ View the [build log](https://storage.cloud.google.com/ci-vcr-logs/beta/refs/head
 
 func init() {
 	rootCmd.AddCommand(testTerraformVCRCmd)
+}
+
+func formatComment(fileName string, tmplText string, data any) (string, error) {
+	funcs := template.FuncMap{
+		"join":         strings.Join,
+		"add":          func(i, j int) int { return i + j },
+		"color":        color,
+		"compoundTest": compoundTest,
+	}
+	tmpl, err := template.New(fileName).Funcs(funcs).Parse(tmplText)
+	if err != nil {
+		panic(fmt.Sprintf("Unable to parse %s: %s", fileName, err))
+	}
+	sb := new(strings.Builder)
+	err = tmpl.Execute(sb, data)
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(sb.String()), nil
+}
+
+func formatPostReplay(data postReplay) (string, error) {
+	return formatComment("post_replay.tmpl", postReplayTmplText, data)
+}
+
+func formatRecordReplay(data recordReplay) (string, error) {
+	logBasePath := fmt.Sprintf("%s/%s/refs/heads/%s/artifacts/%s", data.LogBucket, data.Version, data.Head, data.BuildID)
+	if data.BuildID == "" {
+		logBasePath = fmt.Sprintf("%s/%s/refs/heads/%s", data.LogBucket, data.Version, data.Head)
+	}
+	data.LogBaseUrl = fmt.Sprintf("https://storage.cloud.google.com/%s", logBasePath)
+	data.BrowseLogBaseUrl = fmt.Sprintf("https://console.cloud.google.com/storage/browser/%s", logBasePath)
+	return formatComment("record_replay.tmpl", recordReplayTmplText, data)
 }

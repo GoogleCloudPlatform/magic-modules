@@ -4,7 +4,7 @@ description: |-
   Creates a new SQL user in Google Cloud SQL.
 ---
 
-# google\_sql\_user
+# google_sql_user
 
 Creates a new Google SQL User on a Google SQL User Instance. For more information, see the [official documentation](https://cloud.google.com/sql/), or the [JSON API](https://cloud.google.com/sql/docs/admin-api/v1beta4/users).
 
@@ -89,7 +89,7 @@ resource "google_sql_database_instance" "main" {
     tier = "db-f1-micro"
 
     database_flags {
-      name  = "cloudsql.iam_authentication"
+      name  = "cloudsql_iam_authentication"
       value = "on"
     }
   }
@@ -119,13 +119,18 @@ The following arguments are supported:
 
 * `type` - (Optional) The user type. It determines the method to authenticate the
     user during login. The default is the database's built-in user type. Flags
-    include "BUILT_IN", "CLOUD_IAM_USER", "CLOUD_IAM_GROUP" or "CLOUD_IAM_SERVICE_ACCOUNT".
+    include "BUILT_IN", "CLOUD_IAM_USER", "CLOUD_IAM_SERVICE_ACCOUNT", "CLOUD_IAM_GROUP",
+    "CLOUD_IAM_GROUP_USER" and "CLOUD_IAM_GROUP_SERVICE_ACCOUNT" for
+    [Postgres](https://cloud.google.com/sql/docs/postgres/admin-api/rest/v1beta4/users#sqlusertype)
+    and [MySQL](https://cloud.google.com/sql/docs/mysql/admin-api/rest/v1beta4/users#sqlusertype).
 
 * `deletion_policy` - (Optional) The deletion policy for the user.
     Setting `ABANDON` allows the resource to be abandoned rather than deleted. This is useful
     for Postgres, where users cannot be deleted from the API if they have been granted SQL roles.
-    
+
     Possible values are: `ABANDON`.
+
+* `password_wo_version` - (Optional) The version of the password_wo. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes).
 
 - - -
 
@@ -151,6 +156,16 @@ The read only `password_policy.status` subblock supports:
 * `locked` - (read only) If true, user does not have login privileges.
 
 * `password_expiration_time` - (read only) Password expiration duration with one week grace period.
+
+## Ephemeral Attributes Reference
+
+The following write-only attributes are supported:
+
+* `password_wo` - (Optional) The password for the user. Can be updated. For Postgres
+    instances this is a Required field, unless type is set to either CLOUD_IAM_USER
+    or CLOUD_IAM_SERVICE_ACCOUNT. Don't set this field for CLOUD_IAM_USER
+    and CLOUD_IAM_SERVICE_ACCOUNT user types for any Cloud SQL instance.
+  **Note**: This property is write-only and will not be read from the API.
 
 ## Attributes Reference
 

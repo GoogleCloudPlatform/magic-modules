@@ -1,0 +1,42 @@
+resource "google_compute_target_http_proxy" "{{$.PrimaryResourceId}}" {
+  name                        = "{{index $.Vars "target_http_proxy_name"}}"
+  http_keep_alive_timeout_sec = 610
+  url_map                     = google_compute_url_map.default.id
+}
+
+resource "google_compute_url_map" "default" {
+  name            = "{{index $.Vars "url_map_name"}}"
+  default_service = google_compute_backend_service.default.id
+
+  host_rule {
+    hosts        = ["mysite.com"]
+    path_matcher = "allpaths"
+  }
+
+  path_matcher {
+    name            = "allpaths"
+    default_service = google_compute_backend_service.default.id
+
+    path_rule {
+      paths   = ["/*"]
+      service = google_compute_backend_service.default.id
+    }
+  }
+}
+
+resource "google_compute_backend_service" "default" {
+  name                  = "{{index $.Vars "backend_service_name"}}"
+  port_name             = "http"
+  protocol              = "HTTP"
+  timeout_sec           = 10
+  load_balancing_scheme = "EXTERNAL_MANAGED"
+
+  health_checks = [google_compute_http_health_check.default.id]
+}
+
+resource "google_compute_http_health_check" "default" {
+  name               = "{{index $.Vars "http_health_check_name"}}"
+  request_path       = "/"
+  check_interval_sec = 1
+  timeout_sec        = 1
+}

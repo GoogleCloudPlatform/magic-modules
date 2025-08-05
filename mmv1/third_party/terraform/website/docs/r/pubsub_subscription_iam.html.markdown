@@ -16,7 +16,7 @@ Three different resources help you manage your IAM policy for pubsub subscriptio
 
 ~> **Note:** `google_pubsub_subscription_iam_binding` resources **can be** used in conjunction with `google_pubsub_subscription_iam_member` resources **only if** they do not grant privilege to the same role.
 
-## google\_pubsub\_subscription\_iam\_policy
+## google_pubsub_subscription_iam_policy
 
 ```hcl
 data "google_iam_policy" "admin" {
@@ -34,7 +34,7 @@ resource "google_pubsub_subscription_iam_policy" "editor" {
 }
 ```
 
-## google\_pubsub\_subscription\_iam\_binding
+## google_pubsub_subscription_iam_binding
 
 ```hcl
 resource "google_pubsub_subscription_iam_binding" "editor" {
@@ -46,7 +46,7 @@ resource "google_pubsub_subscription_iam_binding" "editor" {
 }
 ```
 
-## google\_pubsub\_subscription\_iam\_member
+## google_pubsub_subscription_iam_member
 
 ```hcl
 resource "google_pubsub_subscription_iam_member" "editor" {
@@ -92,7 +92,7 @@ exported:
 
 ## Import
 
--> **Custom Roles**: If you're importing a IAM resource with a custom role, make sure to use the
+-> **Custom Roles** If you're importing a IAM resource with a custom role, make sure to use the
  full name of the custom role, e.g. `[projects/my-project|organizations/my-org]/roles/my-custom-role`.
 
 ### Importing IAM members

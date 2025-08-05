@@ -3,7 +3,7 @@ package alloydb_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -11,7 +11,7 @@ func TestAccAlloydbUser_updateRoles_BuiltIn(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -53,7 +53,9 @@ resource "google_alloydb_instance" "default" {
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
-  network    = data.google_compute_network.default.id
+  network_config {
+    network = data.google_compute_network.default.id
+  }
 
   initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
@@ -81,7 +83,7 @@ func TestAccAlloydbUser_updatePassword_BuiltIn(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -123,7 +125,9 @@ resource "google_alloydb_instance" "default" {
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
-  network    = data.google_compute_network.default.id
+  network_config {
+    network = data.google_compute_network.default.id
+  }
 
   initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
@@ -151,7 +155,7 @@ func TestAccAlloydbUser_updateRoles_IAM(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -192,7 +196,9 @@ resource "google_alloydb_instance" "default" {
 resource "google_alloydb_cluster" "default" {
   cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
   location   = "us-central1"
-  network    = data.google_compute_network.default.id
+  network_config {
+    network = data.google_compute_network.default.id
+  }
   initial_user {
     password = "tf_test_cluster_secret%{random_suffix}"
   }

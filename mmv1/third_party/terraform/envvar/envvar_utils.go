@@ -19,6 +19,18 @@ var CredsEnvVars = []string{
 	"GOOGLE_USE_DEFAULT_CREDENTIALS",
 }
 
+// CredsEnvVarsExcludingAdcs returns the contents of CredsEnvVars excluding GOOGLE_APPLICATION_CREDENTIALS
+func CredsEnvVarsExcludingAdcs() []string {
+	envs := CredsEnvVars
+	var filtered []string
+	for _, e := range envs {
+		if e != "GOOGLE_APPLICATION_CREDENTIALS" {
+			filtered = append(filtered, e)
+		}
+	}
+	return filtered
+}
+
 var ProjectNumberEnvVars = []string{
 	"GOOGLE_PROJECT_NUMBER",
 }
@@ -27,10 +39,6 @@ var ProjectEnvVars = []string{
 	"GOOGLE_PROJECT",
 	"GCLOUD_PROJECT",
 	"CLOUDSDK_CORE_PROJECT",
-}
-
-var FirestoreProjectEnvVars = []string{
-	"GOOGLE_FIRESTORE_PROJECT",
 }
 
 var RegionEnvVars = []string{
@@ -78,6 +86,10 @@ var UniverseDomainEnvVars = []string{
 	"GOOGLE_UNIVERSE_DOMAIN",
 }
 
+var ProjectPrefixEnvVars = []string{
+	"GOOGLE_UNIVERSE_PROJECT_PREFIX",
+}
+
 // This is the billing account that will be charged for the infrastructure used during testing. For
 // that reason, it is also the billing account used for creating new projects.
 var BillingAccountEnvVars = []string{
@@ -94,6 +106,23 @@ var MasterBillingAccountEnvVars = []string{
 // setup. This is only used during integration tests and would be invalid to surface to users
 var PapDescriptionEnvVars = []string{
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
+}
+
+// This value is the instance id of a pre-configured Chronicle instance, for the purpose of
+// integration tests. It is needed because the instance is 1-to-1 with a test project, and it
+// cannot be created within the test org.
+var ChronicleInstanceIdEnvVars = []string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
+}
+
+var ImpersonateServiceAccountEnvVars = []string{
+	"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
+}
+
+// This value is the project used for vmwareengine tests. A separate project is needed
+// due to the limited quota allocated to each testing project
+var vmwareengineProjectEnvVars = []string{
+	"GOOGLE_VMWAREENGINE_PROJECT",
 }
 
 // AccTestPreCheck ensures at least one of the project env variables is set.
@@ -117,8 +146,12 @@ func GetTestCredsFromEnv() string {
 
 // Returns googleapis.com if there's no universe set.
 func GetTestUniverseDomainFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, IdentityUserEnvVars...)
 	return transport_tpg.MultiEnvSearch(UniverseDomainEnvVars)
+}
+
+// Project Prefix of different universes
+func GetUniverseProjectPrefixFromEnv() string {
+	return transport_tpg.MultiEnvSearch(ProjectPrefixEnvVars)
 }
 
 // AccTestPreCheck ensures at least one of the region env variables is set.
@@ -130,6 +163,10 @@ func GetTestZoneFromEnv() string {
 	return transport_tpg.MultiEnvSearch(ZoneEnvVars)
 }
 
+func GetTestImpersonateServiceAccountFromEnv() string {
+	return transport_tpg.MultiEnvSearch(ImpersonateServiceAccountEnvVars)
+}
+
 func GetTestCustIdFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, CustIdEnvVars...)
 	return transport_tpg.MultiEnvSearch(CustIdEnvVars)
@@ -138,13 +175,6 @@ func GetTestCustIdFromEnv(t *testing.T) string {
 func GetTestIdentityUserFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, IdentityUserEnvVars...)
 	return transport_tpg.MultiEnvSearch(IdentityUserEnvVars)
-}
-
-// Firestore can't be enabled at the same time as Datastore, so we need a new
-// project to manage it until we can enable Firestore programmatically.
-func GetTestFirestoreProjectFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, FirestoreProjectEnvVars...)
-	return transport_tpg.MultiEnvSearch(FirestoreProjectEnvVars)
 }
 
 // Returns the raw organization id like 1234567890, skipping the test if one is
@@ -192,6 +222,16 @@ func GetTestServiceAccountFromEnv(t *testing.T) string {
 func GetTestPublicAdvertisedPrefixDescriptionFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, PapDescriptionEnvVars...)
 	return transport_tpg.MultiEnvSearch(PapDescriptionEnvVars)
+}
+
+func GetTestChronicleInstanceIdFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, ChronicleInstanceIdEnvVars...)
+	return transport_tpg.MultiEnvSearch(ChronicleInstanceIdEnvVars)
+}
+
+func GetTestVmwareengineProjectFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, vmwareengineProjectEnvVars...)
+	return transport_tpg.MultiEnvSearch(vmwareengineProjectEnvVars)
 }
 
 func SkipIfEnvNotSet(t *testing.T, envs ...string) {

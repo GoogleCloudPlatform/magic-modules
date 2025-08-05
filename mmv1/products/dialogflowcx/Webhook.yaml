@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,129 +11,358 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'Webhook'
-base_url: '{{parent}}/webhooks'
-update_verb: :PATCH
-update_mask: true
 description: |
   Webhooks host the developer's business logic. During a session, webhooks allow the developer to use the data extracted by Dialogflow's natural language processing to generate dynamic responses, validate collected data, or trigger actions on the backend.
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Official Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
   api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.webhooks'
-timeouts: !ruby/object:Api::Timeouts
+docs:
+id_format: '{{parent}}/webhooks/{{name}}'
+base_url: '{{parent}}/webhooks'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{parent}}/webhooks/{{name}}'
+timeouts:
   insert_minutes: 40
   update_minutes: 40
-custom_code: !ruby/object:Provider::Terraform::CustomCode
-  custom_import: templates/terraform/custom_import/dialogflowcx_webhook.go.erb
-  pre_create: templates/terraform/pre_create/dialogflow_set_location.go.erb
-  pre_update: templates/terraform/pre_create/dialogflow_set_location.go.erb
-  pre_delete: templates/terraform/pre_create/dialogflow_set_location.go.erb
-  pre_read: templates/terraform/pre_create/dialogflow_set_location.go.erb
+  delete_minutes: 20
+custom_code:
+  pre_create: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_read: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_delete: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/dialogflowcx_webhook.go.tmpl'
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'dialogflowcx_webhook_full'
-    primary_resource_id: 'basic_webhook'
+  - name: 'dialogflowcx_webhook_standard'
+    primary_resource_id: 'standard_webhook'
     vars:
       agent_name: 'dialogflowcx-agent'
-id_format: '{{parent}}/webhooks/{{name}}'
-import_format: ['{{parent}}/webhooks/{{name}}']
-skip_sweeper: true
+  - name: 'dialogflowcx_webhook_flexible'
+    primary_resource_id: 'flexible_webhook'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+  - name: 'dialogflowcx_webhook_service_directory_standard'
+    primary_resource_id: 'standard_webhook'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+  - name: 'dialogflowcx_webhook_service_directory_flexible'
+    primary_resource_id: 'flexible_webhook'
+    vars:
+      agent_name: 'dialogflowcx-agent'
 parameters:
-  - !ruby/object:Api::Type::String
-    name: parent
-    url_param_only: true
-    immutable: true
+  - name: 'parent'
+    type: String
     description: |
       The agent to create a webhook for.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
+    url_param_only: true
+    immutable: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
-    output: true
+  - name: 'name'
+    type: String
     description: |
       The unique identifier of the webhook.
       Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/webhooks/<Webhook ID>.
-    custom_flatten: templates/terraform/custom_flatten/name_from_self_link.erb
-  - !ruby/object:Api::Type::String
-    name: 'displayName'
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'displayName'
+    type: String
     description: |
       The human-readable name of the webhook, unique within the agent.
     required: true
-  - !ruby/object:Api::Type::String
-    name: 'timeout'
+  - name: 'timeout'
+    type: String
     description: |
       Webhook execution timeout.
-  - !ruby/object:Api::Type::Boolean
-    name: 'disabled'
+  - name: 'disabled'
+    type: Boolean
     description: |
       Indicates whether the webhook is disabled.
-  - !ruby/object:Api::Type::NestedObject
-    name: 'genericWebService'
-    description: |
-      Configuration for a generic web service.
+  - name: genericWebService
+    type: NestedObject
+    description: Represents configuration for a generic web service.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'uri'
-        description: |
-          Whether to use speech adaptation for speech recognition.
+      - name: allowedCaCerts
+        type: Array
+        description: |-
+          Specifies a list of allowed custom CA certificates (in DER format) for
+          HTTPS verification. This overrides the default SSL trust store. If this
+          is empty or unspecified, Dialogflow will use Google's default trust store
+          to verify certificates.
+          N.B. Make sure the HTTPS server certificates are signed with "subject alt
+          name". For instance a certificate can be self-signed using the following
+          command,
+          openssl x509 -req -days 200 -in example.com.csr \
+          -signkey example.com.key \
+          -out example.com.crt \
+          -extfile <(printf "\nsubjectAltName='DNS:www.example.com'")
+        item_type:
+          type: String
+      - name: httpMethod
+        type: Enum
+        description: |-
+          HTTP method for the flexible webhook calls. Standard webhook always uses
+          POST.
+        enum_values:
+          - 'POST'
+          - 'GET'
+          - 'HEAD'
+          - 'PUT'
+          - 'DELETE'
+          - 'PATCH'
+          - 'OPTIONS'
+      - name: oauthConfig
+        type: NestedObject
+        description: |-
+          Represents configuration of OAuth client credential flow for 3rd party
+          API authentication.
+        properties:
+          - name: clientId
+            type: String
+            description: The client ID provided by the 3rd party platform.
+            required: true
+          - name: clientSecret
+            type: String
+            description: |-
+              The client secret provided by the 3rd party platform.  If the
+              `secret_version_for_client_secret` field is set, this field will be
+              ignored.
+            ignore_read: true
+          - name: scopes
+            type: Array
+            description: The OAuth scopes to grant.
+            item_type:
+              type: String
+          - name: secretVersionForClientSecret
+            type: String
+            description: |-
+              The name of the SecretManager secret version resource storing the
+              client secret. If this field is set, the `client_secret` field will be
+              ignored.
+              Format: `projects/{project}/secrets/{secret}/versions/{version}`
+          - name: tokenEndpoint
+            type: String
+            description: |-
+              The token endpoint provided by the 3rd party platform to exchange an
+              access token.
+            required: true
+      - name: parameterMapping
+        type: KeyValuePairs
+        description: |-
+          Maps the values extracted from specific fields of the flexible webhook
+          response into session parameters.
+          - Key: session parameter name
+          - Value: field path in the webhook response
+      - name: requestBody
+        type: String
+        description: Defines a custom JSON object as request body to send to flexible webhook.
+      - name: requestHeaders
+        type: KeyValuePairs
+        description: The HTTP request headers to send together with webhook requests.
+      - name: secretVersionForUsernamePassword
+        type: String
+        description: |-
+          The SecretManager secret version resource storing the username:password
+          pair for HTTP Basic authentication.
+          Format: `projects/{project}/secrets/{secret}/versions/{version}`
+      - name: secretVersionsForRequestHeaders
+        type: Map
+        description: |-
+          The HTTP request headers to send together with webhook requests. Header
+          values are stored in SecretManager secret versions.
+
+          When the same header name is specified in both `request_headers` and
+          `secret_versions_for_request_headers`, the value in
+          `secret_versions_for_request_headers` will be used.
+        key_name: 'key'
+        value_type:
+          name: 'secretVersionsForRequestHeader'
+          type: NestedObject
+          properties:
+            - name: secretVersion
+              type: String
+              description: |
+                The SecretManager secret version resource storing the header value.
+                Format: `projects/{project}/secrets/{secret}/versions/{version}`
+              required: true
+      - name: serviceAgentAuth
+        type: Enum
+        description: |-
+          Indicate the auth token type generated from the [Diglogflow service
+          agent](https://cloud.google.com/iam/docs/service-agents#dialogflow-service-agent).
+          The generated token is sent in the Authorization header.
+        enum_values:
+          - 'NONE'
+          - 'ID_TOKEN'
+          - 'ACCESS_TOKEN'
+      - name: uri
+        type: String
+        description: The webhook URI for receiving POST requests. It must use https protocol.
         required: true
-      - !ruby/object:Api::Type::KeyValuePairs
-        name: 'requestHeaders'
-        description: |
-          The HTTP request headers to send together with webhook requests.
-        immutable: true
-      - !ruby/object:Api::Type::Array
-        name: 'allowedCaCerts'
-        description: |
-          Specifies a list of allowed custom CA certificates (in DER format) for HTTPS verification.
-        item_type: Api::Type::String
-  - !ruby/object:Api::Type::NestedObject
-    name: 'serviceDirectory'
+      - name: webhookType
+        type: Enum
+        description: |-
+          Type of the webhook.
+        enum_values:
+          - 'STANDARD'
+          - 'FLEXIBLE'
+  - name: 'serviceDirectory'
+    type: NestedObject
     description: |
       Configuration for a Service Directory service.
     properties:
-      - !ruby/object:Api::Type::String
-        name: 'service'
+      - name: 'service'
+        type: String
         description: |
           The name of Service Directory service.
         required: true
-      - !ruby/object:Api::Type::NestedObject
-        name: 'genericWebService'
-        description: |
-          The name of Service Directory service.
-        required: true
+      - name: genericWebService
+        type: NestedObject
+        description: Represents configuration for a generic web service.
         properties:
-          - !ruby/object:Api::Type::String
-            name: 'uri'
-            description: |
-              Whether to use speech adaptation for speech recognition.
+          - name: allowedCaCerts
+            type: Array
+            description: |-
+              Specifies a list of allowed custom CA certificates (in DER format) for
+              HTTPS verification. This overrides the default SSL trust store. If this
+              is empty or unspecified, Dialogflow will use Google's default trust store
+              to verify certificates.
+              N.B. Make sure the HTTPS server certificates are signed with "subject alt
+              name". For instance a certificate can be self-signed using the following
+              command,
+              openssl x509 -req -days 200 -in example.com.csr \
+              -signkey example.com.key \
+              -out example.com.crt \
+              -extfile <(printf "\nsubjectAltName='DNS:www.example.com'")
+            item_type:
+              type: String
+          - name: httpMethod
+            type: Enum
+            description: |-
+              HTTP method for the flexible webhook calls. Standard webhook always uses
+              POST.
+            enum_values:
+              - 'POST'
+              - 'GET'
+              - 'HEAD'
+              - 'PUT'
+              - 'DELETE'
+              - 'PATCH'
+              - 'OPTIONS'
+          - name: oauthConfig
+            type: NestedObject
+            description: |-
+              Represents configuration of OAuth client credential flow for 3rd party
+              API authentication.
+            properties:
+              - name: clientId
+                type: String
+                description: The client ID provided by the 3rd party platform.
+                required: true
+              - name: clientSecret
+                type: String
+                description: |-
+                  The client secret provided by the 3rd party platform.  If the
+                  `secret_version_for_client_secret` field is set, this field will be
+                  ignored.
+                ignore_read: true
+              - name: scopes
+                type: Array
+                description: The OAuth scopes to grant.
+                item_type:
+                  type: String
+              - name: secretVersionForClientSecret
+                type: String
+                description: |-
+                  The name of the SecretManager secret version resource storing the
+                  client secret. If this field is set, the `client_secret` field will be
+                  ignored.
+                  Format: `projects/{project}/secrets/{secret}/versions/{version}`
+              - name: tokenEndpoint
+                type: String
+                description: |-
+                  The token endpoint provided by the 3rd party platform to exchange an
+                  access token.
+                required: true
+          - name: parameterMapping
+            type: KeyValuePairs
+            description: |-
+              Maps the values extracted from specific fields of the flexible webhook
+              response into session parameters.
+              - Key: session parameter name
+              - Value: field path in the webhook response
+          - name: requestBody
+            type: String
+            description: Defines a custom JSON object as request body to send to flexible webhook.
+          - name: requestHeaders
+            type: KeyValuePairs
+            description: The HTTP request headers to send together with webhook requests.
+          - name: secretVersionForUsernamePassword
+            type: String
+            description: |-
+              The SecretManager secret version resource storing the username:password
+              pair for HTTP Basic authentication.
+              Format: `projects/{project}/secrets/{secret}/versions/{version}`
+          - name: secretVersionsForRequestHeaders
+            type: Map
+            description: |-
+              The HTTP request headers to send together with webhook requests. Header
+              values are stored in SecretManager secret versions.
+
+              When the same header name is specified in both `request_headers` and
+              `secret_versions_for_request_headers`, the value in
+              `secret_versions_for_request_headers` will be used.
+            key_name: 'key'
+            value_type:
+              name: 'secretVersionsForRequestHeader'
+              type: NestedObject
+              properties:
+                - name: secretVersion
+                  type: String
+                  description: |
+                    The SecretManager secret version resource storing the header value.
+                    Format: `projects/{project}/secrets/{secret}/versions/{version}`
+                  required: true
+          - name: serviceAgentAuth
+            type: Enum
+            description: |-
+              Indicate the auth token type generated from the [Diglogflow service
+              agent](https://cloud.google.com/iam/docs/service-agents#dialogflow-service-agent).
+              The generated token is sent in the Authorization header.
+            enum_values:
+              - 'NONE'
+              - 'ID_TOKEN'
+              - 'ACCESS_TOKEN'
+          - name: uri
+            type: String
+            description: The webhook URI for receiving POST requests. It must use https protocol.
             required: true
-          - !ruby/object:Api::Type::KeyValuePairs
-            name: 'requestHeaders'
-            description: |
-              The HTTP request headers to send together with webhook requests.
-            immutable: true
-          - !ruby/object:Api::Type::Array
-            name: 'allowedCaCerts'
-            description: |
-              Specifies a list of allowed custom CA certificates (in DER format) for HTTPS verification.
-            item_type: Api::Type::String
-  - !ruby/object:Api::Type::String
-    name: 'startFlow'
+          - name: webhookType
+            type: Enum
+            description: |-
+              Type of the webhook.
+            enum_values:
+              - 'STANDARD'
+              - 'FLEXIBLE'
+  - name: 'startFlow'
+    type: String
+    description: |
+      Deprecated. Name of the start flow in this agent. A start flow will be automatically created when the agent is created, and can only be deleted by deleting the agent. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
     output: true
+  - name: 'securitySettings'
+    type: String
     description: |
-      Name of the start flow in this agent. A start flow will be automatically created when the agent is created, and can only be deleted by deleting the agent. Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/flows/<Flow ID>.
-  - !ruby/object:Api::Type::String
-    name: 'securitySettings'
+      Deprecated. Name of the SecuritySettings reference for the agent. Format: projects/<Project ID>/locations/<Location ID>/securitySettings/<Security Settings ID>.
+  - name: 'enableStackdriverLogging'
+    type: Boolean
     description: |
-      Name of the SecuritySettings reference for the agent. Format: projects/<Project ID>/locations/<Location ID>/securitySettings/<Security Settings ID>.
-  - !ruby/object:Api::Type::Boolean
-    name: 'enableStackdriverLogging'
+      Deprecated. Determines whether this agent should log conversation queries.
+  - name: 'enableSpellCorrection'
+    type: Boolean
     description: |
-      Determines whether this agent should log conversation queries.
-  - !ruby/object:Api::Type::Boolean
-    name: 'enableSpellCorrection'
-    description: |
-      Indicates if automatic spell correction is enabled in detect intent requests.
+      Deprecated. Indicates if automatic spell correction is enabled in detect intent requests.

@@ -1,8 +1,0 @@
-resource "google_firebase_database_instance" "full" {
-  provider = google-beta
-  project  = "<%= ctx[:test_env_vars]['project_id'] %>"
-  region   = "europe-west1"
-  instance_id = "<%= ctx[:vars]['instance_id'] %>"
-  type     = "USER_DATABASE"
-  desired_state   = "DISABLED"
-}

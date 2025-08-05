@@ -135,7 +135,7 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainCreate(d *schema.ResourceData
 		return err
 	}
 
-	if err := ServiceNetworkingOperationWaitTime(config, op, "Create Service Networking Peered DNS Domain", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
+	if err := ServiceNetworkingOperationWaitTimeHW(config, op, "Create Service Networking Peered DNS Domain", userAgent, project, d.Timeout(schema.TimeoutCreate)); err != nil {
 		return err
 	}
 
@@ -240,7 +240,7 @@ func resourceGoogleServiceNetworkingPeeredDNSDomainDelete(d *schema.ResourceData
 	return nil
 }
 
-// NOTE(deviavir): An out of band aspect of this API is that it uses a unique formatting of network
+// TODO: An out of band aspect of this API is that it uses a unique formatting of network
 // different from the standard self_link URI. It requires a call to the resource manager to get the project
 // number for the current project.
 func getProjectNumber(d *schema.ResourceData, config *transport_tpg.Config, project, userAgent string) (string, error) {

@@ -3,7 +3,7 @@ package datastream_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -33,7 +33,7 @@ func TestAccDatastreamStream_update(t *testing.T) {
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"stream_id", "location", "desired_state", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDatastreamStream_datastreamStreamBasicUpdate(context, "RUNNING", true),
@@ -43,7 +43,7 @@ func TestAccDatastreamStream_update(t *testing.T) {
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"stream_id", "location", "desired_state", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDatastreamStream_datastreamStreamBasicUpdate(context, "PAUSED", true),
@@ -53,7 +53,7 @@ func TestAccDatastreamStream_update(t *testing.T) {
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"stream_id", "location", "desired_state", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccDatastreamStream_datastreamStreamBasicUpdate(context, "RUNNING", true),
@@ -63,11 +63,21 @@ func TestAccDatastreamStream_update(t *testing.T) {
 				ResourceName:            "google_datastream_stream.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"stream_id", "location", "desired_state", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
+			},
+			{
+				ResourceName:            "google_datastream_stream.gtid",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"create_without_validation", "stream_id", "location", "desired_state", "labels", "terraform_labels"},
 			},
 			{
 				// Disable prevent_destroy
 				Config: testAccDatastreamStream_datastreamStreamBasicUpdate(context, "RUNNING", false),
+			},
+			{
+				Config: testAccDatastreamStream_datastreamStreamBasicExample(context),
+				Check:  resource.TestCheckResourceAttr("google_datastream_stream.gtid", "state", "NOT_STARTED"),
 			},
 		},
 	})
@@ -146,6 +156,7 @@ resource "google_datastream_connection_profile" "source_connection_profile" {
     display_name          = "Source connection profile"
     location              = "us-central1"
     connection_profile_id = "tf-test-source-profile%{random_suffix}"
+    create_without_validation = true
 
     mysql_profile {
         hostname = google_sql_database_instance.instance.public_ip_address
@@ -194,6 +205,7 @@ resource "google_datastream_stream" "default" {
     location = "us-central1"
     display_name = "my stream update"
     desired_state = "%{desired_state}"
+    create_without_validation = true
 
     labels = {
     	key = "updated"
@@ -202,7 +214,45 @@ resource "google_datastream_stream" "default" {
     source_config {
         source_connection_profile = google_datastream_connection_profile.source_connection_profile.id
 
-        mysql_source_config {}
+        mysql_source_config {
+	        binary_log_position {}
+	    }
+    }
+    destination_config {
+        destination_connection_profile = google_datastream_connection_profile.destination_connection_profile.id
+        gcs_destination_config {
+            path = "mydata"
+            file_rotation_mb = 200
+            file_rotation_interval = "60s"
+            json_file_format {
+                schema_file_format = "NO_SCHEMA_FILE"
+                compression = "GZIP"
+            }
+        }
+    }
+
+    backfill_all {
+    }
+	%{lifecycle_block}
+}
+
+resource "google_datastream_stream" "gtid" {
+    stream_id = "tf-test-my-stream-gtid%{random_suffix}"
+    location = "us-central1"
+    display_name = "my gtid stream update"
+    desired_state = "%{desired_state}"
+    create_without_validation = true
+
+    labels = {
+    	key = "updated"
+    }
+
+    source_config {
+        source_connection_profile = google_datastream_connection_profile.source_connection_profile.id
+
+        mysql_source_config {
+	        gtid {}
+	    }
     }
     destination_config {
         destination_connection_profile = google_datastream_connection_profile.destination_connection_profile.id

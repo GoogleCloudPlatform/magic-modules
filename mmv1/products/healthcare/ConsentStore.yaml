@@ -1,4 +1,4 @@
-# Copyright 2023 Google Inc.
+# Copyright 2024 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,91 +11,92 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- !ruby/object:Api::Resource
+---
 name: 'ConsentStore'
 kind: 'healthcare#consentStore'
-base_url: '{{dataset}}/consentStores?consentStoreId={{name}}'
-self_link: '{{dataset}}/consentStores/{{name}}'
-update_verb: :PATCH
-update_mask: true
 description: |
   The Consent Management API is a tool for tracking user consents and the documentation associated with the consents.
-iam_policy: !ruby/object:Api::Resource::IamPolicy
-  method_name_separator: ':'
-  fetch_iam_policy_verb: :GET
-  parent_resource_attribute: 'consent_store_id'
-  import_format: ['{{%dataset}}/consentStores/{{name}}', '{{name}}']
-  base_url: '{{%dataset}}/consentStores/{{name}}'
-  self_link: '{{%dataset}}/consentStores/{{name}}'
-references: !ruby/object:Api::Resource::ReferenceLinks
+references:
   guides:
     'Creating a Consent store': 'https://cloud.google.com/healthcare/docs/how-tos/consent'
   api: 'https://cloud.google.com/healthcare/docs/reference/rest/v1/projects.locations.datasets.consentStores'
-# Skipping the sweeper since this is a fine-grained resource under dataset
-skip_sweeper: true
+docs:
 id_format: '{{dataset}}/consentStores/{{name}}'
-import_format: ['{{%dataset}}/consentStores/{{name}}']
+base_url: '{{dataset}}/consentStores?consentStoreId={{name}}'
+self_link: '{{dataset}}/consentStores/{{name}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{%dataset}}/consentStores/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_attribute: 'consent_store_id'
+  base_url: '{{%dataset}}/consentStores/{{name}}'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  self_link: '{{%dataset}}/consentStores/{{name}}'
+  import_format:
+    - '{{%dataset}}/consentStores/{{name}}'
+    - '{{name}}'
+custom_code:
+# Skipping the sweeper since this is a fine-grained resource under dataset
+exclude_sweeper: true
 examples:
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'healthcare_consent_store_basic'
+  - name: 'healthcare_consent_store_basic'
     primary_resource_id: 'my-consent'
-    primary_resource_name:
-      ' fmt.Sprintf("projects/%s/locations/%s/datasets/tf-test-my-dataset%s",
-      envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(),
-      context["random_suffix"]), fmt.Sprintf("tf-test-my-consent-store%s",
-      context["random_suffix"])'
+    primary_resource_name: ' fmt.Sprintf("projects/%s/locations/%s/datasets/tf-test-my-dataset%s", envvar.GetTestProjectFromEnv(), envvar.GetTestRegionFromEnv(), context["random_suffix"]), fmt.Sprintf("tf-test-my-consent-store%s", context["random_suffix"])'
     vars:
       dataset_id: 'my-dataset'
       consent_id: 'my-consent-store'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'healthcare_consent_store_full'
+  - name: 'healthcare_consent_store_full'
     primary_resource_id: 'my-consent'
     vars:
       dataset_id: 'my-dataset'
       consent_id: 'my-consent-store'
-  - !ruby/object:Provider::Terraform::Examples
-    name: 'healthcare_consent_store_iam'
+  - name: 'healthcare_consent_store_iam'
     primary_resource_id: 'my-consent'
     vars:
       dataset_id: 'my-dataset'
       account_id: 'my-account'
       consent_id: 'my-consent-store'
 parameters:
-  - !ruby/object:Api::Type::ResourceRef
-    name: 'dataset'
+  - name: 'dataset'
+    type: ResourceRef
     description: |
       Identifies the dataset addressed by this request. Must be in the format
       'projects/{project}/locations/{location}/datasets/{dataset}'
+    url_param_only: true
     required: true
     immutable: true
     resource: 'Dataset'
     imports: 'selfLink'
-    url_param_only: true
 properties:
-  - !ruby/object:Api::Type::String
-    name: 'name'
+  - name: 'name'
+    type: String
     description: |
       The name of this ConsentStore, for example:
       "consent1"
+    url_param_only: true
     required: true
     immutable: true
-    url_param_only: true
-    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.erb'
-  - !ruby/object:Api::Type::String
-    name: 'defaultConsentTtl'
-    required: false
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'defaultConsentTtl'
+    type: String
     description: |
       Default time to live for consents in this store. Must be at least 24 hours. Updating this field will not affect the expiration time of existing consents.
 
       A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
-  - !ruby/object:Api::Type::Boolean
-    name: 'enableConsentCreateOnUpdate'
     required: false
+  - name: 'enableConsentCreateOnUpdate'
+    type: Boolean
     description: |
       If true, [consents.patch] [google.cloud.healthcare.v1.consent.UpdateConsent] creates the consent if it does not already exist.
-  - !ruby/object:Api::Type::KeyValueLabels
-    name: 'labels'
     required: false
+  - name: 'labels'
+    type: KeyValueLabels
     description: |
       User-supplied key-value pairs used to organize Consent stores.
 
@@ -109,3 +110,4 @@ properties:
 
       An object containing a list of "key": value pairs.
       Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+    required: false

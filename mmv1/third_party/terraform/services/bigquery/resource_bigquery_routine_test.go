@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -50,6 +50,7 @@ resource "google_bigquery_routine" "sproc" {
   routine_id     = "%s"
   routine_type = "SCALAR_FUNCTION"
   language = "SQL"
+  security_mode = "INVOKER"
   definition_body = "1"
 }
 `, dataset, routine)
@@ -66,6 +67,7 @@ resource "google_bigquery_routine" "sproc" {
   routine_id     = "%s"
   routine_type = "SCALAR_FUNCTION"
   language = "JAVASCRIPT"
+  security_mode = "DEFINER"
   definition_body = "CREATE FUNCTION multiplyInputs return x*y;"
   arguments {
     name = "x"

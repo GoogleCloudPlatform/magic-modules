@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
@@ -19,6 +19,7 @@ func TestAccRedisInstanceDatasource_basic(t *testing.T) {
 				Config: testAccRedisInstanceDatasourceConfig(acctest.RandString(t, 10)),
 				Check: resource.ComposeTestCheckFunc(
 					acctest.CheckDataSourceStateMatchesResourceState("data.google_redis_instance.redis", "google_redis_instance.redis"),
+					resource.TestCheckResourceAttrSet("data.google_redis_instance.redis", "reserved_ip_range"),
 				),
 			},
 		},

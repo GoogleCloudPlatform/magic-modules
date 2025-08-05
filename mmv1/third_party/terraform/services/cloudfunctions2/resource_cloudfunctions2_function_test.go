@@ -3,7 +3,7 @@ package cloudfunctions2_test
 import (
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -28,7 +28,7 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 				ResourceName:            "google_cloudfunctions2_function.terraform-test2",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.generation", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccCloudFunctions2Function_test_update(context),
@@ -37,7 +37,7 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 				ResourceName:            "google_cloudfunctions2_function.terraform-test2",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.generation", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccCloudFunctions2Function_test_redeploy(context),
@@ -46,7 +46,7 @@ func TestAccCloudFunctions2Function_update(t *testing.T) {
 				ResourceName:            "google_cloudfunctions2_function.terraform-test2",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.generation", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -75,7 +75,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   }
 
   build_config {
-    runtime = "nodejs12"
+    runtime = "nodejs18"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -115,9 +115,9 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   labels = {
     env = "test-update"
   }
-  
+
   build_config {
-    runtime = "nodejs12"
+    runtime = "nodejs18"
     entry_point = "helloHttp"
     source {
       storage_source {
@@ -125,6 +125,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
         object = google_storage_bucket_object.object.name
       }
     }
+    on_deploy_update_policy {}
   }
 
   service_config {
@@ -154,7 +155,7 @@ resource "google_cloudfunctions2_function" "terraform-test2" {
   description = "function test"
 
   build_config {
-    runtime = "nodejs16"
+    runtime = "nodejs18"
     entry_point = "helloHttp"
     environment_variables = {
         BUILD_CONFIG_TEST = "build_test"
@@ -189,9 +190,12 @@ func TestAccCloudFunctions2Function_fullUpdate(t *testing.T) {
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
-	if acctest.BootstrapPSARole(t, "service-", "gcp-sa-pubsub", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
-		t.Fatal("Stopping the test because a binding was added.")
-	}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -273,7 +277,7 @@ resource "google_cloudfunctions2_function" "function" {
   description = "a new function"
 
   build_config {
-    runtime     = "nodejs12"
+    runtime     = "nodejs18"
     entry_point = "entryPoint" # Set the entry point in the code
     environment_variables = {
       BUILD_CONFIG_TEST = "build_test"
@@ -318,4 +322,323 @@ resource "google_cloudfunctions2_function" "function" {
     }
   }
 }`, context)
+}
+
+func TestAccCloudFunctions2Function_updateAbiuFull(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"zip_path":      "./test-fixtures/function-source.zip",
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudfunctions2functionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudfunctions2function_abiuBasic(context),
+			},
+			{
+				ResourceName:            "google_cloudfunctions2_function.terraform-test2",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.generation", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccCloudFunctions2Function_test_abiuUpdate(context),
+			},
+			{
+				ResourceName:            "google_cloudfunctions2_function.terraform-test2",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.generation", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccCloudFunctions2Function_test_abiuUpdate2(context),
+			},
+			{
+				ResourceName:            "google_cloudfunctions2_function.terraform-test2",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location", "build_config.0.source.0.storage_source.0.object", "build_config.0.source.0.storage_source.0.generation", "build_config.0.source.0.storage_source.0.bucket", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccCloudfunctions2function_abiuBasic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "tf-test-cloudfunctions2-function-bucket%{random_suffix}"
+  location = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "%{zip_path}"
+}
+
+resource "google_cloudfunctions2_function" "terraform-test2" {
+  name = "tf-test-test-function%{random_suffix}"
+  location = "us-central1"
+  description = "a new function"
+  labels = {
+    env = "test"
+  }
+
+  build_config {
+    runtime = "nodejs18"
+    entry_point = "helloHttp"
+    source {
+      storage_source {
+        bucket = google_storage_bucket.bucket.name
+        object = google_storage_bucket_object.object.name
+      }
+    }
+    automatic_update_policy {}
+  }
+
+  service_config {
+    max_instance_count  = 1
+    available_memory    = "1536Mi"
+    timeout_seconds     = 30
+  }
+}
+`, context)
+}
+
+func testAccCloudFunctions2Function_test_abiuUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "tf-test-cloudfunctions2-function-bucket%{random_suffix}"
+  location = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "%{zip_path}"
+}
+
+resource "google_cloudfunctions2_function" "terraform-test2" {
+  name = "tf-test-test-function%{random_suffix}"
+  location = "us-central1"
+  description = "an updated function with automatic runtime update specified"
+  labels = {
+    env = "test-update"
+  }
+
+  build_config {
+    runtime = "nodejs18"
+    entry_point = "helloHttp"
+    source {
+      storage_source {
+        bucket = google_storage_bucket.bucket.name
+        object = google_storage_bucket_object.object.name
+      }
+    }
+    on_deploy_update_policy {}
+  }
+
+  service_config {
+    min_instance_count = 1
+  }
+}
+`, context)
+}
+
+func testAccCloudFunctions2Function_test_abiuUpdate2(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "tf-test-cloudfunctions2-function-bucket%{random_suffix}"
+  location = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "%{zip_path}"
+}
+
+resource "google_cloudfunctions2_function" "terraform-test2" {
+  name = "tf-test-test-function%{random_suffix}"
+  location = "us-central1"
+  description = "an updated function with no runtime update specified"
+  labels = {
+    env = "test-update"
+  }
+
+  build_config {
+    runtime = "nodejs18"
+    entry_point = "helloHttp"
+    source {
+      storage_source {
+        bucket = google_storage_bucket.bucket.name
+        object = google_storage_bucket_object.object.name
+      }
+    }
+  }
+
+  service_config {
+    min_instance_count = 1
+  }
+}
+`, context)
+}
+
+func TestAccCloudFunctions2Function_generation(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"zip_path":      "./test-fixtures/function-source.zip",
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudfunctions2functionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudfunctions2function_generation(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckOutput("object_gen_eq_storage_source_gen", "true"),
+				),
+			},
+		},
+	})
+}
+
+func testAccCloudfunctions2function_generation(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "tf-test-cloudfunctions2-function-bucket%{random_suffix}"
+  location = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "%{zip_path}"
+}
+
+resource "google_cloudfunctions2_function" "terraform-test2" {
+  name = "tf-test-test-function%{random_suffix}"
+  location = "us-central1"
+  description = "a new function"
+  labels = {
+    env = "test"
+  }
+
+  build_config {
+    runtime = "nodejs18"
+    entry_point = "helloHttp"
+    source {
+      storage_source {
+        bucket = google_storage_bucket.bucket.name
+        object = google_storage_bucket_object.object.name
+        generation = google_storage_bucket_object.object.generation
+      }
+    }
+  }
+
+  service_config {
+    max_instance_count  = 1
+    available_memory    = "1536Mi"
+    timeout_seconds     = 30
+  }
+}
+
+output "object_gen_eq_storage_source_gen" {
+  value = google_storage_bucket_object.object.generation == google_cloudfunctions2_function.terraform-test2.build_config.0.source.0.storage_source.0.generation
+}
+`, context)
+}
+
+func TestAccCloudFunctions2Function_binAuthPolicy(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"zip_path":      "./test-fixtures/function-source.zip",
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudfunctions2functionDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudfunctions2function_binAuthz(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckOutput("binary_authorization_policy_eq", "true"),
+				),
+			},
+		},
+	})
+}
+
+func testAccCloudfunctions2function_binAuthz(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_storage_bucket" "bucket" {
+  name     = "tf-test-cloudfunctions2-function-bucket%{random_suffix}"
+  location = "US"
+  uniform_bucket_level_access = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name   = "function-source.zip"
+  bucket = google_storage_bucket.bucket.name
+  source = "%{zip_path}"
+}
+
+resource "google_binary_authorization_policy" "policy" {
+  default_admission_rule {
+    evaluation_mode  = "ALWAYS_ALLOW"
+    enforcement_mode = "ENFORCED_BLOCK_AND_AUDIT_LOG"
+  }
+}
+
+resource "google_cloudfunctions2_function" "terraform-test2" {
+  depends_on = [
+    google_binary_authorization_policy.policy
+  ]
+  name = "tf-test-test-function%{random_suffix}"
+  location = "us-central1"
+  description = "a new function"
+  labels = {
+    env = "test"
+  }
+
+  build_config {
+    runtime = "nodejs18"
+    entry_point = "helloHttp"
+    source {
+      storage_source {
+        bucket = google_storage_bucket.bucket.name
+        object = google_storage_bucket_object.object.name
+        generation = google_storage_bucket_object.object.generation
+      }
+    }
+  }
+
+  service_config {
+    max_instance_count  = 1
+    available_memory    = "1536Mi"
+    timeout_seconds     = 30
+    binary_authorization_policy = "default"
+  }
+}
+
+output "binary_authorization_policy_eq" {
+  value = google_cloudfunctions2_function.terraform-test2.service_config.0.binary_authorization_policy == "default"
+}
+`, context)
 }

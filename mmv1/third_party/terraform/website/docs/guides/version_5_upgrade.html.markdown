@@ -1,12 +1,12 @@
 ---
-page_title: "Terraform Google Provider 5.0.0 Upgrade Guide"
+page_title: "Terraform provider for Google Cloud 5.0.0 Upgrade Guide"
 description: |-
-  Terraform Google Provider 5.0.0 Upgrade Guide
+  Terraform provider for Google Cloud 5.0.0 Upgrade Guide
 ---
 
-# Terraform Google Provider 5.0.0 Upgrade Guide
+# Terraform provider for Google Cloud 5.0.0 Upgrade Guide
 
-The `5.0.0` release of the Google provider for Terraform is a major version and
+The `5.0.0` release of the Terraform provider for Google Cloud is a major version and
 includes some changes that you will need to consider when upgrading. This guide
 is intended to help with that process and focuses only on the changes necessary
 to upgrade from the final `4.X` series release to `5.0.0`.
@@ -113,8 +113,8 @@ included in requests to the API. Replacing those labels' values with `_` or
 `true` are recommended.
 
 Not all of Google Cloud resources support labels and annotations. Please check
-the Terraform Google provider resource documentation to figure out if a given
-resource supports `labels` or `annotations` fields.
+the resource documentation to figure out if a given resource supports `labels`
+or `annotations` fields.
 
 #### Provider default labels
 
@@ -188,7 +188,7 @@ Provider-level default annotations are not supported at this time.
 
 #### Resource labels
 
-Previously, `labels` and `annotations` fields in the Terraform Google provider
+Previously, `labels` and `annotations` fields in the Google Cloud provider
 were authoritative and Terraform thought it was the only owner of the fields.
 This model worked well initially, but with the introduction of system labels and
 other client-managed labels, Terraform would conflict with their labels and show
@@ -726,7 +726,7 @@ proposed value to configuration (below) or apply `lifecycle.ignore_changes` to t
 
 ## Resource: `google_dataflow_flex_template_job`
 
-### Fields that are a part of the [environment block](https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.locations.flexTemplates/launch#FlexTemplateRuntimeEnvironment) will be overriden to be sent via their fields even when supplied via parameters.
+### Fields that are a part of the [environment block](https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.locations.flexTemplates/launch#FlexTemplateRuntimeEnvironment) will be overridden to be sent via their fields even when supplied via parameters.
 
 Several fields within the `google_dataflow_flex_template_job` resource can be supplied through either the `parameters{}` block or a field on the resource object. Support for these fields on the resource object was added in the `4.66.0` release of the Google provider. That version introduced an issue where the values were being double-sent to the API due to being recorded in Terraform state in two places. To resolve this issue, these fields will be deduplicated and sent to the API through the resource object.
 

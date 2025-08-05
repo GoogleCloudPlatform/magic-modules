@@ -65,9 +65,9 @@ func (s *CloudFunctionId) locationId() string {
 
 func parseCloudFunctionId(d *schema.ResourceData, config *transport_tpg.Config) (*CloudFunctionId, error) {
 	if err := tpgresource.ParseImportId([]string{
-		"projects/(?P<project>[^/]+)/locations/(?P<region>[^/]+)/functions/(?P<name>[^/]+)",
-		"(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)",
-		"(?P<name>[^/]+)",
+		"^projects/(?P<project>[^/]+)/locations/(?P<region>[^/]+)/functions/(?P<name>[^/]+)$",
+		"^(?P<project>[^/]+)/(?P<region>[^/]+)/(?P<name>[^/]+)$",
+		"^(?P<name>[^/]+)$",
 	}, d, config); err != nil {
 		return nil, err
 	}
@@ -136,10 +136,10 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 		},
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(5 * time.Minute),
-			Read:   schema.DefaultTimeout(5 * time.Minute),
-			Update: schema.DefaultTimeout(5 * time.Minute),
-			Delete: schema.DefaultTimeout(5 * time.Minute),
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Read:   schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(20 * time.Minute),
 		},
 
 		CustomizeDiff: customdiff.All(
@@ -201,7 +201,7 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: `Docker Registry to use for storing the function's Docker images. Allowed values are CONTAINER_REGISTRY (default) and ARTIFACT_REGISTRY.`,
+				Description: `Docker Registry to use for storing the function's Docker images. Allowed values are ARTIFACT_REGISTRY (default) and CONTAINER_REGISTRY.`,
 			},
 
 			"docker_repository": {
@@ -287,7 +287,7 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 			"runtime": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: `The runtime in which the function is going to run. Eg. "nodejs12", "nodejs14", "python37", "go111".`,
+				Description: `The runtime in which the function is going to run. Eg. "nodejs20", "python37", "go111".`,
 			},
 
 			"service_account_email": {
@@ -296,6 +296,13 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 				Computed:    true,
 				ForceNew:    true,
 				Description: ` If provided, the self-provided service account to run the function with.`,
+			},
+
+			"build_service_account": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: `The fully-qualified name of the service account to be used for the build step of deploying this function`,
 			},
 
 			"vpc_connector": {
@@ -485,11 +492,42 @@ func ResourceCloudFunctionsFunction() *schema.Resource {
 					},
 				},
 			},
+
+			"automatic_update_policy": {
+				Type:          schema.TypeList,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"on_deploy_update_policy"},
+				MaxItems:      1,
+				Description:   `Security patches are applied automatically to the runtime without requiring the function to be redeployed.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{},
+				},
+			},
+
+			"on_deploy_update_policy": {
+				Type:          schema.TypeList,
+				Optional:      true,
+				ConflictsWith: []string{"automatic_update_policy"},
+				MaxItems:      1,
+				Description:   `Security patches are only applied when a function is redeployed.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"runtime_version": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: `The runtime version which was used during latest function deployment.`,
+						},
+					},
+				},
+			},
+
 			"status": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: `Describes the current stage of a deployment.`,
 			},
+
 			"version_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -583,6 +621,14 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 			"You must specify a trigger when deploying a new function.")
 	}
 
+	if v, ok := d.GetOk("automatic_update_policy"); ok {
+		function.AutomaticUpdatePolicy = expandAutomaticUpdatePolicy(v.([]interface{}))
+		function.OnDeployUpdatePolicy = nil
+	} else if v, ok := d.GetOk("on_deploy_update_policy"); ok {
+		function.OnDeployUpdatePolicy = expandOnDeployUpdatePolicy(v.([]interface{}))
+		function.AutomaticUpdatePolicy = nil
+	}
+
 	if v, ok := d.GetOk("ingress_settings"); ok {
 		function.IngressSettings = v.(string)
 	}
@@ -625,6 +671,10 @@ func resourceCloudFunctionsCreate(d *schema.ResourceData, meta interface{}) erro
 
 	if v, ok := d.GetOk("min_instances"); ok {
 		function.MinInstances = int64(v.(int))
+	}
+
+	if v, ok := d.GetOk("build_service_account"); ok {
+		function.BuildServiceAccount = v.(string)
 	}
 
 	log.Printf("[DEBUG] Creating cloud function: %s", function.Name)
@@ -714,6 +764,9 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 	if err := d.Set("service_account_email", function.ServiceAccountEmail); err != nil {
 		return fmt.Errorf("Error setting service_account_email: %s", err)
 	}
+	if err := d.Set("build_service_account", function.BuildServiceAccount); err != nil {
+		return fmt.Errorf("Error setting build_service_account: %s", err)
+	}
 	if err := d.Set("environment_variables", function.EnvironmentVariables); err != nil {
 		return fmt.Errorf("Error setting environment_variables: %s", err)
 	}
@@ -793,6 +846,25 @@ func resourceCloudFunctionsRead(d *schema.ResourceData, meta interface{}) error 
 	}
 	if err := d.Set("version_id", strconv.FormatInt(function.VersionId, 10)); err != nil {
 		return fmt.Errorf("Error setting version_id: %s", err)
+	}
+	// check the on_deploy_update_policy first as it's mutually exclusive to automatice_update_policy, and the latter is system default
+	if function.OnDeployUpdatePolicy != nil {
+		if err := d.Set("on_deploy_update_policy", flattenOnDeployUpdatePolicy(function.OnDeployUpdatePolicy)); err != nil {
+			return fmt.Errorf("Error setting on_deploy_update_policy: %s", err)
+		}
+		function.AutomaticUpdatePolicy = nil
+		d.Set("automatic_update_policy", nil)
+	} else {
+		d.Set("on_deploy_update_policy", nil)
+	}
+
+	if function.AutomaticUpdatePolicy != nil {
+		if err := d.Set("automatic_update_policy", flattenAutomaticUpdatePolicy(function.AutomaticUpdatePolicy)); err != nil {
+			return fmt.Errorf("Error setting automatic_update_policy: %s", err)
+		}
+		d.Set("on_deploy_update_policy", nil)
+	} else {
+		d.Set("automatic_update_policy", nil)
 	}
 
 	return nil
@@ -897,7 +969,7 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 		updateMaskArr = append(updateMaskArr, "buildEnvironmentVariables")
 	}
 
-	if d.HasChange("vpc_connector") {
+	if d.HasChange("vpc_connector") || d.HasChange("vpc_connector_egress_settings") {
 		function.VpcConnector = d.Get("vpc_connector").(string)
 		updateMaskArr = append(updateMaskArr, "vpcConnector")
 	}
@@ -943,6 +1015,27 @@ func resourceCloudFunctionsUpdate(d *schema.ResourceData, meta interface{}) erro
 	if d.HasChange("min_instances") {
 		function.MinInstances = int64(d.Get("min_instances").(int))
 		updateMaskArr = append(updateMaskArr, "minInstances")
+	}
+
+	if d.HasChange("build_service_account") {
+		function.BuildServiceAccount = d.Get("build_service_account").(string)
+		updateMaskArr = append(updateMaskArr, "buildServiceAccount")
+	}
+
+	if d.HasChange("automatic_update_policy") {
+		function.AutomaticUpdatePolicy = expandAutomaticUpdatePolicy(d.Get("automatic_update_policy").([]interface{}))
+		if function.AutomaticUpdatePolicy != nil {
+			function.OnDeployUpdatePolicy = nil
+		}
+		updateMaskArr = append(updateMaskArr, "automatic_update_policy")
+	}
+
+	if d.HasChange("on_deploy_update_policy") {
+		function.OnDeployUpdatePolicy = expandOnDeployUpdatePolicy(d.Get("on_deploy_update_policy").([]interface{}))
+		if function.OnDeployUpdatePolicy != nil {
+			function.AutomaticUpdatePolicy = nil
+		}
+		updateMaskArr = append(updateMaskArr, "on_deploy_update_policy")
 	}
 
 	if len(updateMaskArr) > 0 {
@@ -1211,5 +1304,44 @@ func flattenSecretVersion(secretVersions []*cloudfunctions.SecretVersion) []map[
 			result = append(result, data)
 		}
 	}
+	return result
+}
+
+func expandAutomaticUpdatePolicy(configured []interface{}) *cloudfunctions.AutomaticUpdatePolicy {
+	if len(configured) == 0 {
+		return nil
+	}
+	return &cloudfunctions.AutomaticUpdatePolicy{}
+}
+
+func flattenAutomaticUpdatePolicy(policy *cloudfunctions.AutomaticUpdatePolicy) []map[string]interface{} {
+	result := make([]map[string]interface{}, 0, 1)
+	if policy == nil {
+		return nil
+	}
+	// Have to append an empty element for empty message type
+	result = append(result, map[string]interface{}{})
+	return result
+}
+
+func expandOnDeployUpdatePolicy(configured []interface{}) *cloudfunctions.OnDeployUpdatePolicy {
+	if len(configured) == 0 {
+		return nil
+	}
+	return &cloudfunctions.OnDeployUpdatePolicy{}
+}
+
+func flattenOnDeployUpdatePolicy(policy *cloudfunctions.OnDeployUpdatePolicy) []map[string]interface{} {
+	result := make([]map[string]interface{}, 0, 1)
+	if policy == nil {
+		return nil
+	}
+
+	result = append(result, map[string]interface{}{
+		"runtime_version": policy.RuntimeVersion,
+	})
+
+	log.Printf("flatten on_deploy_update_policy to: %s", result)
+
 	return result
 }

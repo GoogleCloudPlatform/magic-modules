@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/caiasset"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/caiasset"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/cai2hcl/common"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/cai2hcl/common"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zclconf/go-cty/cty"
 	"google.golang.org/api/compute/v1"
@@ -219,6 +219,9 @@ func convertScheduling(sched *compute.Scheduling) []map[string]interface{} {
 	if len(sched.ProvisioningModel) > 0 {
 		data["provisioning_model"] = sched.ProvisioningModel
 	}
+	if sched.AvailabilityDomain > 0 {
+		data["availability_domain"] = sched.AvailabilityDomain
+	}
 	return []map[string]interface{}{data}
 }
 
@@ -333,6 +336,7 @@ func flattenIpv6AccessConfigs(ipv6AccessConfigs []*compute.AccessConfig) []map[s
 		}
 		flattened[i]["public_ptr_domain_name"] = ac.PublicPtrDomainName
 		flattened[i]["external_ipv6"] = ac.ExternalIpv6
+		flattened[i]["external_ipv6_prefix_length"] = ac.ExternalIpv6PrefixLength
 	}
 	return flattened
 }

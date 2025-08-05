@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -44,6 +44,7 @@ func TestAccDataSourceGoogleBillingAccount_byShortName(t *testing.T) {
 					resource.TestCheckResourceAttr("data.google_billing_account.acct", "id", billingId),
 					resource.TestCheckResourceAttr("data.google_billing_account.acct", "name", name),
 					resource.TestCheckResourceAttr("data.google_billing_account.acct", "open", "true"),
+					resource.TestCheckResourceAttrSet("data.google_billing_account.acct", "currency_code"),
 				),
 			},
 		},

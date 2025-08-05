@@ -1,0 +1,13 @@
+resource "google_chronicle_data_access_scope" "{{$.PrimaryResourceId}}" {
+  location = "us"
+  instance = "{{index $.TestEnvVars "chronicle_id"}}"
+  data_access_scope_id = "{{index $.Vars "data_access_scope_id"}}"
+  description = "{{index $.Vars "description"}}"
+  allowed_data_access_labels {
+    ingestion_label {
+	  ingestion_label_key = "ingestion_key"
+      ingestion_label_value = "ingestion_value"
+    }
+  }
+}
+

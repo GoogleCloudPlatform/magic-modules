@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -62,6 +63,7 @@ var (
 		"cluster_config.0.gce_cluster_config.0.metadata",
 		"cluster_config.0.gce_cluster_config.0.reservation_affinity",
 		"cluster_config.0.gce_cluster_config.0.node_group_affinity",
+		"cluster_config.0.gce_cluster_config.0.confidential_instance_config",
 	}
 
 	schieldedInstanceConfigKeys = []string{
@@ -76,11 +78,13 @@ var (
 		"cluster_config.0.gce_cluster_config.0.reservation_affinity.0.values",
 	}
 
-	preemptibleWorkerDiskConfigKeys = []string{
-		"cluster_config.0.preemptible_worker_config.0.disk_config.0.num_local_ssds",
-		"cluster_config.0.preemptible_worker_config.0.disk_config.0.boot_disk_size_gb",
-		"cluster_config.0.preemptible_worker_config.0.disk_config.0.boot_disk_type",
+	confidentialInstanceConfigKeys = []string{
+		"cluster_config.0.gce_cluster_config.0.confidential_instance_config.0.enable_confidential_compute",
 	}
+
+	masterDiskConfigKeys            = diskConfigKeys("master_config")
+	workerDiskConfigKeys            = diskConfigKeys("worker_config")
+	preemptibleWorkerDiskConfigKeys = diskConfigKeys("preemptible_worker_config")
 
 	clusterSoftwareConfigKeys = []string{
 		"cluster_config.0.software_config.0.image_version",
@@ -98,6 +102,7 @@ var (
 	}
 
 	clusterConfigKeys = []string{
+		"cluster_config.0.cluster_tier",
 		"cluster_config.0.staging_bucket",
 		"cluster_config.0.temp_bucket",
 		"cluster_config.0.gce_cluster_config",
@@ -119,6 +124,29 @@ var (
 
 const resourceDataprocGoogleLabelPrefix = "goog-dataproc"
 const resourceDataprocGoogleProvidedLabelPrefix = "labels." + resourceDataprocGoogleLabelPrefix
+
+// The keys inside a DiskConfig. configName is the name of the field this disk
+// config is inside. E.g. 'master_config', 'worker_config', or
+// 'preemptible_worker_config'.
+func diskConfigKeys(configName string) []string {
+	return []string{
+		"cluster_config.0." + configName + ".0.disk_config.0.num_local_ssds",
+		"cluster_config.0." + configName + ".0.disk_config.0.boot_disk_size_gb",
+		"cluster_config.0." + configName + ".0.disk_config.0.boot_disk_type",
+		"cluster_config.0." + configName + ".0.disk_config.0.local_ssd_interface",
+	}
+}
+
+// Suppress diffs for values that are equivalent except for their use of the words "location"
+// compared to "region" or "zone"
+func LocationDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	return LocationDiffSuppressHelper(old, new) || LocationDiffSuppressHelper(new, old)
+}
+
+func LocationDiffSuppressHelper(a, b string) bool {
+	return strings.Replace(a, "/locations/", "/regions/", 1) == b ||
+		strings.Replace(a, "/locations/", "/zones/", 1) == b
+}
 
 func resourceDataprocLabelDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if strings.HasPrefix(k, resourceDataprocGoogleProvidedLabelPrefix) && new == "" {
@@ -166,7 +194,8 @@ func ResourceDataprocCluster() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
-			tpgresource.SetLabelsDiff,
+			// User labels are not supported in Dataproc Virtual Cluster
+			tpgresource.SetLabelsDiffWithoutAttributionLabel,
 		),
 
 		SchemaVersion: 1,
@@ -235,7 +264,7 @@ func ResourceDataprocCluster() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Description: `The list of the labels (key/value pairs) configured on the resource and to be applied to instances in the cluster.
-				
+
 				**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
 				Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
 			},
@@ -524,7 +553,15 @@ func ResourceDataprocCluster() *schema.Resource {
 				Description: `Allows you to configure various aspects of the cluster.`,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-
+						"cluster_tier": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Computed:     true,
+							Description:  `Specifies the tier of the cluster created.`,
+							AtLeastOneOf: clusterConfigKeys,
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"CLUSTER_TIER_UNSPECIFIED", "CLUSTER_TIER_STANDARD", "CLUSTER_TIER_PREMIUM"}, false),
+						},
 						"staging_bucket": {
 							Type:         schema.TypeString,
 							Optional:     true,
@@ -637,6 +674,7 @@ func ResourceDataprocCluster() *schema.Resource {
 									"metadata": {
 										Type:         schema.TypeMap,
 										Optional:     true,
+										Computed:     true,
 										AtLeastOneOf: gceClusterConfigKeys,
 										Elem:         &schema.Schema{Type: schema.TypeString},
 										ForceNew:     true,
@@ -735,6 +773,26 @@ func ResourceDataprocCluster() *schema.Resource {
 											},
 										},
 									},
+									"confidential_instance_config": {
+										Type:         schema.TypeList,
+										Optional:     true,
+										AtLeastOneOf: gceClusterConfigKeys,
+										Computed:     true,
+										MaxItems:     1,
+										Description:  `Confidential Instance Config for clusters using Compute Engine Confidential VMs.`,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"enable_confidential_compute": {
+													Type:         schema.TypeBool,
+													Optional:     true,
+													Default:      false,
+													AtLeastOneOf: confidentialInstanceConfigKeys,
+													ForceNew:     true,
+													Description:  `Defines whether the instance should have confidential compute enabled.`,
+												},
+											},
+										},
+									},
 								},
 							},
 						},
@@ -819,43 +877,39 @@ func ResourceDataprocCluster() *schema.Resource {
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"num_local_ssds": {
-													Type:        schema.TypeInt,
-													Optional:    true,
-													Computed:    true,
-													Description: `The amount of local SSD disks that will be attached to each master cluster node. Defaults to 0.`,
-													AtLeastOneOf: []string{
-														"cluster_config.0.master_config.0.disk_config.0.num_local_ssds",
-														"cluster_config.0.master_config.0.disk_config.0.boot_disk_size_gb",
-														"cluster_config.0.master_config.0.disk_config.0.boot_disk_type",
-													},
-													ForceNew: true,
+													Type:         schema.TypeInt,
+													Optional:     true,
+													Computed:     true,
+													Description:  `The amount of local SSD disks that will be attached to each master cluster node. Defaults to 0.`,
+													AtLeastOneOf: masterDiskConfigKeys,
+													ForceNew:     true,
 												},
 
 												"boot_disk_size_gb": {
-													Type:        schema.TypeInt,
-													Optional:    true,
-													Computed:    true,
-													Description: `Size of the primary disk attached to each node, specified in GB. The primary disk contains the boot volume and system libraries, and the smallest allowed disk size is 10GB. GCP will default to a predetermined computed value if not set (currently 500GB). Note: If SSDs are not attached, it also contains the HDFS data blocks and Hadoop working directories.`,
-													AtLeastOneOf: []string{
-														"cluster_config.0.master_config.0.disk_config.0.num_local_ssds",
-														"cluster_config.0.master_config.0.disk_config.0.boot_disk_size_gb",
-														"cluster_config.0.master_config.0.disk_config.0.boot_disk_type",
-													},
+													Type:         schema.TypeInt,
+													Optional:     true,
+													Computed:     true,
+													Description:  `Size of the primary disk attached to each node, specified in GB. The primary disk contains the boot volume and system libraries, and the smallest allowed disk size is 10GB. GCP will default to a predetermined computed value if not set (currently 500GB). Note: If SSDs are not attached, it also contains the HDFS data blocks and Hadoop working directories.`,
+													AtLeastOneOf: masterDiskConfigKeys,
 													ForceNew:     true,
 													ValidateFunc: validation.IntAtLeast(10),
 												},
 
 												"boot_disk_type": {
-													Type:        schema.TypeString,
-													Optional:    true,
-													Description: `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard". Defaults to "pd-standard".`,
-													AtLeastOneOf: []string{
-														"cluster_config.0.master_config.0.disk_config.0.num_local_ssds",
-														"cluster_config.0.master_config.0.disk_config.0.boot_disk_size_gb",
-														"cluster_config.0.master_config.0.disk_config.0.boot_disk_type",
-													},
-													ForceNew: true,
-													Default:  "pd-standard",
+													Type:         schema.TypeString,
+													Optional:     true,
+													Description:  `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard". Defaults to "pd-standard".`,
+													AtLeastOneOf: masterDiskConfigKeys,
+													ForceNew:     true,
+													Default:      "pd-standard",
+												},
+
+												"local_ssd_interface": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													Description:  `Interface type of local SSDs (default is "scsi"). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).`,
+													AtLeastOneOf: masterDiskConfigKeys,
+													ForceNew:     true,
 												},
 											},
 										},
@@ -968,43 +1022,39 @@ func ResourceDataprocCluster() *schema.Resource {
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"num_local_ssds": {
-													Type:        schema.TypeInt,
-													Optional:    true,
-													Computed:    true,
-													Description: `The amount of local SSD disks that will be attached to each master cluster node. Defaults to 0.`,
-													AtLeastOneOf: []string{
-														"cluster_config.0.worker_config.0.disk_config.0.num_local_ssds",
-														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_size_gb",
-														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_type",
-													},
-													ForceNew: true,
+													Type:         schema.TypeInt,
+													Optional:     true,
+													Computed:     true,
+													Description:  `The amount of local SSD disks that will be attached to each master cluster node. Defaults to 0.`,
+													AtLeastOneOf: workerDiskConfigKeys,
+													ForceNew:     true,
 												},
 
 												"boot_disk_size_gb": {
-													Type:        schema.TypeInt,
-													Optional:    true,
-													Computed:    true,
-													Description: `Size of the primary disk attached to each node, specified in GB. The primary disk contains the boot volume and system libraries, and the smallest allowed disk size is 10GB. GCP will default to a predetermined computed value if not set (currently 500GB). Note: If SSDs are not attached, it also contains the HDFS data blocks and Hadoop working directories.`,
-													AtLeastOneOf: []string{
-														"cluster_config.0.worker_config.0.disk_config.0.num_local_ssds",
-														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_size_gb",
-														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_type",
-													},
+													Type:         schema.TypeInt,
+													Optional:     true,
+													Computed:     true,
+													Description:  `Size of the primary disk attached to each node, specified in GB. The primary disk contains the boot volume and system libraries, and the smallest allowed disk size is 10GB. GCP will default to a predetermined computed value if not set (currently 500GB). Note: If SSDs are not attached, it also contains the HDFS data blocks and Hadoop working directories.`,
+													AtLeastOneOf: workerDiskConfigKeys,
 													ForceNew:     true,
 													ValidateFunc: validation.IntAtLeast(10),
 												},
 
 												"boot_disk_type": {
-													Type:        schema.TypeString,
-													Optional:    true,
-													Description: `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard". Defaults to "pd-standard".`,
-													AtLeastOneOf: []string{
-														"cluster_config.0.worker_config.0.disk_config.0.num_local_ssds",
-														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_size_gb",
-														"cluster_config.0.worker_config.0.disk_config.0.boot_disk_type",
-													},
-													ForceNew: true,
-													Default:  "pd-standard",
+													Type:         schema.TypeString,
+													Optional:     true,
+													Description:  `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard". Defaults to "pd-standard".`,
+													AtLeastOneOf: workerDiskConfigKeys,
+													ForceNew:     true,
+													Default:      "pd-standard",
+												},
+
+												"local_ssd_interface": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													Description:  `Interface type of local SSDs (default is "scsi"). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).`,
+													AtLeastOneOf: workerDiskConfigKeys,
+													ForceNew:     true,
 												},
 											},
 										},
@@ -1130,6 +1180,14 @@ func ResourceDataprocCluster() *schema.Resource {
 													Default:      "pd-standard",
 													Description:  `The disk type of the primary disk attached to each preemptible worker node. Such as "pd-ssd" or "pd-standard". Defaults to "pd-standard".`,
 												},
+
+												"local_ssd_interface": {
+													Type:         schema.TypeString,
+													Optional:     true,
+													AtLeastOneOf: preemptibleWorkerDiskConfigKeys,
+													ForceNew:     true,
+													Description:  `Interface type of local SSDs (default is "scsi"). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).`,
+												},
 											},
 										},
 									},
@@ -1161,6 +1219,7 @@ func ResourceDataprocCluster() *schema.Resource {
 													ForceNew: true,
 													AtLeastOneOf: []string{
 														"cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list",
+														"cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.provisioning_model_mix",
 													},
 													Description: `List of instance selection options that the group will use when creating new VMs.`,
 													Elem: &schema.Resource{
@@ -1205,6 +1264,36 @@ func ResourceDataprocCluster() *schema.Resource {
 														},
 													},
 												},
+												"provisioning_model_mix": {
+													Type:     schema.TypeList,
+													Optional: true,
+													ForceNew: true,
+													AtLeastOneOf: []string{
+														"cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.instance_selection_list",
+														"cluster_config.0.preemptible_worker_config.0.instance_flexibility_policy.0.provisioning_model_mix",
+													},
+													MaxItems:    1,
+													Description: `Defines how Dataproc should create VMs with a mixture of provisioning models.`,
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															"standard_capacity_base": {
+																Type:         schema.TypeInt,
+																Optional:     true,
+																ForceNew:     true,
+																Description:  `The base capacity that will always use Standard VMs to avoid risk of more preemption than the minimum capacity you need.`,
+																ValidateFunc: validation.IntAtLeast(0),
+															},
+
+															"standard_capacity_percent_above_base": {
+																Type:         schema.TypeInt,
+																Optional:     true,
+																ForceNew:     true,
+																Description:  `The percentage of target capacity that should use Standard VM. The remaining percentage will use Spot VMs.`,
+																ValidateFunc: validation.IntBetween(0, 100),
+															},
+														},
+													},
+												},
 											},
 										},
 									},
@@ -1221,9 +1310,13 @@ func ResourceDataprocCluster() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"kerberos_config": {
 										Type:        schema.TypeList,
-										Required:    true,
 										Description: "Kerberos related configuration",
-										MaxItems:    1,
+										Optional:    true,
+										ExactlyOneOf: []string{
+											"cluster_config.0.security_config.0.kerberos_config",
+											"cluster_config.0.security_config.0.identity_config",
+										},
+										MaxItems: 1,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"cross_realm_trust_admin_server": {
@@ -1303,6 +1396,26 @@ by Dataproc`,
 													Type:        schema.TypeString,
 													Optional:    true,
 													Description: `The Cloud Storage URI of the truststore file used for SSL encryption. If not provided, Dataproc will provide a self-signed certificate.`,
+												},
+											},
+										},
+									},
+									"identity_config": {
+										Type:        schema.TypeList,
+										Description: "Identity related configuration",
+										Optional:    true,
+										ExactlyOneOf: []string{
+											"cluster_config.0.security_config.0.kerberos_config",
+											"cluster_config.0.security_config.0.identity_config",
+										},
+										MaxItems: 1,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"user_service_account_mapping": {
+													Type:        schema.TypeMap,
+													Required:    true,
+													Elem:        &schema.Schema{Type: schema.TypeString},
+													Description: `User to service account mappings for multi-tenancy.`,
 												},
 											},
 										},
@@ -1420,7 +1533,7 @@ by Dataproc`,
 										Type:             schema.TypeString,
 										Required:         true,
 										Description:      `The autoscaling policy used by the cluster.`,
-										DiffSuppressFunc: tpgresource.LocationDiffSuppress,
+										DiffSuppressFunc: LocationDiffSuppress,
 									},
 								},
 							},
@@ -1613,6 +1726,13 @@ by Dataproc`,
 																			Description: `The disk type of the primary disk attached to each node. Such as "pd-ssd" or "pd-standard". Defaults to "pd-standard".`,
 																			ForceNew:    true,
 																			Default:     "pd-standard",
+																		},
+
+																		"local_ssd_interface": {
+																			Type:        schema.TypeString,
+																			Optional:    true,
+																			Description: `Interface type of local SSDs (default is "scsi"). Valid values: "scsi" (Small Computer System Interface), "nvme" (Non-Volatile Memory Express).`,
+																			ForceNew:    true,
 																		},
 																	},
 																},
@@ -1962,6 +2082,10 @@ func expandClusterConfig(d *schema.ResourceData, config *transport_tpg.Config) (
 		conf.TempBucket = v.(string)
 	}
 
+	if v, ok := d.GetOk("cluster_config.0.cluster_tier"); ok {
+		conf.ClusterTier = v.(string)
+	}
+
 	c, err := expandGceClusterConfig(d, config)
 	if err != nil {
 		return nil, err
@@ -2094,6 +2218,9 @@ func expandNodeGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGroupCo
 			if v, ok := dcfg["boot_disk_type"]; ok {
 				icg.DiskConfig.BootDiskType = v.(string)
 			}
+			if v, ok := dcfg["local_ssd_interface"]; ok {
+				icg.DiskConfig.LocalSsdInterface = v.(string)
+			}
 		}
 	}
 
@@ -2145,6 +2272,7 @@ func expandGceClusterConfig(d *schema.ResourceData, config *transport_tpg.Config
 	}
 	if v, ok := cfg["internal_ip_only"]; ok {
 		conf.InternalIpOnly = v.(bool)
+		conf.ForceSendFields = append(conf.ForceSendFields, "InternalIpOnly")
 	}
 	if v, ok := cfg["metadata"]; ok {
 		conf.Metadata = tpgresource.ConvertStringMap(v.(map[string]interface{}))
@@ -2152,6 +2280,7 @@ func expandGceClusterConfig(d *schema.ResourceData, config *transport_tpg.Config
 	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.shielded_instance_config"); ok {
 		cfgSic := v.([]interface{})[0].(map[string]interface{})
 		conf.ShieldedInstanceConfig = &dataproc.ShieldedInstanceConfig{}
+		conf.ShieldedInstanceConfig.ForceSendFields = []string{"EnableIntegrityMonitoring", "EnableSecureBoot", "EnableVtpm"}
 		if v, ok := cfgSic["enable_integrity_monitoring"]; ok {
 			conf.ShieldedInstanceConfig.EnableIntegrityMonitoring = v.(bool)
 		}
@@ -2182,13 +2311,41 @@ func expandGceClusterConfig(d *schema.ResourceData, config *transport_tpg.Config
 			conf.NodeGroupAffinity.NodeGroupUri = v.(string)
 		}
 	}
+	if v, ok := d.GetOk("cluster_config.0.gce_cluster_config.0.confidential_instance_config"); ok {
+		cfgCic := v.([]interface{})[0].(map[string]interface{})
+		conf.ConfidentialInstanceConfig = &dataproc.ConfidentialInstanceConfig{}
+		if v, ok := cfgCic["enable_confidential_compute"]; ok {
+			conf.ConfidentialInstanceConfig.EnableConfidentialCompute = v.(bool)
+		}
+	}
 	return conf, nil
 }
 
 func expandSecurityConfig(cfg map[string]interface{}) *dataproc.SecurityConfig {
 	conf := &dataproc.SecurityConfig{}
 	if kfg, ok := cfg["kerberos_config"]; ok {
-		conf.KerberosConfig = expandKerberosConfig(kfg.([]interface{})[0].(map[string]interface{}))
+		k := kfg.([]interface{})
+		if len(k) > 0 {
+			conf.KerberosConfig = expandKerberosConfig(k[0].(map[string]interface{}))
+		}
+	}
+	if ifg, ok := cfg["identity_config"]; ok {
+		i := ifg.([]interface{})
+		if len(i) > 0 {
+			conf.IdentityConfig = expandIdentityConfig(i[0].(map[string]interface{}))
+		}
+	}
+	return conf
+}
+
+func expandIdentityConfig(cfg map[string]interface{}) *dataproc.IdentityConfig {
+	conf := &dataproc.IdentityConfig{}
+	if v, ok := cfg["user_service_account_mapping"]; ok {
+		m := make(map[string]string)
+		for k, val := range v.(map[string]interface{}) {
+			m[k] = val.(string)
+		}
+		conf.UserServiceAccountMapping = m
 	}
 	return conf
 }
@@ -2366,6 +2523,9 @@ func expandPreemptibleInstanceGroupConfig(cfg map[string]interface{}) *dataproc.
 			if v, ok := dcfg["boot_disk_type"]; ok {
 				icg.DiskConfig.BootDiskType = v.(string)
 			}
+			if v, ok := dcfg["local_ssd_interface"]; ok {
+				icg.DiskConfig.LocalSsdInterface = v.(string)
+			}
 		}
 	}
 
@@ -2376,6 +2536,9 @@ func expandPreemptibleInstanceGroupConfig(cfg map[string]interface{}) *dataproc.
 			icg.InstanceFlexibilityPolicy = &dataproc.InstanceFlexibilityPolicy{}
 			if v, ok := flexibilityPolicy["instance_selection_list"]; ok {
 				icg.InstanceFlexibilityPolicy.InstanceSelectionList = expandInstanceSelectionList(v)
+			}
+			if v, ok := flexibilityPolicy["provisioning_model_mix"]; ok {
+				icg.InstanceFlexibilityPolicy.ProvisioningModelMix = expandProvisioningModelMix(v)
 			}
 		}
 
@@ -2408,6 +2571,18 @@ func expandInstanceSelectionList(v interface{}) []*dataproc.InstanceSelection {
 	return instanceSelections
 }
 
+func expandProvisioningModelMix(v interface{}) *dataproc.ProvisioningModelMix {
+	pmm := v.([]interface{})
+	if len(pmm) > 0 {
+		provisioningModelMix := pmm[0].(map[string]interface{})
+		return &dataproc.ProvisioningModelMix{
+			StandardCapacityBase:             int64(provisioningModelMix["standard_capacity_base"].(int)),
+			StandardCapacityPercentAboveBase: int64(provisioningModelMix["standard_capacity_percent_above_base"].(int)),
+		}
+	}
+	return nil
+}
+
 func expandMasterInstanceGroupConfig(cfg map[string]interface{}) *dataproc.InstanceGroupConfig {
 	icg := &dataproc.InstanceGroupConfig{}
 
@@ -2438,6 +2613,9 @@ func expandMasterInstanceGroupConfig(cfg map[string]interface{}) *dataproc.Insta
 			}
 			if v, ok := dcfg["boot_disk_type"]; ok {
 				icg.DiskConfig.BootDiskType = v.(string)
+			}
+			if v, ok := dcfg["local_ssd_interface"]; ok {
+				icg.DiskConfig.LocalSsdInterface = v.(string)
 			}
 		}
 	}
@@ -2479,6 +2657,9 @@ func expandWorkerInstanceGroupConfig(cfg map[string]interface{}) *dataproc.Insta
 			}
 			if v, ok := dcfg["boot_disk_type"]; ok {
 				icg.DiskConfig.BootDiskType = v.(string)
+			}
+			if v, ok := dcfg["local_ssd_interface"]; ok {
+				icg.DiskConfig.LocalSsdInterface = v.(string)
 			}
 		}
 	}
@@ -2801,8 +2982,8 @@ func flattenClusterConfig(d *schema.ResourceData, cfg *dataproc.ClusterConfig) (
 	}
 
 	data := map[string]interface{}{
-		"staging_bucket": d.Get("cluster_config.0.staging_bucket").(string),
-
+		"staging_bucket":            d.Get("cluster_config.0.staging_bucket").(string),
+		"cluster_tier":              d.Get("cluster_config.0.cluster_tier").(string),
 		"bucket":                    cfg.ConfigBucket,
 		"temp_bucket":               cfg.TempBucket,
 		"gce_cluster_config":        flattenGceClusterConfig(d, cfg.GceClusterConfig),
@@ -2844,12 +3025,16 @@ func flattenSecurityConfig(d *schema.ResourceData, sc *dataproc.SecurityConfig) 
 	}
 	data := map[string]interface{}{
 		"kerberos_config": flattenKerberosConfig(d, sc.KerberosConfig),
+		"identity_config": flattenIdentityConfig(d, sc.IdentityConfig),
 	}
 
 	return []map[string]interface{}{data}
 }
 
 func flattenKerberosConfig(d *schema.ResourceData, kfg *dataproc.KerberosConfig) []map[string]interface{} {
+	if kfg == nil {
+		return nil
+	}
 	data := map[string]interface{}{
 		"enable_kerberos":                       kfg.EnableKerberos,
 		"root_principal_password_uri":           kfg.RootPrincipalPasswordUri,
@@ -2866,6 +3051,17 @@ func flattenKerberosConfig(d *schema.ResourceData, kfg *dataproc.KerberosConfig)
 		"kdc_db_key_uri":                        kfg.KdcDbKeyUri,
 		"tgt_lifetime_hours":                    kfg.TgtLifetimeHours,
 		"realm":                                 kfg.Realm,
+	}
+
+	return []map[string]interface{}{data}
+}
+
+func flattenIdentityConfig(d *schema.ResourceData, ifg *dataproc.IdentityConfig) []map[string]interface{} {
+	if ifg == nil {
+		return nil
+	}
+	data := map[string]interface{}{
+		"user_service_account_mapping": d.Get("cluster_config.0.security_config.0.identity_config.0.user_service_account_mapping").(map[string]interface{}),
 	}
 
 	return []map[string]interface{}{data}
@@ -3046,6 +3242,7 @@ func flattenNodeGroupConfig(icg *dataproc.InstanceGroupConfig) []map[string]inte
 			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
 			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
 			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
+			disk["local_ssd_interface"] = icg.DiskConfig.LocalSsdInterface
 		}
 		data["accelerators"] = flattenAccelerators(icg.Accelerators)
 
@@ -3102,6 +3299,13 @@ func flattenGceClusterConfig(d *schema.ResourceData, gcc *dataproc.GceClusterCon
 			},
 		}
 	}
+	if gcc.ConfidentialInstanceConfig != nil {
+		gceConfig["confidential_instance_config"] = []map[string]interface{}{
+			{
+				"enable_confidential_compute": gcc.ConfidentialInstanceConfig.EnableConfidentialCompute,
+			},
+		}
+	}
 
 	return []map[string]interface{}{gceConfig}
 }
@@ -3135,10 +3339,16 @@ func flattenPreemptibleInstanceGroupConfig(d *schema.ResourceData, icg *dataproc
 			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
 			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
 			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
+			disk["local_ssd_interface"] = icg.DiskConfig.LocalSsdInterface
 		}
 		if icg.InstanceFlexibilityPolicy != nil {
-			instanceFlexibilityPolicy["instance_selection_list"] = flattenInstanceSelectionList(icg.InstanceFlexibilityPolicy.InstanceSelectionList)
-			instanceFlexibilityPolicy["instance_selection_results"] = flattenInstanceSelectionResults(icg.InstanceFlexibilityPolicy.InstanceSelectionResults)
+			if icg.InstanceFlexibilityPolicy.InstanceSelectionList != nil {
+				instanceFlexibilityPolicy["instance_selection_list"] = flattenInstanceSelectionList(icg.InstanceFlexibilityPolicy.InstanceSelectionList)
+				instanceFlexibilityPolicy["instance_selection_results"] = flattenInstanceSelectionResults(icg.InstanceFlexibilityPolicy.InstanceSelectionResults)
+			}
+			if icg.InstanceFlexibilityPolicy.ProvisioningModelMix != nil {
+				instanceFlexibilityPolicy["provisioning_model_mix"] = flattenProvisioningModelMix(icg.InstanceFlexibilityPolicy.ProvisioningModelMix)
+			}
 		}
 	}
 
@@ -3175,6 +3385,14 @@ func flattenInstanceSelectionResults(isr []*dataproc.InstanceSelectionResult) []
 
 }
 
+func flattenProvisioningModelMix(pmm *dataproc.ProvisioningModelMix) []map[string]interface{} {
+	provisioningModelMix := map[string]interface{}{}
+	provisioningModelMix["standard_capacity_base"] = pmm.StandardCapacityBase
+	provisioningModelMix["standard_capacity_percent_above_base"] = pmm.StandardCapacityPercentAboveBase
+
+	return []map[string]interface{}{provisioningModelMix}
+}
+
 func flattenMasterInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.InstanceGroupConfig) []map[string]interface{} {
 	disk := map[string]interface{}{}
 	data := map[string]interface{}{}
@@ -3189,6 +3407,7 @@ func flattenMasterInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.Inst
 			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
 			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
 			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
+			disk["local_ssd_interface"] = icg.DiskConfig.LocalSsdInterface
 		}
 
 		data["accelerators"] = flattenAccelerators(icg.Accelerators)
@@ -3213,6 +3432,7 @@ func flattenWorkerInstanceGroupConfig(d *schema.ResourceData, icg *dataproc.Inst
 			disk["boot_disk_size_gb"] = icg.DiskConfig.BootDiskSizeGb
 			disk["num_local_ssds"] = icg.DiskConfig.NumLocalSsds
 			disk["boot_disk_type"] = icg.DiskConfig.BootDiskType
+			disk["local_ssd_interface"] = icg.DiskConfig.LocalSsdInterface
 		}
 
 		data["accelerators"] = flattenAccelerators(icg.Accelerators)
@@ -3294,8 +3514,10 @@ func dataprocImageVersionDiffSuppress(_, old, new string, _ *schema.ResourceData
 	if newV.minor != oldV.minor {
 		return false
 	}
-	// Only compare subminor version if set in config version.
-	if newV.subminor != "" && newV.subminor != oldV.subminor {
+
+	ignoreSubminor := []string{"", "prodcurrent", "prodprevious"}
+	// Only compare subminor version if set to a numeric value in config version.
+	if !slices.Contains(ignoreSubminor, newV.subminor) && newV.subminor != oldV.subminor {
 		return false
 	}
 	// Only compare os if it is set in config version.
