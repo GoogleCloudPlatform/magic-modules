@@ -167,10 +167,14 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 func TestAcc{{ $.Res.ResourceName }}_ResourceIdentity(t *testing.T) {
 	t.Parallel()
 	{{- if gt (len $.Res.TestExamples) 0 }}
+	{{- $firstExample := index $.Res.TestExamples 0 }}
 	context := map[string]interface{}{
-	{{- template "EnvVarContext" dict "TestEnvVars" (index $.Res.TestExamples 0).TestEnvVars "HasNewLine" false}}
-	{{- range $varKey, $varVal := (index $.Res.TestExamples 0).TestVarsOverrides }}
+	{{- template "EnvVarContext" dict "TestEnvVars" $firstExample.TestEnvVars "HasNewLine" false}}
+	{{- range $varKey, $varVal := $firstExample.TestVarsOverrides }}
 		"{{$varKey}}": {{$varVal}},
+	{{- end }}
+	{{- range $e := $.Res.IdentityProperties }}
+		"{{ $e.Name }}": acctest.RandString(t, 10),
 	{{- end }}
 		"random_suffix": acctest.RandString(t, 10),
 	}
@@ -183,10 +187,10 @@ func TestAcc{{ $.Res.ResourceName }}_ResourceIdentity(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAcc{{ (index $.Res.TestExamples 0).TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
+				Config: testAcc{{ $firstExample.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
 				ConfigStateChecks: []statecheck.StateCheck{
 					statecheck.ExpectIdentity(
-						"{{ $.Res.TerraformName }}.{{ (index $.Res.TestExamples 0).PrimaryResourceId }}",
+						"{{ $.Res.TerraformName }}.{{ $firstExample.PrimaryResourceId }}",
 						map[string]knownvalue.Check{
 							{{- range $e := $.Res.IdentityProperties }}
 							"{{ $e.Name }}": knownvalue.StringExact(context["{{ $e.Name }}"].(string)),
@@ -195,14 +199,14 @@ func TestAcc{{ $.Res.ResourceName }}_ResourceIdentity(t *testing.T) {
 					),
 					{{- range $e := $.Res.IdentityProperties }}
 					statecheck.ExpectKnownValue(
-						"{{ $.Res.TerraformName }}.{{ (index $.Res.TestExamples 0).PrimaryResourceId }}",
+						"{{ $.Res.TerraformName }}.{{ $firstExample.PrimaryResourceId }}",
 						tfjsonpath.New("{{ $e.Name }}"),
 						knownvalue.StringExact(context["{{ $e.Name }}"].(string))),
 					{{- end }}
 				},
 			},
 			{
-				ResourceName:    "{{ $.Res.TerraformName }}.{{ (index $.Res.TestExamples 0).PrimaryResourceId }}",
+				ResourceName:    "{{ $.Res.TerraformName }}.{{ $firstExample.PrimaryResourceId }}",
 				ImportState:     true,
 				ImportStateKind: resource.ImportBlockWithResourceIdentity,
 			},
