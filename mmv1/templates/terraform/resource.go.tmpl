@@ -150,8 +150,18 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
               {{- end }}
             }
           },
+{{- if $.IdentityUpgraders }}
+          IdentityUpgraders: []schema.IdentityUpgrader{
+{{- range $v := $.IdentityUpgradersCount }}
+              {
+                Type: identity{{ $.ResourceName }}ResourceV{{$v}}(),
+                Upgrade: Identity{{ $.ResourceName }}UpgradeV{{$v}},
+                Version: {{$v}},
+              },
+{{- end }}
+          },
+{{- end }}
         },
-{{ end }}
         Schema: map[string]*schema.Schema{
 			{{- range $prop := $.OrderProperties $.AllUserProperties }}
 {{template "SchemaFields" $prop -}}
@@ -1243,7 +1253,13 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
 
     {{ $.CustomTemplate $.StateMigrationFile false -}}
 {{- end }}
-{{- if and $.HasPostCreateComputedFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
+
+{{- if and $.IdentitySchemaVersion $.IdentityUpgraders }}
+
+    {{ $.CustomTemplate $.IdentityUpgraderFile false -}}
+{{- end }}
+
+{{- if and $.HasComputedIdFormatFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
 func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.ResourceData, meta interface{}, res map[string]interface{}) error {
     config := meta.(*transport_tpg.Config)
     {{- /* Don't render decoder for PollAsync resources - their decoders are expected to return `nil` until the resource completion completes, but we need to set their computed fields in order to call PollRead - so there can never be a dependency on the decoder. */}}

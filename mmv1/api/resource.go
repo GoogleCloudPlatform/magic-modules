@@ -249,6 +249,8 @@ type Resource struct {
 	// The version of the identity schema for the resource.
 	IdentitySchemaVersion int `yaml:"identity_schema_version,omitempty"`
 
+	IdentityUpgraders bool `yaml:"identity_upgraders,omitempty"`
+
 	// From this schema version on, state_upgrader code is generated for the resource.
 	// When unset, state_upgrade_base_schema_version defauts to 0.
 	// Normally, it is not needed to be set.
@@ -897,6 +899,10 @@ func getLabelsFieldNote(title string) string {
 
 func (r Resource) StateMigrationFile() string {
 	return fmt.Sprintf("templates/terraform/state_migrations/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
+}
+
+func (r Resource) IdentityUpgraderFile() string {
+	return fmt.Sprintf("templates/terraform/identity_upgraders/%s_%s.go.tmpl", google.Underscore(r.ProductMetadata.Name), google.Underscore(r.Name))
 }
 
 // ====================
@@ -1843,6 +1849,14 @@ func (r Resource) VersionedProvider(exampleVersion string) bool {
 func (r Resource) StateUpgradersCount() []int {
 	var nums []int
 	for i := r.StateUpgradeBaseSchemaVersion; i < r.SchemaVersion; i++ {
+		nums = append(nums, i)
+	}
+	return nums
+}
+
+func (r Resource) IdentityUpgradersCount() []int {
+	var nums []int
+	for i := 1; i < r.IdentitySchemaVersion; i++ {
 		nums = append(nums, i)
 	}
 	return nums
