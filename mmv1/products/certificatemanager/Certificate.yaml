@@ -39,6 +39,7 @@ async:
     resource_inside_response: false
 custom_code:
   constants: 'templates/terraform/constants/cert_manager.tmpl'
+  tgc_encoder: 'templates/tgc_next/encoders/certificatemanager_certificate.go.tmpl'
   tgc_decoder: 'templates/tgc_next/decoders/certificatemanager_certificate.go.tmpl'
 schema_version: 1
 state_upgraders: true
@@ -65,6 +66,7 @@ examples:
       dns_auth_name2: 'dns-auth2'
       dns_auth_subdomain2: 'subdomain2'
       cert_name: 'dns-cert'
+    tgc_skip_test: "No data in cai asset for this test"
   - name: 'certificate_manager_google_managed_certificate_issuance_config'
     primary_resource_id: 'default'
     vars:
@@ -108,7 +110,6 @@ examples:
     primary_resource_id: 'default'
     vars:
       cert_name: 'client-auth-cert'
-    tgc_test_ignore_extra: ['description', 'scope', 'self_managed.pem_certificate', 'self_managed.pem_private_key']
 parameters:
   - name: 'name'
     type: String
@@ -203,7 +204,6 @@ properties:
 
           Leaf certificate comes first, followed by intermediate ones if any.
         immutable: true
-        is_missing_in_cai: true
         exactly_one_of:
           - 'self_managed.0.certificate_pem'
           - 'self_managed.0.pem_certificate'
