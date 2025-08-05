@@ -141,10 +141,10 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Description: `The project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
 			"event_stream": {
-				Type:          schema.TypeList,
-				Optional:      true,
-				MaxItems:      1,
-				ConflictsWith: []string{"schedule"},
+				Type:             schema.TypeList,
+				Optional:         true,
+				MaxItems:         1,
+				ConflictsWith:    []string{"schedule"},
 				DiffSuppressFunc: diffSuppressEventStream,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -173,7 +173,7 @@ func ResourceStorageTransferJob() *schema.Resource {
 				MaxItems:      1,
 				Optional:      true,
 				ConflictsWith: []string{"transfer_spec", "schedule"},
-				ExactlyOneOf: []string{"transfer_spec", "replication_spec"},
+				ExactlyOneOf:  []string{"transfer_spec", "replication_spec"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"object_conditions": objectConditionsSchema(replicationSpecObjectConditionsKeys),
@@ -199,11 +199,11 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Description: `Replication specification.`,
 			},
 			"transfer_spec": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
+				Type:          schema.TypeList,
+				Optional:      true,
+				MaxItems:      1,
 				ConflictsWith: []string{"replication_spec"},
-				ExactlyOneOf: []string{"transfer_spec", "replication_spec"},
+				ExactlyOneOf:  []string{"transfer_spec", "replication_spec"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"object_conditions": objectConditionsSchema(transferSpecObjectConditionsKeys),
@@ -327,8 +327,8 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"log_actions": {
-							Type:     schema.TypeList,
-							Optional: true,
+							Type:         schema.TypeList,
+							Optional:     true,
 							AtLeastOneOf: []string{"logging_config.0.enable_on_prem_gcs_transfer_logs", "logging_config.0.log_actions", "logging_config.0.log_action_states"},
 							Elem: &schema.Schema{
 								Type:         schema.TypeString,
@@ -337,8 +337,8 @@ func ResourceStorageTransferJob() *schema.Resource {
 							Description: `Specifies the actions to be logged. Not supported for transfers with PosifxFilesystem data sources; use enable_on_prem_gcs_transfer_logs instead.`,
 						},
 						"log_action_states": {
-							Type:     schema.TypeList,
-							Optional: true,
+							Type:         schema.TypeList,
+							Optional:     true,
 							AtLeastOneOf: []string{"logging_config.0.enable_on_prem_gcs_transfer_logs", "logging_config.0.log_actions", "logging_config.0.log_action_states"},
 							Elem: &schema.Schema{
 								Type:         schema.TypeString,
@@ -347,10 +347,10 @@ func ResourceStorageTransferJob() *schema.Resource {
 							Description: `States in which logActions are logged. Not supported for transfers with PosifxFilesystem data sources; use enable_on_prem_gcs_transfer_logs instead.`,
 						},
 						"enable_on_prem_gcs_transfer_logs": {
-							Type:     schema.TypeBool,
-							Optional: true,
+							Type:         schema.TypeBool,
+							Optional:     true,
 							AtLeastOneOf: []string{"logging_config.0.enable_on_prem_gcs_transfer_logs", "logging_config.0.log_actions", "logging_config.0.log_action_states"},
-							Description:   `For transfers with a PosixFilesystem source, this option enables the Cloud Storage transfer logs for this transfer.`,
+							Description:  `For transfers with a PosixFilesystem source, this option enables the Cloud Storage transfer logs for this transfer.`,
 						},
 					},
 				},
@@ -1158,7 +1158,7 @@ func expandAzureFederatedIdentifyConfig(federatedIdentifyConfig []interface{}) *
 }
 
 func flattenAzureFederatedIdentifyConfig(d *schema.ResourceData) []map[string]interface{} {
-	if ((d.Get("transfer_spec.0.azure_blob_storage_data_source.0.federated_identity_config.0.client_id") == "") || (d.Get("transfer_spec.0.azure_blob_storage_data_source.0.federated_identity_config.0.tenant_id") == "") ){
+	if (d.Get("transfer_spec.0.azure_blob_storage_data_source.0.federated_identity_config.0.client_id") == "") || (d.Get("transfer_spec.0.azure_blob_storage_data_source.0.federated_identity_config.0.tenant_id") == "") {
 		return []map[string]interface{}{}
 	}
 
@@ -1380,14 +1380,14 @@ func flattenAwsS3Data(awsS3Data *storagetransfer.AwsS3Data, d *schema.ResourceDa
 		"path":        awsS3Data.Path,
 		"role_arn":    awsS3Data.RoleArn,
 	}
-	if _, exist := d.GetOk("transfer_spec.0.aws_s3_data_source.0.aws_access_key"); exist{
+	if _, exist := d.GetOk("transfer_spec.0.aws_s3_data_source.0.aws_access_key"); exist {
 		data["aws_access_key"] = flattenAwsAccessKeys(d)
 	}
-	
+
 	if awsS3Data.ManagedPrivateNetwork {
 		data["managed_private_network"] = awsS3Data.ManagedPrivateNetwork
 	}
-	
+
 	return []map[string]interface{}{data}
 }
 
@@ -1479,23 +1479,23 @@ func expandAzureBlobStorageData(azureBlobStorageDatas []interface{}) *storagetra
 	azureBlobStorageData := azureBlobStorageDatas[0].(map[string]interface{})
 
 	return &storagetransfer.AzureBlobStorageData{
-		Container:         azureBlobStorageData["container"].(string),
-		Path:              azureBlobStorageData["path"].(string),
-		StorageAccount:    azureBlobStorageData["storage_account"].(string),
-		AzureCredentials:  expandAzureCredentials(azureBlobStorageData["azure_credentials"].([]interface{})),
-		CredentialsSecret: azureBlobStorageData["credentials_secret"].(string),
+		Container:               azureBlobStorageData["container"].(string),
+		Path:                    azureBlobStorageData["path"].(string),
+		StorageAccount:          azureBlobStorageData["storage_account"].(string),
+		AzureCredentials:        expandAzureCredentials(azureBlobStorageData["azure_credentials"].([]interface{})),
+		CredentialsSecret:       azureBlobStorageData["credentials_secret"].(string),
 		FederatedIdentityConfig: expandAzureFederatedIdentifyConfig(azureBlobStorageData["federated_identity_config"].([]interface{})),
 	}
 }
 
 func flattenAzureBlobStorageData(azureBlobStorageData *storagetransfer.AzureBlobStorageData, d *schema.ResourceData) []map[string]interface{} {
 	data := map[string]interface{}{
-		"container":          azureBlobStorageData.Container,
-		"path":               azureBlobStorageData.Path,
-		"storage_account":    azureBlobStorageData.StorageAccount,
-		"azure_credentials":  flattenAzureCredentials(d),
+		"container":                 azureBlobStorageData.Container,
+		"path":                      azureBlobStorageData.Path,
+		"storage_account":           azureBlobStorageData.StorageAccount,
+		"azure_credentials":         flattenAzureCredentials(d),
 		"federated_identity_config": flattenAzureFederatedIdentifyConfig(d),
-		"credentials_secret": azureBlobStorageData.CredentialsSecret,
+		"credentials_secret":        azureBlobStorageData.CredentialsSecret,
 	}
 
 	return []map[string]interface{}{data}
