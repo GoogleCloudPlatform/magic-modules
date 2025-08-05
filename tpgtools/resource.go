@@ -87,6 +87,9 @@ type Resource struct {
 	// Properties are the fields of a resource. Properties may be nested.
 	Properties []Property
 
+	// Identities is the list of resource properties that are used to identify the resource.
+	Identities []IdentityProperty
+
 	// InsertTimeoutMinutes is the timeout value in minutes for the resource
 	// create operation
 	InsertTimeoutMinutes int
@@ -174,6 +177,8 @@ type Resource struct {
 	// Guides point to non-rest useful context for the resource.
 	Guides []Link
 
+	// The version of the identity schema for the resource.
+	IdentitySchemaVersion int
 	// The current schema version
 	SchemaVersion int
 	// The schema versions from 0 to the current schema version
@@ -330,6 +335,11 @@ func (r Resource) SchemaProperties() (props []Property) {
 	return collapsedProperties(r.Properties)
 }
 
+// IdentityProperties is the list of resource properties that are used to identify the resource.
+func (r Resource) IdentityProperties() (props []IdentityProperty) {
+	return r.Identities
+}
+
 // Enum arrays are not arrays of strings in the DCL and require special
 // conversion
 func (r Resource) EnumArrays() (props []Property) {
@@ -442,16 +452,17 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	resourceTitle := strings.Split(info.Title, "/")[1]
 
 	res := Resource{
-		title:                SnakeCaseTerraformResourceName(jsonToSnakeCase(resourceTitle).snakecase()),
-		dclStructName:        TitleCaseResourceName(schema.Title),
-		dclTitle:             TitleCaseResourceName(resourceTitle),
-		productMetadata:      product,
-		versionMetadata:      version,
-		Description:          info.Description,
-		location:             location,
-		InsertTimeoutMinutes: 20,
-		UpdateTimeoutMinutes: 20,
-		DeleteTimeoutMinutes: 20,
+		title:                 SnakeCaseTerraformResourceName(jsonToSnakeCase(resourceTitle).snakecase()),
+		dclStructName:         TitleCaseResourceName(schema.Title),
+		dclTitle:              TitleCaseResourceName(resourceTitle),
+		productMetadata:       product,
+		versionMetadata:       version,
+		Description:           info.Description,
+		location:              location,
+		InsertTimeoutMinutes:  20,
+		UpdateTimeoutMinutes:  20,
+		DeleteTimeoutMinutes:  20,
+		IdentitySchemaVersion: 1,
 	}
 
 	// Since the resource's "info" extension field can't be accessed, the relevant
@@ -490,7 +501,6 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 	}
 	res.ID = id
 	res.UseTerraformID = customID
-
 	// Resource Override: Custom Import Function
 	cifd := CustomImportFunctionDetails{}
 	cifdOk, err := overrides.ResourceOverrideWithDetails(CustomImport, &cifd, location)
@@ -533,12 +543,13 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		res.Mutex = md.Mutex
 	}
 
-	props, err := createPropertiesFromSchema(schema, typeFetcher, overrides, &res, nil, location)
+	identities, props, err := createPropertiesFromSchema(schema, typeFetcher, overrides, &res, nil, location)
 	if err != nil {
 		return nil, err
 	}
 
 	res.Properties = props
+	res.Identities = identities
 
 	onlyLongFormFormat := shouldAllowForwardSlashInFormat(res.ID, res.Properties)
 	// Resource Override: Import formats
@@ -712,6 +723,16 @@ func createResource(schema *openapi.Schema, info *openapi.Info, typeFetcher *Typ
 		for i := range res.SchemaVersions {
 			res.SchemaVersions[i] = i
 		}
+	}
+
+	// Resource Override: Identity Schema Version
+	identitySchema := IdentitySchemaDetails{}
+	identitySchemaOk, err := overrides.ResourceOverrideWithDetails(IdentityVersion, &identitySchema, location)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode custom timeout details: %v", err)
+	}
+	if identitySchemaOk {
+		res.IdentitySchemaVersion = identitySchema.Version
 	}
 
 	if overrides.ResourceOverride(GenerateLongFormTests, location) {
