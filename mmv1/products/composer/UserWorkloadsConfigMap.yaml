@@ -32,7 +32,7 @@ examples:
   - name: 'composer_user_workloads_config_map_basic'
     primary_resource_id: 'config_map'
     vars:
-      service_account_name: 'service-account'
+      service_account_name: 'test-sa'
       environment_name: 'test-environment'
       config_map_name: 'test-config-map'
 parameters:
