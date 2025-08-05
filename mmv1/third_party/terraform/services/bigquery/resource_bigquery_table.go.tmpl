@@ -1051,13 +1051,12 @@ func ResourceBigQueryTable() *schema.Resource {
 						},
 
 						// UseLegacySQL: [Optional] Specifies whether to use BigQuery's
-						// legacy SQL for this view. The default value is true. If set to
-						// false, the view will use BigQuery's standard SQL:
+						// legacy SQL for this view. If set to false, the view will use
+						// BigQuery's standard SQL:
 						"use_legacy_sql": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Default:     true,
-							Description: `Specifies whether to use BigQuery's legacy SQL for this view. The default value is true. If set to false, the view will use BigQuery's standard SQL`,
+							Description: `Specifies whether to use BigQuery's legacy SQL for this view. If set to false, the view will use BigQuery's standard SQL`,
 						},
 					},
 				},
