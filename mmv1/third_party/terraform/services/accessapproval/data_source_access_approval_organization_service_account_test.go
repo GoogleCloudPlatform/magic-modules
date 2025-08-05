@@ -12,7 +12,7 @@ func TestAccDataSourceAccessApprovalOrganizationServiceAccount_basic(t *testing.
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"org_id": envvar.GetTestOrgFromEnv(t),
+		"org_id": envvar.GetTestOrgTargetFromEnv(t),
 	}
 
 	resourceName := "data.google_access_approval_organization_service_account.aa_account"
