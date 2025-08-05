@@ -24,6 +24,7 @@ resource "google_project" "guest_project" {
 }
 
 resource "google_org_policy_policy" "shared_reservation_org_policy" {
+  provider = google-beta
   name   = "projects/${google_project.owner_project.project_id}/policies/compute.sharedReservationsOwnerProjects"
   parent = "projects/${google_project.owner_project.project_id}"
 
