@@ -30,8 +30,8 @@ self_link: 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
 create_url: 'projects/{{project}}/locations/{{location}}/instances?instanceId={{name}}'
 immutable: true
 timeouts:
-  insert_minutes: 20
-  update_minutes: 20
+  insert_minutes: 40
+  update_minutes: 40
   delete_minutes: 20
 autogen_async: true
 async:
