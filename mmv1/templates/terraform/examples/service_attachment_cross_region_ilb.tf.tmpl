@@ -1,0 +1,77 @@
+resource "google_compute_service_attachment" "{{$.PrimaryResourceId}}" {
+  name                  = "{{index $.Vars "name"}}"
+  region                = "us-central1"
+  description           = "A service attachment configured with Terraform"
+  connection_preference = "ACCEPT_AUTOMATIC"
+  enable_proxy_protocol = false
+  nat_subnets           = [google_compute_subnetwork.subnetwork_psc.id]
+  target_service        = google_compute_global_forwarding_rule.forwarding_rule.id
+}
+
+resource "google_compute_global_forwarding_rule" "forwarding_rule" {
+  name                  = "{{index $.Vars "name"}}"
+  target                = google_compute_target_http_proxy.http_proxy.id
+  network               = google_compute_network.network.id
+  subnetwork            = google_compute_subnetwork.subnetwork.id
+  port_range            = "80"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+
+  depends_on = [google_compute_subnetwork.subnetwork_proxy]
+}
+
+resource "google_compute_target_http_proxy" "http_proxy" {
+  name        = "{{index $.Vars "name"}}"
+  description = "a description"
+  url_map     = google_compute_url_map.url_map.id
+}
+
+resource "google_compute_url_map" "url_map" {
+  name            = "{{index $.Vars "name"}}"
+  description     = "Url map."
+  default_service = google_compute_backend_service.backend_service.id
+}
+
+resource "google_compute_backend_service" "backend_service" {
+  name                  = "{{index $.Vars "name"}}"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  health_checks         = [google_compute_health_check.health_check.id]
+}
+
+resource "google_compute_health_check" "health_check" {
+  name               = "{{index $.Vars "name"}}"
+  check_interval_sec = 1
+  timeout_sec        = 1
+
+  tcp_health_check {
+    port = "80"
+  }
+}
+
+resource "google_compute_subnetwork" "subnetwork_psc" {
+  name          = "psc-{{index $.Vars "name"}}"
+  region        = "us-central1"
+  network       = google_compute_network.network.id
+  purpose       =  "PRIVATE_SERVICE_CONNECT"
+  ip_cidr_range = "10.1.0.0/16"
+}
+
+resource "google_compute_subnetwork" "subnetwork_proxy" {
+  name          = "proxy-{{index $.Vars "name"}}"
+  region        = "us-central1"
+  network       = google_compute_network.network.id
+  purpose       =  "GLOBAL_MANAGED_PROXY"
+  role          = "ACTIVE"
+  ip_cidr_range = "10.2.0.0/16"
+}
+
+resource "google_compute_subnetwork" "subnetwork" {
+  name          = "{{index $.Vars "name"}}"
+  region        = "us-central1"
+  network       = google_compute_network.network.id
+  ip_cidr_range = "10.0.0.0/16"
+}
+
+resource "google_compute_network" "network" {
+  name                    = "{{index $.Vars "name"}}"
+  auto_create_subnetworks = false
+}
