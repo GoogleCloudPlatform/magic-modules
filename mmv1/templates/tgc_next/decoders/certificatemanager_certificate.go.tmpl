@@ -1,6 +1,6 @@
 // self_managed.pem_certificate comes from root level of cai asset data.
-if v, ok := res["pemCertificate"]; ok {
-	res["selfManaged"] = map[string]interface{}{"pemCertificate": v}
+if _, ok := res["pemCertificate"]; ok {
+	res["selfManaged"] = map[string]interface{}{"pemCertificate": "*******"}
 }
 if _, ok := res["scope"]; !ok {
 	res["scope"] = "DEFAULT"
