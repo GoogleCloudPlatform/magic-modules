@@ -12,22 +12,24 @@
 */ -}}
 updateMask := []string{}
 
-if d.HasChange("enable_stackdriver_logging") {
+if !plan.EnableStackdriverLogging.Equal(state.EnableStackdriverLogging) {
 	updateMask = append(updateMask, "enableStackdriverLogging")
 }
 
-if d.HasChange("enable_stackdriver_monitoring") {
+if !plan.EnableStackdriverMonitoring.Equal(state.EnableStackdriverMonitoring) {
 	updateMask = append(updateMask, "enableStackdriverMonitoring")
 }
 
-if d.HasChange("enable_rbac") {
-    updateMask = append(updateMask, "enableRbac")
+if !plan.EnableRbac.Equal(state.EnableRbac) {
+	updateMask = append(updateMask, "enableRbac")
 }
+
 
 // updateMask is a URL parameter but not present in the schema, so ReplaceVars
 // won't set it
 
-url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+url, err := transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
 if err != nil {
-    return err
+  resp.Diagnostics.AddError("Error, failure building update mask query parameters in {{ $.Name -}}", err.Error())
+  return
 }

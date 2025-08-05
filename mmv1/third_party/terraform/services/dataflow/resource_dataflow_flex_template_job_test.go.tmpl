@@ -407,40 +407,6 @@ func TestAccDataflowFlexTemplateJob_withAdditionalPipelineOptions(t *testing.T) 
 	})
 }
 
-func TestAccDataflowFlexTemplateJob_withAdditionalPipelineOptions(t *testing.T) {
-	// Dataflow responses include serialized java classes and bash commands
-	// This makes body comparison infeasible
-	acctest.SkipIfVcr(t)
-	t.Parallel()
-
-	randStr := acctest.RandString(t, 10)
-	job := "tf-test-dataflow-job-" + randStr
-	additionalPipelineOptions := []string{"numberOfWorkerHarnessThreads=200"}
-	bucket := "tf-test-dataflow-bucket-" + randStr
-	topic := "tf-test-topic" + randStr
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckDataflowJobDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccDataflowFlexTemplateJob_additionalPipelineOptions(job, bucket, topic, additionalPipelineOptions),
-				Check: resource.ComposeTestCheckFunc(
-					testAccDataflowFlexJobExists(t, "google_dataflow_flex_template_job.flex_job_pipeline_options", false),
-					testAccDataflowFlexTemplateJobHasAdditionalPipelineOptions(t, "google_dataflow_flex_template_job.flex_job_pipeline_options", additionalPipelineOptions, false),
-				),
-			},
-			{
-				ResourceName:            "google_dataflow_flex_template_job.flex_job_pipeline_options",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"on_delete", "parameters", "skip_wait_on_job_termination", "state", "additional_pipeline_options", "container_spec_gcs_path", "labels", "terraform_labels"},
-			},
-		},
-	})
-}
-
 func TestAccDataflowFlexTemplateJob_withProviderDefaultLabels(t *testing.T) {
 	// This resource uses custom retry logic that cannot be sped up without
 	// modifying the actual resource

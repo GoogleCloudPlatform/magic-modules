@@ -1,7 +1,6 @@
 package compute
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -234,20 +233,4 @@ func flattenScratchDisk(disk *compute.AttachedDisk) map[string]interface{} {
 	result["interface"] = disk.Interface
 
 	return result
-}
-
-func flattenPartnerMetadata(partnerMetadata map[string]compute.StructuredEntries) (map[string]string, error) {
-	partnerMetadataMap := make(map[string]string)
-	for key, value := range partnerMetadata {
-
-		jsonString, err := json.Marshal(&value)
-		if err != nil {
-			return nil, err
-		}
-		if value.Entries != nil {
-			partnerMetadataMap[key] = string(jsonString)
-		}
-
-	}
-	return partnerMetadataMap, nil
 }
