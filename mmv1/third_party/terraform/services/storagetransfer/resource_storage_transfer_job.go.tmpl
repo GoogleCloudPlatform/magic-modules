@@ -1460,11 +1460,10 @@ func expandAzureCredentials(azureCredentials []interface{}) *storagetransfer.Azu
 }
 
 func flattenAzureCredentials(d *schema.ResourceData) []map[string]interface{} {
-	{{- if ne $.TargetVersionName "ga" }}
 	if d.Get("transfer_spec.0.azure_blob_storage_data_source.0.azure_credentials.0.sas_token") == "" {
 		return []map[string]interface{}{}
 	}
-	{{- end }}
+
 	data := map[string]interface{}{
 		"sas_token": d.Get("transfer_spec.0.azure_blob_storage_data_source.0.azure_credentials.0.sas_token"),
 	}
