@@ -62,7 +62,7 @@ resource "google_certificate_manager_certificate_issuance_config" "issuanceconfi
 }
 
 resource "google_privateca_ca_pool" "pool" {
-  name     = "ca-pool"
+  name     = "ca-pool%{random_suffix}"
   location = "us-central1"
   tier     = "ENTERPRISE"
 }
