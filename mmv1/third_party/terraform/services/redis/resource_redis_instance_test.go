@@ -1,14 +1,14 @@
 package redis_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
-	"context"
 
+	redis "cloud.google.com/go/redis/apiv1"
+	redispb "cloud.google.com/go/redis/apiv1/redispb"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
-	redispb "cloud.google.com/go/redis/apiv1/redispb"
-	redis "cloud.google.com/go/redis/apiv1"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -514,10 +514,5 @@ func checkRedisInstanceTags(resourceName string, testContext map[string]interfac
 
 		// If we reach here, the tag key was not found.
 		return fmt.Errorf("expected tag key '%s' not found on instance '%s'", expectedTagKey, req.Name)
-	}
-}
-
-
-		return fmt.Errorf("expected tag value %q not attached to instance %s", expectedTagValue, instanceID)
 	}
 }
