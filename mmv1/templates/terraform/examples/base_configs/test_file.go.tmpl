@@ -170,14 +170,14 @@ func TestAcc{{ $.Res.ResourceName }}_ResourceIdentity(t *testing.T) {
 	{{- $firstExample := index $.Res.TestExamples 0 }}
 	context := map[string]interface{}{
 	{{- template "EnvVarContext" dict "TestEnvVars" $firstExample.TestEnvVars "HasNewLine" false}}
-	{{- range $varKey, $varVal := $firstExample.TestVarsOverrides }}
-		"{{$varKey}}": {{$varVal}},
-	{{- end }}
-	{{- range $e := $.Res.IdentityProperties }}
-		"{{ $e.Name }}": acctest.RandString(t, 10),
-	{{- end }}
 		"random_suffix": acctest.RandString(t, 10),
 	}
+	{{- range $e := $.Res.IdentityProperties }}
+	context["{{ $e.Name }}"] = acctest.RandString(t, 10)
+	{{- end }}
+	{{- range $varKey, $varVal := $firstExample.TestVarsOverrides }}
+	context["{{$varKey}}"] = {{$varVal}}
+	{{- end }}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
