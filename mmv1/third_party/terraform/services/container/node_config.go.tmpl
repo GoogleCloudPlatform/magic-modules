@@ -1295,12 +1295,6 @@ func expandNodeConfig(v interface{}) *container.NodeConfig {
 	}
 
 	{{ if ne $.TargetVersionName `ga` -}}
-	if v,ok := nodeConfig["flex_start"]; ok {
-		nc.FlexStart = v.(bool)
-	}
-	{{- end }}
-
-	{{ if ne $.TargetVersionName `ga` -}}
 	if v, ok := nodeConfig["host_maintenance_policy"]; ok {
 		nc.HostMaintenancePolicy = expandHostMaintenancePolicy(v)
 	}
