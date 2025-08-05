@@ -42,6 +42,7 @@ custom_code:
   custom_import: 'templates/terraform/custom_import/apigee_addons.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/apigee_addons_override.go.tmpl'
   custom_identity_schema: 'templates/terraform/custom_identity_schema/apigee_addons.go.tmpl'
+  custom_identity_read: 'templates/terraform/custom_identity_read/apigee_addons.go.tmpl'
 examples:
   - name: 'apigee_addons_basic'
     exclude_test: true

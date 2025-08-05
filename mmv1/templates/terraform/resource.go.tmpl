@@ -718,6 +718,9 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     }
 {{- end}}
 
+{{- if $.CustomCode.CustomIdentityRead }}
+    {{ $.CustomTemplate $.CustomCode.CustomIdentityRead true -}}
+{{- else }}
 	identity, err := d.Identity()
 	if err != nil {
 		return fmt.Errorf("Error getting identity: %s", err)
@@ -730,8 +733,9 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
             }     
     }
     {{- end }}
-    return nil
+{{- end }}
 {{  end -}}
+    return nil
 }
 
 {{if $.Updatable -}}
