@@ -162,6 +162,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
           },
 {{- end }}
         },
+{{- end }}
         Schema: map[string]*schema.Schema{
 			{{- range $prop := $.OrderProperties $.AllUserProperties }}
 {{template "SchemaFields" $prop -}}
@@ -717,6 +718,18 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     }
 {{- end}}
 
+	identity, err := d.Identity()
+	if err != nil {
+		return fmt.Errorf("Error getting identity: %s", err)
+	}
+    {{- range $p := $.IdentityProperties }}
+    if v, ok := identity.GetOk("{{ underscore $p.Name}}"); ok && v != "" {
+        err = identity.Set("{{ underscore $p.Name}}", d.Get("{{ underscore $p.Name}}").(string))
+            if err != nil {
+                return fmt.Errorf("Error setting {{ underscore $p.Name}}: %s", err)
+            }     
+    }
+    {{- end }}
     return nil
 {{  end -}}
 }
@@ -1259,7 +1272,7 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
     {{ $.CustomTemplate $.IdentityUpgraderFile false -}}
 {{- end }}
 
-{{- if and $.HasComputedIdFormatFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
+{{- if and $.HasPostCreateComputedFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
 func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.ResourceData, meta interface{}, res map[string]interface{}) error {
     config := meta.(*transport_tpg.Config)
     {{- /* Don't render decoder for PollAsync resources - their decoders are expected to return `nil` until the resource completion completes, but we need to set their computed fields in order to call PollRead - so there can never be a dependency on the decoder. */}}
