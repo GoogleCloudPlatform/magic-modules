@@ -130,11 +130,11 @@ func testAccDialogflowConversationProfile_dialogflowAgentFull1(context map[strin
 					conversation_process_config {
 						recent_sentences_count = 1
 					}
-					disable_agent_query_logging            = true
-					enable_conversation_augmented_query    = true
-					enable_event_based_suggestion          = true
-					enable_query_suggestion_when_no_answer = true
-					enable_query_suggestion_only            = true
+					disable_agent_query_logging            = false
+					enable_conversation_augmented_query    = false
+					enable_event_based_suggestion          = false
+					enable_query_suggestion_when_no_answer = false
+					enable_query_suggestion_only            = false
 					query_config {
 						confidence_threshold = "1.0"
 						context_filter_settings {
@@ -154,10 +154,10 @@ func testAccDialogflowConversationProfile_dialogflowAgentFull1(context map[strin
 						}
 					}
 					suggestion_feature {
-						type =  "DIALOGFLOW_ASSIST"
+						type =  "CONVERSATION_SUMMARIZATION"
 					}
 					suggestion_trigger_settings {
-						no_small_talk = true
+						no_small_talk = false
 						only_end_user = true
 					}
 				}
@@ -169,11 +169,11 @@ func testAccDialogflowConversationProfile_dialogflowAgentFull1(context map[strin
 					conversation_process_config {
 						recent_sentences_count = 1
 					}
-					disable_agent_query_logging            = true
-					enable_conversation_augmented_query    = true
-					enable_event_based_suggestion          = true
-					enable_query_suggestion_when_no_answer = true
-					enable_query_suggestion_only           = true
+					disable_agent_query_logging            = false
+					enable_conversation_augmented_query    = false
+					enable_event_based_suggestion          = false
+					enable_query_suggestion_when_no_answer = false
+					enable_query_suggestion_only           = false
 					query_config {
 						confidence_threshold = 0.1
 						context_filter_settings {
@@ -193,10 +193,10 @@ func testAccDialogflowConversationProfile_dialogflowAgentFull1(context map[strin
 						}
 					}
 					suggestion_feature {
-						type = "DIALOGFLOW_ASSIST"
+						type = "CONVERSATION_SUMMARIZATION"
 					}
 					suggestion_trigger_settings {
-						no_small_talk = true
+						no_small_talk = false
 						only_end_user = true
 					}
 				}
@@ -335,7 +335,7 @@ func testAccDialogflowConversationProfile_dialogflowAgentFull2(context map[strin
 						}
 					}
 					suggestion_feature {
-						type =  "DIALOGFLOW_ASSIST"
+						type =  "CONVERSATION_SUMMARIZATION"
 					}
 					suggestion_trigger_settings {
 						no_small_talk = false
@@ -374,7 +374,7 @@ func testAccDialogflowConversationProfile_dialogflowAgentFull2(context map[strin
 						}
 					}
 					suggestion_feature {
-						type = "DIALOGFLOW_ASSIST"
+						type = "CONVERSATION_SUMMARIZATION"
 					}
 					suggestion_trigger_settings {
 						no_small_talk = false
