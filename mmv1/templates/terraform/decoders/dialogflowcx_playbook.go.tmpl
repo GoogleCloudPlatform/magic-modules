@@ -7,6 +7,278 @@ if !ok { return nil, fmt.Errorf("'displayName' is not a string") }
 if displayName == "Playbook Example with Fulfillment" {
 	log.Printf("[DEBUG] Received response for Playbook %q: %#v", d.Id(), res)
 
+	//   - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
+	//   - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
+	setHandlers2EventHandlerFulfillmentAdvancedSettings := func(data map[string]interface{}) error {
+		// --- Traverse to the parent map ---
+		handlers, ok := data["handlers"].([]interface{})
+		if !ok { return fmt.Errorf("'handlers' is not a slice") }
+
+		if len(handlers) <= 2 { return fmt.Errorf("index 2 out of bounds for 'handlers'") }
+		handler, ok := handlers[2].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'handlers[2]' is not a map") }
+
+		eventHandler, ok := handler["eventHandler"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'eventHandler' is not a map") }
+
+		fulfillment, ok := eventHandler["fulfillment"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'fulfillment' is not a map") }
+
+		advancedSettings, ok := fulfillment["advancedSettings"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'advancedSettings' is not a map") }
+
+		// --- Update the value to use the original ---
+		advancedSettings["audioExportGcsDestination"] = d.Get("handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination.0").(map[string]interface{})
+		advancedSettings["loggingSettings"] = map[string]interface{}{
+			"enableConsentBasedRedaction": true,
+			"enableInteractionLogging": true,
+			"enableStackdriverLogging": true,
+		}
+
+		return nil
+	}
+	if err := setHandlers2EventHandlerFulfillmentAdvancedSettings(res); err != nil {
+		return nil, err
+	}
+
+	//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
+	//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
+	setHandlers6LifecycleHandlerFulfillmentAdvancedSettings := func(data map[string]interface{}) error {
+		// --- Traverse to the parent map ---
+		handlers, ok := data["handlers"].([]interface{})
+		if !ok { return fmt.Errorf("'handlers' is not a slice") }
+
+		if len(handlers) <= 6 { return fmt.Errorf("index 6 out of bounds for 'handlers'") }
+		handler, ok := handlers[6].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'handlers[6]' is not a map") }
+
+		lifecycleHandler, ok := handler["lifecycleHandler"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'lifecycleHandler' is not a map") }
+
+		fulfillment, ok := lifecycleHandler["fulfillment"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'fulfillment' is not a map") }
+
+		advancedSettings, ok := fulfillment["advancedSettings"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'advancedSettings' is not a map") }
+
+		// --- Update the value to use the original ---
+		advancedSettings["audioExportGcsDestination"] = d.Get("handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination.0").(map[string]interface{})
+		advancedSettings["loggingSettings"] = map[string]interface{}{
+			"enableConsentBasedRedaction": true,
+			"enableInteractionLogging": true,
+			"enableStackdriverLogging": true,
+		}
+
+		return nil
+	}
+	if err := setHandlers6LifecycleHandlerFulfillmentAdvancedSettings(res); err != nil {
+		return nil, err
+	}
+
+	//   - 'handlers.2.event_handler.0.fulfillment.0.messages.1.response_type'
+	//   - 'handlers.2.event_handler.0.fulfillment.0.messages.1.tool_call'
+	//   - 'handlers.2.event_handler.0.fulfillment.0.messages.2.knowledge_info_card'
+	setHandlers2EventHandlerFulfillmentMessages := func(data map[string]interface{}) error {
+		// --- Traverse to the parent map ---
+		handlers, ok := data["handlers"].([]interface{})
+		if !ok { return fmt.Errorf("'handlers' is not a slice") }
+
+		if len(handlers) <= 2 { return fmt.Errorf("index 2 out of bounds for 'handlers'") }
+		handler, ok := handlers[2].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'handlers[2]' is not a map") }
+
+		eventHandler, ok := handler["eventHandler"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'eventHandler' is not a map") }
+
+		fulfillment, ok := eventHandler["fulfillment"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'fulfillment' is not a map") }
+
+		messages, ok := fulfillment["messages"].([]interface{})
+		if !ok { return fmt.Errorf("'messages' is not a slice") }
+
+		if len(messages) <= 1 { return fmt.Errorf("index 1 out of bounds for 'messages'") }
+		message1, ok := messages[1].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'messages[1]' is not a map") }
+
+		message1["toolCall"] = d.Get("handlers.2.event_handler.0.fulfillment.0.messages.1.tool_call.0").(map[string]interface{})
+		delete(message1["toolCall"].(map[string]interface{}), "input_parameters")
+		message1["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
+		message1["responseType"] = "ENTRY_PROMPT"
+
+		if len(messages) <= 2 { return fmt.Errorf("index 2 out of bounds for 'messages'") }
+		message2, ok := messages[2].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'messages[2]' is not a map") }
+
+		message2["knowledgeInfoCard"] = map[string]interface{}{"maximumSnippets": 1}
+
+		return nil
+	}
+	if err := setHandlers2EventHandlerFulfillmentMessages(res); err != nil {
+		return nil, err
+	}
+
+	//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.messages.1.response_type'
+	//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.messages.1.tool_call'
+	//   - 'handlers.6.lifecycle_handler.0.fulfillment.0.messages.2.knowledge_info_card'
+	setHandlers6LifecycleHandlerFulfillmentMessages := func(data map[string]interface{}) error {
+		// --- Traverse to the parent map ---
+		handlers, ok := data["handlers"].([]interface{})
+		if !ok { return fmt.Errorf("'handlers' is not a slice") }
+
+		if len(handlers) <= 6 { return fmt.Errorf("index 6 out of bounds for 'handlers'") }
+		handler, ok := handlers[6].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'handlers[6]' is not a map") }
+
+		lifecycleHandler, ok := handler["lifecycleHandler"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'lifecycleHandler' is not a map") }
+
+		fulfillment, ok := lifecycleHandler["fulfillment"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'fulfillment' is not a map") }
+
+		messages, ok := fulfillment["messages"].([]interface{})
+		if !ok { return fmt.Errorf("'messages' is not a slice") }
+
+		if len(messages) <= 1 { return fmt.Errorf("index 1 out of bounds for 'messages'") }
+		message1, ok := messages[1].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'messages[1]' is not a map") }
+
+		message1["toolCall"] = d.Get("handlers.6.lifecycle_handler.0.fulfillment.0.messages.1.tool_call.0").(map[string]interface{})
+		delete(message1["toolCall"].(map[string]interface{}), "input_parameters")
+		message1["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
+		message1["responseType"] = "ENTRY_PROMPT"
+
+		if len(messages) <= 2 { return fmt.Errorf("index 2 out of bounds for 'messages'") }
+		message2, ok := messages[2].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'messages[2]' is not a map") }
+
+		message2["knowledgeInfoCard"] = map[string]interface{}{"maximumSnippets": 1}
+
+		return nil
+	}
+	if err := setHandlers6LifecycleHandlerFulfillmentMessages(res); err != nil {
+		return nil, err
+	}
+
+	//   - 'handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.1.message.0.knowledge_info_card'
+	//   - 'handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.message.0.tool_call'
+	setHandlers3EventHandlerFulfillmentConditionalCases1Cases0 := func(data map[string]interface{}) error {
+		// --- Traverse to the parent map ---
+		handlers, ok := data["handlers"].([]interface{})
+		if !ok { return fmt.Errorf("'handlers' is not a slice") }
+
+		if len(handlers) <= 3 { return fmt.Errorf("index 3 out of bounds for 'handlers'") }
+		handler, ok := handlers[3].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'handlers[3]' is not a map") }
+
+		eventHandler, ok := handler["eventHandler"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'eventHandler' is not a map") }
+
+		fulfillment, ok := eventHandler["fulfillment"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'fulfillment' is not a map") }
+
+		conditionalCases, ok := fulfillment["conditionalCases"].([]interface{})
+		if !ok { return fmt.Errorf("'conditionalCases' is not a slice") }
+
+		if len(conditionalCases) <= 1 { return fmt.Errorf("index 1 out of bounds for 'conditionalCases'") }
+		conditionalCase, ok := conditionalCases[1].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'conditionalCases[1]' is not a map") }
+
+		cases, ok := conditionalCase["cases"].([]interface{})
+		if !ok { return fmt.Errorf("'cases' is not a slice") }
+
+		if len(cases) <= 0 { return fmt.Errorf("index 0 out of bounds for 'cases'") }
+		case0, ok := cases[0].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'cases[0]' is not a map") }
+
+		caseContent, ok := case0["caseContent"].([]interface{})
+		if !ok { return fmt.Errorf("'cases' is not a slice") }
+
+		if len(caseContent) <= 1 { return fmt.Errorf("index 1 out of bounds for 'caseContent'") }
+		caseContent1, ok := caseContent[1].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'caseContent[1]' is not a map") }
+
+		caseContent1Message, ok := caseContent1["message"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'message' is not a map") }
+
+		caseContent1Message["knowledgeInfoCard"] = map[string]interface{}{"maximumSnippets": 1}
+
+		if len(caseContent) <= 8 { return fmt.Errorf("index 8 out of bounds for 'caseContent'") }
+		caseContent8, ok := caseContent[8].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'caseContent[8]' is not a map") }
+
+		caseContent8Message, ok := caseContent8["message"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'message' is not a map") }
+
+		caseContent8Message["toolCall"] = d.Get("handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.message.0.tool_call.0").(map[string]interface{})
+		delete(caseContent8Message["toolCall"].(map[string]interface{}), "input_parameters")
+		caseContent8Message["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
+
+		return nil
+	}
+	if err := setHandlers3EventHandlerFulfillmentConditionalCases1Cases0(res); err != nil {
+		return nil, err
+	}
+
+	//   - 'handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.1.message.0.knowledge_info_card'
+	//   - 'handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.message.0.tool_call'
+	setHandlers7LifecycleHandlerFulfillmentConditionalCases1Cases0 := func(data map[string]interface{}) error {
+		// --- Traverse to the parent map ---
+		handlers, ok := data["handlers"].([]interface{})
+		if !ok { return fmt.Errorf("'handlers' is not a slice") }
+
+		if len(handlers) <= 7 { return fmt.Errorf("index 7 out of bounds for 'handlers'") }
+		handler, ok := handlers[7].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'handlers[7]' is not a map") }
+
+		lifecycleHandler, ok := handler["lifecycleHandler"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'lifecycleHandler' is not a map") }
+
+		fulfillment, ok := lifecycleHandler["fulfillment"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'fulfillment' is not a map") }
+
+		conditionalCases, ok := fulfillment["conditionalCases"].([]interface{})
+		if !ok { return fmt.Errorf("'conditionalCases' is not a slice") }
+
+		if len(conditionalCases) <= 1 { return fmt.Errorf("index 1 out of bounds for 'conditionalCases'") }
+		conditionalCase, ok := conditionalCases[1].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'conditionalCases[1]' is not a map") }
+
+		cases, ok := conditionalCase["cases"].([]interface{})
+		if !ok { return fmt.Errorf("'cases' is not a slice") }
+
+		if len(cases) <= 0 { return fmt.Errorf("index 0 out of bounds for 'cases'") }
+		case0, ok := cases[0].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'cases[0]' is not a map") }
+
+		caseContent, ok := case0["caseContent"].([]interface{})
+		if !ok { return fmt.Errorf("'cases' is not a slice") }
+
+		if len(caseContent) <= 1 { return fmt.Errorf("index 1 out of bounds for 'caseContent'") }
+		caseContent1, ok := caseContent[1].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'caseContent[1]' is not a map") }
+
+		caseContent1Message, ok := caseContent1["message"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'message' is not a map") }
+
+		caseContent1Message["knowledgeInfoCard"] = map[string]interface{}{"maximumSnippets": 1}
+
+		if len(caseContent) <= 8 { return fmt.Errorf("index 8 out of bounds for 'caseContent'") }
+		caseContent8, ok := caseContent[8].(map[string]interface{})
+		if !ok { return fmt.Errorf("element at 'caseContent[8]' is not a map") }
+
+		caseContent8Message, ok := caseContent8["message"].(map[string]interface{})
+		if !ok { return fmt.Errorf("'message' is not a map") }
+
+		caseContent8Message["toolCall"] = d.Get("handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.message.0.tool_call.0").(map[string]interface{})
+		delete(caseContent8Message["toolCall"].(map[string]interface{}), "input_parameters")
+		caseContent8Message["toolCall"].(map[string]interface{})["inputParameters"] = map[string]interface{}{"query": "example-value"}
+
+		return nil
+	}
+	if err := setHandlers7LifecycleHandlerFulfillmentConditionalCases1Cases0(res); err != nil {
+		return nil, err
+	}
+
 	//   - 'input_parameter_definitions'
 	//   - 'output_parameter_definitions'
 	setInputOutputParameterDefinitions := func(data map[string]interface{}) error {
