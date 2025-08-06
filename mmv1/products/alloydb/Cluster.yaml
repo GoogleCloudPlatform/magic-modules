@@ -492,6 +492,7 @@ properties:
         description: |
           Whether automated backups are enabled.
         default_from_api: true
+        include_empty_value_in_cai: true
   - name: 'backupSource'
     type: NestedObject
     description: 'Cluster created from backup.'
