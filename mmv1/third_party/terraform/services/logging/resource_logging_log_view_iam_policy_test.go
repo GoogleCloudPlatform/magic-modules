@@ -45,7 +45,7 @@ func TestAccLoggingLogView_loggingLogViewIamPolicyBasicExampleUpdate(t *testing.
 
 func testAccLoggingLogView_loggingLogViewIamPolicyBasicExampleUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_logging_project_bucket_config" "logging_log_view" {
+resource "google_logging_project_bucket_config" "logging_log_bucket" {
     project        = "%{project}"
     location       = "global"
     retention_days = 30
@@ -54,7 +54,7 @@ resource "google_logging_project_bucket_config" "logging_log_view" {
 
 resource "google_logging_log_view" "logging_log_view" {
   name        = "tf-test-view%{random_suffix}"
-  bucket      = google_logging_project_bucket_config.logging_log_view.id
+  bucket      = google_logging_project_bucket_config.logging_log_bucket.id
   description = "An updated logging view configured with Terraform"
   filter      = "SOURCE(\"projects/myproject\") AND resource.type = \"gce_instance\""
 }
@@ -78,7 +78,7 @@ resource "google_logging_log_view_iam_policy" "log_view_iam_policy_0" {
 
 func testAccLoggingLogView_loggingLogViewIamPolicyMultiExamplesUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_logging_project_bucket_config" "logging_log_view" {
+resource "google_logging_project_bucket_config" "logging_log_bucket" {
     project        = "%{project}"
     location       = "global"
     retention_days = 30
@@ -94,7 +94,7 @@ data "google_iam_policy" "iam_policy_0" {
 
 resource "google_logging_log_view" "logging_log_view0" {
   name        = "tf-test-view-0-%{random_suffix}"
-  bucket      = google_logging_project_bucket_config.logging_log_view.id
+  bucket      = google_logging_project_bucket_config.logging_log_bucket.id
   description = "An updated logging view configured with Terraform"
   filter      = "SOURCE(\"projects/myproject\") AND resource.type = \"gce_instance\""
 }
@@ -102,14 +102,14 @@ resource "google_logging_log_view" "logging_log_view0" {
 resource "google_logging_log_view_iam_policy" "log_view_iam_policy_0" {
   parent      = google_logging_log_view.logging_log_view0.parent
   location    = google_logging_log_view.logging_log_view0.location
-  bucket      = google_logging_log_view.logging_log_view0.bucket
+  bucket      = google_logging_project_bucket_config.logging_log_bucket.bucket_id
   name        = google_logging_log_view.logging_log_view0.name
   policy_data = data.google_iam_policy.iam_policy_0.policy_data
 }
 
 resource "google_logging_log_view" "logging_log_view1" {
   name        = "tf-test-view-1-%{random_suffix}"
-  bucket      = google_logging_project_bucket_config.logging_log_view.id
+  bucket      = google_logging_project_bucket_config.logging_log_bucket.id
   description = "An updated logging view configured with Terraform"
   filter      = "SOURCE(\"projects/myproject\") AND resource.type = \"gce_instance\""
 }
@@ -117,7 +117,7 @@ resource "google_logging_log_view" "logging_log_view1" {
 resource "google_logging_log_view_iam_policy" "log_view_iam_policy_1" {
   parent      = google_logging_log_view.logging_log_view1.parent
   location    = google_logging_log_view.logging_log_view1.location
-  bucket      = google_logging_log_view.logging_log_view1.bucket
+  bucket      = google_logging_project_bucket_config.logging_log_bucket.bucket_id
   name        = google_logging_log_view.logging_log_view1.name
   policy_data = data.google_iam_policy.iam_policy_0.policy_data
 }
