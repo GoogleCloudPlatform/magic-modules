@@ -76,14 +76,12 @@ func (s testFailureRateLabel) String() string {
 }
 
 type testFailure struct {
-	TestName             string
-	AffectedResource     string
-	ErrorMessage         string
-	DebugLogLink         string
-	GaFailureRate        string
-	GaFailureRateLabel   testFailureRateLabel
-	BetaFailureRate      string
-	BetaFailureRateLabel testFailureRateLabel
+	TestName          string
+	AffectedResource  string
+	DebugLogLinks     map[provider.Version]string
+	ErrorMessageLinks map[provider.Version]string
+	FailureRates      map[provider.Version]string
+	FailureRateLabels map[provider.Version]testFailureRateLabel
 }
 
 // createTestFailureTicketCmd represents the createTestFailureTicket command
@@ -150,13 +148,13 @@ func execCreateTestFailureTicket(now time.Time, gh *github.Client, gcs Cloudstor
 	for tName, tFailure := range testFailuresToday {
 		if _, ok := gaTestFailuresMap[tName]; ok {
 			gaRate, gaRateLabel := testFailureRate(gaTestFailuresMap[tName])
-			tFailure.GaFailureRate = gaRate
-			tFailure.GaFailureRateLabel = gaRateLabel
+			tFailure.FailureRates[provider.GA] = gaRate
+			tFailure.FailureRateLabels[provider.GA] = gaRateLabel
 		}
 		if _, ok := betaTestFailuresMap[tName]; ok {
 			betaRate, betaRateLabel := testFailureRate(betaTestFailuresMap[tName])
-			tFailure.BetaFailureRate = betaRate
-			tFailure.BetaFailureRateLabel = betaRateLabel
+			tFailure.FailureRates[provider.Beta] = betaRate
+			tFailure.FailureRateLabels[provider.Beta] = betaRateLabel
 		}
 	}
 
@@ -194,19 +192,30 @@ func lastNDaysTestFailureMap(pVersion provider.Version, n int, now time.Time, gc
 		for _, testInfo := range testInfoList {
 			testName := testInfo.Name
 			if _, ok := testFailuresMap[testName]; !ok {
-				testFailuresMap[testName] = make([]bool, TotalDays)
+				testFailuresMap[testName] = make([]bool, n)
 			}
 			testFailuresMap[testName][i] = testInfo.Status == "FAILURE"
 
 			if i == 0 && testInfo.Status == "FAILURE" {
 				if _, ok := testFailuresToday[testName]; !ok {
 					testFailuresToday[testName] = &testFailure{
-						TestName:         testName,
-						AffectedResource: convertTestNameToResource(testName),
-						ErrorMessage:     testInfo.ErrorMessage,
-						DebugLogLink:     testInfo.LogLink,
+						TestName:          testName,
+						AffectedResource:  convertTestNameToResource(testName),
+						ErrorMessageLinks: map[provider.Version]string{provider.GA: "", provider.Beta: ""},
+						DebugLogLinks:     map[provider.Version]string{provider.GA: "", provider.Beta: ""},
+						FailureRates:      map[provider.Version]string{provider.GA: "N/A", provider.Beta: "N/A"},
+						FailureRateLabels: map[provider.Version]testFailureRateLabel{provider.GA: testFailure0, provider.Beta: testFailure0},
 					}
 				}
+				// store error message
+				d := date.Format("2006-01-02")
+				fileName := fmt.Sprintf("%s-%s-%s.txt", testName, pVersion, d)
+				errorMessageLink, err := storeErrorMessage(pVersion, gcs, testInfo.ErrorMessage, fileName, d)
+				if err != nil {
+					return err
+				}
+				testFailuresToday[testName].ErrorMessageLinks[pVersion] = errorMessageLink
+				testFailuresToday[testName].DebugLogLinks[pVersion] = testInfo.LogLink
 			}
 		}
 	}
@@ -214,6 +223,9 @@ func lastNDaysTestFailureMap(pVersion provider.Version, n int, now time.Time, gc
 }
 
 func testFailureRate(testFailures []bool) (string, testFailureRateLabel) {
+	if testFailures == nil || len(testFailures) == 0 {
+		return "N/A", testFailure0
+	}
 	n := len(testFailures)
 	failCount := 0
 	last3DaysFailed := true
@@ -253,7 +265,7 @@ func getTestInfoList(pVersion provider.Version, date time.Time, gcs Cloudstorage
 	lookupDate := date.Format("2006-01-02")
 
 	testStatusFileName := fmt.Sprintf("%s-%s.json", lookupDate, pVersion.String())
-	objectName := pVersion.String() + "/" + testStatusFileName
+	objectName := fmt.Sprintf("test-metadata/%s/%s", pVersion.String(), testStatusFileName)
 
 	var testInfoList []TestInfo
 	err := gcs.DownloadFile(NightlyDataBucket, objectName, testStatusFileName)
@@ -269,7 +281,7 @@ func getTestInfoList(pVersion provider.Version, date time.Time, gcs Cloudstorage
 }
 
 func shouldCreateTicket(testfailure testFailure, existTestNames []string, todayClosedTestNames []string) bool {
-	if testfailure.GaFailureRateLabel == testFailureNone && testfailure.BetaFailureRateLabel == testFailureNone {
+	if testfailure.FailureRateLabels[provider.GA] == testFailureNone && testfailure.FailureRateLabels[provider.Beta] == testFailureNone {
 		return false
 	}
 	for _, t := range existTestNames {
@@ -283,7 +295,7 @@ func shouldCreateTicket(testfailure testFailure, existTestNames []string, todayC
 		}
 	}
 
-	if testfailure.GaFailureRateLabel == testFailure100 || testfailure.BetaFailureRateLabel == testFailure100 || testfailure.GaFailureRateLabel == testFailure50 || testfailure.BetaFailureRateLabel == testFailure50 {
+	if testfailure.FailureRateLabels[provider.GA] >= testFailure50 || testfailure.FailureRateLabels[provider.Beta] >= testFailure50 {
 		return true
 	}
 
@@ -390,10 +402,10 @@ func createTicket(ctx context.Context, gh *github.Client, testFailure *testFailu
 		return fmt.Errorf("error formatting issue body: %w", err)
 	}
 
-	failureRatelabel := testFailure.GaFailureRateLabel.String()
+	failureRatelabel := testFailure.FailureRateLabels[provider.GA].String()
 
-	if testFailure.BetaFailureRateLabel > testFailure.GaFailureRateLabel {
-		failureRatelabel = testFailure.BetaFailureRateLabel.String()
+	if testFailure.FailureRateLabels[provider.Beta] > testFailure.FailureRateLabels[provider.GA] {
+		failureRatelabel = testFailure.FailureRateLabels[provider.Beta].String()
 	}
 
 	ticketLabels := []string{
@@ -441,37 +453,67 @@ func formatIssueBody(testFailure testFailure) (string, error) {
 func testNamesFromIssues(issues []*github.Issue) ([]string, error) {
 	var testNames []string
 	for _, issue := range issues {
-		if issue.IsPullRequest() {
-			continue
+		tns, err := testNamesFromIssue(issue)
+		if err != nil {
+			return testNames, err
 		}
+		testNames = append(testNames, tns...)
+	}
+	return testNames, nil
+}
 
-		affectedTests := strings.ReplaceAll(issue.GetBody(), "<!-- List all impacted tests for searchability. The title of the issue can instead list one or more groups of tests, or describe the overall root cause. -->", "")
-		impactTestRegexp := regexp.MustCompile(`Impacted tests:?[\r?\n]+((?:-? ?TestAcc[^\r\n]*\r?\n)*)`)
-		matches := impactTestRegexp.FindStringSubmatch(affectedTests)
+func testNamesFromIssue(issue *github.Issue) ([]string, error) {
+	var testNames []string
+	if issue.IsPullRequest() {
+		return testNames, nil
+	}
 
-		if len(matches) > 1 {
-			tests := strings.Split(matches[1], "\r\n")
+	affectedTests := strings.ReplaceAll(issue.GetBody(), "<!-- List all impacted tests for searchability. The title of the issue can instead list one or more groups of tests, or describe the overall root cause. -->", "")
+	impactTestRegexp := regexp.MustCompile(`Impacted tests:?[\r?\n]+((?:-? ?TestAcc[^\r\n]*\r?\n)*)`)
+	matches := impactTestRegexp.FindStringSubmatch(affectedTests)
 
-			for _, test := range tests {
-				subtests := strings.Split(test, "\n")
-				for _, subtest := range subtests {
-					if strings.HasPrefix(subtest, "- ") {
-						subtest = strings.TrimSpace(subtest[2:])
-						subtestParts := strings.Fields(subtest)
-						subtest = subtestParts[0]
+	if len(matches) > 1 {
+		tests := strings.Split(matches[1], "\r\n")
+
+		for _, test := range tests {
+			subtests := strings.Split(test, "\n")
+			for _, subtest := range subtests {
+				if strings.HasPrefix(subtest, "- ") {
+					subtest = strings.TrimSpace(subtest[2:])
+					subtestParts := strings.Fields(subtest)
+					subtest = subtestParts[0]
+					testNames = append(testNames, subtest)
+				} else {
+					singleTestRegexp := regexp.MustCompile(`TestAcc[^\r\n]*`)
+					if singleTestRegexp.MatchString(subtest) {
 						testNames = append(testNames, subtest)
-					} else {
-						singleTestRegexp := regexp.MustCompile(`TestAcc[^\r\n]*`)
-						if singleTestRegexp.MatchString(subtest) {
-							testNames = append(testNames, subtest)
-						}
 					}
 				}
 			}
-
 		}
+
 	}
 	return testNames, nil
+}
+
+func storeErrorMessage(pVersion provider.Version, gcs CloudstorageClient, errorMessage, fileName, date string) (string, error) {
+	// write error message to file
+	data := []byte(errorMessage)
+	err := os.WriteFile(fileName, data, 0644)
+	if err != nil {
+		return "", fmt.Errorf("failed to write error message to file %s : %w", fileName, err)
+	}
+
+	// upload file to GCS
+	objectName := fmt.Sprintf("test-errors/%s/%s/%s", pVersion.String(), date, fileName)
+	err = gcs.WriteToGCSBucket(NightlyDataBucket, objectName, fileName)
+	if err != nil {
+		return "", fmt.Errorf("failed to upload error message file %s to GCS bucket: %w", objectName, err)
+	}
+
+	// compute object view path
+	link := fmt.Sprintf("https://storage.cloud.google.com/%s/%s", NightlyDataBucket, objectName)
+	return link, nil
 }
 
 func init() {
@@ -479,7 +521,7 @@ func init() {
 }
 
 var (
-	// TODO(shuyama1): add all mismatch resource names
+	// TODO: add all mismatch resource names
 	resourceNameConverter = map[string]string{
 		"google_iam3_projects_policy_binding":        "google_iam_projects_policy_binding",
 		"google_iam3_organizations_policy_binding":   "google_iam_organizations_policy_binding",

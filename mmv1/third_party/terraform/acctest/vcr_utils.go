@@ -13,7 +13,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -32,7 +31,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	fwDiags "github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -51,6 +49,8 @@ var sourcesLock = sync.RWMutex{}
 var configs map[string]*transport_tpg.Config
 
 var sources map[string]VcrSource
+
+var diffFlag = "[Diff]"
 
 // VcrSource is a source for a given VCR test with the value that seeded it
 type VcrSource struct {
@@ -145,8 +145,18 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 	if IsVcrEnabled() {
 		defer closeRecorder(t)
 	} else if isReleaseDiffEnabled() {
-		c = initializeReleaseDiffTest(c, t.Name())
+		// creates temporary file for the individual test, will be a temporary to store the output
+		tempOutputFile, err := createTemporaryFile()
+		if err != nil {
+			t.Errorf("creating temporary file %v", err)
+		}
+		defer func() {
+			writeOutputFileDeferFunction(tempOutputFile, t.Failed())
+		}()
+		c = initializeReleaseDiffTest(c, t.Name(), tempOutputFile)
 	}
+
+	c = extendWithTGCData(t, c)
 
 	// terraform_labels is a computed field to which "goog-terraform-provisioned": "true" is always
 	// added by the provider. ImportStateVerify "checks for strict equality and does not respect
@@ -162,6 +172,16 @@ func VcrTest(t *testing.T, c resource.TestCase) {
 	c.Steps = steps
 
 	resource.Test(t, c)
+}
+
+func createTemporaryFile() (*os.File, error) {
+	// creates temporary file for the individual test, will be a temporary to store the output
+	tempOutputFile, err := os.CreateTemp("", "release_diff_test_output_*.log")
+	if err != nil {
+		return nil, err
+	}
+
+	return tempOutputFile, nil
 }
 
 // We need to explicitly close the VCR recorder to save the cassette
@@ -198,87 +218,6 @@ func closeRecorder(t *testing.T) {
 		delete(sources, t.Name())
 		sourcesLock.Unlock()
 	}
-}
-
-func isReleaseDiffEnabled() bool {
-	releaseDiff := os.Getenv("RELEASE_DIFF")
-	return releaseDiff != ""
-}
-
-func initializeReleaseDiffTest(c resource.TestCase, testName string) resource.TestCase {
-	var releaseProvider string
-	packagePath := fmt.Sprint(reflect.TypeOf(transport_tpg.Config{}).PkgPath())
-	if strings.Contains(packagePath, "google-beta") {
-		releaseProvider = "google-beta"
-	} else {
-		releaseProvider = "google"
-	}
-
-	if c.ExternalProviders != nil {
-		c.ExternalProviders[releaseProvider] = resource.ExternalProvider{}
-	} else {
-		c.ExternalProviders = map[string]resource.ExternalProvider{
-			releaseProvider: {},
-		}
-	}
-
-	localProviderName := "google-local"
-	if c.Providers != nil {
-		c.Providers = map[string]*schema.Provider{
-			localProviderName: GetSDKProvider(testName),
-		}
-		c.ProtoV5ProviderFactories = map[string]func() (tfprotov5.ProviderServer, error){
-			localProviderName: func() (tfprotov5.ProviderServer, error) {
-				return nil, nil
-			},
-		}
-	} else {
-		c.ProtoV5ProviderFactories = map[string]func() (tfprotov5.ProviderServer, error){
-			localProviderName: func() (tfprotov5.ProviderServer, error) {
-				provider, err := MuxedProviders(testName)
-				return provider(), err
-			},
-		}
-	}
-
-	var replacementSteps []resource.TestStep
-	for _, testStep := range c.Steps {
-		if testStep.Config != "" {
-			ogConfig := testStep.Config
-			testStep.Config = reformConfigWithProvider(ogConfig, localProviderName)
-			if testStep.ExpectError == nil && testStep.PlanOnly == false {
-				newStep := resource.TestStep{
-					Config: reformConfigWithProvider(ogConfig, releaseProvider),
-				}
-				testStep.PlanOnly = true
-				testStep.ExpectNonEmptyPlan = false
-				replacementSteps = append(replacementSteps, newStep)
-			}
-			replacementSteps = append(replacementSteps, testStep)
-		} else {
-			replacementSteps = append(replacementSteps, testStep)
-		}
-	}
-
-	c.Steps = replacementSteps
-
-	return c
-}
-
-func reformConfigWithProvider(config, provider string) string {
-	configBytes := []byte(config)
-	providerReplacement := fmt.Sprintf("provider = %s", provider)
-	providerReplacementBytes := []byte(providerReplacement)
-	providerBlock := regexp.MustCompile(`provider *=.*google-beta.*`)
-
-	if providerBlock.Match(configBytes) {
-		return string(providerBlock.ReplaceAll(configBytes, providerReplacementBytes))
-	}
-
-	providerReplacement = fmt.Sprintf("${1}\n\t%s", providerReplacement)
-	providerReplacementBytes = []byte(providerReplacement)
-	resourceHeader := regexp.MustCompile(`(resource .*google_.* .*\w+.*\{.*)`)
-	return string(resourceHeader.ReplaceAll(configBytes, providerReplacementBytes))
 }
 
 // HandleVCRConfiguration configures the recorder (github.com/dnaeon/go-vcr/recorder) used in the VCR test
