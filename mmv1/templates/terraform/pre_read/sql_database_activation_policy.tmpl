@@ -1,8 +1,8 @@
 instance := d.Get("instance").(string)
 databaseInstance, err := config.NewSqlAdminClient(userAgent).Instances.Get(project, instance).Do()
-	if err != nil {
-		return err
-	}
-	if databaseInstance.Settings.ActivationPolicy != "ALWAYS" {
-		return nil
-	}
+if err != nil {
+	return err
+}
+if databaseInstance.Settings != nil && databaseInstance.Settings.ActivationPolicy != "ALWAYS" {
+	return nil
+}
