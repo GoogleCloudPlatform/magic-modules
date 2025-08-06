@@ -1,8 +1,3 @@
-// Note for DRZ Advanced Customers: To ensure DRZ Advanced compliance for data-in-transit,
-// you must use the appropriate multi-regional endpoint (mREP) for the `apigee_custom_endpoint`.
-// This is the primary configuration required from a customer's perspective to leverage
-// DRZ Advanced capabilities. Other guarantees for data-in-use and data-at-rest are
-// managed by the Apigee service and Google's underlying infrastructure.
 provider "google" {
   apigee_custom_endpoint = "https://eu-apigee.googleapis.com/v1/"
 }
