@@ -98,7 +98,7 @@ examples:
   - name: 'service_attachment_cross_region_ilb'
     primary_resource_id: 'psc_ilb_service_attachment'
     vars:
-      name: 'tf-test'
+      name: 'sa'
 parameters:
   - name: 'region'
     type: ResourceRef
