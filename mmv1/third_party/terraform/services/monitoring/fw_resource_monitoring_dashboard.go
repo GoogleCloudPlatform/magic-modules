@@ -136,6 +136,7 @@ func (r *MonitoringDashboardResource) Create(ctx context.Context, req resource.C
 
 	createTimeout := time.Duration(20) * time.Minute
 
+	tflog.Trace(ctx, "Creating Monitoring Dashboard", map[string]interface{}{"url": url})
 	res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
 		Config:               r.providerConfig,
 		Method:               "POST",
@@ -181,8 +182,6 @@ func (r *MonitoringDashboardResource) Read(ctx context.Context, req resource.Rea
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	tflog.Trace(ctx, "read Monitoring Dashboard resource")
 
 	r.Refresh(ctx, &data, &resp.State, req, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
@@ -232,7 +231,7 @@ func (r *MonitoringDashboardResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	tflog.Trace(ctx, "Updating Monitoring Domain", map[string]interface{}{"url": url})
+	tflog.Trace(ctx, "Updating Monitoring Dashboard", map[string]interface{}{"url": url})
 
 	updateTimeout := time.Duration(20) * time.Minute
 
@@ -250,7 +249,7 @@ func (r *MonitoringDashboardResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	tflog.Trace(ctx, "Successfully sent update request for Monitoring Domain", map[string]interface{}{"response": res})
+	tflog.Trace(ctx, "Successfully updated Monitoring Dashboard", map[string]interface{}{"response": res})
 	id := fmt.Sprintf("projects/%s/dashboards/%s",
 		state.Project.ValueString(),
 		res["name"],
@@ -334,7 +333,7 @@ func (r *MonitoringDashboardResource) Refresh(ctx context.Context, data *Monitor
 		return
 	}
 
-	tflog.Trace(ctx, "Refreshing Monitoring Dashboard", map[string]interface{}{"url": url})
+	tflog.Trace(ctx, "Reading Monitoring Dashboard", map[string]interface{}{"url": url})
 
 	res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
 		Config:               r.providerConfig,
@@ -349,6 +348,8 @@ func (r *MonitoringDashboardResource) Refresh(ctx context.Context, data *Monitor
 		return
 	}
 
+	tflog.Trace(ctx, "Successfully read Monitoring Dashboard", map[string]interface{}{"response": res})
+
 	id := fmt.Sprintf("projects/%s/dashboards/%s",
 		data.Project.ValueString(),
 		res["name"],
@@ -357,10 +358,8 @@ func (r *MonitoringDashboardResource) Refresh(ctx context.Context, data *Monitor
 
 	str, err := structure.FlattenJsonToString(res)
 	if err != nil {
-		diags.AddError("Error reading Dashboard:", fmt.Sprintf("%s", err))
+		diags.AddError("Error converting Dashboard:", fmt.Sprintf("%s", err))
 		return
 	}
 	data.DashboardJson = jsontypes.NewNormalizedValue(str)
-
-	tflog.Trace(ctx, "Refreshed Monitoring Dashboard resource data.")
 }
