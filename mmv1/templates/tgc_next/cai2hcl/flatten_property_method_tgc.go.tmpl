@@ -26,10 +26,6 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 	}
 	return tpgresource.GetResourceNameFromSelfLink(v.(string))
 }
-	{{- else if $.IgnoreRead }}
-func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, _ *schema.ResourceData, _ *transport_tpg.Config) interface{} {
-	return v
-}
 	{{- else }}
 {{ template "flattenPropertyMethod" $ -}}
 	{{- end }}
