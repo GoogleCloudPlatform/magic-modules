@@ -2000,6 +2000,8 @@ func (r Resource) ShouldGenerateSingularDataSource() bool {
 	return r.GenerateDatasource
 }
 
+// DatasourceOptionalFields returns a list of fields from the resource's URI
+// that should be marked as "Required".
 func (r Resource) DatasourceRequiredFields() []string {
 	requiredFields := []string{}
 	uriParts := strings.Split(r.SelfLink, "/")
