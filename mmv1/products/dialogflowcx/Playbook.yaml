@@ -34,7 +34,6 @@ custom_code:
   pre_update: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   pre_delete: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
   custom_import: 'templates/terraform/custom_import/dialogflowcx_playbook.go.tmpl'
-  decoder: 'templates/terraform/decoders/dialogflowcx_playbook.go.tmpl'
 
 examples:
   - name: "dialogflowcx_playbook_basic"
@@ -46,9 +45,6 @@ examples:
     vars:
       agent_name: 'dialogflowcx-agent'
       bucket_name: 'dialogflowcx-bucket'
-    ignore_read_extra:
-      - 'input_parameter_definitions.0.type_schema.0.schema_reference.0.tool'
-      - 'output_parameter_definitions.0.type_schema.0.schema_reference.0.tool'
 
 parameters:
   - name: 'parent'
@@ -77,118 +73,6 @@ properties:
     description: |
       High level description of the goal the playbook intend to accomplish. A goal should be concise since it's visible to other playbooks that may reference this playbook.
     required: true
-  - name: 'inputParameterDefinitions'
-    type: Array
-    description: Defined structured input parameters for this playbook.
-    item_type:
-      type: NestedObject
-      properties:
-        - name: 'name'
-          type: String
-          description: Name of parameter.
-          required: true
-        - name: 'description'
-          type: String
-          description: Human-readable description of the parameter. Limited to 300 characters.
-        - name: 'typeSchema'
-          type: NestedObject
-          description: |
-            Type schema of parameter.
-
-            Union field **schema**. The encapsulated schema. **schema** can be only one of the following: inlineSchema and schemaReference.
-          properties:
-            - name: 'schemaReference'
-              type: NestedObject
-              description: Set if this is a schema reference.
-              properties:
-                - name: 'tool'
-                  type: String
-                  description: |
-                    The tool that contains this schema definition.
-                    Format: **projects/<ProjectID>/locations/<LocationID>/agents/<AgentID>/tools/<ToolID>**.
-                - name: 'schema'
-                  type: String
-                  description: The name of the schema.
-            - name: 'inlineSchema'
-              type: NestedObject
-              description: Set if this is an inline schema definition.
-              properties:
-                - name: 'type'
-                  type: Enum
-                  description: Data type of the schema.
-                  enum_values:
-                    - 'DATA_TYPE_UNSPECIFIED'
-                    - 'STRING'
-                    - 'NUMBER'
-                    - 'BOOLEAN'
-                    - 'ARRAY'
-                - name: 'items'
-                  type: String
-                  description: |
-                    Schema of the elements if this is an ARRAY type
-
-                    This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [TypeSchema](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/ParameterDefinition#TypeSchema).
-                  state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                  custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-                  validation:
-                    function: 'validation.StringIsJSON'
-  - name: 'outputParameterDefinitions'
-    type: Array
-    description: Defined structured output parameters for this playbook.
-    item_type:
-      type: NestedObject
-      properties:
-        - name: 'name'
-          type: String
-          description: Name of parameter.
-          required: true
-        - name: 'description'
-          type: String
-          description: Human-readable description of the parameter. Limited to 300 characters.
-        - name: 'typeSchema'
-          type: NestedObject
-          description: |
-            Type schema of parameter.
-
-            Union field **schema**. The encapsulated schema. **schema** can be only one of the following: inlineSchema and schemaReference.
-          properties:
-            - name: 'schemaReference'
-              type: NestedObject
-              description: Set if this is a schema reference.
-              properties:
-                - name: 'tool'
-                  type: String
-                  description: |
-                    The tool that contains this schema definition.
-                    Format: **projects/<ProjectID>/locations/<LocationID>/agents/<AgentID>/tools/<ToolID>**.
-                - name: 'schema'
-                  type: String
-                  description: The name of the schema.
-            - name: 'inlineSchema'
-              type: NestedObject
-              description: Set if this is an inline schema definition.
-              properties:
-                - name: 'type'
-                  type: Enum
-                  description: Data type of the schema.
-                  enum_values:
-                    - 'DATA_TYPE_UNSPECIFIED'
-                    - 'STRING'
-                    - 'NUMBER'
-                    - 'BOOLEAN'
-                    - 'ARRAY'
-                - name: 'items'
-                  type: String
-                  description: |
-                    Schema of the elements if this is an ARRAY type
-
-                    This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [TypeSchema](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/ParameterDefinition#TypeSchema).
-                  state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
-                  custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
-                  custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
-                  validation:
-                    function: 'validation.StringIsJSON'
   - name: 'instruction'
     type: NestedObject
     description: |
