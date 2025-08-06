@@ -48,7 +48,7 @@ resource "google_compute_health_check" "health_check" {
 }
 
 resource "google_compute_subnetwork" "subnetwork_psc" {
-  name          = "psc-{{index $.Vars "name"}}"
+  name          = "{{index $.Vars "name"}}-psc"
   region        = "us-central1"
   network       = google_compute_network.network.id
   purpose       =  "PRIVATE_SERVICE_CONNECT"
@@ -56,7 +56,7 @@ resource "google_compute_subnetwork" "subnetwork_psc" {
 }
 
 resource "google_compute_subnetwork" "subnetwork_proxy" {
-  name          = "proxy-{{index $.Vars "name"}}"
+  name          = "{{index $.Vars "name"}}-proxy"
   region        = "us-central1"
   network       = google_compute_network.network.id
   purpose       =  "GLOBAL_MANAGED_PROXY"
