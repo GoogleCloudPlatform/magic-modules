@@ -125,6 +125,7 @@ properties:
                         - KNOWLEDGE_ASSIST
                         - DIALOGFLOW_ASSIST
                         - ENTITY_EXTRACTION
+                        - CONVERSATION_SUMMARIZATION
                 - type: Boolean
                   name: 'enableEventBasedSuggestion'
                   description: |
@@ -309,6 +310,7 @@ properties:
                         - KNOWLEDGE_ASSIST
                         - DIALOGFLOW_ASSIST
                         - ENTITY_EXTRACTION
+                        - CONVERSATION_SUMMARIZATION
                 - type: Boolean
                   name: 'enableEventBasedSuggestion'
                   description: |
