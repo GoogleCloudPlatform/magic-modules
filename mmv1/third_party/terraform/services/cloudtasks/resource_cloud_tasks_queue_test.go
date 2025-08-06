@@ -2,8 +2,9 @@ package cloudtasks_test
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -198,7 +199,7 @@ func TestAccCloudTasksQueue_paused(t *testing.T) {
 				ResourceName:            "google_cloud_tasks_queue.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"app_engine_routing_override.0.service", "app_engine_routing_override.0.version", "app_engine_routing_override.0.instance"},
+				ImportStateVerifyIgnore: []string{"app_engine_routing_override.0.service", "app_engine_routing_override.0.version", "app_engine_routing_override.0.instance", "desired_state"},
 			},
 		},
 	})
