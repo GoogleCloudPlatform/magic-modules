@@ -2399,3 +2399,107 @@ resource "google_storage_transfer_job" "transfer_job" {
 }
 `, project, dataSourceBucketName, project, dataSinkBucketName, project, transferJobDescription, project)
 }
+
+func TestAccStorageTransferJob_updatePathToEmpty(t *testing.T) {
+	t.Parallel()
+
+	randSuffix := acctest.RandString(t, 10)
+	dataSourceBucketName := "tf-acc-source-" + randSuffix
+	dataSinkBucketName := "tf-acc-sink-" + randSuffix
+	jobDescription := "tf-acc-test-path-update"
+	jobResourceName := "google_storage_transfer_job.transfer_job"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Step 1: Create the resource with a non-empty path
+				Config: testAccStorageTransferJob_withPath(envvar.GetTestProjectFromEnv(), dataSourceBucketName, dataSinkBucketName, jobDescription, "foo/"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(jobResourceName, "transfer_spec.0.gcs_data_source.0.path", "foo/"),
+					resource.TestCheckResourceAttr(jobResourceName, "transfer_spec.0.gcs_data_sink.0.path", "foo/"),
+				),
+			},
+			{
+				// Step 2: Update the path to be an empty string
+				Config: testAccStorageTransferJob_withPath(envvar.GetTestProjectFromEnv(), dataSourceBucketName, dataSinkBucketName, jobDescription, ""),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(jobResourceName, "transfer_spec.0.gcs_data_source.0.path", ""),
+					resource.TestCheckResourceAttr(jobResourceName, "transfer_spec.0.gcs_data_sink.0.path", ""),
+				),
+			},
+			{
+				// Step 3: Verify with an import
+				ResourceName:      jobResourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+// Add this new config helper function as well.
+func testAccStorageTransferJob_withPath(project, dataSourceBucketName, dataSinkBucketName, transferJobDescription, path string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "data_source" {
+  name          = "%s"
+  project       = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket" "data_sink" {
+  name          = "%s"
+  project       = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+data "google_storage_transfer_project_service_account" "default" {
+  project = "%s"
+}
+
+resource "google_storage_bucket_iam_member" "data_source" {
+  bucket = google_storage_bucket.data_source.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_bucket_iam_member" "data_sink" {
+  bucket = google_storage_bucket.data_sink.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_transfer_job" "transfer_job" {
+  description = "%s"
+  project     = "%s"
+
+  transfer_spec {
+    gcs_data_source {
+      bucket_name = google_storage_bucket.data_source.name
+      path        = "%s"
+    }
+    gcs_data_sink {
+      bucket_name = google_storage_bucket.data_sink.name
+      path        = "%s"
+    }
+  }
+
+  schedule {
+    schedule_start_date {
+      year  = 2028
+      month = 1
+      day   = 1
+    }
+  }
+
+  depends_on = [
+    google_storage_bucket_iam_member.data_source,
+    google_storage_bucket_iam_member.data_sink,
+  ]
+}
+`, dataSourceBucketName, project, dataSinkBucketName, project, project, transferJobDescription, project, path, path)
+}
