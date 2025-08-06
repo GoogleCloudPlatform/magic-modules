@@ -254,7 +254,6 @@ properties:
   - name: 'linkedVpcNetwork'
     type: NestedObject
     description: VPC network that is associated with the spoke.
-    immutable: true
     conflicts:
       - linked_interconnect_attachments
       - linked_router_appliance_instances
