@@ -2000,6 +2000,38 @@ func (r Resource) ShouldGenerateSingularDataSource() bool {
 	return r.GenerateDatasource
 }
 
+func (r Resource) DatasourceRequiredFields() []string {
+	requiredFields := []string{}
+	uriParts := strings.Split(r.SelfLink, "/")
+
+	for _, part := range uriParts {
+		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
+			field := strings.TrimSuffix(strings.TrimPrefix(part, "{{"), "}}")
+			if field != "region" && field != "project" && field != "zone" {
+				requiredFields = append(requiredFields, field)
+			}
+		}
+	}
+	return requiredFields
+}
+
+// DatasourceOptionalFields returns a list of fields from the resource's URI
+// that should be marked as "Optional".
+func (r Resource) DatasourceOptionalFields() []string {
+	optionalFields := []string{}
+	uriParts := strings.Split(r.SelfLink, "/")
+
+	for _, part := range uriParts {
+		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
+			field := strings.TrimSuffix(strings.TrimPrefix(part, "{{"), "}}")
+			if field == "region" || field == "project" || field == "zone" {
+				optionalFields = append(optionalFields, field)
+			}
+		}
+	}
+	return optionalFields
+}
+
 func (r Resource) ShouldGenerateSweepers() bool {
 	if !r.ExcludeSweeper && !utils.IsEmpty(r.Sweeper) {
 		return true
