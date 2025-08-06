@@ -1,36 +1,33 @@
 package monitoring
 
 import (
-	"bytes"
 	"context"
-	"fmt"
-	"mime/multipart"
+	"reflect"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
-	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
-	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
-	"github.com/hashicorp/terraform-provider-google/google/fwresource"
-	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 )
 
-func MonitoringDashboardDiffSuppress() stringplanmodifier.String {
-	return &monitoringDashboardDiffSuppress{}
+func FWMonitoringDashboardDiffSuppress() planmodifier.String {
+	return &fwmonitoringDashboardDiffSuppress{}
 }
 
-type monitoringDashboardDiffSuppress struct {
+type fwmonitoringDashboardDiffSuppress struct {
 }
 
-func (d *instanceOptionDiffSuppress) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringRequest) {
+// Description returns a human-readable description of the plan modifier.
+func (m fwmonitoringDashboardDiffSuppress) Description(_ context.Context) string {
+	return "Verifies if computed attributes are the only difference in the dashboard_json field."
+}
+
+// MarkdownDescription returns a markdown description of the plan modifier.
+func (m fwmonitoringDashboardDiffSuppress) MarkdownDescription(_ context.Context) string {
+	return "Verifies if computed attributes are the only difference in the dashboard_json field."
+}
+
+func (m *fwmonitoringDashboardDiffSuppress) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
 	var old jsontypes.Normalized
 	diags := req.State.GetAttribute(ctx, path.Root("dashboard_json"), &old)
 	resp.Diagnostics.Append(diags...)
@@ -47,11 +44,11 @@ func (d *instanceOptionDiffSuppress) PlanModifyString(ctx context.Context, req p
 
 	oldMap, err := structure.ExpandJsonFromString(old.ValueString())
 	if err != nil {
-		return false
+		return
 	}
 	newMap, err := structure.ExpandJsonFromString(new.ValueString())
 	if err != nil {
-		return false
+		return
 	}
 
 	oldMap = recursiveRemoveComputedKeys(oldMap, newMap)

@@ -1,13 +1,11 @@
 package monitoring
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"mime/multipart"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -17,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
 	"github.com/hashicorp/terraform-provider-google/google/fwmodels"
 	"github.com/hashicorp/terraform-provider-google/google/fwresource"
 	"github.com/hashicorp/terraform-provider-google/google/fwtransport"
@@ -81,7 +80,7 @@ func (r *MonitoringDashboardResource) Schema(_ context.Context, _ resource.Schem
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
-					stringplanmodifier.MonitoringDashboardDiffSuppress(),
+					FWMonitoringDashboardDiffSuppress(),
 				},
 			},
 			// This is included for backwards compatibility with the original, SDK-implemented resource.
@@ -111,23 +110,22 @@ func (r *MonitoringDashboardResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
-	var project, billingProject types.String
+	var project types.String
 	project = fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	billingProject = types.StringValue(r.providerConfig.BillingProject)
 
 	var schemaDefaultVals fwtransport.DefaultVars
 	schemaDefaultVals.Project = project
 
-	dashboardJsonProp, diags := data.DashboardJson.ValueString()
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	dashboardJsonProp := data.DashboardJson.ValueString()
 	//resource is configured to have a supplied request json rather than the resource being configured directly in Terraform
 	obj, err := structure.ExpandJsonFromString(dashboardJsonProp)
+	if err != nil {
+		resp.Diagnostics.AddError("Error expanding supplied JSON:", fmt.Sprintf("%s", dashboardJsonProp))
+		return
+	}
 
 	// Use provider_meta to set User-Agent
 	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
@@ -138,10 +136,10 @@ func (r *MonitoringDashboardResource) Create(ctx context.Context, req resource.C
 
 	createTimeout := time.Duration(20) * time.Minute
 
-	res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+	res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
 		Config:               r.providerConfig,
 		Method:               "POST",
-		Project:              billingProject.ValueString(),
+		Project:              project.ValueString(),
 		RawURL:               url,
 		UserAgent:            userAgent,
 		Body:                 obj,
@@ -184,9 +182,6 @@ func (r *MonitoringDashboardResource) Read(ctx context.Context, req resource.Rea
 		return
 	}
 
-	// Use provider_meta to set User-Agent
-	r.client.UserAgent = fwtransport.GenerateFrameworkUserAgentString(metaData, r.client.UserAgent)
-
 	tflog.Trace(ctx, "read Monitoring Dashboard resource")
 
 	r.Refresh(ctx, &data, &resp.State, req, &resp.Diagnostics)
@@ -212,27 +207,27 @@ func (r *MonitoringDashboardResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	var project, billingProject types.String
+	var project types.String
 	project = fwresource.GetProjectFramework(plan.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	billingProject = types.StringValue(r.providerConfig.BillingProject)
 
 	var schemaDefaultVals fwtransport.DefaultVars
 	schemaDefaultVals.Project = project
 
-	dashboardJsonProp, diags := plan.DashboardJson.ValueString()
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	dashboardJsonProp := plan.DashboardJson.ValueString()
+
 	//resource is configured to have a supplied request json rather than the resource being configured directly in Terraform
 	obj, err := structure.ExpandJsonFromString(dashboardJsonProp)
+	if err != nil {
+		resp.Diagnostics.AddError("Error expanding supplied JSON:", fmt.Sprintf("%s", dashboardJsonProp))
+		return
+	}
 
 	// Use provider_meta to set User-Agent
 	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
-	url := fwtransport.ReplaceVars(ctx, req, diags, schemaDefaultVals, r.providerConfig, "{{MonitoringBasePath}}"+"v1/"+state.Id)
+	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{MonitoringBasePath}}"+"v1/"+state.Id.ValueString())
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -241,12 +236,13 @@ func (r *MonitoringDashboardResource) Update(ctx context.Context, req resource.U
 
 	updateTimeout := time.Duration(20) * time.Minute
 
-	res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+	res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
 		Config:               r.providerConfig,
 		Method:               "PATCH",
 		Project:              project.ValueString(),
 		RawURL:               url,
 		UserAgent:            userAgent,
+		Body:                 obj,
 		Timeout:              updateTimeout,
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsMonitoringConcurrentEditError},
 	}, &resp.Diagnostics)
@@ -256,7 +252,7 @@ func (r *MonitoringDashboardResource) Update(ctx context.Context, req resource.U
 
 	tflog.Trace(ctx, "Successfully sent update request for Monitoring Domain", map[string]interface{}{"response": res})
 	id := fmt.Sprintf("projects/%s/dashboards/%s",
-		data.Project.ValueString(),
+		state.Project.ValueString(),
 		res["name"],
 	)
 	plan.Id = types.StringValue(id)
@@ -284,16 +280,16 @@ func (r *MonitoringDashboardResource) Delete(ctx context.Context, req resource.D
 	}
 
 	var project types.String
-	project = fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), diags)
-	if diags.HasError() {
+	project = fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	var schemaDefaultVals fwtransport.DefaultVars
 	schemaDefaultVals.Project = project
 
 	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
-	url := fwtransport.ReplaceVars(ctx, req, diags, schemaDefaultVals, r.providerConfig, "{{MonitoringBasePath}}"+"v1/"+data.Id)
-	if diags.HasError() {
+	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{MonitoringBasePath}}"+"v1/"+data.Id.ValueString())
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -301,7 +297,7 @@ func (r *MonitoringDashboardResource) Delete(ctx context.Context, req resource.D
 
 	deleteTimeout := time.Duration(20) * time.Minute
 
-	res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+	_, _ = fwtransport.SendRequest(fwtransport.SendRequestOptions{
 		Config:    r.providerConfig,
 		Method:    "DELETE",
 		Project:   project.ValueString(),
@@ -310,11 +306,15 @@ func (r *MonitoringDashboardResource) Delete(ctx context.Context, req resource.D
 		Timeout:   deleteTimeout,
 	}, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
-		diags.AddError(fmt.Sprintf("Error deleting Monitoring Domain: %s", data.Id))
+		resp.Diagnostics.AddError("Error deleting Monitoring Domain:", fmt.Sprintf("%s", data.Id.ValueString()))
 		return
 	}
 
 	tflog.Trace(ctx, "Successfully deleted Monitoring Domain.")
+}
+
+func (r *MonitoringDashboardResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
 func (r *MonitoringDashboardResource) Refresh(ctx context.Context, data *MonitoringDashboardResourceModel, state *tfsdk.State, req interface{}, diags *diag.Diagnostics) {
@@ -329,14 +329,14 @@ func (r *MonitoringDashboardResource) Refresh(ctx context.Context, data *Monitor
 	schemaDefaultVals.Project = project
 
 	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
-	url := fwtransport.ReplaceVars(ctx, req, diags, schemaDefaultVals, r.providerConfig, "{{MonitoringBasePath}}"+"v1/"+data.Id)
+	url := fwtransport.ReplaceVars(ctx, req, diags, schemaDefaultVals, r.providerConfig, "{{MonitoringBasePath}}"+"v1/"+data.Id.ValueString())
 	if diags.HasError() {
 		return
 	}
 
 	tflog.Trace(ctx, "Refreshing Monitoring Dashboard", map[string]interface{}{"url": url})
 
-	res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+	res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
 		Config:               r.providerConfig,
 		Method:               "GET",
 		Project:              project.ValueString(),
@@ -345,25 +345,22 @@ func (r *MonitoringDashboardResource) Refresh(ctx context.Context, data *Monitor
 		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsMonitoringConcurrentEditError},
 	}, diags)
 	if diags.HasError() {
-		fwtransport.HandleNotFoundError(ctx, err, state, fmt.Sprintf("MonitoringDashboard %s", data.Id.ValueString()), &resp.Diagnostics)
+		fwtransport.HandleNotFoundError(ctx, err, state, fmt.Sprintf("MonitoringDashboard %s", data.Id.ValueString()), diags)
 		return
 	}
 
 	id := fmt.Sprintf("projects/%s/dashboards/%s",
-		plan.Project.ValueString(),
+		data.Project.ValueString(),
 		res["name"],
 	)
 	data.Id = types.StringValue(id)
 
 	str, err := structure.FlattenJsonToString(res)
 	if err != nil {
-		diags.AddError(
-			"Error reading Dashboard",
-			fmt.Sprintf("%s", err),
-		)
+		diags.AddError("Error reading Dashboard:", fmt.Sprintf("%s", err))
 		return
 	}
-	data.DashboardJson = types.StringValue(str)
+	data.DashboardJson = jsontypes.NewNormalizedValue(str)
 
 	tflog.Trace(ctx, "Refreshed Monitoring Dashboard resource data.")
 }
