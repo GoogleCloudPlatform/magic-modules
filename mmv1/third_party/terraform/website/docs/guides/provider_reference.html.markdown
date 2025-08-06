@@ -368,6 +368,22 @@ Support for custom endpoints is on a best-effort basis. The underlying
 endpoint and default values for a resource can be changed at any time without
 being considered a breaking change.
 
+**Data Residency and DRZ Advanced**
+
+For services that support Data Residency, you can specify a regional endpoint to ensure your data is processed and stored in a specific geographic location.
+
+For services offering DRZ Advanced capabilities, it is critical to use the correct multi-regional endpoint (mREP) to ensure data remains within the chosen multi-region during transit. This is the main action required in your Terraform configuration to utilize a service's DRZ Advanced features. Other advanced guarantees, such as ensuring data is processed only within the selected location (data-in-use), are provided by the service's backend and Google's infrastructure and do not require specific Terraform configuration.
+
+Example for Apigee with a European Union mREP:
+
+```
+provider "google" {
+  apigee_custom_endpoint = "https://eu-apigee.googleapis.com/v1/"
+}
+```
+
+Always consult the specific service documentation for the correct regional or multi-regional endpoint to use.
+
 ---
 
 * `universe_domain` - (Optional) Specify the GCP universe to deploy in.
