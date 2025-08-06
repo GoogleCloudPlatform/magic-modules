@@ -15,16 +15,6 @@
 {{- define "expandTgcPropertyMethod" }}
     {{ if $.CustomTgcExpand }}
 {{- $.CustomTemplate $.CustomTgcExpand false -}}
-    {{ else if and ($.IsA "Array") ($.ItemType.IsA "ResourceRef")}}
-{{- template "expandArrayResourcerefWithValidation" $ -}}
-    {{ else if ($.IsA "ResourceRef") }}
-      {{- if $.IsResourceRefFound }}
-{{- template "expandResourcerefWithValidation" $ -}}
-      {{- else }}
-func expand{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
-	return v, nil
-}
-      {{- end }}
     {{ else }}
 {{- template "expandPropertyMethod" $ -}}
     {{ end }}

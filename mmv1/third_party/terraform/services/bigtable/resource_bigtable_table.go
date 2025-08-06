@@ -682,13 +682,13 @@ func FlattenColumnFamily(families []bigtable.FamilyInfo) ([]map[string]interface
 	return result, nil
 }
 
-// TODO(rileykarson): Fix the stored import format after rebasing 3.0.0
+// TODO: Fix the stored import format after rebasing 3.0.0
 func resourceBigtableTableImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
 	if err := tpgresource.ParseImportId([]string{
-		"projects/(?P<project>[^/]+)/instances/(?P<instance_name>[^/]+)/tables/(?P<name>[^/]+)",
-		"(?P<project>[^/]+)/(?P<instance_name>[^/]+)/(?P<name>[^/]+)",
-		"(?P<instance_name>[^/]+)/(?P<name>[^/]+)",
+		"^projects/(?P<project>[^/]+)/instances/(?P<instance_name>[^/]+)/tables/(?P<name>[^/]+)$",
+		"^(?P<project>[^/]+)/(?P<instance_name>[^/]+)/(?P<name>[^/]+)$",
+		"^(?P<instance_name>[^/]+)/(?P<name>[^/]+)$",
 	}, d, config); err != nil {
 		return nil, err
 	}
