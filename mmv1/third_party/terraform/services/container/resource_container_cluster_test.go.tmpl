@@ -1999,6 +1999,62 @@ func TestAccContainerCluster_withNodeConfigLinuxNodeConfig(t *testing.T) {
 	})
 }
 
+func TestAccContainerCluster_withKubeletConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withKubeletConfig(clusterName, networkName, subnetworkName, "none", "None", "best-effort"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_kubelet_config",
+						"node_config.0.kubelet_config.0.cpu_manager_policy", "none"),
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_kubelet_config",
+						"node_config.0.kubelet_config.0.memory_manager_policy", "None"),
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_kubelet_config",
+						"node_config.0.kubelet_config.0.topology_manager_policy", "best-effort"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_kubelet_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withKubeletConfig(clusterName, networkName, subnetworkName, "static", "Static", "single-numa-node"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_kubelet_config",
+						"node_config.0.kubelet_config.0.cpu_manager_policy", "static"),
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_kubelet_config",
+						"node_config.0.kubelet_config.0.memory_manager_policy", "Static"),
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_kubelet_config",
+						"node_config.0.kubelet_config.0.topology_manager_policy", "single-numa-node"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_kubelet_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
 func TestAccContainerCluster_withNodeConfigFastSocket(t *testing.T) {
 	t.Parallel()
 
@@ -14469,4 +14525,82 @@ resource "google_container_cluster" "primary" {
   deletion_protection = false
 }
 `, clusterName, networkName, subnetworkName, unauthenticated, authenticated)
+}
+
+func TestAccContainerCluster_withKubeletConfig(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
+	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_withKubeletConfig(clusterName, networkName, subnetworkName, "none", "None", "best-effort"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_kubelet_config",
+						"node_config.0.kubelet_config.0.cpu_manager_policy", "none"),
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_kubelet_config",
+						"node_config.0.kubelet_config.0.memory_manager_policy", "None"),
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_kubelet_config",
+						"node_config.0.kubelet_config.0.topology_manager_policy", "best-effort"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_kubelet_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_withKubeletConfig(clusterName, networkName, subnetworkName, "static", "Static", "single-numa-node"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_kubelet_config",
+						"node_config.0.kubelet_config.0.cpu_manager_policy", "static"),
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_kubelet_config",
+						"node_config.0.kubelet_config.0.memory_manager_policy", "Static"),
+					resource.TestCheckResourceAttr(
+						"google_container_cluster.with_kubelet_config",
+						"node_config.0.kubelet_config.0.topology_manager_policy", "single-numa-node"),
+				),
+			},
+			{
+				ResourceName:            "google_container_cluster.with_kubelet_config",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_withKubeletConfig(clusterName, networkName, subnetworkName, cpuManagerPolicy, memoryManagerPolicy, topologyManagerPolicy string) string {
+	return fmt.Sprintf(`
+resource "google_container_cluster" "with_kubelet_config" {
+  name               = "%s"
+  location           = "us-central1-a"
+  initial_node_count = 1
+  network            = "%s"
+  subnetwork         = "%s"
+  deletion_protection = false
+
+  node_config {
+    machine_type = "e2-standard-2"
+    kubelet_config {
+      cpu_manager_policy = "%s"
+      memory_manager_policy = "%s"
+      topology_manager_policy = "%s"
+    }
+  }
+}
+`, clusterName, networkName, subnetworkName, cpuManagerPolicy, memoryManagerPolicy, topologyManagerPolicy)
 }
