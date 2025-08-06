@@ -66,7 +66,6 @@ examples:
       dns_auth_name2: 'dns-auth2'
       dns_auth_subdomain2: 'subdomain2'
       cert_name: 'dns-cert'
-    tgc_skip_test: "No data in cai asset for this test"
   - name: 'certificate_manager_google_managed_certificate_issuance_config'
     primary_resource_id: 'default'
     vars:
@@ -78,12 +77,10 @@ examples:
     primary_resource_id: 'default'
     vars:
       cert_name: 'self-managed-cert'
-    tgc_test_ignore_extra: ['self_managed.pem_certificate', 'self_managed.pem_private_key']
   - name: 'certificate_manager_self_managed_certificate_regional'
     primary_resource_id: 'default'
     vars:
       cert_name: 'self-managed-cert'
-    tgc_test_ignore_extra: ['self_managed.pem_certificate', 'self_managed.pem_private_key']
   - name: 'certificate_manager_google_managed_certificate_issuance_config_all_regions'
     primary_resource_id: 'default'
     vars:
@@ -105,7 +102,6 @@ examples:
       dns_auth_name: 'dns-auth'
       dns_auth_subdomain: 'subdomain'
       cert_name: 'dns-cert'
-    tgc_test_ignore_extra: ['scope']
   - name: 'certificate_manager_client_auth_certificate'
     primary_resource_id: 'default'
     vars:
