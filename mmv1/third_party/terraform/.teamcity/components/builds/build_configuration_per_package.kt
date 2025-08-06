@@ -29,7 +29,7 @@ fun BuildConfigurationsForPackages(packages: Map<String, Map<String, String>>, p
         val displayName: String = info.getValue("displayName").toString()
 
         val pkg = PackageDetails(packageName, displayName, providerName, parentProjectName, releaseDiffTest)
-        val buildConfig = pkg.buildConfiguration(path, vcsRoot, sharedResources, environmentVariables, testPrefix = testPrefix)
+        val buildConfig = pkg.buildConfiguration(path, vcsRoot, sharedResources, environmentVariables, testPrefix = testPrefix, releaseDiffTest)
         list.add(buildConfig)
     }
 
