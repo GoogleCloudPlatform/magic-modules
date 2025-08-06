@@ -47,6 +47,14 @@ examples:
       agent_name: 'dialogflowcx-agent'
       bucket_name: 'dialogflowcx-bucket'
     ignore_read_extra:
+      - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
+      - 'handlers.2.event_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
+      - 'handlers.2.event_handler.0.fulfillment.0.messages.1.tool_call'
+      - 'handlers.3.event_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.message.0.tool_call'
+      - 'handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.audio_export_gcs_destination'
+      - 'handlers.6.lifecycle_handler.0.fulfillment.0.advanced_settings.0.logging_settings'
+      - 'handlers.6.lifecycle_handler.0.fulfillment.0.messages.1.tool_call'
+      - 'handlers.7.lifecycle_handler.0.fulfillment.0.conditional_cases.1.cases.0.case_content.8.message.0.tool_call'
       - 'input_parameter_definitions.0.type_schema.0.schema_reference.0.tool'
       - 'output_parameter_definitions.0.type_schema.0.schema_reference.0.tool'
 
@@ -272,6 +280,1504 @@ properties:
         type: String
         description: |
           The custom prompt to use.
+  - name: 'handlers'
+    type: Array
+    description: |
+      A list of registered handlers to execute based on the specified triggers.
+    item_type:
+      type: NestedObject
+      description: |
+        Handler can be used to define custom logic to be executed based on the user-specified triggers.
+
+        This field is part of a union field `handlers`, which specifies the type of handler to invoke: Only one of `eventHandler` or `lifecycleHandler` may be set.
+      properties:
+        - name: 'eventHandler'
+          type: NestedObject
+          description: |
+            A handler triggered by event.
+          properties:
+            - name: 'event'
+              type: String
+              description: |
+                The name of the event that triggers this handler.
+              required: true
+            - name: 'condition'
+              type: String
+              description: |
+                The condition that must be satisfied to trigger this handler.
+            - name: fulfillment
+              type: NestedObject
+              description: |-
+                The fulfillment to call when the event occurs.
+
+                A fulfillment can do one or more of the following actions at the same time:
+                * Generate rich message responses.
+                * Set parameter values.
+                * Call the webhook.
+                Fulfillments can be called at various stages in the Page or
+                Form lifecycle. For example, when a DetectIntentRequest drives a
+                session to enter a new page, the page's entry fulfillment can add a static
+                response to the QueryResult in the returning DetectIntentResponse,
+                call the webhook (e.g., to load user data from a database), or both.
+              required: true
+              properties:
+                - name: messages
+                  type: Array
+                  description: The list of rich message responses to present to the user.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: responseType
+                        type: Enum
+                        description: Response type.
+                        enum_values:
+                          - 'ENTRY_PROMPT'
+                          - 'PARAMETER_PROMPT'
+                          - 'HANDLER_PROMPT'
+                      - name: channel
+                        type: String
+                        description: |
+                          The channel which the response is associated with. Clients can specify the channel via [QueryParameters.channel](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/QueryParameters#FIELDS.channel), and only associated channel response will be returned.
+                      - name: playAudio
+                        type: NestedObject
+                        description: Specifies an audio clip to be played by the client as part of the response.
+                        properties:
+                          - name: audioUri
+                            type: String
+                            description: |-
+                              URI of the audio clip. Dialogflow does not impose any validation on this
+                              value. It is specific to the client that reads it.
+                            required: true
+                          - name: allowPlaybackInterruption
+                            type: Boolean
+                            description: |-
+                              Whether the playback of this message can be interrupted by the end
+                              user's speech and the client can then starts the next Dialogflow
+                              request.
+                            output: true
+                      - name: mixedAudio
+                        type: NestedObject
+                        output: true
+                        description: |-
+                          Represents an audio message that is composed of both segments
+                          synthesized from the Dialogflow agent prompts and ones hosted externally
+                          at the specified URIs.
+                          The external URIs are specified via
+                          play_audio.
+                          This message is generated by Dialogflow only and not supposed to be
+                          defined by the user.
+                        properties:
+                          - name: segments
+                            type: Array
+                            output: true
+                            description: Segments this audio response is composed of.
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - name: audio
+                                  type: String
+                                  output: true
+                                  description: |-
+                                    Raw audio synthesized from the Dialogflow agent's response using
+                                    the output config specified in the request.
+                                - name: uri
+                                  type: String
+                                  output: true
+                                  description: |-
+                                    Client-specific URI that points to an audio clip accessible to the
+                                    client. Dialogflow does not impose any validation on it.
+                                - name: allowPlaybackInterruption
+                                  type: Boolean
+                                  description: |-
+                                    Whether the playback of this segment can be interrupted by the end
+                                    user's speech and the client should then start the next Dialogflow
+                                    request.
+                                  output: true
+                      - name: telephonyTransferCall
+                        type: NestedObject
+                        description: |-
+                          Represents the signal that telles the client to transfer the phone call
+                          connected to the agent to a third-party endpoint.
+                        properties:
+                          - name: phoneNumber
+                            type: String
+                            description: |-
+                              Transfer the call to a phone number
+                              in [E.164 format](https://en.wikipedia.org/wiki/E.164).
+                      - name: knowledgeInfoCard
+                        type: NestedObject
+                        description: |-
+                          Represents info card response. If the response contains generative
+                          knowledge prediction, Dialogflow will return a payload with Infobot
+                          Messenger compatible info card.
+
+                          Otherwise, the info card response is skipped.
+                        properties:
+                          - name: maximumSnippets
+                            type: Integer
+                            description: |-
+                              The maximum number of snippets that can be included in the response.
+                              Default to 1 if the value is unset.
+                              The maximum allowed is 5.
+                              If set to 0, fallback to Data Store search results gets disabled.
+                      - name: toolCall
+                        type: NestedObject
+                        description: Represents a call of a specific tool's action with the specified inputs.
+                        properties:
+                          - name: inputParameters
+                            type: String
+                            description: |
+                              The action's input parameters.
+
+                              This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                            custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                            validation:
+                              function: 'validation.StringIsJSON'
+                          - name: tool
+                            type: String
+                            description: |-
+                              The tool associated with this call.
+                              Format:
+                              `projects//locations//agents//tools/`.
+                            required: true
+                          - name: action
+                            type: String
+                            description: The name of the tool's action associated with this call.
+                            required: true
+                      - name: text
+                        type: NestedObject
+                        description: The text response message.
+                        properties:
+                          - name: text
+                            type: Array
+                            description: |-
+                              A collection of text response variants. If multiple variants are
+                              defined, only one text response variant is returned at runtime.
+                            required: true
+                            item_type:
+                              type: String
+                          - name: allowPlaybackInterruption
+                            type: Boolean
+                            description: |-
+                              Whether the playback of this message can be interrupted by the end
+                              user's speech and the client can then starts the next Dialogflow
+                              request.
+                            output: true
+                      - name: payload
+                        type: String
+                        description: |
+                          Returns a response containing a custom, platform-specific payload.
+
+                          This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                        validation:
+                          function: 'validation.StringIsJSON'
+                      - name: conversationSuccess
+                        type: NestedObject
+                        description: |-
+                          Indicates that the conversation succeeded, i.e., the bot handled the issue
+                          that the customer talked to it about.
+
+                          Dialogflow only uses this to determine which conversations should be
+                          counted as successful and doesn't process the metadata in this message in
+                          any way. Note that Dialogflow also considers conversations that get to the
+                          conversation end page as successful even if they don't return
+                          ConversationSuccess.
+
+                          You may set this, for example:
+                          * In the entry_fulfillment of a Page if
+                          entering the page indicates that the conversation succeeded.
+                          * In a webhook response when you determine that you handled the customer
+                          issue.
+                        properties:
+                          - name: metadata
+                            type: String
+                            description: |
+                              Custom metadata. Dialogflow doesn't impose any structure on this.
+
+                              This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                            custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                            validation:
+                              function: 'validation.StringIsJSON'
+                      - name: outputAudioText
+                        type: NestedObject
+                        description: |-
+                          A text or ssml response that is preferentially used for TTS output audio
+                          synthesis, as described in the comment on the ResponseMessage message.
+                        properties:
+                          - name: text
+                            type: String
+                            description: The raw text to be synthesized.
+                          - name: ssml
+                            type: String
+                            description: |-
+                              The SSML text to be synthesized. For more information, see
+                              [SSML](/speech/text-to-speech/docs/ssml).
+                          - name: allowPlaybackInterruption
+                            type: Boolean
+                            description: |-
+                              Whether the playback of this message can be interrupted by the end
+                              user's speech and the client can then starts the next Dialogflow
+                              request.
+                            output: true
+                      - name: liveAgentHandoff
+                        type: NestedObject
+                        description: |-
+                          Indicates that the conversation should be handed off to a live agent.
+
+                          Dialogflow only uses this to determine which conversations were handed off
+                          to a human agent for measurement purposes. What else to do with this signal
+                          is up to you and your handoff procedures.
+
+                          You may set this, for example:
+                          * In the entry_fulfillment of a Page if
+                          entering the page indicates something went extremely wrong in the
+                          conversation.
+                          * In a webhook response when you determine that the customer issue can only
+                          be handled by a human.
+                        properties:
+                          - name: metadata
+                            type: String
+                            description: |-
+                              Custom metadata for your handoff procedure. Dialogflow doesn't impose
+                              any structure on this.
+
+                              This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                            custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                            validation:
+                              function: 'validation.StringIsJSON'
+                      - name: endInteraction
+                        type: String
+                        output: true
+                        description: |-
+                          Indicates that interaction with the Dialogflow agent has ended.
+                          This message is generated by Dialogflow only and not supposed to be
+                          defined by the user.
+                - name: tag
+                  type: String
+                  description: |-
+                    The value of this field will be populated in the WebhookRequest
+                    `fulfillmentInfo.tag` field by Dialogflow when the associated webhook is
+                    called.
+                    The tag is typically used by the webhook service to identify which
+                    fulfillment is being called, but it could be used for other purposes.
+                    This field is required if `webhook` is specified.
+                - name: webhook
+                  type: String
+                  description: |-
+                    The webhook to call.
+                    Format:
+                    `projects//locations//agents//webhooks/`.
+                - name: returnPartialResponses
+                  type: Boolean
+                  description: |-
+                    Whether Dialogflow should return currently queued fulfillment response
+                    messages in streaming APIs. If a webhook is specified, it happens before
+                    Dialogflow invokes webhook.
+                    Warning:
+                    1) This flag only affects streaming API. Responses are still queued
+                    and returned once in non-streaming API.
+                    2) The flag can be enabled in any fulfillment but only the first 3 partial
+                    responses will be returned. You may only want to apply it to fulfillments
+                    that have slow webhooks.
+                - name: setParameterActions
+                  type: Array
+                  description: Set parameter values before executing the webhook.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: parameter
+                        type: String
+                        description: Display name of the parameter.
+                      - name: value
+                        type: String
+                        description: |
+                          The new value of the parameter. A null value clears the parameter.
+
+                          This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Value](https://protobuf.dev/reference/protobuf/google.protobuf/#value).
+                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                        validation:
+                          function: 'validation.StringIsJSON'
+                - name: conditionalCases
+                  type: Array
+                  description: Conditional cases for this fulfillment.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: cases
+                        type: Array
+                        description: A list of cascading if-else conditions.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: caseContent
+                              type: Array
+                              description: A list of case content.
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: message
+                                    type: NestedObject
+                                    description: |-
+                                      Represents a response message that can be returned by a conversational agent.
+
+                                      Response messages are also used for output audio synthesis. The approach is
+                                      as follows:
+
+                                      * If at least one OutputAudioText response is present, then all
+                                      OutputAudioText responses are linearly concatenated, and the result is used
+                                      for output audio synthesis.
+                                      * If the OutputAudioText responses are a mixture of text and SSML, then the
+                                      concatenated result is treated as SSML; otherwise, the result is treated as
+                                      either text or SSML as appropriate. The agent designer should ideally use
+                                      either text or SSML consistently throughout the bot design.
+                                      * Otherwise, all Text responses are linearly concatenated, and the result is
+                                      used for output audio synthesis.
+
+                                      This approach allows for more sophisticated user experience scenarios, where
+                                      the text displayed to the user may differ from what is heard.
+                                    properties:
+                                      - name: conversationSuccess
+                                        type: NestedObject
+                                        description: |-
+                                          Indicates that the conversation succeeded, i.e., the bot handled the issue
+                                          that the customer talked to it about.
+
+                                          Dialogflow only uses this to determine which conversations should be
+                                          counted as successful and doesn't process the metadata in this message in
+                                          any way. Note that Dialogflow also considers conversations that get to the
+                                          conversation end page as successful even if they don't return
+                                          ConversationSuccess.
+
+                                          You may set this, for example:
+                                          * In the entry_fulfillment of a Page if
+                                          entering the page indicates that the conversation succeeded.
+                                          * In a webhook response when you determine that you handled the customer
+                                          issue.
+                                        properties:
+                                          - name: metadata
+                                            type: String
+                                            description: |
+                                              Custom metadata. Dialogflow doesn't impose any structure on this.
+
+                                              This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                                            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                            custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                                            validation:
+                                              function: 'validation.StringIsJSON'
+                                      - name: outputAudioText
+                                        type: NestedObject
+                                        description: |-
+                                          A text or ssml response that is preferentially used for TTS output audio
+                                          synthesis, as described in the comment on the ResponseMessage message.
+                                        properties:
+                                          - name: text
+                                            type: String
+                                            description: The raw text to be synthesized.
+                                          - name: ssml
+                                            type: String
+                                            description: |-
+                                              The SSML text to be synthesized. For more information, see
+                                              [SSML](/speech/text-to-speech/docs/ssml).
+                                          - name: allowPlaybackInterruption
+                                            type: Boolean
+                                            description: |-
+                                              Whether the playback of this message can be interrupted by the end
+                                              user's speech and the client can then starts the next Dialogflow
+                                              request.
+                                            output: true
+                                      - name: liveAgentHandoff
+                                        type: NestedObject
+                                        description: |-
+                                          Indicates that the conversation should be handed off to a live agent.
+
+                                          Dialogflow only uses this to determine which conversations were handed off
+                                          to a human agent for measurement purposes. What else to do with this signal
+                                          is up to you and your handoff procedures.
+
+                                          You may set this, for example:
+                                          * In the entry_fulfillment of a Page if
+                                          entering the page indicates something went extremely wrong in the
+                                          conversation.
+                                          * In a webhook response when you determine that the customer issue can only
+                                          be handled by a human.
+                                        properties:
+                                          - name: metadata
+                                            type: String
+                                            description: |-
+                                              Custom metadata for your handoff procedure. Dialogflow doesn't impose
+                                              any structure on this.
+
+                                              This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                                            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                            custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                                            validation:
+                                              function: 'validation.StringIsJSON'
+                                      - name: endInteraction
+                                        type: String
+                                        output: true
+                                        description: |-
+                                          Indicates that interaction with the Dialogflow agent has ended.
+                                          This message is generated by Dialogflow only and not supposed to be
+                                          defined by the user.
+                                      - name: playAudio
+                                        type: NestedObject
+                                        description: Specifies an audio clip to be played by the client as part of the response.
+                                        properties:
+                                          - name: audioUri
+                                            type: String
+                                            description: |-
+                                              URI of the audio clip. Dialogflow does not impose any validation on this
+                                              value. It is specific to the client that reads it.
+                                            required: true
+                                          - name: allowPlaybackInterruption
+                                            type: Boolean
+                                            description: |-
+                                              Whether the playback of this message can be interrupted by the end
+                                              user's speech and the client can then starts the next Dialogflow
+                                              request.
+                                            output: true
+                                      - name: mixedAudio
+                                        type: NestedObject
+                                        output: true
+                                        description: |-
+                                          Represents an audio message that is composed of both segments
+                                          synthesized from the Dialogflow agent prompts and ones hosted externally
+                                          at the specified URIs.
+                                          The external URIs are specified via
+                                          play_audio.
+                                          This message is generated by Dialogflow only and not supposed to be
+                                          defined by the user.
+                                        properties:
+                                          - name: segments
+                                            type: Array
+                                            output: true
+                                            description: Segments this audio response is composed of.
+                                            item_type:
+                                              type: NestedObject
+                                              properties:
+                                                - name: audio
+                                                  type: String
+                                                  output: true
+                                                  description: |-
+                                                    Raw audio synthesized from the Dialogflow agent's response using
+                                                    the output config specified in the request.
+                                                - name: uri
+                                                  type: String
+                                                  output: true
+                                                  description: |-
+                                                    Client-specific URI that points to an audio clip accessible to the
+                                                    client. Dialogflow does not impose any validation on it.
+                                                - name: allowPlaybackInterruption
+                                                  type: Boolean
+                                                  description: |-
+                                                    Whether the playback of this segment can be interrupted by the end
+                                                    user's speech and the client should then start the next Dialogflow
+                                                    request.
+                                                  output: true
+                                      - name: telephonyTransferCall
+                                        type: NestedObject
+                                        description: |-
+                                          Represents the signal that telles the client to transfer the phone call
+                                          connected to the agent to a third-party endpoint.
+                                        properties:
+                                          - name: phoneNumber
+                                            type: String
+                                            description: |-
+                                              Transfer the call to a phone number
+                                              in [E.164 format](https://en.wikipedia.org/wiki/E.164).
+                                      - name: knowledgeInfoCard
+                                        type: NestedObject
+                                        description: |-
+                                          Represents info card response. If the response contains generative
+                                          knowledge prediction, Dialogflow will return a payload with Infobot
+                                          Messenger compatible info card.
+
+                                          Otherwise, the info card response is skipped.
+                                        properties:
+                                          - name: maximumSnippets
+                                            type: Integer
+                                            description: |-
+                                              The maximum number of snippets that can be included in the response.
+                                              Default to 1 if the value is unset.
+                                              The maximum allowed is 5.
+                                              If set to 0, fallback to Data Store search results gets disabled.
+                                      - name: toolCall
+                                        type: NestedObject
+                                        description: Represents a call of a specific tool's action with the specified inputs.
+                                        properties:
+                                          - name: tool
+                                            type: String
+                                            description: |-
+                                              The tool associated with this call.
+                                              Format:
+                                              `projects//locations//agents//tools/`.
+                                            required: true
+                                          - name: action
+                                            type: String
+                                            description: The name of the tool's action associated with this call.
+                                            required: true
+                                          - name: inputParameters
+                                            type: String
+                                            description: |
+                                              The action's input parameters.
+
+                                              This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                                            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                            custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                                            validation:
+                                              function: 'validation.StringIsJSON'
+                                      - name: text
+                                        type: NestedObject
+                                        description: The text response message.
+                                        properties:
+                                          - name: text
+                                            type: Array
+                                            description: |-
+                                              A collection of text response variants. If multiple variants are
+                                              defined, only one text response variant is returned at runtime.
+                                            required: true
+                                            item_type:
+                                              type: String
+                                          - name: allowPlaybackInterruption
+                                            type: Boolean
+                                            description: |-
+                                              Whether the playback of this message can be interrupted by the end
+                                              user's speech and the client can then starts the next Dialogflow
+                                              request.
+                                            output: true
+                                      - name: payload
+                                        type: String
+                                        description: |
+                                          Returns a response containing a custom, platform-specific payload.
+
+                                          This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                                        validation:
+                                          function: 'validation.StringIsJSON'
+                                  - name: additionalCases
+                                    type: String
+                                    description: |-
+                                      A generic empty message that you can re-use to avoid defining duplicated
+                                      empty messages in your APIs. A typical example is to use it as the request
+                                      or the response type of an API method. For instance:
+
+                                      service Foo {
+                                      rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);
+                                      }
+
+                                      This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [ConditionalCases](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/Fulfillment#ConditionalCases).
+                                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                                    validation:
+                                      function: 'validation.StringIsJSON'
+                            - name: condition
+                              type: String
+                              description: |-
+                                The condition to activate and select this case. Empty means the
+                                condition is always true. The condition is evaluated against form
+                                parameters or session
+                                parameters.
+
+                                See the [conditions
+                                reference](https://cloud.google.com/dialogflow/priv/docs/v3/condition).
+                - name: advancedSettings
+                  type: NestedObject
+                  description: |-
+                    Hierarchical advanced settings for agent/flow/page/fulfillment/parameter.
+                    Settings exposed at lower level overrides the settings exposed at higher
+                    level. Overriding occurs at the sub-setting level. For example, the
+                    playback_interruption_settings at fulfillment level only overrides the
+                    playback_interruption_settings at the agent level, leaving other settings
+                    at the agent level unchanged.
+
+                    DTMF settings does not override each other. DTMF settings set at different
+                    levels define DTMF detections running in parallel.
+
+                    Hierarchy: Agent->Flow->Page->Fulfillment/Parameter.
+                  properties:
+                    - name: audioExportGcsDestination
+                      type: NestedObject
+                      description: |-
+                        Google Cloud Storage location for a Dialogflow operation that writes or
+                        exports objects (e.g. exported agent or transcripts) outside of Dialogflow.
+                      properties:
+                        - name: uri
+                          type: String
+                          description: |-
+                            The Google Cloud Storage URI for the exported objects. A URI is of the
+                            form:
+                            `gs://bucket/object-name-or-prefix`
+                            Whether a full object name, or just a prefix, its usage depends on the
+                            Dialogflow operation.
+                          required: true
+                    - name: speechSettings
+                      type: NestedObject
+                      description: Define behaviors of speech to text detection.
+                      properties:
+                        - name: endpointerSensitivity
+                          type: Integer
+                          description: |-
+                            Sensitivity of the speech model that detects the end of speech.
+                            Scale from 0 to 100.
+                        - name: noSpeechTimeout
+                          type: String
+                          description: Timeout before detecting no speech.
+                        - name: useTimeoutBasedEndpointing
+                          type: Boolean
+                          description: |-
+                            Use timeout based endpointing, interpreting endpointer sensitivity as
+                            seconds of timeout value.
+                        - name: models
+                          type: KeyValuePairs
+                          description: |-
+                            Mapping from language to Speech-to-Text model. The mapped Speech-to-Text
+                            model will be selected for requests from its corresponding language.
+                            For more information, see
+                            [Speech
+                            models](https://cloud.google.com/dialogflow/cx/docs/concept/speech-models).
+                    - name: dtmfSettings
+                      type: NestedObject
+                      description: Define behaviors for DTMF (dual tone multi frequency).
+                      properties:
+                        - name: enabled
+                          type: Boolean
+                          description: |-
+                            If true, incoming audio is processed for DTMF (dual tone multi frequency)
+                            events. For example, if the caller presses a button on their telephone
+                            keypad and DTMF processing is enabled, Dialogflow will detect the
+                            event (e.g. a "3" was pressed) in the incoming audio and pass the event
+                            to the bot to drive business logic (e.g. when 3 is pressed, return the
+                            account balance).
+                        - name: maxDigits
+                          type: Integer
+                          description: Max length of DTMF digits.
+                        - name: finishDigit
+                          type: String
+                          description: The digit that terminates a DTMF digit sequence.
+                        - name: interdigitTimeoutDuration
+                          type: String
+                          description: Interdigit timeout setting for matching dtmf input to regex.
+                        - name: endpointingTimeoutDuration
+                          type: String
+                          description: Endpoint timeout setting for matching dtmf input to regex.
+                    - name: loggingSettings
+                      type: NestedObject
+                      description: Define behaviors on logging.
+                      properties:
+                        - name: enableInteractionLogging
+                          type: Boolean
+                          description: Enables DF Interaction logging.
+                        - name: enableConsentBasedRedaction
+                          type: Boolean
+                          description: |-
+                            Enables consent-based end-user input redaction, if true, a pre-defined
+                            session parameter `$session.params.conversation-redaction` will be
+                            used to determine if the utterance should be redacted.
+                        - name: disableLogging
+                          type: Boolean
+                          description: If true, DF Interaction logging is currently disabled.
+                        - name: enableStackdriverLogging
+                          type: Boolean
+                          description: Enables Google Cloud Logging.
+                - name: enableGenerativeFallback
+                  type: Boolean
+                  description: |-
+                    If the flag is true, the agent will utilize LLM to generate a text
+                    response. If LLM generation fails, the defined
+                    responses in the fulfillment will be respected.
+                    This flag is only useful for fulfillments associated with no-match event
+                    handlers.
+                - name: generators
+                  type: Array
+                  description: A list of Generators to be called during this fulfillment.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: generator
+                        type: String
+                        description: |-
+                          The generator to call.
+                          Format:
+                          `projects//locations//agents//generators/`.
+                        required: true
+                      - name: inputParameters
+                        type: KeyValuePairs
+                        description: |-
+                          Map from placeholder parameter in the
+                          Generator to corresponding session parameters. By default,
+                          Dialogflow uses the session parameter with the same name to fill in the
+                          generator template. e.g. If there is a placeholder parameter `city` in
+                          the Generator, Dialogflow default to fill in the `$city` with
+                          `$session.params.city`. However, you may choose to fill `$city` with
+                          `$session.params.desination-city`.
+                          - Map key: parameter ID
+                          - Map value: session parameter name
+                      - name: outputParameter
+                        type: String
+                        description: Output parameter which should contain the generator response.
+                        required: true
+        - name: 'lifecycleHandler'
+          type: NestedObject
+          description: |
+            A handler triggered during specific lifecycle of the playbook execution.
+          properties:
+            - name: 'lifecycleStage'
+              type: String
+              description: |
+                The name of the lifecycle stage that triggers this handler. Supported values:
+                * **playbook-start**
+                * **pre-action-selection**
+                * **pre-action-execution**
+              required: true
+            - name: 'condition'
+              type: String
+              description: |
+                The condition that must be satisfied to trigger this handler.
+            - name: fulfillment
+              type: NestedObject
+              description: |-
+                The fulfillment to call when the event occurs.
+
+                A fulfillment can do one or more of the following actions at the same time:
+                * Generate rich message responses.
+                * Set parameter values.
+                * Call the webhook.
+                Fulfillments can be called at various stages in the Page or
+                Form lifecycle. For example, when a DetectIntentRequest drives a
+                session to enter a new page, the page's entry fulfillment can add a static
+                response to the QueryResult in the returning DetectIntentResponse,
+                call the webhook (e.g., to load user data from a database), or both.
+              required: true
+              properties:
+                - name: messages
+                  type: Array
+                  description: The list of rich message responses to present to the user.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: responseType
+                        type: Enum
+                        description: Response type.
+                        enum_values:
+                          - 'ENTRY_PROMPT'
+                          - 'PARAMETER_PROMPT'
+                          - 'HANDLER_PROMPT'
+                      - name: channel
+                        type: String
+                        description: |
+                          The channel which the response is associated with. Clients can specify the channel via [QueryParameters.channel](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/QueryParameters#FIELDS.channel), and only associated channel response will be returned.
+                      - name: playAudio
+                        type: NestedObject
+                        description: Specifies an audio clip to be played by the client as part of the response.
+                        properties:
+                          - name: audioUri
+                            type: String
+                            description: |-
+                              URI of the audio clip. Dialogflow does not impose any validation on this
+                              value. It is specific to the client that reads it.
+                            required: true
+                          - name: allowPlaybackInterruption
+                            type: Boolean
+                            description: |-
+                              Whether the playback of this message can be interrupted by the end
+                              user's speech and the client can then starts the next Dialogflow
+                              request.
+                            output: true
+                      - name: mixedAudio
+                        type: NestedObject
+                        output: true
+                        description: |-
+                          Represents an audio message that is composed of both segments
+                          synthesized from the Dialogflow agent prompts and ones hosted externally
+                          at the specified URIs.
+                          The external URIs are specified via
+                          play_audio.
+                          This message is generated by Dialogflow only and not supposed to be
+                          defined by the user.
+                        properties:
+                          - name: segments
+                            type: Array
+                            output: true
+                            description: Segments this audio response is composed of.
+                            item_type:
+                              type: NestedObject
+                              properties:
+                                - name: audio
+                                  type: String
+                                  output: true
+                                  description: |-
+                                    Raw audio synthesized from the Dialogflow agent's response using
+                                    the output config specified in the request.
+                                - name: uri
+                                  type: String
+                                  output: true
+                                  description: |-
+                                    Client-specific URI that points to an audio clip accessible to the
+                                    client. Dialogflow does not impose any validation on it.
+                                - name: allowPlaybackInterruption
+                                  type: Boolean
+                                  description: |-
+                                    Whether the playback of this segment can be interrupted by the end
+                                    user's speech and the client should then start the next Dialogflow
+                                    request.
+                                  output: true
+                      - name: telephonyTransferCall
+                        type: NestedObject
+                        description: |-
+                          Represents the signal that telles the client to transfer the phone call
+                          connected to the agent to a third-party endpoint.
+                        properties:
+                          - name: phoneNumber
+                            type: String
+                            description: |-
+                              Transfer the call to a phone number
+                              in [E.164 format](https://en.wikipedia.org/wiki/E.164).
+                      - name: knowledgeInfoCard
+                        type: NestedObject
+                        description: |-
+                          Represents info card response. If the response contains generative
+                          knowledge prediction, Dialogflow will return a payload with Infobot
+                          Messenger compatible info card.
+
+                          Otherwise, the info card response is skipped.
+                        properties:
+                          - name: maximumSnippets
+                            type: Integer
+                            description: |-
+                              The maximum number of snippets that can be included in the response.
+                              Default to 1 if the value is unset.
+                              The maximum allowed is 5.
+                              If set to 0, fallback to Data Store search results gets disabled.
+                      - name: toolCall
+                        type: NestedObject
+                        description: Represents a call of a specific tool's action with the specified inputs.
+                        properties:
+                          - name: inputParameters
+                            type: String
+                            description: |
+                              The action's input parameters.
+
+                              This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                            custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                            validation:
+                              function: 'validation.StringIsJSON'
+                          - name: tool
+                            type: String
+                            description: |-
+                              The tool associated with this call.
+                              Format:
+                              `projects//locations//agents//tools/`.
+                            required: true
+                          - name: action
+                            type: String
+                            description: The name of the tool's action associated with this call.
+                            required: true
+                      - name: text
+                        type: NestedObject
+                        description: The text response message.
+                        properties:
+                          - name: text
+                            type: Array
+                            description: |-
+                              A collection of text response variants. If multiple variants are
+                              defined, only one text response variant is returned at runtime.
+                            required: true
+                            item_type:
+                              type: String
+                          - name: allowPlaybackInterruption
+                            type: Boolean
+                            description: |-
+                              Whether the playback of this message can be interrupted by the end
+                              user's speech and the client can then starts the next Dialogflow
+                              request.
+                            output: true
+                      - name: payload
+                        type: String
+                        description: |
+                          Returns a response containing a custom, platform-specific payload.
+
+                          This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                        validation:
+                          function: 'validation.StringIsJSON'
+                      - name: conversationSuccess
+                        type: NestedObject
+                        description: |-
+                          Indicates that the conversation succeeded, i.e., the bot handled the issue
+                          that the customer talked to it about.
+
+                          Dialogflow only uses this to determine which conversations should be
+                          counted as successful and doesn't process the metadata in this message in
+                          any way. Note that Dialogflow also considers conversations that get to the
+                          conversation end page as successful even if they don't return
+                          ConversationSuccess.
+
+                          You may set this, for example:
+                          * In the entry_fulfillment of a Page if
+                          entering the page indicates that the conversation succeeded.
+                          * In a webhook response when you determine that you handled the customer
+                          issue.
+                        properties:
+                          - name: metadata
+                            type: String
+                            description: |
+                              Custom metadata. Dialogflow doesn't impose any structure on this.
+
+                              This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                            custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                            validation:
+                              function: 'validation.StringIsJSON'
+                      - name: outputAudioText
+                        type: NestedObject
+                        description: |-
+                          A text or ssml response that is preferentially used for TTS output audio
+                          synthesis, as described in the comment on the ResponseMessage message.
+                        properties:
+                          - name: text
+                            type: String
+                            description: The raw text to be synthesized.
+                          - name: ssml
+                            type: String
+                            description: |-
+                              The SSML text to be synthesized. For more information, see
+                              [SSML](/speech/text-to-speech/docs/ssml).
+                          - name: allowPlaybackInterruption
+                            type: Boolean
+                            description: |-
+                              Whether the playback of this message can be interrupted by the end
+                              user's speech and the client can then starts the next Dialogflow
+                              request.
+                            output: true
+                      - name: liveAgentHandoff
+                        type: NestedObject
+                        description: |-
+                          Indicates that the conversation should be handed off to a live agent.
+
+                          Dialogflow only uses this to determine which conversations were handed off
+                          to a human agent for measurement purposes. What else to do with this signal
+                          is up to you and your handoff procedures.
+
+                          You may set this, for example:
+                          * In the entry_fulfillment of a Page if
+                          entering the page indicates something went extremely wrong in the
+                          conversation.
+                          * In a webhook response when you determine that the customer issue can only
+                          be handled by a human.
+                        properties:
+                          - name: metadata
+                            type: String
+                            description: |-
+                              Custom metadata for your handoff procedure. Dialogflow doesn't impose
+                              any structure on this.
+
+                              This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                            custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                            validation:
+                              function: 'validation.StringIsJSON'
+                      - name: endInteraction
+                        type: String
+                        output: true
+                        description: |-
+                          Indicates that interaction with the Dialogflow agent has ended.
+                          This message is generated by Dialogflow only and not supposed to be
+                          defined by the user.
+                - name: tag
+                  type: String
+                  description: |-
+                    The value of this field will be populated in the WebhookRequest
+                    `fulfillmentInfo.tag` field by Dialogflow when the associated webhook is
+                    called.
+                    The tag is typically used by the webhook service to identify which
+                    fulfillment is being called, but it could be used for other purposes.
+                    This field is required if `webhook` is specified.
+                - name: webhook
+                  type: String
+                  description: |-
+                    The webhook to call.
+                    Format:
+                    `projects//locations//agents//webhooks/`.
+                - name: returnPartialResponses
+                  type: Boolean
+                  description: |-
+                    Whether Dialogflow should return currently queued fulfillment response
+                    messages in streaming APIs. If a webhook is specified, it happens before
+                    Dialogflow invokes webhook.
+                    Warning:
+                    1) This flag only affects streaming API. Responses are still queued
+                    and returned once in non-streaming API.
+                    2) The flag can be enabled in any fulfillment but only the first 3 partial
+                    responses will be returned. You may only want to apply it to fulfillments
+                    that have slow webhooks.
+                - name: setParameterActions
+                  type: Array
+                  description: Set parameter values before executing the webhook.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: parameter
+                        type: String
+                        description: Display name of the parameter.
+                      - name: value
+                        type: String
+                        description: |
+                          The new value of the parameter. A null value clears the parameter.
+
+                          This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Value](https://protobuf.dev/reference/protobuf/google.protobuf/#value).
+                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+                        validation:
+                          function: 'validation.StringIsJSON'
+                - name: conditionalCases
+                  type: Array
+                  description: Conditional cases for this fulfillment.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: cases
+                        type: Array
+                        description: A list of cascading if-else conditions.
+                        item_type:
+                          type: NestedObject
+                          properties:
+                            - name: caseContent
+                              type: Array
+                              description: A list of case content.
+                              item_type:
+                                type: NestedObject
+                                properties:
+                                  - name: message
+                                    type: NestedObject
+                                    description: |-
+                                      Represents a response message that can be returned by a conversational agent.
+
+                                      Response messages are also used for output audio synthesis. The approach is
+                                      as follows:
+
+                                      * If at least one OutputAudioText response is present, then all
+                                      OutputAudioText responses are linearly concatenated, and the result is used
+                                      for output audio synthesis.
+                                      * If the OutputAudioText responses are a mixture of text and SSML, then the
+                                      concatenated result is treated as SSML; otherwise, the result is treated as
+                                      either text or SSML as appropriate. The agent designer should ideally use
+                                      either text or SSML consistently throughout the bot design.
+                                      * Otherwise, all Text responses are linearly concatenated, and the result is
+                                      used for output audio synthesis.
+
+                                      This approach allows for more sophisticated user experience scenarios, where
+                                      the text displayed to the user may differ from what is heard.
+                                    properties:
+                                      - name: conversationSuccess
+                                        type: NestedObject
+                                        description: |-
+                                          Indicates that the conversation succeeded, i.e., the bot handled the issue
+                                          that the customer talked to it about.
+
+                                          Dialogflow only uses this to determine which conversations should be
+                                          counted as successful and doesn't process the metadata in this message in
+                                          any way. Note that Dialogflow also considers conversations that get to the
+                                          conversation end page as successful even if they don't return
+                                          ConversationSuccess.
+
+                                          You may set this, for example:
+                                          * In the entry_fulfillment of a Page if
+                                          entering the page indicates that the conversation succeeded.
+                                          * In a webhook response when you determine that you handled the customer
+                                          issue.
+                                        properties:
+                                          - name: metadata
+                                            type: String
+                                            description: |
+                                              Custom metadata. Dialogflow doesn't impose any structure on this.
+
+                                              This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                                            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                            custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                                            validation:
+                                              function: 'validation.StringIsJSON'
+                                      - name: outputAudioText
+                                        type: NestedObject
+                                        description: |-
+                                          A text or ssml response that is preferentially used for TTS output audio
+                                          synthesis, as described in the comment on the ResponseMessage message.
+                                        properties:
+                                          - name: text
+                                            type: String
+                                            description: The raw text to be synthesized.
+                                          - name: ssml
+                                            type: String
+                                            description: |-
+                                              The SSML text to be synthesized. For more information, see
+                                              [SSML](/speech/text-to-speech/docs/ssml).
+                                          - name: allowPlaybackInterruption
+                                            type: Boolean
+                                            description: |-
+                                              Whether the playback of this message can be interrupted by the end
+                                              user's speech and the client can then starts the next Dialogflow
+                                              request.
+                                            output: true
+                                      - name: liveAgentHandoff
+                                        type: NestedObject
+                                        description: |-
+                                          Indicates that the conversation should be handed off to a live agent.
+
+                                          Dialogflow only uses this to determine which conversations were handed off
+                                          to a human agent for measurement purposes. What else to do with this signal
+                                          is up to you and your handoff procedures.
+
+                                          You may set this, for example:
+                                          * In the entry_fulfillment of a Page if
+                                          entering the page indicates something went extremely wrong in the
+                                          conversation.
+                                          * In a webhook response when you determine that the customer issue can only
+                                          be handled by a human.
+                                        properties:
+                                          - name: metadata
+                                            type: String
+                                            description: |-
+                                              Custom metadata for your handoff procedure. Dialogflow doesn't impose
+                                              any structure on this.
+
+                                              This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                                            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                            custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                                            validation:
+                                              function: 'validation.StringIsJSON'
+                                      - name: endInteraction
+                                        type: String
+                                        output: true
+                                        description: |-
+                                          Indicates that interaction with the Dialogflow agent has ended.
+                                          This message is generated by Dialogflow only and not supposed to be
+                                          defined by the user.
+                                      - name: playAudio
+                                        type: NestedObject
+                                        description: Specifies an audio clip to be played by the client as part of the response.
+                                        properties:
+                                          - name: audioUri
+                                            type: String
+                                            description: |-
+                                              URI of the audio clip. Dialogflow does not impose any validation on this
+                                              value. It is specific to the client that reads it.
+                                            required: true
+                                          - name: allowPlaybackInterruption
+                                            type: Boolean
+                                            description: |-
+                                              Whether the playback of this message can be interrupted by the end
+                                              user's speech and the client can then starts the next Dialogflow
+                                              request.
+                                            output: true
+                                      - name: mixedAudio
+                                        type: NestedObject
+                                        output: true
+                                        description: |-
+                                          Represents an audio message that is composed of both segments
+                                          synthesized from the Dialogflow agent prompts and ones hosted externally
+                                          at the specified URIs.
+                                          The external URIs are specified via
+                                          play_audio.
+                                          This message is generated by Dialogflow only and not supposed to be
+                                          defined by the user.
+                                        properties:
+                                          - name: segments
+                                            type: Array
+                                            output: true
+                                            description: Segments this audio response is composed of.
+                                            item_type:
+                                              type: NestedObject
+                                              properties:
+                                                - name: audio
+                                                  type: String
+                                                  output: true
+                                                  description: |-
+                                                    Raw audio synthesized from the Dialogflow agent's response using
+                                                    the output config specified in the request.
+                                                - name: uri
+                                                  type: String
+                                                  output: true
+                                                  description: |-
+                                                    Client-specific URI that points to an audio clip accessible to the
+                                                    client. Dialogflow does not impose any validation on it.
+                                                - name: allowPlaybackInterruption
+                                                  type: Boolean
+                                                  description: |-
+                                                    Whether the playback of this segment can be interrupted by the end
+                                                    user's speech and the client should then start the next Dialogflow
+                                                    request.
+                                                  output: true
+                                      - name: telephonyTransferCall
+                                        type: NestedObject
+                                        description: |-
+                                          Represents the signal that telles the client to transfer the phone call
+                                          connected to the agent to a third-party endpoint.
+                                        properties:
+                                          - name: phoneNumber
+                                            type: String
+                                            description: |-
+                                              Transfer the call to a phone number
+                                              in [E.164 format](https://en.wikipedia.org/wiki/E.164).
+                                      - name: knowledgeInfoCard
+                                        type: NestedObject
+                                        description: |-
+                                          Represents info card response. If the response contains generative
+                                          knowledge prediction, Dialogflow will return a payload with Infobot
+                                          Messenger compatible info card.
+
+                                          Otherwise, the info card response is skipped.
+                                        properties:
+                                          - name: maximumSnippets
+                                            type: Integer
+                                            description: |-
+                                              The maximum number of snippets that can be included in the response.
+                                              Default to 1 if the value is unset.
+                                              The maximum allowed is 5.
+                                              If set to 0, fallback to Data Store search results gets disabled.
+                                      - name: toolCall
+                                        type: NestedObject
+                                        description: Represents a call of a specific tool's action with the specified inputs.
+                                        properties:
+                                          - name: tool
+                                            type: String
+                                            description: |-
+                                              The tool associated with this call.
+                                              Format:
+                                              `projects//locations//agents//tools/`.
+                                            required: true
+                                          - name: action
+                                            type: String
+                                            description: The name of the tool's action associated with this call.
+                                            required: true
+                                          - name: inputParameters
+                                            type: String
+                                            description: |
+                                              The action's input parameters.
+
+                                              This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                                            state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                            custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                            custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                                            validation:
+                                              function: 'validation.StringIsJSON'
+                                      - name: text
+                                        type: NestedObject
+                                        description: The text response message.
+                                        properties:
+                                          - name: text
+                                            type: Array
+                                            description: |-
+                                              A collection of text response variants. If multiple variants are
+                                              defined, only one text response variant is returned at runtime.
+                                            required: true
+                                            item_type:
+                                              type: String
+                                          - name: allowPlaybackInterruption
+                                            type: Boolean
+                                            description: |-
+                                              Whether the playback of this message can be interrupted by the end
+                                              user's speech and the client can then starts the next Dialogflow
+                                              request.
+                                            output: true
+                                      - name: payload
+                                        type: String
+                                        description: |
+                                          Returns a response containing a custom, platform-specific payload.
+
+                                          This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [Struct](https://protobuf.dev/reference/protobuf/google.protobuf/#struct).
+                                        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                        custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                                        validation:
+                                          function: 'validation.StringIsJSON'
+                                  - name: additionalCases
+                                    type: String
+                                    description: |-
+                                      A generic empty message that you can re-use to avoid defining duplicated
+                                      empty messages in your APIs. A typical example is to use it as the request
+                                      or the response type of an API method. For instance:
+
+                                      service Foo {
+                                      rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);
+                                      }
+
+                                      This field uses JSON data as a string. The value provided must be a valid JSON representation documented in [ConditionalCases](https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/Fulfillment#ConditionalCases).
+                                    state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+                                    custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+                                    custom_expand: 'templates/terraform/custom_expand/json_schema.tmpl'
+                                    validation:
+                                      function: 'validation.StringIsJSON'
+                            - name: condition
+                              type: String
+                              description: |-
+                                The condition to activate and select this case. Empty means the
+                                condition is always true. The condition is evaluated against form
+                                parameters or session
+                                parameters.
+
+                                See the [conditions
+                                reference](https://cloud.google.com/dialogflow/priv/docs/v3/condition).
+                - name: advancedSettings
+                  type: NestedObject
+                  description: |-
+                    Hierarchical advanced settings for agent/flow/page/fulfillment/parameter.
+                    Settings exposed at lower level overrides the settings exposed at higher
+                    level. Overriding occurs at the sub-setting level. For example, the
+                    playback_interruption_settings at fulfillment level only overrides the
+                    playback_interruption_settings at the agent level, leaving other settings
+                    at the agent level unchanged.
+
+                    DTMF settings does not override each other. DTMF settings set at different
+                    levels define DTMF detections running in parallel.
+
+                    Hierarchy: Agent->Flow->Page->Fulfillment/Parameter.
+                  properties:
+                    - name: audioExportGcsDestination
+                      type: NestedObject
+                      description: |-
+                        Google Cloud Storage location for a Dialogflow operation that writes or
+                        exports objects (e.g. exported agent or transcripts) outside of Dialogflow.
+                      properties:
+                        - name: uri
+                          type: String
+                          description: |-
+                            The Google Cloud Storage URI for the exported objects. A URI is of the
+                            form:
+                            `gs://bucket/object-name-or-prefix`
+                            Whether a full object name, or just a prefix, its usage depends on the
+                            Dialogflow operation.
+                          required: true
+                    - name: speechSettings
+                      type: NestedObject
+                      description: Define behaviors of speech to text detection.
+                      properties:
+                        - name: endpointerSensitivity
+                          type: Integer
+                          description: |-
+                            Sensitivity of the speech model that detects the end of speech.
+                            Scale from 0 to 100.
+                        - name: noSpeechTimeout
+                          type: String
+                          description: Timeout before detecting no speech.
+                        - name: useTimeoutBasedEndpointing
+                          type: Boolean
+                          description: |-
+                            Use timeout based endpointing, interpreting endpointer sensitivity as
+                            seconds of timeout value.
+                        - name: models
+                          type: KeyValuePairs
+                          description: |-
+                            Mapping from language to Speech-to-Text model. The mapped Speech-to-Text
+                            model will be selected for requests from its corresponding language.
+                            For more information, see
+                            [Speech
+                            models](https://cloud.google.com/dialogflow/cx/docs/concept/speech-models).
+                    - name: dtmfSettings
+                      type: NestedObject
+                      description: Define behaviors for DTMF (dual tone multi frequency).
+                      properties:
+                        - name: enabled
+                          type: Boolean
+                          description: |-
+                            If true, incoming audio is processed for DTMF (dual tone multi frequency)
+                            events. For example, if the caller presses a button on their telephone
+                            keypad and DTMF processing is enabled, Dialogflow will detect the
+                            event (e.g. a "3" was pressed) in the incoming audio and pass the event
+                            to the bot to drive business logic (e.g. when 3 is pressed, return the
+                            account balance).
+                        - name: maxDigits
+                          type: Integer
+                          description: Max length of DTMF digits.
+                        - name: finishDigit
+                          type: String
+                          description: The digit that terminates a DTMF digit sequence.
+                        - name: interdigitTimeoutDuration
+                          type: String
+                          description: Interdigit timeout setting for matching dtmf input to regex.
+                        - name: endpointingTimeoutDuration
+                          type: String
+                          description: Endpoint timeout setting for matching dtmf input to regex.
+                    - name: loggingSettings
+                      type: NestedObject
+                      description: Define behaviors on logging.
+                      properties:
+                        - name: enableInteractionLogging
+                          type: Boolean
+                          description: Enables DF Interaction logging.
+                        - name: enableConsentBasedRedaction
+                          type: Boolean
+                          description: |-
+                            Enables consent-based end-user input redaction, if true, a pre-defined
+                            session parameter `$session.params.conversation-redaction` will be
+                            used to determine if the utterance should be redacted.
+                        - name: disableLogging
+                          type: Boolean
+                          description: If true, DF Interaction logging is currently disabled.
+                        - name: enableStackdriverLogging
+                          type: Boolean
+                          description: Enables Google Cloud Logging.
+                - name: enableGenerativeFallback
+                  type: Boolean
+                  description: |-
+                    If the flag is true, the agent will utilize LLM to generate a text
+                    response. If LLM generation fails, the defined
+                    responses in the fulfillment will be respected.
+                    This flag is only useful for fulfillments associated with no-match event
+                    handlers.
+                - name: generators
+                  type: Array
+                  description: A list of Generators to be called during this fulfillment.
+                  item_type:
+                    type: NestedObject
+                    properties:
+                      - name: generator
+                        type: String
+                        description: |-
+                          The generator to call.
+                          Format:
+                          `projects//locations//agents//generators/`.
+                        required: true
+                      - name: inputParameters
+                        type: KeyValuePairs
+                        description: |-
+                          Map from placeholder parameter in the
+                          Generator to corresponding session parameters. By default,
+                          Dialogflow uses the session parameter with the same name to fill in the
+                          generator template. e.g. If there is a placeholder parameter `city` in
+                          the Generator, Dialogflow default to fill in the `$city` with
+                          `$session.params.city`. However, you may choose to fill `$city` with
+                          `$session.params.desination-city`.
+                          - Map key: parameter ID
+                          - Map value: session parameter name
+                      - name: outputParameter
+                        type: String
+                        description: Output parameter which should contain the generator response.
+                        required: true
   - name: 'playbookType'
     type: Enum
     description: Type of the playbook.
