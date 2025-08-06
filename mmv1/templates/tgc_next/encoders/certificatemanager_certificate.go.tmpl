@@ -1,6 +1,7 @@
-// self_managed.pem_certificate goes in root level of cai asset data.
-selfManagedPemCertificateProp := d.Get("self_managed.0.pem_certificate")
-
-obj["pemCertificate"] = selfManagedPemCertificateProp.(string)
+if _, ok := d.GetOk("self_managed"); ok {
+	// self_managed.pem_certificate goes in root level of cai asset data.
+	selfManagedPemCertificateProp := d.Get("self_managed.0.pem_certificate")
+	obj["pemCertificate"] = selfManagedPemCertificateProp.(string)
+}
 
 return obj, nil
