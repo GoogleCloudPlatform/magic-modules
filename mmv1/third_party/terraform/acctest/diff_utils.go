@@ -16,7 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-var diffFlag = "[Diff]"
+const diffFlag = "[Diff]"
 
 func isReleaseDiffEnabled() bool {
 	releaseDiff := os.Getenv("RELEASE_DIFF")
