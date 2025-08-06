@@ -1396,7 +1396,7 @@ func flattenAwsS3Data(awsS3Data *storagetransfer.AwsS3Data, d *schema.ResourceDa
 	if awsS3Data.ManagedPrivateNetwork {
 		data["managed_private_network"] = awsS3Data.ManagedPrivateNetwork
 	}
-  
+
 	if awsS3Data.CloudfrontDomain != "" {
 		data["cloudfront_domain"] = awsS3Data.CloudfrontDomain
 	}
