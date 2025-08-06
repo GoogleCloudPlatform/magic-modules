@@ -40,14 +40,14 @@ fun BuildConfigurationsForPackages(packages: Map<String, Map<String, String>>, p
 // Intended to be used in short-lived projects where we're testing specific packages, e.g. feature branch testing
 fun BuildConfigurationForSinglePackage(packageName: String, packagePath: String, packageDisplayName: String, providerName: String, parentProjectName: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration, testPrefix: String = "TestAcc", releaseDiffTest: String = "false"): BuildType{
     val pkg = PackageDetails(packageName, packageDisplayName, providerName, parentProjectName, releaseDiffTest)
-    return pkg.buildConfiguration(packagePath, vcsRoot, sharedResources, environmentVariables, testPrefix = testPrefix)
+    return pkg.buildConfiguration(packagePath, vcsRoot, sharedResources, environmentVariables, testPrefix = testPrefix, releaseDiffTest)
 }
 
 class PackageDetails(private val packageName: String, private val displayName: String, private val providerName: String, private val parentProjectName: String, private val releaseDiffTest: String) {
 
     // buildConfiguration returns a BuildType for a service package
     // For BuildType docs, see https://teamcity.jetbrains.com/app/dsl-documentation/root/build-type/index.html
-    fun buildConfiguration(path: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration, buildTimeout: Int = DefaultBuildTimeoutDuration, testPrefix: String): BuildType {
+    fun buildConfiguration(path: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration, buildTimeout: Int = DefaultBuildTimeoutDuration, testPrefix: String, releaseDiffTest: String): BuildType {
         val testPrefix = "TestAcc"
         val testTimeout = "12"
 
@@ -72,7 +72,11 @@ class PackageDetails(private val packageName: String, private val displayName: S
                 tagBuildToIndicateTriggerMethod()
                 configureGoEnv()
                 downloadTerraformBinary()
-                runAcceptanceTests()
+                if (releaseDiffTest.toBoolean()) {
+                    runDiffTests()
+                } else {
+                    runAcceptanceTests()
+                }
                 saveArtifactsToGCS()
                 archiveArtifactsIfOverLimit() // Must be after push to GCS step, as this step impacts debug log files
             }
