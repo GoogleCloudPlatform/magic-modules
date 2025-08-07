@@ -322,6 +322,9 @@ type Type struct {
 	// If a property is missing in CAI asset, use `is_missing_in_cai: true`
 	// and `exclude_false_in_cai: true` is not needed
 	ExcludeFalseInCai bool `yaml:"exclude_false_in_cai,omitempty"`
+
+	// If true, the custom flatten function is not applied during cai2hcl
+	TGCIgnoreTerraformCustomFlatten bool `yaml:"tgc_ignore_terraform_custom_flatten,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -1353,4 +1356,10 @@ func (t Type) TGCSendEmptyValue() bool {
 	}
 
 	return false
+}
+
+// When the property has ignore_read: true and have custom_flatten method,
+// the custom_flatten method should not be applied when compiling the tgc-next provider.
+func (t Type) ShouldIgnoreCustomFlatten() bool {
+	return t.ResourceMetadata.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
 }
