@@ -18,7 +18,7 @@
     {{- $.CustomTemplate $.CustomFlatten false -}}
 {{- else -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-  {{- if $.IgnoreRead }}
+  {{- if and $.IgnoreRead (not $.ResourceMetadata.IsTgcCompiler) }}
   return d.Get("{{ $.TerraformLineage }}")
   {{- else if $.IsA "NestedObject" }}
   if v == nil {
