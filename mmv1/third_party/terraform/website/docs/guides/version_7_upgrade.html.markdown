@@ -180,4 +180,4 @@ Remove `template.containers.depends_on` from your configuration after upgrade.
 
 ## Resource: `google_vertex_ai_index`
 
-### `metadata`, `metadata.config`, and `metadata.config.dimensions` are now required. Resource creation would fail without these attributes already, so no change is necessary to existing configurations.
+### `metadata`, and `metadata.config` are now required. Resource creation would fail without these attributes already, so no change is necessary to existing configurations.

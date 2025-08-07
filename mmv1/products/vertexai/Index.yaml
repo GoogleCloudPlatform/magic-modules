@@ -152,7 +152,7 @@ properties:
             type: NestedObject
             description:
               The configuration with regard to the algorithms used for efficient
-              search.
+              search. This field may be required based on your configuration.
             properties:
               - name: 'treeAhConfig'
                 type: NestedObject
