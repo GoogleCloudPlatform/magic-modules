@@ -105,41 +105,20 @@ func dataSourceGoogleKmsKeyRingsRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	for {
-		url, err = transport_tpg.AddQueryParams(url, params)
-		if err != nil {
-			return err
-		}
-
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:               config,
-			Method:               "GET",
-			Project:              billingProject,
-			RawURL:               url,
-			UserAgent:            userAgent,
-			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.Is429RetryableQuotaError},
-		})
-		if err != nil {
-			return fmt.Errorf("Error retrieving buckets: %s", err)
-		}
-
-		if res["keyRings"] == nil {
-			break
-		}
-		pageKeyRings, err := flattenKMSKeyRingsList(config, res["keyRings"])
-		if err != nil {
-			return fmt.Errorf("error flattening key rings list: %s", err)
-		}
-		keyRings = append(keyRings, pageKeyRings...)
-
-		pToken, ok := res["nextPageToken"]
-		if ok && pToken != nil && pToken.(string) != "" {
-			params["pageToken"] = pToken.(string)
-		} else {
-			break
-		}
+	opts := transport_tpg.GetPaginatedItemsSliceOptions{
+		ResourceData:   d,
+		Config:         config,
+		BillingProject: &billingProject,
+		UserAgent:      userAgent,
+		URL:            url,
+		ResourceToList: "keyRings",
+		Params:         params,
+		ListFlattener:  flattenKMSKeyRingsList,
 	}
-
+	keyRings, err = transport_tpg.GetPaginatedItemsSlice(opts)
+	if err != nil {
+		return fmt.Errorf("Error retrieving key rings: %s", err)
+	}
 	log.Printf("[DEBUG] Found %d key rings", len(keyRings))
 	if err := d.Set("key_rings", keyRings); err != nil {
 		return fmt.Errorf("error setting key rings: %s", err)
