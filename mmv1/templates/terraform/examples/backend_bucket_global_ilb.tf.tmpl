@@ -1,3 +1,6 @@
+# Note: This example must be run in a project without Cloud Armor tier configured,
+# as it may cause conflicts with the INTERNAL_MANAGED load balancing scheme.
+
 resource "google_project" "unarmored" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
@@ -10,31 +13,11 @@ resource "google_project_service" "project" {
   project = google_project.unarmored.number
   service = "compute.googleapis.com"
   disable_on_destroy = true
-resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
-  name                        = "{{index $.Vars "bucket_name"}}"
-  location                    = "EU"
-  storage_class               = "STANDARD"
-  force_destroy               = true
-  uniform_bucket_level_access = true
 }
 
 resource "google_compute_backend_bucket" "{{$.PrimaryResourceId}}" {
   name                  = "{{index $.Vars "backend_bucket_name"}}"
   project               = google_project.unarmored.number
-  bucket_name           = google_storage_bucket.{{$.PrimaryResourceId}}.name
-  load_balancing_scheme = "INTERNAL_MANAGED"
-
-  depends_on = [google_project_service.project]
-}
-
-resource "google_storage_bucket" "{{$.PrimaryResourceId}}" {
-  name                        = "{{index $.Vars "bucket_name"}}"
-  project                     = google_project.unarmored.number
-  location                    = "US-CENTRAL1"
-  force_destroy               = true
-  uniform_bucket_level_access = true
-
-  depends_on = [google_project_service.project]
   bucket_name           = google_storage_bucket.{{$.PrimaryResourceId}}.name
   load_balancing_scheme = "INTERNAL_MANAGED"
 
