@@ -1,0 +1,50 @@
+func flattenDatabaseMigrationServiceConversionWorkspaceGlobalSettings(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	if v == nil {
+		return nil
+	}
+	
+	// Start with the API response
+	apiMap := v.(map[string]interface{})
+	
+	// List of computed fields that are added by the API
+	computedFields := map[string]bool{
+		"has_apply":                   true,
+		"has_apply_success":           true,
+		"has_convert":                 true,
+		"has_convert_success":         true,
+		"has_dry_run":                 true,
+		"has_dry_run_success":         true,
+		"has_ora2pg":                  true,
+		"has_ora2pg_success":          true,
+		"has_rules":                   true,
+		"has_seed":                    true,
+		"has_seed_success":            true,
+		"needs_conversion_for_issues": true,
+		"filter":                      true,
+		"v2":                          true,
+	}
+	
+	// Get the original value from the config
+	original, ok := d.GetOk("global_settings")
+	
+	resultMap := make(map[string]interface{})
+	
+	if ok {
+		// If we have an original value, only include keys that were in the original configuration
+		originalMap := original.(map[string]interface{})
+		for key := range originalMap {
+			if val, exists := apiMap[key]; exists {
+				resultMap[key] = val
+			}
+		}
+	} else {
+		// During import or if no original value, include all non-computed fields
+		for key, val := range apiMap {
+			if !computedFields[key] {
+				resultMap[key] = val
+			}
+		}
+	}
+	
+	return resultMap
+}
