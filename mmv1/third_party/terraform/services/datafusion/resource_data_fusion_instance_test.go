@@ -158,7 +158,6 @@ resource "google_data_fusion_instance" "foobar" {
 `, instanceName)
 }
 
-// Corrected destroy check function
 func testAccCheckDatafusionInstanceDestroyProducer(t *testing.T) func(*terraform.State) error {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
@@ -202,10 +201,6 @@ func testAccCheckDatafusionInstanceDestroyProducer(t *testing.T) func(*terraform
 
 func TestAccDatafusionInstance_tags(t *testing.T) {
 	t.Parallel()
-
-	// The tag key and value bootstrap functions create organization-level tags.
-	// We will use the short names here for the labels, which is a common
-	// pattern in test environments. We must convert the names to be valid labels.
 	tagKeyShortName := "test-tagkey-" + acctest.RandString(t, 6)
 	tagValueShortName := "test-tagvalue-" + acctest.RandString(t, 6)
 
@@ -237,7 +232,6 @@ func TestAccDatafusionInstance_tags(t *testing.T) {
 	})
 }
 
-// CORRECTED HCL template to use 'labels' instead of 'tags'
 func testAccDatafusionInstanceLabels(testContext map[string]interface{}) string {
 	return acctest.Nprintf(`
 	resource "google_data_fusion_instance" "test" {
@@ -252,7 +246,6 @@ func testAccDatafusionInstanceLabels(testContext map[string]interface{}) string 
 	`, testContext)
 }
 
-// CORRECTED check function to verify labels on the instance
 func checkDatafusionInstanceLabels(resourceName, expectedTagKey, expectedTagValue string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[resourceName]
