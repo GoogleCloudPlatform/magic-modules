@@ -1,6 +1,7 @@
 - type: PRODUCT_BASE_PATH
   details:
-    basepathidentifier: cloud_build_worker_pool
+    skip: true
+    basepathidentifier: cloud_build
 - type: PRODUCT_TITLE # used to align with mmv1 product
   details:
     title: "cloudbuild"
