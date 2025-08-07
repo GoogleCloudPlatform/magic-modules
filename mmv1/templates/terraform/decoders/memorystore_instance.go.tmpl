@@ -85,10 +85,25 @@
 					}
 				}
 			}
+			// NOTE: Due to how the api updates the backend. When mode is set to CLUSTER_DISABLED
+			// When desired_auto_created_endpoints is set this flow works as expected
+			// FLOW: Terraform  -> API Input -> API Output -> Terraform output
+			// CLUSTER_DISABLED and desired_auto_created_endpoints defined: desired_auto_created_endpoints -> endpoints -> Endpoints -> desired_auto_created_endpoints + Endpoints
+			// CLUSTER_DISABLED and desired_psc_auto_connections defined: desired_psc_auto_connections -> psc_auto_connections -> Endpoints -> desired_auto_created_endpoints + Endpoints
+			// CLUSTER and desired_psc_auto_connections defined: desired_psc_auto_connections -> psc_auto_connections -> psc_auto_connections -> desired_psc_auto_connections + psc_auto_connection
+			// CLUSTER and desired_auto_created_endpoints defined: desired_auto_created_endpoints -> endpoints -> Endpoints -> desired_auto_created_endpoints + Endpoints
+			// The issue is that when CLUSTE_DISABLED is set for that flow  API is updated Endpoints instead of psc_auto_connections.
+			// The if else if below checks what is define by the user in order to set the correct fielt in the state
 			if len(transformed) > 0 {
-				d.Set("desired_auto_created_endpoints", transformed)
-				log.Printf("[DEBUG] Setting desired_auto_created_endpoints in decoder for %#v", transformed)
-
+				_, okEndpoint := d.GetOk("desired_auto_created_endpoints")
+				_, okPsc := d.GetOk("desired_psc_auto_connections")
+				if okEndpoint {
+					d.Set("desired_auto_created_endpoints", transformed)
+					log.Printf("[DEBUG] Setting desired_auto_created_endpoints in decoder within endpoints for %#v", transformed)
+				} else if okPsc {
+					d.Set("desired_psc_auto_connections", transformed)
+					log.Printf("[DEBUG] Setting desired_psc_auto_connections in decoder within endpoints for %#v", transformed)
+				}
 			}
 		}
 
