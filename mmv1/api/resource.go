@@ -408,7 +408,11 @@ func (r *Resource) SetDefault(product *Product) {
 		r.ApiName = r.Name
 	}
 	if r.CollectionUrlKey == "" {
-		r.CollectionUrlKey = google.Camelize(google.Plural(r.Name), "lower")
+		key := r.Name
+		if r.ApiResourceTypeKind != "" {
+			key = r.ApiResourceTypeKind
+		}
+		r.CollectionUrlKey = google.Camelize(google.Plural(key), "lower")
 	}
 	if r.IdFormat == "" {
 		r.IdFormat = r.SelfLinkUri()
