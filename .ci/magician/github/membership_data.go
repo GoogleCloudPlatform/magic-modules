@@ -135,7 +135,12 @@ var (
 			},
 		},
 		"trodge": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 8, 7),
+					end:       newDate(2025, 8, 8),
+				},
+			},
 		},
 		"zli82016": {
 			vacations: []Vacation{
