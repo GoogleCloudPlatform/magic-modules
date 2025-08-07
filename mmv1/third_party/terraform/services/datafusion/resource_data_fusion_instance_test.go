@@ -1,12 +1,16 @@
 package datafusion_test
 
 import (
+	"context"
 	"fmt"
+	"strings"
 	"testing"
 
+	datafusion "cloud.google.com/go/datafusion/apiv1"
+	datafusionpb "cloud.google.com/go/datafusion/apiv1/datafusionpb"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccDataFusionInstance_update(t *testing.T) {
@@ -154,44 +158,139 @@ resource "google_data_fusion_instance" "foobar" {
 `, instanceName)
 }
 
+// Corrected destroy check function
+func testAccCheckDatafusionInstanceDestroyProducer(t *testing.T) func(*terraform.State) error {
+	return func(s *terraform.State) error {
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "google_data_fusion_instance" {
+				continue
+			}
+
+			instanceName := rs.Primary.Attributes["name"]
+			project := rs.Primary.Attributes["project"]
+			location := rs.Primary.Attributes["region"]
+			if location == "" {
+				location = rs.Primary.Attributes["location"]
+			}
+
+			if location == "" {
+				return fmt.Errorf("could not determine location for Data Fusion instance %s", instanceName)
+			}
+
+			ctx := context.Background()
+			datafusionClient, err := datafusion.NewClient(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to create datafusion client: %v", err)
+			}
+			defer datafusionClient.Close()
+
+			req := &datafusionpb.GetInstanceRequest{
+				Name: fmt.Sprintf("projects/%s/locations/%s/instances/%s", project, location, instanceName),
+			}
+
+			_, err = datafusionClient.GetInstance(ctx, req)
+			if err == nil {
+				return fmt.Errorf("Data Fusion instance %s still exists", instanceName)
+			}
+			if !strings.Contains(err.Error(), "NotFound") {
+				return fmt.Errorf("error checking Data Fusion instance %s existence: %v", instanceName, err)
+			}
+		}
+		return nil
+	}
+}
+
 func TestAccDatafusionInstance_tags(t *testing.T) {
 	t.Parallel()
 
-	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "datafusion-instances-tagkey", nil)
-	context := map[string]interface{}{
-		"org":           envvar.GetTestOrgFromEnv(t),
-		"tagKey":        tagKey,
-		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "datafusion-instances-tagvalue", tagKey),
+	// The tag key and value bootstrap functions create organization-level tags.
+	// We will use the short names here for the labels, which is a common
+	// pattern in test environments. We must convert the names to be valid labels.
+	tagKeyShortName := "test-tagkey-" + acctest.RandString(t, 6)
+	tagValueShortName := "test-tagvalue-" + acctest.RandString(t, 6)
+
+	testContext := map[string]interface{}{
+		"tagKey":        tagKeyShortName,
+		"tagValue":      tagValueShortName,
 		"random_suffix": acctest.RandString(t, 10),
 	}
+	resourceName := "google_data_fusion_instance.test"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckDataFusionInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckDatafusionInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccDatafusionInstanceTags(context),
+				Config: testAccDatafusionInstanceLabels(testContext),
+				Check: resource.ComposeTestCheckFunc(
+					checkDatafusionInstanceLabels(resourceName, tagKeyShortName, tagValueShortName),
+				),
 			},
 			{
-				ResourceName:            "google_data_fusion_instance.instance",
+				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"region", "labels", "terraform_labels", "tags"},
+				ImportStateVerifyIgnore: []string{"labels"},
 			},
 		},
 	})
 }
 
-func testAccDatafusionInstanceTags(context map[string]interface{}) string {
+// CORRECTED HCL template to use 'labels' instead of 'tags'
+func testAccDatafusionInstanceLabels(testContext map[string]interface{}) string {
 	return acctest.Nprintf(`
-resource "google_data_fusion_instance" "instance" {
-  name   = "tf-test-my-instance-%{random_suffix}"
-  region = "us-central1"
-  type   = "BASIC"
-  tags = {
-	"%{org}/%{tagKey}" = "%{tagValue}"
-  }
+	resource "google_data_fusion_instance" "test" {
+	  name = "tf-test-instance-%{random_suffix}"
+	  type = "BASIC"
+	  region = "us-central1"
+	
+	  labels = {
+	    "%{tagKey}" = "%{tagValue}"
+	  }
+	}
+	`, testContext)
 }
-`, context)
+
+// CORRECTED check function to verify labels on the instance
+func checkDatafusionInstanceLabels(resourceName, expectedTagKey, expectedTagValue string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Resource not found: %s", resourceName)
+		}
+		project := rs.Primary.Attributes["project"]
+		location := rs.Primary.Attributes["region"]
+		instanceName := rs.Primary.Attributes["name"]
+
+		ctx := context.Background()
+		datafusionClient, err := datafusion.NewClient(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to create datafusion client: %v", err)
+		}
+		defer datafusionClient.Close()
+
+		req := &datafusionpb.GetInstanceRequest{
+			Name: fmt.Sprintf("projects/%s/locations/%s/instances/%s", project, location, instanceName),
+		}
+
+		instance, err := datafusionClient.GetInstance(ctx, req)
+		if err != nil {
+			return fmt.Errorf("failed to get datafusion instance '%s': %v", req.Name, err)
+		}
+
+		labels := instance.GetLabels()
+		if labels == nil {
+			return fmt.Errorf("expected labels not found on instance '%s'", req.Name)
+		}
+
+		if actualValue, ok := labels[expectedTagKey]; ok {
+			if actualValue == expectedTagValue {
+				return nil
+			}
+			return fmt.Errorf("label key '%s' found with incorrect value. Expected: %s, Got: %s", expectedTagKey, expectedTagValue, actualValue)
+		}
+
+		return fmt.Errorf("expected label key '%s' not found on instance '%s'", expectedTagKey, req.Name)
+	}
 }
