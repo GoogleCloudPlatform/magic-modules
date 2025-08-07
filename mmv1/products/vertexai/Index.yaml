@@ -153,7 +153,6 @@ properties:
             description:
               The configuration with regard to the algorithms used for efficient
               search.
-            required: true
             properties:
               - name: 'treeAhConfig'
                 type: NestedObject
