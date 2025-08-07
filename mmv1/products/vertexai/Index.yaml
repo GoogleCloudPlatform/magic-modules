@@ -85,6 +85,7 @@ properties:
   - name: 'metadata'
     type: NestedObject
     description: An additional information about the Index
+    required: true
     properties:
       - name: 'contentsDeltaUri'
         type: String
@@ -106,6 +107,7 @@ properties:
       - name: 'config'
         type: NestedObject
         description: The configuration of the Matching Engine Index.
+        required: true
         immutable: true
         properties:
           - name: 'dimensions'
@@ -151,6 +153,7 @@ properties:
             description:
               The configuration with regard to the algorithms used for efficient
               search.
+            required: true
             properties:
               - name: 'treeAhConfig'
                 type: NestedObject
