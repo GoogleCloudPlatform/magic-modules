@@ -145,3 +145,80 @@ resource "google_database_migration_service_connection_profile" "alloydbprofile"
 }
 `, context)
 }
+
+func TestAccDatabaseMigrationServiceConnectionProfile_sqlserver(t *testing.T) {
+	t.Parallel()
+
+	suffix := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDatabaseMigrationServiceConnectionProfile_sqlserver_basic(suffix),
+			},
+			{
+				ResourceName:            "google_database_migration_service_connection_profile.sqlserver",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "sqlserver.0.password", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccDatabaseMigrationServiceConnectionProfile_sqlserver_update(suffix),
+			},
+			{
+				ResourceName:            "google_database_migration_service_connection_profile.sqlserver",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"connection_profile_id", "location", "sqlserver.0.password", "labels", "terraform_labels"},
+			},
+		},
+	})
+}
+
+func testAccDatabaseMigrationServiceConnectionProfile_sqlserver_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_database_migration_service_connection_profile" "sqlserver" {
+	location = "us-central1"
+	connection_profile_id = "tf-test-sqlserver-profile%{random_suffix}"
+	display_name          = "tf-test-sqlserver-profile-display%{random_suffix}"
+	labels = { 
+		foo = "bar" 
+	}
+	sqlserver {
+		host = "10.20.30.40"
+		port = 1433
+		username = "tf-test-sqlserver-user%{random_suffix}"
+		password = "tf-test-sqlserver-pass%{random_suffix}"
+		database = "master"
+
+		static_ip_connectivity {}
+	}
+}
+`, context)
+}
+
+func testAccDatabaseMigrationServiceConnectionProfile_sqlserver_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_database_migration_service_connection_profile" "sqlserver" {
+	location = "us-central1"
+	connection_profile_id = "tf-test-sqlserver-profile%{random_suffix}"
+	display_name          = "tf-test-sqlserver-profile-updated%{random_suffix}"
+	labels = { 
+		bar = "foo" 
+	}
+	sqlserver {
+		host = "10.20.30.50"
+		port = 1433
+		username = "tf-test-sqlserver-updated-user%{random_suffix}"
+		password = "tf-test-sqlserver-updated-pass%{random_suffix}"
+		database = "master"
+
+		static_ip_connectivity {}
+	}
+}
+`, context)
+}

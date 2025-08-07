@@ -1,0 +1,21 @@
+resource "google_database_migration_service_connection_profile" "<%= ctx[:primary_resource_id] %>" {
+  location              = "us-central1"
+  connection_profile_id = "<%= ctx[:vars]['profile'] %>"
+  display_name          = "<%= ctx[:vars]['profile'] %>"
+  labels = {
+    foo = "bar"
+  }
+  sqlserver {
+    host     = "10.1.0.100"
+    port     = 1433
+    username = "<%= ctx[:vars]['sqldb_user'] %>"
+    password = "<%= ctx[:vars]['sqldb_pass'] %>"
+
+    ssl {
+      type = "SERVER_ONLY"
+      ca_certificate = file("<%= ctx[:vars]['sqldb_cert'] %>.pem")
+    }
+
+    static_service_ip_connectivity {}
+  }
+}
