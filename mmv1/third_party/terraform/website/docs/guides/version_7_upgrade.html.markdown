@@ -177,3 +177,7 @@ Remove `template.containers.depends_on` from your configuration after upgrade.
 ## Resource: `google_vertex_ai_endpoint`
 
 ### `enable_secure_private_service_connect` is removed as it is not available in the GA version of the API, only in the beta version.
+
+## Resource: `google_vertex_ai_index`
+
+### `metadata`, `metadata.config`, and `metadata.config.dimensions` are now required. Resource creation would fail without these attributes already, so no change is necessary to existing configurations.
