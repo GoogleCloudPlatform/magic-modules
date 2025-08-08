@@ -47,6 +47,17 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 	{{- end }}
 	t.Parallel()
 
+	{{- if $e.BootstrapIam }}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+	{{- range $iam := $e.BootstrapIam }}
+		{
+			Member: "{{$iam.Member}}",
+			Role:   "{{$iam.Role}}",
+		},
+	{{- end}}
+	})
+	{{- end }}
+
 	context := map[string]interface{}{
 	{{- template "EnvVarContext" dict "TestEnvVars" $e.TestEnvVars "HasNewLine" false}}
 	{{- range $varKey, $varVal := $e.TestVarsOverrides }}

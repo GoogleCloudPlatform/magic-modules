@@ -12,205 +12,544 @@
 # limitations under the License.
 
 ---
-name: 'Connection'
-description: |
-  A connection to a GitHub App installation.
-min_version: 'beta'
-docs:
-id_format: 'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}'
-base_url: 'projects/{{project}}/locations/{{location}}/connections'
-self_link: 'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/connections?connectionId={{connection_id}}'
-update_verb: 'PATCH'
+name: Connection
+description: A connection for GitHub, GitHub Enterprise, GitLab, and GitLab Enterprise.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/developer-connect/docs/overview'
+  api: 'https://cloud.google.com/developer-connect/docs/api/reference/rest/v1/projects.locations.connections'
+base_url: projects/{{project}}/locations/{{location}}/connections
 update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/connections/{{connection_id}}
+create_url: projects/{{project}}/locations/{{location}}/connections?connectionId={{connection_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/connections/{{connection_id}}
 import_format:
-  - 'projects/{{project}}/locations/{{location}}/connections/{{connection_id}}'
-timeouts:
-  insert_minutes: 20
-  update_minutes: 20
-  delete_minutes: 20
-autogen_async: true
-async:
-  actions: ['create', 'delete', 'update']
-  type: 'OpAsync'
-  operation:
-    base_url: '{{op_id}}'
-  result:
-    resource_inside_response: true
-custom_code:
+  - projects/{{project}}/locations/{{location}}/connections/{{connection_id}}
 examples:
-  - name: 'developer_connect_connection_basic'
+  - name: 'developer_connect_connection_new'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection-new%s", context["random_suffix"])'
+    vars:
+      connection_name: 'tf-test-connection-new'
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    exclude_test: true
+  - name: 'developer_connect_connection_existing_credentials'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection-cred%s", context["random_suffix"])'
+    vars:
+      connection_name: 'tf-test-connection-cred'
+      secret_name: "projects/your-project/secrets/your-secret-id/versions/latest"
+    test_vars_overrides:
+      secret_name: '"projects/devconnect-terraform-creds/secrets/tf-test-do-not-change-github-oauthtoken-e0b9e7/versions/1"'
+  - name: 'developer_connect_connection_existing_installation'
+    exclude_test: true
+  - name: 'developer_connect_connection_github'
     primary_resource_id: 'my-connection'
     primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
-    min_version: 'beta'
     vars:
       connection_name: 'tf-test-connection'
   - name: 'developer_connect_connection_github_doc'
-    min_version: 'beta'
     exclude_test: true
+  - name: 'developer_connect_connection_github_enterprise'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
+    vars:
+      connection_name: 'tf-test-connection'
+  - name: 'developer_connect_connection_github_enterprise_doc'
+    exclude_test: true
+  - name: 'developer_connect_connection_gitlab'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
+    vars:
+      connection_name: 'tf-test-connection'
+  - name: 'developer_connect_connection_gitlab_doc'
+    exclude_test: true
+  - name: 'developer_connect_connection_gitlab_enterprise'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
+    vars:
+      connection_name: 'tf-test-connection'
+  - name: 'developer_connect_connection_gitlab_enterprise_doc'
+    exclude_test: true
+  - name: 'developer_connect_connection_bbc'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
+    vars:
+      connection_name: 'tf-test-connection'
+  - name: 'developer_connect_connection_bbc_doc'
+    exclude_test: true
+  - name: 'developer_connect_connection_bbdc'
+    primary_resource_id: 'my-connection'
+    primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
+    vars:
+      connection_name: 'tf-test-connection'
+  - name: 'developer_connect_connection_bbdc_doc'
+    exclude_test: true
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: Q29ubmVjdGlvbg==
 parameters:
-  - name: 'location'
+  - name: location
     type: String
-    description: |
-      Resource ID segment making up resource `name`. It identifies the resource
-      within its parent collection as described in https://google.aip.dev/122. See documentation
-      for resource type `developerconnect.googleapis.com/GitRepositoryLink`.
-    min_version: 'beta'
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
     url_param_only: true
     required: true
-    immutable: true
-  - name: 'connectionId'
+  - name: connectionId
     type: String
-    description: |
-      Required. Id of the requesting object. If auto-generating Id server-side,
-      remove this field and connection_id from the method_signature of Create RPC.
-    min_version: 'beta'
+    description: |-
+      Required. Id of the requesting object
+      If auto-generating Id server-side, remove this field and
+      connection_id from the method_signature of Create RPC
+    immutable: true
     url_param_only: true
     required: true
-    immutable: true
 properties:
-  - name: 'githubConfig'
+  - name: githubConfig
     type: NestedObject
-    description: |
-      Configuration for connections to github.com.
-    min_version: 'beta'
+    description: Configuration for connections to github.com.
     properties:
-      - name: 'githubApp'
+      - name: installationUri
         type: String
-        description: |
-          Required. Immutable. The GitHub Application that was installed to
-          the GitHub user or organization.
-          Possible values:
-            GIT_HUB_APP_UNSPECIFIED
-            DEVELOPER_CONNECT
-            FIREBASE"
-        min_version: 'beta'
-        required: true
-        immutable: true
-      - name: 'authorizerCredential'
-        type: NestedObject
-        description: |
-          Represents an OAuth token of the account that authorized the Connection,and
-          associated metadata.
-        min_version: 'beta'
-        properties:
-          - name: 'oauthTokenSecretVersion'
-            type: String
-            description: |
-              Required. A SecretManager resource containing the OAuth token
-              that authorizes the connection.
-              Format: `projects/*/secrets/*/versions/*`.
-            min_version: 'beta'
-            required: true
-          - name: 'username'
-            type: String
-            description: |
-              Output only. The username associated with this token.
-            min_version: 'beta'
-            output: true
-      - name: 'appInstallationId'
-        type: String
-        description: |
-          Optional. GitHub App installation id.
-        min_version: 'beta'
-      - name: 'installationUri'
-        type: String
-        description: |
-          Output only. The URI to navigate to in order to manage the installation
-          associated with this GitHubConfig.
-        min_version: 'beta'
+        description: |-
+          Output only. The URI to navigate to in order to manage the installation associated
+          with this GitHubConfig.
         output: true
-  - name: 'name'
+      - name: githubApp
+        type: String
+        description: |-
+          Required. Immutable. The GitHub Application that was installed to the GitHub user or
+          organization.
+          Possible values:
+          GIT_HUB_APP_UNSPECIFIED
+          DEVELOPER_CONNECT
+          FIREBASE
+        immutable: true
+        required: true
+      - name: authorizerCredential
+        type: NestedObject
+        description: |-
+          Represents an OAuth token of the account that authorized the Connection,
+          and associated metadata.
+        default_from_api: true
+        properties:
+          - name: oauthTokenSecretVersion
+            type: String
+            description: |-
+              Required. A SecretManager resource containing the OAuth token that authorizes
+              the connection. Format: `projects/*/secrets/*/versions/*`.
+            required: true
+          - name: username
+            type: String
+            description: Output only. The username associated with this token.
+            output: true
+      - name: appInstallationId
+        type: String
+        description: Optional. GitHub App installation id.
+        default_from_api: true
+  - name: githubEnterpriseConfig
+    type: NestedObject
+    description: Configuration for connections to an instance of GitHub Enterprise.
+    properties:
+      - name: appSlug
+        type: String
+        description: Output only. The URL-friendly name of the GitHub App.
+        output: true
+      - name: privateKeySecretVersion
+        type: String
+        description: |-
+          Optional. SecretManager resource containing the private key of the GitHub App,
+          formatted as `projects/*/secrets/*/versions/*`.
+      - name: installationUri
+        type: String
+        description: |-
+          Output only. The URI to navigate to in order to manage the installation associated
+          with this GitHubEnterpriseConfig.
+        output: true
+      - name: serviceDirectoryConfig
+        type: NestedObject
+        description: |-
+          ServiceDirectoryConfig represents Service Directory configuration for a
+          connection.
+        properties:
+          - name: service
+            type: String
+            description: |-
+              Required. The Service Directory service name.
+              Format:
+              projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.
+            required: true
+      - name: serverVersion
+        type: String
+        description: Output only. GitHub Enterprise version installed at the host_uri.
+        output: true
+      - name: sslCaCertificate
+        type: String
+        description: Optional. SSL certificate to use for requests to GitHub Enterprise.
+      - name: hostUri
+        type: String
+        description: Required. The URI of the GitHub Enterprise host this connection is for.
+        required: true
+      - name: appId
+        type: String
+        description: Optional. ID of the GitHub App created from the manifest.
+      - name: webhookSecretSecretVersion
+        type: String
+        description: |-
+          Optional. SecretManager resource containing the webhook secret of the GitHub App,
+          formatted as `projects/*/secrets/*/versions/*`.
+      - name: appInstallationId
+        type: String
+        description: Optional. ID of the installation of the GitHub App.
+  - name: labels
+    type: KeyValueLabels
+    description: Optional. Labels as key value pairs
+  - name: etag
     type: String
-    description: |
+    description: |-
+      Optional. This checksum is computed by the server based on the value of other
+      fields, and may be sent on update and delete requests to ensure the
+      client has an up-to-date value before proceeding.
+  - name: uid
+    type: String
+    description: Output only. A system-assigned unique identifier for a the GitRepositoryLink.
+    output: true
+  - name: name
+    type: String
+    description: |-
       Identifier. The resource name of the connection, in the format
       `projects/{project}/locations/{location}/connections/{connection_id}`.
-    min_version: 'beta'
     output: true
-  - name: 'createTime'
-    type: String
-    description: |
-      Output only. [Output only] Create timestamp
-    min_version: 'beta'
+  - name: reconciling
+    type: Boolean
+    description: |-
+      Output only. Set to true when the connection is being set up or updated in the
+      background.
     output: true
-  - name: 'updateTime'
-    type: String
-    description: |
-      Output only. [Output only] Update timestamp
-    min_version: 'beta'
-    output: true
-  - name: 'deleteTime'
-    type: String
-    description: |
-      Output only. [Output only] Delete timestamp
-    min_version: 'beta'
-    output: true
-  - name: 'labels'
-    type: KeyValueLabels
-    description: |
-      Optional. Labels as key value pairs
-    min_version: 'beta'
-  - name: 'installationState'
+  - name: gitlabEnterpriseConfig
     type: NestedObject
-    description: |
-      Describes stage and necessary actions to be taken by the user to complete the installation.
-      Used for GitHub and GitHub Enterprise based connections.
-    min_version: 'beta'
+    description: Configuration for connections to an instance of GitLab Enterprise.
+    properties:
+      - name: authorizerCredential
+        type: NestedObject
+        description: |-
+          Represents a personal access token that authorized the Connection,
+          and associated metadata.
+        required: true
+        properties:
+          - name: userTokenSecretVersion
+            type: String
+            description: |-
+              Required. A SecretManager resource containing the user token that authorizes
+              the Developer Connect connection. Format:
+              `projects/*/secrets/*/versions/*`.
+            required: true
+          - name: username
+            type: String
+            description: Output only. The username associated with this token.
+            output: true
+      - name: serviceDirectoryConfig
+        type: NestedObject
+        description: |-
+          ServiceDirectoryConfig represents Service Directory configuration for a
+          connection.
+        properties:
+          - name: service
+            type: String
+            description: |-
+              Required. The Service Directory service name.
+              Format:
+              projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.
+            required: true
+      - name: sslCaCertificate
+        type: String
+        description: |-
+          Optional. SSL Certificate Authority certificate to use for requests to GitLab
+          Enterprise instance.
+      - name: serverVersion
+        type: String
+        description: Output only. Version of the GitLab Enterprise server running on the `host_uri`.
+        output: true
+      - name: hostUri
+        type: String
+        description: Required. The URI of the GitLab Enterprise host this connection is for.
+        required: true
+      - name: webhookSecretSecretVersion
+        type: String
+        description: |-
+          Required. Immutable. SecretManager resource containing the webhook secret of a GitLab project,
+          formatted as `projects/*/secrets/*/versions/*`. This is used to validate
+          webhooks.
+        immutable: true
+        required: true
+      - name: readAuthorizerCredential
+        type: NestedObject
+        description: |-
+          Represents a personal access token that authorized the Connection,
+          and associated metadata.
+        required: true
+        properties:
+          - name: userTokenSecretVersion
+            type: String
+            description: |-
+              Required. A SecretManager resource containing the user token that authorizes
+              the Developer Connect connection. Format:
+              `projects/*/secrets/*/versions/*`.
+            required: true
+          - name: username
+            type: String
+            description: Output only. The username associated with this token.
+            output: true
+  - name: bitbucketCloudConfig
+    type: NestedObject
+    description: Configuration for connections to an instance of Bitbucket Cloud.
+    properties:
+      - name: workspace
+        type: String
+        description: Required. The Bitbucket Cloud Workspace ID to be connected to Google Cloud Platform.
+        required: true
+      - name: webhookSecretSecretVersion
+        type: String
+        description: |-
+          Required. Immutable. SecretManager resource containing the webhook secret used to verify webhook
+          events, formatted as `projects/*/secrets/*/versions/*`. This is used to
+          validate and create webhooks.
+        immutable: true
+        required: true
+      - name: readAuthorizerCredential
+        type: NestedObject
+        description: |-
+          Represents a personal access token that authorized the Connection,
+          and associated metadata.
+        required: true
+        properties:
+          - name: userTokenSecretVersion
+            type: String
+            description: |-
+              Required. A SecretManager resource containing the user token that authorizes
+              the Developer Connect connection. Format:
+              `projects/*/secrets/*/versions/*`.
+            required: true
+          - name: username
+            type: String
+            description: Output only. The username associated with this token.
+            output: true
+      - name: authorizerCredential
+        type: NestedObject
+        description: |-
+          Represents a personal access token that authorized the Connection,
+          and associated metadata.
+        required: true
+        properties:
+          - name: userTokenSecretVersion
+            type: String
+            description: |-
+              Required. A SecretManager resource containing the user token that authorizes
+              the Developer Connect connection. Format:
+              `projects/*/secrets/*/versions/*`.
+            required: true
+          - name: username
+            type: String
+            description: Output only. The username associated with this token.
+            output: true
+  - name: bitbucketDataCenterConfig
+    type: NestedObject
+    description: Configuration for connections to an instance of Bitbucket Data Center.
+    properties:
+      - name: webhookSecretSecretVersion
+        type: String
+        description: |-
+          Required. Immutable. SecretManager resource containing the webhook secret used to verify webhook
+          events, formatted as `projects/*/secrets/*/versions/*`. This is used to
+          validate webhooks.
+        immutable: true
+        required: true
+      - name: readAuthorizerCredential
+        type: NestedObject
+        description: |-
+          Represents a personal access token that authorized the Connection,
+          and associated metadata.
+        required: true
+        properties:
+          - name: userTokenSecretVersion
+            type: String
+            description: |-
+              Required. A SecretManager resource containing the user token that authorizes
+              the Developer Connect connection. Format:
+              `projects/*/secrets/*/versions/*`.
+            required: true
+          - name: username
+            type: String
+            description: Output only. The username associated with this token.
+            output: true
+      - name: authorizerCredential
+        type: NestedObject
+        description: |-
+          Represents a personal access token that authorized the Connection,
+          and associated metadata.
+        required: true
+        properties:
+          - name: username
+            type: String
+            description: Output only. The username associated with this token.
+            output: true
+          - name: userTokenSecretVersion
+            type: String
+            description: |-
+              Required. A SecretManager resource containing the user token that authorizes
+              the Developer Connect connection. Format:
+              `projects/*/secrets/*/versions/*`.
+            required: true
+      - name: serviceDirectoryConfig
+        type: NestedObject
+        description: |-
+          ServiceDirectoryConfig represents Service Directory configuration for a
+          connection.
+        properties:
+          - name: service
+            type: String
+            description: |-
+              Required. The Service Directory service name.
+              Format:
+              projects/{project}/locations/{location}/namespaces/{namespace}/services/{service}.
+            required: true
+      - name: sslCaCertificate
+        type: String
+        description: |-
+          Optional. SSL certificate authority to trust when making requests to Bitbucket Data
+          Center.
+      - name: serverVersion
+        type: String
+        description: Output only. Version of the Bitbucket Data Center server running on the `host_uri`.
+        output: true
+      - name: hostUri
+        type: String
+        description: Required. The URI of the Bitbucket Data Center host this connection is for.
+        required: true
+  - name: updateTime
+    type: String
+    description: Output only. [Output only] Update timestamp
+    output: true
+  - name: deleteTime
+    type: String
+    description: Output only. [Output only] Delete timestamp
+    output: true
+  - name: installationState
+    type: NestedObject
+    description: |-
+      Describes stage and necessary actions to be taken by the
+      user to complete the installation. Used for GitHub and GitHub Enterprise
+      based connections.
     output: true
     properties:
-      - name: 'stage'
+      - name: message
         type: String
-        description: |
+        description: |-
+          Output only. Message of what the user should do next to continue the installation.
+          Empty string if the installation is already complete.
+      - name: actionUri
+        type: String
+        description: |-
+          Output only. Link to follow for next action. Empty string if the installation is already
+          complete.
+      - name: stage
+        type: String
+        description: |-
           Output only. Current step of the installation process.
           Possible values:
-            STAGE_UNSPECIFIED
-            PENDING_CREATE_APP
-            PENDING_USER_OAUTH
-            PENDING_INSTALL_APP
-            COMPLETE
-        min_version: 'beta'
+          STAGE_UNSPECIFIED
+          PENDING_CREATE_APP
+          PENDING_USER_OAUTH
+          PENDING_INSTALL_APP
+          COMPLETE
         output: true
-      - name: 'message'
-        type: String
-        description: |
-          Output only. Message of what the user should do next to continue
-          the installation.Empty string if the installation is already complete.
-        min_version: 'beta'
-      - name: 'actionUri'
-        type: String
-        description: |
-          Output only. Link to follow for next action. Empty string if the
-          installation is already complete.
-        min_version: 'beta'
-  - name: 'disabled'
+  - name: disabled
     type: Boolean
-    description:
-      Optional. If disabled is set to true, functionality is disabled for
-      this connection. Repository based API methods and webhooks processing
-      for repositories in this connection will be disabled.
-    min_version: 'beta'
-  - name: 'reconciling'
-    type: Boolean
-    description: |
-      Output only. Set to true when the connection is being set up or updated
-      in the background.
-    min_version: 'beta'
-    output: true
-  - name: 'annotations'
+    description: |-
+      Optional. If disabled is set to true, functionality is disabled for this connection.
+      Repository based API methods and webhooks processing for repositories in
+      this connection will be disabled.
+  - name: annotations
     type: KeyValueAnnotations
-    description: |
-      Optional. Allows clients to store small amounts of arbitrary data.
-    min_version: 'beta'
-  - name: 'etag'
+    description: Optional. Allows clients to store small amounts of arbitrary data.
+  - name: gitlabConfig
+    type: NestedObject
+    description: Configuration for connections to gitlab.com.
+    properties:
+      - name: webhookSecretSecretVersion
+        type: String
+        description: |-
+          Required. Immutable. SecretManager resource containing the webhook secret of a GitLab project,
+          formatted as `projects/*/secrets/*/versions/*`. This is used to validate
+          webhooks.
+        immutable: true
+        required: true
+      - name: readAuthorizerCredential
+        type: NestedObject
+        description: |-
+          Represents a personal access token that authorized the Connection,
+          and associated metadata.
+        required: true
+        properties:
+          - name: userTokenSecretVersion
+            type: String
+            description: |-
+              Required. A SecretManager resource containing the user token that authorizes
+              the Developer Connect connection. Format:
+              `projects/*/secrets/*/versions/*`.
+            required: true
+          - name: username
+            type: String
+            description: Output only. The username associated with this token.
+            output: true
+      - name: authorizerCredential
+        type: NestedObject
+        description: |-
+          Represents a personal access token that authorized the Connection,
+          and associated metadata.
+        required: true
+        properties:
+          - name: userTokenSecretVersion
+            type: String
+            description: |-
+              Required. A SecretManager resource containing the user token that authorizes
+              the Developer Connect connection. Format:
+              `projects/*/secrets/*/versions/*`.
+            required: true
+          - name: username
+            type: String
+            description: Output only. The username associated with this token.
+            output: true
+  - name: createTime
     type: String
-    description: |
-      Optional. This checksum is computed by the server based on the value
-      of other fields, and may be sent on update and delete requests to ensure the
-      client has an up-to-date value before proceeding.
-    min_version: 'beta'
-  - name: 'uid'
-    type: String
-    description: |
-      Output only. A system-assigned unique identifier for a the GitRepositoryLink.
-    min_version: 'beta'
+    description: Output only. [Output only] Create timestamp
     output: true
+  - name: cryptoKeyConfig
+    type: NestedObject
+    description: |-
+      The crypto key configuration. This field is used by the Customer-managed
+      encryption keys (CMEK) feature.
+    properties:
+      - name: keyReference
+        type: String
+        description: |-
+          Required. The name of the key which is used to encrypt/decrypt customer data. For key
+          in Cloud KMS, the key should be in the format of
+          `projects/*/locations/*/keyRings/*/cryptoKeys/*`.
+        required: true

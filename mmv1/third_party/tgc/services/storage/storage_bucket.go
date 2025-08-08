@@ -10,10 +10,11 @@ package storage
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/cai"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/cai"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 	"google.golang.org/api/storage/v1"
@@ -213,8 +214,10 @@ func expandBucketRetentionPolicy(configured interface{}) *storage.BucketRetentio
 	}
 	retentionPolicy := retentionPolicies[0].(map[string]interface{})
 
+	value, _ := strconv.ParseInt(retentionPolicy["retention_period"].(string), 10, 64)
+
 	bucketRetentionPolicy := &storage.BucketRetentionPolicy{
-		RetentionPeriod: int64(retentionPolicy["retention_period"].(int)),
+		RetentionPeriod: value,
 	}
 
 	return bucketRetentionPolicy

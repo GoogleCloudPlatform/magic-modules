@@ -13,6 +13,7 @@
 
 ---
 name: 'ReservationAssignment'
+api_resource_type_kind: Assignment
 description: |
   The BigqueryReservation Assignment resource.
 references:
@@ -83,7 +84,7 @@ properties:
   - name: 'jobType'
     type: String
     description: |
-      Types of job, which could be specified when using the reservation. Possible values: JOB_TYPE_UNSPECIFIED, PIPELINE, QUERY
+      Types of job, which could be specified when using the reservation. Possible values: JOB_TYPE_UNSPECIFIED, PIPELINE, QUERY, CONTINUOUS
     required: true
   - name: 'state'
     type: String

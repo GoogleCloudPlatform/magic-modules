@@ -26,7 +26,7 @@ delete_url: 'projects/{{project}}/locations/{{location}}/privateClouds/{{name}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/privateClouds/{{name}}'
 timeouts:
-  insert_minutes: 240
+  insert_minutes: 360
   update_minutes: 190
   delete_minutes: 150
 autogen_async: true
@@ -36,7 +36,7 @@ async:
   operation:
     base_url: '{{op_id}}'
     timeouts:
-      insert_minutes: 240
+      insert_minutes: 360
       update_minutes: 190
       delete_minutes: 150
   result:
@@ -47,11 +47,16 @@ custom_code:
   decoder: 'templates/terraform/decoders/private_cloud.go.tmpl'
   pre_create: 'templates/terraform/pre_create/vmwareengine_private_cloud.go.tmpl'
   post_create: 'templates/terraform/post_create/private_cloud.go.tmpl'
-  post_delete: 'templates/terraform/post_delete/private_cloud.go.tmpl'
   post_update: 'templates/terraform/post_update/private_cloud.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/vmwareengine_private_cloud.go.tmpl'
+sweeper:
+  query_string: "?delay_hours=0"
+  url_substitutions:
+    - region: "us-central1-a"
+    - region: "southamerica-west1-a"
+    - region: "me-west1-a"
+    - region: "me-west1-b"
 error_abort_predicates:
-
   - 'transport_tpg.Is429QuotaError'
 examples:
   - name: 'vmware_engine_private_cloud_basic'
@@ -209,10 +214,12 @@ properties:
             type: String
             description: |
               Zone that will remain operational when connection between the two zones is lost.
+              Specify the zone in the following format: projects/{project}/locations/{location}.
           - name: 'secondaryLocation'
             type: String
             description: |
               Additional zone for a higher level of availability and load balancing.
+              Specify the zone in the following format: projects/{project}/locations/{location}.
       - name: 'autoscalingSettings'
         type: NestedObject
         description: |
@@ -394,7 +401,6 @@ properties:
     description: |
       Initial type of the private cloud.
     immutable: true
-    ignore_read: true
     diff_suppress_func: 'vmwareenginePrivateCloudStandardTypeDiffSuppressFunc'
     enum_values:
       - 'STANDARD'

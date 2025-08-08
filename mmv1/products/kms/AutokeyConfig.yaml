@@ -22,7 +22,6 @@ description: |
   ~> **Note:** AutokeyConfigs cannot be deleted from Google Cloud Platform.
   Destroying a Terraform-managed AutokeyConfig will remove it from state but
   *will not delete the resource from the project.*
-min_version: 'beta'
 references:
   guides:
     'Cloud KMS with Autokey': 'https://cloud.google.com/kms/docs/kms-with-autokey'
@@ -51,12 +50,15 @@ custom_code:
   pre_read: 'templates/terraform/pre_read/kms_autokey_config_folder.go.tmpl'
   pre_update: 'templates/terraform/pre_update/kms_autokey_config_folder.go.tmpl'
   pre_delete: 'templates/terraform/pre_delete/kms_autokey_config_folder.go.tmpl'
+  post_create: 'templates/terraform/post_create/sleep.go.tmpl'
+  post_update: 'templates/terraform/post_create/sleep.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/kms_autokey_config.go.tmpl'
 # Using a handwritten sweeper because of pre_delete.
 exclude_sweeper: true
 examples:
   - name: 'kms_autokey_config_all'
     primary_resource_id: 'example-autokeyconfig'
+    # test depends upon google_project_service_identity service which is still in beta, so we need to keep test limited to beta
     min_version: 'beta'
     vars:
       folder_name: 'my-folder'
@@ -65,15 +67,11 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     external_providers: ["random", "time"]
-    # Need the time_sleep resource
-    # Currently failing
-    skip_vcr: true
 parameters:
   - name: 'folder'
     type: String
     description: |
       The folder for which to retrieve config.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -85,4 +83,7 @@ properties:
       The target key project for a given folder where KMS Autokey will provision a
       CryptoKey for any new KeyHandle the Developer creates. Should have the form
       `projects/<project_id_or_number>`.
-    min_version: 'beta'
+  - name: 'etag'
+    type: String
+    description: 'The etag of the AutokeyConfig for optimistic concurrency control.'
+    output: true

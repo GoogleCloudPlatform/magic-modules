@@ -13,13 +13,15 @@
 
 ---
 name: 'Endpoint'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/endpoints/{endpoint}'
 description:
   'Models are deployed into it, and afterwards Endpoint is called to obtain
   predictions and explanations.'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
-  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.endpoints'
+  api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.endpoints'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/endpoints'
 self_link: 'projects/{{project}}/locations/{{location}}/endpoints/{{name}}'
@@ -137,7 +139,7 @@ properties:
                     training](https://cloud.google.com/vertex-ai/docs/training/configure-compute#machine-types).
                     For DeployedModel this field is optional, and the default
                     value is `n1-standard-2`. For BatchPredictionJob or as part
-                    of WorkerPoolSpec this field is required. TODO(rsurowka):
+                    of WorkerPoolSpec this field is required. TODO:
                     Try to better unify the required vs optional.'
                   output: true
                 - name: 'acceleratorType'
@@ -456,6 +458,7 @@ properties:
           description:
             'A list of Projects from which the forwarding rule will target the service attachment.'
       - name: 'enableSecurePrivateServiceConnect'
+        min_version: 'beta'
         type: Boolean
         description:
           'If set to true, enable secure private service connect with IAM authorization. Otherwise, private service connect will be done without authorization. Note latency will be slightly increased if authorization is enabled.'

@@ -47,21 +47,35 @@ custom_code:
   constants: 'templates/terraform/constants/iam_workforce_pool.go.tmpl'
   decoder: 'templates/terraform/decoders/treat_deleted_state_as_gone.go.tmpl'
   test_check_destroy: 'templates/terraform/custom_check_destroy/iam_workforce_pool.go.tmpl'
+exclude_sweeper: true
 examples:
   - name: 'iam_workforce_pool_basic'
+    primary_resource_name: 'fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])'
     primary_resource_id: 'example'
+    region_override: 'global'
     vars:
       workforce_pool_id: 'example-pool'
     test_env_vars:
       org_id: 'ORG_ID'
   - name: 'iam_workforce_pool_full'
+    primary_resource_name: 'fmt.Sprintf("tf-test-example-pool%s", context["random_suffix"])'
     primary_resource_id: 'example'
+    region_override: 'global'
     vars:
       workforce_pool_id: 'example-pool'
     test_env_vars:
       org_id: 'ORG_ID'
+iam_policy:
+  parent_resource_attribute: 'workforce_pool_id'
+  method_name_separator: ':'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  allowed_iam_role: 'roles/iam.workforcePoolViewer'
+  admin_iam_role: 'roles/iam.workforcePoolAdmin'
+  fetch_iam_policy_verb: 'POST'
+  import_format:
+    - 'locations/{{location}}/workforcePools/{{workforce_pool_id}}'
+    - '{{workforce_pool_id}}'
 parameters:
-properties:
   - name: 'location'
     type: String
     description: The location for the resource.
@@ -79,6 +93,7 @@ properties:
     immutable: true
     validation:
       function: 'ValidateWorkforcePoolId'
+properties:
   - name: 'name'
     type: String
     description: |

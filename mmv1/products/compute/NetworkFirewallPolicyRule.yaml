@@ -38,6 +38,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_code:
+  constants: 'templates/terraform/constants/network_firewall_policy_rule.go.tmpl'
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -49,14 +51,30 @@ examples:
   - name: 'network_firewall_policy_rule'
     primary_resource_id: 'primary'
     vars:
-      tag_key: 'tagkey'
+      address_group: 'address-group'
+      fw_policy: 'fw-policy'
       network: 'network'
-      fw_policy: 'policy'
-      address: 'address'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      project_name: 'PROJECT_NAME'
+      service_acct: 'SERVICE_ACCT'
+  - name: 'network_firewall_policy_rule_network_scope_egress'
+    primary_resource_id: 'primary'
+    vars:
+      fw_policy: 'fw-policy'
     test_env_vars:
       project_name: 'PROJECT_NAME'
-      org_id: 'ORG_ID'
-      service_acct: 'SERVICE_ACCT'
+    min_version: beta
+  - name: 'network_firewall_policy_rule_network_scope_ingress'
+    primary_resource_id: 'primary'
+    vars:
+      fw_policy: 'fw-policy'
+      network: 'network'
+    test_env_vars:
+      project_name: 'PROJECT_NAME'
+    min_version: beta
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef
@@ -114,6 +132,33 @@ properties:
           CIDR IP address range. Maximum number of destination CIDR IP ranges allowed is 5000.
         item_type:
           type: String
+      - name: 'srcNetworkScope'
+        type: Enum
+        description: |
+          Network scope of the traffic source.
+        min_version: beta
+        enum_values:
+          - 'INTERNET'
+          - 'INTRA_VPC'
+          - 'NON_INTERNET'
+          - 'VPC_NETWORKS'
+      - name: 'srcNetworks'
+        type: Array
+        description: |
+          Networks of the traffic source. It can be either a full or partial url.
+        min_version: beta
+        item_type:
+          type: String
+      - name: 'destNetworkScope'
+        type: Enum
+        description: |
+          Network scope of the traffic destination.
+        min_version: beta
+        enum_values:
+          - 'INTERNET'
+          - 'INTRA_VPC'
+          - 'NON_INTERNET'
+          - 'VPC_NETWORKS'
       - name: 'layer4Configs'
         type: Array
         send_empty_value: true
@@ -225,6 +270,7 @@ properties:
       A fully-qualified URL of a SecurityProfile resource instance.
       Example: https://networksecurity.googleapis.com/v1/projects/{project}/locations/{location}/securityProfileGroups/my-security-profile-group
       Must be specified if action = 'apply_security_profile_group' and cannot be specified for other actions.
+    diff_suppress_func: 'SecurityProfileGroupPrefixSlashes'
   - name: 'tlsInspect'
     type: Boolean
     description: |

@@ -89,6 +89,10 @@ type CustomCode struct {
 	// in the Read function.
 	PreRead string `yaml:"pre_read"`
 
+	// This code is run after Read calls happen.  It's placed in the
+	// Read function and also after the nested_query read call.
+	PostRead string `yaml:"post_read"`
+
 	// This code is run before the Update call happens.  It's placed
 	// in the Update function, just after the encoder call, before
 	// the Update call.  Just like the encoder, it is only used if
@@ -133,4 +137,13 @@ type CustomCode struct {
 	// resource was successfully deleted. Use this if the API responds
 	// with a success HTTP code for deleted resources
 	TestCheckDestroy string `yaml:"test_check_destroy"`
+
+	ValidateRawResourceConfigFuncs string `yaml:"raw_resource_config_validation"`
+
+	// ====================
+	// TGC Encoders & Decoders
+	// ====================
+	TgcEncoder string `yaml:"tgc_encoder"`
+
+	TgcDecoder string `yaml:"tgc_decoder"`
 }

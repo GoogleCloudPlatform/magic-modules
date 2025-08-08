@@ -60,6 +60,9 @@ iam_policy:
 custom_code:
   decoder: 'templates/terraform/decoders/snapshot.go.tmpl'
   pre_create: 'templates/terraform/pre_create/compute_snapshot_precreate_url.go.tmpl'
+sweeper:
+  url_substitutions:
+    - zone: "us-central1-a"
 examples:
   - name: 'snapshot_basic'
     primary_resource_id: 'snapshot'
@@ -120,13 +123,20 @@ parameters:
         ignore_read: true
         sensitive: true
         custom_flatten: 'templates/terraform/custom_flatten/compute_snapshot_snapshot_encryption_raw_key.go.tmpl'
+      - name: 'rsaEncryptedKey'
+        type: String
+        description: |
+          Specifies an encryption key stored in Google Cloud KMS, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+        ignore_read: true
+        sensitive: true
       - name: 'sha256'
         type: String
         description: |
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
-        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+        # TODO Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeySelfLink'
         type: String
         description: |
@@ -153,6 +163,17 @@ parameters:
           RFC 4648 base64 to either encrypt or decrypt this resource.
         # The docs list this field but it is never returned.
         sensitive: true
+      - name: 'rsaEncryptedKey'
+        type: String
+        description: |
+          Specifies an encryption key stored in Google Cloud KMS, encoded in
+          RFC 4648 base64 to either encrypt or decrypt this resource.
+        sensitive: true
+      - name: 'kmsKeySelfLink'
+        type: String
+        description: |
+          The name of the encryption key that is stored in Google Cloud KMS.
+        api_name: kmsKeyName
       - name: 'kmsKeyServiceAccount'
         type: String
         description: |

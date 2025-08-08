@@ -60,15 +60,21 @@ aliases:
 1. Run acceptance tests for only modified resources. (Full test runs can take over 9 hours.) See [Go's documentation](https://pkg.go.dev/cmd/go#hdr-Testing_flags) for more information about `-run` and other flags.
 
     ```bash
+    make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$'
+    ```
+
+    To run all tests matching, e.g., `TestAccContainerNodePool*`, omit the trailing `$$`:
+
+    ```bash
     make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool'
     ```
 
-> **Note:** Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
+    > **Note:** Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
 
 1. Optional: Save verbose test output (including API requests and responses) to a file for analysis.
 
     ```bash
-    TF_LOG=DEBUG make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+    TF_LOG=DEBUG make testacc TEST=./google/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$' > output.log
     ```
 
 1. Optional: Debug tests with [Delve](https://github.com/go-delve/delve). See [`dlv test` documentation](https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_test.md) for information about available flags.
@@ -95,12 +101,19 @@ aliases:
     ```bash
     make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool'
     ```
-> **Note:** Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
+
+    To run all tests matching, e.g., `TestAccContainerNodePool*`, omit the trailing `$$`:
+
+    ```bash
+    make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool'
+    ```
+
+    > **Note:** Acceptance tests create actual infrastructure which can incur costs. Acceptance tests may not clean up after themselves if interrupted, so you may want to check for stray resources and / or billing charges.
 
 1. Optional: Save verbose test output to a file for analysis.
 
     ```bash
-    TF_LOG=DEBUG make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool_basic' > output.log
+    TF_LOG=DEBUG make testacc TEST=./google-beta/services/container TESTARGS='-run=TestAccContainerNodePool_basic$$' > output.log
     ```
 
 1. Optional: Debug tests with [Delve](https://github.com/go-delve/delve). See [`dlv test` documentation](https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_test.md) for information about available flags.
@@ -114,12 +127,63 @@ aliases:
 
 {{< /tabs >}}
 
-### Common errors
+## Troubleshooting acceptance tests {#troubleshooting}
 
-- `After applying this test step, the plan was not empty.`
-  - See [Fix diffs]({{< ref "/develop/diffs" >}}).
-- `Blocks of type "FIELD_NAME" are not expected here`
-  - The field does not exist; this is either because it has not been implemented or because the test is running for the `google` provider and the field is only implemented in the `google-beta` provider. See [Add resource tests]({{< ref "/test/test" >}}) for information on using version guards to exclude beta-only fields from GA tests, or [Promote from beta to GA]({{< ref "/develop/promote-to-ga" >}}) for information on how to promote fields that were accidentally made beta-only.
+### After applying this test step, the plan was not empty.
+
+This indicates that the returned values from the API (which will be displayed on the left) are different than what is in the configuration (displayed on the right). Fields which are listed as "known after apply" are not the cause of the diff and can be ignored in terms of resolving the issue.
+
+See [Fix diffs]({{< ref "/develop/diffs" >}}) for more information on potential causes and fixes.
+
+### Blocks of type "FIELD_NAME" are not expected here
+
+The field called `FIELD_NAME` does not exist; this is either because it has not been implemented or because the test is running for the `google` provider and the field is only implemented in the `google-beta` provider. See [Add resource tests]({{< ref "/test/test" >}}) for information on using version guards to exclude beta-only fields from GA tests, or [Promote from beta to GA]({{< ref "/develop/promote-to-ga" >}}) for information on how to promote fields that were accidentally made beta-only.
+
+### Provider produced inconsistent result after apply ... Root object was present, but now absent.
+
+This indicates that after an apply to create or update a resource, the resource was not present in Terraform state. This generally means one of a few things:
+
+- [API is eventually consistent or returns an Operation]({{< ref "/develop/diffs#eventually-consistent" >}})
+- The URL for reads was built incorrectly. The exact fix will depend on why this is happening. Run the test with the `TF_LOG=DEBUG` environment variable and check whether the read URL matches what you expect.
+- There is a call to unset the resource's id (`d.SetId("")`) somewhere it shouldn't be. The fix is to remove that extraneous call. This is rare.
+
+### Error: Inconsistent dependency lock file
+
+Tests require all of the providers they use (except the one actually being tested) to be explicitly stated. This error generally means one of a few things:
+
+- If the error mentions `provider registry.terraform.io/hashicorp/google`:
+  - Beta-only test: This indicates that one of the `google_*` resources in the test doesn't have `provider = google-beta` set
+    - ```hcl
+      resource "google_compute_instance" "beta-instance" {
+        provider = google-beta
+        # ...
+      }
+      ```
+  - GA+beta test: This indicates that the wrong setting is being used for `ProtoV5ProviderFactories` on a handwritten test case. Should be:
+    - ```go
+      acctest.VcrTest(t, resource.TestCase{
+		    // ...
+		    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+      ```
+- If the error mentions `provider registry.terraform.io/hashicorp/google-beta`:
+  - Beta-only test: This indicates that the wrong setting is being used for `ProtoV5ProviderFactories` on a handwritten test case. Should be:
+    - ```go
+      acctest.VcrTest(t, resource.TestCase{
+		    // ...
+		    ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+      ```
+  - GA+beta test: This indicates that one of the `google_*` resources in the test has `provider = google-beta` set. `provider = google-beta` can't be set unless the test is beta-only.
+- If the error mentions some other provider: The test relies on an external provider, such as `time`, and that is not explicitly declared
+  - For MMv1 example-based tests, use [`examples.external_providers`](https://googlecloudplatform.github.io/magic-modules/reference/resource/#examples).
+  - For Handwritten tests, use TestCase.ExternalProviders:
+    ```go
+    acctest.VcrTest(t, resource.TestCase{
+      ExternalProviders: map[string]resource.ExternalProvider{
+        "time": {},
+      },
+      // ...
+    }
+    ```
 
 ## Optional: Test with different `terraform` versions
 
@@ -290,6 +354,32 @@ Configure Terraform to use locally-built binaries for `google` and `google-beta`
     TF_LOG=DEBUG TF_LOG_PATH=output.log TF_CLI_CONFIG_FILE="$HOME/tf-dev-override.tfrc" terraform apply
     ```
 
+### Run Tests with VCR Locally
+
+VCR tests record HTTP request/response interactions in cassettes and replay them in future runs without calling the real API.
+
+Running tests in `REPLAYING` mode locally can sometimes be useful. In particular, it can allow you to test more quickly, cheaply, and without spinning up real infrastructure, once you've got an initial recording.
+
+It can also be helpful for debugging tests that seem to work locally, but fail in CI in replaying mode.
+   
+VCR is controlled via two variables:
+- `VCR_MODE`: `REPLAYING` or `RECORDING` mode 
+- `VCR_PATH`: Path where recorded cassettes are stored. 
+
+Ensure both variables are configured to properly trigger VCR tests locally.
+
+If you don't already have an existing cassette that's up to date, first do a run in `RECORDING` mode:
+   
+```bash
+VCR_PATH=$HOME/.vcr/ VCR_MODE=RECORDING  make testacc TEST=./google/services/alloydb TESTARGS='-run=TestAccContainerNodePool_basic$$'
+```
+
+Now run the same test again in `REPLAYING` mode:
+
+```bash
+VCR_PATH=$HOME/.vcr/ VCR_MODE=REPLAYING make testacc TEST=./google/services/alloydb TESTARGS='-run=TestAccContainerNodePool_basic$$'
+```
+
 ### Cleanup
 
 To stop using developer overrides, stop setting `TF_CLI_CONFIG_FILE` in the commands you are executing.
@@ -298,4 +388,4 @@ Terraform will resume its normal behaviour of pulling published provider version
 
 ## What's next?
 
-[Create a pull request]({{< ref "/contribute/create-pr" >}})
+[Create a pull request]({{< ref "/code-review/create-pr" >}})

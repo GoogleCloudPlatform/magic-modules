@@ -1,0 +1,146 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: SecurityGateway
+description: Deployment of Security Gateway.
+base_url: projects/{{project}}/locations/{{location}}/securityGateways
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/securityGateways/{{security_gateway_id}}
+create_url: projects/{{project}}/locations/{{location}}/securityGateways?securityGatewayId={{security_gateway_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/securityGateways/{{security_gateway_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/securityGateways/{{security_gateway_id}}
+iam_policy:
+  method_name_separator: ':'
+  iam_conditions_request_type: 'QUERY_PARAM_NESTED'
+  allowed_iam_role: 'roles/beyondcorp.securityGatewayUser'
+  parent_resource_attribute: 'security_gateway_id'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/securityGateways/{{security_gateway_id}}'
+    - '{{security_gateway_id}}'
+examples:
+  - name: beyondcorp_security_gateway_basic
+    primary_resource_id: example
+    primary_resource_name: 'fmt.Sprintf("default%s", context["random_suffix"])'
+    region_override: 'global'
+    vars:
+      security_gateway_name: default
+autogen_async: true
+async:
+  operation:
+    timeouts:
+      insert_minutes: 20
+      update_minutes: 20
+      delete_minutes: 20
+    base_url: '{{op_id}}'
+  actions:
+    - create
+    - delete
+    - update
+  type: OpAsync
+  result:
+    resource_inside_response: true
+  include_project: false
+autogen_status: U2VjdXJpdHlHYXRld2F5
+custom_code:
+  constants: 'templates/terraform/constants/beyondcorp_security_gateway.go.tmpl'
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122. Must be omitted or set to `global`.
+    deprecation_message: '`location` is deprecated and will be removed in a future major release.'
+    immutable: true
+    url_param_only: true
+    default_value: 'global'
+    validation:
+      regex: '^global$'
+    required: false
+  - name: securityGatewayId
+    type: String
+    description: |-
+      Optional. User-settable SecurityGateway resource ID.
+      * Must start with a letter.
+      * Must contain between 4-63 characters from `/a-z-/`.
+      * Must end with a number or letter.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: state
+    type: String
+    description: |-
+      Output only. The operational state of the SecurityGateway.
+      Possible values:
+      STATE_UNSPECIFIED
+      CREATING
+      UPDATING
+      DELETING
+      RUNNING
+      DOWN
+      ERROR
+    output: true
+  - name: updateTime
+    type: String
+    description: Output only. Timestamp when the resource was last modified.
+    output: true
+  - name: createTime
+    type: String
+    description: Output only. Timestamp when the resource was created.
+    output: true
+  - name: hubs
+    type: Map
+    description: |-
+      Optional. Map of Hubs that represents regional data path deployment with GCP region
+      as a key.
+    key_name: region
+    key_description: The region to deploy the hub in.
+    set_hash_func: 'beyondcorpSecurityGatewayHubsHash'
+    value_type:
+      name: Hub
+      type: NestedObject
+      properties:
+        - name: internetGateway
+          type: NestedObject
+          description: Internet Gateway configuration.
+          default_from_api: true
+          properties:
+            - name: assignedIps
+              type: Array
+              description: Output only. List of IP addresses assigned to the Cloud NAT.
+              output: true
+              item_type:
+                type: String
+  - name: displayName
+    type: String
+    description: |-
+      Optional. An arbitrary user-provided name for the SecurityGateway.
+      Cannot exceed 64 characters.
+  - name: externalIps
+    type: Array
+    description: |-
+      Output only. IP addresses that will be used for establishing
+      connection to the endpoints.
+    output: true
+    item_type:
+      type: String
+  - name: name
+    type: String
+    description: Identifier. Name of the resource.
+    output: true
+  - name: delegatingServiceAccount
+    type: String
+    description: |-
+      Service account used for operations that involve resources in consumer projects.
+    output: true

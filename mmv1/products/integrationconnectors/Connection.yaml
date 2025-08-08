@@ -137,7 +137,7 @@ properties:
   - name: 'description'
     type: String
     description: |
-      An arbitrary description for the Conection.
+      An arbitrary description for the Connection.
   - name: 'labels'
     type: KeyValueLabels
     description: |
@@ -236,6 +236,7 @@ properties:
           authType of the Connection
         required: true
         enum_values:
+          - 'AUTH_TYPE_UNSPECIFIED'
           - 'USER_PASSWORD'
           - 'OAUTH2_JWT_BEARER'
           - 'OAUTH2_CLIENT_CREDENTIALS'
@@ -305,12 +306,6 @@ properties:
         type: NestedObject
         description: |
           User password for Authentication.
-        exactly_one_of:
-          - 'auth_config.0.user_password'
-          - 'auth_config.0.oauth2_jwt_bearer'
-          - 'auth_config.0.oauth2_client_credentials'
-          - 'auth_config.0.ssh_public_key'
-          - 'auth_config.0.oauth2_auth_code_flow'
         properties:
           - name: 'username'
             type: String
@@ -332,12 +327,6 @@ properties:
         type: NestedObject
         description: |
           OAuth2 JWT Bearer for Authentication.
-        exactly_one_of:
-          - 'auth_config.0.user_password'
-          - 'auth_config.0.oauth2_jwt_bearer'
-          - 'auth_config.0.oauth2_client_credentials'
-          - 'auth_config.0.ssh_public_key'
-          - 'auth_config.0.oauth2_auth_code_flow'
         properties:
           - name: 'clientKey'
             type: NestedObject
@@ -373,12 +362,6 @@ properties:
         type: NestedObject
         description: |
           OAuth3 Client Credentials for Authentication.
-        exactly_one_of:
-          - 'auth_config.0.user_password'
-          - 'auth_config.0.oauth2_jwt_bearer'
-          - 'auth_config.0.oauth2_client_credentials'
-          - 'auth_config.0.ssh_public_key'
-          - 'auth_config.0.oauth2_auth_code_flow'
         properties:
           - name: 'clientId'
             type: String
@@ -400,12 +383,6 @@ properties:
         type: NestedObject
         description: |
           SSH Public Key for Authentication.
-        exactly_one_of:
-          - 'auth_config.0.user_password'
-          - 'auth_config.0.oauth2_jwt_bearer'
-          - 'auth_config.0.oauth2_client_credentials'
-          - 'auth_config.0.ssh_public_key'
-          - 'auth_config.0.oauth2_auth_code_flow'
         properties:
           - name: 'username'
             type: String
@@ -442,12 +419,6 @@ properties:
         type: NestedObject
         description: |
           Parameters to support Oauth 2.0 Auth Code Grant Authentication.
-        exactly_one_of:
-          - 'auth_config.0.user_password'
-          - 'auth_config.0.oauth2_jwt_bearer'
-          - 'auth_config.0.oauth2_client_credentials'
-          - 'auth_config.0.ssh_public_key'
-          - 'auth_config.0.oauth2_auth_code_flow'
         properties:
           - name: 'clientId'
             type: String
@@ -568,6 +539,16 @@ properties:
         description: |
           Enabled represents whether logging is enabled or not for a connection.
         required: true
+      - name: 'level'
+        type: Enum
+        description: |
+          Log configuration level.
+        default_from_api: true
+        enum_values:
+          - 'LOG_LEVEL_UNSPECIFIED'
+          - 'ERROR'
+          - 'INFO'
+          - 'DEBUG'
   - name: 'sslConfig'
     type: NestedObject
     description: |

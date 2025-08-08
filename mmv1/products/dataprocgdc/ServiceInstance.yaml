@@ -25,6 +25,11 @@ id_format: projects/{{project}}/locations/{{location}}/serviceInstances/{{servic
 import_format:
   - projects/{{project}}/locations/{{location}}/serviceInstances/{{service_instance_id}}
 autogen_async: true
+autogen_status: U2VydmljZUluc3RhbmNl
+exclude_sweeper: true
+sweeper:
+  url_substitutions:
+    - region: "us-west2"
 parameters:
   - name: location
     type: String
@@ -52,6 +57,7 @@ examples:
       project: "my-project"
     test_vars_overrides:
       'project': '"gdce-cluster-monitoring"'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/21173
 properties:
   - name: gdceCluster
     type: NestedObject

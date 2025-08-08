@@ -12,11 +12,11 @@
 # limitations under the License.
 
 name: 'BackupPlan'
-min_version: beta
 base_url: projects/{{project}}/locations/{{location}}/backupPlans
 create_url: projects/{{project}}/locations/{{location}}/backupPlans/?backup_plan_id={{backup_plan_id}}
 self_link: projects/{{project}}/locations/{{location}}/backupPlans/{{backup_plan_id}}
-immutable: true
+update_verb: 'PATCH'
+update_mask: true
 description: A backup plan defines when and how to back up a resource, including the backup's schedule, retention, and location.
 import_format:
   - 'projects/{{project}}/locations/{{location}}/backupPlans/{{backup_plan_id}}'
@@ -27,14 +27,29 @@ references:
 autogen_async: true
 timeouts:
   insert_minutes: 60
+  update_minutes: 60
   delete_minutes: 60
 examples:
   - name: 'backup_dr_backup_plan_simple'
-    min_version: 'beta'
     primary_resource_id: 'my-backup-plan-1'
     vars:
       backup_vault_id: 'backup-vault-simple-test'
       backup_plan_id: 'backup-plan-simple-test'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - name: 'backup_dr_backup_plan_for_disk_resource'
+    primary_resource_id: 'my-disk-backup-plan-1'
+    min_version: 'beta'
+    vars:
+      backup_vault_id: 'backup-vault-disk-test'
+      backup_plan_id: 'backup-plan-disk-test'
+    test_env_vars:
+      project: :PROJECT_NAME
+  - name: 'backup_dr_backup_plan_for_csql_resource'
+    primary_resource_id: 'my-csql-backup-plan-1'
+    vars:
+      backup_vault_id: 'backup-vault-csql-test'
+      backup_plan_id: 'backup-plan-csql-test'
     test_env_vars:
       project: :PROJECT_NAME
 parameters:
@@ -42,12 +57,14 @@ parameters:
     type: String
     required: true
     url_param_only: true
+    immutable: true
     description: |
       The location for the backup plan
   - name: 'backup_plan_id'
     type: String
     required: true
     url_param_only: true
+    immutable: true
     description: |-
       The ID of the backup plan
 properties:
@@ -67,16 +84,26 @@ properties:
     description: |
       Backup vault where the backups gets stored using this Backup plan.
     required: true
+    immutable: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - name: 'backupVaultServiceAccount'
     type: String
     description: |
       The Google Cloud Platform Service Account to be used by the BackupVault for taking backups.
     output: true
+  - name: 'supportedResourceTypes'
+    type: Array
+    description: |
+      The list of all resource types to which the `BackupPlan` can be applied.
+    min_version: beta
+    item_type:
+      type: String
+    output: true
   - name: 'resourceType'
     type: String
     description: |
-      The resource type to which the `BackupPlan` will be applied. Examples include, "compute.googleapis.com/Instance" and "storage.googleapis.com/Bucket".
+      The resource type to which the `BackupPlan` will be applied.
+      Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk", "sqladmin.googleapis.com/Instance" and "storage.googleapis.com/Bucket".
     required: true
   - name: 'createTime'
     type: String
@@ -140,6 +167,7 @@ properties:
                   - THURSDAY
                   - FRIDAY
                   - SATURDAY
+                  - SUNDAY
             - name: 'daysOfMonth'
               type: 'Array'
               description: 'Specifies days of months like 1, 5, or 14 on which jobs will run.'
@@ -215,3 +243,8 @@ properties:
                   description: |
                     The hour of the day (1-24) when the window ends, for example, if the value of end hour of the day is 10, that means the backup window end time is 10:00.
                     The end hour of the day should be greater than the start
+  - name: 'logRetentionDays'
+    type: Integer
+    immutable: true
+    description: |
+      This is only applicable for CloudSql resource. Days for which logs will be stored. This value should be greater than or equal to minimum enforced log retention duration of the backup vault.

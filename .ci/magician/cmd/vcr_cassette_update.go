@@ -15,7 +15,7 @@ import (
 	_ "embed"
 )
 
-var vcuEnvironmentVariables = [...]string{
+var vcuRequiredEnvironmentVariables = [...]string{
 	"GOCACHE",
 	"GOPATH",
 	"GOOGLE_BILLING_ACCOUNT",
@@ -36,6 +36,11 @@ var vcuEnvironmentVariables = [...]string{
 	"SA_KEY",
 	"USER",
 	"GITHUB_TOKEN_CLASSIC",
+}
+
+var vcuOptionalEnvironmentVariables = [...]string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
+	"GOOGLE_VMWAREENGINE_PROJECT",
 }
 
 var (
@@ -73,13 +78,21 @@ var vcrCassetteUpdateCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		env := make(map[string]string, len(vcuEnvironmentVariables))
-		for _, ev := range vcuEnvironmentVariables {
+		env := make(map[string]string)
+		for _, ev := range vcuRequiredEnvironmentVariables {
 			val, ok := os.LookupEnv(ev)
 			if !ok {
 				return fmt.Errorf("did not provide %s environment variable", ev)
 			}
 			env[ev] = val
+		}
+		for _, ev := range vcuOptionalEnvironmentVariables {
+			val, ok := os.LookupEnv(ev)
+			if ok {
+				env[ev] = val
+			} else {
+				fmt.Printf("🟡 Did not provide %s environment variable\n", ev)
+			}
 		}
 
 		buildID := args[0]

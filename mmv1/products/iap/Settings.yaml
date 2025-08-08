@@ -52,15 +52,15 @@ properties:
       The resource name of the IAP protected resource. Name can have below resources:
       * organizations/{organization_id}
       * folders/{folder_id}
-      * projects/{projects_id}
-      * projects/{projects_id}/iap_web
-      * projects/{projects_id}/iap_web/compute
-      * projects/{projects_id}/iap_web/compute-{region}
-      * projects/{projects_id}/iap_web/compute/service/{service_id}
-      * projects/{projects_id}/iap_web/compute-{region}/service/{service_id}
-      * projects/{projects_id}/iap_web/appengine-{app_id}
-      * projects/{projects_id}/iap_web/appengine-{app_id}/service/{service_id}
-      * projects/{projects_id}/iap_web/appengine-{app_id}/service/{service_id}/version/{version_id}
+      * projects/{project_id}
+      * projects/{project_id}/iap_web
+      * projects/{project_id}/iap_web/compute
+      * projects/{project_id}/iap_web/compute-{region}
+      * projects/{project_id}/iap_web/compute/services/{service_id}
+      * projects/{project_id}/iap_web/compute-{region}/services/{service_id}
+      * projects/{project_id}/iap_web/appengine-{app_id}
+      * projects/{project_id}/iap_web/appengine-{app_id}/services/{service_id}
+      * projects/{project_id}/iap_web/appengine-{app_id}/services/{service_id}/version/{version_id}
 
     required: true
     immutable: true
@@ -74,6 +74,7 @@ properties:
         type: NestedObject
         description: |
           GCIP claims and endpoint configurations for 3p identity providers.
+          * Enabling gcipSetting significantly changes the way IAP authenticates users. Identity Platform does not support IAM, so IAP will not enforce any IAM policies for requests to your application.
         properties:
           - name: 'tenantIds'
             type: Array
@@ -114,6 +115,7 @@ properties:
               (https://developers.google.com/identity/protocols/OpenIDConnect#hd-param)
               Note: IAP does not verify that the id token's hd claim matches this value
               since access behavior is managed by IAM policies.
+              * loginHint setting is not a replacement for access control. Always enforce an appropriate access policy if you want to restrict access to users outside your domain.
           - name: 'programmaticClients'
             type: Array
             description: |

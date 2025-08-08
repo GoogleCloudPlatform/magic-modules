@@ -37,6 +37,7 @@ update_verb: 'PATCH'
 update_mask: true
 import_format:
   - '{{name}}'
+mutex: 'accessPolicies/{{name}}'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -58,8 +59,6 @@ iam_policy:
   import_format:
     - 'accessPolicies/{{name}}'
     - '{{name}}'
-custom_code:
-  post_create: 'templates/terraform/post_create/accesspolicy.tmpl'
 # Skipping the sweeper due to the non-standard base_url
 exclude_sweeper: true
 examples:

@@ -28,6 +28,7 @@ timeouts:
   update_minutes: 30
   delete_minutes: 30
 autogen_async: true
+autogen_status: Q2x1c3Rlcg==
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -43,6 +44,11 @@ examples:
       cluster_id: 'my-cluster'
       key_name: 'example-key'
       keyring_name: 'example-keyring'
+  - name: 'managedkafka_cluster_mtls'
+    primary_resource_id: 'example'
+    vars:
+      cluster_id: 'my-cluster'
+      ca_pool_id: 'my-ca-pool'
   - name: 'managedkafka_cluster_cmek'
     primary_resource_id: 'example'
     min_version: 'beta'
@@ -84,7 +90,7 @@ properties:
             type: Array
             description: "Virtual Private Cloud (VPC) subnets where IP addresses for the Kafka
               cluster are allocated. To make the cluster available in a VPC, you must specify at least
-              one subnet per network. You must specify between 1 and 10 subnets.
+              one `network_configs` block. Max of 10 subnets per cluster.
               Additional subnets may be specified with additional `network_configs` blocks."
             required: true
             item_type:
@@ -94,9 +100,9 @@ properties:
                   type: String
                   description: "Name of the VPC subnet from which the cluster is accessible. Both broker and
                     bootstrap server IP addresses and DNS entries are automatically created
-                    in the subnet. The subnet must be located in the same region as the
-                    cluster. The project may differ. The name of the subnet must be
-                    in the format `projects/PROJECT_ID/regions/REGION/subnetworks/SUBNET`."
+                    in the subnet. There can only be one subnet per network, and the subnet
+                    must be located in the same region as the cluster. The project may differ.
+                    The name of the subnet must be in the format `projects/PROJECT_ID/regions/REGION/subnetworks/SUBNET`."
                   required: true
                   diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
       - name: 'kmsKey'
@@ -150,3 +156,34 @@ properties:
     type: String
     description: "The current state of the cluster. Possible values: `STATE_UNSPECIFIED`, `CREATING`, `ACTIVE`, `DELETING`."
     output: true
+  - name: 'tlsConfig'
+    type: NestedObject
+    default_from_api: true
+    description: "TLS configuration for the Kafka cluster. This is used to configure mTLS authentication. To clear our a TLS configuration that has been previously set, please explicitly add an empty `tls_config` block."
+    properties:
+      - name: 'trustConfig'
+        type: NestedObject
+        allow_empty_object: true
+        description: "The configuration of the broker truststore. If specified, clients can use mTLS for authentication."
+        properties:
+          - name: 'casConfigs'
+            type: Array
+            description: "Configuration for the Google Certificate Authority Service. To support mTLS, you must specify at least one `cas_configs` block. A maximum of 10 CA pools can be specified. Additional CA pools may be specified with additional `cas_configs` blocks."
+            item_type:
+              type: NestedObject
+              properties:
+                - name: 'caPool'
+                  type: String
+                  description: "The name of the CA pool to pull CA certificates from. The CA pool does not need
+                    to be in the same project or location as the Kafka cluster. Must be in the format `projects/PROJECT_ID/locations/LOCATION/caPools/CA_POOL_ID."
+                  required: true
+                  diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+      - name: 'sslPrincipalMappingRules'
+        type: String
+        description: "The rules for mapping mTLS certificate Distinguished Names (DNs) to
+          shortened principal names for Kafka ACLs. This field corresponds exactly
+          to the ssl.principal.mapping.rules broker config and matches the format
+          and syntax defined in the Apache Kafka documentation. Setting or
+          modifying this field will trigger a rolling restart of the Kafka
+          brokers to apply the change. An empty string means that the default
+          Kafka behavior is used. Example: `RULE:^CN=(.?),OU=ServiceUsers.$/$1@example.com/,DEFAULT`"

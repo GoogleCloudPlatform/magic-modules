@@ -22,29 +22,34 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_access_approval_project_service_account":   accessapproval.DataSourceAccessApprovalProjectServiceAccount(),
 	"google_access_context_manager_access_policy":   accesscontextmanager.DataSourceAccessContextManagerAccessPolicy(),
 	"google_active_folder":                             resourcemanager.DataSourceGoogleActiveFolder(),
+	"google_alloydb_cluster":                           alloydb.DataSourceAlloydbDatabaseCluster(),
 	"google_alloydb_locations":                         alloydb.DataSourceAlloydbLocations(),
 	"google_alloydb_supported_database_flags":          alloydb.DataSourceAlloydbSupportedDatabaseFlags(),
+	"google_alloydb_instance":                          alloydb.DataSourceAlloydbDatabaseInstance(),
 	"google_artifact_registry_docker_image":            artifactregistry.DataSourceArtifactRegistryDockerImage(),
-        "google_artifact_registry_locations":               artifactregistry.DataSourceGoogleArtifactRegistryLocations(),
+	"google_artifact_registry_docker_images":           artifactregistry.DataSourceArtifactRegistryDockerImages(),
+	"google_artifact_registry_locations":               artifactregistry.DataSourceGoogleArtifactRegistryLocations(),
 	"google_artifact_registry_repository":              artifactregistry.DataSourceArtifactRegistryRepository(),
+	"google_artifact_registry_version":                 artifactregistry.DataSourceArtifactRegistryVersion(),
 	"google_apphub_discovered_workload":		    apphub.DataSourceApphubDiscoveredWorkload(),
 	"google_app_engine_default_service_account":        appengine.DataSourceGoogleAppEngineDefaultServiceAccount(),
 	"google_apphub_application":						apphub.DataSourceGoogleApphubApplication(),
 	"google_apphub_discovered_service":		    apphub.DataSourceApphubDiscoveredService(),
-	{{- if ne $.TargetVersionName "ga" }}
 	"google_backup_dr_management_server":				backupdr.DataSourceGoogleCloudBackupDRService(),
-	"google_backup_dr_backup":							backupdr.DataSourceGoogleCloudBackupDRBackup(),
 	"google_backup_dr_backup_plan_association":			backupdr.DataSourceGoogleCloudBackupDRBackupPlanAssociation(),
 	"google_backup_dr_backup_plan":						backupdr.DataSourceGoogleCloudBackupDRBackupPlan(),
+	"google_backup_dr_backup":							backupdr.DataSourceGoogleCloudBackupDRBackup(),
 	"google_backup_dr_data_source":						backupdr.DataSourceGoogleCloudBackupDRDataSource(),
-	{{- end }}
 	"google_backup_dr_backup_vault":					backupdr.DataSourceGoogleCloudBackupDRBackupVault(),
 	"google_beyondcorp_app_connection":                 beyondcorp.DataSourceGoogleBeyondcorpAppConnection(),
 	"google_beyondcorp_app_connector":                  beyondcorp.DataSourceGoogleBeyondcorpAppConnector(),
 	"google_beyondcorp_app_gateway":                    beyondcorp.DataSourceGoogleBeyondcorpAppGateway(),
+	"google_beyondcorp_security_gateway":               beyondcorp.DataSourceGoogleBeyondcorpSecurityGateway(),
 	"google_billing_account":                           billing.DataSourceGoogleBillingAccount(),
+	"google_bigquery_table":          								  bigquery.DataSourceGoogleBigQueryTable(),
 	"google_bigquery_tables":          								  bigquery.DataSourceGoogleBigQueryTables(),
 	"google_bigquery_dataset":          								bigquery.DataSourceGoogleBigqueryDataset(),
+	"google_bigquery_datasets":          				bigquery.DataSourceGoogleBigqueryDatasets(),
 	"google_bigquery_default_service_account":          bigquery.DataSourceGoogleBigqueryDefaultServiceAccount(),
 	"google_certificate_manager_certificates":          certificatemanager.DataSourceGoogleCertificateManagerCertificates(),
 	"google_certificate_manager_certificate_map":       certificatemanager.DataSourceGoogleCertificateManagerCertificateMap(),
@@ -65,6 +70,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_cloud_run_service":                         cloudrun.DataSourceGoogleCloudRunService(),
 	"google_cloud_run_v2_job":                          cloudrunv2.DataSourceGoogleCloudRunV2Job(),
 	"google_cloud_run_v2_service":                      cloudrunv2.DataSourceGoogleCloudRunV2Service(),
+	"google_cloud_run_v2_worker_pool":					cloudrunv2.DataSourceGoogleCloudRunV2WorkerPool(),
 	"google_composer_environment":                      composer.DataSourceGoogleComposerEnvironment(),
 	"google_composer_user_workloads_config_map":        composer.DataSourceGoogleComposerUserWorkloadsConfigMap(),
 	"google_composer_user_workloads_secret":            composer.DataSourceGoogleComposerUserWorkloadsSecret(),
@@ -82,6 +88,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_ha_vpn_gateway":                    compute.DataSourceGoogleComputeHaVpnGateway(),
 	"google_compute_health_check":                      compute.DataSourceGoogleComputeHealthCheck(),
 	"google_compute_image":                             compute.DataSourceGoogleComputeImage(),
+	"google_compute_images":							compute.DataSourceGoogleComputeImages(),
 	"google_compute_instance":                          compute.DataSourceGoogleComputeInstance(),
 	"google_compute_instance_group":                    compute.DataSourceGoogleComputeInstanceGroup(),
 	"google_compute_instance_group_manager":            compute.DataSourceGoogleComputeInstanceGroupManager(),
@@ -92,6 +99,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_machine_types":                     compute.DataSourceGoogleComputeMachineTypes(),
 	"google_compute_network":                           compute.DataSourceGoogleComputeNetwork(),
 	"google_compute_networks":                          compute.DataSourceGoogleComputeNetworks(),
+    "google_compute_network_attachment":                compute.DataSourceGoogleComputeNetworkAttachment(),
 	"google_compute_network_endpoint_group":            compute.DataSourceGoogleComputeNetworkEndpointGroup(),
 	"google_compute_network_peering":                   compute.DataSourceComputeNetworkPeering(),
 	"google_compute_node_types":                        compute.DataSourceGoogleComputeNodeTypes(),
@@ -102,6 +110,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_region_instance_template":          compute.DataSourceGoogleComputeRegionInstanceTemplate(),
 	"google_compute_region_network_endpoint_group":     compute.DataSourceGoogleComputeRegionNetworkEndpointGroup(),
 	"google_compute_region_ssl_certificate":            compute.DataSourceGoogleRegionComputeSslCertificate(),
+	"google_compute_region_ssl_policy":                 compute.DataSourceGoogleRegionComputeSslPolicy(),
 	"google_compute_reservation":                       compute.DataSourceGoogleComputeReservation(),
 	"google_compute_resource_policy":                   compute.DataSourceGoogleComputeResourcePolicy(),
 	"google_compute_router":                            compute.DataSourceGoogleComputeRouter(),
@@ -111,6 +120,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_snapshot":                          compute.DataSourceGoogleComputeSnapshot(),
 	"google_compute_ssl_certificate":                   compute.DataSourceGoogleComputeSslCertificate(),
 	"google_compute_ssl_policy":                        compute.DataSourceGoogleComputeSslPolicy(),
+	"google_compute_storage_pool_types":                compute.DataSourceGoogleComputeStoragePoolTypes(),
 	"google_compute_subnetwork":                        compute.DataSourceGoogleComputeSubnetwork(),
 	"google_compute_subnetworks":                       compute.DataSourceGoogleComputeSubnetworks(),
 	"google_compute_vpn_gateway":                       compute.DataSourceGoogleComputeVpnGateway(),
@@ -123,21 +133,22 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_container_engine_versions":                 container.DataSourceGoogleContainerEngineVersions(),
 	"google_container_registry_image":                  containeranalysis.DataSourceGoogleContainerImage(),
 	"google_container_registry_repository":             containeranalysis.DataSourceGoogleContainerRepo(),
+	"google_dataplex_data_quality_rules":				dataplex.DataSourceDataplexDataQualityRules(),
 	"google_dataproc_metastore_service":                dataprocmetastore.DataSourceDataprocMetastoreService(),
 	"google_datastream_static_ips":                     datastream.DataSourceGoogleDatastreamStaticIps(),
 	"google_dns_keys":                                  dns.DataSourceDNSKeys(),
 	"google_dns_managed_zone":                          dns.DataSourceDnsManagedZone(),
 	"google_dns_managed_zones":                         dns.DataSourceDnsManagedZones(),
 	"google_dns_record_set":                            dns.DataSourceDnsRecordSet(),
+	"google_gke_hub_membership":                        gkehub.DataSourceGoogleGkeHubMembership(),
 	"google_gke_hub_membership_binding":                gkehub2.DataSourceGoogleGkeHubMembershipBinding(),
+	"google_gke_hub_feature":                           gkehub2.DataSourceGoogleGkeHubFeature(),
 	"google_filestore_instance":                        filestore.DataSourceGoogleFilestoreInstance(),
 	"google_iam_policy":                                resourcemanager.DataSourceGoogleIamPolicy(),
 	"google_iam_role":                                  resourcemanager.DataSourceGoogleIamRole(),
 	"google_iam_testable_permissions":                  resourcemanager.DataSourceGoogleIamTestablePermissions(),
-	{{- if ne $.TargetVersionName "ga" }}
 	"google_iam_workload_identity_pool":                iambeta.DataSourceIAMBetaWorkloadIdentityPool(),
 	"google_iam_workload_identity_pool_provider":       iambeta.DataSourceIAMBetaWorkloadIdentityPoolProvider(),
-	{{- end }}
 	"google_iap_client":                                iap.DataSourceGoogleIapClient(),
 	"google_kms_crypto_key":                            kms.DataSourceGoogleKmsCryptoKey(),
 	"google_kms_crypto_keys":                           kms.DataSourceGoogleKmsCryptoKeys(),
@@ -145,7 +156,10 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_kms_crypto_key_latest_version":             kms.DataSourceGoogleKmsLatestCryptoKeyVersion(),
 	"google_kms_crypto_key_versions":                    kms.DataSourceGoogleKmsCryptoKeyVersions(),
 	"google_kms_key_ring":                              kms.DataSourceGoogleKmsKeyRing(),
-	"google_kms_key_rings":                              kms.DataSourceGoogleKmsKeyRings(),
+	"google_kms_key_rings":                             kms.DataSourceGoogleKmsKeyRings(),
+	"google_kms_key_handle":                            kms.DataSourceGoogleKmsKeyHandle(),
+	"google_kms_autokey_config":                        kms.DataSourceGoogleKmsAutokeyConfig(),
+	"google_kms_key_handles":							kms.DataSourceGoogleKmsKeyHandles(),
 	"google_kms_secret":                                kms.DataSourceGoogleKmsSecret(),
 	"google_kms_secret_ciphertext":                     kms.DataSourceGoogleKmsSecretCiphertext(),
 	{{- if ne $.TargetVersionName "ga" }}
@@ -155,6 +169,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_firebase_hosting_channel":                  firebasehosting.DataSourceGoogleFirebaseHostingChannel(),
 	"google_firebase_web_app":                          firebase.DataSourceGoogleFirebaseWebApp(),
 	{{- end }}
+	"google_firestore_document":                        firestore.DataSourceGoogleFirestoreDocument(),
 	"google_folder":                                    resourcemanager.DataSourceGoogleFolder(),
 	"google_folders":                                   resourcemanager.DataSourceGoogleFolders(),
 	"google_folder_organization_policy":                resourcemanager.DataSourceGoogleFolderOrganizationPolicy(),
@@ -163,6 +178,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_logging_project_cmek_settings":             logging.DataSourceGoogleLoggingProjectCmekSettings(),
 	"google_logging_project_settings":                  logging.DataSourceGoogleLoggingProjectSettings(),
 	"google_logging_sink":                              logging.DataSourceGoogleLoggingSink(),
+	"google_lustre_instance":                           lustre.DataSourceLustreInstance(),
 	"google_monitoring_notification_channel":           monitoring.DataSourceMonitoringNotificationChannel(),
 	"google_monitoring_cluster_istio_service":          monitoring.DataSourceMonitoringServiceClusterIstio(),
 	"google_monitoring_istio_canonical_service":        monitoring.DataSourceMonitoringIstioCanonicalService(),
@@ -179,10 +195,24 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_oracle_database_cloud_vm_clusters":			oracledatabase.DataSourceOracleDatabaseCloudVmClusters(),
 	"google_oracle_database_cloud_vm_cluster":          oracledatabase.DataSourceOracleDatabaseCloudVmCluster(),
 	"google_organization":                              resourcemanager.DataSourceGoogleOrganization(),
+	"google_organizations":                             resourcemanager.DataSourceGoogleOrganizations(),
+	"google_organization_iam_custom_role":              resourcemanager.DataSourceGoogleOrganizationIamCustomRole(),
+	"google_organization_iam_custom_roles":             resourcemanager.DataSourceGoogleOrganizationIamCustomRoles(),
+	"google_parameter_manager_parameter":               parametermanager.DataSourceParameterManagerParameter(),
+	"google_parameter_manager_parameters":              parametermanager.DataSourceParameterManagerParameters(),
+	"google_parameter_manager_parameter_version":       parametermanager.DataSourceParameterManagerParameterVersion(),
+	"google_parameter_manager_parameter_version_render":parametermanager.DataSourceParameterManagerParameterVersionRender(),
+	"google_parameter_manager_regional_parameter":      parametermanagerregional.DataSourceParameterManagerRegionalRegionalParameter(),
+	"google_parameter_manager_regional_parameters":     parametermanagerregional.DataSourceParameterManagerRegionalRegionalParameters(),
+	"google_parameter_manager_regional_parameter_version": parametermanagerregional.DataSourceParameterManagerRegionalRegionalParameterVersion(),
+	"google_parameter_manager_regional_parameter_version_render":parametermanagerregional.DataSourceParameterManagerRegionalRegionalParameterVersionRender(),
 	"google_privateca_certificate_authority":           privateca.DataSourcePrivatecaCertificateAuthority(),
 	"google_privileged_access_manager_entitlement":     privilegedaccessmanager.DataSourceGooglePrivilegedAccessManagerEntitlement(),
 	"google_project":                                   resourcemanager.DataSourceGoogleProject(),
 	"google_projects":                                  resourcemanager.DataSourceGoogleProjects(),
+	"google_project_ancestry":                          resourcemanager.DataSourceGoogleProjectAncestry(),
+	"google_project_iam_custom_role":                   resourcemanager.DataSourceGoogleProjectIamCustomRole(),
+	"google_project_iam_custom_roles":                  resourcemanager.DataSourceGoogleProjectIamCustomRoles(),
 	"google_project_organization_policy":               resourcemanager.DataSourceGoogleProjectOrganizationPolicy(),
 	"google_project_service":                           resourcemanager.DataSourceGoogleProjectService(),
 	"google_pubsub_subscription":                       pubsub.DataSourceGooglePubsubSubscription(),
@@ -223,6 +253,10 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_storage_bucket_object":                     storage.DataSourceGoogleStorageBucketObject(),
 	"google_storage_bucket_objects":                    storage.DataSourceGoogleStorageBucketObjects(),
 	"google_storage_bucket_object_content":             storage.DataSourceGoogleStorageBucketObjectContent(),
+	"google_storage_control_folder_intelligence_config":  storagecontrol.DataSourceGoogleStorageControlFolderIntelligenceConfig(),
+  "google_storage_control_organization_intelligence_config": storagecontrol.DataSourceGoogleStorageControlOrganizationIntelligenceConfig(),
+	"google_storage_control_project_intelligence_config":  storagecontrol.DataSourceGoogleStorageControlProjectIntelligenceConfig(),
+	"google_storage_insights_dataset_config": storageinsights.DataSourceGoogleStorageInsightsDatasetConfig(),
 	"google_storage_object_signed_url":                 storage.DataSourceGoogleSignedUrl(),
 	"google_storage_project_service_account":           storage.DataSourceGoogleStorageProjectServiceAccount(),
 	"google_storage_transfer_project_service_account":  storagetransfer.DataSourceGoogleStorageTransferProjectServiceAccount(),
@@ -236,7 +270,10 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_tpu_v2_accelerator_types":                  tpuv2.DataSourceTpuV2AcceleratorTypes(),
 	{{- end }}
 	"google_vpc_access_connector":                      vpcaccess.DataSourceVPCAccessConnector(),
+	"google_memorystore_instance":						memorystore.DataSourceMemorystoreInstance(),
+	"google_memcache_instance":							memcache.DataSourceMemcacheInstance(),
 	"google_redis_instance":                            redis.DataSourceGoogleRedisInstance(),
+	"google_redis_cluster":                             redis.DataSourceRedisCluster(),
 	"google_vertex_ai_index":                           vertexai.DataSourceVertexAIIndex(),
 	"google_vmwareengine_cluster":                      vmwareengine.DataSourceVmwareengineCluster(),
 	"google_vmwareengine_external_access_rule":         vmwareengine.DataSourceVmwareengineExternalAccessRule(),
@@ -248,6 +285,8 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_vmwareengine_private_cloud":                vmwareengine.DataSourceVmwareenginePrivateCloud(),
 	"google_vmwareengine_subnet":                       vmwareengine.DataSourceVmwareengineSubnet(),
 	"google_vmwareengine_vcenter_credentials":          vmwareengine.DataSourceVmwareengineVcenterCredentials(),
+	"google_compute_region_backend_service":            compute.DataSourceGoogleComputeRegionBackendService(),
+	"google_network_management_connectivity_test_run":  networkmanagement.DataSourceGoogleNetworkManagementTestRun(),
 	// ####### END handwritten datasources ###########
 }
 
@@ -283,6 +322,7 @@ var handwrittenIAMDatasources = map[string]*schema.Resource{
 	"google_project_iam_policy":                    tpgiamresource.DataSourceIamPolicy(resourcemanager.IamProjectSchema, resourcemanager.NewProjectIamUpdater),
 	"google_pubsub_subscription_iam_policy":        tpgiamresource.DataSourceIamPolicy(pubsub.IamPubsubSubscriptionSchema, pubsub.NewPubsubSubscriptionIamUpdater),
 	"google_service_account_iam_policy":            tpgiamresource.DataSourceIamPolicy(resourcemanager.IamServiceAccountSchema, resourcemanager.NewServiceAccountIamUpdater),
+	"google_storage_bucket_iam_policy":                       tpgiamresource.DataSourceIamPolicy(storage.StorageBucketIamSchema, storage.StorageBucketIamUpdaterProducer),
 	// ####### END non-generated IAM datasources ###########
 }
 
@@ -356,6 +396,9 @@ var handwrittenResources = map[string]*schema.Resource{
 	"google_endpoints_service":                     servicemanagement.ResourceEndpointsService(),
 	"google_folder":                                resourcemanager.ResourceGoogleFolder(),
 	"google_folder_organization_policy":            resourcemanager.ResourceGoogleFolderOrganizationPolicy(),
+	{{- if ne $.TargetVersionName "ga" }}
+	"google_folder_service_identity":               resourcemanager.ResourceFolderServiceIdentity(),
+	{{- end }}
 	"google_logging_billing_account_sink":          logging.ResourceLoggingBillingAccountSink(),
 	"google_logging_billing_account_exclusion":     logging.ResourceLoggingExclusion(logging.BillingAccountLoggingExclusionSchema, logging.NewBillingAccountLoggingExclusionUpdater, logging.BillingAccountLoggingExclusionIdParseFunc),
 	"google_logging_billing_account_bucket_config": logging.ResourceLoggingBillingAccountBucketConfig(),
@@ -456,6 +499,9 @@ var handwrittenIAMResources = map[string]*schema.Resource{
 	"google_storage_managed_folder_iam_binding":    tpgiamresource.ResourceIamBinding(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer, storage.StorageManagedFolderIdParseFunc),
 	"google_storage_managed_folder_iam_member":     tpgiamresource.ResourceIamMember(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer, storage.StorageManagedFolderIdParseFunc),
 	"google_storage_managed_folder_iam_policy":     tpgiamresource.ResourceIamPolicy(storage.StorageManagedFolderIamSchema, storage.StorageManagedFolderIamUpdaterProducer, storage.StorageManagedFolderIdParseFunc),
+	"google_storage_bucket_iam_binding":            tpgiamresource.ResourceIamBinding(storage.StorageBucketIamSchema, storage.StorageBucketIamUpdaterProducer, storage.StorageBucketIdParseFunc),
+    "google_storage_bucket_iam_member":             tpgiamresource.ResourceIamMember(storage.StorageBucketIamSchema, storage.StorageBucketIamUpdaterProducer, storage.StorageBucketIdParseFunc),
+    "google_storage_bucket_iam_policy":             tpgiamresource.ResourceIamPolicy(storage.StorageBucketIamSchema, storage.StorageBucketIamUpdaterProducer, storage.StorageBucketIdParseFunc),
 	"google_organization_iam_binding":              tpgiamresource.ResourceIamBinding(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),
 	"google_organization_iam_member":               tpgiamresource.ResourceIamMember(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),
 	"google_organization_iam_policy":               tpgiamresource.ResourceIamPolicy(resourcemanager.IamOrganizationSchema, resourcemanager.NewOrganizationIamUpdater, resourcemanager.OrgIdParseFunc),
@@ -471,4 +517,15 @@ var handwrittenIAMResources = map[string]*schema.Resource{
 	"google_service_account_iam_member":            tpgiamresource.ResourceIamMember(resourcemanager.IamServiceAccountSchema, resourcemanager.NewServiceAccountIamUpdater, resourcemanager.ServiceAccountIdParseFunc),
 	"google_service_account_iam_policy":            tpgiamresource.ResourceIamPolicy(resourcemanager.IamServiceAccountSchema, resourcemanager.NewServiceAccountIamUpdater, resourcemanager.ServiceAccountIdParseFunc),
 	// ####### END non-generated IAM resources ###########
+}
+
+// UseGeneratedProducts uses every generated product to avoid "imported and not used" errors.
+// This allows developers to define a product without any resources, datasources, or other files.
+//
+// This avoids goimports which takes a very long time, or needing to know if there are any other
+// files in a given package when generating this file (which is done in parallel)
+func UseGeneratedProducts() {
+	{{- range $service := $.GetMmv1ServicesInVersion $.Products }}
+	  var _ = {{$service}}.ProductName
+	{{- end }}
 }

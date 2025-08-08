@@ -48,9 +48,12 @@ func TestAccPubsubTopic_cmek(t *testing.T) {
 	kms := acctest.BootstrapKMSKey(t)
 	topicName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-	if acctest.BootstrapPSARole(t, "service-", "gcp-sa-pubsub", "roles/cloudkms.cryptoKeyEncrypterDecrypter") {
-		t.Fatal("Stopping the test because a role was added to the policy.")
-	}
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+		},
+	})
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -230,6 +233,7 @@ resource "google_pubsub_topic" "foo" {
     allowed_persistence_regions = [
       "%s",
     ]
+    enforce_in_transit = false
   }
 }
 `, topic, key, value, region)
@@ -366,4 +370,264 @@ resource "google_pubsub_topic" "foo" {
   }
 }
 `, topic)
+}
+
+func TestAccPubsubTopic_azureEventHubsIngestionUpdate(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubTopic_updateWithAzureEventHubsIngestionSettings(topic),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubTopic_updateWithUpdatedAzureEventHubsIngestionSettings(topic),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccPubsubTopic_updateWithAzureEventHubsIngestionSettings(topic string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+
+  # Outside of automated terraform-provider-google CI tests, these values must be of actual Cloud Storage resources for the test to pass.
+  ingestion_data_source_settings {
+  	azure_event_hubs {
+		resource_group = "azure-ingestion-resource-group"
+		namespace = "azure-ingestion-namespace"
+		event_hub = "azure-ingestion-event-hub"
+		client_id = "aZZZZZZZ-YYYY-HHHH-GGGG-abcdef569123"
+		tenant_id = "0XXXXXXX-YYYY-HHHH-GGGG-123456789123"
+		subscription_id = "bXXXXXXX-YYYY-HHHH-GGGG-123456789123"
+		gcp_service_account = "fake-service-account@fake-gcp-project.iam.gserviceaccount.com"
+    }
+  }
+}
+`, topic)
+}
+
+func testAccPubsubTopic_updateWithUpdatedAzureEventHubsIngestionSettings(topic string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+
+  # Outside of automated terraform-provider-google CI tests, these values must be of actual Cloud Storage resources for the test to pass.
+  ingestion_data_source_settings {
+  	azure_event_hubs {
+		resource_group = "ingestion-resource-group"
+		namespace = "ingestion-namespace"
+		event_hub = "ingestion-event-hub"
+		client_id = "aZZZZZZZ-YYYY-HHHH-GGGG-abcdef123456"
+		tenant_id = "0XXXXXXX-YYYY-HHHH-GGGG-123456123456"
+		subscription_id = "bXXXXXXX-YYYY-HHHH-GGGG-123456123456"
+		gcp_service_account = "fake-account@new-gcp-project.iam.gserviceaccount.com"
+    }
+  }
+}
+`, topic)
+}
+
+func TestAccPubsubTopic_awsMskIngestionUpdate(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubTopic_updateWithAwsMskIngestionSettings(topic),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubTopic_updateWithUpdatedAwsMskIngestionSettings(topic),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccPubsubTopic_updateWithAwsMskIngestionSettings(topic string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+
+  # Outside of automated terraform-provider-google CI tests, these values must be of actual Cloud Storage resources for the test to pass.
+  ingestion_data_source_settings {
+  	aws_msk {
+		cluster_arn = "arn:aws:kinesis:us-west-2:111111111111:stream/fake-stream-name"
+		topic = "test-topic"
+		aws_role_arn = "arn:aws:iam::111111111111:role/fake-role-name"
+		gcp_service_account = "fake-service-account@fake-gcp-project.iam.gserviceaccount.com"
+    }
+  }
+}
+`, topic)
+}
+
+func testAccPubsubTopic_updateWithUpdatedAwsMskIngestionSettings(topic string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+
+  # Outside of automated terraform-provider-google CI tests, these values must be of actual Cloud Storage resources for the test to pass.
+  ingestion_data_source_settings {
+  	aws_msk {
+		cluster_arn = "arn:aws:kinesis:us-west-2:111111111111:stream/fake-stream-name"
+		topic = "test-topic"
+		aws_role_arn = "arn:aws:iam::111111111111:role/fake-role-name"
+		gcp_service_account = "updated-fake-service-account@fake-gcp-project.iam.gserviceaccount.com"
+    }
+  }
+}
+`, topic)
+}
+
+func TestAccPubsubTopic_confluentCloudIngestionUpdate(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPubsubTopic_updateWithConfluentCloudIngestionSettings(topic),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccPubsubTopic_updateWithUpdatedConfluentCloudIngestionSettings(topic),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccPubsubTopic_updateWithConfluentCloudIngestionSettings(topic string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+
+  # Outside of automated terraform-provider-google CI tests, these values must be of actual Cloud Storage resources for the test to pass.
+  ingestion_data_source_settings {
+	confluent_cloud {
+		bootstrap_server = "test.us-west2.gcp.confluent.cloud:1111"
+		cluster_id = "1234"
+		topic = "test-topic"
+		identity_pool_id = "test-identity-pool-id"
+		gcp_service_account = "fake-service-account@fake-gcp-project.iam.gserviceaccount.com"
+    }
+  }
+}
+`, topic)
+}
+
+func testAccPubsubTopic_updateWithUpdatedConfluentCloudIngestionSettings(topic string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+  name = "%s"
+
+  # Outside of automated terraform-provider-google CI tests, these values must be of actual Cloud Storage resources for the test to pass.
+  ingestion_data_source_settings {
+	confluent_cloud {
+		bootstrap_server = "test.us-west2.gcp.confluent.cloud:1111"
+		cluster_id = "1234"
+		topic = "test-topic"
+		identity_pool_id = "test-identity-pool-id"
+		gcp_service_account = "updated-fake-service-account@fake-gcp-project.iam.gserviceaccount.com"
+    }
+  }
+}
+`, topic)
+}
+func TestAccPubsubTopic_javascriptUdfUpdate(t *testing.T) {
+	t.Parallel()
+
+	topic := fmt.Sprintf("tf-test-topic-%s", acctest.RandString(t, 10))
+
+	functionName := "my_func"
+	code := "function my_func(message, metadata) {return null;}"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckPubsubTopicDestroyProducer(t),
+		Steps: []resource.TestStep{
+			// Initial transform
+			{
+				Config: testAccPubsubTopic_javascriptUdfSettings(topic, functionName, code),
+			},
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Destroy transform
+			{
+				ResourceName:      "google_pubsub_topic.foo",
+				ImportStateId:     topic,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccPubsubTopic_javascriptUdfSettings(topic, functionName, code string) string {
+	return fmt.Sprintf(`
+resource "google_pubsub_topic" "foo" {
+	name = "%s"
+
+	message_transforms {
+		javascript_udf {
+			function_name = "%s"
+			code = "%s"
+		}
+	}
+}
+	`, topic, functionName, code)
 }

@@ -49,6 +49,28 @@ examples:
       security_profile_name: 'sec-profile'
     test_env_vars:
       org_id: 'ORG_ID'
+  - name: 'network_security_security_profile_group_mirroring'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'network'
+      deployment_group_id: 'deployment-group'
+      endpoint_group_id: 'endpoint-group'
+      security_profile_name: 'sec-profile'
+      security_profile_group_name: 'sec-profile-group'
+    test_env_vars:
+      org_id: 'ORG_ID'
+  - name: 'network_security_security_profile_group_intercept'
+    min_version: 'beta'
+    primary_resource_id: 'default'
+    vars:
+      network_name: 'network'
+      deployment_group_id: 'deployment-group'
+      endpoint_group_id: 'endpoint-group'
+      security_profile_name: 'sec-profile'
+      security_profile_group_name: 'sec-profile-group'
+    test_env_vars:
+      org_id: 'ORG_ID'
 parameters:
   - name: 'name'
     type: String
@@ -100,3 +122,11 @@ properties:
     type: String
     description: |
       Reference to a SecurityProfile with the threat prevention configuration for the SecurityProfileGroup.
+  - name: 'customMirroringProfile'
+    type: String
+    description: |
+      Reference to a SecurityProfile with the custom mirroring configuration for the SecurityProfileGroup.
+  - name: 'customInterceptProfile'
+    type: String
+    description: |
+      Reference to a SecurityProfile with the CustomIntercept configuration.

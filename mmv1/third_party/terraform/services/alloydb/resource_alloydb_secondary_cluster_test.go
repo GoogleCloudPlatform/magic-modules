@@ -12,7 +12,7 @@ import (
 func TestAccAlloydbCluster_secondaryClusterMandatoryFields(t *testing.T) {
 	t.Parallel()
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -86,7 +86,7 @@ func TestAccAlloydbCluster_secondaryClusterMissingSecondaryConfig(t *testing.T) 
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -151,7 +151,7 @@ func TestAccAlloydbCluster_secondaryClusterDefinedSecondaryConfigButMissingClust
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -219,7 +219,7 @@ func TestAccAlloydbCluster_secondaryClusterDefinedSecondaryConfigButClusterTypeI
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -288,7 +288,7 @@ func TestAccAlloydbCluster_secondaryClusterUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -374,9 +374,9 @@ func TestAccAlloydbCluster_secondaryClusterUsingCMEK(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
-		"key_name":      "tf-test-key-" + acctest.RandString(t, 10),
+		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-east1", "tf-bootstrap-alloydb-secondary-key1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -434,7 +434,7 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   encryption_config {
-    kms_key_name = google_kms_crypto_key.key.id
+    kms_key_name = "%{kms_key_name}"
   }
 
   depends_on = [
@@ -449,18 +449,8 @@ data "google_compute_network" "default" {
   name = "%{network_name}"
 }
 
-resource "google_kms_key_ring" "keyring" {
-  name     = "%{key_name}"
-  location = "us-east1"
-}
-
-resource "google_kms_crypto_key" "key" {
-  name     = "%{key_name}"
-  key_ring = google_kms_key_ring.keyring.id
-}
-
 resource "google_kms_crypto_key_iam_member" "crypto_key" {
-  crypto_key_id = google_kms_crypto_key.key.id
+  crypto_key_id = "%{kms_key_name}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-alloydb.iam.gserviceaccount.com"
 }
@@ -472,7 +462,7 @@ func TestAccAlloydbCluster_secondaryClusterWithNetworkConfig(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -546,8 +536,8 @@ func TestAccAlloydbCluster_secondaryClusterWithNetworkConfigAndAllocatedIPRange(
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"address_name":  acctest.BootstrapSharedTestGlobalAddress(t, "alloydbinstance-network-config-1"),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"address_name":  acctest.BootstrapSharedTestGlobalAddress(t, "alloydb-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
@@ -629,7 +619,7 @@ func TestAccAlloydbCluster_secondaryClusterPromote(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
 		"secondary_cluster_location": "us-east1",
-		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -784,7 +774,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndSimultaneousUpdate(t *testi
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
 		"secondary_cluster_location": "us-east1",
-		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -880,7 +870,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndDeleteOriginalPrimary(t *te
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
 		"secondary_cluster_location": "us-east1",
-		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -963,7 +953,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndUpdate(t *testing.T) {
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
 		"secondary_cluster_location": "us-east1",
-		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1068,8 +1058,8 @@ func TestAccAlloydbCluster_secondaryClusterPromoteWithNetworkConfigAndAllocatedI
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
-		"address_name":  acctest.BootstrapSharedTestGlobalAddress(t, "alloydbinstance-network-config-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"address_name":  acctest.BootstrapSharedTestGlobalAddress(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1229,14 +1219,14 @@ data "google_compute_global_address" "private_ip_alloc" {
 `, context)
 }
 
-// This test passes if automated backup policy and inital user can be added and deleted from the promoted secondary cluster
+// This test passes if automated backup policy and initial user can be added and deleted from the promoted secondary cluster
 func TestAccAlloydbCluster_secondaryClusterPromoteAndAddAndDeleteAutomatedBackupPolicyAndInitialUser(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
 		"secondary_cluster_location": "us-south1",
-		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 		"hour":                       23,
 	}
 
@@ -1377,7 +1367,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndDeleteTimeBasedRetentionPol
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
 		"secondary_cluster_location": "us-south1",
-		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -1599,7 +1589,7 @@ func TestAccAlloydbCluster_secondaryClusterPromoteAndAddContinuousBackupConfig(t
 	context := map[string]interface{}{
 		"random_suffix":              acctest.RandString(t, 10),
 		"secondary_cluster_location": "us-south1",
-		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"network_name":               acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{

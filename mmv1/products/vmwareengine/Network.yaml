@@ -40,12 +40,20 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-# There is a handwritten sweeper that provides a list of locations to sweep
-exclude_sweeper: true
+collection_url_key: "vmwareEngineNetworks"
+sweeper:
+  dependencies:
+    - "google_vmwareengine_network_policy"
+  url_substitutions:
+    - region: 'global'
+    - region: 'southamerica-west1'
+    - region: 'me-west1'
 examples:
   - name: 'vmware_engine_network_standard'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20719
     primary_resource_id: 'vmw-engine-network'
   - name: 'vmware_engine_network_legacy'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20719
     primary_resource_id: 'vmw-engine-network'
     vars:
       proj_id: 'vmw-proj'

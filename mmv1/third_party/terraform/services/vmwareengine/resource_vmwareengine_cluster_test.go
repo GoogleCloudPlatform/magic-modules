@@ -2,6 +2,7 @@ package vmwareengine_test
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 
@@ -19,10 +20,11 @@ func TestAccVmwareengineCluster_vmwareEngineClusterUpdate(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"region":          "me-west1", // region with allocated quota
-		"random_suffix":   acctest.RandString(t, 10),
-		"org_id":          envvar.GetTestOrgFromEnv(t),
-		"billing_account": envvar.GetTestBillingAccountFromEnv(t),
+		"region":               "me-west1", // region with allocated quota
+		"random_suffix":        acctest.RandString(t, 10),
+		"org_id":               envvar.GetTestOrgFromEnv(t),
+		"billing_account":      envvar.GetTestBillingAccountFromEnv(t),
+		"vmwareengine_project": os.Getenv("GOOGLE_VMWAREENGINE_PROJECT"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -71,6 +73,7 @@ func testVmwareEngineClusterConfig(context map[string]interface{}, nodeCount int
 	context["node_count"] = nodeCount
 	return acctest.Nprintf(`
 resource "google_vmwareengine_network" "cluster-nw" {
+  project     = "%{vmwareengine_project}"
   name        = "tf-test-cluster-nw%{random_suffix}"
   location    = "global"
   type        = "STANDARD"
@@ -78,6 +81,7 @@ resource "google_vmwareengine_network" "cluster-nw" {
 }
 
 resource "google_vmwareengine_private_cloud" "cluster-pc" {
+  project     = "%{vmwareengine_project}"
   location    = "%{region}-b"
   name        = "tf-test-cluster-pc%{random_suffix}"
   description = "Sample test PC."
@@ -135,6 +139,7 @@ func testVmwareEngineClusterUpdateConfig(context map[string]interface{}, nodeCou
 	context["node_count"] = nodeCount
 	return acctest.Nprintf(`
 resource "google_vmwareengine_network" "cluster-nw" {
+  project     = "%{vmwareengine_project}"
   name        = "tf-test-cluster-nw%{random_suffix}"
   location    = "global"
   type        = "STANDARD"
@@ -142,6 +147,7 @@ resource "google_vmwareengine_network" "cluster-nw" {
 }
 
 resource "google_vmwareengine_private_cloud" "cluster-pc" {
+  project     = "%{vmwareengine_project}"
   location    = "%{region}-b"
   name        = "tf-test-cluster-pc%{random_suffix}"
   description = "Sample test PC."

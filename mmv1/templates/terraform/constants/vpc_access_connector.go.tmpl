@@ -1,0 +1,8 @@
+func isInstanceShrinkage(_ context.Context, old, new, _ interface{}) bool {
+    // max and min instances can only increase in-place,
+    // so we must create a new resource if it is decreased.
+    if old == nil || new == nil {
+        return false
+    }
+    return new.(int) < old.(int)
+}

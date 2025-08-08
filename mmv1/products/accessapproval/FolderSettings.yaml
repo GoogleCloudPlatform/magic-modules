@@ -14,6 +14,8 @@
 ---
 name: 'FolderSettings'
 api_resource_type_kind: AccessApprovalSettings
+api_variant_patterns:
+  - 'folders/{folder}/accessApprovalSettings'
 legacy_name: 'google_folder_access_approval_settings'
 description: |
   Access Approval enables you to require your explicit approval whenever Google support and engineering need to access your customer content.
@@ -36,6 +38,8 @@ custom_code:
   constants: 'templates/terraform/constants/access_approval.go.tmpl'
   pre_create: 'templates/terraform/update_mask.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/clear_folder_access_approval_settings.go.tmpl'
+  post_create: 'templates/terraform/post_create/sleep_5_min.go.tmpl'
+  post_update: 'templates/terraform/post_create/sleep_5_min.go.tmpl'
 examples:
   - name: 'folder_access_approval_full'
     primary_resource_id: 'folder_access_approval'

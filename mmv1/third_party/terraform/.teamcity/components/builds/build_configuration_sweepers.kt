@@ -10,6 +10,7 @@ package builds
 import ArtifactRules
 import DefaultBuildTimeoutDuration
 import DefaultParallelism
+import jetbrains.buildServer.configs.kotlin.buildFeatures.GolangFeature
 import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnText
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnText
@@ -60,6 +61,7 @@ class SweeperDetails(private val sweeperName: String, private val parentProjectN
         // These hardcoded values affect the sweeper CLI command's behaviour
         val testPrefix = "TestAcc"
         val testTimeout = "12"
+        val releaseDiffTest = "false"
 
         return BuildType {
 
@@ -81,7 +83,9 @@ class SweeperDetails(private val sweeperName: String, private val parentProjectN
             }
 
             features {
-                golang()
+                feature(GolangFeature {
+                    testFormat = "json"
+                })
                 if (sharedResources.isNotEmpty()) {
                     sharedResources {
                         // When the build runs, it locks the value(s) below
@@ -94,7 +98,7 @@ class SweeperDetails(private val sweeperName: String, private val parentProjectN
 
             params {
                 configureGoogleSpecificTestParameters(environmentVariables)
-                acceptanceTestBuildParams(parallelism, testPrefix, testTimeout)
+                acceptanceTestBuildParams(parallelism, testPrefix, testTimeout, releaseDiffTest)
                 sweeperParameters(sweeperRegions, sweeperRun)
                 terraformLoggingParameters(environmentVariables, providerName)
                 terraformCoreBinaryTesting()

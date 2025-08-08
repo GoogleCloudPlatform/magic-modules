@@ -38,6 +38,9 @@ async:
   result:
     resource_inside_response: false
 custom_code:
+sweeper:
+  url_substitutions:
+    - region: "us-west1"
 examples:
   - name: 'network_services_lb_traffic_extension_basic'
     primary_resource_id: 'default'
@@ -99,6 +102,7 @@ properties:
       Match conditions for each extension chain are evaluated in sequence for a given request.
       The first extension chain that has a condition that matches the request is executed.
       Any subsequent extension chains do not execute. Limited to 5 extension chains per resource.
+      Further information can be found at https://cloud.google.com/service-extensions/docs/reference/rest/v1/ExtensionChain
     required: true
     item_type:
       type: NestedObject
@@ -128,6 +132,7 @@ properties:
             A set of extensions to execute for the matching request.
             At least one extension is required. Up to 3 extensions can be defined for each extension chain for
             LbTrafficExtension resource. LbRouteExtension chains are limited to 1 extension per extension chain.
+            Further documentation to be found at https://cloud.google.com/service-extensions/docs/reference/rest/v1/ExtensionChain#Extension
           required: true
           item_type:
             type: NestedObject
@@ -182,6 +187,13 @@ properties:
                 item_type:
                   type: String
                 min_size: 1
+              - name: 'metadata'
+                type: KeyValuePairs
+                description: |
+                  Metadata associated with the extension. This field is used to pass metadata to the extension service.
+                  You can set up key value pairs for metadata as you like and need.
+                  f.e. {"key": "value", "key2": "value2"}.
+
   - name: 'loadBalancingScheme'
     type: Enum
     description: |
@@ -189,6 +201,7 @@ properties:
       For more information, refer to [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service) and
       [Supported application load balancers](https://cloud.google.com/service-extensions/docs/callouts-overview#supported-lbs).
     immutable: true
+    required: true
     enum_values:
       - 'INTERNAL_MANAGED'
       - 'EXTERNAL_MANAGED'

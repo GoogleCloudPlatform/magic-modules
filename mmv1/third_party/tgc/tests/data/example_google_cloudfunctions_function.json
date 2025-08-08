@@ -19,7 +19,7 @@
                 },
                 "location": "us-east1",
                 "name": "my-cf",
-                "runtime": "nodejs14",
+                "runtime": "nodejs20",
                 "timeout": 60,
                 "trigger_http": true,
                 "vpcConnector": "vpc-con-cf",

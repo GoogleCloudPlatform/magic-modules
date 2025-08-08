@@ -41,6 +41,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 iam_policy:
   parent_resource_attribute: 'name'
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
@@ -59,6 +60,7 @@ examples:
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
+    tgc_test_ignore_in_asset: ['RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec']
   - name: 'backend_bucket_full'
     primary_resource_id: 'image_backend_full'
     vars:
@@ -70,6 +72,7 @@ examples:
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
+    tgc_test_ignore_in_asset: ['RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec']
   - name: 'backend_bucket_query_string_whitelist'
     primary_resource_id: 'image_backend'
     vars:
@@ -102,6 +105,15 @@ examples:
     vars:
       backend_bucket_name: 'image-backend-bucket'
       bucket_name: 'image-store-bucket'
+    exclude_docs: true
+  - name: 'backend_bucket_global_ilb'
+    primary_resource_id: 'global-ilb-backend'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    vars:
+      backend_bucket_name: 'global-ilb-backend-bucket'
+      bucket_name: 'global-ilb-bucket'
     exclude_docs: true
 parameters:
 properties:
@@ -157,18 +169,21 @@ properties:
         type: Integer
         description: |
           Specifies the default TTL for cached content served by this origin for responses
-          that do not have an existing valid TTL (max-age or s-max-age).
+          that do not have an existing valid TTL (max-age or s-max-age). When the `cache_mode`
+          is set to "USE_ORIGIN_HEADERS", you must omit this field.
         default_from_api: true
         send_empty_value: true
       - name: 'maxTtl'
         type: Integer
         description: |
-          Specifies the maximum allowed TTL for cached content served by this origin.
+          Specifies the maximum allowed TTL for cached content served by this origin. When the
+          `cache_mode` is set to "USE_ORIGIN_HEADERS", you must omit this field.
         default_from_api: true
       - name: 'clientTtl'
         type: Integer
         description: |
-          Specifies the maximum allowed TTL for cached content served by this origin.
+          Specifies the maximum allowed TTL for cached content served by this origin. When the
+          `cache_mode` is set to "USE_ORIGIN_HEADERS", you must omit this field.
         default_from_api: true
         send_empty_value: true
       - name: 'negativeCaching'
@@ -259,6 +274,7 @@ properties:
   - name: 'enableCdn'
     type: Boolean
     description: 'If true, enable Cloud CDN for this BackendBucket.'
+    include_empty_value_in_cai: true
   - name: 'name'
     type: String
     description: |
@@ -273,3 +289,12 @@ properties:
     immutable: true
     validation:
       regex: '^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$'
+  - name: 'loadBalancingScheme'
+    is_missing_in_cai: true
+    type: Enum
+    description: |
+      The value can only be INTERNAL_MANAGED for cross-region internal layer 7 load balancer.
+      If loadBalancingScheme is not specified, the backend bucket can be used by classic global external load balancers, or global application external load balancers, or both.
+    enum_values:
+      - 'INTERNAL_MANAGED'
+    send_empty_value: true

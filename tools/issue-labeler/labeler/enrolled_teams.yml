@@ -9,7 +9,7 @@ service/accesscontextmanager:
   - google_access_context_manager_.*
 service/aiplatform-colab-enterprise:
   resources:
-  - google_vertex_ai_notebook_.*
+  - google_colab_.*
 service/aiplatform-dataset:
   resources:
   - google_vertex_ai_dataset
@@ -29,6 +29,10 @@ service/aiplatform-prediction:
   - google_vertex_ai_endpoint
   - google_vertex_ai_deployment_resource_pool
   - google_ml_engine_model
+  - google_vertex_ai_endpoint_with_model_garden_deployment
+service/aiplatform-rag-engine:
+  resources:
+  - google_vertex_ai_rag_engine_config
 service/aiplatform-tensorboard:
   resources:
   - google_vertex_ai_tensorboard
@@ -41,6 +45,9 @@ service/apigateway:
 service/apigee:
   resources:
   - google_apigee_.*
+service/apihub:
+  resources:
+  - google_apihub_.*
 service/apikeys:
   resources:
   - google_apikeys_key
@@ -138,6 +145,7 @@ service/cloudresourcemanager-crm:
   - google_organization_iam_member
   - google_organization_iam_policy
   - google_resource_manager_lien
+  - google_resource_manager_capability
 service/cloudresourcemanager-tags:
   resources:
   - google_tags_.*
@@ -180,6 +188,8 @@ service/compute-instances:
 service/compute-interconnect:
   resources:
   - google_compute_interconnect.*
+  - google_compute_wire_group
+  - google_compute_cross_site_network
 service/compute-ipam:
   resources:
   - google_compute_address
@@ -240,6 +250,7 @@ service/compute-pd:
   resources:
   - google_compute_attached_disk.*
   - google_compute_disk.*
+  - google_compute_storage_pool.*
   - google_compute_region_disk.*
   - google_compute_image.*
   - google_compute_snapshot.*
@@ -284,6 +295,9 @@ service/compute-vpn:
   - google_compute_ha_vpn_gateway
   - google_compute_external_vpn_gateway
   - google_compute_vpn_.*
+service/contactcenterinsights:
+  resources:
+  - google_contact_center_insights_.*
 service/container:
   resources:
   - google_container_cluster
@@ -318,6 +332,7 @@ service/dataproc:
   - google_dataproc_job.*
   - google_dataproc_workflow_template
   - google_dataproc_batch
+  - google_dataproc_session_template
 service/dataprocgdc:
   resources:
   - google_dataproc_gdc_.*
@@ -368,8 +383,22 @@ service/filestore:
 service/firebase:
   team: firebase-terraform
   resources:
-  - google_firebase_.*
+  - google_firebase_android.*
+  - google_firebase_apple.*
+  - google_firebase_app_check.*
+  - google_firebase_database.*
+  - google_firebase_extensions.*
+  - google_firebase_hosting.*
+  - google_firebase_project
+  - google_firebase_storage.*
+  - google_firebase_web.*
   - google_firebaserules_.*
+service/firebaseapphosting:
+  resources:
+  - google_firebase_app_hosting.*
+service/firebasedataconnect:
+  resources:
+  - google_firebase_data_connect_.*
 service/firestore-controlplane:
   resources:
   - google_firestore_backup_schedule
@@ -415,15 +444,16 @@ service/iam-serviceaccount:
   resources:
   - google_project_default_service_accounts
   - google_project_service_identity
+  - google_folder_service_identity
   - google_service_account.*
 service/iam-wlid:
   resources:
   - google_iam_access_boundary_policy
-  - google_iam_workload_identity_pool
-  - google_iam_workload_identity_pool_provider
+  - google_iam_workload_identity_pool.*
 service/iam-workforce:
   resources:
   - google_iam_workforce_pool.*
+  - google_iam_oauth_client.*
 service/iap:
   resources:
   - google_iap_.*
@@ -445,6 +475,9 @@ service/logging:
 service/looker-core:
   resources:
   - google_looker_instance
+service/lustre:
+  resources:
+  - google_lustre_.*
 service/managedidentities:
   resources:
   - google_active_directory_.*
@@ -454,12 +487,18 @@ service/managedkafka:
 service/memcache:
   resources:
   - google_memcache_instance
+service/memorystore:
+  resources:
+  - google_memorystore.*
 service/metastore:
   resources:
   - google_dataproc_metastore_.*
 service/migrationcenter:
   resources:
   - google_migration_center_.*
+service/modelarmor:
+  resources:
+  - google_model_armor_.*
 service/monitoring-alerting:
   resources:
   - google_monitoring_notification_channel
@@ -513,6 +552,9 @@ service/networkconnectivity-serviceautomation:
 service/networkmanagement-connectivity-test:
   resources:
   - google_network_management_connectivity_test
+service/networksecurity-mtls:
+  resources:
+  - google_network_security_backend_authentication_config
 service/networksecurity-swp:
   resources:
   - google_network_security_gateway_security_policy
@@ -562,6 +604,9 @@ service/oslogin:
 service/parallelstore:
   resources:
   - google_parallelstore_.*
+service/parametermanager:
+  resources:
+  - google_parameter_manager_.*
 service/policy-based-routing:
   resources:
   - google_network_connectivity_policy_based_route
@@ -593,11 +638,10 @@ service/recaptchaenterprise:
   - google_recaptcha_enterprise_key
 service/redis-cluster:
   resources:
-  - google_redis_cluster
+  - google_redis_cluster.*
 service/redis-instance:
   resources:
   - google_redis_instance
-  - google_memorystore_instance
 service/regional-endpoints:
   resources:
   - google_network_connectivity_regional_endpoint
@@ -605,6 +649,9 @@ service/run:
   team: cloud-run-control-plane
   resources:
   - google_cloud_run_.*
+service/saasservicemgmt:
+  resources:
+  - google_saas_runtime_.*
 service/secretmanager:
   resources:
   - google_secret_manager_.*

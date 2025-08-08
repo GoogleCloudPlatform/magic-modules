@@ -50,6 +50,7 @@ examples:
       project: "my-project"
     test_vars_overrides:
       'project': '"gdce-cluster-monitoring"'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20419
   - name: "dataprocgdc_applicationenvironment"
     primary_resource_id: "application-environment"
     vars:
@@ -57,9 +58,11 @@ examples:
       project: "my-project"
     test_vars_overrides:
       'project': '"gdce-cluster-monitoring"'
+    skip_test: https://github.com/hashicorp/terraform-provider-google/issues/20419
 update_verb: PATCH
 update_mask: true
 autogen_async: false
+autogen_status: QXBwbGljYXRpb25FbnZpcm9ubWVudA==
 properties:
   - name: name
     type: String

@@ -34,7 +34,7 @@ jobs:
   build-and-unit-test:
     permissions:
       statuses: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 30
     steps:
     - name: Get Job URL
@@ -81,7 +81,7 @@ jobs:
     - name: Run Unit Tests
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |
-        make testnolint TESTARGS="-p 4"
+        make testnolint
     - name: Lint Check
       if: ${{ !cancelled() && steps.pull_request.outputs.has_changes == 'true' }}
       run: |

@@ -133,6 +133,22 @@ examples:
       'deletion_protection': 'false'
     # Requires SQLServer Configuration
     exclude_test: true
+  - name: 'datastream_stream_mysql_gtid'
+    primary_resource_id: 'default'
+    vars:
+      database_name: 'db'
+      database_password: 'password'
+      database_user: 'user'
+      deletion_protection: 'true'
+      destination_connection_profile_id: 'destination-profile'
+      source_connection_profile_id: 'source-profile'
+      mysql_name: 'mysql'
+      mysql_root_password: 'root-password'
+      stream_id: 'stream'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    # Requires MySQL Configuration
+    exclude_test: true
   - name: 'datastream_stream_postgresql_bigquery_dataset_id'
     primary_resource_id: 'default'
     vars:
@@ -181,6 +197,29 @@ examples:
     external_providers: ["random", "time"]
       # Random provider
     skip_vcr: true
+  - name: 'datastream_stream_bigquery_blmt'
+    primary_resource_id: 'default'
+    vars:
+      stream_id: 'blmt-stream'
+      database_instance_name: 'blmt-instance'
+      deletion_protection: 'true'
+      source_connection_profile_id: 'blmt-source-profile'
+      destination_connection_profile_id: 'blmt-destination-profile'
+      blmt_bucket_name: 'blmt-bucket'
+      blmt_connection_id: 'blmt-connection'
+    test_vars_overrides:
+      'deletion_protection': 'false'
+    external_providers: ["random"]
+    skip_vcr: true
+    # Involves complex dependency creation, which makes it impractical in this context
+    exclude_test: true
+  - name: 'datastream_stream_salesforce'
+    primary_resource_id: 'default'
+    vars:
+      stream_id: 'sf-stream'
+      source_connection_profile_id: 'source-profile'
+      destination_connection_profile_id: 'destination-profile'
+    exclude_test: true
 virtual_fields:
   - name: 'desired_state'
     description: |
@@ -249,6 +288,7 @@ properties:
           - 'source_config.0.oracle_source_config'
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
+          - 'source_config.0.salesforce_source_config'
         properties:
           - name: 'includeObjects'
             type: NestedObject
@@ -420,6 +460,24 @@ properties:
             send_empty_value: true
             validation:
               function: 'validation.IntAtLeast(0)'
+          - name: 'binaryLogPosition'
+            type: NestedObject
+            allow_empty_object: true
+            send_empty_value: true
+            conflicts:
+              - source_config.0.mysql_source_config.gtid
+            description: |
+              CDC reader reads from binary logs replication cdc method.
+            properties: []
+          - name: 'gtid'
+            type: NestedObject
+            allow_empty_object: true
+            send_empty_value: true
+            conflicts:
+              - source_config.0.mysql_source_config.binaryLogPosition
+            description: |
+              CDC reader reads from gtid based replication.
+            properties: []
       - name: 'oracleSourceConfig'
         type: NestedObject
         description: |
@@ -431,6 +489,7 @@ properties:
           - 'source_config.0.oracle_source_config'
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
+          - 'source_config.0.salesforce_source_config'
         properties:
           - name: 'includeObjects'
             type: NestedObject
@@ -657,6 +716,7 @@ properties:
           - 'source_config.0.oracle_source_config'
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
+          - 'source_config.0.salesforce_source_config'
         properties:
           - name: 'includeObjects'
             type: NestedObject
@@ -854,6 +914,7 @@ properties:
           - 'source_config.0.oracle_source_config'
           - 'source_config.0.postgresql_source_config'
           - 'source_config.0.sql_server_source_config'
+          - 'source_config.0.salesforce_source_config'
         properties:
           - name: 'includeObjects'
             type: NestedObject
@@ -1057,6 +1118,92 @@ properties:
             allow_empty_object: true
             properties:
               []
+      - name: 'salesforceSourceConfig'
+        type: NestedObject
+        description: |
+          Salesforce data source configuration.
+        send_empty_value: true
+        allow_empty_object: true
+        exactly_one_of:
+          - 'source_config.0.mysql_source_config'
+          - 'source_config.0.oracle_source_config'
+          - 'source_config.0.postgresql_source_config'
+          - 'source_config.0.sql_server_source_config'
+          - 'source_config.0.salesforce_source_config'
+        properties:
+          - name: 'includeObjects'
+            type: NestedObject
+            description: |
+              Salesforce objects to retrieve from the source.
+            properties:
+              - name: 'objects'
+                type: Array
+                description: |
+                  Salesforce objects in Salesforce Org.
+                required: true
+                min_size: 1
+                item_type:
+                  description: |
+                    Salesforce objects.
+                  type: NestedObject
+                  properties:
+                    - name: 'objectName'
+                      type: String
+                      description: |
+                        Name of object in Salesforce Org.
+                    - name: 'fields'
+                      type: Array
+                      description: |
+                        Fields in the Salesforce object. When unspecified as part of include/exclude objects, includes/excludes everything/nothing.
+                      min_size: 1
+                      item_type:
+                        description: |
+                          Salesforce field.
+                        type: NestedObject
+                        properties:
+                          - name: 'name'
+                            type: String
+                            description: |
+                              Field name.
+          - name: 'excludeObjects'
+            type: NestedObject
+            description: |
+              Salesforce objects to exclude from the stream.
+            properties:
+              - name: 'objects'
+                type: Array
+                description: |
+                  Salesforce objects in data source.
+                required: true
+                min_size: 1
+                item_type:
+                  description: |
+                    Salesforce objects.
+                  type: NestedObject
+                  properties:
+                    - name: 'objectName'
+                      type: String
+                      description: |
+                        Name of object in Salesforce Org.
+                    - name: 'fields'
+                      type: Array
+                      description: |
+                        Fields in the Salesforce object. When unspecified as part of include/exclude objects, includes/excludes everything/nothing.
+                      min_size: 1
+                      item_type:
+                        description: |
+                          Salesforce field.
+                        type: NestedObject
+                        properties:
+                          - name: 'name'
+                            type: String
+                            description: |
+                              Field name.
+          - name: 'pollingInterval'
+            type: String
+            description: |
+              Salesforce objects polling interval. The interval at which new changes will be polled for each object. The duration must be between 5 minutes and 24 hours.
+            required: true
   - name: 'destinationConfig'
     type: NestedObject
     description: |
@@ -1190,6 +1337,40 @@ properties:
                       encryption key. i.e. projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{cryptoKey}.
                       See https://cloud.google.com/bigquery/docs/customer-managed-encryption for more information.
                     immutable: true
+          - name: 'blmtConfig'
+            type: NestedObject
+            description: 'BigLake Managed Tables configuration for BigQuery streams.'
+            properties:
+              - name: 'bucket'
+                type: String
+                description: |
+                      The Cloud Storage bucket name.
+                required: true
+              - name: 'connectionName'
+                type: String
+                description: |
+                      The bigquery connection. Format: `{project}.{location}.{name}`
+                required: true
+              - name: 'fileFormat'
+                type: String
+                description: |
+                      The file format.
+                required: true
+                enum_values:
+                  - FILE_FORMAT_UNSPECIFIED
+                  - PARQUET
+              - name: 'tableFormat'
+                type: String
+                description: |
+                      The table format.
+                required: true
+                enum_values:
+                  - TABLE_FORMAT_UNSPECIFIED
+                  - ICEBERG
+              - name: 'rootPath'
+                type: String
+                description: |
+                      The root path inside the Cloud Storage bucket.
           - name: 'merge'
             type: NestedObject
             description: |
@@ -1563,6 +1744,40 @@ properties:
                         min_size: 1
                   min_size: 1
             min_size: 1
+      - name: 'salesforceExcludedObjects'
+        type: NestedObject
+        description: |
+          Salesforce objects to avoid backfilling.
+        properties:
+          - name: 'objects'
+            type: Array
+            description: |
+              Salesforce objects in Salesforce Org.
+            required: true
+            min_size: 1
+            item_type:
+              description: |
+                Salesforce objects.
+              type: NestedObject
+              properties:
+                - name: 'objectName'
+                  type: String
+                  description: |
+                    Name of object in Salesforce Org.
+                - name: 'fields'
+                  type: Array
+                  description: |
+                    Fields in the Salesforce object. When unspecified as part of include/exclude objects, includes/excludes everything/nothing.
+                  min_size: 1
+                  item_type:
+                    description: |
+                      Salesforce field.
+                    type: NestedObject
+                    properties:
+                      - name: 'name'
+                        type: String
+                        description: |
+                          Field name.
   - name: 'backfillNone'
     type: NestedObject
     description: |

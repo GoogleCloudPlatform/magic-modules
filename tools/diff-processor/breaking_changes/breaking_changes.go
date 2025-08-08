@@ -14,7 +14,7 @@ type BreakingChange struct {
 	RuleName               string
 }
 
-const breakingChangesPath = "develop/breaking-changes/breaking-changes"
+const breakingChangesPath = "breaking-changes/breaking-changes"
 
 func NewBreakingChange(message, identifier string) BreakingChange {
 	return BreakingChange{
@@ -45,7 +45,8 @@ func ComputeBreakingChanges(schemaDiff diff.SchemaDiff) []BreakingChange {
 
 		for field, fieldDiff := range resourceDiff.Fields {
 			for _, rule := range FieldDiffRules {
-				for _, message := range rule.Messages(resource, field, fieldDiff) {
+				rd := schemaDiff[resource]
+				for _, message := range rule.Messages(resource, field, fieldDiff, rd) {
 					breakingChanges = append(breakingChanges, NewBreakingChange(message, rule.Identifier))
 				}
 			}

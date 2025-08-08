@@ -19,14 +19,14 @@ For more information about types of resources and the generation process overall
 1. Complete the steps in [Set up your development environment]({{< ref "/develop/set-up-dev-environment" >}}) to set up your environment and your Google Cloud project.
 1. [Ensure the resource to which you want to add the fields exists in the provider]({{< ref "/develop/add-resource" >}}).
 1. Ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
-   ```
-   cd ~/magic-modules
-   git checkout main && git clean -f . && git checkout -- . && git pull
-   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-   git checkout main && git clean -f . && git checkout -- . && git pull
-   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-   git checkout main && git clean -f . && git checkout -- . && git pull
-   ```
+  ```bash
+  cd ~/magic-modules
+  git checkout main && git clean -f . && git checkout -- . && git pull
+  cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+  git checkout main && git clean -f . && git checkout -- . && git pull
+  cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+  git checkout main && git clean -f . && git checkout -- . && git pull
+  ```
 
 ## Add fields
 
@@ -167,6 +167,12 @@ Replace `String` in the field type with one of the following options:
     key_name: 'KEY_NAME'
     key_description: |
       MULTILINE_KEY_FIELD_DESCRIPTION
+  # Map of primitive values
+    value_type:
+      name: mapIntegerName
+      type: Integer
+
+  # Map of complex values
     value_type:
       name: mapObjectName
       type: NestedObject
@@ -177,7 +183,7 @@ Replace `String` in the field type with one of the following options:
           MULTI_LINE_FIELD_DESCRIPTION
 ```
 
-This type is only used for string -> complex type mappings, use "KeyValuePairs" for simple mappings. Complex maps can't be represented natively in Terraform, and this type is transformed into an associative array (TypeSet) with the key merged into the object alongside other top-level fields.
+This type is used for general-case string -> non-string type mappings, use "KeyValuePairs" for string -> string mappings. Complex maps can't be represented natively in Terraform, and this type is transformed into an associative array (TypeSet) with the key merged into the object alongside other top-level fields.
 
 For `key_name` and `key_description`, provide a domain-appropriate name and description. For example, a map that references a specific type of resource would generally use the singular resource kind as the key name (such as "topic" for PubSub Topic) and a descriptor of the expected format depending on the context (such as resourceId vs full resource name).
 
@@ -186,7 +192,7 @@ For `key_name` and `key_description`, provide a domain-appropriate name and desc
 
 2. Modify the field configuration according to the API documentation and behavior.
 
-> **Note:** The templates in this section only include the most commonly-used fields. For a comprehensive reference, see [MMv1 field reference]({{<ref "/develop/field-reference" >}}). For information about modifying the values sent and received for a field, see [Modify the API request or response]({{<ref "/develop/custom-code#modify-the-api-request-or-response" >}}).
+> **Note:** The templates in this section only include the most commonly-used fields. For a comprehensive reference, see [MMv1 field reference]({{<ref "/reference/field" >}}). For information about modifying the values sent and received for a field, see [Modify the API request or response]({{<ref "/develop/custom-code#modify-the-api-request-or-response" >}}).
 {{< /tab >}}
 {{< tab "Handwritten" >}}
 1. Add the field to the handwritten resource's schema.
@@ -210,7 +216,7 @@ For `key_name` and `key_description`, provide a domain-appropriate name and desc
 ## What's next?
 
 + [Add IAM support]({{< ref "/develop/add-iam-support" >}})
-+ [Add documentation]({{< ref "/develop/add-documentation" >}})
++ [Add documentation]({{< ref "/document/add-documentation" >}})
 + [Add custom resource code]({{< ref "/develop/custom-code" >}})
 + [Add tests]({{< ref "/test/test" >}})
 + [Run tests]({{< ref "/test/run-tests" >}})

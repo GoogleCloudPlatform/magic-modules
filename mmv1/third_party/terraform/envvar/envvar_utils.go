@@ -86,6 +86,10 @@ var UniverseDomainEnvVars = []string{
 	"GOOGLE_UNIVERSE_DOMAIN",
 }
 
+var ProjectPrefixEnvVars = []string{
+	"GOOGLE_UNIVERSE_PROJECT_PREFIX",
+}
+
 // This is the billing account that will be charged for the infrastructure used during testing. For
 // that reason, it is also the billing account used for creating new projects.
 var BillingAccountEnvVars = []string{
@@ -104,8 +108,21 @@ var PapDescriptionEnvVars = []string{
 	"GOOGLE_PUBLIC_AVERTISED_PREFIX_DESCRIPTION",
 }
 
+// This value is the instance id of a pre-configured Chronicle instance, for the purpose of
+// integration tests. It is needed because the instance is 1-to-1 with a test project, and it
+// cannot be created within the test org.
+var ChronicleInstanceIdEnvVars = []string{
+	"GOOGLE_CHRONICLE_INSTANCE_ID",
+}
+
 var ImpersonateServiceAccountEnvVars = []string{
 	"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
+}
+
+// This value is the project used for vmwareengine tests. A separate project is needed
+// due to the limited quota allocated to each testing project
+var vmwareengineProjectEnvVars = []string{
+	"GOOGLE_VMWAREENGINE_PROJECT",
 }
 
 // AccTestPreCheck ensures at least one of the project env variables is set.
@@ -129,8 +146,12 @@ func GetTestCredsFromEnv() string {
 
 // Returns googleapis.com if there's no universe set.
 func GetTestUniverseDomainFromEnv(t *testing.T) string {
-	SkipIfEnvNotSet(t, IdentityUserEnvVars...)
 	return transport_tpg.MultiEnvSearch(UniverseDomainEnvVars)
+}
+
+// Project Prefix of different universes
+func GetUniverseProjectPrefixFromEnv() string {
+	return transport_tpg.MultiEnvSearch(ProjectPrefixEnvVars)
 }
 
 // AccTestPreCheck ensures at least one of the region env variables is set.
@@ -201,6 +222,16 @@ func GetTestServiceAccountFromEnv(t *testing.T) string {
 func GetTestPublicAdvertisedPrefixDescriptionFromEnv(t *testing.T) string {
 	SkipIfEnvNotSet(t, PapDescriptionEnvVars...)
 	return transport_tpg.MultiEnvSearch(PapDescriptionEnvVars)
+}
+
+func GetTestChronicleInstanceIdFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, ChronicleInstanceIdEnvVars...)
+	return transport_tpg.MultiEnvSearch(ChronicleInstanceIdEnvVars)
+}
+
+func GetTestVmwareengineProjectFromEnv(t *testing.T) string {
+	SkipIfEnvNotSet(t, vmwareengineProjectEnvVars...)
+	return transport_tpg.MultiEnvSearch(vmwareengineProjectEnvVars)
 }
 
 func SkipIfEnvNotSet(t *testing.T, envs ...string) {

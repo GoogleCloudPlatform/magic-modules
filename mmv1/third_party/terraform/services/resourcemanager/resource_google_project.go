@@ -216,9 +216,9 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	// Sleep for 10s, letting the billing account settle before other resources
+	// Sleep to let the billing account settle before other resources
 	// try to use this project.
-	time.Sleep(10 * time.Second)
+	time.Sleep(15 * time.Second)
 
 	err = resourceGoogleProjectRead(d, meta)
 	if err != nil {
@@ -245,7 +245,7 @@ func resourceGoogleProjectCreate(d *schema.ResourceData, meta interface{}) error
 		err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default")
 		// Retry if API is not yet enabled.
 		if err != nil && transport_tpg.IsGoogleApiErrorWithCode(err, 403) {
-			time.Sleep(10 * time.Second)
+			time.Sleep(15 * time.Second)
 			err = forceDeleteComputeNetwork(d, config, project.ProjectId, "default")
 		}
 		if err != nil {
@@ -774,7 +774,7 @@ func doEnableServicesRequest(services []string, project, billingProject, userAge
 // Handle errors that are retryable at call time for serviceusage
 // Specifically, errors in https://cloud.google.com/service-usage/docs/reference/rest/v1/services/batchEnable#response-body
 // Errors in operations are handled separately.
-// NOTE(rileykarson): This should probably be turned into a retry predicate
+// TODO: This should probably be turned into a retry predicate
 func handleServiceUsageRetryablePreconditionError(err error) error {
 	if err == nil {
 		return nil
@@ -800,7 +800,7 @@ func ListCurrentlyEnabledServices(project, billingProject, userAgent string, con
 	err := transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() error {
 			ctx := context.Background()
-			call := config.NewServiceUsageClient(userAgent).Services.List(fmt.Sprintf("projects/%s", project))
+			call := config.NewServiceUsageClient(userAgent).Services.List(fmt.Sprintf("projects/%s", project)).PageSize(200)
 			if config.UserProjectOverride && billingProject != "" {
 				call.Header().Add("X-Goog-User-Project", billingProject)
 			}
@@ -810,16 +810,13 @@ func ListCurrentlyEnabledServices(project, billingProject, userAgent string, con
 						// services are returned as "projects/{{project}}/services/{{name}}"
 						name := tpgresource.GetResourceNameFromSelfLink(v.Name)
 
-						// if name not in ignoredProjectServicesSet
-						if _, ok := ignoredProjectServicesSet[name]; !ok {
-							apiServices[name] = struct{}{}
+						apiServices[name] = struct{}{}
 
-							// if a service has been renamed, set both. We'll deal
-							// with setting the right values later.
-							if v, ok := renamedServicesByOldAndNewServiceNames[name]; ok {
-								log.Printf("[DEBUG] Adding service alias for %s to enabled services: %s", name, v)
-								apiServices[v] = struct{}{}
-							}
+						// if a service has been renamed, set both. We'll deal
+						// with setting the right values later.
+						if v, ok := renamedServicesByOldAndNewServiceNames[name]; ok {
+							log.Printf("[DEBUG] Adding service alias for %s to enabled services: %s", name, v)
+							apiServices[v] = struct{}{}
 						}
 					}
 					return nil

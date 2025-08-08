@@ -15,6 +15,7 @@ import org.junit.Assert.fail
 const val gaProjectName = "Google"
 const val betaProjectName = "Google Beta"
 const val nightlyTestsProjectName = "Nightly Tests"
+const val weeklyDiffTestsProjectName = "Weekly Diff Tests"
 const val mmUpstreamProjectName = "Upstream MM Testing"
 const val projectSweeperProjectName = "Project Sweeper"
 
@@ -41,6 +42,12 @@ fun testContextParameters(): AllContextParameters {
         "org2Ga",
         "org2Beta",
         "org2Vcr",
+        "chronicleInstanceIdGa",
+        "chronicleInstanceIdBeta",
+        "chronicleInstanceIdVcr",
+        "vmwareengineProjectGa",
+        "vmwareengineProjectBeta",
+        "vmwareengineProjectVcr",
         "billingAccount",
         "billingAccount2",
         "custId",

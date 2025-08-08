@@ -14,6 +14,10 @@
 ---
 name: 'Instance'
 description: A Workbench instance.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/vertex-ai/docs/workbench/instances/introduction'
+  api: 'https://cloud.google.com/vertex-ai/docs/workbench/reference/rest/v2/projects.locations.instances'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
 base_url: 'projects/{{project}}/locations/{{location}}/instances'
@@ -24,7 +28,7 @@ update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/instances/{{name}}'
 timeouts:
-  insert_minutes: 20
+  insert_minutes: 40
   update_minutes: 20
   delete_minutes: 20
 autogen_async: true
@@ -48,6 +52,12 @@ custom_code:
   post_create: 'templates/terraform/post_create/workbench_instance.go.tmpl'
   pre_update: 'templates/terraform/pre_update/workbench_instance.go.tmpl'
   post_update: 'templates/terraform/post_update/workbench_instance.go.tmpl'
+sweeper:
+  url_substitutions:
+    - region: "us-central1-a"
+    - region: "us-west1-a"
+custom_diff:
+  - 'workbenchMetadataCustomizeDiff'
 examples:
   - name: 'workbench_instance_basic'
     primary_resource_id: 'instance'
@@ -67,6 +77,7 @@ examples:
     region_override: 'us-west1-a'
     vars:
       instance_name: 'workbench-instance'
+      reservation_name: 'wbi-reservation'
     ignore_read_extra:
       - 'gce_setup.0.vm_image'
   - name: 'workbench_instance_labels_stopped'
@@ -87,6 +98,7 @@ examples:
     vars:
       instance_name: 'workbench-instance'
       network_name: 'wbi-test-default'
+      reservation_name: 'wbi-reservation'
       key_name: 'my-crypto-key'
     test_env_vars:
       project_id: 'PROJECT_NAME'
@@ -97,6 +109,21 @@ examples:
       - 'gce_setup.0.vm_image'
       - 'gce_setup.0.boot_disk.0.disk_type'
       - 'gce_setup.0.data_disks.0.disk_type'
+  - name: 'workbench_instance_confidential_compute'
+    primary_resource_id: 'instance'
+    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
+    region_override: 'us-west1-a'
+    vars:
+      instance_name: 'workbench-instance'
+  - name: 'workbench_instance_euc'
+    primary_resource_id: 'instance'
+    primary_resource_name: 'fmt.Sprintf("tf-test-workbench-instance%s", context["random_suffix"])'
+    region_override: 'us-west1-a'
+    vars:
+      instance_name: 'workbench-instance'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+      project_number: 'PROJECT_NUMBER'
 virtual_fields:
   - name: 'desired_state'
     description: |
@@ -433,6 +460,52 @@ properties:
           Optional. Flag to enable ip forwarding or not, default false/off.
           https://cloud.google.com/vpc/docs/using-routes#canipforward
         immutable: true
+      - name: 'confidentialInstanceConfig'
+        type: NestedObject
+        immutable: true
+        description: |
+          Confidential instance configuration.
+        properties:
+          - name: 'confidentialInstanceType'
+            type: Enum
+            description: |
+              Defines the type of technology used by the confidential instance.
+            enum_values:
+              - 'SEV'
+      - name: 'reservationAffinity'
+        type: NestedObject
+        immutable: true
+        default_from_api: true
+        description: |
+          Reservations that this instance can consume from.
+        properties:
+          - name: 'consumeReservationType'
+            type: Enum
+            immutable: true
+            default_from_api: true
+            description: |
+              Specifies the type of reservation from which this instance can consume resources:
+              RESERVATION_ANY (default), RESERVATION_SPECIFIC, or RESERVATION_NONE.
+            enum_values:
+              - 'RESERVATION_NONE'
+              - 'RESERVATION_ANY'
+              - 'RESERVATION_SPECIFIC'
+          - name: 'key'
+            immutable: true
+            description: |
+              Corresponds to the label key of a reservation resource. To target a
+              RESERVATION_SPECIFIC by name, use compute.googleapis.com/reservation-name
+              as the key and specify the name of your reservation as its value.
+          - name: 'values'
+            type: Array
+            immutable: true
+            item_type:
+              type: String
+            description: |
+              Corresponds to the label values of a reservation resource. This can be
+              either a name to a reservation in the same project or
+              "projects/different-project/reservations/some-reservation-name"
+              to target a shared reservation in the same zone but in a different project.
   - name: 'proxyUri'
     type: String
     description: |
@@ -543,3 +616,12 @@ properties:
       Optional. Labels to apply to this instance. These can be later modified
       by the UpdateInstance method.
     diff_suppress_func: 'WorkbenchInstanceLabelsDiffSuppress'
+  - name: 'enableThirdPartyIdentity'
+    type: Boolean
+    description: |
+      Flag that specifies that a notebook can be accessed with third party
+      identity provider.
+  - name: 'enableManagedEuc'
+    type: Boolean
+    description: |
+      Flag to enable managed end user credentials for the instance.

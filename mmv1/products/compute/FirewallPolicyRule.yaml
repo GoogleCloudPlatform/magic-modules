@@ -29,6 +29,7 @@ update_url: 'locations/global/firewallPolicies/{{firewall_policy}}/patchRule?pri
 update_verb: 'POST'
 delete_url: 'locations/global/firewallPolicies/{{firewall_policy}}/removeRule?priority={{priority}}'
 delete_verb: 'POST'
+legacy_long_form_project: true
 import_format:
   - 'locations/global/firewallPolicies/{{firewall_policy}}/rules/{{priority}}'
   - '{{firewall_policy}}/{{priority}}'
@@ -44,14 +45,36 @@ custom_code:
   post_update: 'templates/terraform/post_update/compute_firewall_policy_rule.go.tmpl'
 examples:
   - name: 'firewall_policy_rule'
-    primary_resource_id: 'policy_rule'
+    primary_resource_id: 'primary'
     vars:
-      fw_policy: 'policy'
-      address: 'address'
+      address_group: 'address-group'
       folder: 'folder'
+      fw_policy: 'fw-policy'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
     test_env_vars:
       org_id: 'ORG_ID'
-      service_account: 'SERVICE_ACCT'
+      service_acct: 'SERVICE_ACCT'
+  - name: 'firewall_policy_rule_network_scope'
+    primary_resource_id: 'primary'
+    vars:
+      folder: 'folder'
+      fw_policy: 'fw-policy'
+      network: 'network'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    min_version: beta
+  - name: 'firewall_policy_rule_secure_tags'
+    primary_resource_id: 'primary'
+    vars:
+      folder: 'folder'
+      fw_policy: 'fw-policy'
+      tag_key: 'tag-key'
+      tag_value: 'tag-value'
+    test_env_vars:
+      org_id: 'ORG_ID'
 parameters:
   - name: 'firewallPolicy'
     type: ResourceRef
@@ -106,6 +129,33 @@ properties:
           CIDR IP address range. Maximum number of destination CIDR IP ranges allowed is 5000.
         item_type:
           type: String
+      - name: 'srcNetworkScope'
+        type: Enum
+        description: |
+          Network scope of the traffic source.
+        min_version: beta
+        enum_values:
+          - 'INTERNET'
+          - 'INTRA_VPC'
+          - 'NON_INTERNET'
+          - 'VPC_NETWORKS'
+      - name: 'srcNetworks'
+        type: Array
+        description: |
+          Networks of the traffic source. It can be either a full or partial url.
+        min_version: beta
+        item_type:
+          type: String
+      - name: 'destNetworkScope'
+        type: Enum
+        description: |
+          Network scope of the traffic destination.
+        min_version: beta
+        enum_values:
+          - 'INTERNET'
+          - 'INTRA_VPC'
+          - 'NON_INTERNET'
+          - 'VPC_NETWORKS'
       - name: 'layer4Configs'
         type: Array
         send_empty_value: true
@@ -184,6 +234,27 @@ properties:
           Names of Network Threat Intelligence lists. The IPs in these lists will be matched against traffic source.
         item_type:
           type: String
+      - name: 'srcSecureTags'
+        type: Array
+        send_empty_value: true
+        description: |
+          List of secure tag values, which should be matched at the source of the traffic. For INGRESS rule, if all the srcSecureTag are INEFFECTIVE, and there is no srcIpRange, this rule will be ignored. Maximum number of source tag values allowed is 256.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'name'
+              type: String
+              description: |
+                Name of the secure tag, created with TagManager's TagValue API.
+              diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+            - name: 'state'
+              type: Enum
+              description: |
+                State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
+              output: true
+              enum_values:
+                - 'EFFECTIVE'
+                - 'INEFFECTIVE'
   - name: 'action'
     type: String
     description: 'The Action to perform when the client connection triggers the rule. Valid actions are "allow", "deny", "goto_next" and "apply_security_profile_group".'
@@ -237,8 +308,32 @@ properties:
       A list of service accounts indicating the sets of instances that are applied with this rule.
     item_type:
       type: String
+  - name: 'targetSecureTags'
+    type: Array
+    send_empty_value: true
+    description: |
+      A list of secure tags that controls which instances the firewall rule applies to.
+      If targetSecureTag are specified, then the firewall rule applies only to instances in the VPC network that have one of those EFFECTIVE secure tags, if all the targetSecureTag are in INEFFECTIVE state, then this rule will be ignored.
+      targetSecureTag may not be set at the same time as targetServiceAccounts. If neither targetServiceAccounts nor targetSecureTag are specified, the firewall rule applies to all instances on the specified network. Maximum number of target secure tags allowed is 256.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'name'
+          type: String
+          description: |
+            Name of the secure tag, created with TagManager's TagValue API.
+          diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
+        - name: 'state'
+          type: Enum
+          description: |
+            State of the secure tag, either EFFECTIVE or INEFFECTIVE. A secure tag is INEFFECTIVE when it is deleted or its network is deleted.
+          output: true
+          enum_values:
+            - 'EFFECTIVE'
+            - 'INEFFECTIVE'
   - name: 'disabled'
     type: Boolean
+    send_empty_value: true
     description: |
       Denotes whether the firewall policy rule is disabled.
       When set to true, the firewall policy rule is not enforced and traffic behaves as if it did not exist.

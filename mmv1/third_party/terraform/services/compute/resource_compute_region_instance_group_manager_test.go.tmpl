@@ -90,6 +90,9 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 				Config: testAccRegionInstanceGroupManager_update(template1, target1, igm),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "DO_NOTHING"),
+{{- if ne $.TargetVersionName "ga" }}
+          resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "DO_NOTHING"),
+{{- end }}
 				),
 			},
 			{
@@ -102,6 +105,9 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 				Config: testAccRegionInstanceGroupManager_update2(template1, target1, target2, template2, igm),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "REPAIR"),
+{{- if ne $.TargetVersionName "ga" }}
+          resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "REPAIR"),
+{{- end }}
 				),
 			},
 			{
@@ -114,6 +120,9 @@ func TestAccRegionInstanceGroupManager_update(t *testing.T) {
 				Config: testAccRegionInstanceGroupManager_update3(template1, target1, target2, template2, igm),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "REPAIR"),
+{{- if ne $.TargetVersionName "ga" }}
+          resource.TestCheckResourceAttr("google_compute_region_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "REPAIR"),
+{{- end }}
 				),
 			},
 			{
@@ -398,7 +407,6 @@ func TestAccRegionInstanceGroupManager_stateful(t *testing.T) {
 }
 
 
-{{- if ne $.TargetVersionName "ga" }}
 func TestAccRegionInstanceGroupManager_stoppedSuspendedTargetSize(t *testing.T) {
   t.Parallel()
 
@@ -432,7 +440,6 @@ func TestAccRegionInstanceGroupManager_stoppedSuspendedTargetSize(t *testing.T) 
     },
   })
 }
-{{- end }}
 
 func TestAccRegionInstanceGroupManager_instanceFlexibilityPolicy(t *testing.T) {
 	t.Parallel()
@@ -714,6 +721,9 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
   instance_lifecycle_policy {
     force_update_on_repair = "YES"
     default_action_on_failure = "DO_NOTHING"
+{{- if ne $.TargetVersionName "ga" }}
+    on_failed_health_check = "DO_NOTHING"
+{{- end }}
   }
 }
 `, template, target, igm)
@@ -819,6 +829,10 @@ resource "google_compute_region_instance_group_manager" "igm-update" {
   instance_lifecycle_policy {
     force_update_on_repair = "NO"
     default_action_on_failure = "REPAIR"
+{{- if ne $.TargetVersionName "ga" }}
+    on_failed_health_check = "REPAIR"
+{{- end }}
+
   }
 }
 `, template1, target1, target2, template2, igm)
@@ -1860,7 +1874,6 @@ resource "google_compute_region_instance_group_manager" "igm-basic" {
 `, context)
 }
 
-{{- if ne $.TargetVersionName "ga" }}
 func testAccRegionInstanceGroupManager_stoppedSuspendedTargetSize(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1969,7 +1982,6 @@ resource "google_compute_region_instance_group_manager" "sr-igm" {
 }
 `, network, template, igm)
 }
-{{- end }}
 
 func testAccRegionInstanceGroupManager_instanceFlexibilityPolicy(network, template, igm string) string {
 	return fmt.Sprintf(`

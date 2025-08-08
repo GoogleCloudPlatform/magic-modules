@@ -24,7 +24,7 @@ import (
 )
 
 func TestExecRequestReviewer(t *testing.T) {
-	availableReviewers := github.AvailableReviewers()
+	availableReviewers := github.AvailableReviewers(nil)
 	if len(availableReviewers) < 3 {
 		t.Fatalf("not enough available reviewers (%v) to run TestExecRequestReviewer (need at least 3)", availableReviewers)
 	}

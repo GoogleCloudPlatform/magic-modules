@@ -40,4 +40,4 @@ See [Client-side fields]({{< ref "/develop/client-side-fields" >}}) for informat
 
 ## Exclude deletion {#exclude_delete}
 
-Some resources do not support deletion in the API and can only be removed from state. For these resources, the best practice is to set [`exclude_delete: true`]({{< ref "/develop/resource-reference#exclude_delete" >}}) on the resource.
+Some resources do not support deletion in the API and can only be removed from state. For these resources, the best practice is to set [`exclude_delete: true`]({{< ref "/reference/resource#exclude_delete" >}}) on the resource.

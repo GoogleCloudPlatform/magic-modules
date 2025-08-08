@@ -50,7 +50,6 @@ async:
 custom_code:
   constants: 'templates/terraform/constants/firestore_index.go.tmpl'
   encoder: 'templates/terraform/encoders/index.go.tmpl'
-  post_create: 'templates/terraform/post_create/index.go.tmpl'
   custom_import: 'templates/terraform/custom_import/index_self_link_as_name_set_project.go.tmpl'
 error_retry_predicates:
 
@@ -79,6 +78,18 @@ examples:
     primary_resource_id: 'my-index'
     vars:
       database_id: 'database-id'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+  - name: 'firestore_index_mongodb_compatible_scope'
+    primary_resource_id: 'my-index'
+    vars:
+      database_id: 'database-id-mongodb-compatible'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+  - name: 'firestore_index_sparse_any'
+    primary_resource_id: 'my-index'
+    vars:
+      database_id: 'database-id-sparse-any'
     test_env_vars:
       project_id: 'PROJECT_NAME'
 parameters:
@@ -119,6 +130,28 @@ properties:
     enum_values:
       - 'ANY_API'
       - 'DATASTORE_MODE_API'
+      - 'MONGODB_COMPATIBLE_API'
+  - name: 'density'
+    type: Enum
+    description: |
+      The density configuration for this index.
+    immutable: true
+    default_from_api: true
+    enum_values:
+      - SPARSE_ALL
+      - SPARSE_ANY
+      - DENSE
+  - name: 'multikey'
+    type: Boolean
+    default_value: false
+    description:
+      Optional. Whether the index is multikey. By default, the index
+      is not multikey. For non-multikey indexes, none of the paths in the
+      index definition reach or traverse an array, except via an explicit
+      array index. For multikey indexes, at most one of the paths in the index
+      definition reach or traverse an array, except via an explicit array
+      index. Violations will result in errors. Note this field only applies to
+      indexes with MONGODB_COMPATIBLE_API ApiScope.
   - name: 'fields'
     type: Array
     description: |
@@ -139,7 +172,7 @@ properties:
             Name of the field.
         - name: 'order'
           type: Enum
-          # TODO (mbang): Exactly one of order, arrayConfig, or vectorConfig must be set
+          # TODO: Exactly one of order, arrayConfig, or vectorConfig must be set
           description: |
             Indicates that this field supports ordering by the specified order or comparing using =, <, <=, >, >=.
             Only one of `order`, `arrayConfig`, and `vectorConfig` can be specified.
@@ -148,7 +181,7 @@ properties:
             - 'DESCENDING'
         - name: 'arrayConfig'
           type: Enum
-          # TODO (mbang): Exactly one of order, arrayConfig, or vectorConfig must be set
+          # TODO: Exactly one of order, arrayConfig, or vectorConfig must be set
           description: |
             Indicates that this field supports operations on arrayValues. Only one of `order`, `arrayConfig`, and
             `vectorConfig` can be specified.
@@ -156,7 +189,7 @@ properties:
             - 'CONTAINS'
         - name: 'vectorConfig'
           type: NestedObject
-          # TODO (mbang): Exactly one of order, arrayConfig, or vectorConfig must be set
+          # TODO: Exactly one of order, arrayConfig, or vectorConfig must be set
           description: |
             Indicates that this field supports vector search operations. Only one of `order`, `arrayConfig`, and
             `vectorConfig` can be specified. Vector Fields should come after the field path `__name__`.

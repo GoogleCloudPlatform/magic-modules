@@ -11,7 +11,7 @@ import (
 	crmv3 "google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/storage/v1"
 
-	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources"
+	resources "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 
@@ -162,15 +162,6 @@ func (m *manager) fetchAncestors(config *transport_tpg.Config, tfData tpgresourc
 			return nil, fmt.Errorf("organization id not found in terraform data")
 		}
 		key = orgKey
-	case "iam.googleapis.com/Role":
-		// google_organization_iam_custom_role or google_project_iam_custom_role
-		if orgOK {
-			key = orgKey
-		} else if projectKey != "" {
-			key = projectKey
-		} else {
-			return []string{unknownOrg}, nil
-		}
 	case "cloudresourcemanager.googleapis.com/Project", "cloudbilling.googleapis.com/ProjectBillingInfo":
 		// for google_project and google_project_iam resources
 		var ancestors []string
@@ -205,10 +196,16 @@ func (m *manager) fetchAncestors(config *transport_tpg.Config, tfData tpgresourc
 		key = projectKey
 
 	default:
-		if projectKey == "" {
+		switch {
+		case orgOK:
+			key = orgKey
+		case folderOK:
+			key = folderKey
+		case projectKey != "":
+			key = projectKey
+		default:
 			return []string{unknownOrg}, nil
 		}
-		key = projectKey
 	}
 	return m.getAncestorsWithCache(key)
 }

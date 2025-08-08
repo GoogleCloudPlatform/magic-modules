@@ -13,7 +13,7 @@
 
 ---
 name: 'BigqueryAnalyticsHub'
-display_name: 'Bigquery Analytics Hub'
+display_name: 'BigQuery Analytics Hub'
 versions:
   - name: 'beta'
     base_url: 'https://analyticshub.googleapis.com/v1/'

@@ -44,6 +44,13 @@ custom_code:
   constants: 'templates/terraform/constants/router.go.tmpl'
 custom_diff:
   - 'resourceComputeRouterCustomDiff'
+sweeper:
+  prefixes:
+    - "swg-autogen-router" # Secure Web Proxy(SWP) auto-generated router prefix.
+  url_substitutions:
+    - region: "us-central1"
+    - region: "us-east1"
+    - region: "us-east4"
 examples:
   - name: 'router_basic'
     primary_resource_id: 'foobar'
@@ -57,6 +64,14 @@ examples:
     vars:
       router_name: 'test-router'
       network_name: 'test-network'
+    ignore_read_extra:
+      - 'advertisedIpRanges'
+  - name: 'compute_router_md5encrypted'
+    primary_resource_id: 'foobar'
+    vars:
+      router_name: 'test-router'
+      network_name: 'test-network'
+    exclude_docs: true
     ignore_read_extra:
       - 'advertisedIpRanges'
 parameters:
@@ -144,7 +159,7 @@ properties:
 
           This enum field has the one valid value: ALL_SUBNETS
         send_empty_value: true
- # TODO(#324): enum?
+ # TODO: #324 enum?
         item_type:
           type: String
       - name: 'advertisedIpRanges'
@@ -201,3 +216,36 @@ properties:
       Indicates if a router is dedicated for use with encrypted VLAN
       attachments (interconnectAttachments).
     immutable: true
+  - name: 'md5AuthenticationKeys'
+    ignore_read: true
+    type: NestedObject
+    description: |
+      Keys used for MD5 authentication.
+    properties:
+      - name: 'name'
+        type: String
+        description: |
+          Name used to identify the key. Must be unique within a router.
+          Must be referenced by exactly one bgpPeer. Must comply with RFC1035.
+        required: true
+      - name: 'key'
+        type: String
+        description: |
+          Value of the key used for MD5 authentication.
+        required: true
+  - name: 'params'
+    type: NestedObject
+    min_version: 'beta'
+    ignore_read: true
+    immutable: true
+    description: |
+     Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the router. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true

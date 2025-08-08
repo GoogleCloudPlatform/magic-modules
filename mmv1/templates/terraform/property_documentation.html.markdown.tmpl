@@ -36,8 +36,11 @@
   {{- if $.Sensitive }}
   **Note**: This property is sensitive and will not be displayed in the plan.
   {{- end }}
+  {{- if $.WriteOnly }}
+  **Note**: This property is write-only and will not be read from the API.
+  {{- end }}
   {{- if and (not $.FlattenObject) $.NestedProperties }}
-  Structure is [documented below](#nested_{{ underscore $.Name }}).
+  Structure is [documented below](#nested_{{ $.LineageAsSnakeCase}}).
   {{- end }}
   {{- if $.DeprecationMessage }}
 

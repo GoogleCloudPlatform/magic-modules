@@ -1,7 +1,9 @@
 package compute_test
 
 import (
+	"context"
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -10,7 +12,54 @@ import (
   {{- if ne $.TargetVersionName "ga" }}
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
   {{- end }}
+  tpgcompute "github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
+
+func TestForceNewResourcePoliciesWorkloadPolicyIfNewIsEmpty(t *testing.T) {
+	cases := map[string]struct {
+		Old, New       interface{}
+		ExpectForceNew bool
+	}{
+		"empty to empty": {
+			Old:            "",
+			New:            "",
+			ExpectForceNew: false,
+		},
+		"empty to non-empty": {
+			Old:            "",
+			New:            "some-policy",
+			ExpectForceNew: false,
+		},
+		"non-empty to non-empty": {
+			Old:            "old-policy",
+			New:            "new-policy",
+			ExpectForceNew: false,
+		},
+		"non-empty to empty (should force new)": {
+			Old:            "existing-policy",
+			New:            "",
+			ExpectForceNew: true,
+		},
+		"whitespace to empty (should force new)": {
+			Old:            "   ",
+			New:            "",
+			ExpectForceNew: true,
+		},
+		"policy name to empty (should force new)": {
+			Old:            "projects/my-project/regions/us-central1/resourcePolicies/my-policy",
+			New:            "",
+			ExpectForceNew: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		result := tpgcompute.ForceNewResourcePoliciesWorkloadPolicyIfNewIsEmpty(context.Background(), tc.Old, tc.New, nil)
+		if result != tc.ExpectForceNew {
+			t.Errorf("bad: %s, %q => %q expect ForceNew to return %t but got %t", tn, tc.Old, tc.New, tc.ExpectForceNew, result)
+		}
+	}
+}
+
 
 func TestAccInstanceGroupManager_basic(t *testing.T) {
 	t.Parallel()
@@ -123,6 +172,9 @@ func TestAccInstanceGroupManager_update(t *testing.T) {
 				Config: testAccInstanceGroupManager_update(template1, target1, description, igm),
 				Check: resource.ComposeTestCheckFunc(
 					       resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "DO_NOTHING"),
+{{- if ne $.TargetVersionName "ga" }}
+                 resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "DO_NOTHING"),
+{{- end }}
 							 ),
 			},
 			{
@@ -135,6 +187,9 @@ func TestAccInstanceGroupManager_update(t *testing.T) {
 				Config: testAccInstanceGroupManager_update2(template1, target1, target2, template2, description, igm),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "REPAIR"),
+{{- if ne $.TargetVersionName "ga" }}
+          resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "REPAIR"),
+{{- end }}
 				),
 			},
 			{
@@ -147,6 +202,9 @@ func TestAccInstanceGroupManager_update(t *testing.T) {
 				Config: testAccInstanceGroupManager_update3(template1, target1, target2, template2, description2, igm),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.default_action_on_failure", "REPAIR"),
+{{- if ne $.TargetVersionName "ga" }}
+          resource.TestCheckResourceAttr("google_compute_instance_group_manager.igm-update", "instance_lifecycle_policy.0.on_failed_health_check", "REPAIR"),
+{{- end }}
 				),
 			},
 			{
@@ -394,7 +452,6 @@ func TestAccInstanceGroupManager_stateful(t *testing.T) {
 	})
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccInstanceGroupManager_stoppedSuspendedTargetSize(t *testing.T) {
   t.Parallel()
 
@@ -428,7 +485,6 @@ func TestAccInstanceGroupManager_stoppedSuspendedTargetSize(t *testing.T) {
     },
   })
 }
-{{- end }}
 
 func TestAccInstanceGroupManager_waitForStatus(t *testing.T) {
 	t.Parallel()
@@ -460,6 +516,76 @@ func TestAccInstanceGroupManager_waitForStatus(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"status", "wait_for_instances_status", "wait_for_instances"},
+			},
+		},
+	})
+}
+
+func TestAccInstanceGroupManager_addingResourcePoliciesToMigWithNonZeroTargetSize_fails(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInstanceGroupManager_withTargetSize(suffix),
+			},
+			{
+				ResourceName:            "google_compute_instance_group_manager.igm-workload-policy",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config:      testAccInstanceGroupManager_resourcePoliciesWorkloadPolicyUpdateError(suffix),
+				ExpectError: regexp.MustCompile("Workload policy update is not allowed when the MIG has instances."),
+			},
+		},
+	})
+}
+
+func TestAccInstanceGroupManager_resourcePoliciesWorkloadPolicyUpdate(t *testing.T) {
+	t.Parallel()
+
+	suffix := acctest.RandString(t, 10)
+	workloadPolicyResourceName := "workload_policy"
+	workloadPolicyResourceUpdate := "workload_policy_2"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckInstanceGroupManagerDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccInstanceGroupManager_resourcePoliciesWorkloadPolicyUpdate(suffix, workloadPolicyResourceName),
+			},
+			{
+				ResourceName:            "google_compute_instance_group_manager.igm-workload-policy",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config: testAccInstanceGroupManager_resourcePoliciesWorkloadPolicyUpdate(suffix, workloadPolicyResourceUpdate),
+			},
+			{
+				ResourceName:            "google_compute_instance_group_manager.igm-workload-policy",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
+			},
+			{
+				Config: testAccInstanceGroupManager_resourcePoliciesWorkloadPolicyUpdate2(suffix),
+			},
+			{
+				ResourceName:            "google_compute_instance_group_manager.igm-workload-policy",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"status"},
 			},
 		},
 	})
@@ -750,6 +876,9 @@ resource "google_compute_instance_group_manager" "igm-update" {
   instance_lifecycle_policy {
     force_update_on_repair = "YES"
     default_action_on_failure = "DO_NOTHING"
+{{- if ne $.TargetVersionName "ga" }}
+    on_failed_health_check = "DO_NOTHING"
+{{- end }}
   }
 }
 `, template, target, description, igm)
@@ -855,6 +984,9 @@ resource "google_compute_instance_group_manager" "igm-update" {
   instance_lifecycle_policy {
     force_update_on_repair = "NO"
     default_action_on_failure = "REPAIR"
+{{- if ne $.TargetVersionName "ga" }}
+    on_failed_health_check = "REPAIR"
+{{- end }}
   }
 }
 `, template1, target1, target2, template2, description, igm)
@@ -1743,7 +1875,6 @@ resource "google_compute_instance_group_manager" "igm-basic" {
 `, network, template, target, igm)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func testAccInstanceGroupManager_stoppedSuspendedTargetSize(network, template, igm string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -1835,7 +1966,6 @@ resource "google_compute_instance_group_manager" "sr-igm" {
 }
 `, network, template, igm)
 }
-{{- end }}
 
 func testAccInstanceGroupManager_waitForStatus(template, target, igm, perInstanceConfig string) string {
 	return fmt.Sprintf(`
@@ -1961,6 +2091,9 @@ resource "google_compute_instance_group_manager" "igm-basic" {
   instance_lifecycle_policy {
     force_update_on_repair = "YES"
     default_action_on_failure = "REPAIR"
+{{- if ne $.TargetVersionName "ga" }}
+    on_failed_health_check = "REPAIR"
+{{- end }}
   }
   wait_for_instances = true
   wait_for_instances_status = "UPDATED"
@@ -1979,6 +2112,220 @@ resource "google_compute_per_instance_config" "per-instance" {
 }
 `, template, target, igm, perInstanceConfig)
 }
+
+func testAccInstanceGroupManager_withTargetSize(suffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  name           = "igm-instance-template-%s"
+  machine_type   = "a4-highgpu-8g"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+    disk_type    = "hyperdisk-balanced"
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+
+resource "google_compute_instance_group_manager" "igm-workload-policy" {
+  description = "Terraform test instance group manager"
+  name        = "igm-basic-workload-policy-%s"
+
+  version {
+    name              = "prod"
+    instance_template = google_compute_instance_template.igm-basic.self_link
+  }
+
+  base_instance_name = "tf-test-igm-no-tp"
+  zone               = "us-central1-b"
+  target_size        = 2
+}
+`, suffix, suffix)
+}
+
+func testAccInstanceGroupManager_resourcePoliciesWorkloadPolicyUpdateError(suffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_resource_policy" "workload_policy_error" {
+  name   = "tf-test-gce-policy-%s"
+  region = "us-central1"
+  workload_policy {
+    type = "HIGH_THROUGHPUT"
+  }
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  name           = "igm-instance-template-%s"
+  machine_type   = "a4-highgpu-8g"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+    disk_type    = "hyperdisk-balanced"
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+
+resource "google_compute_instance_group_manager" "igm-workload-policy" {
+  description = "Terraform test instance group manager"
+  name        = "igm-basic-workload-policy-%s"
+
+  version {
+    name              = "prod"
+    instance_template = google_compute_instance_template.igm-basic.self_link
+  }
+
+  base_instance_name = "tf-test-igm-no-tp"
+  zone               = "us-central1-b"
+  target_size        = 2
+
+  resource_policies {
+    workload_policy = google_compute_resource_policy.workload_policy_error.self_link
+  }
+}
+`, suffix, suffix, suffix)
+}
+
+func testAccInstanceGroupManager_resourcePoliciesWorkloadPolicyUpdate(suffix, workloadPolicy string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_resource_policy" "workload_policy" {
+  name   = "tf-test-gce-policy-%s"
+  region = "us-central1"
+  workload_policy {
+    type = "HIGH_THROUGHPUT"
+  }
+}
+
+resource "google_compute_resource_policy" "workload_policy_2" {
+  name   = "tf-test-gce-policy-%s-2"
+  region = "us-central1"
+  workload_policy {
+    type = "HIGH_THROUGHPUT"
+  }
+}
+
+
+resource "google_compute_instance_template" "igm-basic" {
+  name           = "igm-instance-template-%s"
+  machine_type   = "a4-highgpu-8g"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+    disk_type    = "hyperdisk-balanced"
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+
+resource "google_compute_instance_group_manager" "igm-workload-policy" {
+  description = "Terraform test instance group manager"
+  name        = "igm-basic-workload-policy-%s"
+
+  version {
+    name              = "prod"
+    instance_template = google_compute_instance_template.igm-basic.self_link
+  }
+
+  base_instance_name = "tf-test-igm-no-tp"
+  zone               = "us-central1-b"
+  target_size        = 0
+
+  resource_policies {
+    workload_policy = google_compute_resource_policy.%s.self_link
+  }
+}
+`, suffix, suffix, suffix, suffix, workloadPolicy)
+}
+
+func testAccInstanceGroupManager_resourcePoliciesWorkloadPolicyUpdate2(suffix string) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "igm-basic" {
+  name           = "igm-instance-template-%s"
+  machine_type   = "a4-highgpu-8g"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+    disk_type    = "hyperdisk-balanced"
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+}
+
+resource "google_compute_instance_group_manager" "igm-workload-policy" {
+  description = "Terraform test instance group manager"
+  name        = "igm-basic-workload-policy-%s"
+
+  version {
+    name              = "prod"
+    instance_template = google_compute_instance_template.igm-basic.self_link
+  }
+
+  base_instance_name = "tf-test-igm-no-tp"
+  zone               = "us-central1-b"
+  target_size        = 0
+}
+`, suffix, suffix)
+}
+
 
 {{ if ne $.TargetVersionName `ga` -}}
 func testAccInstanceGroupManager_resourceManagerTags(template_name, tag_name, igm_name, project_id string) string {

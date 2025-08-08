@@ -1,0 +1,53 @@
+// This encoder ensures TTL fields are handled correctly based on cache mode
+routing, ok := obj["routing"].(map[string]interface{})
+if !ok {
+	return obj, nil
+}
+
+pathMatchers, ok := routing["pathMatchers"].([]interface{})
+if !ok || len(pathMatchers) == 0 {
+	return obj, nil
+}
+
+for _, pm := range pathMatchers {
+	pathMatcher, ok := pm.(map[string]interface{})
+	if !ok {
+		continue
+	}
+
+	routeRules, ok := pathMatcher["routeRules"].([]interface{})
+	if !ok {
+		continue
+	}
+
+	for _, rr := range routeRules {
+		routeRule, ok := rr.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		routeAction, ok := routeRule["routeAction"].(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		cdnPolicy, ok := routeAction["cdnPolicy"].(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		// Handle TTL fields based on cache mode
+		if cacheMode, ok := cdnPolicy["cacheMode"].(string); ok {
+			switch cacheMode {
+			case "USE_ORIGIN_HEADERS", "BYPASS_CACHE":
+				delete(cdnPolicy, "clientTtl")
+				delete(cdnPolicy, "defaultTtl")
+				delete(cdnPolicy, "maxTtl")
+			case "FORCE_CACHE_ALL":
+				delete(cdnPolicy, "maxTtl")
+			}
+		}
+	}
+}
+
+return obj, nil 

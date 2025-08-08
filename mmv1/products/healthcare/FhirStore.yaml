@@ -51,8 +51,11 @@ examples:
       fhir_store_name: 'example-fhir-store'
       pubsub_topic: 'fhir-notifications'
       bq_dataset_name: 'bq_example_dataset'
-    test_vars_overrides:
-      'policyChanged': ' acctest.BootstrapPSARoles(t, "service-", "gcp-sa-healthcare", []string{"roles/bigquery.dataEditor", "roles/bigquery.jobUser"})'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com"
+        role: "roles/bigquery.dataEditor"
+      - member: "serviceAccount:service-{project_number}@gcp-sa-healthcare.iam.gserviceaccount.com"
+        role: "roles/bigquery.jobUser"
   - name: 'healthcare_fhir_store_notification_config'
     primary_resource_id: 'default'
     vars:

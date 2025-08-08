@@ -29,16 +29,16 @@ package google
 
 import (
 	"sort"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/appengine"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/container"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/compute"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/kms"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/resourcemanager"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/spanner"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/secretmanagerregional"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/securesourcemanager"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/securitycenterv2"
-	"github.com/GoogleCloudPlatform/terraform-google-conversion/v5/tfplan2cai/converters/google/resources/services/storage"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/appengine"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/container"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/compute"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/kms"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/resourcemanager"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/spanner"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/secretmanagerregional"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/securesourcemanager"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/securitycenterv2"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/tfplan2cai/converters/google/resources/services/storage"
 	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
 )
 
@@ -108,6 +108,7 @@ func ResourceConverters() map[string][]cai.ResourceConverter {
 		"google_datastream_private_connection":            {datastream.ResourceConverterDatastreamPrivateConnection()},
 		"google_datastream_stream":                        {datastream.ResourceConverterDatastreamStream()},
 		"google_firebase_project":                         {firebase.ResourceConverterFirebaseProject()},
+		"google_org_policy_custom_constraint":             {orgpolicy.ResourceConverterOrgPolicyCustomConstraint()},
 		"google_org_policy_policy":                        {resourcemanager.ResourceConverterOrgPolicyPolicy()},
 		"google_redis_instance":                           {redis.ResourceConverterRedisInstance()},
 		"google_spanner_database":                         {spanner.ResourceConverterSpannerDatabase()},

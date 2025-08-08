@@ -1,5 +1,5 @@
 resource "google_network_security_address_group" "basic_global_networksecurity_address_group" {
-  name        = "{{index $.Vars "address"}}"
+  name        = "{{index $.Vars "address_group"}}"
   parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
   description = "Sample global networksecurity_address_group"
   location    = "global"
@@ -21,29 +21,48 @@ resource "google_compute_firewall_policy" "default" {
 }
 
 resource "google_compute_firewall_policy_rule" "{{$.PrimaryResourceId}}" {
-  firewall_policy = google_compute_firewall_policy.default.name
-  description     = "Resource created for Terraform acceptance testing"
-  priority        = 9000
-  enable_logging  = true
-  action          = "allow"
-  direction       = "EGRESS"
-  disabled        = false
+  firewall_policy         = google_compute_firewall_policy.default.name
+  description             = "Resource created for Terraform acceptance testing"
+  priority                = 9000
+  enable_logging          = true
+  action                  = "allow"
+  direction               = "EGRESS"
+  disabled                = false
+  target_service_accounts = ["{{index $.TestEnvVars "service_acct"}}"]
 
   match {
+    dest_ip_ranges            = ["11.100.0.1/32"]
+    dest_fqdns                = []
+    dest_region_codes         = ["US"]
+    dest_threat_intelligences = ["iplist-known-malicious-ips"]
+    src_address_groups        = []
+    dest_address_groups       = [google_network_security_address_group.basic_global_networksecurity_address_group.id]
+
     layer4_configs {
       ip_protocol = "tcp"
-      ports = [8080]
+      ports       = [8080]
     }
+
     layer4_configs {
       ip_protocol = "udp"
-      ports = [22]
+      ports       = [22]
     }
-    dest_ip_ranges = ["11.100.0.1/32"]
-    dest_fqdns = []
-    dest_region_codes = ["US"]
-    dest_threat_intelligences = ["iplist-known-malicious-ips"]
-    src_address_groups = []
-    dest_address_groups = [google_network_security_address_group.basic_global_networksecurity_address_group.id]
   }
-  target_service_accounts = ["{{index $.TestEnvVars "service_account"}}"]
+}
+
+resource "google_tags_tag_key" "basic_key" {
+  description = "For keyname resources."
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  purpose     = "GCE_FIREWALL"
+  short_name  = "{{index $.Vars "tag_key"}}"
+
+  purpose_data = {
+    organization = "auto"
+  }
+}
+
+resource "google_tags_tag_value" "basic_value" {
+  description = "For valuename resources."
+  parent      = google_tags_tag_key.basic_key.id
+  short_name  = "{{index $.Vars "tag_value"}}"
 }

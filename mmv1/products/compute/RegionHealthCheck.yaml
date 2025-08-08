@@ -14,6 +14,8 @@
 ---
 name: 'RegionHealthCheck'
 api_resource_type_kind: HealthCheck
+api_variant_patterns:
+  - 'projects/{project}/regions/{region}/healthChecks/{healthCheck}'
 kind: 'compute#healthCheck'
 description: |
   Health Checks determine whether instances are responsive and able to do work.
@@ -50,6 +52,12 @@ custom_code:
   encoder: 'templates/terraform/encoders/health_check_type.tmpl'
 custom_diff:
   - 'healthCheckCustomizeDiff'
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west4"
+    - region: "europe-west1"
+    - region: "us-west1"
 examples:
   - name: 'region_health_check_tcp'
     primary_resource_id: 'tcp-region-health-check'
@@ -104,6 +112,16 @@ examples:
     primary_resource_id: 'grpc-region-health-check'
     vars:
       health_check_name: 'grpc-region-health-check'
+  - name: 'region_health_check_grpc_with_tls'
+    primary_resource_id: 'grpc-with-tls-region-health-check'
+    min_version: 'beta'
+    vars:
+      health_check_name: 'grpc-with-tls-region-health-check'
+  - name: 'region_health_check_grpc_with_tls_full'
+    primary_resource_id: 'grpc-with-tls-region-health-check'
+    min_version: 'beta'
+    vars:
+      health_check_name: 'grpc-with-tls-region-health-check'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -191,6 +209,7 @@ properties:
       - 'tcp_health_check'
       - 'ssl_health_check'
       - 'grpc_health_check'
+      - 'grpc_tls_health_check'
     diff_suppress_func: 'portDiffSuppress'
     properties:
       - name: 'host'
@@ -316,6 +335,7 @@ properties:
       - 'tcp_health_check'
       - 'ssl_health_check'
       - 'grpc_health_check'
+      - 'grpc_tls_health_check'
     diff_suppress_func: 'portDiffSuppress'
     properties:
       - name: 'host'
@@ -441,6 +461,7 @@ properties:
       - 'tcp_health_check'
       - 'ssl_health_check'
       - 'grpc_health_check'
+      - 'grpc_tls_health_check'
     diff_suppress_func: 'portDiffSuppress'
     properties:
       - name: 'request'
@@ -547,6 +568,7 @@ properties:
       - 'tcp_health_check'
       - 'ssl_health_check'
       - 'grpc_health_check'
+      - 'grpc_tls_health_check'
     diff_suppress_func: 'portDiffSuppress'
     properties:
       - name: 'request'
@@ -653,6 +675,7 @@ properties:
       - 'tcp_health_check'
       - 'ssl_health_check'
       - 'grpc_health_check'
+      - 'grpc_tls_health_check'
     diff_suppress_func: 'portDiffSuppress'
     properties:
       - name: 'host'
@@ -778,6 +801,7 @@ properties:
       - 'tcp_health_check'
       - 'ssl_health_check'
       - 'grpc_health_check'
+      - 'grpc_tls_health_check'
     diff_suppress_func: 'portDiffSuppress'
     properties:
       - name: 'port'
@@ -842,6 +866,66 @@ properties:
           - 'grpc_health_check.0.port_name'
           - 'grpc_health_check.0.port_specification'
           - 'grpc_health_check.0.grpc_service_name'
+  - name: 'grpcTlsHealthCheck'
+    min_version: 'beta'
+    type: NestedObject
+    exactly_one_of:
+      - 'http_health_check'
+      - 'https_health_check'
+      - 'http2_health_check'
+      - 'tcp_health_check'
+      - 'ssl_health_check'
+      - 'grpc_health_check'
+      - 'grpc_tls_health_check'
+    diff_suppress_func: 'portDiffSuppress'
+    properties:
+      - name: 'port'
+        type: Integer
+        description: |
+          The port number for the health check request.
+          Must be specified if port_specification is USE_FIXED_PORT. Valid values are 1 through 65535.
+        at_least_one_of:
+          - 'grpc_tls_health_check.0.port'
+          - 'grpc_tls_health_check.0.port_specification'
+          - 'grpc_tls_health_check.0.grpc_service_name'
+      - name: 'portSpecification'
+        type: Enum
+        description: |
+          Specifies how port is selected for health checking, can be one of the
+          following values:
+
+            * `USE_FIXED_PORT`: The port number in `port` is used for health checking.
+
+            * `USE_NAMED_PORT`: Not supported for GRPC with TLS health checking.
+
+            * `USE_SERVING_PORT`: For NetworkEndpointGroup, the port specified for each
+            network endpoint is used for health checking. For other backends, the
+            port or named port specified in the Backend Service is used for health
+            checking.
+
+          If not specified, gRPC health check follows behavior specified in the `port` field.
+        at_least_one_of:
+          - 'grpc_tls_health_check.0.port'
+          - 'grpc_tls_health_check.0.port_specification'
+          - 'grpc_tls_health_check.0.grpc_service_name'
+        enum_values:
+          - 'USE_FIXED_PORT'
+          - 'USE_NAMED_PORT'
+          - 'USE_SERVING_PORT'
+      - name: 'grpcServiceName'
+        type: String
+        description: |
+          The gRPC service name for the health check.
+          The value of grpcServiceName has the following meanings by convention:
+
+          * Empty serviceName means the overall status of all services at the backend.
+          * Non-empty serviceName means the health of that gRPC service, as defined by the owner of the service.
+
+          The grpcServiceName can only be ASCII.
+        at_least_one_of:
+          - 'grpc_tls_health_check.0.port'
+          - 'grpc_tls_health_check.0.port_specification'
+          - 'grpc_tls_health_check.0.grpc_service_name'
   - name: 'logConfig'
     type: NestedObject
     description: |

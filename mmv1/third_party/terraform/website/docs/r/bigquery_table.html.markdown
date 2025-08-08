@@ -133,15 +133,24 @@ The following arguments are supported:
     ~>**NOTE:** Because this field expects a JSON string, any changes to the
     string will create a diff, even if the JSON itself hasn't changed.
     If the API returns a different value for the same schema, e.g. it
-    switched the order of values or replaced `STRUCT` field type with `RECORD`
-    field type, we currently cannot suppress the recurring diff this causes.
-    As a workaround, we recommend using the schema as returned by the API.
+    switched the order of values or replaced a field data type (`STRUCT` with
+    `RECORD`, `DECIMAL` with `NUMERIC`, etc.), we currently cannot suppress
+    the recurring diff this causes. As a workaround, we recommend using the
+    schema as returned by the API.
 
     ~>**NOTE:**  If you use `external_data_configuration`
     [documented below](#nested_external_data_configuration) and do **not** set
     `external_data_configuration.connection_id`, schemas must be specified
     with `external_data_configuration.schema`. Otherwise, schemas must be
     specified with this top-level field.
+
+* `ignore_schema_changes` - (Optional)  A list of fields which should be ignored for each column in schema.
+    **NOTE:** Right now only `dataPolicies` field is supported. We might support others in the future.
+
+* `ignore_auto_generated_schema` - (Optional)  If true, Terraform will prevent columns added by the server(e.g. hive partitioned columns) in schema from showing diff.
+
+* `schema_foreign_type_info` - (Optional) Specifies metadata of the foreign data
+    type definition in field schema. Structure is [documented below](#nested_schema_foreign_type_info).
 
 * `time_partitioning` - (Optional) If specified, configures time-based
     partitioning for this table. Structure is [documented below](#nested_time_partitioning).
@@ -180,7 +189,11 @@ The following arguments are supported:
     globally unique. Tag key is expected to be in the namespaced format, for
     example "123456789012/environment" where 123456789012 is the ID of the
     parent organization or project resource for this tag key. Tag value is
-    expected to be the short name, for example "Production".
+    expected to be the short name, for example "Production". See [Tag definitions](https://cloud.google.com/iam/docs/tags-access-control#definitions)
+    for more details.
+
+* `external_catalog_table_options` - (Optional) Options defining open source
+    compatible table. Structure is [documented below](#nested_external_catalog_table_options).
 
 <a name="nested_external_data_configuration"></a>The `external_data_configuration` block supports:
 
@@ -369,6 +382,11 @@ The following arguments are supported:
 
 * `enable_list_inference` - (Optional) Indicates whether to use schema inference specifically for Parquet LIST logical type.
 
+<a name="nested_schema_foreign_type_info"></a>The `schema_foreign_type_info` block supports:
+
+* `type_system` - (Required) Specifies the system which defines the foreign data
+    type.
+
 <a name="nested_time_partitioning"></a>The `time_partitioning` block supports:
 
 * `expiration_ms` - (Optional) Number of milliseconds for which to keep the
@@ -408,6 +426,8 @@ The following arguments are supported:
 
 * `use_legacy_sql` - (Optional) Specifies whether to use BigQuery's legacy SQL for this view.
     The default value is true. If set to false, the view will use BigQuery's standard SQL.
+    -> **Note**: Starting in provider version `7.0.0`, no default value is
+    provided for this field unless explicitly set in the configuration.
 
 <a name="nested_materialized_view"></a>The `materialized_view` block supports:
 
@@ -499,6 +519,48 @@ The following arguments are supported:
 * `file_format` - (Required) The file format the table data is stored in.
 
 * `table_format` - (Required) The table format the metadata only snapshots are stored in.
+
+<a name="nested_external_catalog_table_options"></a>The `external_catalog_table_options` block supports:
+
+* `parameters` - (Optional) A map of key value pairs defining the parameters and
+  properties of the open source table. Corresponds with hive meta store table
+  parameters. Maximum size of 4Mib.
+* `storage_descriptor` - (Optional) A storage descriptor containing information
+  about the physical storage of this table. Structure is [documented below](#nested_storage_descriptor).
+* `connection_id` - (Optional) The connection specifying the credentials to be
+  used to read external storage, such as Azure Blob, Cloud Storage, or S3. The
+  connection is needed to read the open source table from BigQuery Engine. The
+  connection_id can have the form `<project_id>.<location_id>.<connection_id>`
+  or `projects/<project_id>/locations/<location_id>/connections/<connection_id>`.
+
+<a name="nested_storage_descriptor"></a>The `storage_descriptor` block supports:
+
+* `location_uri` - (Optional) The physical location of the table (e.g.
+  'gs://spark-dataproc-data/pangea-data/case_sensitive/' or
+  'gs://spark-dataproc-data/pangea-data/*'). The maximum length is 2056 bytes.
+
+* `input_format` - (Optional) Specifies the fully qualified class name of the
+  InputFormat (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcInputFormat"). The
+  maximum length is 128 characters.
+
+* `output_format` - (Optional) Specifies the fully qualified class name of the
+  OutputFormat (e.g. "org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat"). The
+  maximum length is 128 characters.
+
+* `serde_info` - (Optional) Serializer and deserializer information. Structure
+  is [documented below](#nested_serde_info).
+
+<a name="nested_serde_info"></a>The `serde_info` block supports:
+
+* `name` - (Optional) Name of the SerDe. The maximum length is 256 characters.
+
+* `serialization_library` - (Required) Specifies a fully-qualified class name of
+  the serialization library that is responsible for the translation of data
+  between table representation and the underlying low-level input and output
+  format structures. The maximum length is 256 characters.
+
+* `parameters` - (Optional) Key-value pairs that define the initialization
+  parameters for the serialization library. Maximum size 10 Kib.
 
 ## Attributes Reference
 

@@ -32,6 +32,7 @@ timeouts:
   update_minutes: 60
   delete_minutes: 60
 autogen_async: true
+autogen_status: Q2xvdWRWbUNsdXN0ZXI=
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
@@ -57,13 +58,37 @@ examples:
       - 'deletion_protection'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'project': '"oci-terraform-testing"'
+      'project': '"oci-terraform-testing-prod"'
       # ofake- prefix is needed to create a dummy resource for testing purposes only
       # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
       # As a result these resources are not sweepable
       # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
       cloud_vm_cluster_id: 'fmt.Sprintf("ofake-tf-test-vmcluster-basic-%s", acctest.RandString(t, 10))'
       cloud_exadata_infrastructure_id: 'fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-basic-%s", acctest.RandString(t, 10))'
+  - name: 'oracledatabase_cloud_vmcluster_odbnetwork'
+    primary_resource_id: 'my_vmcluster'
+    vars:
+      project: 'my-project'
+      cloud_vm_cluster_id: 'my-instance'
+      cloud_exadata_infrastructure_id: 'my-exadata'
+      odb_network: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork'
+      odb_subnet: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-odbsubnet'
+      backup_odb_subnet: 'projects/my-project/locations/europe-west2/odbNetworks/my-odbnetwork/odbSubnets/my-backup-odbsubnet'
+      deletion_protection: 'true'
+    ignore_read_extra:
+      - 'deletion_protection'
+    test_vars_overrides:
+      deletion_protection: 'false'
+      project: '"oci-terraform-testing-prod"'
+      # ofake- prefix is needed to create a dummy resource for testing purposes only
+      # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
+      # As a result these resources are not sweepable
+      # See: https://github.com/hashicorp/terraform-provider-google/issues/20599
+      cloud_vm_cluster_id: 'fmt.Sprintf("ofake-tf-test-vmcluster-odbnetwork-%s", acctest.RandString(t, 10))'
+      cloud_exadata_infrastructure_id: 'fmt.Sprintf("ofake-tf-test-exadata-for-vmcluster-odbnetwork-%s", acctest.RandString(t, 10))'
+      odb_network: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork"'
+      odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-client-odbsubnet"'
+      backup_odb_subnet: '"projects/oci-terraform-testing-prod/locations/europe-west2/odbNetworks/tf-test-permanent-odbnetwork/odbSubnets/tf-test-permanent-backup-odbsubnet"'
   - name: 'oracledatabase_cloud_vmcluster_full'
     primary_resource_id: 'my_vmcluster'
     vars:
@@ -75,7 +100,7 @@ examples:
       - 'deletion_protection'
     test_vars_overrides:
       'deletion_protection': 'false'
-      'project': '"oci-terraform-testing"'
+      'project': '"oci-terraform-testing-prod"'
       # ofake- prefix is needed to create a dummy resource for testing purposes only
       # See: https://github.com/hashicorp/terraform-provider-google/issues/19983#issuecomment-2516403770
       # As a result these resources are not sweepable
@@ -289,12 +314,32 @@ properties:
   - name: 'cidr'
     type: String
     description: 'Network settings. CIDR to use for cluster IP allocation. '
-    required: true
+    required: false
   - name: 'backupSubnetCidr'
     type: String
     description: 'CIDR range of the backup subnet. '
-    required: true
+    required: false
   - name: 'network'
     type: String
     description: "The name of the VPC network.\nFormat: projects/{project}/global/networks/{network} "
-    required: true
+    required: false
+  - name: odbNetwork
+    type: String
+    description: |-
+      The name of the OdbNetwork associated with the VM Cluster.
+      Format:
+      projects/{project}/locations/{location}/odbNetworks/{odb_network}
+      It is optional but if specified, this should match the parent ODBNetwork of
+      the odb_subnet and backup_odb_subnet.
+  - name: odbSubnet
+    type: String
+    description: |-
+      The name of the OdbSubnet associated with the VM Cluster for
+      IP allocation. Format:
+      projects/{project}/locations/{location}/odbNetworks/{odb_network}/odbSubnets/{odb_subnet}
+  - name: backupOdbSubnet
+    type: String
+    description: |-
+      The name of the backup OdbSubnet associated with the VM Cluster.
+      Format:
+      projects/{project}/locations/{location}/odbNetworks/{odb_network}/odbSubnets/{odb_subnet}

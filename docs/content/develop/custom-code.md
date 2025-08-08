@@ -32,8 +32,8 @@ Use `custom_code.constants` to inject top-level code in a resource file. This is
 
 - Constants
 - Regexes compiled at build time
-- Functions, such as [diff suppress functions]({{<ref "/develop/field-reference#diff_suppress_func" >}}),
-  [validation functions]({{<ref "/develop/field-reference#validation" >}}),
+- Functions, such as [diff suppress functions]({{<ref "/reference/field#diff_suppress_func" >}}),
+  [validation functions]({{<ref "/reference/field#validation" >}}),
   CustomizeDiff functions, and so on.
 - Methods
 
@@ -264,7 +264,7 @@ docs:
     * `FIELD_NAME` - (Optional, [Beta](https://terraform.io/docs/providers/google/guides/provider_versions.html)) FIELD_DESCRIPTION
 ```
 
-See [Add documentation (Handwritten)]({{< ref "/develop/add-documentation" >}}) for more information about what to include in the field documentation.
+See [Add documentation (Handwritten)]({{< ref "/document/add-documentation" >}}) for more information about what to include in the field documentation.
 
 ## What's next?
 

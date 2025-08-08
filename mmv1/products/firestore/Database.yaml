@@ -72,6 +72,22 @@ examples:
       - 'project'
       - 'etag'
       - 'deletion_policy'
+  - name: 'firestore_database_with_tags'
+    primary_resource_id: 'database'
+    vars:
+      database_id: 'database-with-tags-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+      tag_key_id: 'keyname'
+      tag_value_id: 'valuename'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
+    exclude_test: true
   - name: 'firestore_cmek_database'
     primary_resource_id: 'database'
     vars:
@@ -124,6 +140,17 @@ examples:
       - 'project'
       - 'etag'
       - 'deletion_policy'
+  - name: 'firestore_database_enterprise'
+    primary_resource_id: 'enterprise-db'
+    vars:
+      database_id: 'database-id'
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
+    ignore_read_extra:
+      - 'project'
+      - 'etag'
+      - 'deletion_policy'
 virtual_fields:
   - name: 'deletion_policy'
     description: |
@@ -134,6 +161,9 @@ virtual_fields:
       See also `delete_protection`.
     type: String
     default_value: "ABANDON"
+    # `deletion_policy` is deprecated and will be removed in a future major release.
+    # Once that release happens, you should use `delete_protection_state` instead.
+    # For now though, setting this field is necessary if you wish for your Firestore databases to be deleted upon `terraform destroy`.
 parameters:
 properties:
   - name: 'name'
@@ -166,6 +196,17 @@ properties:
     enum_values:
       - 'FIRESTORE_NATIVE'
       - 'DATASTORE_MODE'
+  - name: 'databaseEdition'
+    type: Enum
+    description: |
+      The database edition.
+    required: false
+    default_from_api: true
+    # Picking a database edition is an irreversible decision
+    immutable: true
+    enum_values:
+      - 'STANDARD'
+      - 'ENTERPRISE'
   - name: 'concurrencyMode'
     type: Enum
     description: |
@@ -274,7 +315,7 @@ properties:
 
           This value should be the KMS key resource ID in the format of
           `projects/{project_id}/locations/{kms_location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
-          How to retrive this resource ID is listed at
+          How to retrieve this resource ID is listed at
           https://cloud.google.com/kms/docs/getting-resource-ids#getting_the_id_for_a_key_and_version.
         required: true
         immutable: true
@@ -290,3 +331,14 @@ properties:
         output: true
         item_type:
           type: String
+  - name: 'tags'
+    type: KeyValuePairs
+    description: |
+      Input only. A map of resource manager tags. Resource manager tag keys
+      and values have the same definition as resource manager tags.
+      Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456.
+      The field is ignored when empty. The field is immutable and causes
+      resource replacement when mutated. To apply tags to an existing resource, see
+      the `google_tags_tag_value` resource.
+    immutable: true
+    ignore_read: true

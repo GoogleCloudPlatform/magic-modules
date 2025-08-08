@@ -32,6 +32,7 @@ timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
+include_in_tgc_next_DO_NOT_USE: true
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -56,6 +57,11 @@ custom_code:
   constants: 'templates/terraform/constants/cloudfunctions2_function.go.tmpl'
   encoder: 'templates/terraform/encoders/cloudfunctions2_runtime_update_policy.go.tmpl'
 taint_resource_on_failed_create: true
+sweeper:
+  url_substitutions:
+    - region: "us-central1"
+    - region: "europe-west6"
+    - region: "us-west1"
 examples:
   - name: 'cloudfunctions2_basic'
     primary_resource_id: 'function'
@@ -111,6 +117,9 @@ examples:
     exclude_test: true
   - name: 'cloudfunctions2_basic_gcs'
     primary_resource_id: 'function'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
       bucket_name_source: 'gcf-source-bucket'
       bucket_name_trigger: 'gcf-trigger-bucket'
@@ -122,13 +131,15 @@ examples:
     test_vars_overrides:
       'zip_path': '"./test-fixtures/function-source-eventarc-gcs.zip"'
       'primary_resource_id': '"terraform-test"'
-      'policyChanged': 'acctest.BootstrapPSARole(t, "service-", "gcp-sa-pubsub", "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
         # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
   - name: 'cloudfunctions2_basic_auditlogs'
     primary_resource_id: 'function'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
       bucket_name_source: 'gcf-source-bucket'
       bucket_name_auditlogs: 'gcf-auditlog-bucket'
@@ -140,7 +151,6 @@ examples:
     test_vars_overrides:
       'zip_path': '"./test-fixtures/function-source-eventarc-gcs.zip"'
       'primary_resource_id': '"terraform-test"'
-      'policyChanged': 'acctest.BootstrapPSARole(t, "service-", "gcp-sa-pubsub", "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
         # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
@@ -165,6 +175,9 @@ examples:
     external_providers: ["random", "time"]
   - name: 'cloudfunctions2_secret_env'
     primary_resource_id: 'function'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
       function: 'function-secret'
       bucket_name: 'gcf-source'
@@ -175,13 +188,15 @@ examples:
     test_vars_overrides:
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
-      'policyChanged': 'acctest.BootstrapPSARole(t, "service-", "gcp-sa-pubsub", "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
         # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
   - name: 'cloudfunctions2_secret_volume'
     primary_resource_id: 'function'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com"
+        role: "roles/cloudkms.cryptoKeyEncrypterDecrypter"
     vars:
       function: 'function-secret'
       bucket_name: 'gcf-source'
@@ -192,7 +207,6 @@ examples:
     test_vars_overrides:
       'location': '"us-central1"'
       'zip_path': '"./test-fixtures/function-source.zip"'
-      'policyChanged': 'acctest.BootstrapPSARole(t, "service-", "gcp-sa-pubsub", "roles/cloudkms.cryptoKeyEncrypterDecrypter")'
         # ignore these fields during import step
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
@@ -251,7 +265,7 @@ examples:
       project: 'my-project-name'
  # this example file will cause IAM conflicts between tests if used to make a test
     exclude_test: true
-  - name: 'cloudfunctions2_abiu'
+  - name: 'cloudfunctions2_automatic_base_image_update'
     primary_resource_id: 'function'
     min_version: 'beta'
     vars:
@@ -270,7 +284,7 @@ examples:
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
-  - name: 'cloudfunctions2_abiu_on_deploy'
+  - name: 'cloudfunctions2_on_deploy_base_image_update'
     primary_resource_id: 'function'
     min_version: 'beta'
     vars:
@@ -489,7 +503,7 @@ properties:
         type: String
         description: |
           Name of the service associated with a Function.
-        default_from_api: true
+        output: true
       - name: 'timeoutSeconds'
         type: Integer
         description: |
@@ -640,6 +654,10 @@ properties:
                     description: |
                       Relative path of the file under the mount path where the secret value for this version will be fetched and made available. For example, setting the mountPath as '/etc/secrets' and path as secret_foo would mount the secret value file at /etc/secrets/secret_foo.
                     required: true
+      - name: 'binaryAuthorizationPolicy'
+        type: String
+        description: |
+          The binary authorization policy to be checked when deploying the Cloud Run service.
   - name: 'eventTrigger'
     type: NestedObject
     description: |

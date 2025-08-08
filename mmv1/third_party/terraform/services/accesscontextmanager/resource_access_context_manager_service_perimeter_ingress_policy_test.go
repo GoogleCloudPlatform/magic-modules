@@ -91,6 +91,7 @@ func testAccAccessContextManagerServicePerimeterIngressPolicy_basic(org, policyT
 
 resource "google_access_context_manager_service_perimeter_ingress_policy" "test-access1" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
+	title = "ingress policy title"
 	ingress_from {
 		identity_type = "ANY_IDENTITY"
 	}
@@ -126,6 +127,10 @@ resource "google_access_context_manager_service_perimeter_ingress_policy" "test-
 	perimeter = google_access_context_manager_service_perimeter.test-access.name
 	ingress_from {
 		identity_type = "ANY_IDENTITY"
+	}
+	ingress_to {
+		resources = ["*"]
+		roles = ["roles/bigquery.admin"]
 	}
 }
 

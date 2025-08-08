@@ -102,6 +102,7 @@ resource "google_access_context_manager_access_level" "test-access" {
 
 resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy" "test-access1" {
   perimeter = google_access_context_manager_service_perimeter.test-access.name
+	title = "ingress policy title"
 	ingress_from {
 		identity_type = "ANY_USER_ACCOUNT"
 		sources {
@@ -125,6 +126,10 @@ resource "google_access_context_manager_service_perimeter_dry_run_ingress_policy
 		sources {
 			access_level = google_access_context_manager_access_level.test-access.name
 		}
+	}
+	ingress_to {
+		resources = ["*"]
+		roles = ["roles/bigquery.admin"]
 	}
   depends_on = [google_access_context_manager_service_perimeter_dry_run_ingress_policy.test-access1]
 }

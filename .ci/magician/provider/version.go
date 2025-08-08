@@ -53,3 +53,13 @@ func (v Version) RepoName() string {
 	}
 	return "unknown"
 }
+
+func (v Version) TeamCityNightlyProjectName() string {
+	switch v {
+	case GA:
+		return "TerraformProviders_GoogleCloud_GOOGLE_NIGHTLYTESTS"
+	case Beta:
+		return "TerraformProviders_GoogleCloud_GOOGLE_BETA_NIGHTLYTESTS"
+	}
+	return "unknown"
+}

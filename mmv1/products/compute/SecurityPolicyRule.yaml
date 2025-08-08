@@ -104,16 +104,16 @@ properties:
               Textual representation of an expression in Common Expression Language syntax. The application context of the containing message determines which well-known feature set of CEL is supported.
             required: true
           # >> These fields are not yet supported, following the global security policy resource.
-          # - !ruby/object:Api::Type::String
           #   name: 'title'
+          #   type: String
           #   description: |
           #     Optional. Title for the expression, i.e. a short string describing its purpose. This can be used e.g. in UIs which allow to enter the expression.
-          # - !ruby/object:Api::Type::String
           #   name: 'description'
+          #   type: String
           #   description: |
           #     Optional. Description of the expression. This is a longer text which describes the expression, e.g. when hovered over it in a UI.
-          # - !ruby/object:Api::Type::String
           #   name: 'location'
+          #   type: String
           #   description: |
           #     Optional. String indicating the location of the expression for error reporting, e.g. a file name and a position in the file.
       - name: 'exprOptions'
@@ -370,6 +370,7 @@ properties:
           * SNI: Server name indication in the TLS session of the HTTPS request. The key value is truncated to the first 128 bytes. The key type defaults to ALL on a HTTP session.
           * REGION_CODE: The country/region from which the request originates.
           * TLS_JA3_FINGERPRINT: JA3 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
+          * TLS_JA4_FINGERPRINT: JA4 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
           * USER_IP: The IP address of the originating client, which is resolved based on "userIpRequestHeaders" configured with the security policy. If there is no "userIpRequestHeaders" configuration or an IP address cannot be resolved from it, the key type defaults to IP.
         enum_values:
           - 'ALL'
@@ -381,6 +382,7 @@ properties:
           - 'SNI'
           - 'REGION_CODE'
           - 'TLS_JA3_FINGERPRINT'
+          - 'TLS_JA4_FINGERPRINT'
           - 'USER_IP'
       - name: 'enforceOnKeyName'
         type: String
@@ -410,6 +412,7 @@ properties:
                 * SNI: Server name indication in the TLS session of the HTTPS request. The key value is truncated to the first 128 bytes. The key type defaults to ALL on a HTTP session.
                 * REGION_CODE: The country/region from which the request originates.
                 * TLS_JA3_FINGERPRINT: JA3 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
+                * TLS_JA4_FINGERPRINT: JA4 TLS/SSL fingerprint if the client connects using HTTPS, HTTP/2 or HTTP/3. If not available, the key type defaults to ALL.
                 * USER_IP: The IP address of the originating client, which is resolved based on "userIpRequestHeaders" configured with the security policy. If there is no "userIpRequestHeaders" configuration or an IP address cannot be resolved from it, the key type defaults to IP.
               enum_values:
                 - 'ALL'
@@ -421,6 +424,7 @@ properties:
                 - 'SNI'
                 - 'REGION_CODE'
                 - 'TLS_JA3_FINGERPRINT'
+                - 'TLS_JA4_FINGERPRINT'
                 - 'USER_IP'
             - name: 'enforceOnKeyName'
               type: String
@@ -484,3 +488,4 @@ properties:
     type: Boolean
     description: |
       If set to true, the specified action is not enforced.
+    send_empty_value: true

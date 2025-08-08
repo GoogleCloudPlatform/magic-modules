@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/google/go-github/v68/github"
 	"golang.org/x/exp/slices"
 )
 
@@ -198,6 +199,86 @@ func TestComputeLabels(t *testing.T) {
 			labels := ComputeLabels(tc.resources, tc.regexpLabels)
 			if !slices.Equal(labels, tc.expectedLabels) {
 				t.Errorf("want %v; got %v", tc.expectedLabels, labels)
+			}
+		})
+	}
+}
+
+func TestComputeLabelChanges(t *testing.T) {
+	tests := []struct {
+		name           string
+		existingLabels []*github.Label
+		desiredLabels  []string
+		desiredColor   string
+		want           []LabelChange
+	}{
+		{
+			name:           "new labels only",
+			existingLabels: []*github.Label{},
+			desiredLabels:  []string{"bug", "enhancement"},
+			desiredColor:   "FF0000",
+			want: []LabelChange{
+				{Name: "bug", Color: "FF0000", IsNew: true, NeedsUpdate: false},
+				{Name: "enhancement", Color: "FF0000", IsNew: true, NeedsUpdate: false},
+			},
+		},
+		{
+			name: "existing labels with correct color",
+			existingLabels: []*github.Label{
+				{Name: github.Ptr("xyz"), Color: github.Ptr("FF0000")},
+				{Name: github.Ptr("bug"), Color: github.Ptr("FF0000")},
+				{Name: github.Ptr("enhancement"), Color: github.Ptr("FF0000")},
+			},
+			desiredLabels: []string{"bug", "enhancement"},
+			desiredColor:  "FF0000",
+			want: []LabelChange{
+				{Name: "bug", Color: "FF0000", IsNew: false, NeedsUpdate: false},
+				{Name: "enhancement", Color: "FF0000", IsNew: false, NeedsUpdate: false},
+			},
+		},
+		{
+			name: "existing labels with wrong color",
+			existingLabels: []*github.Label{
+				{Name: github.Ptr("bug"), Color: github.Ptr("00FF00")},
+				{Name: github.Ptr("enhancement"), Color: github.Ptr("00FF00")},
+			},
+			desiredLabels: []string{"bug", "enhancement"},
+			desiredColor:  "FF0000",
+			want: []LabelChange{
+				{Name: "bug", Color: "FF0000", IsNew: false, NeedsUpdate: true},
+				{Name: "enhancement", Color: "FF0000", IsNew: false, NeedsUpdate: true},
+			},
+		},
+		{
+			name: "mixed existing and new labels",
+			existingLabels: []*github.Label{
+				{Name: github.Ptr("bug"), Color: github.Ptr("FF0000")},
+			},
+			desiredLabels: []string{"bug", "enhancement"},
+			desiredColor:  "FF0000",
+			want: []LabelChange{
+				{Name: "bug", Color: "FF0000", IsNew: false, NeedsUpdate: false},
+				{Name: "enhancement", Color: "FF0000", IsNew: true, NeedsUpdate: false},
+			},
+		},
+		{
+			name: "case insensitive color comparison",
+			existingLabels: []*github.Label{
+				{Name: github.Ptr("bug"), Color: github.Ptr("ff0000")},
+			},
+			desiredLabels: []string{"bug"},
+			desiredColor:  "FF0000",
+			want: []LabelChange{
+				{Name: "bug", Color: "FF0000", IsNew: false, NeedsUpdate: false},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := ComputeLabelChanges(tt.existingLabels, tt.desiredLabels, tt.desiredColor)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ComputeLabelChanges() = %v, want %v", got, tt.want)
 			}
 		})
 	}

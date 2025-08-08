@@ -43,7 +43,7 @@ iam_policy:
 custom_code:
   custom_import: 'templates/terraform/custom_import/data_catalog_taxonomy.go.tmpl'
 sweeper:
-  sweepable_identifier_field: displayName
+  identifier_field: displayName
 examples:
   - name: 'data_catalog_taxonomy_basic'
     primary_resource_id: 'basic_taxonomy'
