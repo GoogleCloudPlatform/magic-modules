@@ -83,7 +83,7 @@ resource "google_compute_organization_security_policy" "policy" {
 
 resource "google_compute_organization_security_policy_rule" "policy" {
   policy_id = google_compute_organization_security_policy.policy.id
-  action = "deny"
+  action = "deny(403)"
 
   description = "Updated description"
   match {
