@@ -1,0 +1,13 @@
+resource "google_cloudbuild_trigger" "my_trigger" {
+  name     = "my-github-trigger-via-dev-connect"
+  location = "us-central1"
+
+  developer_connect_event_config {
+    git_repository_link = "projects/gcb-terraform-creds/locations/us-central1/connections/developer-connect-connection/gitRepositoryLinks/gcb-repos-robot-tf-demo"
+    push {
+      branch = "main"
+    }
+  }
+
+  filename = "cloudbuild.yaml"
+}
