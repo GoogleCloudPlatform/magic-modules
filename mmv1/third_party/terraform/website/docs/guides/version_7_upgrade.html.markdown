@@ -104,7 +104,8 @@ Description of the change and how users should adjust their configuration (if ne
 
 ## Resource: `google_beyondcorp_application` is now removed
 
-`google_beyondcorp_application` has been removed. Use `google_beyondcorp_security_gateway_application` instead.
+`google_beyondcorp_application` and its associated IAM resources `google_beyondcorp_application_iam_binding`, `google_beyondcorp_application_iam_member`, and `google_beyondcorp_application_iam_policy`  have been removed. 
+Use `google_beyondcorp_security_gateway_application` instead.
 
 ## Resource: `google_bigtable_table_iam_binding`
 
