@@ -53,7 +53,7 @@ import (
 {{- end}}
 )
 
-func DataSource{{ .ResourceName -}}() *schema.Resource {
+func DataSourceGoogle{{ .ResourceName -}}() *schema.Resource {
 	rs := Resource{{ .ResourceName -}}().Schema
 
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(rs)
