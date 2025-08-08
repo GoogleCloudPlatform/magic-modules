@@ -48,6 +48,12 @@ func TestAssetParent(t *testing.T) {
 			want:      "//cloudresourcemanager.googleapis.com/organizations/unknown",
 		},
 		{
+			name:      "new folder with only itself in ancestors",
+			ancestors: []string{"folders/123"},
+			cai:       &resources.Asset{Type: "cloudresourcemanager.googleapis.com/Folder"},
+			want:      "//cloudresourcemanager.googleapis.com/folders/123",
+		},
+		{
 			name:      "organization",
 			ancestors: []string{"organizations/789"},
 			cai:       &resources.Asset{Type: "cloudresourcemanager.googleapis.com/Organization"},
@@ -84,11 +90,6 @@ func TestAssetParent_Fail(t *testing.T) {
 			name:      "project",
 			ancestors: []string{},
 			cai:       &resources.Asset{Type: "cloudresourcemanager.googleapis.com/Project"},
-		},
-		{
-			name:      "folder",
-			ancestors: []string{"folders/456"},
-			cai:       &resources.Asset{Type: "cloudresourcemanager.googleapis.com/Folder"},
 		},
 		{
 			name:      "other resource",
