@@ -1,6 +1,6 @@
 [
    {
-      "name":"//alloydb.googleapis.com/alloydb-cluster/instances/alloydb-instance",
+      "name":"//alloydb.googleapis.com/projects/{{.Provider.project}}/locations/placeholder-foobar/clusters/alloydb-cluster/instances/alloydb-instance",
       "asset_type":"alloydb.googleapis.com/Instance",
       "resource":{
          "version":"v1beta",
@@ -19,8 +19,6 @@
       },
      "ancestry_path": "{{.Ancestry}}/project/{{.Provider.project}}",
      "ancestors": ["organizations/{{.OrgID}}"]
-
-
    },
    {
       "name":"//alloydb.googleapis.com/projects/{{.Provider.project}}/locations/us-central1/clusters/alloydb-cluster",

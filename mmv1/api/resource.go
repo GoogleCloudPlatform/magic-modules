@@ -379,6 +379,10 @@ type TGCResource struct {
 	// and compute.googleapis.com/GlobalAddress has GlobalAddress for CaiResourceKind.
 	// But they have the same api resource type: address
 	CaiResourceKind string `yaml:"cai_resource_kind,omitempty"`
+
+	// It is used rarely, when the identity field is a field other than `name`
+	// For example, the identity is `instance_id` for google_alloydb_instance
+	TgcIdentity string `yaml:"tgc_identity,omitempty"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -552,9 +556,6 @@ func (r Resource) UserVirtualFields() []*Type {
 }
 
 func (r Resource) ServiceVersion() string {
-	if r.CaiBaseUrl != "" {
-		return extractVersionFromBaseUrl(r.CaiBaseUrl)
-	}
 	return extractVersionFromBaseUrl(r.BaseUrl)
 }
 
@@ -1969,9 +1970,15 @@ func (r Resource) DefineAssetTypeForResourceInProduct() bool {
 // For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
 func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
 	caiBaseUrl := ""
+
 	if r.CaiBaseUrl != "" {
-		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.CaiBaseUrl)
+		identity := "name"
+		if r.TgcIdentity != "" {
+			identity = r.TgcIdentity
+		}
+		caiBaseUrl = fmt.Sprintf("%s/{{%s}}", r.CaiBaseUrl, identity)
 	}
+
 	if caiBaseUrl == "" {
 		caiBaseUrl = r.SelfLink
 	}
@@ -2227,6 +2234,7 @@ func (r Resource) CaiResourceName() string {
 	return r.Name
 }
 
+// Checks if the compiler is the tgc next
 func (r Resource) IsTgcCompiler() bool {
 	return r.Compiler == "terraformgoogleconversionnext-codegen"
 }
