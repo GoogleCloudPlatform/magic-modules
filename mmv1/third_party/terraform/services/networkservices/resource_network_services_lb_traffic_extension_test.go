@@ -1,6 +1,7 @@
 package networkservices_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -808,7 +809,6 @@ resource "google_compute_region_backend_service" "callouts_backend_2" {
 }
 
 func TestAccNetworkServicesLbTrafficExtension_crossRegionInternalPluginExtension(t *testing.T) {
-	acctest.SkipIfVcr(t) // Test requires a existing container image that contains the plugin code, published in an Artifact Registry repository.
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -821,6 +821,26 @@ func TestAccNetworkServicesLbTrafficExtension_crossRegionInternalPluginExtension
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkServicesLbTrafficExtensionDestroyProducer(t),
 		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
+				Check: resource.ComposeTestCheckFunc(
+					// Upload the compiled plugin code to Artifact Registry
+					testAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
+						t,
+						"google_artifact_registry_repository.test_repository",
+						"my-wasm-plugin",
+						"v1",
+						"test-fixtures/compiled-package/plugin.wasm",
+						"plugin.wasm",
+					),
+				),
+			},
+			{
+				ResourceName:            "google_artifact_registry_repository.test_repository",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "name", "terraform_labels"},
+			},
 			{
 				Config: testAccNetworkServicesLbTrafficExtension_crossRegionInternalPluginExtension(context),
 			},
@@ -835,7 +855,7 @@ func TestAccNetworkServicesLbTrafficExtension_crossRegionInternalPluginExtension
 }
 
 func testAccNetworkServicesLbTrafficExtension_crossRegionInternalPluginExtension(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+	return fmt.Sprint(testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
 # VPC network
 resource "google_compute_network" "gilb_network" {
   name                    = "tf-test-l7-ilb-network%{random_suffix}"
@@ -1037,18 +1057,17 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
   versions {
     version_name = "v1"
     description = "v1 version of my wasm plugin"
-    image_uri = "us-central1-docker.pkg.dev/%{test_project_id}/svextensionplugin/my-wasm-plugin:prod"
+    image_uri = "projects/%{test_project_id}/locations/us-central1/repositories/tf-test-repository-standard%{random_suffix}/genericArtifacts/my-wasm-plugin:v1"
 
     labels = {
       test_label =  "test_value"
     }
   }
 }
-`, context)
+`, context))
 }
 
 func TestAccNetworkServicesLbTrafficExtension_globalExternalPluginExtension(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	context := map[string]interface{}{
@@ -1061,6 +1080,26 @@ func TestAccNetworkServicesLbTrafficExtension_globalExternalPluginExtension(t *t
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetworkServicesLbTrafficExtensionDestroyProducer(t),
 		Steps: []resource.TestStep{
+			{
+				Config: testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context),
+				Check: resource.ComposeTestCheckFunc(
+					// Upload the compiled plugin code to Artifact Registry
+					testAccCheckNetworkServicesWasmPlugin_uploadCompiledCode(
+						t,
+						"google_artifact_registry_repository.test_repository",
+						"my-wasm-plugin",
+						"v1",
+						"test-fixtures/compiled-package/plugin.wasm",
+						"plugin.wasm",
+					),
+				),
+			},
+			{
+				ResourceName:            "google_artifact_registry_repository.test_repository",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "name", "terraform_labels"},
+			},
 			{
 				Config: testAccNetworkServicesLbTrafficExtension_globalExternalPluginExtension(context),
 			},
@@ -1075,7 +1114,7 @@ func TestAccNetworkServicesLbTrafficExtension_globalExternalPluginExtension(t *t
 }
 
 func testAccNetworkServicesLbTrafficExtension_globalExternalPluginExtension(context map[string]interface{}) string {
-	return acctest.Nprintf(`
+	return fmt.Sprint(testAccNetworkServicesWasmPlugin_artifactRegistryRepositorySetup(context), acctest.Nprintf(`
 # forwarding rule
 resource "google_compute_global_forwarding_rule" "default" {
   name                  = "tf-test-l7-ilb-forwarding-rule%{random_suffix}"
@@ -1168,12 +1207,12 @@ resource "google_network_services_wasm_plugin" "wasm_plugin" {
   versions {
     version_name = "v1"
     description = "v1 version of my wasm plugin"
-    image_uri = "us-central1-docker.pkg.dev/%{test_project_id}/svextensionplugin/my-wasm-plugin:prod"
+    image_uri = "projects/%{test_project_id}/locations/us-central1/repositories/tf-test-repository-standard%{random_suffix}/genericArtifacts/my-wasm-plugin:v1"
 
     labels = {
       test_label =  "test_value"
     }
   }
 }
-`, context)
+`, context))
 }

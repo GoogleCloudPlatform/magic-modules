@@ -41,10 +41,19 @@ async:
     resource_inside_response: false
 custom_code:
 examples:
-  - name: 'wasm_plugin_basic'
+  - name: 'wasm_plugin_basic_docker_repository'
     primary_resource_id: 'wasm_plugin'
     vars:
       wasm_plugin_name: 'my-wasm-plugin'
+      plugin_package_name: 'my-wasm-plugin-data'
+      repository_name: 'my-artifact-registry-docker-repository'
+    skip_vcr: true
+  - name: 'wasm_plugin_basic_generic_repository'
+    primary_resource_id: 'wasm_plugin'
+    vars:
+      wasm_plugin_name: 'my-wasm-plugin'
+      plugin_package_name: 'my-wasm-plugin-data'
+      repository_name: 'my-artifact-registry-generic-repository'
     skip_vcr: true
 parameters:
   - name: 'location'
