@@ -30,7 +30,7 @@ func TestAccAlloydbCluster_update(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccAlloydbCluster_update(context),
@@ -39,7 +39,7 @@ func TestAccAlloydbCluster_update(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
@@ -89,7 +89,7 @@ func TestAccAlloydbCluster_upgrade(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "labels", "terraform_labels", "skip_await_major_version_upgrade"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location", "labels", "terraform_labels", "skip_await_major_version_upgrade"},
 			},
 			{
 				Config: testAccAlloydbCluster_afterUpgrade(context),
@@ -98,7 +98,7 @@ func TestAccAlloydbCluster_upgrade(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location", "labels", "terraform_labels", "skip_await_major_version_upgrade"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location", "labels", "terraform_labels", "skip_await_major_version_upgrade"},
 			},
 		},
 	})
@@ -279,7 +279,7 @@ func TestAccAlloydbCluster_addAutomatedBackupPolicyAndInitialUser(t *testing.T) 
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_withInitialUserAndAutomatedBackupPolicy(context),
@@ -288,7 +288,7 @@ func TestAccAlloydbCluster_addAutomatedBackupPolicyAndInitialUser(t *testing.T) 
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
@@ -320,7 +320,7 @@ func TestAccAlloydbCluster_deleteAutomatedBackupPolicyAndInitialUser(t *testing.
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_withoutInitialUserAndAutomatedBackupPolicy(context),
@@ -329,7 +329,7 @@ func TestAccAlloydbCluster_deleteAutomatedBackupPolicyAndInitialUser(t *testing.
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
@@ -360,7 +360,7 @@ func TestAccAlloydbCluster_AutomatedBackupPolicyHandlesMidnight(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
@@ -687,7 +687,7 @@ func TestAccAlloydbCluster_usingCMEK(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "cluster_id", "location"},
 			},
 		},
 	})
@@ -741,7 +741,7 @@ func TestAccAlloydbCluster_CMEKInAutomatedBackupIsUpdatable(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_updateCMEKInAutomatedBackup(context),
@@ -750,7 +750,7 @@ func TestAccAlloydbCluster_CMEKInAutomatedBackupIsUpdatable(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_usingCMEKallowDeletion(context),
@@ -759,7 +759,7 @@ func TestAccAlloydbCluster_CMEKInAutomatedBackupIsUpdatable(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "cluster_id", "location"},
 			},
 		},
 	})
@@ -932,7 +932,7 @@ func TestAccAlloydbCluster_continuousBackup_enabledByDefault(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
@@ -968,7 +968,7 @@ func TestAccAlloydbCluster_continuousBackup_update_noChangeIfDefaultsSet(t *test
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_continuousBackupConfig(context),
@@ -981,7 +981,7 @@ func TestAccAlloydbCluster_continuousBackup_update_noChangeIfDefaultsSet(t *test
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
@@ -1017,7 +1017,7 @@ func TestAccAlloydbCluster_continuousBackup_noChangeIfRemoved(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
@@ -1062,7 +1062,7 @@ func TestAccAlloydbCluster_continuousBackup_update(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_continuousBackupConfig(context),
@@ -1075,7 +1075,7 @@ func TestAccAlloydbCluster_continuousBackup_update(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_continuousBackupConfig(context2),
@@ -1088,7 +1088,7 @@ func TestAccAlloydbCluster_continuousBackup_update(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
@@ -1182,7 +1182,7 @@ func TestAccAlloydbCluster_continuousBackup_CMEKIsUpdatable(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_usingCMEKInClusterAndContinuousBackup(context2),
@@ -1191,7 +1191,7 @@ func TestAccAlloydbCluster_continuousBackup_CMEKIsUpdatable(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_continuousBackupUsingCMEKAllowDeletion(context2),
@@ -1200,7 +1200,7 @@ func TestAccAlloydbCluster_continuousBackup_CMEKIsUpdatable(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "cluster_id", "location"},
 			},
 		},
 	})
@@ -1572,7 +1572,7 @@ func TestAccAlloydbCluster_standardClusterUpdate(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_withSubscriptionTypeStandard(context),
@@ -1581,7 +1581,7 @@ func TestAccAlloydbCluster_standardClusterUpdate(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_withSubscriptionTypeStandard(context),
@@ -1590,7 +1590,7 @@ func TestAccAlloydbCluster_standardClusterUpdate(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 		},
 	})
@@ -1616,7 +1616,7 @@ func TestAccAlloydbCluster_trialClusterUpdate(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_withSubscriptionTypeTrial(context),
@@ -1625,7 +1625,7 @@ func TestAccAlloydbCluster_trialClusterUpdate(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 			{
 				Config: testAccAlloydbCluster_withSubscriptionTypeStandard(context),
@@ -1634,7 +1634,7 @@ func TestAccAlloydbCluster_trialClusterUpdate(t *testing.T) {
 				ResourceName:            "google_alloydb_cluster.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"initial_user", "cluster_id", "location"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "initial_user", "cluster_id", "location"},
 			},
 		},
 	})
