@@ -58,6 +58,9 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/zones/{{zone}}/disks/{{name}}'
     - '{{name}}'
+datasource:
+  generate: true
+  use_set_datasource_label: true
 custom_code:
   constants: 'templates/terraform/constants/disk.tmpl'
   encoder: 'templates/terraform/encoders/disk.tmpl'
