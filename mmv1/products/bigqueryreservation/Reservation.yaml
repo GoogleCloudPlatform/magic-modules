@@ -159,7 +159,7 @@ properties:
   - name: 'scalingMode'
     type: Enum
     min_version: beta
-    default_from_api: true
+    default_value: 'SCALING_MODE_UNSPECIFIED'
     description: |
       The scaling mode for the reservation. If the field is present but maxSlots is not present,
       requests will be rejected with error code google.rpc.Code.INVALID_ARGUMENT.
@@ -199,6 +199,7 @@ properties:
       autoscaling slots. Please note, in this mode, the ignoreIdleSlots field must be set to false.
       Otherwise the request will be rejected with error code google.rpc.Code.INVALID_ARGUMENT.
     enum_values:
+      - 'SCALING_MODE_UNSPECIFIED'
       - 'AUTOSCALE_ONLY'
       - 'IDLE_SLOTS_ONLY'
       - 'ALL_SLOTS'
