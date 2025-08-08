@@ -288,7 +288,7 @@ if displayName == "Playbook Example with Fulfillment" {
 				"name": "schema-reference-example",
 				"typeSchema": map[string]interface{}{
 					"schemaReference": map[string]interface{}{
-						"schema": "example-schema",
+						"schema": "Pet",
 						"tool": d.Get("input_parameter_definitions.0.type_schema.0.schema_reference.0.tool").(string),
 					},
 				},
@@ -324,7 +324,7 @@ if displayName == "Playbook Example with Fulfillment" {
 				"name": "schema-reference-example",
 				"typeSchema": map[string]interface{}{
 					"schemaReference": map[string]interface{}{
-						"schema": "example-schema",
+						"schema": "Pet",
 						"tool": d.Get("output_parameter_definitions.0.type_schema.0.schema_reference.0.tool").(string),
 					},
 				},
