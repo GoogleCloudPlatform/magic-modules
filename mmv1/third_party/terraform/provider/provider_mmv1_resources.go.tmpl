@@ -121,28 +121,7 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_compute_storage_pool_types":                compute.DataSourceGoogleComputeStoragePoolTypes(),
 	"google_compute_subnetwork":                        compute.DataSourceGoogleComputeSubnetwork(),
 	"google_compute_subnetworks":                       compute.DataSourceGoogleComputeSubnetworks(),
-	"google_compute_vpn_gateway":                       compute.DataSourceGoogleCofunc SetDataSourceLabels(d *schema.ResourceData) error {
-	effectiveLabels := d.Get("effective_labels")
-	if effectiveLabels == nil {
-		return nil
-	}
-
-	if d.Get("labels") == nil {
-		return fmt.Errorf("`labels` field is not present in the resource schema.")
-	}
-	if err := d.Set("labels", effectiveLabels); err != nil {
-		return fmt.Errorf("Error setting labels in data source: %s", err)
-	}
-
-	if d.Get("terraform_labels") == nil {
-		return fmt.Errorf("`terraform_labels` field is not present in the resource schema.")
-	}
-	if err := d.Set("terraform_labels", effectiveLabels); err != nil {
-		return fmt.Errorf("Error setting terraform_labels in data source: %s", err)
-	}
-
-	return nil
-}mputeVpnGateway(),
+	"google_compute_vpn_gateway":                       compute.DataSourceGoogleComputeVpnGateway(),
 	"google_compute_zones":                             compute.DataSourceGoogleComputeZones(),
 	"google_container_azure_versions":                  containerazure.DataSourceGoogleContainerAzureVersions(),
 	"google_container_aws_versions":                    containeraws.DataSourceGoogleContainerAwsVersions(),
