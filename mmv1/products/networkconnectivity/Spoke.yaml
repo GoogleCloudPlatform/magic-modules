@@ -259,6 +259,9 @@ properties:
       - linked_router_appliance_instances
       - linked_vpn_tunnels
       - linked_producer_vpc_network
+    update_mask_fields:
+      - 'linkedVpcNetwork.excludeExportRanges'
+      - 'linkedVpcNetwork.includeExportRanges'
     properties:
       - name: 'uri'
         type: String
