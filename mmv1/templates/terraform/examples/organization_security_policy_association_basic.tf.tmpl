@@ -5,7 +5,7 @@ resource "google_folder" "security_policy_target" {
   deletion_protection = false
 }
 
-resource "google_compute_organization_security_policy" "policy" {
+resource "google_compute_organization_security_policy" "{{$.PrimaryResourceId}}" {
   provider   = google-beta
   short_name = "tf-test%{random_suffix}"
   parent     = google_folder.security_policy_target.name
@@ -24,9 +24,15 @@ resource "google_compute_organization_security_policy_rule" "{{$.PrimaryResource
   priority = 100
 }
 
+resource "time_sleep" "wait_120_seconds" {
+create_duration = "120s"
+depends_on = [google_compute_organization_security_policy.{{$.PrimaryResourceId}}]
+}
+
 resource "google_compute_organization_security_policy_association" "{{$.PrimaryResourceId}}" {
   provider = google-beta
   name          = "tf-test%{random_suffix}"
   attachment_id = google_compute_organization_security_policy.{{$.PrimaryResourceId}}.parent
   policy_id     = google_compute_organization_security_policy.{{$.PrimaryResourceId}}.id
+  depends_on = [time_sleep.wait_120_seconds]
 }

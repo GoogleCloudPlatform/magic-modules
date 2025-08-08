@@ -45,6 +45,8 @@ examples:
   - name: 'organization_security_policy_association_basic'
     primary_resource_id: 'policy'
     min_version: 'beta'
+    external_providers:
+      - "time"
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:
