@@ -177,7 +177,7 @@ virtual_fields:
         * DELETE
         * PREVENT
         * ABANDON
-    default_value: 'DELETE'
+    default_value: 'PREVENT'
 properties:
   - name: 'name'
     type: String
