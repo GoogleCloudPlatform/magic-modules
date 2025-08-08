@@ -24,6 +24,92 @@ resource "google_dialogflow_cx_tool" "my_tool" {
   parent       = google_dialogflow_cx_agent.agent.id
   display_name = "Example Tool"
   description  = "Example Description"
+  open_api_spec {
+    text_schema = <<EOF
+    {
+      "openapi": "3.0.0",
+      "info": {
+        "title": "Simple Pets API",
+        "version": "1.0.0"
+      },
+      "servers": [
+        {
+          "url": "https://api.example.com/v1"
+        }
+      ],
+      "paths": {
+        "/pets": {
+          "get": {
+            "summary": "List all pets",
+            "operationId": "listPets",
+            "responses": {
+              "200": {
+                "description": "An array of pets",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Pet"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "post": {
+            "summary": "Create a new pet",
+            "operationId": "createPet",
+            "requestBody": {
+              "description": "Pet to add to the store",
+              "required": true,
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Pet"
+                  }
+                }
+              }
+            },
+            "responses": {
+              "201": {
+                "description": "Pet created",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/Pet"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "components": {
+        "schemas": {
+          "Pet": {
+            "type": "object",
+            "required": [
+              "id",
+              "name"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+    EOF
+  }
 }
 
 resource "google_dialogflow_cx_generator" "my_generator" {
@@ -74,6 +160,78 @@ resource "google_dialogflow_cx_playbook" "{{$.PrimaryResourceId}}" {
     }
     steps {
       text = "step 3"
+    }
+  }
+
+  input_parameter_definitions {
+    name = "schema-reference-example"
+    description = "An example description."
+    type_schema {
+      schema_reference {
+        schema = "Pet"
+        tool = google_dialogflow_cx_tool.my_tool.id
+      }
+    }
+  }
+
+  input_parameter_definitions {
+    name = "inline-schema-string-example"
+    description = "An example description."
+    type_schema {
+      inline_schema {
+        type = "STRING"
+      }
+    }
+  }
+
+  input_parameter_definitions {
+    name = "inline-schema-number-array-example"
+    description = "An example description."
+    type_schema {
+      inline_schema {
+        type = "ARRAY"
+        items = jsonencode({
+          "inlineSchema": {
+            "type": "NUMBER"
+          }
+        })
+      }
+    }
+  }
+
+  output_parameter_definitions {
+    name = "schema-reference-example"
+    description = "An example description."
+    type_schema {
+      schema_reference {
+        schema = "Pet"
+        tool = google_dialogflow_cx_tool.my_tool.id
+      }
+    }
+  }
+
+  output_parameter_definitions {
+    name = "inline-schema-string-example"
+    description = "An example description."
+    type_schema {
+      inline_schema {
+        type = "STRING"
+      }
+    }
+  }
+
+  output_parameter_definitions {
+    name = "inline-schema-number-array-example"
+    description = "An example description."
+    type_schema {
+      inline_schema {
+        type = "ARRAY"
+        items = jsonencode({
+          "inlineSchema": {
+            "type": "NUMBER"
+          }
+        })
+      }
     }
   }
 
