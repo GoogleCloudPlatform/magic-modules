@@ -42,6 +42,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -69,6 +71,8 @@ resource "google_alloydb_cluster" "secondary" {
   secondary_config {
     primary_cluster_name = google_alloydb_cluster.primary.name
   }
+
+  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -111,6 +115,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -134,6 +140,8 @@ resource "google_alloydb_cluster" "secondary" {
   continuous_backup_config {
     enabled = false
   }
+
+  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -176,6 +184,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -202,6 +212,8 @@ resource "google_alloydb_cluster" "secondary" {
   secondary_config {
     primary_cluster_name = google_alloydb_cluster.primary.name
   }
+
+  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -244,6 +256,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -271,6 +285,8 @@ resource "google_alloydb_cluster" "secondary" {
   secondary_config {
     primary_cluster_name = google_alloydb_cluster.primary.name
   }
+
+  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -327,6 +343,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -358,6 +376,8 @@ resource "google_alloydb_cluster" "secondary" {
   labels = {
     foo = "bar"
   }
+
+  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -405,6 +425,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -436,6 +458,8 @@ resource "google_alloydb_cluster" "secondary" {
   encryption_config {
     kms_key_name = "%{kms_key_name}"
   }
+
+  deletion_protection = false
 
   depends_on = [
     google_alloydb_instance.primary,
@@ -492,6 +516,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
 		network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -519,6 +545,8 @@ resource "google_alloydb_cluster" "secondary" {
   secondary_config {
     primary_cluster_name = google_alloydb_cluster.primary.name
   }
+
+  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -568,6 +596,8 @@ resource "google_alloydb_cluster" "primary" {
 		network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
 		allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -596,6 +626,8 @@ resource "google_alloydb_cluster" "secondary" {
   secondary_config {
     primary_cluster_name = google_alloydb_cluster.primary.name
   }
+
+  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -657,6 +689,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -686,6 +720,8 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   deletion_policy = "FORCE"
+
+  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -720,6 +756,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -743,6 +781,8 @@ resource "google_alloydb_cluster" "secondary" {
   continuous_backup_config {
     enabled = false
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "secondary" {
@@ -812,6 +852,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -839,6 +881,8 @@ resource "google_alloydb_cluster" "secondary" {
   labels = {
     foo = "bar" 
   }  
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "secondary" {
@@ -922,6 +966,8 @@ resource "google_alloydb_cluster" "secondary" {
   continuous_backup_config {
     enabled = false
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "secondary" {
@@ -1000,6 +1046,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -1028,6 +1076,7 @@ resource "google_alloydb_cluster" "secondary" {
     foo = "bar"
   }
 
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "secondary" {
@@ -1098,6 +1147,8 @@ resource "google_alloydb_cluster" "primary" {
     network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
     allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -1128,6 +1179,8 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   deletion_policy = "FORCE"
+
+  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -1167,6 +1220,8 @@ resource "google_alloydb_cluster" "primary" {
     network    = "projects/${data.google_project.project.number}/global/networks/${data.google_compute_network.default.name}"
     allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -1191,6 +1246,8 @@ resource "google_alloydb_cluster" "secondary" {
   continuous_backup_config {
     enabled = false
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "secondary" {
@@ -1283,6 +1340,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -1336,6 +1395,8 @@ resource "google_alloydb_cluster" "secondary" {
       test = "tf-test-alloydb-secondary-cluster%{random_suffix}"
     }
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "secondary" {
@@ -1423,6 +1484,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -1471,6 +1534,9 @@ resource "google_alloydb_cluster" "secondary" {
       retention_period = "4.5s"
     }
   }
+
+  deletion_protection = false
+
   lifecycle {
     ignore_changes = [
       automated_backup_policy[0].time_based_retention
@@ -1508,6 +1574,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -1553,6 +1621,9 @@ resource "google_alloydb_cluster" "secondary" {
       }
     }
   }
+
+  deletion_protection = false
+
   lifecycle {
     ignore_changes = [
       automated_backup_policy[0].time_based_retention
@@ -1636,6 +1707,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -1661,6 +1734,7 @@ resource "google_alloydb_cluster" "secondary" {
     recovery_window_days = 14
   }
 
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "secondary" {

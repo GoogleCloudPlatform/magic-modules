@@ -89,6 +89,8 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
@@ -122,6 +124,8 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
@@ -155,6 +159,8 @@ resource "google_alloydb_cluster" "restored" {
   lifecycle {
     prevent_destroy = true
   }
+
+  deletion_protection = false
 }
 
 data "google_project" "project" {}
@@ -174,6 +180,8 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
@@ -201,6 +209,8 @@ resource "google_alloydb_cluster" "restored" {
     cluster = google_alloydb_cluster.source.name
   }
 
+  deletion_protection = false
+
   lifecycle {
     prevent_destroy = true
   }
@@ -222,6 +232,8 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
@@ -247,6 +259,8 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
+
+  deletion_protection = false
 
   lifecycle {
     prevent_destroy = true
@@ -271,6 +285,8 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
@@ -297,6 +313,8 @@ resource "google_alloydb_cluster" "restored_from_backup" {
     backup_name = google_alloydb_backup.default.name
   }
 
+  deletion_protection = false
+
   lifecycle {
     prevent_destroy = true
   }
@@ -312,6 +330,8 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
     cluster = google_alloydb_cluster.source.name
     point_in_time = google_alloydb_backup.default.update_time
   }
+
+  deletion_protection = false
 
   lifecycle {
     prevent_destroy = true
@@ -336,6 +356,8 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
@@ -367,6 +389,8 @@ resource "google_alloydb_cluster" "restored_from_backup" {
     recovery_window_days = 20
   }
 
+  deletion_protection = false
+
   lifecycle {
     prevent_destroy = true
   }
@@ -387,6 +411,8 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
     enabled              = true
     recovery_window_days = 20
   }
+
+  deletion_protection = false
 
   lifecycle {
     prevent_destroy = true
@@ -411,6 +437,8 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
@@ -449,6 +477,8 @@ resource "google_alloydb_cluster" "restored_from_backup" {
     enabled              = true
     recovery_window_days = 20
   }
+
+  deletion_protection = false
 
   lifecycle {
     prevent_destroy = true
@@ -521,6 +551,8 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   restore_backup_source {
     backup_name = google_alloydb_backup.default.name
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_cluster" "restored_from_point_in_time" {
@@ -533,6 +565,8 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
     cluster = google_alloydb_cluster.source.name
     point_in_time = google_alloydb_backup.default.update_time
   }
+
+  deletion_protection = false
 }
 
 data "google_project" "project" {}

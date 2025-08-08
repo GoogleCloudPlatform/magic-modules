@@ -56,6 +56,8 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
+
+  deletion_protection = false
 }
 
 data "google_project" "project" {
@@ -112,6 +114,8 @@ resource "google_alloydb_cluster" "default" {
     network = data.google_compute_network.default.id
   }
   database_version = "POSTGRES_14"
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "default" {
@@ -140,6 +144,8 @@ resource "google_alloydb_cluster" "default" {
     network = data.google_compute_network.default.id
   }
   database_version = "POSTGRES_15"
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "default" {
@@ -192,6 +198,8 @@ resource "google_alloydb_cluster" "default" {
   network_config {
   	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
+
+  deletion_protection = false
 }
 
 data "google_project" "project" {
@@ -235,6 +243,8 @@ resource "google_alloydb_cluster" "default" {
   network_config {
   	network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
+
+  deletion_protection = false
 }
 
 data "google_project" "project" {
@@ -397,6 +407,9 @@ resource "google_alloydb_cluster" "default" {
       test = "tf-test-alloydb-cluster%{random_suffix}"
     }
   }
+
+  deletion_protection = false
+
   lifecycle {
     prevent_destroy = true
   }  
@@ -419,6 +432,9 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
+
+  deletion_protection = false
+
   lifecycle {
     prevent_destroy = true
   }  
@@ -474,9 +490,11 @@ resource "google_alloydb_cluster" "default" {
 	  count = 1
 	}
     labels = {
-	  test = "tf-test-alloydb-cluster%{random_suffix}"
-	}
+	  	test = "tf-test-alloydb-cluster%{random_suffix}"
+		}
   }
+
+  deletion_protection = false
 }
 data "google_project" "project" {}
 resource "google_compute_network" "default" {
@@ -588,6 +606,9 @@ resource "google_alloydb_cluster" "default" {
       retention_period = "4.5s"
     }
   }
+
+  deletion_protection = false
+
   lifecycle {
     ignore_changes = [
       automated_backup_policy[0].time_based_retention
@@ -628,6 +649,9 @@ resource "google_alloydb_cluster" "default" {
       }
     }
   }
+
+  deletion_protection = false
+
   lifecycle {
     ignore_changes = [
       automated_backup_policy[0].time_based_retention
@@ -680,6 +704,8 @@ resource "google_alloydb_cluster" "default" {
   encryption_config {
     kms_key_name = "%{kms_key_name}"
   }
+
+  deletion_protection = false
   depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 resource "google_compute_network" "default" {
@@ -761,8 +787,11 @@ resource "google_alloydb_cluster" "default" {
       retention_period = "510s"
     }
   }
+
+  deletion_protection = false
+
   lifecycle {
-	prevent_destroy = true
+		prevent_destroy = true
   }
   depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
@@ -803,6 +832,9 @@ resource "google_alloydb_cluster" "default" {
       retention_period = "510s"
     }
   }
+
+  deletion_protection = false
+
   lifecycle {
     prevent_destroy = true
   }
@@ -851,6 +883,8 @@ resource "google_alloydb_cluster" "default" {
       retention_period = "510s"
     }
   }
+
+  deletion_protection = false
   depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
@@ -1071,6 +1105,9 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
+
+  deletion_protection = false
+
   lifecycle {
     prevent_destroy = true
   }
@@ -1098,6 +1135,9 @@ resource "google_alloydb_cluster" "default" {
     enabled              = %{enabled}
     recovery_window_days = %{recovery_window_days}
   }
+
+  deletion_protection = false
+
   lifecycle {
     prevent_destroy = true
   }
@@ -1181,8 +1221,11 @@ resource "google_alloydb_cluster" "default" {
       kms_key_name = "%{key_name}"
     }
   }
+
+  deletion_protection = false
+
   lifecycle {
-	prevent_destroy = true
+		prevent_destroy = true
   }
   depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
@@ -1216,6 +1259,8 @@ resource "google_alloydb_cluster" "default" {
       kms_key_name = "%{key_name}"
     }
   }
+
+  deletion_protection = false
   depends_on = [google_kms_crypto_key_iam_member.crypto_key]
 }
 
@@ -1266,6 +1311,8 @@ resource "google_alloydb_cluster" "default" {
   network_config {
 		network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
   }
+
+  deletion_protection = false
 }
 data "google_project" "project" {}
 resource "google_compute_network" "default" {
@@ -1308,6 +1355,8 @@ resource "google_alloydb_cluster" "default" {
 		network    = "projects/${data.google_project.project.number}/global/networks/${google_compute_network.default.name}"
 		allocated_ip_range = google_compute_global_address.private_ip_alloc.name
   }
+
+  deletion_protection = false
 }
 data "google_project" "project" {}
 resource "google_compute_network" "default" {
@@ -1368,6 +1417,8 @@ resource "google_alloydb_cluster" "default" {
       }
     }
   }
+
+  deletion_protection = false
 }
 data "google_project" "project" {}
 resource "google_compute_network" "default" {
@@ -1416,6 +1467,8 @@ resource "google_alloydb_cluster" "default" {
       day = "WEDNESDAY"
     }
   }
+
+  deletion_protection = false
 }
 
 resource "google_compute_network" "default" {
@@ -1445,6 +1498,8 @@ resource "google_alloydb_cluster" "default" {
       }
     }
   }
+
+  deletion_protection = false
 }
 
 resource "google_compute_network" "default" {
@@ -1487,6 +1542,8 @@ resource "google_alloydb_cluster" "default" {
   psc_config {
     psc_enabled = true
   }
+
+  deletion_protection = false
 }
 data "google_project" "project" {}
 `, context)

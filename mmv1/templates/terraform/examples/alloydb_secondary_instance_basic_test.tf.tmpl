@@ -4,6 +4,8 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -34,6 +36,7 @@ resource "google_alloydb_cluster" "secondary" {
 
   deletion_policy = "FORCE"
 
+  deletion_protection = false
   depends_on = [google_alloydb_instance.primary]
 }
 
