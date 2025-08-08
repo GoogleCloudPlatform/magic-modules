@@ -3,7 +3,7 @@ resource "google_notebooks_instance" "{{$.PrimaryResourceId}}" {
   location = "us-west1-a"
   machine_type = "e2-medium"
   vm_image {
-    project      = "deeplearning-platform-release"
-    image_family = "pytorch-2-7-cu128-ubuntu-2204-nvidia-570"
+    project      = "cloud-notebooks-managed"
+    image_family = "workbench-instances"
   }
 }
