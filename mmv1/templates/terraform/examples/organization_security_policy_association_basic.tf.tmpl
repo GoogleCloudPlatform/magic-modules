@@ -24,9 +24,9 @@ resource "google_compute_organization_security_policy_rule" "{{$.PrimaryResource
   priority = 100
 }
 
-resource "time_sleep" "wait_120_seconds" {
-create_duration = "120s"
-depends_on = [google_compute_organization_security_policy.{{$.PrimaryResourceId}}]
+resource "time_sleep" "wait_120_seconds_for_apply" {
+  create_duration = "120s"
+  depends_on = [google_compute_organization_security_policy.{{$.PrimaryResourceId}}]
 }
 
 resource "google_compute_organization_security_policy_association" "{{$.PrimaryResourceId}}" {
@@ -34,5 +34,11 @@ resource "google_compute_organization_security_policy_association" "{{$.PrimaryR
   name          = "tf-test%{random_suffix}"
   attachment_id = google_compute_organization_security_policy.{{$.PrimaryResourceId}}.parent
   policy_id     = google_compute_organization_security_policy.{{$.PrimaryResourceId}}.id
-  depends_on = [time_sleep.wait_120_seconds]
+  depends_on = [time_sleep.wait_120_seconds_for_apply]
 }
+
+resource "time_sleep" "wait_120_seconds_for_post_destroy" {
+  create_duration = "120s"
+  depends_on = [google_compute_organization_security_policy_association.{{$.PrimaryResourceId}}]
+}
+
