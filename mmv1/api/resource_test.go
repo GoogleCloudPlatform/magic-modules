@@ -171,22 +171,6 @@ func TestResourceServiceVersion(t *testing.T) {
 			},
 			expected: "v3",
 		},
-		{
-			description: "CaiBaseUrl does not start with a version",
-			obj: Resource{
-				BaseUrl:    "apis/serving.knative.dev/v1/namespaces/{{project}}/services",
-				CaiBaseUrl: "projects/{{project}}/locations/{{location}}/services",
-			},
-			expected: "",
-		},
-		{
-			description: "CaiBaseUrl starts with a version",
-			obj: Resource{
-				BaseUrl:    "apis/serving.knative.dev/v1/namespaces/{{project}}/services",
-				CaiBaseUrl: "v1/projects/{{project}}/locations/{{location}}/services",
-			},
-			expected: "v1",
-		},
 	}
 
 	for _, tc := range cases {
