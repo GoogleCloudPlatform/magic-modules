@@ -672,6 +672,40 @@ func schemaNodeConfig() *schema.Schema {
                                 Optional:    true,
                                 Description: `Defines whether to enable single process OOM killer.`,
                             },
+							"memory_manager": {
+                                Type: schema.TypeList,
+                                Optional: true,
+                                Description: `Configuration for the memory manager on the node. The memory manager optimizes memory and hugepages allocation for pods, especially those in the Guaranteed QoS class, by influencing NUMA affinity.`,
+                                Elem: &schema.Resource{
+                                    Schema: map[string]*schema.Schema{
+                                        "policy": {
+                                            Type:        schema.TypeString,
+                                            Optional:    true,
+                                            Description: `The memory manager policy to use. This policy guides how memory and hugepages are allocated and managed for pods on the node, influencing NUMA affinity.`,
+                                        },
+	                                },
+	                            },
+	                        },
+                            "topology_manager": {
+                                Type: schema.TypeList,
+                                Optional: true,
+                                MaxItems: 1,
+                                Description: `Configuration for the Topology Manager on the node. The Topology Manager aligns CPU, memory, and device resources on a node to optimize performance, especially for NUMA-aware workloads, by ensuring resource co-location.`,
+                                Elem: &schema.Resource{
+                                    Schema: map[string]*schema.Schema{
+                                        "policy": {
+                                            Type:        schema.TypeString,
+                                            Optional:    true,
+                                            Description: `The Topology Manager policy to use. This policy dictates how resource alignment is handled on the node.`,
+                                        },
+                                        "scope": {
+                                            Type:        schema.TypeString,
+                                            Optional:    true,
+                                            Description: `The Topology Manager scope, defining the granularity at which policy decisions are applied. Valid values are "container" (resources are aligned per container within a pod) or "pod" (resources are aligned for the entire pod).`,
+                                        },
+                                    },
+                                },
+                            },
 						},
 					},
 				},
@@ -1486,6 +1520,12 @@ func expandKubeletConfig(v interface{}) *container.NodeKubeletConfig {
 	if singleProcessOomKill, ok := cfg["single_process_oom_kill"]; ok {
 	    kConfig.SingleProcessOomKill = singleProcessOomKill.(bool)
     }
+	if v, ok := cfg["memory_manager"]; ok {
+		kConfig.MemoryManager = expandMemoryManager(v)
+	}
+    if v, ok := cfg["topology_manager"]; ok {
+		kConfig.TopologyManager = expandTopologyManager(v)
+	}
 	return kConfig
 }
 
@@ -1582,6 +1622,54 @@ func expandHugepagesConfig(v interface{}) *container.HugepagesConfig {
 	}
 
 	return hugepagesConfig
+}
+
+func expandTopologyManager(v interface{}) *container.TopologyManager {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.TopologyManager{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	topologyManager := &container.TopologyManager{}
+
+	if v, ok := cfg["policy"]; ok {
+		topologyManager.Policy = v.(string)
+	}
+
+	if v, ok := cfg["scope"]; ok {
+		topologyManager.Scope = v.(string)
+	}
+
+	return topologyManager
+}
+
+func expandMemoryManager(v interface{}) *container.MemoryManager {
+	if v == nil {
+		return nil
+	}
+	ls := v.([]interface{})
+	if len(ls) == 0 {
+		return nil
+	}
+	if ls[0] == nil {
+		return &container.MemoryManager{}
+	}
+	cfg := ls[0].(map[string]interface{})
+
+	memoryManager := &container.MemoryManager{}
+
+	if v, ok := cfg["policy"]; ok {
+		memoryManager.Policy = v.(string)
+	}
+
+	return memoryManager
 }
 
 func expandContainerdConfig(v interface{}) *container.ContainerdConfig {
@@ -2140,6 +2228,29 @@ func flattenKubeletConfig(c *container.NodeKubeletConfig) []map[string]interface
 			"image_maximum_gc_age":                   c.ImageMaximumGcAge,
 			"allowed_unsafe_sysctls":                 c.AllowedUnsafeSysctls,
 			"single_process_oom_kill":                 c.SingleProcessOomKill,
+			"topology_manager":                       flattenTopologyManager(c.TopologyManager),
+			"memory_manager":                         flattenMemoryManager(c.MemoryManager),
+		})
+	}
+	return result
+}
+
+func flattenTopologyManager(c *container.TopologyManager)[]map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"policy": c.Policy,
+			"scope": c.Scope,
+		})
+	}
+	return result
+}
+
+func flattenMemoryManager(c *container.MemoryManager)[]map[string]interface{} {
+	result := []map[string]interface{}{}
+	if c != nil {
+		result = append(result, map[string]interface{}{
+			"policy": c.Policy,
 		})
 	}
 	return result
