@@ -274,11 +274,11 @@ resource "google_network_connectivity_spoke" "primary" {
   hub = google_network_connectivity_hub.basic_hub.id
   linked_vpc_network {
     exclude_export_ranges = [
-      "198.51.100.0/24",
+      "192.168.0.0/24",
       "10.10.0.0/16"
     ]
     include_export_ranges = [
-      "198.51.100.0/23", 
+      "192.168.0.0/16", 
       "10.0.0.0/8"
     ]
     uri = google_compute_network.network.self_link
@@ -313,11 +313,11 @@ resource "google_network_connectivity_spoke" "primary" {
   hub = google_network_connectivity_hub.basic_hub.id
   linked_vpc_network {
     exclude_export_ranges = [
-      "198.51.100.0/24",
+      "100.64.0.0/16",
       "10.10.0.0/16"
     ]
     include_export_ranges = [
-      "198.51.100.0/23", 
+      "100.64.0.0/10", 
       "10.0.0.0/8"
     ]
     uri = google_compute_network.network.self_link
@@ -610,11 +610,12 @@ resource "google_network_connectivity_spoke" "primary" {
   hub = google_network_connectivity_hub.basic_hub.id
   linked_vpc_network {
     exclude_export_ranges = [
-      "198.51.100.0/24",
+      "172.16.0.0/24",
+      "172.16.0.1/24",
       "10.10.0.0/16"
     ]
     include_export_ranges = [
-      "198.51.100.0/23", 
+      "172.16.0.0/16", 
       "10.0.0.0/8"
     ]
     uri = google_compute_network.network.self_link
@@ -649,11 +650,11 @@ resource "google_network_connectivity_spoke" "primary" {
   hub = google_network_connectivity_hub.basic_hub.id
   linked_vpc_network {
     exclude_export_ranges = [
-      "198.51.100.0/24",
+      "198.51.100.0/22",
       "10.10.0.0/16"
     ]
     include_export_ranges = [
-      "198.51.100.0/23", 
+      "198.51.100.0/24", 
       "10.0.0.0/8"
     ]
     uri = google_compute_network.network.self_link
