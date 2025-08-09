@@ -30,6 +30,10 @@ import (
 {{- if not $.Res.ExcludeDelete }}
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 {{- end }}
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 
 	"{{ $.ImportPath }}/acctest"
 	"{{ $.ImportPath  }}/envvar"
@@ -159,3 +163,56 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 	}
 }
 {{- end }}
+
+func TestAcc{{ $.Res.ResourceName }}_ResourceIdentity(t *testing.T) {
+	t.Parallel()
+	{{- if gt (len $.Res.TestExamples) 0 }}
+	{{- $firstExample := index $.Res.TestExamples 0 }}
+	context := map[string]interface{}{
+	{{- template "EnvVarContext" dict "TestEnvVars" $firstExample.TestEnvVars "HasNewLine" false}}
+		"random_suffix": acctest.RandString(t, 10),
+	}
+	{{- range $e := $.Res.IdentityProperties }}
+	context["{{ $e.Name }}"] = acctest.RandString(t, 10)
+	{{- end }}
+	{{- range $varKey, $varVal := $firstExample.TestVarsOverrides }}
+	context["{{$varKey}}"] = {{$varVal}}
+	{{- end }}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+			tfversion.SkipBelow(tfversion.Version1_12_0),
+		},
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc{{ $firstExample.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectIdentity(
+						"{{ $.Res.TerraformName }}.{{ $firstExample.PrimaryResourceId }}",
+						map[string]knownvalue.Check{
+							{{- range $e := $.Res.IdentityProperties }}
+							"{{ $e.Name }}": knownvalue.StringExact(context["{{ $e.Name }}"].(string)),
+							{{- end }}
+						},
+					),
+					{{- range $e := $.Res.IdentityProperties }}
+					statecheck.ExpectKnownValue(
+						"{{ $.Res.TerraformName }}.{{ $firstExample.PrimaryResourceId }}",
+						tfjsonpath.New("{{ $e.Name }}"),
+						knownvalue.StringExact(context["{{ $e.Name }}"].(string))),
+					{{- end }}
+				},
+			},
+			{
+				ResourceName:    "{{ $.Res.TerraformName }}.{{ $firstExample.PrimaryResourceId }}",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
+	{{- else }}
+	t.Skip("Skipping resource identity test as no test examples are defined.")
+	{{- end }}
+}
