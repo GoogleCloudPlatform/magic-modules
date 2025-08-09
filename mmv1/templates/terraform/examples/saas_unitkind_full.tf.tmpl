@@ -1,0 +1,91 @@
+resource "google_saas_saas" "saas" {
+    provider = google-beta
+    location = "us-central1"
+    saas_id = "{{index $.Vars "unit_kind_id"}}"
+    labels = {
+      "foo" = "bar"
+    }
+
+    locations {
+      name = "us-east1"
+    }
+
+    locations {
+      name = "europe-west1"
+    }
+}
+
+resource "google_saas_unit_kind" "project-{{$.PrimaryResourceId}}" {
+    provider     = google-beta
+    location     = "us-central1"
+    unit_kind_id = "p-{{index $.Vars "unit_kind_id"}}"
+    saas         = google_saas_saas.saas.id
+}
+
+resource "google_saas_unit_kind" "network-{{$.PrimaryResourceId}}" {
+  provider     = google-beta
+  location     = "us-central1"
+  unit_kind_id = "n-{{index $.Vars "unit_kind_id"}}"
+  saas         = google_saas_saas.saas.id
+
+  dependency {
+    unit_kind = google_saas_unit_kind.project-{{$.PrimaryResourceId}}.id
+    alias     = "project"
+  }
+
+  input_variable_mapping {
+    variable = "project_id"
+    from {
+      dependency      = "project"
+      output_variable = "project_id"
+    }
+  }
+
+  input_variable_mapping {
+    variable = "consumer_id"
+    to {
+      dependency        = "project"
+      input_variable    = "consumer_id"
+      ignore_for_lookup = true
+    }
+  }
+
+
+}
+
+resource "google_saas_unit_kind" "{{$.PrimaryResourceId}}" {
+  provider     = google-beta
+  location     = "us-central1"
+  unit_kind_id = "a-{{index $.Vars "unit_kind_id"}}"
+  saas         = google_saas_saas.saas.id
+
+    labels = {
+      "foo" = "bar"
+    }
+
+    annotations = {
+      "foo" = "baz"
+    }
+
+  dependency {
+    unit_kind = google_saas_unit_kind.network-{{$.PrimaryResourceId}}.id
+    alias     = "network"
+  }
+
+  input_variable_mapping {
+    variable = "vpc_name"
+    from {
+      dependency      = "network"
+      output_variable = "vpc_name"
+    }
+  }
+
+  input_variable_mapping {
+    variable = "consumer_id"
+    to {
+      dependency        = "network"
+      input_variable    = "consumer_id"
+      ignore_for_lookup = true
+    }
+  }
+}
