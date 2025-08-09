@@ -12,24 +12,11 @@ import (
 
 func DataSourceTpuTensorflowVersions() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceTpuTensorFlowVersionsRead,
-		Schema: map[string]*schema.Schema{
-			"project": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"zone": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
-			"versions": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
-		},
+   ...
+   DeprecationMessage: "`google_tpu_node` is deprecated and will be removed in a future major release.
+  Use `google_tpu_v2_vm` instead." + "For moving from TPU Node to TPU VM architecture, see
+  https://cloud.google.com/tpu/docs/system-architecture-tpu-vm#from-tpu-node-to-tpu-vm.",
+   ...
 	}
 }
 
