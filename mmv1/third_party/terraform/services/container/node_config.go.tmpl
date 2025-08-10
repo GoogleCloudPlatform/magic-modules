@@ -718,13 +718,17 @@ func schemaNodeConfig() *schema.Schema {
 							},
 							"transparent_hugepage_defrag": {
                             	Type:        schema.TypeString,
+								Default:     "TRANSPARENT_HUGEPAGE_DEFRAG_UNSPECIFIED",
                             	Optional:    true,
                             	Description: `Defines the transparent hugepage defrag configuration on the node. VM hugepage allocation can be managed by either limiting defragmentation for delayed allocation or skipping it entirely for immediate allocation only. See https://docs.kernel.org/admin-guide/mm/transhuge.html for more details.`,
+								ValidateFunc: validation.StringInSlice([]string{"TRANSPARENT_HUGEPAGE_DEFRAG_UNSPECIFIED", "TRANSPARENT_HUGEPAGE_DEFRAG_ALWAYS", "TRANSPARENT_HUGEPAGE_DEFRAG_DEFER", "TRANSPARENT_HUGEPAGE_DEFRAG_DEFER_WITH_MADVISE", "TRANSPARENT_HUGEPAGE_DEFRAG_MADVISE", "TRANSPARENT_HUGEPAGE_DEFRAG_NEVER"}, false),
                             },
 							"transparent_hugepage_enabled": {
                             	Type:        schema.TypeString,
+								Default:     "TRANSPARENT_HUGEPAGE_ENABLED_UNSPECIFIED",
                             	Optional:    true,
                             	Description: `Transparent hugepage support for anonymous memory can be entirely disabled (mostly for debugging purposes) or only enabled inside MADV_HUGEPAGE regions (to avoid the risk of consuming more memory resources) or enabled system wide. See https://docs.kernel.org/admin-guide/mm/transhuge.html for more details.`,
+								ValidateFunc: validation.StringInSlice([]string{"TRANSPARENT_HUGEPAGE_ENABLED_UNSPECIFIED", "TRANSPARENT_HUGEPAGE_ENABLED_ALWAYS", "TRANSPARENT_HUGEPAGE_ENABLED_MADVISE", "TRANSPARENT_HUGEPAGE_ENABLED_NEVER"}, false),
                             },
 						},
 					},
