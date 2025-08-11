@@ -758,7 +758,7 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 		propertyWithRequiredWith([]string{requiredWith}),
 	}
 
-	if originalField.Required {
+	if originalField.Required || len(originalField.ExactlyOneOf) > 0 {
 		exactlyOneOf := append(originalField.ExactlyOneOf, fieldPathOriginalField, fieldPathCurrentField)
 		options = append(options, propertyWithExactlyOneOf(exactlyOneOf))
 	} else {

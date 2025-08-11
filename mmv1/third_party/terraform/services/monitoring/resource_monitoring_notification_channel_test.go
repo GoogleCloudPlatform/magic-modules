@@ -155,30 +155,30 @@ func TestAccMonitoringNotificationChannel_updateSensitiveLabelsWo(t *testing.T) 
 				ResourceName:            "google_monitoring_notification_channel.pagerduty",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "labels.password", "sensitive_labels_wo"},
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "labels.password"},
 			},
 			{
 				ResourceName:            "google_monitoring_notification_channel.basicauth",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "labels.password", "sensitive_labels_wo"},
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "labels.password"},
 			},
 			{
 				Config:                  testAccMonitoringNotificationChannel_updateSensitiveWoLabels(),
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "labels.password", "sensitive_labels_wo"},
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "labels.password"},
 			},
 			{
 				ResourceName:            "google_monitoring_notification_channel.pagerduty",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "labels.password", "sensitive_labels_wo"},
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "labels.password"},
 			},
 			{
 				ResourceName:            "google_monitoring_notification_channel.basicauth",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "labels.password", "sensitive_labels_wo"},
+				ImportStateVerifyIgnore: []string{"labels.%", "labels.service_key", "labels.password"},
 			},
 		},
 	})
@@ -201,18 +201,18 @@ func TestAccMonitoringNotificationChannel_updateSensitiveLabelsWo_slack(t *testi
 				ResourceName:            "google_monitoring_notification_channel.slack",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.oauth_token", "sensitive_labels_wo"},
+				ImportStateVerifyIgnore: []string{"labels.oauth_token"},
 			},
 			{
 				Config:                  testAccMonitoringNotificationChannel_updateSensitiveWoLabels_slack(),
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.oauth_token", "sensitive_labels_wo"},
+				ImportStateVerifyIgnore: []string{"labels.oauth_token"},
 			},
 			{
 				ResourceName:            "google_monitoring_notification_channel.slack",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"labels.oauth_token", "sensitive_labels_wo"},
+				ImportStateVerifyIgnore: []string{"labels.oauth_token"},
 			},
 		},
 	})
@@ -324,9 +324,9 @@ resource "google_monitoring_notification_channel" "basicauth" {
 		"url"      = "http://fakeurl.com"
 	}
 
-	sensitive_labels_wo {
+	sensitive_labels {
 		password_wo         = "somepassword"
-		password_wo_version = 1
+		password_wo_version = "1"
 	}
 }
 
@@ -334,9 +334,9 @@ resource "google_monitoring_notification_channel" "pagerduty" {
 	display_name = "TFTest Pagerduty Channel"
 	type         = "pagerduty"
 
-	sensitive_labels_wo {
+	sensitive_labels {
 		service_key_wo         = "some_service_key"
-		service_key_wo_version = 1
+		service_key_wo_version = "1"
 	}
 }
 `)
@@ -353,9 +353,9 @@ resource "google_monitoring_notification_channel" "basicauth" {
 		"url"      = "http://fakeurl.com"
 	}
 
-	sensitive_labels_wo {
+	sensitive_labels {
 		password_wo         = "another_password"
-		password_wo_version = 2
+		password_wo_version = "2"
 	}
 }
 
@@ -363,9 +363,9 @@ resource "google_monitoring_notification_channel" "pagerduty" {
 	display_name = "TFTest Pagerduty Channel"
 	type         = "pagerduty"
 
-	sensitive_labels_wo {
+	sensitive_labels {
 		service_key_wo         = "another_service_key"
-		service_key_wo_version = 2
+		service_key_wo_version = "2"
 	}
 }
 `)
@@ -381,9 +381,9 @@ resource "google_monitoring_notification_channel" "slack" {
 		"channel_name" = "#foobar"
 	}
 
-	sensitive_labels_wo {
+	sensitive_labels {
 		auth_token_wo         = "one"
-		auth_token_wo_version = 1
+		auth_token_wo_version = "1"
 	}
 }
 `)
@@ -399,9 +399,9 @@ resource "google_monitoring_notification_channel" "slack" {
 		"channel_name" = "#foobar"
 	}
 
-	sensitive_labels_wo {
+	sensitive_labels {
 		auth_token_wo         = "two"
-		auth_token_wo_version = 2
+		auth_token_wo_version = "2"
 	}
 }
 `)
