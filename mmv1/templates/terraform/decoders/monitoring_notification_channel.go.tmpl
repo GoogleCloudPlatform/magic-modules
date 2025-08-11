@@ -17,7 +17,7 @@ if labelmap, ok := res["labels"]; ok {
 		if _, apiOk := labels[sl]; apiOk {
 			if _, exists := d.GetOkExists("sensitive_labels.0." + sl); exists {
 				delete(labels, sl)
-			} else if _, exists := d.GetOkExists("sensitive_labels_wo.0." + sl + "_wo_version"); exists {
+			} else if _, exists := d.GetOkExists("sensitive_labels.0." + sl + "_wo_version"); exists {
 				delete(labels, sl)
 			} else {
 				labels[sl] = d.Get("labels." + sl)

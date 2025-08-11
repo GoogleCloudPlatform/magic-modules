@@ -1,6 +1,5 @@
 
-var sensitiveLabels = []string{"auth_token", "service_key", "password"}
-var sensitiveWoLabels = []string{"auth_token_wo", "service_key_wo", "password_wo"}
+var sensitiveLabels = []string{"auth_token", "service_key", "password", "auth_token_wo", "service_key_wo", "password_wo"}
 
 func sensitiveLabelCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v interface{}) error {
 	for _, sp := range sensitiveLabels {
@@ -12,16 +11,11 @@ func sensitiveLabelCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, v
 	}
 
 	{{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
-		for _, sp := range sensitiveWoLabels {
+		for _, sp := range sensitiveLabels {
 			mapLabel := diff.Get("labels." + sp[:len(sp)-3]).(string)
-			authLabel, _ := diff.GetRawConfigAt(cty.GetAttrPath("sensitive_labels_wo").IndexInt(0).GetAttr(sp))
+			authLabel, _ := diff.GetRawConfigAt(cty.GetAttrPath("sensitive_labels").IndexInt(0).GetAttr(sp))
 			if mapLabel != "" && (!authLabel.IsNull() && authLabel.Type() == cty.String) {
 				return fmt.Errorf("Sensitive label [%s] cannot be set in both `labels` and the `sensitive_labels_wo` block.", sp)
-			}
-			if !authLabel.IsNull() && authLabel.Type() == cty.String {
-				if _, versionExists := diff.GetOkExists("sensitive_labels_wo.0." + sp + "_version"); !versionExists {
-					return fmt.Errorf("Sensitive label [%s] must be set with %s_version", sp, sp)
-				}
 			}
 		}
 	{{- end }}

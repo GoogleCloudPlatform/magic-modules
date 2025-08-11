@@ -109,8 +109,7 @@ properties:
         description: |
           An authorization token for a notification channel. Channel types that support this field include: slack
         sensitive: true
-        exactly_one_of:
-          - 'sensitive_labels.0.auth_token'
+        conflicts:
           - 'sensitive_labels.0.password'
           - 'sensitive_labels.0.service_key'
       - name: 'password'
@@ -119,9 +118,8 @@ properties:
         description: |
           An password for a notification channel. Channel types that support this field include: webhook_basicauth
         sensitive: true
-        exactly_one_of:
+        conflicts:
           - 'sensitive_labels.0.auth_token'
-          - 'sensitive_labels.0.password'
           - 'sensitive_labels.0.service_key'
       - name: 'serviceKey'
         type: String
@@ -129,10 +127,9 @@ properties:
         description: |
           An servicekey token for a notification channel. Channel types that support this field include: pagerduty
         sensitive: true
-        exactly_one_of:
+        conflicts:
           - 'sensitive_labels.0.auth_token'
           - 'sensitive_labels.0.password'
-          - 'sensitive_labels.0.service_key'
   - name: 'name'
     type: String
     description: |
