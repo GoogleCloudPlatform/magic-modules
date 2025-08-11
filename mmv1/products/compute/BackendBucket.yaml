@@ -115,6 +115,7 @@ examples:
       backend_bucket_name: 'global-ilb-backend-bucket'
       bucket_name: 'global-ilb-bucket'
     exclude_docs: true
+    skip_vcr: true
 parameters:
 properties:
   - name: 'bucketName'

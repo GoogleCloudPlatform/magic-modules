@@ -1,5 +1,6 @@
 # Note: This example must be run in a project without Cloud Armor tier configured,
 # as it may cause conflicts with the INTERNAL_MANAGED load balancing scheme.
+# This test is skipped in VCR mode due to non-determinism in project creation and resource management.
 
 resource "google_project" "unarmored" {
   project_id      = "tf-test%{random_suffix}"
