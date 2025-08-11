@@ -172,39 +172,13 @@ properties:
     validation:
       function: 'validatePeerAddr'
   - name: 'sharedSecret'
+    write_only: true
     type: String
     description: |
       Shared secret used to set the secure session between the Cloud VPN
       gateway and the peer VPN gateway.
     ignore_read: true
     sensitive: true
-    exactly_one_of:
-      - 'shared_secret'
-      - 'shared_secret_wo'
-    conflicts:
-      - 'shared_secret_wo'
-  - name: 'sharedSecretWo'
-    type: String
-    description: |
-      Shared secret used to set the secure session between the Cloud VPN
-      gateway and the peer VPN gateway. This is a write-only field.
-      It is not returned by the API.
-    api_name: 'sharedSecret'
-    write_only: true
-    exactly_one_of:
-      - 'shared_secret'
-      - 'shared_secret_wo'
-    conflicts:
-      - 'shared_secret'
-    required_with:
-      - 'shared_secret_wo_version'
-  - name: 'sharedSecretWoVersion'
-    type: Integer
-    default_value: 0
-    url_param_only: true
-    description: |
-      Triggers update of shared_secret write-only. For more info see
-      [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)
   - name: 'sharedSecretHash'
     type: String
     description: |
