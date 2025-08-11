@@ -33,6 +33,9 @@ import (
 )
 
 var {{ $.ResourceName }}IamSchema = map[string]*schema.Schema{
+{{ if $.DeprecationMessage }}
+      DeprecationMessage: "{{ $.DeprecationMessage -}}",
+{{- end}}
 {{- range $i, $param := $.IamResourceParams }}
 	"{{ underscore $param }}": {
 		Type:             schema.TypeString,
