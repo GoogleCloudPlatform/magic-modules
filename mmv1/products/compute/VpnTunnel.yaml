@@ -179,6 +179,7 @@ properties:
       gateway and the peer VPN gateway.
     ignore_read: true
     sensitive: true
+    required: true
   - name: 'sharedSecretHash'
     type: String
     description: |
