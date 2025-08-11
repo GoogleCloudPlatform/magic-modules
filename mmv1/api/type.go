@@ -1257,6 +1257,14 @@ func (t *Type) IsForceNew() bool {
 	return !(parent.FlattenObject && t.IsA("KeyValueLabels"))
 }
 
+func (t *Type) ExpanderPropVariableName() string {
+	name := t.ApiName
+	if t.WriteOnly {
+		name = t.Name
+	}
+	return fmt.Sprintf("%sProp", name)
+}
+
 // Returns true if the type does not correspond to an API type
 func (t *Type) ProviderOnly() bool {
 	// These are special case fields created by the generator which have no API counterpart
