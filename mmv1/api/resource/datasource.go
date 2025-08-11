@@ -20,8 +20,4 @@ type Datasource struct {
 	// boolean to determine whether tpgresource.SetDataSourceLabel block used in some datasources
 	// should be included in the generation
 	UseSetDataSourceLabel bool `yaml:"use_set_datasource_label"`
-
-	// set location as done via: d.Set("location", location) in a few data_source files
-	// shouldn't really be used but done for backwards compatibility purposes
-	SetLocationBlock bool `yaml:"set_location"`
 }
