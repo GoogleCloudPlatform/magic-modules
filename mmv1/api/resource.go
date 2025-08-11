@@ -1365,7 +1365,7 @@ func (r Resource) HasPostCreateComputedFields() bool {
 // Functions used to create slices of resource properties that could not otherwise be called from within generating templates.
 func (r Resource) ReadProperties() []*Type {
 	return google.Reject(r.GettableProperties(), func(p *Type) bool {
-		return p.IgnoreRead || p.WriteOnly
+		return p.IgnoreRead
 	})
 }
 
