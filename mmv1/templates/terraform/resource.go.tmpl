@@ -172,9 +172,29 @@ func resource{{ $.ResourceName }}{{ camelize $prop.Name "upper" }}SetStyleDiff(_
 
 
 func resource{{ $.ResourceName -}}GetRawConfigAttributeAsString(d *schema.ResourceData, key string) string {
-    if v := d.GetRawConfig().GetAttr(key); !v.IsNull() {
-        return v.AsString()
+    // see https://developer.hashicorp.com/terraform/plugin/sdkv2/resources/write-only-arguments#retrieving-write-only-values
+    parts := strings.Split(key, ".")
+
+    var path cty.Path
+    if len(parts) > 0 {
+        path = cty.GetAttrPath(parts[0])
     }
+
+    for i := 1; i < len(parts); i++ {
+        part := parts[i]
+
+        if index, err := strconv.Atoi(part); err == nil {
+            path = path.IndexInt(index)
+        } else {
+            path = path.GetAttr(part)
+        }
+    }
+
+    woCty, diags := d.GetRawConfigAt(path)
+    if len(diags) == 0 && !woCty.IsNull() && woCty.Type().Equals(cty.String) {
+        return woCty.AsString()
+    }
+
     return ""
 }
 
