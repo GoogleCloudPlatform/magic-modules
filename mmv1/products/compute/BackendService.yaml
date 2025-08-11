@@ -56,7 +56,7 @@ custom_code:
   decoder: 'templates/terraform/decoders/backend_service.go.tmpl'
   post_create: 'templates/terraform/post_create/compute_backend_service_security_policy.go.tmpl'
   post_update: 'templates/terraform/post_create/compute_backend_service_security_policy.go.tmpl'
-  tgc_decoder: 'templates/tgc_next/decoders/backend_service.go.tmpl'
+  tgc_decoder: 'templates/tgc_next/decoders/compute_backend_service.go.tmpl'
 schema_version: 1
 examples:
   - name: 'backend_service_basic'
@@ -337,7 +337,6 @@ properties:
                 description: |
                   If true, the metric data is collected and reported to Cloud
                   Monitoring, but is not used for load balancing.
-                include_empty_value_in_cai: true
               - name: 'maxUtilization'
                 type: Double
                 description: |
@@ -1119,7 +1118,6 @@ properties:
           required: true
           description: |
             If true, the metric data is not used for load balancing.
-          include_empty_value_in_cai: true
   - name: 'name'
     type: String
     description: |
