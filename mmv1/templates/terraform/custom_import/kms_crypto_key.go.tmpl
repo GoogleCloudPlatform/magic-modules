@@ -13,17 +13,6 @@
 		return nil, fmt.Errorf("Error setting name: %s", err)
 	}
 
-	versionTemplate, ok := d.GetOk("version_template")
-	if !ok {
-		return nil, fmt.Errorf("Error retrieving version_template: %s", err)
-	}
-
-	// skip_initial_version_creation must be true for external keys
-	protectionLevel := versionTemplate.(map[string]interface{})["protection_level"].(string)
-	if err := d.Set("skip_initial_version_creation", protectionLevel == "EXTERNAL" || protectionLevel == "EXTERNAL_VPC"); err != nil {
-		return nil, fmt.Errorf("Error setting skip_initial_version_creation: %s", err)
-	}
-
 	id, err := tpgresource.ReplaceVars(d, config, "{{$.GetIdFormat}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)

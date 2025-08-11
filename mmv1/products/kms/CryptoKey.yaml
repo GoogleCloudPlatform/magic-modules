@@ -76,7 +76,7 @@ parameters:
       You must use the `google_kms_crypto_key_version` resource to create a new CryptoKeyVersion
       or `google_kms_key_ring_import_job` resource to import the CryptoKeyVersion.
     url_param_only: true
-    immutable: true
+    ignore_read: true
 properties:
   - name: 'name'
     type: String
