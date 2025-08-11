@@ -185,3 +185,11 @@ Remove `template.containers.depends_on` from your configuration after upgrade.
 ## Resource: `google_tpu_node`
 
 ### `google_tpu_node` is removed as it is not supported.
+
+## Resource: `google_project_service`
+
+### `disable_on_destroy` now defaults to `false`
+
+The default value for `disable_on_destroy` has been changed to `false`. The previous default (`true`) created a risk of unintended service disruptions, as destroying a single `google_project_service` resource would disable the API for the entire project.
+
+Now, destroying the resource will only remove it from Terraform's state and leave the service enabled. To disable a service when the resource is destroyed, you must now make an explicit decision by setting `disable_on_destroy = true`.
