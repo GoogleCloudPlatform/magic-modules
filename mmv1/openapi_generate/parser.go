@@ -163,7 +163,7 @@ func buildProduct(filePath, output string, root *openapi3.T, header []byte) stri
 	apiVersion := &product.Version{}
 
 	apiVersion.BaseUrl = fmt.Sprintf("%s/%s/", server, version)
-	// TODO(slevenick) figure out how to tell the API version
+	// TODO figure out how to tell the API version
 	apiVersion.Name = "ga"
 	apiProduct.Versions = []*product.Version{apiVersion}
 
