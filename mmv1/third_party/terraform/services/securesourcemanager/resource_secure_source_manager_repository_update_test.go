@@ -12,7 +12,7 @@ func TestAccSecureSourceManagerRepository_secureSourceManagerRepositoryBasicExam
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"deletion_policy": "PREVENT",
+		"deletion_policy": "DELETE",
 		"random_suffix":   acctest.RandString(t, 10),
 	}
 
