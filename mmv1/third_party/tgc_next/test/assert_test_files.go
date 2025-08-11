@@ -56,7 +56,7 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, ignoredAssetF
 
 		logger := zaptest.NewLogger(t)
 
-		// If the primary resource is available, only test the primary resource.
+		// If the primary resource is specified, only test the primary resource.
 		// Otherwise, test all of the resources in the test.
 		if primaryResource != "" {
 			t.Logf("Test for the primary resource %s begins.", primaryResource)
