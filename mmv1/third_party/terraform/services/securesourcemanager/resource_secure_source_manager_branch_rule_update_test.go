@@ -11,7 +11,7 @@ func TestAccSecureSourceManagerBranchRule_secureSourceManagerBranchRuleWithField
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"prevent_destroy": false,
+		"deletion_policy": "DELETE",
 		"random_suffix":   acctest.RandString(t, 10),
 	}
 
@@ -48,7 +48,7 @@ resource "google_secure_source_manager_instance" "instance" {
     instance_id = "tf-test-my-initial-instance%{random_suffix}"
 
     # Prevent accidental deletions.
-    deletion_policy = "%{prevent_destroy}"
+    deletion_policy = "%{deletion_policy}"
 }
 
 resource "google_secure_source_manager_repository" "repository" {
@@ -57,7 +57,7 @@ resource "google_secure_source_manager_repository" "repository" {
     location = google_secure_source_manager_instance.instance.location
 
     # Prevent accidental deletions.
-    deletion_policy = "%{prevent_destroy}"
+    deletion_policy = "%{deletion_policy}"
 }
 
 resource "google_secure_source_manager_branch_rule" "default" {
@@ -83,7 +83,7 @@ resource "google_secure_source_manager_instance" "instance" {
 	instance_id = "tf-test-my-initial-instance%{random_suffix}"
 
     # Prevent accidental deletions.
-    deletion_policy = "%{prevent_destroy}"
+    deletion_policy = "%{deletion_policy}"
 }
 
 resource "google_secure_source_manager_repository" "repository" {
@@ -92,7 +92,7 @@ resource "google_secure_source_manager_repository" "repository" {
     location = google_secure_source_manager_instance.instance.location
 
     # Prevent accidental deletions.
-    deletion_policy = "%{prevent_destroy}"
+    deletion_policy = "%{deletion_policy}"
 }
 
 resource "google_secure_source_manager_branch_rule" "default" {
