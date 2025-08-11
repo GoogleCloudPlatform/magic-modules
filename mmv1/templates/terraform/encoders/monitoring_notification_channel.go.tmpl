@@ -21,9 +21,13 @@ labels = labelmap.(map[string]string)
 for _, sl := range sensitiveLabels {
 	if auth, _ := d.GetOkExists("sensitive_labels.0." + sl); auth != "" {
 		labels[sl] = auth.(string)
+    {{- if ne $.Compiler "terraformgoogleconversion-codegen" }}
 	} else if authCty, diags := d.GetRawConfigAt(cty.GetAttrPath("sensitive_labels").IndexInt(0).GetAttr(sl)); len(diags) == 0 && !authCty.IsNull() && authCty.Type() == cty.String {
 		labels[sl[:len(sl)-3]] = authCty.AsString()
 	}
+    {{- else }}
+	}
+    {{ end }}
 }
 
 obj["labels"] = labels
