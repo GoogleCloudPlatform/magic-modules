@@ -54,9 +54,7 @@ resource "google_secure_source_manager_instance" "instance" {
     instance_id = "tf-test-my-instance%{random_suffix}"
 
     # Prevent accidental deletions.
-    lifecycle {
-      prevent_destroy = "%{prevent_destroy}"
-    }
+    deletion_policy = "%{prevent_destroy}"
 }
 
 resource "google_secure_source_manager_repository" "default" {
@@ -65,9 +63,7 @@ resource "google_secure_source_manager_repository" "default" {
     instance = google_secure_source_manager_instance.instance.name
 
     # Prevent accidental deletions.
-    lifecycle {
-      prevent_destroy = "%{prevent_destroy}"
-    }
+    deletion_policy = "%{prevent_destroy}"
 }
 `, context)
 }
@@ -79,9 +75,7 @@ resource "google_secure_source_manager_instance" "instance" {
     instance_id = "tf-test-my-instance%{random_suffix}"
 
     # Prevent accidental deletions.
-    lifecycle {
-      prevent_destroy = "%{prevent_destroy}"
-    }
+    deletion_policy = "%{prevent_destroy}"
 }
 
 resource "google_secure_source_manager_repository" "default" {
@@ -92,9 +86,7 @@ resource "google_secure_source_manager_repository" "default" {
     description = "new description"
 
     # Prevent accidental deletions.
-    lifecycle {
-      prevent_destroy = "%{prevent_destroy}"
-    }
+    deletion_policy = "%{prevent_destroy}"
 }
 `, context)
 }
