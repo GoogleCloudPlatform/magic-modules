@@ -34,6 +34,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: false
+custom_code:
 sweeper:
   url_substitutions:
     - region: "us-central1"
@@ -160,7 +161,6 @@ properties:
         - name: 'ipCidrRange'
           type: String
           output: true
-          # required: true
           description: |
             The IP address range in the CIDR format represented by this sub prefix.
         - name: 'isAddress'
@@ -185,6 +185,5 @@ properties:
         - name: 'delegatee_project'
           type: String
           output: true
-          # required: true
           description: |
             Name of the project scoping this PublicDelegatedSubPrefix.
