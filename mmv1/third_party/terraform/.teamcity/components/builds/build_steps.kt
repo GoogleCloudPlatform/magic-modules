@@ -250,7 +250,7 @@ fun BuildSteps.runDiffTests() {
         })
 
         step(ScriptBuildStep {
-            name = "Run via jen20/teamcity-go-test"
+            name = "Run via scripts/teamcitytestscripts/teamcity-diff-test"
             workingDir = "%PACKAGE_PATH%"
             scriptContent = """
                 #!/bin/bash
