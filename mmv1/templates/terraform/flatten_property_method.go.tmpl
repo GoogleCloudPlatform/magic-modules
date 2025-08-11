@@ -47,6 +47,11 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config)
       {{- end }}
     {{- end }}
+    {{- if and $.ResourceMetadata.IsTgcCompiler (not $.AllowEmptyObject) }}
+    if tgcresource.AllValuesAreNil(transformed) {
+      return nil
+    }
+    {{- end }}
   return []interface{}{transformed}
   {{- else if and ($.IsA "Array") ($.ItemType.IsA "NestedObject") }}
   if v == nil {
