@@ -5981,9 +5981,8 @@ resource "google_backup_dr_backup_plan" "plan" {
 resource "google_sql_database_instance" "source" {
     name                = "tf-test-source-%{random_suffix}"
     database_version    = "MYSQL_8_0"
-    region             = "us-central1"
-    project            = "%{project}"
-
+    region             	= "us-central1"
+    project            	= "%{project}"
     settings {
         tier = "db-f1-micro"
         backup_configuration {
@@ -5995,11 +5994,11 @@ resource "google_sql_database_instance" "source" {
 
 // Associate backup plan with SQL instance
 resource "google_backup_dr_backup_plan_association" "association" { 
-  location = "us-central1" 
-  backup_plan_association_id = "tf-test-bpa-test-%{random_suffix}"
-  resource =   "projects/${google_sql_database_instance.source.project}/instances/${google_sql_database_instance.source.name}"
-  resource_type= "sqladmin.googleapis.com/Instance"
-  backup_plan = google_backup_dr_backup_plan.plan.name
+  location 						= "us-central1" 
+  backup_plan_association_id 	= "tf-test-bpa-test-%{random_suffix}"
+  resource 						=   "projects/${google_sql_database_instance.source.project}/instances/${google_sql_database_instance.source.name}"
+  resource_type					= "sqladmin.googleapis.com/Instance"
+  backup_plan 					= google_backup_dr_backup_plan.plan.name
 }
 
 // Wait for the first backup to be created
@@ -6010,10 +6009,10 @@ resource "time_sleep" "wait_5_mins" {
 }
 
 data "google_backup_dr_backup" "sql_backups" {
-  project = "%{project}"
-  location      = "us-central1"
-  backup_vault_id = "%{backup_vault_id}"
-  data_source_id = element(split("/", google_backup_dr_backup_plan_association.association.data_source), length(split("/", google_backup_dr_backup_plan_association.association.data_source)) - 1)
+  project			= "%{project}"
+  location      	= "us-central1"
+  backup_vault_id 	= "%{backup_vault_id}"
+  data_source_id 	= element(split("/", google_backup_dr_backup_plan_association.association.data_source), length(split("/", google_backup_dr_backup_plan_association.association.data_source)) - 1)
 
   depends_on = [time_sleep.wait_5_mins]
 }
@@ -6027,9 +6026,9 @@ resource "google_sql_database_instance" "instance" {
     tier = "db-g1-small"
   }
 
-  backupdr_backup = data.google_backup_dr_backup.sql_backups.backups[0].name
+  backupdr_backup 		= data.google_backup_dr_backup.sql_backups.backups[0].name
 
-  deletion_protection = false
+  deletion_protection 	= false
 }
 `, context)
 }
