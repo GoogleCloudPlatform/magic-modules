@@ -1160,8 +1160,8 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 	return bootstrapInstance.Name
 }
 
-// waitForOperation polls the operation until it is done or times out.
-func waitForOperation(ctx context.Context, t *testing.T, backupdrService *backupdr.Service, op *backupdr.Operation) (*backupdr.Operation, error) {
+// waitForBackupdrOperation polls the operation until it is done or times out.
+func waitForBackupdrOperation(ctx context.Context, t *testing.T, backupdrService *backupdr.Service, op *backupdr.Operation) (*backupdr.Operation, error) {
 	t.Helper()
 	opService := backupdr.NewProjectsLocationsOperationsService(backupdrService)
 	ticker := time.NewTicker(5 * time.Second) // Poll every 5 seconds
@@ -1237,7 +1237,7 @@ func BootstrapBackupDRVault(t *testing.T, vaultID, location string) string {
 		fmt.Printf("Successfully initiated creation of BackupDR vault %q (Operation: %s)\n", vaultName, op.Name)
 
 		// *** WAIT FOR COMPLETION ***
-		if _, err := waitForOperation(ctx, t, backupdrService, op); err != nil {
+		if _, err := waitForBackupdrOperation(ctx, t, backupdrService, op); err != nil {
 			t.Fatalf("Create operation for %s failed: %v", vaultName, err)
 		}
 		fmt.Printf("Successfully created BackupDR vault %q\n", vaultName)

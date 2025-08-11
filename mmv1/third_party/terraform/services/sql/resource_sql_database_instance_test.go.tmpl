@@ -1320,7 +1320,6 @@ func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 }
 
 func TestAccSqlDatabaseInstance_createFromBackupDR(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	// Bootstrap the BackupDR vault
@@ -1395,7 +1394,6 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 }
 
 func TestAccSqlDatabaseInstance_BackupDRUpdate(t *testing.T) {
-	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	// Bootstrap the BackupDR vault
