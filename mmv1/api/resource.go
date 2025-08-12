@@ -2014,6 +2014,15 @@ func (r Resource) ShouldDatasourceSetLabels() bool {
 	return false
 }
 
+func (r Resource) ShouldDatasourceSetAnnotations() bool {
+	for _, p := range r.Properties {
+		if p.Name == "annotations" && p.Type == "KeyValueAnnotations" {
+			return true
+		}
+	}
+	return false
+}
+
 // DatasourceOptionalFields returns a list of fields from the resource's URI
 // that should be marked as "Required".
 func (r Resource) DatasourceRequiredFields() []string {
