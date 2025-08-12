@@ -6017,7 +6017,7 @@ data "google_backup_dr_backup" "sql_backups" {
 
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
-  database_version = "POSTGRES_12"
+  database_version = "POSTGRES_12_1"
   region           = "us-central1"
 
   settings {
