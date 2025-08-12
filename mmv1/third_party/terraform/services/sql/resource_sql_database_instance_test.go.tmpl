@@ -5978,7 +5978,7 @@ resource "google_backup_dr_backup_plan" "plan" {
 // Create source SQL instance to backup
 resource "google_sql_database_instance" "source" {
     name                = "tf-test-source-%{random_suffix}"
-    database_version    = "POSTGRES_11"
+    database_version    = "POSTGRES_12"
     region             	= "us-central1"
     project            	= "%{project}"
     settings {
@@ -6017,7 +6017,7 @@ data "google_backup_dr_backup" "sql_backups" {
 
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
-  database_version = "POSTGRES_11"
+  database_version = "POSTGRES_12"
   region           = "us-central1"
 
   settings {
