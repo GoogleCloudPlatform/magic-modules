@@ -91,6 +91,8 @@ properties:
       Labels with sensitive data are obfuscated by the API and therefore Terraform cannot
       determine if there are upstream changes to these fields. They can also be configured via
       the sensitive_labels block, but cannot be configured in both places.
+    default_from_api: true
+    diff_suppress_func: NotificationChannelLabelDiffSuppress
   - name: 'sensitiveLabels'
     type: NestedObject
     description: |
