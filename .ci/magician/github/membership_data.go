@@ -102,8 +102,8 @@ var (
 		"roaks3": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 7, 1),
-					endDate:   newDate(2025, 7, 14),
+					startDate: newDate(2025, 8, 1),
+					endDate:   newDate(2025, 8, 11),
 				},
 			},
 		},
@@ -135,7 +135,12 @@ var (
 			},
 		},
 		"trodge": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 8, 7),
+					endDate:   newDate(2025, 8, 10),
+				},
+			},
 		},
 		"zli82016": {
 			vacations: []Vacation{

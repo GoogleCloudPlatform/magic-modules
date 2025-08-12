@@ -136,7 +136,7 @@ parameters:
           The RFC 4648 base64 encoded SHA-256 hash of the customer-supplied
           encryption key that protects this resource.
         output: true
-        # TODO(chrisst) Change to ResourceRef once KMS is in Magic Modules
+        # TODO Change to ResourceRef once KMS is in Magic Modules
       - name: 'kmsKeySelfLink'
         type: String
         description: |

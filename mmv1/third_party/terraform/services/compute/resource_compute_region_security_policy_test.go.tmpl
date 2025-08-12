@@ -1115,4 +1115,76 @@ func testAccComputeRegionSecurityPolicy_withNetworkMatch_update(context map[stri
 	}
 	`, context)
 }
+
+func TestAccComputeRegionSecurityPolicy_withAdvancedOptions(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeRegionSecurityPolicyDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionSecurityPolicy_withAdvancedOptions(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionSecurityPolicy_withAdvancedOptionsUpdate(context),
+			},
+			{
+				ResourceName:      "google_compute_region_security_policy.policy",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func testAccComputeRegionSecurityPolicy_withAdvancedOptions(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_region_security_policy" "policy" {
+  name        = "tf-test%{random_suffix}"
+  description = "basic region security policy"
+  type        = "CLOUD_ARMOR"
+
+  advanced_options_config {
+    json_parsing = "STANDARD_WITH_GRAPHQL"
+    json_custom_config {
+      content_types = ["application/json"]
+    }
+    log_level                    = "VERBOSE"
+    user_ip_request_headers      = ["x-forwarded-for"]
+    request_body_inspection_size = "8KB"
+  }
+}
+`, context)
+}
+
+func testAccComputeRegionSecurityPolicy_withAdvancedOptionsUpdate(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_region_security_policy" "policy" {
+  name        = "tf-test%{random_suffix}"
+  description = "basic region security policy"
+  type        = "CLOUD_ARMOR"
+
+  advanced_options_config {
+    json_parsing = "STANDARD"
+    json_custom_config {
+      content_types = ["text/json"]
+    }
+    log_level                    = "NORMAL"
+    user_ip_request_headers      = ["x-real-ip"]
+    request_body_inspection_size = "16KB"
+  }
+}
+`, context)
+}
 {{- end }}
