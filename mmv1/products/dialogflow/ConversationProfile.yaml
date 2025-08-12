@@ -113,19 +113,10 @@ properties:
                   description: |
                     The suggestion feature.
                   properties:
-                    - type: Enum
+                    - type: String
                       name: 'type'
                       description: |
                         Type of Human Agent Assistant API feature to request.
-                      enum_values:
-                        - ARTICLE_SUGGESTION
-                        - FAQ
-                        - SMART_REPLY
-                        - KNOWLEDGE_SEARCH
-                        - KNOWLEDGE_ASSIST
-                        - DIALOGFLOW_ASSIST
-                        - ENTITY_EXTRACTION
-                        - CONVERSATION_SUMMARIZATION
                 - type: Boolean
                   name: 'enableEventBasedSuggestion'
                   description: |
@@ -297,20 +288,10 @@ properties:
                   description: |
                     The suggestion feature.
                   properties:
-                    - type: Enum
+                    - type: String
                       name: 'type'
                       description: |
                         Type of Human Agent Assistant API feature to request.
-                      enum_values:
-                        - TYPE_UNSPECIFIED
-                        - ARTICLE_SUGGESTION
-                        - FAQ
-                        - SMART_REPLY
-                        - KNOWLEDGE_SEARCH
-                        - KNOWLEDGE_ASSIST
-                        - DIALOGFLOW_ASSIST
-                        - ENTITY_EXTRACTION
-                        - CONVERSATION_SUMMARIZATION
                 - type: Boolean
                   name: 'enableEventBasedSuggestion'
                   description: |
@@ -607,6 +588,7 @@ properties:
         name: 'languageCode'
         description: |
           The language of the supplied audio.
+        default_from_api: true
       - type: Boolean
         name: 'enableWordInfo'
         description: |
@@ -619,6 +601,7 @@ properties:
     name: 'languageCode'
     description: |
       Language code for the conversation profile. This should be a BCP-47 language tag.
+    default_from_api: true
   - type: String
     name: 'timeZone'
     description: |
