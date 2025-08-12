@@ -2007,12 +2007,10 @@ func (r *Resource) ShouldGenerateSingularDataSource() bool {
 
 func (r Resource) ShouldDatasourceSetLabels() bool {
 	for _, p := range r.Properties {
-		if p.Name == "labels" && p.Type == "KeyValuePairs" {
-			// Found it, so we can stop looking and return true.
+		if p.Name == "labels" && p.Type == "KeyValueLabels" {
 			return true
 		}
 	}
-	// If the loop finishes without finding a match, return false.
 	return false
 }
 

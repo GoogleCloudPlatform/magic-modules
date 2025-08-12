@@ -16,8 +16,4 @@ package resource
 type Datasource struct {
 	// boolean to determine whether the datasource file should be generated
 	Generate bool `yaml:"generate"`
-
-	// boolean to determine whether tpgresource.SetDataSourceLabel block used in some datasources
-	// should be included in the generation
-	UseSetDataSourceLabel bool `yaml:"use_set_datasource_label"`
 }
