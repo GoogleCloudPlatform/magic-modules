@@ -68,6 +68,7 @@ resource "google_dialogflow_cx_agent" "{{$.PrimaryResourceId}}" {
   gen_app_builder_settings {
     engine = "projects/-/locations/-/collections/-/engines/-"
   }
+  start_playbook = "projects/-/locations/-/agents/-/playbooks/00000000-0000-0000-0000-000000000000"
   enable_multi_language_training = false
   locked = false
   answer_feedback_settings {
