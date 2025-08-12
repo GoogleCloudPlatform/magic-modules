@@ -1507,6 +1507,35 @@ linux_node_config {
     * `CGROUP_MODE_V1`: CGROUP_MODE_V1 specifies to use cgroupv1 for the cgroup configuration on the node image.
     * `CGROUP_MODE_V2`: CGROUP_MODE_V2 specifies to use cgroupv2 for the cgroup configuration on the node image.
 
+* `transparent_hugepage_defrag` - (Optional) Defines the transparent hugepage defrag configuration on the node. VM hugepage allocation can be managed by either limiting defragmentation for delayed allocation or skipping it entirely for immediate allocation only. See [Linux kernel docs](https://docs.kernel.org/admin-guide/mm/transhuge.html) for more details.
+  Possible values:
+  * `TRANSPARENT_HUGEPAGE_DEFRAG_UNSPECIFIED` - Default value. GKE will not
+  modify the kernel configuration.
+  * `TRANSPARENT_HUGEPAGE_DEFRAG_ALWAYS` - It means that an application
+  requesting THP will stall on allocation failure and directly reclaim pages
+  and compact memory in an effort to allocate a THP immediately.
+  * `TRANSPARENT_HUGEPAGE_DEFRAG_DEFER` - It means that an application will
+  wake kswapd in the background to reclaim pages and wake kcompactd to compact
+  memory so that THP is available in the near future. It’s the
+  responsibility of khugepaged to then install the THP pages later.
+  * `TRANSPARENT_HUGEPAGE_DEFRAG_DEFER_WITH_MADVISE` - It means that an
+  application will enter direct reclaim and compaction like always, but only
+  for regions that have used madvise(MADV_HUGEPAGE); all other regions will
+  wake kswapd in the background to reclaim pages and wake kcompactd to compact
+  memory so that THP is available in the near future.
+  * `TRANSPARENT_HUGEPAGE_DEFRAG_MADVISE` - It means that an application will
+  enter direct reclaim like always but only for regions that are have used
+  madvise(MADV_HUGEPAGE). This is the default kernel configuration.
+  * `TRANSPARENT_HUGEPAGE_DEFRAG_NEVER` - It means that an application will
+  never enter direct reclaim or compaction.
+
+* `transparent_hugepage_enabled` - (Optional) Transparent hugepage support for anonymous memory can be entirely disabled (mostly for debugging purposes) or only enabled inside MADV_HUGEPAGE regions (to avoid the risk of consuming more memory resources) or enabled system wide. See [Linux kernel docs](https://docs.kernel.org/admin-guide/mm/transhuge.html) for more details.
+  Possible values are:
+  * `TRANSPARENT_HUGEPAGE_ENABLED_UNSPECIFIED` - Default value. GKE will not modify the kernel configuration.
+  * `TRANSPARENT_HUGEPAGE_ENABLED_ALWAYS` - Transparent hugepage support for anonymous memory is enabled system wide.
+  * `TRANSPARENT_HUGEPAGE_ENABLED_MADVISE` - Transparent hugepage support for anonymous memory is enabled inside MADV_HUGEPAGE regions. This is the anonymous memory is enabled inside MADV_HUGEPAGE regions. This is the default kernel configuration.
+  * `TRANSPARENT_HUGEPAGE_ENABLED_NEVER` - Transparent hugepage support for anonymous memory is disabled.
+
 * `hugepages_config` - (Optional) Amounts for 2M and 1G hugepages. Structure is [documented below](#nested_hugepages_config).
 
 <a name="nested_hugepages_config"></a>The `hugepages_config` block supports:
