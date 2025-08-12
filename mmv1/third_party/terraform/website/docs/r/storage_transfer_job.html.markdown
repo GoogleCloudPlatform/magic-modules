@@ -264,7 +264,7 @@ A duration in seconds with up to nine fractional digits, terminated by 's'. Exam
 
 * `cloudfront_domain` - (Optional) The CloudFront distribution domain name pointing to this bucket, to use when fetching. See [Transfer from S3 via CloudFront](https://cloud.google.com/storage-transfer/docs/s3-cloudfront) for more information. Format: `https://{id}.cloudfront.net` or any valid custom domain. Must begin with `https://`.
 
-* `credentials-secret` - (Optional)  The Resource name of a secret in Secret Manager, `Format: projects/{projectNumber}/secrets/{secret_name}`.  AWS credentials must be stored in Secret Manager in JSON format: `{ "accessKeyId": "ACCESS_KEY_ID", "secretAccessKey": "SECRET_ACCESS_KEY" }`.
+* `credentials_secret` - (Optional)  The Resource name of a secret in Secret Manager, `Format: projects/{projectNumber}/secrets/{secret_name}`.  AWS credentials must be stored in Secret Manager in JSON format: `{ "accessKeyId": "ACCESS_KEY_ID", "secretAccessKey": "SECRET_ACCESS_KEY" }`.
 
 The `aws_access_key` block supports:
 
