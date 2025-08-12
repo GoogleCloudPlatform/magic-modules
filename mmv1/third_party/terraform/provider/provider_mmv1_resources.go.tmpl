@@ -264,7 +264,6 @@ var handwrittenDatasources = map[string]*schema.Resource{
 	"google_tags_tag_keys":                             tags.DataSourceGoogleTagsTagKeys(),
 	"google_tags_tag_value":                            tags.DataSourceGoogleTagsTagValue(),
 	"google_tags_tag_values":							tags.DataSourceGoogleTagsTagValues(),
-	"google_tpu_tensorflow_versions":                   tpu.DataSourceTpuTensorflowVersions(),
 	{{- if ne $.TargetVersionName "ga" }}
 	"google_tpu_v2_runtime_versions":                   tpuv2.DataSourceTpuV2RuntimeVersions(),
 	"google_tpu_v2_accelerator_types":                  tpuv2.DataSourceTpuV2AcceleratorTypes(),
