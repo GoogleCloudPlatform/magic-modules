@@ -327,7 +327,6 @@ properties:
     default_from_api: true
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess'
     update_verb: 'POST'
-    include_empty_value_in_cai: true
   - name: 'privateIpv6GoogleAccess'
     type: String
     description: The private IPv6 google access type for the VMs in this subnet.
@@ -520,7 +519,6 @@ properties:
       org policy, if there is no org policy specified, then it will default to disabled.
       This field isn't supported if the subnet purpose field is set to REGIONAL_MANAGED_PROXY.
     default_from_api: true
-    include_empty_value_in_cai: true
     deprecation_message: 'This field is being removed in favor of log_config. If log_config is present, flow logs are enabled.'
   - name: 'state'
     type: Enum
