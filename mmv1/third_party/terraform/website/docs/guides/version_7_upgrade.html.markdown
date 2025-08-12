@@ -185,6 +185,7 @@ Remove `template.containers.depends_on` from your configuration after upgrade.
 ## Resource: `google_vertex_ai_index`
 
 ### `metadata`, and `metadata.config` are now required. Resource creation would fail without these attributes already, so no change is necessary to existing configurations.
+
 ## Resource: `google_tpu_node` is now removed
 
 `google_tpu_node` is removed in favor of `google_tpu_v2_vm`. For moving from TPU Node to TPU VM architecture, see https://cloud.google.com/tpu/docs/system-architecture-tpu-vm#from-tpu-node-to-tpu-vm.
