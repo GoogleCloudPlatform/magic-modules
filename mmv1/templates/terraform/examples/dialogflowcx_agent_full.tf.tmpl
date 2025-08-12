@@ -68,7 +68,7 @@ resource "google_dialogflow_cx_agent" "{{$.PrimaryResourceId}}" {
   gen_app_builder_settings {
     engine = "projects/-/locations/-/collections/-/engines/-"
   }
-  enableMultiLanguageTraining = false
+  enable_multi_language_training = false
   locked = false
   answer_feedback_settings {
     enable_answer_feedback = false
@@ -76,7 +76,8 @@ resource "google_dialogflow_cx_agent" "{{$.PrimaryResourceId}}" {
   client_certificate_settings {
     passphrase      = "projects/example-proj/secrets/example-secret/versions/example-version"
     private_key     = "projects/example-proj/secrets/example-secret/versions/example-version"
-    ssl_certificate = "-----BEGIN CERTIFICATE-----
+    ssl_certificate = <<EOT
+-----BEGIN CERTIFICATE-----
 MIIDdDCCAlygAwIBAgIJANg0gKeB5LKmMA0GCSqGSIb3DQEBCwUAMIGSMQswCQYD
 VQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNU2FuIEZyYW5j
 aXNjbzEZMBcGA1UECgwQR2l0SHViLCBJbmMuMRkwFwYDVQQLDBBHb3Zlcm5tZW50
@@ -94,7 +95,8 @@ g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6
 g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6
 g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6
 g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6g8e6
------END CERTIFICATE-----"
+-----END CERTIFICATE-----
+EOT
   }
   personalization_settings {
     default_end_user_metadata = "{\"example-key\": \"example-value\"}"

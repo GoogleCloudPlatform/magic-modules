@@ -335,6 +335,7 @@ properties:
       A read only boolean field reflecting Zone Isolation status of the agent.
   - name: 'answerFeedbackSettings'
     type: NestedObject
+    ignore_read: true
     description: |
       Answer feedback collection settings.
     properties:
