@@ -102,6 +102,12 @@ Description of the change and how users should adjust their configuration (if ne
 
 ## Resources
 
+## Resource: `google_bigquery_table`
+
+### `view.use_legacy_sql` no longer has a default value of `True`
+
+If `view.use_legacy_sql` is not specified in the configuration, no value is sent to the API.
+
 ## Resource: `google_bigtable_table_iam_binding`
 
 ### `instance` is now removed
