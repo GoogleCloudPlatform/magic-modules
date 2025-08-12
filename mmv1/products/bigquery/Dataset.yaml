@@ -37,6 +37,7 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
   constants: 'templates/terraform/constants/bigquery_dataset.go.tmpl'
   pre_read: 'templates/terraform/pre_read/bigquery_dataset.go.tmpl'
@@ -95,7 +96,6 @@ examples:
     primary_resource_id: 'dataset'
     vars:
       dataset_id: 'example_dataset'
-    min_version: 'beta'
   - name: 'bigquery_dataset_resource_tags'
     primary_resource_id: 'dataset'
     primary_resource_name: 'fmt.Sprintf("tf_test_dataset%s", context["random_suffix"])'
@@ -128,6 +128,8 @@ properties:
       'An array of objects that define dataset access for one or more entities.'
     is_set: true
     default_from_api: true
+    is_missing_in_cai: true
+    set_hash_func: 'resourceBigqueryDatasetAccessHash'
     item_type:
       type: NestedObject
       properties:
@@ -399,6 +401,11 @@ properties:
       By default, this is FALSE, which means the dataset and its table names are
       case-sensitive. This field does not affect routine references.
     default_from_api: true
+    # This property has default value `true` in the real CAI asset.
+    # The bool property with `default_from_api: true` will have false value in converted CAI asset
+    # by default during tfplan2cai.
+    # Use exclude_false_in_cai: true to override the default behavior during tfplan2cai conversion.
+    exclude_false_in_cai: true
   - name: 'defaultCollation'
     type: String
     description: |
@@ -435,17 +442,14 @@ properties:
     description: |
       Options defining open source compatible datasets living in the BigQuery catalog. Contains
       metadata of open source database, schema or namespace represented by the current dataset.
-    min_version: beta
     properties:
       - name: 'parameters'
         type: KeyValuePairs
         description: |
           A map of key value pairs defining the parameters and properties of the open source schema.
           Maximum size of 2Mib.
-        min_version: beta
       - name: 'defaultStorageLocationUri'
         type: String
         description: |
           The storage location URI for all tables in the dataset. Equivalent to hive metastore's
           database locationUri. Maximum length of 1024 characters.
-        min_version: beta

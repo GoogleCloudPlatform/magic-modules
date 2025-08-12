@@ -1,0 +1,37 @@
+resource "google_datastream_private_connection" "{{$.PrimaryResourceId}}" {
+    display_name          = "Connection profile"
+    location              = "us-central1"
+    private_connection_id = "{{index $.Vars "private_connection_id"}}"
+
+    labels = {
+        key = "value"
+    }
+
+    psc_interface_config {
+        network_attachment = google_compute_network_attachment.default.id
+    }
+}
+
+resource "google_compute_network_attachment" "default" {
+    name                  = "{{index $.Vars "network_attachment_name"}}"
+    region                = "us-central1"
+    description           = "basic network attachment description"
+    connection_preference = "ACCEPT_AUTOMATIC"
+
+    subnetworks = [
+        google_compute_subnetwork.default.self_link
+    ]
+}
+
+resource "google_compute_network" "default" {
+    name                    = "{{index $.Vars "network_name"}}"
+    auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "default" {
+    name   = "{{index $.Vars "subnetwork_name"}}"
+    region = "us-central1"
+
+    network       = google_compute_network.default.id
+    ip_cidr_range = "10.0.0.0/16"
+}

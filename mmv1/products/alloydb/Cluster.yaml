@@ -61,6 +61,7 @@ custom_code:
   pre_delete: 'templates/terraform/pre_delete/alloydb_cluster.go.tmpl'
 # Skipping the sweeper because we need to force-delete clusters.
 exclude_sweeper: true
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'alloydb_cluster_basic'
     primary_resource_id: 'default'
@@ -72,12 +73,16 @@ examples:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-1")'
   - name: 'alloydb_cluster_after_upgrade'
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
       alloydb_instance_name: 'alloydb-instance'
       network_name: 'alloydb-network'
+    test_vars_overrides:
+      'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-1")'
   - name: 'alloydb_cluster_full'
     primary_resource_id: 'full'
     vars:
@@ -112,7 +117,7 @@ examples:
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
       network_name: 'alloydb-network'
     test_vars_overrides:
-      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1")'
+      'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
     exclude_docs: true
 virtual_fields:
   - name: 'deletion_policy'
@@ -298,17 +303,20 @@ properties:
       Initial user to setup during cluster creation.
     ignore_read: true
     custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.tmpl'
+    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/alloydb_cluster_input_user_flatten.go.tmpl'
     properties:
       - name: 'user'
         type: String
         description: |
           The database username.
+        is_missing_in_cai: true
       - name: 'password'
         type: String
         description: |
           The initial password for the user.
         required: true
         sensitive: true
+        is_missing_in_cai: true
   - name: 'restoreBackupSource'
     type: NestedObject
     description: |
@@ -443,14 +451,17 @@ properties:
                     Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
                 - name: 'minutes'
                   type: Integer
+                  is_missing_in_cai: true
                   description: |
                     Minutes of hour of day. Currently, only the value 0 is supported.
                 - name: 'seconds'
                   type: Integer
+                  is_missing_in_cai: true
                   description: |
                     Seconds of minutes of the time. Currently, only the value 0 is supported.
                 - name: 'nanos'
                   type: Integer
+                  is_missing_in_cai: true
                   description: |
                     Fractions of seconds in nanoseconds. Currently, only the value 0 is supported.
       - name: 'timeBasedRetention'

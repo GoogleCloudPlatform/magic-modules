@@ -340,7 +340,7 @@ properties:
             properties:
               - name: 'enableConfidentialCompute'
                 type: Boolean
-                # TODO(esu): Change this to required in next breaking release.
+                # TODO: Change this to required in next breaking release.
                 description: |
                   Whether the instance has confidential compute enabled.
                 min_version: 'beta'
@@ -490,7 +490,7 @@ properties:
               description: |
                 Name of the snapshot to use as the source for the disk. This can be the snapshot's `self_link`, `id`, or a string in the format of `projects/{project}/global/snapshots/{snapshot}`. If set, `sizeGb` and `fsType` must be empty. Can only be updated if it has an existing value.
               min_version: 'beta'
-              # TODO(esu): Add conflicting fields once complex lists are supported.
+              # TODO: Add conflicting fields once complex lists are supported.
   - name: 'ephemeralDirectories'
     type: Array
     description: |

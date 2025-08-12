@@ -117,6 +117,7 @@ async:
     resource_inside_response: false
 custom_code:
   encoder: 'templates/terraform/encoders/redis_cluster.go.tmpl'
+  decoder: 'templates/terraform/decoders/redis_cluster.go.tmpl'
 sweeper:
   ensure_value:
     field: deletionProtectionEnabled
@@ -283,8 +284,7 @@ properties:
       - name: 'backup'
         type: String
         description: |
-         Example: //redis.googleapis.com/projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backup} A shorter version (without the prefix) of the backup name is also supported,
-         like projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backupId}. In this case, it assumes the backup is under redis.googleapis.com.
+         Example: `projects/{project}/locations/{location}/backupCollections/{collection}/backups/{backup}`.
         required: true
         immutable: true
   - name: 'backupCollection'
@@ -378,6 +378,14 @@ properties:
         type: String
         description: |
           Immutable. The zone for single zone Memorystore Redis cluster.
+  - name: 'allowFewerZonesDeployment'
+    type: Boolean
+    immutable: true
+    description: |
+      Allows customers to specify if they are okay with deploying a multi-zone
+      cluster in less than 3 zones. Once set, if there is a zonal outage during
+      the cluster creation, the cluster will only be deployed in 2 zones, and
+      stay within the 2 zones for its lifecycle.
   - name: 'pscConfigs'
     type: Array
     description: |
@@ -812,3 +820,21 @@ properties:
   - name: 'kmsKey'
     type: String
     description: The KMS key used to encrypt the at-rest data of the cluster.
+  - name: 'managedServerCa'
+    type: NestedObject
+    output: true
+    description: Cluster's Certificate Authority. This field will only be populated if Redis Cluster's transit_encryption_mode is TRANSIT_ENCRYPTION_MODE_SERVER_AUTHENTICATION
+    properties:
+      - name: 'caCerts'
+        type: Array
+        output: true
+        description: The PEM encoded CA certificate chains for redis managed server authentication
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'certificates'
+              type: Array
+              output: true
+              description: The certificates that form the CA chain, from leaf to root order
+              item_type:
+                type: String

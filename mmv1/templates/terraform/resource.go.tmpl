@@ -291,45 +291,14 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{- /* Set computed resource properties required for building the ID from create API response (as long as Create doesn't use an async operation) */}}
 {{- /* This is necessary so that the ID is set correctly (and so that the following Read can succeed.) */}}
 {{- /* Technically this should possibly use the read URL explicitly, since id_format could differ - but that might need to be in addition to id_format anyway. */}}
-{{- if and $.HasComputedIdFormatFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
+{{- if and $.HasPostCreateComputedFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
     // Set computed resource properties from create API response so that they're available on the subsequent Read
     // call.
-{{- /* Don't render decoder for PollAsync resources - their decoders are expected to return `nil` until the resource completion completes, but we need to set their computed fields in order to call PollRead - so there can never be a dependency on the decoder. */}}
-{{- if and $.CustomCode.Decoder (or (not $.GetAsync) (not ($.GetAsync.IsA "PollAsync"))) }}
-    res, err = resource{{ $.ResourceName -}}Decoder(d, meta, res)
+    err = resource{{ $.ResourceName }}PostCreateSetComputedFields(d, meta, res)
     if err != nil {
-        return fmt.Errorf("decoding response: %w", err)
+        return fmt.Errorf("setting computed ID format fields: %w", err)
     }
-    if res == nil {
-        return fmt.Errorf("decoding response, could not find object")
-    }
-{{- end }}
-{{- $renderedIdFromName := "false" }}
-{{- range $prop := $.GettableProperties }}
-{{- /* Check if prop is potentially computed */}}
-{{-   if and ($.InIdFormat $prop) (and (or $prop.Output $prop.DefaultFromApi) (not $prop.IgnoreRead)) }}
-{{-     if and (eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl") (eq $renderedIdFromName "false") }}
-    // Setting `name` field so that `id_from_name` flattener will work properly.
-    if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(res["name"], d, config)); err != nil {
-        return fmt.Errorf(`Error setting computed identity field "name": %s`, err)
-    }
-    {{- $renderedIdFromName = "true" }}
-{{-     end }}
-{{-     if and $prop.Output (not $prop.IgnoreRead) }}
-    if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
-        return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
-    }
-{{-     else if and $prop.DefaultFromApi (not $prop.IgnoreRead) }}
-    // {{ underscore $prop.Name }} is set by API when unset
-    if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("{{ underscore $prop.Name }}"))) {
-        if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
-            return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
-        }
-    }
-{{-     end }}
-{{-   end }}{{/* prop is potentially computed */}}
-{{- end }}{{/* range */}}
-{{- end}}{{/* Set computed resource properties... */}}
+{{- end}}
 
     // Store the ID now
     id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
@@ -340,7 +309,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 
 {{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
 {{  if ($.GetAsync.IsA "OpAsync") -}}
-{{    if and $.GetAsync.Result.ResourceInsideResponse $.GetIdentity -}}
+{{    if and $.GetAsync.Result.ResourceInsideResponse $.HasPostCreateComputedFields -}}
     // Use the resource in the operation response to populate
     // identity fields and d.Id() before read
     var opRes map[string]interface{}
@@ -383,13 +352,33 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     }
 {{- end}}
 {{- end}}
-{{- range $prop := $.GettableProperties }}
-{{-  if $.IsInIdentity $prop }}
-    if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
+    {{- if $.HasPostCreateComputedFields}}
+    {{- $renderedIdFromName := "false" }}
+    {{- range $prop := $.GettableProperties }}
+    {{- /* Check if prop is potentially computed */}}
+    {{-   if and ($.InPostCreateComputed $prop) (and (or $prop.Output $prop.DefaultFromApi) (not $prop.IgnoreRead)) }}
+    {{-     if and (eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl") (eq $renderedIdFromName "false") }}
+    // Setting `name` field so that `id_from_name` flattener will work properly.
+    if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(opRes["name"], d, config)); err != nil {
         return err
     }
-{{- end}}
-{{- end}}
+    {{-       $renderedIdFromName = "true" }}
+    {{-     end }}
+    {{-     if and $prop.Output (not $prop.IgnoreRead) }}
+    if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
+        return err
+    }
+    {{-     else if and $prop.DefaultFromApi (not $prop.IgnoreRead) }}
+    // {{ underscore $prop.Name }} is set by API when unset
+    if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("{{ underscore $prop.Name }}"))) {
+        if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(opRes["{{ $prop.ApiName -}}"], d, config)); err != nil {
+            return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
+        }
+    }
+    {{-     end }}
+    {{-   end }}{{/* prop is potentially computed */}}
+    {{- end }}{{/* range */}}
+    {{- end}}
 
     // This may have caused the ID to update - update it if so.
     id, err = tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
@@ -1232,4 +1221,59 @@ func resource{{ $.ResourceName -}}PostCreateFailure(d *schema.ResourceData, meta
 {{- if and $.SchemaVersion $.StateUpgraders }}
 
     {{ $.CustomTemplate $.StateMigrationFile false -}}
+{{- end }}
+{{- if and $.HasPostCreateComputedFields (or (or (not $.GetAsync) (not ($.GetAsync.Allow "Create"))) (and $.GetAsync (and ($.GetAsync.IsA "PollAsync") ($.GetAsync.Allow "Create"))))}}
+func resource{{ $.ResourceName -}}PostCreateSetComputedFields(d *schema.ResourceData, meta interface{}, res map[string]interface{}) error {
+    config := meta.(*transport_tpg.Config)
+    {{- /* Don't render decoder for PollAsync resources - their decoders are expected to return `nil` until the resource completion completes, but we need to set their computed fields in order to call PollRead - so there can never be a dependency on the decoder. */}}
+    {{- if and $.CustomCode.Decoder (or (not $.GetAsync) (not ($.GetAsync.IsA "PollAsync"))) }}
+    res, err := resource{{ $.ResourceName -}}Decoder(d, meta, res)
+    if err != nil {
+        return fmt.Errorf("decoding response: %w", err)
+    }
+    if res == nil {
+        return fmt.Errorf("decoding response, could not find object")
+    }
+    {{- end }}
+    {{- if $.NestedQuery}}
+    {{- if $.NestedQuery.Keys}}
+    if _, ok := res["{{ index $.NestedQuery.Keys 0 -}}"]; ok {
+        res, err := flattenNested{{ $.ResourceName -}}(d, meta, res)
+        if err != nil {
+            return fmt.Errorf("Error getting nested object from operation response: %s", err)
+        }
+        if res == nil {
+            // Object isn't there any more - remove it from the state.
+            return fmt.Errorf("Error decoding response from operation, could not find nested object")
+        }
+    }
+    {{- end}}
+    {{- end}}
+    {{- $renderedIdFromName := "false" }}
+    {{- range $prop := $.GettableProperties }}
+    {{- /* Check if prop is potentially computed */}}
+    {{-   if and ($.InPostCreateComputed $prop) (and (or $prop.Output $prop.DefaultFromApi) (not $prop.IgnoreRead)) }}
+    {{-     if and (eq $prop.CustomFlatten "templates/terraform/custom_flatten/id_from_name.tmpl") (eq $renderedIdFromName "false") }}
+    // Setting `name` field so that `id_from_name` flattener will work properly.
+    if err := d.Set("name", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}Name(res["name"], d, config)); err != nil {
+        return fmt.Errorf(`Error setting computed identity field "name": %s`, err)
+    }
+    {{-       $renderedIdFromName = "true" }}
+    {{-     end }}
+    {{-     if and $prop.Output (not $prop.IgnoreRead) }}
+    if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
+        return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
+    }
+    {{-     else if and $prop.DefaultFromApi (not $prop.IgnoreRead) }}
+    // {{ underscore $prop.Name }} is set by API when unset
+    if tpgresource.IsEmptyValue(reflect.ValueOf(d.Get("{{ underscore $prop.Name }}"))) {
+        if err := d.Set("{{ underscore $prop.Name -}}", flatten{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}(res["{{ $prop.ApiName -}}"], d, config)); err != nil {
+            return fmt.Errorf(`Error setting computed identity field "{{ underscore $prop.Name }}": %s`, err)
+        }
+    }
+    {{-     end }}
+    {{-   end }}{{/* prop is potentially computed */}}
+    {{- end }}{{/* range */}}
+    return nil
+}
 {{- end }}

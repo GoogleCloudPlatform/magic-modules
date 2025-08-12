@@ -32,6 +32,7 @@ timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
+include_in_tgc_next_DO_NOT_USE: true
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
@@ -264,7 +265,7 @@ examples:
       project: 'my-project-name'
  # this example file will cause IAM conflicts between tests if used to make a test
     exclude_test: true
-  - name: 'cloudfunctions2_abiu'
+  - name: 'cloudfunctions2_automatic_base_image_update'
     primary_resource_id: 'function'
     min_version: 'beta'
     vars:
@@ -283,7 +284,7 @@ examples:
     ignore_read_extra:
       - 'build_config.0.source.0.storage_source.0.object'
       - 'build_config.0.source.0.storage_source.0.bucket'
-  - name: 'cloudfunctions2_abiu_on_deploy'
+  - name: 'cloudfunctions2_on_deploy_base_image_update'
     primary_resource_id: 'function'
     min_version: 'beta'
     vars:

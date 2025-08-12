@@ -101,6 +101,50 @@ func TestMinCpuPlatformDiffSuppress(t *testing.T) {
 	}
 }
 
+func TestDisksForceAttachDiffSuppress(t *testing.T) {
+	cases := map[string]struct {
+		Old, New           string
+		ExpectDiffSuppress bool
+	}{
+		"force_attach unchanged": {
+			Old:                "true",
+			New:                "true",
+			ExpectDiffSuppress: true,
+		},
+		"force_attach changed to true": {
+			Old:                "false",
+			New:                "true",
+			ExpectDiffSuppress: false,
+		},
+		"force_attach changed to false": {
+			Old:                "true",
+			New:                "false",
+			ExpectDiffSuppress: false,
+		},
+		"force_attach unchanged false": {
+			Old:                "false",
+			New:                "false",
+			ExpectDiffSuppress: true,
+		},
+		"force_attach changed false from empty": {
+			Old:                "",
+			New:                "false",
+			ExpectDiffSuppress: true,
+		},
+		"force_attach changed empty from false": {
+			Old:                "false",
+			New:                "",
+			ExpectDiffSuppress: true,
+		},
+	}
+
+	for tn, tc := range cases {
+		if tpgcompute.DisksForceAttachDiffSuppress("", tc.Old, tc.New, nil) != tc.ExpectDiffSuppress {
+			t.Errorf("bad: %s, %q => %q expect DiffSuppress to return %t", tn, tc.Old, tc.New, tc.ExpectDiffSuppress)
+		}
+	}
+}
+
 func TestCheckForCommonAliasIp(t *testing.T) {
 	type testCase struct {
 		old, new []*compute.AliasIpRange
@@ -159,7 +203,7 @@ func computeInstanceImportStep(zone, instanceName string, additionalImportIgnore
 	// metadata is only read into state if set in the config
 	// importing doesn't know whether metadata.startup_script vs metadata_startup_script is set in the config,
 	// it always takes metadata.startup-script
-	ignores := []string{"metadata.%", "metadata.startup-script", "metadata_startup_script", "boot_disk.0.initialize_params.0.resource_manager_tags.%",  "params.0.resource_manager_tags.%"}
+	ignores := []string{"metadata.%", "metadata.startup-script", "metadata_startup_script", "boot_disk.0.initialize_params.0.resource_manager_tags.%", "params.0.resource_manager_tags.%"}
 
 	return resource.TestStep{
 		ResourceName:            "google_compute_instance.foobar",
@@ -177,9 +221,9 @@ func TestAccComputeInstance_basic1(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic(instanceName),
@@ -213,9 +257,9 @@ func TestAccComputeInstance_basic2(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic2(instanceName),
@@ -238,9 +282,9 @@ func TestAccComputeInstance_basic3(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic3(instanceName),
@@ -263,9 +307,9 @@ func TestAccComputeInstance_basic4(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic4(instanceName),
@@ -288,9 +332,9 @@ func TestAccComputeInstance_basic5(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic5(instanceName),
@@ -311,16 +355,16 @@ func TestAccComputeInstance_resourceManagerTags(t *testing.T) {
 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-    context := map[string]interface{}{
+	context := map[string]interface{}{
 		"project":       envvar.GetTestProjectFromEnv(),
 		"random_suffix": acctest.RandString(t, 10),
 		"instance_name": instanceName,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_resourceManagerTags(context),
@@ -332,7 +376,8 @@ func TestAccComputeInstance_resourceManagerTags(t *testing.T) {
 				Config: testAccComputeInstance_resourceManagerTagsUpdate(context),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance)),
+						t, "google_compute_instance.foobar", &instance),
+				),
 			},
 		},
 	})
@@ -462,9 +507,9 @@ func TestAccComputeInstance_descriptionUpdate(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_description(instanceName),
@@ -494,17 +539,16 @@ func TestAccComputeInstance_IP(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_ip(ipName, instanceName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
-					testAccCheckComputeInstanceAccessConfigHasNatIP(&instance),
-				),
+					testAccCheckComputeInstanceAccessConfigHasNatIP(&instance)),
 			},
 		},
 	})
@@ -519,9 +563,9 @@ func TestAccComputeInstance_IPv6(t *testing.T) {
 	var ptrName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_ipv6(ipName, instanceName, ptrName),
@@ -564,52 +608,52 @@ func TestAccComputeInstance_ipv6ExternalReservation(t *testing.T) {
 }
 
 func TestAccComputeInstance_internalIPv6(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  var instance compute.Instance
-  var ipName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-  var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	var instance compute.Instance
+	var ipName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccComputeInstance_internalIpv6(ipName, instanceName),
-        Check: resource.ComposeTestCheckFunc(
-          testAccCheckComputeInstanceExists(
-            t, "google_compute_instance.foobar", &instance),
-          testAccCheckComputeInstanceIpv6AccessConfigHasInternalIPv6(&instance),
-        ),
-      },
-      computeInstanceImportStep("us-west2-a", instanceName, []string{}),
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_internalIpv6(ipName, instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceIpv6AccessConfigHasInternalIPv6(&instance),
+				),
+			},
+			computeInstanceImportStep("us-west2-a", instanceName, []string{}),
+		},
+	})
 }
 
 func TestAccComputeInstance_internalIPv6PrefixLength(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  var instance compute.Instance
-  var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccComputeInstance_internalIpv6PrefixLength("96", instanceName),
-        Check: resource.ComposeTestCheckFunc(
-          testAccCheckComputeInstanceExists(
-            t, "google_compute_instance.foobar", &instance),
-          testAccCheckComputeInstanceIpv6AccessConfigHasInternalIPv6(&instance),
-        ),
-      },
-      computeInstanceImportStep("us-west2-a", instanceName, []string{"allow_stopping_for_update"}),
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_internalIpv6PrefixLength("96", instanceName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					testAccCheckComputeInstanceIpv6AccessConfigHasInternalIPv6(&instance),
+				),
+			},
+			computeInstanceImportStep("us-west2-a", instanceName, []string{"allow_stopping_for_update"}),
+		},
+	})
 }
 
 func TestAccComputeInstance_PTRRecord(t *testing.T) {
@@ -621,9 +665,9 @@ func TestAccComputeInstance_PTRRecord(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_PTRRecord(ptrName, instanceName),
@@ -652,9 +696,9 @@ func TestAccComputeInstance_networkTier(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_networkTier(instanceName),
@@ -693,9 +737,9 @@ func TestAccComputeInstance_diskEncryption(t *testing.T) {
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_disks_encryption(bootEncryptionKey, diskNameToEncryptionKey, instanceName, acctest.RandString(t, 10)),
@@ -724,9 +768,9 @@ func TestAccComputeInstance_diskEncryptionRestart(t *testing.T) {
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_disks_encryption_restart(bootEncryptionKey, diskNameToEncryptionKey, instanceName),
@@ -771,14 +815,14 @@ func TestAccComputeInstance_kmsDiskEncryption(t *testing.T) {
 	acctest.BootstrapIamMembers(t, []acctest.IamMember{
 		{
 			Member: "serviceAccount:service-{project_number}@compute-system.iam.gserviceaccount.com",
-			Role: "roles/cloudkms.cryptoKeyEncrypterDecrypter",
+			Role:   "roles/cloudkms.cryptoKeyEncrypterDecrypter",
 		},
 	})
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_disks_kms(bootKmsKeyName, diskNameToEncryptionKey, instanceName, acctest.RandString(t, 10)),
@@ -1022,9 +1066,9 @@ func TestAccComputeInstance_resourcePolicyUpdate(t *testing.T) {
 	var scheduleName2 = fmt.Sprintf("tf-tests-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_instanceSchedule(instanceName, scheduleName1),
@@ -1073,9 +1117,9 @@ func TestAccComputeInstance_attachedDisk(t *testing.T) {
 	var diskName = fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_attachedDisk(diskName, instanceName),
@@ -1098,9 +1142,9 @@ func TestAccComputeInstance_attachedDisk_sourceUrl(t *testing.T) {
 	var diskName = fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_attachedDisk_sourceUrl(diskName, instanceName),
@@ -1123,9 +1167,9 @@ func TestAccComputeInstance_attachedDisk_modeRo(t *testing.T) {
 	var diskName = fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_attachedDisk_modeRo(diskName, instanceName),
@@ -1140,6 +1184,52 @@ func TestAccComputeInstance_attachedDisk_modeRo(t *testing.T) {
 	})
 }
 
+func TestAccComputeInstance_attachDisk_forceAttach(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	var diskName = fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10))
+	var forceAttachSetToTrue = true
+	var forceAttachSetToFalse = false
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeInstance_attachedDisk_forceAttach_zonal(diskName, instanceName, forceAttachSetToTrue),
+				ExpectError: regexp.MustCompile("Force attaching zonal disks is not supported"),
+			},
+			{
+				Config: testAccComputeInstance_attachedDisk_forceAttach_zonal(diskName, instanceName, forceAttachSetToFalse),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "attached_disk.0.force_attach", fmt.Sprintf("%t", forceAttachSetToFalse)),
+				),
+			},
+			{
+				Config: testAccComputeInstance_attachedDisk_forceAttach(diskName, instanceName, forceAttachSetToTrue),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "attached_disk.0.force_attach", fmt.Sprintf("%t", forceAttachSetToTrue)),
+				),
+			},
+			{
+				Config: testAccComputeInstance_attachedDisk_forceAttach(diskName, instanceName, forceAttachSetToFalse),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "attached_disk.0.force_attach", fmt.Sprintf("%t", forceAttachSetToFalse)),
+				),
+			},
+		},
+	})
+}
+
 func TestAccComputeInstance_attachedDiskUpdate(t *testing.T) {
 	t.Parallel()
 
@@ -1149,9 +1239,9 @@ func TestAccComputeInstance_attachedDiskUpdate(t *testing.T) {
 	var diskName2 = fmt.Sprintf("tf-testd-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_attachedDisk(diskName, instanceName),
@@ -1201,9 +1291,9 @@ func TestAccComputeInstance_bootDisk_source(t *testing.T) {
 	var diskName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_bootDisk_source(diskName, instanceName),
@@ -1226,9 +1316,9 @@ func TestAccComputeInstance_bootDisk_sourceUrl(t *testing.T) {
 	var diskName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_bootDisk_sourceUrl(diskName, instanceName),
@@ -1251,9 +1341,9 @@ func TestAccComputeInstance_bootDisk_type(t *testing.T) {
 	var diskType = "pd-ssd"
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_bootDisk_type(instanceName, diskType),
@@ -1274,14 +1364,60 @@ func TestAccComputeInstance_bootDisk_mode(t *testing.T) {
 	var diskMode = "READ_WRITE"
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_bootDisk_mode(instanceName, diskMode),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{}),
+		},
+	})
+}
+
+func TestAccComputeInstance_bootDisk_forceAttach(t *testing.T) {
+	t.Parallel()
+
+	var instance compute.Instance
+	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	var diskName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	var forceAttachSetToTrue = true
+	var forceAttachSetToFalse = false
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeInstance_bootDisk_forceAttach_zonal(diskName, instanceName, forceAttachSetToTrue),
+				ExpectError: regexp.MustCompile("Force attaching zonal disks is not supported"),
+			},
+			{
+				Config: testAccComputeInstance_bootDisk_forceAttach_zonal(diskName, instanceName, forceAttachSetToFalse),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.force_attach", fmt.Sprintf("%t", forceAttachSetToFalse)),
+				),
+			},
+			{
+				Config: testAccComputeInstance_bootDisk_forceAttach(instanceName, forceAttachSetToTrue),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.force_attach", fmt.Sprintf("%t", forceAttachSetToTrue)),
+				),
+			},
+			{
+				Config: testAccComputeInstance_bootDisk_forceAttach(instanceName, forceAttachSetToFalse),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.force_attach", fmt.Sprintf("%t", forceAttachSetToFalse)),
+				),
+			},
 		},
 	})
 }
@@ -1293,9 +1429,9 @@ func TestAccComputeInstance_with375GbScratchDisk(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_with375GbScratchDisk(instanceName),
@@ -1310,11 +1446,11 @@ func TestAccComputeInstance_with375GbScratchDisk(t *testing.T) {
 							"interface": "SCSI",
 						},
 						{
-							"interface": "NVME",
+							"interface":  "NVME",
 							"deviceName": "nvme-local-ssd",
 						},
 						{
-							"interface": "SCSI",
+							"interface":  "SCSI",
 							"deviceName": "scsi-local-ssd",
 						},
 					}),
@@ -1335,9 +1471,9 @@ func TestAccComputeInstance_with18TbScratchDisk(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_with18TbScratchDisk(instanceName),
@@ -1378,9 +1514,9 @@ func TestAccComputeInstance_forceNewAndChangeMetadata(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic(instanceName),
@@ -1409,9 +1545,9 @@ func TestAccComputeInstance_update(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic(instanceName),
@@ -1443,9 +1579,9 @@ func TestAccComputeInstance_stopInstanceToUpdate(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			// Set fields that require stopping the instance
 			{
@@ -1485,9 +1621,9 @@ func TestAccComputeInstance_serviceAccount(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_serviceAccount(instanceName),
@@ -1562,9 +1698,9 @@ func TestAccComputeInstance_serviceAccount_updated(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_serviceAccount_update0(instanceName),
@@ -1617,9 +1753,9 @@ func TestAccComputeInstance_serviceAccount_updated0to1to0scopes(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_serviceAccount_update01(instanceName),
@@ -1662,9 +1798,9 @@ func TestAccComputeInstance_scheduling(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_scheduling(instanceName),
@@ -1748,9 +1884,9 @@ func TestAccComputeInstance_advancedMachineFeatures(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_advancedMachineFeatures(instanceName),
@@ -1780,10 +1916,6 @@ func TestAccComputeInstance_performanceMonitoringUnit(t *testing.T) {
 		"instance_name":               fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 		"performance_monitoring_unit": "STANDARD",
 	}
-	context_2 := map[string]interface{}{
-		"instance_name":               context_1["instance_name"].(string),
-		"performance_monitoring_unit": "ENHANCED",
-	}
 	context_3 := map[string]interface{}{
 		"instance_name":               context_1["instance_name"].(string),
 		"performance_monitoring_unit": "ARCHITECTURAL",
@@ -1804,15 +1936,6 @@ func TestAccComputeInstance_performanceMonitoringUnit(t *testing.T) {
 			},
 			computeInstanceImportStep("us-central1-a", context_1["instance_name"].(string), []string{"allow_stopping_for_update"}),
 			{
-				Config: testAccComputeInstance_performanceMonitoringUnit(context_2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceExists(
-						t, "google_compute_instance.foobar", &instance),
-					resource.TestCheckResourceAttr("google_compute_instance.foobar", "advanced_machine_features.0.performance_monitoring_unit", "ENHANCED"),
-				),
-			},
-			computeInstanceImportStep("us-central1-a", context_2["instance_name"].(string), []string{"allow_stopping_for_update"}),
-			{
 				Config: testAccComputeInstance_performanceMonitoringUnit(context_3),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceExists(
@@ -1829,7 +1952,7 @@ func TestAccComputeInstance_enableUefiNetworking(t *testing.T) {
 
 	var instance compute.Instance
 	context_1 := map[string]interface{}{
-		"instance_name":               fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"instance_name":          fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
 		"enable_uefi_networking": "true",
 	}
 
@@ -1859,9 +1982,9 @@ func TestAccComputeInstance_soleTenantNodeAffinities(t *testing.T) {
 	var groupName = fmt.Sprintf("tf-test-nodegroup-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_withoutNodeAffinities(instanceName, templateName, groupName),
@@ -1883,7 +2006,6 @@ func TestAccComputeInstance_soleTenantNodeAffinities(t *testing.T) {
 	})
 }
 
-
 func TestAccComputeInstance_reservationAffinities(t *testing.T) {
 	t.Parallel()
 
@@ -1891,9 +2013,9 @@ func TestAccComputeInstance_reservationAffinities(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-resaffinity-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_reservationAffinity_nonSpecificReservationConfig(instanceName, "NO_RESERVATION"),
@@ -1989,6 +2111,14 @@ func TestAccComputeInstance_hostErrorTimeoutSecconds(t *testing.T) {
 				),
 			},
 			computeInstanceImportStep(context_4["zone"].(string), context_4["instance_name"].(string), []string{}),
+			{
+				Config: testAccComputeInstance_hostErrorTimeoutSeconds(context_1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "scheduling.0.host_error_timeout_seconds", "90"),
+				),
+			},
+			computeInstanceImportStep(context_1["zone"].(string), context_1["instance_name"].(string), []string{}),
 		},
 	})
 }
@@ -2001,9 +2131,9 @@ func TestAccComputeInstance_subnet_auto(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_subnet_auto(acctest.RandString(t, 10), instanceName),
@@ -2025,9 +2155,9 @@ func TestAccComputeInstance_subnet_custom(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_subnet_custom(acctest.RandString(t, 10), instanceName),
@@ -2054,9 +2184,9 @@ func TestAccComputeInstance_subnet_xpn(t *testing.T) {
 	projectName := fmt.Sprintf("tf-test-xpn-%d", time.Now().Unix())
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_subnet_xpn(org, billingId, projectName, instanceName, acctest.RandString(t, 10)),
@@ -2078,9 +2208,9 @@ func TestAccComputeInstance_networkIPAuto(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_networkIPAuto(acctest.RandString(t, 10), instanceName),
@@ -2101,9 +2231,9 @@ func TestAccComputeInstance_network_ip_custom(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	var ipAddress = "10.0.200.200"
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_network_ip_custom(acctest.RandString(t, 10), instanceName, ipAddress),
@@ -2126,9 +2256,9 @@ func TestAccComputeInstance_private_image_family(t *testing.T) {
 	var familyName = fmt.Sprintf("tf-testf-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_private_image_family(diskName, familyName, instanceName),
@@ -2150,9 +2280,9 @@ func TestAccComputeInstance_networkPerformanceConfig(t *testing.T) {
 	var imageName = fmt.Sprintf("tf-testf-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_networkPerformanceConfig(imageName, diskName, instanceName),
@@ -2173,9 +2303,9 @@ func TestAccComputeInstance_forceChangeMachineTypeManually(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic(instanceName),
@@ -2199,9 +2329,9 @@ func TestAccComputeInstance_multiNic(t *testing.T) {
 	subnetworkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_multiNic(instanceName, networkName, subnetworkName),
@@ -2222,9 +2352,9 @@ func TestAccComputeInstance_nictype_update(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_nictype(instanceName, "GVNIC"),
@@ -2251,9 +2381,9 @@ func TestAccComputeInstance_guestAccelerator(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_guestAccelerator(instanceName, 1),
@@ -2275,9 +2405,9 @@ func TestAccComputeInstance_guestAcceleratorSkip(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_guestAccelerator(instanceName, 0),
@@ -2298,9 +2428,9 @@ func TestAccComputeInstance_minCpuPlatform(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_minCpuPlatform(instanceName),
@@ -2329,9 +2459,9 @@ func TestAccComputeInstance_deletionProtectionExplicitFalse(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic_deletionProtectionFalse(instanceName),
@@ -2352,9 +2482,9 @@ func TestAccComputeInstance_deletionProtectionExplicitTrueAndUpdateFalse(t *test
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic_deletionProtectionTrue(instanceName),
@@ -2385,9 +2515,9 @@ func TestAccComputeInstance_primaryAliasIpRange(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_primaryAliasIpRange(instanceName),
@@ -2410,9 +2540,9 @@ func TestAccComputeInstance_secondaryAliasIpRange(t *testing.T) {
 	subnetName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_secondaryAliasIpRange(networkName, subnetName, instanceName),
@@ -2485,9 +2615,9 @@ func TestAccComputeInstance_hostname(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_hostname(instanceName),
@@ -2508,9 +2638,9 @@ func TestAccComputeInstance_shieldedVmConfig(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_shieldedVmConfig(instanceName, true, true, true),
@@ -2544,9 +2674,9 @@ func TestAccComputeInstanceConfidentialInstanceConfigMain(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstanceConfidentialInstanceConfigEnable(instanceName, "SEV"),
@@ -2630,9 +2760,9 @@ func TestAccComputeInstance_hyperdiskBootDisk_provisioned_iops_throughput(t *tes
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"instance_name":         fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
-		"zone":                  "us-central1-a",
-		"provisioned_iops": 	 12000,
+		"instance_name":          fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"zone":                   "us-central1-a",
+		"provisioned_iops":       12000,
 		"provisioned_throughput": 200,
 	}
 
@@ -2655,9 +2785,9 @@ func TestAccComputeInstance_enableDisplay(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_enableDisplay(instanceName),
@@ -2665,6 +2795,10 @@ func TestAccComputeInstance_enableDisplay(t *testing.T) {
 			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 			{
 				Config: testAccComputeInstance_enableDisplayUpdated(instanceName),
+			},
+			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
+			{
+				Config: testAccComputeInstance_enableDisplay(instanceName),
 			},
 			computeInstanceImportStep("us-central1-a", instanceName, []string{"allow_stopping_for_update"}),
 		},
@@ -2758,9 +2892,9 @@ func TestAccComputeInstance_desiredStatusUpdateBasic(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic2(instanceName),
@@ -2812,9 +2946,9 @@ func TestAccComputeInstance_desiredStatusTerminatedUpdateFields(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic2(instanceName),
@@ -2854,9 +2988,9 @@ func TestAccComputeInstance_updateRunning_desiredStatusRunning_allowStoppingForU
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic2(instanceName),
@@ -2888,9 +3022,9 @@ func TestAccComputeInstance_updateRunning_desiredStatusNotSet_notAllowStoppingFo
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic2(instanceName),
@@ -2915,9 +3049,9 @@ func TestAccComputeInstance_updateRunning_desiredStatusRunning_notAllowStoppingF
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic2(instanceName),
@@ -2942,9 +3076,9 @@ func TestAccComputeInstance_updateRunning_desiredStatusTerminated_allowStoppingF
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic2(instanceName),
@@ -2974,9 +3108,9 @@ func TestAccComputeInstance_updateRunning_desiredStatusTerminated_notAllowStoppi
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic2(instanceName),
@@ -3006,9 +3140,9 @@ func TestAccComputeInstance_updateTerminated_desiredStatusNotSet_allowStoppingFo
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic2(instanceName),
@@ -3046,9 +3180,9 @@ func TestAccComputeInstance_updateTerminated_desiredStatusTerminated_allowStoppi
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic2(instanceName),
@@ -3086,9 +3220,9 @@ func TestAccComputeInstance_updateTerminated_desiredStatusNotSet_notAllowStoppin
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic2(instanceName),
@@ -3126,9 +3260,9 @@ func TestAccComputeInstance_updateTerminated_desiredStatusTerminated_notAllowSto
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic2(instanceName),
@@ -3166,9 +3300,9 @@ func TestAccComputeInstance_updateTerminated_desiredStatusRunning_allowStoppingF
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic2(instanceName),
@@ -3206,9 +3340,9 @@ func TestAccComputeInstance_updateTerminated_desiredStatusRunning_notAllowStoppi
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_basic2(instanceName),
@@ -3291,9 +3425,9 @@ func TestAccComputeInstance_resourcePolicyCollocate(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_resourcePolicyCollocate(instanceName, acctest.RandString(t, 10)),
@@ -3310,9 +3444,9 @@ func TestAccComputeInstance_resourcePolicySpread(t *testing.T) {
 	var instance compute.Instance
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_resourcePolicySpread(instanceName, acctest.RandString(t, 10)),
@@ -3334,9 +3468,9 @@ func TestAccComputeInstance_subnetworkUpdate(t *testing.T) {
 	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_subnetworkUpdate(suffix, instanceName),
@@ -3359,12 +3493,12 @@ func TestAccComputeInstance_subnetworkProjectMustMatchError(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeInstance_subnetworkProjectExpectError(suffix, instanceName),
+				Config:      testAccComputeInstance_subnetworkProjectExpectError(suffix, instanceName),
 				ExpectError: regexp.MustCompile("must match subnetwork_project"),
 			},
 		},
@@ -3416,9 +3550,9 @@ func TestAccComputeInstance_queueCount(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_queueCountSet(instanceName),
@@ -3428,16 +3562,15 @@ func TestAccComputeInstance_queueCount(t *testing.T) {
 	})
 }
 
-
 func TestAccComputeInstance_spotVM(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_spotVM(instanceName),
@@ -3451,16 +3584,15 @@ func TestAccComputeInstance_spotVM(t *testing.T) {
 	})
 }
 
-
 func TestAccComputeInstance_spotVM_update(t *testing.T) {
 	t.Parallel()
 
 	var instance compute.Instance
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_scheduling(instanceName),
@@ -3493,9 +3625,9 @@ func TestAccComputeInstance_maxRunDuration_update(t *testing.T) {
 	expectedMaxRunDuration.Seconds = 60
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_standardVM_maxRunDuration(instanceName, "STOP"),
@@ -3527,9 +3659,9 @@ func TestAccComputeInstance_standardVM_maxRunDuration_stopTerminationAction(t *t
 	var instanceTerminationAction = "STOP"
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_standardVM_maxRunDuration(instanceName, instanceTerminationAction),
@@ -3557,9 +3689,9 @@ func TestAccComputeInstance_localSsdVM_maxRunDuration_stopTerminationAction(t *t
 	var instanceTerminationAction = "STOP"
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_localSsdVM_maxRunDuration(instanceName, instanceTerminationAction),
@@ -3587,9 +3719,9 @@ func TestAccComputeInstance_spotVM_maxRunDuration_deleteTerminationAction(t *tes
 	var instanceTerminationAction = "DELETE"
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_spotVM_maxRunDuration(instanceName, instanceTerminationAction),
@@ -3617,9 +3749,9 @@ func TestAccComputeInstance_standardVM_maxRunDuration_deleteTerminationAction(t 
 	var instanceTerminationAction = "DELETE"
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_standardVM_maxRunDuration(instanceName, instanceTerminationAction),
@@ -3645,9 +3777,9 @@ func TestAccComputeInstance_spotVM_maxRunDuration_update(t *testing.T) {
 	expectedMaxRunDuration.Nanos = 123
 	expectedMaxRunDuration.Seconds = 60
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_scheduling(instanceName),
@@ -3681,9 +3813,9 @@ func TestAccComputeInstance_localSsdRecoveryTimeout(t *testing.T) {
 	expectedLocalSsdRecoveryTimeout.Seconds = 3600
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_localSsdRecoveryTimeout(instanceName),
@@ -3708,9 +3840,9 @@ func TestAccComputeInstance_localSsdRecoveryTimeout_update(t *testing.T) {
 	expectedLocalSsdRecoveryTimeout.Nanos = 0
 	expectedLocalSsdRecoveryTimeout.Seconds = 3600
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_scheduling(instanceName),
@@ -3842,9 +3974,9 @@ func TestAccComputeInstance_metadataStartupScript_update(t *testing.T) {
 	var instanceName = fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_metadataStartupScript(instanceName, "e2-medium", "abc"),
@@ -3910,9 +4042,9 @@ func TestAccComputeInstance_regionBootDisk(t *testing.T) {
 	var suffix = acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:     func() { acctest.AccTestPreCheck(t) },
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy: testAccCheckComputeInstanceDestroyProducer(t),
+		CheckDestroy:             testAccCheckComputeInstanceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccComputeInstance_regionBootDisk(instanceName, diskName, suffix),
@@ -3921,7 +4053,6 @@ func TestAccComputeInstance_regionBootDisk(t *testing.T) {
 						t, "google_compute_instance.regional_vm_instance", &instance),
 					testAccCheckComputeInstanceBootDisk(&instance, diskName),
 				),
-
 			},
 		},
 	})
@@ -4117,6 +4248,14 @@ func TestAccComputeInstance_keyRevocationActionType(t *testing.T) {
 					testAccCheckComputeInstanceExists(
 						t, "google_compute_instance.foobar", &instance),
 					resource.TestCheckResourceAttr("google_compute_instance.foobar", "key_revocation_action_type", ""),
+				),
+			},
+			{
+				Config: testAccComputeInstance_keyRevocationActionType(context_2),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceExists(
+						t, "google_compute_instance.foobar", &instance),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "key_revocation_action_type", "STOP"),
 				),
 			},
 		},
@@ -4497,7 +4636,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfi
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateTwoPoliciesRemoveAccessConfig(suffix, policyName, policyName2, instanceName, "google_compute_region_security_policy.policyforinstance.self_link", "google_compute_region_security_policy.policyforinstance.self_link"),
+				Config:      testAccComputeInstance_nic_securityPolicyCreateWithTwoNicsAndTwoAccessConfigsUpdateTwoPoliciesRemoveAccessConfig(suffix, policyName, policyName2, instanceName, "google_compute_region_security_policy.policyforinstance.self_link", "google_compute_region_security_policy.policyforinstance.self_link"),
 				ExpectError: regexp.MustCompile(errorDeleteAccessConfigWithSecPolicy),
 			},
 			{
@@ -4603,7 +4742,7 @@ func testAccComputeInstance_nic_securityPolicyCreateWithAccessConfigUpdateAccess
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateAccessConfig(suffix, policyName, instanceName),
+				Config:      testAccComputeInstance_nic_securityPolicyCreateWithTwoAccessConfigsUpdateAccessConfig(suffix, policyName, instanceName),
 				ExpectError: regexp.MustCompile(errorDeleteAccessConfigWithSecPolicy),
 			},
 			{
@@ -4717,7 +4856,7 @@ func testAccCheckComputeInstanceUpdateMachineType(t *testing.T, n string) resour
 func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 	t.Parallel()
 	suffix := fmt.Sprintf("%s", acctest.RandString(t, 10))
-  envRegion := envvar.GetTestRegionFromEnv()
+	envRegion := envvar.GetTestRegionFromEnv()
 	var instance compute.Instance
 
 {{ if eq $.TargetVersionName `ga` }}
@@ -4734,7 +4873,7 @@ func TestAccComputeInstance_NetworkAttachment(t *testing.T) {
 	context := map[string]interface{}{
 		"suffix":                  (acctest.RandString(t, 10)),
 		"network_attachment_name": testNetworkAttachmentName,
-    "region":                  envRegion,
+		"region":                  envRegion,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -4857,7 +4996,6 @@ func TestAccComputeInstance_guestOsFeatures(t *testing.T) {
 		},
 	})
 }
-
 
 func testAccCheckComputeInstanceDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {
@@ -4985,15 +5123,15 @@ func testAccCheckComputeInstanceIpv6AccessConfigHasExternalIPv6(instance *comput
 }
 
 func testAccCheckComputeInstanceIpv6AccessConfigHasInternalIPv6(instance *compute.Instance) resource.TestCheckFunc {
-  return func(s *terraform.State) error {
-    for _, i := range instance.NetworkInterfaces {
-      if i.Ipv6Address == "" {
-        return fmt.Errorf("no internal IPv6 address")
-      }
-    }
+	return func(s *terraform.State) error {
+		for _, i := range instance.NetworkInterfaces {
+			if i.Ipv6Address == "" {
+				return fmt.Errorf("no internal IPv6 address")
+			}
+		}
 
-    return nil
-  }
+		return nil
+	}
 }
 
 func testAccCheckComputeInstanceAccessConfigHasPTR(instance *compute.Instance) resource.TestCheckFunc {
@@ -5035,7 +5173,7 @@ func testAccCheckComputeInstanceMaxRunDuration(instance *compute.Instance, insta
 		}
 
 		if !reflect.DeepEqual(*instance.Scheduling.MaxRunDuration, instanceMaxRunDurationWant) {
-			return fmt.Errorf("got the wrong instance max run duration action: have: %#v; want: %#v",instance.Scheduling.MaxRunDuration, instanceMaxRunDurationWant)
+			return fmt.Errorf("got the wrong instance max run duration action: have: %#v; want: %#v", instance.Scheduling.MaxRunDuration, instanceMaxRunDurationWant)
 		}
 
 		return nil
@@ -5069,7 +5207,7 @@ func testAccCheckComputeInstanceLocalSsdRecoveryTimeout(instance *compute.Instan
 		}
 
 		if !reflect.DeepEqual(*instance.Scheduling.LocalSsdRecoveryTimeout, instanceLocalSsdRecoveryTiemoutWant) {
-			return fmt.Errorf("got the wrong instance local ssd recovery timeout action: have: %#v; want: %#v",instance.Scheduling.LocalSsdRecoveryTimeout, instanceLocalSsdRecoveryTiemoutWant)
+			return fmt.Errorf("got the wrong instance local ssd recovery timeout action: have: %#v; want: %#v", instance.Scheduling.LocalSsdRecoveryTimeout, instanceLocalSsdRecoveryTiemoutWant)
 		}
 
 		return nil
@@ -5116,7 +5254,7 @@ func testAccCheckComputeInstanceTerminationAction(instance *compute.Instance, in
 		}
 
 		if instance.Scheduling.InstanceTerminationAction != instanceTerminationActionWant {
-			return fmt.Errorf("got the wrong instance termniation action: have: %s; want: %s",instance.Scheduling.InstanceTerminationAction, instanceTerminationActionWant)
+			return fmt.Errorf("got the wrong instance termniation action: have: %s; want: %s", instance.Scheduling.InstanceTerminationAction, instanceTerminationActionWant)
 		}
 
 		return nil
@@ -5212,7 +5350,7 @@ func testAccCheckComputeInstanceScratchDisk(instance *compute.Instance, interfac
 				if deviceName, ok := interfaces[i]["deviceName"]; ok {
 					if disk.DeviceName != deviceName {
 						return fmt.Errorf("Mismatched device name on scratch disk #%d, expected: %q, found: %q",
-						i, deviceName, disk.DeviceName)
+							i, deviceName, disk.DeviceName)
 					}
 				}
 
@@ -5729,7 +5867,6 @@ resource "google_compute_instance" "foobar" {
   name           = "%s"
   machine_type   = "e2-medium"
   zone           = "us-central1-a"
-  can_ip_forward = false
   tags           = ["foo", "bar"]
   desired_status  = "RUNNING"
 
@@ -5770,7 +5907,6 @@ resource "google_compute_instance" "foobar" {
   name           = "%s"
   machine_type   = "e2-medium"
   zone           = "us-central1-a"
-  can_ip_forward = false
   tags           = ["foo", "bar"]
 
   boot_disk {
@@ -5832,7 +5968,6 @@ resource "google_compute_instance" "foobar" {
   name           = "%s"
   machine_type   = "e2-medium"
   zone           = "us-central1-a"
-  can_ip_forward = false
   tags           = ["foo", "bar"]
 
   boot_disk {
@@ -5863,7 +5998,6 @@ resource "google_compute_instance" "foobar" {
   name           = "%s"
   machine_type   = "e2-medium"
   zone           = "us-central1-a"
-  can_ip_forward = false
   tags           = ["foo", "bar"]
 
   boot_disk {
@@ -6282,7 +6416,6 @@ resource "google_compute_instance" "foobar" {
   name                = "%s"
   machine_type        = "e2-medium"
   zone                = "us-central1-a"
-  can_ip_forward      = false
   tags                = ["foo", "bar"]
   deletion_protection = false
 
@@ -6310,7 +6443,6 @@ resource "google_compute_instance" "foobar" {
   name                = "%s"
   machine_type        = "e2-medium"
   zone                = "us-central1-a"
-  can_ip_forward      = false
   tags                = ["foo", "bar"]
   deletion_protection = true
 
@@ -6494,7 +6626,7 @@ resource "google_compute_instance" "foobar" {
 }
 
 func testAccComputeInstance_internalIpv6(ip, instance string) string {
-  return fmt.Sprintf(`
+	return fmt.Sprintf(`
   data "google_compute_image" "my_image" {
     family  = "debian-11"
     project = "debian-cloud"
@@ -7448,6 +7580,106 @@ resource "google_compute_instance" "foobar" {
 `, disk, instance)
 }
 
+func testAccComputeInstance_attachedDisk_forceAttach(disk, instance string, force_attach bool) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_region_disk" "regionaldisk" {
+  name  		= "%s-1"
+  size  		= 10
+  type  		= "pd-ssd"
+  region 		= "us-central1"
+  replica_zones = ["us-central1-a", "us-central1-b"]
+}
+
+resource "google_compute_region_disk" "regionaldisk2" {
+  name  		= "%s-2"
+  size  		= 10
+  type  		= "pd-ssd"
+  region 		= "us-central1"
+  replica_zones = ["us-central1-a", "us-central1-b"]
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  attached_disk {
+    source       = google_compute_region_disk.regionaldisk.self_link
+    force_attach = %t
+  }
+
+  attached_disk {
+    source       = google_compute_region_disk.regionaldisk2.self_link
+    force_attach = %t
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, disk, disk, instance, force_attach, force_attach)
+}
+
+func testAccComputeInstance_attachedDisk_forceAttach_zonal(disk, instance string, force_attach bool) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name = "%s-1"
+  size = 10
+  type = "pd-ssd"
+  zone = "us-central1-a"
+}
+
+resource "google_compute_disk" "foobar2" {
+  name = "%s-2"
+  size = 10
+  type = "pd-ssd"
+  zone = "us-central1-a"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+  }
+
+  attached_disk {
+    source = google_compute_disk.foobar.name
+	force_attach = %t
+  }
+
+  attached_disk {
+    source = google_compute_disk.foobar2.name
+    force_attach = %t
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, disk, disk, instance, force_attach, force_attach)
+}
+
 func testAccComputeInstance_bootDisk_source(disk, instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
@@ -7558,6 +7790,62 @@ resource "google_compute_instance" "foobar" {
   }
 }
 `, instance, diskMode)
+}
+
+func testAccComputeInstance_bootDisk_forceAttach_zonal(disk, instance string, force_attach bool) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_disk" "foobar" {
+  name  = "%s"
+  zone  = "us-central1-a"
+  image = data.google_compute_image.my_image.self_link
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    source = google_compute_disk.foobar.name
+	force_attach = %t
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, disk, instance, force_attach)
+}
+
+func testAccComputeInstance_bootDisk_forceAttach(instance string, force_attach bool) string {
+	return fmt.Sprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance" "foobar" {
+  name         = "%s"
+  machine_type = "e2-medium"
+  zone         = "us-central1-a"
+
+  boot_disk {
+    initialize_params {
+      image = data.google_compute_image.my_image.self_link
+    }
+	force_attach = %t
+  }
+
+  network_interface {
+    network = "default"
+  }
+}
+`, instance, force_attach)
 }
 
 func testAccComputeInstance_with375GbScratchDisk(instance string) string {
@@ -8534,7 +8822,6 @@ resource "google_compute_instance" "foobar" {
   name           = "%s"
   machine_type   = "e2-medium"
   zone           = "us-central1-a"
-  can_ip_forward = false
   tags           = ["foo", "bar"]
 
   //deletion_protection = false is implicit in this config due to default value
@@ -8952,7 +9239,6 @@ resource "google_compute_instance" "foobar" {
   name           = "%s"
   machine_type   = "e2-medium"
   zone           = "us-central1-a"
-  can_ip_forward = false
 
   boot_disk {
     initialize_params {
@@ -9389,7 +9675,8 @@ resource "google_compute_instance" "foobar" {
 		values = ["%[1]s"]
 	}
   }
-}`, instanceName)
+}
+`, instanceName)
 }
 
 {{ if ne $.TargetVersionName `ga` -}}
@@ -9418,7 +9705,8 @@ resource "google_compute_instance" "foobar" {
     %{host_error_timeout_sec}
 	automatic_restart = true
   }
-}`, context)
+}
+`, context)
 }
 {{- end }}
 
@@ -9458,7 +9746,7 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstanceConfidentialInstanceConfigEnable(instance string, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family    = "ubuntu-2004-lts"
+  family    = "ubuntu-2204-lts"
   project   = "ubuntu-os-cloud"
 }
 
@@ -9573,7 +9861,7 @@ resource "google_compute_instance" "foobar4" {
 func testAccComputeInstanceConfidentialInstanceConfigNoEnable(instance string, minCpuPlatform, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image2" {
-  family    = "ubuntu-2004-lts"
+  family    = "ubuntu-2204-lts"
   project   = "ubuntu-os-cloud"
 }
 
@@ -9683,7 +9971,6 @@ resource "google_compute_instance" "foobar" {
   name           = "%s"
   machine_type   = "e2-medium"
   zone           = "us-central1-a"
-  can_ip_forward = false
   tags           = ["foo", "bar"]
   desired_status  = "RUNNING"
 
@@ -9720,7 +10007,6 @@ resource "google_compute_instance" "foobar" {
   name           = "%s"
   machine_type   = "e2-medium"
   zone           = "us-central1-a"
-  can_ip_forward = false
   tags           = ["foo", "bar"]
   desired_status  = "RUNNING"
 
@@ -9887,7 +10173,6 @@ resource "google_compute_instance" "foobar" {
 	name           = "%s"
 	machine_type   = "%s"
 	zone           = "us-central1-a"
-	can_ip_forward = false
 	tags           = ["foo", "bar"]
 
 	boot_disk {
@@ -9949,7 +10234,6 @@ resource "google_compute_instance" "foobar" {
 	name           = "%s"
 	machine_type   = "e2-medium"
 	zone           = "us-central1-a"
-	can_ip_forward = false
 	tags           = ["baz"]
 
 	boot_disk {
@@ -10013,7 +10297,6 @@ resource "google_compute_instance" "foobar" {
   name           = "%s"
   machine_type   = "c2-standard-4"
   zone           = "us-east4-b"
-  can_ip_forward = false
   tags           = ["foo", "bar"]
 
   //deletion_protection = false is implicit in this config due to default value
@@ -10041,7 +10324,6 @@ resource "google_compute_instance" "second" {
   name           = "%s-2"
   machine_type   = "c2-standard-4"
   zone           = "us-east4-b"
-  can_ip_forward = false
   tags           = ["foo", "bar"]
 
   //deletion_protection = false is implicit in this config due to default value
@@ -10073,7 +10355,6 @@ resource "google_compute_resource_policy" "foo" {
     collocation = "COLLOCATED"
   }
 }
-
 `, instance, instance, suffix)
 }
 
@@ -10088,7 +10369,6 @@ resource "google_compute_instance" "foobar" {
   name           = "%s"
   machine_type   = "e2-standard-4"
   zone           = "us-east4-b"
-  can_ip_forward = false
   tags           = ["foo", "bar"]
 
   //deletion_protection = false is implicit in this config due to default value
@@ -10480,7 +10760,7 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_spotVM(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family    = "ubuntu-2004-lts"
+  family    = "ubuntu-2204-lts"
   project   = "ubuntu-os-cloud"
 }
 
@@ -10512,7 +10792,7 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_standardVM_maxRunDuration(instance string, instanceTerminationAction string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family    = "ubuntu-2004-lts"
+  family    = "ubuntu-2204-lts"
   project   = "ubuntu-os-cloud"
 }
 
@@ -10547,7 +10827,7 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_standardVM_maxRunDurationUpdated(instance string, instanceTerminationAction string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family    = "ubuntu-2004-lts"
+  family    = "ubuntu-2204-lts"
   project   = "ubuntu-os-cloud"
 }
 
@@ -10620,11 +10900,10 @@ resource "google_compute_instance" "foobar" {
 `, instance, instanceTerminationAction)
 }
 
-
 func testAccComputeInstance_spotVM_maxRunDuration(instance string, instanceTerminationAction string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family    = "ubuntu-2004-lts"
+  family    = "ubuntu-2204-lts"
   project   = "ubuntu-os-cloud"
 }
 
@@ -10660,7 +10939,7 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_localSsdRecoveryTimeout(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family    = "ubuntu-2004-lts"
+  family    = "ubuntu-2204-lts"
   project   = "ubuntu-os-cloud"
 }
 
@@ -10694,7 +10973,7 @@ resource "google_compute_instance" "foobar" {
 func testAccComputeInstance_partnerMetadata_empty(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family    = "ubuntu-2004-lts"
+  family    = "ubuntu-2204-lts"
   project   = "ubuntu-os-cloud"
 }
 
@@ -10712,13 +10991,14 @@ resource "google_compute_instance" "foobar" {
   network_interface {
     network = "default"
   }
-}`, instance)
+}
+`, instance)
 }
 
 func testAccComputeInstance_partnerMetadata(instance string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family    = "ubuntu-2004-lts"
+  family    = "ubuntu-2204-lts"
   project   = "ubuntu-os-cloud"
 }
 
@@ -10748,7 +11028,8 @@ resource "google_compute_instance" "foobar" {
   		}
   	})
   }
-}`, instance)
+}
+`, instance)
 }
 {{- end }}
 
@@ -10763,7 +11044,6 @@ resource "google_compute_instance" "foobar" {
   name           = "%s"
   machine_type   = "%s"
   zone           = "us-central1-a"
-  can_ip_forward = false
   tags           = ["foo", "bar"]
 
   boot_disk {
@@ -10796,7 +11076,6 @@ resource "google_compute_instance" "foobar" {
   name           = "%s"
   machine_type   = "%s"
   zone           = "us-central1-a"
-  can_ip_forward = false
   tags           = ["foo", "bar"]
 
   boot_disk {
@@ -11862,7 +12141,7 @@ func TestAccComputeInstance_bootDisk_storagePoolSpecified(t *testing.T) {
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config:    testAccComputeInstance_bootDisk_storagePoolSpecified(instanceName, storagePoolNameLong, envvar.GetTestZoneFromEnv()),
+				Config: testAccComputeInstance_bootDisk_storagePoolSpecified(instanceName, storagePoolNameLong, envvar.GetTestZoneFromEnv()),
 			},
 			{
 				ResourceName:      "google_compute_instance.foobar",
@@ -11884,7 +12163,7 @@ func TestAccComputeInstance_bootDisk_storagePoolSpecified_nameOnly(t *testing.T)
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
 			{
-				Config:    testAccComputeInstance_bootDisk_storagePoolSpecified(instanceName, "tf-bootstrap-storage-pool-hyperdisk-balanced-basic-2", envvar.GetTestZoneFromEnv()),
+				Config: testAccComputeInstance_bootDisk_storagePoolSpecified(instanceName, "tf-bootstrap-storage-pool-hyperdisk-balanced-basic-2", envvar.GetTestZoneFromEnv()),
 			},
 			{
 				ResourceName:      "google_compute_instance.foobar",
@@ -11926,38 +12205,38 @@ resource "google_compute_instance" "foobar" {
 }
 
 func TestAccComputeInstance_bootAndAttachedDisk_interface(t *testing.T) {
-        t.Parallel()
+	t.Parallel()
 
-        instanceName1 := fmt.Sprintf("tf-test-vm1-%s", acctest.RandString(t, 10))
-        diskName1 := fmt.Sprintf("tf-test-disk1-%s", acctest.RandString(t, 10))
-        instanceName2 := fmt.Sprintf("tf-test-vm2-%s", acctest.RandString(t, 10))
-        diskName2 := fmt.Sprintf("tf-test-disk2-%s", acctest.RandString(t, 10))
-        acctest.VcrTest(t, resource.TestCase{
-                PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-                ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-                Steps: []resource.TestStep{
-                        {
-                                Config:    testAccComputeInstance_bootAndAttachedDisk_interface(instanceName1, diskName1, envvar.GetTestZoneFromEnv(), "c3-standard-22", "NVME", false),
-                                Check: resource.ComposeTestCheckFunc(
-                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.interface", "NVME"),
-                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "machine_type", "c3-standard-22"),
-                                ),
-                        },
-                        //computeInstanceImportStep("us-central1-a", instanceName1, []string{"desired_status","allow_stopping_for_update"}),
-                        {
-                                Config:    testAccComputeInstance_bootAndAttachedDisk_interface(instanceName2, diskName2, envvar.GetTestZoneFromEnv(), "n2-standard-8", "SCSI", true),
-                                Check: resource.ComposeTestCheckFunc(
-                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.interface", "SCSI"),
-                                        resource.TestCheckResourceAttr("google_compute_instance.foobar", "machine_type", "n2-standard-8"),
-                                ),
-                        },
-                        //computeInstanceImportStep("us-central1-a", instanceName2, []string{"desired_status","allow_stopping_for_update"}),
-                },
-        })
+	instanceName1 := fmt.Sprintf("tf-test-vm1-%s", acctest.RandString(t, 10))
+	diskName1 := fmt.Sprintf("tf-test-disk1-%s", acctest.RandString(t, 10))
+	instanceName2 := fmt.Sprintf("tf-test-vm2-%s", acctest.RandString(t, 10))
+	diskName2 := fmt.Sprintf("tf-test-disk2-%s", acctest.RandString(t, 10))
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstance_bootAndAttachedDisk_interface(instanceName1, diskName1, envvar.GetTestZoneFromEnv(), "c3-standard-22", "NVME", false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.interface", "NVME"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "machine_type", "c3-standard-22"),
+				),
+			},
+			//computeInstanceImportStep("us-central1-a", instanceName1, []string{"desired_status","allow_stopping_for_update"}),
+			{
+				Config: testAccComputeInstance_bootAndAttachedDisk_interface(instanceName2, diskName2, envvar.GetTestZoneFromEnv(), "n2-standard-8", "SCSI", true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "boot_disk.0.interface", "SCSI"),
+					resource.TestCheckResourceAttr("google_compute_instance.foobar", "machine_type", "n2-standard-8"),
+				),
+			},
+			//computeInstanceImportStep("us-central1-a", instanceName2, []string{"desired_status","allow_stopping_for_update"}),
+		},
+	})
 }
 
 func testAccComputeInstance_bootAndAttachedDisk_interface(instanceName, diskName, zone, machineType, bootDiskInterface string, allowStoppingForUpdate bool) string {
-        return fmt.Sprintf(`
+	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
   family    = "ubuntu-2204-lts"
   project   = "ubuntu-os-cloud"
@@ -12077,7 +12356,8 @@ resource "google_compute_instance" "foobar" {
 	network_interface {
 		network = "default"
 	}
-}`, context)
+}
+`, context)
 }
 
 func testAccComputeInstance_nicStackTypeUpdate_ipv6(context map[string]interface{}) string {

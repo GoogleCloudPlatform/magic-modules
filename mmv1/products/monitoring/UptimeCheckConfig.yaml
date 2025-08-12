@@ -37,7 +37,6 @@ timeouts:
 custom_code:
   encoder: 'templates/terraform/encoders/uptime_check_config.go.tmpl'
   constants: 'templates/terraform/constants/monitoring_uptime_check_config.go.tmpl'
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_delete: 'templates/terraform/custom_delete/monitoring_uptime_check_config.go.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 error_retry_predicates:
@@ -177,6 +176,9 @@ properties:
       result in uptime checks running from all regions.
     item_type:
       type: String
+  - name: 'logCheckFailures'
+    type: Boolean
+    description: Specifies whether to log the results of failed probes to Cloud Logging.
   - name: 'checkerType'
     type: Enum
     description:
@@ -244,27 +246,10 @@ properties:
           - name: 'password'
             type: String
             description: The password to authenticate.
-            exactly_one_of:
-              - 'password'
-              - 'password_wo'
+            required: true
+            write_only: true
             sensitive: true
             custom_flatten: 'templates/terraform/custom_flatten/uptime_check_http_password.tmpl'
-          - name: 'passwordWo'
-            type: String
-            description: The password to authenticate.
-            exactly_one_of:
-              - 'passwordWo'
-              - 'password'
-            required_with:
-              - 'http_check.0.auth_info.0.password_wo_version'
-            write_only: true
-          - name: 'passwordWoVersion'
-            type: String
-            immutable: true
-            ignore_read: true
-            description: The password write-only version.
-            required_with:
-              - 'http_check.0.auth_info.0.password_wo'
           - name: 'username'
             type: String
             description: The username to authenticate.

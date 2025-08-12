@@ -4,8 +4,9 @@ go 1.23
 
 require (
 	bitbucket.org/creachadair/stringset v0.0.11
-	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.78.0
+	github.com/GoogleCloudPlatform/declarative-resource-client-library v1.80.0
 	github.com/golang/glog v1.2.0
+	github.com/hashicorp/hcl v1.0.0
 	github.com/kylelemons/godebug v1.1.0
 	github.com/nasa9084/go-openapi v0.0.0-20210722142352-4a81d737faf6
 	gopkg.in/yaml.v2 v2.4.0
