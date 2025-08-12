@@ -701,8 +701,20 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 					},
 				},
 			},
+			"labels": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"label_fingerprint": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: `The fingerprint used for optimistic locking of this resource. Used internally during updates.`,
+			},
 		},
-
 		UseJSONNumber: true,
 	}
 }
@@ -805,6 +817,30 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 		return err
 	}
 
+	labels := tpgresource.ExpandLabels(d)
+	if labels != nil {
+		// To get labels_fingerprint, we need to read the resource first
+		err = resourceComputeSecurityPolicyRead(d, meta)
+		if err != nil {
+			log.Printf("[DEBUG] Error reading SecurityPolicy %q after creation: %s", sp, err)
+			return err
+		}
+		// Now we can set the labels
+		setLabels := &compute.GlobalSetLabelsRequest{
+			Labels:           labels,
+			LabelFingerprint: d.Get("label_fingerprint").(string),
+		}
+		op, err = client.SecurityPolicies.SetLabels(project, sp, setLabels).Do()
+		if err != nil {
+			return err
+		}
+
+		err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Creating SecurityPolicy.Labels %q", sp), userAgent, d.Timeout(schema.TimeoutCreate))
+		if err != nil {
+			return err
+		}
+	}
+
 	return resourceComputeSecurityPolicyRead(d, meta)
 }
 
@@ -860,6 +896,14 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 
 	if err := d.Set("recaptcha_options_config", flattenSecurityPolicyRecaptchaOptionConfig(securityPolicy.RecaptchaOptionsConfig)); err != nil {
 		return fmt.Errorf("Error setting recaptcha_options_config: %s", err)
+	}
+
+	if err := d.Set("labels", securityPolicy.Labels); err != nil {
+		return fmt.Errorf("Error setting labels: %s", err)
+	}
+
+	if err := d.Set("label_fingerprint", securityPolicy.LabelFingerprint); err != nil {
+		return fmt.Errorf("Error setting label_fingerprint: %s", err)
 	}
 
 	return nil
@@ -921,6 +965,22 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 	if d.HasChange("recaptcha_options_config") {
 		securityPolicy.RecaptchaOptionsConfig = expandSecurityPolicyRecaptchaOptionsConfig(d.Get("recaptcha_options_config").([]interface{}), d)
 		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "RecaptchaOptionsConfig")
+	}
+
+	if d.HasChange("labels") {
+		labels := tpgresource.ExpandLabels(d)
+		labelFingerprint := d.Get("label_fingerprint").(string)
+		req := compute.GlobalSetLabelsRequest{Labels: labels, LabelFingerprint: labelFingerprint}
+
+		op, err := config.NewComputeClient(userAgent).SecurityPolicies.SetLabels(project, sp, &req).Do()
+		if err != nil {
+			return fmt.Errorf("Error updating labels: %s", err)
+		}
+
+		opErr := ComputeOperationWaitTime(config, op, project, "labels to update", userAgent, d.Timeout(schema.TimeoutUpdate))
+		if opErr != nil {
+			return opErr
+		}
 	}
 
 	if len(securityPolicy.ForceSendFields) > 0 {
