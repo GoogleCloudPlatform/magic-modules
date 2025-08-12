@@ -14196,7 +14196,7 @@ func testAccContainerCluster_additional_ip_ranges_config(name string, additional
                            resource "google_compute_subnetwork" "extra_%d" {
                              ip_cidr_range = "10.1.%d.0/24"
                              name = "tf-test-subnet-%d"
-                             network = google_compute_network.main.self_link
+                             network = google_compute_network.msc_main.self_link
                              region = "us-central1"
                              %s
                            }
@@ -14211,15 +14211,15 @@ func testAccContainerCluster_additional_ip_ranges_config(name string, additional
 	}
 
 	return fmt.Sprintf(`
-	resource "google_compute_network" "main" {
+	resource "google_compute_network" "msc_main" {
 	  name                    = "%s"
 	  auto_create_subnetworks = false
 	}
 
-	resource "google_compute_subnetwork" "main" {
+	resource "google_compute_subnetwork" "msc_main" {
 	  ip_cidr_range = "10.2.0.0/24"
-	  name          = "main"
-	  network       = google_compute_network.main.self_link
+	  name          = "msc-main"
+	  network       = google_compute_network.msc_main.self_link
 	  region        = "us-central1"
 
 	  secondary_ip_range {
@@ -14238,8 +14238,8 @@ func testAccContainerCluster_additional_ip_ranges_config(name string, additional
 	resource "google_container_cluster" "primary" {
 	  name     = "%s"
 	  location = "us-central1-a"
-	  network    = google_compute_network.main.name
-	  subnetwork = google_compute_subnetwork.main.name
+	  network    = google_compute_network.msc_main.name
+	  subnetwork = google_compute_subnetwork.msc_main.name
           initial_node_count = 1
 
 	  ip_allocation_policy {
