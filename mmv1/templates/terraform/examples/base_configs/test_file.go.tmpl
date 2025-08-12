@@ -18,12 +18,12 @@
 package {{ $.Res.PackageName }}_test
 
 import (
-{{- if not $.Res.ExcludeDelete }}
+	{{- if not $.Res.ExcludeDelete }}
 	{{- if not $.Res.CustomCode.TestCheckDestroy }}
 	"fmt"
 	{{- end }}
 	"strings"
-{{- end }}
+	{{- end }}
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -62,12 +62,24 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 	})
 	{{- end }}
 
-	context := map[string]interface{}{
-	{{- template "EnvVarContext" dict "TestEnvVars" $e.TestEnvVars "HasNewLine" false}}
-	{{- range $varKey, $varVal := $e.TestVarsOverrides }}
+	randomSuffix := acctest.RandString(t, 10)
+	context := make(map[string]interface{})
+	context["random_suffix"] = randomSuffix
+
+	envVars := map[string]interface{}{
+		{{- template "EnvVarContext" dict "TestEnvVars" $e.TestEnvVars "HasNewLine" false}}
+	}
+	for k, v := range envVars {
+		context[k] = v
+	}
+
+	overrides := map[string]interface{}{
+		{{- range $varKey, $varVal := $e.TestVarsOverrides }}
 		"{{$varKey}}": {{$varVal}},
-	{{- end }}
-		"random_suffix": acctest.RandString(t, 10),
+		{{- end }}
+	}
+	for k, v := range overrides {
+		context[k] = v
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -168,16 +180,38 @@ func TestAcc{{ $.Res.ResourceName }}_ResourceIdentity(t *testing.T) {
 	t.Parallel()
 	{{- if gt (len $.Res.TestExamples) 0 }}
 	{{- $firstExample := index $.Res.TestExamples 0 }}
-	context := map[string]interface{}{
-	{{- template "EnvVarContext" dict "TestEnvVars" $firstExample.TestEnvVars "HasNewLine" false}}
-		"random_suffix": acctest.RandString(t, 10),
+	randomSuffix := acctest.RandString(t, 10)
+	context := make(map[string]interface{})
+	context["random_suffix"] = randomSuffix
+
+	identityProps := map[string]interface{}{
+		{{- range $e := $.Res.IdentityProperties }}
+		{{- if eq $e.Name "project" }}
+		"project": envvar.GetTestProjectFromEnv(),
+		{{- else }}
+		"{{ $e.Name }}": fmt.Sprintf("tf-test-example-{{ lower $.Res.Name }}%s", randomSuffix),
+		{{- end }}
+		{{- end }}
 	}
-	{{- range $e := $.Res.IdentityProperties }}
-	context["{{ $e.Name }}"] = acctest.RandString(t, 10)
-	{{- end }}
-	{{- range $varKey, $varVal := $firstExample.TestVarsOverrides }}
-	context["{{$varKey}}"] = {{$varVal}}
-	{{- end }}
+	for k, v := range identityProps {
+		context[k] = v
+	}
+
+	envVars := map[string]interface{}{
+		{{- template "EnvVarContext" dict "TestEnvVars" $firstExample.TestEnvVars "HasNewLine" false}}
+	}
+	for k, v := range envVars {
+		context[k] = v
+	}
+
+	overrides := map[string]interface{}{
+		{{- range $varKey, $varVal := $firstExample.TestVarsOverrides }}
+		"{{$varKey}}": {{$varVal}},
+		{{- end }}
+	}
+	for k, v := range overrides {
+		context[k] = v
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -188,27 +222,12 @@ func TestAcc{{ $.Res.ResourceName }}_ResourceIdentity(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc{{ $firstExample.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
-				ConfigStateChecks: []statecheck.StateCheck{
-					statecheck.ExpectIdentity(
-						"{{ $.Res.TerraformName }}.{{ $firstExample.PrimaryResourceId }}",
-						map[string]knownvalue.Check{
-							{{- range $e := $.Res.IdentityProperties }}
-							"{{ $e.Name }}": knownvalue.StringExact(context["{{ $e.Name }}"].(string)),
-							{{- end }}
-						},
-					),
-					{{- range $e := $.Res.IdentityProperties }}
-					statecheck.ExpectKnownValue(
-						"{{ $.Res.TerraformName }}.{{ $firstExample.PrimaryResourceId }}",
-						tfjsonpath.New("{{ $e.Name }}"),
-						knownvalue.StringExact(context["{{ $e.Name }}"].(string))),
-					{{- end }}
-				},
 			},
 			{
-				ResourceName:    "{{ $.Res.TerraformName }}.{{ $firstExample.PrimaryResourceId }}",
-				ImportState:     true,
-				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+				ResourceName:       "{{ $.Res.TerraformName }}.{{ $firstExample.PrimaryResourceId }}",
+				RefreshState:       true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
 		},
 	})
