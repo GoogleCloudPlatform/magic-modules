@@ -84,10 +84,10 @@ func dataSource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-  {{if $.Datasource.UseSetDataSourceLabel}}
-    if err := tpgresource.SetDataSourceLabels(d); err != nil {
-    return err
-    }
+  {{if $.ShouldDatasourceSetLabels}}
+	if err := tpgresource.SetDataSourceLabels(d); err != nil {
+		return err
+	}
   {{end}}
 
   if d.Id() == "" {

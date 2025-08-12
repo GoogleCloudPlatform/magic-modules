@@ -2005,6 +2005,17 @@ func (r *Resource) ShouldGenerateSingularDataSource() bool {
 	return r.Datasource.Generate
 }
 
+func (r Resource) ShouldDatasourceSetLabels() bool {
+	for _, p := range r.Properties {
+		if p.Name == "labels" && p.Type == "KeyValuePairs" {
+			// Found it, so we can stop looking and return true.
+			return true
+		}
+	}
+	// If the loop finishes without finding a match, return false.
+	return false
+}
+
 // DatasourceOptionalFields returns a list of fields from the resource's URI
 // that should be marked as "Required".
 func (r Resource) DatasourceRequiredFields() []string {
