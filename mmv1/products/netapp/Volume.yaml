@@ -205,7 +205,6 @@ properties:
               type: Integer
               description: |-
                 An integer representing the anonymous user ID. Range is 0 to 4294967295. Required when `squash_mode` is `ROOT_SQUASH` or `ALL_SQUASH`.
-              required_when: "squashMode == 'ROOT_SQUASH' || squashMode == 'ALL_SQUASH'"
   - name: 'protocols'
     type: Array
     description: |
