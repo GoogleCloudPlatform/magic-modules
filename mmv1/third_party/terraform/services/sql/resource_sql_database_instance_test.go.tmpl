@@ -1363,6 +1363,7 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    acctest.RandString(t, 10),
+		"db_version":   "POSTGRES_11",
 		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
@@ -1403,10 +1404,11 @@ func TestAccSqlDatabaseInstance_BackupDRUpdate(t *testing.T) {
     backupvault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
 
     context := map[string]interface{}{
-        "random_suffix":  acctest.RandString(t, 10),
-        "project":        project,
-        "backup_vault_id": backupVaultID,
-        "backup_vault":  backupvault,
+        "random_suffix": 	acctest.RandString(t, 10),
+        "project": 			project,
+        "backup_vault_id": 	backupVaultID,
+        "backup_vault": 	backupvault,
+		"db_version": 		"MYSQL_8_0_41",
     }
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -5894,7 +5896,7 @@ func testAccSqlDatabaseInstance_beforeBackup(context map[string]interface{}) str
 	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
-  database_version = "POSTGRES_11"
+  database_version = "%{db_version}"
   region           = "us-central1"
 
   settings {
@@ -5978,7 +5980,7 @@ resource "google_backup_dr_backup_plan" "plan" {
 // Create source SQL instance to backup
 resource "google_sql_database_instance" "source" {
     name                = "tf-test-source-%{random_suffix}"
-    database_version    = "POSTGRES_12"
+    database_version    = "MYSQL_8_0_41"
     region             	= "us-central1"
     project            	= "%{project}"
     settings {
@@ -6017,7 +6019,7 @@ data "google_backup_dr_backup" "sql_backups" {
 
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
-  database_version = "POSTGRES_12_1"
+  database_version = "MYSQL_8_0_41"
   region           = "us-central1"
 
   settings {
