@@ -86,6 +86,8 @@ jobs:
         make build
     - name: Run Unit Tests
       if: ${{ !failure() && steps.pull_request.outputs.has_changes == 'true' }}
+      env:
+        TESTARGS: '-parallel=10'
       run: |
         make test
     - name: Post Result Status to Pull Request

@@ -35,6 +35,8 @@ jobs:
           go build
 
       - name: Run Unit Tests
+        env:
+          TESTARGS: '-parallel=10'
         run: |
           make testnolint
 
