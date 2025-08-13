@@ -41,6 +41,8 @@ update_verb: 'PATCH'
 update_mask: true
 
 exclude_delete: true
+datasource:
+  generate: true
 
 import_format:
   - 'folders/{{name}}/locations/global/intelligenceConfig'
