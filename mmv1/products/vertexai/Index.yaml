@@ -88,6 +88,7 @@ properties:
       Additional information about the Index.
       Although this field is not marked as required in the API specification, it is currently required when creating an Index and must be provided.
       Attempts to create an Index without this field will result in an API error.
+    required: true
     properties:
       - name: 'contentsDeltaUri'
         type: String
@@ -109,6 +110,7 @@ properties:
       - name: 'config'
         type: NestedObject
         description: The configuration of the Matching Engine Index.
+        required: true
         immutable: true
         properties:
           - name: 'dimensions'
@@ -153,7 +155,7 @@ properties:
             type: NestedObject
             description:
               The configuration with regard to the algorithms used for efficient
-              search.
+              search. This field may be required based on your configuration.
             properties:
               - name: 'treeAhConfig'
                 type: NestedObject

@@ -201,6 +201,7 @@ properties:
       For more information, refer to [Choosing a load balancer](https://cloud.google.com/load-balancing/docs/backend-service) and
       [Supported application load balancers](https://cloud.google.com/service-extensions/docs/callouts-overview#supported-lbs).
     immutable: true
+    required: true
     enum_values:
       - 'INTERNAL_MANAGED'
       - 'EXTERNAL_MANAGED'

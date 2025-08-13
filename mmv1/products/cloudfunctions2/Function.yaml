@@ -503,7 +503,7 @@ properties:
         type: String
         description: |
           Name of the service associated with a Function.
-        default_from_api: true
+        output: true
       - name: 'timeoutSeconds'
         type: Integer
         description: |
@@ -678,6 +678,7 @@ properties:
         default_from_api: true
       - name: 'eventType'
         type: String
+        required: true
         description: 'Required. The type of event to observe.'
       - name: 'eventFilters'
         type: Array
