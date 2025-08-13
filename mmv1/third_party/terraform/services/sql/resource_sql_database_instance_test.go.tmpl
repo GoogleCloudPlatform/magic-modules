@@ -6000,10 +6000,10 @@ resource "google_backup_dr_backup_plan_association" "association" {
 }
 
 // Wait for the first backup to be created
-resource "time_sleep" "wait_5_mins" {
+resource "time_sleep" "wait_10_mins" {
   depends_on = [google_backup_dr_backup_plan_association.association]
 
-  create_duration = "300s"
+  create_duration = "600s"
 }
 
 data "google_backup_dr_backup" "sql_backups" {
@@ -6012,7 +6012,7 @@ data "google_backup_dr_backup" "sql_backups" {
   backup_vault_id 	= "%{backup_vault_id}"
   data_source_id 	= element(split("/", google_backup_dr_backup_plan_association.association.data_source), length(split("/", google_backup_dr_backup_plan_association.association.data_source)) - 1)
 
-  depends_on = [time_sleep.wait_5_mins]
+  depends_on = [time_sleep.wait_10_mins]
 }
 
 resource "google_sql_database_instance" "instance" {
