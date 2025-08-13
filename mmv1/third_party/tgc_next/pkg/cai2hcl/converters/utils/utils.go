@@ -30,10 +30,10 @@ template: //bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}
 assetName: //bigquery.googleapis.com/projects/my-project/datasets/my-dataset
 hclData: [project:my-project dataset_id:my-dataset]
 
-It also handles mutliple-path fragements.
+It also handles multi-fragment fields.
 template: {{cluster}}/instances/{{instance_id}}
 assetName: //alloydb.googleapis.com/projects/ci-test-project/locations/us-central1/clusters/tf-test-cluster/instances/tf-test-instance
-{{cluster}} field covers projects/ci-test-project/locations/us-central1/clusters/tf-test-cluster
+hclData: [cluster:projects/ci-test-project/locations/us-central1/clusters/tf-test-cluster instance_id:tf-test-instance]
 */
 func ParseUrlParamValuesFromAssetName(assetName, template string, outputFields map[string]struct{}, hclData map[string]any) {
 	templateFragments := strings.Split(template, "/")
@@ -46,25 +46,27 @@ func ParseUrlParamValuesFromAssetName(assetName, template string, outputFields m
 
 		// Check if the template fragment is a field (e.g., {{project}})
 		if fieldName, isField := strings.CutPrefix(templateFragment, "{{"); isField {
-			fieldName, _ = strings.CutSuffix(fieldName, "}}")
+			if fieldName, hasEnd := strings.CutSuffix(fieldName, "}}"); hasEnd {
+				// Find the end of this field in the template. The end is the next non-field fragment.
+				endTemplateIx := templateIx + 1
+				for endTemplateIx < len(templateFragments) && strings.HasPrefix(templateFragments[endTemplateIx], "{{") {
+					endTemplateIx++
+				}
 
-			// Find the end of this field in the template. The end is the next non-field fragment.
-			endTemplateIx := templateIx + 1
-			for endTemplateIx < len(templateFragments) && strings.HasPrefix(templateFragments[endTemplateIx], "{{") {
-				endTemplateIx++
+				endAssetIx := getEndAssetIx(endTemplateIx, templateFragments, assetFragments)
+
+				valueFragments := assetFragments[assetIx:endAssetIx]
+				value := strings.Join(valueFragments, "/")
+
+				if _, isOutput := outputFields[fieldName]; !isOutput {
+					hclData[fieldName] = value
+				}
+
+				assetIx = endAssetIx
+				templateIx = endTemplateIx - 1
+			} else {
+				assetIx++
 			}
-
-			endAssetIx := getEndAssetIx(endTemplateIx, templateFragments, assetFragments)
-
-			valueFragments := assetFragments[assetIx:endAssetIx]
-			value := strings.Join(valueFragments, "/")
-
-			if _, isOutput := outputFields[fieldName]; !isOutput {
-				hclData[fieldName] = value
-			}
-
-			assetIx = endAssetIx
-			templateIx = endTemplateIx - 1
 		} else {
 			// This is a literal fragment, just advance the asset index if it matches.
 			if assetIx < len(assetFragments) && assetFragments[assetIx] == templateFragment {
