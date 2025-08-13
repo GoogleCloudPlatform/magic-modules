@@ -466,9 +466,10 @@ func TestAccAlloydbCluster_missingWeeklySchedule(t *testing.T) {
 				Config: testAccAlloydbCluster_missingWeeklySchedule(context),
 			},
 			{
-				ResourceName:      "google_alloydb_cluster.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -560,17 +561,19 @@ func TestAccAlloydbCluster_deleteTimeBasedRetentionPolicy(t *testing.T) {
 				Config: testAccAlloydbCluster_withTimeBasedRetentionPolicy(context),
 			},
 			{
-				ResourceName:      "google_alloydb_cluster.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccAlloydbCluster_withoutTimeBasedRetentionPolicy(context),
 			},
 			{
-				ResourceName:      "google_alloydb_cluster.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccAlloydbCluster_alloydbClusterBasicExample(context),
@@ -1295,9 +1298,10 @@ func TestAccAlloydbCluster_withNetworkConfig(t *testing.T) {
 				Config: testAccAlloydbCluster_withNetworkConfig(context),
 			},
 			{
-				ResourceName:      "google_alloydb_cluster.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -1338,9 +1342,10 @@ func TestAccAlloydbCluster_withNetworkConfigAndAllocatedIPRange(t *testing.T) {
 				Config: testAccAlloydbCluster_withNetworkConfigAndAllocatedIPRange(context),
 			},
 			{
-				ResourceName:      "google_alloydb_cluster.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -1390,9 +1395,10 @@ func TestAccAlloydbCluster_withMaintenanceWindows(t *testing.T) {
 				Config: testAccAlloydbCluster_withMaintenanceWindows(context),
 			},
 			{
-				ResourceName:      "google_alloydb_cluster.default",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_alloydb_cluster.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})

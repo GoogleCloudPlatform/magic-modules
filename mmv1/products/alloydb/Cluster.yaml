@@ -66,6 +66,8 @@ examples:
     primary_resource_id: 'default'
     vars:
       alloydb_cluster_name: 'alloydb-cluster'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'alloydb_cluster_before_upgrade'
     primary_resource_id: 'default'
     vars:
@@ -74,6 +76,8 @@ examples:
       network_name: 'alloydb-network'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-1")'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'alloydb_cluster_after_upgrade'
     primary_resource_id: 'default'
     vars:
@@ -82,6 +86,8 @@ examples:
       network_name: 'alloydb-network'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-1")'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'alloydb_cluster_full'
     primary_resource_id: 'full'
     vars:
@@ -98,6 +104,7 @@ examples:
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedTestNetwork(t, "alloydb-instance-basic")'
     ignore_read_extra:
+      - 'deletion_protection'
       - 'reconciling'
       - 'update_time'
     exclude_test: true
@@ -107,6 +114,8 @@ examples:
       alloydb_primary_cluster_name: 'alloydb-primary-cluster'
       alloydb_primary_instance_name: 'alloydb-primary-instance'
       alloydb_secondary_cluster_name: 'alloydb-secondary-cluster'
+    ignore_read_extra:
+      - 'deletion_protection'
     exclude_test: true
   - name: 'alloydb_secondary_cluster_basic_test'
     primary_resource_id: 'secondary'
@@ -117,6 +126,8 @@ examples:
       network_name: 'alloydb-network'
     test_vars_overrides:
       'network_name': 'acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")'
+    ignore_read_extra:
+      - 'deletion_protection'
     exclude_docs: true
 virtual_fields:
   - name: 'deletion_policy'
