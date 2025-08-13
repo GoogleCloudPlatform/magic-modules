@@ -205,6 +205,32 @@ func TestAccComputeBackendBucket_withCdnCacheMode_update(t *testing.T) {
 	})
 }
 
+func TestAccComputeBackendBucket_withTags(t *testing.T) {
+	t.Parallel()
+
+	backendName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	storageName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
+	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-networks-tagkey", "organizations/"+org, make(map[string]interface{}))
+	sharedTagkey, _ := tagKeyResult["shared_tag_key"]
+	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-networks-tagvalue", sharedTagkey, org)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeBackendBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeBackendBucket_withTags(backendName, storageName, tagKeyResult, tagValueResult),
+			},
+			{
+				ResourceName:      "google_compute_backend_bucket.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccComputeBackendBucket_basic(backendName, storageName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_backend_bucket" "foobar" {
@@ -413,4 +439,23 @@ resource "google_storage_bucket" "bucket" {
   location = "EU"
 }
 `, backendName, default_ttl, storageName)
+}
+
+func testAccComputeBackendBucket_withTags(backendName, storageName string, tagKey string, tagValue string) string {
+	return fmt.Sprintf(`
+resource "google_compute_backend_bucket" "foobar" {
+  name        = "%s"
+  bucket_name = google_storage_bucket.bucket_one.name
+  params {
+	resource_manager_tags = {
+		"%s" = "%s"
+	}
+  }
+}
+
+resource "google_storage_bucket" "bucket_one" {
+  name     = "%s"
+  location = "EU"
+}
+`, backendName, storageName)
 }
