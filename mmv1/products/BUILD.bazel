@@ -1,0 +1,5 @@
+filegroup(
+    name = "products",
+    srcs = glob(["**"]),
+    visibility = ["//mmv1:__pkg__"],
+)

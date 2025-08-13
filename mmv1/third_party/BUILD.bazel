@@ -1,0 +1,17 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+filegroup(
+    name = "tgc",
+    srcs = glob([
+        "cai2hcl/**",
+        "tgc/**",
+        "tgc_next/**",
+    ]),
+    visibility = ["//mmv1:__pkg__"],
+)
+
+filegroup(
+    name = "tpg",
+    srcs = glob(["terraform/**"]),
+    visibility = ["//mmv1:__pkg__"],
+)

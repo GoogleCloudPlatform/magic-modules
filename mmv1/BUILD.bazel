@@ -1,4 +1,5 @@
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
+load("@rules_pkg//:pkg.bzl", "pkg_tar")
 
 go_library(
     name = "mmv1_lib",
@@ -9,6 +10,7 @@ go_library(
         "//mmv1/api",
         "//mmv1/openapi_generate",
         "//mmv1/provider",
+        "@com_github_golang_glog//:glog",
         "@org_golang_x_exp//slices",
     ],
 )
@@ -16,5 +18,39 @@ go_library(
 go_binary(
     name = "mmv1",
     embed = [":mmv1_lib"],
+    importpath = "github.com/GoogleCloudPlatform/magic-modules/mmv1",
     visibility = ["//visibility:public"],
+)
+
+
+genrule(
+    name = "mmv1_gen",
+    srcs = [
+        "//mmv1/templates:tpg",
+        "//mmv1/products:products",
+        "//mmv1/third_party:tpg",
+    ],
+    tools = [":mmv1"],
+    outs = ["mmv1_generated.tar.gz"],
+    cmd = """
+        # Save the binary path before changing directories
+        MMV1_BIN="$$(pwd)/$(execpath :mmv1)"
+        
+        echo "Debug: Current directory: $$(pwd)"
+        echo "Debug: MMV1 binary path: $$MMV1_BIN"
+        ls -la
+        
+        # Now change to mmv1 directory
+        cd mmv1
+        mkdir -p terraform-provider-google
+        
+        echo "Running mmv1 from: $$(pwd)"
+        ls -la
+        
+        # Use the absolute path to the binary
+        $$MMV1_BIN -output=./terraform-provider-google -version=ga
+        
+        # Create the tar file
+        tar -czf $$OLDPWD/$@ -C terraform-provider-google .
+    """,
 )

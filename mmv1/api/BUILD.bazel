@@ -11,12 +11,13 @@ go_library(
         "type.go",
     ],
     importpath = "github.com/GoogleCloudPlatform/magic-modules/mmv1/api",
-    visibility = ["//visibility:public"],
+    visibility = ["//mmv1:__subpackages__"],
     deps = [
         "//mmv1/api/product",
         "//mmv1/api/resource",
         "//mmv1/api/utils",
         "//mmv1/google",
+        "@com_github_golang_glog//:glog",
         "@org_golang_x_exp//slices",
     ],
 )

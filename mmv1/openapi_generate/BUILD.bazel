@@ -4,7 +4,7 @@ go_library(
     name = "openapi_generate",
     srcs = ["parser.go"],
     importpath = "github.com/GoogleCloudPlatform/magic-modules/mmv1/openapi_generate",
-    visibility = ["//visibility:public"],
+    visibility = ["//mmv1:__subpackages__"],
     deps = [
         "//mmv1/api",
         "//mmv1/api/product",

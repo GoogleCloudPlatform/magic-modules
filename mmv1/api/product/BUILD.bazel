@@ -4,6 +4,8 @@ go_library(
     name = "product",
     srcs = ["version.go"],
     importpath = "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product",
-    visibility = ["//visibility:public"],
-    deps = ["@org_golang_x_exp//slices"],
+    visibility = ["//mmv1:__subpackages__"],
+    deps = [
+        "@org_golang_x_exp//slices",
+    ],
 )

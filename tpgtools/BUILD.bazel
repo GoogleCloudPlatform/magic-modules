@@ -179,7 +179,6 @@ go_library(
     name = "tpgtools_lib",
     srcs = [
         "documentation.go",
-        "empty_serialization.go",
         "file_utils.go",
         "id.go",
         "main.go",
@@ -193,7 +192,6 @@ go_library(
         "property_helpers.go",
         "resource.go",
         "sample.go",
-        "serialization.go",
         "serialization_helpers.go",
         "strings.go",
         "type.go",
@@ -256,7 +254,7 @@ genrule(
                k,
            ) for (k, v) in RESOURCES.items() if v["test"] == True] +
            ["terraform-provider-google/website/docs/r/{}.html.markdown".format(k) for (k, v) in RESOURCES.items() if v["docs"] == True],
-    cmd = "$(location :tpgtools_compiler) --overrides tpgtools/overrides --path tpgtools/api --templates tpgtools/templates --version ga --output $(RULEDIR)/ga",
+    cmd = "$(location :tpgtools_compiler) --overrides tpgtools/overrides --path tpgtools/api --templates tpgtools/templates --version ga --output $(RULEDIR)/terraform-provider-google",
     tools = [":tpgtools_compiler"],
     visibility = ["//visibility:public"],
 )

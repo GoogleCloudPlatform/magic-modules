@@ -9,7 +9,7 @@ go_library(
         "yaml_validator.go",
     ],
     importpath = "github.com/GoogleCloudPlatform/magic-modules/mmv1/google",
-    visibility = ["//visibility:public"],
+    visibility = ["//mmv1:__subpackages__"],
     deps = [
         "@com_github_golang_glog//:glog",
         "@in_gopkg_yaml_v2//:yaml_v2",

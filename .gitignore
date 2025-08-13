@@ -66,3 +66,5 @@ tpgtools/serialization.go
 MODULE.bazel.lock
 go.work
 go.work.sum
+
+/tmp

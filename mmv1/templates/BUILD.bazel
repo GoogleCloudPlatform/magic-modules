@@ -1,0 +1,14 @@
+filegroup(
+    name = "tgc",
+    srcs = glob([
+        "tgc/**",
+        "tgc_next/**",
+    ]),
+    visibility = ["//mmv1:__subpackages__"],
+)
+
+filegroup(
+    name = "tpg",
+    srcs = glob(["terraform/**"]),
+    visibility = ["//mmv1:__subpackages__"],
+)

@@ -13,7 +13,7 @@ go_library(
         "validation.go",
     ],
     importpath = "github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource",
-    visibility = ["//visibility:public"],
+    visibility = ["//mmv1:__subpackages__"],
     deps = [
         "//mmv1/google",
         "@com_github_golang_glog//:glog",

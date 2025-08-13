@@ -8,7 +8,6 @@ load("@gazelle//:def.bzl", "gazelle")
 # gazelle:exclude mmv1/third_party
 # gazelle:exclude scripts
 # gazelle:exclude tools
-# gazelle:exclude tpgtools/ignored_handwritten
-# gazelle:exclude tpgtools/serializable
+# gazelle:exclude tpgtools
 # gazelle:prefix github.com/GoogleCloudPlatform/magic-modules
 gazelle(name = "gazelle")

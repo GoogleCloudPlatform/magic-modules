@@ -12,7 +12,7 @@ go_library(
         "terraform_tgc_next.go",
     ],
     importpath = "github.com/GoogleCloudPlatform/magic-modules/mmv1/provider",
-    visibility = ["//visibility:public"],
+    visibility = ["//mmv1:__subpackages__"],
     deps = [
         "//mmv1/api",
         "//mmv1/api/product",

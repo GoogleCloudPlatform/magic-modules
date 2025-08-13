@@ -289,6 +289,10 @@ func FixImports(outputPath string, dumpDiffs bool) {
 		baseArgs = []string{"-d", "-w"}
 	}
 
+	cmd := exec.Command("which", "goimports")
+	output, _ := cmd.Output()
+	log.Printf("which goimports: %s\n", output)
+
 	// -w and -d are mutually exclusive; if dumpDiffs is requested we need to run twice.
 	for _, base := range baseArgs {
 		hasFiles := false
@@ -302,6 +306,10 @@ func FixImports(outputPath string, dumpDiffs bool) {
 			hasFiles = true
 			return true
 		})
+
+		if !hasFiles {
+			log.Printf("no files found ")
+		}
 
 		if hasFiles {
 			cmd := exec.Command("goimports", args...)
@@ -317,6 +325,8 @@ func FixImports(outputPath string, dumpDiffs bool) {
 			}
 		}
 	}
+
+	log.Println("Done running goimports")
 }
 
 type TestInput struct {
