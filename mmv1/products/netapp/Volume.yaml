@@ -194,7 +194,7 @@ properties:
             - name: 'squashMode'
               type: Enum
               description: |-
-                SquashMode defines how remote user privileges are restricted when accessing an NFS export. It controls how user identities (like root) are mapped to anonymous users to limit access and enforce security.
+                SquashMode defines how remote user privileges are restricted when accessing an NFS export. It controls how the user identities (like root) are mapped to anonymous users to limit access and enforce security.
               enum_values:
                 - 'SQUASH_MODE_UNSPECIFIED'
                 - 'NO_ROOT_SQUASH'
