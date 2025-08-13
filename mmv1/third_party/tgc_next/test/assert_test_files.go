@@ -76,7 +76,8 @@ func BidirectionalConversion(t *testing.T, ignoredFields []string, ignoredAssetF
 		return nil
 	}
 
-	backoffPolicy := retry.WithMaxRetries(maxRetries, retry.NewConstant(50*time.Millisecond))
+	// Note maxAttempts-1 is retries, not attempts.
+	backoffPolicy := retry.WithMaxRetries(maxAttempts-1, retry.NewConstant(50*time.Millisecond))
 
 	t.Log("Starting test with retry logic.")
 
