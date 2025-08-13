@@ -481,9 +481,9 @@ func TestAccComputeRegionBackendService_withTags(t *testing.T) {
 
 	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-  tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-networks-tagkey", "organizations/"+org, make(map[string]interface{}))
+  tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-rbs-tagkey", "organizations/"+org, make(map[string]interface{}))
 	sharedTagkey,_ := tagKeyResult["shared_tag_key"]
-	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-networks-tagvalue", sharedTagkey, org)
+	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-rbs-tagvalue", sharedTagkey, org)
 
 
 	acctest.VcrTest(t, resource.TestCase{
