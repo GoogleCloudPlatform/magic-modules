@@ -7,7 +7,7 @@ resource "google_dialogflow_conversation_profile" "{{$.PrimaryResourceId}}" {
   display_name = "{{index $.Vars "profile_name"}}"
   location = "global"
   automated_agent_config {
-    agent = "projects/${google_dialogflow_agent.basic_agent.id}/agent/environments/draft"
+    agent = "projects/${google_dialogflow_agent.basic_agent.id}/locations/global/agent/environments/draft"
   }
   human_agent_assistant_config {
     message_analysis_config {

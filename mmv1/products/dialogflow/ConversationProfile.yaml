@@ -522,7 +522,8 @@ properties:
           - JSON
   - type: NestedObject
     name: 'loggingConfig'
-    custom_flatten: 'templates/terraform/custom_flatten/conversation_profile_stack_driver.go.tmpl'
+    # Due to inconsistent  API behaviour http://b/303056144, ignore read can be removed once fixed
+    ignore_read: true
     description: |
       Defines logging behavior for conversation lifecycle events.
     properties:
