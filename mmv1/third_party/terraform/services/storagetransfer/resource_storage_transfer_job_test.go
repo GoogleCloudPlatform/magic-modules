@@ -2460,6 +2460,7 @@ resource "google_storage_transfer_job" "transfer_job" {
       bucket_name = "%s"
       path        = "foo/bar/"
       endpoint    = "https://sample.r2.cloudflarestorage.com/"
+      region      = "enam"
       s3_metadata {
         auth_method   = "AUTH_METHOD_AWS_SIGNATURE_V4"
         list_api      = "LIST_OBJECTS_V2"
