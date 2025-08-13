@@ -230,7 +230,7 @@ fun BuildSteps.archiveArtifactsIfOverLimit() {
 fun BuildSteps.runDiffTests() {
     if (UseTeamCityGoTest) {
         step(ScriptBuildStep {
-            name = "Run Tests"
+            name = "Run Diff Tests"
             scriptContent = "go test -v \"%PACKAGE_PATH%\" -timeout=\"%TIMEOUT%h\" -test.parallel=\"%PARALLELISM%\" -run=\"%TEST_PREFIX%\" -json"
         })
     } else {
@@ -260,7 +260,7 @@ fun BuildSteps.runDiffTests() {
                 fi
                 
                 echo "Compiling teamcity-diff-test..."
-                cd scripts/teamcitytestscripts
+                cd ../../../scripts/teamcitytestscripts
                 go build -o ../../teamcity-diff-test .
                 cd ../../
 
