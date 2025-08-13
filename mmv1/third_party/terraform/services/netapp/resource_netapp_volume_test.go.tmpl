@@ -760,7 +760,6 @@ data "google_compute_network" "default" {
 `, context)
 }
 
-
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccNetappVolume_flexAutoTierNetappVolume_update(t *testing.T) {
 	context := map[string]interface{}{
@@ -873,51 +872,51 @@ data "google_compute_network" "default" {
 }
 
 func TestAccNetappVolume_volumeExportPolicyWithSquashMode(t *testing.T) {
-    context := map[string]interface{}{
-        "network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
-        "random_suffix": acctest.RandString(t, 10),
-    }
-    acctest.VcrTest(t, resource.TestCase{
-        PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-        ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-        CheckDestroy:             testAccCheckNetappVolumeDestroyProducer(t),
-        ExternalProviders: map[string]resource.ExternalProvider{
-            "time": {},
-        },
-        Steps: []resource.TestStep{
-            {
-                Config: testAccNetappVolume_volumeExportPolicyWithSquashMode_noRootSquash(context),
-            },
-            {
-                ResourceName:            "google_netapp_volume.test_volume",
-                ImportState:             true,
-                ImportStateVerify:       true,
-                ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
-            },
-            {
-                Config: testAccNetappVolume_volumeExportPolicyWithSquashMode_rootSquash(context),
-            },
-            {
-                ResourceName:            "google_netapp_volume.test_volume",
-                ImportState:             true,
-                ImportStateVerify:       true,
-                ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
-            },
-            {
-                Config: testAccNetappVolume_volumeExportPolicyWithSquashMode_allSquash(context),
-            },
-            {
-                ResourceName:            "google_netapp_volume.test_volume",
-                ImportState:             true,
-                ImportStateVerify:       true,
-                ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
-            },
-        },
-    })
+	context := map[string]interface{}{
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		CheckDestroy:             testAccCheckNetappVolumeDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNetappVolume_volumeExportPolicyWithSquashMode_noRootSquash(context),
+			},
+			{
+				ResourceName:            "google_netapp_volume.test_volume",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetappVolume_volumeExportPolicyWithSquashMode_rootSquash(context),
+			},
+			{
+				ResourceName:            "google_netapp_volume.test_volume",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
+			},
+			{
+				Config: testAccNetappVolume_volumeExportPolicyWithSquashMode_allSquash(context),
+			},
+			{
+				ResourceName:            "google_netapp_volume.test_volume",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
+			},
+		},
+	})
 }
 
 func testAccNetappVolume_volumeExportPolicyWithSquashMode_noRootSquash(context map[string]interface{}) string {
-    return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default" {
     provider = google-beta
     name = "tf-test-pool%{random_suffix}"
@@ -942,8 +941,16 @@ resource "google_netapp_volume" "test_volume" {
         rules {
             access_type     = "READ_WRITE"
             allowed_clients = "0.0.0.0/0"
+            has_root_access       = "true"
+            kerberos5_read_only   = false
+            kerberos5_read_write  = false
+            kerberos5i_read_only  = false
+            kerberos5i_read_write = false
+            kerberos5p_read_only  = false
+            kerberos5p_read_write = false
+            nfsv3                 = true
+            nfsv4                 = false
             squash_mode     = "NO_ROOT_SQUASH"
-            nfsv3 = true
         }
     }
 }
@@ -955,7 +962,7 @@ data "google_compute_network" "default" {
 }
 
 func testAccNetappVolume_volumeExportPolicyWithSquashMode_rootSquash(context map[string]interface{}) string {
-    return acctest.Nprintf(`
+	return acctest.Nprintf(`
   resource "google_netapp_storage_pool" "default" {
       provider = google-beta
       name = "tf-test-pool%{random_suffix}"
@@ -980,9 +987,17 @@ func testAccNetappVolume_volumeExportPolicyWithSquashMode_rootSquash(context map
           rules {
               access_type     = "READ_WRITE"
               allowed_clients = "0.0.0.0/0"
-              squash_mode     = "ROOT_SQUASH"
-              anon_uid        = 65534
-              nfsv3 = true
+              has_root_access       = "true"
+                kerberos5_read_only   = false
+                kerberos5_read_write  = false
+                kerberos5i_read_only  = false
+                kerberos5i_read_write = false
+                kerberos5p_read_only  = false
+                kerberos5p_read_write = false
+                nfsv3                 = true
+                nfsv4                 = false
+                squash_mode     = "ROOT_SQUASH"
+                anon_uid        = 65534
           }
       }
   }
@@ -995,7 +1010,7 @@ func testAccNetappVolume_volumeExportPolicyWithSquashMode_rootSquash(context map
 }
 
 func testAccNetappVolume_volumeExportPolicyWithSquashMode_allSquash(context map[string]interface{}) string {
-    return acctest.Nprintf(`
+	return acctest.Nprintf(`
   resource "google_netapp_storage_pool" "default" {
       provider = google-beta
       name = "tf-test-pool%{random_suffix}"
@@ -1020,9 +1035,17 @@ func testAccNetappVolume_volumeExportPolicyWithSquashMode_allSquash(context map[
           rules {
               access_type     = "READ_WRITE"
               allowed_clients = "0.0.0.0/0"
+              has_root_access       = "true"
+              kerberos5_read_only   = false
+              kerberos5_read_write  = false
+              kerberos5i_read_only  = false
+              kerberos5i_read_write = false
+              kerberos5p_read_only  = false
+              kerberos5p_read_write = false
+              nfsv3                 = true
+              nfsv4                 = false
               squash_mode     = "ALL_SQUASH"
               anon_uid        = 65534
-              nfsv3 = true
           }
       }
   }
