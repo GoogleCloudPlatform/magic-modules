@@ -36,7 +36,7 @@ jobs:
 
       - name: Run Unit Tests
         env:
-          TESTARGS: '-parallel=10'
+          TESTARGS: '-parallel=25'
         run: |
           make testnolint
 
