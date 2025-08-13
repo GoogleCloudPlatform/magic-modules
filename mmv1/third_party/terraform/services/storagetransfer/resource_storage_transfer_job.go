@@ -293,7 +293,7 @@ func ResourceStorageTransferJob() *schema.Resource {
 							MaxItems:     1,
 							Elem:         awsS3CompatibleDataSchema(),
 							ExactlyOneOf: transferSpecDataSourceKeys,
-							Description:  `An AwsS3CompatibleData data source.`,
+							Description:  `An Aws S3 Compatible data source.`,
 						},
 					},
 				},
