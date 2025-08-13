@@ -260,9 +260,10 @@ fun BuildSteps.runDiffTests() {
                 fi
                 
                 echo "Compiling teamcity-diff-test..."
-                cd ../../../scripts/teamcitytestscripts
+                pushd ../../../scripts/teamcitytestscripts > /dev/null
                 go build -o ../../teamcity-diff-test .
-                cd ../../
+                popd > /dev/null
+
 
                 export TEST_COUNT=${'$'}(./test-binary -test.list="%TEST_PREFIX%" | wc -l)
                 echo "Found ${'$'}{TEST_COUNT} tests that match the given test prefix %TEST_PREFIX%"
