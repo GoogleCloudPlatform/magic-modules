@@ -200,7 +200,7 @@ properties:
                 - 'NO_ROOT_SQUASH'
                 - 'ROOT_SQUASH'
                 - 'ALL_SQUASH'
-              default_value: "NO_ROOT_SQUASH"
+              default_value: "SQUASH_MODE_UNSPECIFIED"
             - name: 'anonUid'
               type: Integer
               description: |-
