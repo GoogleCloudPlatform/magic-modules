@@ -41,7 +41,6 @@ func ParseUrlParamValuesFromAssetName(assetName, template string, outputFields m
 
 	// Iterate through the fragments and match fields.
 	assetIx := 0
-	endAssetIx := 0
 	for templateIx := 0; templateIx < len(templateFragments); templateIx++ {
 		templateFragment := templateFragments[templateIx]
 
@@ -55,18 +54,7 @@ func ParseUrlParamValuesFromAssetName(assetName, template string, outputFields m
 				endTemplateIx++
 			}
 
-			if endTemplateIx != len(templateFragments) {
-				nextNonFieldFragment := templateFragments[endTemplateIx]
-				for {
-					if endAssetIx == len(assetFragments) || assetFragments[endAssetIx] == nextNonFieldFragment {
-						break
-					} else {
-						endAssetIx++
-					}
-				}
-			} else {
-				endAssetIx = len(assetFragments)
-			}
+			endAssetIx := getEndAssetIx(endTemplateIx, templateFragments, assetFragments)
 
 			valueFragments := assetFragments[assetIx:endAssetIx]
 			value := strings.Join(valueFragments, "/")
@@ -86,6 +74,26 @@ func ParseUrlParamValuesFromAssetName(assetName, template string, outputFields m
 			}
 		}
 	}
+}
+
+// Finds the exclusive end index of a dynamic path segment within a Google Cloud asset name
+// by searching for the next literal segment from a template.
+func getEndAssetIx(endTemplateIx int, templateFragments []string, assetFragments []string) int {
+	if endTemplateIx >= len(templateFragments) {
+		return len(assetFragments)
+	}
+
+	// Find the index of the next non-field fragment in the asset name.
+	nextNonFieldFragment := templateFragments[endTemplateIx]
+	for ix, item := range assetFragments {
+		if item == nextNonFieldFragment {
+			return ix
+		}
+	}
+
+	// If the next non-field fragment is not found in the asset name,
+	// it means the dynamic field goes to the end of the asset name.
+	return len(assetFragments)
 }
 
 // DecodeJSON decodes the map object into the target struct.
