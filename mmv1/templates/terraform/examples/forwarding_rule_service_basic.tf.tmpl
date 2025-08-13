@@ -1,9 +1,3 @@
 resource "google_compute_global_forwarding_rule" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "forwarding_rule_service_name"}}"
-  target     = google_compute_target_pool.default.id
-  port_range = "80"
-}
-
-resource "google_compute_target_pool" "default" {
-  name = "{{index $.Vars "target_pool_name"}}"
 }
