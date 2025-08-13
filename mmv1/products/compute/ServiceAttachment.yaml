@@ -95,6 +95,10 @@ examples:
       producer_forwarding_rule_name: 'producer-forwarding-rule'
       consumer_address_name: 'psc-ilb-consumer-address'
       consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
+  - name: 'service_attachment_cross_region_ilb'
+    primary_resource_id: 'psc_ilb_service_attachment'
+    vars:
+      name: 'sa'
 parameters:
   - name: 'region'
     type: ResourceRef
