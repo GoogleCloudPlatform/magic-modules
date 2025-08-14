@@ -6,7 +6,7 @@ description: |-
 
 # google_certificate_manager_dns_authorization
 
-Use this data source to get information about a Certificate Manager DNS Authorization. For more details, see the [API documentation](https://cloud.google.com/certificate-manager/docs/reference/rest/v1/projects.locations.dnsAuthorizations).
+Use this data source to get information about a Certificate Manager DNS Authorization. For more details, see the [API documentation](https://cloud.google.com/certificate-manager/docs/reference/certificate-manager/rest/v1/projects.locations.dnsAuthorizations).
 
 ## Example Usage
 
