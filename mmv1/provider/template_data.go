@@ -93,6 +93,14 @@ func (td *TemplateData) GenerateMetadataFile(filePath string, resource api.Resou
 	td.GenerateFile(filePath, templatePath, resource, false, templates...)
 }
 
+func (td *TemplateData) GenerateDataSourceFile(filePath string, resource api.Resource) {
+	templatePath := "templates/terraform/datasource.go.tmpl"
+	templates := []string{
+		templatePath,
+	}
+	td.GenerateFile(filePath, templatePath, resource, true, templates...)
+}
+
 func (td *TemplateData) GenerateProductFile(filePath string, product api.Product) {
 	templatePath := "templates/terraform/product.go.tmpl"
 	templates := []string{

@@ -327,7 +327,6 @@ properties:
     default_from_api: true
     update_url: 'projects/{{project}}/regions/{{region}}/subnetworks/{{name}}/setPrivateIpGoogleAccess'
     update_verb: 'POST'
-    include_empty_value_in_cai: true
   - name: 'privateIpv6GoogleAccess'
     type: String
     description: The private IPv6 google access type for the VMs in this subnet.

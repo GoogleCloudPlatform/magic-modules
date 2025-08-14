@@ -1,0 +1,14 @@
+resource "google_compute_region_security_policy" "{{$.PrimaryResourceId}}" {
+  name        = "{{index $.Vars "sec_policy_name"}}"
+  description = "with advanced config"
+  type        = "CLOUD_ARMOR"
+
+  advanced_options_config {
+    json_parsing = "STANDARD_WITH_GRAPHQL"
+    json_custom_config {
+      content_types = ["application/json"]
+    }
+    log_level               = "VERBOSE"
+    user_ip_request_headers = ["x-forwarded-for"]
+  }
+}

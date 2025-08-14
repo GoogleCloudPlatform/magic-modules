@@ -678,6 +678,7 @@ properties:
         default_from_api: true
       - name: 'eventType'
         type: String
+        required: true
         description: 'Required. The type of event to observe.'
       - name: 'eventFilters'
         type: Array
