@@ -66,6 +66,7 @@ examples:
       'deletion_policy': '"DELETE"'
     ignore_read_extra:
       - 'update_time'
+      - 'deletion_policy'
   - name: 'secure_source_manager_instance_cmek'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
@@ -80,6 +81,7 @@ examples:
       'deletion_policy': '"DELETE"'
     ignore_read_extra:
       - 'update_time'
+      - 'deletion_policy'
   - name: 'secure_source_manager_instance_private'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
@@ -95,6 +97,7 @@ examples:
     external_providers: ["time"]
     ignore_read_extra:
       - 'update_time'
+      - 'deletion_policy'
   - name: 'secure_source_manager_instance_private_psc_backend'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
@@ -118,6 +121,7 @@ examples:
     external_providers: ["time"]
     ignore_read_extra:
       - 'update_time'
+      - 'deletion_policy'
   - name: 'secure_source_manager_instance_private_psc_endpoint'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
@@ -138,6 +142,7 @@ examples:
     external_providers: ["time"]
     ignore_read_extra:
       - 'update_time'
+      - 'deletion_policy'
   - name: 'secure_source_manager_instance_workforce_identity_federation'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
@@ -150,6 +155,7 @@ examples:
       'deletion_policy': '"DELETE"'
     ignore_read_extra:
       - 'update_time'
+      - 'deletion_policy'
 parameters:
   - name: 'location'
     type: String
@@ -177,7 +183,7 @@ virtual_fields:
         * DELETE
         * PREVENT
         * ABANDON
-    default_value: 'DELETE'
+    default_value: 'PREVENT'
 properties:
   - name: 'name'
     type: String
