@@ -30,7 +30,12 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-forwarding-rule-region_service%s", context["random_suffix"])'
     vars:
       forwarding_rule_region_service_name: 'forwarding-rule-region-service'
-      target_pool_name: 'tf-test-target-pool'
+      regional_health_check_name: 'tf-test-region-health-check'
+      regional_backend_service_name: 'regional-bs'
+      regional_url_map_name: 'regional-url-map'
+      regional_target_http_proxy_name: 'regional-target-http-proxy'
+      compute_network_name: 'tf-test-network-name'
+      compute_subnetwork_name: 'tf-test-subnetwork-name'
 parameters:
 properties:
   - name: 'name'
