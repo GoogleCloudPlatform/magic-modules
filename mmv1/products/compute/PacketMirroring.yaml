@@ -184,7 +184,7 @@ properties:
                 The URL of the instances where this rule should be active.
               required: true
               custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
-              diff_suppress_func: `tpgresource.CompareSelfLinkOrResourceName`
+              diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
               resource: 'Instance'
               imports: 'selfLink'
       - name: 'tags'
