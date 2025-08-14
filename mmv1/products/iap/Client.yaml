@@ -14,6 +14,8 @@
 ---
 name: 'Client'
 api_resource_type_kind: IdentityAwareProxyClient
+deprecation_message: >-
+  After July 2025, the `google_iap_client` Terraform resource will no longer function as intended due to the deprecation of the IAP OAuth Admin API
 description: |
   Contains the data that describes an Identity Aware Proxy owned client.
 
@@ -31,6 +33,8 @@ self_link: '{{brand}}/identityAwareProxyClients/{{client_id}}'
 immutable: true
 import_format:
   - '{{brand}}/identityAwareProxyClients/{{client_id}}'
+datasource:
+  generate: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20

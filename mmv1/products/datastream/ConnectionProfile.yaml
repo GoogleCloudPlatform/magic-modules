@@ -23,7 +23,7 @@ docs:
 id_format: 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles'
 self_link: 'projects/{{project}}/locations/{{location}}/connectionProfiles/{{connection_profile_id}}'
-create_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}&force={{create_without_validation}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connectionProfiles?connectionProfileId={{connection_profile_id}}'
 update_verb: 'PATCH'
 update_mask: true
 import_format:
@@ -40,6 +40,8 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+  constants: 'templates/terraform/constants/datastream_connection_profile.go.tmpl'
+  pre_create: 'templates/terraform/pre_create/datastream_connection_profile.go.tmpl'
 examples:
   - name: 'datastream_connection_profile_basic'
     primary_resource_id: 'default'
@@ -122,6 +124,7 @@ parameters:
     required: false
     immutable: true
     default_value: false
+    diff_suppress_func: 'resourceDataStreamStreamCreateWithoutValidationDiffSuppress'
   - name: 'location'
     type: String
     description: |
