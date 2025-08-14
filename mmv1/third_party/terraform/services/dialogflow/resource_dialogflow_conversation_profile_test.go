@@ -18,10 +18,11 @@
 package dialogflow_test
 
 import (
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"testing"
 )
 
 func TestAccDialogflowConversationProfile_update(t *testing.T) {
@@ -47,7 +48,7 @@ func TestAccDialogflowConversationProfile_update(t *testing.T) {
 				ResourceName:            "google_dialogflow_conversation_profile.profile",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "logging_config.enable_stackdriver_logging"},
 			},
 			{
 				Config: testAccDialogflowConversationProfile_dialogflowAgentFull2(context),
@@ -56,7 +57,7 @@ func TestAccDialogflowConversationProfile_update(t *testing.T) {
 				ResourceName:            "google_dialogflow_conversation_profile.profile",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location"},
+				ImportStateVerifyIgnore: []string{"location", "logging_config.enable_stackdriver_logging"},
 			},
 		},
 	})
