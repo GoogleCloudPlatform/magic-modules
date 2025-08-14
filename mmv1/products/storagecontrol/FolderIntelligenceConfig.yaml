@@ -41,8 +41,6 @@ update_verb: 'PATCH'
 update_mask: true
 
 exclude_delete: true
-datasource:
-  generate: true
 
 import_format:
   - 'folders/{{name}}/locations/global/intelligenceConfig'
@@ -50,6 +48,9 @@ import_format:
 # If true, code for handling long-running operations is generated along with
 # the resource. If false, that code is not generated.
 autogen_async: false
+
+datasource:
+  generate: true
 
 examples:
   - name: storage_control_folder_intelligence_config_basic
