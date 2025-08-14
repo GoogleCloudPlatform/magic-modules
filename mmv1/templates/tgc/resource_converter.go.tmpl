@@ -81,18 +81,18 @@ func Get{{ $.ResourceName -}}ApiObject(d tpgresource.TerraformResourceData, conf
     obj := make(map[string]interface{})
 {{- range $prop := $.SettableProperties }}
 {{- if $prop.FlattenObject }}
-    {{ $prop.ExpanderPropVariableName -}}, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(nil, d, config)
+    {{ $prop.TitlelizeProperty -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(nil, d, config)
 {{- else }}
-    {{ $prop.ExpanderPropVariableName -}}, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(d.Get("{{underscore $prop.Name}}"), d, config)
+    {{ $prop.TitlelizeProperty -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(d.Get("{{underscore $prop.Name}}"), d, config)
 {{- end}}
     if err != nil {
         return nil, err
 {{- if not $prop.SendEmptyValue }}
-    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ExpanderPropVariableName -}})) && (ok || !reflect.DeepEqual(v, {{ $prop.ExpanderPropVariableName -}})) {
+    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.TitlelizeProperty -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.TitlelizeProperty -}}Prop)) {
 {{- else }}
-    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); ok || !reflect.DeepEqual(v, {{ $prop.ExpanderPropVariableName -}}) {
+    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); ok || !reflect.DeepEqual(v, {{ $prop.TitlelizeProperty -}}Prop) {
 {{- end }}
-        obj["{{ $prop.ApiName -}}"] = {{ $prop.ExpanderPropVariableName -}}
+        obj["{{ $prop.ApiName -}}"] = {{ $prop.TitlelizeProperty -}}Prop
     }
 {{- end}}
 

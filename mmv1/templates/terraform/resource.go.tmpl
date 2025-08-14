@@ -54,7 +54,7 @@ import (
 {{- end}}
 )
 
-{{if $.CustomCode.Constants -}} 
+{{if $.CustomCode.Constants -}}
     {{- $.CustomTemplate $.CustomCode.Constants true -}}
 {{- end}}
 
@@ -138,7 +138,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
             {{- range $prop := $.VirtualFields }}
 {{template "SchemaFields" $prop -}}
             {{- end }}
-{{- if $.CustomCode.ExtraSchemaEntry }} 
+{{- if $.CustomCode.ExtraSchemaEntry }}
     {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
 {{- end}}
 {{ if $.HasProject -}}
@@ -187,17 +187,17 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
     obj := make(map[string]interface{})
 
 {{- range $prop := $.SettableProperties }}
-    {{ $prop.ExpanderPropVariableName -}}, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}({{ if $prop.FlattenObject }}nil{{ else if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d, "{{ underscore $prop.Name }}"){{ else }}d.Get("{{ underscore $prop.Name }}"){{ end }}, d, config)
+    {{ $prop.TitlelizeProperty -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{ end }}{{ $.ResourceName -}}{{ camelize $prop.Name "upper" -}}({{ if $prop.FlattenObject }}nil{{ else if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d, "{{ underscore $prop.Name }}"){{ else }}d.Get("{{ underscore $prop.Name }}"){{ end }}, d, config)
     if err != nil {
         return err
     {{- if $prop.SendEmptyValue -}}
-    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.ExpanderPropVariableName -}}) {
+    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.TitlelizeProperty -}}Prop) {
     {{-      else if $prop.FlattenObject -}}
-    } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ExpanderPropVariableName -}})) {
+    } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.TitlelizeProperty -}}Prop)) {
     {{-      else -}}
-    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ExpanderPropVariableName -}})) && (ok || !reflect.DeepEqual(v, {{ $prop.ExpanderPropVariableName -}})) {
+    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.TitlelizeProperty -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.TitlelizeProperty -}}Prop)) {
     {{- end}}
-        obj["{{ $prop.ApiName -}}"] = {{ $prop.ExpanderPropVariableName -}}
+        obj["{{ $prop.ApiName -}}"] = {{ $prop.TitlelizeProperty -}}Prop
     }
     {{- end}}
 
@@ -407,7 +407,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{        end  -}}
 {{      end -}}{{/*if ($.GetAsync.IsA "OpAsync")*/}}
 {{    end -}}{{/*if and $.GetAsync ($.GetAsync.Allow "Create")*/}}
-{{if $.CustomCode.PostCreate -}} 
+{{if $.CustomCode.PostCreate -}}
     {{- $.CustomTemplate $.CustomCode.PostCreate false -}}
 {{- end}}
 
@@ -724,17 +724,17 @@ func resource{{ $.ResourceName -}}Update(d *schema.ResourceData, meta interface{
     obj := make(map[string]interface{})
 {{-             range $prop := $.UpdateBodyProperties }}
     {{/* flattened $s won't have something stored in state so instead nil is passed to the next expander. */}}
-    {{- $prop.ExpanderPropVariableName -}}, err := expand{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}({{ if $prop.FlattenObject }}nil{{ else if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d, "{{ underscore $prop.Name }}"){{else}}d.Get("{{underscore $prop.Name}}"){{ end }}, d, config)
+    {{- $prop.TitlelizeProperty -}}Prop, err := expand{{ if $.NestedQuery -}}Nested{{end}}{{ $.ResourceName -}}{{ camelize $prop.Name "upper"  -}}({{ if $prop.FlattenObject }}nil{{ else if $prop.WriteOnly }}tpgresource.GetRawConfigAttributeAsString(d, "{{ underscore $prop.Name }}"){{else}}d.Get("{{underscore $prop.Name}}"){{ end }}, d, config)
     if err != nil {
         return err
 {{-                 if $prop.SendEmptyValue -}}
-    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.ExpanderPropVariableName -}}) {
+    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); ok || !reflect.DeepEqual(v, {{ $prop.TitlelizeProperty -}}Prop) {
 {{-                 else if $prop.FlattenObject -}}
-    } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ExpanderPropVariableName -}})) {
+    } else if !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.TitlelizeProperty -}}Prop)) {
 {{-                 else -}}
-    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, {{ $prop.ExpanderPropVariableName -}})) {
+    } else if v, ok := d.GetOkExists("{{ underscore $prop.Name -}}"); !tpgresource.IsEmptyValue(reflect.ValueOf(v)) && (ok || !reflect.DeepEqual(v, {{ $prop.TitlelizeProperty -}}Prop)) {
 {{-                 end}}
-        obj["{{ $prop.ApiName -}}"] = {{ $prop.ExpanderPropVariableName -}}
+        obj["{{ $prop.ApiName -}}"] = {{ $prop.TitlelizeProperty -}}Prop
     }
 {{-             end}}
 
@@ -998,7 +998,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         }
 {{-                     end}}
 {{-                 end}}
-    } 
+    }
 {{-             end  }}{{/*range PropertiesByCustomUpdate*/}}
 {{ "" }}
   d.Partial(false)
@@ -1034,7 +1034,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     if err != nil {
         return err
     }
-{{ if $.CustomCode.CustomDelete }} 
+{{ if $.CustomCode.CustomDelete }}
 {{ $.CustomTemplate $.CustomCode.CustomDelete false -}}
 {{- else }}
 
@@ -1091,7 +1091,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     }
 
     headers := make(http.Header)
-    {{- if $.CustomCode.PreDelete }} 
+    {{- if $.CustomCode.PreDelete }}
         {{ $.CustomTemplate $.CustomCode.PreDelete false -}}
     {{- end }}
 
