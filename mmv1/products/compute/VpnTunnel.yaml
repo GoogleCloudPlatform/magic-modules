@@ -172,13 +172,14 @@ properties:
     validation:
       function: 'validatePeerAddr'
   - name: 'sharedSecret'
+    write_only: true
     type: String
     description: |
       Shared secret used to set the secure session between the Cloud VPN
       gateway and the peer VPN gateway.
-    required: true
     ignore_read: true
     sensitive: true
+    required: true
   - name: 'sharedSecretHash'
     type: String
     description: |
