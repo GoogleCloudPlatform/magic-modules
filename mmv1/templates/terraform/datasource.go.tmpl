@@ -1,0 +1,104 @@
+{{/* The license inside this block applies to this file
+  Copyright 2024 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
+{{$.CodeHeader TemplatePath}}
+package {{ lower $.ProductMetadata.Name }}
+
+import (
+
+    "fmt"
+    "log"
+    "net/http"
+    "reflect"
+{{- if $.SupportsIndirectUserProjectOverride }}
+    "regexp"
+{{- end }}
+{{- if or (and (not $.Immutable) ($.UpdateMask)) $.LegacyLongFormProject }}
+    "strings"
+{{- end }}
+    "time"
+
+{{/*     # We list all the v2 imports here, because we run 'goimports' to guess the correct */}}
+{{/*     # set of imports, which will never guess the major version correctly. */}}
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+    "github.com/hashicorp/go-cty/cty"
+
+    "{{ $.ImportPath }}/tpgresource"
+    transport_tpg "{{ $.ImportPath }}/transport"
+    "{{ $.ImportPath }}/verify"
+
+{{ if $.FlattenedProperties }}
+    "google.golang.org/api/googleapi"
+{{- end}}
+)
+
+func DataSource{{ .ResourceName -}}() *schema.Resource {
+	rs := Resource{{ .ResourceName -}}().Schema
+
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(rs)
+
+  // Set 'Required' schema elements
+  tpgresource.AddRequiredFieldsToSchema(dsSchema, {{range $index, $field := .DatasourceRequiredFields}}{{if gt $index 0}}, {{end}}{{printf "%q" $field}}{{end}})
+
+  // Set 'Optional' schema elements
+  tpgresource.AddOptionalFieldsToSchema(dsSchema, {{range $index, $field := .DatasourceOptionalFields}}{{if gt $index 0}}, {{end}}{{printf "%q" $field}}{{end}})
+
+  return &schema.Resource{
+		Read:   dataSource{{ $.ResourceName -}}Read,
+		Schema: dsSchema,
+	}
+}
+
+func dataSource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
+  config := meta.(*transport_tpg.Config)
+
+  id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+    if err != nil {
+        return err
+    }
+  d.SetId(id)
+
+  err = resource{{ $.ResourceName -}}Read(d, meta)
+	if err != nil {
+		return err
+	}
+
+  {{if $.ShouldDatasourceSetLabels}}
+	if err := tpgresource.SetDataSourceLabels(d); err != nil {
+		return err
+	}
+  {{end}}
+
+  {{if $.ShouldDatasourceSetAnnotations}}
+	if err := tpgresource.SetDataSourceAnnotations(d); err != nil {
+		return err
+	}
+  {{end}}
+
+  if d.Id() == "" {
+		return fmt.Errorf("%s not found", id)
+	}
+
+  return nil
+}

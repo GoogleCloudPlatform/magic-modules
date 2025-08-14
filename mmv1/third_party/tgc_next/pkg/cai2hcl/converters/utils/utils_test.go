@@ -1,8 +1,11 @@
 package utils_test
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters/utils"
@@ -185,4 +188,76 @@ func createSchema(name string) map[string]*schema.Schema {
 	provider := tpg_provider.Provider()
 
 	return provider.ResourcesMap[name].Schema
+}
+
+func TestParseUrlParamValuesFromAssetName(t *testing.T) {
+	compareMaps := func(m1, m2 map[string]any) error {
+		if diff := cmp.Diff(m1, m2, cmpopts.SortMaps(func(k1, k2 string) bool { return k1 < k2 })); diff != "" {
+			return fmt.Errorf("maps are not equal (-got +want):\n%s", diff)
+		}
+		return nil
+	}
+
+	// Test cases for different scenarios
+	testCases := []struct {
+		name         string
+		template     string
+		assetName    string
+		outputFields map[string]struct{}
+		want         map[string]any
+	}{
+		{
+			name:         "ComputeUrlmap",
+			template:     "//compute.googleapis.com/projects/{{project}}/global/urlMaps/{{name}}",
+			assetName:    "//compute.googleapis.com/projects/my-project/global/urlMaps/urlmapibgtchooyo",
+			outputFields: make(map[string]struct{}),
+			want:         map[string]any{"project": "my-project", "name": "urlmapibgtchooyo"},
+		},
+		{
+			name:         "BigQueryDataset",
+			template:     "//bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}",
+			assetName:    "//bigquery.googleapis.com/projects/my-project/datasets/my-dataset",
+			outputFields: make(map[string]struct{}),
+			want:         map[string]any{"project": "my-project", "dataset_id": "my-dataset"},
+		},
+		{
+			name:         "AlloyDBInstance",
+			template:     "//alloydb.googleapis.com/{{cluster}}/instances/{{instance_id}}",
+			assetName:    "//alloydb.googleapis.com/projects/ci-test/locations/us-central1/clusters/tf-test-cluster/instances/tf-test-instance",
+			outputFields: make(map[string]struct{}),
+			want:         map[string]any{"cluster": "projects/ci-test/locations/us-central1/clusters/tf-test-cluster", "instance_id": "tf-test-instance"},
+		},
+		{
+			name:         "WithOutputFieldsIgnored",
+			template:     "//bigquery.googleapis.com/projects/{{project}}/location/{{location}}/datasets/{{dataset_id}}",
+			assetName:    "//bigquery.googleapis.com/projects/my-project/location/abc/datasets/my-dataset",
+			outputFields: map[string]struct{}{"location": {}}, // 'location' should be ignored
+			want:         map[string]any{"project": "my-project", "dataset_id": "my-dataset"},
+		},
+		{
+			name:         "WithMissingSuffix",
+			template:     "//bigquery.googleapis.com/projects/{{project/datasets/{{dataset_id}}",
+			assetName:    "//bigquery.googleapis.com/projects/my-project/datasets/my-dataset",
+			outputFields: make(map[string]struct{}),
+			want:         map[string]any{"dataset_id": "my-dataset"},
+		},
+		{
+			name:         "EmptyTemplate",
+			template:     "",
+			assetName:    "//bigquery.googleapis.com/projects/my-project/datasets/my-dataset",
+			outputFields: make(map[string]struct{}),
+			want:         map[string]any{},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			hclData := make(map[string]any)
+			utils.ParseUrlParamValuesFromAssetName(tc.assetName, tc.template, tc.outputFields, hclData)
+
+			if err := compareMaps(hclData, tc.want); err != nil {
+				t.Fatalf("map mismatch: %v", err)
+			}
+		})
+	}
 }

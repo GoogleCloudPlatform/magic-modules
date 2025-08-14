@@ -13,11 +13,11 @@ resource "google_clouddeploy_deploy_policy" "{{$.PrimaryResourceId}}" {
         time_zone = "America/Los_Angeles"
         weekly_windows {
             start_time {
-                hours = "12"
-                minutes = "00"
+                hours = 0
+                minutes = 0
             }
             end_time {
-                hours = "13"
+                hours = "24"
                 minutes = "00"
             }
         }

@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 
 	hashicorpcty "github.com/hashicorp/go-cty/cty"
@@ -28,29 +29,73 @@ func ParseFieldValue(url string, name string) string {
 template: //bigquery.googleapis.com/projects/{{project}}/datasets/{{dataset_id}}
 assetName: //bigquery.googleapis.com/projects/my-project/datasets/my-dataset
 hclData: [project:my-project dataset_id:my-dataset]
+
+It also handles multi-fragment fields.
+template: {{cluster}}/instances/{{instance_id}}
+assetName: //alloydb.googleapis.com/projects/ci-test-project/locations/us-central1/clusters/tf-test-cluster/instances/tf-test-instance
+hclData: [cluster:projects/ci-test-project/locations/us-central1/clusters/tf-test-cluster instance_id:tf-test-instance]
 */
 func ParseUrlParamValuesFromAssetName(assetName, template string, outputFields map[string]struct{}, hclData map[string]any) {
-	fragments := strings.Split(template, "/")
-	if len(fragments) < 2 {
-		// We need a field and a prefix.
-		return
-	}
-	fields := make(map[string]string) // keys are prefixes in URI, values are names of fields
-	for ix, item := range fragments[1:] {
-		if trimmed, ok := strings.CutPrefix(item, "{{"); ok {
-			if trimmed, ok = strings.CutSuffix(trimmed, "}}"); ok {
-				fields[fragments[ix]] = trimmed // ix is relative to the subslice
+	templateFragments := strings.Split(template, "/")
+	assetFragments := strings.Split(assetName, "/")
+
+	// Iterate through the fragments and match fields.
+	assetIx := 0
+	for templateIx := 0; templateIx < len(templateFragments); templateIx++ {
+		templateFragment := templateFragments[templateIx]
+
+		// Check if the template fragment is a field (e.g., {{project}})
+		if fieldName, isField := strings.CutPrefix(templateFragment, "{{"); isField {
+			if fieldName, hasEnd := strings.CutSuffix(fieldName, "}}"); hasEnd {
+				// Find the end of this field in the template. The end is the next non-field fragment.
+				endTemplateIx := templateIx + 1
+				for endTemplateIx < len(templateFragments) && strings.HasPrefix(templateFragments[endTemplateIx], "{{") {
+					endTemplateIx++
+				}
+
+				endAssetIx := getEndAssetIx(endTemplateIx, templateFragments, assetFragments)
+
+				valueFragments := assetFragments[assetIx:endAssetIx]
+				value := strings.Join(valueFragments, "/")
+
+				if _, isOutput := outputFields[fieldName]; !isOutput {
+					hclData[fieldName] = value
+				}
+
+				assetIx = endAssetIx
+				templateIx = endTemplateIx - 1
+			} else {
+				assetIx++
+			}
+		} else {
+			// This is a literal fragment, just advance the asset index if it matches.
+			if assetIx < len(assetFragments) && assetFragments[assetIx] == templateFragment {
+				assetIx++
+			} else {
+				log.Printf("Warning: Template literal '%s' does not match assetName at index %d.", templateFragment, assetIx)
 			}
 		}
 	}
-	fragments = strings.Split(assetName, "/")
-	for ix, item := range fragments[:len(fragments)-1] {
-		if fieldName, ok := fields[item]; ok {
-			if _, isOutput := outputFields[fieldName]; !isOutput {
-				hclData[fieldName] = fragments[ix+1]
-			}
+}
+
+// Finds the exclusive end index of a dynamic path segment within a Google Cloud asset name
+// by searching for the next literal segment from a template.
+func getEndAssetIx(endTemplateIx int, templateFragments []string, assetFragments []string) int {
+	if endTemplateIx >= len(templateFragments) {
+		return len(assetFragments)
+	}
+
+	// Find the index of the next non-field fragment in the asset name.
+	nextNonFieldFragment := templateFragments[endTemplateIx]
+	for ix, item := range assetFragments {
+		if item == nextNonFieldFragment {
+			return ix
 		}
 	}
+
+	// If the next non-field fragment is not found in the asset name,
+	// it means the dynamic field goes to the end of the asset name.
+	return len(assetFragments)
 }
 
 // DecodeJSON decodes the map object into the target struct.

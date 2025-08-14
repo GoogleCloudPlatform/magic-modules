@@ -337,7 +337,6 @@ properties:
                 description: |
                   If true, the metric data is collected and reported to Cloud
                   Monitoring, but is not used for load balancing.
-                include_empty_value_in_cai: true
               - name: 'maxUtilization'
                 type: Double
                 description: |
@@ -1119,7 +1118,6 @@ properties:
           required: true
           description: |
             If true, the metric data is not used for load balancing.
-          include_empty_value_in_cai: true
   - name: 'name'
     type: String
     description: |

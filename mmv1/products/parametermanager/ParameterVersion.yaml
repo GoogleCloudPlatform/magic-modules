@@ -57,6 +57,22 @@ examples:
     vars:
       parameter_id: 'parameter'
       parameter_version_id: 'parameter_version'
+  - name: 'parameter_version_with_json_format_with_file'
+    primary_resource_id: 'parameter-version-with-json-format-with-file'
+    vars:
+      parameter_id: 'parameter'
+      parameter_version_id: 'parameter_version'
+      data: parameter-json-data.json
+    test_vars_overrides:
+      'data': '"./test-fixtures/parameter_data_json_format.json"'
+  - name: 'parameter_version_with_yaml_format_with_file'
+    primary_resource_id: 'parameter-version-with-yaml-format-with-file'
+    vars:
+      parameter_id: 'parameter'
+      parameter_version_id: 'parameter_version'
+      data: parameter-yaml-data.yaml
+    test_vars_overrides:
+      'data': '"./test-fixtures/parameter_data_yaml_format.yaml"'
 custom_code:
   custom_import: 'templates/terraform/custom_import/parameter_manager_parameter_version.go.tmpl'
 parameters:

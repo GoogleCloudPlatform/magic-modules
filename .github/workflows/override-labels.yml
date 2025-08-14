@@ -1,0 +1,29 @@
+name: override-labels
+
+permissions: read-all
+
+on:
+  pull_request_target:
+    types: [labeled, unlabeled]
+
+
+jobs:
+  override-breaking-change:
+    runs-on: ubuntu-22.04
+    if: github.event.label.name == 'override-breaking-change'
+    permissions:
+      statuses: write
+    env:
+      STATE: "${{ github.event.action == 'labeled' && 'success' || 'failure' }}"
+      DESCRIPTION: "${{ github.event.action == 'labeled' && 'override-breaking-change applied' || 'override-breaking-change removed' }}"
+    steps:
+      - name: Override breaking changes label applied
+        shell: bash
+        run: |
+          curl -L \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.event.pull_request.head.sha }} \
+            -d '{"state":"${{ env.STATE }}","description":"${{ env.DESCRIPTION }}","context":"terraform-provider-breaking-change-test"}'

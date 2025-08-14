@@ -1,0 +1,9 @@
+if sm, ok := res["selfManaged"].(map[string]interface{}); ok {
+	sm["pemCertificate"] = res["pemCertificate"]
+	sm["pemPrivateKey"] = "hidden"
+}
+if vStr, ok := res["scope"].(string); ok && vStr == "DEFAULT" {
+	// Omit the default value.
+	delete(res, "scope")
+}
+return res, nil

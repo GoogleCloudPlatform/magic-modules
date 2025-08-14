@@ -65,7 +65,7 @@ examples:
       subnet_name: 'my-subnet'
       network_name: 'my-network'
       prevent_destroy: 'true'
-      kms_key_name: "my-key"
+      kms_key_name: 'my-key'
     test_vars_overrides:
       'prevent_destroy': 'false'
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
@@ -517,6 +517,14 @@ properties:
         enum_values:
           - 'MULTI_ZONE'
           - 'SINGLE_ZONE'
+  - name: 'allowFewerZonesDeployment'
+    type: Boolean
+    description: |
+      Allows customers to specify if they are okay with deploying a multi-zone
+      instance in less than 3 zones. Once set, if there is a zonal outage during
+      the instance creation, the instance will only be deployed in 2 zones, and
+      stay within the 2 zones for its lifecycle.
+    immutable: true
   - name: 'deletionProtectionEnabled'
     type: Boolean
     description: "Optional. If set to true deletion of the instance will fail. "

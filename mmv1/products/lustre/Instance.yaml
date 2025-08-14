@@ -26,6 +26,9 @@ update_verb: PATCH
 id_format: projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
 import_format:
   - projects/{{project}}/locations/{{location}}/instances/{{instance_id}}
+sweeper:
+  url_substitutions:
+    - location: "us-central1-a"
 examples:
 
   - name: lustre_instance_basic
