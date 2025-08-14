@@ -741,6 +741,20 @@ func (r Resource) GetIdentity() []*Type {
 	})
 }
 
+func deduplicateSliceOfStrings(slice []string) []string {
+	seen := make(map[string]bool, len(slice))
+	result := make([]string, 0, len(slice))
+
+	for _, str := range slice {
+		if !seen[str] {
+			seen[str] = true
+			result = append(result, str)
+		}
+	}
+
+	return result
+}
+
 func buildWriteOnlyField(name string, versionFieldName string, originalField *Type, originalFieldLineage string) *Type {
 	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", originalField.Description)
 	fieldPathOriginalField := originalFieldLineage
@@ -764,15 +778,15 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 
 	if originalField.Required {
 		exactlyOneOf := append(originalField.ExactlyOneOf, fieldPathOriginalField, fieldPathCurrentField)
-		options = append(options, propertyWithExactlyOneOf(exactlyOneOf))
+		options = append(options, propertyWithExactlyOneOf(deduplicateSliceOfStrings(exactlyOneOf)))
 	} else {
 		conflicts := append(originalField.Conflicts, fieldPathOriginalField)
-		options = append(options, propertyWithConflicts(conflicts))
+		options = append(options, propertyWithConflicts(deduplicateSliceOfStrings(conflicts)))
 	}
 
 	if len(originalField.AtLeastOneOf) > 0 {
 		atLeastOneOf := append(originalField.AtLeastOneOf, fieldPathCurrentField)
-		options = append(options, propertyWithAtLeastOneOf(atLeastOneOf))
+		options = append(options, propertyWithAtLeastOneOf(deduplicateSliceOfStrings(atLeastOneOf)))
 	}
 
 	return NewProperty(name, originalField.ApiName, options)
