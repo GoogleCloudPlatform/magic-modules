@@ -29,6 +29,9 @@ examples:
     min_version: 'beta'
     vars:
       saas_name: test-saas
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
+        role: "roles/saasservicemgmt.serviceAgent"
 autogen_async: false
 autogen_status: U2Fhcw==
 parameters:

@@ -13,6 +13,12 @@ import (
 
 func TestAccSaasRuntimeSaas_update(t *testing.T) {
 	t.Parallel()
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com",
+			Role:   "roles/saasservicemgmt.serviceAgent",
+		},
+	})
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
