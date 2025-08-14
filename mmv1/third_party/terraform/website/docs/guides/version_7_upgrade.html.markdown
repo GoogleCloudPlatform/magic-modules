@@ -86,20 +86,6 @@ terraform {
 }
 ```
 
-## Provider
-
-### Provider-level change example header
-
-Description of the change and how users should adjust their configuration (if needed).
-
-## Datasources
-
-## Datasource: `google_product_datasource`
-
-### Datasource-level change example header
-
-Description of the change and how users should adjust their configuration (if needed).
-
 ## Resources
 
 ## Resource: `google_artifact_registry_repository`
