@@ -503,6 +503,8 @@ resource "google_alloydb_cluster" "restored_from_point_in_time" {
     recovery_window_days = 20
   }
 
+  deletion_protection = false
+
   lifecycle {
     prevent_destroy = true
   }
@@ -526,6 +528,8 @@ resource "google_alloydb_cluster" "source" {
   network_config {
     network = data.google_compute_network.default.id
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "source" {
