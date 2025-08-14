@@ -170,7 +170,6 @@ func resource{{ $.ResourceName }}{{ camelize $prop.Name "upper" }}SetStyleDiff(_
 }
 {{- end}}
 
-
 func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{}) error {
 {{- if and ($.GetAsync) (and ($.GetAsync.IsA "OpAsync") ($.GetAsync.IncludeProject) ($.GetAsync.Allow "Create")) -}}
     var project string
