@@ -37,6 +37,7 @@ func bootstrapGkeTagManagerServiceAgents(t *testing.T) {
 }
 
 func TestAccContainerCluster_basic(t *testing.T) {
+	// Trigger tests
 	t.Parallel()
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
