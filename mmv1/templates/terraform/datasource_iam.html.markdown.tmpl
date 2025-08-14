@@ -46,6 +46,7 @@ description: |-
 {{- if $.IamPolicy.DeprecationMessage }}
 ~> **Warning:** {{$.IamPolicy.DeprecationMessage}}
 {{- end }}
+
 Retrieves the current IAM policy data for {{ lower $.Name }}
 {{- if or (eq $.MinVersionObj.Name "beta") (eq $.IamPolicy.MinVersion "beta") }}
 ~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
