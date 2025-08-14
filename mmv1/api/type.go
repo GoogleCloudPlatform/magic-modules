@@ -311,8 +311,17 @@ type Type struct {
 	// just as they are in the standard flattener template.
 	CustomTgcFlatten string `yaml:"custom_tgc_flatten,omitempty"`
 
-	// If true, we will include the empty value of this attribute in CAI asset.
+	// If true, the empty value of this attribute in CAI asset is included.
 	IncludeEmptyValueInCai bool `yaml:"include_empty_value_in_cai,omitempty"`
+
+	// If the property is type of bool and has `defaul_from_api: true`,
+	// include empty value in CAI asset by default during tfplan2cai conversion.
+	// Use `exclude_false_in_cai` to override the default behavior
+	// when the default value on API side is true.
+	//
+	// If a property is missing in CAI asset, use `is_missing_in_cai: true`
+	// and `exclude_false_in_cai: true` is not needed
+	ExcludeFalseInCai bool `yaml:"exclude_false_in_cai,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -434,7 +443,7 @@ func (t Type) Lineage() string {
 // This format is intended for resource metadata, to be used for connecting a Terraform
 // type with a corresponding API type.
 func (t Type) MetadataLineage() string {
-	if t.ParentMetadata == nil {
+	if t.ParentMetadata == nil || t.ParentMetadata.FlattenObject {
 		return google.Underscore(t.Name)
 	}
 
@@ -615,7 +624,6 @@ func (t Type) ExactlyOneOfList() []string {
 	if t.ResourceMetadata == nil {
 		return []string{}
 	}
-
 	return t.ExactlyOneOf
 }
 
@@ -912,6 +920,9 @@ func (t Type) UserProperties() []*Type {
 		}
 
 		return google.Reject(t.Properties, func(p *Type) bool {
+			if t.ResourceMetadata.IsTgcCompiler() {
+				return p.Exclude || p.Output
+			}
 			return p.Exclude
 		})
 	}
@@ -999,6 +1010,54 @@ func propertyWithClientSide(clientSide bool) func(*Type) {
 func propertyWithIgnoreWrite(ignoreWrite bool) func(*Type) {
 	return func(p *Type) {
 		p.IgnoreWrite = ignoreWrite
+	}
+}
+
+func propertyWithRequired(required bool) func(*Type) {
+	return func(p *Type) {
+		p.Required = required
+	}
+}
+
+func propertyWithWriteOnly(writeOnly bool) func(*Type) {
+	return func(p *Type) {
+		p.WriteOnly = writeOnly
+	}
+}
+
+func propertyWithIgnoreRead(ignoreRead bool) func(*Type) {
+	return func(p *Type) {
+		p.IgnoreRead = ignoreRead
+	}
+}
+
+func propertyWithConflicts(conflicts []string) func(*Type) {
+	return func(p *Type) {
+		p.Conflicts = conflicts
+	}
+}
+
+func propertyWithRequiredWith(requiredWith []string) func(*Type) {
+	return func(p *Type) {
+		p.RequiredWith = requiredWith
+	}
+}
+
+func propertyWithExactlyOneOf(exactlyOneOf []string) func(*Type) {
+	return func(p *Type) {
+		p.ExactlyOneOf = exactlyOneOf
+	}
+}
+
+func propertyWithAtLeastOneOf(atLeastOneOf []string) func(*Type) {
+	return func(p *Type) {
+		p.AtLeastOneOf = atLeastOneOf
+	}
+}
+
+func propertyWithApiName(apiName string) func(*Type) {
+	return func(p *Type) {
+		p.ApiName = apiName
 	}
 }
 
@@ -1222,7 +1281,7 @@ func (t *Type) ProviderOnly() bool {
 // fields still need to be included, ie:
 // flattenedField > newParent > renameMe should be passed to this function as
 // flattened_field.0.new_parent.0.im_renamed
-// TODO(emilymye): Change format of input for
+// TODO: Change format of input for
 // exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
 // convert to snake in this method
 func (t *Type) GetPropertySchemaPath(schemaPath string) string {
@@ -1270,4 +1329,28 @@ func (t Type) GetPropertySchemaPathList(propertyList []string) []string {
 		}
 	}
 	return list
+}
+
+func (t Type) IsJsonField() bool {
+	if t.CustomFlatten == "templates/terraform/custom_flatten/json_schema.tmpl" {
+		return true
+	}
+	if t.CustomExpand == "templates/terraform/custom_expand/json_schema.tmpl" || t.CustomExpand == "templates/terraform/custom_expand/json_value.tmpl" {
+		return true
+	}
+	return false
+}
+
+// Checks if the empty value should be set in CAI assets during tfplan2cai conversion
+func (t Type) TGCSendEmptyValue() bool {
+	if t.IncludeEmptyValueInCai {
+		return true
+	}
+
+	// Automatically check if false value should be set in CAI assets
+	if t.IsA("Boolean") {
+		return t.Required || (t.DefaultFromApi && !t.IsMissingInCai && !t.ExcludeFalseInCai)
+	}
+
+	return false
 }

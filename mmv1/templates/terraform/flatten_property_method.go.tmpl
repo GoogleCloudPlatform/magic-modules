@@ -18,7 +18,7 @@
     {{- $.CustomTemplate $.CustomFlatten false -}}
 {{- else -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-  {{- if $.IgnoreRead }}
+  {{- if or (and $.IgnoreRead (not $.ResourceMetadata.IsTgcCompiler)) $.ClientSide }}
   return d.Get("{{ $.TerraformLineage }}")
   {{- else if $.IsA "NestedObject" }}
   if v == nil {
@@ -46,6 +46,11 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     transformed["{{ underscore $prop.Name }}"] =
     flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config)
       {{- end }}
+    {{- end }}
+    {{- if and $.ResourceMetadata.IsTgcCompiler (not $.AllowEmptyObject) }}
+    if tgcresource.AllValuesAreNil(transformed) {
+      return nil
+    }
     {{- end }}
   return []interface{}{transformed}
   {{- else if and ($.IsA "Array") ($.ItemType.IsA "NestedObject") }}
@@ -132,10 +137,14 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
   }
   return tpgresource.ConvertAndMapStringArr(v.([]interface{}), tpgresource.ConvertSelfLinkToV1)
   {{- else if $.IsA "ResourceRef" }}
+    {{- if $.ResourceMetadata.IsTgcCompiler }}
+  {{- template "fullToRelativePath" $ -}}
+    {{- else }}
   if v == nil {
     return v
   }
   return tpgresource.ConvertSelfLinkToV1(v.(string))
+    {{- end }}
   {{- else if $.IsSet }}
   if v == nil {
     return v
@@ -145,6 +154,11 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     {{- else if or ($.ItemType.IsA "String") ($.ItemType.IsA "Enum") }}
   return schema.NewSet(schema.HashString, v.([]interface{}))
     {{- end }}
+  {{- else if and ($.ResourceMetadata.IsTgcCompiler) ($.IsA "Boolean") ($.Required) }}
+	if v == nil {
+		return false
+	}
+	return v
   {{- else }}
   return v
 {{- end }}

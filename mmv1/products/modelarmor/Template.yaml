@@ -1,4 +1,4 @@
-# Copyright 2024 Google Inc.
+# Copyright 2025 Google Inc.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -156,7 +156,8 @@ properties:
         properties:
           - name: advancedConfig
             type: NestedObject
-            conflicts: [basicConfig]
+            conflicts:
+              - filter_config.0.sdp_settings.0.basic_config
             description: Sensitive Data Protection Advanced configuration.
             properties:
               - name: inspectTemplate
@@ -182,7 +183,8 @@ properties:
                   `projects/{project}/locations/{location}/deidentifyTemplates/{deidentify_template}`
           - name: basicConfig
             type: NestedObject
-            conflicts: [advancedConfig]
+            conflicts:
+              - filter_config.0.sdp_settings.0.advanced_config
             description: Sensitive Data Protection basic configuration.
             properties:
               - name: filterEnforcement
