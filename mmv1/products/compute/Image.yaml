@@ -106,7 +106,7 @@ properties:
     type: Integer
     description: |
       Size of the image when restored onto a persistent disk (in GB).
-    # TODO(alexstephen): Build family support.
+    # TODO: Build family support.
     # Families use a different API
     default_from_api: true
   - name: 'family'
@@ -241,7 +241,7 @@ properties:
           This is provided by the client when the disk image is created.
         api_name: sha1Checksum
         diff_suppress_func: 'tpgresource.Base64DiffSuppress'
-      # TODO(alexstephen): Figure out cross-module ResourceRefs
+      # TODO: Figure out cross-module ResourceRefs
       - name: 'source'
         type: String
         description: |

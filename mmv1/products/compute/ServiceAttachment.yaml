@@ -106,6 +106,10 @@ examples:
       producer_health_check_name: 'producer-service-health-check'
       producer_service_name: 'producer-service'
       producer_forwarding_rule_name: 'producer-forwarding-rule'
+  - name: 'service_attachment_cross_region_ilb'
+    primary_resource_id: 'psc_ilb_service_attachment'
+    vars:
+      name: 'sa'
 parameters:
   - name: 'region'
     type: ResourceRef
@@ -272,13 +276,13 @@ properties:
       properties:
         - name: 'projectIdOrNum'
           type: String
-          # TODO (laurensknoll): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+          # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           description: |
             A project that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.
         - name: 'networkUrl'
           type: String
-          # TODO (laurensknoll): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+          # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           description: |
             The network that is allowed to connect to this service attachment.
             Only one of project_id_or_num and network_url may be set.
