@@ -48,7 +48,7 @@ func TestAccDialogflowConversationProfile_update(t *testing.T) {
 				ResourceName:            "google_dialogflow_conversation_profile.profile",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "logging_config.enable_stackdriver_logging"},
+				ImportStateVerifyIgnore: []string{"location", "logging_config", "logging_config.0", "logging_config.0.enable_stackdriver_logging"},
 			},
 			{
 				Config: testAccDialogflowConversationProfile_dialogflowAgentFull2(context),
@@ -57,7 +57,7 @@ func TestAccDialogflowConversationProfile_update(t *testing.T) {
 				ResourceName:            "google_dialogflow_conversation_profile.profile",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "logging_config.enable_stackdriver_logging"},
+				ImportStateVerifyIgnore: []string{"location", "logging_config", "logging_config.0", "logging_config.0.enable_stackdriver_logging"},
 			},
 		},
 	})
