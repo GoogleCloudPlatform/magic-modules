@@ -4172,7 +4172,7 @@ resource "google_container_node_pool" "with_tier1_net" {
   cluster    = google_container_cluster.cluster.name
   node_count = 1
   node_locations = [
-    "us-central1-a",
+    "us-central1-c",
   ]
   network_config {
     network_performance_config {
