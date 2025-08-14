@@ -490,6 +490,7 @@ properties:
     type: Boolean
     description: |
       Optional. Flag indicating if the volume will be a large capacity volume or a regular volume.
+    immutable: true
   - name: 'multipleEndpoints'
     type: Boolean
     description: |
