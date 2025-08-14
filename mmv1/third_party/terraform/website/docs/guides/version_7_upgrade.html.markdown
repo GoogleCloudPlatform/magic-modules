@@ -68,7 +68,11 @@ For example, given this previous configuration:
 terraform {
   required_providers {
     google = {
+<<<<<<< HEAD
       version = "~> 5.30.0"
+=======
+      version = "~> 6.48.0"
+>>>>>>> c96e1c59a (add 7.0.0 guide to main (#14861))
     }
   }
 }
@@ -86,6 +90,7 @@ terraform {
 }
 ```
 
+<<<<<<< HEAD
 ## Provider
 
 ### Provider-level change example header
@@ -125,6 +130,10 @@ Terraform from destroying or recreating the cluster during `terraform apply`. In
 `google_beyondcorp_application`, the associated IAM resources `google_beyondcorp_application_iam_binding`, `google_beyondcorp_application_iam_member`, and `google_beyondcorp_application_iam_policy`, and the `google_beyondcorp_application_iam_policy` datasource have been removed. 
 Use `google_beyondcorp_security_gateway_application` instead.
 
+=======
+## Resources
+
+>>>>>>> c96e1c59a (add 7.0.0 guide to main (#14861))
 ## Resource: `google_artifact_registry_repository`
 
 ### `public_repository` fields have had their default values removed.
@@ -149,12 +158,15 @@ Use `google_beyondcorp_security_gateway_application` instead.
 
 `instance` has been removed in favor of `instance_name`.
 
+<<<<<<< HEAD
 ## Resource: `google_compute_packet_mirroring`
 
 ### `subnetworks` and `instances` fields have been converted to sets
 
 `subnetworks` and `instances` fields have been converted to sets. If you need to access values in their nested objects, it will need to be accessed via `for_each` or locally converting the field to a list/array in your configuration.
 
+=======
+>>>>>>> c96e1c59a (add 7.0.0 guide to main (#14861))
 ## Resource: `google_compute_subnetwork`
 
 ### `enable_flow_logs`is now removed
@@ -181,12 +193,15 @@ To reflect the new type explicitly, surround the current integer value in quotes
 
 Remove `description` from your configuration after upgrade.
 
+<<<<<<< HEAD
 ## Resource: `google_colab_runtime_template`
 
 ### `post_startup_script_config` is now removed.
 
 Remove `post_startup_script_config` from your configuration after upgrade.
 
+=======
+>>>>>>> c96e1c59a (add 7.0.0 guide to main (#14861))
 ## Resource: `google_network_services_lb_traffic_extension`
 
 ### `load_balancing_scheme` is now required
@@ -237,4 +252,8 @@ Remove `template.containers.depends_on` from your configuration after upgrade.
 
 The default value for `disable_on_destroy` has been changed to `false`. The previous default (`true`) created a risk of unintended service disruptions, as destroying a single `google_project_service` resource would disable the API for the entire project.
 
+<<<<<<< HEAD
 Now, destroying the resource will only remove it from Terraform's state and leave the service enabled. To disable a service when the resource is destroyed, you must now make an explicit decision by setting `disable_on_destroy = true`.
+=======
+Now, destroying the resource will only remove it from Terraform's state and leave the service enabled. To disable a service when the resource is destroyed, you must now make an explicit decision by setting `disable_on_destroy = true`.
+>>>>>>> c96e1c59a (add 7.0.0 guide to main (#14861))
