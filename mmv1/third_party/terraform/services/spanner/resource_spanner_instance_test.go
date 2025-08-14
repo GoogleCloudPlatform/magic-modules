@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
-
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
@@ -534,6 +534,34 @@ func TestAccSpannerInstance_freeInstanceBasicUpdate(t *testing.T) {
 	})
 }
 
+func TestAccSpannerInstance_tags(t *testing.T) {
+	t.Parallel()
+
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "spanner-instances-tagkey", map[string]interface{}{})
+	context := map[string]interface{}{
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "spanner-instances-tagvalue", tagKey),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckSpannerInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSpannerInstanceTags(context),
+			},
+			{
+				ResourceName:            "google_spanner_instance.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels", "tags"},
+			},
+		},
+	})
+}
+
 func testAccSpannerInstance_basic(name string) string {
 	return fmt.Sprintf(`
 resource "google_spanner_instance" "basic" {
@@ -853,4 +881,15 @@ resource "google_spanner_instance" "main" {
   num_nodes     = 1
 }
 `, name, name)
+}
+
+func testAccSpannerInstanceTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_spanner_instance" "basic" {
+  config       = "regional-us-central1"
+  display_name = "%s"
+  num_nodes    = 2
+  tags = {"%{org}/%{tagKey}" = "%{tagValue}"}
+	}
+`, context)
 }
