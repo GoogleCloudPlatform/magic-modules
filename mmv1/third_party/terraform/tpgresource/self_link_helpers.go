@@ -1,8 +1,10 @@
 package tpgresource
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"regexp"
 	"strings"
@@ -98,20 +100,20 @@ func NestedUrlSetHashFunc(v interface{}) int {
 		return 0
 	}
 
-  var buf bytes.Buffer
+	var buf bytes.Buffer
 	m := v.(map[string]interface{})
 	log.Printf("[DEBUG] hashing %v", m)
 
 	if v, ok := m["url"]; ok {
 		if v == nil {
-      v = ""
-    } else {
-      if relUrl, err := GetRelativePath(v.(string)); err != nil {
-        log.Printf("[WARN] Error on retrieving relative path of network url: %s", err)
-      } else {
-        v = relUrl
-      }
-    }
+			v = ""
+		} else {
+			if relUrl, err := GetRelativePath(v.(string)); err != nil {
+				log.Printf("[WARN] Error on retrieving relative path of network url: %s", err)
+			} else {
+				v = relUrl
+			}
+		}
 
 		buf.WriteString(fmt.Sprintf("%v-", v))
 	}
@@ -119,7 +121,6 @@ func NestedUrlSetHashFunc(v interface{}) int {
 	log.Printf("[DEBUG] computed hash value of %v from %v", Hashcode(buf.String()), buf.String())
 	return Hashcode(buf.String())
 }
-
 
 func ConvertSelfLinkToV1(link string) string {
 	reg := regexp.MustCompile("/compute/[a-zA-Z0-9]*/projects/")
