@@ -189,3 +189,140 @@ func IsApiNotEnabledError(err error) bool {
 	}
 	return false
 }
+
+type GetPaginatedItemsSliceOptions struct {
+	ResourceData   *schema.ResourceData
+	Config         *Config
+	BillingProject *string
+	UserAgent      string
+	URL            string
+	ListFlattener  func(config *Config, res interface{}) ([]interface{}, error)
+	Params         map[string]string
+	ResourceToList string
+}
+
+func GetPaginatedItemsSlice(paginationOptions GetPaginatedItemsSliceOptions) ([]interface{}, error) {
+	if paginationOptions.Params == nil {
+		paginationOptions.Params = make(map[string]string)
+	}
+
+	items := make([]interface{}, 0)
+	for {
+		// Depending on previous iterations, opt.Params might contain a pageToken param
+		url, err := AddQueryParams(paginationOptions.URL, paginationOptions.Params)
+		if err != nil {
+			return nil, err
+		}
+
+		headers := make(http.Header)
+		opts := SendRequestOptions{
+			Config:               paginationOptions.Config,
+			Method:               "GET",
+			RawURL:               url,
+			UserAgent:            paginationOptions.UserAgent,
+			Headers:              headers,
+			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
+		}
+		if paginationOptions.BillingProject != nil {
+			opts.Project = *paginationOptions.BillingProject
+		}
+		res, err := SendRequest(opts)
+		if err != nil {
+			return nil, HandleNotFoundError(err, paginationOptions.ResourceData, fmt.Sprintf("%s %q", paginationOptions.ResourceToList, paginationOptions.ResourceData.Id()))
+		}
+
+		var newItems []interface{}
+		if paginationOptions.ListFlattener != nil {
+			if res[paginationOptions.ResourceToList] != nil {
+				flattened, err := paginationOptions.ListFlattener(paginationOptions.Config, res[paginationOptions.ResourceToList])
+				if err != nil {
+					return nil, err
+				}
+				newItems = flattened
+			}
+		} else {
+			if v, ok := res[paginationOptions.ResourceToList].([]interface{}); ok {
+				newItems = v
+			}
+		}
+		items = append(items, newItems...)
+
+		if v, ok := res["nextPageToken"]; ok && v != nil && v.(string) != "" {
+			paginationOptions.Params["pageToken"] = v.(string)
+		} else {
+			break
+		}
+	}
+	return items, nil
+}
+
+type GetPaginatedItemsMapOptions struct {
+	ResourceData   *schema.ResourceData
+	Config         *Config
+	BillingProject *string
+	UserAgent      string
+	URL            string
+	ListFlattener  func(config *Config, res interface{}) ([]map[string]interface{}, error)
+	Params         map[string]string
+	ResourceToList string
+}
+
+func GetPaginatedItemsMap(paginationOptions GetPaginatedItemsMapOptions) ([]map[string]interface{}, error) {
+	if paginationOptions.Params == nil {
+		paginationOptions.Params = make(map[string]string)
+	}
+
+	items := make([]map[string]interface{}, 0)
+	for {
+		url, err := AddQueryParams(paginationOptions.URL, paginationOptions.Params)
+		if err != nil {
+			return nil, err
+		}
+
+		headers := make(http.Header)
+		opts := SendRequestOptions{
+			Config:               paginationOptions.Config,
+			Method:               "GET",
+			RawURL:               url,
+			UserAgent:            paginationOptions.UserAgent,
+			Headers:              headers,
+			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
+		}
+		if paginationOptions.BillingProject != nil {
+			opts.Project = *paginationOptions.BillingProject
+		}
+		res, err := SendRequest(opts)
+		if err != nil {
+			return nil, HandleNotFoundError(err, paginationOptions.ResourceData, fmt.Sprintf("%s %q", paginationOptions.ResourceToList, paginationOptions.ResourceData.Id()))
+		}
+
+		var newItems []map[string]interface{}
+		if paginationOptions.ListFlattener != nil {
+			if res[paginationOptions.ResourceToList] != nil {
+				flattened, err := paginationOptions.ListFlattener(paginationOptions.Config, res[paginationOptions.ResourceToList])
+				if err != nil {
+					return nil, err
+				}
+				newItems = flattened
+			}
+		} else {
+			if v, ok := res[paginationOptions.ResourceToList].([]interface{}); ok {
+				for _, item := range v {
+					if m, ok := item.(map[string]interface{}); ok {
+						newItems = append(newItems, m)
+					} else {
+						return nil, fmt.Errorf("item in list is not a map[string]interface{}")
+					}
+				}
+			}
+		}
+		items = append(items, newItems...)
+
+		if v, ok := res["nextPageToken"]; ok && v != nil && v.(string) != "" {
+			paginationOptions.Params["pageToken"] = v.(string)
+		} else {
+			break
+		}
+	}
+	return items, nil
+}
