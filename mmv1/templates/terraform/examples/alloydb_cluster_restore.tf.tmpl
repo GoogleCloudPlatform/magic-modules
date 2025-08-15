@@ -6,6 +6,8 @@ resource "google_alloydb_cluster" "{{$.PrimaryResourceId}}" {
   initial_user {
     password = "{{index $.Vars "alloydb_cluster_name"}}"
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "{{$.PrimaryResourceId}}" {
@@ -37,6 +39,8 @@ resource "google_alloydb_cluster" "restored_from_backup" {
   restore_backup_source {
     backup_name = google_alloydb_backup.{{$.PrimaryResourceId}}.name
   }
+
+  deletion_protection = false
 }
 
 resource "google_alloydb_cluster" "restored_via_pitr" {
@@ -49,6 +53,8 @@ resource "google_alloydb_cluster" "restored_via_pitr" {
     cluster = google_alloydb_cluster.{{$.PrimaryResourceId}}.name
     point_in_time = "2023-08-03T19:19:00.094Z"
   }
+
+  deletion_protection = false
 }
 
 data "google_project" "project" {}
