@@ -59,7 +59,7 @@ func Get{{ $.ResourceName -}}CaiAssets(d tpgresource.TerraformResourceData, conf
     }
     if obj, err := Get{{ $.ResourceName -}}CaiObject(d, config); err == nil {
         location, _ := tpgresource.GetLocation(d, config)
-        if location == "" && strings.Contains(name, "/global/") {
+        if location == "" {
             location = "global"
         }
         return []caiasset.Asset{
@@ -90,7 +90,7 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
 {{- end}}
     if err != nil {
         return nil, err
-{{- if and (not $prop.SendEmptyValue) (not $prop.IncludeEmptyValueInCai) }}
+{{- if and (not $prop.SendEmptyValue) (not $prop.TGCSendEmptyValue) }}
     } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop)) {
 {{- else }}
     } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop) {
