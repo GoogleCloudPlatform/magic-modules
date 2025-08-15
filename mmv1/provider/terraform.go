@@ -108,6 +108,7 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 			t.GenerateResourceTests(object, *templateData, outputFolder)
 			t.GenerateResourceSweeper(object, *templateData, outputFolder)
 			t.GenerateSingularDataSource(object, *templateData, outputFolder)
+			t.GenerateSingularDataSourceTests(object, *templateData, outputFolder)
 			// log.Printf("Generating %s metadata", object.Name)
 			t.GenerateResourceMetadata(object, *templateData, outputFolder)
 		}
@@ -201,6 +202,21 @@ func (t *Terraform) GenerateSingularDataSource(object api.Resource, templateData
 	}
 	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s.go", t.ResourceGoFilename(object)))
 	templateData.GenerateDataSourceFile(targetFilePath, object)
+}
+
+func (t *Terraform) GenerateSingularDataSourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+	if !object.ShouldGenerateSingularDataSourceTests() {
+		return
+	}
+
+	productName := t.Product.ApiName
+	targetFolder := path.Join(outputFolder, t.FolderName(), "services", productName)
+	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
+		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
+	}
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s_generated_test.go", t.ResourceGoFilename(object)))
+	templateData.GenerateDataSourceTestFile(targetFilePath, object)
+
 }
 
 // GenerateProduct creates the product.go file for a given service directory.
