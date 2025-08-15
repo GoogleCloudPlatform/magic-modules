@@ -31,7 +31,6 @@ var tevRequiredEnvironmentVariables = [...]string{
 	"GOOGLE_IMPERSONATE_SERVICE_ACCOUNT",
 	"KOKORO_ARTIFACTS_DIR",
 	"HOME",
-	"MODIFIED_FILE_PATH",
 	"PATH",
 	"USER",
 }
@@ -125,7 +124,7 @@ The following environment variables are required:
 			return fmt.Errorf("wrong number of arguments %d, expected 1", len(args))
 		}
 
-		return execTestEAPVCR(args[0], env["GEN_PATH"], env["KOKORO_ARTIFACTS_DIR"], env["MODIFIED_FILE_PATH"], rnr, vt)
+		return execTestEAPVCR(args[0], env["GEN_PATH"], env["KOKORO_ARTIFACTS_DIR"], rnr, vt)
 	},
 }
 
@@ -137,7 +136,7 @@ func listTEVEnvironmentVariables() string {
 	return result
 }
 
-func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath string, rnr ExecRunner, vt *vcr.Tester) error {
+func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir string, rnr ExecRunner, vt *vcr.Tester) error {
 	vt.SetRepoPath(provider.Private, genPath)
 	if err := rnr.PushDir(genPath); err != nil {
 		return fmt.Errorf("error changing to gen path: %w", err)
