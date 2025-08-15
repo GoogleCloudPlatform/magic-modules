@@ -93,6 +93,8 @@ examples:
     primary_resource_id: 'full'
     vars:
       alloydb_cluster_name: 'alloydb-cluster-full'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'alloydb_cluster_restore'
     primary_resource_id: 'source'
     vars:
