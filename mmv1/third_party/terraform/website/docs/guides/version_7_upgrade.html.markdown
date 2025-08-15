@@ -92,6 +92,10 @@ terraform {
 
 Description of the change and how users should adjust their configuration (if needed).
 
+### Resource import formats have improved validation
+
+Throughout the provider there were many resources which erroneously gave false positives to poorly formatted import input if a subset of the provided input was valid to their configured import formats. All GCP resource IDs supplied to "terraform import" must match the documentation specified import formats exactly.
+
 ## Datasources
 
 ## Datasource: `google_product_datasource`
@@ -99,6 +103,12 @@ Description of the change and how users should adjust their configuration (if ne
 ### Datasource-level change example header
 
 Description of the change and how users should adjust their configuration (if needed).
+
+## Datasource: `google_service_account_key`
+
+### `project` is now removed
+
+`project` has been removed. It can be safely removed from your configuration.
 
 ## Resources
 
@@ -109,6 +119,11 @@ Description of the change and how users should adjust their configuration (if ne
 The field `deletion_protection` has been added with a default value of `true`. This field prevents
 Terraform from destroying or recreating the cluster during `terraform apply`. In 7.0.0, existing clusters will have
 `deletion_protection` set to `true` during the next refresh unless otherwise set in configuration.
+
+## Resource: `google_beyondcorp_application` is now removed
+
+`google_beyondcorp_application`, the associated IAM resources `google_beyondcorp_application_iam_binding`, `google_beyondcorp_application_iam_member`, and `google_beyondcorp_application_iam_policy`, and the `google_beyondcorp_application_iam_policy` datasource have been removed. 
+Use `google_beyondcorp_security_gateway_application` instead.
 
 ## Resource: `google_artifact_registry_repository`
 
