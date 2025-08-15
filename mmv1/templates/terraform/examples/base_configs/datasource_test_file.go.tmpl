@@ -3,7 +3,7 @@
 
 // ----------------------------------------------------------------------------
 //
-//     ***     AUTO GENERATED CODE    ***    Type: MMv1     ***
+//     *** AUTO GENERATED CODE    *** Type: MMv1     ***
 //
 // ----------------------------------------------------------------------------
 //
@@ -28,11 +28,12 @@ import (
 	"{{ $.ImportPath }}/tpgresource"
 )
 
-{{ range $e := $.Res.TestExamples }}
+{{ if $.Res.TestExamples }}
+{{ $e := index $.Res.TestExamples 0 }}
 func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 	t.Parallel()
 
-    context := map[string]interface{}{
+	context := map[string]interface{}{
 	{{- template "EnvVarContext" dict "TestEnvVars" $e.TestEnvVars "HasNewLine" false}}
 	{{- range $varKey, $varVal := $e.TestVarsOverrides }}
 		"{{$varKey}}": {{$varVal}},
@@ -40,23 +41,48 @@ func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 		"random_suffix": acctest.RandString(t, 10),
 	}
 
-    acctest.VcrTest(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-        {{- if $.Res.VersionedProvider $e.MinVersion }}
+	{{- if $.Res.VersionedProvider $e.MinVersion }}
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-        {{- else }}
-            ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-        {{- end }}
-        {{- if $e.ExternalProviders }}
+	{{- else }}
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+	{{- end }}
+	{{- if $e.ExternalProviders }}
 		ExternalProviders: map[string]resource.ExternalProvider{
 		{{- range $provider := $e.ExternalProviders }}
 			"{{$provider}}": {},
 		{{- end }}
 		},
-        {{- end }}
-        {{- if not $.Res.ExcludeDelete }}
-            CheckDestroy: testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t),
-        {{- end }}
-    }
+	{{- end }}
+	{{- if not $.Res.ExcludeDelete }}
+		CheckDestroy: testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t),
+	{{- end }}
+		Steps: []resource.TestStep{
+			{
+				Config: testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}DataSource(context),
+			},
+	{{- if not $e.ExcludeImportTest }}
+			{
+				ResourceName:      "{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
+				ImportState:       true,
+				ImportStateVerify: true,
+		{{- if $.Res.IgnoreReadPropertiesToString $e }}
+				ImportStateVerifyIgnore: {{ $.Res.IgnoreReadPropertiesToString $e }},
+		{{- end }}
+			},
+	{{- end }}
+		},
+	})
+}
+
+func testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}DataSource(context map[string]interface{}) string {
+	return fmt.Sprintf(`%s
+
+		data "{{ $.Res.TerraformName }}" "default" {
+		name = {{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}.name
+		}`,
+		testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
+	)
 }
 {{ end }}
