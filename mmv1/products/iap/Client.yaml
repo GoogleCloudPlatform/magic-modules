@@ -35,6 +35,7 @@ import_format:
   - '{{brand}}/identityAwareProxyClients/{{client_id}}'
 datasource:
   generate: true
+  generate_tests: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20

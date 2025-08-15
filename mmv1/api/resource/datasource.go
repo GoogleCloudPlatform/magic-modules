@@ -16,4 +16,6 @@ package resource
 type Datasource struct {
 	// boolean to determine whether the datasource file should be generated
 	Generate bool `yaml:"generate"`
+	// boolean to determine whether tests should be generated for a datasource
+	GenerateTests bool `yaml:"generate_tests"`
 }
