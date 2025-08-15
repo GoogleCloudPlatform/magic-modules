@@ -10,8 +10,8 @@ import (
 
 func sourceRepoImport(d *schema.ResourceData, config *transport_tpg.Config) error {
 	if err := tpgresource.ParseImportId([]string{
-		"projects/(?P<project>[^/]+)/repos/(?P<name>.+)",
-		"(?P<name>.+)",
+		"^projects/(?P<project>[^/]+)/repos/(?P<name>.+)$",
+		"^(?P<name>.+)$",
 	}, d, config); err != nil {
 		return err
 	}
@@ -28,8 +28,8 @@ func sourceRepoImport(d *schema.ResourceData, config *transport_tpg.Config) erro
 
 func runtimeconfigVariableImport(d *schema.ResourceData, config *transport_tpg.Config) error {
 	if err := tpgresource.ParseImportId([]string{
-		"projects/(?P<project>[^/]+)/configs/(?P<parent>[^/]+)/variables/(?P<name>.+)",
-		"(?P<parent>[^/]+)/(?P<name>.+)",
+		"^projects/(?P<project>[^/]+)/configs/(?P<parent>[^/]+)/variables/(?P<name>.+)$",
+		"^(?P<parent>[^/]+)/(?P<name>.+)$",
 	}, d, config); err != nil {
 		return err
 	}
