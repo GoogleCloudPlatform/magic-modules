@@ -109,7 +109,7 @@ timeouts:
   delete_minutes: 30
 autogen_async: true
 datasource:
-  generate: true 
+  generate: true
   generate_tests: true
 async:
   actions: ['create', 'delete', 'update']
