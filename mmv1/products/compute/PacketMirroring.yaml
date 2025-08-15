@@ -145,7 +145,7 @@ properties:
       - name: 'subnetworks'
         type: Array
         is_set: true
-        set_hash_func: nestedUrlSetHashFunc
+        set_hash_func: tpgresource.NestedUrlSetHashFunc
         description: |
           All instances in one of these subnetworks will be mirrored.
         at_least_one_of:
@@ -169,7 +169,7 @@ properties:
       - name: 'instances'
         type: Array
         is_set: true
-        set_hash_func: nestedUrlSetHashFunc
+        set_hash_func: tpgresource.NestedUrlSetHashFunc
         description: |
           All the listed instances will be mirrored.  Specify at most 50.
         at_least_one_of:
