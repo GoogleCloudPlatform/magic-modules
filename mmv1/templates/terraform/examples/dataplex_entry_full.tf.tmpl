@@ -1,4 +1,4 @@
-resource "google_dataplex_aspect_type" "{{index $.Vars "aspect_type_name"}}-one" {
+resource "google_dataplex_aspect_type" "aspect-type-full-one" {
   aspect_type_id         = "{{index $.Vars "aspect_type_name"}}-one"
   location     = "us-central1"
   project      = "{{index $.TestEnvVars "project_number"}}"
@@ -31,7 +31,7 @@ resource "google_dataplex_aspect_type" "{{index $.Vars "aspect_type_name"}}-one"
 EOF
 }
 
-resource "google_dataplex_aspect_type" "{{index $.Vars "aspect_type_name"}}-two" {
+resource "google_dataplex_aspect_type" "aspect-type-full-two" {
   aspect_type_id         = "{{index $.Vars "aspect_type_name"}}-two"
   location     = "us-central1"
   project      = "{{index $.TestEnvVars "project_number"}}"
@@ -64,28 +64,28 @@ resource "google_dataplex_aspect_type" "{{index $.Vars "aspect_type_name"}}-two"
 EOF
 }
 
-resource "google_dataplex_entry_group" "{{index $.Vars "entry_group_name"}}" {
+resource "google_dataplex_entry_group" "entry-group-full" {
   entry_group_id = "{{index $.Vars "entry_group_name"}}"
   project = "{{index $.TestEnvVars "project_number"}}"
   location = "us-central1"
 }
 
-resource "google_dataplex_entry_type" "{{index $.Vars "entry_type_name"}}" {
+resource "google_dataplex_entry_type" "entry-type-full" {
   entry_type_id = "{{index $.Vars "entry_type_name"}}"
   project = "{{index $.TestEnvVars "project_number"}}"
   location = "us-central1"
 
   required_aspects {
-    type = google_dataplex_aspect_type.{{index $.Vars "aspect_type_name"}}-one.name
+    type = google_dataplex_aspect_type.aspect-type-full-one.name
   }
 }
 
 resource "google_dataplex_entry" "{{$.PrimaryResourceId}}" {
-  entry_group_id = google_dataplex_entry_group.{{index $.Vars "entry_group_name"}}.entry_group_id
+  entry_group_id = google_dataplex_entry_group.entry-group-full.entry_group_id
   project = "{{index $.TestEnvVars "project_number"}}"
   location = "us-central1"
   entry_id = "{{index $.Vars "entry_id"}}"
-  entry_type = google_dataplex_entry_type.{{index $.Vars "entry_type_name"}}.name
+  entry_type = google_dataplex_entry_type.entry-type-full.name
   fully_qualified_name = "bigquery:{{index $.TestEnvVars "project_number"}}.test-dataset"
   parent_entry = "projects/{{index $.TestEnvVars "project_number"}}/locations/us-central1/entryGroups/{{index $.Vars "entry_group_name"}}/entries/some-other-entry"
   entry_source {
@@ -114,7 +114,7 @@ resource "google_dataplex_entry" "{{$.PrimaryResourceId}}" {
 
   aspects {
     aspect_key = "{{index $.TestEnvVars "project_number"}}.us-central1.{{index $.Vars "aspect_type_name"}}-one"
-    aspect_value {
+    aspect {
       data = <<EOF
           {"type": "VIEW"    }
         EOF
@@ -123,11 +123,11 @@ resource "google_dataplex_entry" "{{$.PrimaryResourceId}}" {
 
   aspects {
     aspect_key = "{{index $.TestEnvVars "project_number"}}.us-central1.{{index $.Vars "aspect_type_name"}}-two"
-    aspect_value {
+    aspect {
       data = <<EOF
           {"story": "SEQUENCE"    }
         EOF
     }
   }
- depends_on = [google_dataplex_aspect_type.{{index $.Vars "aspect_type_name"}}-two, google_dataplex_aspect_type.{{index $.Vars "aspect_type_name"}}-one]
+ depends_on = [google_dataplex_aspect_type.aspect-type-full-two, google_dataplex_aspect_type.aspect-type-full-one]
 }

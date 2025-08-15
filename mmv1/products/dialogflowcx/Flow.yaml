@@ -49,8 +49,14 @@ examples:
     vars:
       agent_name: 'dialogflowcx-agent'
       bucket_name: 'dialogflowcx-bucket'
+      data-store: 'datastore-flow-full'
   - name: 'dialogflowcx_flow_default_start_flow'
     primary_resource_id: 'default_start_flow'
+    vars:
+      agent_name: 'dialogflowcx-agent'
+    exclude_docs: true
+  - name: 'dialogflowcx_flow_custom_endpoint'
+    primary_resource_id: 'custom_endpoint_flow'
     vars:
       agent_name: 'dialogflowcx-agent'
     exclude_docs: true
@@ -501,6 +507,12 @@ properties:
                     custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
                     validation:
                       function: 'validation.StringIsJSON'
+            - name: 'enableGenerativeFallback'
+              type: Boolean
+              description: |
+                If the flag is true, the agent will utilize LLM to generate a text response.
+                If LLM generation fails, the defined responses in the fulfillment will be respected.
+                This flag is only useful for fulfillments associated with no-match event handlers.
         - name: 'targetPage'
           type: String
           description: |
