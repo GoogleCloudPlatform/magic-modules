@@ -273,7 +273,7 @@ fun BuildSteps.runDiffTests() {
                 fi
                 
                 echo "Starting tests"
-                ./test-binary -test.list="%TEST_PREFIX%" | ./teamcity-diff-test -test ./test-binary -parallelism "%PARALLELISM%" -timeout "%TIMEOUT%h"
+                ./test-binary -test.list="%TEST_PREFIX%" | ../../../teamcity-diff-test -test ./test-binary -parallelism "%PARALLELISM%" -timeout "%TIMEOUT%h"
             """.trimIndent()
         })
     }
