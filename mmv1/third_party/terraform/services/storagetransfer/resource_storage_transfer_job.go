@@ -694,9 +694,9 @@ func gcsDataSchema() *schema.Resource {
 				Description: `Google Cloud Storage bucket name.`,
 			},
 			"path": {
-				Optional:    true,
-				Type:        schema.TypeString,
-				Description: `Google Cloud Storage path in bucket to transfer. Must be an empty string or full path name that ends with a '/'. This field is treated as an object prefix. As such, it should not begin with a '/'.`,
+				Optional:     true,
+				Type:         schema.TypeString,
+				Description:  `Google Cloud Storage path in bucket to transfer. Must be an empty string or full path name that ends with a '/'. This field is treated as an object prefix. As such, it should not begin with a '/'.`,
 				ValidateFunc: validateGCSDataPath,
 			},
 		},
