@@ -127,6 +127,7 @@ properties:
       - name: 'image'
         type: String
         description: The OS image name in vCenter, only valid when using Windows.
+        default_from_api: true
       - name: 'bootDiskSizeGb'
         type: Integer
         description: VMware disk size to be used during creation.
