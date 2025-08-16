@@ -29,6 +29,11 @@ func DataSourceSqlDatabaseInstanceLatestRecoveryTime() *schema.Resource {
 				Computed:    true,
 				Description: `Timestamp, identifies the latest recovery time of the source instance.`,
 			},
+			"source_instance_deletion_time": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `Timestamp, identifies when the source instance was deleted. If this instance is deleted, then you must set the timestamp.`,
+			},
 		},
 	}
 }
@@ -47,7 +52,15 @@ func dataSourceSqlDatabaseInstanceLatestRecoveryTimeRead(d *schema.ResourceData,
 	project := fv.Project
 	instance := fv.Name
 
-	latestRecoveryTime, err := config.NewSqlAdminClient(userAgent).Projects.Instances.GetLatestRecoveryTime(project, instance).Do()
+	deletionTime := d.Get("source_instance_deletion_time").(string)
+
+	latestRecoveryTimeCall := config.NewSqlAdminClient(userAgent).Projects.Instances.GetLatestRecoveryTime(project, instance)
+
+	if deletionTime != "" {
+		latestRecoveryTimeCall = latestRecoveryTimeCall.SourceInstanceDeletionTime(deletionTime)
+	}
+
+	latestRecoveryTime, err := latestRecoveryTimeCall.Do()
 	if err != nil {
 		return err
 	}
@@ -59,6 +72,11 @@ func dataSourceSqlDatabaseInstanceLatestRecoveryTimeRead(d *schema.ResourceData,
 	if err := d.Set("latest_recovery_time", latestRecoveryTime.LatestRecoveryTime); err != nil {
 		return fmt.Errorf("Error setting latest_recovery_time: %s", err)
 	}
+
+	if err := d.Set("source_instance_deletion_time", deletionTime); err != nil {
+		return fmt.Errorf("Error setting source_instance_deletion_time: %s", err)
+	}
+
 	d.SetId(fmt.Sprintf("projects/%s/instance/%s", project, instance))
 	return nil
 }
