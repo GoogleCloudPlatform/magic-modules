@@ -1,10 +1,14 @@
 package redis_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
+	redis "cloud.google.com/go/redis/apiv1"
+	redispb "cloud.google.com/go/redis/apiv1/redispb"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 )
@@ -406,4 +410,109 @@ resource "google_redis_instance" "test" {
   redis_version = "REDIS_4_0"
 }
 `, name)
+}
+
+func TestAccRedisInstance_tags(t *testing.T) {
+	t.Parallel()
+
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "redis-instances-tagkey", map[string]interface{}{})
+	tagValue := acctest.BootstrapSharedTestOrganizationTagValue(t, "redis-instances-tagvalue", tagKey)
+
+	testContext := map[string]interface{}{
+		"org":           envvar.GetTestOrgFromEnv(t),
+		"tagKey":        tagKey,
+		"tagValue":      tagValue,
+		"random_suffix": acctest.RandString(t, 10),
+	}
+	resourceName := "google_redis_instance.test"
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckRedisInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccRedisInstanceTags(testContext),
+				Check: resource.ComposeTestCheckFunc(
+					checkRedisInstanceTags(resourceName, testContext),
+				),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"tags"},
+			},
+		},
+	})
+}
+
+func testAccRedisInstanceTags(testContext map[string]interface{}) string {
+	return acctest.Nprintf(`
+	resource "google_redis_instance" "test" {
+	  name = "tf-test-instance-%{random_suffix}"
+	  memory_size_gb = 5
+	  tags = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, testContext)
+}
+
+// This function gets the instance via the Redis API and inspects its tags.
+func checkRedisInstanceTags(resourceName string, testContext map[string]interface{}) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Resource not found: %s", resourceName)
+		}
+
+		// Get resource attributes from state
+		project := rs.Primary.Attributes["project"]
+		location := rs.Primary.Attributes["region"]
+		instanceName := rs.Primary.Attributes["name"]
+
+		// Construct the expected full tag key
+		expectedTagKey := fmt.Sprintf("%s/%s", testContext["org"], testContext["tagKey"])
+		expectedTagValue := fmt.Sprintf("%s", testContext["tagValue"])
+
+		// This `ctx` variable is now a `context.Context` object
+		ctx := context.Background()
+
+		// Create a Redis client
+		redisClient, err := redis.NewCloudRedisClient(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to create redis client: %v", err)
+		}
+		defer redisClient.Close()
+
+		// Construct the request to get the instance details
+		req := &redispb.GetInstanceRequest{
+			Name: fmt.Sprintf("projects/%s/locations/%s/instances/%s", project, location, instanceName),
+		}
+
+		// Get the Redis instance
+		instance, err := redisClient.GetInstance(ctx, req)
+		if err != nil {
+			return fmt.Errorf("failed to get redis instance '%s': %v", req.Name, err)
+		}
+
+		// Check the instance's labels for the expected tag
+		// In the Redis API, tags are represented as labels.
+		labels := instance.GetLabels()
+		if labels == nil {
+			return fmt.Errorf("expected labels not found on instance '%s'", req.Name)
+		}
+
+		if actualValue, ok := labels[expectedTagKey]; ok {
+			if actualValue == expectedTagValue {
+				// The tag was found with the correct value. Success!
+				return nil
+			}
+			return fmt.Errorf("tag key '%s' found with incorrect value. Expected: %s, Got: %s", expectedTagKey, expectedTagValue, actualValue)
+		}
+
+		// If we reach here, the tag key was not found.
+		return fmt.Errorf("expected tag key '%s' not found on instance '%s'", expectedTagKey, req.Name)
+	}
 }
