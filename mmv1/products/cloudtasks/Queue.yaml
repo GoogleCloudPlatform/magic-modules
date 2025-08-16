@@ -34,6 +34,8 @@ iam_policy:
     - '{{name}}'
 custom_code:
   constants: 'templates/terraform/constants/cloud_tasks_retry_config_custom_diff.go.tmpl'
+  post_create: 'templates/terraform/post_create/cloud_tasks_queue_state.go.tmpl'
+  post_update: 'templates/terraform/post_update/cloud_tasks_queue_state.go.tmpl'
 examples:
   - name: 'queue_basic'
     primary_resource_id: 'default'
@@ -56,6 +58,18 @@ examples:
     primary_resource_id: 'http_target_oauth'
     vars:
       name: 'cloud-tasks-queue-http-target-oauth'
+virtual_fields:
+  - name: 'desired_state'
+    type: Enum
+    description: |
+      The desired state of the queue. Use this to pause and resume the queue.
+
+      * RUNNING: The queue is running. Tasks can be dispatched.
+      * PAUSED: The queue is paused. Tasks are not dispatched but can be added to the queue.
+    default_value: 'RUNNING'
+    enum_values:
+      - 'RUNNING'
+      - 'PAUSED'
 parameters:
   - name: 'location'
     type: String
@@ -207,6 +221,15 @@ properties:
           This field may contain any value between 0.0 and 1.0, inclusive. 0.0 is the
           default and means that no operations are logged.
         required: true
+  - name: 'state'
+    type: Enum
+    description: |
+      The current state of the queue.
+    output: true
+    enum_values:
+      - 'RUNNING'
+      - 'PAUSED'
+      - 'DISABLED'
   - name: 'httpTarget'
     type: NestedObject
     description: Modifies HTTP target for HTTP tasks.
