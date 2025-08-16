@@ -28,6 +28,17 @@ resource "google_redis_cluster" "{{$.PrimaryResourceId}}" {
       }
     }
   }
+  automated_backup_config {
+    retention = "3024000s"  # 35 days
+    fixed_frequency_schedule {
+      start_time {
+        hours = 20  # UTC
+      }
+    }
+  }
+  gcs_source {
+    uris = ["gs://bucket/dump1.rdb", "gs://bucket/dump2.rdb"]
+  }
   depends_on = [
     google_network_connectivity_service_connection_policy.default
   ]
