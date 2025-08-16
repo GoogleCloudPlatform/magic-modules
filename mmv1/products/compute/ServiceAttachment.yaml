@@ -95,6 +95,17 @@ examples:
       producer_forwarding_rule_name: 'producer-forwarding-rule'
       consumer_address_name: 'psc-ilb-consumer-address'
       consumer_forwarding_rule_name: 'psc-ilb-consumer-forwarding-rule'
+  - name: 'service_attachment_tunneling_config'
+    primary_resource_id: 'psc_ilb_service_attachment'
+    min_version: beta
+    vars:
+      service_attachment_name: 'my-psc-ilb'
+      network_name: 'psc-ilb-network'
+      nat_subnetwork_name: 'psc-ilb-nat'
+      producer_subnetwork_name: 'psc-ilb-producer-subnetwork'
+      producer_health_check_name: 'producer-service-health-check'
+      producer_service_name: 'producer-service'
+      producer_forwarding_rule_name: 'producer-forwarding-rule'
   - name: 'service_attachment_cross_region_ilb'
     primary_resource_id: 'psc_ilb_service_attachment'
     vars:
@@ -133,6 +144,22 @@ properties:
       Fingerprint of this resource. This field is used internally during
       updates of this resource.
     output: true
+  - name: 'pscServiceAttachmentId'
+    type: NestedObject
+    description: |
+      An 128-bit global unique ID of the PSC service attachment.
+    output: true
+    properties:
+      - name: 'high'
+        type: String
+        description: |
+          The high 64 bits of the PSC service attachment ID.
+        output: true
+      - name: 'low'
+        type: String
+        description: |
+          The low 64 bits of the PSC service attachment ID.
+        output: true
   - name: 'connectionPreference'
     type: String
     description: |
@@ -213,6 +240,21 @@ properties:
     immutable: true
     item_type:
       type: String
+  - name: 'tunnelingConfig'
+    type: NestedObject
+    description: |
+      Tunneling configuration for this service attachment.
+    min_version: beta
+    ignore_read: true
+    properties:
+      - name: 'routingMode'
+        type: String
+        description: |
+          The routing mode for tunneling traffic.
+      - name: 'encapsulationProfile'
+        type: String
+        description: |
+          The encapsulation profile for tunneling traffic.
   - name: 'consumerRejectLists'
     type: Array
     description: |
