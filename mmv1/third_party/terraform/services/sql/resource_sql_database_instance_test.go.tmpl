@@ -5989,6 +5989,11 @@ resource "google_sql_database_instance" "source" {
             enabled = true
         }
     }
+	lifecycle {
+		ignore_changes = [
+		  settings[0].backup_configuration[0].enabled,
+		]
+ 	}
     deletion_protection = false
 }
 
@@ -6031,6 +6036,11 @@ resource "google_sql_database_instance" "instance" {
 
   backupdr_backup 		= data.google_backup_dr_backup.sql_backups.backups[0].name
 
+  lifecycle {
+	ignore_changes = [
+	  settings[0].backup_configuration[0].enabled,
+	]
+  }
   deletion_protection 	= false
 }
 `, context)
