@@ -6024,6 +6024,9 @@ resource "google_sql_database_instance" "instance" {
 
   settings {
     tier = "db-g1-small"
+	backup_configuration {
+    	enabled = true
+    }
   }
 
   backupdr_backup 		= data.google_backup_dr_backup.sql_backups.backups[0].name
