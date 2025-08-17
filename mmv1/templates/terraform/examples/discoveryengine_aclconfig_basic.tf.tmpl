@@ -1,0 +1,9 @@
+resource "google_discovery_engine_acl_config" "basic" {
+  location = "global"
+  idp_config {
+    idp_type = "THIRD_PARTY"
+    external_idp_config {
+      workforce_pool_name = "locations/global/workforcePools/cloud-console-pool-manual"
+    }
+  }
+}
