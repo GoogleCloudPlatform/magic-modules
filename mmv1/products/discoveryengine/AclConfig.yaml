@@ -57,7 +57,7 @@ properties:
         type: Enum
         description: |
           Identity provider type.
-        enum_values: 
+        enum_values:
           - 'GSUITE'
           - 'THIRD_PARTY'
       - name: 'externalIdpConfig'
