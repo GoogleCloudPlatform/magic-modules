@@ -27,8 +27,8 @@ exclude_delete: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/aclConfig'
 timeouts:
-  insert_minutes: 60
-  update_minutes: 60
+  insert_minutes: 5
+  update_minutes: 5
 examples:
   - name: 'discoveryengine_aclconfig_basic'
     primary_resource_id: 'basic'
