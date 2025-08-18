@@ -45,6 +45,9 @@ resource "google_lustre_instance" "instance" {
   network                     = data.google_compute_network.lustre-network.id
   gke_support_enabled         = false
   per_unit_storage_throughput = 1000   
+  timeouts {
+	create = "60m"
+  }
 }
 
 // This example assumes this network already exists.

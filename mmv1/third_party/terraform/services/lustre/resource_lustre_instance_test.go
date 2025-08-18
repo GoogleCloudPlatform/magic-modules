@@ -62,7 +62,7 @@ resource "google_lustre_instance" "instance" {
   capacity_gib                = 18000
   per_unit_storage_throughput = 1000
   timeouts {
-	create = "120m"
+	create = "60m"
   }
 }
 
@@ -94,7 +94,7 @@ resource "google_lustre_instance" "instance" {
     test = "test-label"
   }
   timeouts {
-	create = "120m"
+	create = "60m"
   }
 }
 
