@@ -2091,7 +2091,6 @@ func (r *Resource) ShouldGenerateSingularDataSourceTests() bool {
 	if r.Datasource == nil {
 		return false
 	}
-
 	return r.Datasource.GenerateTests
 }
 

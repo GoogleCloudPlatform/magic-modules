@@ -57,7 +57,7 @@ func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 	{{- end }}
 	{{- if not $.Res.ExcludeDelete }}
 		CheckDestroy: testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t),
-	{{- end }}
+{{- end }}
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}DataSource(context),
@@ -80,7 +80,9 @@ func testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}DataSource(co
 	return fmt.Sprintf(`%s
 
 		data "{{ $.Res.TerraformName }}" "default" {
-		name = {{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}.name
+		{{- range $fieldName := $.Res.DatasourceRequiredFields }}
+		{{ $fieldName }} = {{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}.{{ $fieldName }}
+		{{- end }}
 		}`,
 		testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
 	)

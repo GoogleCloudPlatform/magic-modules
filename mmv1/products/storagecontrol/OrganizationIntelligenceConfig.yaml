@@ -51,6 +51,7 @@ autogen_async: false
 
 datasource:
   generate: true
+  generate_tests: false
 
 examples:
   - name: storage_control_organization_intelligence_config_basic

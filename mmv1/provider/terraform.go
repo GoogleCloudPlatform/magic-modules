@@ -214,7 +214,7 @@ func (t *Terraform) GenerateSingularDataSourceTests(object api.Resource, templat
 	if err := os.MkdirAll(targetFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating parent directory %v: %v", targetFolder, err))
 	}
-	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s_generated_test.go", t.ResourceGoFilename(object)))
+	targetFilePath := path.Join(targetFolder, fmt.Sprintf("data_source_%s_test.go", t.ResourceGoFilename(object)))
 	templateData.GenerateDataSourceTestFile(targetFilePath, object)
 
 }
