@@ -101,6 +101,13 @@ func ProjectNumberDiffSuppress(_, old, new string, _ *schema.ResourceData) bool 
 	return a2 == b2
 }
 
+func SuppressRoutingModeDefault(_, old, new string, _ *schema.ResourceData) bool {
+	if old == new {
+		return true
+	}
+	return (old == "" && new == "EXPLICIT_ROUTING_MODE") ||
+		(old == "EXPLICIT_ROUTING_MODE" && new == "")
+}
 // Suppress diffs when the value read from api
 // has the project ID instead of the project number
 func ProjectIDDiffSuppress(_, old, new string, _ *schema.ResourceData) bool {
