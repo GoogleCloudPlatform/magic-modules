@@ -49,7 +49,6 @@ custom_code:
   constants: 'templates/terraform/constants/network_services_gateway.go.tmpl'
   post_delete: 'templates/terraform/post_delete/network_services_gateway.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/network_services_gateway.go.tmpl'
-  extra_schema_entry: 'templates/terraform/extra_schema_entry/network_services_gateway.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-east1"
@@ -226,3 +225,11 @@ properties:
     enum_values:
       - 'NONE'
       - 'DEBUG_HEADERS'
+  - name: 'routingMode'
+    type: Enum
+    diff_suppress_func: 'tpgresource.SuppressRoutingModeDefault'
+    description: |
+      The routing mode of the Gateway. This field is configurable only for gateways of type SECURE_WEB_GATEWAY. This field is required for gateways of type SECURE_WEB_GATEWAY.
+    enum_values:
+      - 'NEXT_HOP_ROUTING_MODE'
+      - 'EXPLICIT_ROUTING_MODE'
