@@ -79,6 +79,14 @@ The following data sources are missing documents:
 
 {{- end }}
 
+{{- if .MissingAPIs }}
+## Missing APIs in test terraform file
+The following APIs are not enabled in .ci/infra/terraform/main.tf and may cause test failure:
+{{ range $inx, $item := .MissingAPIs }}
+- `{{ $item }}`
+{{- end }}
+{{- end }}
+
 {{- $errorsLength := len .Errors}}
 {{- if gt $errorsLength 0}}
 ## Errors
