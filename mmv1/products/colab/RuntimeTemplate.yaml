@@ -209,21 +209,3 @@ properties:
                             If a variable cannot be resolved, the reference in the input string will be unchanged.
                             The $(VAR_NAME) syntax can be escaped with a double $$, ie: $$(VAR_NAME). Escaped
                             references will never be expanded, regardless of whether the variable exists or not.'
-      - name: 'postStartupScriptConfig'
-        deprecation_message: '`post_startup_script_config` is deprecated and will be removed in a future major release. New resource creation with this field is unavailable at this time.'
-        type: NestedObject
-        description: 'Post startup script config.'
-        properties:
-          - name: 'postStartupScript'
-            type: String
-            description: 'Post startup script to run after runtime is started.'
-          - name: 'postStartupScriptUrl'
-            type: String
-            description: 'Post startup script url to download. Example: https://bucket/script.sh.'
-          - name: 'postStartupScriptBehavior'
-            type: Enum
-            description: 'Post startup script behavior that defines download and execution behavior.'
-            enum_values:
-              - 'RUN_ONCE'
-              - 'RUN_EVERY_START'
-              - 'DOWNLOAD_AND_RUN_EVERY_START'
