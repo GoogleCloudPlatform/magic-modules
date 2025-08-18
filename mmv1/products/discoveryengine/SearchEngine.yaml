@@ -155,5 +155,6 @@ properties:
   - name: 'appType'
     type: Enum
     description: This is the application type this engine resource represents.
+    immutable: true
     enum_values:
       - 'APP_TYPE_INTRANET'
