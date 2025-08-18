@@ -135,7 +135,6 @@ properties:
         - name: 'name'
           type: String
           output: true
-          # required: true
           description: |
             The name of the sub public delgated prefix.
         - name: 'description'
