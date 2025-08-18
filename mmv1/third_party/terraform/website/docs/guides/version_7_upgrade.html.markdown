@@ -92,6 +92,10 @@ terraform {
 
 Description of the change and how users should adjust their configuration (if needed).
 
+### Resource import formats have improved validation
+
+Throughout the provider there were many resources which erroneously gave false positives to poorly formatted import input if a subset of the provided input was valid to their configured import formats. All GCP resource IDs supplied to "terraform import" must match the documentation specified import formats exactly.
+
 ## Datasources
 
 ## Datasource: `google_product_datasource`
@@ -100,7 +104,19 @@ Description of the change and how users should adjust their configuration (if ne
 
 Description of the change and how users should adjust their configuration (if needed).
 
+## Datasource: `google_service_account_key`
+
+### `project` is now removed
+
+`project` has been removed. It can be safely removed from your configuration.
+
 ## Resources
+
+
+## Resource: `google_beyondcorp_application` is now removed
+
+`google_beyondcorp_application`, the associated IAM resources `google_beyondcorp_application_iam_binding`, `google_beyondcorp_application_iam_member`, and `google_beyondcorp_application_iam_policy`, and the `google_beyondcorp_application_iam_policy` datasource have been removed. 
+Use `google_beyondcorp_security_gateway_application` instead.
 
 ## Resource: `google_artifact_registry_repository`
 
