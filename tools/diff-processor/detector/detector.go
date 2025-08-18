@@ -2,14 +2,19 @@ package detector
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
+	"google/provider/new/google/transport"
+
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/diff"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/diff-processor/documentparser"
 	"github.com/GoogleCloudPlatform/magic-modules/tools/test-reader/reader"
+	"github.com/hashicorp/hcl/v2"
+	"github.com/hashicorp/hcl/v2/hclsimple"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/zclconf/go-cty/cty"
@@ -42,6 +47,21 @@ type MissingDocDetails struct {
 	Name     string
 	FilePath string
 	Fields   []string
+}
+
+type TFFile struct {
+	M      *Module  `hcl:"module,block"`
+	Remain hcl.Body `hcl:",remain"`
+}
+
+type Module struct {
+	Name       string   `hcl:"name,label"`
+	ActiveAPIs []string `hcl:"activate_apis"`
+	Remain     hcl.Body `hcl:",remain"`
+}
+
+var skipAPIs = map[string]bool{
+	"www.googleapis.com": true,
 }
 
 // Detect missing tests for the given resource changes map in the given slice of tests.
@@ -217,6 +237,68 @@ func DetectMissingDocs(schemaDiff diff.SchemaDiff, repoPath string) (map[string]
 		}
 	}
 	return ret, nil
+}
+
+func DetectMissingAPIs(schemaDiff diff.SchemaDiff, fileName string) ([]string, error) {
+	hasNewResource := false
+	for _, resourceDiff := range schemaDiff {
+		if resourceDiff.IsNewResource() {
+			hasNewResource = true
+			break
+		}
+	}
+	if !hasNewResource {
+		return nil, nil
+	}
+
+	if filepath.Ext(fileName) != ".hcl" {
+		sourceFile, err := os.Open(fileName)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open source file %s: %w", fileName, err)
+		}
+		defer sourceFile.Close() // Ensure source file is closed
+
+		tmpFile, err := os.Create(filepath.Join(os.TempDir(), filepath.Base(fileName)+".hcl"))
+		if err != nil {
+			return nil, err
+		}
+		defer os.Remove(tmpFile.Name())
+
+		_, err = io.Copy(tmpFile, sourceFile)
+		if err != nil {
+			return nil, fmt.Errorf("failed to copy file contents: %w", err)
+		}
+		fileName = tmpFile.Name()
+	}
+	var config TFFile
+	err := hclsimple.DecodeFile(fileName, nil, &config)
+	if err != nil {
+		return nil, err
+	}
+	enabledAPIs := make(map[string]struct{})
+	for _, v := range config.M.ActiveAPIs {
+		enabledAPIs[v] = struct{}{}
+	}
+
+	var missingAPIs []string
+	for _, v := range transport.DefaultBasePaths {
+		s := strings.Split(strings.TrimPrefix(v, "https://"), "/")[0]
+		prefix := []string{"{{location}}-", "{{region}}-"}
+		for _, p := range prefix {
+			s = strings.TrimPrefix(s, p)
+		}
+		if strings.Contains(s, "{{location}}") {
+			continue
+		}
+		if skipAPIs[s] {
+			continue
+		}
+		if _, ok := enabledAPIs[s]; !ok {
+			missingAPIs = append(missingAPIs, s)
+		}
+	}
+	sort.Strings(missingAPIs)
+	return missingAPIs, nil
 }
 
 // DetectMissingDocsForDatasource detect new fields that are missing docs given the schema diffs.
