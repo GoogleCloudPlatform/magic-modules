@@ -61,3 +61,18 @@ func MergeFlattenedProperties(hclData map[string]interface{}, flattenedProp inte
 	}
 	return nil
 }
+
+// Checks if all values in the map are nil
+func AllValuesAreNil(m map[string]interface{}) bool {
+	if len(m) == 0 {
+		return true
+	}
+
+	for _, v := range m {
+		if v != nil {
+			return false
+		}
+	}
+
+	return true
+}
