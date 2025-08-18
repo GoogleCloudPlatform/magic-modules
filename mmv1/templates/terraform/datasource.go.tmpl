@@ -68,7 +68,7 @@ func DataSource{{ .ResourceName -}}() *schema.Resource {
 		Read:   dataSource{{ $.ResourceName -}}Read,
 		Schema: dsSchema,
 	}
-} 
+}
 
 func dataSource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
   config := meta.(*transport_tpg.Config)
