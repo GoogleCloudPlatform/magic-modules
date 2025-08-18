@@ -198,3 +198,19 @@ properties:
     type: Boolean
     description: 'Output only. By default, false. If true, the Subscriber agreed to the email sharing mandate that is enabled for Listing.'
     output: true
+  - name: 'commercialInfo'
+    type: NestedObject
+    description: |
+      Commercial info metadata for this subscription. This is set if this is a commercial subscription i.e. if this subscription was created from subscribing to a commercial listing.
+    output: true
+    properties:
+      - name: 'cloudMarketplace'
+        type: NestedObject
+        description: Cloud Marketplace commercial metadata for this subscription.
+        output: true
+        properties:
+          - name: 'order'
+            type: String
+            description: |
+              Resource name of the Marketplace Order.
+            output: true

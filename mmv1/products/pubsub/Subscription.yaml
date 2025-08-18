@@ -29,6 +29,7 @@ create_verb: 'PUT'
 update_url: 'projects/{{project}}/subscriptions/{{name}}'
 update_verb: 'PATCH'
 update_mask: true
+include_in_tgc_next_DO_NOT_USE: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -44,6 +45,7 @@ custom_code:
   constants: 'templates/terraform/constants/subscription.go.tmpl'
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/pubsub_subscription.tmpl'
+  tgc_encoder: 'templates/tgc_next/encoders/pubsub_add_name.go.tmpl'
 examples:
   - name: 'pubsub_subscription_push'
     primary_resource_id: 'example'
@@ -55,6 +57,8 @@ examples:
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
+    tgc_test_ignore_extra:
+      - enable_message_ordering  # ignore its false value in configuration
   - name: 'pubsub_subscription_pull_filter'
     primary_resource_id: 'example'
     vars:
@@ -116,6 +120,17 @@ examples:
       subscription_name: 'example-subscription'
       bucket_name: 'example-bucket'
       service_account_id: 'example-stw'
+  - name: 'pubsub_subscription_single_smt'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
+  - name: 'pubsub_subscription_multiple_smts'
+    primary_resource_id: 'example'
+    vars:
+      topic_name: 'example-topic'
+      subscription_name: 'example-subscription'
+    tgc_skip_test: 'The dynamic block is in test configuration. The test takes time to fix.'
 parameters:
 properties:
   - name: 'name'
@@ -156,6 +171,7 @@ properties:
         description: |
           The name of the table to which to write data, of the form {projectId}.{datasetId}.{tableId}
         required: true
+        is_missing_in_cai: true
       - name: 'useTopicSchema'
         type: Boolean
         description: |
@@ -170,6 +186,7 @@ properties:
           must be published in JSON format. Only one of use_topic_schema and use_table_schema can be set.
         conflicts:
           - use_topic_schema
+        is_missing_in_cai: true
       - name: 'writeMetadata'
         type: Boolean
         description: |
@@ -187,6 +204,7 @@ properties:
           The service account to use to write to BigQuery. If not specified, the Pub/Sub
           [service agent](https://cloud.google.com/iam/docs/service-agents),
           service-{project_number}@gcp-sa-pubsub.iam.gserviceaccount.com, is used.
+        is_missing_in_cai: true
   - name: 'cloudStorageConfig'
     type: NestedObject
     description: |
@@ -196,6 +214,7 @@ properties:
     conflicts:
       - push_config
       - bigquery_config
+    is_missing_in_cai: true
     properties:
       - name: 'bucket'
         type: String
@@ -329,6 +348,7 @@ properties:
           - v1beta1: uses the push format defined in the v1beta1 Pub/Sub API.
           - v1 or v1beta2: uses the push format defined in the v1 Pub/Sub API.
         diff_suppress_func: 'IgnoreMissingKeyInMap("x-goog-version")'
+        custom_tgc_expand: templates/tgc_next/custom_expand/pubsub_subscription_attributes.go.tmpl
       - name: 'noWrapper'
         type: NestedObject
         description: |

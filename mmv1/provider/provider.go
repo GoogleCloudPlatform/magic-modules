@@ -24,7 +24,7 @@ const RESOURCE_DIRECTORY_BETA = "google-beta"
 const RESOURCE_DIRECTORY_PRIVATE = "google-private"
 const RESOURCE_DIRECTORY_TGC = "pkg"
 
-// # TODO(nelsonjr): Review all object interfaces and move to private methods
+// # TODO: Review all object interfaces and move to private methods
 // # that should not be exposed outside the object hierarchy.
 func ProviderName(t Provider) string {
 	return reflect.TypeOf(t).Name()

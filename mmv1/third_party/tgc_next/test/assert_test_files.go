@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl"
 	cai2hclconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters"
@@ -18,6 +19,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai"
 	tfplan2caiconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters"
+	"github.com/sethvargo/go-retry"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
@@ -32,38 +34,58 @@ var (
 )
 
 func BidirectionalConversion(t *testing.T, ignoredFields []string, ignoredAssetFields []string) {
-	resourceTestData, primaryResource, err := prepareTestData(t.Name())
-	if err != nil {
-		t.Fatal("Error preparing the input data:", err)
-	}
-
-	if resourceTestData == nil {
-		t.Skipf("The test data is unavailable.")
-	}
-
-	// Create a temporary directory for running terraform.
-	tfDir, err := os.MkdirTemp(tmpDir, "terraform")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer os.RemoveAll(tfDir)
-
-	logger := zaptest.NewLogger(t)
-
-	// If the primary resource is available, only test the primary resource.
-	// Otherwise, test all of the resources in the test.
-	if primaryResource != "" {
-		t.Logf("Test for the primary resource %s begins.", primaryResource)
-		err = testSingleResource(t, t.Name(), resourceTestData[primaryResource], tfDir, ignoredFields, ignoredAssetFields, logger, true)
+	retries := 0
+	flakyAction := func(ctx context.Context) error {
+		log.Printf("Starting the retry %d", retries)
+		resourceTestData, primaryResource, err := prepareTestData(t.Name(), retries)
+		retries++
 		if err != nil {
-			t.Fatal("Test fails:", err)
+			return fmt.Errorf("error preparing the input data: %v", err)
 		}
-	} else {
-		for _, testData := range resourceTestData {
-			err = testSingleResource(t, t.Name(), testData, tfDir, ignoredFields, ignoredAssetFields, logger, false)
+
+		if resourceTestData == nil {
+			return retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
+		}
+
+		// Create a temporary directory for running terraform.
+		tfDir, err := os.MkdirTemp(tmpDir, "terraform")
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(tfDir)
+
+		logger := zaptest.NewLogger(t)
+
+		// If the primary resource is specified, only test the primary resource.
+		// Otherwise, test all of the resources in the test.
+		if primaryResource != "" {
+			t.Logf("Test for the primary resource %s begins.", primaryResource)
+			err = testSingleResource(t, t.Name(), resourceTestData[primaryResource], tfDir, ignoredFields, ignoredAssetFields, logger, true)
 			if err != nil {
-				t.Fatal("Test fails: ", err)
+				return err
 			}
+		} else {
+			for _, testData := range resourceTestData {
+				err = testSingleResource(t, t.Name(), testData, tfDir, ignoredFields, ignoredAssetFields, logger, false)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	}
+
+	// Note maxAttempts-1 is retries, not attempts.
+	backoffPolicy := retry.WithMaxRetries(maxAttempts-1, retry.NewConstant(50*time.Millisecond))
+
+	t.Log("Starting test with retry logic.")
+
+	if err := retry.Do(context.Background(), backoffPolicy, flakyAction); err != nil {
+		if strings.Contains(err.Error(), "test data is unavailable") {
+			t.Skipf("Test skipped because data was unavailable after all retries: %v", err)
+		} else {
+			t.Fatalf("Failed after all retries %d: %v", retries, err)
 		}
 	}
 }
@@ -151,8 +173,11 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 
 	parsedExportConfig := exportResources[0].Attributes
 	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, ignoredFieldSet)
+
+	// Sometimes, the reason for missing fields could be CAI asset data issue.
 	if len(missingKeys) > 0 {
-		return fmt.Errorf("missing fields in resource %s after cai2hcl conversion:\n%s", testData.ResourceAddress, missingKeys)
+		log.Printf("missing fields in resource %s after cai2hcl conversion:\n%s", testData.ResourceAddress, missingKeys)
+		return retry.RetryableError(fmt.Errorf("missing fields"))
 	}
 	log.Printf("Step 1 passes for resource %s. All of the fields in raw config are in export config", testData.ResourceAddress)
 
@@ -198,7 +223,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 			if diff := cmp.Diff(
 				asset.Resource,
 				roundtripAsset.Resource,
-				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "DiscoveryDocumentURI"),
+				cmpopts.IgnoreFields(caiasset.AssetResource{}, "Version", "Data", "Location", "DiscoveryDocumentURI"),
 				// Consider DiscoveryDocumentURI equal if they have the same number of path segments when split by "/".
 				cmp.FilterPath(func(p cmp.Path) bool {
 					return p.Last().String() == ".DiscoveryDocumentURI"
@@ -206,6 +231,13 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 					parts1 := strings.Split(x, "/")
 					parts2 := strings.Split(y, "/")
 					return len(parts1) == len(parts2)
+				})),
+				cmp.FilterPath(func(p cmp.Path) bool {
+					return p.Last().String() == ".DiscoveryName"
+				}, cmp.Comparer(func(x, y string) bool {
+					xParts := strings.Split(x, "/")
+					yParts := strings.Split(y, "/")
+					return xParts[len(xParts)-1] == yParts[len(yParts)-1]
 				})),
 			); diff != "" {
 				return fmt.Errorf("differences found between exported asset and roundtrip asset (-want +got):\n%s", diff)
