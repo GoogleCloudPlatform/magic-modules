@@ -138,6 +138,8 @@ examples:
     primary_resource_id: 'developer-connect-trigger-pull'
   - name: 'cloudbuild_trigger_developer_connect_push'
     primary_resource_id: 'developer-connect-trigger-push'
+  - name: 'cloudbuild_trigger_developer_connect_push_branch'
+    primary_resource_id: 'developer-connect-trigger-push'
 parameters:
   - name: 'location'
     type: String
