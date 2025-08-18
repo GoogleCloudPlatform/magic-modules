@@ -46,7 +46,7 @@ resource "google_lustre_instance" "instance" {
   gke_support_enabled         = false
   per_unit_storage_throughput = 1000   
   timeouts {
-	create = "60m"
+	create = "120m"
   }
 }
 
