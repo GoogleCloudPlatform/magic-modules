@@ -1,0 +1,4 @@
+resource "google_backup_dr_service_config" "bpa1" { 
+  location = "us-central1" 
+  resource_type= "compute.googleapis.com/Instance"
+}

@@ -77,6 +77,8 @@ type recordReplay struct {
 	Version                       string
 	Head                          string
 	BuildID                       string
+	LogBaseUrl                    string
+	BrowseLogBaseUrl              string
 }
 
 var testTerraformVCRCmd = &cobra.Command{
@@ -235,12 +237,13 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 
 	notRunBeta, notRunGa := notRunTests(tpgRepo.UnifiedZeroDiff, tpgbRepo.UnifiedZeroDiff, replayingResult)
+
 	postReplayData := postReplay{
 		RunFullVCR:       runFullVCR,
 		AffectedServices: sort.StringSlice(servicesArr),
 		NotRunBetaTests:  notRunBeta,
 		NotRunGATests:    notRunGa,
-		ReplayingResult:  replayingResult,
+		ReplayingResult:  subtestResult(replayingResult),
 		ReplayingErr:     replayingErr,
 		LogBucket:        "ci-vcr-logs",
 		Version:          provider.Beta.String(),
@@ -318,8 +321,8 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 		allRecordingPassed := len(recordingResult.FailedTests) == 0 && !hasTerminatedTests && recordingErr == nil
 
 		recordReplayData := recordReplay{
-			RecordingResult:               recordingResult,
-			ReplayingAfterRecordingResult: replayingAfterRecordingResult,
+			RecordingResult:               subtestResult(recordingResult),
+			ReplayingAfterRecordingResult: subtestResult(replayingAfterRecordingResult),
 			RecordingErr:                  recordingErr,
 			HasTerminatedTests:            hasTerminatedTests,
 			AllRecordingPassed:            allRecordingPassed,
@@ -384,6 +387,43 @@ func notRunTests(gaDiff, betaDiff string, result vcr.Result) ([]string, []string
 	sort.Strings(notRunBeta)
 	sort.Strings(notRunGa)
 	return notRunBeta, notRunGa
+}
+
+func subtestResult(original vcr.Result) vcr.Result {
+	return vcr.Result{
+		PassedTests:  excludeCompoundTests(original.PassedTests, original.PassedSubtests),
+		FailedTests:  excludeCompoundTests(original.FailedTests, original.FailedSubtests),
+		SkippedTests: excludeCompoundTests(original.SkippedTests, original.SkippedSubtests),
+		Panics:       original.Panics,
+	}
+}
+
+// Returns the name of the compound test that the given subtest belongs to.
+func compoundTest(subtest string) string {
+	parts := strings.Split(subtest, "__")
+	if len(parts) != 2 {
+		return subtest
+	}
+	return parts[0]
+}
+
+// Returns subtests and tests that are not compound tests.
+func excludeCompoundTests(allTests, subtests []string) []string {
+	res := make([]string, 0, len(allTests)+len(subtests))
+	compoundTests := make(map[string]struct{}, len(subtests))
+	for _, subtest := range subtests {
+		if compound := compoundTest(subtest); compound != subtest {
+			compoundTests[compound] = struct{}{}
+			res = append(res, subtest)
+		}
+	}
+	for _, test := range allTests {
+		if _, ok := compoundTests[test]; !ok {
+			res = append(res, test)
+		}
+	}
+	sort.Strings(res)
+	return res
 }
 
 func modifiedPackages(changedFiles []string, version provider.Version) (map[string]struct{}, bool) {
@@ -468,9 +508,10 @@ func init() {
 
 func formatComment(fileName string, tmplText string, data any) (string, error) {
 	funcs := template.FuncMap{
-		"join":  strings.Join,
-		"add":   func(i, j int) int { return i + j },
-		"color": color,
+		"join":         strings.Join,
+		"add":          func(i, j int) int { return i + j },
+		"color":        color,
+		"compoundTest": compoundTest,
 	}
 	tmpl, err := template.New(fileName).Funcs(funcs).Parse(tmplText)
 	if err != nil {
@@ -489,5 +530,11 @@ func formatPostReplay(data postReplay) (string, error) {
 }
 
 func formatRecordReplay(data recordReplay) (string, error) {
+	logBasePath := fmt.Sprintf("%s/%s/refs/heads/%s/artifacts/%s", data.LogBucket, data.Version, data.Head, data.BuildID)
+	if data.BuildID == "" {
+		logBasePath = fmt.Sprintf("%s/%s/refs/heads/%s", data.LogBucket, data.Version, data.Head)
+	}
+	data.LogBaseUrl = fmt.Sprintf("https://storage.cloud.google.com/%s", logBasePath)
+	data.BrowseLogBaseUrl = fmt.Sprintf("https://console.cloud.google.com/storage/browser/%s", logBasePath)
 	return formatComment("record_replay.tmpl", recordReplayTmplText, data)
 }
