@@ -128,7 +128,7 @@ properties:
     description: |
       List of sub public delegated fixes for BYO IP functionality.
       Each item in this array represents a sub prefix that can be
-      used to create addresses or further allocations.
+      used to create addresses or further allocations. This is a read-only field.
     item_type:
       type: NestedObject
       properties:
