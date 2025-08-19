@@ -61,6 +61,9 @@ func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}DataSource(context),
+				Check: resource.ComposeTestCheckFunc(
+					acctest.CheckDataSourceStateMatchesResourceState("data.{{ $e.ResourceType $.Res.TerraformName }}.default", "{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}"),
+					),
 			},
 	{{- if not $e.ExcludeImportTest }}
 			{
