@@ -880,34 +880,34 @@ func TestAccNetappStoragePool_ManualQos(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckNetappStoragePoolDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetappVolumeDestroyProducer(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
 		},
 		Steps: []resource.TestStep{
 			{
-				Config: TestAccNetappStoragePool_ManualQosAuto(context),
+				Config: testAccNetappVolume_ManualQosAuto(context),
 			},
 			{
-				ResourceName:            "google_netapp_storage_pool.test_pool",
+				ResourceName:            "google_netapp_volume.test_volume",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
 			{
-				Config: TestAccNetappStoragePool_ManualQosManual(context),
+				Config: testAccNetappVolume_ManualQosManual(context),
 			},
 			{
-				ResourceName:            "google_netapp_storage_pool.test_pool",
+				ResourceName:            "google_netapp_volume.test_volume",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
 		},
 	})
 }
 
-func TestAccNetappStoragePool_ManualQosAuto(context map[string]interface{}) string {
+func testAccNetappVolume_ManualQosAuto(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
@@ -938,7 +938,7 @@ data "google_compute_network" "default" {
 `, context)
 }
 
-func TestAccNetappStoragePool_ManualQosManual(context map[string]interface{}) string {
+func testAccNetappVolume_ManualQosManual(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
