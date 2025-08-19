@@ -1437,6 +1437,76 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_createFromPointInTimeRestore(t *testing.T) {
+	// Sqladmin client
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":   acctest.RandString(t, 10),
+		"project":     envvar.GetTestProjectFromEnv(),
+	}
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_pointInTimeRestore(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "point_in_time_restore_context"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_updateFromPointInTimeRestore(t *testing.T) {
+	// Sqladmin client
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix":    acctest.RandString(t, 10),
+		"project": envvar.GetTestProjectFromEnv(), 
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_beforeBackup(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_pointInTimeRestore(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "point_in_time_restore_context"},
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_basicClone(t *testing.T) {
 	// Sqladmin client
 	acctest.SkipIfVcr(t)
@@ -6400,11 +6470,131 @@ data "google_sql_backup_run" "backup" {
 `, context)
 }
 
+func testAccSqlDatabaseInstance_pointInTimeRestore(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+// Create service account
+resource "google_service_account" "bkdr_sa" {
+    account_id   = "tf-test-bkdr-sa-%{random_suffix}"
+    display_name = "Backup DR Service Account"
+}
+
+// Create a BackupDR vault
+resource "google_backup_dr_backup_vault" "vault" {
+    location ="us-central1"
+    backup_vault_id    = "tf-test-bv-%{random_suffix}"
+    description = "This is a second backup vault built by Terraform."
+    backup_minimum_enforced_retention_duration = "86400s"
+    labels = {
+      foo = "bar1"
+      bar = "baz1"
+    }
+    annotations = {
+      annotations1 = "bar1"
+      annotations2 = "baz1"
+    }
+    force_update = "true"
+    force_delete = "true"
+    allow_missing = "true" 
+}
+
+// Create a backup plan
+resource "google_backup_dr_backup_plan" "plan" {
+  location       = "us-central1"
+  backup_plan_id = "tf-test-bp-test-%{random_suffix}"
+  resource_type  = "sqladmin.googleapis.com/Instance"
+  backup_vault   = google_backup_dr_backup_vault.vault.name
+
+  backup_rules {
+    rule_id                = "rule-1"
+    backup_retention_days  = 1
+
+    standard_schedule {
+      recurrence_type     = "DAILY"
+      hourly_frequency    = 6
+      time_zone           = "UTC"
+
+      backup_window {
+        start_hour_of_day = 0
+        end_hour_of_day   = 23
+      }
+    }
+  }
+}
+
+// Create source SQL instance to backup
+resource "google_sql_database_instance" "source" {
+    name                = "tf-test-source-%{random_suffix}"
+    database_version    = "MYSQL_8_0"
+    region             = "us-central1"
+    project            = "%{project}"
+
+    settings {
+        tier = "db-f1-micro"
+        backup_configuration {
+            enabled = true
+        }
+    }
+    deletion_protection = false
+}
+
+// Associate backup plan with SQL instance
+resource "google_backup_dr_backup_plan_association" "association" { 
+  location = "us-central1" 
+  backup_plan_association_id = "tf-test-bpa-test-%{random_suffix}"
+  resource =   "projects/${google_sql_database_instance.source.project}/instances/${google_sql_database_instance.source.name}"
+  resource_type= "sqladmin.googleapis.com/Instance"
+  backup_plan = google_backup_dr_backup_plan.plan.name
+
+  depends_on = [
+    google_sql_database_instance.source,
+    google_backup_dr_backup_plan.plan
+  ]
+}
+
+// Wait for the first backup to be created
+resource "time_sleep" "wait_5_mins" {
+  depends_on = [google_backup_dr_backup_plan_association.association]
+
+  create_duration = "300s"
+}
+
+data "google_backup_dr_backup" "sql_backups" {
+  project = "%{project}"
+  location      = "us-central1"
+  backup_vault_id = "tf-test-bv-%{random_suffix}"
+  data_source_id = element(split("/", google_backup_dr_backup_plan_association.association.data_source), length(split("/", google_backup_dr_backup_plan_association.association.data_source)) - 1)
+
+  depends_on = [time_sleep.wait_5_mins]
+}
+
+resource "google_sql_database_instance" "instance" {
+  name             = "tf-test-%{random_suffix}"
+  database_version = "POSTGRES_11"
+  region           = "us-central1"
+
+  settings {
+	tier = "db-g1-small"
+	backup_configuration {
+		enabled            = "false"
+	}
+  }
+
+  point_in_time_restore_context {
+    datasource = google_backup_dr_backup_plan_association.association.data_source
+    point_in_time = timeadd(google_backup_dr_backup_plan_association.association.create_time, "300s")
+	target_instance = "%{project}:tf-test-%{random_suffix}-new"
+  }
+
+  deletion_protection = false
+}
+`, context)
+}
+
 func testAccSqlDatabaseInstance_basicClone(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
-  database_version = "POSTGRES_11"
+  database_version = "MYSQL_8_0"
   region           = "us-central1"
 
   clone {
