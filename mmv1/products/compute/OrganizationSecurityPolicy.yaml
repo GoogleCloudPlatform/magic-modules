@@ -104,3 +104,4 @@ properties:
       - 'CLOUD_ARMOR_EDGE'
       - 'CLOUD_ARMOR_INTERNAL_SERVICE'
       - 'CLOUD_ARMOR_NETWORK'
+      - 'FIREWALL'
