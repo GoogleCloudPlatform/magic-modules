@@ -114,6 +114,9 @@ When the write-only variant of a field is used, it means that its value will be 
 This field is meant to replace `sensitive` as it doesn't store the value in state. 
 See [Ephemerality in Resources - Use Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral/write-only) for more information.
 
+If you configure multiple write-only fields of which only one can be set at a time, you must use `conflicts` instead of
+`exactly_one_of` to ensure that the provider can handle the conflict correctly.
+
 Write-only fields are only supported in Terraform v1.11+. Because the provider supports earlier Terraform versions, write only fields must be paired with (mutually exclusive) `sensitive` fields covering the same functionality for compatibility with those older versions.
 This field cannot be used in conjuction with `immutable` or `sensitive`.
 
