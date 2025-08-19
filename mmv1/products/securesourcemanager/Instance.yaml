@@ -95,6 +95,7 @@ examples:
     external_providers: ["time"]
     ignore_read_extra:
       - 'update_time'
+    exclude_doc: true
   - name: 'secure_source_manager_instance_private_psc_backend'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
