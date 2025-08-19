@@ -10,7 +10,6 @@ resource "google_firestore_database" "{{$.PrimaryResourceId}}" {
   app_engine_integration_mode       = "DISABLED"
   point_in_time_recovery_enablement = "POINT_IN_TIME_RECOVERY_ENABLED"
   delete_protection_state           = "{{index $.Vars "delete_protection_state"}}"
-  deletion_policy                   = "DELETE"
   cmek_config {
     kms_key_name                    = google_kms_crypto_key.crypto_key.id
   }

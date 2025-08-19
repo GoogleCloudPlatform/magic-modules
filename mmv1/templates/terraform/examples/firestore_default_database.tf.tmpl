@@ -3,4 +3,6 @@ resource "google_firestore_database" "{{$.PrimaryResourceId}}" {
   name        = "(default)"
   location_id = "nam5"
   type        = "FIRESTORE_NATIVE"
+
+  delete_protection_state = "{{index $.Vars "delete_protection_state"}}"
 }

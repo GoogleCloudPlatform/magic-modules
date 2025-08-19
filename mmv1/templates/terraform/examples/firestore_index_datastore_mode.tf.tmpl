@@ -5,7 +5,6 @@ resource "google_firestore_database" "database" {
   type        = "DATASTORE_MODE"
 
   delete_protection_state = "DELETE_PROTECTION_DISABLED"
-  deletion_policy         = "DELETE"
 }
 
 resource "google_firestore_index" "{{$.PrimaryResourceId}}" {

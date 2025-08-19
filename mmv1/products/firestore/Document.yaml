@@ -48,18 +48,24 @@ examples:
   - name: 'firestore_document_basic'
     primary_resource_id: 'mydoc'
     vars:
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
       document_id: 'my-doc-id'
       project_id: 'project-id'
     test_env_vars:
       org_id: 'ORG_ID'
     external_providers: ["random", "time"]
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
   - name: 'firestore_document_nested_document'
     primary_resource_id: 'mydoc'
     vars:
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
       document_id: 'my-doc-id'
       project_id: 'project-id'
     test_env_vars:
       org_id: 'ORG_ID'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
     external_providers: ["random", "time"]
 parameters:
   - name: 'database'

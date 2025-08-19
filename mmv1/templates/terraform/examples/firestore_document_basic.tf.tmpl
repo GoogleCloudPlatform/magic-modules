@@ -25,6 +25,8 @@ resource "google_firestore_database" "database" {
   location_id = "nam5"
   type        = "FIRESTORE_NATIVE"
 
+  delete_protection_state  = "{{index $.Vars "delete_protection_state"}}"
+
   depends_on = [google_project_service.firestore]
 }
 

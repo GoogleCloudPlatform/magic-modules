@@ -2,9 +2,10 @@ package firestore_test
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
@@ -122,6 +123,7 @@ resource "google_firestore_database" "database" {
   type             = "DATASTORE_MODE"
   location_id      = "nam5"
   concurrency_mode = "%s"
+  delete_protection_state = "DELETE_PROTECTION_DISABLED"
 }
 `, projectId, randomSuffix, concurrencyMode)
 }
@@ -134,6 +136,7 @@ resource "google_firestore_database" "database" {
   type                              = "DATASTORE_MODE"
   location_id                       = "nam5"
   point_in_time_recovery_enablement = "%s"
+  delete_protection_state = "DELETE_PROTECTION_DISABLED"
 }
 `, projectId, randomSuffix, pointInTimeRecoveryEnablement)
 }

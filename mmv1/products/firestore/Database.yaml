@@ -52,12 +52,13 @@ custom_code:
 examples:
   - name: 'firestore_default_database'
     primary_resource_id: 'database'
+    vars:
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
     test_env_vars:
       project_id: 'PROJECT_NAME'
     ignore_read_extra:
       - 'project'
       - 'etag'
-      - 'deletion_policy'
     exclude_test: true
   - name: 'firestore_database'
     primary_resource_id: 'database'
@@ -71,7 +72,6 @@ examples:
     ignore_read_extra:
       - 'project'
       - 'etag'
-      - 'deletion_policy'
   - name: 'firestore_database_with_tags'
     primary_resource_id: 'database'
     vars:
@@ -86,7 +86,6 @@ examples:
     ignore_read_extra:
       - 'project'
       - 'etag'
-      - 'deletion_policy'
     exclude_test: true
   - name: 'firestore_cmek_database'
     primary_resource_id: 'database'
@@ -102,15 +101,15 @@ examples:
     ignore_read_extra:
       - 'project'
       - 'etag'
-      - 'deletion_policy'
   - name: 'firestore_default_database_in_datastore_mode'
     primary_resource_id: 'datastore_mode_database'
+    vars:
+      delete_protection_state: 'DELETE_PROTECTION_ENABLED'
     test_env_vars:
       project_id: 'PROJECT_NAME'
     ignore_read_extra:
       - 'project'
       - 'etag'
-      - 'deletion_policy'
     exclude_test: true
   - name: 'firestore_database_in_datastore_mode'
     primary_resource_id: 'datastore_mode_database'
@@ -124,7 +123,6 @@ examples:
     ignore_read_extra:
       - 'project'
       - 'etag'
-      - 'deletion_policy'
   - name: 'firestore_cmek_database_in_datastore_mode'
     primary_resource_id: 'database'
     vars:
@@ -139,7 +137,6 @@ examples:
     ignore_read_extra:
       - 'project'
       - 'etag'
-      - 'deletion_policy'
   - name: 'firestore_database_enterprise'
     primary_resource_id: 'enterprise-db'
     vars:
@@ -147,23 +144,11 @@ examples:
       delete_protection_state: 'DELETE_PROTECTION_ENABLED'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+    test_vars_overrides:
+      'delete_protection_state': '"DELETE_PROTECTION_DISABLED"'
     ignore_read_extra:
       - 'project'
       - 'etag'
-      - 'deletion_policy'
-virtual_fields:
-  - name: 'deletion_policy'
-    description: |
-      Deletion behavior for this database.
-      If the deletion policy is `ABANDON`, the database will be removed from Terraform state but not deleted from Google Cloud upon destruction.
-      If the deletion policy is `DELETE`, the database will both be removed from Terraform state and deleted from Google Cloud upon destruction.
-      The default value is `ABANDON`.
-      See also `delete_protection`.
-    type: String
-    default_value: "ABANDON"
-    # `deletion_policy` is deprecated and will be removed in a future major release.
-    # Once that release happens, you should use `delete_protection_state` instead.
-    # For now though, setting this field is necessary if you wish for your Firestore databases to be deleted upon `terraform destroy`.
 parameters:
 properties:
   - name: 'name'
@@ -249,11 +234,9 @@ properties:
     description: |
       State of delete protection for the database.
       When delete protection is enabled, this database cannot be deleted.
-      The default value is `DELETE_PROTECTION_STATE_UNSPECIFIED`, which is currently equivalent to `DELETE_PROTECTION_DISABLED`.
-      **Note:** Additionally, to delete this database using `terraform destroy`, `deletion_policy` must be set to `DELETE`.
-    default_from_api: true
+      The default value is `DELETE_PROTECTION_ENABLED'.
+    default_value: 'DELETE_PROTECTION_ENABLED'
     enum_values:
-      - 'DELETE_PROTECTION_STATE_UNSPECIFIED'
       - 'DELETE_PROTECTION_ENABLED'
       - 'DELETE_PROTECTION_DISABLED'
   - name: 'etag'

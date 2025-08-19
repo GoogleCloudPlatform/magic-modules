@@ -250,3 +250,15 @@ Remove `template.containers.depends_on` from your configuration after upgrade.
 The default value for `disable_on_destroy` has been changed to `false`. The previous default (`true`) created a risk of unintended service disruptions, as destroying a single `google_project_service` resource would disable the API for the entire project.
 
 Now, destroying the resource will only remove it from Terraform's state and leave the service enabled. To disable a service when the resource is destroyed, you must now make an explicit decision by setting `disable_on_destroy = true`.
+
+## Resource: `google_firestore_database`
+
+### `deletion_policy` has been removed, `delete_protection_state` now defaults to `'DELETE_PROTECTION_ENABLED'`, and `delete_protection_state` no longer supports `'DELETE_PROTECTION_STATE_UNSPECIFIED`'.
+
+The previously available Terraform-only field `deletion_policy` has been removed as it conflicted with `delete_protection_state`.
+
+Additionally, the new default value of `delete_protection_state` is `'DELETE_PROTECTION_ENABLED'`. `DELETE_PROTECTION_STATE_UNSPECIFIED` is no longer supported.
+
+Destroying the resource will, if `delete_protection_state` is `DELETE_PROTECTION_ENABLED`, be disallowed. Users needing to destroy a resource will need to set `delete_protection_state` to `'DELETE_PROTECTION_DISABLED'`, run `terraform apply`, and subsequently run `terraform destroy`.
+
+To upgrade, users should remove all references to `deletion_policy` for Firestore databases. Any references to `'DELETE_PROTECTION_STATE_UNSPECIFIED'` should be changed to `'DELETE_PROTECTION_ENABLED'` (recommended) or `'DELETE_PROTECTION_DISABLED'` as required. To retain the previous delete protection state, choose `'DELETE_PROTECTION_DISABLED'`.
