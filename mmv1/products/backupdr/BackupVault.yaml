@@ -39,6 +39,7 @@ async:
     resource_inside_response: true
 custom_code:
   pre_delete: 'templates/terraform/pre_delete/backup_dr_backup_vault.go.tmpl'
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'backup_dr_backup_vault_full'
     primary_resource_id: 'backup-vault-test'
@@ -113,6 +114,7 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: "Optional. Resource labels to represent user provided metadata. "
+    is_missing_in_cai: true
   - name: 'createTime'
     type: String
     description: 'Output only. The time when the instance was created. '
@@ -167,6 +169,7 @@ properties:
     type: KeyValueAnnotations
     description: "Optional. User annotations. See https://google.aip.dev/128#annotations\nStores
       small amounts of arbitrary data. "
+    is_missing_in_cai: true
   - name: 'accessRestriction'
     type: Enum
     description: |
@@ -182,6 +185,7 @@ properties:
   - name: 'backupRetentionInheritance'
     type: Enum
     ignore_read: true
+    is_missing_in_cai: true
     description: |
         How a backup's enforced retention end time is inherited. Default value is `INHERIT_VAULT_RETENTION` if not provided during creation.
     enum_values:
