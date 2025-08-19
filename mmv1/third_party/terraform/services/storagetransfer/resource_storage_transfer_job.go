@@ -759,7 +759,7 @@ func awsS3DataSchema() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ExactlyOneOf: awsS3AuthKeys,
-				Description:  `The Resource name of a secret in Secret Manager. AWS credentials must be stored in Secret Manager in JSON format. Secret Name Format: projects/{projectNumber}/secrets/{secret_name}`,
+				Description:  `The Resource name of a secret in Secret Manager. AWS credentials must be stored in Secret Manager in JSON format. If credentials_secret is specified, do not specify role_arn or aws_access_key. Format: projects/{projectNumber}/secrets/{secret_name}.`,
 			},
 		},
 	}
