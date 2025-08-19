@@ -340,6 +340,10 @@ properties:
         type: Integer
         description: |
           Minimum number of instances for the service, to be divided among all revisions receiving traffic.
+      - name: 'maxInstanceCount'
+        type: Integer
+        description: |
+          Combined maximum number of instances for all revisions receiving traffic.
       - name: 'scalingMode'
         type: Enum
         description: |
