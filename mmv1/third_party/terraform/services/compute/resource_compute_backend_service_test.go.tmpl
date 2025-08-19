@@ -1166,11 +1166,13 @@ func TestAccComputeBackendService_withNetworkPassThroughLbTrafficPolicy(t *testi
 func TestAccComputeNetwork_resourceManagerTags(t *testing.T) {
 	t.Parallel()
 
+	org := envvar.GetTestOrgFromEnv(t)
+
 	serviceName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
 	checkName := fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10))
-	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-networks-tagkey", "organizations/"+org, make(map[string]interface{}))
+	tagKeyResult := acctest.BootstrapSharedTestTagKeyDetails(t, "crm-bs-tagkey", "organizations/"+org, make(map[string]interface{}))
 	sharedTagkey,_ := tagKeyResult["shared_tag_key"]
-	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-networks-tagvalue", sharedTagkey, org)
+	tagValueResult := acctest.BootstrapSharedTestTagValueDetails(t, "crm-bs-tagvalue", sharedTagkey, org)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1178,7 +1180,7 @@ func TestAccComputeNetwork_resourceManagerTags(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeBackendServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeBackendService_withTags(serviceName, checkName, tagKeyResult, tagValueResult),
+				Config: testAccComputeBackendService_withTags(serviceName, checkName, tagKeyResult["name"], tagValueResult["name"]),
 			},
 			{
 				ResourceName:      "google_compute_backend_service.foobar",
@@ -3017,5 +3019,5 @@ resource "google_compute_http_health_check" "zero" {
   check_interval_sec = 1
   timeout_sec        = 1
 }
-`, serviceName, checkName)
+`, serviceName, tagKey, tagValue, checkName)
 }
