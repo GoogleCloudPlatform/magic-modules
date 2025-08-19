@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package storage
 
 import (
@@ -80,7 +78,7 @@ func datasourceGoogleStorageBucketsRead(d *schema.ResourceData, meta interface{}
 		return err
 	}
 
-	opts := transport_tpg.GetPaginatedItemsMapOptions{
+	opts := transport_tpg.GetPaginatedItemsOptions{
 		ResourceData:   d,
 		Config:         config,
 		BillingProject: nil,
@@ -88,7 +86,7 @@ func datasourceGoogleStorageBucketsRead(d *schema.ResourceData, meta interface{}
 		URL:            url,
 		ResourceToList: "items",
 	}
-	buckets, err := transport_tpg.GetPaginatedItemsMap(opts)
+	buckets, err := transport_tpg.GetPaginatedItems(opts)
 	if err != nil {
 		return fmt.Errorf("Error retrieving buckets: %s", err)
 	}
@@ -102,15 +100,14 @@ func datasourceGoogleStorageBucketsRead(d *schema.ResourceData, meta interface{}
 	return nil
 }
 
-func flattenDatasourceGoogleBucketsList(config *transport_tpg.Config, v interface{}) ([]map[string]interface{}, error) {
+func flattenDatasourceGoogleBucketsList(config *transport_tpg.Config, v []map[string]interface{}) ([]map[string]interface{}, error) {
 	if v == nil {
 		return make([]map[string]interface{}, 0), nil
 	}
 
-	ls := v.([]interface{})
-	bucketObjects := make([]map[string]interface{}, 0, len(ls))
-	for _, raw := range ls {
-		o := raw.(map[string]interface{})
+	bucketObjects := make([]map[string]interface{}, 0, len(v))
+	for _, raw := range v {
+		o := raw
 
 		var mContentType, mMediaLink, mName, mSelfLink, mStorageClass interface{}
 		if oContentType, ok := o["contentType"]; ok {

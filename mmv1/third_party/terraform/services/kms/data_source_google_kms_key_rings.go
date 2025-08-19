@@ -89,8 +89,6 @@ func dataSourceGoogleKmsKeyRingsRead(d *schema.ResourceData, meta interface{}) e
 		billingProject = bp
 	}
 
-	var keyRings []interface{}
-
 	params := make(map[string]string)
 	if filter, ok := d.GetOk("filter"); ok {
 		log.Printf("[DEBUG] Search for key rings using filter ?filter=%s", filter.(string))
@@ -105,7 +103,7 @@ func dataSourceGoogleKmsKeyRingsRead(d *schema.ResourceData, meta interface{}) e
 		return err
 	}
 
-	opts := transport_tpg.GetPaginatedItemsSliceOptions{
+	opts := transport_tpg.GetPaginatedItemsOptions{
 		ResourceData:   d,
 		Config:         config,
 		BillingProject: &billingProject,
@@ -115,7 +113,8 @@ func dataSourceGoogleKmsKeyRingsRead(d *schema.ResourceData, meta interface{}) e
 		Params:         params,
 		ListFlattener:  flattenKMSKeyRingsList,
 	}
-	keyRings, err = transport_tpg.GetPaginatedItemsSlice(opts)
+	var keyRings []map[string]interface{}
+	keyRings, err = transport_tpg.GetPaginatedItems(opts)
 	if err != nil {
 		return fmt.Errorf("Error retrieving key rings: %s", err)
 	}
@@ -128,11 +127,9 @@ func dataSourceGoogleKmsKeyRingsRead(d *schema.ResourceData, meta interface{}) e
 }
 
 // flattenKMSKeyRingsList flattens a list of key rings
-func flattenKMSKeyRingsList(config *transport_tpg.Config, keyRingsList interface{}) ([]interface{}, error) {
-	var keyRings []interface{}
-	for _, k := range keyRingsList.([]interface{}) {
-		keyRing := k.(map[string]interface{})
-
+func flattenKMSKeyRingsList(config *transport_tpg.Config, keyRingsList []map[string]interface{}) ([]map[string]interface{}, error) {
+	var keyRings []map[string]interface{}
+	for _, keyRing := range keyRingsList {
 		parsedId, err := parseKmsKeyRingId(keyRing["name"].(string), config)
 		if err != nil {
 			return nil, err

@@ -87,7 +87,7 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 		return fmt.Errorf("Error setting api endpoint")
 	}
 
-	opts := transport_tpg.GetPaginatedItemsSliceOptions{
+	opts := transport_tpg.GetPaginatedItemsOptions{
 		ResourceData:   d,
 		Config:         config,
 		BillingProject: &billingProject,
@@ -96,33 +96,32 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 		ResourceToList: "locations",
 		Params:         map[string]string{"filter": "name:projects/{{project}}/locations/*"},
 	}
-	listedLocations, err := transport_tpg.GetPaginatedItemsSlice(opts)
+	listedLocations, err := transport_tpg.GetPaginatedItems(opts)
 	if err != nil {
 		return err
 	}
-	locations := make([]map[string]interface{}, 0)
+	var locations []map[string]interface{}
 	for _, loc := range listedLocations {
 		locationDetails := make(map[string]interface{})
-		l := loc.(map[string]interface{})
-		if l["name"] != nil {
-			locationDetails["name"] = l["name"].(string)
+		if loc["name"] != nil {
+			locationDetails["name"] = loc["name"].(string)
 		}
-		if l["locationId"] != nil {
-			locationDetails["location_id"] = l["locationId"].(string)
+		if loc["locationId"] != nil {
+			locationDetails["location_id"] = loc["locationId"].(string)
 		}
-		if l["displayName"] != nil {
-			locationDetails["display_id"] = l["displayName"].(string)
+		if loc["displayName"] != nil {
+			locationDetails["display_id"] = loc["displayName"].(string)
 		}
-		if l["labels"] != nil {
+		if loc["labels"] != nil {
 			labels := make(map[string]string)
-			for k, v := range l["labels"].(map[string]interface{}) {
+			for k, v := range loc["labels"].(map[string]interface{}) {
 				labels[k] = v.(string)
 			}
 			locationDetails["labels"] = labels
 		}
-		if l["metadata"] != nil {
+		if loc["metadata"] != nil {
 			metadata := make(map[string]string)
-			for k, v := range l["metadata"].(map[interface{}]interface{}) {
+			for k, v := range loc["metadata"].(map[interface{}]interface{}) {
 				metadata[k.(string)] = v.(string)
 			}
 			locationDetails["metadata"] = metadata

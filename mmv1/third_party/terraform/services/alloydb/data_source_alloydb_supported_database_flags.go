@@ -139,7 +139,7 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 	if err != nil {
 		return fmt.Errorf("Error setting api endpoint")
 	}
-	opts := transport_tpg.GetPaginatedItemsSliceOptions{
+	opts := transport_tpg.GetPaginatedItemsOptions{
 		ResourceData:   d,
 		Config:         config,
 		BillingProject: &billingProject,
@@ -147,14 +147,14 @@ func dataSourceAlloydbSupportedDatabaseFlagsRead(d *schema.ResourceData, meta in
 		URL:            url,
 		ResourceToList: "supportedDatabaseFlags",
 	}
-	result, err := transport_tpg.GetPaginatedItemsSlice(opts)
+	result, err := transport_tpg.GetPaginatedItems(opts)
 	if err != nil {
 		return err
 	}
-	supportedDatabaseFlags := make([]map[string]interface{}, 0)
+	var supportedDatabaseFlags []map[string]interface{}
 	for _, dbFlag := range result {
 		supportedDatabaseFlag := make(map[string]interface{})
-		flag := dbFlag.(map[string]interface{})
+		flag := dbFlag
 		if flag["name"] != nil {
 			supportedDatabaseFlag["name"] = flag["name"].(string)
 		}

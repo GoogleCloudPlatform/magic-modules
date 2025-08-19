@@ -102,7 +102,7 @@ func dataSourceGoogleKmsLatestCryptoKeyVersionRead(d *schema.ResourceData, meta 
 		return fmt.Errorf("No CryptoVersions found in crypto key %s", cryptoKeyId.CryptoKeyId())
 	}
 
-	latestVersion := versions[lv].(map[string]interface{})
+	latestVersion := versions[lv]
 
 	// The google_kms_crypto_key resource and dataset set
 	// id as the value of name (projects/{{project}}/locations/{{location}}/keyRings/{{keyRing}}/cryptoKeys/{{name}})

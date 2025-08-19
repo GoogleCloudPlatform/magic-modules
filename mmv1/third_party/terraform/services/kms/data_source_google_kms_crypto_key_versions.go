@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package kms
 
 import (
@@ -155,7 +153,7 @@ func dataSourceGoogleKmsCryptoKeyVersionsRead(d *schema.ResourceData, meta inter
 	return nil
 }
 
-func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, cryptoKeyId string, userAgent string) ([]interface{}, error) {
+func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, cryptoKeyId string, userAgent string) ([]map[string]interface{}, error) {
 	config := meta.(*transport_tpg.Config)
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions")
@@ -181,8 +179,8 @@ func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}
 		params["filter"] = filter.(string)
 	}
 
-	cryptoKeyVersions := make([]interface{}, 0)
-	opts := transport_tpg.GetPaginatedItemsSliceOptions{
+	var cryptoKeyVersions []map[string]interface{}
+	opts := transport_tpg.GetPaginatedItemsOptions{
 		ResourceData:   d,
 		Config:         config,
 		BillingProject: &billingProject,
@@ -191,7 +189,7 @@ func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}
 		ResourceToList: "cryptoKeyVersions",
 		Params:         params,
 	}
-	cryptoKeyVersions, err = transport_tpg.GetPaginatedItemsSlice(opts)
+	cryptoKeyVersions, err = transport_tpg.GetPaginatedItems(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -199,10 +197,10 @@ func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}
 	return cryptoKeyVersions, nil
 }
 
-func flattenKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, versionsList []interface{}, cryptoKeyId string) ([]interface{}, error) {
-	var versions []interface{}
+func flattenKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, versionsList []map[string]interface{}, cryptoKeyId string) ([]map[string]interface{}, error) {
+	var versions []map[string]interface{}
 	for _, v := range versionsList {
-		version := v.(map[string]interface{})
+		version := v
 
 		data := map[string]interface{}{}
 		// The google_kms_crypto_key resource and dataset set
