@@ -51,7 +51,7 @@ autogen_async: false
 
 datasource:
   generate: true
-  generate_tests: false
+  exclude_test_generation: true
 
 examples:
   - name: storage_control_folder_intelligence_config_basic

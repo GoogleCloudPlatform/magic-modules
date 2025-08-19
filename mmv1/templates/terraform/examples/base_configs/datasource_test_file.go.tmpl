@@ -61,6 +61,10 @@ func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}DataSource(context),
+				Check: resource.ComposeTestCheckFunc(
+					acctest.CheckDataSourceStateMatchesResourceState( "{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}", 
+					"data.{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}"),
+					),
 			},
 	{{- if not $e.ExcludeImportTest }}
 			{
@@ -77,14 +81,16 @@ func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 }
 
 func testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}DataSource(context map[string]interface{}) string {
-	return fmt.Sprintf(`%s
+	return acctest.Nprintf(`
+
+		{{ $e.TestHCLText }}
 
 		data "{{ $.Res.TerraformName }}" "default" {
 		{{- range $fieldName := $.Res.DatasourceRequiredFields }}
 		{{ $fieldName }} = {{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}.{{ $fieldName }}
 		{{- end }}
 		}`,
-		testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
+		context,
 	)
 }
 {{ end }}
