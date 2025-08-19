@@ -1,0 +1,201 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'DataConnector'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/collections/{collection}/dataConnector'
+description: |
+  DataConnector manages the connection to external data sources for all data stores grouped
+  under a Collection. It's a singleton resource of Collection. The initialization is only
+  supported through DataConnectorService.SetUpDataConnector method, which will create a new
+  Collection and initialize its DataConnector.
+references:
+  guides:
+    'Introduction': 'https://cloud.google.com/agentspace/docs/introduction-to-connectors-and-data-stores'
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rpc/google.cloud.discoveryengine.v1alpha#dataconnectorservice'
+base_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
+self_link: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
+create_url: 'projects/{{project}}/locations/{{location}}:setUpDataConnector'
+update_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
+update_verb: 'PATCH'
+update_mask: true
+delete_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id_url_param}}'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 5
+  delete_minutes: 20
+autogen_async: false
+async:
+  actions: ['create', 'delete']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+examples:
+  - name: 'discoveryengine_dataconnector_jira_basic'
+    primary_resource_id: 'jira-basic'
+    vars:
+      collection_id: 'collection-id'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The geographic location where the data store should reside. The value can
+      only be one of "global", "us" and "eu".
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'collectionIdUrlParam'
+    type: String
+    description: |
+      The ID to use for the Collection, which will become the final component
+      of the Collection's resource name. A new Collection is created as
+      part of the DataConnector setup. DataConnector is a singleton
+      resource under Collection, managing all DataStores of the Collection.
+      This field must conform to [RFC-1034](https://tools.ietf.org/html/rfc1034)
+      standard with a length limit of 63 characters. Otherwise, an
+      INVALID_ARGUMENT error is returned.
+    url_param_only: true
+    required: true
+properties:
+  - name: 'collectionId'
+    type: String
+    description: |
+      The ID to use for the Collection, which will become the final component
+      of the Collection's resource name. A new Collection is created as
+      part of the DataConnector setup. DataConnector is a singleton
+      resource under Collection, managing all DataStores of the Collection.
+      This field must conform to [RFC-1034](https://tools.ietf.org/html/rfc1034)
+      standard with a length limit of 63 characters. Otherwise, an
+      INVALID_ARGUMENT error is returned.
+    required: true
+  - name: 'collectionDisplayName'
+    type: String
+    description: |
+      The display name of the Collection.
+      Should be human readable, used to display collections in the Console
+      Dashboard. UTF-8 encoded string with limit of 1024 characters.
+    required: true
+  - name: 'dataConnector'
+    type: NestedObject
+    description: |
+      The DataConnector to initialize in the newly created Collection.
+    required: true
+    properties:
+      - name: 'name'
+        type: String
+        description: |
+          The full resource name of the Data Connector.
+          Format: `projects/*/locations/*/collections/*/dataConnector`.
+        output: true
+      - name: 'dataSource'
+        type: String
+        description: |
+          The name of the data source.
+          Supported values: `salesforce`, `jira`, `confluence`, `bigquery`.
+        required: true
+      - name: 'params'
+        type: NestedObject
+        description: |
+          Params needed to access the source in the format of (Key, Value) pairs.
+        required: true
+        properties:
+          - name: 'instance_uri'
+            type: String
+            description: |
+              The uri to access the data source.
+          - name: 'instance_id'
+            type: String
+            description: |
+              The id to access the data source.
+          - name: 'client_id'
+            type: String
+            description: |
+              The client id for the third party service provider to identify your application.
+          - name: 'client_secret'
+            type: String
+            description: |
+              The client secret generated by the third party authorization server.
+          - name: 'refresh_token'
+            type: String
+            description: |
+              OAuth refresh token for UCS to obtain a new access token without user interaction.
+          - name: 'access_token'
+            type: String
+            description: |
+              OAuth token for UCS to access to the protected resource.
+          - name: 'user_account'
+            type: String
+            description: |
+              The username or email with the source.
+          - name: 'api_token'
+            type: String
+            description: |
+              The API token generated for the source account, that is used for authenticating
+              anywhere where you would have used a password.
+          - name: 'auth_type'
+            type: String
+            description: |
+              The authorization type for the data source.
+              Supported values: `BASIC_AUTH`, `OAUTH`, `OAUTH_ACCESS_TOKEN`,
+              `OAUTH_TWO_LEGGED`, `OAUTH_JWT_BEARER`, `OAUTH_PASSWORD_GRANT`, `JWT`,
+              `API_TOKEN`, `FEDERATED_CREDENTIAL`.
+      - name: 'refreshInterval'
+        type: NestedObject
+        description: |
+          The refresh interval for data sync. If duration is set to 0, the data will
+          be synced in real time. The streaming feature is not supported yet. The
+          minimum is 30 minutes and maximum is 7 days. When the refresh interval is
+          set to the same value as the incremental refresh interval, incremental
+          sync will be disabled.
+        required: true
+        properties:
+          - name: 'seconds'
+            type: Integer
+            description: |
+              Signed seconds of the span of time. Must be from -315,576,000,000
+              to +315,576,000,000 inclusive. Note: these bounds are computed from:
+              60 sec/min * 60 min/hr * 24 hr/day * 365.25 days/year * 10000 years
+          - name: 'nanos'
+            type: Integer
+            description: |
+              Signed fractions of a second at nanosecond resolution of the span
+              of time. Durations less than one second are represented with a 0
+              `seconds` field and a positive or negative `nanos` field. For durations
+              of one second or more, a non-zero value for the `nanos` field must be
+              of the same sign as the `seconds` field. Must be from -999,999,999
+              to +999,999,999 inclusive.
+      - name: 'entities'
+        type: Array
+        description: |
+          List of entities from the connected data source to ingest.
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'entityName'
+              type: String
+              description: |
+                The name of the entity. Supported values by data source:
+                * Salesforce: `Lead`, `Opportunity`, `Contact`, `Account`, `Case`, `Contract`, `Campaign`
+                * Jira: project, issue, attachment, comment, worklog
+                * Confluence: `Content`, `Space`
+            - name: 'params'
+              type: 
+      - name: 'staticIpEnabled'
+        type: Boolean
+        description: |
+          Whether customer has enabled static IP addresses for this connector.

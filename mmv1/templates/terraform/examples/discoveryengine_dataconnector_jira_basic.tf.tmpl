@@ -1,0 +1,35 @@
+resource "google_discovery_engine_data_connector" "jira-basic" {
+  location                  = "global"
+  collection_id             = "{{index $.Vars "collection_id"}}"
+  collection_id_url_param   = "{{index $.Vars "collection_id"}}"
+  collection_display_name   = "tf-test-dataconnector-jira"
+  data_connector {
+    data_source             = "jira"
+    params {
+        instance_id         = "33db20a3-dc45-4305-a505-d70b68599840"
+        instance_uri        = "https://vaissptbots1.atlassian.net/"
+        client_secret       = "ATOAGAf7J5OIiM_q-fmgSZjbh0lWxOkj3-P-KgGK5Q2yRmAJkEWqiFWuVK4fjfwtTSqFEBDE636D"
+        client_id           = "YPadCV8GGM5GOik1hYRjaC98tG7ChRo6"
+        refresh_token       = "fill-in-the-blank"
+    }
+    refresh_interval {
+        seconds             = 86400
+    }
+    entities {
+        entity_name         = "project"
+    }
+    entities {
+        entity_name         = "issue"
+    }
+    entities {
+        entity_name         = "attachment"
+    }
+    entities {
+        entity_name         = "comment"
+    }
+    entities {
+        entity_name         = "worklog"
+    }
+    static_ip_enabled       = true
+  }
+}
