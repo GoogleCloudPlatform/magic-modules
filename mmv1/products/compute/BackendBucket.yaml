@@ -313,3 +313,4 @@ properties:
           and values are in the format tagValues/456.
         api_name: resourceManagerTags
         ignore_read: true
+        immutable: true
