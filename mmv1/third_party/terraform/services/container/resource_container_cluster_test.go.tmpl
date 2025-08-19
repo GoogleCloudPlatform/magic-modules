@@ -14743,3 +14743,58 @@ resource "google_container_cluster" "primary" {
 }
 `, clusterName, networkName, subnetworkName, unauthenticated, authenticated)
 }
+
+func TestAccContainerCluster_auto_ip_address_management(t *testing.T) {
+	t.Parallel()
+
+	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:	  func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccContainerCluster_auto_ip_address_management(clusterName, true),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccContainerCluster_auto_ip_address_management(clusterName, false),
+			},
+			{
+				ResourceName:      "google_container_cluster.primary",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+func testAccContainerCluster_auto_ip_address_management(clusterName string, autoIpam bool) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "default" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_container_cluster" "primary" {
+  name                 = "%s"
+  location             = "us-central1-a"
+  initial_node_count   = 1
+  network              = google_compute_network.default.name
+  deletion_protection  = false
+
+  ip_allocation_policy {
+    auto_ipam_config {
+      enabled = %t
+    }
+  }
+}
+`, clusterName, clusterName, autoIpam)
+}

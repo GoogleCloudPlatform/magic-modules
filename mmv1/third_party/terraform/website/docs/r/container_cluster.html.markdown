@@ -829,6 +829,8 @@ secondary Pod IP address assignment to node pools isn't needed. Structure is [do
 * `additional_ip_ranges_config` - (Optional) The configuration for individual additional subnetworks attached to the cluster.
 Structure is [documented below](#nested_additional_ip_ranges_config).
 
+* `auto_ipam_config` - (Optional) The configuration for auto IP address management.
+Structure is [documented below](#nested_auto_ipam_config).
 
 <a name="nested_additional_pod_ranges_config"></a>The `additional_pod_ranges_config` block supports:
 
@@ -841,6 +843,9 @@ Structure is [documented below](#nested_additional_ip_ranges_config).
 
 * `pod_ipv4_range_names`- (Required) List of secondary ranges names within this subnetwork that can be used for pod IPs.
 
+<a name="nested_auto_ipam_config"></a>The `auto_ipam_config` block supports:
+
+* `enabled` - (Required) Enable auto IP address management on the cluster.
 
 <a name="nested_master_auth"></a>The `master_auth` block supports:
 
