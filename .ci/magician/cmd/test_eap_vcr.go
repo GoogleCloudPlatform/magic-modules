@@ -15,6 +15,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	//go:embed templates/vcr/post_replay_eap.tmpl
+	postReplayEAPTmplText string
+)
+
 var tevRequiredEnvironmentVariables = [...]string{
 	"GEN_PATH",
 	"GOCACHE",
@@ -190,7 +195,7 @@ func execTestEAPVCR(changeNumber, genPath, kokoroArtifactsDir, modifiedFilePath 
 		Version:          provider.Private.String(),
 		Head:             head,
 	}
-	comment, err := formatPostReplay(postReplayData)
+	comment, err := formatPostReplayEAP(postReplayData)
 	if err != nil {
 		return fmt.Errorf("error formatting post replay comment: %w", err)
 	}
@@ -290,4 +295,8 @@ View the [build log](https://storage.cloud.google.com/ci-vcr-logs/%s/refs/heads/
 
 func init() {
 	rootCmd.AddCommand(testEAPVCRCmd)
+}
+
+func formatPostReplayEAP(data postReplay) (string, error) {
+	return formatComment("post_replay_eap.tmpl", postReplayEAPTmplText, data)
 }
