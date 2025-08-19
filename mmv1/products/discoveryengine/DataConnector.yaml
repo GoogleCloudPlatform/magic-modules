@@ -193,8 +193,6 @@ properties:
                 * Salesforce: `Lead`, `Opportunity`, `Contact`, `Account`, `Case`, `Contract`, `Campaign`
                 * Jira: project, issue, attachment, comment, worklog
                 * Confluence: `Content`, `Space`
-            - name: 'params'
-              type: 
       - name: 'staticIpEnabled'
         type: Boolean
         description: |
