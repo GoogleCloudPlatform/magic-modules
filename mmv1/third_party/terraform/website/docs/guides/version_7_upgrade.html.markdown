@@ -112,6 +112,13 @@ Description of the change and how users should adjust their configuration (if ne
 
 ## Resources
 
+## Resource: `google_alloydb_cluster`
+
+### Cluster deletion now prevented by default with `deletion_protection`
+
+The field `deletion_protection` has been added with a default value of `true`. This field prevents
+Terraform from destroying or recreating the cluster during `terraform apply`. In 7.0.0, existing clusters will have
+`deletion_protection` set to `true` during the next refresh unless otherwise set in configuration.
 
 ## Resource: `google_beyondcorp_application` is now removed
 
@@ -142,6 +149,12 @@ Use `google_beyondcorp_security_gateway_application` instead.
 
 `instance` has been removed in favor of `instance_name`.
 
+## Resource: `google_compute_packet_mirroring`
+
+### `subnetworks` and `instances` fields have been converted to sets
+
+`subnetworks` and `instances` fields have been converted to sets. If you need to access values in their nested objects, it will need to be accessed via `for_each` or locally converting the field to a list/array in your configuration.
+
 ## Resource: `google_compute_subnetwork`
 
 ### `enable_flow_logs`is now removed
@@ -167,6 +180,12 @@ To reflect the new type explicitly, surround the current integer value in quotes
 ### `description` is now removed
 
 Remove `description` from your configuration after upgrade.
+
+## Resource: `google_colab_runtime_template`
+
+### `post_startup_script_config` is now removed.
+
+Remove `post_startup_script_config` from your configuration after upgrade.
 
 ## Resource: `google_network_services_lb_traffic_extension`
 
