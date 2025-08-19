@@ -216,4 +216,3 @@ properties:
       - 'QOS_TYPE_UNSPECIFIED'
       - 'AUTO'
       - 'MANUAL'
-
