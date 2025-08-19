@@ -147,7 +147,10 @@ func testAccMetastoreFederationTags(testContext map[string]interface{}) string {
 	  service_id = "tf-test-service-%{random_suffix}"
 	  location   = "us-east1"
 	  tier       = "DEVELOPER"
-	  endpoint_protocol = "GRPC"
+	  hive_metastore_config {
+				version           = "3.1.2"
+				endpoint_protocol = "GRPC"
+			}
 	}
 
 	resource "google_dataproc_metastore_federation" "test" {
@@ -157,7 +160,7 @@ func testAccMetastoreFederationTags(testContext map[string]interface{}) string {
 	  backend_metastores {
 	    name = google_dataproc_metastore_service.backend.id
 	    metastore_type = "DATAPROC_METASTORE"
-	    rank = 1
+	    rank = "1"
 	  }
 	  tags = {
 	    "%{org}/%{tagKey}" = "%{tagValue}"
@@ -203,8 +206,6 @@ func checkMetastoreFederationTags(resourceName string, testContext map[string]in
 			return fmt.Errorf("failed to get metastore federation '%s': %v", req.Name, err)
 		}
 
-		// Check the federation's labels for the expected tag
-		// In the Metastore Federation API, tags are represented as labels.
 		labels := federation.GetLabels()
 		if labels == nil {
 			return fmt.Errorf("expected labels not found on federation '%s'", req.Name)
