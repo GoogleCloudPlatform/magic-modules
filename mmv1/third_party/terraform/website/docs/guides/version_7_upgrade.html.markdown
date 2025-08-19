@@ -135,7 +135,7 @@ Use `google_beyondcorp_security_gateway_application` instead.
 
 ### `view.use_legacy_sql` no longer has a default value of `True`
 
-If `view.use_legacy_sql` is not specified in the configuration, no value is sent to the API. For configurations that were created without explicitly setting `view.use_legacy_sql` in previous versions, the planned diff report will contain `use_legacy_sql = true -> null`. To achieve the desired behavior, either set `view.use_legacy_sql = true` explicitly, or update `view.query` to a standard SQL query.
+The `view.use_legacy_sql` field no longer has a default value. Configurations that relied on the old default will show no diff in the plan, and there will be no change to existing views. For a new view, leaving this field unspecified in the configuration will result in the view being created with no `use_legacy_sql` value, which assumes the legacy SQL dialect for its query according to the [API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#ViewDefinition).
 
 ## Resource: `google_bigtable_table_iam_binding`
 
