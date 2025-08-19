@@ -54,7 +54,7 @@ import (
 {{- end}}
 )
 
-{{if $.CustomCode.Constants -}}
+{{if $.CustomCode.Constants -}} 
     {{- $.CustomTemplate $.CustomCode.Constants true -}}
 {{- end}}
 
@@ -138,7 +138,7 @@ func Resource{{ $.ResourceName -}}() *schema.Resource {
             {{- range $prop := $.VirtualFields }}
 {{template "SchemaFields" $prop -}}
             {{- end }}
-{{- if $.CustomCode.ExtraSchemaEntry }}
+{{- if $.CustomCode.ExtraSchemaEntry }} 
     {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
 {{- end}}
 {{ if $.HasProject -}}
@@ -406,7 +406,7 @@ func resource{{ $.ResourceName -}}Create(d *schema.ResourceData, meta interface{
 {{        end  -}}
 {{      end -}}{{/*if ($.GetAsync.IsA "OpAsync")*/}}
 {{    end -}}{{/*if and $.GetAsync ($.GetAsync.Allow "Create")*/}}
-{{if $.CustomCode.PostCreate -}}
+{{if $.CustomCode.PostCreate -}} 
     {{- $.CustomTemplate $.CustomCode.PostCreate false -}}
 {{- end}}
 
@@ -997,7 +997,7 @@ if d.HasChange("{{ join ($.PropertyNamesToStrings (index $CustomUpdateProps $gro
         }
 {{-                     end}}
 {{-                 end}}
-    }
+    } 
 {{-             end  }}{{/*range PropertiesByCustomUpdate*/}}
 {{ "" }}
   d.Partial(false)
@@ -1033,7 +1033,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     if err != nil {
         return err
     }
-{{ if $.CustomCode.CustomDelete }}
+{{ if $.CustomCode.CustomDelete }} 
 {{ $.CustomTemplate $.CustomCode.CustomDelete false -}}
 {{- else }}
 
@@ -1090,7 +1090,7 @@ func resource{{ $.ResourceName }}Delete(d *schema.ResourceData, meta interface{}
     }
 
     headers := make(http.Header)
-    {{- if $.CustomCode.PreDelete }}
+    {{- if $.CustomCode.PreDelete }} 
         {{ $.CustomTemplate $.CustomCode.PreDelete false -}}
     {{- end }}
 
