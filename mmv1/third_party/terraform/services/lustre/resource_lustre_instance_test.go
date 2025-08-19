@@ -93,6 +93,9 @@ resource "google_lustre_instance" "instance" {
   labels                      = {
     test = "test-label"
   }
+  timeouts {
+	create = "120m"
+  }
 }
 
 // This example assumes this network already exists.
