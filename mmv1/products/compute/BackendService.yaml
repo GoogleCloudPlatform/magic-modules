@@ -1704,4 +1704,3 @@ properties:
         api_name: resourceManagerTags
         ignore_read: true
         immutable: true
-
