@@ -1358,8 +1358,6 @@ func (t Type) TGCSendEmptyValue() bool {
 	return false
 }
 
-// When the property has ignore_read: true and have custom_flatten method,
-// the custom_flatten method should not be applied when compiling the tgc-next provider.
 func (t Type) ShouldIgnoreCustomFlatten() bool {
 	return t.ResourceMetadata.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
 }
