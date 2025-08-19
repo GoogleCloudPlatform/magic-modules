@@ -86,7 +86,7 @@ examples:
     vars:
       instance_id: 'my-instance'
     ignore_read_extra:
-      - 'update_time' 
+      - 'update_time'
     exclude_docs: true
   - name: 'secure_source_manager_instance_private'
     primary_resource_id: 'default'
