@@ -4,6 +4,10 @@ resource "google_cloud_run_v2_service" "{{$.PrimaryResourceId}}" {
   deletion_protection = false
   ingress = "INGRESS_TRAFFIC_ALL"
 
+  scaling {
+    max_instance_count = 1
+  }
+
   template {
     containers {
       image = "us-docker.pkg.dev/cloudrun/container/hello"
@@ -20,8 +24,5 @@ resource "google_cloud_run_v2_service" "{{$.PrimaryResourceId}}" {
       accelerator = "nvidia-l4"
     }
     gpu_zonal_redundancy_disabled = true
-    scaling {
-      max_instance_count = 1
-    }
   }
 }
