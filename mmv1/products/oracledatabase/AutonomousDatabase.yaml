@@ -666,12 +666,14 @@ properties:
       projects/{project}/locations/{location}/odbNetworks/{odb_network}
       It is optional but if specified, this should match the parent ODBNetwork of
       the odb_subnet and backup_odb_subnet.
+    default_from_api: true
   - name: odbSubnet
     type: String
     description: |-
       The name of the OdbSubnet associated with the Autonomous Database for
       IP allocation. Format:
       projects/{project}/locations/{location}/odbNetworks/{odb_network}/odbSubnets/{odb_subnet}
+    default_from_api: true
   - name: 'createTime'
     type: String
     description: 'The date and time that the Autonomous Database was created. '
