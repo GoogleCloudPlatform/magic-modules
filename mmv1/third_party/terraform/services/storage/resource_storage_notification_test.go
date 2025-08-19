@@ -27,7 +27,7 @@ func TestAccStorageNotification_basic(t *testing.T) {
 	var notification storage.Notification
 	bucketName := acctest.TestBucketName(t)
 	topicName := fmt.Sprintf("tf-pstopic-test-%d", acctest.RandInt(t))
-	topic := fmt.Sprintf("//pubsub.googleapis.com/projects/%s/topics/%s", os.Getenv("GOOGLE_PROJECT"), topicName)
+	topic := fmt.Sprintf("projects/%s/topics/%s", os.Getenv("GOOGLE_PROJECT"), topicName)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -53,11 +53,17 @@ func TestAccStorageNotification_basic(t *testing.T) {
 				ResourceName:      "google_storage_notification.notification",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"topic", // required ignore-read field
+				},
 			},
 			{
 				ResourceName:      "google_storage_notification.notification_with_prefix",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"topic", // required ignore-read field
+				},
 			},
 		},
 	})
@@ -71,7 +77,7 @@ func TestAccStorageNotification_withEventsAndAttributes(t *testing.T) {
 	var notification storage.Notification
 	bucketName := acctest.TestBucketName(t)
 	topicName := fmt.Sprintf("tf-pstopic-test-%d", acctest.RandInt(t))
-	topic := fmt.Sprintf("//pubsub.googleapis.com/projects/%s/topics/%s", os.Getenv("GOOGLE_PROJECT"), topicName)
+	topic := fmt.Sprintf("projects/%s/topics/%s", os.Getenv("GOOGLE_PROJECT"), topicName)
 	eventType1 := "OBJECT_FINALIZE"
 	eventType2 := "OBJECT_ARCHIVE"
 
@@ -101,6 +107,9 @@ func TestAccStorageNotification_withEventsAndAttributes(t *testing.T) {
 				ResourceName:      "google_storage_notification.notification",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"topic", // required ignore-read field
+				},
 			},
 		},
 	})

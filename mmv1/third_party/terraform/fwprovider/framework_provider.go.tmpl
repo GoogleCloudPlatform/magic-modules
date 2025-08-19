@@ -27,6 +27,7 @@ import (
     {{- if ne $.TargetVersionName "ga" }}
     "github.com/hashicorp/terraform-provider-google/google/services/firebase"
     {{- end }}
+	"github.com/hashicorp/terraform-provider-google/google/services/storage"
 
     transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -332,6 +333,7 @@ func (p *FrameworkProvider) DataSources(_ context.Context) []func() datasource.D
 func (p *FrameworkProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		apigee.NewApigeeKeystoresAliasesKeyCertFileResource,
+		storage.NewStorageNotificationResource,
 	}
 }
 

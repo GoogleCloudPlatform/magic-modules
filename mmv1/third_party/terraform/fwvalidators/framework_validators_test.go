@@ -307,3 +307,81 @@ func TestBoundedDuration(t *testing.T) {
 		})
 	}
 }
+
+func TestStringValuesInSetValidator(t *testing.T) {
+	t.Parallel()
+
+	// Define the set of valid strings for the validator
+	validStrings := []string{"APPLE", "BANANA", "CHERRY"}
+
+	stringSet := func(elems []string) types.Set {
+		if elems == nil {
+			return types.SetNull(types.StringType)
+		}
+		val, diags := types.SetValueFrom(context.Background(), types.StringType, elems)
+		if diags.HasError() {
+			t.Fatalf("Failed to create test set: %v", diags)
+		}
+		return val
+	}
+
+	cases := map[string]struct {
+		ConfigValue        types.Set
+		ExpectedErrorCount int
+	}{
+		"valid set with one element": {
+			ConfigValue:        stringSet([]string{"APPLE"}),
+			ExpectedErrorCount: 0,
+		},
+		"valid set with multiple elements": {
+			ConfigValue:        stringSet([]string{"BANANA", "CHERRY"}),
+			ExpectedErrorCount: 0,
+		},
+		"valid empty set": {
+			ConfigValue:        stringSet([]string{}),
+			ExpectedErrorCount: 0,
+		},
+		"null set is valid": {
+			ConfigValue:        stringSet(nil),
+			ExpectedErrorCount: 0,
+		},
+		"unknown set is valid": {
+			ConfigValue:        types.SetUnknown(types.StringType),
+			ExpectedErrorCount: 0,
+		},
+		"invalid set with one element": {
+			ConfigValue:        stringSet([]string{"DURIAN"}),
+			ExpectedErrorCount: 1,
+		},
+		"invalid set with multiple elements": {
+			ConfigValue:        stringSet([]string{"DURIAN", "ELDERBERRY"}),
+			ExpectedErrorCount: 2,
+		},
+		"set with mixed valid and invalid elements": {
+			ConfigValue:        stringSet([]string{"APPLE", "DURIAN", "CHERRY"}),
+			ExpectedErrorCount: 1,
+		},
+	}
+
+	for tn, tc := range cases {
+		tn, tc := tn, tc
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+
+			req := validator.SetRequest{
+				Path:        path.Root("test_attribute"),
+				ConfigValue: tc.ConfigValue,
+			}
+			resp := &validator.SetResponse{
+				Diagnostics: diag.Diagnostics{},
+			}
+			v := fwvalidators.StringValuesInSet(validStrings...)
+
+			v.ValidateSet(context.Background(), req, resp)
+
+			if resp.Diagnostics.ErrorsCount() != tc.ExpectedErrorCount {
+				t.Errorf("Expected %d errors, but got %d. Errors: %v", tc.ExpectedErrorCount, resp.Diagnostics.ErrorsCount(), resp.Diagnostics.Errors())
+			}
+		})
+	}
+}
