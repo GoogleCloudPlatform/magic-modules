@@ -268,7 +268,6 @@ properties:
         type: String
         description: |
           CA pool resource, resource must in the format of `projects/{project}/locations/{location}/caPools/{ca_pool}`.
-        required: true
         immutable: true
       - name: 'httpServiceAttachment'
         type: String
