@@ -94,7 +94,6 @@ func dataSourceAlloydbLocationsRead(d *schema.ResourceData, meta interface{}) er
 		UserAgent:      userAgent,
 		URL:            url,
 		ResourceToList: "locations",
-		Params:         map[string]string{"filter": "name:projects/{{project}}/locations/*"},
 	}
 	listedLocations, err := transport_tpg.GetPaginatedItems(opts)
 	if err != nil {
