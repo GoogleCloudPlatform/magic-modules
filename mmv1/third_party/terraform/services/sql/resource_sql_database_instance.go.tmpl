@@ -798,7 +798,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							},
 							Description: `Config used to determine the final backup settings for the instance`,
 
-						}
+						},
 					},
 				},
 				Description: `The settings to use for the database. The configuration is detailed below.`,
@@ -1514,7 +1514,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		EnableGoogleMlIntegration:     _settings["enable_google_ml_integration"].(bool),
 		EnableDataplexIntegration:     _settings["enable_dataplex_integration"].(bool),
 		RetainBackupsOnDelete:         _settings["retain_backups_on_delete"].(bool),
-		FinalBackupConfig:			   expandFinalBackupConfig(_settings["finala_backup_config"].([]interface{})),
+		FinalBackupConfig:			   expandFinalBackupConfig(_settings["final_backup_config"].([]interface{})),
 		UserLabels:                    tpgresource.ConvertStringMap(_settings["user_labels"].(map[string]interface{})),
 		BackupConfiguration:           expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
 		DatabaseFlags:                 expandDatabaseFlags(_settings["database_flags"].(*schema.Set).List()),
@@ -1765,7 +1765,8 @@ func expandFinalBackupConfig(configured []interface{}) *sqladmin.FinalBackupConf
 	_finalBackupConfig := configured[0].(map[string]interface{})
 	return &sqladmin.FinalBackupConfig{
 		Enabled: _finalBackupConfig["enabled"].(bool),
-		RetentionDays: int(_finalBackupConfig["retention_days"].(int)),
+		RetentionDays: int64(_finalBackupConfig["retention_days"].(int)),
+		ForceSendFields:             []string{"Enabled"},
 	}
 }
 
@@ -2494,6 +2495,10 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 		data["backup_configuration"] = flattenBackupConfiguration(settings.BackupConfiguration)
 	}
 
+	if settings.FinalBackupConfig != nil {
+		data["final_backup_config"] = flattenFinalBackupConfig(settings.FinalBackupConfig)
+	}
+
 	if settings.DatabaseFlags != nil {
 		data["database_flags"] = flattenDatabaseFlags(settings.DatabaseFlags)
 	}
@@ -2573,6 +2578,15 @@ func flattenBackupConfiguration(backupConfiguration *sqladmin.BackupConfiguratio
 		"point_in_time_recovery_enabled": backupConfiguration.PointInTimeRecoveryEnabled,
 		"backup_retention_settings":      flattenBackupRetentionSettings(backupConfiguration.BackupRetentionSettings),
 		"transaction_log_retention_days": backupConfiguration.TransactionLogRetentionDays,
+	}
+
+	return []map[string]interface{}{data}
+}
+
+func flattenFinalBackupConfig(finalBackupConfig *sqladmin.FinalBackupConfig) []map[string]interface{} {
+	data := map[string]interface{}{
+		"enabled":             finalBackupConfig.Enabled,
+		"retention_days":                        finalBackupConfig.RetentionDays,
 	}
 
 	return []map[string]interface{}{data}
