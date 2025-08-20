@@ -11,7 +11,6 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-provider-google/tpgresource"
 	"google.golang.org/api/googleapi"
 )
 
@@ -233,7 +232,7 @@ func GetPaginatedItems(paginationOptions GetPaginatedItemsOptions) ([]map[string
 
 		var newItems []map[string]interface{}
 		if res[paginationOptions.ResourceToList] != nil {
-			itemsAsMap, err := tpgresource.InterfaceSliceToMapSlice(res[paginationOptions.ResourceToList])
+			itemsAsMap, err := InterfaceSliceToMapSlice(res[paginationOptions.ResourceToList])
 			if err != nil {
 				return nil, err
 			}
@@ -258,4 +257,21 @@ func GetPaginatedItems(paginationOptions GetPaginatedItemsOptions) ([]map[string
 		}
 	}
 	return items, nil
+}
+
+func InterfaceSliceToMapSlice(i interface{}) ([]map[string]interface{}, error) {
+	itemsAsInterface, ok := i.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("cannot convert to slice of interfaces: got %T", i)
+	}
+
+	itemsAsMap := make([]map[string]interface{}, len(itemsAsInterface))
+	for idx, item := range itemsAsInterface {
+		var ok bool
+		itemsAsMap[idx], ok = item.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("cannot convert item to map[string]interface{}: got %T", item)
+		}
+	}
+	return itemsAsMap, nil
 }
