@@ -737,7 +737,7 @@ func (r Resource) GetIdentity() []*Type {
 	})
 }
 
-func buildWriteOnlyField(name string, versionFieldName string, originalField *Type, originalFieldLineage string) *Type {
+func buildWriteOnlyField(resourceName string, name string, versionFieldName string, originalField *Type, originalFieldLineage string) *Type {
 	description := fmt.Sprintf("%s Note: This property is write-only and will not be read from the API. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", originalField.Description)
 	fieldPathOriginalField := originalFieldLineage
 	fieldPathCurrentField := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(name))
@@ -759,7 +759,7 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 
 	// TODO: remove this branch with the next major release + add migration guide
 	// In the future (next major) the secret_data_wo_version is required and should always be set explicitly (so no default, required with the _wo field)
-	if name != "secretDataWo" {
+	if name != "secretDataWo" && resourceName != "SecretVersion" {
 		options = append(options, propertyWithRequiredWith([]string{requiredWith}))
 	}
 
@@ -779,7 +779,7 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 	return NewProperty(name, originalField.ApiName, options)
 }
 
-func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField *Type, originalFieldLineage string) *Type {
+func buildWriteOnlyVersionField(resourceName string, name string, originalField *Type, writeOnlyField *Type, originalFieldLineage string) *Type {
 	description := fmt.Sprintf("Triggers update of %s write-only. For more info see [updating write-only attributes](/docs/providers/google/guides/using_write_only_attributes.html#updating-write-only-attributes)", google.Underscore(writeOnlyField.Name))
 	requiredWith := strings.ReplaceAll(originalFieldLineage, google.Underscore(originalField.Name), google.Underscore(writeOnlyField.Name))
 
@@ -792,7 +792,7 @@ func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField
 
 	// TODO: remove this branch with the next major release + add migration guide
 	// In the future (next major) the secret_data_wo_version is required and should always be set explicitly (so no default, required with the _wo field)
-	if name == "secretDataWoVersion" {
+	if name == "secretDataWoVersion" && resourceName == "SecretVersion" {
 		options = append(options, propertyWithDefaultValue(0))
 	} else {
 		propertyWithRequiredWith([]string{requiredWith})
@@ -807,8 +807,8 @@ func (r *Resource) addWriteOnlyFields(props []*Type, propWithWoConfigured *Type,
 	}
 	woFieldName := fmt.Sprintf("%sWo", propWithWoConfigured.Name)
 	woVersionFieldName := fmt.Sprintf("%sVersion", woFieldName)
-	writeOnlyField := buildWriteOnlyField(woFieldName, woVersionFieldName, propWithWoConfigured, propWithWoConfiguredLineagePath)
-	writeOnlyVersionField := buildWriteOnlyVersionField(woVersionFieldName, propWithWoConfigured, writeOnlyField, propWithWoConfiguredLineagePath)
+	writeOnlyField := buildWriteOnlyField(r.Name, woFieldName, woVersionFieldName, propWithWoConfigured, propWithWoConfiguredLineagePath)
+	writeOnlyVersionField := buildWriteOnlyVersionField(r.Name, woVersionFieldName, propWithWoConfigured, writeOnlyField, propWithWoConfiguredLineagePath)
 	props = append(props, writeOnlyField, writeOnlyVersionField)
 	return props
 }
