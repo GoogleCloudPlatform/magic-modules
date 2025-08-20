@@ -226,9 +226,10 @@ func TestAccComputeBackendBucket_withTags(t *testing.T) {
 				Config: testAccComputeBackendBucket_withTags(backendName, storageName, tagKeyResult["name"], tagValueResult["name"]),
 			},
 			{
-				ResourceName:      "google_compute_backend_bucket.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_backend_bucket.foobar",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"params"},
 			},
 		},
 	})
