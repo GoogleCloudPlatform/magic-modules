@@ -928,6 +928,7 @@ resource "google_netapp_volume" "test_volume" {
     location = "us-east4"
     name = "tf-test-test-volume%{random_suffix}"
     capacity_gib = "100"
+    description = "This is a test description for manual qos (auto) volume"
     share_name = "tf-test-test-volume%{random_suffix}"
     storage_pool = google_netapp_storage_pool.test_pool.name
     protocols = ["NFSV3"]
