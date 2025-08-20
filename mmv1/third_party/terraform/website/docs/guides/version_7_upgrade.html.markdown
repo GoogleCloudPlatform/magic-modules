@@ -152,7 +152,7 @@ Use `google_beyondcorp_security_gateway_application` instead.
 
 ### The resource will no longer use hardcoded values
 
-`disk.type`, `disk.mode` and `disk.interface` will no longer be hardcoded into the code and instead will be set by the API. This shouldn't have any effect on the functionality of the resource.
+`disk.type`, `disk.mode` and `disk.interface` will no longer use provider configured default values and instead will be set by the API. This shouldn't have any effect on the functionality of the resource.
 
 ## Resource: `google_compute_region_instance_template`
 
