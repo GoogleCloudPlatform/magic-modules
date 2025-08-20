@@ -11,6 +11,7 @@ import (
 
 	"github.com/hashicorp/errwrap"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/tpgresource"
 	"google.golang.org/api/googleapi"
 )
 
@@ -232,20 +233,11 @@ func GetPaginatedItems(paginationOptions GetPaginatedItemsOptions) ([]map[string
 
 		var newItems []map[string]interface{}
 		if res[paginationOptions.ResourceToList] != nil {
-			// The list of items is interface{}. Its underlying type is []interface{}.
-			// We need to convert it to []map[string]interface{}
-			itemsAsInterface, ok := res[paginationOptions.ResourceToList].([]interface{})
-			if !ok {
-				return nil, fmt.Errorf("cannot convert %s to slice of interfaces: got %T", paginationOptions.ResourceToList, res[paginationOptions.ResourceToList])
+			itemsAsMap, err := tpgresource.InterfaceSliceToMapSlice(res[paginationOptions.ResourceToList])
+			if err != nil {
+				return nil, err
 			}
 
-			itemsAsMap := make([]map[string]interface{}, len(itemsAsInterface))
-			for i, item := range itemsAsInterface {
-				itemsAsMap[i], ok = item.(map[string]interface{})
-				if !ok {
-					return nil, fmt.Errorf("cannot convert item to map[string]interface{}: got %T", item)
-				}
-			}
 			if paginationOptions.ListFlattener != nil {
 				log.Printf("[DEBUG] res[paginationOptions.ResourceToList]: %#v", res[paginationOptions.ResourceToList])
 				flattened, err := paginationOptions.ListFlattener(paginationOptions.Config, itemsAsMap)

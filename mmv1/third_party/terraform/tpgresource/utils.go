@@ -258,6 +258,24 @@ func InterfaceSliceToStringSlice(v interface{}) ([]string, error) {
 	return stringSlice, nil
 }
 
+func InterfaceSliceToMapSlice(v interface{}) ([]map[string]interface{}, error) {
+	interfaceSlice, ok := v.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("expected []interface{}, got %T", v)
+	}
+
+	mapSlice := make([]map[string]interface{}, len(interfaceSlice))
+
+	for i, item := range interfaceSlice {
+		mapSlice[i], ok = item.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("expected map[string]interface{}, got %T at index %d", item, i)
+		}
+	}
+
+	return mapSlice, nil
+}
+
 // SortStringsByConfigOrder takes a slice of map[string]interface{} from a TF config
 // and API data, and returns a new slice containing the API data, reorderd to match
 // the TF config as closely as possible (with new items at the end of the list.)
