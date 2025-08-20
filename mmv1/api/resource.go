@@ -755,7 +755,12 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 		propertyWithWriteOnly(true),
 		propertyWithApiName(apiName),
 		propertyWithIgnoreRead(true),
-		propertyWithRequiredWith([]string{requiredWith}),
+	}
+
+	// TODO: remove this branch with the next major release + add migration guide
+	// In the future (next major) the secret_data_wo_version is required and should always be set explicitly (so no default, required with the _wo field)
+	if name != "secretDataWo" {
+		options = append(options, propertyWithRequiredWith([]string{requiredWith}))
 	}
 
 	if originalField.Required {
