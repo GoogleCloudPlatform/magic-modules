@@ -916,7 +916,6 @@ resource "google_netapp_storage_pool" "test_pool" {
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
   qos_type = "AUTO"
-  total_throughput_mibps = "64"
 }
 
 resource "time_sleep" "wait_3_minutes" {
@@ -928,10 +927,10 @@ resource "google_netapp_volume" "test_volume" {
     location = "us-east4"
     name = "tf-test-test-volume%{random_suffix}"
     capacity_gib = "100"
-    description = "This is a test description for manual qos (auto) volume"
     share_name = "tf-test-test-volume%{random_suffix}"
     storage_pool = google_netapp_storage_pool.test_pool.name
     protocols = ["NFSV3"]
+    throughput_mibps = "64"
 }
 
 data "google_compute_network" "default" {
@@ -949,7 +948,6 @@ resource "google_netapp_storage_pool" "test_pool" {
   capacity_gib = "2048"
   network = data.google_compute_network.default.id
   qos_type = "MANUAL"
-  total_throughput_mibps = "64"
 }
 
 resource "time_sleep" "wait_3_minutes" {
