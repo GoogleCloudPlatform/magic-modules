@@ -628,6 +628,7 @@ func (t Type) ExactlyOneOfList() []string {
 	if t.ResourceMetadata == nil {
 		return []string{}
 	}
+
 	return t.ExactlyOneOf
 }
 
@@ -1014,54 +1015,6 @@ func propertyWithClientSide(clientSide bool) func(*Type) {
 func propertyWithIgnoreWrite(ignoreWrite bool) func(*Type) {
 	return func(p *Type) {
 		p.IgnoreWrite = ignoreWrite
-	}
-}
-
-func propertyWithRequired(required bool) func(*Type) {
-	return func(p *Type) {
-		p.Required = required
-	}
-}
-
-func propertyWithWriteOnly(writeOnly bool) func(*Type) {
-	return func(p *Type) {
-		p.WriteOnly = writeOnly
-	}
-}
-
-func propertyWithIgnoreRead(ignoreRead bool) func(*Type) {
-	return func(p *Type) {
-		p.IgnoreRead = ignoreRead
-	}
-}
-
-func propertyWithConflicts(conflicts []string) func(*Type) {
-	return func(p *Type) {
-		p.Conflicts = conflicts
-	}
-}
-
-func propertyWithRequiredWith(requiredWith []string) func(*Type) {
-	return func(p *Type) {
-		p.RequiredWith = requiredWith
-	}
-}
-
-func propertyWithExactlyOneOf(exactlyOneOf []string) func(*Type) {
-	return func(p *Type) {
-		p.ExactlyOneOf = exactlyOneOf
-	}
-}
-
-func propertyWithAtLeastOneOf(atLeastOneOf []string) func(*Type) {
-	return func(p *Type) {
-		p.AtLeastOneOf = atLeastOneOf
-	}
-}
-
-func propertyWithApiName(apiName string) func(*Type) {
-	return func(p *Type) {
-		p.ApiName = apiName
 	}
 }
 
