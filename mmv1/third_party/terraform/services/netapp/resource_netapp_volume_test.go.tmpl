@@ -917,7 +917,6 @@ resource "google_netapp_storage_pool" "test_pool" {
   network = data.google_compute_network.default.id
   qos_type = "AUTO"
   total_throughput_mibps = "64"
-  total_iops = "1024"
 }
 
 resource "time_sleep" "wait_3_minutes" {
@@ -950,7 +949,6 @@ resource "google_netapp_storage_pool" "test_pool" {
   network = data.google_compute_network.default.id
   qos_type = "MANUAL"
   total_throughput_mibps = "64"
-  total_iops = "1024"
 }
 
 resource "time_sleep" "wait_3_minutes" {
