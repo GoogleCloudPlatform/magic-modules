@@ -231,23 +231,30 @@ func GetPaginatedItems(paginationOptions GetPaginatedItemsOptions) ([]map[string
 		}
 
 		var newItems []map[string]interface{}
-		if paginationOptions.ListFlattener != nil {
-			if res[paginationOptions.ResourceToList] != nil {
-				flattened, err := paginationOptions.ListFlattener(paginationOptions.Config, res[paginationOptions.ResourceToList].([]map[string]interface{}))
+		if res[paginationOptions.ResourceToList] != nil {
+			// The list of items is interface{}. Its underlying type is []interface{}.
+			// We need to convert it to []map[string]interface{}
+			itemsAsInterface, ok := res[paginationOptions.ResourceToList].([]interface{})
+			if !ok {
+				return nil, fmt.Errorf("cannot convert %s to slice of interfaces: got %T", paginationOptions.ResourceToList, res[paginationOptions.ResourceToList])
+			}
+
+			itemsAsMap := make([]map[string]interface{}, len(itemsAsInterface))
+			for i, item := range itemsAsInterface {
+				itemsAsMap[i], ok = item.(map[string]interface{})
+				if !ok {
+					return nil, fmt.Errorf("cannot convert item to map[string]interface{}: got %T", item)
+				}
+			}
+			if paginationOptions.ListFlattener != nil {
+				log.Printf("[DEBUG] res[paginationOptions.ResourceToList]: %#v", res[paginationOptions.ResourceToList])
+				flattened, err := paginationOptions.ListFlattener(paginationOptions.Config, itemsAsMap)
 				if err != nil {
 					return nil, err
 				}
 				newItems = flattened
-			}
-		} else {
-			if v, ok := res[paginationOptions.ResourceToList].([]interface{}); ok {
-				for _, item := range v {
-					if m, ok := item.(map[string]interface{}); ok {
-						newItems = append(newItems, m)
-					} else {
-						return nil, fmt.Errorf("item in list is not a map[string]interface{}")
-					}
-				}
+			} else {
+				newItems = itemsAsMap
 			}
 		}
 		items = append(items, newItems...)
