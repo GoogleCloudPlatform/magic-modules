@@ -379,6 +379,9 @@ type TGCResource struct {
 	// and compute.googleapis.com/GlobalAddress has GlobalAddress for CaiResourceKind.
 	// But they have the same api resource type: address
 	CaiResourceKind string `yaml:"cai_resource_kind,omitempty"`
+
+	// If true, the Terraform custom encoder is not applied during tfplan2cai
+	TGCIgnoreTerraformEncoder bool `yaml:"tgc_ignore_terraform_encoder,omitempty"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
