@@ -14350,7 +14350,7 @@ func TestAccContainerCluster_additional_ip_ranges_config_on_create(t *testing.T)
 func TestAccContainerCluster_additional_ip_ranges_config_on_update(t *testing.T) {
 	t.Parallel()
 
-	testName := "gke-msc"
+	testName := "gke-msc-update"
 	network, sri := bootstrapAdditionalIpRangesNetworkConfig(t, testName, 2, 2)
 
 	clusterName := fmt.Sprintf("tf-test-cluster-%s", acctest.RandString(t, 10))
