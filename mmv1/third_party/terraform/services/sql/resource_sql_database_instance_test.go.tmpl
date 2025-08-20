@@ -1400,6 +1400,43 @@ func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_createFromBackupDR(t *testing.T) {
+	t.Parallel()
+
+	// Bootstrap the BackupDR vault
+    backupVaultID := "bv-test"
+    location := "us-central1"
+    project := envvar.GetTestProjectFromEnv()
+    backupvault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
+
+    context := map[string]interface{}{
+        "random_suffix":  acctest.RandString(t, 10),
+        "project":        project,
+        "backup_vault_id": backupVaultID,
+        "backup_vault":   backupvault,
+    }
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_createFromBackupDR(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "backupdr_backup"},
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 	// Sqladmin client
 	acctest.SkipIfVcr(t)
@@ -1407,6 +1444,7 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    acctest.RandString(t, 10),
+		"db_version":   "POSTGRES_11",
 		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
@@ -1437,45 +1475,22 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 	})
 }
 
-func TestAccSqlDatabaseInstance_createFromPointInTimeRestore(t *testing.T) {
-	// Sqladmin client
-	acctest.SkipIfVcr(t)
+func TestAccSqlDatabaseInstance_BackupDRUpdate(t *testing.T) {
 	t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix":   acctest.RandString(t, 10),
-		"project":     envvar.GetTestProjectFromEnv(),
-	}
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
-		ExternalProviders: map[string]resource.ExternalProvider{
-			"time": {},
-		},
-		Steps: []resource.TestStep{
-			{
-				Config: testAccSqlDatabaseInstance_pointInTimeRestore(context),
-			},
-			{
-				ResourceName:            "google_sql_database_instance.instance",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "point_in_time_restore_context"},
-			},
-		},
-	})
-}
+	// Bootstrap the BackupDR vault
+    backupVaultID := "bv-test"
+    location := "us-central1"
+    project := envvar.GetTestProjectFromEnv()
+    backupvault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
 
-func TestAccSqlDatabaseInstance_updateFromPointInTimeRestore(t *testing.T) {
-	// Sqladmin client
-	acctest.SkipIfVcr(t)
-	t.Parallel()
-
-	context := map[string]interface{}{
-		"random_suffix":    acctest.RandString(t, 10),
-		"project": envvar.GetTestProjectFromEnv(), 
-	}
+    context := map[string]interface{}{
+        "random_suffix": 	acctest.RandString(t, 10),
+        "project": 			project,
+        "backup_vault_id": 	backupVaultID,
+        "backup_vault": 	backupvault,
+		"db_version": 		"MYSQL_8_0_41",
+    }
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1495,13 +1510,13 @@ func TestAccSqlDatabaseInstance_updateFromPointInTimeRestore(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccSqlDatabaseInstance_pointInTimeRestore(context),
+				Config: testAccSqlDatabaseInstance_updateFromBackupDR(context),
 			},
 			{
 				ResourceName:            "google_sql_database_instance.instance",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "point_in_time_restore_context"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "backupdr_backup"},
 			},
 		},
 	})
@@ -6421,7 +6436,7 @@ func testAccSqlDatabaseInstance_beforeBackup(context map[string]interface{}) str
 	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
-  database_version = "POSTGRES_11"
+  database_version = "%{db_version}"
   region           = "us-central1"
 
   settings {
@@ -6470,7 +6485,7 @@ data "google_sql_backup_run" "backup" {
 `, context)
 }
 
-func testAccSqlDatabaseInstance_pointInTimeRestore(context map[string]interface{}) string {
+func testAccSqlDatabaseInstance_createFromBackupDR(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 // Create service account
 resource "google_service_account" "bkdr_sa" {
@@ -6478,35 +6493,16 @@ resource "google_service_account" "bkdr_sa" {
     display_name = "Backup DR Service Account"
 }
 
-// Create a BackupDR vault
-resource "google_backup_dr_backup_vault" "vault" {
-    location ="us-central1"
-    backup_vault_id    = "tf-test-bv-%{random_suffix}"
-    description = "This is a second backup vault built by Terraform."
-    backup_minimum_enforced_retention_duration = "86400s"
-    labels = {
-      foo = "bar1"
-      bar = "baz1"
-    }
-    annotations = {
-      annotations1 = "bar1"
-      annotations2 = "baz1"
-    }
-    force_update = "true"
-    force_delete = "true"
-    allow_missing = "true" 
-}
-
 // Create a backup plan
 resource "google_backup_dr_backup_plan" "plan" {
   location       = "us-central1"
   backup_plan_id = "tf-test-bp-test-%{random_suffix}"
   resource_type  = "sqladmin.googleapis.com/Instance"
-  backup_vault   = google_backup_dr_backup_vault.vault.name
+  backup_vault   = "%{backup_vault}"
 
   backup_rules {
     rule_id                = "rule-1"
-    backup_retention_days  = 1
+    backup_retention_days  = 7
 
     standard_schedule {
       recurrence_type     = "DAILY"
@@ -6524,49 +6520,170 @@ resource "google_backup_dr_backup_plan" "plan" {
 // Create source SQL instance to backup
 resource "google_sql_database_instance" "source" {
     name                = "tf-test-source-%{random_suffix}"
-    database_version    = "MYSQL_8_0"
-    region             = "us-central1"
-    project            = "%{project}"
-
+    database_version    = "MYSQL_8_0_41"
+    region             	= "us-central1"
+    project            	= "%{project}"
     settings {
         tier = "db-f1-micro"
         backup_configuration {
             enabled = true
         }
     }
+	lifecycle {
+		ignore_changes = [
+		  settings[0].backup_configuration[0].enabled,
+		]
+ 	}
     deletion_protection = false
 }
 
 // Associate backup plan with SQL instance
 resource "google_backup_dr_backup_plan_association" "association" { 
-  location = "us-central1" 
-  backup_plan_association_id = "tf-test-bpa-test-%{random_suffix}"
-  resource =   "projects/${google_sql_database_instance.source.project}/instances/${google_sql_database_instance.source.name}"
-  resource_type= "sqladmin.googleapis.com/Instance"
-  backup_plan = google_backup_dr_backup_plan.plan.name
-
-  depends_on = [
-    google_sql_database_instance.source,
-    google_backup_dr_backup_plan.plan
-  ]
+  location 						= "us-central1" 
+  backup_plan_association_id 	= "tf-test-bpa-test-%{random_suffix}"
+  resource 						= "projects/${google_sql_database_instance.source.project}/instances/${google_sql_database_instance.source.name}"
+  resource_type					= "sqladmin.googleapis.com/Instance"
+  backup_plan 					= google_backup_dr_backup_plan.plan.name
 }
 
 // Wait for the first backup to be created
-resource "time_sleep" "wait_5_mins" {
+resource "time_sleep" "wait_10_mins" {
   depends_on = [google_backup_dr_backup_plan_association.association]
 
-  create_duration = "300s"
+  create_duration = "600s"
 }
 
 data "google_backup_dr_backup" "sql_backups" {
-  project = "%{project}"
-  location      = "us-central1"
-  backup_vault_id = "tf-test-bv-%{random_suffix}"
-  data_source_id = element(split("/", google_backup_dr_backup_plan_association.association.data_source), length(split("/", google_backup_dr_backup_plan_association.association.data_source)) - 1)
+  project			= "%{project}"
+  location      	= "us-central1"
+  backup_vault_id 	= "%{backup_vault_id}"
+  data_source_id 	= element(split("/", google_backup_dr_backup_plan_association.association.data_source), length(split("/", google_backup_dr_backup_plan_association.association.data_source)) - 1)
 
-  depends_on = [time_sleep.wait_5_mins]
+  depends_on = [time_sleep.wait_10_mins]
 }
 
+resource "google_sql_database_instance" "instance" {
+  name             = "tf-test-%{random_suffix}"
+  database_version = "MYSQL_8_0_41"
+  region           = "us-central1"
+
+  settings {
+    tier = "db-g1-small"
+	backup_configuration {
+    	enabled = true
+    }
+  }
+
+  backupdr_backup 		= data.google_backup_dr_backup.sql_backups.backups[0].name
+
+  deletion_protection 	= false
+}
+`, context)
+}
+
+func testAccSqlDatabaseInstance_updateFromBackupDR(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+// Create service account
+resource "google_service_account" "bkdr_sa" {
+    account_id   = "tf-test-bkdr-sa-%{random_suffix}"
+    display_name = "Backup DR Service Account"
+}
+
+// Create a backup plan
+resource "google_backup_dr_backup_plan" "plan" {
+  location       = "us-central1"
+  backup_plan_id = "tf-test-bp-test-%{random_suffix}"
+  resource_type  = "sqladmin.googleapis.com/Instance"
+  backup_vault   = "%{backup_vault}"
+
+  backup_rules {
+    rule_id                = "rule-1"
+    backup_retention_days  = 7
+
+    standard_schedule {
+      recurrence_type     = "DAILY"
+      hourly_frequency    = 6
+      time_zone           = "UTC"
+
+      backup_window {
+        start_hour_of_day = 0
+        end_hour_of_day   = 23
+      }
+    }
+  }
+}
+
+// Create source SQL instance to backup
+resource "google_sql_database_instance" "source" {
+    name                = "tf-test-source-%{random_suffix}"
+    database_version    = "MYSQL_8_0_41"
+    region             	= "us-central1"
+    project            	= "%{project}"
+    settings {
+        tier = "db-f1-micro"
+        backup_configuration {
+            enabled = true
+        }
+    }
+	lifecycle {
+		ignore_changes = [
+		  settings[0].backup_configuration[0].enabled,
+		]
+ 	}
+    deletion_protection = false
+}
+
+// Associate backup plan with SQL instance
+resource "google_backup_dr_backup_plan_association" "association" { 
+  location 						= "us-central1" 
+  backup_plan_association_id 	= "tf-test-bpa-test-%{random_suffix}"
+  resource 						= "projects/${google_sql_database_instance.source.project}/instances/${google_sql_database_instance.source.name}"
+  resource_type					= "sqladmin.googleapis.com/Instance"
+  backup_plan 					= google_backup_dr_backup_plan.plan.name
+}
+
+// Wait for the first backup to be created
+resource "time_sleep" "wait_10_mins" {
+  depends_on = [google_backup_dr_backup_plan_association.association]
+
+  create_duration = "600s"
+}
+
+data "google_backup_dr_backup" "sql_backups" {
+  project			= "%{project}"
+  location      	= "us-central1"
+  backup_vault_id 	= "%{backup_vault_id}"
+  data_source_id 	= element(split("/", google_backup_dr_backup_plan_association.association.data_source), length(split("/", google_backup_dr_backup_plan_association.association.data_source)) - 1)
+
+  depends_on = [time_sleep.wait_10_mins]
+}
+
+resource "google_sql_database_instance" "instance" {
+  name             = "tf-test-%{random_suffix}"
+  database_version = "MYSQL_8_0_41"
+  region           = "us-central1"
+
+  settings {
+    tier = "db-g1-small"
+	backup_configuration {
+    	enabled = true
+    }
+  }
+  lifecycle {
+	ignore_changes = [
+	  settings[0].backup_configuration[0].enabled,
+	]
+  }
+
+  backupdr_backup 		= data.google_backup_dr_backup.sql_backups.backups[0].name
+
+  deletion_protection 	= false
+}
+`, context)
+}
+
+func testAccSqlDatabaseInstance_basicClone(context map[string]interface{}) string {
+	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
   database_version = "POSTGRES_11"
