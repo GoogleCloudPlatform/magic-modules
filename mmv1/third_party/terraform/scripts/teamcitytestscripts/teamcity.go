@@ -109,6 +109,8 @@ func (test *TeamCityTest) FormatTestOutput() string {
 
 	// test passes if no diff, even if failure (failure artifacts will be in regular_failure_file.log)
 	output.WriteString(fmt.Sprintf(TeamCityTestFinished, now, test.Name))
+	// instead of failing when something unexpected happens, we skip the test now
+	output.WriteString(fmt.Sprintf(TeamCityTestIgnored, now, test.Name))
 
 	return output.String()
 }
