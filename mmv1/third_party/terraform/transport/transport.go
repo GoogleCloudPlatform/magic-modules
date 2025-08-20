@@ -191,14 +191,15 @@ func IsApiNotEnabledError(err error) bool {
 }
 
 type GetPaginatedItemsOptions struct {
-	ResourceData   *schema.ResourceData
-	Config         *Config
-	BillingProject *string
-	UserAgent      string
-	URL            string
-	ListFlattener  func(config *Config, res []map[string]interface{}) ([]map[string]interface{}, error)
-	Params         map[string]string
-	ResourceToList string
+	ResourceData         *schema.ResourceData
+	Config               *Config
+	BillingProject       *string
+	UserAgent            string
+	URL                  string
+	ListFlattener        func(config *Config, res []map[string]interface{}) ([]map[string]interface{}, error)
+	Params               map[string]string
+	ResourceToList       string
+	ErrorRetryPredicates []RetryErrorPredicateFunc
 }
 
 func GetPaginatedItems(paginationOptions GetPaginatedItemsOptions) ([]map[string]interface{}, error) {
@@ -220,7 +221,7 @@ func GetPaginatedItems(paginationOptions GetPaginatedItemsOptions) ([]map[string
 			RawURL:               url,
 			UserAgent:            paginationOptions.UserAgent,
 			Headers:              headers,
-			ErrorRetryPredicates: []RetryErrorPredicateFunc{Is429RetryableQuotaError},
+			ErrorRetryPredicates: paginationOptions.ErrorRetryPredicates,
 		}
 		if paginationOptions.BillingProject != nil {
 			opts.Project = *paginationOptions.BillingProject

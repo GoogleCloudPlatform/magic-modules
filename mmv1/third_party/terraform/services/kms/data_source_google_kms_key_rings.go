@@ -104,14 +104,15 @@ func dataSourceGoogleKmsKeyRingsRead(d *schema.ResourceData, meta interface{}) e
 	}
 
 	opts := transport_tpg.GetPaginatedItemsOptions{
-		ResourceData:   d,
-		Config:         config,
-		BillingProject: &billingProject,
-		UserAgent:      userAgent,
-		URL:            url,
-		ResourceToList: "keyRings",
-		Params:         params,
-		ListFlattener:  flattenKMSKeyRingsList,
+		ResourceData:         d,
+		Config:               config,
+		BillingProject:       &billingProject,
+		UserAgent:            userAgent,
+		URL:                  url,
+		ResourceToList:       "keyRings",
+		Params:               params,
+		ListFlattener:        flattenKMSKeyRingsList,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.Is429RetryableQuotaError},
 	}
 	var keyRings []map[string]interface{}
 	keyRings, err = transport_tpg.GetPaginatedItems(opts)

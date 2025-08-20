@@ -125,13 +125,14 @@ func dataSourceKMSCryptoKeysList(d *schema.ResourceData, meta interface{}, keyRi
 	}
 
 	opt := transport_tpg.GetPaginatedItemsOptions{
-		ResourceData:   d,
-		Config:         config,
-		BillingProject: &billingProject,
-		UserAgent:      userAgent,
-		URL:            url,
-		Params:         params,
-		ResourceToList: "cryptoKeys",
+		ResourceData:         d,
+		Config:               config,
+		BillingProject:       &billingProject,
+		UserAgent:            userAgent,
+		URL:                  url,
+		Params:               params,
+		ResourceToList:       "cryptoKeys",
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.Is429RetryableQuotaError},
 	}
 	resp, err := transport_tpg.GetPaginatedItems(opt)
 	if err != nil {

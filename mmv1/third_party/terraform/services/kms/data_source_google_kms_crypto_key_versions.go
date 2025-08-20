@@ -181,13 +181,14 @@ func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}
 
 	var cryptoKeyVersions []map[string]interface{}
 	opts := transport_tpg.GetPaginatedItemsOptions{
-		ResourceData:   d,
-		Config:         config,
-		BillingProject: &billingProject,
-		UserAgent:      userAgent,
-		URL:            url,
-		ResourceToList: "cryptoKeyVersions",
-		Params:         params,
+		ResourceData:         d,
+		Config:               config,
+		BillingProject:       &billingProject,
+		UserAgent:            userAgent,
+		URL:                  url,
+		ResourceToList:       "cryptoKeyVersions",
+		Params:               params,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.Is429RetryableQuotaError},
 	}
 	cryptoKeyVersions, err = transport_tpg.GetPaginatedItems(opts)
 	if err != nil {
