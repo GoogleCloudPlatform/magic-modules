@@ -977,7 +977,7 @@ func propertyWithDescription(description string) func(*Type) {
 	}
 }
 
-func propertyWithDefaultValue(defaultValue string) func(*Type) {
+func propertyWithDefaultValue(defaultValue int) func(*Type) {
 	return func(p *Type) {
 		p.DefaultValue = defaultValue
 	}

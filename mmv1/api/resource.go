@@ -786,9 +786,9 @@ func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField
 		propertyWithClientSide(true),
 	}
 
-	// TODO(anymore) remove with next major release + add migration guide
+	// TODO: remove this branch with the next major release + add migration guide
 	if name == "secretDataWoVersion" {
-		options = append(options, propertyWithDefaultValue("0"))
+		options = append(options, propertyWithDefaultValue(0))
 	}
 
 	return NewProperty(name, name, options)
