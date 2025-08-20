@@ -102,6 +102,20 @@ properties:
           The full resource name of the Data Connector.
           Format: `projects/*/locations/*/collections/*/dataConnector`.
         output: true
+      - name: 'state'
+        type: Enum
+        description: |
+          The state of connector.
+        output: true
+        enum_values:
+          - 'STATE_UNSPECIFIED'
+          - 'CREATING'
+          - 'ACTIVE'
+          - 'FAILED'
+          - 'RUNNING'
+          - 'WARNING'
+          - 'INITIALIZATION_FAILED'
+          - 'UPDATING'
       - name: 'dataSource'
         type: String
         description: |
@@ -193,7 +207,131 @@ properties:
                 * Salesforce: `Lead`, `Opportunity`, `Contact`, `Account`, `Case`, `Contract`, `Campaign`
                 * Jira: project, issue, attachment, comment, worklog
                 * Confluence: `Content`, `Space`
+      - name: 'create_time'
+        type: Time
+        description: |
+          Timestamp when the DataConnector was created.
+        output: true
+      - name: 'latest_pause_time'
+        type: Time
+        description: |
+          The most recent timestamp when this [DataConnector][] was paused,
+          affecting all functionalities such as data synchronization.
+          Pausing a connector has the following effects:
+            - All functionalities, including data synchronization, are halted.
+            - Any ongoing data synchronization job will be canceled.
+            - No future data synchronization runs will be scheduled nor can be
+          triggered.
+        output: true
+      - name: 'last_sync_time'
+        type: Time
+        description: |
+          For periodic connectors only, the last time a data sync was completed.
+        output: true
+      - name: 'update_time'
+        type: Time
+        description: |
+          Timestamp when the DataConnector was updated.
+        output: true
+      - name: 'errors'
+        type: Array
+        description: |
+          The errors from initialization or from the latest connector run.
+        output: true
+        item_type:
+          type: NestedObject
+          properties:
+            - name: 'code'
+              type: Integer
+              description: |
+                The status code, which should be an enum value of google.rpc.Code.
+              output: true
+            - name: 'message'
+              type: String
+              description: |
+                A developer-facing error message, which should be in English.
+              output: true
+      - name: 'kms_key_name'
+        type: String
+        description: |
+          The KMS key to be used to protect the DataStores managed by this connector.
+          Must be set for requests that need to comply with CMEK Org Policy
+          protections.
+          If this field is set and processed successfully, the DataStores created by
+          this connector will be protected by the KMS key.
+      - name: 'actionState'
+        type: Enum
+        description: |
+          State of the action connector. This reflects whether the action connector
+          is initializing, active or has encountered errors.
+        output: true
+        enum_values:
+          - 'STATE_UNSPECIFIED'
+          - 'CREATING'
+          - 'ACTIVE'
+          - 'FAILED'
+          - 'RUNNING'
+          - 'WARNING'
+          - 'INITIALIZATION_FAILED'
+          - 'UPDATING'
       - name: 'staticIpEnabled'
         type: Boolean
         description: |
           Whether customer has enabled static IP addresses for this connector.
+      - name: 'staticIpAddresses'
+        type: Array
+        description: |
+          The static IP addresses used by this connector.
+        output: true
+        item_type:
+          type: String
+      - name: 'blockingReasons'
+        type: Array
+        description: |
+          User actions that must be completed before the connector can start syncing data.
+        output: true
+        item_type:
+          type: Enum
+          enum_values:
+            - 'ALLOWLIST_STATIC_IP'
+            - 'ALLOWLIST_IN_SERVICE_ATTACHMENT'
+      - name: 'privateConnectivityProjectId'
+        type: String
+        description: |
+          The tenant project ID associated with private connectivity connectors.
+          This project must be allowlisted by in order for the connector to function.
+        output: true
+      - name: 'connectorType'
+        type: Enum
+        description: |
+          The type of connector. Each source can only map to one type.
+          For example, salesforce, confluence and jira have THIRD_PARTY connector
+          type. It is not mutable once set by system.
+        output: true
+        enum_values:
+          - 'CONNECTOR_TYPE_UNSPECIFIED'
+          - 'THIRD_PARTY'
+          - 'GCP_FHIR'
+          - 'BIG_QUERY'
+          - 'GCS'
+          - 'GOOGLE_MAIL'
+          - 'GOOGLE_CALENDAR'
+          - 'GOOGLE_DRIVE'
+          - 'NATIVE_CLOUD_IDENTITY'
+          - 'THIRD_PARTY_FEDERATED'
+          - 'THIRD_PARTY_EUA'
+          - 'GCNV'
+      - name: 'realtimeState'
+        type: Enum
+        description: |
+          The real-time sync state.
+        output: true
+        enum_values:
+          - 'STATE_UNSPECIFIED'
+          - 'CREATING'
+          - 'ACTIVE'
+          - 'FAILED'
+          - 'RUNNING'
+          - 'WARNING'
+          - 'INITIALIZATION_FAILED'
+          - 'UPDATING'
