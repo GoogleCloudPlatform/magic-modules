@@ -75,6 +75,8 @@ func dataSource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{
 
   id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
 
+  d.SetId(id)
+
   err = resource{{ $.ResourceName -}}Read(d, meta)
 	if err != nil {
 		return err
