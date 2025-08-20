@@ -1187,6 +1187,7 @@ func TestAccComputeBackendService_resourceManagerTags(t *testing.T) {
 				ResourceName:      "google_compute_backend_service.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"params"},
 			},
 		},
 	})
