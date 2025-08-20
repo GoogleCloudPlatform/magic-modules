@@ -782,13 +782,15 @@ func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField
 		propertyWithType("String"),
 		propertyWithImmutable(originalField.Immutable),
 		propertyWithDescription(description),
-		propertyWithRequiredWith([]string{requiredWith}),
 		propertyWithClientSide(true),
 	}
 
 	// TODO: remove this branch with the next major release + add migration guide
+	// In the future (next major) the secret_data_wo_version is required and should always be set explicitly (so no default, required with the _wo field)
 	if name == "secretDataWoVersion" {
 		options = append(options, propertyWithDefaultValue(0))
+	} else {
+		propertyWithRequiredWith([]string{requiredWith})
 	}
 
 	return NewProperty(name, name, options)
