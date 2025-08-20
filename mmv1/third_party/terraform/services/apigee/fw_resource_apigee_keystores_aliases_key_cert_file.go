@@ -85,7 +85,7 @@ func (r *ApigeeKeystoresAliasesKeyCertFileResource) Configure(ctx context.Contex
 	r.providerConfig = p
 }
 
-func (r *ApigeeKeystoresAliasesKeyCertFileResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *ApigeeKeystoresAliasesKeyCertFileResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "An alias from a key/cert file.",
 		Attributes: map[string]schema.Attribute{
@@ -161,6 +161,14 @@ func (r *ApigeeKeystoresAliasesKeyCertFileResource) Schema(_ context.Context, _ 
 					},
 				},
 			},
+		},
+		Blocks: map[string]schema.Block{
+			"timeouts": timeouts.Block(ctx, timeouts.Opts{
+				Create: true,
+				Read:   true,
+				Update: true,
+				Delete: true,
+			}),
 		},
 	}
 }
