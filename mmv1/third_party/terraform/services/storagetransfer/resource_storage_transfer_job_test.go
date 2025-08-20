@@ -2526,10 +2526,13 @@ resource "google_storage_transfer_job" "transfer_job" {
   transfer_spec {
     aws_s3_compatible_data_source {
       bucket_name = "%s"
-      path        = "foo/bar/"
-      endpoint    = "https://sample.r2.cloudflarestorage.com/"
+      path        = "foo/bar/foo/"
+      endpoint    = "https://sample-update.r2.cloudflarestorage.com/"
       s3_metadata {
-        request_model = "REQUEST_MODEL_PATH_STYLE"
+        auth_method   = "AUTH_METHOD_AWS_SIGNATURE_V2"
+        list_api      = "LIST_OBJECTS"
+        protocol      = "NETWORK_PROTOCOL_HTTPS"
+        request_model = "REQUEST_MODEL_VIRTUAL_HOSTED_STYLE"
       }
     }
     gcs_data_sink {
