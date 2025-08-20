@@ -1,0 +1,28 @@
+resource "google_saas_runtime_saas" "example_saas" {
+  provider = google-beta
+  saas_id  = "{{index $.Vars "saas_name"}}"
+  location = "global"
+
+  locations {
+    name = "us-central1"
+  }
+}
+
+resource "google_saas_runtime_unit_kind" "cluster_unit_kind" {
+  provider = google-beta
+  location = "global"
+  unit_kind_id = "{{index $.Vars "cluster_unitkind_name"}}"
+  saas = google_saas_runtime_saas.example_saas.id
+}
+
+resource "google_saas_runtime_unit_kind" "{{$.PrimaryResourceId}}" {
+  provider = google-beta
+  location = "global"
+  unit_kind_id = "{{index $.Vars "app_unitkind_name"}}"
+  saas = google_saas_runtime_saas.example_saas.id
+
+  dependencies {
+    unit_kind = google_saas_runtime_unit_kind.cluster_unit_kind.id
+    alias     = "cluster"
+  }
+}
