@@ -5,7 +5,9 @@ import (
 	"context"
 	"fmt"
 	"mime/multipart"
+	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -37,16 +39,17 @@ type ApigeeKeystoresAliasesKeyCertFileResource struct {
 }
 
 type ApigeeKeystoresAliasesKeyCertFileResourceModel struct {
-	Id          types.String `tfsdk:"id"`
-	OrgId       types.String `tfsdk:"org_id"`
-	Environment types.String `tfsdk:"environment"`
-	Keystore    types.String `tfsdk:"keystore"`
-	Alias       types.String `tfsdk:"alias"`
-	Cert        types.String `tfsdk:"cert"`
-	Key         types.String `tfsdk:"key"`
-	Password    types.String `tfsdk:"password"`
-	Type        types.String `tfsdk:"type"`
-	CertsInfo   types.List   `tfsdk:"certs_info"`
+	Id          types.String   `tfsdk:"id"`
+	OrgId       types.String   `tfsdk:"org_id"`
+	Environment types.String   `tfsdk:"environment"`
+	Keystore    types.String   `tfsdk:"keystore"`
+	Alias       types.String   `tfsdk:"alias"`
+	Cert        types.String   `tfsdk:"cert"`
+	Key         types.String   `tfsdk:"key"`
+	Password    types.String   `tfsdk:"password"`
+	Type        types.String   `tfsdk:"type"`
+	CertsInfo   types.List     `tfsdk:"certs_info"`
+	Timeouts    timeouts.Value `tfsdk:"timeouts"`
 }
 
 type CertInfoDetailModel struct {
@@ -172,6 +175,12 @@ func (r *ApigeeKeystoresAliasesKeyCertFileResource) Create(ctx context.Context, 
 		return
 	}
 
+	createTimeout, diags := plan.Timeouts.Create(ctx, 20*time.Minute)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	buf := new(bytes.Buffer)
 	bw := multipart.NewWriter(buf)
 	if !plan.Key.IsNull() && !plan.Key.IsUnknown() {
@@ -195,17 +204,10 @@ func (r *ApigeeKeystoresAliasesKeyCertFileResource) Create(ctx context.Context, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	res, diags := sendRequestRawBodyFramework(ctx, SendRequestRawBodyOptions{
-		Config:      r.providerConfig,
-		Method:      "POST",
-		Project:     billingProject.ValueString(),
-		RawURL:      url,
-		UserAgent:   userAgent,
-		Body:        buf,
-		ContentType: bw.FormDataContentType(),
-	})
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
+
+	res, err := sendRequestRawBodyWithTimeout(r.providerConfig, "POST", billingProject.ValueString(), url, userAgent, buf, bw.FormDataContentType(), createTimeout)
+	if err != nil {
+		resp.Diagnostics.AddError("Error, failure to create key cert file", err.Error())
 		return
 	}
 
@@ -258,6 +260,11 @@ func (r *ApigeeKeystoresAliasesKeyCertFileResource) Update(ctx context.Context, 
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	updateTimeout, diags := plan.Timeouts.Update(ctx, 20*time.Minute)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	buf := new(bytes.Buffer)
 	bw := multipart.NewWriter(buf)
@@ -280,18 +287,10 @@ func (r *ApigeeKeystoresAliasesKeyCertFileResource) Update(ctx context.Context, 
 	}
 
 	tflog.Trace(ctx, "Updating Apigee Keystore Alias", map[string]interface{}{"url": url})
+	res, err := sendRequestRawBodyWithTimeout(r.providerConfig, "PUT", billingProject.ValueString(), url, userAgent, buf, bw.FormDataContentType(), updateTimeout)
 
-	res, diags := sendRequestRawBodyFramework(ctx, SendRequestRawBodyOptions{
-		Config:      r.providerConfig,
-		Method:      "PUT",
-		Project:     billingProject.ValueString(),
-		RawURL:      url,
-		UserAgent:   userAgent,
-		Body:        buf,
-		ContentType: bw.FormDataContentType(),
-	})
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
+	if err != nil {
+		resp.Diagnostics.AddError("Error, failure to update key cert file", err.Error())
 		return
 	}
 
@@ -319,6 +318,12 @@ func (r *ApigeeKeystoresAliasesKeyCertFileResource) Delete(ctx context.Context, 
 		return
 	}
 
+	deleteTimeout, diags := data.Timeouts.Delete(ctx, 20*time.Minute)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
 
 	var schemaDefaultVals fwtransport.DefaultVars
@@ -335,6 +340,7 @@ func (r *ApigeeKeystoresAliasesKeyCertFileResource) Delete(ctx context.Context, 
 		Project:   data.OrgId.ValueString(),
 		RawURL:    url,
 		UserAgent: userAgent,
+		Timeout:   deleteTimeout,
 	}, &resp.Diagnostics)
 
 	tflog.Trace(ctx, "Successfully deleted Apigee Keystore Alias.")
@@ -351,6 +357,12 @@ func (r *ApigeeKeystoresAliasesKeyCertFileResource) refresh(ctx context.Context,
 		return
 	}
 
+	readTimeout, timeoutDiags := data.Timeouts.Read(ctx, 20*time.Minute)
+	diags.Append(timeoutDiags...)
+	if diags.HasError() {
+		return
+	}
+
 	tflog.Trace(ctx, "Refreshing Apigee Keystore Alias", map[string]interface{}{"url": url})
 
 	res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
@@ -359,6 +371,7 @@ func (r *ApigeeKeystoresAliasesKeyCertFileResource) refresh(ctx context.Context,
 		Project:   data.OrgId.ValueString(),
 		RawURL:    url,
 		UserAgent: userAgent,
+		Timeout:   readTimeout,
 	}, diags)
 
 	if diags.HasError() {
