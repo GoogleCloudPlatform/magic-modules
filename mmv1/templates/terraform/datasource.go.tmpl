@@ -73,19 +73,7 @@ func DataSource{{ .ResourceName -}}() *schema.Resource {
 func dataSource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
   config := meta.(*transport_tpg.Config)
 
-  {{if $.ImportFormat}}
-    id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{index $.ImportFormat 0}}{{$.ReadQueryParams}}")
-      if err != nil {
-          return err
-      }
-    d.SetId(id)
-  {{else}}
-    id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
-      if err != nil {
-          return err
-      }
-    d.SetId(id)
-  {{end}}
+  id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
 
   err = resource{{ $.ResourceName -}}Read(d, meta)
 	if err != nil {
