@@ -149,6 +149,14 @@ resource "google_saas_runtime_unit_kind" "example" {
       output_variable = "endpoint"
     }
   }
+
+  labels = {
+    "label-one": "foo"
+  }
+  
+  annotations = {
+    "annotation-one": "bar"
+  }
 }
 `, context)
 }
