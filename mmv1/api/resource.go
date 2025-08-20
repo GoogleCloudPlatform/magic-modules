@@ -382,6 +382,12 @@ type TGCResource struct {
 
 	// If true, the Terraform custom encoder is not applied during tfplan2cai
 	TGCIgnoreTerraformEncoder bool `yaml:"tgc_ignore_terraform_encoder,omitempty"`
+
+	// [Optional] The parameter that uniquely identifies the resource.
+	// Generally, it's safe to leave empty, in which case it defaults to `name`.
+	// Other values are normally useful in cases where an object has a parent
+	// and is identified by some non-name value, such as an ip+port pair.
+	CaiIdentity string `yaml:"cai_identity,omitempty"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -1890,14 +1896,18 @@ func (r Resource) DefineAssetTypeForResourceInProduct() bool {
 // For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
 func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
 	caiBaseUrl := ""
+	caiId := "name"
+	if r.CaiIdentity != "" {
+		caiId = r.CaiIdentity
+	}
 	if r.CaiBaseUrl != "" {
-		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.CaiBaseUrl)
+		caiBaseUrl = fmt.Sprintf("%s/{{%s}}", r.CaiBaseUrl, caiId)
 	}
 	if caiBaseUrl == "" {
 		caiBaseUrl = r.SelfLink
 	}
 	if caiBaseUrl == "" {
-		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.BaseUrl)
+		caiBaseUrl = fmt.Sprintf("%s/{{%s}}", r.BaseUrl, caiId)
 	}
 	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, caiBaseUrl)
 }

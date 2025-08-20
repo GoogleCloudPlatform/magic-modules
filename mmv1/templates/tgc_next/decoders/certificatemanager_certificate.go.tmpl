@@ -6,4 +6,4 @@ if vStr, ok := res["scope"].(string); ok && vStr == "DEFAULT" {
 	// Omit the default value.
 	delete(res, "scope")
 }
-return res, nil
+return res, hclData, nil
