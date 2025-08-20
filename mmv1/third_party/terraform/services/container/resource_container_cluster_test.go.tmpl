@@ -14379,7 +14379,7 @@ func TestAccContainerCluster_additional_ip_ranges_config_on_update(t *testing.T)
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_additional_ip_ranges_config(clusterName, network, sri[1:]),
+				Config: testAccContainerCluster_additional_ip_ranges_config(clusterName, network, sri[:1]),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
@@ -14397,7 +14397,7 @@ func TestAccContainerCluster_additional_ip_ranges_config_on_update(t *testing.T)
 				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
-				Config: testAccContainerCluster_additional_ip_ranges_config(clusterName, network, sri[1:]),
+				Config: testAccContainerCluster_additional_ip_ranges_config(clusterName, network, sri[:1]),
 			},
 			{
 				ResourceName:      "google_container_cluster.primary",
