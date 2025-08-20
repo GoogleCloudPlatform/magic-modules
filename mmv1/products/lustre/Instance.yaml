@@ -44,7 +44,7 @@ autogen_async: true
 async:
   operation:
     timeouts:
-      insert_minutes: 20
+      insert_minutes: 120
       update_minutes: 20
       delete_minutes: 20
     base_url: '{{op_id}}'
