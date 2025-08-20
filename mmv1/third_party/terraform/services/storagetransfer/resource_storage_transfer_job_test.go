@@ -2405,7 +2405,6 @@ func TestAccStorageTransferJob_awsS3CompatibleDataSource(t *testing.T) {
 
 	testDataSourceBucketName := acctest.RandString(t, 10)
 	testDataSinkName := acctest.RandString(t, 10)
-	testTransferJobDescription := acctest.RandString(t, 10)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -2413,7 +2412,7 @@ func TestAccStorageTransferJob_awsS3CompatibleDataSource(t *testing.T) {
 		CheckDestroy:             testAccStorageTransferJobDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccStorageTransferJob_awsS3CompatibleDataSource(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription),
+				Config: testAccStorageTransferJob_awsS3CompatibleDataSource(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -2421,7 +2420,7 @@ func TestAccStorageTransferJob_awsS3CompatibleDataSource(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccStorageTransferJob_updateAwsS3CompatibleDataSource(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName, testTransferJobDescription),
+				Config: testAccStorageTransferJob_updateAwsS3CompatibleDataSource(envvar.GetTestProjectFromEnv(), testDataSourceBucketName, testDataSinkName),
 			},
 			{
 				ResourceName:      "google_storage_transfer_job.transfer_job",
@@ -2432,7 +2431,7 @@ func TestAccStorageTransferJob_awsS3CompatibleDataSource(t *testing.T) {
 	})
 }
 
-func testAccStorageTransferJob_awsS3CompatibleDataSource(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string) string {
+func testAccStorageTransferJob_awsS3CompatibleDataSource(project string, dataSourceBucketName string, dataSinkBucketName string) string {
 	return fmt.Sprintf(`
 data "google_storage_transfer_project_service_account" "default" {
   project = "%s"
@@ -2452,7 +2451,7 @@ resource "google_storage_bucket_iam_member" "data_sink" {
 }
 
 resource "google_storage_transfer_job" "transfer_job" {
-  description = "%s"
+  description = "A test job using an aws s3 compatible data source"
   project     = "%s"
 
   transfer_spec {
@@ -2498,10 +2497,10 @@ resource "google_storage_transfer_job" "transfer_job" {
     google_storage_bucket_iam_member.data_sink,
   ]
 }
-`, project, dataSinkBucketName, project, transferJobDescription, project, dataSourceBucketName)
+`, project, dataSinkBucketName, project, project, dataSourceBucketName)
 }
 
-func testAccStorageTransferJob_updateAwsS3CompatibleDataSource(project string, dataSourceBucketName string, dataSinkBucketName string, transferJobDescription string) string {
+func testAccStorageTransferJob_updateAwsS3CompatibleDataSource(project string, dataSourceBucketName string, dataSinkBucketName string) string {
 	return fmt.Sprintf(`
 data "google_storage_transfer_project_service_account" "default" {
   project = "%s"
@@ -2521,7 +2520,7 @@ resource "google_storage_bucket_iam_member" "data_sink" {
 }
 
 resource "google_storage_transfer_job" "transfer_job" {
-  description = "%s"
+  description = "A test job using an aws s3 compatible data source"
   project     = "%s"
 
   transfer_spec {
@@ -2563,5 +2562,5 @@ resource "google_storage_transfer_job" "transfer_job" {
     google_storage_bucket_iam_member.data_sink,
   ]
 }
-`, project, dataSinkBucketName, project, transferJobDescription, project, dataSourceBucketName)
+`, project, dataSinkBucketName, project, project, dataSourceBucketName)
 }
