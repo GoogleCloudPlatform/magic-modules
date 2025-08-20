@@ -51,12 +51,12 @@ type Resource struct {
 }
 
 const (
-	ymdFormat  = "2006-01-02"
-	maxRetries = 3
+	ymdFormat   = "2006-01-02"
+	maxAttempts = 3
 )
 
 var (
-	TestsMetadata = make([]NightlyRun, maxRetries)
+	TestsMetadata = make([]NightlyRun, maxAttempts)
 	setupDone     = false
 )
 
@@ -88,8 +88,8 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 				// Keep looking until we find a date with metadata.
 				i--
 				retries++
-				if retries > maxRetries {
-					// Stop looking when we find maxRetries dates with no metadata.
+				if retries > maxAttempts {
+					// Stop looking when we find maxAttempts dates with no metadata.
 					return nil, fmt.Errorf("too many retries, %v", allErrs)
 				}
 			} else {
