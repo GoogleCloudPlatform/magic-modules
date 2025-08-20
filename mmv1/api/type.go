@@ -977,6 +977,12 @@ func propertyWithDescription(description string) func(*Type) {
 	}
 }
 
+func propertyWithDefaultValue(defaultValue string) func(*Type) {
+	return func(p *Type) {
+		p.DefaultValue = defaultValue
+	}
+}
+
 func propertyWithMinVersion(minVersion string) func(*Type) {
 	return func(p *Type) {
 		p.MinVersion = minVersion
