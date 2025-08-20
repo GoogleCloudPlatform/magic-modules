@@ -223,7 +223,7 @@ properties:
     url_param_only: true
     properties:
       - name: 'secretAccessKeyWoVersion'
-        type: Integer
+        type: String
         url_param_only: true
         required_with:
           - 'sensitive_params.0.secretAccessKeyWo'
