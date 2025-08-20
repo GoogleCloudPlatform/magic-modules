@@ -129,8 +129,9 @@ resource "google_saas_runtime_unit_kind" "example" {
   input_variable_mappings {
     variable = "tenant_project_number"
     to {
-      dependency     = "cluster"
-      input_variable = "tenant_project_number"
+      dependency        = "cluster"
+      input_variable    = "tenant_project_number"
+      ignore_for_lookup = true
     }
   }
 
