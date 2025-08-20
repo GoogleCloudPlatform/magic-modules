@@ -100,7 +100,11 @@ func ProjectNumberDiffSuppress(_, old, new string, _ *schema.ResourceData) bool 
 	b2 = string(reN.ReplaceAll([]byte(new), replacement))
 	return a2 == b2
 }
-
+// Suppresses diffs where `routing_mode` is unset (empty string) vs. explicitly set
+// to "EXPLICIT_ROUTING_MODE". Since null/empty is treated as the default
+// EXPLICIT_ROUTING_MODE, both values collapse into the same state. This ensures
+// Terraform does not show unnecessary differences unless the value is explicitly
+// changed to "NEXT_HOP_ROUTING_MODE".
 func SuppressRoutingModeDefault(_, old, new string, _ *schema.ResourceData) bool {
 	if old == new {
 		return true
