@@ -238,10 +238,12 @@ properties:
           The Secret Access Key of the AWS account transferring data from.
         write_only: true
         at_least_one_of:
-          - 'sensitive_params.0.secret_access_key'
           - 'sensitive_params.0.secret_access_key_wo'
+          - 'sensitive_params.0.secret_access_key'
         conflicts:
           - 'sensitive_params.0.secret_access_key'
+        required_with:
+          - 'sensitive_params.0.secret_access_key_wo_version'
       - name: 'secretAccessKeyWoVersion'
         type: Integer
         url_param_only: true
