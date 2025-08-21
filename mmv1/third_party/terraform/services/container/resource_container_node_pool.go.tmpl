@@ -968,11 +968,6 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 	}
 	_, err = clusterNodePoolsGetCall.Do()
-{{- else }}
-	npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name)
-	_, err = npCache.get(nodePoolInfo.fullyQualifiedName(name))
-{{- end }}
-
 	if err != nil {
 		if err = transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Container NodePool %s", name)); err == nil {
 			return false, nil
@@ -980,6 +975,15 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 		// There was some other error in reading the resource
 		return true, err
 	}
+{{- else }}
+	npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name)
+	_, err = npCache.get(nodePoolInfo.fullyQualifiedName(name))
+	if err != nil {
+		log.Printf("[WARN] Removing %s because it's gone", fmt.Sprintf("NodePool %q from cluster %q", name, nodePoolInfo.cluster))
+		d.SetId("")
+		return false, nil
+	}
+{{- end }}
 	return true, nil
 }
 
