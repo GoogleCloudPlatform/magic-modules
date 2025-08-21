@@ -216,3 +216,7 @@ properties:
       - 'QOS_TYPE_UNSPECIFIED'
       - 'AUTO'
       - 'MANUAL'
+  - name: 'availableThroughputMibps'
+    type: String
+    description: |
+      Available throughput of the storage pool (in MiB/s).
