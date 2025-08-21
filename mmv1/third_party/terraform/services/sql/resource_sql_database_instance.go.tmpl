@@ -172,6 +172,12 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 				Optional:    true,
 				Description: `Used to block Terraform from deleting a SQL Instance. Defaults to true.`,
 			},
+			"final_backup_description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The description of final backup if instance enable create final backup during instance deletion. `,
+
+			},
 			"settings": {
 				Type:         schema.TypeList,
 				Optional:     true,
@@ -2400,7 +2406,7 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 	var op *sqladmin.Operation
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Delete(project, d.Get("name").(string)).Do()
+			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Delete(project, d.Get("name").(string)).FinalBackupDescription(finalBackupDescription).Do()
 			if rerr != nil {
 				return rerr
 			}
