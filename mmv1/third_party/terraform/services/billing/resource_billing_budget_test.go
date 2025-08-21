@@ -221,7 +221,6 @@ resource "google_billing_budget" "budget" {
     labels  = {
       label = "bar"
     }
-    subaccounts = []
   }
 
   amount {
@@ -460,19 +459,18 @@ resource "google_billing_budget" "budget" {
     labels  = {
       label1 = "bar2"
     }
-	custom_period {
-	  start_date {
-		year = 2022
-		month = 1
-		day = 1
-	  }
-	  end_date {
-		year = 2023
-		month = 12
-		day = 31
-	  }
-	}
-	credit_types = []
+		custom_period {
+		  start_date {
+			year = 2022
+			month = 1
+			day = 1
+		  }
+		  end_date {
+			year = 2023
+			month = 12
+			day = 31
+		  }
+		}
   }
 
   amount {
