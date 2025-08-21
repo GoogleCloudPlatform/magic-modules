@@ -189,6 +189,7 @@ properties:
     type: String
     description: |
       Optional. Custom Performance Total Throughput of the pool (in MiB/s).
+    default_from_api: true
   - name: 'totalIops'
     type: String
     description: |

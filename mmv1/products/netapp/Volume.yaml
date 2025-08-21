@@ -571,3 +571,4 @@ properties:
     type: Double
     description: |
       Optional. Custom Performance Total Throughput of the pool (in MiB/s).
+    default_from_api: true
