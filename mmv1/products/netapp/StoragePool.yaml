@@ -218,7 +218,7 @@ properties:
       - 'AUTO'
       - 'MANUAL'
   - name: 'availableThroughputMibps'
-    type: String
+    type: Double
     description: |
       Available throughput of the storage pool (in MiB/s).
     output: true
