@@ -58,15 +58,20 @@ properties:
   - name: 'displayName'
     type: String
     description: |
-      A textual name of the security policy.
+      User-provided name of the organization security policy. The name should be unique in the organization in which the security policy is created. This should only be used when SecurityPolicyType is FIREWALL.
     min_version: 'beta'
-    required: true
     immutable: true
   - name: 'description'
     type: String
     description: |
       A textual description for the organization security policy.
     min_version: 'beta'
+  - name: 'shortName'
+    type: String
+    description: |
+      User-provided name of the organization security policy. The name should be unique in the organization in which the security policy is created. This should only be used when SecurityPolicyType is CLOUD_ARMOR.
+    min_version: 'beta'
+    immutable: true
   - name: 'fingerprint'
     type: Fingerprint
     description: |
@@ -84,11 +89,13 @@ properties:
   - name: 'type'
     type: Enum
     description: |
-      The type indicates the intended use of the security policy.
-      For organization security policies, the only supported type
-      is "FIREWALL".
+      The type indicates the intended use of the security policy. This field can be set only at resource creation time.
     min_version: 'beta'
     immutable: true
     default_value: "FIREWALL"
     enum_values:
       - 'FIREWALL'
+      - 'CLOUD_ARMOR'
+      - 'CLOUD_ARMOR_EDGE'
+      - 'CLOUD_ARMOR_INTERNAL_SERVICE'
+      - 'CLOUD_ARMOR_NETWORK'
