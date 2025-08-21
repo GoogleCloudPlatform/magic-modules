@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func DefaultProjectModify(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse, providerConfigProject string){
+func DefaultProjectModify(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse, providerConfigProject string) {
 	var old types.String
 	diags := req.State.GetAttribute(ctx, path.Root("project"), &old)
 	resp.Diagnostics.Append(diags...)
