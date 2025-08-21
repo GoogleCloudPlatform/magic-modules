@@ -1643,7 +1643,7 @@ linux_node_config {
 
 <a name="nested_enterprise_config"></a>The `enterprise_config` block supports:
 
-* `desired_tier` - (DEPRECATED) Sets the tier of the cluster. Available options include `STANDARD` and `ENTERPRISE`.
+* `desired_tier` - (Optional) (DEPRECATED) Sets the tier of the cluster. Available options include `STANDARD` and `ENTERPRISE`.
 
 <a name="anonymous_authentication_config"></a>The `anonymous_authentication_config` block supports:
 
