@@ -1546,9 +1546,8 @@ func expandAwsS3CompatibleData(awsS3CompatibleDataSchema []interface{}) *storage
 		Region:     awsS3CompatibleData["region"].(string),
 	}
 
-	if awsS3CompatibleData["s3_metadata"] != nil {
-		result.S3Metadata = expandS3Metadata(awsS3CompatibleData["s3_metadata"].([]interface{}))
-
+	if v, ok := awsS3CompatibleData["s3_metadata"].([]interface{}); ok {
+		result.S3Metadata = expandS3Metadata(v)
 	}
 	return result
 }
