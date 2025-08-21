@@ -78,7 +78,7 @@ func (r *storageNotificationResource) Configure(_ context.Context, req resource.
 func (r *storageNotificationResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Creates a new notification configuration on a specified bucket, establishing a flow of event notifications from GCS to a Cloud Pub/Sub topic.",
-		Version:     1, // needed for state upgrader
+		Version:     1,
 		Attributes: map[string]schema.Attribute{
 			"bucket": schema.StringAttribute{
 				Required:    true,
@@ -102,6 +102,9 @@ func (r *storageNotificationResource) Schema(_ context.Context, _ resource.Schem
 				Description: "The Cloud Pub/Sub topic to which this subscription publishes.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
+				},
+				Validators: []validator.String{
+					fwvalidators.NewTopicPrefixValidator(),
 				},
 			},
 			"custom_attributes": schema.MapAttribute{
@@ -297,7 +300,9 @@ func (r *storageNotificationResource) refresh(ctx context.Context, model *storag
 	apiObjectNamePrefix := res.ObjectNamePrefix
 	model.ObjectNamePrefix = fwresource.FlattenStringEmptyToNull(configuredObjectNamePrefix, apiObjectNamePrefix)
 
-	// topic is not read - API returns a longer value and topic is a required field.
+	// trim the fully qualified prefix
+	apiValue := res.Topic
+	model.Topic = types.StringValue(strings.TrimPrefix(apiValue, "//pubsub.googleapis.com/"))
 
 	eventTypesDiags := model.EventTypes.ElementsAs(ctx, &res.EventTypes, false)
 	diags.Append(eventTypesDiags...)

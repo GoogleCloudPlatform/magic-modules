@@ -311,3 +311,34 @@ func StringValuesInSet(validStrings ...string) validator.Set {
 		ValidStrings: validStrings,
 	}
 }
+
+type TopicPrefixValidator struct{}
+
+func (v TopicPrefixValidator) Description(ctx context.Context) string {
+	return "ensures the topic does not start with '//pubsub.googleapis.com/'"
+}
+
+func (v TopicPrefixValidator) MarkdownDescription(ctx context.Context) string {
+	return "Ensures the topic does not start with `//pubsub.googleapis.com/`."
+}
+
+func (v TopicPrefixValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
+	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {
+		return
+	}
+
+	value := req.ConfigValue.ValueString()
+	forbiddenPrefix := "//pubsub.googleapis.com/"
+
+	if strings.HasPrefix(value, forbiddenPrefix) {
+		resp.Diagnostics.AddAttributeError(
+			req.Path,
+			"Invalid Topic Format",
+			fmt.Sprintf("The topic must not start with '%s', please use the format projects/{project}/topics/{topic} instead.", forbiddenPrefix),
+		)
+	}
+}
+
+func NewTopicPrefixValidator() validator.String {
+	return TopicPrefixValidator{}
+}

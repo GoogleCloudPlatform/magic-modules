@@ -385,3 +385,63 @@ func TestStringValuesInSetValidator(t *testing.T) {
 		})
 	}
 }
+
+func TestTopicPrefixValidator(t *testing.T) {
+	t.Parallel()
+
+	type testCase struct {
+		value         types.String
+		expectError   bool
+		errorContains string
+	}
+
+	tests := map[string]testCase{
+		"valid topic format": {
+			value:       types.StringValue("projects/my-project/topics/my-topic"),
+			expectError: false,
+		},
+		"invalid topic format - starts with pubsub prefix": {
+			value:         types.StringValue("//pubsub.googleapis.com/projects/my-project/topics/my-topic"),
+			expectError:   true,
+			errorContains: "The topic must not start with '//pubsub.googleapis.com/', please use the format projects/{project}/topics/{topic} instead.",
+		},
+	}
+
+	for name, test := range tests {
+		name, test := name, test
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			request := validator.StringRequest{
+				Path:           path.Root("test_topic"),
+				PathExpression: path.MatchRoot("test_topic"),
+				ConfigValue:    test.value,
+			}
+			response := validator.StringResponse{}
+			v := fwvalidators.NewTopicPrefixValidator()
+
+			v.ValidateString(context.Background(), request, &response)
+
+			if test.expectError && !response.Diagnostics.HasError() {
+				t.Errorf("expected error, got none for value: %q", test.value.ValueString())
+			}
+
+			if !test.expectError && response.Diagnostics.HasError() {
+				t.Errorf("got unexpected error for value: %q: %s", test.value.ValueString(), response.Diagnostics.Errors())
+			}
+
+			if test.errorContains != "" {
+				foundError := false
+				for _, err := range response.Diagnostics.Errors() {
+					if err.Detail() == test.errorContains {
+						foundError = true
+						break
+					}
+				}
+				if !foundError {
+					t.Errorf("expected error with detail %q, got none", test.errorContains)
+				}
+			}
+		})
+	}
+}

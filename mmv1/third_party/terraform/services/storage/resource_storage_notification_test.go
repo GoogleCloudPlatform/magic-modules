@@ -53,17 +53,11 @@ func TestAccStorageNotification_basic(t *testing.T) {
 				ResourceName:      "google_storage_notification.notification",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"topic", // required ignore-read field
-				},
 			},
 			{
 				ResourceName:      "google_storage_notification.notification_with_prefix",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"topic", // required ignore-read field
-				},
 			},
 		},
 	})
@@ -107,9 +101,6 @@ func TestAccStorageNotification_withEventsAndAttributes(t *testing.T) {
 				ResourceName:      "google_storage_notification.notification",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"topic", // required ignore-read field
-				},
 			},
 		},
 	})
