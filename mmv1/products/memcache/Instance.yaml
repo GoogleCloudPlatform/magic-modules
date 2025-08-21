@@ -38,6 +38,7 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+  pre_delete: 'templates/terraform/pre_delete/memcache_instance.go.tmpl'
 examples:
   - name: 'memcache_instance_basic'
     primary_resource_id: 'instance'
@@ -46,6 +47,8 @@ examples:
       network_name: 'test-network'
       address_name: 'address'
     exclude_test: true
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'memcache_instance_basic_test'
     primary_resource_id: 'instance'
     vars:
@@ -330,3 +333,14 @@ properties:
     ignore_read: true
     item_type:
       type: String
+virtual_fields:
+  - name: 'deletion_protection'
+    description: |
+      Whether Terraform will be prevented from destroying the instance. Defaults to true.
+      When a `terraform destroy` or `terraform apply` would delete the instance,
+      the command will fail if this field is not set to false in Terraform state.
+      When the field is set to true or unset in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the instance will fail.
+      When the field is set to false, deleting the instance is allowed.
+    type: Boolean
+    default_value: true
