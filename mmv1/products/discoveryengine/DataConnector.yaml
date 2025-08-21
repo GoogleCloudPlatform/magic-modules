@@ -212,6 +212,35 @@ properties:
                 * Salesforce: `Lead`, `Opportunity`, `Contact`, `Account`, `Case`, `Contract`, `Campaign`
                 * Jira: project, issue, attachment, comment, worklog
                 * Confluence: `Content`, `Space`
+            - name: 'keyPropertyMappings'
+              type: KeyValuePairs
+              description: |
+                Attributes for indexing.
+                Key: Field name.
+                Value: The key property to map a field to, such as `title`, and
+                `description`. Supported key properties:
+                * `title`: The title for data record. This would be displayed on search
+                  results.
+                * `description`: The description for data record. This would be displayed
+                  on search results.
+            - name: 'dataStore'
+              type: String
+              description: |
+                The full resource name of the associated data store for the source
+                entity.
+                Format: `projects/*/locations/*/collections/*/dataStores/*`.
+                When the connector is initialized by the DataConnectorService.SetUpDataConnector
+                method, a DataStore is automatically created for each source entity.
+              output: true
+            - name: 'params'
+              type: NestedObject
+              description: |
+                The parameters for the entity to facilitate data ingestion.
+              properties:
+                - name: 'document_id_column'
+                  type: String
+                  description: |
+                    The value of the column ID.
       - name: 'create_time'
         type: Time
         description: |
