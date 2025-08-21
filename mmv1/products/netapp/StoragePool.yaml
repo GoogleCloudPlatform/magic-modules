@@ -222,4 +222,3 @@ properties:
     description: |
       Available throughput of the storage pool (in MiB/s).
     output: true
-
