@@ -962,7 +962,7 @@ resource "google_netapp_volume" "test_volume" {
     share_name = "tf-test-test-volume%{random_suffix}"
     storage_pool = google_netapp_storage_pool.test_pool.name
     protocols = ["NFSV3"]
-    throughput_mibps = "64"
+    throughput_mibps = 12.5
 }
 
 data "google_compute_network" "default" {
