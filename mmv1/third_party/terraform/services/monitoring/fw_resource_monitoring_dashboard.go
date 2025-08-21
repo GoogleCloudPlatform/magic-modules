@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-framework-jsontypes/jsontypes"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -25,6 +24,7 @@ import (
 var (
 	_ resource.Resource                = &MonitoringDashboardResource{}
 	_ resource.ResourceWithConfigure   = &MonitoringDashboardResource{}
+	_ resource.ResourceWithModifyPlan  = &MonitoringDashboardResource{}
 	_ resource.ResourceWithImportState = &MonitoringDashboardResource{}
 )
 
@@ -37,9 +37,10 @@ type MonitoringDashboardResource struct {
 }
 
 type MonitoringDashboardResourceModel struct {
-	Id            types.String         `tfsdk:"id"`
-	Project       types.String         `tfsdk:"project"`
-	DashboardJson jsontypes.Normalized `tfsdk:"dashboard_json"`
+	Id                  types.String `tfsdk:"id"`
+	Project             types.String `tfsdk:"project"`
+	DashboardJson       Normalized   `tfsdk:"dashboard_json"`
+	DashboardJsonExport types.String `tfsdk:"dashboard_json_export"`
 }
 
 func (r *MonitoringDashboardResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -61,6 +62,13 @@ func (r *MonitoringDashboardResource) Configure(ctx context.Context, req resourc
 	r.providerConfig = p
 }
 
+func (r *MonitoringDashboardResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	fwresource.DefaultProjectModify(ctx, req, resp, r.providerConfig.Project)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
+
 func (r *MonitoringDashboardResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "An alias from a key/cert file.",
@@ -75,13 +83,16 @@ func (r *MonitoringDashboardResource) Schema(_ context.Context, _ resource.Schem
 				},
 			},
 			"dashboard_json": schema.StringAttribute{
-				CustomType:  jsontypes.NormalizedType{},
+				CustomType:  NormalizedType{},
 				Description: "The JSON representation of a dashboard, following the format at https://cloud.google.com/monitoring/api/ref_v3/rest/v1/projects.dashboards.",
 				Required:    true,
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
 					FWMonitoringDashboardDiffSuppress(),
 				},
+			},
+			"dashboard_json_export": schema.StringAttribute{
+				Description: "The JSON representation of a dashboard, following the format at https://cloud.google.com/monitoring/api/ref_v3/rest/v1/projects.dashboards. This attribute contains computed dashboard fields not contained in the user-supplied `dashboard_json` field",
+				Computed:    true,
 			},
 			// This is included for backwards compatibility with the original, SDK-implemented resource.
 			"id": schema.StringAttribute{
@@ -153,10 +164,7 @@ func (r *MonitoringDashboardResource) Create(ctx context.Context, req resource.C
 
 	tflog.Trace(ctx, "Successfully created Monitoring Dashboard", map[string]interface{}{"response": res})
 
-	id := fmt.Sprintf("projects/%s/dashboards/%s",
-		data.Project.ValueString(),
-		res["name"],
-	)
+	id := res["name"].(string)
 	data.Id = types.StringValue(id)
 
 	r.Refresh(ctx, &data, &resp.State, req, &resp.Diagnostics)
@@ -224,6 +232,16 @@ func (r *MonitoringDashboardResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
+	dashboardJsonExportProp := state.DashboardJsonExport.ValueString()
+
+	//etag must be obtained from the export object
+	eObj, err := structure.ExpandJsonFromString(dashboardJsonExportProp)
+	if err != nil {
+		resp.Diagnostics.AddError("Error expanding supplied JSON:", fmt.Sprintf("%s", dashboardJsonProp))
+		return
+	}
+	obj["etag"] = eObj["etag"]
+
 	// Use provider_meta to set User-Agent
 	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
 	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{MonitoringBasePath}}"+"v1/"+state.Id.ValueString())
@@ -250,11 +268,6 @@ func (r *MonitoringDashboardResource) Update(ctx context.Context, req resource.U
 	}
 
 	tflog.Trace(ctx, "Successfully updated Monitoring Dashboard", map[string]interface{}{"response": res})
-	id := fmt.Sprintf("projects/%s/dashboards/%s",
-		state.Project.ValueString(),
-		res["name"],
-	)
-	plan.Id = types.StringValue(id)
 
 	r.Refresh(ctx, &plan, &resp.State, req, &resp.Diagnostics)
 	if resp.Diagnostics.HasError() {
@@ -313,7 +326,42 @@ func (r *MonitoringDashboardResource) Delete(ctx context.Context, req resource.D
 }
 
 func (r *MonitoringDashboardResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	idRegexes := []string{
+		"projects/(?P<project>[^/]+)/dashboards/(?P<id>[^/]+)",
+		"(?P<id>[^/]+)",
+	}
+
+	var resourceSchemaResp resource.SchemaResponse
+	r.Schema(ctx, resource.SchemaRequest{}, &resourceSchemaResp)
+	if resourceSchemaResp.Diagnostics.HasError() {
+		resp.Diagnostics.Append(resourceSchemaResp.Diagnostics...)
+		return
+	}
+
+	parsedAttributes, diags := fwresource.ParseImportId(ctx, req, resourceSchemaResp.Schema, r.providerConfig, idRegexes)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	for name, value := range parsedAttributes {
+		//manually construct resource id for state
+		if name == "id" {
+			var proj string
+			pVal, _ := parsedAttributes["project"].ToTerraformValue(ctx)
+			_ = pVal.As(&proj)
+			var dashId string
+			nVal, _ := value.ToTerraformValue(ctx)
+			_ = nVal.As(&dashId)
+			id := fmt.Sprintf("projects/%s/dashboards/%s",
+				proj,
+				dashId,
+			)
+			resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root(name), types.StringValue(id))...)
+		} else {
+			resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root(name), value)...)
+		}
+	}
 }
 
 func (r *MonitoringDashboardResource) Refresh(ctx context.Context, data *MonitoringDashboardResourceModel, state *tfsdk.State, req interface{}, diags *diag.Diagnostics) {
@@ -350,16 +398,14 @@ func (r *MonitoringDashboardResource) Refresh(ctx context.Context, data *Monitor
 
 	tflog.Trace(ctx, "Successfully read Monitoring Dashboard", map[string]interface{}{"response": res})
 
-	id := fmt.Sprintf("projects/%s/dashboards/%s",
-		data.Project.ValueString(),
-		res["name"],
-	)
-	data.Id = types.StringValue(id)
-
 	str, err := structure.FlattenJsonToString(res)
 	if err != nil {
 		diags.AddError("Error converting Dashboard:", fmt.Sprintf("%s", err))
 		return
 	}
-	data.DashboardJson = jsontypes.NewNormalizedValue(str)
+	if data.DashboardJson.IsNull() || data.DashboardJson.IsUnknown() {
+		data.DashboardJson = NewNormalizedValue(str)
+	}
+	exportStr, _ := structure.NormalizeJsonString(str)
+	data.DashboardJsonExport = types.StringValue(exportStr)
 }
