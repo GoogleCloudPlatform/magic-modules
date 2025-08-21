@@ -52,7 +52,7 @@ autogen_async: false
 
 datasource:
   generate: true
-  exclude_test_generation: true
+  exclude_test: true
 
 examples:
   - name: storage_control_project_intelligence_config_basic

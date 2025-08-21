@@ -2091,7 +2091,7 @@ func (r *Resource) ShouldGenerateSingularDataSourceTests() bool {
 	if r.Datasource == nil {
 		return false
 	}
-	return !r.Datasource.ExcludeTestGeneration
+	return !r.Datasource.ExcludeTest
 }
 
 func (r Resource) ShouldDatasourceSetLabels() bool {
