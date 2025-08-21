@@ -172,7 +172,7 @@ The following arguments are supported:
 
 * `hdfs_data_source` - (Optional) An HDFS data source. Structure [documented below](#nested_hdfs_data_source).
 
-* `aws_s3_compatible_data_source` - (Optional) An AwsS3CompatibleData data source. Structure [documented below](#nested_aws_s3_compatible_data_source).
+* `aws_s3_compatible_data_source` - (Optional) An AWS S3 Compatible data source. Structure [documented below](#nested_aws_s3_compatible_data_source).
 
 <a name="nested_replication_spec"></a>The `replication_spec` block supports:
 
