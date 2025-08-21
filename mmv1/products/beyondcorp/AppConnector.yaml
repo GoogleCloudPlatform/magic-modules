@@ -42,6 +42,7 @@ async:
   result:
     resource_inside_response: true
 custom_code:
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'beyondcorp_app_connector_basic'
     primary_resource_id: 'app_connector'

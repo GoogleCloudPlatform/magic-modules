@@ -303,7 +303,6 @@ properties:
       Initial user to setup during cluster creation.
     ignore_read: true
     custom_flatten: 'templates/terraform/custom_flatten/alloydb_cluster_input_user_flatten.go.tmpl'
-    custom_tgc_flatten: 'templates/tgc_next/custom_flatten/alloydb_cluster_input_user_flatten.go.tmpl'
     properties:
       - name: 'user'
         type: String

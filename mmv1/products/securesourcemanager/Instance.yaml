@@ -80,6 +80,14 @@ examples:
       'deletion_policy': '"DELETE"'
     ignore_read_extra:
       - 'update_time'
+  - name: 'secure_source_manager_instance_private_trusted_cert'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
+    vars:
+      instance_id: 'my-instance'
+    ignore_read_extra:
+      - 'update_time'
+    exclude_docs: true
   - name: 'secure_source_manager_instance_private'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
@@ -262,7 +270,6 @@ properties:
         type: String
         description: |
           CA pool resource, resource must in the format of `projects/{project}/locations/{location}/caPools/{ca_pool}`.
-        required: true
         immutable: true
       - name: 'httpServiceAttachment'
         type: String
