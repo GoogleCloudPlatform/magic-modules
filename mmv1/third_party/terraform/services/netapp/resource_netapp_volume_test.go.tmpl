@@ -760,7 +760,6 @@ data "google_compute_network" "default" {
 `, context)
 }
 
-
 {{ if ne $.TargetVersionName `ga` -}}
 func TestAccNetappVolume_flexAutoTierNetappVolume_update(t *testing.T) {
 	context := map[string]interface{}{
