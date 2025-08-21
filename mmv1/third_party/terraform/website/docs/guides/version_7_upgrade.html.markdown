@@ -241,7 +241,7 @@ Now, destroying the resource will only remove it from Terraform's state and leav
 
 ## Resource: `google_memorystore_instance`
 
- `allow_fewer_zones_Deployment` has been removed as user configurable but will be set to true at creation
+ `allow_fewer_zones_deployment` has been removed because it isn't user-configurable.
 
 ## Resource: `google_redis_cluster`
 
