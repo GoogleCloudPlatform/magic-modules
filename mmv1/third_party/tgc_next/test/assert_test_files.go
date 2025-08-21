@@ -249,7 +249,7 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	return nil
 }
 
-// Gets the ancestry cache for tfplan2cai conversion
+// Gets the ancestry cache for tfplan2cai conversion and the default project
 func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 	ancestryCache := make(map[string]string, 0)
 	defaultProject := ""
