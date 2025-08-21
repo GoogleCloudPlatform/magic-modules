@@ -21,7 +21,8 @@ references:
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/repositories?repository_id={{repository_id}}'
 self_link: 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
-immutable: true
+update_verb: 'PATCH'
+update_mask: true
 import_format:
   - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
   - '{{repository_id}}'
@@ -31,7 +32,7 @@ timeouts:
   delete_minutes: 20
 autogen_async: true
 async:
-  actions: ['create', 'delete']
+  actions: ['create', 'update', 'delete']
   type: 'OpAsync'
   operation:
     base_url: '{{op_id}}'
@@ -46,6 +47,7 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/repositories/{{repository_id}}'
     - '{{repository_id}}'
 custom_code:
+  pre_delete: 'templates/terraform/pre_delete/securesourcemanager_deletion_policy.go.tmpl'
 examples:
   - name: 'secure_source_manager_repository_basic'
     primary_resource_id: 'default'
@@ -53,35 +55,54 @@ examples:
     vars:
       repository_id: 'my-repository'
       instance_id: 'my-instance'
-      prevent_destroy: 'true'
+      deletion_policy: 'PREVENT'
     test_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_policy': '"DELETE"'
     oics_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_policy': '"DELETE"'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'secure_source_manager_repository_initial_config'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
     vars:
       repository_id: 'my-repository'
       instance_id: 'my-instance'
-      prevent_destroy: 'true'
+      deletion_policy: 'PREVENT'
     test_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_policy': '"DELETE"'
     oics_vars_overrides:
-      'prevent_destroy': 'false'
+      'deletion_policy': '"DELETE"'
+    ignore_read_extra:
+      - 'deletion_policy'
 parameters:
   - name: 'location'
     type: String
+    immutable: true
     description: |
       The location for the Repository.
     url_param_only: true
     required: true
   - name: 'repository_id'
     type: String
+    immutable: true
     description: |
       The ID for the Repository.
     url_param_only: true
     required: true
+virtual_fields:
+  - name: 'deletion_policy'
+    type: String
+    description: |
+      The deletion policy for the repository. Setting `ABANDON` allows the resource
+      to be abandoned, rather than deleted. Setting `DELETE` deletes the resource
+      and all its contents. Setting `PREVENT` prevents the resource from accidental deletion
+      by erroring out during plan.
+      Default is `DELETE`.  Possible values are:
+        * DELETE
+        * PREVENT
+        * ABANDON
+    default_value: 'PREVENT'
 properties:
   - name: 'name'
     type: String
@@ -97,6 +118,7 @@ properties:
     description: |
       The name of the instance in which the repository is hosted.
     required: true
+    immutable: true
     diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
   - name: 'uid'
     type: String
@@ -139,13 +161,16 @@ properties:
     description: |
       Initial configurations for the repository.
     ignore_read: true
+    immutable: true
     properties:
       - name: 'defaultBranch'
         type: String
+        immutable: true
         description: |
           Default branch name of the repository.
       - name: 'gitignores'
         type: Array
+        immutable: true
         description: |
           List of gitignore template names user can choose from.
           Valid values can be viewed at https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories#initialconfig.
@@ -153,11 +178,13 @@ properties:
           type: String
       - name: 'license'
         type: String
+        immutable: true
         description: |
           License template name user can choose from.
           Valid values can be viewed at https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories#initialconfig.
       - name: 'readme'
         type: String
+        immutable: true
         description: |
           README template name.
           Valid values can be viewed at https://cloud.google.com/secure-source-manager/docs/reference/rest/v1/projects.locations.repositories#initialconfig.

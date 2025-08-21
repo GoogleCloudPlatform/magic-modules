@@ -89,6 +89,10 @@ One of the following is required:
 
 * `source_md5hash` - (Optional) User-provided md5hash to trigger replacement of object in storage bucket, Must be Base 64 MD5 hash of the object data. The usual way to set this is filemd5("file.zip"), where "file.zip" is the local filename
 
+* `force_empty_content_type` - (Optional) When set to true, it ensure the object's Content-Type is empty.
+
+* `deletion_policy` - (Optional) When set to ABANDON, the object won't be deleted from storage bucket. Instead, it will only be removed from terraform's state file.
+
 ---
 
 <a name="nested_customer_encryption"></a>The `customer_encryption` block supports:

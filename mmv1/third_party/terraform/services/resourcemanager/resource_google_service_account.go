@@ -122,21 +122,22 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 		ServiceAccount: sa,
 	}
 
-	d.SetId(fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", project, aid, project))
-
 	iamClient := config.NewIamClient(userAgent)
 	sa, err = iamClient.Projects.ServiceAccounts.Create("projects/"+project, r).Do()
 	if err != nil {
 		gerr, ok := err.(*googleapi.Error)
 		alreadyExists := ok && gerr.Code == 409 && d.Get("create_ignore_already_exists").(bool)
 		if alreadyExists {
+			fullServiceAccountName := fmt.Sprintf("projects/%s/serviceAccounts/%s@%s.iam.gserviceaccount.com", project, aid, project)
 			err = transport_tpg.Retry(transport_tpg.RetryOptions{
 				RetryFunc: func() (operr error) {
-					sa, saerr := iamClient.Projects.ServiceAccounts.Get(d.Id()).Do()
+					sa, saerr := iamClient.Projects.ServiceAccounts.Get(fullServiceAccountName).Do()
 
 					if saerr != nil {
 						return saerr
 					}
+
+					d.SetId(sa.Name)
 					return populateResourceData(d, sa)
 				},
 				Timeout: d.Timeout(schema.TimeoutCreate),
@@ -151,6 +152,9 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 		}
 	}
 
+	d.SetId(sa.Name)
+	populateResourceData(d, sa)
+
 	// We poll until the resource is found due to eventual consistency issue
 	// on part of the api https://cloud.google.com/iam/docs/overview#consistency.
 	// Wait for at least 3 successful responses in a row to ensure result is consistent.
@@ -162,8 +166,6 @@ func resourceGoogleServiceAccountCreate(d *schema.ResourceData, meta interface{}
 		d.Timeout(schema.TimeoutCreate),
 		3, // Number of consecutive occurences.
 	)
-
-	populateResourceData(d, sa)
 
 	// We can't guarantee complete consistency even after polling,
 	// so sleep for some additional time to reduce the likelihood of
@@ -319,9 +321,9 @@ func resourceGoogleServiceAccountUpdate(d *schema.ResourceData, meta interface{}
 func resourceGoogleServiceAccountImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
 	if err := tpgresource.ParseImportId([]string{
-		"projects/(?P<project>[^/]+)/serviceAccounts/(?P<email>[^/]+)",
-		"(?P<project>[^/]+)/(?P<email>[^/]+)",
-		"(?P<email>[^/]+)"}, d, config); err != nil {
+		"^projects/(?P<project>[^/]+)/serviceAccounts/(?P<email>[^/]+)$",
+		"^(?P<project>[^/]+)/(?P<email>[^/]+)$",
+		"^(?P<email>[^/]+)$"}, d, config); err != nil {
 		return nil, err
 	}
 

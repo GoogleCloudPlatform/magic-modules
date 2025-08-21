@@ -92,6 +92,10 @@ terraform {
 
 Description of the change and how users should adjust their configuration (if needed).
 
+### Resource import formats have improved validation
+
+Throughout the provider there were many resources which erroneously gave false positives to poorly formatted import input if a subset of the provided input was valid to their configured import formats. All GCP resource IDs supplied to "terraform import" must match the documentation specified import formats exactly.
+
 ## Datasources
 
 ## Datasource: `google_product_datasource`
@@ -100,7 +104,38 @@ Description of the change and how users should adjust their configuration (if ne
 
 Description of the change and how users should adjust their configuration (if needed).
 
+## Datasource: `google_service_account_key`
+
+### `project` is now removed
+
+`project` has been removed. It can be safely removed from your configuration.
+
 ## Resources
+
+## Resource: `google_alloydb_cluster`
+
+### Cluster deletion now prevented by default with `deletion_protection`
+
+The field `deletion_protection` has been added with a default value of `true`. This field prevents
+Terraform from destroying or recreating the cluster during `terraform apply`. In 7.0.0, existing clusters will have
+`deletion_protection` set to `true` during the next refresh unless otherwise set in configuration.
+
+## Resource: `google_beyondcorp_application` is now removed
+
+`google_beyondcorp_application`, the associated IAM resources `google_beyondcorp_application_iam_binding`, `google_beyondcorp_application_iam_member`, and `google_beyondcorp_application_iam_policy`, and the `google_beyondcorp_application_iam_policy` datasource have been removed. 
+Use `google_beyondcorp_security_gateway_application` instead.
+
+## Resource: `google_artifact_registry_repository`
+
+### `public_repository` fields have had their default values removed.
+
+`public_repository` fields have had their default values removed. If your state has been reliant on them, they will need to be manually included into your configuration now.
+
+## Resource: `google_bigquery_table`
+
+### `view.use_legacy_sql` no longer has a default value of `True`
+
+The `view.use_legacy_sql` field no longer has a default value. Configurations that relied on the old default will show no diff in the plan, and there will be no change to existing views. For a new view, leaving this field unspecified in the configuration will result in the view being created with no `use_legacy_sql` value, which the API interprets as a `true` and assumes the legacy SQL dialect for its query. See the [API documentation](https://cloud.google.com/bigquery/docs/reference/rest/v2/tables#ViewDefinition) for more details.
 
 ## Resource: `google_bigtable_table_iam_binding`
 
@@ -119,6 +154,30 @@ Description of the change and how users should adjust their configuration (if ne
 ### `instance` is now removed
 
 `instance` has been removed in favor of `instance_name`.
+
+## Resource: `google_compute_packet_mirroring`
+
+### `subnetworks` and `instances` fields have been converted to sets
+
+`subnetworks` and `instances` fields have been converted to sets. If you need to access values in their nested objects, it will need to be accessed via `for_each` or locally converting the field to a list/array in your configuration.
+
+## Resource: `google_compute_subnetwork`
+
+### `enable_flow_logs`is now removed
+
+`enable_flow_logs` has been removed in favor of `log_config`.
+
+## Resource: `google_compute_instance_template`
+
+### The resource will no longer use hardcoded values
+
+`disk.type`, `disk.mode` and `disk.interface` will no longer use provider configured default values and instead will be set by the API. This shouldn't have any effect on the functionality of the resource.
+
+## Resource: `google_compute_region_instance_template`
+
+### The resource will no longer use hardcoded values
+
+`disk.type`, `disk.mode` and `disk.interface` will no longer use provider configured default values and instead will be set by the API. This shouldn't have any effect on the functionality of the resource.
 
 ## Resource: `google_notebooks_location` is now removed
 
@@ -146,6 +205,18 @@ Remove `configmanagement.binauthz` from your configuration after upgrade.
 
 Remove `description` from your configuration after upgrade.
 
+## Resource: `google_colab_runtime_template`
+
+### `post_startup_script_config` is now removed.
+
+Remove `post_startup_script_config` from your configuration after upgrade.
+
+## Resource: `google_network_services_lb_traffic_extension`
+
+### `load_balancing_scheme` is now required
+
+`load_balancing_scheme` is now a required field.
+
 ## Resource: `google_storage_transfer_job`
 
 ### `transfer_spec.gcs_data_sink.path` Implemented validation to prevent strings from starting with a '/' character, while still permitting empty strings."
@@ -155,3 +226,39 @@ Remove `description` from your configuration after upgrade.
 ### `replication_spec.gcs_data_source.path` Implemented validation to prevent strings from starting with a '/' character, while still permitting empty strings."
 
 ### `replication_spec.gcs_data_sink.path` Implemented validation to prevent strings from starting with a '/' character, while still permitting empty strings."
+
+## Resource: `google_cloudfunctions2_function`
+
+### `event_trigger.event_type` is now required
+
+The `event_type` field is now required when `event_trigger` is configured.
+
+### `service_config.service` is changed from `Argument` to `Attribute`
+
+Remove `service_config.service` from your configuration after upgrade.
+
+## Resource: `google_cloud_run_v2_worker_pool`
+
+### `template.containers.depends_on` is removed as it is not supported.
+
+Remove `template.containers.depends_on` from your configuration after upgrade.
+
+## Resource: `google_vertex_ai_endpoint`
+
+### `enable_secure_private_service_connect` is removed as it is not available in the GA version of the API, only in the beta version.
+
+## Resource: `google_vertex_ai_index`
+
+### `metadata`, and `metadata.config` are now required. Resource creation would fail without these attributes already, so no change is necessary to existing configurations.
+
+## Resource: `google_tpu_node` is now removed
+
+`google_tpu_node` is removed in favor of `google_tpu_v2_vm`. For moving from TPU Node to TPU VM architecture, see https://cloud.google.com/tpu/docs/system-architecture-tpu-vm#from-tpu-node-to-tpu-vm.
+
+## Resource: `google_project_service`
+
+### `disable_on_destroy` now defaults to `false`
+
+The default value for `disable_on_destroy` has been changed to `false`. The previous default (`true`) created a risk of unintended service disruptions, as destroying a single `google_project_service` resource would disable the API for the entire project.
+
+Now, destroying the resource will only remove it from Terraform's state and leave the service enabled. To disable a service when the resource is destroyed, you must now make an explicit decision by setting `disable_on_destroy = true`.

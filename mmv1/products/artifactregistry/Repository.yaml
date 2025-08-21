@@ -42,7 +42,7 @@ async:
 iam_policy:
   method_name_separator: ':'
   allowed_iam_role: 'roles/artifactregistry.reader'
-    # TODO (camthornton): Change to repository_id in 4.0
+    # TODO: Change to repository_id in 4.0
   parent_resource_attribute: 'repository'
   base_url: 'projects/{{project}}/locations/{{location}}/repositories/{{name}}'
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
@@ -53,7 +53,6 @@ iam_policy:
 custom_code:
   constants: 'templates/terraform/constants/artifact_registry_repository.go.tmpl'
   encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/artifact_registry_remote_repository.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-central1"
@@ -99,7 +98,7 @@ examples:
   - name: 'artifact_registry_repository_remote_apt'
     primary_resource_id: 'my-repo'
     vars:
-      repository_id: 'debian-buster'
+      repository_id: 'debian-stable'
       desc: 'example remote apt repository'
   - name: 'artifact_registry_repository_remote_yum'
     primary_resource_id: 'my-repo'
@@ -389,7 +388,7 @@ properties:
           type: NestedObject
           description: |-
             Policy condition for matching versions.
-          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
+          # TODO: exactly_one_of: condition, mostRecentVersions
           properties:
             - name: 'tagState'
               type: Enum
@@ -435,7 +434,7 @@ properties:
           description: |-
             Policy condition for retaining a minimum number of versions. May only be
             specified with a Keep action.
-          # TODO (jrsb): exactly_one_of: condition, mostRecentVersions
+          # TODO: exactly_one_of: condition, mostRecentVersions
           properties:
             - name: 'packageNamePrefixes'
               type: Array
@@ -483,7 +482,7 @@ properties:
               - name: 'repositoryBase'
                 type: Enum
                 description: |-
-                  A common public repository base for Apt, e.g. `"debian/dists/buster"`
+                  A common public repository base for Apt, e.g. `"debian/dists/stable"`
                 required: true
                 immutable: true
                 enum_values:
@@ -517,9 +516,6 @@ properties:
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.docker_repository.0.custom_repository
-            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-            # Eventually lets delete default_value and custom_flatten in a major release
-            default_value: "DOCKER_HUB"
             enum_values:
               - 'DOCKER_HUB'
           - name: 'customRepository'
@@ -556,9 +552,6 @@ properties:
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.maven_repository.0.custom_repository
-            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-            # Eventually lets delete default_value and custom_flatten in a major release
-            default_value: "MAVEN_CENTRAL"
             enum_values:
               - 'MAVEN_CENTRAL'
           - name: 'customRepository'
@@ -595,9 +588,6 @@ properties:
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.npm_repository.0.custom_repository
-            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-            # Eventually lets delete default_value and custom_flatten in a major release
-            default_value: "NPMJS"
             enum_values:
               - 'NPMJS'
           - name: 'customRepository'
@@ -634,9 +624,6 @@ properties:
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.python_repository.0.custom_repository
-            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-            # Eventually lets delete default_value and custom_flatten in a major release
-            default_value: "PYPI"
             enum_values:
               - 'PYPI'
           - name: 'customRepository'

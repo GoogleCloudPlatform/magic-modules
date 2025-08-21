@@ -15,10 +15,6 @@
 {{- define "expandTgcPropertyMethod" }}
     {{ if $.CustomTgcExpand }}
 {{- $.CustomTemplate $.CustomTgcExpand false -}}
-    {{ else if and ($.IsA "Array") ($.ItemType.IsA "ResourceRef")}}
-{{- template "expandArrayResourcerefWithValidation" $ -}}
-    {{ else if ($.IsA "ResourceRef") }}
-{{- template "expandResourcerefWithValidation" $ -}}
     {{ else }}
 {{- template "expandPropertyMethod" $ -}}
     {{ end }}

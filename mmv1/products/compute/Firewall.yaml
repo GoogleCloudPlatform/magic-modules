@@ -50,6 +50,7 @@ async:
   result:
     resource_inside_response: false
 collection_url_key: 'items'
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
   extra_schema_entry: 'templates/terraform/extra_schema_entry/firewall.tmpl'
   constants: 'templates/terraform/constants/firewall.tmpl'
@@ -72,7 +73,7 @@ examples:
       project: 'PROJECT_NAME'
 parameters:
 properties:
-  # TODO(nelsonjr): [nice to have] Make the format here simpler to use, in
+  # TODO: [nice to have] Make the format here simpler to use, in
   # the form of # 22/tcp, [12345-23456]/tcp. It requires a conversion
   # function to the # final JSON format expected by the API for this
   # proposal to work.

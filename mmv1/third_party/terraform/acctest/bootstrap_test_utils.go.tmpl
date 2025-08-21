@@ -385,7 +385,7 @@ func BootstrapKMSKeyWithPurposeInLocationAndName(t *testing.T, purpose, location
 		t.Fatalf("Unable to bootstrap KMS key. CryptoKey is nil!")
 	}
 
-	// TODO(b/372305432): Use the pagination properly.
+	// TODO: b/372305432 Use the pagination properly.
 	ckvResp, err := kmsClient.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(keyName).Do()
 	if err != nil {
 		t.Fatalf("Unable to list cryptoKeyVersions: %v", err)
@@ -1098,7 +1098,7 @@ func BootstrapSharedSQLInstanceBackupRun(t *testing.T) string {
 			PointInTimeRecoveryEnabled: true,
 		}
 		settings := &sqladmin.Settings{
-			Tier:                "db-f1-micro",
+			Tier:                "db-custom-2-3840",
 			BackupConfiguration: backupConfig,
 		}
 		bootstrapInstance = &sqladmin.DatabaseInstance{
