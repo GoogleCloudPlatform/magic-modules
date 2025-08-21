@@ -45,6 +45,8 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+custom_code:
+  post_read: 'templates/terraform/post_read/discoveryengine_dataconnector_use_declared_res.go.tmpl'
 examples:
   - name: 'discoveryengine_dataconnector_jira_basic'
     primary_resource_id: 'jira-basic'
@@ -83,6 +85,7 @@ properties:
       standard with a length limit of 63 characters. Otherwise, an
       INVALID_ARGUMENT error is returned.
     required: true
+    ignore_read: true
   - name: 'collectionDisplayName'
     type: String
     description: |
@@ -90,11 +93,13 @@ properties:
       Should be human readable, used to display collections in the Console
       Dashboard. UTF-8 encoded string with limit of 1024 characters.
     required: true
+    ignore_read: true
   - name: 'dataConnector'
     type: NestedObject
     description: |
       The DataConnector to initialize in the newly created Collection.
     required: true
+    ignore_read: true
     properties:
       - name: 'name'
         type: String
