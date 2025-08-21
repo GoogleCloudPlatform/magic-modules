@@ -172,6 +172,7 @@ properties:
       must be expressed in CIDR format. IPv4 or IPv6 ranges are supported.
     is_set: true
     default_from_api: true
+    diff_suppress_func: 'diffSuppressDestinationRanges'
     item_type:
       type: String
   - name: 'direction'

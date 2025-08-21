@@ -351,6 +351,29 @@ func TestAccComputeFirewall_resourceManagerTags(t *testing.T) {
 	})
 }
 
+func TestAccComputeFirewall_ipv6(t *testing.T) {
+	t.Parallel()
+
+	networkName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+	firewallName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeFirewallDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeFirewall_ipv6(networkName, firewallName),
+			},
+			{
+				ResourceName:      "google_compute_firewall.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
 func testAccComputeFirewall_resourceManagerTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_compute_network" "foobar" {
@@ -679,6 +702,45 @@ resource "google_compute_firewall" "foobar" {
 
   source_ranges = ["${google_compute_address.foobar.address}/32"]
   target_tags   = ["foo"]
+
+  allow {
+    protocol = "tcp"
+  }
+}
+`, network, network, network, firewall)
+}
+
+func testAccComputeFirewall_ipv6(network, firewall string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name = "%s"
+  auto_create_subnetworks = false
+	enable_ula_internal_ipv6 = true
+}
+
+resource "google_compute_subnetwork" "subnet1" {
+  name             = "%s-subnet-1"
+  region           = "us-central1"
+	stack_type       = "IPV6_ONLY"
+	ipv6_access_type = "INTERNAL"
+  network          = google_compute_network.foobar.name
+}
+
+resource "google_compute_subnetwork" "subnet2" {
+  name             = "%s-subnet-2"
+  region           = "us-central1"
+	stack_type       = "IPV6_ONLY"
+	ipv6_access_type = "INTERNAL"
+  network          = google_compute_network.foobar.name
+}
+
+resource "google_compute_firewall" "foobar" {
+  name        = "%s"
+  network     = google_compute_network.foobar.name
+  direction   = "INGRESS"
+
+  source_ranges      = [google_compute_subnetwork.subnet1.internal_ipv6_prefix]
+  destination_ranges = [google_compute_subnetwork.subnet2.internal_ipv6_prefix]
 
   allow {
     protocol = "tcp"

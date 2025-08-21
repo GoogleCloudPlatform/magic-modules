@@ -107,6 +107,30 @@ func diffSuppressSourceRanges(k, old, new string, d *schema.ResourceData) bool {
 			return true
 		}
 	}
-	// For any other source_ranges value diff, don't suppress
-	return false
+
+	return diffSuppressCIDR("source_ranges", d)
+}
+
+func diffSuppressDestinationRanges(k, old, new string, d *schema.ResourceData) bool {
+	return diffSuppressCIDR("destination_ranges", d)
+}
+
+func diffSuppressCIDR (key string, d *schema.ResourceData) bool {
+	o, n := d.GetChange(key)
+	oldRanges := o.(*schema.Set).List()
+	newRanges := n.(*schema.Set).List()
+
+	if len(oldRanges) != len(newRanges) {
+		return false
+	}
+
+	for i := 0; i < len(oldRanges); i++ {
+		oldCIDR := netip.MustParsePrefix(oldRanges[i].(string))
+		newCIDR := netip.MustParsePrefix(newRanges[i].(string))
+
+		if oldCIDR != newCIDR {
+			return false
+		}
+	}
+	return true
 }
