@@ -317,13 +317,6 @@ properties:
         description: |
           A Cloud Storage URI of a folder, in the format gs://<bucket_name>/<path_inside_bucket>. A sub-folder <backup_folder> containing backup files will be stored below it.
         required: true
-  - name: 'deletion_protection'
-    type: Boolean
-    description: |
-      Indicates if the dataproc metastore should be protected against accidental deletions.Defaults to false.
-      When the field is set to true in Terraform state, a `terraform apply`
-      or `terraform destroy` that would delete the service will fail.
-    default_value: false
   - name: 'maintenanceWindow'
     type: NestedObject
     description: |
