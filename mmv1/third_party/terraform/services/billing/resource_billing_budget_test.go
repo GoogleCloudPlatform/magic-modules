@@ -1,39 +1,39 @@
 package billing_test
 
 import (
-  "context"
-  "testing"
+	"context"
+	"testing"
 
-  "github.com/hashicorp/terraform-plugin-testing/helper/resource"
-  "github.com/hashicorp/terraform-provider-google/google/acctest"
-  "github.com/hashicorp/terraform-provider-google/google/envvar"
-  "github.com/hashicorp/terraform-provider-google/google/services/billing"
-  transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/billing"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestAccBillingBudget_billingBudgetCurrencycode(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "billing_acct":  envvar.GetTestMasterBillingAccountFromEnv(t),
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"billing_acct":  envvar.GetTestMasterBillingAccountFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccBillingBudget_billingBudgetCurrencycode(context),
-        Check:  resource.ComposeTestCheckFunc(),
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBillingBudget_billingBudgetCurrencycode(context),
+				Check:  resource.ComposeTestCheckFunc(),
+			},
+		},
+	})
 }
 
 func testAccBillingBudget_billingBudgetCurrencycode(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_billing_account" "account" {
   billing_account = "%{billing_acct}"
 }
@@ -70,97 +70,97 @@ resource "google_billing_budget" "budget" {
 }
 
 func TestAccBillingBudget_billingBudgetUpdate(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "billing_acct":  envvar.GetTestMasterBillingAccountFromEnv(t),
-    "random_suffix": acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"billing_acct":  envvar.GetTestMasterBillingAccountFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccBillingBudget_billingBudgetUpdateStart(context),
-      },
-      {
-        ResourceName:      "google_billing_budget.budget",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccBillingBudget_billingBudgetUpdateRemoveFilter(context),
-      },
-      {
-        ResourceName:      "google_billing_budget.budget",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccBillingBudget_billingBudgetCalendarUpdate(context),
-      },
-      {
-        ResourceName:      "google_billing_budget.budget",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccBillingBudget_billingBudgetUpdate(context),
-      },
-      {
-        ResourceName:      "google_billing_budget.budget",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccBillingBudget_billingBudgetCustomPeriodUpdate(context),
-      },
-      {
-        ResourceName:      "google_billing_budget.budget",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBillingBudget_billingBudgetUpdateStart(context),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBillingBudget_billingBudgetUpdateRemoveFilter(context),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBillingBudget_billingBudgetCalendarUpdate(context),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBillingBudget_billingBudgetUpdate(context),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBillingBudget_billingBudgetCustomPeriodUpdate(context),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
 func TestAccBillingBudget_billingFilterSubaccounts(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "master_billing_acct": envvar.GetTestMasterBillingAccountFromEnv(t),
-    "random_suffix":       acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"master_billing_acct": envvar.GetTestMasterBillingAccountFromEnv(t),
+		"random_suffix":       acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccBillingBudget_billingFilterSubaccounts(context),
-      },
-      {
-        ResourceName:      "google_billing_budget.budget",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-      {
-        Config: testAccBillingBudget_billingFilterRemoveSubaccounts(context),
-      },
-      {
-        ResourceName:      "google_billing_budget.budget",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-    },
-  })
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBillingBudget_billingFilterSubaccounts(context),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccBillingBudget_billingFilterRemoveSubaccounts(context),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
 func testAccBillingBudget_billingFilterSubaccounts(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_billing_account" "account" {
   billing_account = "%{master_billing_acct}"
 }
@@ -204,7 +204,7 @@ resource "google_billing_budget" "budget" {
 }
 
 func testAccBillingBudget_billingFilterRemoveSubaccounts(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 data "google_billing_account" "account" {
   billing_account = "%{master_billing_acct}"
 }
@@ -241,7 +241,7 @@ resource "google_billing_budget" "budget" {
 }
 
 func testAccBillingBudget_billingBudgetUpdateStart(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_pubsub_topic" "topic1" {
   name = "tf-test-billing-budget1-%{random_suffix}"
 }
@@ -291,7 +291,7 @@ resource "google_billing_budget" "budget" {
 }
 
 func testAccBillingBudget_billingBudgetUpdateRemoveFilter(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_pubsub_topic" "topic1" {
   name = "tf-test-billing-budget1-%{random_suffix}"
 }
@@ -337,7 +337,7 @@ resource "google_billing_budget" "budget" {
 }
 
 func testAccBillingBudget_billingBudgetUpdate(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_pubsub_topic" "topic1" {
   name = "tf-test-billing-budget1-%{random_suffix}"
 }
@@ -388,7 +388,7 @@ resource "google_billing_budget" "budget" {
 }
 
 func testAccBillingBudget_billingBudgetCalendarUpdate(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_pubsub_topic" "topic1" {
   name = "tf-test-billing-budget1-%{random_suffix}"
 }
@@ -436,7 +436,7 @@ resource "google_billing_budget" "budget" {
 }
 
 func testAccBillingBudget_billingBudgetCustomPeriodUpdate(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 resource "google_pubsub_topic" "topic1" {
   name = "tf-test-billing-budget1-%{random_suffix}"
 }
@@ -495,91 +495,91 @@ resource "google_billing_budget" "budget" {
 }
 
 func TestBillingBudgetStateUpgradeV0(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  cases := map[string]struct {
-    Attributes map[string]interface{}
-    Expected   map[string]string
-    Meta       interface{}
-  }{
-    "shorten long name": {
-      Attributes: map[string]interface{}{
-        "name": "billingAccounts/000000-111111-222222/budgets/9188612e-e4c0-4e69-9d14-9befebbcb87d",
-      },
-      Expected: map[string]string{
-        "name": "9188612e-e4c0-4e69-9d14-9befebbcb87d",
-      },
-      Meta: &transport_tpg.Config{},
-    },
-    "short name stays": {
-      Attributes: map[string]interface{}{
-        "name": "9188612e-e4c0-4e69-9d14-9befebbcb87d",
-      },
-      Expected: map[string]string{
-        "name": "9188612e-e4c0-4e69-9d14-9befebbcb87d",
-      },
-      Meta: &transport_tpg.Config{},
-    },
-  }
-  for tn, tc := range cases {
-    t.Run(tn, func(t *testing.T) {
-      actual, err := billing.ResourceBillingBudgetUpgradeV0(context.Background(), tc.Attributes, tc.Meta)
+	cases := map[string]struct {
+		Attributes map[string]interface{}
+		Expected   map[string]string
+		Meta       interface{}
+	}{
+		"shorten long name": {
+			Attributes: map[string]interface{}{
+				"name": "billingAccounts/000000-111111-222222/budgets/9188612e-e4c0-4e69-9d14-9befebbcb87d",
+			},
+			Expected: map[string]string{
+				"name": "9188612e-e4c0-4e69-9d14-9befebbcb87d",
+			},
+			Meta: &transport_tpg.Config{},
+		},
+		"short name stays": {
+			Attributes: map[string]interface{}{
+				"name": "9188612e-e4c0-4e69-9d14-9befebbcb87d",
+			},
+			Expected: map[string]string{
+				"name": "9188612e-e4c0-4e69-9d14-9befebbcb87d",
+			},
+			Meta: &transport_tpg.Config{},
+		},
+	}
+	for tn, tc := range cases {
+		t.Run(tn, func(t *testing.T) {
+			actual, err := billing.ResourceBillingBudgetUpgradeV0(context.Background(), tc.Attributes, tc.Meta)
 
-      if err != nil {
-        t.Error(err)
-      }
+			if err != nil {
+				t.Error(err)
+			}
 
-      for _, expectedName := range tc.Expected {
-        if actual["name"] != expectedName {
-          t.Errorf("expected: name -> %#v\n got: name -> %#v\n in: %#v",
-            expectedName, actual["name"], actual)
-        }
-      }
-    })
-  }
+			for _, expectedName := range tc.Expected {
+				if actual["name"] != expectedName {
+					t.Errorf("expected: name -> %#v\n got: name -> %#v\n in: %#v",
+						expectedName, actual["name"], actual)
+				}
+			}
+		})
+	}
 }
 
 func TestAccBillingBudget_budgetFilterProjectsOrdering(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 
-  context := map[string]interface{}{
-    "org":                  envvar.GetTestOrgFromEnv(t),
-    "billing_acct":         envvar.GetTestMasterBillingAccountFromEnv(t),
-    "project_billing_acct": envvar.GetTestBillingAccountFromEnv(t),
-    "random_suffix_1":      acctest.RandString(t, 10),
-    "random_suffix_2":      acctest.RandString(t, 10),
-  }
+	context := map[string]interface{}{
+		"org":                  envvar.GetTestOrgFromEnv(t),
+		"billing_acct":         envvar.GetTestMasterBillingAccountFromEnv(t),
+		"project_billing_acct": envvar.GetTestBillingAccountFromEnv(t),
+		"random_suffix_1":      acctest.RandString(t, 10),
+		"random_suffix_2":      acctest.RandString(t, 10),
+	}
 
-  acctest.VcrTest(t, resource.TestCase{
-    PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-    ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-    CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
-    Steps: []resource.TestStep{
-      {
-        Config: testAccBillingBudget_budgetFilterProjectsOrdering1(context),
-      },
-      {
-        ResourceName:      "google_billing_budget.budget",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBillingBudgetDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBillingBudget_budgetFilterProjectsOrdering1(context),
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
 
-      {
-        Config:             testAccBillingBudget_budgetFilterProjectsOrdering2(context),
-        PlanOnly:           true,
-        ExpectNonEmptyPlan: false,
-      },
-      {
-        ResourceName:      "google_billing_budget.budget",
-        ImportState:       true,
-        ImportStateVerify: true,
-      },
-    },
-  })
+			{
+				Config:             testAccBillingBudget_budgetFilterProjectsOrdering2(context),
+				PlanOnly:           true,
+				ExpectNonEmptyPlan: false,
+			},
+			{
+				ResourceName:      "google_billing_budget.budget",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }
 
 func testAccBillingBudget_budgetFilterProjectsOrdering1(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 
 data "google_billing_account" "account" {
   billing_account = "%{billing_acct}"
@@ -625,7 +625,7 @@ resource "google_billing_budget" "budget" {
 }
 
 func testAccBillingBudget_budgetFilterProjectsOrdering2(context map[string]interface{}) string {
-  return acctest.Nprintf(`
+	return acctest.Nprintf(`
 
 data "google_billing_account" "account" {
   billing_account = "%{billing_acct}"
