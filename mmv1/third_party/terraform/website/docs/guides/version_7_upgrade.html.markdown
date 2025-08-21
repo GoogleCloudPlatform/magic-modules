@@ -249,6 +249,12 @@ Remove `service_config.service` from your configuration after upgrade.
 
 Remove `template.containers.depends_on` from your configuration after upgrade.
 
+## Resource: `google_sql_user`
+
+## `password_wo_version` is now required when `password_wo` is set
+
+This standardizes the behavior of write-only fields across the provider and makes it easier to remember to update the fields together.
+
 ## Resource: `google_vertex_ai_endpoint`
 
 ### `enable_secure_private_service_connect` is removed as it is not available in the GA version of the API, only in the beta version.
