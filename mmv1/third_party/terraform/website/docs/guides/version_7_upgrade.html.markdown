@@ -245,4 +245,4 @@ Now, destroying the resource will only remove it from Terraform's state and leav
 
 ## Resource: `google_redis_cluster`
 
- `allow_fewer_zones_Deployment` has been removed because it isn't user-configurable.
+ `allow_fewer_zones_deployment` has been removed because it isn't user-configurable.
