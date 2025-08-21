@@ -29,9 +29,10 @@ import (
 )
 
 var (
-	_ resource.Resource                = &storageNotificationResource{}
-	_ resource.ResourceWithConfigure   = &storageNotificationResource{}
-	_ resource.ResourceWithImportState = &storageNotificationResource{}
+	_ resource.Resource                 = &storageNotificationResource{}
+	_ resource.ResourceWithConfigure    = &storageNotificationResource{}
+	_ resource.ResourceWithImportState  = &storageNotificationResource{}
+	_ resource.ResourceWithUpgradeState = &storageNotificationResource{}
 )
 
 func NewStorageNotificationResource() resource.Resource {
@@ -77,6 +78,7 @@ func (r *storageNotificationResource) Configure(_ context.Context, req resource.
 func (r *storageNotificationResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description: "Creates a new notification configuration on a specified bucket, establishing a flow of event notifications from GCS to a Cloud Pub/Sub topic.",
+		Version:     1, // needed for state upgrader
 		Attributes: map[string]schema.Attribute{
 			"bucket": schema.StringAttribute{
 				Required:    true,
