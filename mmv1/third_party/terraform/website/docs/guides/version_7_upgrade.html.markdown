@@ -287,6 +287,17 @@ The default value for `disable_on_destroy` has been changed to `false`. The prev
 
 <<<<<<< HEAD
 Now, destroying the resource will only remove it from Terraform's state and leave the service enabled. To disable a service when the resource is destroyed, you must now make an explicit decision by setting `disable_on_destroy = true`.
+<<<<<<< HEAD
 =======
 Now, destroying the resource will only remove it from Terraform's state and leave the service enabled. To disable a service when the resource is destroyed, you must now make an explicit decision by setting `disable_on_destroy = true`.
 >>>>>>> c96e1c59a (add 7.0.0 guide to main (#14861))
+=======
+
+## Resource: `google_memorystore_instance`
+
+ `allow_fewer_zones_deployment` has been removed because it isn't user-configurable.
+
+## Resource: `google_redis_cluster`
+
+ `allow_fewer_zones_deployment` has been removed because it isn't user-configurable.
+>>>>>>> eed48c10c (Breaking Change: Remove allow_fewer_zones_deployment from Memorystore and Redis Cluster (#14889))
