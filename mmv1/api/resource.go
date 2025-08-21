@@ -2109,13 +2109,7 @@ func (r Resource) ShouldDatasourceSetAnnotations() bool {
 // that should be marked as "Required".
 func (r Resource) DatasourceRequiredFields() []string {
 	requiredFields := []string{}
-	var uri string
-	if len(r.ImportFormat) > 0 {
-		uri = r.ImportFormat[0]
-	} else {
-		uri = r.SelfLink
-	}
-	uriParts := strings.Split(uri, "/")
+	uriParts := strings.Split(r.IdFormat, "/")
 
 	for _, part := range uriParts {
 		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
@@ -2132,13 +2126,7 @@ func (r Resource) DatasourceRequiredFields() []string {
 // that should be marked as "Optional".
 func (r Resource) DatasourceOptionalFields() []string {
 	optionalFields := []string{}
-	var uri string
-	if len(r.ImportFormat) > 0 {
-		uri = r.ImportFormat[0]
-	} else {
-		uri = r.SelfLink
-	}
-	uriParts := strings.Split(uri, "/")
+	uriParts := strings.Split(r.IdFormat, "/")
 
 	for _, part := range uriParts {
 		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
