@@ -251,7 +251,7 @@ properties:
             Group resource using the fully-qualified URL, rather than a
             partial URL.
           required: true
-          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkCanonicalPaths'
           custom_flatten: 'templates/terraform/custom_flatten/guard_self_link.go.tmpl'
         - name: 'maxConnections'
           type: Integer
