@@ -233,8 +233,17 @@ Remove `description` from your configuration after upgrade.
 
 Remove `post_startup_script_config` from your configuration after upgrade.
 
+<<<<<<< HEAD
 =======
 >>>>>>> c96e1c59a (add 7.0.0 guide to main (#14861))
+=======
+## Resource: `google_monitoring_uptime_check_config`
+
+### Exactly one of `http_check.auth_info.password` and `http_check.auth_info.password_wo` must be set
+
+At least one must be set, and setting both would make it unclear which was being used.
+
+>>>>>>> 7b15bdcb5 (Standardized required_with behavior for write-only fields (#14941))
 ## Resource: `google_network_services_lb_traffic_extension`
 
 ### `load_balancing_scheme` is now required
@@ -266,6 +275,18 @@ Remove `service_config.service` from your configuration after upgrade.
 ### `template.containers.depends_on` is removed as it is not supported.
 
 Remove `template.containers.depends_on` from your configuration after upgrade.
+
+## Resource: `google_secret_manager_secret_version`
+
+### `secret_data_wo` and `secret_data_wo_version` must be set together
+
+This standardizes the behavior of write-only fields across the provider and makes it easier to remember to update the fields together.
+
+## Resource: `google_sql_user`
+
+### `password_wo_version` is now required when `password_wo` is set
+
+This standardizes the behavior of write-only fields across the provider and makes it easier to remember to update the fields together.
 
 ## Resource: `google_vertex_ai_endpoint`
 
