@@ -208,7 +208,7 @@ resource "google_dataproc_metastore_service" "my_metastore" {
         service_id = "%s"
         location   = "%s"
         tier       = "%s"
-        deletion_protection = true
+        deletion_protection = false
         hive_metastore_config {
                 version = "2.3.6"
         }
