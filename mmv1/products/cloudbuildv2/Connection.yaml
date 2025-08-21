@@ -49,6 +49,7 @@ iam_policy:
 custom_code:
 exclude_tgc: true
 legacy_long_form_project: true
+include_in_tgc_next_DO_NOT_USE: true
 sweeper:
   url_substitutions:
     - region: "us-central1"
@@ -59,6 +60,8 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-connection%s", context["random_suffix"])'
     vars:
       connection_name: 'tf-test-connection'
+    tgc_test_ignore_extra:
+      - github_config.app_installation_id # It has 0 in Terraform configuration
   - name: 'cloudbuildv2_connection_ghe'
     exclude_test: true
   - name: 'cloudbuildv2_connection_github'
@@ -70,6 +73,7 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
+    custom_tgc_expand: 'templates/tgc_next/custom_expand/cloudbuildv2_repository_name.go.tmpl'
   - name: 'location'
     type: String
     description: The location for the resource
