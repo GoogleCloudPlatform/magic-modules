@@ -256,7 +256,7 @@ A duration in seconds with up to nine fractional digits, terminated by 's'. Exam
 
 * `bucket_name` - (Required) Name of the bucket.
 
-* `path` - (Optionla) Specifies the path to transfer objects.
+* `path` - (Optional) Specifies the path to transfer objects.
 
 * `endpoint` - (Required) Endpoint of the storage service.
 
