@@ -34,6 +34,7 @@ iam_policy:
   example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
 custom_code:
   constants: 'templates/terraform/constants/binaryauthorization_attestor.go.tmpl'
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'binary_authorization_attestor_basic'
     primary_resource_id: 'attestor'
