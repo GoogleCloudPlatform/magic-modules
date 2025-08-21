@@ -165,6 +165,15 @@ The `view.use_legacy_sql` field no longer has a default value. Configurations th
 `instance` has been removed in favor of `instance_name`.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+## Resource: `google_billing_budget`
+
+### `budget_filter.credit types` and `budget_filter.subaccounts` are no longer optional+computed, only optional
+
+`budget_filter.credit types` and `budget_filter.subaccounts` are no longer O+C. These fields already did not export any API-default values, so no change to your configuration should be necessary.
+
+>>>>>>> e2e1d5150 (remove default_from_api from credit_types and subaccounts in google_billing_budget (#14938))
 ## Resource: `google_compute_packet_mirroring`
 
 ### `subnetworks` and `instances` fields have been converted to sets
