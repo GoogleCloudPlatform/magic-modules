@@ -169,7 +169,7 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 			if testResult.Status == "FAILURE" || testResult.Status == "UNKNOWN" {
 				errorMessage = convertErrorMessage(testResult.ErrorMessage)
 			}
-			
+
 			queuedTime, err := time.Parse(tcTimeFormat, build.QueuedDate)
 			if err != nil {
 				return fmt.Errorf("failed to parse QueuedDate: %v", err)
@@ -182,7 +182,7 @@ func createTestReport(pVersion provider.Version, tc TeamcityClient, gcs Cloudsto
 			if err != nil {
 				return fmt.Errorf("failed to parse FinishDate: %v", err)
 			}
-			
+
 			testInfoList = append(testInfoList, TestInfo{
 				Name:            testResult.Name,
 				Status:          testResult.Status,
