@@ -1,7 +1,5 @@
 // Copyright (c) HashiCorp, Inc.
 // SPDX-License-Identifier: MPL-2.0
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package storagetransfer_test
 
 import (
@@ -578,7 +576,6 @@ func TestAccStorageTransferJob_hdfsSource(t *testing.T) {
 func TestAccStorageTransferJob_withServiceAccount(t *testing.T) {
 	t.Parallel()
 
-	// Use randomized names to avoid collisions during parallel test runs
 	testTransferJobDescription := acctest.RandString(t, 10)
 	testSourceBucketName := fmt.Sprintf("tf-acc-source-%s", acctest.RandString(t, 10))
 	testSinkBucketName := fmt.Sprintf("tf-acc-sink-%s", acctest.RandString(t, 10))
