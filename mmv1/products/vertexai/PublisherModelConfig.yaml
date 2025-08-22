@@ -20,9 +20,9 @@ references:
     'Official Documentation': 'https://cloud.google.com/vertex-ai/docs'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.publishers.models'
 docs:
-base_url: 'projects/{project}/locations/{location}/publishers/{publisher}/models/{model}'
-self_link: 'projects/{project}/locations/{location}/publishers/{publisher}/models/{model}:fetchPublisherModelConfig'
-create_url: 'projects/{project}/locations/{location}/publishers/{publisher}/models/{model}:setPublisherModelConfig'
+base_url: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}'
+self_link: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}:fetchPublisherModelConfig'
+create_url: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}:setPublisherModelConfig'
 update_verb: 'POST'
 update_mask: true
 min_version: 'beta'
@@ -30,6 +30,14 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+custom_code:
+# TODO: there is no destroy endpoint, disable the logging config on destroy?
+# custom_delete: 't.b.d.'
+examples:
+  - name: 'publisher_model_config_basic'
+    primary_resource_id: 'default'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
 parameters:
   - name: 'location'
     type: String
@@ -50,50 +58,56 @@ parameters:
     required: true
     immutable: true
 properties:
-  - name: 'loggingConfig'
+  - name: 'publisherModelConfig'
     type: NestedObject
+    required: true
     description: |-
-      The prediction request/response logging config.
-    default_from_api: true
+      The publisher model config.
     properties:
-      - name: 'enabled'
-        type: Boolean
-        description: |-
-          If logging is enabled or not.
-        required: true
-      - name: 'samplingRate'
-        type: Float
-        description: |-
-          Percentage of requests to be logged, expressed as a fraction in range(0,1).
-        required: true
-      - name: 'bigQueryDestination'
+      - name: 'loggingConfig'
         type: NestedObject
         description: |-
-          BigQuery table for logging. If only given a project, a new dataset will be created with
-          name logging_<endpoint-display-name>_<endpoint-id> where will be made BigQuery-dataset-name
-          compatible (e.g. most special characters will become underscores). If no table name is given,
-          a new table will be created with name request_response_logging
-        properties:
-          - name: 'outputUri'
-            type: String
-            description: |-
-              BigQuery URI to a project or table, up to 2000 characters long. When only the project is
-              specified, the Dataset and Table is created. When the full table reference is specified,
-              the Dataset must exist and table must not exist.
-              Accepted forms:
-              BigQuery path. For example: `bq://projectId` or `bq://projectId.bqDatasetId` or
-              `bq://projectId.bqDatasetId.bqTableId`.
-            required: true
-      - name: 'requestResponseLoggingSchemaVersion'
-        type: String
-        output: true
-        description: |-
-          The schema version used in creating the BigQuery table for the request response logging.
-          The versions are "v1" and "v2". The current default version is "v1".
-      - name: 'enableOtelLogging'
-        type: Boolean
+          The prediction request/response logging config.
         default_from_api: true
-        description: |-
-          This field is used for large models. If true, in addition to the original large model logs,
-          logs will be converted in OTel schema format, and saved in otel_log column. Default value
-          is false.
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: |-
+              If logging is enabled or not.
+            required: true
+          - name: 'samplingRate'
+            type: Float
+            description: |-
+              Percentage of requests to be logged, expressed as a fraction in range(0,1).
+            required: true
+          - name: 'bigqueryDestination'
+            type: NestedObject
+            description: |-
+              BigQuery table for logging. If only given a project, a new dataset will be created with
+              name logging_<endpoint-display-name>_<endpoint-id> where will be made BigQuery-dataset-name
+              compatible (e.g. most special characters will become underscores). If no table name is given,
+              a new table will be created with name request_response_logging
+            properties:
+              - name: 'outputUri'
+                type: String
+                description: |-
+                  BigQuery URI to a project or table, up to 2000 characters long. When only the project is
+                  specified, the Dataset and Table is created. When the full table reference is specified,
+                  the Dataset must exist and table must not exist.
+                  Accepted forms:
+                  BigQuery path. For example: `bq://projectId` or `bq://projectId.bqDatasetId` or
+                  `bq://projectId.bqDatasetId.bqTableId`.
+                required: true
+          - name: 'requestResponseLoggingSchemaVersion'
+            type: String
+            output: true
+            description: |-
+              The schema version used in creating the BigQuery table for the request response logging.
+              The versions are "v1" and "v2". The current default version is "v1".
+          - name: 'enableOtelLogging'
+            type: Boolean
+            default_from_api: true
+            description: |-
+              This field is used for large models. If true, in addition to the original large model logs,
+              logs will be converted in OTel schema format, and saved in otel_log column. Default value
+              is false.
