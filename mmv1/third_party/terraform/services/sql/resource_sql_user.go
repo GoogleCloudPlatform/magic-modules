@@ -71,7 +71,7 @@ func ResourceSqlUser() *schema.Resource {
 				return map[string]*schema.Schema{
 					"project": {
 						Type:              schema.TypeString,
-						RequiredForImport: true,
+						OptionalForImport: true,
 						Description:       `The project that the service account belongs to.`,
 					},
 					"instance": {
