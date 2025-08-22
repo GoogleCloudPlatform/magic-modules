@@ -61,7 +61,6 @@ parameters:
     description: |
       ID of the folder of the access approval settings.
     url_param_only: true
-    required: true
     immutable: true
 properties:
   - name: 'name'
@@ -89,7 +88,6 @@ properties:
 
       A maximum of 10 enrolled services will be enforced, to be expanded as the set of supported services is expanded.
     is_set: true
-    required: true
     set_hash_func: accessApprovalEnrolledServicesHash
     item_type:
       type: NestedObject
