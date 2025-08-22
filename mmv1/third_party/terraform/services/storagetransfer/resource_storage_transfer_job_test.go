@@ -2531,9 +2531,6 @@ resource "google_storage_transfer_job" "with_sa" {
   }
 
 	depends_on = [
-    google_storage_bucket_iam_member.source_iam,
-    google_storage_bucket_iam_member.sink_iam,
-    google_service_account_iam_member.token_creator,
     time_sleep.wait_120_seconds,
   ]
 }
