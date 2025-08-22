@@ -25,6 +25,7 @@ self_link: 'projects/{project}/locations/{location}/publishers/{publisher}/model
 create_url: 'projects/{project}/locations/{location}/publishers/{publisher}/models/{model}:setPublisherModelConfig'
 update_verb: 'POST'
 update_mask: true
+min_version: 'beta'
 timeouts:
   insert_minutes: 20
   update_minutes: 20
