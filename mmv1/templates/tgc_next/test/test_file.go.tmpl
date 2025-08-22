@@ -21,7 +21,7 @@ import (
 )
 
 {{ range $e := $.TestExamples }}
-func TestAcc{{ $e.TestSlug $.ProductMetadata.Name $.Name }}(t *testing.T) {
+func {{ if $e.TGCHandwrittenTestName }}{{ $e.TGCHandwrittenTestName }}{{ else }}TestAcc{{ $e.TestSlug $.ProductMetadata.Name $.Name }}{{ end }}(t *testing.T) {
 	{{- if $e.TGCSkipTest }}
 	t.Skip("{{$e.TGCSkipTest}}")
 	{{- end }}
