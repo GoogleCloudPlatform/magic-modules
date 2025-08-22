@@ -54,4 +54,3 @@ properties:
     type: String
     description: Name or self link of a forwarding rule service.
     required: true
-
