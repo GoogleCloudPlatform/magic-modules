@@ -192,6 +192,8 @@ type Examples struct {
 	// The reason to skip a test. For example, a link to a ticket explaining the issue that needs to be resolved before
 	// unskipping the test. If this is not empty, the test will be skipped.
 	TGCSkipTest string `yaml:"tgc_skip_test,omitempty"`
+	// When a test is generated from a handwritten provder test, its name will be stored here
+	TGCHandwrittenTestName string `yaml:"-"`
 }
 
 // Set default value for fields
@@ -389,6 +391,9 @@ func (e *Examples) OiCSLink() string {
 }
 
 func (e *Examples) TestSlug(productName, resourceName string) string {
+	if e.TGCHandwrittenTestName != "" {
+		return e.TGCHandwrittenTestName
+	}
 	ret := fmt.Sprintf("%s%s_%sExample", productName, resourceName, google.Camelize(e.Name, "lower"))
 	return ret
 }

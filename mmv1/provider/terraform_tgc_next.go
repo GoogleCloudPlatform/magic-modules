@@ -23,14 +23,18 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/product"
+	"github.com/GoogleCloudPlatform/magic-modules/mmv1/api/resource"
 	"github.com/GoogleCloudPlatform/magic-modules/mmv1/google"
 	"github.com/otiai10/copy"
 )
+
+var testRegex = regexp.MustCompile("func (TestAcc[^(])")
 
 // TerraformGoogleConversionNext is for both tfplan2cai and cai2hcl conversions
 // and copying other files, such as transport.go
@@ -127,6 +131,7 @@ func (tgc TerraformGoogleConversionNext) GenerateCaiToHclObjects(outputFolder, r
 }
 
 func (tgc *TerraformGoogleConversionNext) GenerateResourceTests(object api.Resource, templateData TemplateData, outputFolder string) {
+	object.Examples = append(object.Examples, tgc.examplesFromHandwrittenTests(object)...)
 	eligibleExample := false
 	for _, example := range object.Examples {
 		if !example.ExcludeTest {
@@ -308,6 +313,30 @@ func (tgc TerraformGoogleConversionNext) replaceImportPath(outputFolder, target 
 	if err != nil {
 		log.Fatalf("Cannot write file %s to replace import path: %s", target, err)
 	}
+}
+
+func (tgc TerraformGoogleConversionNext) examplesFromHandwrittenTests(object api.Resource) ([]resource.Examples, error) {
+	if object.ProductMetadata == nil {
+		return nil, nil
+	}
+	product := object.ProductMetadata
+	productName := google.Underscore(product.Name)
+	resourceFullName := fmt.Sprintf("%s_%s", productName, google.Underscore(object.Name))
+	handwrittenTestFilePath := fmt.Sprintf("third_party/terraform/services/%s/resource_%s_test.go", productName, resourceFullName)
+	data, err := os.ReadFile(handwrittenTestFilePath)
+	if err != nil {
+		return nil, fmt.Errorf("error reading handwritten test file %s: %v", handwrittenTestFilePath, err)
+	}
+	matches := testRegex.FindAllSubmatch(data, -1)
+	examples := make([]resource.Examples, len(matches))
+	for i, match := range matches {
+		if len(match) == 2 {
+			examples[i] = resource.Examples{
+				TGCHandwrittenTestName: string(match[1]),
+			}
+		}
+	}
+	return examples, nil
 }
 
 // Generates the list of resources, and gets the count of resources.
