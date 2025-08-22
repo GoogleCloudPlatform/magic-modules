@@ -322,6 +322,9 @@ type Type struct {
 	// If a property is missing in CAI asset, use `is_missing_in_cai: true`
 	// and `exclude_false_in_cai: true` is not needed
 	ExcludeFalseInCai bool `yaml:"exclude_false_in_cai,omitempty"`
+
+	// If true, the custom flatten function is not applied during cai2hcl
+	TGCIgnoreTerraformCustomFlatten bool `yaml:"tgc_ignore_terraform_custom_flatten,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -506,6 +509,10 @@ func (t Type) EnumValuesToString(quoteSeperator string, addEmpty bool) string {
 
 func (t Type) TitlelizeProperty() string {
 	return google.Camelize(t.Name, "upper")
+}
+
+func (t Type) CamelizeProperty() string {
+	return google.Camelize(t.Name, "lower")
 }
 
 // If the Prefix field is already set, returns the value.
@@ -1306,4 +1313,8 @@ func (t Type) TGCSendEmptyValue() bool {
 	}
 
 	return false
+}
+
+func (t Type) ShouldIgnoreCustomFlatten() bool {
+	return t.ResourceMetadata.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
 }
