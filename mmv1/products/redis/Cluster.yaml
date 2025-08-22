@@ -110,6 +110,7 @@ timeouts:
 autogen_async: true
 datasource:
   generate: true
+  exclude_test: true
 async:
   actions: ['create', 'delete', 'update']
   type: 'OpAsync'
