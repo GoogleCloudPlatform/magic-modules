@@ -2088,6 +2088,27 @@ func TestAccBigQueryTable_foreignTypeInfo(t *testing.T) {
 	})
 }
 
+func TestAccBigQueryTable_ResourceIdentity(t *testing.T) {
+	t.Parallel()
+
+	datasetID := fmt.Sprintf("tf_test_dataset_%s", acctest.RandString(t, 10))
+	tableID := fmt.Sprintf("tf_test_table_%s", acctest.RandString(t, 10))
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccBigQueryTableBasicSchema(datasetID, tableID),
+			},
+			{
+				ResourceName:    "google_bigquery_table.test",
+				ImportState:     true,
+				ImportStateKind: resource.ImportBlockWithResourceIdentity,
+			},
+		},
+	})
+}
+
 func testAccCheckBigQueryExtData(t *testing.T, expectedQuoteChar string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		for _, rs := range s.RootModule().Resources {
