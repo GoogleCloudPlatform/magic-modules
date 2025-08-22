@@ -81,9 +81,7 @@ examples:
       'deletion_policy': '"DELETE"'
     ignore_read_extra:
       - 'update_time'
-<<<<<<< HEAD
       - 'deletion_policy'
-=======
   - name: 'secure_source_manager_instance_private_trusted_cert'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
@@ -91,8 +89,8 @@ examples:
       instance_id: 'my-instance'
     ignore_read_extra:
       - 'update_time'
+      - 'deletion_policy'
     exclude_docs: true
->>>>>>> 87b4ef0a14e7b29a18b81105f3ccd7e2d894a278
   - name: 'secure_source_manager_instance_private'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
