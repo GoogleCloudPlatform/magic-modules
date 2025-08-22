@@ -525,6 +525,7 @@ properties:
       the instance creation, the instance will only be deployed in 2 zones, and
       stay within the 2 zones for its lifecycle.
     immutable: true
+    deprecation_message: 'allow_fewer_zone_deployment flag will no longer be a user settable field, default behaviour will be as if set to true'
   - name: 'deletionProtectionEnabled'
     type: Boolean
     description: "Optional. If set to true deletion of the instance will fail. "
