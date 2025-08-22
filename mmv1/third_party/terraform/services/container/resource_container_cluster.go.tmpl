@@ -1862,7 +1862,7 @@ func ResourceContainerCluster() *schema.Resource {
 							Type:        schema.TypeList,
 							MaxItems:    1,
 							Optional:    true,
-							Computed:    true,
+							DiffSuppressFunc: suppressDiffAutoIpamConfig,
 							Description: `Configuration for auto IP address management.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -8175,4 +8175,14 @@ func containerClusterNodeVersionCustomizeDiffFunc(diff tpgresource.TerraformReso
 	}
 
 	return nil
+}
+
+func suppressDiffAutoIpamConfig(k, old, new string, r *schema.ResourceData) bool {
+	if k == "ip_allocation_policy.0.auto_ipam_config.#" && old == "1" && new == "0" {
+		o, _ := r.GetChange("ip_allocation_policy.0.auto_ipam_config.0.enabled")
+		if !o.(bool) {
+			return true
+		}
+	}
+	return false
 }
