@@ -81,14 +81,13 @@ func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 
 func testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}DataSource(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+{{ $e.TestHCLText }}
 
-		{{ $e.TestHCLText }}
-
-		data "{{ $.Res.TerraformName }}" "default" {
-		{{- range $fieldName := $.Res.DatasourceRequiredFields }}
-		{{ $fieldName }} = {{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}.{{ $fieldName }}
-		{{- end }}
-		}`,
+data "{{ $.Res.TerraformName }}" "default" {
+{{- range $fieldName := $.Res.DatasourceRequiredFields }}
+  {{ $fieldName }} = {{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}.{{ $fieldName }}
+{{- end }}
+}`,
 		context,
 	)
 }
