@@ -135,7 +135,12 @@ var (
 			},
 		},
 		"trodge": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 8, 7),
+					endDate:   newDate(2025, 8, 10),
+				},
+			},
 		},
 		"zli82016": {
 			vacations: []Vacation{
@@ -150,7 +155,6 @@ var (
 	// This is for new team members who are onboarding
 	trustedContributors = map[string]struct{}{
 		"bbasata":           struct{}{},
-		"jaylonmcshan03":    struct{}{},
 		"malhotrasagar2212": struct{}{},
 	}
 )

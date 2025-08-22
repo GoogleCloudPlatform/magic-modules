@@ -337,7 +337,6 @@ properties:
                 description: |
                   If true, the metric data is collected and reported to Cloud
                   Monitoring, but is not used for load balancing.
-                include_empty_value_in_cai: true
               - name: 'maxUtilization'
                 type: Double
                 description: |
@@ -1119,7 +1118,6 @@ properties:
           required: true
           description: |
             If true, the metric data is not used for load balancing.
-          include_empty_value_in_cai: true
   - name: 'name'
     type: String
     description: |
@@ -1690,3 +1688,19 @@ properties:
             description: |
               A boolean flag enabling IP:PORT based dynamic forwarding.
             immutable: true
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+      Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the backend service. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true
+        immutable: true

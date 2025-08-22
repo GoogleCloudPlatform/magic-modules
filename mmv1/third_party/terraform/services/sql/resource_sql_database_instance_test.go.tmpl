@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -1183,6 +1184,86 @@ func TestAccSqlDatabaseInstance_withPSCEnabled_withIpV4Enabled(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_withPscEnabled_withNetworkAttachmentUri_thenRemoveNetworkAttachment(t *testing.T) {
+	t.Parallel()
+
+	random_suffix := acctest.RandString(t, 10)
+	instanceName := "tf-test-" + random_suffix
+	projectId := envvar.GetTestProjectFromEnv()
+	region := "us-central1"
+	networkNameStr := "tf-test-cloud-sql-network-" + random_suffix
+	subnetworkNameStr := "tf-test-cloud-sql-subnetwork-" + random_suffix
+	networkAttachmentNameStr := "tf-test-cloud-sql-update-na-" + random_suffix
+	networkName := acctest.BootstrapSharedTestNetwork(t, networkNameStr)
+	subnetworkName := acctest.BootstrapSubnet(t, subnetworkNameStr, networkName)
+	networkAttachmentName := acctest.BootstrapNetworkAttachment(t, networkAttachmentNameStr, subnetworkName)
+	networkAttachmentUri := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", projectId, region, networkAttachmentName)
+
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutPscOutbound(instanceName),
+				Check:  resource.ComposeTestCheckFunc(verifyPscNetorkAttachmentOperation("google_sql_database_instance.instance", true, true, "")),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withNetworkAttachmentUri(instanceName, networkAttachmentUri),
+				Check:  resource.ComposeTestCheckFunc(verifyPscNetorkAttachmentOperation("google_sql_database_instance.instance", true, true, networkAttachmentUri)),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateIdPrefix:     fmt.Sprintf("%s/", projectId),
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withoutPscOutbound(instanceName),
+				Check:  resource.ComposeTestCheckFunc(verifyPscNetorkAttachmentOperation("google_sql_database_instance.instance", true, true, "")),
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_withPscEnabled_withNetworkAttachmentUriOnCreate(t *testing.T) {
+	t.Parallel()
+
+	random_suffix := acctest.RandString(t, 10)
+	instanceName := "tf-test-" + random_suffix
+	projectId := envvar.GetTestProjectFromEnv()
+	region := "us-central1"
+	networkNameStr := "tf-test-cloud-sql-network-" + random_suffix
+	subnetworkNameStr := "tf-test-cloud-sql-subnetwork-" + random_suffix
+	networkAttachmentNameStr := "tf-test-cloud-sql-update-na-" + random_suffix
+	networkName := acctest.BootstrapSharedTestNetwork(t, networkNameStr)
+	subnetworkName := acctest.BootstrapSubnet(t, subnetworkNameStr, networkName)
+	networkAttachmentName := acctest.BootstrapNetworkAttachment(t, networkAttachmentNameStr, subnetworkName)
+	networkAttachmentUri := fmt.Sprintf("projects/%s/regions/%s/networkAttachments/%s", projectId, region, networkAttachmentName)
+
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_withPSCEnabled_withNetworkAttachmentUri(instanceName, networkAttachmentUri),
+				ExpectError: regexp.MustCompile(`.*Network attachment used for Private Service Connect interfaces can not be assigned with instance creation.*`),
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_withPrivateNetwork_withAllocatedIpRange(t *testing.T) {
 
 	t.Parallel()
@@ -1319,6 +1400,43 @@ func TestAccSqlDatabaseInstance_createFromBackup(t *testing.T) {
 	})
 }
 
+func TestAccSqlDatabaseInstance_createFromBackupDR(t *testing.T) {
+	t.Parallel()
+
+	// Bootstrap the BackupDR vault
+    backupVaultID := "bv-test"
+    location := "us-central1"
+    project := envvar.GetTestProjectFromEnv()
+    backupvault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
+
+    context := map[string]interface{}{
+        "random_suffix":  acctest.RandString(t, 10),
+        "project":        project,
+        "backup_vault_id": backupVaultID,
+        "backup_vault":   backupvault,
+    }
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_createFromBackupDR(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "backupdr_backup"},
+			},
+		},
+	})
+}
+
 func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 	// Sqladmin client
 	acctest.SkipIfVcr(t)
@@ -1326,6 +1444,7 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix":    acctest.RandString(t, 10),
+		"db_version":   "POSTGRES_11",
 		"original_db_name": acctest.BootstrapSharedSQLInstanceBackupRun(t),
 	}
 
@@ -1351,6 +1470,53 @@ func TestAccSqlDatabaseInstance_backupUpdate(t *testing.T) {
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "restore_backup_context"},
+			},
+		},
+	})
+}
+
+func TestAccSqlDatabaseInstance_BackupDRUpdate(t *testing.T) {
+	t.Parallel()
+
+	// Bootstrap the BackupDR vault
+    backupVaultID := "bv-test"
+    location := "us-central1"
+    project := envvar.GetTestProjectFromEnv()
+    backupvault := acctest.BootstrapBackupDRVault(t, backupVaultID, location)
+
+    context := map[string]interface{}{
+        "random_suffix": 	acctest.RandString(t, 10),
+        "project": 			project,
+        "backup_vault_id": 	backupVaultID,
+        "backup_vault": 	backupvault,
+		"db_version": 		"MYSQL_8_0_41",
+    }
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSqlDatabaseInstance_beforeBackup(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testAccSqlDatabaseInstance_updateFromBackupDR(context),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "backupdr_backup"},
 			},
 		},
 	})
@@ -2944,6 +3110,189 @@ func TestAccSqlDatabaseInstance_PostgresSwitchoverSuccess(t *testing.T) {
 			{
 				// Remove replica from primary's resource
 				Config: googleSqlDatabaseInstance_postgresRemoveReplicaFromPrimaryAfterSwitchover(project, replicaName),
+			},
+		},
+	})
+}
+
+// Read pool for Postgres. Scale out (change node count)
+func TestAccSqlDatabaseInstance_PostgresReadPoolScaleOutSuccess(t *testing.T) {
+	t.Parallel()
+	primaryName := "tf-test-pg-readpool-primary-" + acctest.RandString(t, 10)
+	readPoolName := "tf-test-pg-readpool-" + acctest.RandString(t, 10)
+	project := envvar.GetTestProjectFromEnv()
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType: "POSTGRES_15",
+					ReplicaName:  readPoolName,
+					NodeCount:    1,
+				}),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-read-pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType: "POSTGRES_15",
+					ReplicaName:  readPoolName,
+					NodeCount:    2,
+				}),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-read-pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+// Read pool for Postgres. Scale up (change machine type)
+func TestAccSqlDatabaseInstance_PostgresReadPoolScaleUpSuccess(t *testing.T) {
+	t.Parallel()
+	primaryName := "tf-test-pg-readpool-mtc-primary-" + acctest.RandString(t, 10)
+	readPoolName := "tf-test-pg-readpool-mtc-" + acctest.RandString(t, 10)
+	project := envvar.GetTestProjectFromEnv()
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType:        "POSTGRES_15",
+					ReplicaName:         readPoolName,
+					NodeCount:           1,
+					ReplicaMachineType:  "db-perf-optimized-N-2",
+				}),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-read-pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType:        "POSTGRES_15",
+					ReplicaName:         readPoolName,
+					NodeCount:           1,
+					ReplicaMachineType:  "db-perf-optimized-N-4",
+				}),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-read-pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+		},
+	})
+}
+
+// Read pool for MySQL. Enable and disable read pool
+func TestAccSqlDatabaseInstance_MysqlReadPoolEnableDisableSuccess(t *testing.T) {
+	t.Parallel()
+	primaryName := "tf-test-mysql-readpool-primary-" + acctest.RandString(t, 10)
+	readPoolName := "tf-test-mysql-readpool-" + acctest.RandString(t, 10)
+	project := envvar.GetTestProjectFromEnv()
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccSqlDatabaseInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType: "MYSQL_8_0",
+					ReplicaName:  readPoolName,
+					InstanceType: "READ_REPLICA_INSTANCE",
+				}),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-read-pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			// Enable read pool
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType: "MYSQL_8_0",
+					ReplicaName:  readPoolName,
+					InstanceType: "READ_POOL_INSTANCE",
+					NodeCount:    1,
+				}),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-read-pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			// Disable read pool
+			{
+				Config: testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName, ReadPoolConfig{
+					DatabaseType: "MYSQL_8_0",
+					ReplicaName:  readPoolName,
+					InstanceType: "READ_REPLICA_INSTANCE",
+				}),
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-primary",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
+			},
+			{
+				ResourceName:            "google_sql_database_instance.original-read-pool",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -4677,6 +5026,81 @@ resource "google_sql_database_instance" "original-replica" {
 `, project, replicaName)
 }
 
+type ReadPoolConfig struct {
+	DatabaseType string
+	ReplicaName string
+	// InstanceType specifies the instance type of the replica,
+	// defaulting to READ_POOL_INSTANCE.
+	//
+	// Despite the naming of this struct, you can also set it to
+	// READ_REPLICA_INSTANCE to create an ordinary read replica in order
+	// to test enable/disable pool scenarios.
+	InstanceType string
+	NodeCount int64
+	// ReplicaMachineType gives the machine type of the read pool nodes
+	// or read replica. It defaults to db-perf-optimized-N-2.
+	ReplicaMachineType string
+}
+
+func testGoogleSqlDatabaseInstanceConfig_eplusWithReadPool(project, primaryName string, rpconfig ReadPoolConfig) string {
+  nodeCountStr := ""
+	if rpconfig.NodeCount > 0 {
+		nodeCountStr = fmt.Sprintf(`  node_count = %d
+`, rpconfig.NodeCount)
+	}
+
+	if rpconfig.InstanceType == "" {
+		rpconfig.InstanceType = "READ_POOL_INSTANCE"
+	}
+
+	if rpconfig.ReplicaMachineType == "" {
+		rpconfig.ReplicaMachineType = "db-perf-optimized-N-2"
+	}
+
+	primaryTxnLogs := ""
+	if strings.HasPrefix(rpconfig.DatabaseType, "MYSQL") {
+		primaryTxnLogs = "binary_log_enabled = true\n"
+	} else if strings.HasPrefix(rpconfig.DatabaseType, "POSTGRES") {
+		primaryTxnLogs = "point_in_time_recovery_enabled = true\n"
+	}
+	
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "original-primary" {
+  project             = "%s"
+  name                = "%s"
+  region              = "us-east1"
+  database_version    = "%s"
+  instance_type       = "CLOUD_SQL_INSTANCE"
+  deletion_protection = false
+
+  settings {
+    tier              = "db-perf-optimized-N-2"
+    edition           = "ENTERPRISE_PLUS"
+    backup_configuration {
+      enabled                        = true
+%s
+    }
+  }
+}
+
+resource "google_sql_database_instance" "original-read-pool" {
+  project              = "%s"
+  name                 = "%s"
+  region               = "us-east1"
+  database_version     = "%s"
+  instance_type        = "%s"
+%s
+  master_instance_name = google_sql_database_instance.original-primary.name
+  deletion_protection  = false
+
+  settings {
+    tier              = "%s"
+    edition           = "ENTERPRISE_PLUS"
+  }
+}
+`, project, primaryName, rpconfig.DatabaseType, primaryTxnLogs, project, rpconfig.ReplicaName, rpconfig.DatabaseType, rpconfig.InstanceType, nodeCountStr, rpconfig.ReplicaMachineType)
+}
+
 func testAccSqlDatabaseInstance_basicInstanceForPsc(instanceName string, projectId string, orgId string, billingAccount string) string {
 	return fmt.Sprintf(`
 resource "google_project" "testproject" {
@@ -4949,6 +5373,49 @@ func verifyPscAutoConnectionsOperation(resourceName string, isPscConfigExpected 
 	}
 }
 
+func verifyPscNetorkAttachmentOperation(resourceName string, isPscConfigExpected bool, expectedPscEnabled bool, expectedNetworkAttachmentUri string ) func(*terraform.State) error {
+	return func(s *terraform.State) error {
+		resource, ok := s.RootModule().Resources[resourceName]
+		if !ok {
+			return fmt.Errorf("Can't find %s in state", resourceName)
+		}
+
+		resourceAttributes := resource.Primary.Attributes
+		_, ok = resourceAttributes["settings.0.ip_configuration.#"]
+		if !ok {
+			return fmt.Errorf("settings.0.ip_configuration.# block is not present in state for %s", resourceName)
+		}
+
+		if isPscConfigExpected {
+			_, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.#"]
+			if !ok {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config property is not present or set in state of %s", resourceName)
+			}
+
+			pscEnabledStr, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.psc_enabled"]
+			pscEnabled, err := strconv.ParseBool(pscEnabledStr)
+			if err != nil || pscEnabled != expectedPscEnabled {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.psc_enabled property value is not set as expected in state of %s, expected %v, actual %v", resourceName, expectedPscEnabled, pscEnabled)
+			}
+
+			networkAttachmentUriStr, ok := resourceAttributes["settings.0.ip_configuration.0.psc_config.0.network_attachment_uri"]
+			if !ok {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.network_attachment_uri block is not present in state for %s", resourceName)
+			}
+
+			if networkAttachmentUriStr != expectedNetworkAttachmentUri && len(networkAttachmentUriStr) == 0 {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.network_attachment_uri block is not set in state for %s", resourceName)
+			}
+
+			if networkAttachmentUriStr != expectedNetworkAttachmentUri {
+				return fmt.Errorf("settings.0.ip_configuration.0.psc_config.0.network_attachment_uri block does not match the expected value for %s", resourceName)
+			}
+		}
+
+		return nil
+	}
+}
+
 func testAccSqlDatabaseInstance_withoutMCPEnabled(instanceName string) string {
 	return fmt.Sprintf(`
 resource "google_sql_database_instance" "instance" {
@@ -5009,6 +5476,32 @@ resource "google_sql_database_instance" "instance" {
 `, instanceName)
 }
 
+func testAccSqlDatabaseInstance_withPSCEnabled_withoutPscOutbound(instanceName string) string {
+	return fmt.Sprintf(`
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier = "db-g1-small"
+    ip_configuration {
+		psc_config {
+			psc_enabled = true
+			network_attachment_uri = ""
+		}
+		ipv4_enabled = false
+    }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
+  }
+}
+`, instanceName)
+}
+
 func testAccSqlDatabaseInstance_withPSCEnabled_withPscAutoConnections(instanceName string, projectId string, networkName string) string {
 	return fmt.Sprintf(`
 data "google_compute_network" "testnetwork" {
@@ -5040,6 +5533,32 @@ resource "google_sql_database_instance" "instance" {
   }
 }
 `, networkName, instanceName, projectId, networkName, projectId)
+}
+
+func testAccSqlDatabaseInstance_withPSCEnabled_withNetworkAttachmentUri(instanceName string, networkAttachmentUri string) string {
+	return fmt.Sprintf(`
+
+resource "google_sql_database_instance" "instance" {
+  name                = "%s"
+  region              = "us-central1"
+  database_version    = "MYSQL_8_0"
+  deletion_protection = false
+  settings {
+    tier = "db-g1-small"
+    ip_configuration {
+		psc_config {
+			psc_enabled = true
+			network_attachment_uri = "%s"
+		}
+		ipv4_enabled = false
+    }
+	backup_configuration {
+		enabled = true
+		binary_log_enabled = true
+	}
+	availability_type = "REGIONAL"
+  }
+}`, instanceName, networkAttachmentUri)
 }
 
 func testAccSqlDatabaseInstance_withPrivateNetwork_withoutAllocatedIpRange(databaseName, networkName string, specifyPrivatePathOption bool, enablePrivatePath bool) string {
@@ -5917,7 +6436,7 @@ func testAccSqlDatabaseInstance_beforeBackup(context map[string]interface{}) str
 	return acctest.Nprintf(`
 resource "google_sql_database_instance" "instance" {
   name             = "tf-test-%{random_suffix}"
-  database_version = "POSTGRES_11"
+  database_version = "%{db_version}"
   region           = "us-central1"
 
   settings {
@@ -5962,6 +6481,203 @@ resource "google_sql_database_instance" "instance" {
 data "google_sql_backup_run" "backup" {
 	instance = "%{original_db_name}"
 	most_recent = true
+}
+`, context)
+}
+
+func testAccSqlDatabaseInstance_createFromBackupDR(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+// Create service account
+resource "google_service_account" "bkdr_sa" {
+    account_id   = "tf-test-bkdr-sa-%{random_suffix}"
+    display_name = "Backup DR Service Account"
+}
+
+// Create a backup plan
+resource "google_backup_dr_backup_plan" "plan" {
+  location       = "us-central1"
+  backup_plan_id = "tf-test-bp-test-%{random_suffix}"
+  resource_type  = "sqladmin.googleapis.com/Instance"
+  backup_vault   = "%{backup_vault}"
+
+  backup_rules {
+    rule_id                = "rule-1"
+    backup_retention_days  = 7
+
+    standard_schedule {
+      recurrence_type     = "DAILY"
+      hourly_frequency    = 6
+      time_zone           = "UTC"
+
+      backup_window {
+        start_hour_of_day = 0
+        end_hour_of_day   = 23
+      }
+    }
+  }
+}
+
+// Create source SQL instance to backup
+resource "google_sql_database_instance" "source" {
+    name                = "tf-test-source-%{random_suffix}"
+    database_version    = "MYSQL_8_0_41"
+    region             	= "us-central1"
+    project            	= "%{project}"
+    settings {
+        tier = "db-f1-micro"
+        backup_configuration {
+            enabled = true
+        }
+    }
+	lifecycle {
+		ignore_changes = [
+		  settings[0].backup_configuration[0].enabled,
+		]
+ 	}
+    deletion_protection = false
+}
+
+// Associate backup plan with SQL instance
+resource "google_backup_dr_backup_plan_association" "association" { 
+  location 						= "us-central1" 
+  backup_plan_association_id 	= "tf-test-bpa-test-%{random_suffix}"
+  resource 						= "projects/${google_sql_database_instance.source.project}/instances/${google_sql_database_instance.source.name}"
+  resource_type					= "sqladmin.googleapis.com/Instance"
+  backup_plan 					= google_backup_dr_backup_plan.plan.name
+}
+
+// Wait for the first backup to be created
+resource "time_sleep" "wait_10_mins" {
+  depends_on = [google_backup_dr_backup_plan_association.association]
+
+  create_duration = "600s"
+}
+
+data "google_backup_dr_backup" "sql_backups" {
+  project			= "%{project}"
+  location      	= "us-central1"
+  backup_vault_id 	= "%{backup_vault_id}"
+  data_source_id 	= element(split("/", google_backup_dr_backup_plan_association.association.data_source), length(split("/", google_backup_dr_backup_plan_association.association.data_source)) - 1)
+
+  depends_on = [time_sleep.wait_10_mins]
+}
+
+resource "google_sql_database_instance" "instance" {
+  name             = "tf-test-%{random_suffix}"
+  database_version = "MYSQL_8_0_41"
+  region           = "us-central1"
+
+  settings {
+    tier = "db-g1-small"
+	backup_configuration {
+    	enabled = true
+    }
+  }
+
+  backupdr_backup 		= data.google_backup_dr_backup.sql_backups.backups[0].name
+
+  deletion_protection 	= false
+}
+`, context)
+}
+
+func testAccSqlDatabaseInstance_updateFromBackupDR(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+// Create service account
+resource "google_service_account" "bkdr_sa" {
+    account_id   = "tf-test-bkdr-sa-%{random_suffix}"
+    display_name = "Backup DR Service Account"
+}
+
+// Create a backup plan
+resource "google_backup_dr_backup_plan" "plan" {
+  location       = "us-central1"
+  backup_plan_id = "tf-test-bp-test-%{random_suffix}"
+  resource_type  = "sqladmin.googleapis.com/Instance"
+  backup_vault   = "%{backup_vault}"
+
+  backup_rules {
+    rule_id                = "rule-1"
+    backup_retention_days  = 7
+
+    standard_schedule {
+      recurrence_type     = "DAILY"
+      hourly_frequency    = 6
+      time_zone           = "UTC"
+
+      backup_window {
+        start_hour_of_day = 0
+        end_hour_of_day   = 23
+      }
+    }
+  }
+}
+
+// Create source SQL instance to backup
+resource "google_sql_database_instance" "source" {
+    name                = "tf-test-source-%{random_suffix}"
+    database_version    = "MYSQL_8_0_41"
+    region             	= "us-central1"
+    project            	= "%{project}"
+    settings {
+        tier = "db-f1-micro"
+        backup_configuration {
+            enabled = true
+        }
+    }
+	lifecycle {
+		ignore_changes = [
+		  settings[0].backup_configuration[0].enabled,
+		]
+ 	}
+    deletion_protection = false
+}
+
+// Associate backup plan with SQL instance
+resource "google_backup_dr_backup_plan_association" "association" { 
+  location 						= "us-central1" 
+  backup_plan_association_id 	= "tf-test-bpa-test-%{random_suffix}"
+  resource 						= "projects/${google_sql_database_instance.source.project}/instances/${google_sql_database_instance.source.name}"
+  resource_type					= "sqladmin.googleapis.com/Instance"
+  backup_plan 					= google_backup_dr_backup_plan.plan.name
+}
+
+// Wait for the first backup to be created
+resource "time_sleep" "wait_10_mins" {
+  depends_on = [google_backup_dr_backup_plan_association.association]
+
+  create_duration = "600s"
+}
+
+data "google_backup_dr_backup" "sql_backups" {
+  project			= "%{project}"
+  location      	= "us-central1"
+  backup_vault_id 	= "%{backup_vault_id}"
+  data_source_id 	= element(split("/", google_backup_dr_backup_plan_association.association.data_source), length(split("/", google_backup_dr_backup_plan_association.association.data_source)) - 1)
+
+  depends_on = [time_sleep.wait_10_mins]
+}
+
+resource "google_sql_database_instance" "instance" {
+  name             = "tf-test-%{random_suffix}"
+  database_version = "MYSQL_8_0_41"
+  region           = "us-central1"
+
+  settings {
+    tier = "db-g1-small"
+	backup_configuration {
+    	enabled = true
+    }
+  }
+  lifecycle {
+	ignore_changes = [
+	  settings[0].backup_configuration[0].enabled,
+	]
+  }
+
+  backupdr_backup 		= data.google_backup_dr_backup.sql_backups.backups[0].name
+
+  deletion_protection 	= false
 }
 `, context)
 }

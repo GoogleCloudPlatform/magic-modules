@@ -311,8 +311,20 @@ type Type struct {
 	// just as they are in the standard flattener template.
 	CustomTgcFlatten string `yaml:"custom_tgc_flatten,omitempty"`
 
-	// If true, we will include the empty value of this attribute in CAI asset.
+	// If true, the empty value of this attribute in CAI asset is included.
 	IncludeEmptyValueInCai bool `yaml:"include_empty_value_in_cai,omitempty"`
+
+	// If the property is type of bool and has `defaul_from_api: true`,
+	// include empty value in CAI asset by default during tfplan2cai conversion.
+	// Use `exclude_false_in_cai` to override the default behavior
+	// when the default value on API side is true.
+	//
+	// If a property is missing in CAI asset, use `is_missing_in_cai: true`
+	// and `exclude_false_in_cai: true` is not needed
+	ExcludeFalseInCai bool `yaml:"exclude_false_in_cai,omitempty"`
+
+	// If true, the custom flatten function is not applied during cai2hcl
+	TGCIgnoreTerraformCustomFlatten bool `yaml:"tgc_ignore_terraform_custom_flatten,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -497,6 +509,10 @@ func (t Type) EnumValuesToString(quoteSeperator string, addEmpty bool) string {
 
 func (t Type) TitlelizeProperty() string {
 	return google.Camelize(t.Name, "upper")
+}
+
+func (t Type) CamelizeProperty() string {
+	return google.Camelize(t.Name, "lower")
 }
 
 // If the Prefix field is already set, returns the value.
@@ -1283,4 +1299,22 @@ func (t Type) IsJsonField() bool {
 		return true
 	}
 	return false
+}
+
+// Checks if the empty value should be set in CAI assets during tfplan2cai conversion
+func (t Type) TGCSendEmptyValue() bool {
+	if t.IncludeEmptyValueInCai {
+		return true
+	}
+
+	// Automatically check if false value should be set in CAI assets
+	if t.IsA("Boolean") {
+		return t.Required || (t.DefaultFromApi && !t.IsMissingInCai && !t.ExcludeFalseInCai)
+	}
+
+	return false
+}
+
+func (t Type) ShouldIgnoreCustomFlatten() bool {
+	return t.ResourceMetadata.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
 }

@@ -14,11 +14,11 @@
   limitations under the License. */ -}}
 {{- define "flattenPropertyMethod" }}
 {{- if $.WriteOnly }}
-{{- else if $.CustomFlatten }}
+{{- else if and $.CustomFlatten (not $.ShouldIgnoreCustomFlatten) }}
     {{- $.CustomTemplate $.CustomFlatten false -}}
 {{- else -}}
 func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
-  {{- if $.IgnoreRead }}
+  {{- if and $.IgnoreRead (not $.ResourceMetadata.IsTgcCompiler) }}
   return d.Get("{{ $.TerraformLineage }}")
   {{- else if $.IsA "NestedObject" }}
   if v == nil {
@@ -46,6 +46,11 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
     transformed["{{ underscore $prop.Name }}"] =
     flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}{{$prop.TitlelizeProperty}}(original["{{ $prop.ApiName }}"], d, config)
       {{- end }}
+    {{- end }}
+    {{- if and $.ResourceMetadata.IsTgcCompiler (not $.AllowEmptyObject) }}
+    if tgcresource.AllValuesAreNil(transformed) {
+      return nil
+    }
     {{- end }}
   return []interface{}{transformed}
   {{- else if and ($.IsA "Array") ($.ItemType.IsA "NestedObject") }}
