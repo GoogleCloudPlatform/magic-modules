@@ -11,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 
 	"os"
@@ -634,6 +636,31 @@ func TestAccStorageObject_objectDeletionPolicy(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckStorageObjectExists(t, bucketName),
 				),
+			},
+		},
+	})
+}
+
+func TestAccStorageObject_ResourceIdentity(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+	objectName := acctest.TestObjectName(t)
+
+	resource.Test(t, resource.TestCase{
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleStorageBucketsObjectBasic(bucketName, objectName),
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectIdentity(
+						"google_storage_bucket_object.object",
+						map[string]knownvalue.Check{
+							"bucket": knownvalue.StringExact(bucketName),
+							"name":   knownvalue.StringExact(objectName),
+						},
+					),
+				},
 			},
 		},
 	})
