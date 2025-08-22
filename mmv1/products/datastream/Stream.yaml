@@ -260,10 +260,6 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: Labels.
-  - name: 'displayName'
-    type: String
-    description: Display name.
-    required: true
   - name: 'sourceConfig'
     type: NestedObject
     description: |
