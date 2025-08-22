@@ -46,6 +46,9 @@ examples:
       security_gateway_name: default
       application_name: my-vm-service
 autogen_async: true
+datasource:
+  generate: true 
+  exclude_test: true
 async:
   operation:
     timeouts:
