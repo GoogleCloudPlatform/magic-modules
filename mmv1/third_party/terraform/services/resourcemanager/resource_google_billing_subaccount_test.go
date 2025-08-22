@@ -86,7 +86,7 @@ resource "google_billing_subaccount" "subaccount" {
 func testAccBillingSubccount_renameOnDestroy(masterBillingAccountId string) string {
 	return fmt.Sprintf(`
 resource "google_billing_subaccount" "subaccount_with_rename_on_destroy" {
-  display_name = "Test Billing Subaccount (Rename on Destroy)"
+  display_name = "Test Billing Subaccount (Rename on Destroy) trigger"
   master_billing_account  = "%s"
   deletion_policy = "RENAME_ON_DESTROY"
 }
