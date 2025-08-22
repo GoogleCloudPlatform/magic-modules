@@ -247,16 +247,16 @@ properties:
             type: String
             description: The password to authenticate.
             exactly_one_of:
-              - 'http_check.0.auth_info.0.password_wo'
-              - 'http_check.0.auth_info.0.password'
+              - 'password'
+              - 'password_wo'
             sensitive: true
             custom_flatten: 'templates/terraform/custom_flatten/uptime_check_http_password.tmpl'
           - name: 'passwordWo'
             type: String
             description: The password to authenticate.
             exactly_one_of:
-              - 'http_check.0.auth_info.0.password_wo'
-              - 'http_check.0.auth_info.0.password'
+              - 'passwordWo'
+              - 'password'
             required_with:
               - 'http_check.0.auth_info.0.password_wo_version'
             write_only: true
