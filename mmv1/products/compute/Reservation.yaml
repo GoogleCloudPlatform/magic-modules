@@ -82,8 +82,6 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-      # Resource creation race
-    skip_vcr: true
   - name: 'shared_reservation_beta'
     primary_resource_id: 'gce_reservation'
     vars:
@@ -93,8 +91,6 @@ examples:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
-      # Resource creation race
-    skip_vcr: true
     min_version: 'beta'
 parameters:
   - name: 'zone'

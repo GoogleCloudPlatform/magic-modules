@@ -557,12 +557,12 @@ var ServicesListGa = mapOf(
         "path" to "./google/services/mlengine"
     ),
     "modelarmor" to mapOf(
-        "name" to "ModelArmor",
+        "name" to "modelarmor",
         "displayName" to "ModelArmor",
         "path" to "./google/services/modelarmor"
     ),
     "modelarmorglobal" to mapOf(
-        "name" to "ModelArmorGlobal",
+        "name" to "modelarmorglobal",
         "displayName" to "ModelArmorGlobal",
         "path" to "./google/services/modelarmorglobal"
     ),
@@ -690,6 +690,11 @@ var ServicesListGa = mapOf(
         "name" to "runtimeconfig",
         "displayName" to "Runtimeconfig",
         "path" to "./google/services/runtimeconfig"
+    ),
+    "saasruntime" to mapOf(
+        "name" to "saasruntime",
+        "displayName" to "SaaS Runtime",
+        "path" to "./google/services/saasruntime"
     ),
     "secretmanager" to mapOf(
         "name" to "secretmanager",
