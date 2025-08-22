@@ -95,6 +95,8 @@
 			// The issue is that when CLUSTE_DISABLED is set for that flow  API is updated Endpoints instead of psc_auto_connections.
 			// The if else if below checks what is define by the user in order to set the correct fielt in the state
 			// The code below fixes use case 2
+			// The else conditon is to handle importing as there is no clear way to tell what the user has set desired_auto_created_endpoints or desired_psc_auto_connections
+			// Default is to set endpoints and user will need to adjust thier Terraform config as to use desired_auto_created_endpoints
 			if len(transformed) > 0 {
 				_, okEndpoint := d.GetOk("desired_auto_created_endpoints")
 				_, okPsc := d.GetOk("desired_psc_auto_connections")
@@ -104,6 +106,9 @@
 				} else if okPsc {
 					d.Set("desired_psc_auto_connections", transformed)
 					log.Printf("[DEBUG] Setting desired_psc_auto_connections in decoder within endpoints for %#v", transformed)
+				} else {
+					d.Set("desired_auto_created_endpoints", transformed)
+					log.Printf("[DEBUG] Setting desired_auto_created_endpoints in decoder within endpoints for %#v", transformed)
 				}
 			}
 		}
