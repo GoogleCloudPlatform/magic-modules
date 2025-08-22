@@ -2008,6 +2008,13 @@ func (r *Resource) ShouldGenerateSingularDataSource() bool {
 	return r.Datasource.Generate
 }
 
+func (r *Resource) ShouldGenerateSingularDataSourceTests() bool {
+	if r.Datasource == nil {
+		return false
+	}
+	return !r.Datasource.ExcludeTest
+}
+
 func (r Resource) ShouldDatasourceSetLabels() bool {
 	for _, p := range r.Properties {
 		if p.Name == "labels" && p.Type == "KeyValueLabels" {
