@@ -51,12 +51,12 @@ func (nodePoolCache *nodePoolCache) get(nodePool string) (*container.NodePool, e
 }
 
 func (nodePoolCache *nodePoolCache) refreshIfNeeded(d *schema.ResourceData, config *transport_tpg.Config, userAgent string, nodePoolInfo *NodePoolInformation, name string) error {
+	nodePoolCache.mutex.Lock()
+	defer nodePoolCache.mutex.Unlock()
+
 	if !nodePoolCache.needsRefresh(nodePoolInfo.fullyQualifiedName(name)) {
 		return nil
 	}
-
-	nodePoolCache.mutex.Lock()
-	defer nodePoolCache.mutex.Unlock()
 
 	parent := fmt.Sprintf("projects/%s/locations/%s/clusters/%s", nodePoolInfo.project, nodePoolInfo.location, nodePoolInfo.cluster)
 	clusterNodePoolsListCall := config.NewContainerClient(userAgent).Projects.Locations.Clusters.NodePools.List(parent)
@@ -79,8 +79,6 @@ func (nodePoolCache *nodePoolCache) refreshIfNeeded(d *schema.ResourceData, conf
 }
 
 func (nodePoolCache *nodePoolCache) needsRefresh(nodePool string) bool {
-	nodePoolCache.mutex.RLock()
-	defer nodePoolCache.mutex.RUnlock()
 	np, ok := nodePoolCache.nodePools[nodePool]
 	if !ok {
 		return true
@@ -794,7 +792,9 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 	}
 
 {{- else }}
-	npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name)
+	if err := npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name); err != nil {
+	  return err
+	}
 	nodePool, err := npCache.get(nodePoolInfo.fullyQualifiedName(name))
 	if err != nil {
 		log.Printf("[WARN] Removing %s because it's gone", fmt.Sprintf("NodePool %q from cluster %q", name, nodePoolInfo.cluster))
@@ -976,7 +976,9 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 		return true, err
 	}
 {{- else }}
-	npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name)
+	if err := npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name); err != nil {
+    return false, err
+	}
 	_, err = npCache.get(nodePoolInfo.fullyQualifiedName(name))
 	if err != nil {
 		log.Printf("[WARN] Removing %s because it's gone", fmt.Sprintf("NodePool %q from cluster %q", name, nodePoolInfo.cluster))
