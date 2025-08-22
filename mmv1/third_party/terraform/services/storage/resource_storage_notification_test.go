@@ -115,9 +115,12 @@ func testAccStorageNotificationDestroyProducer(t *testing.T) func(s *terraform.S
 				continue
 			}
 
-			bucket, notificationID := tpgstorage.ResourceStorageNotificationParseID(rs.Primary.ID)
+			bucket, notificationID, err := tpgstorage.ParseStorageNotificationID(rs.Primary.ID)
+			if err != nil {
+				return err
+			}
 
-			_, err := config.NewStorageClient(config.UserAgent).Notifications.Get(bucket, notificationID).Do()
+			_, err = config.NewStorageClient(config.UserAgent).Notifications.Get(bucket, notificationID).Do()
 			if err == nil {
 				return fmt.Errorf("Notification configuration still exists")
 			}
@@ -140,7 +143,10 @@ func testAccCheckStorageNotificationExists(t *testing.T, resource string, notifi
 
 		config := acctest.GoogleProviderConfig(t)
 
-		bucket, notificationID := tpgstorage.ResourceStorageNotificationParseID(rs.Primary.ID)
+		bucket, notificationID, err := tpgstorage.ParseStorageNotificationID(rs.Primary.ID)
+		if err != nil {
+			return err
+		}
 
 		found, err := config.NewStorageClient(config.UserAgent).Notifications.Get(bucket, notificationID).Do()
 		if err != nil {

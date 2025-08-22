@@ -250,7 +250,7 @@ func (r *storageNotificationResource) Delete(ctx context.Context, req resource.D
 		return
 	}
 
-	bucket, notificationID, err := parseStorageNotificationID(state.Id.ValueString())
+	bucket, notificationID, err := ParseStorageNotificationID(state.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Invalid resource ID", err.Error())
 		return
@@ -274,7 +274,7 @@ func (r *storageNotificationResource) ImportState(ctx context.Context, req resou
 }
 
 func (r *storageNotificationResource) refresh(ctx context.Context, model *storageNotificationModel, metaData *fwmodels.ProviderMetaModel, diags *diag.Diagnostics) bool {
-	bucket, notificationID, err := parseStorageNotificationID(model.Id.ValueString())
+	bucket, notificationID, err := ParseStorageNotificationID(model.Id.ValueString())
 	if err != nil {
 		diags.AddError("Invalid resource ID", err.Error())
 		return false
@@ -304,17 +304,19 @@ func (r *storageNotificationResource) refresh(ctx context.Context, model *storag
 	apiValue := res.Topic
 	model.Topic = types.StringValue(strings.TrimPrefix(apiValue, "//pubsub.googleapis.com/"))
 
-	eventTypesDiags := model.EventTypes.ElementsAs(ctx, &res.EventTypes, false)
+	var eventTypesDiags diag.Diagnostics
+	model.EventTypes, eventTypesDiags = types.SetValueFrom(ctx, types.StringType, res.EventTypes)
 	diags.Append(eventTypesDiags...)
 
-	customAttrsDiags := model.CustomAttributes.ElementsAs(ctx, &res.CustomAttributes, false)
+	var customAttrsDiags diag.Diagnostics
+	model.CustomAttributes, customAttrsDiags = types.MapValueFrom(ctx, types.StringType, res.CustomAttributes)
 	diags.Append(customAttrsDiags...)
 
 	return !diags.HasError()
 }
 
-// parseStorageNotificationID replicates the logic from the SDKv2 helper.
-func parseStorageNotificationID(id string) (bucket string, notificationID string, err error) {
+// ParseStorageNotificationID replicates the logic from the SDKv2 helper.
+func ParseStorageNotificationID(id string) (bucket string, notificationID string, err error) {
 	parts := strings.Split(id, "/")
 	if len(parts) != 3 || parts[1] != "notificationConfigs" {
 		return "", "", fmt.Errorf("invalid storage notification ID format, expected '{bucket}/notificationConfigs/{notification_id}', got '%s'", id)
