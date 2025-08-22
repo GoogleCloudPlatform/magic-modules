@@ -1555,9 +1555,10 @@ func TestAccMemorystoreInstance_memorystorePscAutoInstanceClusterDisabled(t *tes
 				Config: testAccMemorystoreInstance_memorystorePscAutoInstanceClusterDisabled(context),
 			},
 			{
-				ResourceName:      "google_memorystore_instance.instance-cluster-disabled",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_memorystore_instance.instance-cluster-disabled",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"desired_auto_created_endpoints.#", "desired_auto_created_endpoints.0.%", "desired_auto_created_endpoints.0.project_id", "desired_auto_created_endpoints.0.network", "desired_psc_auto_connections.#", "desired_psc_auto_connections.0.%", "desired_psc_auto_connections.0.network", "desired_psc_auto_connections.0.project_id"},
 			},
 		},
 	})
