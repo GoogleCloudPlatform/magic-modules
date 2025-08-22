@@ -16,7 +16,7 @@ func TestAccBillingSubaccount_renameOnDestroy(t *testing.T) {
 	t.Parallel()
 
 	masterBilling := envvar.GetTestMasterBillingAccountFromEnv(t)
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -35,7 +35,7 @@ func TestAccBillingSubaccount_basic(t *testing.T) {
 	t.Parallel()
 
 	masterBilling := envvar.GetTestMasterBillingAccountFromEnv(t)
-	resource.Test(t, resource.TestCase{
+	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		Steps: []resource.TestStep{
