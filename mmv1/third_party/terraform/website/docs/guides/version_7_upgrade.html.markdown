@@ -157,7 +157,7 @@ The `view.use_legacy_sql` field no longer has a default value. Configurations th
 
 The `event_type` field is now required when `event_trigger` is configured.
 
-### `service_config.service` is changed from `Argument` to `Attribute`
+### `service_config.service` is now an output only field
 
 Remove `service_config.service` from your configuration after upgrade.
 
@@ -190,6 +190,12 @@ Remove `post_startup_script_config` from your configuration after upgrade.
 ### `disk.type`, `disk.mode` and `disk.interface` will no longer use provider configured default values
 
 `disk.type`, `disk.mode` and `disk.interface` will no longer use provider configured default values and instead will be set by the API. See the [API documentation](https://cloud.google.com/compute/docs/reference/rest/v1/regionInstanceTemplates) for more details.
+
+## Resource: `google_compute_router`
+
+### `advertised_ip_ranges` fields have been converted to sets
+
+`advertised_ip_ranges` fields have been converted to sets. If you need to access values `advertised_ip_ranges`'s' nested object, it will need to be accessed via `for_each` or locally converting the field to a list/array in your configuration.
 
 ## Resource: `google_compute_subnetwork`
 
@@ -252,6 +258,22 @@ This standardizes the behavior of write-only fields across the provider and make
 ### `password_wo` and `password_wo_version` must be set together
 
 This standardizes the behavior of write-only fields across the provider and makes it easier to remember to update the fields together.
+
+## Resource: `google_secure_source_manager_instance`
+
+### `deletion_policy` has had its default value changed to `PREVENT`
+
+`deletion_policy` has had its default value changed to `PREVENT`. This field prevents
+Terraform from destroying or recreating the cluster during `terraform apply`. In 7.0.0, existing resources will have
+`deletion_policy` set to `true` during the next refresh unless otherwise set in configuration.
+
+## Resource: `google_secure_source_manager_repository`
+
+### `deletion_policy` has had its default value changed to `PREVENT`
+
+`deletion_policy` has had its default value changed to `PREVENT`. This field prevents
+Terraform from destroying or recreating the cluster during `terraform apply`. In 7.0.0, existing resources will have
+`deletion_policy` set to `true` during the next refresh unless otherwise set in configuration.
 
 ## Resource: `google_storage_transfer_job`
 
