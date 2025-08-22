@@ -113,16 +113,23 @@ properties:
     description: |
       A set of key/value label pairs to assign to this FeatureView.
   - name: 'syncConfig'
-    type: NestedObject
-    description: |
-      Configures when data is to be synced/updated for this FeatureView. At the end of the sync the latest featureValues for each entityId of this FeatureView are made ready for online serving.
-    properties:
-      - name: 'cron'
-        type: String
-        description: |
-          Cron schedule (https://en.wikipedia.org/wiki/Cron) to launch scheduled runs.
-          To explicitly set a timezone to the cron tab, apply a prefix in the cron tab: "CRON_TZ=${IANA_TIME_ZONE}" or "TZ=${IANA_TIME_ZONE}".
-        default_from_api: true
+  type: NestedObject
+  description: |
+    Configures when data is to be synced/updated for this FeatureView. At the end of the sync the latest featureValues for each entityId of this FeatureView are made ready for online serving.
+  properties:
+    - name: 'cron'
+      type: String
+      description: |
+        Cron schedule (https://en.wikipedia.org/wiki/Cron) to launch scheduled runs.
+        To explicitly set a timezone to the cron tab, apply a prefix in the cron tab: "CRON_TZ=${IANA_TIME_ZONE}" or "TZ=${IANA_TIME_ZONE}".
+      conflicts_with: 
+        - continuous
+    - name: 'continuous'
+      type: Boolean
+      description: |
+        If true, syncs the FeatureView in a continuous manner to Online Store.
+      conflicts_with:
+        - cron
   - name: 'bigQuerySource'
     type: NestedObject
     description: |
