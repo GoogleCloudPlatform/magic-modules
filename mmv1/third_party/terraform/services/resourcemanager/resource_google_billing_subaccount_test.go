@@ -30,6 +30,24 @@ func TestAccBillingSubaccount_renameOnDestroy(t *testing.T) {
 		},
 	})
 }
+func TestAccBillingSubaccount_renameOnDestroy2(t *testing.T) {
+	t.Parallel()
+
+	masterBilling := envvar.GetTestMasterBillingAccountFromEnv(t)
+	acctest.VcrTest(t, resource.TestCase{
+
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckGoogleBillingSubaccountRenameOnDestroy(t),
+		Steps: []resource.TestStep{
+			{
+				// Test Billing Subaccount creation
+				Config: testAccBillingSubccount_renameOnDestroy(masterBilling),
+				Check:  testAccCheckGoogleBillingSubaccountExists(t, "subaccount_with_rename_on_destroy"),
+			},
+		},
+	})
+}
 
 func TestAccBillingSubaccount_basic(t *testing.T) {
 	t.Parallel()
