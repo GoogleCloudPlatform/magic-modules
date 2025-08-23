@@ -162,7 +162,7 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: |
-      Optional. Resource labels to represent user-provided metadata.
+      Optional. Resource labels to represent the user-provided metadata.
   - name: 'createTime'
     type: String
     description: |
