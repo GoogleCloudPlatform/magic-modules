@@ -2780,4 +2780,3 @@ resource "google_storage_transfer_job" "with_sa" {
 }
 `, project, dataSourceBucketName, project, dataSinkBucketName, description, project)
 }
-
