@@ -446,3 +446,59 @@ func TestDetectMissingDocsForDatasource(t *testing.T) {
 		})
 	}
 }
+
+func TestDetectMissingAPIs(t *testing.T) {
+	schemaDiff := diff.SchemaDiff{
+		"a_resource": diff.ResourceDiff{
+			ResourceConfig: diff.ResourceConfigDiff{
+				New: &schema.Resource{},
+			},
+		},
+	}
+	tests := []struct {
+		name      string
+		fileName  string
+		wantAPIs  []string
+		wantError bool
+	}{
+		{
+			name:      "file not exist",
+			fileName:  "not-exist.tf",
+			wantError: true,
+		},
+		{
+			name:     "missing apis",
+			fileName: "../testdata/missingapi.tf",
+			wantAPIs: []string{
+				"apigee.googleapis.com",
+				"apihub.googleapis.com",
+				"biglake.googleapis.com",
+				"dataprocgdc.googleapis.com",
+				"developerconnect.googleapis.com",
+				"domains.googleapis.com",
+				"edgecontainer.googleapis.com",
+				"edgenetwork.googleapis.com",
+				"firebaseappcheck.googleapis.com",
+				"firebaseapphosting.googleapis.com",
+				"firebasedataconnect.googleapis.com",
+				"integrations.googleapis.com",
+				"oracledatabase.googleapis.com",
+				"storagebatchoperations.googleapis.com",
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := DetectMissingAPIs(schemaDiff, test.fileName)
+			if test.wantError && err == nil {
+				t.Fatalf("DetectMissingAPIs(%s) got nil error, want error", test.fileName)
+			}
+			if err != nil && !test.wantError {
+				t.Fatalf("DetectMissingAPIs(%s) got error %s", test.fileName, err)
+			}
+			if diff := cmp.Diff(test.wantAPIs, got); diff != "" {
+				t.Errorf("DetectMissingAPIs(%s) got diff(-want, got)\n: %s", test.fileName, diff)
+			}
+		})
+	}
+}
