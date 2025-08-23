@@ -444,6 +444,9 @@ func TestAccComputeRegionBackendService_zonalILB(t *testing.T) {
 	instanceName := fmt.Sprintf("tf-test-ilb-vm-%s", acctest.RandString(t, 10))
 	instanceName2 := fmt.Sprintf("tf-test-ilb-vm2-%s", acctest.RandString(t, 10))
 
+	// subnetwork with random suffix
+	subnetName := fmt.Sprintf("tf-test-subnet-%s", acctest.RandString(t, 8))
+
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
@@ -452,7 +455,7 @@ func TestAccComputeRegionBackendService_zonalILB(t *testing.T) {
 			// STEP 1: base (self-link v1)
 			{
 				Config: testAccComputeRegionBackendService_zonalILB_withGroup(
-					testAccComputeRegionBackendService_common(checkName, negName, instanceName),
+					testAccComputeRegionBackendService_common(checkName, negName, instanceName, subnetName),
 					serviceName,
 					"google_compute_network_endpoint_group.neg.id",
 				),
@@ -463,7 +466,7 @@ func TestAccComputeRegionBackendService_zonalILB(t *testing.T) {
 				ImportStateVerify: true,
 			},
 
-		  // STEP 2: same NEG with /compute/beta/ (apply OK)
+			// STEP 2: same NEG with /compute/beta/ (apply OK)
 			{
 				Config: fmt.Sprintf(`
 %s
@@ -473,7 +476,7 @@ locals {
 }
 
 %s
-`, testAccComputeRegionBackendService_common(checkName, negName, instanceName),
+`, testAccComputeRegionBackendService_common(checkName, negName, instanceName, subnetName),
 					testAccComputeRegionBackendService_zonalILB_withGroup("", serviceName, "local.neg_beta"),
 				),
 			},
@@ -494,14 +497,14 @@ locals {
 }
 
 %s
-`, testAccComputeRegionBackendService_common(checkName, negName, instanceName),
+`, testAccComputeRegionBackendService_common(checkName, negName, instanceName, subnetName),
 					testAccComputeRegionBackendService_zonalILB_withGroup("", serviceName, "local.neg_slash_upper"),
 				),
 			},
 
 			// STEP 4: Modified scenario (changes NEG/HC/VM) — continues validating real updates
 			{
-				Config: testAccComputeRegionBackendService_zonalILBModified(serviceName, checkName, negName, instanceName, checkName2, negName2, instanceName2),
+				Config: testAccComputeRegionBackendService_zonalILBModified(serviceName, checkName, negName, instanceName, checkName2, negName2, instanceName2, subnetName),
 			},
 			{
 				ResourceName:      "google_compute_region_backend_service.default",
@@ -512,7 +515,7 @@ locals {
 	})
 }
 
-func testAccComputeRegionBackendService_common(checkName, negName, instanceName string) string {
+func testAccComputeRegionBackendService_common(checkName, negName, instanceName, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "default" {
   name                    = "tf-test-net"
@@ -520,7 +523,7 @@ resource "google_compute_network" "default" {
 }
 
 resource "google_compute_subnetwork" "default" {
-  name          = "tf-test-subnet"
+  name          = "%s"
   ip_cidr_range = "10.10.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.default.id
@@ -568,7 +571,7 @@ resource "google_compute_network_endpoint" "endpoint" {
   ip_address             = google_compute_instance.default.network_interface[0].network_ip
   port                   = 8080
 }
-`, checkName, instanceName, negName)
+`, subnetworkName, checkName, instanceName, negName)
 }
 
 func testAccComputeRegionBackendService_zonalILB_withGroup(commonHCL string, serviceName string, groupExpr string) string {
@@ -595,7 +598,7 @@ resource "google_compute_region_backend_service" "default" {
 `, header, serviceName, groupExpr)
 }
 
-func testAccComputeRegionBackendService_zonalILBModified(serviceName, checkName, negName, instanceName, checkName2, negName2, instanceName2 string) string {
+func testAccComputeRegionBackendService_zonalILBModified(serviceName, checkName, negName, instanceName, checkName2, negName2, instanceName2, subnetworkName string) string {
 	return fmt.Sprintf(`
 resource "google_compute_network" "default" {
   name  = "tf-test-net"
@@ -603,7 +606,7 @@ resource "google_compute_network" "default" {
 }
 
 resource "google_compute_subnetwork" "default" {
-  name          = "tf-test-subnet"
+  name          = "%s"
   ip_cidr_range = "10.10.0.0/16"
   region        = "us-central1"
   network       = google_compute_network.default.id
@@ -707,7 +710,7 @@ resource "google_compute_region_backend_service" "default" {
     capacity_scaler       = 0.5
   }
 }
-`, checkName, instanceName, negName, instanceName2, checkName2, negName2, serviceName)
+`, subnetworkName, checkName, instanceName, negName, instanceName2, checkName2, negName2, serviceName)
 }
 
 func TestAccComputeRegionBackendService_withDynamicBackendCount(t *testing.T) {
