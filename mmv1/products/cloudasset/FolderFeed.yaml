@@ -24,8 +24,10 @@ references:
   api: 'https://cloud.google.com/asset-inventory/docs/reference/rest/'
 docs:
 base_url: 'folders/{{folder_id}}/feeds'
-self_link: '{{name}}'
+self_link: 'folders/{{folder_id}}/feeds/{{feed_id}}'
+id_format: '{{name}}'
 create_url: 'folders/{{folder_id}}/feeds?feedId={{feed_id}}'
+update_url: '{{name}}'
 update_verb: 'PATCH'
 update_mask: true
 timeouts:
