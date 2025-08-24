@@ -63,11 +63,17 @@ func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 				Config: testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}DataSource(context),
 				Check: resource.ComposeTestCheckFunc(
 					{{- if gt (len ($.Res.IgnoreReadPropertiesToString $e)) 0 }}
-										acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
-											"data.{{ $e.ResourceType $.Res.TerraformName }}.default",
-											"{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
-											acctest.StringSliceToSet({{ $.Res.IgnoreReadPropertiesToString $e }}),
-										),
+						acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
+							"data.{{ $e.ResourceType $.Res.TerraformName }}.default",
+							"{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
+							map[string]struct{}{
+								{{- range $name, $val := $.Res.Parameters }}
+									{{- if $val.IgnoreRead }}
+								"{{ $name }}": {},
+									{{- end }}
+								{{- end }}
+							},
+						),
 					{{- else }}
 										acctest.CheckDataSourceStateMatchesResourceState("data.{{ $e.ResourceType $.Res.TerraformName }}.default", "{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}"),
 					{{- end }}
