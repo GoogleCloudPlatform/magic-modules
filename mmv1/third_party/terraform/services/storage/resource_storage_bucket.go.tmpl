@@ -424,44 +424,6 @@ func ResourceStorageBucket() *schema.Resource {
 			"cors": {
 				Type:     schema.TypeList,
 				Optional: true,
-				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
-					if d.HasChange("cors") && (k == "cors.#") {
-						o, n := d.GetChange("cors")
-						oldVal := o.([]interface{})
-						newVal := n.([]interface{})
-						isOldEmpty := oldVal == nil || reflect.ValueOf(oldVal).Len() == 0
-						count := 0
-						for _, corsRule := range n.([]interface{}) {
-							if corsRule == nil {
-								continue
-							}
-							rule := corsRule.(map[string]interface{})
-							maxAgeSeconds := rule["max_age_seconds"].(int)
-							sendMaxAge := rule["send_max_age_seconds_if_zero"].(bool)
-							// if send_max_age_seconds_if_zero is true, max_age_seconds can be zero
-							if sendMaxAge || maxAgeSeconds > 0 {
-								count++
-							}
-
-							method := rule["method"].([]interface{})
-							responseHeader := rule["response_header"].([]interface{})
-							origin := rule["origin"].([]interface{})
-
-							// check if all cors attributes provided have values
-							if len(method) > 0 || len(origin) > 0 || len(responseHeader) > 0 {
-								count++
-							}
-						}
-
-						isNewEmpty := count == 0 || reflect.ValueOf(newVal).Len() == 0
-
-						// If both are considered empty, suppress the diff.
-						if isOldEmpty && isNewEmpty {
-							return true
-						}
-					}
-					return false
-				},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"origin": {
@@ -492,11 +454,6 @@ func ResourceStorageBucket() *schema.Resource {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Description: `The value, in seconds, to return in the Access-Control-Max-Age header used in preflight responses.`,
-						},
-						"send_max_age_seconds_if_zero": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Description: `While set true, max_age_seconds value will be sent in the request even for zero value of the field. This field is only useful for setting 0 value to the max_age_seconds field. It can be used alone or together with max_age_seconds.`,
 						},
 					},
 				},
@@ -1408,37 +1365,38 @@ func expandCors(configured []interface{}) []*storage.BucketCors {
 		if v, ok := data["max_age_seconds"].(int); ok {
 			corsRule.MaxAgeSeconds = int64(v)
 		}
-		
-		if data["send_max_age_seconds_if_zero"].(bool) {
-			corsRule.ForceSendFields = append(corsRule.ForceSendFields, "MaxAgeSeconds")
-		}
 		corsRules = append(corsRules, &corsRule)
 	}
 	return corsRules
 }
 
 func flattenCors(d *schema.ResourceData, corsRules []*storage.BucketCors) []map[string]interface{} {
-	if corsRules == nil {
+	cors, _ := d.GetOk("cors")
+	if corsRules == nil && len(cors.([]interface{})) == 0 {
 		return []map[string]interface{}{}
 	}
 	corsRulesSchema := make([]map[string]interface{}, 0, len(corsRules))
-	for index, corsRule := range corsRules {
+	for _, corsRule := range corsRules {
 		data := map[string]interface{}{
 			"origin":          corsRule.Origin,
 			"method":          corsRule.Method,
 			"response_header": corsRule.ResponseHeader,
 			"max_age_seconds": corsRule.MaxAgeSeconds,
 		}
-
-		// set send_max_age_seconds_if_zero if available in resource
-		if v, ok := d.GetOk(fmt.Sprintf("cors.%d", index)); ok {
-			corsRule := v.(map[string]interface{})
-			data["send_max_age_seconds_if_zero"] = corsRule["send_max_age_seconds_if_zero"].(bool)
-		} else {
-			data["send_max_age_seconds_if_zero"] = false
-		}
-
 		corsRulesSchema = append(corsRulesSchema, data)
+	}
+
+	if len(corsRules) < len(cors.([]interface{})) {
+		differnce := len(cors.([]interface{})) - len(corsRules)
+		for ; differnce > 0; differnce-- {
+			cors := map[string]interface{}{
+				"origin":          []string{},
+				"method":          []string{},
+				"response_header": []string{},
+				"max_age_seconds": 0,
+			}
+			corsRulesSchema = append(corsRulesSchema, cors)
+		}
 	}
 	return corsRulesSchema
 }
