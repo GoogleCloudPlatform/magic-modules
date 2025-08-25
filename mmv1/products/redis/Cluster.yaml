@@ -386,6 +386,7 @@ properties:
       cluster in less than 3 zones. Once set, if there is a zonal outage during
       the cluster creation, the cluster will only be deployed in 2 zones, and
       stay within the 2 zones for its lifecycle.
+    deprecation_message: 'allow_fewer_zone_deployment flag will no longer be a user settable field, default behaviour will be as if set to true'
   - name: 'pscConfigs'
     type: Array
     description: |
