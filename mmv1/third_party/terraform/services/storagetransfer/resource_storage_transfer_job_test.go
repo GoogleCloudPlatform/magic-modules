@@ -2751,6 +2751,31 @@ resource "google_storage_bucket" "sink" {
   force_destroy = true
 }
 
+
+data "google_storage_transfer_project_service_account" "default" {
+  project = "%s"
+}
+
+resource "google_storage_bucket_iam_member" "source_iam" {
+  bucket = google_storage_bucket.source.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "google_storage_bucket_iam_member" "sink_iam" {
+  bucket = google_storage_bucket.sink.name
+  role   = "roles/storage.admin"
+  member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
+}
+
+resource "time_sleep" "wait_120_seconds_2" {
+  depends_on = [
+    google_storage_bucket_iam_member.source_iam,
+    google_storage_bucket_iam_member.sink_iam,
+  ]
+  create_duration = "120s"
+}
+
 resource "google_storage_transfer_job" "with_sa" {
   description = "%s"
   project     = "%s"
@@ -2778,5 +2803,5 @@ resource "google_storage_transfer_job" "with_sa" {
   }
 
 }
-`, project, dataSourceBucketName, project, dataSinkBucketName, description, project)
+`, project, dataSourceBucketName, project, dataSinkBucketName, project, description, project)
 }
