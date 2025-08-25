@@ -110,6 +110,16 @@ The field `deletion_protection` has been added with a default value of `true`. T
 Terraform from destroying or recreating the cluster during `terraform apply`. In 7.0.0, existing clusters will have
 `deletion_protection` set to `true` during the next refresh unless otherwise set in configuration.
 
+## Resource: `google_apigee_keystores_aliases_key_cert_file`
+
+### `google_apigee_keystores_aliases_key_cert_file` Migrated to the Plugin Framework
+
+This resource has been migrated from SDKv2 to the more modern [plugin framework resource implementation](https://developer.hashicorp.com/terraform/plugin/framework). One potential breaking change is expected with this migration; please review the details below.
+
+### `certs_info` is now output-only
+
+Previously the `certis_info` field was set as an optional value, but the configured value was never used by the API. It is now correctly marked as output-only. If set in your configuration, simply remove it and the API value will continue to be used.
+
 ## Resource: `google_artifact_registry_repository`
 
 ### `public_repository` fields have had their default values removed.
@@ -290,6 +300,22 @@ Terraform from destroying or recreating the cluster during `terraform apply`. In
 Terraform [Type Conversion](https://developer.hashicorp.com/terraform/language/expressions/types#type-conversion) will handle the change automatically for most configurations, and they will not need to be modified.
 
 To reflect the new type explicitly, surround the current integer value in quotes, i.e. `retention_period = 10` -> `retention_period = "10"`.
+
+## Resource: `google_storage_notification`
+
+### `google_storage_notification` Migrated to the Plugin Framework
+
+This resource has been migrated from SDKv2 to the more modern [plugin framework resource implementation](https://developer.hashicorp.com/terraform/plugin/framework). One associated breaking change is expected with this migration; please review the details below.
+
+### `topic` Field Format Change
+
+The `topic` field for `google_storage_notification` must now be provided in the format `projects/{{project}}/topics/{{topic}}`.
+
+The previous SDKv2 implementation accepted both `projects/{{project}}/topics/{{topic}}` and the fully qualified Google API format `//pubsub.googleapis.com/projects/{{project}}/topics/{{topic}}` in configuration. However, it consistently stored the latter (fully qualified) format in the Terraform state.
+
+With this migration, only the `projects/{{project}}/topics/{{topic}}` format is allowed in configuration, aligning with the `id` format of the `google_pubsub_topic` resource.
+
+A state upgrader will automatically migrate the `topic` field's format in your Terraform state when you upgrade to this provider version. However, you **must ensure your Terraform configuration files are updated** to use the `projects/{{project}}/topics/{{topic}}` format to avoid validation errors.
 
 ## Resource: `google_tpu_node` is now removed
 
