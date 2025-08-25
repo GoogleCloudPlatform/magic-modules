@@ -66,6 +66,13 @@ examples:
     vars:
       data_exchange_id: 'tf_test_log_email_data_exchange'
       description: 'Example for log email test for data exchange'
+  - name: 'bigquery_analyticshub_public_data_exchange'
+    primary_resource_id: 'data_exchange'
+    primary_resource_name: 'fmt.Sprintf("tf_test_log_email_data_exchange%s", context["random_suffix"])'
+    region_override: 'US'
+    vars:
+      data_exchange_id: 'public_data_exchange'
+      desc: 'Example for public data exchange'
 parameters:
 properties:
   - name: 'name'
@@ -146,6 +153,13 @@ properties:
           - 'sharing_environment_config.0.dcr_exchange_config'
         properties:
           []
+  - name: 'discoveryType'
+    type: Enum
+    enum_values:
+      - 'DISCOVERY_TYPE_PRIVATE'
+      - 'DISCOVERY_TYPE_PUBLIC'
+    default_from_api: true
+    description: Type of discovery on the discovery page for all the listings under this exchange. Cannot be set for a Data Clean Room. Updating this field also updates (overwrites) the discoveryType field for all the listings under this exchange.
   - name: 'logLinkedDatasetQueryUserEmail'
     type: Boolean
     description:

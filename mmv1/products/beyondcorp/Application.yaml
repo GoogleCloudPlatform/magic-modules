@@ -31,6 +31,7 @@ iam_policy:
   import_format:
     - 'projects/{{project}}/locations/global/securityGateways/{{security_gateways_id}}/applications/{{application_id}}'
     - '{{application_id}}'
+  deprecation_message: '`google_beyondcorp_application` and associated IAM resources are deprecated. Use `google_beyondcorp_security_gateway_application` instead.'
 examples:
   - name: beyondcorp_application_basic
     primary_resource_id: example
