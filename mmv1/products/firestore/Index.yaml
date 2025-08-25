@@ -162,7 +162,7 @@ properties:
     type: Boolean
     default_value: false
     description:
-      Optional. Whether it is an unique index. Unique index ensures all values for the
+      Whether it is an unique index. Unique index ensures all values for the
       indexed field(s) are unique across documents.
   - name: 'fields'
     type: Array
