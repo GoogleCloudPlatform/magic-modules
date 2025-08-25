@@ -6,12 +6,15 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+    "github.com/hashicorp/terraform-provider-google/google/envvar"
 )
 
 func TestAccArtifactRegistryRepository_update(t *testing.T) {
 	t.Parallel()
 
 	repositoryID := fmt.Sprintf("tf-test-%d", acctest.RandInt(t))
+    project := envvar.GetTestProjectFromEnv()
+    expectedUri := fmt.Sprintf("us-central1-docker.pkg.dev/%s/%s", project, repositoryID)
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -20,6 +23,7 @@ func TestAccArtifactRegistryRepository_update(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccArtifactRegistryRepository_update(repositoryID),
+				Check:  resource.TestCheckResourceAttr("google_artifact_registry_repository.test", "registry_uri", expectedUri),
 			},
 			{
 				ResourceName:      "google_artifact_registry_repository.test",
