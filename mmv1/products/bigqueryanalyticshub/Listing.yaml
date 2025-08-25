@@ -220,6 +220,23 @@ properties:
         required: true
         immutable: true
         diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+      - name: 'restrictedExportPolicy'
+        type: NestedObject
+        description: Restricted export policy used to configure restricted export on linked dataset
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+        properties:
+          - name: 'enabled'
+            type: Boolean
+            description: If true, enable restricted export.
+            diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+          - name: 'restrictDirectTableAccess'
+            type: Boolean
+            description: If true, restrict direct table access (read api/tabledata.list) on linked table.
+            diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+          - name: 'restrictQueryResult'
+            type: Boolean
+            description: If true, restrict export of query result derived from restricted linked dataset table.
+            diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
       - name: 'selectedResources'
         type: Array
         description: Resource in this dataset that is selectively shared. This field is required for data clean room exchanges.
