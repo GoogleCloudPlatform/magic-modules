@@ -361,7 +361,7 @@ func TestProviderOnly(t *testing.T) {
 			},
 		},
 	}
-	labeled.Properties = labeled.AddExtraFields(labeled.PropertiesWithExcluded(), nil, "")
+	labeled.Properties = labeled.AddLabelsRelatedFields(labeled.PropertiesWithExcluded(), nil)
 	labeled.SetDefault(nil)
 
 	cases := []struct {

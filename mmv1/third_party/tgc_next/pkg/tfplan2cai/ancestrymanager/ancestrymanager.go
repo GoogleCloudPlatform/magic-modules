@@ -196,7 +196,13 @@ func (m *manager) fetchAncestors(config *transport_tpg.Config, tfData tpgresourc
 			return []string{unknownOrg}, nil
 		}
 		key = projectKey
-
+	case "apigee.googleapis.com/Instance":
+		// Project is used to find the ancestors.
+		// org_id in resource `google_apigee_instance` is the apigee org id under a project.
+		if projectKey == "" {
+			return []string{unknownOrg}, nil
+		}
+		key = projectKey
 	default:
 		switch {
 		case orgOK:

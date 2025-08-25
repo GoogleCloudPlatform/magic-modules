@@ -1965,6 +1965,7 @@ func TestAccContainerNodePool_withSoleTenantConfig(t *testing.T) {
 	np := fmt.Sprintf("tf-test-np-%s", acctest.RandString(t, 10))
 	networkName := acctest.BootstrapSharedTestNetwork(t, "gke-cluster")
 	subnetworkName := acctest.BootstrapSubnet(t, "gke-cluster", networkName)
+	minNodeCpus := 1
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -1972,7 +1973,7 @@ func TestAccContainerNodePool_withSoleTenantConfig(t *testing.T) {
 		CheckDestroy:             testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccContainerNodePool_withSoleTenantConfig(cluster, np, networkName, subnetworkName),
+				Config: testAccContainerNodePool_withSoleTenantConfig(cluster, np, networkName, subnetworkName, minNodeCpus),
 			},
 			{
 				ResourceName:      "google_container_node_pool.with_sole_tenant_config",
@@ -3892,8 +3893,34 @@ resource "google_container_node_pool" "with_kubelet_config" {
       image_gc_high_threshold_percent        = %d
       image_minimum_gc_age                   = %q
       image_maximum_gc_age                   = %q
-      allowed_unsafe_sysctls               = ["kernel.shm*", "kernel.msg*", "kernel.sem", "fs.mqueue.*", "net.*"]
+      allowed_unsafe_sysctls                 = ["kernel.shm*", "kernel.msg*", "kernel.sem", "fs.mqueue.*", "net.*"]
       single_process_oom_kill                = %v
+      max_parallel_image_pulls               = 5
+      eviction_max_pod_grace_period_seconds  = 200
+      eviction_soft {
+        memory_available = "100Mi"
+	nodefs_available = "50%%"
+        nodefs_inodes_free = "40%%"
+        imagefs_available = "30%%"
+        imagefs_inodes_free = "20%%"
+        pid_available = "10%%"
+      }
+      eviction_soft_grace_period {
+        memory_available = "5m"
+	nodefs_available = "4m30s"
+        nodefs_inodes_free = "3.6m"
+        imagefs_available = "100s"
+        imagefs_inodes_free = "2m"
+        pid_available = "3m2.6s"
+      }
+      eviction_minimum_reclaim {
+        memory_available = "10%%"
+        nodefs_available = "8.5%%"
+        nodefs_inodes_free = "5.0%%"
+        imagefs_available = "3%%"
+        imagefs_inodes_free = "9%%"
+        pid_available = "5%%"
+      }
     }
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
@@ -3926,6 +3953,8 @@ func testAccContainerNodePool_withLinuxNodeConfig(cluster, np, tcpMem, networkNa
         "net.ipv4.tcp_tw_reuse"       = 1
 	"kernel.shmmni"               = 8192
       }
+      transparent_hugepage_enabled = "TRANSPARENT_HUGEPAGE_ENABLED_ALWAYS"
+      transparent_hugepage_defrag  = "TRANSPARENT_HUGEPAGE_DEFRAG_DEFER_WITH_MADVISE"
     }
 `, tcpMem, tcpMem)
 	}
@@ -4071,7 +4100,8 @@ resource "google_compute_subnetwork" "container_subnetwork" {
 
 resource "google_container_cluster" "cluster" {
   name               = "%s"
-  location           = "us-central1"
+  # Zonal rather than regional to reduce setup time and node count per zone.
+  location           = "us-central1-c"
   initial_node_count = 1
 
   network    = google_compute_network.container_network.name
@@ -4081,82 +4111,82 @@ resource "google_container_cluster" "cluster" {
     services_secondary_range_name = google_compute_subnetwork.container_subnetwork.secondary_ip_range[1].range_name
   }
   release_channel {
-	channel = "RAPID"
+    channel = "RAPID"
   }
   deletion_protection = false
 }
 
 resource "google_container_node_pool" "with_manual_pod_cidr" {
-  name               = "%s-manual"
-  location           = "us-central1"
-  cluster            = google_container_cluster.cluster.name
+  name       = "%s-manual"
+  location   = google_container_cluster.cluster.location
+  cluster    = google_container_cluster.cluster.name
   node_count = 1
   network_config {
     create_pod_range = false
-    pod_range = google_compute_subnetwork.container_subnetwork.secondary_ip_range[2].range_name
+    pod_range        = google_compute_subnetwork.container_subnetwork.secondary_ip_range[2].range_name
   }
   node_config {
-	oauth_scopes = [
-	  "https://www.googleapis.com/auth/cloud-platform",
-	]
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform",
+    ]
   }
 }
 
 resource "google_container_node_pool" "with_auto_pod_cidr" {
-  name               = "%s-auto"
-  location           = "us-central1"
-  cluster            = google_container_cluster.cluster.name
+  name       = "%s-auto"
+  location   = google_container_cluster.cluster.location
+  cluster    = google_container_cluster.cluster.name
   node_count = 1
   network_config {
-	create_pod_range    = true
-	pod_range           = "auto-pod-range"
-	pod_ipv4_cidr_block = "10.2.0.0/20"
+    create_pod_range    = true
+    pod_range           = "auto-pod-range"
+    pod_ipv4_cidr_block = "10.2.0.0/20"
   }
   node_config {
-	oauth_scopes = [
-	  "https://www.googleapis.com/auth/cloud-platform",
-	]
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform",
+    ]
   }
 }
 
 resource "google_container_node_pool" "with_pco_disabled" {
-  name               = "%s-pco"
-  location           = "us-central1"
-  cluster            = google_container_cluster.cluster.name
+  name       = "%s-pco"
+  location   = google_container_cluster.cluster.location
+  cluster    = google_container_cluster.cluster.name
   node_count = 1
   network_config {
-	pod_cidr_overprovision_config {
-		disabled = true
-	}
+    pod_cidr_overprovision_config {
+      disabled = true
+    }
   }
   node_config {
-	oauth_scopes = [
-	  "https://www.googleapis.com/auth/cloud-platform",
-	]
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform",
+    ]
   }
 }
 
 resource "google_container_node_pool" "with_tier1_net" {
-  name               = "%s-tier1"
-  location           = "us-central1"
-  cluster            = google_container_cluster.cluster.name
+  name       = "%s-tier1"
+  location   = google_container_cluster.cluster.location
+  cluster    = google_container_cluster.cluster.name
   node_count = 1
   node_locations = [
-	"us-central1-a",
+    "us-central1-c",
   ]
   network_config {
-	network_performance_config {
-		total_egress_bandwidth_tier = "%s"
-	}
+    network_performance_config {
+      total_egress_bandwidth_tier = "%s"
+    }
   }
   node_config {
-	machine_type = "n2-standard-32"
-	gvnic {
-		enabled = true
-	}
-	oauth_scopes = [
-		"https://www.googleapis.com/auth/cloud-platform",
-	]
+    machine_type = "n2-standard-32"
+    gvnic {
+      enabled = true
+    }
+    oauth_scopes = [
+      "https://www.googleapis.com/auth/cloud-platform",
+    ]
   }
 }
 
@@ -4855,7 +4885,7 @@ resource "google_container_node_pool" "np2" {
 `, cluster, networkName, subnetworkName, np1, np2)
 }
 
-func testAccContainerNodePool_withSoleTenantConfig(cluster, np, networkName, subnetworkName string) string {
+func testAccContainerNodePool_withSoleTenantConfig(cluster, np, networkName, subnetworkName string, minNodeCpus int) string {
        return fmt.Sprintf(`
 data "google_container_engine_versions" "central1a" {
   location = "us-central1-a"
@@ -4865,6 +4895,7 @@ resource "google_compute_node_template" "soletenant-tmpl" {
   name      = "tf-test-soletenant-tmpl"
   region    = "us-central1"
   node_type = "n1-node-96-624"
+  cpu_overcommit_type = "ENABLED"
 }
 
 resource "google_compute_node_group" "nodes" {
@@ -4897,6 +4928,7 @@ resource "google_container_node_pool" "with_sole_tenant_config" {
         operator = "IN"
         values   = [google_compute_node_group.nodes.name]
       }
+      min_node_cpus = %d
     }
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
@@ -4904,7 +4936,7 @@ resource "google_container_node_pool" "with_sole_tenant_config" {
     ]
   }
 }
-`, cluster, networkName, subnetworkName, np)
+`, cluster, networkName, subnetworkName, np, minNodeCpus)
 }
 
 func TestAccContainerNodePool_withConfidentialNodes(t *testing.T) {
@@ -5528,7 +5560,6 @@ resource "google_container_node_pool" "primary_nodes" {
   node_count = 1
 
   node_config {
-    machine_type = "n1-standard-1" // can't be e2 because of local-ssd
     disk_size_gb = 15
 
     resource_manager_tags = {
@@ -5575,12 +5606,11 @@ resource "google_container_node_pool" "primary_nodes" {
   node_count = 1
 
   node_config {
-    machine_type = "n1-standard-1" // can't be e2 because of local-ssd
     disk_size_gb = 15
 
     resource_manager_tags = {
       "%{pid}/%{tagKey1}" = "%{tagValue1}"
-	  "%{pid}/%{tagKey2}" = "%{tagValue2}"
+      "%{pid}/%{tagKey2}" = "%{tagValue2}"
     }
   }
 }
@@ -5623,7 +5653,6 @@ resource "google_container_node_pool" "primary_nodes" {
   node_count = 1
 
   node_config {
-    machine_type = "n1-standard-1" // can't be e2 because of local-ssd
     disk_size_gb = 15
   }
 }

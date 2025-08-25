@@ -58,11 +58,13 @@ func DataSource{{ .ResourceName -}}() *schema.Resource {
 
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(rs)
 
-  // Set 'Required' schema elements
+  {{if .DatasourceRequiredFields}}
   tpgresource.AddRequiredFieldsToSchema(dsSchema, {{range $index, $field := .DatasourceRequiredFields}}{{if gt $index 0}}, {{end}}{{printf "%q" $field}}{{end}})
-
-  // Set 'Optional' schema elements
+  {{end}}
+  
+  {{if .DatasourceOptionalFields}}
   tpgresource.AddOptionalFieldsToSchema(dsSchema, {{range $index, $field := .DatasourceOptionalFields}}{{if gt $index 0}}, {{end}}{{printf "%q" $field}}{{end}})
+  {{end}}
 
   return &schema.Resource{
 		Read:   dataSource{{ $.ResourceName -}}Read,
@@ -83,6 +85,18 @@ func dataSource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{
 	if err != nil {
 		return err
 	}
+
+  {{if $.ShouldDatasourceSetLabels}}
+	if err := tpgresource.SetDataSourceLabels(d); err != nil {
+		return err
+	}
+  {{end}}
+
+  {{if $.ShouldDatasourceSetAnnotations}}
+	if err := tpgresource.SetDataSourceAnnotations(d); err != nil {
+		return err
+	}
+  {{end}}
 
   if d.Id() == "" {
 		return fmt.Errorf("%s not found", id)
