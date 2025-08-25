@@ -303,19 +303,19 @@ func TestAccBigqueryAnalyticsHubListing_bigqueryAnalyticshubRestrictedExportPoli
 func testAccBigqueryAnalyticsHubListing_bigqueryAnalyticshubRestrictedExportPolicyListingUpdate(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_bigquery_analytics_hub_data_exchange" "listing" {
-  location         = "US"
+  location         = "us"
   data_exchange_id = "tf_test_my_data_exchange%{random_suffix}"
   display_name     = "tf_test_my_data_exchange%{random_suffix}"
-  description      = "example public listing%{random_suffix}"
+  description      = "example listing with restricted export policy%{random_suffix}"
   discovery_type   = "DISCOVERY_TYPE_PRIVATE"
 }
 
 resource "google_bigquery_analytics_hub_listing" "listing" {
-  location         = "US"
+  location         = "us"
   data_exchange_id = google_bigquery_analytics_hub_data_exchange.listing.data_exchange_id
   listing_id       = "tf_test_my_listing%{random_suffix}"
   display_name     = "tf_test_my_listing%{random_suffix}"
-  description      = "example public listing%{random_suffix}"
+  description      = "example listing with restricted export policy%{random_suffix}"
   discovery_type   = "DISCOVERY_TYPE_PRIVATE"
   allow_only_metadata_sharing= false
 
@@ -332,8 +332,8 @@ resource "google_bigquery_analytics_hub_listing" "listing" {
 resource "google_bigquery_dataset" "listing" {
   dataset_id                  = "tf_test_my_listing%{random_suffix}"
   friendly_name               = "tf_test_my_listing%{random_suffix}"
-  description                 = "example public listing%{random_suffix}"
-  location                    = "US"
+  description                 = "example listing with restricted export policy%{random_suffix}"
+  location                    = "us"
 }
 `, context)
 }
