@@ -419,6 +419,11 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Computed:    true,
 				Description: `When the Transfer Job was deleted.`,
 			},
+			"service_account": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The user-managed service account to run the job. If this field is specified, the given service account is granted the necessary permissions to all applicable resources (e.g. GCS buckets) required by the job. If not specified, the project's service account is used.`,
+			},
 		},
 		UseJSONNumber: true,
 	}
@@ -902,6 +907,7 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 		ReplicationSpec:    expandReplicationSpecs(d.Get("replication_spec").([]interface{})),
 		LoggingConfig:      expandTransferJobLoggingConfig(d.Get("logging_config").([]interface{})),
 		NotificationConfig: expandTransferJobNotificationConfig(d.Get("notification_config").([]interface{})),
+		ServiceAccount:     d.Get("service_account").(string),
 	}
 
 	var res *storagetransfer.TransferJob
@@ -968,6 +974,9 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 	}
 	if err := d.Set("deletion_time", res.DeletionTime); err != nil {
 		return fmt.Errorf("Error setting deletion_time: %s", err)
+	}
+	if err := d.Set("service_account", res.ServiceAccount); err != nil {
+		return fmt.Errorf("Error setting service_account: %s", err)
 	}
 
 	err = d.Set("schedule", flattenTransferSchedule(res.Schedule))
@@ -1075,6 +1084,13 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 			transferJob.LoggingConfig = expandTransferJobLoggingConfig(v.([]interface{}))
 		} else {
 			transferJob.LoggingConfig = nil
+		}
+	}
+
+	if d.HasChange("service_account") {
+		fieldMask = append(fieldMask, "service_account")
+		if v, ok := d.GetOk("service_account"); ok {
+			transferJob.ServiceAccount = v.(string)
 		}
 	}
 
