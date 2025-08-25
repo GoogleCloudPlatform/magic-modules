@@ -126,7 +126,6 @@ func checkCertificateManagerIssuanceConfigWithTags(resourceName string, testCont
 
 		ctx := context.Background()
 
-		// Use the corrected NewClient() to instantiate the client.
 		certificateManagerClient, err := cmanager.NewClient(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to create certificate manager client: %v", err)
