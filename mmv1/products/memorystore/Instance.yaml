@@ -65,7 +65,7 @@ examples:
       subnet_name: 'my-subnet'
       network_name: 'my-network'
       prevent_destroy: 'true'
-      kms_key_name: "my-key"
+      kms_key_name: 'my-key'
     test_vars_overrides:
       'prevent_destroy': 'false'
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'

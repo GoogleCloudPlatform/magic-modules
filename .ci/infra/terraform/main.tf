@@ -334,6 +334,7 @@ module "project-services" {
     "resourceviews.googleapis.com",
     "run.googleapis.com",
     "runtimeconfig.googleapis.com",
+    "saasservicemgmt.googleapis.com",
     "secretmanager.googleapis.com",
     "securesourcemanager.googleapis.com",
     "securetoken.googleapis.com",

@@ -784,8 +784,6 @@ properties:
           - name: 'gpuZonalRedundancyDisabled'
             type: Boolean
             description: True if GPU zonal redundancy is disabled on this execution.
-            default_from_api: true
-            send_empty_value: true
   - name: 'observedGeneration'
     type: String
     description: |
