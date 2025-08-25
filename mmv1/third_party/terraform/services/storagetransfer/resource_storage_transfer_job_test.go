@@ -2768,7 +2768,7 @@ resource "google_storage_bucket_iam_member" "sink_iam" {
   member = "serviceAccount:${data.google_storage_transfer_project_service_account.default.email}"
 }
 
-resource "time_sleep" "wait_120_seconds_2" {
+resource "time_sleep" "wait_120_seconds_3" {
   depends_on = [
     google_storage_bucket_iam_member.source_iam,
     google_storage_bucket_iam_member.sink_iam,
@@ -2803,7 +2803,7 @@ resource "google_storage_transfer_job" "with_sa" {
   }
 
   depends_on = [
-    time_sleep.wait_120_seconds_2,
+    time_sleep.wait_120_seconds_3,
   ]
 
 }
