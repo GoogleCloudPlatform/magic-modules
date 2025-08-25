@@ -191,15 +191,15 @@ func IsApiNotEnabledError(err error) bool {
 }
 
 type GetPaginatedItemsOptions struct {
-	ResourceData         *schema.ResourceData
-	Config               *Config
-	BillingProject       *string
-	UserAgent            string
-	URL                  string
-	ListFlattener        func(config *Config, res []map[string]interface{}) ([]map[string]interface{}, error)
-	Params               map[string]string
-	ResourceToList       string
-	ErrorRetryPredicates []RetryErrorPredicateFunc
+	ResourceData         *schema.ResourceData                                                                 // Data for the resource that is being paginated
+	Config               *Config                                                                              // Config for the provider
+	BillingProject       *string                                                                              // Billing project for the request
+	UserAgent            string                                                                               // User agent for the request
+	URL                  string                                                                               // URL for the request, e.g. "https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a/instances"
+	ListFlattener        func(config *Config, res []map[string]interface{}) ([]map[string]interface{}, error) // Function to flatten the list of items
+	Params               map[string]string                                                                    // Parameters for the request
+	ResourceToList       string                                                                               // Resource to list, e.g. "items"
+	ErrorRetryPredicates []RetryErrorPredicateFunc                                                            // Predicates for retrying the request
 }
 
 func GetPaginatedItems(paginationOptions GetPaginatedItemsOptions) ([]map[string]interface{}, error) {
