@@ -50,6 +50,9 @@ import_format:
 # the resource. If false, that code is not generated.
 autogen_async: false
 
+datasource:
+  generate: true
+
 examples:
   - name: storage_control_project_intelligence_config_basic
     primary_resource_id: example

@@ -688,7 +688,7 @@ properties:
   - type: Boolean
     name: enableAdvancedCluster
     description: If set, the advanced cluster feature is enabled.
-    output: true
+    default_from_api: true
   - type: NestedObject
     name: privateRegistryConfig
     description: Configuration for private registry.

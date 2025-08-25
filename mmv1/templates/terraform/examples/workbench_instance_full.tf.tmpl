@@ -22,6 +22,26 @@ resource "google_service_account_iam_binding" "act_as_permission" {
   ]
 }
 
+resource "google_compute_reservation" "gpu_reservation" {
+  name     = "{{index $.Vars "reservation_name"}}"
+  zone     = "us-central1-a"
+
+  specific_reservation {
+    count = 1
+    
+    instance_properties {
+      machine_type = "n1-standard-4"
+      
+      guest_accelerators {
+        accelerator_type  = "nvidia-tesla-t4"
+        accelerator_count = 1
+      }
+    }
+  }
+
+  specific_reservation_required = true
+}
+
 resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "instance_name"}}"
   location = "us-central1-a"
@@ -73,6 +93,12 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
       serial-port-logging-enable = "false"
     }
 
+    reservation_affinity {
+      consume_reservation_type = "RESERVATION_SPECIFIC"
+      key = "compute.googleapis.com/reservation-name"
+      values = [google_compute_reservation.gpu_reservation.name]
+    }
+
     enable_ip_forwarding = true
 
     tags = ["abc", "def"]
@@ -96,5 +122,6 @@ resource "google_workbench_instance" "{{$.PrimaryResourceId}}" {
     google_compute_subnetwork.my_subnetwork,
     google_compute_address.static,
     google_service_account_iam_binding.act_as_permission,
+    google_compute_reservation.gpu_reservation
   ]
 }

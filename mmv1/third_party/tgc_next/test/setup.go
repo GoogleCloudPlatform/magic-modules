@@ -27,6 +27,11 @@ type CaiData struct {
 	CaiAsset caiasset.Asset `json:"cai_asset,omitempty"`
 }
 
+type NightlyRun struct {
+	MetadataByTest map[string]TgcMetadataPayload
+	Date           time.Time
+}
+
 type TgcMetadataPayload struct {
 	TestName         string                       `json:"test_name"`
 	RawConfig        string                       `json:"raw_config"`
@@ -45,49 +50,59 @@ type Resource struct {
 	Attributes map[string]struct{} `json:"attributes"`
 }
 
+const (
+	ymdFormat   = "2006-01-02"
+	maxAttempts = 3
+)
+
 var (
-	TestsMetadata = make(map[string]TgcMetadataPayload)
+	TestsMetadata = make([]NightlyRun, maxAttempts)
 	setupDone     = false
 )
 
-func ReadTestsDataFromGcs() (map[string]TgcMetadataPayload, error) {
+func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 	if !setupDone {
 		bucketName := "cai_assets_metadata"
 		currentDate := time.Now()
+		ctx := context.Background()
+		client, err := storage.NewClient(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("storage.NewClient: %v", err)
+		}
+		defer client.Close()
 
-		for len(TestsMetadata) == 0 {
-			objectName := fmt.Sprintf("nightly_tests/%s/nightly_tests_meta.json", currentDate.Format("2006-01-02"))
-			log.Printf("Read object  %s from the bucket %s", objectName, bucketName)
+		bucket := client.Bucket(bucketName)
 
-			ctx := context.Background()
-			client, err := storage.NewClient(ctx)
+		var allErrs error
+		retries := 0
+		for i := 0; i < len(TestsMetadata); i++ {
+			metadata, err := readTestsDataFromGCSForRun(ctx, currentDate, bucketName, bucket)
 			if err != nil {
-				return nil, fmt.Errorf("storage.NewClient: %v", err)
-			}
-			defer client.Close()
-
-			currentDate = currentDate.AddDate(0, 0, -1)
-
-			rc, err := client.Bucket(bucketName).Object(objectName).NewReader(ctx)
-			if err != nil {
-				if err == storage.ErrObjectNotExist {
-					log.Printf("Object '%s' in bucket '%s' does NOT exist.\n", objectName, bucketName)
-					continue
+				if allErrs == nil {
+					allErrs = fmt.Errorf("reading tests data from gcs: %v", err)
 				} else {
-					return nil, fmt.Errorf("Object(%q).NewReader: %v", objectName, err)
+					allErrs = fmt.Errorf("%v, %v", allErrs, err)
 				}
 			}
-			defer rc.Close()
-
-			data, err := io.ReadAll(rc)
-			if err != nil {
-				return nil, fmt.Errorf("io.ReadAll: %v", err)
+			if metadata == nil {
+				// Keep looking until we find a date with metadata.
+				i--
+				retries++
+				if retries > maxAttempts {
+					// Stop looking when we find maxAttempts dates with no metadata.
+					return nil, fmt.Errorf("too many retries, %v", allErrs)
+				}
+			} else {
+				TestsMetadata[i] = NightlyRun{
+					MetadataByTest: metadata,
+					Date:           currentDate,
+				}
 			}
+			currentDate = currentDate.AddDate(0, 0, -1)
+		}
 
-			err = json.Unmarshal(data, &TestsMetadata)
-			if err != nil {
-				return nil, fmt.Errorf("json.Unmarshal: %v", err)
-			}
+		if allErrs != nil {
+			return nil, allErrs
 		}
 
 		if os.Getenv("WRITE_FILES") != "" {
@@ -98,7 +113,36 @@ func ReadTestsDataFromGcs() (map[string]TgcMetadataPayload, error) {
 	return TestsMetadata, nil
 }
 
-func prepareTestData(testName string) (map[string]ResourceTestData, string, error) {
+func readTestsDataFromGCSForRun(ctx context.Context, currentDate time.Time, bucketName string, bucket *storage.BucketHandle) (map[string]TgcMetadataPayload, error) {
+	metadata := make(map[string]TgcMetadataPayload)
+	objectName := fmt.Sprintf("nightly_tests/%s/nightly_tests_meta.json", currentDate.Format(ymdFormat))
+	log.Printf("Read object  %s from the bucket %s", objectName, bucketName)
+
+	rc, err := bucket.Object(objectName).NewReader(ctx)
+	if err != nil {
+		if err == storage.ErrObjectNotExist {
+			log.Printf("Object '%s' in bucket '%s' does NOT exist.\n", objectName, bucketName)
+			return nil, nil
+		} else {
+			return nil, fmt.Errorf("Object(%q).NewReader: %v", objectName, err)
+		}
+	}
+	defer rc.Close()
+
+	data, err := io.ReadAll(rc)
+	if err != nil {
+		return nil, fmt.Errorf("io.ReadAll: %v", err)
+	}
+
+	err = json.Unmarshal(data, &metadata)
+	if err != nil {
+		return nil, fmt.Errorf("json.Unmarshal: %v", err)
+	}
+
+	return metadata, nil
+}
+
+func prepareTestData(testName string, retries int) (map[string]ResourceTestData, string, error) {
 	var err error
 	cacheMutex.Lock()
 	defer cacheMutex.Unlock()
@@ -107,12 +151,22 @@ func prepareTestData(testName string) (map[string]ResourceTestData, string, erro
 		return nil, "", err
 	}
 
-	testMetadata := TestsMetadata[testName]
-	resourceMetadata := testMetadata.ResourceMetadata
-	if len(resourceMetadata) == 0 {
+	var testMetadata TgcMetadataPayload
+	var resourceMetadata map[string]*ResourceMetadata
+
+	run := TestsMetadata[retries]
+	testMetadata, ok := run.MetadataByTest[testName]
+	if !ok {
 		log.Printf("Data of test is unavailable: %s", testName)
 		return nil, "", nil
 	}
+	resourceMetadata = testMetadata.ResourceMetadata
+	if len(resourceMetadata) == 0 {
+		log.Printf("Data of resource is unavailable: %s", testName)
+		return nil, "", nil
+	}
+
+	log.Printf("Found metadata for %s from run on %s", testName, run.Date.Format(ymdFormat))
 
 	rawTfFile := fmt.Sprintf("%s.tf", testName)
 	err = os.WriteFile(rawTfFile, []byte(testMetadata.RawConfig), 0644)
@@ -129,7 +183,7 @@ func prepareTestData(testName string) (map[string]ResourceTestData, string, erro
 	}
 
 	if len(rawResourceConfigs) == 0 {
-		return nil, "", fmt.Errorf("Test %s fails: raw config is unavailable", testName)
+		return nil, "", fmt.Errorf("test %s fails: raw config is unavailable", testName)
 	}
 
 	rawConfigMap := convertToConfigMap(rawResourceConfigs)

@@ -82,12 +82,12 @@ properties:
     type: NestedObject
     exactly_one_of:
       - include_all_resources
-      # TODO(hashicorp/terraform-provider-google#22581): add this block back + test once deployment is supported
+      # TODO: hashicorp/terraform-provider-google#22581 add this block back + test once deployment is supported
       # - include
     properties: []
     send_empty_value: true
     allow_empty_object: true
-  # TODO(hashicorp/terraform-provider-google#22581): add this block back + test once deployment is supported
+  # TODO: hashicorp/terraform-provider-google#22581 add this block back + test once deployment is supported
   # - name: 'include'
   #   type: NestedObject
   #   properties:
