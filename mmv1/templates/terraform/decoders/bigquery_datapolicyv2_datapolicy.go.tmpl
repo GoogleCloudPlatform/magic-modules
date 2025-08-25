@@ -1,0 +1,13 @@
+// The create/read response is not in the same format as the resource.
+// The API response is a flat object that needs to be nested inside the "data_policy" field.
+newRes := make(map[string]interface{})
+
+// The API response is the content of the "data_policy" nested object.
+newRes["dataPolicy"] = res
+
+// Copy over other top-level fields from the state.
+if v, ok := d.GetOk("data_policy_id"); ok {
+	newRes["dataPolicyId"] = v
+}
+
+return newRes, nil
