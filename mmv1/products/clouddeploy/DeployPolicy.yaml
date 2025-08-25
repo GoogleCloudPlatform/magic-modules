@@ -94,7 +94,6 @@ properties:
   - name: "suspended"
     type: Boolean
     description: "When suspended, the policy will not prevent actions from occurring, even if the action violates the policy."
-    send_empty_value: true
   - name: "selectors"
     type: Array
     description: "Selected resources to which the policy will be applied. At least one selector is required. If one selector matches the resource the policy applies. For example, if there are two selectors and the action being attempted matches one of them, the policy will apply to that action."
