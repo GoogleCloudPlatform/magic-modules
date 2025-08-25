@@ -2802,6 +2802,10 @@ resource "google_storage_transfer_job" "with_sa" {
     }
   }
 
+  depends_on = [
+    time_sleep.wait_120_seconds_2,
+  ]
+
 }
 `, project, dataSourceBucketName, project, dataSinkBucketName, project, description, project)
 }
