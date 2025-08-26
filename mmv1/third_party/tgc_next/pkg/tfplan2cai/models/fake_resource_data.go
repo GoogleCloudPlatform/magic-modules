@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -41,13 +42,18 @@ type getResult struct {
 
 // Compare to https://github.com/hashicorp/terraform-plugin-sdk/blob/97b4465/helper/schema/resource_data.go#L15
 type FakeResourceData struct {
-	reader schema.FieldReader
-	schema map[string]*schema.Schema
+	reader   schema.FieldReader
+	schema   map[string]*schema.Schema
+	identity *schema.IdentityData
 }
 
 // Id returns the ID of the resource from state.
 func (d *FakeResourceData) Id() string {
 	return ""
+}
+
+func (d *FakeResourceData) Identity() (*schema.IdentityData, error) {
+	return d.identity, nil
 }
 
 func (d *FakeResourceData) getRaw(key string) getResult {
@@ -105,6 +111,10 @@ func (d *FakeResourceData) GetOk(name string) (interface{}, bool) {
 	}
 
 	return r.Value, exists
+}
+
+func (d *FakeResourceData) GetRawConfig() cty.Value {
+	return cty.NullVal(cty.String)
 }
 
 func (d *FakeResourceData) GetOkExists(key string) (interface{}, bool) {
