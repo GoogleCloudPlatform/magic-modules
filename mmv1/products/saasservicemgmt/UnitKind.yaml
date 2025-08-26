@@ -31,6 +31,9 @@ examples:
       saas_name: example-saas
       cluster_unitkind_name: cluster-unitkind
       app_unitkind_name: app-unitkind
+      release_name: example-release
+    test_env_vars:
+      project: 'PROJECT_NAME'
     bootstrap_iam:
       - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
         role: "roles/saasservicemgmt.serviceAgent"
