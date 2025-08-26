@@ -132,7 +132,7 @@ func testAccCheckVertexAIPublisherModelConfigDestroyProducer(t *testing.T) func(
 
 			config := acctest.GoogleProviderConfig(t)
 
-			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{VertexAIBasePath}}projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}:fetchPublisherModelConfig")
+			url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}VertexAIBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/publishers/{{"{{"}}publisher{{"}}"}}/models/{{"{{"}}model{{"}}"}}:fetchPublisherModelConfig")
 			if err != nil {
 				return err
 			}
