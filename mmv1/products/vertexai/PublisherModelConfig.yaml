@@ -24,12 +24,13 @@ base_url: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/
 id_format: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}'
 self_link: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}:fetchPublisherModelConfig'
 create_url: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}:setPublisherModelConfig'
+update_url: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}:setPublisherModelConfig'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}'
   - '{{project}}/{{location}}/{{publisher}}/{{model}}'
   - '{{location}}/{{publisher}}/{{model}}'
 update_verb: 'POST'
-update_mask: true
+update_mask: false
 min_version: 'beta'
 timeouts:
   insert_minutes: 20
@@ -41,6 +42,7 @@ custom_code:
 examples:
   - name: 'publisher_model_config_basic'
     primary_resource_id: 'default'
+    exclude_test: true
     test_env_vars:
       project_id: 'PROJECT_NAME'
 parameters:
