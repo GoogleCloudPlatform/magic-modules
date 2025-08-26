@@ -169,7 +169,7 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
         name = "secret_var_2"
 
         secret_ref {
-          secret  = google_secret_manager_secret.secret.secret_id
+          secret  = google_secret_manager_secret.secret_new.secret_id
           version = "2"
         }
       }
