@@ -21,8 +21,13 @@ references:
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1beta1/projects.locations.publishers.models'
 docs:
 base_url: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}'
+id_format: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}'
 self_link: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}:fetchPublisherModelConfig'
 create_url: 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}:setPublisherModelConfig'
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/publishers/{{publisher}}/models/{{model}}'
+  - '{{project}}/{{location}}/{{publisher}}/{{model}}'
+  - '{{location}}/{{publisher}}/{{model}}'
 update_verb: 'POST'
 update_mask: true
 min_version: 'beta'
@@ -31,8 +36,8 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
-# TODO: there is no destroy endpoint, disable the logging config on destroy?
-# custom_delete: 't.b.d.'
+  custom_delete: 'templates/terraform/custom_delete/vertex_ai_publisher_model_config.go.tmpl'
+  decoder: 'templates/terraform/decoders/vertex_ai_publisher_model_config.go.tmpl'
 examples:
   - name: 'publisher_model_config_basic'
     primary_resource_id: 'default'
@@ -76,7 +81,7 @@ properties:
               If logging is enabled or not.
             required: true
           - name: 'samplingRate'
-            type: Float
+            type: Double
             description: |-
               Percentage of requests to be logged, expressed as a fraction in range(0,1).
             required: true
@@ -98,6 +103,7 @@ properties:
                   BigQuery path. For example: `bq://projectId` or `bq://projectId.bqDatasetId` or
                   `bq://projectId.bqDatasetId.bqTableId`.
                 required: true
+                ignore_read: true
           - name: 'requestResponseLoggingSchemaVersion'
             type: String
             output: true

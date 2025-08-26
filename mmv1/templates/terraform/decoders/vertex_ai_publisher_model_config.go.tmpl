@@ -1,0 +1,7 @@
+// the GET endpoint returns loggingConfig not nested in publisherModelConfig
+if lc, ok := res["loggingConfig"]; ok && lc != nil {
+	res["publisherModelConfig"] = map[string]interface{}{
+		"loggingConfig": lc,
+	}
+}
+return res, nil
