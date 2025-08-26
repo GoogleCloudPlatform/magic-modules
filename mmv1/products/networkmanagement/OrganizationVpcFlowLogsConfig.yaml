@@ -46,6 +46,8 @@ examples:
     min_version: 'beta'
     vars:
       vpc_flow_logs_config_id: 'basic-org-test-id'
+    test_env_vars:
+      org_id: :ORG_ID
 parameters:
   - name: 'organization'
     type: String
