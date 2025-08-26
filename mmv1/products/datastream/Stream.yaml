@@ -1229,6 +1229,7 @@ properties:
             type: String
             description: |
               Path inside the Cloud Storage bucket to write data to.
+            required: true
           - name: 'fileRotationMb'
             type: Integer
             description: |
