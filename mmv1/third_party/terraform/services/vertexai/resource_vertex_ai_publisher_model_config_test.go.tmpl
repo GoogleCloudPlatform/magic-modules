@@ -17,6 +17,8 @@
 
 package vertexai_test
 
+{{ if ne $.TargetVersionName `ga` -}}
+
 import (
 	"fmt"
 	"strings"
@@ -156,3 +158,5 @@ func testAccCheckVertexAIPublisherModelConfigDestroyProducer(t *testing.T) func(
 		return nil
 	}
 }
+
+{{ end }}
