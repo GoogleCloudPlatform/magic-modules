@@ -109,7 +109,7 @@ examples:
 virtual_fields:
   - name: 'desired_psc_auto_connections'
     description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead."
-    deprecation_message: '`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead. Terrafrom import will work with desired_auto_created_endpoints only'
+    deprecation_message: '`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead. `terraform import` will only work with desired_auto_created_endpoints`.'
     type: Array
     immutable: true
     conflicts:
