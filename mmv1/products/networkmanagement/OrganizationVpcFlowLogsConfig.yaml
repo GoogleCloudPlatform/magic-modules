@@ -139,6 +139,7 @@ properties:
     output: true
   - name: 'crossProjectMetadata'
     type: String
+    default_from_api: true
     description: |-
       Determines whether to include cross project annotations in the logs.
       This field is available only for organization configurations. If not
