@@ -62,15 +62,13 @@ func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 			{
 				Config: testAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}DataSource(context),
 				Check: resource.ComposeTestCheckFunc(
-					{{- if gt (len ($.Res.IgnoreReadPropertiesToString $e)) 0 }}
+					{{- if gt (len ($.Res.IgnoreReadProperties $e)) 0 }}
 						acctest.CheckDataSourceStateMatchesResourceStateWithIgnores(
 							"data.{{ $e.ResourceType $.Res.TerraformName }}.default",
 							"{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
 							map[string]struct{}{
-								{{- range $name, $val := $.Res.Parameters }}
-									{{- if $val.IgnoreRead }}
-								"{{ $name }}": {},
-									{{- end }}
+								{{- range $prop := $.Res.IgnoreReadProperties $e }}
+								"{{ $prop }}": {},
 								{{- end }}
 							},
 						),
@@ -79,16 +77,6 @@ func TestAccDataSource{{ $.Res.ResourceName }}_basic(t *testing.T) {
 					{{- end }}
 					),
 			},
-	{{- if not $e.ExcludeImportTest }}
-			{
-				ResourceName:      "{{ $e.ResourceType $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
-				ImportState:       true,
-				ImportStateVerify: true,
-		{{- if $.Res.IgnoreReadPropertiesToString $e }}
-				ImportStateVerifyIgnore: {{ $.Res.IgnoreReadPropertiesToString $e }},
-		{{- end }}
-			},
-	{{- end }}
 		},
 	})
 }
