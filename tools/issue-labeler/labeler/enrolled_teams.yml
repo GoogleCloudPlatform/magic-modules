@@ -29,6 +29,10 @@ service/aiplatform-prediction:
   - google_vertex_ai_endpoint
   - google_vertex_ai_deployment_resource_pool
   - google_ml_engine_model
+  - google_vertex_ai_endpoint_with_model_garden_deployment
+service/aiplatform-rag-engine:
+  resources:
+  - google_vertex_ai_rag_engine_config
 service/aiplatform-tensorboard:
   resources:
   - google_vertex_ai_tensorboard
@@ -645,6 +649,9 @@ service/run:
   team: cloud-run-control-plane
   resources:
   - google_cloud_run_.*
+service/saasservicemgmt:
+  resources:
+  - google_saas_runtime_.*
 service/secretmanager:
   resources:
   - google_secret_manager_.*

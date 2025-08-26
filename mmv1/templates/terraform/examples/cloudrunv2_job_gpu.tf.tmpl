@@ -11,6 +11,7 @@ resource "google_cloud_run_v2_job" "{{$.PrimaryResourceId}}" {
       node_selector {
         accelerator = "nvidia-l4"
       }
+      gpu_zonal_redundancy_disabled = true
     }
   }
 }
