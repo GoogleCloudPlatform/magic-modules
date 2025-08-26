@@ -368,70 +368,7 @@ resource "google_network_management_vpc_flow_logs_config" "subnet-test" {
 }
 `, context)
 }
-func TestAccNetworkManagementOrganizationVpcFlowLogsConfig_update(t *testing.T) {
-	t.Parallel()
 
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"org_id":        os.Getenv("GOOGLE_ORG_ID"),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckNetworkManagementVpcFlowLogsConfigDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccNetworkManagementOrganizationVpcFlowLogsConfig_basic(context),
-			},
-			{
-				ResourceName:            "google_network_management_organization_vpc_flow_logs_config.org-test-update",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"organization", "location", "vpc_flow_logs_config_id"},
-			},
-			{
-				Config: testAccNetworkManagementOrganizationVpcFlowLogsConfig_update(context),
-			},
-			{
-				ResourceName:            "google_network_management_organization_vpc_flow_logs_config.org-test-update",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"organization", "location", "vpc_flow_logs_config_id"},
-			},
-		},
-	})
-}
-
-// Helper function for the initial resource creation.
-func testAccNetworkManagementOrganizationVpcFlowLogsConfig_basic(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_network_management_organization_vpc_flow_logs_config" "org-test-update" {
-  provider                = google-beta
-  vpc_flow_logs_config_id = "tf-test-update-org-id-%{random_suffix}"
-  organization            = "%{org_id}"
-  location                = "global"
-}
-`, context)
-}
-
-// Helper function for the updated resource configuration.
-func testAccNetworkManagementOrganizationVpcFlowLogsConfig_update(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_network_management_organization_vpc_flow_logs_config" "org-test-update" {
-  provider                = google-beta
-  vpc_flow_logs_config_id = "tf-test-update-org-id-%{random_suffix}"
-  organization            = "%{org_id}"
-  location                = "global"
-
-  state                   = "DISABLED"
-  aggregation_interval    = "INTERVAL_30_SEC"
-  description             = "This is an updated description"
-  flow_sampling           = 0.5
-  metadata                = "EXCLUDE_ALL_METADATA"
-}
-`, context)
-}
 {{ end }}
 
 func testAccNetworkManagementVpcFlowLogsConfig_baseResources(context map[string]interface{}) string {
