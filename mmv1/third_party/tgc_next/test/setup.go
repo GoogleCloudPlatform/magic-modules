@@ -28,8 +28,8 @@ type CaiData struct {
 }
 
 type NightlyRun struct {
-	MetadataByTest map[string][]TgcMetadataPayload
-	Date           time.Time
+	MetadataByTestAndStep map[string]map[int]TgcMetadataPayload
+	Date                  time.Time
 }
 
 // The metadata for each step in one test
@@ -103,8 +103,8 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 				}
 			} else {
 				TestsMetadata[i] = NightlyRun{
-					MetadataByTest: metadata,
-					Date:           currentDate,
+					MetadataByTestAndStep: metadata,
+					Date:                  currentDate,
 				}
 			}
 			currentDate = currentDate.AddDate(0, 0, -1)
@@ -122,8 +122,8 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 	return TestsMetadata, nil
 }
 
-func readTestsDataFromGCSForRun(ctx context.Context, currentDate time.Time, bucketName string, bucket *storage.BucketHandle) (map[string][]TgcMetadataPayload, error) {
-	metadata := make(map[string][]TgcMetadataPayload)
+func readTestsDataFromGCSForRun(ctx context.Context, currentDate time.Time, bucketName string, bucket *storage.BucketHandle) (map[string]map[int]TgcMetadataPayload, error) {
+	metadata := make(map[string]map[int]TgcMetadataPayload)
 	objectName := fmt.Sprintf("nightly_tests/%s/nightly_tests_meta.json", currentDate.Format(ymdFormat))
 	log.Printf("Read object  %s from the bucket %s", objectName, bucketName)
 
@@ -162,10 +162,10 @@ func getStepNumbers(testName string) ([]int, error) {
 
 	stepNumbers := make([]int, 0)
 	for _, run := range TestsMetadata {
-		testMetadata, ok := run.MetadataByTest[testName]
+		testMetadata, ok := run.MetadataByTestAndStep[testName]
 		if ok && len(testMetadata) > 0 {
-			for _, stepMetadata := range testMetadata {
-				stepNumbers = append(stepNumbers, stepMetadata.StepNumber)
+			for stepNumber := range testMetadata {
+				stepNumbers = append(stepNumbers, stepNumber)
 			}
 			break
 		}
@@ -173,13 +173,13 @@ func getStepNumbers(testName string) ([]int, error) {
 	return stepNumbers, nil
 }
 
-func prepareTestData(testName string, targetStep int, retries int) (*StepTestData, error) {
+func prepareTestData(testName string, stepNumber int, retries int) (*StepTestData, error) {
 	var err error
 
-	var testMetadata []TgcMetadataPayload
+	var testMetadata map[int]TgcMetadataPayload
 
 	run := TestsMetadata[retries]
-	testMetadata, ok := run.MetadataByTest[testName]
+	testMetadata, ok := run.MetadataByTestAndStep[testName]
 	if !ok {
 		log.Printf("Data of test is unavailable: %s", testName)
 		return nil, nil
@@ -187,44 +187,41 @@ func prepareTestData(testName string, targetStep int, retries int) (*StepTestDat
 
 	log.Printf("Found metadata for %s from run on %s", testName, run.Date.Format(ymdFormat))
 
-	for _, stepMetadata := range testMetadata {
-		stepN := stepMetadata.StepNumber
-		if stepN == targetStep {
-			resourceMetadata := stepMetadata.ResourceMetadata
+	if stepMetadata, ok := testMetadata[stepNumber]; ok {
+		resourceMetadata := stepMetadata.ResourceMetadata
 
-			rawTfFile := fmt.Sprintf("%s_step%d.tf", testName, stepN)
-			err = os.WriteFile(rawTfFile, []byte(stepMetadata.RawConfig), 0644)
-			if err != nil {
-				return nil, fmt.Errorf("error writing to file %s: %#v", rawTfFile, err)
-			}
-			if os.Getenv("WRITE_FILES") == "" {
-				defer os.Remove(rawTfFile)
-			}
-
-			rawResourceConfigs, err := parseResourceConfigs(rawTfFile)
-			if err != nil {
-				return nil, fmt.Errorf("error parsing resource configs: %#v", err)
-			}
-
-			if len(rawResourceConfigs) == 0 {
-				return nil, fmt.Errorf("Test %s fails: raw config is unavailable", testName)
-			}
-
-			rawConfigMap := convertToConfigMap(rawResourceConfigs)
-
-			resourceTestData := make(map[string]ResourceTestData, 0)
-			for address, metadata := range resourceMetadata {
-				resourceTestData[address] = ResourceTestData{
-					ParsedRawConfig:  rawConfigMap[address],
-					ResourceMetadata: *metadata,
-				}
-			}
-			return &StepTestData{
-				StepNumber:       stepN,
-				PrimaryResource:  stepMetadata.PrimaryResource,
-				ResourceTestData: resourceTestData,
-			}, nil
+		rawTfFile := fmt.Sprintf("%s_step%d.tf", testName, stepNumber)
+		err = os.WriteFile(rawTfFile, []byte(stepMetadata.RawConfig), 0644)
+		if err != nil {
+			return nil, fmt.Errorf("error writing to file %s: %#v", rawTfFile, err)
 		}
+		if os.Getenv("WRITE_FILES") == "" {
+			defer os.Remove(rawTfFile)
+		}
+
+		rawResourceConfigs, err := parseResourceConfigs(rawTfFile)
+		if err != nil {
+			return nil, fmt.Errorf("error parsing resource configs: %#v", err)
+		}
+
+		if len(rawResourceConfigs) == 0 {
+			return nil, fmt.Errorf("Test %s fails: raw config is unavailable", testName)
+		}
+
+		rawConfigMap := convertToConfigMap(rawResourceConfigs)
+
+		resourceTestData := make(map[string]ResourceTestData, 0)
+		for address, metadata := range resourceMetadata {
+			resourceTestData[address] = ResourceTestData{
+				ParsedRawConfig:  rawConfigMap[address],
+				ResourceMetadata: *metadata,
+			}
+		}
+		return &StepTestData{
+			StepNumber:       stepNumber,
+			PrimaryResource:  stepMetadata.PrimaryResource,
+			ResourceTestData: resourceTestData,
+		}, nil
 	}
 
 	return nil, nil
