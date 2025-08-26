@@ -160,7 +160,6 @@ properties:
       indexes with MONGODB_COMPATIBLE_API ApiScope.
   - name: 'unique'
     type: Boolean
-    default_value: false
     default_from_api: true
     description:
       Whether it is an unique index. Unique index ensures all values for the
