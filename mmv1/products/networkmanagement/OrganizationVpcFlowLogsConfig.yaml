@@ -39,6 +39,7 @@ async:
 custom_code:
 sweeper:
   url_substitutions:
+    - parent: "organizations/${ORG_ID}"
     - region: "global"
 examples:
   - name: 'network_management_org_vpc_flow_logs_config_basic'
@@ -47,7 +48,7 @@ examples:
     vars:
       vpc_flow_logs_config_id: 'basic-org-test-id'
     test_env_vars:
-      org_id: :ORG_ID
+      org_id: 'ORG_ID'
 parameters:
   - name: 'organization'
     type: String
