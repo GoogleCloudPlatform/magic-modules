@@ -1282,15 +1282,9 @@ func (r Resource) IgnoreReadProperties(e resource.Examples) []string {
 			props = append(props, google.Underscore(tp.Name))
 		}
 	}
-	for _, tp := range e.IgnoreReadExtra {
-		props = append(props, google.Underscore(tp))
-	}
-	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
-		props = append(props, google.Underscore(tp))
-	}
-	for _, tp := range ignoreReadFields(r.AllUserProperties()) {
-		props = append(props, google.Underscore(tp))
-	}
+	props = append(props, e.IgnoreReadExtra...)
+	props = append(props, r.IgnoreReadLabelsFields(r.PropertiesWithExcluded())...)
+	props = append(props, ignoreReadFields(r.AllUserProperties())...)
 
 	slices.Sort(props)
 	return props
