@@ -25,8 +25,8 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
 
-	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -88,7 +88,6 @@ resource "google_vertex_ai_publisher_model_config" "default" {
 }
 `, context)
 }
-
 
 func testAccVertexAIPublisherModelConfig_publisherModelConfigBasic_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
@@ -157,4 +156,3 @@ func testAccCheckVertexAIPublisherModelConfigDestroyProducer(t *testing.T) func(
 		return nil
 	}
 }
-
