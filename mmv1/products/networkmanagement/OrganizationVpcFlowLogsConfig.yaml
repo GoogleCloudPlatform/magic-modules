@@ -36,6 +36,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+  include_project: true
 custom_code:
 sweeper:
   url_substitutions:
