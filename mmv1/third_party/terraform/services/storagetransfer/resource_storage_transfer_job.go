@@ -141,6 +141,11 @@ func ResourceStorageTransferJob() *schema.Resource {
 				ForceNew:    true,
 				Description: `The project in which the resource belongs. If it is not provided, the provider project is used.`,
 			},
+			"service_account": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The user-managed service account to run the job. If this field is specified, the given service account is granted the necessary permissions to all applicable resources (e.g. GCS buckets) required by the job.`,
+			},
 			"event_stream": {
 				Type:             schema.TypeList,
 				Optional:         true,
@@ -418,11 +423,6 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: `When the Transfer Job was deleted.`,
-			},
-			"service_account": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: `The user-managed service account to run the job. If this field is specified, the given service account is granted the necessary permissions to all applicable resources (e.g. GCS buckets) required by the job. If not specified, the project's service account is used.`,
 			},
 		},
 		UseJSONNumber: true,
