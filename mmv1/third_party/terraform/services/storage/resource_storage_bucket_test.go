@@ -1134,7 +1134,7 @@ func TestAccStorageBucket_cors(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "cors.1.send_max_age_seconds_if_zero"},
+				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
 				Config: testAccStorageBucket_basic(bucketName),
@@ -1166,7 +1166,7 @@ func TestAccStorageBucket_emptyCors(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "cors.1.send_max_age_seconds_if_zero"},
+				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
 				Config: testGoogleStorageBucketsEmptyCors(bucketName),
