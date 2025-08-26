@@ -21,7 +21,7 @@ func TestAccComputePublicPrefixes(t *testing.T) {
 		"public_delegated_prefixes_ipv6":           testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesIpv6Test,
 		"public_advertised_prefixes_pdp_scope":     testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesPdpScopeTest,
 		"public_delegated_prefix_ipv6_subnet_mode": testAccComputePublicDelegatedPrefix_publicDelegatedPrefixIpv6SubnetModeTest,
-		"public_delgated_prefix_wit_sub_prefix":    TestAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPrefixExample,
+		"public_delgated_prefix_with_sub_prefix":   TestAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPrefixExample,
 	}
 
 	for name, tc := range testCases {
