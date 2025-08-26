@@ -270,6 +270,11 @@ properties:
       longer than 63 characters. Label keys must begin with a lowercase letter
       and may only contain lowercase letters, numeric characters, underscores,
       and dashes.
+  - name: 'registryUri'
+    type: String
+    output: true
+    description: |
+      The repository endpoint, for example: us-docker.pkg.dev/my-proj/my-repo.
   - name: 'kmsKeyName'
     type: String
     description: |-
