@@ -128,7 +128,7 @@ properties:
     description: |
       List of sub public delegated fixes for BYO IP functionality.
       Each item in this array represents a sub prefix that can be
-      used to create addresses or further allocations. This is a read-only field.
+      used to create addresses or further allocations.
     item_type:
       type: NestedObject
       properties:
@@ -147,7 +147,7 @@ properties:
         - name: 'status'
           type: Enum
           description: |
-            Output-only. The status of the sub public delegated prefix.
+            The status of the sub public delegated prefix.
           enum_values:
             - 'INITIALIZING'
             - 'READY_TO_ANNOUNCE'
