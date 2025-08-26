@@ -2229,7 +2229,6 @@ resource "google_storage_bucket" "bucket" {
     method                       = ["z9z"]
     response_header              = ["000"]
     max_age_seconds              = 0
-    send_max_age_seconds_if_zero = true
   }
 }
 `, bucketName)
