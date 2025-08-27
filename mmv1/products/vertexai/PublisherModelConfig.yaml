@@ -36,7 +36,15 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+autogen_async: true
+async:
+  actions: ['create', 'update']
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
 custom_code:
+  constants: 'templates/terraform/constants/vertex_ai_publisher_model_config.go.tmpl'
   custom_delete: 'templates/terraform/custom_delete/vertex_ai_publisher_model_config.go.tmpl'
   decoder: 'templates/terraform/decoders/vertex_ai_publisher_model_config.go.tmpl'
 examples:
@@ -85,7 +93,7 @@ properties:
           - name: 'samplingRate'
             type: Double
             description: |-
-              Percentage of requests to be logged, expressed as a fraction in range(0,1).
+              Percentage of requests to be logged, expressed as a fraction in range(0,1].
             required: true
           - name: 'bigqueryDestination'
             type: NestedObject
@@ -105,7 +113,7 @@ properties:
                   BigQuery path. For example: `bq://projectId` or `bq://projectId.bqDatasetId` or
                   `bq://projectId.bqDatasetId.bqTableId`.
                 required: true
-                ignore_read: true
+                diff_suppress_func: bqOutputUriDiffSuppress
           - name: 'requestResponseLoggingSchemaVersion'
             type: String
             output: true
