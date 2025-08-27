@@ -195,7 +195,7 @@ func writeOutputFileDeferFunction(tempOutputFile *os.File, failed bool) {
 		// Check if the output line starts with "[Diff]"
 		if isDiff {
 			fmt.Fprintf(os.Stdout, "%s Breaking Change Detected] \n", diffTag)
-			fmt.Fprintf(os.Stdout, "%s %s\n", diffTag, testOutput)
+			fmt.Fprintf(diffFailureFile, "%s %s\n", diffTag, testOutput)
 		} else {
 			fmt.Fprintf(regularFailureFile, testOutput)
 			fmt.Fprintf(regularFailureFile, "FAILED --- %s\n", testOutput)
