@@ -1574,7 +1574,7 @@ func ResourceStorageBucketStateUpgradeV3(_ context.Context, rawState map[string]
 			if v, ok := retentionPolicy["retention_period"]; ok {
 				value, err := strconv.ParseInt(v.(string), 10, 64)
 				if err != nil {
-					return err
+					return nil, err
 				}
 				retentionPolicy["retention_period"] = value
 
