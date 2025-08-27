@@ -444,7 +444,7 @@ func TestAccNetworkManagementOrganizationVpcFlowLogsConfig_update(t *testing.T) 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
-		CheckDestroy:             testAccCheckNetworkManagementOrganizationVpcFlowLogsConfigDestroyProducer(t),
+		CheckDestroy:             testAccCheckNetworkManagementVpcFlowLogsConfigDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNetworkManagementOrganizationVpcFlowLogsConfig_basic(context),
