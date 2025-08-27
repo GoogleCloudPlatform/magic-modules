@@ -1572,7 +1572,12 @@ func ResourceStorageBucketStateUpgradeV3(_ context.Context, rawState map[string]
 		if len(retentionPolicies) > 0 {
 			retentionPolicy := retentionPolicies[0].(map[string]interface{})
 			if v, ok := retentionPolicy["retention_period"]; ok {
-				retentionPolicy["retention_period"] = strconv.Itoa(v.(int))
+				value, err := strconv.ParseInt(v.(string), 10, 64)
+				if err != nil {
+					return err
+				}
+				retentionPolicy["retention_period"] = value
+
 			}
 		}
 	}
