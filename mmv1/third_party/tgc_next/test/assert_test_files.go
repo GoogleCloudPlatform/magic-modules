@@ -99,8 +99,13 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	}
 
 	if testData.Cai == nil {
-		log.Printf("SKIP: cai asset is unavailable for resource %s", testData.ResourceAddress)
-		return nil
+		if primaryResource {
+			log.Printf("cai asset is unavailable for resource %s", testData.ResourceAddress)
+			return retry.RetryableError(fmt.Errorf("test data is unavailable"))
+		} else {
+			log.Printf("SKIP: cai asset is unavailable for resource %s", testData.ResourceAddress)
+			return nil
+		}
 	}
 
 	assets := make([]caiasset.Asset, 0)
