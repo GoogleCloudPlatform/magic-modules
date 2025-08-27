@@ -489,18 +489,8 @@ func TestAccGKEHubFeature_FleetDefaultMemberConfigConfigManagement(t *testing.T)
 				ImportState:       true,
 				ImportStateVerify: true,
 			},
-			{
-				ResourceName:      "google_gke_hub_feature.feature",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
       {
 				Config: testAccGKEHubFeature_FleetDefaultMemberConfigConfigManagementRemovalUpdate(context),
-			},
-			{
-				ResourceName:      "google_gke_hub_feature.feature",
-				ImportState:       true,
-				ImportStateVerify: true,
 			},
 			{
 				ResourceName:      "google_gke_hub_feature.feature",
