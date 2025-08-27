@@ -30,7 +30,7 @@ func TestAccStorageBucket_retentionPeriodUpgrade(t *testing.T) {
 			{
 				Config:             bucket,
 				ExpectNonEmptyPlan: false,
-				PlanOnly:           true,
+				PlanOnly:           false,
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						ExpectKnownRetentionPeriodValue("google_storage_bucket.bucket", expectedRetentionPeriod),
