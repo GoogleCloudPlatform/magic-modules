@@ -75,7 +75,7 @@ func resourceComputeFirewallSourceFieldsCustomizeDiff(_ context.Context, diff *s
 	return nil
 }
 
-func diffSuppressSourceRanges(k, old, new string, d *schema.ResourceData) bool {
+func DiffSuppressSourceRanges(k, old, new string, d *schema.ResourceData) bool {
 	if k == "source_ranges.#" {
 		if old == "1" && new == "0" {
 			// Allow diffing on the individual element if we are going from 1 -> 0
@@ -108,18 +108,16 @@ func diffSuppressSourceRanges(k, old, new string, d *schema.ResourceData) bool {
 		}
 	}
 
-	return diffSuppressCIDR("source_ranges", d)
+	o, n := d.GetChange("source_ranges")
+	return CompareCIDRlist(o.(*schema.Set).List(), n.(*schema.Set).List())
 }
 
-func diffSuppressDestinationRanges(k, old, new string, d *schema.ResourceData) bool {
-	return diffSuppressCIDR("destination_ranges", d)
+func DiffSuppressDestinationRanges(k, old, new string, d *schema.ResourceData) bool {
+	o, n := d.GetChange("destination_ranges")
+	return CompareCIDRlist(o.(*schema.Set).List(), n.(*schema.Set).List())
 }
 
-func diffSuppressCIDR (key string, d *schema.ResourceData) bool {
-	o, n := d.GetChange(key)
-	oldRanges := o.(*schema.Set).List()
-	newRanges := n.(*schema.Set).List()
-
+func CompareCIDRlist (oldRanges, newRanges []any) bool {
 	if len(oldRanges) != len(newRanges) {
 		return false
 	}

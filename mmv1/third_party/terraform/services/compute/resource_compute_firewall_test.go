@@ -5,9 +5,12 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"github.com/hashicorp/terraform-provider-google/google/services/compute"
 )
 
 func TestAccComputeFirewall_update(t *testing.T) {
@@ -369,6 +372,37 @@ func TestAccComputeFirewall_ipv6(t *testing.T) {
 				ResourceName:      "google_compute_firewall.foobar",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccComputeFirewall_removeDefaultIPv4range(t *testing.T) {
+	t.Parallel()
+
+	networkName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+	firewallName := fmt.Sprintf("tf-test-firewall-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeFirewallDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeFirewall_removeDefaultIPv4range(networkName, firewallName),
+			},
+			{
+				ResourceName:      "google_compute_firewall.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeFirewall_noSource(networkName, firewallName),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_compute_firewall.foobar", plancheck.ResourceActionNoop),
+					},
+				},
 			},
 		},
 	})
@@ -747,4 +781,133 @@ resource "google_compute_firewall" "foobar" {
   }
 }
 `, network, network, network, firewall)
+}
+
+func testAccComputeFirewall_removeDefaultIPv4range(network, firewall string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "foobar" {
+  name                    = "%s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_firewall" "foobar" {
+  name        = "%s"
+  description = "Resource created for Terraform acceptance testing"
+  network     = google_compute_network.foobar.name
+
+  allow {
+    protocol = "tcp"
+    ports    = [22]
+  }
+	source_ranges = ["0.0.0.0/0"]
+}
+`, network, firewall)
+}
+
+func TestDiffSuppressSourceRanges(t *testing.T) {
+
+	testCases := []struct {
+		name         string
+		k            string
+		old          string
+		new          string
+		resourceData *schema.ResourceData
+		want         bool
+	}{
+		{
+			name: "source_ranges.# 1->0",
+			k:    "source_ranges.#",
+			old:  "1",
+			new:  "0",
+			want: true,
+		},
+		{
+			name: "source_ranges.# 2->1",
+			k:    "source_ranges.#",
+			old:  "2",
+			new:  "1",
+			want: false,
+		},
+		{
+			name: "source_ranges.# 0->1",
+			k:    "source_ranges.#",
+			old:  "0",
+			new:  "1",
+			want: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := compute.DiffSuppressSourceRanges(tc.k, tc.old, tc.new, tc.resourceData)
+			if got != tc.want {
+				t.Errorf("DiffSuppressSourceRanges() = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestCompareCIDRlist(t *testing.T) {
+	tests := []struct {
+		name      string
+		oldRanges []any
+		newRanges []any
+		want      bool
+	}{
+		{
+			name:      "no change single IPv4 range",
+			oldRanges: []any{"10.0.0.0/8"},
+			newRanges: []any{"10.0.0.0/8"},
+			want:      true,
+		},
+		{
+			name:      "no change multiple IPv4 ranges",
+			oldRanges: []any{"10.0.0.0/8", "172.16.0.0/16"},
+			newRanges: []any{"10.0.0.0/8", "172.16.0.0/16"},
+			want:      true,
+		},
+		{
+			name:      "range added",
+			oldRanges: []any{"10.0.0.0/8"},
+			newRanges: []any{"10.0.0.0/8", "172.16.0.0/16"},
+			want:      false,
+		},
+		{
+			name:      "changed multiple IPv4 ranges",
+			oldRanges: []any{"10.0.0.0/8", "172.16.0.0/16"},
+			newRanges: []any{"10.0.0.0/8", "192.168.0.0/24"},
+			want:      false,
+		},
+		{
+			name:      "equivalent IPv6 range",
+			oldRanges: []any{"2001:db8::/64"},
+			newRanges: []any{"2001:db8:0:0:0:0:0:0/64"},
+			want:      true,
+		},
+		{
+			name:      "same IPv6 range (short address format)",
+			oldRanges: []any{"2001:db8::/64"},
+			newRanges: []any{"2001:db8::/64"},
+			want:      true,
+		},
+		{
+			name:      "same IPv6 range (long address format)",
+			oldRanges: []any{"2001:db8:0:0:0:0:0:0/64"},
+			newRanges: []any{"2001:db8:0:0:0:0:0:0/64"},
+			want:      true,
+		},
+		{
+			name:      "different IPv6 range (short address format)",
+			oldRanges: []any{"2001:db8::/64"},
+			newRanges: []any{"2001:db8:1::/64"},
+			want:      false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := compute.CompareCIDRlist(tt.oldRanges, tt.newRanges); got != tt.want {
+				t.Errorf("CompareCIDRlist() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
