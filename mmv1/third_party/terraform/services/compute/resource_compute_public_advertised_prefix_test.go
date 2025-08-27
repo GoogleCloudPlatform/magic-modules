@@ -110,7 +110,7 @@ func testAccCheckParentHasSubPrefix(t *testing.T, project, region, parentName, s
 			}
 		}
 
-		return fmt.Errorf("sub-prefix %q not found in parent %q's sub-prefix list", newSubPrefixName, parentName)
+		return fmt.Errorf("Sub-Prefix %q not found in parent %q's sub-prefix list", newSubPrefixName, parentName)
 	}
 }
 
