@@ -31,7 +31,6 @@ examples:
       saas_name: example-saas
       cluster_unitkind_name: cluster-unitkind
       app_unitkind_name: app-unitkind
-      release_name: example-release
     test_env_vars:
       project: 'PROJECT_NAME'
     bootstrap_iam:
@@ -65,14 +64,6 @@ properties:
     type: String
     description: The timestamp when the resource was created.
     output: true
-  - name: defaultRelease
-    type: String
-    description: |-
-      A reference to the Release object to use as default for creating new units
-      of this UnitKind (optional).
-
-      If not specified, a new unit must explicitly reference which release to use
-      for its creation.
   - name: dependencies
     type: Array
     description: |-

@@ -15,13 +15,23 @@ resource "google_saas_runtime_unit_kind" "example_unitkind" {
   saas         = google_saas_runtime_saas.example_saas.id
 }
 
+resource "google_saas_runtime_release" "example_previous" {
+  provider          = google-beta
+  location          = "global"
+  release_id        = "{{index $.Vars "previous_release_name"}}"
+  unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
+  blueprint {
+    package = "us-central1-docker.pkg.dev/{{index $.TestEnvVars "project"}}/test-repo/tf-test-easysaas-alpha-image:latest"
+  }
+}
+
 resource "google_saas_runtime_release" "{{$.PrimaryResourceId}}" {
   provider          = google-beta
   location          = "global"
   release_id        = "{{index $.Vars "release_name"}}"
   unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
   blueprint {
-    package = "us-central1-docker.pkg.dev/{{index $.TestEnvVars "project"}}/test-repo/tf-test-easysaas-beta-image"
+    package = "us-central1-docker.pkg.dev/{{index $.TestEnvVars "project"}}/test-repo/tf-test-easysaas-beta-image:latest"
   }
   input_variable_defaults {
     variable = "name"

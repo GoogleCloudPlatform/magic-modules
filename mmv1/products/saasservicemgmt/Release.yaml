@@ -31,6 +31,7 @@ examples:
       saas_name: example-saas
       unitkind_name: example-unitkind
       release_name: example-release
+      previous_release_name: previous-release
     test_env_vars:
       project: "PROJECT_NAME"
     bootstrap_iam:

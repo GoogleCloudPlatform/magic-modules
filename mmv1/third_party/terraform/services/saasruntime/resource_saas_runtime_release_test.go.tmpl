@@ -76,13 +76,23 @@ resource "google_saas_runtime_unit_kind" "example_unitkind" {
   saas         = google_saas_runtime_saas.example_saas.id
 }
 
+resource "google_saas_runtime_release" "example_previous" {
+  provider          = google-beta
+  location          = "global"
+  release_id        = "tf-test-previous-release%{random_suffix}"
+  unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
+  blueprint {
+    package = "us-central1-docker.pkg.dev/%{project}/test-repo/tf-test-easysaas-alpha-image:latest"
+  }
+}
+
 resource "google_saas_runtime_release" "example" {
   provider          = google-beta
   location          = "global"
   release_id        = "tf-test-example-release%{random_suffix}"
   unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
   blueprint {
-    package = "us-central1-docker.pkg.dev/%{project}/test-repo/tf-test-easysaas-beta-image"
+    package = "us-central1-docker.pkg.dev/%{project}/test-repo/tf-test-easysaas-beta-image:latest"
   }
   input_variable_defaults {
     variable = "name"
@@ -114,10 +124,10 @@ resource "google_saas_runtime_unit_kind" "example_unitkind" {
 resource "google_saas_runtime_release" "example_previous" {
   provider          = google-beta
   location          = "global"
-  release_id        = "tf-test-example-release-previous%{random_suffix}"
+  release_id        = "tf-test-previous-release%{random_suffix}"
   unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
   blueprint {
-    package = "us-central1-docker.pkg.dev/%{project}/test-repo/tf-test-easysaas-alpha-image"
+    package = "us-central1-docker.pkg.dev/%{project}/test-repo/tf-test-easysaas-alpha-image:latest"
   }
 }
 
@@ -127,7 +137,7 @@ resource "google_saas_runtime_release" "example" {
   release_id        = "tf-test-example-release%{random_suffix}"
   unit_kind         = google_saas_runtime_unit_kind.example_unitkind.id
   blueprint {
-    package = "us-central1-docker.pkg.dev/%{project}/test-repo/tf-test-easysaas-beta-image"
+    package = "us-central1-docker.pkg.dev/%{project}/test-repo/tf-test-easysaas-beta-image:latest"
   }
   input_variable_defaults {
     variable = "name"
