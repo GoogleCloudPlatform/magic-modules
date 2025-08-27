@@ -139,7 +139,7 @@ properties:
         - name: 'description'
           type: String
           description: |
-            Optional description of this sub public delegated prefix.
+            An optional description of this sub public delegated prefix.
         - name: 'region'
           type: String
           description: |
