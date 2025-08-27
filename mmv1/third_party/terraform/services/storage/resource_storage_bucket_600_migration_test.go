@@ -56,7 +56,7 @@ resource "google_storage_bucket" "bucket" {
 var _ plancheck.PlanCheck = expectKnownRetentionPeriodValue{}
 
 type expectKnownRetentionPeriodValue struct {
-	ResourceAddress        string
+	ResourceAddress         string
 	ExpectedRetentionPeriod string
 }
 
@@ -88,7 +88,7 @@ func (e expectKnownRetentionPeriodValue) CheckPlan(ctx context.Context, req plan
 
 func ExpectKnownRetentionPeriodValue(resourceAddress string, expectedRetentionPeriod string) plancheck.PlanCheck {
 	return expectKnownRetentionPeriodValue{
-		ResourceAddress:        resourceAddress,
+		ResourceAddress:         resourceAddress,
 		ExpectedRetentionPeriod: expectedRetentionPeriod,
 	}
 }
