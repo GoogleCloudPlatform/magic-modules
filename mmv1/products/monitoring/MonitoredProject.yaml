@@ -69,7 +69,6 @@ parameters:
     url_param_only: true
     required: true
     ignore_read: true
-    diff_suppress_func: 'tpgresource.CompareResourceNames'
 properties:
   - name: 'name'
     type: String
