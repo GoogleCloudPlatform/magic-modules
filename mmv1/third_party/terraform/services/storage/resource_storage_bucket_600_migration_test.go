@@ -14,7 +14,7 @@ import (
 func TestAccStorageBucket_retentionPeriodUpgrade(t *testing.T) {
 	t.Parallel()
 
-	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
+	bucketName := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt(t))
 	retentionPeriod := 3600
 	bucket := testAccStorageBucket_retentionPeriod(bucketName, retentionPeriod)
 	expectedRetentionPeriod := strconv.Itoa(retentionPeriod)
