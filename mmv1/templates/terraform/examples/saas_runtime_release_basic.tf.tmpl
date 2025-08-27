@@ -36,5 +36,6 @@ resource "google_saas_runtime_release" "{{$.PrimaryResourceId}}" {
   input_variable_defaults {
     variable = "name"
     value    = "test"
+    type     = "STRING"
   }
 }

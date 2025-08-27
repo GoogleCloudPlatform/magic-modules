@@ -97,6 +97,7 @@ resource "google_saas_runtime_release" "example" {
   input_variable_defaults {
     variable = "name"
     value    = "test"
+    type     = "STRING"
   }
 }
 `, context)
@@ -142,6 +143,7 @@ resource "google_saas_runtime_release" "example" {
   input_variable_defaults {
     variable = "name"
     value    = "test"
+    type     = "STRING"
   }
   labels = {
     "key" = "value"
