@@ -1233,7 +1233,7 @@ properties:
             type: Integer
             description: |
               The maximum file size to be saved in the bucket.
-            default_from_api: true
+            default_value: 50
           - name: 'fileRotationInterval'
             type: String
             description: |
