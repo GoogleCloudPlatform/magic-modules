@@ -71,10 +71,10 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
     }
 
     package_spec {
-      dependency_files_gcs_uri = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_dependencies_tar_gz.name}"
-      pickle_object_gcs_uri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_code_pkl.name}"
+      dependency_files_gcs_uri = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_dependencies_adk.name}"
+      pickle_object_gcs_uri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_pickle_adk.name}"
       python_version           = "3.11"
-      requirements_gcs_uri     = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_requirements_txt.name}"
+      requirements_gcs_uri     = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_requirements_adk.name}"
     }
   }
 
@@ -110,22 +110,22 @@ resource "google_storage_bucket" "bucket" {
   force_destroy               = true
 }
 
-resource "google_storage_bucket_object" "bucket_obj_requirements_txt" {
-  name   = "requirements.txt"
+resource "google_storage_bucket_object" "bucket_obj_requirements_adk" {
+  name   = "requirements_adk.txt"
   bucket = google_storage_bucket.bucket.id
-  source = "./test-fixtures/requirements.txt"
+  source = "./test-fixtures/requirements_adk.txt"
 }
 
-resource "google_storage_bucket_object" "bucket_obj_code_pkl" {
-  name   = "code.pkl"
+resource "google_storage_bucket_object" "bucket_obj_pickle_adk" {
+  name   = "pickle_adk.pkl"
   bucket = google_storage_bucket.bucket.id
-  source = "./test-fixtures/code.pkl"
+  source = "./test-fixtures/pickle_adk.pkl"
 }
 
-resource "google_storage_bucket_object" "bucket_obj_dependencies_tar_gz" {
-  name   = "dependencies.tar.gz"
+resource "google_storage_bucket_object" "bucket_obj_dependencies_adk" {
+  name   = "dependencies_adk.tar.gz"
   bucket = google_storage_bucket.bucket.id
-  source = "./test-fixtures/dependencies.tar.gz"
+  source = "./test-fixtures/dependencies_adk.tar.gz"
 }
 
 data "google_project" "project" {}
@@ -176,10 +176,10 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
     }
 
     package_spec {
-      dependency_files_gcs_uri = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_dependencies_tar_gz.name}"
-      pickle_object_gcs_uri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_code_pkl.name}"
+      dependency_files_gcs_uri = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_dependencies_langchain.name}"
+      pickle_object_gcs_uri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_pickle_langchain.name}"
       python_version           = "3.12"
-      requirements_gcs_uri     = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_requirements_txt.name}"
+      requirements_gcs_uri     = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_requirements_langchain.name}"
     }
   }
 
@@ -245,19 +245,37 @@ resource "google_storage_bucket" "bucket" {
   force_destroy               = true
 }
 
-resource "google_storage_bucket_object" "bucket_obj_requirements_txt" {
+resource "google_storage_bucket_object" "bucket_obj_requirements_adk" {
+  name   = "requirements_adk.txt"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/requirements_adk.txt"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_pickle_adk" {
+  name   = "pickle_adk.pkl"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/pickle_adk.pkl"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_dependencies_adk" {
+  name   = "dependencies_adk.tar.gz"
+  bucket = google_storage_bucket.bucket.id
+  source = "./test-fixtures/dependencies_adk.tar.gz"
+}
+
+resource "google_storage_bucket_object" "bucket_obj_requirements_langchain" {
   name   = "requirements_langchain.txt"
   bucket = google_storage_bucket.bucket.id
   source = "./test-fixtures/requirements_langchain.txt"
 }
 
-resource "google_storage_bucket_object" "bucket_obj_code_pkl" {
-  name   = "code_langchain.pkl"
+resource "google_storage_bucket_object" "bucket_obj_pickle_langchain" {
+  name   = "pickle_langchain.pkl"
   bucket = google_storage_bucket.bucket.id
-  source = "./test-fixtures/code_langchain.pkl"
+  source = "./test-fixtures/pickle_langchain.pkl"
 }
 
-resource "google_storage_bucket_object" "bucket_obj_dependencies_tar_gz" {
+resource "google_storage_bucket_object" "bucket_obj_dependencies_langchain" {
   name   = "dependencies_langchain.tar.gz"
   bucket = google_storage_bucket.bucket.id
   source = "./test-fixtures/dependencies_langchain.tar.gz"

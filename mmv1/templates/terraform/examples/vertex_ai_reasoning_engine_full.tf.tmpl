@@ -41,7 +41,7 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
 
     package_spec {
       dependency_files_gcs_uri = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_dependencies_tar_gz.name}"
-      pickle_object_gcs_uri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_code_pkl.name}"
+      pickle_object_gcs_uri    = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_pickle.name}"
       python_version           = "3.11"
       requirements_gcs_uri     = "${google_storage_bucket.bucket.url}/${google_storage_bucket_object.bucket_obj_requirements_txt.name}"
     }
@@ -82,19 +82,19 @@ resource "google_storage_bucket" "bucket" {
 resource "google_storage_bucket_object" "bucket_obj_requirements_txt" {
   name   = "requirements.txt"
   bucket = google_storage_bucket.bucket.id
-  source = "./test-fixtures/requirements.txt"
+  source = "./test-fixtures/requirements_adk.txt"
 }
 
-resource "google_storage_bucket_object" "bucket_obj_code_pkl" {
+resource "google_storage_bucket_object" "bucket_obj_pickle" {
   name   = "code.pkl"
   bucket = google_storage_bucket.bucket.id
-  source = "./test-fixtures/code.pkl"
+  source = "./test-fixtures/pickle_adk.pkl"
 }
 
 resource "google_storage_bucket_object" "bucket_obj_dependencies_tar_gz" {
   name   = "dependencies.tar.gz"
   bucket = google_storage_bucket.bucket.id
-  source = "./test-fixtures/dependencies.tar.gz"
+  source = "./test-fixtures/dependencies_adk.tar.gz"
 }
 
 data "google_project" "project" {
