@@ -144,7 +144,7 @@ func (td *TemplateData) GenerateTestFile(filePath string, resource api.Resource)
 	}
 	tmplInput := TestInput{
 		Res:                  resource,
-		ImportPath:           td.ImportPath(),
+		ImportPath:           resource.ImportPath,
 		PROJECT_NAME:         "my-project-name",
 		CREDENTIALS:          "my/credentials/filename.json",
 		REGION:               "us-west1",
@@ -279,15 +279,6 @@ func (td *TemplateData) GenerateFile(filePath, templatePath string, input any, g
 	if err != nil {
 		glog.Exit(err)
 	}
-}
-
-func (td *TemplateData) ImportPath() string {
-	if td.VersionName == GA_VERSION {
-		return "github.com/hashicorp/terraform-provider-google/google"
-	} else if td.VersionName == ALPHA_VERSION || td.VersionName == PRIVATE_VERSION {
-		return "internal/terraform-next/google-private"
-	}
-	return "github.com/hashicorp/terraform-provider-google-beta/google-beta"
 }
 
 func FixImports(outputPath string, dumpDiffs bool) {
