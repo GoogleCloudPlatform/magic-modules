@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"math"
 	"strconv"
@@ -1572,12 +1573,7 @@ func ResourceStorageBucketStateUpgradeV3(_ context.Context, rawState map[string]
 		if len(retentionPolicies) > 0 {
 			retentionPolicy := retentionPolicies[0].(map[string]interface{})
 			if v, ok := retentionPolicy["retention_period"]; ok {
-				value, err := strconv.ParseInt(v.(string), 10, 64)
-				if err != nil {
-					return nil, err
-				}
-				retentionPolicy["retention_period"] = value
-
+				retentionPolicy["retention_period"] = v.(json.Number).String()
 			}
 		}
 	}
