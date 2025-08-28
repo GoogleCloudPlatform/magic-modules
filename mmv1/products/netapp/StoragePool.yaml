@@ -194,6 +194,7 @@ properties:
     type: String
     description: |
       Optional. Custom Performance Total IOPS of the pool If not provided, it will be calculated based on the totalThroughputMibps
+    default_from_api: true
   - name: 'hotTierSizeGib'
     type: String
     description: |
