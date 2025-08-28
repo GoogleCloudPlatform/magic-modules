@@ -1,0 +1,9 @@
+resource "google_secure_source_manager_instance" "{{$.PrimaryResourceId}}" {
+  instance_id = "{{index $.Vars "instance_id"}}"
+  location    = "us-central1"
+
+  private_config {
+    is_private = true
+  }
+  deletion_policy = "DELETE"
+}

@@ -58,11 +58,13 @@ func DataSource{{ .ResourceName -}}() *schema.Resource {
 
 	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(rs)
 
-  // Set 'Required' schema elements
+  {{if .DatasourceRequiredFields}}
   tpgresource.AddRequiredFieldsToSchema(dsSchema, {{range $index, $field := .DatasourceRequiredFields}}{{if gt $index 0}}, {{end}}{{printf "%q" $field}}{{end}})
-
-  // Set 'Optional' schema elements
+  {{end}}
+  
+  {{if .DatasourceOptionalFields}}
   tpgresource.AddOptionalFieldsToSchema(dsSchema, {{range $index, $field := .DatasourceOptionalFields}}{{if gt $index 0}}, {{end}}{{printf "%q" $field}}{{end}})
+  {{end}}
 
   return &schema.Resource{
 		Read:   dataSource{{ $.ResourceName -}}Read,
@@ -73,10 +75,11 @@ func DataSource{{ .ResourceName -}}() *schema.Resource {
 func dataSource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{}) error {
   config := meta.(*transport_tpg.Config)
 
-  id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
-    if err != nil {
+  id, err := tpgresource.ReplaceVars{{if $.LegacyLongFormProject -}}ForId{{ end -}}(d, config, "{{ $.IdFormat -}}")
+  if err != nil {
         return err
-    }
+  }
+
   d.SetId(id)
 
   err = resource{{ $.ResourceName -}}Read(d, meta)
