@@ -85,7 +85,8 @@
 					}
 				}
 			}
-			// NOTE: Due to how the api updates the backend. When mode is set to CLUSTER_DISABLED
+			// NOTE: We want to make these fields detect API-side drift, so if the API returns a value for them we set them in state
+			// SOULTION: Due to how the api updates the backend. When mode is set to CLUSTER_DISABLED
 			// When desired_auto_created_endpoints is set this flow works as expected
 			// FLOW: Terraform  -> API Input -> API Output -> Terraform output
 			// 1. CLUSTER_DISABLED and desired_auto_created_endpoints defined: desired_auto_created_endpoints -> endpoints -> Endpoints -> desired_auto_created_endpoints + Endpoints
