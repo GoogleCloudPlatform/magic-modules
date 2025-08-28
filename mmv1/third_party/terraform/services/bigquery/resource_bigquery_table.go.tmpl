@@ -2297,8 +2297,15 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	if _, err = config.NewBigQueryClient(userAgent).Tables.Update(project, datasetID, tableID, table).Do(); err != nil {
-		return err
+	ignoreSchemaChanges := d.Get("ignore_schema_changes").([]interface{})
+	if slices.Contains(ignoreSchemaChanges, "dataPolicies") {
+		if _, err = config.NewBigQueryClient(userAgent).Tables.Patch(project, datasetID, tableID, table).Do(); err != nil {
+			return err
+		}
+	} else {
+		if _, err = config.NewBigQueryClient(userAgent).Tables.Update(project, datasetID, tableID, table).Do(); err != nil {
+			return err
+		}
 	}
 
 	return resourceBigQueryTableRead(d, meta)
