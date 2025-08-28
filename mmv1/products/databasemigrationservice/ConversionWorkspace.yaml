@@ -152,7 +152,7 @@ properties:
   - name: 'createTime'
     type: Time
     description: |
-      Output only. The timestamp when the workspace resource was created.
+      The timestamp when the workspace resource was created.
     output: true
   - name: 'updateTime'
     type: Time
