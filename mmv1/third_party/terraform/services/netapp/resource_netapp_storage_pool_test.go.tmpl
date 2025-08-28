@@ -568,7 +568,7 @@ data "google_compute_network" "default" {
 `, context)
 }
 
-func TestAccNetappStoragePool_customPerformanceStoragePoolCreateExample_update(t *testing.T) {
+func TestAccNetappStoragePool_customPerformanceEnabledStoragePoolCreateExample_update(t *testing.T) {
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
 		"random_suffix": acctest.RandString(t, 10),
@@ -580,7 +580,7 @@ func TestAccNetappStoragePool_customPerformanceStoragePoolCreateExample_update(t
 		CheckDestroy:             testAccCheckNetappStoragePoolDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNetappStoragePool_customPerformanceStoragePoolCreateExample_full(context),
+				Config: testAccNetappStoragePool_customPerformanceEnabledStoragePoolCreateExample_full(context),
 			},
 			{
 				ResourceName:            "google_netapp_storage_pool.test_pool",
@@ -589,7 +589,7 @@ func TestAccNetappStoragePool_customPerformanceStoragePoolCreateExample_update(t
 				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
 			},
 			{
-				Config: testAccNetappStoragePool_customPerformanceStoragePoolCreateExample_update(context),
+				Config: testAccNetappStoragePool_customPerformanceEnabledStoragePoolCreateExample_update(context),
 			},
 			{
 				ResourceName:            "google_netapp_storage_pool.test_pool",
@@ -601,7 +601,7 @@ func TestAccNetappStoragePool_customPerformanceStoragePoolCreateExample_update(t
 	})
 }
 
-func testAccNetappStoragePool_customPerformanceStoragePoolCreateExample_full(context map[string]interface{}) string {
+func testAccNetappStoragePool_customPerformanceEnabledStoragePoolCreateExample_full(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
@@ -619,7 +619,7 @@ data "google_compute_network" "default" {
 `, context)
 }
 
-func testAccNetappStoragePool_customPerformanceStoragePoolCreateExample_update(context map[string]interface{}) string {
+func testAccNetappStoragePool_customPerformanceEnabledStoragePoolCreateExample_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "test_pool" {
   name = "tf-test-pool%{random_suffix}"
