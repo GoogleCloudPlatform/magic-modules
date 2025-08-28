@@ -42,7 +42,8 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}'
     - '{{data_policy_id}}'
 custom_code:
-  decoder: templates/terraform/decoders/bigquery_datapolicyv2_datapolicy.go.tmpl
+  encoder: templates/terraform/encoders/bigquery_datapolicyv2_datapolicy.go.tmpl
+  update_encoder: templates/terraform/update_encoder/bigquery_datapolicyv2_datapolicy.go.tmpl
 examples:
   - name: 'bigquery_datapolicyv2_datapolicy_basic'
     primary_resource_id: 'basic_data_policy'
@@ -81,95 +82,83 @@ parameters:
     url_param_only: true
     required: true
 properties:
-  - name: dataPolicy
+  - name: dataMaskingPolicy
     type: NestedObject
-    description: Represents the label-policy binding.
-    required: true
+    description: The policy used to specify data masking rule.
     properties:
-      - name: dataMaskingPolicy
-        type: NestedObject
-        description: The policy used to specify data masking rule.
-        properties:
-          - name: predefinedExpression
-            type: String
-            description: |-
-              A predefined masking expression.
-              Possible values:
-              SHA256
-              ALWAYS_NULL
-              DEFAULT_MASKING_VALUE
-              LAST_FOUR_CHARACTERS
-              FIRST_FOUR_CHARACTERS
-              EMAIL_MASK
-              DATE_YEAR_MASK
-              RANDOM_HASH
-          - name: routine
-            type: String
-            description: |-
-              The name of the BigQuery routine that contains the custom masking
-              routine, in the format of
-              `projects/{project_number}/datasets/{dataset_id}/routines/{routine_id}`.
-            diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
-      - name: dataPolicyId
+      - name: predefinedExpression
         type: String
         description: |-
-          User-assigned (human readable) ID of the data policy that needs to be
-          unique within a project. Used as {data_policy_id} in part of the resource
-          name.
-        output: true
-      - name: dataPolicyType
-        type: String
-        description: |-
-          Type of data policy.
+          A predefined masking expression.
           Possible values:
-          DATA_MASKING_POLICY
-          RAW_DATA_ACCESS_POLICY
-          COLUMN_LEVEL_SECURITY_POLICY
-        required: true
-      - name: etag
+          SHA256
+          ALWAYS_NULL
+          DEFAULT_MASKING_VALUE
+          LAST_FOUR_CHARACTERS
+          FIRST_FOUR_CHARACTERS
+          EMAIL_MASK
+          DATE_YEAR_MASK
+          RANDOM_HASH
+      - name: routine
         type: String
         description: |-
-          The etag for this Data Policy.
-          This field is used for UpdateDataPolicy calls. If Data Policy exists, this
-          field is required and must match the server's etag. It will also be
-          populated in the response of GetDataPolicy, CreateDataPolicy, and
-          UpdateDataPolicy calls.
-        default_from_api: true
-      - name: grantees
-        type: Array
-        description: |-
-          The list of IAM principals that have Fine Grained Access to the underlying
-          data goverened by this data policy.
+          The name of the BigQuery routine that contains the custom masking
+          routine, in the format of
+          `projects/{project_number}/datasets/{dataset_id}/routines/{routine_id}`.
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: dataPolicyType
+    type: String
+    description: |-
+      Type of data policy.
+      Possible values:
+      DATA_MASKING_POLICY
+      RAW_DATA_ACCESS_POLICY
+      COLUMN_LEVEL_SECURITY_POLICY
+    required: true
+  - name: etag
+    type: String
+    description: |-
+      The etag for this Data Policy.
+      This field is used for UpdateDataPolicy calls. If Data Policy exists, this
+      field is required and must match the server's etag. It will also be
+      populated in the response of GetDataPolicy, CreateDataPolicy, and
+      UpdateDataPolicy calls.
+    default_from_api: true
+  - name: grantees
+    type: Array
+    description: |-
+      The list of IAM principals that have Fine Grained Access to the underlying
+      data goverened by this data policy.
 
-          Uses the [IAM V2 principal
-          syntax](https://cloud.google.com/iam/docs/principal-identifiers#v2) Only
-          supports principal types users, groups, serviceaccounts, cloudidentity.
-          This field is supported in V2 Data Policy only. In case of V1 data policies
-          (i.e. verion = 1 and policy_tag is set), this field is not populated.
-        item_type:
-          type: String
-        default_from_api: true
-      - name: name
-        type: String
-        description: |-
-          Identifier. Resource name of this data policy, in the format of
-          `projects/{project_number}/locations/{location_id}/dataPolicies/{data_policy_id}`.
-        output: true
-      - name: policyTag
-        type: String
-        description: |-
-          Policy tag resource name, in the format of
-          `projects/{project_number}/locations/{location_id}/taxonomies/{taxonomy_id}/policyTags/{policyTag_id}`.
-          policy_tag is supported only for V1 data policies.
-        output: true
-      - name: version
-        type: String
-        description: |-
-          The version of the Data Policy resource.
-          Possible values:
-          V1
-          V2
-        output: true
+      Uses the [IAM V2 principal
+      syntax](https://cloud.google.com/iam/docs/principal-identifiers#v2) Only
+      supports principal types users, groups, serviceaccounts, cloudidentity.
+      This field is supported in V2 Data Policy only. In case of V1 data policies
+      (i.e. verion = 1 and policy_tag is set), this field is not populated.
+    item_type:
+      type: String
+    default_from_api: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. Resource name of this data policy, in the format of
+      `projects/{project_number}/locations/{location_id}/dataPolicies/{data_policy_id}`.
+    output: true
+  - name: policyTag
+    type: String
+    description: |-
+      Policy tag resource name, in the format of
+      `projects/{project_number}/locations/{location_id}/taxonomies/{taxonomy_id}/policyTags/{policyTag_id}`.
+      policy_tag is supported only for V1 data policies.
+    output: true
+  - name: version
+    type: String
+    description: |-
+      The version of the Data Policy resource.
+      Possible values:
+      V1
+      V2
+    output: true
   - name: dataPolicyId
     type: String
     description: |-
