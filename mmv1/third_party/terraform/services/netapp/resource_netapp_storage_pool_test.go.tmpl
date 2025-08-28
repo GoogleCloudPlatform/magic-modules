@@ -611,6 +611,7 @@ resource "google_netapp_storage_pool" "test_pool" {
   network = data.google_compute_network.default.id
   description = "this is a test description"
   custom_performance_enabled = true
+  total_throughput_mibps = "200"
 }
 
 data "google_compute_network" "default" {
