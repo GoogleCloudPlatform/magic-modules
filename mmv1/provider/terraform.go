@@ -286,10 +286,8 @@ func (t *Terraform) GenerateIamDocumentation(object api.Resource, templateData T
 func (t *Terraform) FolderName() string {
 	if t.TargetVersionName == "ga" {
 		return "google"
-	} else if t.TargetVersionName == "beta" {
-		return "google-beta"
 	}
-	return "google-private"
+	return "google-" + t.TargetVersionName
 }
 
 // Similar to FullResourceName, but override-aware to prevent things like ending in _test.
@@ -716,9 +714,8 @@ func (t Terraform) replaceImportPath(outputFolder, target string) {
 		tpg = TERRAFORM_PROVIDER_BETA
 		dir = RESOURCE_DIRECTORY_BETA
 	default:
-		tpg = TERRAFORM_PROVIDER_PRIVATE
-		dir = RESOURCE_DIRECTORY_PRIVATE
-
+		tpg = "github.com/hashicorp/terraform-provider-google-" + t.TargetVersionName
+		dir = "google-" + t.TargetVersionName
 	}
 
 	sourceByte = bytes.Replace(sourceByte, []byte(gaImportPath), []byte(tpg+"/"+dir), -1)
@@ -748,7 +745,7 @@ func (t Terraform) ProviderFromVersion() string {
 	case "beta":
 		dir = RESOURCE_DIRECTORY_BETA
 	default:
-		dir = RESOURCE_DIRECTORY_PRIVATE
+		dir = "google-" + t.TargetVersionName
 	}
 	return dir
 }
