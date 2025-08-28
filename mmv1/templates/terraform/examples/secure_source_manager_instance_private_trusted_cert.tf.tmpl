@@ -5,4 +5,5 @@ resource "google_secure_source_manager_instance" "{{$.PrimaryResourceId}}" {
   private_config {
     is_private = true
   }
+  deletion_policy = "DELETE"
 }

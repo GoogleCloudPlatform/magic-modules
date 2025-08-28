@@ -1,0 +1,56 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'WebForwardingRuleService'
+description: |
+  Only used to generate IAM resources
+# This resource is only used to generate IAM resources. They do not correspond to real
+# GCP resources, and should not be used to generate anything other than IAM support.
+exclude_resource: true
+docs:
+id_format: 'projects/{{project}}/iap_web/forwarding_rule/services/{{name}}'
+base_url: 'projects/{{project}}/iap_web/forwarding_rule/services/{{name}}'
+self_link: 'projects/{{project}}/iap_web/forwarding_rule/services/{{name}}'
+import_format:
+  - 'projects/{{project}}/iap_web/forwarding_rule/services/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_type: 'google_compute_global_forwarding_rule'
+  fetch_iam_policy_verb: 'POST'
+  allowed_iam_role: 'roles/iap.httpsResourceAccessor'
+  parent_resource_attribute: 'forwarding_rule_service_name'
+  iam_conditions_request_type: 'REQUEST_BODY'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+custom_code:
+exclude_tgc: true
+examples:
+  - name: 'forwarding_rule_service_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-forwarding-rule-service%s", context["random_suffix"])'
+    vars:
+      forwarding_rule_service_name: 'forwarding-rule-service'
+      target_http_proxy_name: 'target-http-proxy-name'
+      url_map_name: 'url-map-name'
+      backend_service_name: 'backend-service-name'
+      health_check_name: 'health-check-name'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: Name or self link of a forwarding rule service.
+    required: true
