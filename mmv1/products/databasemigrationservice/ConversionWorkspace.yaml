@@ -157,5 +157,5 @@ properties:
   - name: 'updateTime'
     type: Time
     description: |
-      Output only. The timestamp when the workspace resource was last updated.
+      The timestamp when the workspace resource was last updated.
     output: true
