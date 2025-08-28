@@ -16,6 +16,7 @@ name: 'OrganizationVpcFlowLogsConfig'
 description:
   VPC Flow Logs Config is a resource that lets you configure
   Flow Logs for Organization.
+min_version: beta
 id_format: 'organizations/{{organization}}/locations/{{location}}/vpcFlowLogsConfigs/{{vpc_flow_logs_config_id}}'
 base_url: 'organizations/{{organization}}/locations/{{location}}/vpcFlowLogsConfigs'
 self_link: 'organizations/{{organization}}/locations/{{location}}/vpcFlowLogsConfigs/{{vpc_flow_logs_config_id}}'
