@@ -173,7 +173,7 @@ func (td *TemplateData) GenerateDataSourceTestFile(filePath string, resource api
 	}
 	tmplInput := TestInput{
 		Res:                  resource,
-		ImportPath:           td.ImportPath(),
+		ImportPath:           resource.ImportPath,
 		PROJECT_NAME:         "my-project-name",
 		CREDENTIALS:          "my/credentials/filename.json",
 		REGION:               "us-west1",
