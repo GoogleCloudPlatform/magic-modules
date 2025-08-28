@@ -32,8 +32,12 @@ examples:
   - name: 'backup_dr_data_source_reference'
     primary_resource_id: 'my-data-source-reference'
     vars:
+      backup_plan_association_id: "my-bpa"
+      backup_vault_id: "my-bv"
+      backup_plan_id: "my-bp"
+      account_id: "my-account"
       data_source_reference_id: "my-dsr"
-      data_source: TODO - Add data source here
+      data_source: "new-dataSource"
     test_env_vars:
       project: "PROJECT_NAME"
 parameters:
