@@ -5668,8 +5668,9 @@ func expandMaintenancePolicy(d *schema.ResourceData, meta interface{}) *containe
 				meo := exclusionOptions.([]interface{})[0].(map[string]interface{})
 				mex := exclusions[exclusion["exclusion_name"].(string)]
 				mex.MaintenanceExclusionOptions = &container.MaintenanceExclusionOptions{
-					Scope:           meo["scope"].(string),
-					ForceSendFields: []string{"Scope"},
+					Scope:             meo["scope"].(string),
+					EndTimeBehavior:   meo["end_time_behavior"].(string),
+					ForceSendFields:   []string{"Scope", "EndTimeBehavior"},
 				}
 				exclusions[exclusion["exclusion_name"].(string)] = mex
 			}
@@ -7308,10 +7309,19 @@ func flattenMaintenancePolicy(mp *container.MaintenancePolicy) []map[string]inte
 				if window.MaintenanceExclusionOptions.Scope != "" {
 					scope = window.MaintenanceExclusionOptions.Scope
 				}
-				exclusion["exclusion_options"] = []map[string]interface{}{
-					{
-						"scope": scope,
-					},
+				if window.MaintenanceExclusionOptions.EndTimeBehavior != "" {
+					exclusion["exclusion_options"] = []map[string]interface{}{
+						{
+							"scope": scope,
+							"end_time_behavior": window.MaintenanceExclusionOptions.EndTimeBehavior,
+						},
+					}
+				} else {
+					exclusion["exclusion_options"] = []map[string]interface{}{
+						{
+							"scope": scope,
+						},
+					}
 				}
 			}
 			exclusions = append(exclusions, exclusion)
