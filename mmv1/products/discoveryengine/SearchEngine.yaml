@@ -153,8 +153,8 @@ properties:
           The name of the company, business or entity that is associated with the engine. Setting this may help improve LLM related features.cd
         immutable: true
   - name: 'appType'
-    type: Enum
-    description: This is the application type this engine resource represents.
+    type: String
+    description: |
+      This is the application type this engine resource represents.
+      The supported values: 'APP_TYPE_UNSPECIFIED', 'APP_TYPE_INTRANET'.
     immutable: true
-    enum_values:
-      - 'APP_TYPE_INTRANET'
