@@ -322,6 +322,9 @@ type Type struct {
 	// If a property is missing in CAI asset, use `is_missing_in_cai: true`
 	// and `exclude_false_in_cai: true` is not needed
 	ExcludeFalseInCai bool `yaml:"exclude_false_in_cai,omitempty"`
+
+	// If true, the custom flatten function is not applied during cai2hcl
+	TGCIgnoreTerraformCustomFlatten bool `yaml:"tgc_ignore_terraform_custom_flatten,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -508,6 +511,10 @@ func (t Type) TitlelizeProperty() string {
 	return google.Camelize(t.Name, "upper")
 }
 
+func (t Type) CamelizeProperty() string {
+	return google.Camelize(t.Name, "lower")
+}
+
 // If the Prefix field is already set, returns the value.
 // Otherwise, set the Prefix field and returns the value.
 func (t *Type) GetPrefix() string {
@@ -536,6 +543,15 @@ func (t *Type) GetPrefix() string {
 }
 
 func (t Type) ResourceType() string {
+	r := t.ResourceRef()
+	if r == nil {
+		return ""
+	}
+	path := strings.Split(r.BaseUrl, "/")
+	return path[len(path)-1]
+}
+
+func (t Type) FWResourceType() string {
 	r := t.ResourceRef()
 	if r == nil {
 		return ""
@@ -624,6 +640,7 @@ func (t Type) ExactlyOneOfList() []string {
 	if t.ResourceMetadata == nil {
 		return []string{}
 	}
+
 	return t.ExactlyOneOf
 }
 
@@ -811,6 +828,45 @@ func (t Type) TFType(s string) string {
 	}
 
 	return "schema.TypeString"
+}
+
+func (t Type) GetFWType() string {
+	switch t.Type {
+	case "Boolean":
+		return "Bool"
+	case "Double":
+		return "Float64"
+	case "Integer":
+		return "Int64"
+	case "String":
+		return "String"
+	case "Time":
+		return "String"
+	case "Enum":
+		return "String"
+	case "ResourceRef":
+		return "String"
+	case "NestedObject":
+		return "Nested"
+	case "Array":
+		return "List"
+	case "KeyValuePairs":
+		return "Map"
+	case "KeyValueLabels":
+		return "Map"
+	case "KeyValueTerraformLabels":
+		return "Map"
+	case "KeyValueEffectiveLabels":
+		return "Map"
+	case "KeyValueAnnotations":
+		return "Map"
+	case "Map":
+		return "Map"
+	case "Fingerprint":
+		return "String"
+	}
+
+	return "String"
 }
 
 // TODO rewrite: validation
@@ -1010,54 +1066,6 @@ func propertyWithClientSide(clientSide bool) func(*Type) {
 func propertyWithIgnoreWrite(ignoreWrite bool) func(*Type) {
 	return func(p *Type) {
 		p.IgnoreWrite = ignoreWrite
-	}
-}
-
-func propertyWithRequired(required bool) func(*Type) {
-	return func(p *Type) {
-		p.Required = required
-	}
-}
-
-func propertyWithWriteOnly(writeOnly bool) func(*Type) {
-	return func(p *Type) {
-		p.WriteOnly = writeOnly
-	}
-}
-
-func propertyWithIgnoreRead(ignoreRead bool) func(*Type) {
-	return func(p *Type) {
-		p.IgnoreRead = ignoreRead
-	}
-}
-
-func propertyWithConflicts(conflicts []string) func(*Type) {
-	return func(p *Type) {
-		p.Conflicts = conflicts
-	}
-}
-
-func propertyWithRequiredWith(requiredWith []string) func(*Type) {
-	return func(p *Type) {
-		p.RequiredWith = requiredWith
-	}
-}
-
-func propertyWithExactlyOneOf(exactlyOneOf []string) func(*Type) {
-	return func(p *Type) {
-		p.ExactlyOneOf = exactlyOneOf
-	}
-}
-
-func propertyWithAtLeastOneOf(atLeastOneOf []string) func(*Type) {
-	return func(p *Type) {
-		p.AtLeastOneOf = atLeastOneOf
-	}
-}
-
-func propertyWithApiName(apiName string) func(*Type) {
-	return func(p *Type) {
-		p.ApiName = apiName
 	}
 }
 
@@ -1353,4 +1361,8 @@ func (t Type) TGCSendEmptyValue() bool {
 	}
 
 	return false
+}
+
+func (t Type) ShouldIgnoreCustomFlatten() bool {
+	return t.ResourceMetadata.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
 }

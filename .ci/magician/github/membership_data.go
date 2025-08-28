@@ -145,8 +145,8 @@ var (
 		"zli82016": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 1, 15),
-					endDate:   newDate(2025, 2, 9),
+					startDate: newDate(2025, 8, 27),
+					endDate:   newDate(2025, 9, 2),
 				},
 			},
 		},
@@ -155,7 +155,6 @@ var (
 	// This is for new team members who are onboarding
 	trustedContributors = map[string]struct{}{
 		"bbasata":           struct{}{},
-		"jaylonmcshan03":    struct{}{},
 		"malhotrasagar2212": struct{}{},
 	}
 )
