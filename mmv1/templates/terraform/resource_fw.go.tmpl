@@ -280,7 +280,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 {{- if $.CustomCode.PreCreate }}
     {{ $.CustomTemplate $.CustomCode.PreCreate false -}}
 {{- end}}
-    res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.CreateVerb -}}",
         Project: billingProject.ValueString(),
@@ -500,7 +500,7 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 {{- if $.CustomCode.PreUpdate }}
     {{ $.CustomTemplate $.CustomCode.PreUpdate false -}}
 {{- end}}
-    res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.UpdateVerb -}}",
         Project: billingProject.ValueString(),
@@ -639,7 +639,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", data.Id.ValueString())
-    res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+    _, _ := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.DeleteVerb -}}",
         Project: billingProject.ValueString(),
@@ -744,7 +744,7 @@ func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.C
 {{- if $.CustomCode.PreRead }}
     {{ $.CustomTemplate $.CustomCode.PreRead false -}}
 {{- end}}
-    res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.ReadVerb -}}",
         Project: billingProject.ValueString(),
