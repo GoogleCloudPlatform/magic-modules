@@ -128,6 +128,12 @@ properties:
     description: |
       A generic list of settings for the workspace. The settings are database pair dependant and can indicate default behavior for the mapping rules engine or turn on or off specific features. Such examples can be: convert_foreign_key_to_interleave=true, skip_triggers=false, ignore_non_table_synonyms=true
     custom_flatten: 'templates/terraform/custom_flatten/database_migration_service_conversion_workspace_global_settings.go.tmpl'
+  - name: 'effectiveGlobalSettings'
+    api_name: globalSettings
+    type: KeyValuePairs
+    output: true
+    description: |
+      A generic list of settings for the workspace. The settings are database pair dependant and can indicate default behavior for the mapping rules engine or turn on or off specific features. Such examples can be: convert_foreign_key_to_interleave=true, skip_triggers=false, ignore_non_table_synonyms=true
   - name: 'hasUncommittedChanges'
     type: Boolean
     description: |
