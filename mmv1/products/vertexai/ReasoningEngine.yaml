@@ -76,12 +76,30 @@ properties:
     output: true
   - name: 'createTime'
     type: String
-    description: The timestamp of when the Index was created in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    description: |-
+      The timestamp of when the Index was created in RFC3339 UTC "Zulu" format,
+      with nanosecond resolution and up to nine fractional digits.
     output: true
   - name: 'updateTime'
     type: String
-    description: The timestamp of when the Index was last updated in RFC3339 UTC "Zulu" format, with nanosecond resolution and up to nine fractional digits.
+    description: |-
+      The timestamp of when the Index was last updated in RFC3339 UTC "Zulu" format,
+      with nanosecond resolution and up to nine fractional digits.
     output: true
+  - name: 'encryptionSpec'
+    type: NestedObject
+    description: |-
+      Optional. Customer-managed encryption key spec for a ReasoningEngine.
+      If set, this ReasoningEngine and all sub-resources of this ReasoningEngine will be secured by this key.
+    immutable: true
+    properties:
+      - name: 'kmsKeyName'
+        type: String
+        description: |-
+          Required. The Cloud KMS resource identifier of the customer managed encryption key used to protect a resource.
+          Has the form: projects/my-project/locations/my-region/keyRings/my-kr/cryptoKeys/my-key.
+          The key needs to be in the same region as where the compute resource is created.
+        required: true
   - name: 'spec'
     type: NestedObject
     description: |-
@@ -149,7 +167,10 @@ properties:
       - name: 'packageSpec'
         type: NestedObject
         description: |-
-          Optional. user provided package spec of the ReasoningEngine. Ignored when users directly specify a deployment image through deploymentSpec.first_party_image_override, but keeping the field_behavior to avoid introducing breaking changes.
+          Optional. User provided package spec of the ReasoningEngine.
+          Ignored when users directly specify a deployment image through
+          deploymentSpec.first_party_image_override, but keeping the
+          field_behavior to avoid introducing breaking changes.
         properties:
           - name: 'dependencyFilesGcsUri'
             type: String
@@ -163,9 +184,10 @@ properties:
           - name: 'requirementsGcsUri'
             type: String
             description: Optional. The Cloud Storage URI of the requirements.txt file
-      - name: 'projectAllowlist'
-        type: Array
-        description: A list of Projects from which the forwarding rule will target the service attachment.
-        immutable: true
-        item_type:
-          type: String
+      - name: 'serviceAccount'
+        type: String
+        description: |-
+          Optional. The service account that the Reasoning Engine artifact runs as.
+          It should have "roles/storage.objectViewer" for reading the user project's
+          Cloud Storage and "roles/aiplatform.user" for using Vertex extensions.
+          If not specified, the Vertex AI Reasoning Engine service Agent in the project will be used.
