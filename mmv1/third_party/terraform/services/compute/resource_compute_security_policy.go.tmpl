@@ -65,6 +65,7 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 		},
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
+			tpgresource.SetLabelsDiff,
 			rulesCustomizeDiff,
 		),
 
@@ -707,12 +708,28 @@ func ResourceComputeSecurityPolicy() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description: `Labels to apply to this address.  A list of key->value pairs.
+
+
+**Note**: This field is non-authoritative, and will only manage the labels present in your configuration.
+Please refer to the field 'effective_labels' for all of the labels present on the resource.`,
+			},
+			"terraform_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `The combination of labels configured directly on the resource and default labels configured on the provider.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+			"effective_labels": {
+				Type:        schema.TypeMap,
+				Computed:    true,
+				Description: `All of labels (key/value pairs) present on the resource in GCP, including the labels configured through Terraform, other clients and services.`,
+				Elem:        &schema.Schema{Type: schema.TypeString},
 			},
 			"label_fingerprint": {
 				Type:        schema.TypeString,
-				Optional:    true,
 				Computed:    true,
-				Description: `The fingerprint used for optimistic locking of this resource. Used internally during updates.`,
+				Description: `The unique fingerprint of the labels.`,
 			},
 		},
 		UseJSONNumber: true,
@@ -760,7 +777,7 @@ func rulesCustomizeDiff(_ context.Context, diff *schema.ResourceDiff, _ interfac
 
 func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
-	userAgent, err :=  tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
 		return err
 	}
@@ -784,17 +801,17 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 		securityPolicy.Rules = expandSecurityPolicyRules(v.(*schema.Set).List())
 	}
 
-	if v, ok := d.GetOk("advanced_options_config"); ok{
+	if v, ok := d.GetOk("advanced_options_config"); ok {
 		securityPolicy.AdvancedOptionsConfig = expandSecurityPolicyAdvancedOptionsConfig(v.([]interface{}))
 	}
 
-	if v, ok := d.GetOk("adaptive_protection_config"); ok{
+	if v, ok := d.GetOk("adaptive_protection_config"); ok {
 		securityPolicy.AdaptiveProtectionConfig = expandSecurityPolicyAdaptiveProtectionConfig(v.([]interface{}))
 	}
 
 	log.Printf("[DEBUG] SecurityPolicy insert request: %#v", securityPolicy)
 
-	if v, ok := d.GetOk("recaptcha_options_config"); ok{
+	if v, ok := d.GetOk("recaptcha_options_config"); ok {
 		securityPolicy.RecaptchaOptionsConfig = expandSecurityPolicyRecaptchaOptionsConfig(v.([]interface{}), d)
 	}
 
@@ -817,19 +834,22 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 		return err
 	}
 
-	labels := tpgresource.ExpandLabels(d)
-	if labels != nil {
-		// To get labels_fingerprint, we need to read the resource first
+	if effectiveLabels := tpgresource.ExpandEffectiveLabels(d); effectiveLabels != nil {
+		userLabels := d.Get("labels")
+		terraformLabels := d.Get("terraform_labels")
+
+		// Labels cannot be set in a create.  We'll have to set them here.
 		err = resourceComputeSecurityPolicyRead(d, meta)
 		if err != nil {
-			log.Printf("[DEBUG] Error reading SecurityPolicy %q after creation: %s", sp, err)
 			return err
 		}
+
 		// Now we can set the labels
 		setLabels := &compute.GlobalSetLabelsRequest{
-			Labels:           labels,
+			Labels:           effectiveLabels,
 			LabelFingerprint: d.Get("label_fingerprint").(string),
 		}
+
 		op, err = client.SecurityPolicies.SetLabels(project, sp, setLabels).Do()
 		if err != nil {
 			return err
@@ -838,6 +858,21 @@ func resourceComputeSecurityPolicyCreate(d *schema.ResourceData, meta interface{
 		err = ComputeOperationWaitTime(config, op, project, fmt.Sprintf("Creating SecurityPolicy.Labels %q", sp), userAgent, d.Timeout(schema.TimeoutCreate))
 		if err != nil {
 			return err
+		}
+
+		// Set back the labels field, as it is needed to decide the value of "labels" in the state in the read function.
+		if err := d.Set("labels", userLabels); err != nil {
+			return fmt.Errorf("Error setting back labels: %s", err)
+		}
+
+		// Set back the terraform_labels field, as it is needed to decide the value of "terraform_labels" in the state in the read function.
+		if err := d.Set("terraform_labels", terraformLabels); err != nil {
+			return fmt.Errorf("Error setting back terraform_labels: %s", err)
+		}
+
+		// Set back the effective_labels field, as it is needed to decide the value of "effective_labels" in the state in the read function.
+		if err := d.Set("effective_labels", effectiveLabels); err != nil {
+			return fmt.Errorf("Error setting back effective_labels: %s", err)
 		}
 	}
 
@@ -898,8 +933,16 @@ func resourceComputeSecurityPolicyRead(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("Error setting recaptcha_options_config: %s", err)
 	}
 
-	if err := d.Set("labels", securityPolicy.Labels); err != nil {
-		return fmt.Errorf("Error setting labels: %s", err)
+	if err := tpgresource.SetLabels(securityPolicy.Labels, d, "labels"); err != nil {
+		return err
+	}
+
+	if err := tpgresource.SetLabels(securityPolicy.Labels, d, "terraform_labels"); err != nil {
+		return err
+	}
+
+	if err := d.Set("effective_labels", securityPolicy.Labels); err != nil {
+		return err
 	}
 
 	if err := d.Set("label_fingerprint", securityPolicy.LabelFingerprint); err != nil {
@@ -967,8 +1010,8 @@ func resourceComputeSecurityPolicyUpdate(d *schema.ResourceData, meta interface{
 		securityPolicy.ForceSendFields = append(securityPolicy.ForceSendFields, "RecaptchaOptionsConfig")
 	}
 
-	if d.HasChange("labels") {
-		labels := tpgresource.ExpandLabels(d)
+	if d.HasChange("effective_labels") {
+		labels := tpgresource.ExpandEffectiveLabels(d)
 		labelFingerprint := d.Get("label_fingerprint").(string)
 		req := compute.GlobalSetLabelsRequest{Labels: labels, LabelFingerprint: labelFingerprint}
 

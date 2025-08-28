@@ -788,17 +788,19 @@ func TestAccComputeSecurityPolicy_labels(t *testing.T) {
 				Config: testAccComputeSecurityPolicy_basicLabels(spName),
 			},
 			{
-				ResourceName:      "google_compute_security_policy.policy",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_security_policy.policy",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 			{
 				Config: testAccComputeSecurityPolicy_updateLabels(spName),
 			},
 			{
-				ResourceName:      "google_compute_security_policy.policy",
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:            "google_compute_security_policy.policy",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
 			},
 		},
 	})
