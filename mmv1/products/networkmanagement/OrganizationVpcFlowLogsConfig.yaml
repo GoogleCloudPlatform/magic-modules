@@ -138,7 +138,7 @@ properties:
       Output only. The time the config was updated.
     output: true
   - name: 'crossProjectMetadata'
-    type: String
+    type: Enum
     default_from_api: true
     description: |-
       Determines whether to include cross project annotations in the logs.
@@ -147,3 +147,7 @@ properties:
       Possible values:
       CROSS_PROJECT_METADATA_ENABLED
       CROSS_PROJECT_METADATA_DISABLED
+    enum_values: 
+      - CROSS_PROJECT_METADATA_ENABLED
+      - CROSS_PROJECT_METADATA_DISABLED
+    
