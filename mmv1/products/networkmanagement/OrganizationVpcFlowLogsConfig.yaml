@@ -147,7 +147,6 @@ properties:
       Possible values:
       CROSS_PROJECT_METADATA_ENABLED
       CROSS_PROJECT_METADATA_DISABLED
-    enum_values: 
+    enum_values:
       - CROSS_PROJECT_METADATA_ENABLED
       - CROSS_PROJECT_METADATA_DISABLED
-    
