@@ -84,22 +84,22 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
     obj := make(map[string]interface{})
 {{- range $prop := $.SettableProperties }}
 {{- if $prop.FlattenObject }}
-    {{ $prop.ApiName -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(nil, d, config)
+    {{ $prop.CamelizeProperty -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(nil, d, config)
 {{- else }}
-    {{ $prop.ApiName -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(d.Get("{{underscore $prop.Name}}"), d, config)
+    {{ $prop.CamelizeProperty -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(d.Get("{{underscore $prop.Name}}"), d, config)
 {{- end}}
     if err != nil {
         return nil, err
 {{- if and (not $prop.SendEmptyValue) (not $prop.TGCSendEmptyValue) }}
-    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop)) {
+    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.CamelizeProperty -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty -}}Prop)) {
 {{- else }}
-    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop) {
+    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty -}}Prop) {
 {{- end }}
-        obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
+        obj["{{ $prop.ApiName -}}"] = {{ $prop.CamelizeProperty -}}Prop
     }
 {{- end}}
 
-{{ if $.CustomCode.Encoder -}}
+{{ if and $.CustomCode.Encoder (not $.TGCIgnoreTerraformEncoder) -}}
     obj, err = resource{{ $.ResourceName -}}Encoder(d, config, obj)
     if err != nil {
         return nil, err
@@ -113,7 +113,7 @@ func Get{{ $.ResourceName -}}CaiObject(d tpgresource.TerraformResourceData, conf
 {{- end}}
 }
 
-{{if $.CustomCode.Encoder -}}
+{{if and $.CustomCode.Encoder (not $.TGCIgnoreTerraformEncoder) -}}
 func resource{{ $.ResourceName -}}Encoder(d tpgresource.TerraformResourceData, meta interface{}, obj map[string]interface{}) (map[string]interface{}, error) {
 {{ $.CustomTemplate $.CustomCode.Encoder false -}}
 }

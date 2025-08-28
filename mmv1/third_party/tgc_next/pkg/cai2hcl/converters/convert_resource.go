@@ -21,12 +21,22 @@ func ConvertResource(asset caiasset.Asset) ([]*models.TerraformResourceBlock, er
 		}
 	}
 
-	// Edge cases
+	// Handle the tdge case that multiple Terraform resources share the same CAI asset type
 	if asset.Type == "compute.googleapis.com/Autoscaler" {
 		if strings.Contains(asset.Name, "/zones/") {
 			converter = ConverterMap[asset.Type]["ComputeAutoscaler"]
 		} else {
 			converter = ConverterMap[asset.Type]["ComputeRegionAutoscaler"]
+		}
+	}
+
+	if asset.Type == "cloudasset.googleapis.com/Feed" {
+		if strings.Contains(asset.Name, "/organizations/") {
+			converter = ConverterMap[asset.Type]["CloudAssetOrganizationFeed"]
+		} else if strings.Contains(asset.Name, "/folders/") {
+			converter = ConverterMap[asset.Type]["CloudAssetFolderFeed"]
+		} else {
+			converter = ConverterMap[asset.Type]["CloudAssetProjectFeed"]
 		}
 	}
 	return converter.Convert(asset)

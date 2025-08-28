@@ -1,0 +1,43 @@
+name: 'WebRegionForwardingRuleService'
+description: |
+  Only used to generate IAM resources
+# This resource is only used to generate IAM resources. They do not correspond to real
+# GCP resources, and should not be used to generate anything other than IAM support.
+exclude_resource: true
+docs:
+id_format: 'projects/{{project}}/iap_web/forwarding_rule-{{region}}/services/{{name}}'
+base_url: 'projects/{{project}}/iap_web/forwarding_rule-{{region}}/services/{{name}}'
+self_link: 'projects/{{project}}/iap_web/forwarding_rule-{{region}}/services/{{name}}'
+import_format:
+  - 'projects/{{project}}/iap_web/forwarding_rule-{{region}}/services/{{name}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  parent_resource_type: 'google_compute_forwarding_rule'
+  fetch_iam_policy_verb: 'POST'
+  allowed_iam_role: 'roles/iap.httpsResourceAccessor'
+  parent_resource_attribute: 'forwarding_rule_region_service_name'
+  iam_conditions_request_type: 'REQUEST_BODY'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+exclude_tgc: true
+examples:
+  - name: 'forwarding_rule_region_service_basic'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-forwarding-rule-region-service%s", context["random_suffix"])'
+    vars:
+      forwarding_rule_region_service_name: 'forwarding-rule-region-service'
+      regional_health_check_name: 'tf-test-region-health-check'
+      regional_backend_service_name: 'regional-bs'
+      regional_url_map_name: 'regional-url-map'
+      regional_target_http_proxy_name: 'regional-target-http-proxy'
+      compute_network_name: 'tf-test-network-name'
+      compute_subnetwork_name: 'tf-test-subnetwork-name'
+parameters:
+properties:
+  - name: 'name'
+    type: String
+    description: Name or self link of a regional forwarding rule service.
+    required: true
