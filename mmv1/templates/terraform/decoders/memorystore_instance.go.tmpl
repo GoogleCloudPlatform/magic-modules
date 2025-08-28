@@ -93,10 +93,14 @@
 				if okEndpoint {
 					d.Set("desired_auto_created_endpoints", transformed)
 					log.Printf("[DEBUG] Setting desired_auto_created_endpoints in decoder within endpoints for %#v", transformed)
+				} else if okPsc {
+					d.Set("desired_auto_created_endpoints", []interface{}{})
 				}
 				if okPsc {
 					d.Set("desired_psc_auto_connections", transformed)
 					log.Printf("[DEBUG] Setting desired_psc_auto_connections in decoder within endpoints for %#v", transformed)
+				} else if okEndpoint {
+					d.Set("desired_psc_auto_connections", []interface{}{})
 				}
 				// Set preferred field on import
 				if !okPsc && !okEndpoint {
