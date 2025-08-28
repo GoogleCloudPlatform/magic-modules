@@ -74,8 +74,11 @@ import (
 {{- end}}
 
 var (
-	_ resource.Resource              = &{{$.ResourceName}}FWResource{}
-	_ resource.ResourceWithConfigure = &{{$.ResourceName}}FWResource{}
+	_ resource.Resource                = &{{$.ResourceName}}FWResource{}
+	_ resource.ResourceWithConfigure   = &{{$.ResourceName}}FWResource{}
+{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff }}
+	_ resource.ResourceWithModifyPlan  = &{{$.ResourceName}}FWResource{}
+{{- end}}
 )
 
 func New{{$.ResourceName}}FWResource() resource.Resource {
