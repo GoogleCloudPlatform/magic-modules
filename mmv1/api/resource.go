@@ -1203,29 +1203,40 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	return uniq
 }
 
-func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
+// IgnoreReadProperties returns a sorted slice of property names (snake_case) that should be ignored when reading.
+// This is useful for downstream code that needs to iterate over these properties.
+func (r Resource) IgnoreReadProperties(e resource.Examples) []string {
 	var props []string
 	for _, tp := range r.AllUserProperties() {
 		if tp.UrlParamOnly || tp.IsA("ResourceRef") {
-			props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp.Name)))
+			props = append(props, google.Underscore(tp.Name))
 		}
 	}
-	for _, tp := range e.IgnoreReadExtra {
-		props = append(props, fmt.Sprintf("\"%s\"", tp))
-	}
-	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
-		props = append(props, fmt.Sprintf("\"%s\"", tp))
-	}
-	for _, tp := range ignoreReadFields(r.AllUserProperties()) {
-		props = append(props, fmt.Sprintf("\"%s\"", tp))
-	}
+	props = append(props, e.IgnoreReadExtra...)
+	props = append(props, r.IgnoreReadLabelsFields(r.PropertiesWithExcluded())...)
+	props = append(props, ignoreReadFields(r.AllUserProperties())...)
 
 	slices.Sort(props)
+	return props
+}
 
+// IgnoreReadPropertiesToString returns the ignore read properties as a Go-syntax string slice.
+// This is a wrapper around IgnoreReadProperties for backwards compatibility.
+func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
+	props := r.IgnoreReadProperties(e)
 	if len(props) > 0 {
-		return fmt.Sprintf("[]string{%s}", strings.Join(props, ", "))
+		return fmt.Sprintf("[]string{%s}", strings.Join(quoteStrings(props), ", "))
 	}
 	return ""
+}
+
+// quoteStrings returns a new slice with each string quoted.
+func quoteStrings(strs []string) []string {
+	quoted := make([]string, len(strs))
+	for i, s := range strs {
+		quoted[i] = fmt.Sprintf("\"%s\"", s)
+	}
+	return quoted
 }
 
 func ignoreReadFields(props []*Type) []string {
@@ -2019,6 +2030,13 @@ func (r *Resource) ShouldGenerateSingularDataSource() bool {
 	}
 
 	return r.Datasource.Generate
+}
+
+func (r *Resource) ShouldGenerateSingularDataSourceTests() bool {
+	if r.Datasource == nil {
+		return false
+	}
+	return !r.Datasource.ExcludeTest
 }
 
 func (r Resource) ShouldDatasourceSetLabels() bool {
