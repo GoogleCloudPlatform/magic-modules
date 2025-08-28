@@ -35,9 +35,6 @@ type TemplateData struct {
 	OutputFolder string
 	VersionName  string
 
-	TerraformResourceDirectory string
-	TerraformProviderModule    string
-
 	// TODO rewrite: is this needed?
 	//     # Information about the local environment
 	//     # (which formatters are enabled, start-time)
@@ -53,18 +50,6 @@ var goimportFiles sync.Map
 
 func NewTemplateData(outputFolder string, versionName string) *TemplateData {
 	td := TemplateData{OutputFolder: outputFolder, VersionName: versionName}
-
-	if versionName == GA_VERSION {
-		td.TerraformResourceDirectory = "google"
-		td.TerraformProviderModule = "github.com/hashicorp/terraform-provider-google"
-	} else if versionName == ALPHA_VERSION || versionName == PRIVATE_VERSION {
-		td.TerraformResourceDirectory = "google-private"
-		td.TerraformProviderModule = "internal/terraform-next"
-	} else {
-		td.TerraformResourceDirectory = "google-beta"
-		td.TerraformProviderModule = "github.com/hashicorp/terraform-provider-google-beta"
-	}
-
 	return &td
 }
 
