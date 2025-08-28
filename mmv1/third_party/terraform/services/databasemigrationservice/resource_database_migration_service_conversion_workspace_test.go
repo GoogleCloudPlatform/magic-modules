@@ -55,6 +55,11 @@ func TestAccDatabaseMigrationServiceConversionWorkspace_update(t *testing.T) {
 			},
 			{
 				Config: testAccDatabaseMigrationServiceConversionWorkspace_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_database_migration_service_conversion_workspace.example", plancheck.ResourceActionUpdate),
+					},
+				},
 			},
 			{
 				ResourceName:            "google_database_migration_service_conversion_workspace.example",
