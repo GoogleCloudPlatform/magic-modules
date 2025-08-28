@@ -32,3 +32,53 @@ func DefaultProjectModify(ctx context.Context, req resource.ModifyPlanRequest, r
 	}
 	return
 }
+
+func DefaultRegionModify(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse, providerConfigRegion string){
+	var old types.String
+	diags := req.State.GetAttribute(ctx, path.Root("region"), &old)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var new types.String
+	diags = req.Plan.GetAttribute(ctx, path.Root("region"), &new)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if (old.IsUnknown() || old.IsNull()) && new.IsUnknown() {
+		region := GetRegionFramework(new, types.StringValue(providerConfigRegion), &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		resp.Plan.SetAttribute(ctx, path.Root("region"), region)
+	}
+	return
+}
+
+func DefaultZoneModify(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse, providerConfigZone string){
+	var old types.String
+	diags := req.State.GetAttribute(ctx, path.Root("zone"), &old)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var new types.String
+	diags = req.Plan.GetAttribute(ctx, path.Root("zone"), &new)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if (old.IsUnknown() || old.IsNull()) && new.IsUnknown() {
+		zone := GetZoneFramework(new, types.StringValue(providerConfigZone), &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		resp.Plan.SetAttribute(ctx, path.Root("zone"), zone)
+	}
+	return
+}

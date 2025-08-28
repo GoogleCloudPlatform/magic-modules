@@ -128,6 +128,23 @@ func (r *{{$.ResourceName}}FWResource) Configure(ctx context.Context, req resour
 	r.providerConfig = p
 }
 
+{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff }}
+func (r *{{$.ResourceName}}FWResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+{{- if and ($.HasProject) (not $.ExcludeDefaultCdiff) }}
+	fwresource.DefaultProjectModify(ctx, req, resp, r.providerConfig.Project)
+{{- end -}}
+{{if and ($.HasRegion) (not $.ExcludeDefaultCdiff)  }}
+	fwresource.DefaultRegionModify(ctx, req, resp, r.providerConfig.Region)
+{{- end -}}
+{{if and ($.HasZone) (not $.ExcludeDefaultCdiff)  }}
+	fwresource.DefaultZoneModify(ctx, req, resp, r.providerConfig.Zone)
+{{- end }}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
+{{- end}}
+
 func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "A resource to represent a SQL User object.",
