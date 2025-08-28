@@ -2238,7 +2238,7 @@ func resourceBigQueryTableUpdate(d *schema.ResourceData, meta interface{}) error
 		}
 	}
 
-	if _, err = config.NewBigQueryClient(userAgent).Tables.Update(project, datasetID, tableID, table).Do(); err != nil {
+	if _, err = config.NewBigQueryClient(userAgent).Tables.Patch(project, datasetID, tableID, table).Do(); err != nil {
 		return err
 	}
 
