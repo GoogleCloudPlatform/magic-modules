@@ -33,6 +33,8 @@ timeouts:
   insert_minutes: 20
   update_minutes: 20
   delete_minutes: 20
+datasource:
+  generate: true
 autogen_async: true
 async:
   actions: ['create', 'delete', 'update']
