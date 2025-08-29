@@ -259,7 +259,7 @@ properties:
               - 'http_check.0.auth_info.0.password'
             required_with:
               - 'http_check.0.auth_info.0.password_wo_version'
-            write_only: true
+            write_only_legacy: true
           - name: 'passwordWoVersion'
             type: String
             immutable: true

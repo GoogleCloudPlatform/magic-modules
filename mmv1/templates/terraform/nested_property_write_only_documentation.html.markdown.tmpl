@@ -3,7 +3,7 @@
 {{ "" }}
   {{- if $.NestedProperties }}
     {{- range $np := $.NestedProperties }}
-      {{- if $np.WriteOnly }}
+      {{- if $np.WriteOnlyLegacy }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $np -}}
       {{- end -}}
     {{- end -}}
