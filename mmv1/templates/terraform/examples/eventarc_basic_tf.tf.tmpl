@@ -7,14 +7,12 @@ data "google_project" "project" {
 resource "google_project_service" "run" {
   provider = google-beta
   service            = "run.googleapis.com"
-  disable_on_destroy = false
 }
     
 # Enable Eventarc API
 resource "google_project_service" "eventarc" {
   provider = google-beta
   service            = "eventarc.googleapis.com"
-  disable_on_destroy = false
 }
 
 # Deploy Cloud Run service
