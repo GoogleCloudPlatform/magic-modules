@@ -264,7 +264,7 @@ properties:
           Optional. Available snapshot periods for scheduling.
 
           - ONE_HOUR:	Snapshot every 1 hour.
-          - SIX_HOURS:	Snapshot every 6 hours.elte
+          - SIX_HOURS:	Snapshot every 6 hours.
           - TWELVE_HOURS:	Snapshot every 12 hours.
           - TWENTY_FOUR_HOURS:	Snapshot every 24 hours.
         required: false
