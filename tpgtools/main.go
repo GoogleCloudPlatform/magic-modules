@@ -20,6 +20,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"strings"
@@ -91,7 +92,10 @@ func main() {
 
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
-		generateResourceTestFile(resource)
+		if string(resource.ProductName())[0] >= 'a' && string(resource.ProductName())[0] <= 'c' {
+			log.Printf("Generating test file for %s", resource.TitleCaseFullName())
+			generateResourceTestFile(resource)
+		}
 		generatedResources = append(generatedResources, resource)
 	}
 
@@ -456,6 +460,7 @@ func generateResourceTestFile(res *Resource) {
 	if len(res.TestSamples()) < 1 {
 		return
 	}
+
 	// Generate resource file
 	tmplInput := ResourceInput{
 		Resource: *res,
