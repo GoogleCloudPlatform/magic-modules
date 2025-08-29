@@ -20,6 +20,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"strings"
@@ -454,6 +455,11 @@ func generateSweeperFile(res *Resource) {
 
 func generateResourceTestFile(res *Resource) {
 	if len(res.TestSamples()) < 1 {
+		return
+	}
+
+	if res.ProductName()[0] < 'p' || res.ProductName()[0] > 'h' {
+		log.Printf("Skipping test file for %s because it's not in the a-e range", res.ProductName())
 		return
 	}
 	// Generate resource file
