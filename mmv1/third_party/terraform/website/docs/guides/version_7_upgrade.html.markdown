@@ -326,7 +326,7 @@ A state upgrader will automatically migrate the `topic` field's format in your T
 ### Instance deletion now prevented by default with `deletion_protection`
 
 The field `deletion_protection` has been added with a default value of `true`. This field prevents
-Terraform from destroying or recreating the Domain. In 7.0.0, existing domains will have 
+Terraform from destroying or recreating the Instance. In 7.0.0, existing instances will have 
 `deletion_protection` set to `true` during the next refresh unless otherwise set in configuration.
 
 **`deletion_protection` does NOT prevent deletion outside of Terraform.**
