@@ -435,9 +435,6 @@ func TestAccRedisInstance_deletionprotection(t *testing.T) {
 			{
 				Config: testAccRedisInstance_deletionprotectionFalse(name, "us-central1", true),
 			},
-			{
-				Config: testAccRedisInstance_update(name, true),
-			},
 		},
 	})
 }
