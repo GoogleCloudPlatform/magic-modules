@@ -49,6 +49,10 @@ examples:
     vars:
       name: 'reasoning-engine'
       bucket_name: 'reasoning-engine'
+      kms_key_name: 'kms-key'
+      service_account_id: 'sa'
+    test_vars_overrides:
+      'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
 parameters:
   - name: 'region'
     type: String

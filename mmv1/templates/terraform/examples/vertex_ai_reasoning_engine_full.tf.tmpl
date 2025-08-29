@@ -3,21 +3,20 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
   description  = "A basic reasoning engine"
   region       = "us-central1"
 
-  # encryption_spec {
-  #   kms_key_name = google_kms_crypto_key.key.id
-  # }
+  encryption_spec {
+    kms_key_name = "{{index $.Vars "kms_key_name"}}"
+  }
 
   spec {
     agent_framework = "google-adk"
     class_methods   = []
-    # service_account = google_service_account.service_account.email
+    service_account = google_service_account.service_account.email
 
     deployment_spec {
 
-      # This is references inside the pickle file.
       env {
-        name  = "PROJECT_ID"
-        value = data.google_project.project.id
+        name  = "var_1"
+        value = "value_2"
       }
 
       env {
@@ -53,11 +52,10 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
   }
 
   depends_on = [
-    # google_kms_crypto_key_iam_member.crypto_key_iam,
-    # google_kms_crypto_key_iam_member.crypto_key_iam_def_sa,
+    google_kms_crypto_key_iam_member.sa_iam_key_crypter_decrypter,
     google_project_iam_member.sa_iam_ai_platform_user,
     google_project_iam_member.sa_iam_object_viewer,
-    google_project_iam_member.sa_iam_viewer,
+    google_project_iam_member.sa_iam_editor,
     google_secret_manager_secret_iam_member.secret_access,
     google_secret_manager_secret_version.secret_version
   ]
@@ -108,8 +106,7 @@ resource "google_storage_bucket_object" "bucket_obj_dependencies_tar_gz" {
 }
 
 resource "google_service_account" "service_account" {
-  account_id   = "reasoning-sa"
-  display_name = "Reasoning Engine Service Account"
+  account_id = "{{index $.Vars "service_account_id"}}"
 }
 
 resource "google_project_iam_member" "sa_iam_object_viewer" {
@@ -124,27 +121,17 @@ resource "google_project_iam_member" "sa_iam_ai_platform_user" {
   member  = google_service_account.service_account.member
 }
 
-resource "google_project_iam_member" "sa_iam_viewer" {
+resource "google_project_iam_member" "sa_iam_editor" {
   role    = "roles/editor"
   project = data.google_project.project.id
   member  = google_service_account.service_account.member
 }
 
-# resource "google_kms_key_ring" "keyring" {
-#   name     = "keyring"
-#   location = "us-central1"
-# }
-
-# resource "google_kms_crypto_key" "key" {
-#   name     = "key"
-#   key_ring = google_kms_key_ring.keyring.id
-# }
-
-# resource "google_kms_crypto_key_iam_member" "crypto_key_iam_def_sa" {
-#   crypto_key_id = google_kms_crypto_key.key.id
-#   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
-#   member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
-# }
+resource "google_kms_crypto_key_iam_member" "sa_iam_key_crypter_decrypter" {
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
+  role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
+  member        = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform.iam.gserviceaccount.com"
+}
 
 data "google_project" "project" {
 }
