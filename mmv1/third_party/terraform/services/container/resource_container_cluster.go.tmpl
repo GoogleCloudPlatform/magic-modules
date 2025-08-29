@@ -1860,6 +1860,21 @@ func ResourceContainerCluster() *schema.Resource {
 							},
 
 						},
+						"auto_ipam_config": {
+							Type: schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Description: `AutoIpamConfig contains all information related to Auto IPAM.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type: schema.TypeBool,
+										Optional: true,
+										Description: `The flag that enables Auto IPAM on this cluster.`,
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -4314,6 +4329,21 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 		log.Printf("[INFO] GKE cluster %s's AdditionalIpRangesConfig has been updated", d.Id())
 	}
 
+	if d.HasChange("ip_allocation_policy.0.auto_ipam_config") {
+		req := &container.UpdateClusterRequest{
+			Update: &container.ClusterUpdate{
+				DesiredAutoIpamConfig: &container.AutoIpamConfig{Enabled: d.Get("ip_allocation_policy.0.auto_ipam_config.0.enabled").(bool)},
+			},
+		}
+
+		updateF := updateFunc(req, "updating AutoIpamConfig")
+		if err := transport_tpg.LockedCall(lockKey, updateF); err != nil {
+			return err
+		}
+
+		log.Printf("[INFO] GKE cluster %s's AutoIpamConfig has been updated", d.Id())
+	}
+
 	if n, ok := d.GetOk("node_pool.#"); ok {
 		for i := 0; i < n.(int); i++ {
 			nodePoolInfo, err := extractNodePoolInformationFromCluster(d, config, clusterName)
@@ -5554,6 +5584,16 @@ func expandIPAllocationPolicy(configured interface{}, d *schema.ResourceData, ne
 		return nil, nil, err
 	}
 
+	desiredAutoIpamConfig := &container.AutoIpamConfig{}
+	autoIpamConfig := config["auto_ipam_config"].([]any)
+	if len(autoIpamConfig) != 0 && autoIpamConfig[0] != nil {
+		rawConfig := autoIpamConfig[0].(map[string]any)
+		if enabled, ok := rawConfig["enabled"]; ok {
+			desiredAutoIpamConfig.Enabled = enabled.(bool)
+		}
+	}
+
+
 	return &container.IPAllocationPolicy{
 		UseIpAliases:          networkingMode == "VPC_NATIVE" || networkingMode == "",
 		ClusterIpv4CidrBlock:  config["cluster_ipv4_cidr_block"].(string),
@@ -5564,6 +5604,7 @@ func expandIPAllocationPolicy(configured interface{}, d *schema.ResourceData, ne
 		UseRoutes:              networkingMode == "ROUTES",
 		StackType:              stackType,
 		PodCidrOverprovisionConfig: expandPodCidrOverprovisionConfig(config["pod_cidr_overprovision_config"]),
+		AutoIpamConfig: desiredAutoIpamConfig,
 	}, additionalIpRangesConfigs, nil
 }
 
@@ -7215,6 +7256,13 @@ func flattenIPAllocationPolicy(c *container.Cluster, d *schema.ResourceData, con
 		p.StackType = "IPV4"
 	}
 
+	var autoIpamMap []map[string]any
+	if p.AutoIpamConfig != nil {
+        autoIpamMap = []map[string]any{
+            {"enabled": p.AutoIpamConfig.Enabled,},
+        }
+    }
+
 	return []map[string]interface{}{
 		{
 			"cluster_ipv4_cidr_block":       p.ClusterIpv4CidrBlock,
@@ -7225,6 +7273,7 @@ func flattenIPAllocationPolicy(c *container.Cluster, d *schema.ResourceData, con
 			"pod_cidr_overprovision_config": flattenPodCidrOverprovisionConfig(p.PodCidrOverprovisionConfig),
 			"additional_pod_ranges_config":  flattenAdditionalPodRangesConfig(c.IpAllocationPolicy),
 			"additional_ip_ranges_config":   flattenAdditionalIpRangesConfigs(p.AdditionalIpRangesConfigs),
+			"auto_ipam_config": autoIpamMap,
 		},
 	}, nil
 }
