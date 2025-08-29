@@ -107,7 +107,7 @@ Example:
 sensitive: true
 ```
 
-### `write_only`
+### `write_only_legacy` (deprecated)
 If true, the field is considered "write-only", which means that its value will
 be obscured in Terraform output as well as not be stored in state. This field is meant to replace `sensitive` as it doesn't store the value in state.
 See [Ephemerality in Resources - Use Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral/write-only)
@@ -121,8 +121,10 @@ This field cannot be used in conjuction with `immutable` or `sensitive`.
 Example:
 
 ```yaml
-write_only: true
+write_only_legacy: true
 ```
+
+**Deprecated**: This field is deprecated and will be removed in a future release.
 
 ### `ignore_read`
 If true, the provider sets the field's value in the resource state based only
