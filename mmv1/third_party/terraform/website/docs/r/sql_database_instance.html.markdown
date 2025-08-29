@@ -395,6 +395,12 @@ The `settings` block supports:
 
 * `retain_backups_on_delete` - (Optional) When this parameter is set to true, Cloud SQL retains backups of the instance even after the instance is deleted. The `ON_DEMAND` backup will be retained until customer deletes the backup or the project. The `AUTOMATED` backup will be retained based on the backups retention setting.
 
+The optional `final_backup_config` subblock supports:
+
+* `enabled` - (Optional) True if enabled final backup.
+
+* `retention_days` - (Optional) The number of days we retain the final backup after instance deletion. The number of days of retain final backup can be set from 1 to 365.
+
 The optional `settings.advanced_machine_features` subblock supports:
 
 * `threads_per_core` - (Optional) The number of threads per core. The value of this flag can be 1 or 2. To disable SMT, set this flag to 1. Only available in Cloud SQL for SQL Server instances. See [smt](https://cloud.google.com/sql/docs/sqlserver/create-instance#smt-create-instance) for more details.
