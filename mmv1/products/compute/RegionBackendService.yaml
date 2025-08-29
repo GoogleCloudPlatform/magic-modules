@@ -251,7 +251,7 @@ properties:
             Group resource using the fully-qualified URL, rather than a
             partial URL.
           required: true
-          diff_suppress_func: 'tpgresource.CompareSelfLinkRelativePaths'
+          diff_suppress_func: 'tpgresource.CompareSelfLinkCanonicalPaths'
           custom_flatten: 'templates/terraform/custom_flatten/guard_self_link.go.tmpl'
         - name: 'maxConnections'
           type: Integer
@@ -1544,3 +1544,19 @@ properties:
                 description: |
                   The name of the VM instance of the leader network endpoint. The instance must
                   already be attached to the NEG specified in the haPolicy.leader.backendGroup.
+  - name: 'params'
+    type: NestedObject
+    ignore_read: true
+    immutable: true
+    description: |
+      Additional params passed with the request, but not persisted as part of resource payload
+    properties:
+      - name: 'resourceManagerTags'
+        type: KeyValuePairs
+        description: |
+          Resource manager tags to be bound to the region backend service. Tag keys and values have the
+          same definition as resource manager tags. Keys must be in the format tagKeys/{tag_key_id},
+          and values are in the format tagValues/456.
+        api_name: resourceManagerTags
+        ignore_read: true
+        immutable: true

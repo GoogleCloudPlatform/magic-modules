@@ -227,7 +227,9 @@ properties:
       - 'DEBUG_HEADERS'
   - name: 'routingMode'
     type: Enum
+    diff_suppress_func: 'tpgresource.SuppressRoutingModeDefault'
     description: |
       The routing mode of the Gateway. This field is configurable only for gateways of type SECURE_WEB_GATEWAY. This field is required for gateways of type SECURE_WEB_GATEWAY.
     enum_values:
       - 'NEXT_HOP_ROUTING_MODE'
+      - 'EXPLICIT_ROUTING_MODE'

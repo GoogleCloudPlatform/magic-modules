@@ -141,7 +141,6 @@ func TestAccComputeNetworkPeering_stackType(t *testing.T) {
 
 }
 
-{{ if ne $.TargetVersionName `ga` }}
 func TestAccComputeNetworkPeering_updateStrategy(t *testing.T) {
 	t.Parallel()
 
@@ -177,7 +176,6 @@ func TestAccComputeNetworkPeering_updateStrategy(t *testing.T) {
 	})
 
 }
-{{- end }}
 
 func testAccComputeNetworkPeeringDestroyProducer(t *testing.T) func(s *terraform.State) error {
 	return func(s *terraform.State) error {

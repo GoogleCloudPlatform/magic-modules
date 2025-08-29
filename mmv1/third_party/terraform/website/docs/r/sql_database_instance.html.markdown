@@ -334,6 +334,11 @@ includes an up-to-date reference of supported versions.
     **NOTE:** Restoring from a backup is an imperative action and not recommended via Terraform. Adding or modifying this
     block during resource creation/update will trigger the restore action after the resource is created/updated.
 
+*  `backupdr_backup` - (optional) The backupdr_backup needed to restore the database to a backup run. This field will
+    cause Terraform to trigger the database to restore from the backup run indicated. The configuration is detailed below.
+    **NOTE:** Restoring from a backup is an imperative action and not recommended via Terraform. Adding or modifying this
+    block during resource creation/update will trigger the restore action after the resource is created/updated.
+
 * `clone` - (Optional) The context needed to create this instance as a clone of another instance. When this field is set during
     resource creation, Terraform will attempt to clone another instance as indicated in the context. The
     configuration is detailed below.
@@ -692,6 +697,12 @@ performing filtering in a Terraform config.
 * `instance_type` - The type of the instance. See [API reference for SqlInstanceType](https://cloud.google.com/sql/docs/mysql/admin-api/rest/v1/instances#SqlInstanceType) for supported values.
 
 ~> **NOTE:** Users can upgrade a read replica instance to a stand-alone Cloud SQL instance with the help of `instance_type`. To promote, users have to set the `instance_type` property as `CLOUD_SQL_INSTANCE` and remove/unset `master_instance_name` and `replica_configuration` from instance configuration. This operation might cause your instance to restart.
+
+* `settings.ip_configuration.psc_config.psc_auto_connections.consumer_network_status` - (Output) The connection policy status of the consumer network.
+
+* `settings.ip_configuration.psc_config.psc_auto_connections.ip_address` - (Output) The IP address of the consumer endpoint.
+
+* `settings.ip_configuration.psc_config.psc_auto_connections.status` - (Output) The connection status of the consumer endpoint.
 
 * `settings.version` - Used to make sure changes to the `settings` block are
     atomic.
