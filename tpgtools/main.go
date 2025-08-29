@@ -458,7 +458,7 @@ func generateResourceTestFile(res *Resource) {
 		return
 	}
 
-	if res.ProductName()[0] < 'p' || res.ProductName()[0] > 'h' {
+	if res.ProductName()[0] < 'q' || res.ProductName()[0] > 'z' {
 		log.Printf("Skipping test file for %s because it's not in the a-e range", res.ProductName())
 		return
 	}
