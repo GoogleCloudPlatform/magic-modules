@@ -93,7 +93,16 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 			return nil, errors.New("Import not supported for this IAM resource.")
 		}
 		config := m.(*transport_tpg.Config)
-		s := strings.Fields(d.Id())
+		var s []string
+		if d.Id() == "" {
+			identity, err := d.Identity()
+			if err != nil {
+				return nil, fmt.Errorf("Error getting identity: %s", err)
+			}
+			s = []string{identity.Get("project").(string), identity.Get("role").(string), identity.Get("member").(string), identity.Get("condition").(string)}
+		} else {
+			s = strings.Fields(d.Id())
+		}
 		var id, role, member string
 		if len(s) < 3 {
 			d.SetId("")
@@ -137,6 +146,9 @@ func iamMemberImport(newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser 
 		}
 		var binding *cloudresourcemanager.Binding
 		for _, b := range p.Bindings {
+			if conditionKeyFromCondition(b.Condition).Title != "" {
+				log.Printf("[DEBUG] condition title from binding: %#v", conditionKeyFromCondition(b.Condition).Title)
+			}
 			if b.Role == role && conditionKeyFromCondition(b.Condition).Title == conditionTitle {
 				containsMember := false
 				for _, m := range b.Members {
@@ -181,10 +193,35 @@ func ResourceIamMember(parentSpecificSchema map[string]*schema.Schema, newUpdate
 		// resource is used.
 		DeprecationMessage: settings.DeprecationMessage,
 
-		Schema: tpgresource.MergeSchemas(IamMemberBaseSchema, parentSpecificSchema),
-		Importer: &schema.ResourceImporter{
-			State: iamMemberImport(newUpdaterFunc, resourceIdParser),
+		Identity: &schema.ResourceIdentity{
+			Version: 1,
+			SchemaFunc: func() map[string]*schema.Schema {
+				return map[string]*schema.Schema{
+					"project": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+						Description:       `The project that the service account belongs to.`,
+					},
+					"role": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+						Description:       `The role that the member is being added to.`,
+					},
+					"member": {
+						Type:              schema.TypeString,
+						RequiredForImport: true,
+						Description:       `The member to add to the role.`,
+					},
+					"condition": {
+						Type:              schema.TypeString,
+						OptionalForImport: true,
+						Description:       `The condition to add to the role.`,
+					},
+				}
+			},
 		},
+		Schema:        tpgresource.MergeSchemas(IamMemberBaseSchema, parentSpecificSchema),
+		Importer:      &schema.ResourceImporter{State: iamMemberImport(newUpdaterFunc, resourceIdParser)},
 		UseJSONNumber: true,
 	}
 }
@@ -289,6 +326,27 @@ func resourceIamMemberRead(newUpdaterFunc NewResourceIamUpdaterFunc) schema.Read
 			return fmt.Errorf("Error setting role: %s", err)
 		}
 		if err := d.Set("condition", FlattenIamCondition(binding.Condition)); err != nil {
+			return fmt.Errorf("Error setting condition: %s", err)
+		}
+
+		identity, err := d.Identity()
+		if err != nil {
+			return fmt.Errorf("Error getting identity: %s", err)
+		}
+		err = identity.Set("project", d.Get("project").(string))
+		if err != nil {
+			return fmt.Errorf("Error setting project: %s", err)
+		}
+		err = identity.Set("role", binding.Role)
+		if err != nil {
+			return fmt.Errorf("Error setting role: %s", err)
+		}
+		err = identity.Set("member", member)
+		if err != nil {
+			return fmt.Errorf("Error setting member: %s", err)
+		}
+		err = identity.Set("condition", binding.Condition.Title)
+		if err != nil {
 			return fmt.Errorf("Error setting condition: %s", err)
 		}
 		return nil
