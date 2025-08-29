@@ -29,6 +29,9 @@ timeouts:
   insert_minutes: 60
   update_minutes: 60
   delete_minutes: 60
+custom_code:
+  tgc_decoder: 'templates/tgc_next/decoders/backup_dr_backup_plan.go.tmpl'
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'backup_dr_backup_plan_simple'
     primary_resource_id: 'my-backup-plan-1'
@@ -95,7 +98,6 @@ properties:
     type: Array
     description: |
       The list of all resource types to which the `BackupPlan` can be applied.
-    min_version: beta
     item_type:
       type: String
     output: true

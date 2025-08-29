@@ -1,0 +1,52 @@
+{{/*# The license inside this block applies to this file.
+  # Copyright 2024 Google Inc.
+  # Licensed under the Apache License, Version 2.0 (the "License");
+  # you may not use this file except in compliance with the License.
+  # You may obtain a copy of the License at
+  #
+  #     http://www.apache.org/licenses/LICENSE-2.0
+  #
+  # Unless required by applicable law or agreed to in writing, software
+  # distributed under the License is distributed on an "AS IS" BASIS,
+  # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  # See the License for the specific language governing permissions and
+  # limitations under the License.
+*/}}
+{{- define "SchemaFieldsFW"}}
+{{- if .FlattenObject -}}
+	{{- range $prop := .ResourceMetadata.OrderProperties .UserProperties -}}
+    {{ template "SchemaFieldsFW" $prop }}
+	{{ end -}}
+{{- else -}}
+"{{underscore .Name -}}": schema.{{.GetFWType}}Attribute{
+{{ if .DefaultFromApi -}}
+	Optional: true,
+	Computed: true,
+{{ else if .Required -}}
+  Required: true,
+{{ else if .Output -}}
+  Computed: true,
+{{ else -}}
+  Optional: true,
+{{ end -}}
+{{ if .DeprecationMessage -}}
+  DeprecationMessage: "{{ .DeprecationMessage }}",
+{{ end -}}
+{{ if .Sensitive -}}
+  Sensitive: true,
+{{ end -}}
+{{ if or .IsForceNew .DefaultFromApi -}}
+    PlanModifiers: []planmodifier.{{.GetFWType}}{
+
+  {{ if .IsForceNew -}}
+      {{lower .GetFWType}}planmodifier.RequiresReplace(),
+  {{ end -}}
+
+  {{ if .DefaultFromApi -}}
+     {{lower .GetFWType}}planmodifier.UseStateForUnknown(),
+  {{ end -}}
+    },
+{{ end -}}
+},
+{{- end -}}
+{{- end -}}

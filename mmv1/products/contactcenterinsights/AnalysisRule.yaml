@@ -32,6 +32,7 @@ update_mask: true
 id_format: projects/{{project}}/locations/{{location}}/analysisRules/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/analysisRules/{{name}}
+autogen_status: QW5hbHlzaXNSdWxl
 examples:
   - name: 'contact_center_insights_analysis_rule_basic'
     primary_resource_id: 'analysis_rule_basic'

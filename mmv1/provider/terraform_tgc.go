@@ -354,6 +354,7 @@ func (tgc TerraformGoogleConversion) CopyCommonFiles(outputFolder string, genera
 	tgc.CopyFileList(outputFolder, retrieveTestSourceCodeWithLocation(".go"))
 
 	resourceConverters := map[string]string{
+		"../caiasset/asset.go":                                                                  "third_party/tgc/caiasset/asset.go",
 		"converters/google/resources/cai/constants.go":                                          "third_party/tgc/cai/constants.go",
 		"converters/google/resources/constants.go":                                              "third_party/tgc/constants.go",
 		"converters/google/resources/cai.go":                                                    "third_party/tgc/cai.go",

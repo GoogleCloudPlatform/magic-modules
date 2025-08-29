@@ -114,6 +114,9 @@ type IamPolicy struct {
 	// [Optional] Check to see if zone value should be replaced with GOOGLE_ZONE in iam tests
 	// Defaults to true
 	SubstituteZoneValue bool `yaml:"substitute_zone_value"`
+
+	// Add a deprecation message for a resource that's been deprecated in the API.
+	DeprecationMessage string `yaml:"deprecation_message,omitempty"`
 }
 
 func (p *IamPolicy) UnmarshalYAML(unmarshal func(any) error) error {

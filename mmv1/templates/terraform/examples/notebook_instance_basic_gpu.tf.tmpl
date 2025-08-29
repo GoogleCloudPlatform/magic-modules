@@ -9,7 +9,7 @@ resource "google_notebooks_instance" "{{$.PrimaryResourceId}}" {
     core_count   = 1
   }
   vm_image {
-    project      = "deeplearning-platform-release"
-    image_family = "pytorch-latest-cu124"
+    project      = "cloud-notebooks-managed"
+    image_family = "workbench-instances"
   }
 }

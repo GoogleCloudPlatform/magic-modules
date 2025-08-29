@@ -81,18 +81,18 @@ func Get{{ $.ResourceName -}}ApiObject(d tpgresource.TerraformResourceData, conf
     obj := make(map[string]interface{})
 {{- range $prop := $.SettableProperties }}
 {{- if $prop.FlattenObject }}
-    {{ $prop.ApiName -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(nil, d, config)
+    {{ $prop.CamelizeProperty -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(nil, d, config)
 {{- else }}
-    {{ $prop.ApiName -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(d.Get("{{underscore $prop.Name}}"), d, config)
+    {{ $prop.CamelizeProperty -}}Prop, err := expand{{ $.ResourceName -}}{{$prop.TitlelizeProperty}}(d.Get("{{underscore $prop.Name}}"), d, config)
 {{- end}}
     if err != nil {
         return nil, err
 {{- if not $prop.SendEmptyValue }}
-    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.ApiName -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop)) {
+    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); !tpgresource.IsEmptyValue(reflect.ValueOf({{ $prop.CamelizeProperty -}}Prop)) && (ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty -}}Prop)) {
 {{- else }}
-    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); ok || !reflect.DeepEqual(v, {{ $prop.ApiName -}}Prop) {
+    } else if v, ok := d.GetOkExists("{{underscore $prop.Name}}"); ok || !reflect.DeepEqual(v, {{ $prop.CamelizeProperty -}}Prop) {
 {{- end }}
-        obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
+        obj["{{ $prop.ApiName -}}"] = {{ $prop.CamelizeProperty -}}Prop
     }
 {{- end}}
 

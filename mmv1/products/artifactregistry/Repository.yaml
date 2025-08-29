@@ -53,7 +53,6 @@ iam_policy:
 custom_code:
   constants: 'templates/terraform/constants/artifact_registry_repository.go.tmpl'
   encoder: 'templates/terraform/encoders/location_from_region.go.tmpl'
-  pre_create: 'templates/terraform/pre_create/artifact_registry_remote_repository.go.tmpl'
 sweeper:
   url_substitutions:
     - region: "us-central1"
@@ -271,6 +270,11 @@ properties:
       longer than 63 characters. Label keys must begin with a lowercase letter
       and may only contain lowercase letters, numeric characters, underscores,
       and dashes.
+  - name: 'registryUri'
+    type: String
+    output: true
+    description: |
+      The repository endpoint, for example: us-docker.pkg.dev/my-proj/my-repo.
   - name: 'kmsKeyName'
     type: String
     description: |-
@@ -517,9 +521,6 @@ properties:
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.docker_repository.0.custom_repository
-            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-            # Eventually lets delete default_value and custom_flatten in a major release
-            default_value: "DOCKER_HUB"
             enum_values:
               - 'DOCKER_HUB'
           - name: 'customRepository'
@@ -556,9 +557,6 @@ properties:
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.maven_repository.0.custom_repository
-            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-            # Eventually lets delete default_value and custom_flatten in a major release
-            default_value: "MAVEN_CENTRAL"
             enum_values:
               - 'MAVEN_CENTRAL'
           - name: 'customRepository'
@@ -595,9 +593,6 @@ properties:
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.npm_repository.0.custom_repository
-            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-            # Eventually lets delete default_value and custom_flatten in a major release
-            default_value: "NPMJS"
             enum_values:
               - 'NPMJS'
           - name: 'customRepository'
@@ -634,9 +629,6 @@ properties:
             immutable: true
             conflicts:
               - remoteRepositoryConfig.0.python_repository.0.custom_repository
-            custom_flatten: 'templates/terraform/custom_flatten/default_if_empty.tmpl'
-            # Eventually lets delete default_value and custom_flatten in a major release
-            default_value: "PYPI"
             enum_values:
               - 'PYPI'
           - name: 'customRepository'

@@ -189,10 +189,12 @@ properties:
     type: String
     description: |
       Optional. Custom Performance Total Throughput of the pool (in MiB/s).
+    default_from_api: true
   - name: 'totalIops'
     type: String
     description: |
       Optional. Custom Performance Total IOPS of the pool If not provided, it will be calculated based on the totalThroughputMibps
+    default_from_api: true
   - name: 'hotTierSizeGib'
     type: String
     description: |
@@ -207,3 +209,17 @@ properties:
       Flag indicating that the hot-tier threshold will be auto-increased by 10% of the hot-tier when it hits 100%. Default is true.
       The increment will kick in only if the new size after increment is still less than or equal to storage pool size.
     min_version: 'beta'
+  - name: 'qosType'
+    type: Enum
+    description: |
+      QoS (Quality of Service) type of the storage pool.
+      Possible values are: AUTO, MANUAL.
+    enum_values:
+      - 'QOS_TYPE_UNSPECIFIED'
+      - 'AUTO'
+      - 'MANUAL'
+  - name: 'availableThroughputMibps'
+    type: Double
+    description: |
+      Available throughput of the storage pool (in MiB/s).
+    output: true

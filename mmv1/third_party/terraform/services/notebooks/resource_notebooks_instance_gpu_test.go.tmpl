@@ -44,8 +44,8 @@ resource "google_notebooks_instance" "test" {
     terraform  = "true"
   }
   vm_image {
-    project      = "deeplearning-platform-release"
-    image_family = "pytorch-latest-cu124"
+    project      = "cloud-notebooks-managed"
+    image_family = "workbench-instances"
   }
   install_gpu_driver = true
   accelerator_config {

@@ -1,0 +1,16 @@
+// Handle desired state after queue creation
+if v, ok := d.GetOk("desired_state"); ok && v.(string) == "PAUSED" {
+  pauseUrl := fmt.Sprintf("%s%s:pause", config.CloudTasksBasePath, id)
+
+  _, err = transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+    Config:    config,
+    Method:    "POST",
+    Project:   billingProject,
+    RawURL:    pauseUrl,
+    UserAgent: userAgent,
+  })
+
+  if err != nil {
+    return fmt.Errorf("Error pausing queue %q: %s", d.Id(), err)
+  }
+}

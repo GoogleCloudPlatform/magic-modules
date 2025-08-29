@@ -237,7 +237,6 @@ func execTestTerraformVCR(prNumber, mmCommitSha, buildID, projectID, buildStep, 
 	}
 
 	notRunBeta, notRunGa := notRunTests(tpgRepo.UnifiedZeroDiff, tpgbRepo.UnifiedZeroDiff, replayingResult)
-
 	postReplayData := postReplay{
 		RunFullVCR:       runFullVCR,
 		AffectedServices: sort.StringSlice(servicesArr),

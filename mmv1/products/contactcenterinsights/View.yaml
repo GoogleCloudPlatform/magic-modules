@@ -26,6 +26,7 @@ update_mask: true
 id_format: projects/{{project}}/locations/{{location}}/views/{{name}}
 import_format:
   - projects/{{project}}/locations/{{location}}/views/{{name}}
+autogen_status: Vmlldw==
 examples:
   - name: 'contact_center_insights_view_basic'
     primary_resource_id: 'basic_view'

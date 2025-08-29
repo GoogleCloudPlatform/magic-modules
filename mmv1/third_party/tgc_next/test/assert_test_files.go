@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl"
 	cai2hclconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/cai2hcl/converters"
@@ -18,6 +19,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai"
 	tfplan2caiconverters "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tfplan2cai/converters"
+	"github.com/sethvargo/go-retry"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest"
@@ -32,38 +34,58 @@ var (
 )
 
 func BidirectionalConversion(t *testing.T, ignoredFields []string, ignoredAssetFields []string) {
-	resourceTestData, primaryResource, err := prepareTestData(t.Name())
-	if err != nil {
-		t.Fatal("Error preparing the input data:", err)
-	}
-
-	if resourceTestData == nil {
-		t.Skipf("The test data is unavailable.")
-	}
-
-	// Create a temporary directory for running terraform.
-	tfDir, err := os.MkdirTemp(tmpDir, "terraform")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer os.RemoveAll(tfDir)
-
-	logger := zaptest.NewLogger(t)
-
-	// If the primary resource is available, only test the primary resource.
-	// Otherwise, test all of the resources in the test.
-	if primaryResource != "" {
-		t.Logf("Test for the primary resource %s begins.", primaryResource)
-		err = testSingleResource(t, t.Name(), resourceTestData[primaryResource], tfDir, ignoredFields, ignoredAssetFields, logger, true)
+	retries := 0
+	flakyAction := func(ctx context.Context) error {
+		log.Printf("Starting the retry %d", retries)
+		resourceTestData, primaryResource, err := prepareTestData(t.Name(), retries)
+		retries++
 		if err != nil {
-			t.Fatal("Test fails:", err)
+			return fmt.Errorf("error preparing the input data: %v", err)
 		}
-	} else {
-		for _, testData := range resourceTestData {
-			err = testSingleResource(t, t.Name(), testData, tfDir, ignoredFields, ignoredAssetFields, logger, false)
+
+		if resourceTestData == nil {
+			return retry.RetryableError(fmt.Errorf("fail: test data is unavailable"))
+		}
+
+		// Create a temporary directory for running terraform.
+		tfDir, err := os.MkdirTemp(tmpDir, "terraform")
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(tfDir)
+
+		logger := zaptest.NewLogger(t)
+
+		// If the primary resource is specified, only test the primary resource.
+		// Otherwise, test all of the resources in the test.
+		if primaryResource != "" {
+			t.Logf("Test for the primary resource %s begins.", primaryResource)
+			err = testSingleResource(t, t.Name(), resourceTestData[primaryResource], tfDir, ignoredFields, ignoredAssetFields, logger, true)
 			if err != nil {
-				t.Fatal("Test fails: ", err)
+				return err
 			}
+		} else {
+			for _, testData := range resourceTestData {
+				err = testSingleResource(t, t.Name(), testData, tfDir, ignoredFields, ignoredAssetFields, logger, false)
+				if err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	}
+
+	// Note maxAttempts-1 is retries, not attempts.
+	backoffPolicy := retry.WithMaxRetries(maxAttempts-1, retry.NewConstant(50*time.Millisecond))
+
+	t.Log("Starting test with retry logic.")
+
+	if err := retry.Do(context.Background(), backoffPolicy, flakyAction); err != nil {
+		if strings.Contains(err.Error(), "test data is unavailable") {
+			t.Skipf("Test skipped because data was unavailable after all retries: %v", err)
+		} else {
+			t.Fatalf("Failed after all retries %d: %v", retries, err)
 		}
 	}
 }
@@ -151,8 +173,11 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 
 	parsedExportConfig := exportResources[0].Attributes
 	missingKeys := compareHCLFields(testData.ParsedRawConfig, parsedExportConfig, ignoredFieldSet)
+
+	// Sometimes, the reason for missing fields could be CAI asset data issue.
 	if len(missingKeys) > 0 {
-		return fmt.Errorf("missing fields in resource %s after cai2hcl conversion:\n%s", testData.ResourceAddress, missingKeys)
+		log.Printf("missing fields in resource %s after cai2hcl conversion:\n%s", testData.ResourceAddress, missingKeys)
+		return retry.RetryableError(fmt.Errorf("missing fields"))
 	}
 	log.Printf("Step 1 passes for resource %s. All of the fields in raw config are in export config", testData.ResourceAddress)
 
@@ -163,8 +188,8 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	// Compare roundtrip_config with export_config to ensure they are identical.
 
 	// Convert the export config to roundtrip assets and then convert the roundtrip assets back to roundtrip config
-	ancestryCache := getAncestryCache(assets)
-	roundtripAssets, roundtripConfigData, err := getRoundtripConfig(t, testName, tfDir, ancestryCache, logger, ignoredAssetFields)
+	ancestryCache, defaultProject := getAncestryCache(assets)
+	roundtripAssets, roundtripConfigData, err := getRoundtripConfig(t, testName, tfDir, ancestryCache, defaultProject, logger, ignoredAssetFields)
 	if err != nil {
 		return fmt.Errorf("error when converting the round-trip config: %#v", err)
 	}
@@ -224,9 +249,10 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	return nil
 }
 
-// Gets the ancestry cache for tfplan2cai conversion
-func getAncestryCache(assets []caiasset.Asset) map[string]string {
+// Gets the ancestry cache for tfplan2cai conversion and the default project
+func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 	ancestryCache := make(map[string]string, 0)
+	defaultProject := ""
 
 	for _, asset := range assets {
 		ancestors := asset.Ancestors
@@ -243,18 +269,29 @@ func getAncestryCache(assets []caiasset.Asset) map[string]string {
 
 			if _, ok := ancestryCache[ancestors[0]]; !ok {
 				ancestryCache[ancestors[0]] = path
+				if defaultProject == "" {
+					if s, hasPrefix := strings.CutPrefix(ancestors[0], "projects/"); hasPrefix {
+						defaultProject = s
+					}
+				}
 			}
 
 			project := utils.ParseFieldValue(asset.Name, "projects")
-			projectKey := fmt.Sprintf("projects/%s", project)
-			if strings.HasPrefix(ancestors[0], "projects") && ancestors[0] != projectKey {
-				if _, ok := ancestryCache[projectKey]; !ok {
-					ancestryCache[projectKey] = path
+			if project != "" {
+				projectKey := fmt.Sprintf("projects/%s", project)
+				if strings.HasPrefix(ancestors[0], "projects") && ancestors[0] != projectKey {
+					if _, ok := ancestryCache[projectKey]; !ok {
+						ancestryCache[projectKey] = path
+					}
+				}
+
+				if defaultProject == "" {
+					defaultProject = project
 				}
 			}
 		}
 	}
-	return ancestryCache
+	return ancestryCache, defaultProject
 }
 
 // Compares HCL and finds all of the keys in map1 that are not in map2
@@ -306,7 +343,7 @@ func isIgnored(key string, ignoredFields map[string]struct{}) bool {
 }
 
 // Converts a tfplan to CAI asset, and then converts the CAI asset into HCL
-func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCache map[string]string, logger *zap.Logger, ignoredAssetFields []string) ([]caiasset.Asset, []byte, error) {
+func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger, ignoredAssetFields []string) ([]caiasset.Asset, []byte, error) {
 	fileName := fmt.Sprintf("%s_export", testName)
 
 	// Run terraform init and terraform apply to generate tfplan.json files
@@ -323,7 +360,7 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 	roundtripAssets, err := tfplan2cai.Convert(ctx, jsonPlan, &tfplan2cai.Options{
 		ErrorLogger:    logger,
 		Offline:        true,
-		DefaultProject: "ci-test-project-nightly-beta",
+		DefaultProject: defaultProject,
 		DefaultRegion:  "",
 		DefaultZone:    "",
 		UserAgent:      "",

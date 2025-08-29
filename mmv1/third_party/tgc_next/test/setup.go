@@ -51,12 +51,12 @@ type Resource struct {
 }
 
 const (
-	ymdFormat  = "2006-01-02"
-	maxRetries = 3
+	ymdFormat   = "2006-01-02"
+	maxAttempts = 3
 )
 
 var (
-	TestsMetadata = make([]NightlyRun, maxRetries)
+	TestsMetadata = make([]NightlyRun, maxAttempts)
 	setupDone     = false
 )
 
@@ -88,8 +88,8 @@ func ReadTestsDataFromGcs() ([]NightlyRun, error) {
 				// Keep looking until we find a date with metadata.
 				i--
 				retries++
-				if retries > maxRetries {
-					// Stop looking when we find maxRetries dates with no metadata.
+				if retries > maxAttempts {
+					// Stop looking when we find maxAttempts dates with no metadata.
 					return nil, fmt.Errorf("too many retries, %v", allErrs)
 				}
 			} else {
@@ -142,7 +142,7 @@ func readTestsDataFromGCSForRun(ctx context.Context, currentDate time.Time, buck
 	return metadata, nil
 }
 
-func prepareTestData(testName string) (map[string]ResourceTestData, string, error) {
+func prepareTestData(testName string, retries int) (map[string]ResourceTestData, string, error) {
 	var err error
 	cacheMutex.Lock()
 	defer cacheMutex.Unlock()
@@ -153,23 +153,20 @@ func prepareTestData(testName string) (map[string]ResourceTestData, string, erro
 
 	var testMetadata TgcMetadataPayload
 	var resourceMetadata map[string]*ResourceMetadata
-	for _, run := range TestsMetadata {
-		var ok bool
-		testMetadata, ok = run.MetadataByTest[testName]
-		if ok {
-			log.Printf("Found metadata for %s from run on %s", testName, run.Date.Format(ymdFormat))
-			resourceMetadata = testMetadata.ResourceMetadata
-			if len(resourceMetadata) > 0 {
-				break
-			}
-		}
-		log.Printf("Missing metadata for %s from run on %s, looking at previous run", testName, run.Date.Format(ymdFormat))
-	}
 
-	if len(resourceMetadata) == 0 {
+	run := TestsMetadata[retries]
+	testMetadata, ok := run.MetadataByTest[testName]
+	if !ok {
 		log.Printf("Data of test is unavailable: %s", testName)
 		return nil, "", nil
 	}
+	resourceMetadata = testMetadata.ResourceMetadata
+	if len(resourceMetadata) == 0 {
+		log.Printf("Data of resource is unavailable: %s", testName)
+		return nil, "", nil
+	}
+
+	log.Printf("Found metadata for %s from run on %s", testName, run.Date.Format(ymdFormat))
 
 	rawTfFile := fmt.Sprintf("%s.tf", testName)
 	err = os.WriteFile(rawTfFile, []byte(testMetadata.RawConfig), 0644)
@@ -186,7 +183,7 @@ func prepareTestData(testName string) (map[string]ResourceTestData, string, erro
 	}
 
 	if len(rawResourceConfigs) == 0 {
-		return nil, "", fmt.Errorf("Test %s fails: raw config is unavailable", testName)
+		return nil, "", fmt.Errorf("test %s fails: raw config is unavailable", testName)
 	}
 
 	rawConfigMap := convertToConfigMap(rawResourceConfigs)
