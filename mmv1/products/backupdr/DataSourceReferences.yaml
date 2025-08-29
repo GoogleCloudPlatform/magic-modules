@@ -13,19 +13,23 @@
 
 ---
 name: 'DataSourceReferences'
+create_url: projects/{{project}}/locations/{{location}}/dataSourceReferences/?data_source_reference_id={{data_source_reference_id}}
 self_link: projects/{{project}}/locations/{{location}}/dataSourceReferences/{{data_source_reference_id}}
-# update_verb: 'PATCH'
-# update_mask: true
+update_verb: 'PATCH'
+update_mask: true
+delete_url: projects/{{project}}/locations/{{location}}/dataSourceReferences/{{data_source_reference_id}}
 description: A reference to a data source in Backup and DR.
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/dataSourceReferences/{{data_source_reference_id}}'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/backup-disaster-recovery/docs'
   api: 'https://cloud.google.com/backup-disaster-recovery/docs/reference/rest'
-autogen_async: true
 timeouts:
   insert_minutes: 60
   update_minutes: 20
   delete_minutes: 60
+autogen_async: true
 examples:
   - name: 'backup_dr_data_source_reference'
     primary_resource_id: 'my-data-source-reference'
@@ -37,7 +41,7 @@ examples:
       data_source_reference_id: "my-dsr"
       data_source: "new-dataSource"
     test_env_vars:
-      project: "PROJECT_NAME"
+      project: 'PROJECT_NAME'
 parameters:
   - name: 'location'
     type: String
