@@ -92,7 +92,10 @@ func main() {
 
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
-		generateResourceTestFile(resource)
+		if string(resource.ProductName())[0] >= 'a' && string(resource.ProductName())[0] <= 'c' {
+			log.Printf("Generating test file for %s", resource.TitleCaseFullName())
+			generateResourceTestFile(resource)
+		}
 		generatedResources = append(generatedResources, resource)
 	}
 
@@ -458,10 +461,6 @@ func generateResourceTestFile(res *Resource) {
 		return
 	}
 
-	if res.ProductName()[0] < 'a' || res.ProductName()[0] > 'c' {
-		log.Printf("Skipping test file for %s because it's not in the a-e range", res.ProductName())
-		return
-	}
 	// Generate resource file
 	tmplInput := ResourceInput{
 		Resource: *res,
