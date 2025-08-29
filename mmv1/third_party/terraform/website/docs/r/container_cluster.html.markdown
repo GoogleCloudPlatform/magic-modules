@@ -1493,6 +1493,28 @@ such as `"300ms"`. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m",
 
 * `single_process_oom_kill` - (Optional) Defines whether to enable single process OOM killer. If true, the processes in the container will be OOM killed individually instead of as a group.
 
+* `topology_manager` - (Optional) These settings control the kubelet's [Topology
+  Manager policy](https://kubernetes.io/docs/tasks/administer-cluster/topology-manager/#topology-manager-policies), which coordinates the set of components responsible for
+  performance optimizations related to CPU isolation, memory, and device locality.
+  
+<a name="nested_topology_manager"></a>The `topology_manager` block supports:
+
+* `policy` - (Optional) The Topology Manager policy controls resource alignment on the node and can be set to one of the following: none (default), best-effort, restricted, or single-numa-node.
+
+* `scope` - (Optional) The Topology Manager scope, defining the granularity at which
+  policy decisions are applied. Valid values are "container" (resources are aligned
+  per container within a pod which is set by default) or "pod" (resources are aligned for the entire pod).
+
+* `memory_manager` -  (Optional) Configuration for the [memory manager](https://kubernetes.io/docs/tasks/administer-cluster/memory-manager/) on the node.
+The memory manager optimizes memory and hugepages allocation for pods, especially
+those in the Guaranteed QoS class, by influencing NUMA affinity.
+
+<a name="nested_memory_manager"></a>The `memory_manager` block supports:
+
+* `policy` - (Optional) The [Memory
+  Manager](https://kubernetes.io/docs/tasks/administer-cluster/memory-manager/)
+  policy can be set to None (default) or Static. This policy dictates how memory alignment is handled on the node.
+
 * `max_parallel_image_pulls` - (Optional) Set the maximum number of image pulls in parallel. The integer must be between 2 and 5, inclusive.
 
 * `eviction_max_pod_grace_period_seconds` - (Optional) Defines the maximum allowed grace period (in seconds) to use when terminating pods in response to a soft eviction threshold being met. The integer must be positive and not exceed 300.
