@@ -4,7 +4,7 @@ description: |-
   Contains information about a GKEHub Feature Memberships.
 ---
 
-# google_gkehub_feature_membership
+# google_gke_hub_feature_membership
 
 Contains information about a GKEHub Feature Memberships. Feature Memberships configure GKEHub Features that apply to specific memberships rather than the project as a whole. The google_gke_hub is the Fleet API.
 
@@ -140,6 +140,58 @@ resource "google_gke_hub_feature_membership" "feature_member" {
         sync_wait_secs = "20"
         secret_type = "gcpserviceaccount"
         gcp_service_account_email = "sa@project-id.iam.gserviceaccount.com"
+      }
+    }
+  }
+}
+```
+
+
+## Example Usage - Config Management with Deployment Override
+
+```hcl
+resource "google_container_cluster" "cluster" {
+  name               = "my-cluster"
+  location           = "us-central1-a"
+  initial_node_count = 1
+}
+
+resource "google_gke_hub_membership" "membership" {
+  membership_id = "my-membership"
+  endpoint {
+    gke_cluster {
+      resource_link = "//container.googleapis.com/${google_container_cluster.cluster.id}"
+    }
+  }
+}
+
+resource "google_gke_hub_feature" "feature" {
+  name = "configmanagement"
+  location = "global"
+
+  labels = {
+    foo = "bar"
+  }
+}
+
+resource "google_gke_hub_feature_membership" "feature_member" {
+  location = "global"
+  feature = google_gke_hub_feature.feature.name
+  membership = google_gke_hub_membership.membership.membership_id
+  configmanagement {
+    version = "1.20.1"
+    config_sync {
+      enabled = true
+      deployment_overrides {
+        deployment_name       = "reconciler-manager"
+        deployment_namespace = "config-management-system"
+        containers {
+          container_name = "reconciler-manager"
+          cpu_request    = "100m"
+          memory_request = "64Mi"
+          cpu_limit      = "250m"
+          memory_limit   = "128Mi"
+        }
       }
     }
   }
@@ -374,11 +426,6 @@ The following arguments are supported:
   (Optional)
   Version of Config Sync installed.
 
-* `binauthz` -
-  (Optional, Deprecated)
-  Binauthz configuration for the cluster. Structure is [documented below](#nested_binauthz).
-  This field will be ignored and should not be set.
-
 * `hierarchy_controller` -
   (Optional)
   Hierarchy Controller configuration for the cluster. Structure is [documented below](#nested_hierarchy_controller).
@@ -392,13 +439,6 @@ The following arguments are supported:
   Policy Controller configuration for the cluster. Structure is [documented below](#nested_policy_controller).
   Configuring Policy Controller through the configmanagement feature is no longer recommended.
   Use the policycontroller feature instead.
-
-    
-<a name="nested_binauthz"></a>The `binauthz` block supports:
-    
-* `enabled` -
-  (Optional)
-  Whether binauthz is enabled in this cluster.
     
 <a name="nested_config_sync"></a>The `config_sync` block supports:
 
@@ -430,7 +470,7 @@ The following arguments are supported:
 
 * `deployment_overrides` -
   (Optional)
-  The override configurations for the Config Sync Deployments. Structure is [documented below](#nested_deployment_overrides).
+  The override configurations for the Config Sync Deployments. Structure is [documented below](#nested_deployment_overrides). The field is only available on Config Sync version 1.20.1 or later.
     
 <a name="nested_git"></a>The `git` block supports:
     

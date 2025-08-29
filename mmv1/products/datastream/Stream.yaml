@@ -216,6 +216,7 @@ examples:
   - name: 'datastream_stream_salesforce'
     primary_resource_id: 'default'
     vars:
+      stream_id: 'sf-stream'
       source_connection_profile_id: 'source-profile'
       destination_connection_profile_id: 'destination-profile'
     exclude_test: true

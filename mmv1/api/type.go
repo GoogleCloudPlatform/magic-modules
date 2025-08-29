@@ -293,6 +293,38 @@ type Type struct {
 	// The prefix used as part of the property expand/flatten function name
 	// flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}
 	Prefix string `yaml:"prefix,omitempty"`
+
+	// The field is not present in CAI asset
+	IsMissingInCai bool `yaml:"is_missing_in_cai,omitempty"`
+
+	// A custom expander replaces the default expander for an attribute.
+	// It is called as part of tfplan2cai conversion if
+	// object.input is false.  It can return an object of any type,
+	// so the function header *is* part of the custom code template.
+	// As with flatten, `property` and `prefix` are available.
+	CustomTgcExpand string `yaml:"custom_tgc_expand,omitempty"`
+
+	// A custom flattener replaces the default flattener for an attribute.
+	// It is called as part of cai2hcl conversion. It can return an object of any type,
+	// so the function header *is* a part of the custom code template. To help with
+	// creating the function header, `property` and `prefix` are available,
+	// just as they are in the standard flattener template.
+	CustomTgcFlatten string `yaml:"custom_tgc_flatten,omitempty"`
+
+	// If true, the empty value of this attribute in CAI asset is included.
+	IncludeEmptyValueInCai bool `yaml:"include_empty_value_in_cai,omitempty"`
+
+	// If the property is type of bool and has `defaul_from_api: true`,
+	// include empty value in CAI asset by default during tfplan2cai conversion.
+	// Use `exclude_false_in_cai` to override the default behavior
+	// when the default value on API side is true.
+	//
+	// If a property is missing in CAI asset, use `is_missing_in_cai: true`
+	// and `exclude_false_in_cai: true` is not needed
+	ExcludeFalseInCai bool `yaml:"exclude_false_in_cai,omitempty"`
+
+	// If true, the custom flatten function is not applied during cai2hcl
+	TGCIgnoreTerraformCustomFlatten bool `yaml:"tgc_ignore_terraform_custom_flatten,omitempty"`
 }
 
 const MAX_NAME = 20
@@ -414,7 +446,7 @@ func (t Type) Lineage() string {
 // This format is intended for resource metadata, to be used for connecting a Terraform
 // type with a corresponding API type.
 func (t Type) MetadataLineage() string {
-	if t.ParentMetadata == nil {
+	if t.ParentMetadata == nil || t.ParentMetadata.FlattenObject {
 		return google.Underscore(t.Name)
 	}
 
@@ -479,6 +511,10 @@ func (t Type) TitlelizeProperty() string {
 	return google.Camelize(t.Name, "upper")
 }
 
+func (t Type) CamelizeProperty() string {
+	return google.Camelize(t.Name, "lower")
+}
+
 // If the Prefix field is already set, returns the value.
 // Otherwise, set the Prefix field and returns the value.
 func (t *Type) GetPrefix() string {
@@ -507,6 +543,15 @@ func (t *Type) GetPrefix() string {
 }
 
 func (t Type) ResourceType() string {
+	r := t.ResourceRef()
+	if r == nil {
+		return ""
+	}
+	path := strings.Split(r.BaseUrl, "/")
+	return path[len(path)-1]
+}
+
+func (t Type) FWResourceType() string {
 	r := t.ResourceRef()
 	if r == nil {
 		return ""
@@ -785,6 +830,45 @@ func (t Type) TFType(s string) string {
 	return "schema.TypeString"
 }
 
+func (t Type) GetFWType() string {
+	switch t.Type {
+	case "Boolean":
+		return "Bool"
+	case "Double":
+		return "Float64"
+	case "Integer":
+		return "Int64"
+	case "String":
+		return "String"
+	case "Time":
+		return "String"
+	case "Enum":
+		return "String"
+	case "ResourceRef":
+		return "String"
+	case "NestedObject":
+		return "Nested"
+	case "Array":
+		return "List"
+	case "KeyValuePairs":
+		return "Map"
+	case "KeyValueLabels":
+		return "Map"
+	case "KeyValueTerraformLabels":
+		return "Map"
+	case "KeyValueEffectiveLabels":
+		return "Map"
+	case "KeyValueAnnotations":
+		return "Map"
+	case "Map":
+		return "Map"
+	case "Fingerprint":
+		return "String"
+	}
+
+	return "String"
+}
+
 // TODO rewrite: validation
 // // Represents an enum, and store is valid values
 // class Enum < Primitive
@@ -836,6 +920,20 @@ func (t Type) ResourceRef() *Resource {
 	return resources[0]
 }
 
+// Checks if the referenced resource is in the same product or not
+func (t Type) IsResourceRefFound() bool {
+	if !t.IsA("ResourceRef") {
+		return false
+	}
+
+	product := t.ResourceMetadata.ProductMetadata
+	resources := google.Select(product.Objects, func(obj *Resource) bool {
+		return obj.Name == t.Resource
+	})
+
+	return len(resources) != 0
+}
+
 // TODO rewrite: validation
 //   func (t *Type) check_resource_ref_property_exists
 //     return unless defined?(resource_ref.all_user_properties)
@@ -878,6 +976,9 @@ func (t Type) UserProperties() []*Type {
 		}
 
 		return google.Reject(t.Properties, func(p *Type) bool {
+			if t.ResourceMetadata.IsTgcCompiler() {
+				return p.Exclude || p.Output
+			}
 			return p.Exclude
 		})
 	}
@@ -1078,7 +1179,7 @@ func (t Type) NamespaceProperty() string {
 }
 
 func (t Type) CustomTemplate(templatePath string, appendNewline bool) string {
-	return resource.ExecuteTemplate(&t, templatePath, appendNewline)
+	return ExecuteTemplate(&t, templatePath, appendNewline)
 }
 
 func (t *Type) GetIdFormat() string {
@@ -1123,13 +1224,45 @@ func (t *Type) IsForceNew() bool {
 		return t.Immutable
 	}
 
+	// WriteOnly fields are never immutable
+	if t.WriteOnly {
+		return false
+	}
+
+	// Output fields (except effective labels) can't be immutable
+	if t.Output && !t.IsA("KeyValueEffectiveLabels") {
+		return false
+	}
+
+	// Explicitly-marked fields are always immutable
+	if t.Immutable {
+		return true
+	}
+
+	// At this point the field can only be immutable if the resource is immutable.
+	if !t.ResourceMetadata.Immutable {
+		return false
+	}
+
+	// If this field has an update_url set, it's not immutable.
+	if t.UpdateUrl != "" {
+		return false
+	}
+
+	// If this is a top-level field, it inherits immutability from the resource.
 	parent := t.Parent()
-	return !t.WriteOnly && (!t.Output || t.IsA("KeyValueEffectiveLabels")) &&
-		(t.Immutable ||
-			(t.ResourceMetadata.Immutable && t.UpdateUrl == "" &&
-				(parent == nil ||
-					(parent.IsForceNew() &&
-						!(parent.FlattenObject && t.IsA("KeyValueLabels"))))))
+	if parent == nil {
+		return true
+	}
+
+	// If the parent field _isn't_ immutable, that's inherited by this field.
+	if !parent.IsForceNew() {
+		return false
+	}
+
+	// Otherwise, the field is immutable unless it's a KeyValueLabels field
+	// and the parent has FlattenObject set.
+	return !(parent.FlattenObject && t.IsA("KeyValueLabels"))
 }
 
 // Returns true if the type does not correspond to an API type
@@ -1156,7 +1289,7 @@ func (t *Type) ProviderOnly() bool {
 // fields still need to be included, ie:
 // flattenedField > newParent > renameMe should be passed to this function as
 // flattened_field.0.new_parent.0.im_renamed
-// TODO(emilymye): Change format of input for
+// TODO: Change format of input for
 // exactly_one_of/at_least_one_of/etc to use camelcase, MM properities and
 // convert to snake in this method
 func (t *Type) GetPropertySchemaPath(schemaPath string) string {
@@ -1204,4 +1337,32 @@ func (t Type) GetPropertySchemaPathList(propertyList []string) []string {
 		}
 	}
 	return list
+}
+
+func (t Type) IsJsonField() bool {
+	if t.CustomFlatten == "templates/terraform/custom_flatten/json_schema.tmpl" {
+		return true
+	}
+	if t.CustomExpand == "templates/terraform/custom_expand/json_schema.tmpl" || t.CustomExpand == "templates/terraform/custom_expand/json_value.tmpl" {
+		return true
+	}
+	return false
+}
+
+// Checks if the empty value should be set in CAI assets during tfplan2cai conversion
+func (t Type) TGCSendEmptyValue() bool {
+	if t.IncludeEmptyValueInCai {
+		return true
+	}
+
+	// Automatically check if false value should be set in CAI assets
+	if t.IsA("Boolean") {
+		return t.Required || (t.DefaultFromApi && !t.IsMissingInCai && !t.ExcludeFalseInCai)
+	}
+
+	return false
+}
+
+func (t Type) ShouldIgnoreCustomFlatten() bool {
+	return t.ResourceMetadata.IsTgcCompiler() && (t.IgnoreRead || t.TGCIgnoreTerraformCustomFlatten)
 }

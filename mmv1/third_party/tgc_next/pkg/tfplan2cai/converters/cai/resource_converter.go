@@ -3,8 +3,8 @@ package cai
 import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/caiasset"
 
-	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/tpgresource"
+	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
 )
 
 type ConvertFunc func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) ([]caiasset.Asset, error)
@@ -14,7 +14,7 @@ type ConvertFunc func(d tpgresource.TerraformResourceData, config *transport_tpg
 // by Terraform, like IAM policies managed with member/binding resources.
 type FetchFullResourceFunc func(d tpgresource.TerraformResourceData, config *transport_tpg.Config) (caiasset.Asset, error)
 
-type ResourceConverter struct {
+type Tfplan2caiConverter struct {
 	Convert           ConvertFunc
 	FetchFullResource FetchFullResourceFunc
 }

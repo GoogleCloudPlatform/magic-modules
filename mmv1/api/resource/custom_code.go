@@ -139,4 +139,11 @@ type CustomCode struct {
 	TestCheckDestroy string `yaml:"test_check_destroy"`
 
 	ValidateRawResourceConfigFuncs string `yaml:"raw_resource_config_validation"`
+
+	// ====================
+	// TGC Encoders & Decoders
+	// ====================
+	TgcEncoder string `yaml:"tgc_encoder"`
+
+	TgcDecoder string `yaml:"tgc_decoder"`
 }

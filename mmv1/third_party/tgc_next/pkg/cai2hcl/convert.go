@@ -16,7 +16,7 @@ type Options struct {
 }
 
 // Converts CAI Assets into HCL string.
-func Convert(assets []*caiasset.Asset, options *Options) ([]byte, error) {
+func Convert(assets []caiasset.Asset, options *Options) ([]byte, error) {
 	if options == nil || options.ErrorLogger == nil {
 		return nil, fmt.Errorf("logger is not initialized")
 	}
@@ -36,8 +36,6 @@ func Convert(assets []*caiasset.Asset, options *Options) ([]byte, error) {
 	}
 
 	t, err := models.HclWriteBlocks(allBlocks)
-
-	options.ErrorLogger.Debug(string(t))
 
 	return t, err
 }

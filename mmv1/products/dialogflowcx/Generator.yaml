@@ -1,0 +1,138 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: Generator
+description:
+  Generators contain prompt to be sent to the LLM model to generate text.
+  The prompt can contain parameters which will be resolved before calling the model.
+  It can optionally contain banned phrases to ensure the model responses are safe.
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/dialogflow/cx/docs'
+  api: 'https://cloud.google.com/dialogflow/cx/docs/reference/rest/v3/projects.locations.agents.generators'
+id_format: '{{parent}}/generators/{{name}}'
+base_url: '{{parent}}/generators'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - '{{parent}}/generators/{{name}}'
+timeouts:
+  insert_minutes: 40
+  update_minutes: 40
+  delete_minutes: 20
+custom_code:
+  pre_create: 'templates/terraform/pre_create/dialogflowcx_generator.go.tmpl'
+  pre_read: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_update: 'templates/terraform/pre_create/dialogflow_set_location.go.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/dialogflowcx_set_location_skip_default_obj.go.tmpl'
+  custom_import: 'templates/terraform/custom_import/dialogflowcx_generator.go.tmpl'
+exclude_sweeper: true
+examples:
+  - name: 'dialogflowcx_generator_basic'
+    primary_resource_id: 'generator'
+    vars:
+      agent_name: 'dialogflowcx-agent-fucntion'
+parameters:
+  - name: 'parent'
+    type: String
+    description: |
+      The agent to create a Generator for.
+      Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>.
+    url_param_only: true
+    immutable: true
+  - name: 'languageCode'
+    type: String
+    description: |
+      The language to create generators for the following fields:
+      * Generator.prompt_text.text
+      If not specified, the agent's default language is used.
+    url_param_only: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The unique identifier of the Generator.
+      Format: projects/<Project ID>/locations/<Location ID>/agents/<Agent ID>/generators/<Generator ID>.
+    output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
+  - name: 'displayName'
+    type: String
+    description: |
+      The human-readable name of the generator, unique within the agent.
+    required: true
+  - name: 'llmModelSettings'
+    type: NestedObject
+    description: |
+      The LLM model settings.
+    properties:
+      - name: 'model'
+        type: String
+        description: |
+          The selected LLM model.
+      - name: 'promptText'
+        type: String
+        description: |
+          The custom prompt to use.
+  - name: 'modelParameter'
+    type: NestedObject
+    description: |
+      Parameters passed to the LLM to configure its behavior.
+    properties:
+      - name: 'temperature'
+        type: Double
+        description: |
+          The temperature used for sampling. Temperature sampling occurs after both topP and topK have been applied.
+          Valid range: [0.0, 1.0] Low temperature = less random. High temperature = more random.
+      - name: 'maxDecodeSteps'
+        type: Integer
+        description: |
+          The maximum number of tokens to generate.
+      - name: 'topP'
+        type: Double
+        description: |
+          If set, only the tokens comprising the top topP probability mass are considered.
+          If both topP and topK are set, topP will be used for further refining candidates selected with topK.
+          Valid range: (0.0, 1.0]. Small topP = less random. Large topP = more random.
+      - name: 'topK'
+        type: Integer
+        description: |
+          If set, the sampling process in each step is limited to the topK tokens with highest probabilities.
+          Valid range: [1, 40] or 1000+. Small topK = less random. Large topK = more random.
+  - name: 'placeholders'
+    type: Array
+    description: |
+      List of custom placeholders in the prompt text.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: 'id'
+          type: String
+          description: |
+            Unique ID used to map custom placeholder to parameters in fulfillment.
+        - name: 'name'
+          type: String
+          description: |
+            Custom placeholder value in the prompt text.
+  - name: 'promptText'
+    type: NestedObject
+    required: true
+    ignore_read: true
+    description: |
+      Prompt for the LLM model.
+    properties:
+      - name: 'text'
+        type: String
+        description: |
+          Text input which can be used for prompt or banned phrases.

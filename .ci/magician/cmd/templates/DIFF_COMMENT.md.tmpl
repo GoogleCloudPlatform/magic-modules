@@ -7,7 +7,7 @@ Your PR hasn't generated any diffs, but I'll let you know if a future commit doe
 Your PR generated some diffs in downstreams - here they are.
 
 {{range .Diffs -}}
-{{.Title}}: [Diff](https://github.com/modular-magician/{{.Repo}}/compare/auto-pr-{{$.PrNumber}}-old..auto-pr-{{$.PrNumber}}) ({{.ShortStat}})
+{{.Title}}: [Diff](https://github.com/modular-magician/{{.Repo}}/compare/{{.OldCommitSHA}}..{{.CommitSHA}}) ({{.ShortStat}})
 {{end -}}
 {{end -}}
 
@@ -49,6 +49,13 @@ The following new resources do not have corresponding service labels:
 
 If you believe this detection to be incorrect please raise the concern with your reviewer. Googlers: This error is safe to ignore once you've completed go/fix-missing-service-labels.
 An `override-missing-service-label` label can be added to allow merging.
+{{end}}
+
+{{- if gt (len .AddedResources) 1 }}
+## Multiple resources added
+
+This PR adds multiple new resources: {{range $i, $resource := .AddedResources}}{{ if gt $i 0}}, {{end}}`{{$resource}}`{{end}}. This makes review significantly more difficult. Please split it into multiple PRs, one per resource.
+An `override-multiple-resources` label can be added to allow merging.
 {{end}}
 
 {{- if and (.MissingDocs) (or .MissingDocs.Resource .MissingDocs.DataSource) }}

@@ -44,6 +44,14 @@ examples:
     primary_resource_id: 'my-account-connector'
     vars:
       account_connector_name: tf-test-ac
+  - name: developer_connect_account_connector_new_relic
+    primary_resource_id: 'my-account-connector'
+    vars:
+      account_connector_name: tf-test-ac
+  - name: developer_connect_account_connector_datastax
+    primary_resource_id: 'my-account-connector'
+    vars:
+      account_connector_name: tf-test-ac
 autogen_async: true
 async:
   operation:
@@ -99,6 +107,8 @@ properties:
           GOOGLE
           SENTRY
           ROVO
+          NEW_RELIC
+          DATASTAX
       - name: scopes
         type: Array
         description: |-

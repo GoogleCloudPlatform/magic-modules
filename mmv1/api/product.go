@@ -14,6 +14,7 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"reflect"
 	"regexp"
@@ -57,6 +58,9 @@ type Product struct {
 	// base URL. Specific to defining the resource as a CAI asset.
 	CaiBaseUrl string
 
+	// CaiResourceType of resources that already have an AssetType constant defined in the product.
+	ResourcesWithCaiAssetType map[string]struct{}
+
 	// A function reference designed for the rare case where you
 	// need to use retries in operation calls. Used for the service api
 	// as it enables itself (self referential) and can result in occasional
@@ -68,6 +72,9 @@ type Product struct {
 	LegacyName string `yaml:"legacy_name,omitempty"`
 
 	ClientName string `yaml:"client_name,omitempty"`
+
+	// The compiler to generate the downstream files, for example "terraformgoogleconversion-codegen".
+	Compiler string `yaml:"-"`
 }
 
 func (p *Product) UnmarshalYAML(unmarshal func(any) error) error {
@@ -131,6 +138,10 @@ func (p *Product) SetDisplayName() {
 	if p.DisplayName == "" {
 		p.DisplayName = google.SpaceSeparated(p.Name)
 	}
+}
+
+func (p *Product) SetCompiler(t string) {
+	p.Compiler = fmt.Sprintf("%s-codegen", strings.ToLower(t))
 }
 
 // ====================
