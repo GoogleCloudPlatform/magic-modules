@@ -195,7 +195,7 @@ resource "time_sleep" "wait_60_seconds" {
 
 resource "google_project_service" "apigee" {
   project = google_project.project.project_id
-  service = "apigee.googleapis.com""
+  service = "apigee.googleapis.com"
   depends_on = [time_sleep.wait_60_seconds]
 }
 
