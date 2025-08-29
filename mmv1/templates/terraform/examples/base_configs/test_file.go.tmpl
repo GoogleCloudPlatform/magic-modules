@@ -40,7 +40,7 @@ import (
 	"{{ $.ImportPath  }}/tpgresource"
 	transport_tpg "{{ $.ImportPath  }}/transport"
 )
-{{ range $e := $.Res.TestExamples }}
+{{ range $i, $e := $.Res.TestExamples }}
 func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T) {
 	{{- if $e.SkipTest }}
 	t.Skip("{{$e.SkipTest}}")
@@ -113,6 +113,14 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 		{{- end }}
 			},
 	{{- end }}
+	{{- if eq $i 0 }}
+			{
+				ResourceName:       "{{ $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
+				RefreshState:       true,
+				ExpectNonEmptyPlan: true,
+				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
+			},
+	{{- end }}
 		},
 	})
 }
@@ -175,63 +183,3 @@ func testAccCheck{{ $.Res.ResourceName }}DestroyProducer(t *testing.T) func(s *t
 	}
 }
 {{- end }}
-
-func TestAcc{{ $.Res.ResourceName }}_ResourceIdentity(t *testing.T) {
-	t.Parallel()
-	{{- if gt (len $.Res.TestExamples) 0 }}
-	{{- $firstExample := index $.Res.TestExamples 0 }}
-	randomSuffix := acctest.RandString(t, 10)
-	context := make(map[string]interface{})
-	context["random_suffix"] = randomSuffix
-
-	identityProps := map[string]interface{}{
-		{{- range $e := $.Res.IdentityProperties }}
-		{{- if eq $e.Name "project" }}
-		"project": envvar.GetTestProjectFromEnv(),
-		{{- else }}
-		"{{ $e.Name }}": fmt.Sprintf("tf-test-example-{{ lower $.Res.Name }}%s", randomSuffix),
-		{{- end }}
-		{{- end }}
-	}
-	for k, v := range identityProps {
-		context[k] = v
-	}
-
-	envVars := map[string]interface{}{
-		{{- template "EnvVarContext" dict "TestEnvVars" $firstExample.TestEnvVars "HasNewLine" false}}
-	}
-	for k, v := range envVars {
-		context[k] = v
-	}
-
-	overrides := map[string]interface{}{
-		{{- range $varKey, $varVal := $firstExample.TestVarsOverrides }}
-		"{{$varKey}}": {{$varVal}},
-		{{- end }}
-	}
-	for k, v := range overrides {
-		context[k] = v
-	}
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		TerraformVersionChecks: []tfversion.TerraformVersionCheck{
-			tfversion.SkipBelow(tfversion.Version1_12_0),
-		},
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAcc{{ $firstExample.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(context),
-			},
-			{
-				ResourceName:       "{{ $.Res.TerraformName }}.{{ $firstExample.PrimaryResourceId }}",
-				RefreshState:       true,
-				ExpectNonEmptyPlan: true,
-				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
-			},
-		},
-	})
-	{{- else }}
-	t.Skip("Skipping resource identity test as no test examples are defined.")
-	{{- end }}
-}
