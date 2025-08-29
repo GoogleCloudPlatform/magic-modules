@@ -1,0 +1,71 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'AclConfig'
+description: |
+  Access Control Configuration.
+references:
+  api: 'https://cloud.google.com/generative-ai-app-builder/docs/reference/rpc/google.cloud.discoveryengine.v1alpha#aclconfigservice'
+base_url: 'projects/{{project}}/locations/{{location}}/aclConfig'
+self_link: 'projects/{{project}}/locations/{{location}}/aclConfig'
+create_url: 'projects/{{project}}/locations/{{location}}/aclConfig'
+create_verb: 'PATCH'
+update_url: 'projects/{{project}}/locations/{{location}}/aclConfig'
+update_verb: 'PATCH'
+exclude_delete: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/aclConfig'
+timeouts:
+  insert_minutes: 5
+  update_minutes: 5
+examples:
+  - name: 'discoveryengine_aclconfig_basic'
+    primary_resource_id: 'basic'
+parameters:
+  - name: 'location'
+    type: String
+    description: |
+      The geographic location where the data store should reside. The value can
+      only be one of "global", "us" and "eu".
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: |
+      The unique full resource name of the aclConfig. Values are of the format
+      `projects/{project}/locations/{location}/aclConfig`.
+    output: true
+  - name: 'idpConfig'
+    type: NestedObject
+    description: |
+      Identity provider config.
+    properties:
+      - name: 'idpType'
+        type: Enum
+        description: |
+          Identity provider type.
+        enum_values:
+          - 'GSUITE'
+          - 'THIRD_PARTY'
+      - name: 'externalIdpConfig'
+        type: NestedObject
+        description: |
+          External third party identity provider config.
+        properties:
+          - name: 'workforcePoolName'
+            type: String
+            description: |
+              Workforce pool name: "locations/global/workforcePools/pool_id"
