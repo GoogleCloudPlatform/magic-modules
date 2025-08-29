@@ -37,6 +37,7 @@ timeouts:
   update_minutes: 20
   delete_minutes: 20
 custom_code:
+  pre_create: templates/terraform/pre_create/cloud_identity_group_membership.go.tmpl
   post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_update: 'templates/terraform/custom_update/cloud_identity_group_membership.go.tmpl'
   post_import: 'templates/terraform/post_import/cloud_identity_group_membership.go.tmpl'
@@ -62,6 +63,12 @@ examples:
       identity_user: 'IDENTITY_USER'
     # Has a handwritten test due to CloudIdentityGroup-related tests needing to run synchronously
     exclude_test: true
+virtual_fields:
+  - name: 'create_ignore_already_exists'
+    description: |
+      If set to true, skip group member creation if a membership with the same name already exists. Defaults to false.
+    type: Boolean
+    default_value: false
 parameters:
   - name: 'group'
     type: ResourceRef

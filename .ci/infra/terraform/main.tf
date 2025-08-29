@@ -306,6 +306,7 @@ module "project-services" {
     "migrationcenter.googleapis.com",
     "ml.googleapis.com",
     "mobilecrashreporting.googleapis.com",
+    "modelarmor.googleapis.com",
     "monitoring.googleapis.com",
     "multiclustermetering.googleapis.com",
     "netapp.googleapis.com",
@@ -333,6 +334,7 @@ module "project-services" {
     "resourceviews.googleapis.com",
     "run.googleapis.com",
     "runtimeconfig.googleapis.com",
+    "saasservicemgmt.googleapis.com",
     "secretmanager.googleapis.com",
     "securesourcemanager.googleapis.com",
     "securetoken.googleapis.com",
@@ -408,6 +410,14 @@ resource "google_project_service_identity" "progressiverollout_sa" {
 
   project = google_project.proj.project_id
   service = "progressiverollout.googleapis.com"
+}
+
+resource "google_project_service_identity" "parametermanager_sa" {
+  provider = google-beta
+  depends_on = [module.project-services]
+
+  project = google_project.proj.project_id
+  service = "parametermanager.googleapis.com"
 }
 
 # TestAccComposerEnvironment_fixPyPiPackages

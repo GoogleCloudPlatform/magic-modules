@@ -14,6 +14,10 @@
 ---
 name: 'GuestPolicies'
 api_resource_type_kind: GuestPolicy
+api_variant_patterns:
+  - 'folders/{folder}/guestPolicies/{guestPolicy}'
+  - 'organizations/{organization}/guestPolicies/{guestPolicy}'
+  - 'projects/{project}/guestPolicies/{guestPolicy}'
 description: |
   An OS Config resource representing a guest configuration policy. These policies represent
   the desired state for VM instance guest environments including packages to install or remove,
@@ -34,8 +38,6 @@ timeouts:
   delete_minutes: 20
 identity:
   - guestPolicyId
-custom_code:
-  post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
 examples:
   - name: 'os_config_guest_policies_basic'
     primary_resource_id: 'guest_policies'
@@ -252,7 +254,7 @@ properties:
           description: |
             An Apt Repository.
           min_version: 'beta'
-          # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+          # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           properties:
             - name: 'archiveType'
               type: Enum
@@ -294,7 +296,7 @@ properties:
           description: |
             A Yum Repository.
           min_version: 'beta'
-          # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+          # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           properties:
             - name: 'id'
               type: String
@@ -326,7 +328,7 @@ properties:
           description: |
             A Zypper Repository.
           min_version: 'beta'
-          # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+          # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           properties:
             - name: 'id'
               type: String
@@ -358,7 +360,7 @@ properties:
           description: |
             A Goo Repository.
           min_version: 'beta'
-          # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+          # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
           properties:
             - name: 'name'
               type: String
@@ -422,7 +424,7 @@ properties:
                 description: |
                   A generic remote artifact.
                 min_version: 'beta'
-                # TODO (mbang): add `conflicts` when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                # TODO: add `conflicts` when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'uri'
                     type: String
@@ -441,7 +443,7 @@ properties:
                 description: |
                   A Google Cloud Storage artifact.
                 min_version: 'beta'
-                # TODO (mbang): add `conflicts` when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                # TODO: add `conflicts` when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'bucket'
                     type: String
@@ -475,7 +477,7 @@ properties:
                 description: |
                   Copies a file onto the instance.
                 min_version: 'beta'
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'artifactId'
                     type: String
@@ -512,7 +514,7 @@ properties:
                 description: |
                   Extracts an archive into the specified directory.
                 min_version: 'beta'
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'artifactId'
                     type: String
@@ -544,7 +546,7 @@ properties:
                 description: |
                   Installs an MSI file.
                 min_version: 'beta'
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'artifactId'
                     type: String
@@ -573,7 +575,7 @@ properties:
                 description: |
                   Installs a deb file via dpkg.
                 min_version: 'beta'
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'artifactId'
                     type: String
@@ -586,7 +588,7 @@ properties:
                 description: |
                   Installs an rpm file via the rpm utility.
                 min_version: 'beta'
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'artifactId'
                     type: String
@@ -599,7 +601,7 @@ properties:
                 description: |
                   Executes an artifact or local file.
                 min_version: 'beta'
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'args'
                     type: Array
@@ -619,19 +621,19 @@ properties:
                     description: |
                       The id of the relevant artifact in the recipe.
                     min_version: 'beta'
-                    # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                    # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                   - name: 'localPath'
                     type: String
                     description: |
                       The absolute path of the file on the local filesystem.
                     min_version: 'beta'
-                    # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                    # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
               - name: 'scriptRun'
                 type: NestedObject
                 description: |
                   Runs commands in a shell.
                 min_version: 'beta'
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'script'
                     type: String
@@ -670,7 +672,7 @@ properties:
                 description: |
                   Copies a file onto the instance.
                 min_version: 'beta'
-                # TODO (mbang): add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
+                # TODO: add exactly_one_of when it can be applied to lists (https://github.com/hashicorp/terraform-plugin-sdk/issues/470)
                 properties:
                   - name: 'artifactId'
                     type: String

@@ -1,0 +1,9 @@
+
+//  if the automated_backup_config is not defined, automatedBackupMode needs to be passed and set to DISABLED in the expand
+if obj["automatedBackupConfig"] == nil {
+    config := meta.(*transport_tpg.Config)
+    automatedBackupConfigProp, _ := expandRedisClusterAutomatedBackupConfig(d.Get("automated_backup_config"), d, config)
+    obj["automatedBackupConfig"] = automatedBackupConfigProp
+}
+
+return obj, nil

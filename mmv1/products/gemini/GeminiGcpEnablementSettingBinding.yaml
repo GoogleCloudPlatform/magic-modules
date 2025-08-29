@@ -14,6 +14,8 @@
 ---
 name: GeminiGcpEnablementSettingBinding
 api_resource_type_kind: SettingBinding
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/geminiGcpEnablementSettings/{geminiGcpEnablementSetting}/settingBindings/{settingBinding}'
 description: The resource for managing GeminiGcpEnablementSetting setting bindings for Admin Control.
 references:
   guides:
@@ -80,11 +82,9 @@ properties:
     description: Target of the binding.
     required: true
   - name: product
-    type: Enum
+    type: String
     description: |-
-      Product type of the setting binding.
-    enum_values:
-      - 'GEMINI_IN_BIGQUERY'
+      Product type of the setting binding. Values include GEMINI_IN_BIGQUERY, GEMINI_CLOUD_ASSIST, etc. See [product reference](https://cloud.google.com/gemini/docs/api/reference/rest/v1/projects.locations.dataSharingWithGoogleSettings.settingBindings) for a complete list.
     default_from_api: true
   - name: name
     type: String

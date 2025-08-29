@@ -6,10 +6,7 @@ description: |-
 
 # google_parameter_manager_regional_parameters
 
-Use this data source to list the Parameter Manager Regional Parameters
-
-~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta datasources.
+Use this data source to list the Parameter Manager Regional Parameters.
 
 ## Example Usage
 
@@ -52,6 +49,8 @@ exported:
 - `parameter_id` - The unique name of the resource.
 
 - `name` - The resource name of the regional parameter. Format: `projects/{{project}}/locations/{{location}}/parameters/{{parameter_id}}`
+
+- `kms_key` - The resource name of the Cloud KMS CryptoKey used to encrypt regional parameter version payload. Format `projects/{{project}}/locations/{{location}}/keyRings/{{key_ring}}/cryptoKeys/{{crypto_key}}`
 
 - `policy_member` - An object containing a unique resource identity tied to the regional parameter. Structure is [documented below](#nested_policy_member).
 

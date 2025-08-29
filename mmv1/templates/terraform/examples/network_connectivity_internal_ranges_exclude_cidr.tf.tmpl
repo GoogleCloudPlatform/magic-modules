@@ -1,0 +1,23 @@
+resource "google_network_connectivity_internal_range" "{{$.PrimaryResourceId}}" {
+  name    = "{{index $.Vars "internal_range_name"}}"
+  description = "Test internal range"
+  network = google_compute_network.default.self_link
+  
+  prefix_length = 24
+  target_cidr_range = [
+    "10.4.0.0/16"
+  ]
+  exclude_cidr_ranges = [
+    "10.5.0.0/24",
+    "10.4.1.0/24",
+    "10.4.0.0/24",
+    "10.4.12.0/24",
+	"10.4.32.0/24",
+	"10.6.0.0/24",
+  ]
+}
+
+resource "google_compute_network" "default" {
+  name                    = "{{index $.Vars "network_name"}}"
+  auto_create_subnetworks = false
+}

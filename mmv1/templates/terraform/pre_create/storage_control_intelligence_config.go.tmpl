@@ -1,0 +1,11 @@
+	updateMask := []string{"filter"}
+
+	if d.HasChange("edition_config") {
+		updateMask = append(updateMask, "editionConfig")
+	}
+	// updateMask is a URL parameter but not present in the schema, so ReplaceVars
+	// won't set it
+	url, err = transport_tpg.AddQueryParams(url, map[string]string{"updateMask": strings.Join(updateMask, ",")})
+	if err != nil {
+		return err
+	}

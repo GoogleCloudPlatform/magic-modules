@@ -1,0 +1,86 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'ControlPlaneAccess'
+description: |
+  Authorize the Runtime components to access directly with Apigee Control Plane.
+references:
+  guides:
+    'Enable ControlPlane access': 'https://cloud.google.com/apigee/docs/hybrid/v1.14/install-enable-control-plane-access'
+  api: 'https://cloud.google.com/apigee/docs/reference/apis/apigee/rest/v1/organizations/updateControlPlaneAccess'
+docs:
+id_format: 'organizations/{{name}}/controlPlaneAccess'
+base_url: ''
+self_link: 'organizations/{{name}}/controlPlaneAccess'
+create_verb: 'PATCH'
+update_verb: 'PATCH'
+async:
+  actions: ['create', 'update']
+  type: 'OpAsync'
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+autogen_async: true
+update_mask: true
+exclude_delete: true
+import_format:
+  - 'organizations/{{name}}/controlPlaneAccess'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+custom_code:
+examples:
+  - name: 'apigee_control_plane_access_basic_test'
+    primary_resource_id: 'apigee_control_plane_access'
+    vars:
+      account_id: 'my-account'
+      project_id: 'my-project'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+parameters:
+  - name: 'name'
+    type: String
+    description: |
+      Name of the Apigee organization.
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'synchronizerIdentities'
+    type: Array
+    description: |
+      Array of service accounts to grant access to control plane resources (for the Synchronizer component), each specified using the following format: `serviceAccount:service-account-name`.
+
+      The `service-account-name` is formatted like an email address. For example: serviceAccount@my_project_id.iam.gserviceaccount.com
+
+      You might specify multiple service accounts, for example, if you have multiple environments and wish to assign a unique service account to each one.
+
+      The service accounts must have **Apigee Synchronizer Manager** role. See also [Create service accounts](https://cloud.google.com/apigee/docs/hybrid/v1.8/sa-about#create-the-service-accounts).
+    send_empty_value: true
+    item_type:
+      type: String
+  - name: 'analyticsPublisherIdentities'
+    type: Array
+    description: |
+      Array of service accounts authorized to publish analytics data to the control plane, each specified using the following format: `serviceAccount:service-account-name`.
+
+      The `service-account-name` is formatted like an email address. For example: serviceAccount@my_project_id.iam.gserviceaccount.com
+
+      You might specify multiple service accounts, for example, if you have multiple environments and wish to assign a unique service account to each one.
+    send_empty_value: true
+    item_type:
+      type: String

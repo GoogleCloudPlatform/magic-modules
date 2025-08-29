@@ -50,6 +50,10 @@ async:
     resource_inside_response: false
   include_project: true
 custom_code:
+sweeper:
+  url_substitutions:
+    - parent: "projects/${PROJECT_NAME}"
+      region: "us-central1-a"
 examples:
   - name: 'network_security_firewall_endpoint_association_basic'
     primary_resource_id: 'default'

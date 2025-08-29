@@ -48,13 +48,3 @@ func sendSecondaryIpRangeIfEmptyDiff(_ context.Context, diff *schema.ResourceDif
 
 	return nil
 }
-
-// DiffSuppressFunc for fields inside `log_config`.
-func subnetworkLogConfigDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// If the enable_flow_logs is not enabled, we don't need to check for differences.
-	if enable_flow_logs := d.Get("enable_flow_logs"); !enable_flow_logs.(bool) {
-		return true
-	}
-
-	return false
-}

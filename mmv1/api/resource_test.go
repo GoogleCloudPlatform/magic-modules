@@ -357,3 +357,149 @@ func TestMagicianLocation(t *testing.T) {
 		t.Errorf("Current package is not under %s. Path from magician dir to current dir: %s", RELATIVE_MAGICIAN_LOCATION, relPath)
 	}
 }
+
+func TestHasPostCreateComputedFields(t *testing.T) {
+	cases := []struct {
+		name, description string
+		resource          Resource
+		want              bool
+	}{
+		{
+			name: "no properties",
+			resource: Resource{
+				IdFormat: "projects/{{project}}/resource/{{resource}}",
+			},
+			want: false,
+		},
+		{
+			name: "no computed properties",
+			resource: Resource{
+				IdFormat: "projects/{{project}}/resource/{{resource}}",
+				Properties: []*Type{
+					{
+						Name: "resource",
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "output-only property",
+			resource: Resource{
+				IdFormat: "projects/{{project}}/resource/{{resource}}",
+				Properties: []*Type{
+					{
+						Name:   "field",
+						Output: true,
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "output-only property in id_format",
+			resource: Resource{
+				IdFormat: "projects/{{project}}/resource/{{resource}}",
+				Properties: []*Type{
+					{
+						Name:   "resource",
+						Output: true,
+					},
+				},
+			},
+			want: true,
+		},
+		{
+			name: "output-only property in id_format with ignore_read",
+			resource: Resource{
+				IdFormat: "projects/{{project}}/resource/{{resource}}",
+				Properties: []*Type{
+					{
+						Name:       "resource",
+						Output:     true,
+						IgnoreRead: true,
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "default_from_api property",
+			resource: Resource{
+				IdFormat: "projects/{{project}}/resource/{{resource}}",
+				Properties: []*Type{
+					{
+						Name:           "field",
+						DefaultFromApi: true,
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "default_from_api property in id_format",
+			resource: Resource{
+				IdFormat: "projects/{{project}}/resource/{{resource}}",
+				Properties: []*Type{
+					{
+						Name:           "resource",
+						DefaultFromApi: true,
+					},
+				},
+			},
+			want: true,
+		},
+		{
+			name: "default_from_api property in id_format with ignore_read",
+			resource: Resource{
+				IdFormat: "projects/{{project}}/resource/{{resource}}",
+				Properties: []*Type{
+					{
+						Name:           "resource",
+						DefaultFromApi: true,
+						IgnoreRead:     true,
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "converts prop.name to snake case",
+			resource: Resource{
+				IdFormat: "projects/{{project}}/resource/{{resource_id}}",
+				Properties: []*Type{
+					{
+						Name:   "resourceId",
+						Output: true,
+					},
+				},
+			},
+			want: true,
+		},
+		{
+			name: "includes fields in self link that aren't in id format",
+			resource: Resource{
+				IdFormat: "projects/{{project}}/resource/{{resource_id}}",
+				SelfLink: "{{name}}",
+				Properties: []*Type{
+					{
+						Name:   "name",
+						Output: true,
+					},
+				},
+			},
+			want: true,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := tc.resource.HasPostCreateComputedFields()
+			if got != tc.want {
+				t.Errorf("HasPostCreateComputedFields(%q) returned unexpected value. got %t; want %t.", tc.name, got, tc.want)
+			}
+		})
+	}
+}

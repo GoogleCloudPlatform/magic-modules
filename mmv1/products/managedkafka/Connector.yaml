@@ -38,9 +38,11 @@ examples:
       topic_id: 'my-topic'
       cluster_id: 'my-cluster'
       cps_topic_name: 'my-cps-topic'
-      additional_subnet_id: 'my-additional-subnetwork-0'
-      subnetwork_id: 'my-subnetwork-0'
-      network_id: 'my-network-0'
+      secondary_subnet_id: 'my-secondary-subnetwork-00'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    external_providers: ["time"]
 parameters:
   - name: 'location'
     type: String

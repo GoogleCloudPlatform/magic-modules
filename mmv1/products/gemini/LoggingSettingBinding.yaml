@@ -14,6 +14,8 @@
 ---
 name: LoggingSettingBinding
 api_resource_type_kind: SettingBinding
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/loggingSettings/{loggingSetting}/settingBindings/{settingBinding}'
 description: The resource for managing Logging setting bindings for Admin Control.
 references:
   guides:
@@ -89,6 +91,7 @@ properties:
       Product type of the setting binding.
     enum_values:
       - 'GEMINI_CODE_ASSIST'
+    default_from_api: true
   - name: name
     type: String
     description: |-

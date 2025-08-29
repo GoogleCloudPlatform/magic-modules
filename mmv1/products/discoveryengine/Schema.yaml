@@ -13,6 +13,8 @@
 
 ---
 name: 'Schema'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/collections/{collection}/dataStores/{dataStore}/schemas/{schema}'
 description: |
   Schema defines the structure and layout of a type of document data.
 references:

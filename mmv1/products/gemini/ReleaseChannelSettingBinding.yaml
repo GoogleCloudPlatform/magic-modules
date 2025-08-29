@@ -14,6 +14,8 @@
 ---
 name: ReleaseChannelSettingBinding
 api_resource_type_kind: SettingBinding
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/releaseChannelSettings/{releaseChannelSetting}/settingBindings/{settingBinding}'
 description: The resource for managing ReleaseChannel setting bindings for Admin Control.
 references:
   guides:
@@ -103,3 +105,4 @@ properties:
     enum_values:
       - 'GEMINI_CLOUD_ASSIST'
       - 'GEMINI_CODE_ASSIST'
+    default_from_api: true

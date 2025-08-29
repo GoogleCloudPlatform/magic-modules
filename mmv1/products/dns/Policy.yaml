@@ -103,6 +103,20 @@ properties:
     update_url: 'projects/{{project}}/policies/{{name}}'
     update_verb: 'PATCH'
     default_value: "Managed by Terraform"
+  - name: 'dns64Config'
+    type: NestedObject
+    default_from_api: true
+    description: Configurations related to DNS64 for this Policy.
+    properties:
+      - name: 'scope'
+        type: NestedObject
+        description: The scope to which DNS64 config will be applied to.
+        required: true
+        properties:
+          - name: 'allQueries'
+            type: Boolean
+            description: Controls whether DNS64 is enabled globally at the network level.
+            send_empty_value: true
   - name: 'enableInboundForwarding'
     type: Boolean
     description: |

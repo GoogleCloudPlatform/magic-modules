@@ -13,6 +13,8 @@
 
 ---
 name: 'AutoscalingPolicy'
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/autoscalingPolicies/{autoscalingPolicy}'
 description: |
   Describes an autoscaling policy for Dataproc cluster autoscaler.
 docs:

@@ -13,6 +13,7 @@
 
 ---
 name: 'Instance'
+# plugin_framework: true
 description: |
   Represents a Data Fusion instance.
 references:
@@ -48,8 +49,6 @@ custom_code:
 sweeper:
   url_substitutions:
     - region: "us-central1"
-    - region: "us-central1"
-      zone: "us-central1-a"
 examples:
   - name: 'data_fusion_instance_basic'
     primary_resource_id: 'basic_instance'

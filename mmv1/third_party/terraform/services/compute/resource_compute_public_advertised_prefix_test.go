@@ -16,10 +16,12 @@ import (
 // Since we only have access to one test prefix range we cannot run tests in parallel
 func TestAccComputePublicPrefixes(t *testing.T) {
 	testCases := map[string]func(t *testing.T){
-		"delegated_prefix":                     testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicTest,
-		"advertised_prefix":                    testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicTest,
-		"public_delegated_prefixes_ipv6":       testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesIpv6Test,
-		"public_advertised_prefixes_pdp_scope": testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesPdpScopeTest,
+		"delegated_prefix":                         testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesBasicTest,
+		"advertised_prefix":                        testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesBasicTest,
+		"public_delegated_prefixes_ipv6":           testAccComputePublicDelegatedPrefix_publicDelegatedPrefixesIpv6Test,
+		"public_advertised_prefixes_pdp_scope":     testAccComputePublicAdvertisedPrefix_publicAdvertisedPrefixesPdpScopeTest,
+		"public_delegated_prefix_ipv6_subnet_mode": testAccComputePublicDelegatedPrefix_publicDelegatedPrefixIpv6SubnetModeTest,
+		"public_delgated_prefix_with_sub_prefix":   TestAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPrefixExample,
 	}
 
 	for name, tc := range testCases {
@@ -31,6 +33,84 @@ func TestAccComputePublicPrefixes(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			tc(t)
 		})
+	}
+}
+
+func TestAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPrefixExample(t *testing.T) {
+	t.Parallel()
+	subPrefixResourceName := "google_compute_public_delegated_prefix.subprefix"
+	parentProject := "tf-static-byoip"
+	parentRegion := "us-central1"
+	parentName := "tf-test-delegation-mode-sub-pdp"
+
+	context := map[string]interface{}{
+		"parent_pdp_id": "projects/tf-static-byoip/regions/us-central1/publicDelegatedPrefixes/tf-test-delegation-mode-sub-pdp",
+		"project":       "tf-static-byoip",
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputePublicDelegatedPrefixDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPrefixExample(context),
+				Check: resource.ComposeTestCheckFunc(
+					// First, a basic check that the sub-prefix was created
+					resource.TestCheckResourceAttrSet(subPrefixResourceName, "id"),
+
+					// Now, the custom check function
+					testAccCheckParentHasSubPrefix(t, parentProject, parentRegion, parentName, subPrefixResourceName),
+				),
+			},
+			{
+				ResourceName:            "google_compute_public_delegated_prefix.subprefix",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region"},
+			},
+		},
+	})
+}
+
+func testAccComputePublicDelegatedPrefix_computePublicDelegatedPrefixWithSubPrefixExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+
+resource "google_compute_public_delegated_prefix" "subprefix" {
+  name = "tf-test-sub-prefix-1%{random_suffix}"
+  description = "A nested address"
+  region = "us-central1"
+  ip_cidr_range = "2600:1901:4500:2::/64"
+  parent_prefix = "%{parent_pdp_id}"
+  mode = "DELEGATION"
+}
+`, context)
+}
+
+func testAccCheckParentHasSubPrefix(t *testing.T, project, region, parentName, subPrefixResourceName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[subPrefixResourceName]
+		if !ok {
+			return fmt.Errorf("Not found: %s", subPrefixResourceName)
+		}
+		newSubPrefixName := rs.Primary.Attributes["name"]
+
+		config := acctest.GoogleProviderConfig(t)
+		computeService := config.NewComputeClient(config.UserAgent)
+
+		parent, err := computeService.PublicDelegatedPrefixes.Get(project, region, parentName).Do()
+		if err != nil {
+			return err
+		}
+
+		for _, sub := range parent.PublicDelegatedSubPrefixs {
+			if sub.Name == newSubPrefixName {
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Sub-Prefix %q not found in parent %q's sub-prefix list", newSubPrefixName, parentName)
 	}
 }
 
@@ -207,6 +287,60 @@ resource "google_compute_public_delegated_prefix" "subprefix" {
   parent_prefix = google_compute_public_delegated_prefix.prefix.id
   allocatable_prefix_length = 64
   mode = "EXTERNAL_IPV6_FORWARDING_RULE_CREATION"
+}
+`, context)
+}
+
+func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixIpv6SubnetModeTest(t *testing.T) {
+	context := map[string]interface{}{
+		"description":   envvar.GetTestPublicAdvertisedPrefixDescriptionFromEnv(t),
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputePublicDelegatedPrefixDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputePublicDelegatedPrefix_publicDelegatedPrefixIpv6SubnetModeExample(context),
+			},
+			{
+				ResourceName:            "google_compute_public_delegated_prefix.prefix",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"region"},
+			},
+		},
+	})
+}
+
+func testAccComputePublicDelegatedPrefix_publicDelegatedPrefixIpv6SubnetModeExample(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_compute_public_advertised_prefix" "advertised" {
+  name = "tf-test-ipv6-pap%{random_suffix}"
+  description = "%{description}"
+  dns_verification_ip = "2001:db8::"
+  ip_cidr_range = "2001:db8::/32"
+  pdp_scope = "REGIONAL"
+}
+
+resource "google_compute_public_delegated_prefix" "prefix" {
+  name = "tf-test-root-pdp%{random_suffix}"
+  description = "test-delegation-mode-pdp"
+  region = "us-east1"
+  ip_cidr_range = "2001:db8::/40"
+  parent_prefix = google_compute_public_advertised_prefix.advertised.id
+  mode = "DELEGATION"
+}
+
+resource "google_compute_public_delegated_prefix" "subprefix" {
+  name = "tf-test-sub-pdp%{random_suffix}"
+  description = "test-subnet-mode-pdp"
+  region = "us-east1"
+  ip_cidr_range = "2001:db8::/48"
+  parent_prefix = google_compute_public_delegated_prefix.prefix.id
+  mode = "EXTERNAL_IPV6_SUBNETWORK_CREATION"
 }
 `, context)
 }

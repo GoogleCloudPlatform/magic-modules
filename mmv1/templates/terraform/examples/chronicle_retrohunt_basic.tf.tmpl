@@ -1,5 +1,4 @@
 resource "google_chronicle_rule" "my-rule" {
- provider = "google-beta"
  location = "us"
  instance = "{{index $.TestEnvVars "chronicle_id"}}"
  deletion_policy = "FORCE"
@@ -9,7 +8,6 @@ resource "google_chronicle_rule" "my-rule" {
 }
 
 resource "google_chronicle_retrohunt" "{{$.PrimaryResourceId}}" {
- provider = "google-beta"
  location = "us"
  instance = "{{index $.TestEnvVars "chronicle_id"}}"
  rule = element(split("/", resource.google_chronicle_rule.my-rule.name), length(split("/", resource.google_chronicle_rule.my-rule.name)) - 1)

@@ -79,6 +79,7 @@ properties:
   - name: 'name'
     type: String
     description: 'Name of the resource.'
+    required: true
   - name: 'nodeAffinityLabels'
     type: KeyValuePairs
     description: |
