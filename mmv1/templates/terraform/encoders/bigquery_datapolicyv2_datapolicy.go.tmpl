@@ -1,0 +1,6 @@
+// The create request is not in the same format as the resource.
+// The API request needs resource to be nested inside the "data_policy" field.
+newObj := make(map[string]interface{})
+newObj["dataPolicy"] = obj
+newObj["dataPolicyId"] = obj["dataPolicyId"].(string)
+return newObj, nil
