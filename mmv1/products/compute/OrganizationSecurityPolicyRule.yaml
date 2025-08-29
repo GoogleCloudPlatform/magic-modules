@@ -88,12 +88,13 @@ properties:
       - name: 'versionedExpr'
         type: Enum
         description: |
-          Preconfigured versioned expression. For organization security policy rules,
-          the only supported type is "FIREWALL".
+          Preconfigured versioned expression. If this field is specified, config must also be specified.
+          Available preconfigured expressions along with their requirements are: SRC_IPS_V1
+          - must specify the corresponding srcIpRange field in config.
         min_version: 'beta'
-        default_value: "FIREWALL"
+        default_value: 'SRC_IPS_V1'
         enum_values:
-          - 'FIREWALL'
+          - 'SRC_IPS_V1'
       - name: 'config'
         type: NestedObject
         description: The configuration options for matching the rule.
@@ -106,9 +107,6 @@ properties:
               Source IP address range in CIDR format. Required for
               INGRESS rules.
             min_version: 'beta'
-            exactly_one_of:
-              - 'match.0.config.0.src_ip_ranges'
-              - 'match.0.config.0.dest_ip_ranges'
             item_type:
               type: String
           - name: 'destIpRanges'
@@ -120,6 +118,7 @@ properties:
             exactly_one_of:
               - 'match.0.config.0.src_ip_ranges'
               - 'match.0.config.0.dest_ip_ranges'
+            deprecation_message: '`dest_ip_ranges` is deprecated and will be removed in a future major release.'
             item_type:
               type: String
           - name: 'layer4Config'
@@ -128,7 +127,7 @@ properties:
               Pairs of IP protocols and ports that the rule should match.
             api_name: layer4Configs
             min_version: 'beta'
-            required: true
+            deprecation_message: '`layer4_config` is deprecated and will be removed in a future major release.'
             item_type:
               type: NestedObject
               properties:
@@ -142,6 +141,7 @@ properties:
                     or the IP protocol number.
                   min_version: 'beta'
                   required: true
+                  deprecation_message: '`ip_protocol` is deprecated and will be removed in a future major release.'
                 - name: 'ports'
                   type: Array
                   description: |
@@ -150,16 +150,21 @@ properties:
                     either an integer or a range. If not specified, this rule
                     applies to connections through any port.
 
-                    Example inputs include: ["22"], ["80","443"], and
-                    ["12345-12349"].
+                    Example inputs include: ['22'], ['80','443'], and
+                    ['12345-12349'].
                   min_version: 'beta'
                   item_type:
                     type: String
+                  deprecation_message: '`ports` is deprecated and will be removed in a future major release.'
   - name: 'action'
     type: String
     description: |
-      The Action to perform when the client connection triggers the rule. Can currently be either
-      "allow", "deny" or "goto_next".
+      The Action to perform when the rule is matched. The following are the valid actions:
+      allow: allow access to target.
+      deny(STATUS): deny access to target, returns the HTTP response code specified. Valid values for STATUS are 403, 404, and 502 e.g. "deny(403)".
+      rate_based_ban: limit client traffic to the configured threshold and ban the client if the traffic exceeds the threshold. Configure parameters for this action in RateLimitOptions. Requires rateLimitOptions to be set.
+      redirect: redirect to a different target. This can either be an internal reCAPTCHA redirect, or an external URL-based redirect via a 302 response. Parameters for this action can be configured via redirectOptions. This action is only supported in Global Security Policies of type CLOUD_ARMOR.
+      throttle: limit client traffic to the configured threshold. Configure parameters for this action in rateLimitOptions. Requires rateLimitOptions to be set for this.
     min_version: 'beta'
     required: true
   - name: 'preview'
@@ -175,6 +180,7 @@ properties:
     enum_values:
       - 'INGRESS'
       - 'EGRESS'
+    deprecation_message: '`direction` is deprecated and will be removed in a future major release.'
   - name: 'targetResources'
     type: Array
     description: |
@@ -185,6 +191,7 @@ properties:
     min_version: 'beta'
     item_type:
       type: String
+    deprecation_message: '`target_resources` is deprecated and will be removed in a future major release.'
   - name: 'enableLogging'
     type: Boolean
     description: |
@@ -193,6 +200,7 @@ properties:
       configured export destination in Stackdriver.
     min_version: 'beta'
     send_empty_value: true
+    deprecation_message: '`enable_logging` is deprecated and will be removed in a future major release.'
   - name: 'targetServiceAccounts'
     type: Array
     description: |
@@ -201,3 +209,4 @@ properties:
     min_version: 'beta'
     item_type:
       type: String
+    deprecation_message: '`target_service_accounts` is deprecated and will be removed in a future major release.'
