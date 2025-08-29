@@ -1149,6 +1149,47 @@ func TestAccStorageBucket_cors(t *testing.T) {
 	})
 }
 
+func TestAccStorageBucket_emptyCors(t *testing.T) {
+	t.Parallel()
+
+	bucketName := fmt.Sprintf("tf-test-acl-bucket-%d", acctest.RandInt(t))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageBucketDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleStorageBucketsCors(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+			{
+				Config: testGoogleStorageBucketsEmptyCors(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy", "cors"},
+			},
+			{
+				Config: testGoogleStorageBucketsRemoveCorsCompletely(bucketName),
+			},
+			{
+				ResourceName:            "google_storage_bucket.bucket",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"force_destroy"},
+			},
+		},
+	})
+}
+
 func TestAccStorageBucket_defaultEventBasedHold(t *testing.T) {
 	t.Parallel()
 
@@ -2184,11 +2225,38 @@ resource "google_storage_bucket" "bucket" {
   }
 
   cors {
-    origin          = ["ghi", "jkl"]
-    method          = ["z9z"]
-    response_header = ["000"]
-    max_age_seconds = 5
+    origin                       = ["ghi", "jkl"]
+    method                       = ["z9z"]
+    response_header              = ["000"]
+    max_age_seconds              = 0
   }
+}
+`, bucketName)
+}
+
+func testGoogleStorageBucketsEmptyCors(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+  cors {
+    origin          = []
+    method          = []
+    response_header = []
+    max_age_seconds = 0
+  }
+  cors {}
+}
+`, bucketName)
+}
+
+func testGoogleStorageBucketsRemoveCorsCompletely(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
 }
 `, bucketName)
 }
