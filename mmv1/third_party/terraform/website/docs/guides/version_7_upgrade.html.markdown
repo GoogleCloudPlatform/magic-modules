@@ -190,7 +190,7 @@ The default value for `disable_on_destroy` has been changed to `false`. The prev
 
 Now, destroying the resource will only remove it from Terraform's state and leave the service enabled. To disable a service when the resource is destroyed, you must now make an explicit decision by setting `disable_on_destroy = true`.
 
-## Resource: `google_redos_instance`
+## Resource: `google_redis_instance`
 
 ### Instance deletion now prevented by default with `deletion_protection`
 
