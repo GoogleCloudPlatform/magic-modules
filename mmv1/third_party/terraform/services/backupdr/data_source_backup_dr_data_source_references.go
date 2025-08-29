@@ -10,7 +10,7 @@ import (
 
 func DataSourceGoogleCloudBackupDRDataSourceReference() *schema.Resource {
 
-	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceBackupDRDataSourceReference().Schema)
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceBackupDRDataSourceReferences().Schema)
 	// Set 'Required' schema elements
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "data_source_reference_id", "location")
 	// Set 'Optional' schema elements
@@ -34,7 +34,7 @@ func dataSourceGoogleCloudBackupDRDataSourceReferenceRead(d *schema.ResourceData
 	data_source_reference_id := d.Get("data_source_reference_id").(string)
 	id := fmt.Sprintf("projects/%s/locations/%s/dataSourceReferences/%s", project, location, data_source_reference_id)
 	d.SetId(id)
-	err = resourceBackupDRDataSourceReferenceRead(d, meta)
+	err = resourceBackupDRDataSourceReferencesRead(d, meta)
 	if err != nil {
 		return err
 	}

@@ -13,8 +13,6 @@
 
 ---
 name: 'DataSourceReferences'
-base_url: projects/{{project}}/locations/{{location}}/dataSourceReferences
-# removed create_url !
 self_link: projects/{{project}}/locations/{{location}}/dataSourceReferences/{{data_source_reference_id}}
 # update_verb: 'PATCH'
 # update_mask: true
