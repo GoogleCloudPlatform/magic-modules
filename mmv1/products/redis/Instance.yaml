@@ -139,7 +139,7 @@ virtual_fields:
       or `terraform destroy` that would delete the instance will fail.
       When the field is set to false, deleting the instance is allowed.
     type: Boolean
-    default_value: true
+    default_value: false
 parameters:
   # TODO: resourceref?
   - name: 'region'
