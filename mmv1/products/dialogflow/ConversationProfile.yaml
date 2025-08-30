@@ -32,6 +32,7 @@ timeouts:
   update_minutes: 40
   delete_minutes: 20
 custom_code:
+  pre_create: 'templates/terraform/pre_create/dialogflow_set_endpoint.go.tmpl'
   post_create: 'templates/terraform/post_create/set_computed_name.tmpl'
   custom_import: 'templates/terraform/custom_import/self_link_as_name_set_project.go.tmpl'
 exclude_sweeper: true
