@@ -34,6 +34,7 @@ examples:
     primary_resource_id: 'example'
     vars:
       reference_list_id: reference_list_id
+      data_access_scope_id: test_scope_id
     test_env_vars:
       chronicle_id: 'CHRONICLE_ID'
 
@@ -92,7 +93,6 @@ properties:
           required: true
   - name: scopeInfo
     type: NestedObject
-    output: true
     description: ScopeInfo specifies the scope info of the reference list.
     properties:
       - name: referenceListScope
