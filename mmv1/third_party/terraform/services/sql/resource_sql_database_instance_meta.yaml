@@ -85,6 +85,7 @@ fields:
   - field: 'settings.disk_type'
   - field: 'settings.edition'
   - field: 'settings.enable_dataplex_integration'
+  - field: 'settings.enable_db_aligned_atomic_writes'
   - field: 'settings.enable_google_ml_integration'
   - field: 'settings.insights_config.query_insights_enabled'
   - field: 'settings.insights_config.query_plans_per_minute'

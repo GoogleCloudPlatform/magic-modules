@@ -408,6 +408,13 @@ API (for read pools, effective_availability_type may differ from availability_ty
 							Set:      schema.HashResource(sqlDatabaseFlagSchemaElem),
 							Elem:     sqlDatabaseFlagSchemaElem,
 						},
+						"enable_db_aligned_atomic_writes": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							ForceNew:    true,
+							Description: `Enables DB Aligned Atomic Writes. Can be used with MySQL only.`,
+						},
 						"disk_autoresize": {
 							Type:        schema.TypeBool,
 							Optional:    true,
@@ -1504,6 +1511,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 {{- end }}
 		PricingPlan:                   _settings["pricing_plan"].(string),
 		DeletionProtectionEnabled:     _settings["deletion_protection_enabled"].(bool),
+		EnableDbAlignedAtomicWrites:   _settings["enable_db_aligned_atomic_writes"].(bool),
 		EnableGoogleMlIntegration:     _settings["enable_google_ml_integration"].(bool),
 		EnableDataplexIntegration:     _settings["enable_dataplex_integration"].(bool),
 		RetainBackupsOnDelete:         _settings["retain_backups_on_delete"].(bool),
@@ -2500,6 +2508,7 @@ func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.Resour
 	data["disk_autoresize"] = settings.StorageAutoResize
 	data["disk_autoresize_limit"] = settings.StorageAutoResizeLimit
 
+	data["enable_db_aligned_atomic_writes"] = settings.EnableDbAlignedAtomicWrites
 	data["enable_google_ml_integration"] = settings.EnableGoogleMlIntegration
 	data["enable_dataplex_integration"] = settings.EnableDataplexIntegration
 
