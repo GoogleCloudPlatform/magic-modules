@@ -495,7 +495,7 @@ func testAccDialogflowConversationProfile_dialogflowRegional(context map[string]
 		project = "${google_project.agent_project.name}"
 		display_name  = "tf-test-conversation-profile-%{random_suffix}-new"
 		location = "us-central1"
-		language_code = "en-us"
+		language_code = "en-US"
 	}
 `, context)
 }
