@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-    "github.com/hashicorp/terraform-provider-google/google/services/bigtable"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/version"
@@ -244,16 +243,6 @@ func ResourceMap() map[string]*schema.Resource {
 
 func ResourceMapWithErrors() (map[string]*schema.Resource, error) {
 {{- if ne $.Compiler "terraformgoogleconversion-codegen"}}
-    // Set state upgraders for handwritten IAMResources
-    // - this is definitely not the right place to inject state upgraders for IAM resources
-    // - however I couldn't find the right place to do so just putting it here for now so I can test the upgrade
-    handwrittenIAMResources["google_bigtable_table_iam_binding"].StateUpgraders = bigtable.BigtableTableIamStateUpgraders
-    handwrittenIAMResources["google_bigtable_table_iam_binding"].SchemaVersion = 1
-    handwrittenIAMResources["google_bigtable_table_iam_member"].StateUpgraders = bigtable.BigtableTableIamStateUpgraders
-    handwrittenIAMResources["google_bigtable_table_iam_member"].SchemaVersion = 1
-    handwrittenIAMResources["google_bigtable_table_iam_policy"].StateUpgraders = bigtable.BigtableTableIamStateUpgraders
-    handwrittenIAMResources["google_bigtable_table_iam_policy"].SchemaVersion = 1
-
 	return mergeResourceMaps(
 		generatedResources,
 		handwrittenResources,
