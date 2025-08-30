@@ -17,8 +17,8 @@ resource "google_chronicle_reference_list" "{{$.PrimaryResourceId}}" {
     value = "referencelist-entry-value"
   }
   syntax_type = "REFERENCE_LIST_SYNTAX_TYPE_PLAIN_TEXT_STRING"
-  scope_info = {
-    reference_list_scope = {
+  scope_info {
+    reference_list_scope {
       scope_names = [
         google_chronicle_data_access_scope.test_scope.name
       ]

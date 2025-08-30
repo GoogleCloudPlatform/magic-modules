@@ -15,8 +15,8 @@ func TestAccChronicleReferenceList_chronicleReferencelistBasicExample_update(t *
 	context := map[string]interface{}{
 		"chronicle_id":             envvar.GetTestChronicleInstanceIdFromEnv(t),
 		"random_suffix":            acctest.RandString(t, 10),
-		"data_access_scope_id":     "test_scope_id" + acctest.RandString(t, 5),
-		"data_access_scope_id_new": "new_test_scope_id" + acctest.RandString(t, 5),
+		"data_access_scope_id":     "test-scope-id" + acctest.RandString(t, 5),
+		"data_access_scope_id_new": "new-test-scope-id" + acctest.RandString(t, 5),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -66,8 +66,8 @@ resource "google_chronicle_reference_list" "example" {
   value = "referencelist-entry-value"
  }
  syntax_type = "REFERENCE_LIST_SYNTAX_TYPE_PLAIN_TEXT_STRING"
- scope_info = {
-    reference_list_scope = {
+ scope_info {
+    reference_list_scope {
       scope_names = [
         google_chronicle_data_access_scope.test_scope.name
       ]
@@ -98,8 +98,8 @@ resource "google_chronicle_reference_list" "example" {
   value = "referencelist-entry-value-updated"
  }
  syntax_type = "REFERENCE_LIST_SYNTAX_TYPE_REGEX"
- scope_info = {
-    reference_list_scope = {
+ scope_info {
+    reference_list_scope {
       scope_names = [
         google_chronicle_data_access_scope.test_scope.name
       ]
