@@ -17,4 +17,19 @@
 	if err := d.Set("project", stringParts[1]); err != nil {
 		return nil, fmt.Errorf("Error setting project: %s", err)
 	}
+
+    var location string
+    for i, part := range stringParts {
+        if part == "locations" && i+1 < len(stringParts) {
+            location = stringParts[i+1]
+            break
+        }
+    }
+    if location == "" {
+        return nil, fmt.Errorf("Could not extract location from name: %s", d.Get("name"))
+    }
+    if err := d.Set("location", location); err != nil {
+        return nil, fmt.Errorf("Error setting location: %s", err)
+    }
+
 	return []*schema.ResourceData{d}, nil
