@@ -11,17 +11,17 @@ func TestAccVertexAIReasoningEngine_vertexAiReasoningEngineUpdate(t *testing.T) 
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"bucket_name": acctest.TestBucketName(t),
-    "kms_key_name": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name,
+		"bucket_name":  acctest.TestBucketName(t),
+		"kms_key_name": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name,
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckVertexAIEndpointDestroyProducer(t),
-    ExternalProviders: map[string]resource.ExternalProvider{
-      "time": {},
-    },
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVertexAIReasoningEngine_vertexAiReasoningEngineBasic(context),
