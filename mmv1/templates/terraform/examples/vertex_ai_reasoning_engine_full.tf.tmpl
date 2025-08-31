@@ -1,3 +1,15 @@
+# Generate pickle files with the cloudpickle library:
+#
+# local_agent = LangchainAgent(
+#   model=MODEL,
+#   agent_executor_kwargs={"return_intermediate_steps": True},
+# )
+#
+# output_filename = "pickle.pkl"
+#
+# with open(output_filename, "wb") as f:
+#   cloudpickle.dump(local_agent, f)
+
 locals {
   class_methods = [
     {
