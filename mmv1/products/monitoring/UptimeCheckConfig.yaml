@@ -246,7 +246,9 @@ properties:
           - name: 'password'
             type: String
             description: The password to authenticate.
-            required: true
+            exactly_one_of:
+              - 'password'
+              - 'password_wo'
             sensitive: true
             custom_flatten: 'templates/terraform/custom_flatten/uptime_check_http_password.tmpl'
           - name: 'passwordWo'
