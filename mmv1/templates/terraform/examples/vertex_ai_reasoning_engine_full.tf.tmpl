@@ -1,3 +1,18 @@
+locals {
+  class_methods = [
+    {
+      api_mode = "async"
+      description = null
+      name = "async_query"
+      parameters = {
+        type     = "object"
+        required = []
+        properties = {}
+      }
+    }
+  ]
+}
+
 resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
   display_name = "{{index $.Vars "name"}}"
   description  = "A basic reasoning engine"
@@ -9,8 +24,8 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
 
   spec {
     agent_framework = "google-adk"
-    class_methods   = []
-    service_account = google_service_account.service_account.email
+    class_methods   = jsonencode(local.class_methods)
+    # service_account = google_service_account.service_account.email
 
     deployment_spec {
 
@@ -52,10 +67,19 @@ resource "google_vertex_ai_reasoning_engine" "{{$.PrimaryResourceId}}" {
   }
 
   depends_on = [
+    time_sleep.wait_5_minutes
+  ]
+}
+
+# Ensure we wait enough time for IAM permissions to be propagated
+resource "time_sleep" "wait_5_minutes" {
+  create_duration = "5m"
+
+  depends_on = [
     google_kms_crypto_key_iam_member.sa_iam_key_crypter_decrypter,
-    google_project_iam_member.sa_iam_ai_platform_user,
-    google_project_iam_member.sa_iam_object_viewer,
-    google_project_iam_member.sa_iam_editor,
+    # google_project_iam_member.sa_iam_ai_platform_user,
+    # google_project_iam_member.sa_iam_object_viewer,
+    # google_project_iam_member.sa_iam_editor,
     google_secret_manager_secret_iam_member.secret_access,
     google_secret_manager_secret_version.secret_version
   ]
@@ -67,7 +91,7 @@ resource "google_secret_manager_secret_version" "secret_version" {
 }
 
 resource "google_secret_manager_secret" "secret" {
-  secret_id = "secret"
+  secret_id = "{{index $.Vars "secret_name"}}"
 
   replication {
     auto {}
@@ -77,7 +101,7 @@ resource "google_secret_manager_secret" "secret" {
 resource "google_secret_manager_secret_iam_member" "secret_access" {
   secret_id  = google_secret_manager_secret.secret.id
   role       = "roles/secretmanager.secretAccessor"
-  member     = google_service_account.service_account.member
+  member     = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -105,27 +129,27 @@ resource "google_storage_bucket_object" "bucket_obj_dependencies_tar_gz" {
   source = "./test-fixtures/dependencies_adk.tar.gz"
 }
 
-resource "google_service_account" "service_account" {
-  account_id = "{{index $.Vars "service_account_id"}}"
-}
+# resource "google_service_account" "service_account" {
+#   account_id = "{{index $.Vars "service_account_id"}}"
+# }
 
-resource "google_project_iam_member" "sa_iam_object_viewer" {
-  role    = "roles/storage.objectViewer"
-  project = data.google_project.project.id
-  member  = google_service_account.service_account.member
-}
+# resource "google_project_iam_member" "sa_iam_object_viewer" {
+#   role    = "roles/storage.objectViewer"
+#   project = data.google_project.project.id
+#   member  = google_service_account.service_account.member
+# }
 
-resource "google_project_iam_member" "sa_iam_ai_platform_user" {
-  role    = "roles/aiplatform.user"
-  project = data.google_project.project.id
-  member  = google_service_account.service_account.member
-}
+# resource "google_project_iam_member" "sa_iam_ai_platform_user" {
+#   role    = "roles/aiplatform.user"
+#   project = data.google_project.project.id
+#   member  = google_service_account.service_account.member
+# }
 
-resource "google_project_iam_member" "sa_iam_editor" {
-  role    = "roles/editor"
-  project = data.google_project.project.id
-  member  = google_service_account.service_account.member
-}
+# resource "google_project_iam_member" "sa_iam_editor" {
+#   role    = "roles/editor"
+#   project = data.google_project.project.id
+#   member  = google_service_account.service_account.member
+# }
 
 resource "google_kms_crypto_key_iam_member" "sa_iam_key_crypter_decrypter" {
   crypto_key_id = "{{index $.Vars "kms_key_name"}}"

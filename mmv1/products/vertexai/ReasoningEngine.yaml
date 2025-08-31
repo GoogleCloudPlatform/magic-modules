@@ -49,10 +49,12 @@ examples:
     vars:
       name: 'reasoning-engine'
       bucket_name: 'reasoning-engine'
-      kms_key_name: 'kms-key'
+      kms_key_name: 'example-key'
+      secret_name: 'secret'
       service_account_id: 'sa'
     test_vars_overrides:
       'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-re-key1").CryptoKey.Name'
+    external_providers: ["time"]
 parameters:
   - name: 'region'
     type: String
@@ -113,10 +115,13 @@ properties:
         type: String
         description: Optional. The OSS agent framework used to develop the agent.
       - name: 'classMethods'
-        type: Array
+        type: String
         description: Optional. Declarations for object class methods in OpenAPI specification format.
-        item_type:
-          type: String
+        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
+        custom_flatten: 'templates/terraform/custom_flatten/json_schema.tmpl'
+        custom_expand: 'templates/terraform/custom_expand/json_value.tmpl'
+        validation:
+          function: 'validation.StringIsJSON'
       - name: 'deploymentSpec'
         type: NestedObject
         description: |-
