@@ -12,15 +12,12 @@
 # limitations under the License.
 
 ---
-name: 'DataSourceReferences'
-create_url: projects/{{project}}/locations/{{location}}/dataSourceReferences/?data_source_reference_id={{data_source_reference_id}}
+name: 'DataSourceReference'
 self_link: projects/{{project}}/locations/{{location}}/dataSourceReferences/{{data_source_reference_id}}
-update_verb: 'PATCH'
-update_mask: true
-delete_url: projects/{{project}}/locations/{{location}}/dataSourceReferences/{{data_source_reference_id}}
 description: A reference to a data source in Backup and DR.
 import_format:
   - 'projects/{{project}}/locations/{{location}}/dataSourceReferences/{{data_source_reference_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/dataSourceReferences'
 references:
   guides:
     'Official Documentation': 'https://cloud.google.com/backup-disaster-recovery/docs'
@@ -32,16 +29,12 @@ timeouts:
 autogen_async: true
 examples:
   - name: 'backup_dr_data_source_reference'
-    primary_resource_id: 'my-data-source-reference'
+    primary_resource_id: 'my_dsr'
     vars:
-      backup_plan_association_id: "my-bpa"
-      backup_vault_id: "my-bv"
-      backup_plan_id: "my-bp"
-      account_id: "my-account"
-      data_source_reference_id: "my-dsr"
-      data_source: "new-dataSource"
-    test_env_vars:
-      project: 'PROJECT_NAME'
+      data_source_reference_id: "example-dsr-id"
+      location: "us-central1"
+      project: "your-project-id"
+# Input parameters for the data source
 parameters:
   - name: 'location'
     type: String

@@ -8,20 +8,20 @@ import (
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
-func DataSourceGoogleCloudBackupDRDataSourceReference() *schema.Resource {
+func DataSourceGoogleCloudBackupDRDataSourceReferences() *schema.Resource {
 
-	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceBackupDRDataSourceReferences().Schema)
+	dsSchema := tpgresource.DatasourceSchemaFromResourceSchema(ResourceBackupDRDataSourceReference().Schema)
 	// Set 'Required' schema elements
 	tpgresource.AddRequiredFieldsToSchema(dsSchema, "data_source_reference_id", "location")
 	// Set 'Optional' schema elements
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 	return &schema.Resource{
-		Read:   dataSourceGoogleCloudBackupDRDataSourceReferenceRead,
+		Read:   dataSourceGoogleCloudBackupDRDataSourceReferencesRead,
 		Schema: dsSchema,
 	}
 }
 
-func dataSourceGoogleCloudBackupDRDataSourceReferenceRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceGoogleCloudBackupDRDataSourceReferencesRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*transport_tpg.Config)
 	project, err := tpgresource.GetProject(d, config)
 	if err != nil {
@@ -34,7 +34,7 @@ func dataSourceGoogleCloudBackupDRDataSourceReferenceRead(d *schema.ResourceData
 	data_source_reference_id := d.Get("data_source_reference_id").(string)
 	id := fmt.Sprintf("projects/%s/locations/%s/dataSourceReferences/%s", project, location, data_source_reference_id)
 	d.SetId(id)
-	err = resourceBackupDRDataSourceReferencesRead(d, meta)
+	err = resourceBackupDRDataSourceReferenceRead(d, meta)
 	if err != nil {
 		return err
 	}
