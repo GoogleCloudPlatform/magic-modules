@@ -78,10 +78,14 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
 
     deployment_spec {
 
-      # This is references inside the pickle file.
       env {
-        name  = "PROJECT_ID"
-        value = data.google_project.project.id
+        name  = "var_1"
+        value = "value_1"
+      }
+
+      env {
+        name  = "var_2"
+        value = "value_2"
       }
 
       secret_env {
@@ -253,15 +257,14 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
 
     deployment_spec {
 
-      # This is references inside the pickle file.
       env {
-        name  = "PROJECT_ID"
-        value = data.google_project.project.id
+        name  = "var_1"
+        value = "value_1b"
       }
 
       env {
-        name  = "REGION"
-        value = "us-central1"
+        name  = "var_2"
+        value = "value_2b"
       }
 
       secret_env {
