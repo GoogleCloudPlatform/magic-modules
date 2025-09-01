@@ -96,7 +96,7 @@ examples:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_nslabels'
     primary_resource_id: 'namespacelabels'
-    primary_resource_name: 'fmt.Sprintf("tf-test-namespacelabels-plan%s", context["random_suffix"])'
+    primary_resource_name: 'fmt.Sprintf("tf-test-nslabels-plan%s", context["random_suffix"])'
     vars:
       name: 'namespacelabels-plan'
       cluster_name: 'namespacelabels-cluster'
