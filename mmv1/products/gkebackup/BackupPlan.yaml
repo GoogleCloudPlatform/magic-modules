@@ -420,6 +420,7 @@ properties:
           - 'backupConfig.0.allNamespaces'
           - 'backupConfig.0.selectedNamespaces'
           - 'backupConfig.0.selectedApplications'
+          - 'backupConfig.0.selectedNamespaceLabels'
       - name: 'selectedNamespaces'
         type: NestedObject
         description: |
@@ -428,6 +429,7 @@ properties:
           - 'backupConfig.0.allNamespaces'
           - 'backupConfig.0.selectedNamespaces'
           - 'backupConfig.0.selectedApplications'
+          - 'backupConfig.0.selectedNamespaceLabels'
         properties:
           - name: 'namespaces'
             type: Array
@@ -444,6 +446,7 @@ properties:
           - 'backupConfig.0.allNamespaces'
           - 'backupConfig.0.selectedNamespaces'
           - 'backupConfig.0.selectedApplications'
+          - 'backupConfig.0.selectedNamespaceLabels'
         properties:
           - name: 'namespacedNames'
             type: Array
@@ -462,6 +465,34 @@ properties:
                   type: String
                   description: |
                     The name of a Kubernetes Resource.
+                  required: true
+      - name: 'selectedNamespaceLabels'
+        type: NestedObject
+        description: |
+          If set, include just the resources in the listed namespace Labels.
+        exactly_one_of:
+          - 'backupConfig.0.allNamespaces'
+          - 'backupConfig.0.selectedNamespaces'
+          - 'backupConfig.0.selectedApplications'
+          - 'backupConfig.0.selectedNamespaceLabels'
+        properties:
+          - name: 'namespaceLabels'
+            type: Array
+            description: |
+              A list of Kubernetes Namespace labels.
+            required: true
+            item_type:
+              type: NestedObject
+              properties:
+                - name: "key"
+                  type: String
+                  description: |
+                    The key of the kubernetes label.
+                  required: true
+                - name: "value"
+                  type: String
+                  description: |
+                    The value of the Label.
                   required: true
       - name: 'permissiveMode'
         type: Boolean
