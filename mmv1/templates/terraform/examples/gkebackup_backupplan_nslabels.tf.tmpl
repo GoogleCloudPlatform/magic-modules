@@ -15,7 +15,7 @@ resource "google_container_cluster" "primary" {
   subnetwork    = "{{index $.Vars "subnetwork_name"}}"
 }
 
-resource "google_gke_backup_backup_plan" "namespacelabels" {
+resource "google_gke_backup_backup_plan" "nslabels" {
   name = "{{index $.Vars "name"}}"
   cluster = google_container_cluster.primary.id
   location = "us-central1"
