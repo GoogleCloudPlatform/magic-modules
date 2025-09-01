@@ -46,9 +46,7 @@ func dataSourceGoogleCloudBackupDRBackupPlanAssociationRead(d *schema.ResourceDa
 	return nil
 }
 
-// Add this new code to your existing backupdr datasource file.
-
-// Plural datasource to list BackupPlanAssociations
+// Plural datasource to Fetch BackupPlanAssociations for a given resource type
 func DataSourceGoogleCloudBackupDRBackupPlanAssociations() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleCloudBackupDRBackupPlanAssociationsRead,
