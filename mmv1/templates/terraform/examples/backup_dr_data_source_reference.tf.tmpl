@@ -1,0 +1,21 @@
+terraform {
+  required_providers {
+    google-beta = {
+      source = "hashicorp/google-beta"
+    }
+  }
+}
+
+# NOTE: This example assumes a DataSourceReference with the specified ID
+# already exists in the given project and location.
+
+data "google_backup_dr_data_source_reference" "{{ .PrimaryResourceId }}" {
+  provider                 = google-beta
+  data_source_reference_id = "{{index $.Vars "data_source_reference_id"}}"
+  location                 = "{{index $.Vars "location"}}"
+  # project                  = "{{index $.Vars "project"}}" # Optional
+}
+
+output "dsr_data_source" {
+  value = data.google_backup_dr_data_source_reference.{{ .PrimaryResourceId }}.data_source
+}
