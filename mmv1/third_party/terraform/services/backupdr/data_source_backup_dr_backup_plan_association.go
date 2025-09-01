@@ -2,6 +2,7 @@ package backupdr
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -42,5 +43,120 @@ func dataSourceGoogleCloudBackupDRBackupPlanAssociationRead(d *schema.ResourceDa
 	if d.Id() == "" {
 		return fmt.Errorf("%s not found", id)
 	}
+	return nil
+}
+
+// Add this new code to your existing backupdr datasource file.
+
+// Plural datasource to list BackupPlanAssociations
+func DataSourceGoogleCloudBackupDRBackupPlanAssociations() *schema.Resource {
+	return &schema.Resource{
+		Read: dataSourceGoogleCloudBackupDRBackupPlanAssociationsRead,
+		Schema: map[string]*schema.Schema{
+			"location": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The location to list the backup plan associations from.",
+			},
+			"project": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The ID of the project in which the resource belongs.",
+			},
+			"resource_type": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: `The resource type of workload on which backup plan is applied. Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk".`,
+			},
+
+			// Output: a computed list of the associations found
+			"associations": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "A list of the backup plan associations found.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"resource": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"backup_plan": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+						"create_time": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func dataSourceGoogleCloudBackupDRBackupPlanAssociationsRead(d *schema.ResourceData, meta interface{}) error {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return err
+	}
+
+	project, err := tpgresource.GetProject(d, config)
+	if err != nil {
+		return err
+	}
+
+	location := d.Get("location").(string)
+	resourceType := d.Get("resource_type").(string)
+
+	// Construct the URL for the custom fetchForResourceType method
+	url := fmt.Sprintf("https://backupdr.googleapis.com/v1/projects/%s/locations/%s/backupPlanAssociations:fetchForResourceType?resourceType=%s", project, location, resourceType)
+
+	// Make the API call
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   project,
+		RawURL:    url,
+		UserAgent: userAgent,
+	})
+	if err != nil {
+		return fmt.Errorf("Error reading BackupPlanAssociations: %s", err)
+	}
+
+	// The API response for a list is often a JSON object with a key holding the array.
+	// Adjust "backupPlanAssociations" to match the key in the actual API response.
+	items, ok := res["backupPlanAssociations"].([]interface{})
+	if !ok {
+		// If the key doesn't exist but there's no error, it's an empty list.
+		items = make([]interface{}, 0)
+	}
+
+	// Flatten the list of items from the API response into the schema
+	associations := make([]map[string]interface{}, 0, len(items))
+	for _, item := range items {
+		association := item.(map[string]interface{})
+		flattened := map[string]interface{}{
+			"name":        association["name"],
+			"resource":    association["resource"],
+			"backup_plan": association["backupPlan"],
+			"create_time": association["createTime"],
+		}
+		associations = append(associations, flattened)
+	}
+
+	if err := d.Set("associations", associations); err != nil {
+		return fmt.Errorf("Error setting associations: %s", err)
+	}
+
+	// Set the ID for the datasource. The URL used for the list is a stable choice.
+	d.SetId(url)
+
 	return nil
 }
