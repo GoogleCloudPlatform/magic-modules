@@ -31,7 +31,7 @@ func NewBackendAuthenticationConfigConverter(provider *schema.Provider) common.C
 	}
 }
 
-// Convert converts CAI assets to HCL resource blocks (Provider version: 6.45.0)
+// Convert converts CAI assets to HCL resource blocks (Provider version: 7.0.1)
 func (c *BackendAuthenticationConfigConverter) Convert(assets []*caiasset.Asset) ([]*common.HCLResourceBlock, error) {
 	var blocks []*common.HCLResourceBlock
 	var err error
