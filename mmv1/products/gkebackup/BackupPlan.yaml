@@ -94,7 +94,7 @@ examples:
       'subnetwork_name': 'acctest.BootstrapSubnet(t, "gke-cluster", acctest.BootstrapSharedTestNetwork(t, "gke-cluster"))'
     oics_vars_overrides:
       'deletion_protection': 'false'
-  - name: 'gkebackup_backupplan_namespacelabels'
+  - name: 'gkebackup_backupplan_nslabels'
     primary_resource_id: 'namespacelabels'
     primary_resource_name: 'fmt.Sprintf("tf-test-namespacelabels-plan%s", context["random_suffix"])'
     vars:
