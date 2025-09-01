@@ -124,6 +124,9 @@ properties:
     type: Boolean
     description: |
       Allows App Engine second generation runtimes to access the legacy bundled services.
+      Cannot specify both `app_engine_apis` and 'app_engine_bundled_services` together.
+    conflicts:
+      - app_engine_bundled_services
   - name: 'runtimeApiVersion'
     type: String
     description: |
@@ -445,3 +448,26 @@ properties:
           **Note:** When managing the number of instances at runtime through the App Engine Admin API or the (now deprecated) Python 2
           Modules API set_num_instances() you must use `lifecycle.ignore_changes = ["manual_scaling"[0].instances]` to prevent drift detection.
         required: true
+  - name: 'appEngineBundledServices'
+    type: Array
+    description: |
+     A list of legacy bundled services to enable for this version on an App Engine second-generation runtime.
+     Cannot specify both `app_engine_apis` and 'app_engine_bundled_services` together.
+    is_set: true
+    item_type:
+      type: Enum
+      enum_values:
+        - 'app_identity_service'
+        - 'blobstore'
+        - 'capability_service'
+        - 'datastore_v3'
+        - 'images'
+        - 'mail'
+        - 'memcache'
+        - 'modules'
+        - 'search'
+        - 'taskqueue'
+        - 'urlfetch'
+        - 'user'
+    conflicts:
+      - app_engine_apis
