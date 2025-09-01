@@ -28,7 +28,7 @@
         "createTime": "2025-09-01T12:22:50.489447184Z",
         "etag": "hI87OGITW_38twEfrG1qMbgXTjulOs0PvGVm5zgpNfQ",
         "name": "projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test2",
-        "trustConfig": "projects/307841421122/locations/global/trustConfigs/id-2de0d4b7-89cf-476f-893d-4567b3791ca9",
+        "trustConfig": "projects/ccm-breakit/locations/global/trustConfigs/id-2de0d4b7-89cf-476f-893d-4567b3791ca9",
         "updateTime": "2025-09-01T12:22:56.430273835Z",
         "wellKnownRoots": "PUBLIC_ROOTS"
       },
@@ -47,7 +47,7 @@
     "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test3",
     "resource": {
       "data": {
-        "clientCertificate": "projects/307841421122/locations/global/certificates/anatolisaukhin-27101",
+        "clientCertificate": "projects/ccm-breakit/locations/global/certificates/anatolisaukhin-27101",
         "createTime": "2025-09-01T12:23:21.187162159Z",
         "etag": "TbNENVDPeneynkqLnTmLvn757xA-GnuI_XTsk2F00y0",
         "name": "projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test3",
@@ -68,11 +68,11 @@
     "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test4",
     "resource": {
       "data": {
-        "clientCertificate": "projects/307841421122/locations/global/certificates/anatolisaukhin-27101",
+        "clientCertificate": "projects/ccm-breakit/locations/global/certificates/anatolisaukhin-27101",
         "createTime": "2025-09-01T12:23:59.175425527Z",
         "etag": "MtMLKQSPwOIjp25H_ndWUe9zKCcVvtHdoHxv5XvBvHU",
         "name": "projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test4",
-        "trustConfig": "projects/307841421122/locations/global/trustConfigs/id-2de0d4b7-89cf-476f-893d-4567b3791ca9",
+        "trustConfig": "projects/ccm-breakit/locations/global/trustConfigs/id-2de0d4b7-89cf-476f-893d-4567b3791ca9",
         "updateTime": "2025-09-01T12:24:09.189436548Z",
         "wellKnownRoots": "PUBLIC_ROOTS"
       },
@@ -93,7 +93,7 @@
         "createTime": "2025-09-01T12:24:38.165237290Z",
         "etag": "q-3pJ_Ae7LorXoNfPMbuxSiwH4JiS4KMlk6Ojm50qbo",
         "name": "projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test5",
-        "trustConfig": "projects/307841421122/locations/global/trustConfigs/id-2de0d4b7-89cf-476f-893d-4567b3791ca9",
+        "trustConfig": "projects/ccm-breakit/locations/global/trustConfigs/id-2de0d4b7-89cf-476f-893d-4567b3791ca9",
         "updateTime": "2025-09-01T12:24:42.574599551Z",
         "wellKnownRoots": "NONE"
       },
@@ -111,11 +111,11 @@
     "name": "//networksecurity.googleapis.com/projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test7",
     "resource": {
       "data": {
-        "clientCertificate": "projects/307841421122/locations/global/certificates/anatolisaukhin-27101",
+        "clientCertificate": "projects/ccm-breakit/locations/global/certificates/anatolisaukhin-27101",
         "createTime": "2025-09-01T12:25:29.338526364Z",
         "etag": "5dYcNBll7z2KaHuJd2nxr9Qp4U1JPuPBzJtFkVdRO_k",
         "name": "projects/ccm-breakit/locations/global/backendAuthenticationConfigs/laurenzk-test7",
-        "trustConfig": "projects/307841421122/locations/global/trustConfigs/id-2de0d4b7-89cf-476f-893d-4567b3791ca9",
+        "trustConfig": "projects/ccm-breakit/locations/global/trustConfigs/id-2de0d4b7-89cf-476f-893d-4567b3791ca9",
         "updateTime": "2025-09-01T12:25:36.419856961Z",
         "wellKnownRoots": "NONE"
       },
