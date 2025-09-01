@@ -493,7 +493,7 @@ properties:
           - 'backupConfig.0.selectedApplications'
           - 'backupConfig.0.selectedNamespaceLabels'
         properties:
-          - name: 'namespaceLabels'
+          - name: 'resourceLabels'
             type: Array
             description: |
               A list of Kubernetes Namespace labels.

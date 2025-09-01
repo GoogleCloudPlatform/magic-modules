@@ -23,7 +23,7 @@ resource "google_gke_backup_backup_plan" "nslabels" {
     include_volume_data = true
     include_secrets = true
     selected_namespace_labels {
-      namespace_labels {
+      resource_labels {
         key = "key1"
         value ="value1"
      }
