@@ -95,11 +95,11 @@ examples:
     oics_vars_overrides:
       'deletion_protection': 'false'
   - name: 'gkebackup_backupplan_nslabels'
-    primary_resource_id: 'namespacelabels'
+    primary_resource_id: 'nslabels'
     primary_resource_name: 'fmt.Sprintf("tf-test-nslabels-plan%s", context["random_suffix"])'
     vars:
-      name: 'namespacelabels-plan'
-      cluster_name: 'namespacelabels-cluster'
+      name: 'nslabels-plan'
+      cluster_name: 'nslabels-cluster'
       deletion_protection: 'true'
       network_name: 'default'
       subnetwork_name: 'default'
