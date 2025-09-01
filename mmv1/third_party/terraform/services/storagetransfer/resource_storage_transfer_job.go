@@ -99,6 +99,7 @@ var (
 	awsS3AuthKeys = []string{
 		"transfer_spec.0.aws_s3_data_source.0.aws_access_key",
 		"transfer_spec.0.aws_s3_data_source.0.role_arn",
+		"transfer_spec.0.aws_s3_data_source.0.credentials_secret",
 	}
 	azureOptionCredentials = []string{
 		"transfer_spec.0.azure_blob_storage_data_source.0.azure_credentials",
@@ -140,6 +141,11 @@ func ResourceStorageTransferJob() *schema.Resource {
 				Computed:    true,
 				ForceNew:    true,
 				Description: `The project in which the resource belongs. If it is not provided, the provider project is used.`,
+			},
+			"service_account": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The user-managed service account to run the job. If this field is specified, the given service account is granted the necessary permissions to all applicable resources (e.g. GCS buckets) required by the job.`,
 			},
 			"event_stream": {
 				Type:             schema.TypeList,
@@ -766,6 +772,12 @@ func awsS3DataSchema() *schema.Resource {
 				Optional:    true,
 				Description: `The CloudFront distribution domain name pointing to this bucket, to use when fetching. See [Transfer from S3 via CloudFront](https://cloud.google.com/storage-transfer/docs/s3-cloudfront) for more information. Format: https://{id}.cloudfront.net or any valid custom domain. Must begin with https://.`,
 			},
+			"credentials_secret": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ExactlyOneOf: awsS3AuthKeys,
+				Description:  `The Resource name of a secret in Secret Manager. AWS credentials must be stored in Secret Manager in JSON format. If credentials_secret is specified, do not specify role_arn or aws_access_key. Format: projects/{projectNumber}/secrets/{secret_name}.`,
+			},
 		},
 	}
 }
@@ -902,6 +914,7 @@ func resourceStorageTransferJobCreate(d *schema.ResourceData, meta interface{}) 
 		ReplicationSpec:    expandReplicationSpecs(d.Get("replication_spec").([]interface{})),
 		LoggingConfig:      expandTransferJobLoggingConfig(d.Get("logging_config").([]interface{})),
 		NotificationConfig: expandTransferJobNotificationConfig(d.Get("notification_config").([]interface{})),
+		ServiceAccount:     d.Get("service_account").(string),
 	}
 
 	var res *storagetransfer.TransferJob
@@ -968,6 +981,9 @@ func resourceStorageTransferJobRead(d *schema.ResourceData, meta interface{}) er
 	}
 	if err := d.Set("deletion_time", res.DeletionTime); err != nil {
 		return fmt.Errorf("Error setting deletion_time: %s", err)
+	}
+	if err := d.Set("service_account", res.ServiceAccount); err != nil {
+		return fmt.Errorf("Error setting service_account: %s", err)
 	}
 
 	err = d.Set("schedule", flattenTransferSchedule(res.Schedule))
@@ -1075,6 +1091,13 @@ func resourceStorageTransferJobUpdate(d *schema.ResourceData, meta interface{}) 
 			transferJob.LoggingConfig = expandTransferJobLoggingConfig(v.([]interface{}))
 		} else {
 			transferJob.LoggingConfig = nil
+		}
+	}
+
+	if d.HasChange("service_account") {
+		fieldMask = append(fieldMask, "service_account")
+		if v, ok := d.GetOk("service_account"); ok {
+			transferJob.ServiceAccount = v.(string)
 		}
 	}
 
@@ -1378,10 +1401,11 @@ func expandAwsS3Data(awsS3Datas []interface{}) *storagetransfer.AwsS3Data {
 
 	awsS3Data := awsS3Datas[0].(map[string]interface{})
 	result := &storagetransfer.AwsS3Data{
-		BucketName:   awsS3Data["bucket_name"].(string),
-		AwsAccessKey: expandAwsAccessKeys(awsS3Data["aws_access_key"].([]interface{})),
-		RoleArn:      awsS3Data["role_arn"].(string),
-		Path:         awsS3Data["path"].(string),
+		BucketName:        awsS3Data["bucket_name"].(string),
+		AwsAccessKey:      expandAwsAccessKeys(awsS3Data["aws_access_key"].([]interface{})),
+		RoleArn:           awsS3Data["role_arn"].(string),
+		CredentialsSecret: awsS3Data["credentials_secret"].(string),
+		Path:              awsS3Data["path"].(string),
 	}
 
 	if v, ok := awsS3Data["managed_private_network"]; ok {
@@ -1411,6 +1435,10 @@ func flattenAwsS3Data(awsS3Data *storagetransfer.AwsS3Data, d *schema.ResourceDa
 
 	if awsS3Data.CloudfrontDomain != "" {
 		data["cloudfront_domain"] = awsS3Data.CloudfrontDomain
+	}
+
+	if awsS3Data.CredentialsSecret != "" {
+		data["credentials_secret"] = awsS3Data.CredentialsSecret
 	}
 
 	return []map[string]interface{}{data}
