@@ -11713,12 +11713,10 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
   secret_manager_config {
     enabled = true
-{{- if ne $.TargetVersionName "ga" }}
   rotation_config {
     enabled = true
     rotation_interval = "300s"
     }
-{{- end }}
   }
   deletion_protection = false
   network    = "%s"
@@ -11741,12 +11739,10 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
   secret_manager_config {
     enabled = true
-{{- if ne $.TargetVersionName "ga" }}
   rotation_config {
     enabled = true
     rotation_interval = "120s"
     }
-{{- end }}
   }
   deletion_protection = false
   network    = "%s"
@@ -11769,12 +11765,10 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 1
   secret_manager_config {
     enabled = true
-{{- if ne $.TargetVersionName "ga" }}
   rotation_config {
     enabled = false
     rotation_interval = "120s"
     }
-{{- end }}
   }
   deletion_protection = false
   network    = "%s"
