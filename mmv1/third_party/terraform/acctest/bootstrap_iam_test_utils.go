@@ -14,7 +14,7 @@ import (
 )
 
 type IamMember struct {
-	Member, Role string
+	Member, Role, Scope string
 }
 
 // BootstrapIamMembers ensures that a given set of member/role pairs exist in the default
@@ -32,8 +32,8 @@ func BootstrapIamMembers(t *testing.T, members []IamMember) {
 	var projectMembers []IamMember
 	var orgMembers []IamMember
 	for _, member := range members {
-		// If the member has an {organization_id} token, we'll handle it as an org binding
-		if strings.Contains(member.Member, "{organization_id}") {
+		// Use scope field to determine if we want to handle as an organization-level binding
+		if strings.Contains(strings.ToLower(member.Scope), "org") {
 			orgMembers = append(orgMembers, member)
 		} else {
 			// Otherwise, treat as project-level (this also covers {project_number} or none)
@@ -65,10 +65,14 @@ func BootstrapIamMembers(t *testing.T, members []IamMember) {
 		if orgId == "" {
 			t.Fatal("Error: Org-level IAM was requested, but no target organization ID was set in the environment.")
 		}
+		projectNumber := envvar.GetTestProjectNumberFromEnv()
 
 		var orgBindings []*cloudresourcemanager.Binding
 		for _, om := range orgMembers {
-			replacedMember := strings.ReplaceAll(om.Member, "{organization_id}", orgId)
+			// In rare cases, we have org-scope bindings on project-level service accounts, so
+			// we should check to replace both.
+			replacedOrgTemplate := strings.ReplaceAll(om.Member, "{organization_id}", orgId)
+			replacedMember := strings.ReplaceAll(replacedOrgTemplate, "{project_number}", projectNumber)
 			orgBindings = append(orgBindings, &cloudresourcemanager.Binding{
 				Role:    om.Role,
 				Members: []string{replacedMember},
