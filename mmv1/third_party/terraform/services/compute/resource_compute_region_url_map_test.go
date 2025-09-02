@@ -2,9 +2,9 @@ package compute_test
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"testing"
 
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
@@ -201,6 +201,7 @@ func TestAccComputeRegionUrlMap_defaultUrlRedirectWithinPathMatcher(t *testing.T
 		},
 	})
 }
+
 // test header_action and path_matcher.header_action in root
 func TestAccComputeRegionUrlMap_headerAction(t *testing.T) {
 	t.Parallel()
@@ -231,6 +232,7 @@ func TestAccComputeRegionUrlMap_headerAction(t *testing.T) {
 		},
 	})
 }
+
 // Set all fields nested within `defaultRouteAction`, test import, then test updating all fields
 func TestAccComputeRegionUrlMap_defaultRouteAction_full_update(t *testing.T) {
 	t.Parallel()
@@ -480,6 +482,7 @@ resource "google_compute_region_url_map" "foobar" {
 }
 `, randomSuffix, randomSuffix, randomSuffix)
 }
+
 func testAccComputeRegionUrlMap_advanced1(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
@@ -817,7 +820,7 @@ resource "google_compute_region_url_map" "foobar" {
         }
         url_rewrite {
           host_rewrite = "stage.example.com" # updated
-          path_prefix_rewrite = "/v2/api/" # updated
+          path_prefix_rewrite = "/v2/api/"    # updated
         }
         weighted_backend_services {
           backend_service = google_compute_region_backend_service.home.self_link
