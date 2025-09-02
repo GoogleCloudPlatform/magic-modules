@@ -201,7 +201,36 @@ func TestAccComputeRegionUrlMap_defaultUrlRedirectWithinPathMatcher(t *testing.T
 		},
 	})
 }
+// test header_action and path_matcher.header_action in root
+func TestAccComputeRegionUrlMap_headerAction(t *testing.T) {
+	t.Parallel()
 
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeUrlMapDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeRegionUrlMap_headerAction1(randomSuffix),
+			},
+			{
+				ResourceName:      "google_compute_region_url_map.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccComputeRegionUrlMap_headerAction2(randomSuffix),
+			},
+			{
+				ResourceName:      "google_compute_region_url_map.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
 // Set all fields nested within `defaultRouteAction`, test import, then test updating all fields
 func TestAccComputeRegionUrlMap_defaultRouteAction_full_update(t *testing.T) {
 	t.Parallel()
@@ -322,6 +351,135 @@ resource "google_compute_region_url_map" "foobar" {
 `, randomSuffix, randomSuffix, randomSuffix)
 }
 
+func testAccComputeRegionUrlMap_headerAction1(randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_backend_service" "foobar" {
+  region        = "us-central1"
+  name          = "regionurlmap-headeraction-%s"
+  protocol      = "HTTP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  health_checks = [google_compute_region_health_check.zero.self_link]
+}
+
+resource "google_compute_region_health_check" "zero" {
+  region   = "us-central1"
+  name     = "regionurlmap-headeraction-%s"
+  http_health_check {
+    port = 80
+  }
+}
+
+resource "google_compute_region_url_map" "foobar" {
+  region          = "us-central1"
+  name            = "regionurlmap-headeraction-%s"
+  default_service = google_compute_region_backend_service.foobar.self_link
+
+  // root-level header_action
+  header_action {
+    request_headers_to_add {
+      header_name  = "x-root-test"
+      header_value = "foo"
+      replace      = true
+    }
+  }
+
+  host_rule {
+    hosts        = ["mysite.com"]
+    path_matcher = "with-headers"
+  }
+
+  path_matcher {
+    name            = "with-headers"
+    default_service = google_compute_region_backend_service.foobar.self_link
+
+    // path_matcher-level header_action
+    header_action {
+      request_headers_to_add {
+        header_name  = "x-path-test"
+        header_value = "bar"
+        replace      = true
+      }
+    }
+
+    path_rule {
+      paths   = ["/home"]
+      service = google_compute_region_backend_service.foobar.self_link
+    }
+  }
+
+  test {
+    host    = "mysite.com"
+    path    = "/home"
+    service = google_compute_region_backend_service.foobar.self_link
+  }
+}
+`, randomSuffix, randomSuffix, randomSuffix)
+}
+
+func testAccComputeRegionUrlMap_headerAction2(randomSuffix string) string {
+	return fmt.Sprintf(`
+resource "google_compute_region_backend_service" "foobar" {
+  region        = "us-central1"
+  name          = "regionurlmap-headeraction-%s"
+  protocol      = "HTTP"
+  load_balancing_scheme = "INTERNAL_MANAGED"
+  health_checks = [google_compute_region_health_check.zero.self_link]
+}
+
+resource "google_compute_region_health_check" "zero" {
+  region   = "us-central1"
+  name     = "regionurlmap-headeraction-%s"
+  http_health_check {
+    port = 80
+  }
+}
+
+resource "google_compute_region_url_map" "foobar" {
+  region          = "us-central1"
+  name            = "regionurlmap-headeraction-%s"
+  default_service = google_compute_region_backend_service.foobar.self_link
+
+  // root-level header_action updated
+  header_action {
+    request_headers_to_add {
+      header_name  = "x-root-test"
+      header_value = "baz"
+      replace      = true
+    }
+  }
+
+  host_rule {
+    hosts        = ["mysite.com"]
+    path_matcher = "with-headers"
+  }
+
+  path_matcher {
+    name            = "with-headers"
+    default_service = google_compute_region_backend_service.foobar.self_link
+
+    // path_matcher-level header_action updated
+    header_action {
+      request_headers_to_add {
+        header_name  = "x-path-test"
+        header_value = "qux"
+        replace      = true
+      }
+    }
+
+    path_rule {
+      paths   = ["/home", "/alt"]
+      service = google_compute_region_backend_service.foobar.self_link
+    }
+  }
+
+  test {
+    host    = "mysite.com"
+    path    = "/alt"
+    service = google_compute_region_backend_service.foobar.self_link
+  }
+}
+`, randomSuffix, randomSuffix, randomSuffix)
+}
 func testAccComputeRegionUrlMap_advanced1(randomSuffix string) string {
 	return fmt.Sprintf(`
 resource "google_compute_region_backend_service" "foobar" {
