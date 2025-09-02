@@ -90,22 +90,25 @@
 			if len(transformed) > 0 {
 				_, okEndpoint := d.GetOk("desired_auto_created_endpoints")
 				_, okPsc := d.GetOk("desired_psc_auto_connections")
-				if okEndpoint {
+				modeValue, _ := d.GetOk("mode")
+
+				if okEndpoint && modeValue != "CLUSTER_DISABLED" {
 					d.Set("desired_auto_created_endpoints", transformed)
 					log.Printf("[DEBUG] Setting desired_auto_created_endpoints in decoder within endpoints for %#v", transformed)
+					// log.Printf("[DEBUG] Value of EndpointRawValue %#v", EndpointRawValue)
 				} else if okPsc {
 					d.Set("desired_auto_created_endpoints", []interface{}{})
 				}
-				if okPsc {
+				if okPsc && modeValue == "CLUSTER_DISABLED" {
 					d.Set("desired_psc_auto_connections", transformed)
 					log.Printf("[DEBUG] Setting desired_psc_auto_connections in decoder within endpoints for %#v", transformed)
+					// log.Printf("[DEBUG] Value of PscRawValue %#v", PscRawValue)
 				} else if okEndpoint {
 					d.Set("desired_psc_auto_connections", []interface{}{})
 				}
 				// Set preferred field on import
 				if !okPsc && !okEndpoint {
 					d.Set("desired_auto_created_endpoints", transformed)
-					log.Printf("[DEBUG] Setting desired_auto_created_endpoints in decoder within endpoints for %#v", transformed)
 				}
 			}
 		}
