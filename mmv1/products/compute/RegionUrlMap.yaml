@@ -396,7 +396,6 @@ properties:
                 custom_expand: 'templates/terraform/custom_expand/resourceref_with_validation.go.tmpl'
                 resource: 'RegionBackendService'
                 imports: 'selfLink'
-                # comeca aqui
               - name: 'headerAction'
                 type: NestedObject
                 description: |
