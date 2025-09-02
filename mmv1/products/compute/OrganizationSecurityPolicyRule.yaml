@@ -92,9 +92,10 @@ properties:
           Available preconfigured expressions along with their requirements are: SRC_IPS_V1
           - must specify the corresponding srcIpRange field in config.
         min_version: 'beta'
-        default_value: 'SRC_IPS_V1'
+        default_from_api: true
         enum_values:
           - 'SRC_IPS_V1'
+          - 'FIREWALL'
       - name: 'config'
         type: NestedObject
         description: The configuration options for matching the rule.
