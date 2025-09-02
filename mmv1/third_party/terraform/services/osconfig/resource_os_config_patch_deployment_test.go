@@ -22,7 +22,7 @@ func TestAccOSConfigPatchDeployment_osConfigPatchDeployment_yum_basic(t *testing
 			{
 				Config: testAccOSConfigPatchDeployment_osConfigPatchDeployment_yum_basic(context),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_os_config_patch_deployment.patch", "patch_config.yum.minimal", "true"),
+					resource.TestCheckResourceAttr("google_os_config_patch_deployment.patch", "patch_config.0.yum.0.minimal", "false"),
 				),
 			},
 			{
@@ -46,7 +46,7 @@ resource "google_os_config_patch_deployment" "patch" {
 
   patch_config {
     yum {
-      minimal = true
+      minimal = false
     }
   }
 
