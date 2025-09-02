@@ -490,6 +490,7 @@ properties:
     type: Boolean
     description: |
       Optional. Flag indicating if the volume will be a large capacity volume or a regular volume.
+    immutable: true
   - name: 'multipleEndpoints'
     type: Boolean
     description: |
@@ -566,3 +567,8 @@ properties:
         description: |
           Optional. Labels to be added to the replication as the key value pairs.
           An object containing a list of "key": value pairs. Example: { "name": "wrench", "mass": "1.3kg", "count": "3" }.
+  - name: 'throughputMibps'
+    type: Double
+    description: |
+      Optional. Custom Performance Total Throughput of the pool (in MiB/s).
+    default_from_api: true

@@ -65,7 +65,7 @@ examples:
       subnet_name: 'my-subnet'
       network_name: 'my-network'
       prevent_destroy: 'true'
-      kms_key_name: "my-key"
+      kms_key_name: 'my-key'
     test_vars_overrides:
       'prevent_destroy': 'false'
       'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
@@ -108,8 +108,8 @@ examples:
       'secondary_instance_prevent_destroy': 'false'
 virtual_fields:
   - name: 'desired_psc_auto_connections'
-    description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead."
-    deprecation_message: '`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead.'
+    description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead `terraform import` will only work with desired_auto_created_endpoints`."
+    deprecation_message: '`desired_psc_auto_connections` is deprecated. Use `desired_auto_created_endpoints` instead. `terraform import` will only work with desired_auto_created_endpoints`.'
     type: Array
     immutable: true
     conflicts:
