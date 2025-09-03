@@ -36,11 +36,20 @@ func TestAccDataSourceGoogleBackupDRDataSourceReferences_basic(t *testing.T) {
 
 					// Now, run the regular checks using the extracted projectID
 					return resource.ComposeTestCheckFunc(
+						// Basic attribute checks
 						resource.TestCheckResourceAttr("data.google_backup_dr_data_source_references.default", "project", projectID),
 						resource.TestCheckResourceAttr("data.google_backup_dr_data_source_references.default", "location", context["location"].(string)),
 						resource.TestCheckResourceAttr("data.google_backup_dr_data_source_references.default", "resource_type", context["resource_type"].(string)),
+
+						// Check that the list itself is populated
 						resource.TestCheckResourceAttrSet("data.google_backup_dr_data_source_references.default", "data_source_references.#"),
+
+						// Checks for existing and new fields within the list
 						resource.TestCheckResourceAttrSet("data.google_backup_dr_data_source_references.default", "data_source_references.0.name"),
+						resource.TestCheckResourceAttrSet("data.google_backup_dr_data_source_references.default", "data_source_references.0.data_source"),
+						resource.TestCheckResourceAttrSet("data.google_backup_dr_data_source_references.default", "data_source_references.0.backup_config_state"),
+						resource.TestCheckResourceAttrSet("data.google_backup_dr_data_source_references.default", "data_source_references.0.gcp_resource_name"),
+						resource.TestCheckResourceAttrSet("data.google_backup_dr_data_source_references.default", "data_source_references.0.resource_type"),
 					)(s)
 				},
 			},

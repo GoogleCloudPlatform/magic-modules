@@ -2,6 +2,7 @@ package backupdr
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -39,6 +40,36 @@ func DataSourceGoogleBackupDRDataSourceReferences() *schema.Resource {
 						"name": {
 							Type:     schema.TypeString,
 							Computed: true,
+						},
+						"data_source": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The underlying data source resource.",
+						},
+						"gcp_resource_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The GCP resource name for the data source.",
+						},
+						"backup_config_state": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The state of the backup config for the data source.",
+						},
+						"backup_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The number of backups for the data source.",
+						},
+						"last_backup_state": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The state of the last backup.",
+						},
+						"last_successful_backup_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The last time a successful backup was made.",
 						},
 						"resource_type": {
 							Type:     schema.TypeString,
@@ -105,10 +136,32 @@ func flattenDataSourceReferences(items []interface{}) ([]map[string]interface{},
 		if !ok {
 			return nil, fmt.Errorf("cannot cast item to map[string]interface{}")
 		}
-		references = append(references, map[string]interface{}{
-			"name":          data["name"],
-			"resource_type": data["resourceType"],
-		})
+
+		ref := map[string]interface{}{
+			"name":                data["name"],
+			"data_source":         data["dataSource"],
+			"backup_config_state": data["dataSourceBackupConfigState"],
+		}
+
+		// The API returns backup count as a string, so we parse it to an integer.
+		if v, ok := data["dataSourceBackupCount"].(string); ok {
+			if i, err := strconv.Atoi(v); err == nil {
+				ref["backup_count"] = i
+			}
+		}
+
+		// Flatten the nested dataSourceBackupConfigInfo object.
+		if configInfo, ok := data["dataSourceBackupConfigInfo"].(map[string]interface{}); ok {
+			ref["last_backup_state"] = configInfo["lastBackupState"]
+			ref["last_successful_backup_time"] = configInfo["lastSuccessfulBackupConsistencyTime"]
+		}
+
+		if resourceInfo, ok := data["dataSourceGcpResourceInfo"].(map[string]interface{}); ok {
+			ref["gcp_resource_name"] = resourceInfo["gcpResourcename"]
+			ref["resource_type"] = resourceInfo["type"]
+		}
+
+		references = append(references, ref)
 	}
 	return references, nil
 }
