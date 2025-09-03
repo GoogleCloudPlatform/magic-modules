@@ -7261,7 +7261,11 @@ func flattenIPAllocationPolicy(c *container.Cluster, d *schema.ResourceData, con
         autoIpamMap = []map[string]any{
             {"enabled": p.AutoIpamConfig.Enabled,},
         }
-    }
+    } else {
+		autoIpamMap = []map[string]any{
+			{"enabled": false,},
+		}
+	}
 
 	return []map[string]interface{}{
 		{
