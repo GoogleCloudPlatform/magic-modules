@@ -229,12 +229,6 @@ Remove `description` from your configuration after upgrade.
 
  `allow_fewer_zones_deployment` has been removed because it isn't user-configurable.
 
-## Resource: `google_monitoring_uptime_check_config`
-
-### Exactly one of `http_check.auth_info.password` and `http_check.auth_info.password_wo` must be set
-
-Setting exactly one of `http_check.auth_info.password` and `http_check.auth_info.password_wo` is now enforced in order to avoid situations where it is unclear which was being used.
-
 ## Resource: `google_network_services_lb_traffic_extension`
 
 ### `load_balancing_scheme` is now required
@@ -247,21 +241,24 @@ This resource is not functional and can safely be removed from your configuratio
 
 ## Resource: `google_project_service`
 
-### `disable_on_destroy` now defaults to `false`
+### `disable_on_destroy` no longer defaults to `true`
 
-The default value for `disable_on_destroy` has been changed to `false`. The previous default (`true`) created a risk of unintended service disruptions, as destroying a single `google_project_service` resource would disable the API for the entire project.
+The default value for `disable_on_destroy` has been removed. The previous default (`true`) created a risk of unintended service disruptions, as destroying a single `google_project_service` resource would disable the API for the entire project.
 
-Now, destroying the resource will only remove it from Terraform's state and leave the service enabled. To disable a service when the resource is destroyed, you must now make an explicit decision by setting `disable_on_destroy = true`.
+Now, destroying the resource will only remove it from Terraform's state and leave the service enabled. For resources that did not explicitly have `disable_on_destroy` set, users will see a diff similar to the following:
+
+```hcl
+  ~ resource "google_project_service" "main" {
+      - disable_on_destroy                    = true -> null
+```
+
+Applying this change is the same as setting the value to `false`. Terraform will not make any additional API requests or change the project service enablement. It will only affect any future removal of this resource.
+
+To enable the previous default behavior, you must now make an explicit decision by setting `disable_on_destroy = true`.
 
 ## Resource: `google_redis_cluster`
 
  `allow_fewer_zones_deployment` has been removed because it isn't user-configurable.
-
-## Resource: `google_secret_manager_secret_version`
-
-### `secret_data_wo` and `secret_data_wo_version` must be set together
-
-This standardizes the behavior of write-only fields across the provider and makes it easier to remember to update the fields together.
 
 ## Resource: `google_sql_user`
 
