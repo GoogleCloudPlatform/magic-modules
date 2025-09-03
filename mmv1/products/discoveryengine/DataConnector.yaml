@@ -193,14 +193,9 @@ properties:
                 method, a DataStore is automatically created for each source entity.
               output: true
             - name: 'params'
-              type: NestedObject
+              type: KeyValuePairs
               description: |
                 The parameters for the entity to facilitate data ingestion.
-              properties:
-                - name: 'document_id_column'
-                  type: String
-                  description: |
-                    The value of the column ID.
       - name: 'create_time'
         type: Time
         description: |
