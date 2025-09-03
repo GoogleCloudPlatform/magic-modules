@@ -71,6 +71,13 @@ properties:
       The resource that the security policy is attached to.
     min_version: 'beta'
     required: true
+  - name: 'displayName'
+    type: String
+    description: |
+      The display name of the security policy of the association.
+    min_version: 'beta'
+    deprecation_message: '`display_name` is deprecated and will be removed in a future release, use `short_name` instead.'
+    output: true
   - name: 'shortName'
     type: String
     description: |
