@@ -343,6 +343,11 @@ includes an up-to-date reference of supported versions.
     resource creation, Terraform will attempt to clone another instance as indicated in the context. The
     configuration is detailed below.
 
+* `point_in_time_restore_context` - (Optional) The point_in_time_restore_context needed for performing a point-in-time recovery of an instance managed by Google Cloud Backup and Disaster Recovery. This field will
+    cause Terraform to trigger the database to restore to a point in time indicated. The configuration is detailed below.
+    **NOTE:** Restoring from a backup is an imperative action and not recommended via Terraform. Adding or modifying this
+    block during resource creation/update will trigger the restore action after the resource is created/updated.
+
 The `settings` block supports:
 
 * `tier` - (Required) The machine type to use. See [tiers](https://cloud.google.com/sql/docs/admin-api/v1beta4/tiers)
