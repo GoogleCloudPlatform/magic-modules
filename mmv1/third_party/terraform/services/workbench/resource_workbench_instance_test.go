@@ -787,11 +787,15 @@ func TestAccWorkbenchInstance_updatelabels(t *testing.T) {
 
 func testAccWorkbenchInstance_label(context map[string]interface{}) string {
 	return acctest.Nprintf(`
+resource "random_uuid" "test" {
+}
+
 resource "google_workbench_instance" "instance" {
   name = "tf-test-workbench-instance%{random_suffix}"
   location = "us-central1-a"
   labels = {
     k = "val"
+	computed_label                         = "${random_uuid.test.result}"
   }
 }
 `, context)
