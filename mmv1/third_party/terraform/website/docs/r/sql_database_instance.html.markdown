@@ -595,7 +595,7 @@ is present when the master instance is a source representation instance, `dump_f
 * `verify_server_certificate` - (Optional) True if the master's common name
     value is checked during the SSL handshake.
 
-The optionanl `point_in_time_restore_context` block supports:
+The optional `point_in_time_restore_context` block supports:
 
 * `datasource` - The Google Cloud Backup and Disaster Recovery Datasource URI.
 
