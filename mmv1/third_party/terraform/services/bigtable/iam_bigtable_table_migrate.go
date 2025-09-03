@@ -42,7 +42,9 @@ func resourceBigtableTableIAMV0() *schema.Resource {
 func ResourceBigtableTableIAMUpgradeV0(_ context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
 	log.Printf("[DEBUG] Attributes before migration: %#v", rawState)
 
-	rawState["instance_name"] = rawState["instance"]
+	if _, ok := rawState["instance"]; ok {
+		rawState["instance_name"] = rawState["instance"]
+	}
 
 	log.Printf("[DEBUG] Attributes after migration: %#v", rawState)
 	return rawState, nil
