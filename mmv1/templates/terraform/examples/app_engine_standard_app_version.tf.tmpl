@@ -90,3 +90,10 @@ resource "google_storage_bucket_object" "object" {
   bucket = google_storage_bucket.bucket.name
   source = "./test-fixtures/hello-world.zip"
 }
+
+resource "google_app_engine_standard_app_version" "{{$.PrimaryResourceId}}" {
+  project    = "{{index $.Vars "project_id"}}"
+  service    = "{{index $.Vars "service_name"}}"
+  version_id = "v1"
+  runtime    = "python38"
+  app_engine_bundled_services = ["app_identity_service", "blobstore", "capability_service", "datastore_v3", "images", "mail", "memcache", "modules", "search", "taskqueue", "urlfetch", "user"]
