@@ -847,6 +847,11 @@ Structure is [documented below](#nested_additional_ip_ranges_config).
 
 * `pod_ipv4_range_names`- (Required) List of secondary ranges names within this subnetwork that can be used for pod IPs.
 
+* `network_tier_config` - (Required) Contains network tier information. Structure is [documented below](#network_tier_config)
+
+<a name="network_tier_config"></a>The `network_tier_config` block supports:
+
+* `network_tier` - (Required) Network tier configuration.
 
 <a name="nested_master_auth"></a>The `master_auth` block supports:
 
