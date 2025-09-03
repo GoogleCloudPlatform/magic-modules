@@ -801,7 +801,7 @@ resource "google_workbench_instance" "instance" {
   location = "us-central1-a"
   labels = {
     k = "val"
-	computed_label                         = "${random_uuid.test.result}"
+	computed_label = "${random_uuid.test.result}"
   }
 }
 `, context)
