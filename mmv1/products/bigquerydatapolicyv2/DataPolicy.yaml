@@ -116,7 +116,7 @@ properties:
       COLUMN_LEVEL_SECURITY_POLICY
     required: true
   - name: etag
-    type: String
+    type: Fingerprint
     description: |-
       The etag for this Data Policy.
       This field is used for UpdateDataPolicy calls. If Data Policy exists, this
