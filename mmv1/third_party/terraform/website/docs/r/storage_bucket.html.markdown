@@ -39,11 +39,10 @@ resource "google_storage_bucket" "static-site" {
     max_age_seconds = 3600
   }
   cors {
-    origin                       = ["http://image-store.com"]
-    method                       = ["GET", "HEAD", "PUT", "POST", "DELETE"]
-    response_header              = ["*"]
-    max_age_seconds              = 0
-    send_max_age_seconds_if_zero = true
+    origin            = ["http://image-store.com"]
+    method            = ["GET", "HEAD", "PUT", "POST", "DELETE"]
+    response_header   = ["*"]
+    max_age_seconds   = 0
   }
 }
 ```
@@ -257,8 +256,6 @@ The following arguments are supported:
 * `response_header` - (Optional) The list of HTTP headers other than the [simple response headers](https://www.w3.org/TR/cors/#simple-response-header) to give permission for the user-agent to share across domains.
 
 * `max_age_seconds` - (Optional) The value, in seconds, to return in the [Access-Control-Max-Age header](https://www.w3.org/TR/cors/#access-control-max-age-response-header) used in preflight responses.
-
-* `send_max_age_seconds_if_zero` - (Optional) If set true, max_age_seconds value will be sent in the request even for zero value of the field. This field is only useful for setting 0 value to the max_age_seconds field. It can be used alone or together with max_age_seconds.
 
 <a name="nested_retention_policy"></a>The `retention_policy` block supports:
 
