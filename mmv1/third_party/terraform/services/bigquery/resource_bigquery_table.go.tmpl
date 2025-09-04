@@ -294,9 +294,15 @@ func bigQueryTableHasRowAccessPolicy(config *transport_tpg.Config, project, data
 	return false, nil
 }
 
+func bigQueryTableHasRowAccessPolicyFunc(config *transport_tpg.Config, project, datasetId, tableId string) func() (bool, error) {
+	return func() (bool, error) {
+		return bigQueryTableHasRowAccessPolicy(config, project, datasetId, tableId)
+	}
+}
+
 // Compares two existing schema implementations and decides if
 // it is changeable.. pairs with a force new on not changeable
-func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, isExternalTable bool, topLevel bool, config *transport_tpg.Config, project, datasetId, tableId string) (bool, error) {
+func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, isExternalTable bool, topLevel bool, hasRowAccessPolicyFunc func() (bool, error)) (bool, error) {
 	switch old.(type) {
 	case []interface{}:
 		arrayOld := old.([]interface{})
@@ -337,7 +343,7 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, isExternalTab
 				continue
 			}
 
-			isChangable, err := resourceBigQueryTableSchemaIsChangeable(mapOld[key], mapNew[key], isExternalTable, false, config, project, datasetId, tableId)
+			isChangable, err := resourceBigQueryTableSchemaIsChangeable(mapOld[key], mapNew[key], isExternalTable, false, hasRowAccessPolicyFunc)
 			if err != nil || !isChangable {
 				return false, err
 			} else if isChangable && topLevel {
@@ -350,7 +356,7 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, isExternalTab
 		newColumns := len(arrayNew) - sameNameColumns
 		isSchemaChangeable := (droppedColumns == 0) || (newColumns == 0)
 		if isSchemaChangeable && topLevel {
-			hasRowAccessPolicy, err := bigQueryTableHasRowAccessPolicy(config, project, datasetId, tableId)
+			hasRowAccessPolicy, err := hasRowAccessPolicyFunc()
 			if err != nil {
 				// Default behavior when we can't get row access policies data.
 				return isSchemaChangeable, nil
@@ -405,7 +411,7 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, isExternalTab
 					return false, nil
 				}
 			case "fields":
-				return resourceBigQueryTableSchemaIsChangeable(valOld, valNew, isExternalTable, false, config, project, datasetId, tableId)
+				return resourceBigQueryTableSchemaIsChangeable(valOld, valNew, isExternalTable, false, hasRowAccessPolicyFunc)
 
 				// other parameters: description, policyTags and
 				// policyTags.names[] are changeable
@@ -422,7 +428,7 @@ func resourceBigQueryTableSchemaIsChangeable(old, new interface{}, isExternalTab
 	}
 }
 
-func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourceDiff, config *transport_tpg.Config, project string) error {
+func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourceDiff, hasRowAccessPolicyFunc func() (bool, error)) error {
 	if _, hasSchema := d.GetOk("schema"); hasSchema {
 		oldSchema, newSchema := d.GetChange("schema")
 		oldSchemaText := oldSchema.(string)
@@ -444,10 +450,8 @@ func resourceBigQueryTableSchemaCustomizeDiffFunc(d tpgresource.TerraformResourc
 			// same as above
 			log.Printf("[DEBUG] unable to unmarshal json customized diff - %v", err)
 		}
-		datasetId := d.Get("dataset_id").(string)
-		tableId := d.Get("table_id").(string)
 		_, isExternalTable := d.GetOk("external_data_configuration")
-		isChangeable, err := resourceBigQueryTableSchemaIsChangeable(old, new, isExternalTable, true, config, project, datasetId, tableId)
+		isChangeable, err := resourceBigQueryTableSchemaIsChangeable(old, new, isExternalTable, true, hasRowAccessPolicyFunc)
 		if err != nil {
 			return err
 		}
@@ -467,7 +471,10 @@ func resourceBigQueryTableSchemaCustomizeDiff(_ context.Context, d *schema.Resou
 	if err != nil {
 		return err
 	}
-	return resourceBigQueryTableSchemaCustomizeDiffFunc(d, config, project)
+	datasetId := d.Get("dataset_id").(string)
+	tableId := d.Get("table_id").(string)
+	hasRowAccessPolicyFunc := bigQueryTableHasRowAccessPolicyFunc(config, project, datasetId, tableId)
+	return resourceBigQueryTableSchemaCustomizeDiffFunc(d, hasRowAccessPolicyFunc)
 }
 
 func validateBigQueryTableSchema(v interface{}, k string) (warnings []string, errs []error) {

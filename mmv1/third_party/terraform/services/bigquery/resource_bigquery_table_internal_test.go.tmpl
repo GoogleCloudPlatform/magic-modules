@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
 
 func TestBigQueryTableSchemaDiffSuppress(t *testing.T) {
@@ -426,19 +425,11 @@ func (testcase *testUnitBigQueryDataTableJSONChangeableTestCase) check(t *testin
 		d.After["external_data_configuration"] = ""
 	}
 
-	datasetId := "my_dataset"
-	d.Before["dataset_id"] = datasetId
-	d.After["dataset_id"] = datasetId
-	tableId := "my_table"
-	d.Before["table_id"] = tableId
-	d.After["table_id"] = tableId
-
-	project := "my-project"
-	config := &transport_tpg.Config{
-		Project: project,
+	hasRowAccessPolicyFunc := func() (bool, error) {
+		return false, nil
 	}
 
-	changeable, err := resourceBigQueryTableSchemaIsChangeable(old, new, testcase.isExternalTable, true, config, project, datasetId, tableId)
+	changeable, err := resourceBigQueryTableSchemaIsChangeable(old, new, testcase.isExternalTable, true, hasRowAccessPolicyFunc)
 	if err != nil {
 		t.Errorf("%s failed unexpectedly: %s", testcase.name, err)
 	}
@@ -446,7 +437,7 @@ func (testcase *testUnitBigQueryDataTableJSONChangeableTestCase) check(t *testin
 		t.Errorf("expected changeable result of %v but got %v for testcase %s", testcase.changeable, changeable, testcase.name)
 	}
 
-	err = resourceBigQueryTableSchemaCustomizeDiffFunc(d, config, project)
+	err = resourceBigQueryTableSchemaCustomizeDiffFunc(d, hasRowAccessPolicyFunc)
 	if err != nil {
 		t.Errorf("error on testcase %s - %v", testcase.name, err)
 	}
