@@ -1,0 +1,7 @@
+resource "google_network_management_organization_vpc_flow_logs_config" "{{$.PrimaryResourceId}}" {
+  provider                = google-beta
+  vpc_flow_logs_config_id = "{{index $.Vars "vpc_flow_logs_config_id"}}"
+  location                = "global"
+  organization            = "{{index $.TestEnvVars "org_id"}}"
+}
+

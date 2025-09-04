@@ -30,7 +30,8 @@ func (cb *Client) ApproveDownstreamGenAndTest(prNumber, commitSha string) error 
 	}
 
 	if buildId == "" {
-		return fmt.Errorf("Failed to find pending build for PR %s", prNumber)
+		fmt.Printf("WARNING: Failed to find pending build for PR %s\nThis build may have been approved already.\n", prNumber)
+		return nil
 	}
 
 	err = approveBuild(PROJECT_ID, buildId)
