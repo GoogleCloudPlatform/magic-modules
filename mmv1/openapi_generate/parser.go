@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"maps"
 	"os"
 	"path"
 	"path/filepath"
@@ -163,7 +162,7 @@ func buildProduct(filePath, output string, root *openapi3.T, header []byte) stri
 	apiVersion := &product.Version{}
 
 	apiVersion.BaseUrl = fmt.Sprintf("%s/%s/", server, version)
-	// TODO figure out how to tell the API version
+	// TODO(slevenick) figure out how to tell the API version
 	apiVersion.Name = "ga"
 	apiProduct.Versions = []*product.Version{apiVersion}
 
@@ -358,9 +357,6 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 		if len(obj.Value.Enum) > 0 {
 			var enums []string
 			for _, enum := range obj.Value.Enum {
-				if strings.HasSuffix(fmt.Sprintf("%v", enum), "_UNSPECIFIED") {
-					continue
-				}
 				enums = append(enums, fmt.Sprintf("%v", enum))
 			}
 			additionalDescription = fmt.Sprintf("\n Possible values:\n %s", strings.Join(enums, "\n"))
@@ -443,8 +439,7 @@ func writeObject(name string, obj *openapi3.SchemaRef, objType openapi3.Types, u
 
 func buildProperties(props openapi3.Schemas, required []string) []*api.Type {
 	properties := []*api.Type{}
-	for _, k := range slices.Sorted(maps.Keys(props)) {
-		prop := props[k]
+	for k, prop := range props {
 		propObj := writeObject(k, prop, propType(prop), false)
 		if slices.Contains(required, k) {
 			propObj.Required = true

@@ -110,6 +110,7 @@ func main() {
 	}
 
 	// product specific generation
+	generateProductsFile("provider_dcl_endpoints", productsForVersion)
 	generateProductsFile("provider_dcl_client_creation", productsForVersion)
 
 	if oPath == nil || *oPath == "" {

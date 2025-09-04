@@ -2,127 +2,82 @@ package compute
 
 import (
 	"fmt"
-	"regexp"
-	"strings"
-
-	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
-	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
-
-var (
-	computeInterconnectLocationIdTemplate = "projects/%s/global/interconnectlocations/%s"
-	computeInterconnectLocationLinkRegex  = regexp.MustCompile(`projects/(.+)/global/interconnectlocations/(.+)$`)
-)
-
-type ComputeInterconnectLocationId struct {
-	Project string
-	Name    string
-}
-
-func (s ComputeInterconnectLocationId) CanonicalId() string {
-	return fmt.Sprintf(computeInterconnectLocationIdTemplate, s.Project, s.Name)
-}
-
-// ParseComputeInterconnectLocationId parses IDs of the form:
-// - projects/{project}/global/interconnectlocations/{name}
-// - {project}/{name}
-// - {name} (requires config.Project)
-func ParseComputeInterconnectLocationId(id string, config *transport_tpg.Config) (*ComputeInterconnectLocationId, error) {
-	var parts []string
-	if computeInterconnectLocationLinkRegex.MatchString(id) {
-		parts = computeInterconnectLocationLinkRegex.FindStringSubmatch(id)
-		return &ComputeInterconnectLocationId{
-			Project: parts[1],
-			Name:    parts[2],
-		}, nil
-	} else {
-		parts = strings.Split(id, "/")
-	}
-
-	if len(parts) == 2 {
-		return &ComputeInterconnectLocationId{
-			Project: parts[0],
-			Name:    parts[1],
-		}, nil
-	} else if len(parts) == 1 {
-		if config.Project == "" {
-			return nil, fmt.Errorf("The default project for the provider must be set when using the `{name}` id format.")
-		}
-		return &ComputeInterconnectLocationId{
-			Project: config.Project,
-			Name:    parts[0],
-		}, nil
-	}
-
-	return nil, fmt.Errorf("Invalid interconnect location id. Expecting resource link, `{project}/{name}` or `{name}` format.")
-}
 
 func DataSourceGoogleComputeInterconnectLocation() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceGoogleComputeInterconnectLocationRead,
-
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-
 			"project": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-
-			"self_link": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-
 			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
+			"self_link": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"peeringdb_facility_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"address": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"facility_provider": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"facility_provider_facility_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"continent": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"city": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
 			"availability_zone": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-
-			"status": {
-				Type:     schema.TypeString,
+			"supports_pzs": {
+				Type:     schema.TypeBool,
 				Computed: true,
+			},
+			"available_features": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"available_link_types": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 	}
@@ -142,48 +97,26 @@ func dataSourceGoogleComputeInterconnectLocationRead(d *schema.ResourceData, met
 
 	name := d.Get("name").(string)
 
-	id := fmt.Sprintf("projects/%s/global/interconnectlocations/%s", project, name)
-
 	location, err := config.NewComputeClient(userAgent).InterconnectLocations.Get(project, name).Do()
 	if err != nil {
-		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("InterconnectLocation Not Found : %s", name), id)
+		return transport_tpg.HandleDataSourceNotFoundError(err, d, fmt.Sprintf("Interconnect Location %q not found", name), "")
 	}
 
 	d.SetId(location.Name)
-	if err := d.Set("project", project); err != nil {
-		return fmt.Errorf("Error setting project: %s", err)
-	}
-	if err := d.Set("self_link", location.SelfLink); err != nil {
-		return fmt.Errorf("Error setting self_link: %s", err)
-	}
-	if err := d.Set("description", location.Description); err != nil {
-		return fmt.Errorf("Error setting description: %s", err)
-	}
-	if err := d.Set("peeringdb_facility_id", location.PeeringdbFacilityId); err != nil {
-		return fmt.Errorf("Error setting peeringdb_facility_id: %s", err)
-	}
-	if err := d.Set("address", location.Address); err != nil {
-		return fmt.Errorf("Error setting address: %s", err)
-	}
-	if err := d.Set("facility_provider", location.FacilityProvider); err != nil {
-		return fmt.Errorf("Error setting facility_provider: %s", err)
-	}
-	if err := d.Set("facility_provider_facility_id", location.FacilityProviderFacilityId); err != nil {
-		return fmt.Errorf("Error setting facility_provider_facility_id: %s", err)
-	}
-	if err := d.Set("continent", location.Continent); err != nil {
-		return fmt.Errorf("Error setting continent: %s", err)
-	}
-	if err := d.Set("city", location.City); err != nil {
-		return fmt.Errorf("Error setting city: %s", err)
-	}
-	if err := d.Set("availability_zone", location.AvailabilityZone); err != nil {
-		return fmt.Errorf("Error setting availability_zone: %s", err)
-	}
-	if err := d.Set("status", location.Status); err != nil {
-		return fmt.Errorf("Error setting status: %s", err)
-	}
+	d.Set("project", project)
+	d.Set("description", location.Description)
+	d.Set("self_link", location.SelfLink)
+	d.Set("peeringdb_facility_id", location.PeeringdbFacilityId)
+	d.Set("address", location.Address)
+	d.Set("facility_provider", location.FacilityProvider)
+	d.Set("facility_provider_facility_id", location.FacilityProviderFacilityId)
+	d.Set("status", location.Status)
+	d.Set("continent", location.Continent)
+	d.Set("city", location.City)
+	d.Set("availability_zone", location.AvailabilityZone)
+	d.Set("supports_pzs", location.SupportsPzs)
+	d.Set("available_features", location.AvailableFeatures)
+	d.Set("available_link_types", location.AvailableLinkTypes)
 
-	d.SetId(id)
 	return nil
 }

@@ -26,7 +26,7 @@ delete_url: 'projects/{{project}}/locations/{{location}}/privateClouds/{{name}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/privateClouds/{{name}}'
 timeouts:
-  insert_minutes: 360
+  insert_minutes: 240
   update_minutes: 190
   delete_minutes: 150
 autogen_async: true
@@ -36,7 +36,7 @@ async:
   operation:
     base_url: '{{op_id}}'
     timeouts:
-      insert_minutes: 360
+      insert_minutes: 240
       update_minutes: 190
       delete_minutes: 150
   result:

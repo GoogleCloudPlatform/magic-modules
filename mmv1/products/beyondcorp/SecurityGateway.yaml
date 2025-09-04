@@ -54,8 +54,6 @@ async:
     resource_inside_response: true
   include_project: false
 autogen_status: U2VjdXJpdHlHYXRld2F5
-custom_code:
-  constants: 'templates/terraform/constants/beyondcorp_security_gateway.go.tmpl'
 parameters:
   - name: location
     type: String
@@ -106,17 +104,15 @@ properties:
       as a key.
     key_name: region
     key_description: The region to deploy the hub in.
-    set_hash_func: 'beyondcorpSecurityGatewayHubsHash'
     value_type:
       name: Hub
       type: NestedObject
       properties:
-        - name: internetGateway
+        - name: internet_gateway
           type: NestedObject
           description: Internet Gateway configuration.
-          default_from_api: true
           properties:
-            - name: assignedIps
+            - name: assigned_ips
               type: Array
               description: Output only. List of IP addresses assigned to the Cloud NAT.
               output: true
@@ -138,9 +134,4 @@ properties:
   - name: name
     type: String
     description: Identifier. Name of the resource.
-    output: true
-  - name: delegatingServiceAccount
-    type: String
-    description: |-
-      Service account used for operations that involve resources in consumer projects.
     output: true

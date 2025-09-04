@@ -64,8 +64,8 @@ var (
 		"BBBmau": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 7, 1),
-					endDate:   newDate(2025, 7, 17),
+					startDate: newDate(2025, 4, 7),
+					endDate:   newDate(2025, 4, 11),
 				},
 			},
 		},
@@ -81,12 +81,7 @@ var (
 			vacations: []Vacation{},
 		},
 		"melinath": {
-			vacations: []Vacation{
-				{
-					startDate: newDate(2025, 6, 26),
-					endDate:   newDate(2025, 7, 7),
-				},
-			},
+			vacations: []Vacation{},
 		},
 		"NickElliot": {
 			vacations: []Vacation{},
@@ -100,12 +95,7 @@ var (
 			},
 		},
 		"roaks3": {
-			vacations: []Vacation{
-				{
-					startDate: newDate(2025, 8, 1),
-					endDate:   newDate(2025, 8, 11),
-				},
-			},
+			vacations: []Vacation{},
 		},
 		"ScottSuarez": {
 			vacations: []Vacation{},
@@ -113,8 +103,8 @@ var (
 		"shuyama1": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 5, 23),
-					endDate:   newDate(2025, 5, 30),
+					startDate: newDate(2025, 3, 26),
+					endDate:   newDate(2025, 4, 1),
 				},
 			},
 		},
@@ -127,26 +117,16 @@ var (
 			},
 		},
 		"slevenick": {
-			vacations: []Vacation{
-				{
-					startDate: newDate(2025, 5, 22),
-					endDate:   newDate(2025, 6, 7),
-				},
-			},
+			vacations: []Vacation{},
 		},
 		"trodge": {
-			vacations: []Vacation{
-				{
-					startDate: newDate(2025, 8, 7),
-					endDate:   newDate(2025, 8, 10),
-				},
-			},
+			vacations: []Vacation{},
 		},
 		"zli82016": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 8, 27),
-					endDate:   newDate(2025, 9, 2),
+					startDate: newDate(2025, 1, 15),
+					endDate:   newDate(2025, 2, 9),
 				},
 			},
 		},
@@ -155,6 +135,7 @@ var (
 	// This is for new team members who are onboarding
 	trustedContributors = map[string]struct{}{
 		"bbasata":           struct{}{},
+		"jaylonmcshan03":    struct{}{},
 		"malhotrasagar2212": struct{}{},
 	}
 )

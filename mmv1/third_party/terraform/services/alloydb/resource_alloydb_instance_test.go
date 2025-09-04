@@ -12,7 +12,7 @@ func TestAccAlloydbInstance_update(t *testing.T) {
 
 	random_suffix := acctest.RandString(t, 10)
 	context := map[string]interface{}{
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-update-1"),
 		"random_suffix": random_suffix,
 	}
 
@@ -64,8 +64,6 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
-
-  deletion_protection = false
 }
 
 data "google_compute_network" "default" {
@@ -101,8 +99,6 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
-
-  deletion_protection = false
 }
 
 data "google_compute_network" "default" {
@@ -117,7 +113,7 @@ func TestAccAlloydbInstance_createInstanceWithMandatoryFields(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-mandatory-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -130,101 +126,6 @@ func TestAccAlloydbInstance_createInstanceWithMandatoryFields(t *testing.T) {
 			},
 		},
 	})
-}
-
-// This test passes if we are able to create a primary instance STOP it and then START it back again
-func TestAccAlloydbInstance_stopstart(t *testing.T) {
-	t.Parallel()
-
-	suffix := acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
-
-	context := map[string]interface{}{
-		"random_suffix": suffix,
-		"network_name":  networkName,
-	}
-
-	contextStop := map[string]interface{}{
-		"random_suffix":     suffix,
-		"network_name":      networkName,
-		"activation_policy": "NEVER",
-	}
-
-	contextStart := map[string]interface{}{
-		"random_suffix":     suffix,
-		"network_name":      networkName,
-		"activation_policy": "ALWAYS",
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAlloydbInstance_createInstanceWithMandatoryFields(context),
-			},
-			{
-				ResourceName:            "google_alloydb_instance.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time"},
-			},
-			{
-				Config: testAccAlloydbInstance_updateActivationPolicy(contextStop),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_alloydb_instance.default", "activation_policy", "NEVER"),
-					resource.TestCheckResourceAttr("google_alloydb_instance.default", "state", "STOPPED"),
-				),
-			},
-			{
-				ResourceName:            "google_alloydb_instance.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
-			},
-			{
-				Config: testAccAlloydbInstance_updateActivationPolicy(contextStart),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_alloydb_instance.default", "activation_policy", "ALWAYS"),
-					resource.TestCheckResourceAttr("google_alloydb_instance.default", "state", "READY"),
-				),
-			},
-			{
-				ResourceName:            "google_alloydb_instance.default",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"cluster", "instance_id", "reconciling", "update_time", "labels", "terraform_labels"},
-			},
-		},
-	})
-}
-
-func testAccAlloydbInstance_updateActivationPolicy(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_alloydb_instance" "default" {
-  cluster       = google_alloydb_cluster.default.name
-  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
-  instance_type = "PRIMARY"
-  activation_policy = "%{activation_policy}"
-}
-
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-central1"
-  network_config {
-    network = data.google_compute_network.default.id
-  }
-
-  deletion_protection = false
-}
-
-data "google_project" "project" {}
-
-data "google_compute_network" "default" {
-  name = "%{network_name}"
-}
-`, context)
 }
 
 func testAccAlloydbInstance_createInstanceWithMandatoryFields(context map[string]interface{}) string {
@@ -241,8 +142,6 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = data.google_compute_network.default.id
   }
-
-  deletion_protection = false
 }
 
 data "google_project" "project" {}
@@ -259,7 +158,7 @@ data "google_compute_network" "default" {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-maximum-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -331,7 +230,7 @@ func TestAccAlloydbInstance_createPrimaryAndReadPoolInstance(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-readpool-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -370,8 +269,6 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = data.google_compute_network.default.id
   }
-
-  deletion_protection = false
 }
 
 data "google_project" "project" {}
@@ -388,7 +285,7 @@ data "google_compute_network" "default" {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-updatedb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -455,8 +352,6 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = data.google_compute_network.default.id
   }
-
-  deletion_protection = false
 }
 
 data "google_project" "project" {}
@@ -471,7 +366,7 @@ data "google_compute_network" "default" {
 func TestAccAlloydbInstance_createInstanceWithNetworkConfigAndAllocatedIPRange(t *testing.T) {
 	t.Parallel()
 
-	testId := "alloydb-1"
+	testId := "alloydbinstance-network-config-1"
 	addressName := acctest.BootstrapSharedTestGlobalAddress(t, testId)
 	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, testId)
 
@@ -508,8 +403,6 @@ resource "google_alloydb_cluster" "default" {
     network    = data.google_compute_network.default.id
     allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
   }
-
-  deletion_protection = false
 }
 
 data "google_compute_network" "default" {
@@ -531,7 +424,7 @@ func TestAccAlloydbInstance_clientConnectionConfig(t *testing.T) {
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
+	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-clientconnectionconfig")
 
 	context := map[string]interface{}{
 		"random_suffix":      suffix,
@@ -649,8 +542,6 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = data.google_compute_network.default.id
   }
-
-  deletion_protection = false
 }
 
 data "google_project" "project" {}
@@ -682,8 +573,6 @@ resource "google_alloydb_cluster" "default" {
   network_config {
     network = data.google_compute_network.default.id
   }
-
-  deletion_protection = false
 }
 
 data "google_project" "project" {}
@@ -700,7 +589,7 @@ func TestAccAlloydbInstance_networkConfig(t *testing.T) {
 	t.Parallel()
 
 	suffix := acctest.RandString(t, 10)
-	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1")
+	networkName := acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-networkconfig")
 
 	context1 := map[string]interface{}{
 		"random_suffix":                suffix,
@@ -815,8 +704,6 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
-
-  deletion_protection = false
 }
 
 data "google_project" "project" {}
@@ -855,8 +742,6 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
-
-  deletion_protection = false
 }
 
 data "google_project" "project" {}
@@ -912,8 +797,6 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
-
-  deletion_protection = false
 }
 data "google_project" "project" {}
 `, context)
@@ -941,8 +824,6 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
-
-  deletion_protection = false
 }
 data "google_project" "project" {}
 `, context)
@@ -998,8 +879,6 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
-
-  deletion_protection = false
 }
 data "google_project" "project" {}
 `, context)
@@ -1030,152 +909,4 @@ func TestAccAlloydbInstance_updateInstanceWithPscInterfaceConfigs(t *testing.T) 
 			},
 		},
 	})
-}
-
-func TestAccAlloydbInstance_updatePscAutoConnections(t *testing.T) {
-	t.Parallel()
-
-	networkName := acctest.BootstrapSharedTestNetwork(t, "tf-test-alloydb-network-psc")
-	random_suffix := acctest.RandString(t, 10)
-	context := map[string]interface{}{
-		"network_name":  networkName,
-		"random_suffix": random_suffix,
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAlloydbInstance_pscAutoConnections(context),
-			},
-			{
-				Config: testAccAlloydbInstance_updatePscAutoConnections(context),
-			},
-		},
-	})
-}
-
-func testAccAlloydbInstance_pscAutoConnections(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_alloydb_instance" "default" {
-  cluster       = google_alloydb_cluster.default.name
-  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
-  instance_type = "PRIMARY"
-  machine_config {
-    cpu_count = 2
-  }
-  psc_instance_config {
-	psc_auto_connections {
-		consumer_project = "${data.google_project.project.project_id}"
-		consumer_network = "projects/${data.google_project.project.project_id}/global/networks/%{network_name}"
-	}
-  }
-}
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-central1"
-  psc_config {
-	psc_enabled = true
-  }
-  initial_user {
-    password = "tf-test-alloydb-cluster%{random_suffix}"
-  }
-
-  deletion_protection = false
-}
-data "google_project" "project" {}
-`, context)
-}
-
-func testAccAlloydbInstance_updatePscAutoConnections(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_alloydb_instance" "default" {
-  cluster       = google_alloydb_cluster.default.name
-  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
-  instance_type = "PRIMARY"
-  machine_config {
-    cpu_count = 2
-  }
-}
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-central1"
-  psc_config {
-	psc_enabled = true
-  }
-  initial_user {
-    password = "tf-test-alloydb-cluster%{random_suffix}"
-  }
-
-  deletion_protection = false
-}
-data "google_project" "project" {}
-`, context)
-}
-
-func TestAccAlloydbInstance_createPrimaryAndReadPoolInstanceWithAllocatedIpRangeOverride(t *testing.T) {
-	t.Parallel()
-
-	testId := "alloydb-1"
-	context := map[string]interface{}{
-		"random_suffix": acctest.RandString(t, 10),
-		"address_name":  acctest.BootstrapSharedTestGlobalAddress(t, testId),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, testId),
-	}
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckAlloydbInstanceDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccAlloydbInstance_createPrimaryAndReadPoolInstanceWithAllocatedIpRangeOverride(context),
-			},
-		},
-	})
-}
-
-func testAccAlloydbInstance_createPrimaryAndReadPoolInstanceWithAllocatedIpRangeOverride(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_alloydb_instance" "primary" {
-  cluster       = google_alloydb_cluster.default.name
-  instance_id   = "tf-test-alloydb-instance%{random_suffix}"
-  instance_type = "PRIMARY"
-}
-
-resource "google_alloydb_instance" "read_pool" {
-  cluster       = google_alloydb_cluster.default.name
-  instance_id   = "tf-test-alloydb-instance%{random_suffix}-read"
-  instance_type = "READ_POOL"
-  read_pool_config {
-    node_count = 4
-  }
-  network_config {
-	allocated_ip_range_override = data.google_compute_global_address.private_ip_alloc.name
-  }
-  depends_on = [google_alloydb_instance.primary]
-}
-
-resource "google_alloydb_cluster" "default" {
-  cluster_id = "tf-test-alloydb-cluster%{random_suffix}"
-  location   = "us-central1"
-  network_config {
-    network = data.google_compute_network.default.id
-  }
-
-  deletion_protection = false
-}
-
-data "google_project" "project" {}
-
-data "google_compute_network" "default" {
-  name = "%{network_name}"
-}
-
-data "google_compute_global_address" "private_ip_alloc" {
-  name =  "%{address_name}"
-}
-`, context)
 }

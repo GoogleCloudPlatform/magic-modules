@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 
 	"magician/provider"
@@ -219,13 +220,13 @@ func TestNotRunTests(t *testing.T) {
 
 func TestAnalyticsComment(t *testing.T) {
 	tests := []struct {
-		name         string
-		data         postReplay
-		wantContains []string
+		name string
+		data analytics
+		want string
 	}{
 		{
 			name: "run full vcr is false and no affected services",
-			data: postReplay{
+			data: analytics{
 				ReplayingResult: vcr.Result{
 					PassedTests:  []string{"a", "b", "c"},
 					SkippedTests: []string{"d", "e"},
@@ -234,26 +235,29 @@ func TestAnalyticsComment(t *testing.T) {
 				RunFullVCR:       false,
 				AffectedServices: []string{},
 			},
-			wantContains: []string{
-				"#### Tests analytics",
-				"Total tests: 6",
-				"Passed tests: 3",
-				"Skipped tests: 2",
-				"Affected tests: 1",
-				"",
-				"<details>",
-				"<summary>Click here to see the affected service packages</summary>",
-				"<blockquote>",
-				"",
-				"None",
-				"",
-				"</blockquote>",
-				"</details>",
-			},
+			want: strings.Join(
+				[]string{
+					"#### Tests analytics",
+					"Total tests: 6",
+					"Passed tests: 3",
+					"Skipped tests: 2",
+					"Affected tests: 1",
+					"",
+					"<details>",
+					"<summary>Click here to see the affected service packages</summary>",
+					"<blockquote>",
+					"",
+					"None",
+					"",
+					"</blockquote>",
+					"</details>",
+				},
+				"\n",
+			),
 		},
 		{
 			name: "run full vcr is false and has affected services",
-			data: postReplay{
+			data: analytics{
 				ReplayingResult: vcr.Result{
 					PassedTests:  []string{"a", "b", "c"},
 					SkippedTests: []string{"d", "e"},
@@ -262,30 +266,33 @@ func TestAnalyticsComment(t *testing.T) {
 				RunFullVCR:       false,
 				AffectedServices: []string{"svc-a", "svc-b"},
 			},
-			wantContains: []string{
-				"#### Tests analytics",
-				"Total tests: 6",
-				"Passed tests: 3",
-				"Skipped tests: 2",
-				"Affected tests: 1",
-				"",
-				"<details>",
-				"<summary>Click here to see the affected service packages</summary>",
-				"<blockquote>",
-				"",
-				"<ul>",
-				"<li>svc-a</li>",
-				"<li>svc-b</li>",
-				"",
-				"</ul>",
-				"",
-				"</blockquote>",
-				"</details>",
-			},
+			want: strings.Join(
+				[]string{
+					"#### Tests analytics",
+					"Total tests: 6",
+					"Passed tests: 3",
+					"Skipped tests: 2",
+					"Affected tests: 1",
+					"",
+					"<details>",
+					"<summary>Click here to see the affected service packages</summary>",
+					"<blockquote>",
+					"",
+					"<ul>",
+					"<li>svc-a</li>",
+					"<li>svc-b</li>",
+					"",
+					"</ul>",
+					"",
+					"</blockquote>",
+					"</details>",
+				},
+				"\n",
+			),
 		},
 		{
 			name: "run full vcr is true",
-			data: postReplay{
+			data: analytics{
 				ReplayingResult: vcr.Result{
 					PassedTests:  []string{"a", "b", "c"},
 					SkippedTests: []string{"d", "e"},
@@ -294,7 +301,7 @@ func TestAnalyticsComment(t *testing.T) {
 				RunFullVCR:       true,
 				AffectedServices: []string{},
 			},
-			wantContains: []string{
+			want: strings.Join([]string{
 				"#### Tests analytics",
 				"Total tests: 6",
 				"Passed tests: 3",
@@ -310,18 +317,18 @@ func TestAnalyticsComment(t *testing.T) {
 				"</blockquote>",
 				"</details>",
 			},
+				"\n",
+			),
 		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := formatPostReplay(tc.data)
+			got, err := formatTestsAnalytics(tc.data)
 			if err != nil {
 				t.Fatalf("Failed to format comment: %v", err)
 			}
-			for _, wc := range tc.wantContains {
-				if !strings.Contains(got, wc) {
-					t.Errorf("formatPostReplay() returned %q, which does not contain %q", got, wc)
-				}
+			if diff := cmp.Diff(tc.want, got); diff != "" {
+				t.Errorf("formatTestsAnalytics() returned unexpected difference (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -329,69 +336,84 @@ func TestAnalyticsComment(t *testing.T) {
 
 func TestNonExercisedTestsComment(t *testing.T) {
 	tests := []struct {
-		name         string
-		data         postReplay
-		wantContains []string
+		name string
+		data nonExercisedTests
+		want string
 	}{
 		{
+			name: "without non exercised tests",
+			data: nonExercisedTests{},
+			want: strings.Join(
+				[]string{},
+				"\n",
+			),
+		},
+		{
 			name: "with not run beta tests",
-			data: postReplay{
+			data: nonExercisedTests{
 				NotRunBetaTests: []string{"beta-1", "beta-2"},
 			},
-			wantContains: []string{
-				"#### Non-exercised tests",
-				"",
-				color("red", "Tests were added that are skipped in VCR:"),
-				"- beta-1",
-				"- beta-2",
-			},
+			want: strings.Join(
+				[]string{
+					"#### Non-exercised tests",
+					"",
+					color("red", "Tests were added that are skipped in VCR:"),
+					"- beta-1",
+					"- beta-2",
+				},
+				"\n",
+			),
 		},
 		{
 			name: "with not run ga tests",
-			data: postReplay{
+			data: nonExercisedTests{
 				NotRunGATests: []string{"ga-1", "ga-2"},
 			},
-			wantContains: []string{
-				"#### Non-exercised tests",
-				"",
-				"",
-				"",
-				color("red", "Tests were added that are GA-only additions and require manual runs:"),
-				"- ga-1",
-				"- ga-2",
-			},
+			want: strings.Join(
+				[]string{
+					"#### Non-exercised tests",
+					"",
+					"",
+					"",
+					color("red", "Tests were added that are GA-only additions and require manual runs:"),
+					"- ga-1",
+					"- ga-2",
+				},
+				"\n",
+			),
 		},
 		{
 			name: "with not run ga tests and not run beta tests",
-			data: postReplay{
+			data: nonExercisedTests{
 				NotRunGATests:   []string{"ga-1", "ga-2"},
 				NotRunBetaTests: []string{"beta-1", "beta-2"},
 			},
-			wantContains: []string{
-				"#### Non-exercised tests",
-				"",
-				color("red", "Tests were added that are skipped in VCR:"),
-				"- beta-1",
-				"- beta-2",
-				"",
-				"",
-				"",
-				color("red", "Tests were added that are GA-only additions and require manual runs:"),
-				"- ga-1",
-				"- ga-2",
-			},
+			want: strings.Join(
+				[]string{
+					"#### Non-exercised tests",
+					"",
+					color("red", "Tests were added that are skipped in VCR:"),
+					"- beta-1",
+					"- beta-2",
+					"",
+					"",
+					"",
+					color("red", "Tests were added that are GA-only additions and require manual runs:"),
+					"- ga-1",
+					"- ga-2",
+				},
+				"\n",
+			),
 		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := formatPostReplay(tc.data)
+			got, err := formatNonExercisedTests(tc.data)
 			if err != nil {
 				t.Fatalf("Failed to format comment: %v", err)
 			}
-			for _, wc := range tc.wantContains {
-				if !strings.Contains(got, wc) {
-					t.Errorf("formatPostReplay() returned %q, which does not contain %q", got, wc)
-				}
+			if diff := cmp.Diff(tc.want, got); diff != "" {
+				t.Errorf("formatNonExercisedTests() returned unexpected difference (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -399,45 +421,46 @@ func TestNonExercisedTestsComment(t *testing.T) {
 
 func TestWithReplayFailedTests(t *testing.T) {
 	tests := []struct {
-		name         string
-		data         postReplay
-		wantContains []string
+		name string
+		data withReplayFailedTests
+		want string
 	}{
 		{
 			name: "with failed tests",
-			data: postReplay{
+			data: withReplayFailedTests{
 				ReplayingResult: vcr.Result{
 					FailedTests: []string{"a", "b"},
 				},
 			},
-			wantContains: []string{
-				"#### Action taken",
-				"<details>",
-				"<summary>Found 2 affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Click here to see the affected tests",
-				"</summary>",
-				"<blockquote>",
-				"<ul>",
-				"<li>a</li>",
-				"<li>b</li>",
-				"", // Empty line
-				"</ul>",
-				"</blockquote>",
-				"</details>",
-				"",
-				"[Get to know how VCR tests work](https://googlecloudplatform.github.io/magic-modules/develop/test/test/)",
-			},
+			want: strings.Join(
+				[]string{
+					"#### Action taken",
+					"<details>",
+					"<summary>Found 2 affected test(s) by replaying old test recordings. Starting RECORDING based on the most recent commit. Click here to see the affected tests",
+					"</summary>",
+					"<blockquote>",
+					"<ul>",
+					"<li>a</li>",
+					"<li>b</li>",
+					"", // Empty line
+					"</ul>",
+					"</blockquote>",
+					"</details>",
+					"",
+					"[Get to know how VCR tests work](https://googlecloudplatform.github.io/magic-modules/develop/test/test/)",
+				},
+				"\n",
+			),
 		},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := formatPostReplay(tc.data)
+			got, err := formatWithReplayFailedTests(tc.data)
 			if err != nil {
 				t.Fatalf("Failed to format comment: %v", err)
 			}
-			for _, wc := range tc.wantContains {
-				if !strings.Contains(got, wc) {
-					t.Errorf("formatPostReplay() returned %q, which does not contain %q", got, wc)
-				}
+			if diff := cmp.Diff(tc.want, got); diff != "" {
+				t.Errorf("formatWithReplayFailedTests() returned unexpected difference (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -446,12 +469,12 @@ func TestWithReplayFailedTests(t *testing.T) {
 func TestWithoutReplayFailedTests(t *testing.T) {
 	tests := []struct {
 		name         string
-		data         postReplay
+		data         withoutReplayFailedTests
 		wantContains []string
 	}{
 		{
 			name: "with replay error",
-			data: postReplay{
+			data: withoutReplayFailedTests{
 				ReplayingErr: fmt.Errorf("some error"),
 				BuildID:      "build-123",
 				Head:         "auto-pr-123",
@@ -465,7 +488,7 @@ func TestWithoutReplayFailedTests(t *testing.T) {
 		},
 		{
 			name: "without replay error",
-			data: postReplay{
+			data: withoutReplayFailedTests{
 				BuildID:   "build-123",
 				Head:      "auto-pr-123",
 				LogBucket: "ci-vcr-logs",
@@ -479,13 +502,13 @@ func TestWithoutReplayFailedTests(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := formatPostReplay(tc.data)
+			got, err := formatWithoutReplayFailedTests(tc.data)
 			if err != nil {
 				t.Fatalf("Failed to format comment: %v", err)
 			}
 			for _, wc := range tc.wantContains {
 				if !strings.Contains(got, wc) {
-					t.Errorf("formatPostReplay() returned %q, which does not contain %q", got, wc)
+					t.Errorf("formatWithoutReplayFailedTests() returned %q, which does not contain %q", got, wc)
 				}
 			}
 		})

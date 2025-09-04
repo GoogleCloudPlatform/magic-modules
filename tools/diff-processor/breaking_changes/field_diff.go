@@ -13,15 +13,13 @@ import (
 // regarding field attribute changes
 type FieldDiffRule struct {
 	Identifier string
-	Messages   func(resource, field string, fieldDiff diff.FieldDiff, resourceDiff diff.ResourceDiffInterface) []string
+	Messages   func(resource, field string, fieldDiff diff.FieldDiff) []string
 }
 
 // FieldDiffRules is a list of FieldDiffRule
 // guarding against provider breaking changes
 var FieldDiffRules = []FieldDiffRule{
 	FieldChangingType,
-	FieldNewRequired,
-	FieldNewOptionalFieldWithDefault,
 	FieldBecomingRequired,
 	FieldBecomingComputedOnly,
 	FieldOptionalComputedToOptional,
@@ -36,7 +34,7 @@ var FieldChangingType = FieldDiffRule{
 	Messages:   FieldChangingTypeMessages,
 }
 
-func FieldChangingTypeMessages(resource, field string, fieldDiff diff.FieldDiff, _ diff.ResourceDiffInterface) []string {
+func FieldChangingTypeMessages(resource, field string, fieldDiff diff.FieldDiff) []string {
 	// Type change doesn't matter for added / removed fields
 	if fieldDiff.Old == nil || fieldDiff.New == nil {
 		return nil
@@ -64,7 +62,7 @@ var FieldBecomingRequired = FieldDiffRule{
 	Messages:   FieldBecomingRequiredMessages,
 }
 
-func FieldBecomingRequiredMessages(resource, field string, fieldDiff diff.FieldDiff, _ diff.ResourceDiffInterface) []string {
+func FieldBecomingRequiredMessages(resource, field string, fieldDiff diff.FieldDiff) []string {
 	// Ignore for added / removed fields
 	if fieldDiff.Old == nil || fieldDiff.New == nil {
 		return nil
@@ -82,7 +80,7 @@ var FieldBecomingComputedOnly = FieldDiffRule{
 	Messages:   FieldBecomingComputedOnlyMessages,
 }
 
-func FieldBecomingComputedOnlyMessages(resource, field string, fieldDiff diff.FieldDiff, _ diff.ResourceDiffInterface) []string {
+func FieldBecomingComputedOnlyMessages(resource, field string, fieldDiff diff.FieldDiff) []string {
 	// ignore for added / removed fields
 	if fieldDiff.Old == nil || fieldDiff.New == nil {
 		return nil
@@ -105,7 +103,7 @@ var FieldOptionalComputedToOptional = FieldDiffRule{
 	Messages:   FieldOptionalComputedToOptionalMessages,
 }
 
-func FieldOptionalComputedToOptionalMessages(resource, field string, fieldDiff diff.FieldDiff, _ diff.ResourceDiffInterface) []string {
+func FieldOptionalComputedToOptionalMessages(resource, field string, fieldDiff diff.FieldDiff) []string {
 	// ignore for added / removed fields
 	if fieldDiff.Old == nil || fieldDiff.New == nil {
 		return nil
@@ -122,7 +120,7 @@ var FieldDefaultModification = FieldDiffRule{
 	Messages:   FieldDefaultModificationMessages,
 }
 
-func FieldDefaultModificationMessages(resource, field string, fieldDiff diff.FieldDiff, _ diff.ResourceDiffInterface) []string {
+func FieldDefaultModificationMessages(resource, field string, fieldDiff diff.FieldDiff) []string {
 	// ignore for added / removed fields
 	if fieldDiff.Old == nil || fieldDiff.New == nil {
 		return nil
@@ -157,7 +155,7 @@ var FieldGrowingMin = FieldDiffRule{
 	Messages:   FieldGrowingMinMessages,
 }
 
-func FieldGrowingMinMessages(resource, field string, fieldDiff diff.FieldDiff, _ diff.ResourceDiffInterface) []string {
+func FieldGrowingMinMessages(resource, field string, fieldDiff diff.FieldDiff) []string {
 	// ignore for added / removed fields
 	if fieldDiff.Old == nil || fieldDiff.New == nil {
 		return nil
@@ -179,7 +177,7 @@ var FieldShrinkingMax = FieldDiffRule{
 	Messages:   FieldShrinkingMaxMessages,
 }
 
-func FieldShrinkingMaxMessages(resource, field string, fieldDiff diff.FieldDiff, _ diff.ResourceDiffInterface) []string {
+func FieldShrinkingMaxMessages(resource, field string, fieldDiff diff.FieldDiff) []string {
 	// ignore for added / removed fields
 	if fieldDiff.Old == nil || fieldDiff.New == nil {
 		return nil
@@ -204,7 +202,7 @@ var FieldRemovingDiffSuppress = FieldDiffRule{
 	Messages:   FieldRemovingDiffSuppressMessages,
 }
 
-func FieldRemovingDiffSuppressMessages(resource, field string, fieldDiff diff.FieldDiff, _ diff.ResourceDiffInterface) []string {
+func FieldRemovingDiffSuppressMessages(resource, field string, fieldDiff diff.FieldDiff) []string {
 	// ignore for added / removed fields
 	if fieldDiff.Old == nil || fieldDiff.New == nil {
 		return nil
@@ -213,47 +211,6 @@ func FieldRemovingDiffSuppressMessages(resource, field string, fieldDiff diff.Fi
 	tmpl := "Field `%s` lost its diff suppress function"
 	if fieldDiff.Old.DiffSuppressFunc != nil && fieldDiff.New.DiffSuppressFunc == nil {
 		return []string{fmt.Sprintf(tmpl, field)}
-	}
-	return nil
-}
-
-var FieldNewRequired = FieldDiffRule{
-	Identifier: "no-new-required",
-	Messages:   FieldNewRequiredMessages,
-}
-
-func FieldNewRequiredMessages(resource, field string, fieldDiff diff.FieldDiff, resourceDiff diff.ResourceDiffInterface) []string {
-	if resourceDiff.IsNewResource() || resourceDiff.IsFieldInNewNestedStructure(field) {
-		return nil
-	}
-
-	// This rule applies to newly added fields (Old == nil).
-	if fieldDiff.Old == nil {
-		if fieldDiff.New.Required {
-			tmpl := "Field `%s` added as required on pre-existing resource `%s`"
-			return []string{fmt.Sprintf(tmpl, field, resource)}
-		}
-	}
-	return nil
-}
-
-var FieldNewOptionalFieldWithDefault = FieldDiffRule{
-	Identifier: "no-new-optional-default",
-	Messages:   FieldNewOptionalFieldWithDefaultMessages,
-}
-
-func FieldNewOptionalFieldWithDefaultMessages(resource, field string, fieldDiff diff.FieldDiff, resourceDiff diff.ResourceDiffInterface) []string {
-	if resourceDiff.IsNewResource() || resourceDiff.IsFieldInNewNestedStructure(field) {
-		return nil
-	}
-
-	// This rule applies to newly added fields (Old == nil).
-	if fieldDiff.Old == nil {
-		if fieldDiff.New.Optional && fieldDiff.New.Default != nil && fieldDiff.New.ForceNew {
-			tmpl := "Field `%s` added as optional with a default value and force new on pre-existing resource `%s`. " +
-				"This can be allowed if there is a confirmed API-level default that matches the schema default"
-			return []string{fmt.Sprintf(tmpl, field, resource)}
-		}
 	}
 	return nil
 }

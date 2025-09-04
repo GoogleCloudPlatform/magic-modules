@@ -358,7 +358,7 @@ func TestMagicianLocation(t *testing.T) {
 	}
 }
 
-func TestHasPostCreateComputedFields(t *testing.T) {
+func TestHasComputedIdFormatFields(t *testing.T) {
 	cases := []struct {
 		name, description string
 		resource          Resource
@@ -476,29 +476,15 @@ func TestHasPostCreateComputedFields(t *testing.T) {
 			},
 			want: true,
 		},
-		{
-			name: "includes fields in self link that aren't in id format",
-			resource: Resource{
-				IdFormat: "projects/{{project}}/resource/{{resource_id}}",
-				SelfLink: "{{name}}",
-				Properties: []*Type{
-					{
-						Name:   "name",
-						Output: true,
-					},
-				},
-			},
-			want: true,
-		},
 	}
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := tc.resource.HasPostCreateComputedFields()
+			got := tc.resource.HasComputedIdFormatFields()
 			if got != tc.want {
-				t.Errorf("HasPostCreateComputedFields(%q) returned unexpected value. got %t; want %t.", tc.name, got, tc.want)
+				t.Errorf("HasComputedIdFormatFields(%q) returned unexpected value. got %t; want %t.", tc.name, got, tc.want)
 			}
 		})
 	}

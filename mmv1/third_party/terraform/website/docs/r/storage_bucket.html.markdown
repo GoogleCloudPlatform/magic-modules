@@ -94,7 +94,7 @@ resource "google_storage_bucket" "no-age-enabled" {
 ## Example Usage - Enabling public access prevention
 
 ```hcl
-resource "google_storage_bucket" "no-public-access" {
+resource "google_storage_bucket" "auto-expire" {
   name          = "no-public-access-bucket"
   location      = "US"
   force_destroy = true
@@ -106,7 +106,7 @@ resource "google_storage_bucket" "no-public-access" {
 ## Example Usage - Enabling hierarchical namespace
 
 ```hcl
-resource "google_storage_bucket" "hns-enabled" {
+resource "google_storage_bucket" "auto-expire" {
   name          = "hns-enabled-bucket"
   location      = "US"
   force_destroy = true
@@ -121,7 +121,7 @@ resource "google_storage_bucket" "hns-enabled" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the bucket. Bucket names must be in lowercase and no more than 63 characters long. You can find the complete list of bucket naming rules [here](https://cloud.google.com/storage/docs/buckets#naming).
+* `name` - (Required) The name of the bucket.
 
 * `location` - (Required) The [GCS location](https://cloud.google.com/storage/docs/bucket-locations).
 
@@ -176,8 +176,6 @@ The following arguments are supported:
 * `time_created` -  (Computed) The creation time of the bucket in RFC 3339 format.
 
 * `updated` -  (Computed) The time at which the bucket's metadata or IAM policy was last updated, in RFC 3339 format.
-
-* `ip_filter` -  (Optional) The bucket IP filtering configuration. Specifies the network sources that can access the bucket, as well as its underlying objects. Structure is [documented below](#nested_ip_filter).
 
 <a name="nested_lifecycle_rule"></a>The `lifecycle_rule` block supports:
 
@@ -255,7 +253,7 @@ The following arguments are supported:
 
 * `is_locked` - (Optional) If set to `true`, the bucket will be [locked](https://cloud.google.com/storage/docs/using-bucket-lock#lock-bucket) and permanently restrict edits to the bucket's retention policy.  Caution: Locking a bucket is an irreversible action.
 
-* `retention_period` - (Required) The period of time, in seconds, that objects in the bucket must be retained and cannot be deleted, overwritten, or archived. The value must be less than 3,155,760,000 seconds.
+* `retention_period` - (Required) The period of time, in seconds, that objects in the bucket must be retained and cannot be deleted, overwritten, or archived. The value must be less than 2,147,483,647 seconds.
 
 <a name="nested_logging"></a>The `logging` block supports:
 
@@ -295,27 +293,6 @@ The following arguments are supported:
 
 * `enabled` - (Required) Enables hierarchical namespace for the bucket.
 
-<a name="nested_ip_filter"></a>The `ip_filter` block supports:
-
-* `mode` - (Required) The state of the IP filter configuration. Valid values are `Enabled` and `Disabled`. When set to `Enabled`, IP filtering rules are applied to a bucket and all incoming requests to the bucket are evaluated against these rules. When set to `Disabled`, IP filtering rules are not applied to a bucket. **Note**: `allow_all_service_agent_access` must be supplied when `mode` is set to `Enabled`, it can be ommited for other values.
-
-* `allow_cross_org_vpcs` - (Optional) While set `true`, allows cross-org VPCs in the bucket's IP filter configuration.
-
-* `allow_all_service_agent_access` (Optional) While set `true`, allows all service agents to access the bucket regardless of the IP filter configuration.
-
-* `public_network_source` - (Optional) The public network IP address ranges that can access the bucket and its data. Structure is [documented below](#nested_public_network_source).
-
-* `vpc_network_sources` - (Optional) The list of VPC networks that can access the bucket. Structure is [documented below](#nested_vpc_network_sources).
-
-<a name="nested_public_network_source"></a>The `public_network_source` block supports:
-
-* `allowed_ip_cidr_ranges` - The list of public IPv4 and IPv6 CIDR ranges that can access the bucket and its data.
-
-<a name="nested_vpc_network_sources"></a>The `vpc_network_sources` block supports:
-
-* `network` - Name of the network. Format: `projects/PROJECT_ID/global/networks/NETWORK_NAME`
-
-* `allowed_ip_cidr_ranges` - The list of public or private IPv4 and IPv6 CIDR ranges that can access the bucket.
 
 ## Attributes Reference
 

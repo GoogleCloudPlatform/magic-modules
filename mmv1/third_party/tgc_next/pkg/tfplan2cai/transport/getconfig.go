@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	transport_tpg "github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/transport"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
 )
 
 func NewConfig(ctx context.Context, project, zone, region string, offline bool, userAgent string) (*transport_tpg.Config, error) {

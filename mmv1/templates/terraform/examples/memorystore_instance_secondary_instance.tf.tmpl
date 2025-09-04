@@ -2,7 +2,7 @@
 resource "google_memorystore_instance" "primary_instance" {
   instance_id                    = "{{index $.Vars "primary_instance_name"}}"
   shard_count                    = 1
-  desired_auto_created_endpoints {
+  desired_psc_auto_connections {
     network                      = google_compute_network.primary_producer_net.id
     project_id                   = data.google_project.project.project_id
   }
@@ -63,7 +63,7 @@ resource "google_compute_network" "primary_producer_net" {
 resource "google_memorystore_instance" "secondary_instance" {
   instance_id                    = "{{index $.Vars "secondary_instance_name"}}"
   shard_count                    = 1
-  desired_auto_created_endpoints {
+  desired_psc_auto_connections {
     network                      = google_compute_network.secondary_producer_net.id
     project_id                   = data.google_project.project.project_id
   }

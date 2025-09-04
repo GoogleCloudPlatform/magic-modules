@@ -42,7 +42,6 @@ async:
   result:
     resource_inside_response: false
 custom_code:
-  encoder: 'templates/terraform/encoders/network_services_edge_cache_service.go.tmpl'
 examples:
   - name: 'network_services_edge_cache_service_basic'
     primary_resource_id: 'instance'

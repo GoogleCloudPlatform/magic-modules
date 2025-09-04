@@ -14,9 +14,6 @@ import (
 	"time"
 	"os"
 
-	"cloud.google.com/go/auth/credentials"
-	"cloud.google.com/go/auth/credentials/impersonate"
-	"cloud.google.com/go/auth/oauth2adapt"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 
@@ -87,7 +84,6 @@ import (
 	"google.golang.org/api/sourcerepo/v1"
 	"google.golang.org/api/spanner/v1"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
-	backupdr "google.golang.org/api/backupdr/v1"
 	"google.golang.org/api/storage/v1"
 	"google.golang.org/api/storagetransfer/v1"
 	"google.golang.org/api/transport"
@@ -235,6 +231,7 @@ func ExpandExternalCredentialsConfig(v interface{}) (*ExternalCredentials, error
 // Config is the configuration structure used to instantiate the Google
 // provider.
 type Config struct {
+	DCLConfig
 	AccessToken                               string
 	Credentials                               string
 	ExternalCredentials                       *ExternalCredentials
@@ -278,14 +275,9 @@ type Config struct {
 	BigtableAdminBasePath string
 	TagsLocationBasePath string
 
-	// DCL
+	// dcl
 	ContainerAwsBasePath string
 	ContainerAzureBasePath string
-	ApikeysBasePath string
-	AssuredWorkloadsBasePath string
-	CloudResourceManagerBasePath string
-	FirebaserulesBasePath string
-	RecaptchaEnterpriseBasePath string
 
 	RequestBatcherServiceUsage *RequestBatcher
 	RequestBatcherIam          *RequestBatcher
@@ -321,19 +313,9 @@ var DefaultBasePaths = map[string]string{
 	IamCredentialsBasePathKey : "https://iamcredentials.googleapis.com/v1/",
 	ResourceManagerV3BasePathKey : "https://cloudresourcemanager.googleapis.com/v3/",
 	BigtableAdminBasePathKey : "https://bigtableadmin.googleapis.com/v2/",
-	TagsLocationBasePathKey: "https://{{"{{"}}location{{"}}"}}-cloudresourcemanager.googleapis.com/v3/",
-	// DCL
-	ContainerAwsBasePathKey: "https://{{"{{"}}location{{"}}"}}-gkemulticloud.googleapis.com/v1/",
+	ContainerAwsBasePathKey:  "https://{{"{{"}}location{{"}}"}}-gkemulticloud.googleapis.com/v1/",
 	ContainerAzureBasePathKey: "https://{{"{{"}}location{{"}}"}}-gkemulticloud.googleapis.com/v1/",
-	ApikeysEndpointEntryKey: "https://apikeys.googleapis.com/v2/",
-{{- if eq $.TargetVersionName "ga" }}
-	AssuredWorkloadsEndpointEntryKey: "https://{{"{{"}}location{{"}}"}}-assuredworkloads.googleapis.com/v1beta1/",
-{{- else }}
-	AssuredWorkloadsEndpointEntryKey: "https://{{"{{"}}location{{"}}"}}-assuredworkloads.googleapis.com/v1/",
-{{- end }}
-	CloudResourceManagerEndpointEntryKey: "https://cloudresourcemanager.googleapis.com/",
-	FirebaserulesEndpointEntryKey: "https://firebaserules.googleapis.com/v1/",
-	RecaptchaEnterpriseEndpointEntryKey: "https://recaptchaenterprise.googleapis.com/v1/",
+	TagsLocationBasePathKey: "https://{{"{{"}}location{{"}}"}}-cloudresourcemanager.googleapis.com/v3/",
 }
 
 var DefaultClientScopes = []string{
@@ -478,9 +460,6 @@ func SetEndpointDefaults(d *schema.ResourceData) error {
 		}, DefaultBasePaths[TagsLocationBasePathKey]))
 	}
 
-	// DCL endpoints - these are hardcoded as a workaround for the DCL not providing a way to
-	// determine base paths at generation time.
-
 	if d.Get(ContainerAwsCustomEndpointEntryKey) == "" {
 		d.Set(ContainerAwsCustomEndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_CONTAINERAWS_CUSTOM_ENDPOINT",
@@ -491,31 +470,6 @@ func SetEndpointDefaults(d *schema.ResourceData) error {
 		d.Set(ContainerAzureCustomEndpointEntryKey, MultiEnvDefault([]string{
 			"GOOGLE_CONTAINERAZURE_CUSTOM_ENDPOINT",
 		}, DefaultBasePaths[ContainerAzureBasePathKey]))
-	}
-	if d.Get(ApikeysEndpointEntryKey) == "" {
-		d.Set(ApikeysEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_APIKEYS_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[ApikeysEndpointEntryKey]))
-	}
-	if d.Get(AssuredWorkloadsEndpointEntryKey) == "" {
-		d.Set(AssuredWorkloadsEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_ASSURED_WORKLOADS_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[AssuredWorkloadsEndpointEntryKey]))
-	}
-	if d.Get(CloudResourceManagerEndpointEntryKey) == "" {
-		d.Set(CloudResourceManagerEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_CLOUD_RESOURCE_MANAGER_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[CloudResourceManagerEndpointEntryKey]))
-	}
-	if d.Get(FirebaserulesEndpointEntryKey) == "" {
-		d.Set(FirebaserulesEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_FIREBASERULES_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[FirebaserulesEndpointEntryKey]))
-	}
-	if d.Get(RecaptchaEnterpriseEndpointEntryKey) == "" {
-		d.Set(RecaptchaEnterpriseEndpointEntryKey, MultiEnvDefault([]string{
-			"GOOGLE_RECAPTCHA_ENTERPRISE_CUSTOM_ENDPOINT",
-		}, DefaultBasePaths[RecaptchaEnterpriseEndpointEntryKey]))
 	}
 
 	return nil
@@ -605,9 +559,10 @@ func (c *Config) LoadAndValidate(ctx context.Context) error {
 		TimestampFormat: "2006/01/02 15:04:05",
 		LogFormat:       "%time% [%lvl%] %msg% \n",
 	})
-	logger.SetOutput(log.Writer())
 
 	alwaysLoggingDeciderClient := func(ctx context.Context, fullMethodName string) bool { return true }
+	grpc_logrus.ReplaceGrpcLogger(logrus.NewEntry(logger))
+
 	c.gRPCLoggingOptions = append(
 		c.gRPCLoggingOptions, option.WithGRPCDialOption(grpc.WithUnaryInterceptor(
 			grpc_logrus.PayloadUnaryClientInterceptor(logrus.NewEntry(logger), alwaysLoggingDeciderClient))),
@@ -902,20 +857,6 @@ func (c *Config) NewSqlAdminClient(userAgent string) *sqladmin.Service {
 	clientSqlAdmin.BasePath = sqlClientBasePath
 
 	return clientSqlAdmin
-}
-
-func (c *Config) NewBackupDRClient(userAgent string) *backupdr.Service {
-	backupdrClientBasePath := RemoveBasePathVersion(RemoveBasePathVersion(c.BackupDRBasePath))
-	log.Printf("[INFO] Instantiating Google SqlAdmin client for path %s", backupdrClientBasePath)
-	clientBackupdrAdmin, err := backupdr.NewService(c.Context, option.WithHTTPClient(c.Client))
-	if err != nil {
-		log.Printf("[WARN] Error creating client storage: %s", err)
-		return nil
-	}
-	clientBackupdrAdmin.UserAgent = userAgent
-	clientBackupdrAdmin.BasePath = backupdrClientBasePath
-
-	return clientBackupdrAdmin
 }
 
 func (c *Config) NewPubsubClient(userAgent string) *pubsub.Service {
@@ -1358,33 +1299,10 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 		}
 
 		if c.ImpersonateServiceAccount != "" && !initialCredentialsOnly {
-			jsonCreds, err := credentials.DetectDefault(&credentials.DetectOptions{
-				Scopes:          clientScopes,
-				CredentialsJSON: []byte(contents),
-			})
+			opts := []option.ClientOption{option.WithCredentialsJSON([]byte(contents)), option.ImpersonateCredentials(c.ImpersonateServiceAccount, c.ImpersonateServiceAccountDelegates...), option.WithScopes(clientScopes...)}
+			creds, err := transport.Creds(context.TODO(), opts...)
 			if err != nil {
-				return googleoauth.Credentials{}, fmt.Errorf("error loading credentials: %s", err)
-			}
-
-			impersonateOpts := &impersonate.CredentialsOptions{
-				TargetPrincipal: c.ImpersonateServiceAccount,
-				Scopes:          clientScopes,
-				Delegates:       c.ImpersonateServiceAccountDelegates,
-				Credentials:     jsonCreds,
-			}
-
-			if c.UniverseDomain != "" && c.UniverseDomain != "googleapis.com" {
-				impersonateOpts.UniverseDomain = c.UniverseDomain
-			}
-
-			authCred, err := impersonate.NewCredentials(impersonateOpts)
-			if err != nil {
-				return googleoauth.Credentials{}, fmt.Errorf("error loading credentials: %s", err)
-			}
-
-			creds := oauth2adapt.Oauth2CredentialsFromAuthCredentials(authCred)
-			if err != nil {
-				return googleoauth.Credentials{}, fmt.Errorf("error loading credentials: %s", err)
+				return googleoauth.Credentials{}, err
 			}
 			return *creds, nil
 		}
@@ -1412,34 +1330,11 @@ func (c *Config) GetCredentials(clientScopes []string, initialCredentialsOnly bo
 	var creds *googleoauth.Credentials
 	var err error
 	if c.ImpersonateServiceAccount != "" && !initialCredentialsOnly {
-		defaultCreds, err := credentials.DetectDefault(&credentials.DetectOptions{
-			Scopes: clientScopes,
-		})
+		opts := option.ImpersonateCredentials(c.ImpersonateServiceAccount, c.ImpersonateServiceAccountDelegates...)
+		creds, err = transport.Creds(context.TODO(), opts, option.WithScopes(clientScopes...))
 		if err != nil {
-			return googleoauth.Credentials{}, fmt.Errorf("error loading credentials: %s", err)
+			return googleoauth.Credentials{}, err
 		}
-
-		impersonateOpts := &impersonate.CredentialsOptions{
-			TargetPrincipal: c.ImpersonateServiceAccount,
-			Scopes:          clientScopes,
-			Delegates:       c.ImpersonateServiceAccountDelegates,
-			Credentials:     defaultCreds,
-		}
-
-		if c.UniverseDomain != "" && c.UniverseDomain != "googleapis.com" {
-			impersonateOpts.UniverseDomain = c.UniverseDomain
-		}
-
-		authCred, err := impersonate.NewCredentials(impersonateOpts)
-		if err != nil {
-			return googleoauth.Credentials{}, fmt.Errorf("error loading credentials: %s", err)
-		}
-
-		creds := oauth2adapt.Oauth2CredentialsFromAuthCredentials(authCred)
-		if err != nil {
-			return googleoauth.Credentials{}, fmt.Errorf("error loading credentials: %s", err)
-		}
-		return *creds, nil
 	} else {
 		log.Printf("[INFO] Authenticating using DefaultClient...")
 		log.Printf("[INFO]   -- Scopes: %s", clientScopes)
@@ -1508,15 +1403,6 @@ func ConfigureBasePaths(c *Config) {
 	c.BigQueryBasePath = DefaultBasePaths[BigQueryBasePathKey]
 	c.BigtableAdminBasePath = DefaultBasePaths[BigtableAdminBasePathKey]
 	c.TagsLocationBasePath = DefaultBasePaths[TagsLocationBasePathKey]
-
-	// DCL
-	c.ContainerAwsBasePath = DefaultBasePaths[ContainerAwsBasePathKey]
-	c.ContainerAzureBasePath = DefaultBasePaths[ContainerAzureBasePathKey]
-	c.ApikeysBasePath = DefaultBasePaths[ApikeysEndpointEntryKey]
-	c.AssuredWorkloadsBasePath = DefaultBasePaths[AssuredWorkloadsEndpointEntryKey]
-	c.CloudResourceManagerBasePath = DefaultBasePaths[CloudResourceManagerEndpointEntryKey]
-	c.FirebaserulesBasePath = DefaultBasePaths[FirebaserulesEndpointEntryKey]
-	c.RecaptchaEnterpriseBasePath = DefaultBasePaths[RecaptchaEnterpriseEndpointEntryKey]
 }
 
 func GetCurrentUserEmail(config *Config, userAgent string) (string, error) {

@@ -22,8 +22,6 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "alloydb-cluster"
   }
-
-  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "default" {

@@ -219,7 +219,6 @@ resource "google_integration_connectors_connection" "zendeskconnection" {
   }
   log_config {
     enabled = true
-    level   = "DEBUG"
   }
   node_config {
     min_node_count = 2

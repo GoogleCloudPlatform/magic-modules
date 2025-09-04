@@ -13,7 +13,7 @@ func TestAccAlloydbInstance_secondaryInstanceUpdateMachineConfig(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -51,8 +51,6 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
-
-  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -82,8 +80,6 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   deletion_policy = "FORCE"
-
-  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -114,8 +110,6 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
-
-  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -146,8 +140,6 @@ resource "google_alloydb_cluster" "secondary" {
 
   deletion_policy = "FORCE"
 
-  deletion_protection = false
-
   depends_on = [google_alloydb_instance.primary]
 }
 
@@ -175,7 +167,7 @@ func TestAccAlloydbInstance_secondaryInstanceWithReadPoolInstance(t *testing.T) 
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -204,8 +196,6 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
-
-  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -235,8 +225,6 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   deletion_policy = "FORCE"
-
-  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -275,8 +263,8 @@ func TestAccAlloydbCluster_secondaryInstanceWithNetworkConfigAndAllocatedIPRange
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
-		"address_name":  acctest.BootstrapSharedTestGlobalAddress(t, "alloydb-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
+		"address_name":  acctest.BootstrapSharedTestGlobalAddress(t, "alloydbinstance-network-config-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -306,8 +294,6 @@ resource "google_alloydb_cluster" "primary" {
     network    = data.google_compute_network.default.id
     allocated_ip_range = data.google_compute_global_address.private_ip_alloc.name
   }
-
-  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -338,8 +324,6 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   deletion_policy = "FORCE"
-
-  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -372,7 +356,7 @@ func TestAccAlloydbInstance_secondaryInstanceUpdateDatabaseFlag(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -410,8 +394,6 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
-
-  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -441,8 +423,6 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   deletion_policy = "FORCE"
-
-  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -475,7 +455,7 @@ func TestAccAlloydbInstance_secondaryInstanceUpdateQueryInsightConfig(t *testing
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -513,8 +493,6 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
-
-  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -544,8 +522,6 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   deletion_policy = "FORCE"
-
-  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }
@@ -581,7 +557,7 @@ func TestAccAlloydbInstance_secondaryInstanceMaximumFields(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydbinstance-network-config-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -610,8 +586,6 @@ resource "google_alloydb_cluster" "primary" {
   network_config {
     network = data.google_compute_network.default.id
   }
-
-  deletion_protection = false
 }
 
 resource "google_alloydb_instance" "primary" {
@@ -641,8 +615,6 @@ resource "google_alloydb_cluster" "secondary" {
   }
 
   deletion_policy = "FORCE"
-
-  deletion_protection = false
 
   depends_on = [google_alloydb_instance.primary]
 }

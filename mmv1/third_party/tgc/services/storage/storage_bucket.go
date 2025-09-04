@@ -10,7 +10,6 @@ package storage
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -214,10 +213,8 @@ func expandBucketRetentionPolicy(configured interface{}) *storage.BucketRetentio
 	}
 	retentionPolicy := retentionPolicies[0].(map[string]interface{})
 
-	value, _ := strconv.ParseInt(retentionPolicy["retention_period"].(string), 10, 64)
-
 	bucketRetentionPolicy := &storage.BucketRetentionPolicy{
-		RetentionPeriod: value,
+		RetentionPeriod: int64(retentionPolicy["retention_period"].(int)),
 	}
 
 	return bucketRetentionPolicy

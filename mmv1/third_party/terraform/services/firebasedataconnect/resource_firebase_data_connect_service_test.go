@@ -61,6 +61,7 @@ func testAccFirebaseDataConnectService_update(context map[string]interface{}, di
 resource "google_project_service" "fdc" {
   project = "%{project_id}"
   service = "firebasedataconnect.googleapis.com"
+  disable_on_destroy = false
 }
 
 # Create an FDC service

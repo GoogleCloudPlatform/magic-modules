@@ -30,7 +30,7 @@ func TestAccBigQueryTable_Basic(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableUpdated(datasetID, tableID),
@@ -39,52 +39,7 @@ func TestAccBigQueryTable_Basic(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
-			},
-		},
-	})
-}
-
-func TestAccBigQueryTable_IgnoreSchemaDataPoliciesChanges(t *testing.T) {
-	t.Parallel()
-
-	projectID := envvar.GetTestProjectFromEnv()
-	random_suffix := acctest.RandString(t, 10)
-	datasetID := fmt.Sprintf("tf_test_dataset_%s", random_suffix)
-	tableID := fmt.Sprintf("tf_test_table_%s", random_suffix)
-	dataPolicyID1 := fmt.Sprintf("tf_test_data_policy_%s", random_suffix)
-	dataPolicyName1 := fmt.Sprintf("projects/%s/locations/us-central1/dataPolicies/%s", projectID, dataPolicyID1)
-	dataPolicyID2 := fmt.Sprintf("tf_test_data_policy_%s", acctest.RandString(t, 10))
-	dataPolicyName2 := fmt.Sprintf("projects/%s/locations/us-central1/dataPolicies/%s", projectID, dataPolicyID2)
-	dataCatTaxonomy := fmt.Sprintf("tf_test_taxonomy_%s", random_suffix)
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccBigQueryTableDataPolicies(datasetID, tableID, dataPolicyID1, dataPolicyID2, dataCatTaxonomy, dataPolicyName1),
-			},
-			{
-				ResourceName:            "google_bigquery_table.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "ignore_schema_changes"},
-			},
-			{
-				Config:             testAccBigQueryTableDataPolicies(datasetID, tableID, dataPolicyID1, dataPolicyID2, dataCatTaxonomy, dataPolicyName2),
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: false,
-			},
-			{
-				Config: testAccBigQueryTableUpdated(datasetID, tableID),
-			},
-			{
-				ResourceName:            "google_bigquery_table.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "ignore_schema_changes"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -108,7 +63,7 @@ func TestAccBigQueryTable_TableMetadataView(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "last_modified_time", "table_metadata_view"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "last_modified_time", "table_metadata_view"},
 			},
 			{
 				Config: testAccBigQueryTableUpdated(datasetID, tableID),
@@ -117,7 +72,7 @@ func TestAccBigQueryTable_TableMetadataView(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "last_modified_time", "table_metadata_view"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "last_modified_time", "table_metadata_view"},
 			},
 		},
 	})
@@ -141,7 +96,7 @@ func TestAccBigQueryTable_OnlyDeletionProtectionUpdate(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableBasicSchema(datasetID, tableID),
@@ -150,7 +105,7 @@ func TestAccBigQueryTable_OnlyDeletionProtectionUpdate(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -174,7 +129,7 @@ func TestAccBigQueryTable_OnlyNestedFieldUpdate(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableTimePartitioningWithExpirationMs(datasetID, tableID, 2000),
@@ -183,7 +138,7 @@ func TestAccBigQueryTable_OnlyNestedFieldUpdate(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -207,7 +162,7 @@ func TestAccBigQueryTable_DropColumns(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableTimePartitioningDropColumnsUpdate(datasetID, tableID),
@@ -216,7 +171,7 @@ func TestAccBigQueryTable_DropColumns(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -242,7 +197,7 @@ func TestAccBigQueryTable_Kms(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -266,7 +221,7 @@ func TestAccBigQueryTable_HourlyTimePartitioning(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableUpdated(datasetID, tableID),
@@ -275,7 +230,7 @@ func TestAccBigQueryTable_HourlyTimePartitioning(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -299,7 +254,7 @@ func TestAccBigQueryTable_MonthlyTimePartitioning(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableUpdated(datasetID, tableID),
@@ -308,7 +263,7 @@ func TestAccBigQueryTable_MonthlyTimePartitioning(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -332,7 +287,7 @@ func TestAccBigQueryTable_YearlyTimePartitioning(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableUpdated(datasetID, tableID),
@@ -341,7 +296,7 @@ func TestAccBigQueryTable_YearlyTimePartitioning(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -366,7 +321,7 @@ func TestAccBigQueryTable_HivePartitioning(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -391,7 +346,7 @@ func TestAccBigQueryTable_HivePartitioningCustomSchema_update(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"external_data_configuration.0.schema", "labels", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"external_data_configuration.0.schema", "labels", "deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableHivePartitioningCustomSchema(bucketName, datasetID, tableID, "new-label"),
@@ -400,7 +355,7 @@ func TestAccBigQueryTable_HivePartitioningCustomSchema_update(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"external_data_configuration.0.schema", "labels", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"external_data_configuration.0.schema", "labels", "deletion_protection"},
 			},
 		},
 	})
@@ -426,7 +381,7 @@ func TestAccBigQueryTable_AvroPartitioning(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -452,7 +407,7 @@ func TestAccBigQueryBigLakeManagedTable(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -520,7 +475,7 @@ func TestAccBigQueryExternalDataTable_json(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"external_data_configuration.0.schema", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"external_data_configuration.0.schema", "deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableJson(datasetID, tableID, bucketName, "UTF-16BE"),
@@ -547,7 +502,7 @@ func TestAccBigQueryTable_RangePartitioning(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -571,7 +526,7 @@ func TestAccBigQueryTable_PrimaryKey(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -598,7 +553,7 @@ func TestAccBigQueryTable_ForeignKey(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -625,7 +580,7 @@ func TestAccBigQueryTable_updateTableConstraints(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableTableConstraintsUpdate(projectID, datasetID, tableID_pk, tableID_fk),
@@ -634,7 +589,7 @@ func TestAccBigQueryTable_updateTableConstraints(t *testing.T) {
 				ResourceName:            resourceName,
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -658,7 +613,7 @@ func TestAccBigQueryTable_View(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -682,7 +637,7 @@ func TestAccBigQueryTable_updateView(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableWithNewSqlView(datasetID, tableID),
@@ -691,7 +646,7 @@ func TestAccBigQueryTable_updateView(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -715,7 +670,7 @@ func TestAccBigQueryTable_WithViewAndSchema(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableWithViewAndSchema(datasetID, tableID, "table description2"),
@@ -724,7 +679,7 @@ func TestAccBigQueryTable_WithViewAndSchema(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -751,13 +706,13 @@ func TestAccBigQueryTable_MaterializedView_DailyTimePartioning_Basic(t *testing.
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
 			},
 			{
 				ResourceName:            "google_bigquery_table.mv_test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableWithMatViewDailyTimePartitioning_basic(datasetID, tableID, materialized_viewID, queryNew),
@@ -766,13 +721,13 @@ func TestAccBigQueryTable_MaterializedView_DailyTimePartioning_Basic(t *testing.
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
 			},
 			{
 				ResourceName:            "google_bigquery_table.mv_test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
 			},
 		},
 	})
@@ -802,13 +757,13 @@ func TestAccBigQueryTable_MaterializedView_DailyTimePartioning_Update(t *testing
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
 			},
 			{
 				ResourceName:            "google_bigquery_table.mv_test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableWithMatViewDailyTimePartitioning(datasetID, tableID, materialized_viewID, enable_refresh, refresh_interval_ms, query),
@@ -817,13 +772,13 @@ func TestAccBigQueryTable_MaterializedView_DailyTimePartioning_Update(t *testing
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
 			},
 			{
 				ResourceName:            "google_bigquery_table.mv_test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
 			},
 		},
 	})
@@ -850,13 +805,13 @@ func TestAccBigQueryTable_MaterializedView_NonIncremental_basic(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "require_partition_filter", "time_partitioning.0.require_partition_filter"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "require_partition_filter", "time_partitioning.0.require_partition_filter"},
 			},
 			{
 				ResourceName:            "google_bigquery_table.mv_test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "require_partition_filter", "time_partitioning.0.require_partition_filter"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "require_partition_filter", "time_partitioning.0.require_partition_filter"},
 			},
 		},
 	})
@@ -1208,45 +1163,6 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_InvalidSchemas(t *testing.T
 	})
 }
 
-func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionIDAndHivePartitioning(t *testing.T) {
-	t.Parallel()
-
-	bucketName := acctest.TestBucketName(t)
-	objectName := fmt.Sprintf("country_partitioned=US/tf_test_%s.csv", acctest.RandString(t, 10))
-
-	datasetID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	tableID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-	connectionID := fmt.Sprintf("tf_test_%s", acctest.RandString(t, 10))
-
-	projectID := envvar.GetTestProjectFromEnv()
-
-	acctest.VcrTest(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccBigQueryTableFromGCSWithSchemaWithConnectionIdAndHivePartitioning(datasetID, tableID, connectionID, projectID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
-			},
-			{
-				ResourceName:            "google_bigquery_table.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "schema"},
-			},
-			{
-				Config: testAccBigQueryTableFromGCSWithSchema(datasetID, tableID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
-			},
-			{
-				ResourceName:            "google_bigquery_table.test",
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns", "schema"},
-			},
-		},
-	})
-}
-
 func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionID_UpdateNoConnectionID(t *testing.T) {
 	t.Parallel()
 
@@ -1271,7 +1187,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionID_UpdateNoConn
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableFromGCSWithSchema(datasetID, tableID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
@@ -1280,7 +1196,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchemaAndConnectionID_UpdateNoConn
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
 			},
 		},
 	})
@@ -1310,7 +1226,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateToConnectionID(t *tes
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableFromGCSWithSchemaWithConnectionId(datasetID, tableID, connectionID, projectID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
@@ -1319,7 +1235,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateToConnectionID(t *tes
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableFromGCSWithSchemaWithConnectionId2(datasetID, tableID, connectionID, projectID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
@@ -1328,7 +1244,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateToConnectionID(t *tes
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
 			},
 		},
 	})
@@ -1355,7 +1271,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateAllowQuotedNewlines(t
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableFromGCSWithSchema_UpdatAllowQuotedNewlines(datasetID, tableID, bucketName, objectName, TEST_SIMPLE_CSV, TEST_SIMPLE_CSV_SCHEMA),
@@ -1364,7 +1280,7 @@ func TestAccBigQueryExternalDataTable_CSV_WithSchema_UpdateAllowQuotedNewlines(t
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection"},
 			},
 		},
 	})
@@ -1392,7 +1308,7 @@ func TestAccBigQueryDataTable_bigtable(t *testing.T) {
 				ResourceName:            "google_bigquery_table.table",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -1420,7 +1336,7 @@ func TestAccBigQueryDataTable_bigtable_options(t *testing.T) {
 				ResourceName:            "google_bigquery_table.table",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableFromBigtable(context),
@@ -1448,7 +1364,7 @@ func TestAccBigQueryDataTable_sheet(t *testing.T) {
 				ResourceName:            "google_bigquery_table.table",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -1472,7 +1388,7 @@ func TestAccBigQueryDataTable_jsonEquivalency(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "labels", "terraform_labels", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccBigQueryTable_jsonEqModeRemoved(datasetID, tableID),
@@ -1481,7 +1397,7 @@ func TestAccBigQueryDataTable_jsonEquivalency(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "labels", "terraform_labels", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -1531,7 +1447,7 @@ func TestAccBigQueryDataTable_expandArray(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "labels", "terraform_labels", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccBigQueryTable_arrayExpanded(datasetID, tableID),
@@ -1540,7 +1456,7 @@ func TestAccBigQueryDataTable_expandArray(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "labels", "terraform_labels", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"etag", "last_modified_time", "deletion_protection", "labels", "terraform_labels"},
 			},
 		},
 	})
@@ -1564,7 +1480,7 @@ func TestAccBigQueryTable_allowDestroy(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "labels", "terraform_labels", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "labels", "terraform_labels"},
 			},
 			{
 				Config:      testAccBigQueryTable_noAllowDestroy(datasetID, tableID),
@@ -1596,7 +1512,7 @@ func TestAccBigQueryTable_emptySchema(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTable_emptySchema(datasetID, tableID),
@@ -1605,7 +1521,7 @@ func TestAccBigQueryTable_emptySchema(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -1630,7 +1546,7 @@ func TestAccBigQueryTable_Update_SchemaWithoutPolicyTagsToWithPolicyTags(t *test
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableBasicSchemaWithPolicyTags(datasetID, tableID, projectID),
@@ -1639,7 +1555,7 @@ func TestAccBigQueryTable_Update_SchemaWithoutPolicyTagsToWithPolicyTags(t *test
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -1664,7 +1580,7 @@ func TestAccBigQueryTable_Update_SchemaWithPolicyTagsToNoPolicyTag(t *testing.T)
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableBasicSchema(datasetID, tableID),
@@ -1673,7 +1589,7 @@ func TestAccBigQueryTable_Update_SchemaWithPolicyTagsToNoPolicyTag(t *testing.T)
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -1698,7 +1614,7 @@ func TestAccBigQueryTable_Update_SchemaWithPolicyTagsToEmptyPolicyTag(t *testing
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableBasicSchemaWithEmptyPolicyTags(datasetID, tableID),
@@ -1707,7 +1623,7 @@ func TestAccBigQueryTable_Update_SchemaWithPolicyTagsToEmptyPolicyTag(t *testing
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -1732,7 +1648,7 @@ func TestAccBigQueryTable_Update_SchemaWithPolicyTagsToEmptyPolicyTagNames(t *te
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableBasicSchemaWithEmptyPolicyTagNames(datasetID, tableID),
@@ -1741,7 +1657,7 @@ func TestAccBigQueryTable_Update_SchemaWithPolicyTagsToEmptyPolicyTagNames(t *te
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -1840,7 +1756,7 @@ func TestAccBigQueryTable_TableReplicationInfo_WithoutReplicationInterval(t *tes
 				ResourceName:            "google_bigquery_table.replica_mv",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -1875,7 +1791,7 @@ func TestAccBigQueryTable_TableReplicationInfo_WithReplicationInterval(t *testin
 				ResourceName:            "google_bigquery_table.replica_mv",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -1906,7 +1822,7 @@ func TestAccBigQueryTable_ResourceTags(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTableWithResourceTagsUpdate(context),
@@ -1915,7 +1831,7 @@ func TestAccBigQueryTable_ResourceTags(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			// testAccBigQueryTableWithResourceTagsDestroy must be called at the end of this test to clear the resource tag bindings of the table before deletion.
 			{
@@ -1925,7 +1841,7 @@ func TestAccBigQueryTable_ResourceTags(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -1953,7 +1869,7 @@ func TestAccBigQueryTable_externalCatalogTableOptions(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 			{
 				Config: testAccBigQueryTable_externalCatalogTableOptions_update(context),
@@ -1962,7 +1878,7 @@ func TestAccBigQueryTable_externalCatalogTableOptions(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -1989,7 +1905,7 @@ func TestAccBigQueryTable_foreignTypeInfo(t *testing.T) {
 				ResourceName:            "google_bigquery_table.test",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"deletion_protection", "ignore_auto_generated_schema", "generated_schema_columns"},
+				ImportStateVerifyIgnore: []string{"deletion_protection"},
 			},
 		},
 	})
@@ -2063,102 +1979,6 @@ EOH
 
 }
 `, datasetID, tableID)
-}
-
-func testAccBigQueryTableDataPolicies(datasetID, tableID, dataPolicyID1, dataPolicyID2, dataCatTaxonomy, dataPolicyName string) string {
-	return fmt.Sprintf(`
-resource "google_bigquery_dataset" "test" {
-  location   = "us-central1"
-  dataset_id = "%s"
-}
-
-resource "google_bigquery_datapolicy_data_policy" "data_policy1" {
-  location         = "us-central1"
-  data_policy_id   = "%s"
-  policy_tag       = google_data_catalog_policy_tag.policy_tag.name
-  data_policy_type = "DATA_MASKING_POLICY"
-  data_masking_policy {
-      predefined_expression = "SHA256"
-  }
-}
-
-resource "google_bigquery_datapolicy_data_policy" "data_policy2" {
-  location         = "us-central1"
-  data_policy_id   = "%s"
-  policy_tag       = google_data_catalog_policy_tag.policy_tag.name
-  data_policy_type = "DATA_MASKING_POLICY"
-  data_masking_policy {
-      predefined_expression = "FIRST_FOUR_CHARACTERS"
-  }
-}
-
-resource "google_data_catalog_policy_tag" "policy_tag" {
-  taxonomy     = google_data_catalog_taxonomy.taxonomy.id
-  display_name = "Low security"
-  description  = "A policy tag normally associated with low security items"
-}
-
-resource "google_data_catalog_taxonomy" "taxonomy" {
-  region                 = "us-central1"
-  display_name           = "%s"
-  description            = "A collection of policy tags"
-  activated_policy_types = ["FINE_GRAINED_ACCESS_CONTROL"]
-}
-
-resource "google_bigquery_table" "test" {
-  depends_on = [google_bigquery_datapolicy_data_policy.data_policy1, google_bigquery_datapolicy_data_policy.data_policy2]
-  deletion_protection = false
-  table_id   = "%s"
-  dataset_id = google_bigquery_dataset.test.dataset_id
-
-  ignore_schema_changes = [
-    "dataPolicies"
-  ]
-
-  schema     = <<EOH
-[
-  {
-    "name": "ts",
-    "type": "TIMESTAMP"
-  },
-  {
-    "name": "some_string",
-    "type": "STRING",
-    "dataPolicies": [
-      {
-        "name": "%s"
-      }
-    ]
-  },
-  {
-    "name": "some_int",
-    "type": "INTEGER"
-  },
-  {
-    "name": "city",
-    "type": "RECORD",
-    "fields": [
-  {
-    "name": "id",
-    "type": "INTEGER"
-  },
-  {
-    "name": "coord",
-    "type": "RECORD",
-    "fields": [
-    {
-    "name": "lon",
-    "type": "FLOAT"
-    }
-    ]
-  }
-    ]
-  }
-]
-EOH
-
-}
-`, datasetID, dataPolicyID1, dataPolicyID2, dataCatTaxonomy, tableID, dataPolicyName)
 }
 
 func testAccBigQueryTableBasicWithTableMetadataView(datasetID, tableID string) string {
@@ -3189,17 +3009,17 @@ resource "google_bigquery_table" "test" {
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
   external_data_configuration {
-  connection_id   = local.connection_id_reformatted
+	connection_id   = local.connection_id_reformatted
     autodetect    = false
     source_format = "PARQUET"
 
     source_uris = [
       "gs://${google_storage_bucket.test.name}/*",
     ]
-    metadata_cache_mode = "%s"
-    hive_partitioning_options {
-      source_uri_prefix = "gs://${google_storage_bucket.test.name}/"
-    }
+	metadata_cache_mode = "%s"
+	hive_partitioning_options {
+		source_uri_prefix = "gs://${google_storage_bucket.test.name}/"
+	}
   }
 
   max_staleness = "%s"
@@ -3294,7 +3114,6 @@ resource "google_storage_bucket" "test" {
   name          = "%s"
   location      = "US"
   force_destroy = true
-  uniform_bucket_level_access = true
 }
 
 resource "google_storage_bucket_object" "test" {
@@ -3590,70 +3409,6 @@ resource "google_bigquery_table" "test" {
 `, connectionID, datasetID, bucketName, objectName, tableID, maxStaleness)
 }
 
-func testAccBigQueryTableFromGCSWithSchemaWithConnectionIdAndHivePartitioning(datasetID, tableID, connectionID, projectID, bucketName, objectName, content, schema string) string {
-	return fmt.Sprintf(`
-resource "google_bigquery_dataset" "test" {
-  dataset_id = "%s"
-}
-resource "google_storage_bucket" "test" {
-  name          = "%s"
-  location      = "US"
-  force_destroy = true
-  uniform_bucket_level_access = true
-}
-resource "google_storage_bucket_object" "test" {
-  name    = "%s"
-  content = <<EOF
-%s
-EOF
-  bucket = google_storage_bucket.test.name
-}
-resource "google_bigquery_connection" "test" {
-   connection_id = "%s"
-   location = "US"
-   cloud_resource {}
-}
-locals {
-   connection_id_split = split("/", google_bigquery_connection.test.name)
-   connection_id_reformatted = "${local.connection_id_split[1]}.${local.connection_id_split[3]}.${local.connection_id_split[5]}"
-}
-resource "google_project_iam_member" "test" {
-   role = "roles/storage.objectViewer"
-   project = "%s"
-   member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
-}
-resource "google_bigquery_table" "test" {
-  deletion_protection = false
-  table_id   = "%s"
-  dataset_id = google_bigquery_dataset.test.dataset_id
-
-  ignore_auto_generated_schema = true
-
-  schema = <<EOF
-  %s
-  EOF
-  external_data_configuration {
-    autodetect    = false
-    connection_id = local.connection_id_reformatted
-    source_format = "CSV"
-    csv_options {
-      encoding = "UTF-8"
-      quote = ""
-    }
-    source_uris = [
-      "gs://${google_storage_bucket.test.name}/${google_storage_bucket_object.test.name}",
-    ]
-    hive_partitioning_options {
-      mode = "AUTO"
-      source_uri_prefix = "gs://${google_storage_bucket.test.name}/"
-      require_partition_filter = false
-    }
-  }
-  depends_on = [google_project_iam_member.test]
-}
-`, datasetID, bucketName, objectName, content, connectionID, projectID, tableID, schema)
-}
-
 func testAccBigQueryTableFromGCSWithSchemaWithConnectionId(datasetID, tableID, connectionID, projectID, bucketName, objectName, content, schema string) string {
 	return fmt.Sprintf(`
 resource "google_bigquery_dataset" "test" {
@@ -3663,7 +3418,6 @@ resource "google_storage_bucket" "test" {
   name          = "%s"
   location      = "US"
   force_destroy = true
-  uniform_bucket_level_access = true
 }
 resource "google_storage_bucket_object" "test" {
   name    = "%s"
@@ -3843,9 +3597,6 @@ resource "google_bigquery_table" "test" {
   deletion_protection = false
   table_id   = "%s"
   dataset_id = google_bigquery_dataset.test.dataset_id
-
-  ignore_auto_generated_schema = true
-
   schema = <<EOF
   %s
   EOF

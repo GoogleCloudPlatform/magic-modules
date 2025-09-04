@@ -113,20 +113,20 @@ func dataSourceGoogleComputeInterconnectLocationsRead(d *schema.ResourceData, me
 	var locations []map[string]interface{}
 	for _, location := range list.Items {
 		locations = append(locations, map[string]interface{}{
-			"name":                          location.Name,
-			"description":                   location.Description,
-			"self_link":                     location.SelfLink,
-			"peeringdb_facility_id":         location.PeeringdbFacilityId,
-			"address":                       location.Address,
-			"facility_provider":             location.FacilityProvider,
-			"facility_provider_facility_id": location.FacilityProviderFacilityId,
-			"status":                        location.Status,
-			"continent":                     location.Continent,
-			"city":                          location.City,
-			"availability_zone":             location.AvailabilityZone,
-			"supports_pzs":                  location.SupportsPzs,
-			"available_features":            location.AvailableFeatures,
-			"available_link_types":          location.AvailableLinkTypes,
+			"name":                            location.Name,
+			"description":                     location.Description,
+			"self_link":                       location.SelfLink,
+			"peeringdb_facility_id":           location.PeeringdbFacilityId,
+			"address":                         location.Address,
+			"facility_provider":               location.FacilityProvider,
+			"facility_provider_facility_id":   location.FacilityProviderFacilityId,
+			"status":                          location.Status,
+			"continent":                       location.Continent,
+			"city":                            location.City,
+			"availability_zone":               location.AvailabilityZone,
+			"supports_pzs":                    location.SupportsPzs,
+			"available_features":              location.AvailableFeatures,
+			"available_link_types":            location.AvailableLinkTypes,
 		})
 	}
 	if err := d.Set("locations", locations); err != nil {

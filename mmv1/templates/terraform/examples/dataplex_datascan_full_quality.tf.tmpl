@@ -23,7 +23,6 @@ resource "google_dataplex_datascan" "{{$.PrimaryResourceId}}" {
   data_quality_spec {
     sampling_percent = 5
     row_filter = "station_id > 1000"
-    catalog_publishing_enabled = true
     post_scan_actions {
       notification_report {
         recipients {

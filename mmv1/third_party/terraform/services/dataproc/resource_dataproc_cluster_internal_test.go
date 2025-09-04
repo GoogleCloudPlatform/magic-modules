@@ -93,8 +93,6 @@ func TestDataprocDiffSuppress(t *testing.T) {
 		{"1.3.10-debian9", "1.3-debian9"},
 		{"1.3.10", "1.3"},
 		{"1.3-debian9", "1.3"},
-		{"1.3.10-debian9", "1.3.prodprevious-debian9"},
-		{"1.3.10-debian9", "1.3.prodcurrent-debian9"},
 	}
 
 	noSuppress := [][]string{
@@ -108,9 +106,6 @@ func TestDataprocDiffSuppress(t *testing.T) {
 		{"1.3", "1.3.10"},
 		{"1.3", "1.3.10-debian9"},
 		{"1.3", "1.3-debian9"},
-		{"1.3.prodprevious-debian9", "1.3.10-debian9"},
-		{"1.3.prodcurrent-debian9", "1.3.10-debian9"},
-		{"1.3.10-debian9", "1.3.randomstring-debian9"},
 	}
 
 	for _, tup := range doSuppress {

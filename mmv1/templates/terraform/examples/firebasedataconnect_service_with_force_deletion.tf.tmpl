@@ -2,6 +2,7 @@
 resource "google_project_service" "fdc" {
   project = "{{index $.TestEnvVars "project_id"}}"
   service = "firebasedataconnect.googleapis.com"
+  disable_on_destroy = false
 }
 
 # Create a Firebase Data Connect service

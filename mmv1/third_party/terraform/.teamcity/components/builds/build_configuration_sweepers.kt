@@ -61,7 +61,6 @@ class SweeperDetails(private val sweeperName: String, private val parentProjectN
         // These hardcoded values affect the sweeper CLI command's behaviour
         val testPrefix = "TestAcc"
         val testTimeout = "12"
-        val releaseDiffTest = "false"
 
         return BuildType {
 
@@ -98,7 +97,7 @@ class SweeperDetails(private val sweeperName: String, private val parentProjectN
 
             params {
                 configureGoogleSpecificTestParameters(environmentVariables)
-                acceptanceTestBuildParams(parallelism, testPrefix, testTimeout, releaseDiffTest)
+                acceptanceTestBuildParams(parallelism, testPrefix, testTimeout)
                 sweeperParameters(sweeperRegions, sweeperRun)
                 terraformLoggingParameters(environmentVariables, providerName)
                 terraformCoreBinaryTesting()

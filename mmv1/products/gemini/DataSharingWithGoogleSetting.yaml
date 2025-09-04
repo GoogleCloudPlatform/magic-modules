@@ -67,7 +67,4 @@ properties:
     description: Labels as key value pairs.
   - name: enablePreviewDataSharing
     type: Boolean
-    description: Whether data sharing should be enabled in Preview products.
-  - name: enableDataSharing
-    type: Boolean
-    description: Whether data sharing should be enabled in GA products.
+    description: Whether preview data sharing should be enabled.

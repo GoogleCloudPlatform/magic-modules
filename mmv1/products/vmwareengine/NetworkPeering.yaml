@@ -138,7 +138,6 @@ properties:
       - 'NETAPP_CLOUD_VOLUMES'
       - 'THIRD_PARTY_SERVICE'
       - 'DELL_POWERSCALE'
-      - 'GOOGLE_CLOUD_NETAPP_VOLUMES'
   - name: 'uid'
     type: String
     description: |

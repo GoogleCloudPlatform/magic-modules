@@ -29,9 +29,6 @@ base_url: 'apis/serving.knative.dev/v1/namespaces/{{project}}/services'
 cai_base_url: 'projects/{{project}}/locations/{{location}}/services'
 import_format:
   - 'locations/{{location}}/namespaces/{{project}}/services/{{name}}'
-datasource:
-  generate: true
-  exclude_test: true
 timeouts:
   insert_minutes: 20
   update_minutes: 20
@@ -1109,6 +1106,3 @@ properties:
             for the Service. For example, `"run.googleapis.com/ingress" = "all"`.
           - `run.googleapis.com/launch-stage` sets the [launch stage](https://cloud.google.com/run/docs/troubleshooting#launch-stage-validation)
             when a preview feature is used. For example, `"run.googleapis.com/launch-stage": "BETA"`
-          - `run.googleapis.com/minScale` sets the [minimum number of container instances](https://cloud.google.com/sdk/gcloud/reference/run/deploy#--min) of the Service.
-          - `run.googleapis.com/scalingMode` sets the type of scaling mode for the service. The supported values for scaling mode are "manual" and "automatic". If not provided, it defaults to "automatic".
-          - `run.googleapis.com/manualInstanceCount` sets the total instance count for the service in manual scaling mode. This number of instances is divided among all revisions with specified traffic based on the percent of traffic they are receiving.

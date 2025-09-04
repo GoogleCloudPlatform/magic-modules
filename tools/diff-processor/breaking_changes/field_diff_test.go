@@ -12,7 +12,6 @@ type fieldTestCase struct {
 	name              string
 	oldField          *schema.Schema
 	newField          *schema.Schema
-	resourceDiff      diff.ResourceDiffInterface
 	expectedViolation bool
 	messageRegex      string // Optional regex to validate the message content
 }
@@ -95,133 +94,8 @@ var FieldBecomingRequiredTestCases = []fieldTestCase{
 	},
 }
 
-func TestFieldNewRequired(t *testing.T) {
-	for _, tc := range FieldNewRequiredTestCases {
-		tc.check(FieldNewRequired, t)
-	}
-}
-
-var FieldNewRequiredTestCases = []fieldTestCase{
-	{
-		name:     "existing resource - field added as required",
-		oldField: nil,
-		newField: &schema.Schema{
-			Description: "beep",
-			Required:    true,
-		},
-		resourceDiff:      existingResourceSchemaDiff,
-		expectedViolation: true,
-	},
-	{
-		name:     "new resource - field added as required but is new resource",
-		oldField: nil,
-		newField: &schema.Schema{
-			Description: "beep",
-			Required:    true,
-		},
-		resourceDiff:      newResourceSchemaDiff,
-		expectedViolation: false,
-	},
-	{
-		name:     "field in new nested structure - field added as required",
-		oldField: nil,
-		newField: &schema.Schema{
-			Description: "beep",
-			Required:    true,
-		},
-		resourceDiff:      fieldInNewStructureSchemaDiff,
-		expectedViolation: false,
-	},
-}
-
-func TestFieldNewOptionalWithDefault(t *testing.T) {
-	for _, tc := range FieldNewOptionalWithDefaultTestCases {
-		tc.check(FieldNewOptionalFieldWithDefault, t)
-	}
-}
-
-var FieldNewOptionalWithDefaultTestCases = []fieldTestCase{
-	{
-		name:     "existing resource - new field added as optional with default and forcenew",
-		oldField: nil,
-		newField: &schema.Schema{
-			Description: "beep",
-			Optional:    true,
-			Default:     "abc",
-			ForceNew:    true,
-		},
-		resourceDiff:      existingResourceSchemaDiff,
-		expectedViolation: true,
-	},
-	{
-		name:     "existing resource - new field added as optional with falsey default and forcenew",
-		oldField: nil,
-		newField: &schema.Schema{
-			Description: "beep",
-			Optional:    true,
-			Default:     false,
-			ForceNew:    true,
-		},
-		resourceDiff:      existingResourceSchemaDiff,
-		expectedViolation: true,
-	},
-	{
-		name:     "existing resource - new field added as optional with default",
-		oldField: nil,
-		newField: &schema.Schema{
-			Description: "beep",
-			Optional:    true,
-			Default:     "abc",
-		},
-		resourceDiff:      existingResourceSchemaDiff,
-		expectedViolation: false,
-	},
-	{
-		name:     "existing resource - new field added as optional with falsey default",
-		oldField: nil,
-		newField: &schema.Schema{
-			Description: "beep",
-			Optional:    true,
-			Default:     false,
-		},
-		resourceDiff:      existingResourceSchemaDiff,
-		expectedViolation: false,
-	},
-	{
-		name:     "new resource - new field added as optional with default",
-		oldField: nil,
-		newField: &schema.Schema{
-			Description: "beep",
-			Optional:    true,
-			Default:     "abc",
-		},
-		resourceDiff:      newResourceSchemaDiff,
-		expectedViolation: false,
-	},
-	{
-		name:     "new resource - new field added as optional with falsey default",
-		oldField: nil,
-		newField: &schema.Schema{
-			Description: "beep",
-			Optional:    true,
-			Default:     false,
-		},
-		resourceDiff:      newResourceSchemaDiff,
-		expectedViolation: false,
-	},
-	{
-		name:     "field in new nested structure - new field added as optional with default and forcenew",
-		oldField: nil,
-		newField: &schema.Schema{
-			Description: "beep",
-			Optional:    true,
-			Default:     "abc",
-			ForceNew:    true,
-		},
-		resourceDiff:      fieldInNewStructureSchemaDiff,
-		expectedViolation: false,
-	},
-}
+// !! min max ?
+// isRuleBreak: FieldOptionalComputedToOptional_func,
 
 func TestFieldChangingType(t *testing.T) {
 	for _, tc := range FieldChangingTypeTestCases {
@@ -720,7 +594,7 @@ var FieldShrinkingMaxTestCases = []fieldTestCase{
 
 // Extended check method that also validates message content when expected
 func (tc *fieldTestCase) check(rule FieldDiffRule, t *testing.T) {
-	messages := rule.Messages("resource", "field", diff.FieldDiff{Old: tc.oldField, New: tc.newField}, tc.resourceDiff)
+	messages := rule.Messages("resource", "field", diff.FieldDiff{Old: tc.oldField, New: tc.newField})
 	violation := len(messages) > 0
 
 	// Check violation expectation

@@ -15,8 +15,6 @@
 name: 'Workbench'
 display_name: 'Vertex AI Workbench'
 versions:
-  - name: 'beta'
-    base_url: 'https://notebooks.googleapis.com/v2/'
   - name: 'ga'
     base_url: 'https://notebooks.googleapis.com/v2/'
 scopes:

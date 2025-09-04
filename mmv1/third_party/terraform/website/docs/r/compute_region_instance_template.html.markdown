@@ -409,13 +409,12 @@ The following arguments are supported:
 * `disk_name` - (Optional) Name of the disk. When not provided, this defaults
     to the name of the instance.
 
-* `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This sets the number of I/O operations per second that the disk can handle. For more details, see the [Extreme persistent disk documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk) or the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks) depending on the selected disk_type.
-
-* `provisioned_throughput` - (Optional) Indicates how much throughput to provision for the disk, in MB/s. This sets the amount of data that can be read or written from the disk per second. Values must greater than or equal to 1. For more details, see the [Hyperdisk documentation](https://cloud.google.com/compute/docs/disks/hyperdisks).
+* `provisioned_iops` - (Optional) Indicates how many IOPS to provision for the disk. This
+    sets the number of I/O operations per second that the disk can handle.
+    Values must be between 10,000 and 120,000. For more details, see the
+    [Extreme persistent disk documentation](https://cloud.google.com/compute/docs/disks/extreme-persistent-disk).
 
 * `resource_manager_tags` - (Optional) A set of key/value resource manager tag pairs to bind to this disk. Keys must be in the format tagKeys/{tag_key_id}, and values are in the format tagValues/456.
-
-* `guest_os_features` - (optional) A list of features to enable on the guest operating system. Applicable only for bootable images. Read [Enabling guest operating system features](https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#guest-os-features) to see a list of available options.
 
 * `source_image` - (Optional) The image from which to
     initialize this disk. This can be one of: the image's `self_link`,
@@ -449,8 +448,6 @@ The following arguments are supported:
 * `mode` - (Optional) The mode in which to attach this disk, either READ_WRITE
     or READ_ONLY. If you are attaching or creating a boot disk, this must
     read-write mode.
-
-* `architecture` - (Optional) The architecture of the attached disk. Valid values are `ARM64` or `x86_64`.
 
 * `source` - (Optional) The name (**not self_link**)
     of the disk (such as those managed by `google_compute_disk`) to attach.
@@ -755,8 +752,6 @@ exported:
 * `creation_timestamp` - Creation timestamp in RFC3339 text format.
 
 * `metadata_fingerprint` - The unique fingerprint of the metadata.
-
-* `numeric_id` - numeric identifier of the resource.
 
 * `self_link` - The URI of the created resource.
 

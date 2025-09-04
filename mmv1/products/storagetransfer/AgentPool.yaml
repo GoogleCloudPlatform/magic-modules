@@ -14,7 +14,6 @@
 ---
 name: 'AgentPool'
 api_resource_type_kind: agentPools
-collection_url_key: agentPools
 description: 'Represents an On-Premises Agent pool.'
 references:
   guides:

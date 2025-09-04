@@ -88,13 +88,21 @@ The following arguments are supported:
 {{ "" }}
 {{ "" }}
 {{- range $p := $.RootProperties }}
-	{{- if and $p.Required (not $p.WriteOnlyLegacy) }}
+	{{- if and $p.Required (not $p.WriteOnly) }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
 	{{- end }}
 {{- end }}
 {{ "" }}
+{{- range $p := $.AllUserProperties }}
+	{{- if $p.Required }}
+{{- trimTemplate "nested_property_documentation.html.markdown.tmpl" $p -}}
+	{{- end}}
+{{- end }}
+- - -
+{{ "" }}
+{{ "" }}
 {{- range $p := $.RootProperties }}
-	{{- if and (not $p.Required) (not $p.Output) (not $p.WriteOnlyLegacy) }}
+	{{- if and (not $p.Required) (not $p.Output) (not $p.WriteOnly) }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
 	{{- end }}
 {{- end }}
@@ -112,12 +120,6 @@ The following arguments are supported:
 {{- if $.Docs.OptionalProperties }}
 {{ $.Docs.OptionalProperties }}
 {{- end }}
-{{ "" }}
-{{- range $p := $.AllUserProperties }}
-	{{- if $p.Required }}
-{{- trimTemplate "nested_property_documentation.html.markdown.tmpl" $p -}}
-	{{- end}}
-{{- end }}
 {{- range $p := $.AllUserProperties }}
 	{{- if and (not $p.Required) (not $p.Output) }}
 {{- trimTemplate "nested_property_documentation.html.markdown.tmpl" $p -}}
@@ -129,7 +131,7 @@ The following arguments are supported:
 
 The following write-only attributes are supported:
 {{ range $p := $.RootProperties }}
-    {{- if $p.WriteOnlyLegacy }}
+    {{- if $p.WriteOnly }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $p }}
     {{- end}}
 {{- end }}

@@ -110,8 +110,7 @@ properties:
         - name: 'match'
           type: NestedObject
           description: |
-            CEL expression evaluated against a route to determine if this term applies (see Policy Language).
-          required: true
+            CEL expression evaluated against a route to determine if this term applies (see Policy Language). When not set, the term applies to all routes.
           properties:
             - name: 'expression'
               type: String

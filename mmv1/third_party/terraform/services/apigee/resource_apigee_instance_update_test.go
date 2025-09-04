@@ -120,11 +120,6 @@ resource "google_apigee_instance" "apigee_instance" {
   consumer_accept_list = [
     google_project.project1.project_id,
   ]
-
-  access_logging_config {
-    enabled = false
-    filter  = "status_code >= 0 && status_code < 600"
-  }
 }
 `, context)
 }
@@ -209,11 +204,6 @@ resource "google_apigee_instance" "apigee_instance" {
     google_project.project1.project_id,
     google_project.project2.project_id,
   ]
-
-  access_logging_config {
-    enabled = false
-    filter  = "status_code >= 0 && status_code < 600"
-  }
 }
 `, context)
 }

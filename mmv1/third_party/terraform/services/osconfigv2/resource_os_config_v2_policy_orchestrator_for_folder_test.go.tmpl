@@ -1,6 +1,5 @@
 package osconfigv2_test
 
-{{ if ne $.TargetVersionName `ga` -}}
 import (
 	"testing"
 
@@ -289,4 +288,3 @@ resource "google_os_config_v2_policy_orchestrator_for_folder" "policy_orchestrat
 }
 `, context)
 }
-{{- end }}

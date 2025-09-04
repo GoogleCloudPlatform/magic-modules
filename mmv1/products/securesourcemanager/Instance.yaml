@@ -52,36 +52,33 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/instances/{{instance_id}}'
     - '{{instance_id}}'
 custom_code:
-  pre_delete: 'templates/terraform/pre_delete/securesourcemanager_deletion_policy.go.tmpl'
 examples:
   - name: 'secure_source_manager_instance_basic'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
-      deletion_policy: 'PREVENT'
+      prevent_destroy: 'true'
     test_vars_overrides:
-      'deletion_policy': '"DELETE"'
+      'prevent_destroy': 'false'
     oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
+      'prevent_destroy': 'false'
     ignore_read_extra:
       - 'update_time'
-      - 'deletion_policy'
   - name: 'secure_source_manager_instance_cmek'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
       kms_key_name: 'my-key'
-      deletion_policy: 'PREVENT'
+      prevent_destroy: 'true'
     test_vars_overrides:
-      'deletion_policy': '"DELETE"'
+      'prevent_destroy': 'false'
       'kms_key_name': 'acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us-central1", "tf-bootstrap-secure-source-manager-key1").CryptoKey.Name'
     oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
+      'prevent_destroy': 'false'
     ignore_read_extra:
       - 'update_time'
-      - 'deletion_policy'
   - name: 'secure_source_manager_instance_private'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
@@ -89,15 +86,14 @@ examples:
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
       root_ca_id: 'root-ca'
-      deletion_policy: 'PREVENT'
+      prevent_destroy: 'true'
     test_vars_overrides:
-      'deletion_policy': '"DELETE"'
+      'prevent_destroy': 'false'
     oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
+      'prevent_destroy': 'false'
     external_providers: ["time"]
     ignore_read_extra:
       - 'update_time'
-      - 'deletion_policy'
   - name: 'secure_source_manager_instance_private_psc_backend'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
@@ -113,15 +109,14 @@ examples:
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
       root_ca_id: 'root-ca'
-      deletion_policy: 'PREVENT'
+      prevent_destroy: 'true'
     test_vars_overrides:
-      'deletion_policy': '"DELETE"'
+      'prevent_destroy': 'false'
     oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
+      'prevent_destroy': 'false'
     external_providers: ["time"]
     ignore_read_extra:
       - 'update_time'
-      - 'deletion_policy'
   - name: 'secure_source_manager_instance_private_psc_endpoint'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
@@ -134,28 +129,26 @@ examples:
       instance_id: 'my-instance'
       ca_pool_id: 'ca-pool'
       root_ca_id: 'root-ca'
-      deletion_policy: 'PREVENT'
+      prevent_destroy: 'true'
     test_vars_overrides:
-      'deletion_policy': '"DELETE"'
+      'prevent_destroy': 'false'
     oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
+      'prevent_destroy': 'false'
     external_providers: ["time"]
     ignore_read_extra:
       - 'update_time'
-      - 'deletion_policy'
   - name: 'secure_source_manager_instance_workforce_identity_federation'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-instance%s", context["random_suffix"])'
     vars:
       instance_id: 'my-instance'
-      deletion_policy: 'PREVENT'
+      prevent_destroy: 'true'
     test_vars_overrides:
-      'deletion_policy': '"DELETE"'
+      'prevent_destroy': 'false'
     oics_vars_overrides:
-      'deletion_policy': '"DELETE"'
+      'prevent_destroy': 'false'
     ignore_read_extra:
       - 'update_time'
-      - 'deletion_policy'
 parameters:
   - name: 'location'
     type: String
@@ -171,19 +164,6 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-virtual_fields:
-  - name: 'deletion_policy'
-    type: String
-    description: |
-      The deletion policy for the instance. Setting `ABANDON` allows the resource
-      to be abandoned, rather than deleted. Setting `DELETE` deletes the resource
-      and all its contents. Setting `PREVENT` prevents the resource from accidental
-      deletion by erroring out during plan.
-      Default is `DELETE`.  Possible values are:
-        * DELETE
-        * PREVENT
-        * ABANDON
-    default_value: 'PREVENT'
 properties:
   - name: 'name'
     type: String
@@ -268,6 +248,7 @@ properties:
         type: String
         description: |
           CA pool resource, resource must in the format of `projects/{project}/locations/{location}/caPools/{ca_pool}`.
+        required: true
         immutable: true
       - name: 'httpServiceAttachment'
         type: String

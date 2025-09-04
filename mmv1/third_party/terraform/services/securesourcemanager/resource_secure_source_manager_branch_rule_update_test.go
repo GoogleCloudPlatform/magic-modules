@@ -11,7 +11,7 @@ func TestAccSecureSourceManagerBranchRule_secureSourceManagerBranchRuleWithField
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"deletion_policy": "DELETE",
+		"prevent_destroy": false,
 		"random_suffix":   acctest.RandString(t, 10),
 	}
 
@@ -46,18 +46,20 @@ func testAccSecureSourceManagerBranchRule_secureSourceManagerBranchRuleWithField
 resource "google_secure_source_manager_instance" "instance" {
     location = "us-central1"
     instance_id = "tf-test-my-initial-instance%{random_suffix}"
-
     # Prevent accidental deletions.
-    deletion_policy = "%{deletion_policy}"
+    lifecycle {
+        prevent_destroy = "%{prevent_destroy}"
+    }
 }
 
 resource "google_secure_source_manager_repository" "repository" {
     repository_id = "tf-test-my-initial-repository%{random_suffix}"
     instance = google_secure_source_manager_instance.instance.name
     location = google_secure_source_manager_instance.instance.location
-
     # Prevent accidental deletions.
-    deletion_policy = "%{deletion_policy}"
+    lifecycle {
+        prevent_destroy = "%{prevent_destroy}"
+    }
 }
 
 resource "google_secure_source_manager_branch_rule" "default" {
@@ -81,18 +83,20 @@ func testAccSecureSourceManagerBranchRule_secureSourceManagerBranchRuleWithField
 resource "google_secure_source_manager_instance" "instance" {
 	location = "us-central1"
 	instance_id = "tf-test-my-initial-instance%{random_suffix}"
-
-    # Prevent accidental deletions.
-    deletion_policy = "%{deletion_policy}"
+	# Prevent accidental deletions.
+	lifecycle {
+		prevent_destroy = "%{prevent_destroy}"
+	}
 }
 
 resource "google_secure_source_manager_repository" "repository" {
     repository_id = "tf-test-my-initial-repository%{random_suffix}"
     instance = google_secure_source_manager_instance.instance.name
     location = google_secure_source_manager_instance.instance.location
-
     # Prevent accidental deletions.
-    deletion_policy = "%{deletion_policy}"
+    lifecycle {
+        prevent_destroy = "%{prevent_destroy}"
+    }
 }
 
 resource "google_secure_source_manager_branch_rule" "default" {

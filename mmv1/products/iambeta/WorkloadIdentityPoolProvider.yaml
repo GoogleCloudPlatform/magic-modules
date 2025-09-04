@@ -310,7 +310,6 @@ properties:
           }
           ```
         required: false
-        state_func: 'func(v interface{}) string { s, _ := structure.NormalizeJsonString(v); return s }'
   - name: 'saml'
     type: NestedObject
     description:
