@@ -41,6 +41,7 @@ async:
       delete_minutes: 30
   result:
     resource_inside_response: false
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
 sweeper:
   url_substitutions:
@@ -52,19 +53,27 @@ examples:
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
+    tgc_test_ignore_extra:
+      - 'allow_open' # Ignore its false value in Terraform configuration
   - name: 'network_security_server_tls_policy_advanced'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
+    tgc_test_ignore_extra:
+      - 'allow_open' # Ignore its false value in Terraform configuration
   - name: 'network_security_server_tls_policy_server_cert'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
+    tgc_test_ignore_extra:
+      - 'allow_open' # Ignore its false value in Terraform configuration
   - name: 'network_security_server_tls_policy_mtls'
     primary_resource_id: 'default'
     vars:
       resource_name: 'my-server-tls-policy'
       trust_config_name: 'my-trust-config'
+    tgc_test_ignore_extra:
+      - 'allow_open' # Ignore its false value in Terraform configuration
 parameters:
   - name: 'name'
     type: String
@@ -94,6 +103,7 @@ properties:
   - name: 'labels'
     type: KeyValueLabels
     description: Set of label tags associated with the ServerTlsPolicy resource.
+    is_missing_in_cai: true
   - name: 'description'
     type: String
     description: |

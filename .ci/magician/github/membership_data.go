@@ -64,8 +64,8 @@ var (
 		"BBBmau": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 4, 7),
-					endDate:   newDate(2025, 4, 11),
+					startDate: newDate(2025, 7, 1),
+					endDate:   newDate(2025, 7, 17),
 				},
 			},
 		},
@@ -81,7 +81,12 @@ var (
 			vacations: []Vacation{},
 		},
 		"melinath": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 6, 26),
+					endDate:   newDate(2025, 7, 7),
+				},
+			},
 		},
 		"NickElliot": {
 			vacations: []Vacation{},
@@ -95,7 +100,12 @@ var (
 			},
 		},
 		"roaks3": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 8, 1),
+					endDate:   newDate(2025, 8, 11),
+				},
+			},
 		},
 		"ScottSuarez": {
 			vacations: []Vacation{},
@@ -125,13 +135,18 @@ var (
 			},
 		},
 		"trodge": {
-			vacations: []Vacation{},
+			vacations: []Vacation{
+				{
+					startDate: newDate(2025, 8, 7),
+					endDate:   newDate(2025, 8, 10),
+				},
+			},
 		},
 		"zli82016": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 1, 15),
-					endDate:   newDate(2025, 2, 9),
+					startDate: newDate(2025, 8, 27),
+					endDate:   newDate(2025, 9, 2),
 				},
 			},
 		},
@@ -140,7 +155,6 @@ var (
 	// This is for new team members who are onboarding
 	trustedContributors = map[string]struct{}{
 		"bbasata":           struct{}{},
-		"jaylonmcshan03":    struct{}{},
 		"malhotrasagar2212": struct{}{},
 	}
 )

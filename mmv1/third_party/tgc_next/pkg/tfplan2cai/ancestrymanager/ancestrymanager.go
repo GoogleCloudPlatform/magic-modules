@@ -164,15 +164,6 @@ func (m *manager) fetchAncestors(config *transport_tpg.Config, tfData tpgresourc
 			return nil, fmt.Errorf("organization id not found in terraform data")
 		}
 		key = orgKey
-	case "iam.googleapis.com/Role":
-		// google_organization_iam_custom_role or google_project_iam_custom_role
-		if orgOK {
-			key = orgKey
-		} else if projectKey != "" {
-			key = projectKey
-		} else {
-			return []string{unknownOrg}, nil
-		}
 	case "cloudresourcemanager.googleapis.com/Project", "cloudbilling.googleapis.com/ProjectBillingInfo":
 		// for google_project and google_project_iam resources
 		var ancestors []string
@@ -205,12 +196,24 @@ func (m *manager) fetchAncestors(config *transport_tpg.Config, tfData tpgresourc
 			return []string{unknownOrg}, nil
 		}
 		key = projectKey
-
-	default:
+	case "apigee.googleapis.com/Instance":
+		// Project is used to find the ancestors.
+		// org_id in resource `google_apigee_instance` is the apigee org id under a project.
 		if projectKey == "" {
 			return []string{unknownOrg}, nil
 		}
 		key = projectKey
+	default:
+		switch {
+		case orgOK:
+			key = orgKey
+		case folderOK:
+			key = folderKey
+		case projectKey != "":
+			key = projectKey
+		default:
+			return []string{unknownOrg}, nil
+		}
 	}
 	return m.getAncestorsWithCache(key)
 }
@@ -387,7 +390,9 @@ func (m *manager) SetAncestors(d tpgresource.TerraformResourceData, config *tran
 		return fmt.Errorf("getting resource ancestry or parent failed: %w", err)
 	}
 
-	cai.Resource.Parent = parent
+	if cai.Resource != nil {
+		cai.Resource.Parent = parent
+	}
 	cai.Ancestors = ancestors
 	return nil
 }

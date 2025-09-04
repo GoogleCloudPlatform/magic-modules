@@ -549,6 +549,11 @@ var schemaNodePool = map[string]*schema.Schema{
 						},
 					},
 				},
+				"subnetwork": {
+					Type:         schema.TypeString,
+					Computed:     true,
+					Description:  `The subnetwork path for the node pool. Format: projects/{project}/regions/{region}/subnetworks/{subnetwork} . If the cluster is associated with multiple subnetworks, the subnetwork for the node pool is picked based on the IP utilization during node pool creation and is immutable.`,
+				},
 			},
 		},
 	},
@@ -697,6 +702,7 @@ func resourceContainerNodePoolCreate(d *schema.ResourceData, meta interface{}) e
 		return nil
 	})
 	if err != nil {
+		d.SetId("")
 		return fmt.Errorf("error creating NodePool: %s", err)
 	}
 	timeout -= time.Since(startTime)
@@ -783,13 +789,19 @@ func resourceContainerNodePoolRead(d *schema.ResourceData, meta interface{}) err
 		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 	}
 	nodePool, err := clusterNodePoolsGetCall.Do()
-{{- else }}
-	npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name)
-	nodePool, err := npCache.get(nodePoolInfo.fullyQualifiedName(name))
-{{- end }}
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("NodePool %q from cluster %q", name, nodePoolInfo.cluster))
 	}
+
+{{- else }}
+	npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name)
+	nodePool, err := npCache.get(nodePoolInfo.fullyQualifiedName(name))
+	if err != nil {
+		log.Printf("[WARN] Removing %s because it's gone", fmt.Sprintf("NodePool %q from cluster %q", name, nodePoolInfo.cluster))
+		d.SetId("")
+		return nil
+	}
+{{- end }}
 
 	npMap, err := flattenNodePool(d, config, nodePool, "")
 	if err != nil {
@@ -956,11 +968,6 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 		clusterNodePoolsGetCall.Header().Add("X-Goog-User-Project", nodePoolInfo.project)
 	}
 	_, err = clusterNodePoolsGetCall.Do()
-{{- else }}
-	npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name)
-	_, err = npCache.get(nodePoolInfo.fullyQualifiedName(name))
-{{- end }}
-
 	if err != nil {
 		if err = transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("Container NodePool %s", name)); err == nil {
 			return false, nil
@@ -968,6 +975,15 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 		// There was some other error in reading the resource
 		return true, err
 	}
+{{- else }}
+	npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name)
+	_, err = npCache.get(nodePoolInfo.fullyQualifiedName(name))
+	if err != nil {
+		log.Printf("[WARN] Removing %s because it's gone", fmt.Sprintf("NodePool %q from cluster %q", name, nodePoolInfo.cluster))
+		d.SetId("")
+		return false, nil
+	}
+{{- end }}
 	return true, nil
 }
 
@@ -1320,6 +1336,7 @@ func flattenNodeNetworkConfig(c *container.NodeNetworkConfig, d *schema.Resource
 			"network_performance_config":      flattenNodeNetworkPerformanceConfig(c.NetworkPerformanceConfig),
 			"additional_node_network_configs": flattenAdditionalNodeNetworkConfig(c.AdditionalNodeNetworkConfigs),
 			"additional_pod_network_configs":  flattenAdditionalPodNetworkConfig(c.AdditionalPodNetworkConfigs),
+			"subnetwork":                      c.Subnetwork,
 		})
 	}
 	return result
@@ -1499,13 +1516,15 @@ func nodePoolUpdate(d *schema.ResourceData, meta interface{}, nodePoolInfo *Node
 		}
 
 		if err := retryWhileIncompatibleOperation(timeout, npLockKey, updateF); err != nil {
-				return err
+			return err
 		}
 		log.Printf("[INFO] Updated autoscaling in Node Pool %s", d.Id())
 	}
 
 	if d.HasChange(prefix + "node_config") {
-		nodePoolNodeConfigUpdate(d, config, nodePoolInfo, prefix, name, timeout)
+		if err := nodePoolNodeConfigUpdate(d, config, nodePoolInfo, prefix, name, timeout); err != nil {
+			return err
+		}
 	}
 
 	if d.HasChange(prefix + "node_count") {

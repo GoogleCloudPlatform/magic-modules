@@ -1,5 +1,4 @@
 resource "google_certificate_manager_certificate" "certificate" {
-  provider = google-beta
   name     = "{{index $.Vars "certificate_name"}}"
   labels   = {
     foo = "bar"
@@ -13,7 +12,6 @@ resource "google_certificate_manager_certificate" "certificate" {
 }
 
 resource "google_certificate_manager_trust_config" "trust_config" {
-  provider    = google-beta
   name        = "{{index $.Vars "trust_config_name"}}"
   description = "sample description for the trust config"
   location    = "global"
@@ -33,7 +31,6 @@ resource "google_certificate_manager_trust_config" "trust_config" {
 }
 
 resource "google_network_security_backend_authentication_config" "default" {
-  provider = google-beta
   name     = "{{index $.Vars "resource_name"}}"
   labels   = {
     bar = "foo"

@@ -42,6 +42,10 @@ description: |-
 ---
 
 # IAM policy for {{$.ProductMetadata.DisplayName}} {{$.Name}}
+{{- if $.IamPolicy.DeprecationMessage }}
+~> **Warning:** {{$.IamPolicy.DeprecationMessage}}
+{{- end }}
+
 Three different resources help you manage your IAM policy for {{$.ProductMetadata.DisplayName}} {{$.Name}}. Each of these resources serves a different use case:
 
 * `{{ $.IamTerraformName }}_policy`: Authoritative. Sets the IAM policy for the {{ lower $.Name }} and replaces any existing policy already attached.

@@ -12,8 +12,8 @@ Prerequisites:
 - A BeyondCorp subscription on the organization
 
 After applying this configuration:
-- (Internal only) Enable stubbed calls for GKE MultiCloud resources
-- (Internal only) Verify ownership of `hashicorptest.com` for new service account
+- (Internal setup) Enable stubbed calls for GKE MultiCloud resources
+- (Internal setup) Verify ownership of `hashicorptest.com` for new service account
 - Enable Media CDN
 - Enable Access Boundary permissions
 - Enable BigQuery Table IAM conditions

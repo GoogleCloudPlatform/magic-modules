@@ -561,6 +561,16 @@ var ServicesListBeta = mapOf(
         "displayName" to "Mlengine",
         "path" to "./google-beta/services/mlengine"
     ),
+    "modelarmor" to mapOf(
+        "name" to "modelarmor",
+        "displayName" to "ModelArmor",
+        "path" to "./google-beta/services/modelarmor"
+    ),
+    "modelarmorglobal" to mapOf(
+        "name" to "modelarmorglobal",
+        "displayName" to "ModelArmorGlobal",
+        "path" to "./google-beta/services/modelarmorglobal"
+    ),
     "monitoring" to mapOf(
         "name" to "monitoring",
         "displayName" to "Monitoring",
@@ -686,6 +696,11 @@ var ServicesListBeta = mapOf(
         "displayName" to "Runtimeconfig",
         "path" to "./google-beta/services/runtimeconfig"
     ),
+    "saasruntime" to mapOf(
+        "name" to "saasruntime",
+        "displayName" to "SaaS Runtime",
+        "path" to "./google-beta/services/saasruntime"
+    ),
     "secretmanager" to mapOf(
         "name" to "secretmanager",
         "displayName" to "Secretmanager",
@@ -800,11 +815,6 @@ var ServicesListBeta = mapOf(
         "name" to "tags",
         "displayName" to "Tags",
         "path" to "./google-beta/services/tags"
-    ),
-    "tpu" to mapOf(
-        "name" to "tpu",
-        "displayName" to "Tpu",
-        "path" to "./google-beta/services/tpu"
     ),
     "tpuv2" to mapOf(
         "name" to "tpuv2",

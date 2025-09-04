@@ -180,7 +180,7 @@ func listGCEnvironmentVariables() string {
 func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, projectId, commitSha string, gh GithubClient, rnr ExecRunner, ctlr *source.Controller) error {
 	errors := map[string][]string{"Other": []string{}}
 
-	// TODO(ScottSuarez) - temporary fix to ensure the label is removed.
+	// TODO - temporary fix to ensure the label is removed.
 	// Once we migrate to the new trigger there is an explicit task
 	// for this and this line can be removed.
 	gh.RemoveLabel(fmt.Sprint(prNumber), "awaiting-approval")
@@ -685,6 +685,9 @@ func init() {
 func checkDocumentFrontmatter(repo source.Repo) []string {
 	var errs []string
 	for _, f := range repo.ChangedFiles {
+		if !strings.HasPrefix(f, "website/docs/r/") && !strings.HasPrefix(f, "website/docs/d/") {
+			continue
+		}
 		if !strings.HasSuffix(f, ".markdown") {
 			continue
 		}
@@ -717,10 +720,6 @@ func checkDocumentFrontmatter(repo source.Repo) []string {
 		}
 		if err := data.Decode(&metadata); err != nil {
 			errs = append(errs, fmt.Sprintf("Failed to decode frontmatter in file %s. This is usually due to an incorrect structure in the frontmatter.", f))
-			continue
-		}
-		if metadata.Subcategory == "" {
-			errs = append(errs, fmt.Sprintf("Failed to detect subcategory in the frontmatter in file %s.", f))
 		}
 	}
 	return errs

@@ -70,4 +70,14 @@ properties:
     description: Whether customer data sharing should be enabled.
   - name: disableWebGrounding
     type: Boolean
-    description: Whether web grounding should be disabled.
+    description: |-
+      Whether web grounding should be disabled.
+    deprecation_message: |-
+      `disable_web_grounding` is deprecated. Use `web_grounding_type` instead.
+  - name: webGroundingType
+    type: String
+    description: |-
+      Web grounding type.
+      Possible values:
+      GROUNDING_WITH_GOOGLE_SEARCH
+      WEB_GROUNDING_FOR_ENTERPRISE

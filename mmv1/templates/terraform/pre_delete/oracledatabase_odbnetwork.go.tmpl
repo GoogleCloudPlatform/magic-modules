@@ -1,0 +1,3 @@
+if d.Get("deletion_protection").(bool) {
+	return fmt.Errorf("cannot destroy google_oracle_database_odb_network resource with id : %q without setting deletion_protection=false and running `terraform apply`", d.Id())
+}

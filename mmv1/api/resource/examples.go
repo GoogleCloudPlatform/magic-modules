@@ -183,6 +183,15 @@ type Examples struct {
 	// These properties are present in Terraform resources schema, but not in CAI assets.
 	// Virtual Fields and url parameters are already ignored by default and do not need to be duplicated here.
 	TGCTestIgnoreExtra []string `yaml:"tgc_test_ignore_extra,omitempty"`
+	// The properties ignored in CAI assets. It is rarely used and only used
+	// when the nested field has sent_empty_value: true.
+	// But its parent field is C + O and not specified in raw_config.
+	// Example: ['RESOURCE.cdnPolicy.signedUrlCacheMaxAgeSec'].
+	// "RESOURCE" means that the property is for resource data in CAI asset.
+	TGCTestIgnoreInAsset []string `yaml:"tgc_test_ignore_in_asset,omitempty"`
+	// The reason to skip a test. For example, a link to a ticket explaining the issue that needs to be resolved before
+	// unskipping the test. If this is not empty, the test will be skipped.
+	TGCSkipTest string `yaml:"tgc_skip_test,omitempty"`
 }
 
 // Set default value for fields

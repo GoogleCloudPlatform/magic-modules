@@ -129,6 +129,26 @@ func TestAccStorageObject_content(t *testing.T) {
 						"google_storage_bucket_object.object", "storage_class", "STANDARD"),
 				),
 			},
+			{
+				Config: testGoogleStorageBucketsObjectEmptyContentType(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket_object.object", "content_type", ""),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket_object.object", "storage_class", "STANDARD"),
+				),
+			},
+			{
+				Config: testGoogleStorageBucketsObjectContent(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckGoogleStorageObject(t, bucketName, objectName, dataMd5),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket_object.object", "content_type", "text/plain; charset=utf-8"),
+					resource.TestCheckResourceAttr(
+						"google_storage_bucket_object.object", "storage_class", "STANDARD"),
+				),
+			},
 		},
 	})
 }
@@ -596,6 +616,29 @@ func TestAccStorageObject_knownAfterApply(t *testing.T) {
 	})
 }
 
+func TestAccStorageObject_objectDeletionPolicy(t *testing.T) {
+	t.Parallel()
+
+	bucketName := acctest.TestBucketName(t)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccStorageObjectDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testGoogleStorageBucketsObjectDeletionPolicy(bucketName, "samplecontent"),
+			},
+			{
+				Config: testGoogleStorageBucketsObjectAbandon(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckStorageObjectExists(t, bucketName),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckGoogleStorageObject(t *testing.T, bucket, object, md5 string) resource.TestCheckFunc {
 	return testAccCheckGoogleStorageObjectWithEncryption(t, bucket, object, md5, "")
 }
@@ -704,6 +747,23 @@ resource "google_storage_bucket_object" "object" {
   name    = "%s"
   bucket  = google_storage_bucket.bucket.name
   content = "%s"
+}
+`, bucketName, objectName, content)
+}
+
+func testGoogleStorageBucketsObjectEmptyContentType(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+
+resource "google_storage_bucket_object" "object" {
+  name                     = "%s"
+  bucket                   = google_storage_bucket.bucket.name
+  content                  = "%s"
+  force_empty_content_type = true
 }
 `, bucketName, objectName, content)
 }
@@ -1042,4 +1102,43 @@ output "valid" {
   value = nonsensitive(local_file.test.content) == data.google_storage_bucket_object_content.bo.content
 }
 `, bucketName, content, filename)
+}
+
+func testGoogleStorageBucketsObjectDeletionPolicy(bucketName string, customContent string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+}
+
+resource "google_storage_bucket_object" "object" {
+  name            = "%s"
+  bucket          = google_storage_bucket.bucket.name
+  content         = "%s"
+  deletion_policy = "ABANDON"
+}
+`, bucketName, objectName, customContent)
+}
+
+func testGoogleStorageBucketsObjectAbandon(bucketName string) string {
+	return fmt.Sprintf(`
+resource "google_storage_bucket" "bucket" {
+  name          = "%s"
+  location      = "US"
+  force_destroy = true
+}
+`, bucketName)
+}
+
+func testAccCheckStorageObjectExists(t *testing.T, bucketName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+
+		config := acctest.GoogleProviderConfig(t)
+
+		_, err := config.NewStorageClient(config.UserAgent).Objects.Get(bucketName, objectName).Do()
+		if err != nil {
+			return err
+		}
+		return nil
+	}
 }
