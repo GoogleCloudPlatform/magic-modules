@@ -39,6 +39,7 @@ custom_code:
   encoder: 'templates/terraform/encoders/cloudbuildv2_repository.go.tmpl'
 exclude_tgc: true
 legacy_long_form_project: true
+include_in_tgc_next_DO_NOT_USE: true
 examples:
 # These tests depend on secrets stored in a separate project, so we prefer not
 # to show them in the docs.
@@ -48,18 +49,24 @@ examples:
       connection_name: 'connection'
       repository_name: 'repository'
     exclude_docs: true
+    tgc_test_ignore_extra:
+      - annotations # It has empty object in Terraform configuration
   - name: 'cloudbuildv2_repository_github'
     primary_resource_id: 'primary'
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
     exclude_docs: true
+    tgc_test_ignore_extra:
+      - annotations # It has empty object in Terraform configuration
   - name: 'cloudbuildv2_repository_gle'
     primary_resource_id: 'primary'
     vars:
       connection_name: 'connection'
       repository_name: 'repository'
     exclude_docs: true
+    tgc_test_ignore_extra:
+      - annotations # It has empty object in Terraform configuration
   - name: 'cloudbuildv2_repository_ghe_doc'
     exclude_test: true
   - name: 'cloudbuildv2_repository_github_doc'
@@ -88,6 +95,8 @@ properties:
     required: true
     immutable: true
     ignore_read: true
+    tgc_ignore_read: true
+    custom_tgc_expand: 'templates/tgc_next/custom_expand/cloudbuildv2_repository_name.go.tmpl'
   - name: 'remoteUri'
     type: String
     description: Required. Git Clone HTTPS URI.
