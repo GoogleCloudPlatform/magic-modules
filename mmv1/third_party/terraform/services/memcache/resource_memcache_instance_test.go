@@ -163,7 +163,7 @@ data "google_compute_network" "memcache_network" {
 `, name, region, network)
 }
 
-func testAccMemcacheInstance_deletionprotection(prefix, name, network, region string) string {
+func testAccMemcacheInstance_deletionprotectionFalse(prefix, name, network, region string) string {
 	return fmt.Sprintf(`
 resource "google_memcache_instance" "test" {
   name = "%s"
