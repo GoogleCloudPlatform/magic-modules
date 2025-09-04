@@ -1,6 +1,8 @@
 package tpgiamresource
 
 import (
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"encoding/json"
@@ -42,8 +44,9 @@ func iamPolicyImport(resourceIdParser ResourceIdParserFunc) schema.StateFunc {
 
 func ResourceIamPolicy(parentSpecificSchema map[string]*schema.Schema, newUpdaterFunc NewResourceIamUpdaterFunc, resourceIdParser ResourceIdParserFunc, options ...func(*IamSettings)) *schema.Resource {
 	settings := NewIamSettings(options...)
+	createTimeOut := time.Duration(settings.CreateTimeOut) * time.Minute
 
-	return &schema.Resource{
+	resourceSchema := &schema.Resource{
 		Create: ResourceIamPolicyCreate(newUpdaterFunc),
 		Read:   ResourceIamPolicyRead(newUpdaterFunc),
 		Update: ResourceIamPolicyUpdate(newUpdaterFunc),
@@ -61,6 +64,12 @@ func ResourceIamPolicy(parentSpecificSchema map[string]*schema.Schema, newUpdate
 		},
 		UseJSONNumber: true,
 	}
+	if createTimeOut > 0 {
+		resourceSchema.Timeouts = &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(createTimeOut),
+		}
+	}
+	return resourceSchema
 }
 
 func ResourceIamPolicyCreate(newUpdaterFunc NewResourceIamUpdaterFunc) schema.CreateFunc {
