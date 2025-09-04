@@ -7,7 +7,6 @@ import (
 	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/caiasset"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	netsecapi "google.golang.org/api/networksecurity/v1"
-	"strings"
 )
 
 // ServerTLSPolicyAssetType is the CAI asset type name.
@@ -94,11 +93,6 @@ func flattenServerTLSPolicy(resource *caiasset.AssetResource) (map[string]any, e
 	return result, nil
 }
 
-func flattenName(name string) string {
-	tokens := strings.Split(name, "/")
-	return tokens[len(tokens)-1]
-}
-
 func flattenServerCertificate(certificate *netsecapi.GoogleCloudNetworksecurityV1CertificateProvider) []map[string]any {
 	if certificate == nil {
 		return nil
@@ -162,12 +156,4 @@ func flattenClientValidationCA(cas []*netsecapi.ValidationCA) []map[string]any {
 	}
 
 	return result
-}
-
-func flattenProjectName(name string) string {
-	tokens := strings.Split(name, "/")
-	if len(tokens) < 2 || tokens[0] != "projects" {
-		return ""
-	}
-	return tokens[1]
 }

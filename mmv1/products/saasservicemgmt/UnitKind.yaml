@@ -1,0 +1,207 @@
+# Copyright 2024 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: UnitKind
+description: A UnitKind serves as a template or type definition for a group of Units. Units that belong to the same UnitKind are managed together, follow the same release model, and are typically updated together through rollouts.
+base_url: projects/{{project}}/locations/{{location}}/unitKinds
+update_mask: true
+self_link: projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
+create_url: projects/{{project}}/locations/{{location}}/unitKinds?unitKindId={{unit_kind_id}}
+update_verb: PATCH
+id_format: projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
+import_format:
+  - projects/{{project}}/locations/{{location}}/unitKinds/{{unit_kind_id}}
+min_version: beta
+examples:
+  - name: saas_runtime_unit_kind_basic
+    primary_resource_id: "example"
+    min_version: 'beta'
+    vars:
+      saas_name: example-saas
+      cluster_unitkind_name: cluster-unitkind
+      app_unitkind_name: app-unitkind
+    test_env_vars:
+      project: 'PROJECT_NAME'
+    bootstrap_iam:
+      - member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com"
+        role: "roles/saasservicemgmt.serviceAgent"
+autogen_async: false
+autogen_status: VW5pdEtpbmQ=
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+  - name: unitKindId
+    type: String
+    description: The ID value for the new unit kind.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: annotations
+    type: KeyValueAnnotations
+    description: |-
+      Annotations is an unstructured key-value map stored with a resource that
+      may be set by external tools to store and retrieve arbitrary metadata.
+      They are not queryable and should be preserved when modifying objects.
+
+      More info: https://kubernetes.io/docs/user-guide/annotations
+  - name: createTime
+    type: String
+    description: The timestamp when the resource was created.
+    output: true
+  - name: dependencies
+    type: Array
+    description: |-
+      List of other unit kinds that this release will depend on. Dependencies
+      will be automatically provisioned if not found. Maximum 10.
+    immutable: true
+    item_type:
+      type: NestedObject
+      properties:
+        - name: alias
+          type: String
+          description: An alias for the dependency. Used for input variable mapping.
+          required: true
+        - name: unitKind
+          type: String
+          description: The unit kind of the dependency.
+          immutable: true
+          required: true
+  - name: etag
+    type: String
+    description: |-
+      An opaque value that uniquely identifies a version or
+      generation of a resource. It can be used to confirm that the client
+      and server agree on the ordering of a resource being written.
+    output: true
+  - name: inputVariableMappings
+    type: Array
+    description: |-
+      List of inputVariables for this release that will either be retrieved from
+      a dependency’s outputVariables, or will be passed on to a dependency’s
+      inputVariables. Maximum 100.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: from
+          type: NestedObject
+          description: Output variables whose values will be passed on to dependencies
+          properties:
+            - name: dependency
+              type: String
+              description: Alias of the dependency that the outputVariable will pass its value to
+              required: true
+            - name: outputVariable
+              type: String
+              description: Name of the outputVariable on the dependency
+              required: true
+        - name: to
+          type: NestedObject
+          description: Input variables whose values will be passed on to dependencies
+          properties:
+            - name: dependency
+              type: String
+              description: Alias of the dependency that the inputVariable will pass its value to
+              required: true
+            - name: ignoreForLookup
+              type: Boolean
+              description: Tells SaaS Runtime if this mapping should be used during lookup or not
+            - name: inputVariable
+              type: String
+              description: Name of the inputVariable on the dependency
+              required: true
+        - name: variable
+          type: String
+          description: name of the variable
+          required: true
+  - name: labels
+    type: KeyValueLabels
+    description: |-
+      The labels on the resource, which can be used for categorization.
+      similar to Kubernetes resource labels.
+  - name: name
+    type: String
+    description: |-
+      Identifier. The resource name (full URI of the resource) following the standard naming
+      scheme:
+
+      "projects/{project}/locations/{location}/unitKinds/{unitKind}"
+    output: true
+  - name: outputVariableMappings
+    type: Array
+    description: |-
+      List of outputVariables for this unit kind will be passed to this unit's
+      outputVariables. Maximum 100.
+    item_type:
+      type: NestedObject
+      properties:
+        - name: from
+          type: NestedObject
+          description: Output variables whose values will be passed on to dependencies
+          properties:
+            - name: dependency
+              type: String
+              description: Alias of the dependency that the outputVariable will pass its value to
+              required: true
+            - name: outputVariable
+              type: String
+              description: Name of the outputVariable on the dependency
+              required: true
+        - name: to
+          type: NestedObject
+          description: Input variables whose values will be passed on to dependencies
+          properties:
+            - name: dependency
+              type: String
+              description: Alias of the dependency that the inputVariable will pass its value to
+              required: true
+            - name: ignoreForLookup
+              type: Boolean
+              description: Tells SaaS Runtime if this mapping should be used during lookup or not
+            - name: inputVariable
+              type: String
+              description: Name of the inputVariable on the dependency
+              required: true
+        - name: variable
+          type: String
+          description: name of the variable
+          required: true
+  - name: saas
+    type: String
+    description: |-
+      A reference to the Saas that defines the product (managed service) that
+      the producer wants to manage with SaaS Runtime. Part of the SaaS Runtime
+      common data model. Immutable once set.
+    immutable: true
+    required: true
+  - name: uid
+    type: String
+    description: |-
+      The unique identifier of the resource. UID is unique in the time
+      and space for this resource within the scope of the service. It is
+      typically generated by the server on successful creation of a resource
+      and must not be changed. UID is used to uniquely identify resources
+      with resource name reuses. This should be a UUID4.
+    output: true
+  - name: updateTime
+    type: String
+    description: |-
+      The timestamp when the resource was last updated. Any
+      change to the resource made by users must refresh this value.
+      Changes to a resource made by the service should refresh this value.
+    output: true

@@ -615,7 +615,6 @@ properties:
     description: |
       Optional. Labels to apply to this instance. These can be later modified
       by the UpdateInstance method.
-    diff_suppress_func: 'WorkbenchInstanceLabelsDiffSuppress'
   - name: 'enableThirdPartyIdentity'
     type: Boolean
     description: |

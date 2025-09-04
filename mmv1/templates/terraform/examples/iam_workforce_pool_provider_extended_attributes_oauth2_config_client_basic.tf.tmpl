@@ -1,0 +1,37 @@
+resource "google_iam_workforce_pool" "pool" {
+  workforce_pool_id = "{{index $.Vars "workforce_pool_id"}}"
+  parent            = "organizations/{{index $.TestEnvVars "org_id"}}"
+  location          = "global"
+}
+
+resource "google_iam_workforce_pool_provider" "{{$.PrimaryResourceId}}" {
+  workforce_pool_id  = google_iam_workforce_pool.pool.workforce_pool_id
+  location           = google_iam_workforce_pool.pool.location
+  provider_id        = "{{index $.Vars "provider_id"}}"
+  attribute_mapping  = {
+    "google.subject" = "assertion.sub"
+  }
+  oidc {
+    issuer_uri        = "https://login.microsoftonline.com/826602fe-2101-470c-9d71-ee1343668989/v2.0"
+    client_id         = "https://analysis.windows.net/powerbi/connector/GoogleBigQuery"
+    web_sso_config {
+      response_type             = "CODE"
+      assertion_claims_behavior = "MERGE_USER_INFO_OVER_ID_TOKEN_CLAIMS"
+    }
+    client_secret {
+        value {
+          plain_text = "client-secret"
+        }
+      }
+  }
+  extended_attributes_oauth2_client {
+    issuer_uri       = "https://login.microsoftonline.com/826602fe-2101-470c-9d71-ee1343668989/v2.0"
+    client_id        = "client-id"
+    client_secret {
+        value {
+          plain_text = "client-secret"
+        }
+      }
+    attributes_type = "AZURE_AD_GROUPS_ID"
+  }
+}
