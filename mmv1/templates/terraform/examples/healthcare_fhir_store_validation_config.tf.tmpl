@@ -19,11 +19,11 @@ resource "google_healthcare_fhir_store" "default" {
   }
 
   validation_config {
-    disable_profile_validation = false
-    enabled_implementation_guides = ["http://hl7.org/fhir/us/core/ImplementationGuide/ig"]
-    disable_required_field_validation = false
-    disable_reference_type_validation = false
-    disable_fhirpath_validation = false
+    disable_profile_validation = true
+    enabled_implementation_guides = []
+    disable_required_field_validation = true
+    disable_reference_type_validation = true
+    disable_fhirpath_validation = true
   }
 }
 

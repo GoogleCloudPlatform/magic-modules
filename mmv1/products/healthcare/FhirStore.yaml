@@ -187,6 +187,7 @@ properties:
     properties:
       - name: 'disableProfileValidation'
         type: Boolean
+        default_value: false
         description: |
           Whether to disable profile validation for this FHIR store. The default value is false. Set this to true to disable checking incoming resources for conformance against structure definitions in this FHIR store.
       - name: 'enabledImplementationGuides'
@@ -207,14 +208,17 @@ properties:
           type: String
       - name: 'disableRequiredFieldValidation'
         type: Boolean
+        default_value: false
         description: |
           Whether to disable required fields validation for incoming resources. The default value is false. Set this to true to disable checking incoming resources for conformance against required fields requirement defined in the FHIR specification. This property only affects resource types that do not have profiles configured for them, any rules in enabled implementation guides will still be enforced.
       - name: 'disableReferenceTypeValidation'
         type: Boolean
+        default_value: false
         description: |
           Whether to disable reference type validation for incoming resources. The default value is false. Set this to true to disable checking incoming resources for conformance against reference type requirement defined in the FHIR specification. This property only affects resource types that do not have profiles configured for them, any rules in enabled implementation guides will still be enforced.
       - name: 'disableFhirpathValidation'
         type: Boolean
+        default_value: false
         description: |
           Whether to disable FHIRPath validation for incoming resources. The default value is false. Set this to true to disable checking incoming resources for conformance against FHIRPath requirement defined in the FHIR specification. This property only affects resource types that do not have profiles configured for them, any rules in enabled implementation guides will still be enforced.
   - name: 'complexDataTypeReferenceParsing'
