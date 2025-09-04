@@ -484,7 +484,6 @@ properties:
             type: NestedObject
             allow_empty_object: true
             send_empty_value: true
-            default_from_api: true
             conflicts:
               - source_config.0.mysql_source_config.gtid
             description: |
