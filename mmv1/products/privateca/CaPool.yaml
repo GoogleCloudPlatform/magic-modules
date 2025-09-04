@@ -62,7 +62,7 @@ examples:
       cloud_kms_key: 'projects/keys-project/locations/asia-east1/keyRings/key-ring/cryptoKeys/crypto-key'
     test_vars_overrides:
       'pool_location': '"asia-east1"'
-      'cloud_kms_key': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ASYMMETRIC_SIGN", "asia-east1").CryptoKey.Name'
+      'cloud_kms_key': 'acctest.BootstrapKMSKeyWithPurposeInLocation(t, "ENCRYPT_DECRYPT", "asia-east1").CryptoKey.Name'
   - name: 'privateca_quickstart'
     primary_resource_id: 'default'
     vars:
