@@ -10,7 +10,7 @@ resource "google_privateca_ca_pool" "{{$.PrimaryResourceId}}" {
   labels = {
     foo = "bar"
   }
-  encryption_spec = {
+  encryption_spec {
     cloud_kms_key = "{{index $.Vars "cloud_kms_key"}}"
   }
   issuance_policy {
