@@ -88,13 +88,13 @@ The following arguments are supported:
 {{ "" }}
 {{ "" }}
 {{- range $p := $.RootProperties }}
-	{{- if and $p.Required (not $p.WriteOnly) }}
+	{{- if and $p.Required (not $p.WriteOnlyLegacy) }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
 	{{- end }}
 {{- end }}
 {{ "" }}
 {{- range $p := $.RootProperties }}
-	{{- if and (not $p.Required) (not $p.Output) (not $p.WriteOnly) }}
+	{{- if and (not $p.Required) (not $p.Output) (not $p.WriteOnlyLegacy) }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $p -}}
 	{{- end }}
 {{- end }}
@@ -129,7 +129,7 @@ The following arguments are supported:
 
 The following write-only attributes are supported:
 {{ range $p := $.RootProperties }}
-    {{- if $p.WriteOnly }}
+    {{- if $p.WriteOnlyLegacy }}
 {{- trimTemplate "property_documentation.html.markdown.tmpl" $p }}
     {{- end}}
 {{- end }}
