@@ -188,8 +188,8 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	// Compare roundtrip_config with export_config to ensure they are identical.
 
 	// Convert the export config to roundtrip assets and then convert the roundtrip assets back to roundtrip config
-	ancestryCache := getAncestryCache(assets)
-	roundtripAssets, roundtripConfigData, err := getRoundtripConfig(t, testName, tfDir, ancestryCache, logger, ignoredAssetFields)
+	ancestryCache, defaultProject := getAncestryCache(assets)
+	roundtripAssets, roundtripConfigData, err := getRoundtripConfig(t, testName, tfDir, ancestryCache, defaultProject, logger, ignoredAssetFields)
 	if err != nil {
 		return fmt.Errorf("error when converting the round-trip config: %#v", err)
 	}
@@ -249,9 +249,10 @@ func testSingleResource(t *testing.T, testName string, testData ResourceTestData
 	return nil
 }
 
-// Gets the ancestry cache for tfplan2cai conversion
-func getAncestryCache(assets []caiasset.Asset) map[string]string {
+// Gets the ancestry cache for tfplan2cai conversion and the default project
+func getAncestryCache(assets []caiasset.Asset) (map[string]string, string) {
 	ancestryCache := make(map[string]string, 0)
+	defaultProject := ""
 
 	for _, asset := range assets {
 		ancestors := asset.Ancestors
@@ -268,18 +269,29 @@ func getAncestryCache(assets []caiasset.Asset) map[string]string {
 
 			if _, ok := ancestryCache[ancestors[0]]; !ok {
 				ancestryCache[ancestors[0]] = path
+				if defaultProject == "" {
+					if s, hasPrefix := strings.CutPrefix(ancestors[0], "projects/"); hasPrefix {
+						defaultProject = s
+					}
+				}
 			}
 
 			project := utils.ParseFieldValue(asset.Name, "projects")
-			projectKey := fmt.Sprintf("projects/%s", project)
-			if strings.HasPrefix(ancestors[0], "projects") && ancestors[0] != projectKey {
-				if _, ok := ancestryCache[projectKey]; !ok {
-					ancestryCache[projectKey] = path
+			if project != "" {
+				projectKey := fmt.Sprintf("projects/%s", project)
+				if strings.HasPrefix(ancestors[0], "projects") && ancestors[0] != projectKey {
+					if _, ok := ancestryCache[projectKey]; !ok {
+						ancestryCache[projectKey] = path
+					}
+				}
+
+				if defaultProject == "" {
+					defaultProject = project
 				}
 			}
 		}
 	}
-	return ancestryCache
+	return ancestryCache, defaultProject
 }
 
 // Compares HCL and finds all of the keys in map1 that are not in map2
@@ -331,7 +343,7 @@ func isIgnored(key string, ignoredFields map[string]struct{}) bool {
 }
 
 // Converts a tfplan to CAI asset, and then converts the CAI asset into HCL
-func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCache map[string]string, logger *zap.Logger, ignoredAssetFields []string) ([]caiasset.Asset, []byte, error) {
+func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCache map[string]string, defaultProject string, logger *zap.Logger, ignoredAssetFields []string) ([]caiasset.Asset, []byte, error) {
 	fileName := fmt.Sprintf("%s_export", testName)
 
 	// Run terraform init and terraform apply to generate tfplan.json files
@@ -348,7 +360,7 @@ func getRoundtripConfig(t *testing.T, testName string, tfDir string, ancestryCac
 	roundtripAssets, err := tfplan2cai.Convert(ctx, jsonPlan, &tfplan2cai.Options{
 		ErrorLogger:    logger,
 		Offline:        true,
-		DefaultProject: "ci-test-project-nightly-beta",
+		DefaultProject: defaultProject,
 		DefaultRegion:  "",
 		DefaultZone:    "",
 		UserAgent:      "",
