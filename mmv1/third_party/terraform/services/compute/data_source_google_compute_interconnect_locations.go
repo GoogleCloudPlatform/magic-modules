@@ -39,7 +39,7 @@ func DataSourceGoogleComputeInterconnectLocations() *schema.Resource {
 							Computed: true,
 						},
 						"address": {
-							Type:     schemaTypeString,
+							Type:     schema.TypeString,
 							Computed: true,
 						},
 						"facility_provider": {
