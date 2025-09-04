@@ -151,12 +151,8 @@ func TestAccDataSourceGoogleBackupDRBackupPlanAssociations(t *testing.T) {
 	})
 }
 
-// testAccCheckBackupPlanAssociationInList verifies that the association created
-// during the test exists in the list returned by the plural data source.
-// This version performs a direct check without any retry logic.
 func testAccCheckBackupPlanAssociationInList(dataSourceName, instanceName, backupPlanName, projectDsName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		// Find the necessary resources from the Terraform state
 		ds, ok := s.RootModule().Resources[dataSourceName]
 		if !ok {
 			return fmt.Errorf("data source not found: %s", dataSourceName)
@@ -180,7 +176,6 @@ func testAccCheckBackupPlanAssociationInList(dataSourceName, instanceName, backu
 		projectID := project.Primary.Attributes["project_id"]
 		projectNumber := project.Primary.Attributes["number"]
 
-		// --- Start Debugging Output ---
 		fmt.Printf("\n--- Performing Direct Association Check ---\n")
 
 		// 1. Reconstruct the 'resource' string using the project NUMBER and instance ID
@@ -193,12 +188,10 @@ func testAccCheckBackupPlanAssociationInList(dataSourceName, instanceName, backu
 		// 2. Normalize the backup plan name to also use the project NUMBER.
 		expectedBackupPlan := strings.Replace(backupPlanNameFromState, "projects/"+projectID, "projects/"+projectNumber, 1)
 		fmt.Printf("Expected Backup Plan (normalized): %s\n", expectedBackupPlan)
-		// --- End Debugging Output ---
 
 		associationsCount, _ := strconv.Atoi(ds.Primary.Attributes["associations.#"])
 		fmt.Printf("Total associations found by data source: %d\n", associationsCount)
 
-		// Loop through the list of associations and look for an exact match.
 		for i := 0; i < associationsCount; i++ {
 			resourceAttr := ds.Primary.Attributes[fmt.Sprintf("associations.%d.resource", i)]
 			backupPlanAttr := ds.Primary.Attributes[fmt.Sprintf("associations.%d.backup_plan", i)]
@@ -207,11 +200,10 @@ func testAccCheckBackupPlanAssociationInList(dataSourceName, instanceName, backu
 
 			if resourceAttr == expectedResource && backupPlanAttr == expectedBackupPlan {
 				fmt.Println("--- Match found! Test successful. ---")
-				return nil // Success: A matching association was found.
+				return nil
 			}
 		}
 
-		// If the loop completes without finding a match, return an error.
 		fmt.Println("--- No match found after checking all associations. ---")
 		return fmt.Errorf("no matching backup plan association found in data source '%s' for resource '%s'", dataSourceName, expectedResource)
 	}

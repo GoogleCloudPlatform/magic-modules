@@ -24,7 +24,7 @@ data "google_backup_dr_backup_plan_associations" "compute_instance_associations"
 The following arguments are supported:
 
 * `location` - (Required)The location where the Backup Plan Association resources reside.
-* `resource_type` - (Required) The resource type of the workload. For example, compute.googleapis.com/Instance or compute.googleapis.com/Disk.
+* `resource_type` - (Required) The resource type of the workload. For example, sqladmin.googleapis.com/Instance or compute.googleapis.com/Instance.
 
 - - -
 

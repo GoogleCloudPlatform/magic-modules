@@ -68,7 +68,6 @@ func DataSourceGoogleCloudBackupDRBackupPlanAssociations() *schema.Resource {
 				Description: `The resource type of workload on which backup plan is applied. Examples include, "compute.googleapis.com/Instance", "compute.googleapis.com/Disk".`,
 			},
 
-			// Output: a computed list of the associations found
 			"associations": {
 				Type:        schema.TypeList,
 				Computed:    true,
@@ -113,10 +112,8 @@ func dataSourceGoogleCloudBackupDRBackupPlanAssociationsRead(d *schema.ResourceD
 	location := d.Get("location").(string)
 	resourceType := d.Get("resource_type").(string)
 
-	// Construct the URL for the custom fetchForResourceType method
-	url := fmt.Sprintf("https://backupdr.googleapis.com/v1/projects/%s/locations/%s/backupPlanAssociations:fetchForResourceType?resourceType=%s", project, location, resourceType)
+	url := fmt.Sprintf("%sprojects/%s/locations/%s/backupPlanAssociations:fetchForResourceType?resourceType=%s", config.BackupDRBasePath, project, location, resourceType)
 
-	// Make the API call
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,
 		Method:    "GET",
@@ -128,11 +125,9 @@ func dataSourceGoogleCloudBackupDRBackupPlanAssociationsRead(d *schema.ResourceD
 		return fmt.Errorf("Error reading BackupPlanAssociations: %s", err)
 	}
 
-	// The API response for a list is often a JSON object with a key holding the array.
 	// Adjust "backupPlanAssociations" to match the key in the actual API response.
 	items, ok := res["backupPlanAssociations"].([]interface{})
 	if !ok {
-		// If the key doesn't exist but there's no error, it's an empty list.
 		items = make([]interface{}, 0)
 	}
 
@@ -153,7 +148,6 @@ func dataSourceGoogleCloudBackupDRBackupPlanAssociationsRead(d *schema.ResourceD
 		return fmt.Errorf("Error setting associations: %s", err)
 	}
 
-	// Set the ID for the datasource. The URL used for the list is a stable choice.
 	d.SetId(url)
 
 	return nil
