@@ -56,7 +56,7 @@ examples:
   - name: firebase_app_hosting_domain_full
     primary_resource_id: example
     ignore_read_extra:
-      - 'custom_domain_status' # This isn't guaranteed to be set right away.
+      - custom_domain_status # This isn't guaranteed to be set right away.
     vars:
       backend_id: 'domain-full'
       service_act_id: 'sa-id'
