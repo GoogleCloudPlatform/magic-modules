@@ -83,8 +83,8 @@ var (
 		"melinath": {
 			vacations: []Vacation{
 				{
-					startDate: newDate(2025, 6, 26),
-					endDate:   newDate(2025, 7, 7),
+					startDate: newDate(2025, 9, 17),
+					endDate:   newDate(2025, 9, 22),
 				},
 			},
 		},
@@ -104,6 +104,10 @@ var (
 				{
 					startDate: newDate(2025, 8, 1),
 					endDate:   newDate(2025, 8, 11),
+				},
+				{
+					startDate: newDate(2025, 9, 23),
+					endDate:   newDate(2025, 9, 29),
 				},
 			},
 		},
@@ -139,6 +143,10 @@ var (
 				{
 					startDate: newDate(2025, 8, 7),
 					endDate:   newDate(2025, 8, 10),
+				},
+				{
+					startDate: newDate(2025, 9, 18),
+					endDate:   newDate(2025, 9, 28),
 				},
 			},
 		},

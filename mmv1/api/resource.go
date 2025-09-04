@@ -387,9 +387,8 @@ type TGCResource struct {
 	TGCIgnoreTerraformEncoder bool `yaml:"tgc_ignore_terraform_encoder,omitempty"`
 
 	// [Optional] The parameter that uniquely identifies the resource.
-	// Generally, it's safe to leave empty, in which case it defaults to `name`.
-	// Other values are normally useful in cases where an object has a parent
-	// and is identified by some non-name value, such as an ip+port pair.
+	// Generally, it shouldn't be set when the identity can be decided.
+	// Otherswise, it should be set.
 	CaiIdentity string `yaml:"cai_identity,omitempty"`
 }
 
@@ -2004,20 +2003,70 @@ func (r Resource) DefineAssetTypeForResourceInProduct() bool {
 // For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
 func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
 	caiBaseUrl := ""
-	caiId := "name"
+	caiId := ""
 	if r.CaiIdentity != "" {
 		caiId = r.CaiIdentity
+	} else {
+		caiId = r.getCaiId()
 	}
+	caiIdTemplate := fmt.Sprintf("{{%s}}", caiId)
 	if r.CaiBaseUrl != "" {
-		caiBaseUrl = fmt.Sprintf("%s/{{%s}}", r.CaiBaseUrl, caiId)
+		if caiId == "" || strings.Contains(r.CaiBaseUrl, caiIdTemplate) {
+			caiBaseUrl = r.CaiBaseUrl
+		} else {
+			caiBaseUrl = fmt.Sprintf("%s/%s", r.CaiBaseUrl, caiIdTemplate)
+		}
 	}
 	if caiBaseUrl == "" {
 		caiBaseUrl = r.SelfLink
 	}
 	if caiBaseUrl == "" {
-		caiBaseUrl = fmt.Sprintf("%s/{{%s}}", r.BaseUrl, caiId)
+		if caiId == "" || strings.Contains(r.BaseUrl, caiIdTemplate) {
+			caiBaseUrl = r.BaseUrl
+		} else {
+			caiBaseUrl = fmt.Sprintf("%s/%s", r.BaseUrl, caiIdTemplate)
+		}
 	}
 	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, caiBaseUrl)
+}
+
+// Guesses the identifier of the resource, as "name" is not always the identifier
+// For example, the cai identifier is feed_id in google_cloud_asset_folder_feed
+func (r Resource) getCaiId() string {
+	for _, p := range r.AllUserProperties() {
+		if p.Name == "name" && !p.Output {
+			return "name"
+		}
+	}
+
+	// Get the last identifier extracted from selfLink
+	id := r.getCandidateCaiId(r.SelfLink)
+	if id != "" {
+		return id
+	}
+
+	// Get the last identifier extracted from createUrl
+	id = r.getCandidateCaiId(r.CreateUrl)
+	if id != "" {
+		return id
+	}
+
+	return ""
+}
+
+// Extracts the last identifier from the url, if it is not computed,
+// then it is the candidate identifier
+func (r Resource) getCandidateCaiId(url string) string {
+	identifiers := r.ExtractIdentifiers(url)
+	if len(identifiers) > 0 {
+		id := identifiers[len(identifiers)-1]
+		for _, p := range r.AllUserProperties() {
+			if google.Underscore(p.Name) == id && !p.Output {
+				return id
+			}
+		}
+	}
+	return ""
 }
 
 // Gets the Cai asset name template, which doesn't include version
@@ -2258,7 +2307,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 // Filters out computed properties during cai2hcl
 func (r Resource) ReadPropertiesForTgc() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
-		return v.Output || v.UrlParamOnly
+		return v.Output || v.UrlParamOnly || v.TGCIgnoreRead
 	})
 }
 

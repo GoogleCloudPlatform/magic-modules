@@ -130,6 +130,12 @@ func flatten{{$.GetPrefix}}{{$.TitlelizeProperty}}(v interface{}, d *schema.Reso
 		return intVal
 	}
 
+ {{- if and $.ResourceMetadata.IsTgcCompiler $.Required }}
+	if v == nil {
+		return 0
+	}
+ {{- end }}
+
 	return v // let terraform core handle it otherwise
   {{- else if and ($.IsA "Array") ($.ItemType.IsA "ResourceRef")}}
   if v == nil {
