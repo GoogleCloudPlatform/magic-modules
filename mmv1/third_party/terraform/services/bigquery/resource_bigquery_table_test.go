@@ -443,7 +443,10 @@ func TestAccBigQueryBigLakeManagedTable(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigLakeManagedTable(bucketName, connectionID, datasetID, tableID, TEST_SIMPLE_CSV_SCHEMA),
@@ -472,10 +475,16 @@ func testAccBigLakeManagedTable(bucketName, connectionID, datasetID, tableID, sc
 			location = "US"
 			cloud_resource {}
 		}
+		// wait for SA creation
+		resource "time_sleep" "wait_120_seconds" {
+			create_duration = "120s"
+			depends_on = [google_bigquery_connection.test]
+		}
 		resource "google_project_iam_member" "test" {
 			role = "roles/storage.objectAdmin"
 			project = data.google_project.project.id
 			member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
+			depends_on = [time_sleep.wait_120_seconds]
 		}
 		resource "google_bigquery_dataset" "test" {
 		  dataset_id = "%s"
@@ -987,7 +996,10 @@ func TestAccBigQueryExternalDataTable_queryAcceleration(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryTableFromGCSParquetWithQueryAcceleration(connectionID, datasetID, tableID, bucketName, objectName, metadataCacheMode, maxStaleness),
@@ -1043,7 +1055,10 @@ func TestAccBigQueryExternalDataTable_connectionIdDiff_UseNameReference(t *testi
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryTableExternalDataConfigurationConnectionID(location, connectionID, datasetID, tableID, bucketName, objectName, connection_id_reference),
@@ -1068,7 +1083,10 @@ func TestAccBigQueryExternalDataTable_connectionIdDiff_UseIdReference(t *testing
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryTableExternalDataConfigurationConnectionID(location, connectionID, datasetID, tableID, bucketName, objectName, connection_id_reference),
@@ -1093,7 +1111,10 @@ func TestAccBigQueryExternalDataTable_connectionIdDiff_UseIdReference_UsCentral1
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryTableExternalDataConfigurationConnectionID(location, connectionID, datasetID, tableID, bucketName, objectName, connection_id_reference),
@@ -1118,7 +1139,10 @@ func TestAccBigQueryExternalDataTable_connectionIdDiff_UseIdReference_UsEast1(t 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryTableExternalDataConfigurationConnectionID(location, connectionID, datasetID, tableID, bucketName, objectName, connection_id_reference),
@@ -1143,7 +1167,10 @@ func TestAccBigQueryExternalDataTable_connectionIdDiff_UseIdReference_EuropeWest
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckBigQueryTableDestroyProducer(t),
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"time": {},
+		},
+		CheckDestroy: testAccCheckBigQueryTableDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccBigQueryTableExternalDataConfigurationConnectionID(location, connectionID, datasetID, tableID, bucketName, objectName, connection_id_reference),
@@ -3154,6 +3181,11 @@ resource "google_bigquery_connection" "test" {
 	location = "US"
 	cloud_resource {}
 }
+// wait for SA creation
+resource "time_sleep" "wait_120_seconds" {
+	create_duration = "120s"
+	depends_on = [google_bigquery_connection.test]
+}
 
 locals {
 	connection_id_split = split("/", google_bigquery_connection.test.name)
@@ -3166,6 +3198,7 @@ locals {
 	role = "roles/storage.objectViewer"
 	project = data.google_project.project.id
 	member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
+	depends_on = [time_sleep.wait_120_seconds]
  }
 
 resource "google_bigquery_dataset" "test" {
@@ -3430,6 +3463,11 @@ resource "google_bigquery_connection" "test" {
    location = "%s"
    cloud_resource {}
 }
+// wait for SA creation
+resource "time_sleep" "wait_120_seconds" {
+	create_duration = "120s"
+	depends_on = [google_bigquery_connection.test]
+}
 
 data "google_project" "project" {}
 
@@ -3437,6 +3475,7 @@ resource "google_project_iam_member" "test" {
    role = "roles/storage.objectViewer"
    project = data.google_project.project.id
    member = "serviceAccount:${google_bigquery_connection.test.cloud_resource[0].service_account_id}"
+   depends_on = [time_sleep.wait_120_seconds]
 }
 
 resource "google_bigquery_dataset" "test" {
