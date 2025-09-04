@@ -1,6 +1,6 @@
 resource "google_privateca_ca_pool" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "name"}}"
-  location = "us-central1"
+  location = "{{index $.Vars "pool_location"}}"
   tier = "ENTERPRISE"
   publishing_options {
     publish_ca_cert = false
@@ -9,6 +9,9 @@ resource "google_privateca_ca_pool" "{{$.PrimaryResourceId}}" {
   }
   labels = {
     foo = "bar"
+  }
+  encryption_spec = {
+    cloud_kms_key = "{{index $.Vars "cloud_kms_key"}}"
   }
   issuance_policy {
     allowed_key_types {
