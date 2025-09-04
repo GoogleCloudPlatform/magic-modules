@@ -97,7 +97,7 @@ func dataSourceGoogleBackupDRDataSourceReferencesRead(d *schema.ResourceData, me
 	location := d.Get("location").(string)
 	resourceType := d.Get("resource_type").(string)
 
-	url := fmt.Sprintf("https://backupdr.googleapis.com/v1/projects/%s/locations/%s/dataSourceReferences:fetchForResourceType?resourceType=%s", project, location, resourceType)
+	url := fmt.Sprintf("%sprojects/%s/locations/%s/dataSourceReferences:fetchForResourceType?resourceType=%s", config.BackupDRBasePath, project, location, resourceType)
 
 	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
 		Config:    config,

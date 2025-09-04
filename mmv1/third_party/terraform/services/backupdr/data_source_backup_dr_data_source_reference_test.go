@@ -34,7 +34,6 @@ func TestAccDataSourceGoogleBackupDRDataSourceReferences_basic(t *testing.T) {
 					}
 					projectID = project.Primary.Attributes["project_id"]
 
-					// Now, run the regular checks using the extracted projectID
 					return resource.ComposeTestCheckFunc(
 						// Basic attribute checks
 						resource.TestCheckResourceAttr("data.google_backup_dr_data_source_references.default", "project", projectID),
