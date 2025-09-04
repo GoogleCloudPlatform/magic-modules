@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func DefaultProjectModify(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse, providerConfigProject string){
+func DefaultProjectModify(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse, providerConfigProject string) {
 	var old types.String
 	diags := req.State.GetAttribute(ctx, path.Root("project"), &old)
 	resp.Diagnostics.Append(diags...)
@@ -33,7 +33,7 @@ func DefaultProjectModify(ctx context.Context, req resource.ModifyPlanRequest, r
 	return
 }
 
-func DefaultRegionModify(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse, providerConfigRegion string){
+func DefaultRegionModify(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse, providerConfigRegion string) {
 	var old types.String
 	diags := req.State.GetAttribute(ctx, path.Root("region"), &old)
 	resp.Diagnostics.Append(diags...)
@@ -58,7 +58,7 @@ func DefaultRegionModify(ctx context.Context, req resource.ModifyPlanRequest, re
 	return
 }
 
-func DefaultZoneModify(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse, providerConfigZone string){
+func DefaultZoneModify(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse, providerConfigZone string) {
 	var old types.String
 	diags := req.State.GetAttribute(ctx, path.Root("zone"), &old)
 	resp.Diagnostics.Append(diags...)
