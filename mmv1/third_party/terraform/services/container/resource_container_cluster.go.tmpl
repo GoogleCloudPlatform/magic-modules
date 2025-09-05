@@ -1877,13 +1877,14 @@ func ResourceContainerCluster() *schema.Resource {
 						"network_tier_config": {
 							Type: schema.TypeList,
 							MaxItems: 1,
-							Description: `Cluster-level network tier configuration is used to determine the default network tier for external IP addresses on cluster resources, such as node pools and load balancers.`,
+							Optional: true,
+							Description: `Used to determine the default network tier for external IP addresses on cluster resources, such as node pools and load balancers.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"network_tier": {
 										Type:         schema.TypeString,
 										Optional:     true,
-										ValidateFunc: validation.StringInSlice([]string{"NETWORK-DEFAULT", "STANDARD", "PREMIUM"}, false),
+										ValidateFunc: validation.StringInSlice([]string{"NETWORK_TIER_DEFAULT", "NETWORK_TIER_STANDARD", "NETWORK_TIER_PREMIUM"}, false),
 										Description:  `Network tier configuration.`,
 									},
 								},
@@ -4377,7 +4378,9 @@ func resourceContainerClusterUpdate(d *schema.ResourceData, meta interface{}) er
 	if d.HasChange("ip_allocation_policy.0.network_tier_config.0.network_tier") {
 		req := &container.UpdateClusterRequest{
 			Update: &container.ClusterUpdate{
-				NetworkTierConfig: d.Get("ip_allocation_policy.0.network_tier_config.0.network_tier").(string),
+				DesiredNetworkTierConfig: &container.NetworkTierConfig{
+					NetworkTier: d.Get("ip_allocation_policy.0.network_tier_config.0.network_tier").(string),
+				},
 			},
 		}
 
@@ -5630,12 +5633,6 @@ func expandIPAllocationPolicy(configured interface{}, d *schema.ResourceData, ne
 		return nil, nil, err
 	}
 
-	desiredNetworkTierConfig := &container.NetworkTierConfig{}
-	if v, ok := config["network_tier_config"]; ok && len(v) > 0 && v[0] != nil {
-		networkTierConfig := v[0].(map[string]any)
-		desiredNetworkTierConfig.NetworkTier = networkTierConfig["network_tier"].(string)
-	}
-
 	return &container.IPAllocationPolicy{
 		UseIpAliases:          networkingMode == "VPC_NATIVE" || networkingMode == "",
 		ClusterIpv4CidrBlock:  config["cluster_ipv4_cidr_block"].(string),
@@ -5647,8 +5644,20 @@ func expandIPAllocationPolicy(configured interface{}, d *schema.ResourceData, ne
 		StackType:              stackType,
 		PodCidrOverprovisionConfig: expandPodCidrOverprovisionConfig(config["pod_cidr_overprovision_config"]),
 		AutoIpamConfig: expandAutoIpamConfig(config["auto_ipam_config"]),
-		NetworkTierConfig:       desiredNetworkTierConfig,
+		NetworkTierConfig:       expandNetworkTierConfig(config["network_tier_config"]),
 	}, additionalIpRangesConfigs, nil
+}
+
+func expandNetworkTierConfig(configured interface{}) *container.NetworkTierConfig {
+	l := configured.([]interface{})
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	config := l[0].(map[string]interface{})
+	return &container.NetworkTierConfig{
+		NetworkTier:    config["network_tier"].(string),
+	}
 }
 
 func expandAutoIpamConfig(configured interface{}) *container.AutoIpamConfig {
@@ -7306,14 +7315,14 @@ func flattenAdditionalIpRangesConfigs(c []*container.AdditionalIPRangesConfig) [
 	return outRanges
 }
 
-func flattenNetworkTierConfig(c *container.NetworkTierConfig) []map[string]interface{} {
-	if c == nil {
+func flattenNetworkTierConfig(ntc *container.NetworkTierConfig) []map[string]interface{} {
+	if ntc == nil {
 		return nil
 	}
 
 	return []map[string]interface{}{
 		{
-			"network_tier": c.NetworkTier,
+			"network_tier": ntc.NetworkTier,
 		},
 	}
 }
