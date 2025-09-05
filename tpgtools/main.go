@@ -92,7 +92,7 @@ func main() {
 
 		generateResourceFile(resource)
 		generateSweeperFile(resource)
-		if string(resource.ProductName())[0] >= 'a' && string(resource.ProductName())[0] <= 'c' {
+		if string(resource.ProductName())[0] == 'c' {
 			log.Printf("Generating test file for %s", resource.TitleCaseFullName())
 			generateResourceTestFile(resource)
 		}
