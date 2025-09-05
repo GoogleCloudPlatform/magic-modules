@@ -71,7 +71,7 @@ func TestAccComputeVpnTunnel_routerWithSharedSecretWo_update(t *testing.T) {
 			{
 				Config: testAccComputeVpnTunnelRouterWithSharedSecretWo(acctest.RandString(t, 10), router),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckNoResourceAttr("google_compute_vpn_tunnel.foobar", "shared_secret"),
+					resource.TestCheckNoResourceAttr("google_compute_vpn_tunnel.foobar", "shared_secret_wo"),
 					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.foobar", "shared_secret_wo_version", "1"),
 				),
 			},
@@ -84,7 +84,7 @@ func TestAccComputeVpnTunnel_routerWithSharedSecretWo_update(t *testing.T) {
 			{
 				Config: testAccComputeVpnTunnelRouterWithSharedSecretWo_update(acctest.RandString(t, 10), router),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckNoResourceAttr("google_compute_vpn_tunnel.foobar", "shared_secret"),
+					resource.TestCheckNoResourceAttr("google_compute_vpn_tunnel.foobar", "shared_secret_wo"),
 					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.foobar", "shared_secret_wo_version", "2"),
 				),
 			},
