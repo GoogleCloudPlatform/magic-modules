@@ -152,6 +152,15 @@ var (
 		}
 		return false
 	})
+
+	suppressDiffForNetworkTierConfig = schema.SchemaDiffSuppressFunc(func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+		if k == "ip_allocation_policy.0.network_tier_config.#" && oldValue == "1" && newValue == "0" {
+			if v, _ := d.Get("ip_allocation_policy.0.network_tier_config.0.network_tier").(string); v == "NETWORK_TIER_DEFAULT" || v == "" {
+				return true
+			}
+		}
+		return false
+	})
 )
 
 // Defines default nodel pool settings for the entire cluster. These settings are
@@ -1878,12 +1887,14 @@ func ResourceContainerCluster() *schema.Resource {
 							Type: schema.TypeList,
 							MaxItems: 1,
 							Optional: true,
+							DiffSuppressFunc: suppressDiffForNetworkTierConfig,
 							Description: `Used to determine the default network tier for external IP addresses on cluster resources, such as node pools and load balancers.`,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"network_tier": {
 										Type:         schema.TypeString,
 										Optional:     true,
+										Default:	  "NETWORK_TIER_DEFAULT",
 										ValidateFunc: validation.StringInSlice([]string{"NETWORK_TIER_DEFAULT", "NETWORK_TIER_STANDARD", "NETWORK_TIER_PREMIUM"}, false),
 										Description:  `Network tier configuration.`,
 									},
