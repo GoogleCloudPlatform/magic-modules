@@ -102,13 +102,13 @@ properties:
       type: NestedObject
       properties:
         - name: type
-          type: String
-          description: |-
-            Name of a supported variable type. Supported types are string, int, bool.
-            Possible values:
-            STRING
-            INT
-            BOOL
+          type: Enum
+          description: "Name of a supported variable type. Supported types are STRING, INT, BOOL."
+          enum_values:
+            - "TYPE_UNSPECIFIED"
+            - "STRING"
+            - "INT"
+            - "BOOL"
           immutable: true
         - name: value
           type: String
@@ -128,13 +128,13 @@ properties:
       type: NestedObject
       properties:
         - name: type
-          type: String
-          description: |-
-            Name of a supported variable type. Supported types are string, int, bool.
-            Possible values:
-            STRING
-            INT
-            BOOL
+          type: Enum
+          description: "Name of a supported variable type. Supported types are STRING, INT, BOOL."
+          enum_values:
+            - "TYPE_UNSPECIFIED"
+            - "STRING"
+            - "INT"
+            - "BOOL"
           immutable: true
         - name: value
           type: String
@@ -167,13 +167,13 @@ properties:
       type: NestedObject
       properties:
         - name: type
-          type: String
-          description: |-
-            Name of a supported variable type. Supported types are string, int, bool.
-            Possible values:
-            STRING
-            INT
-            BOOL
+          type: Enum
+          description: "Name of a supported variable type. Supported types are STRING, INT, BOOL."
+          enum_values:
+            - "TYPE_UNSPECIFIED"
+            - "STRING"
+            - "INT"
+            - "BOOL"
           immutable: true
         - name: value
           type: String
