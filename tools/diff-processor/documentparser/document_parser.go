@@ -74,6 +74,9 @@ func (d *DocumentParser) Parse(src []byte) error {
 		if strings.HasPrefix(p, "Argument Reference") {
 			argument = p
 		}
+		if strings.HasPrefix(p, "Ephemeral Attributes Reference") {
+			argument = p
+		}
 	}
 	for _, text := range []string{argument, attribute} {
 		if len(text) != 0 {
