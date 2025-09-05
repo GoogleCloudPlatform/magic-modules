@@ -8,19 +8,6 @@ resource "google_kms_crypto_key_iam_member" "privateca_sa_keyuser_encrypterdecry
   member = google_project_service_identity.privateca_sa.member
 }
 
-resource "google_kms_crypto_key_iam_member" "privateca_sa_keyuser_signerverifier" {
-  crypto_key_id = "{{index $.Vars "cloud_kms_key"}}"
-  role          = "roles/cloudkms.signerVerifier"
-
-  member = google_project_service_identity.privateca_sa.member
-}
-
-resource "google_kms_crypto_key_iam_member" "privateca_sa_keyuser_viewer" {
-  crypto_key_id = "{{index $.Vars "cloud_kms_key"}}"
-  role          = "roles/viewer"
-  member = google_project_service_identity.privateca_sa.member
-}
-
 resource "google_privateca_ca_pool" "{{$.PrimaryResourceId}}" {
   name = "{{index $.Vars "name"}}"
   location = "{{index $.Vars "pool_location"}}"
@@ -116,7 +103,5 @@ resource "google_privateca_ca_pool" "{{$.PrimaryResourceId}}" {
 
   depends_on = [
     google_kms_crypto_key_iam_member.privateca_sa_keyuser_encrypterdecrypter,
-    google_kms_crypto_key_iam_member.privateca_sa_keyuser_signerverifier,
-    google_kms_crypto_key_iam_member.privateca_sa_keyuser_viewer,
   ]
 }
