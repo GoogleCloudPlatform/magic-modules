@@ -1,28 +1,3 @@
-var WorkbenchInstanceProvidedLabels = []string{
-	"consumer-project-id",
-	"consumer-project-number",
-	"notebooks-product",
-	"resource-name",
-}
-
-func WorkbenchInstanceLabelsDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
-	// Suppress diffs for the labels
-	for _, label := range WorkbenchInstanceProvidedLabels {
-		if strings.Contains(k, label) && new == "" {
-			return true
-		}
-	}
-
-	// Let diff be determined by labels (above)
-	if strings.Contains(k, "labels.%") {
-		return true
-	}
-
-	// For other keys, don't suppress diff.
-	return false
-}
-
-
 var WorkbenchInstanceSettableUnmodifiableDefaultMetadata = []string{
 	"install-monitoring-agent",
 	"serial-port-logging-enable",

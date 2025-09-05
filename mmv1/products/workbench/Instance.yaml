@@ -612,10 +612,10 @@ properties:
     immutable: true
   - name: 'labels'
     type: KeyValueLabels
+    default_from_api: true
     description: |
       Optional. Labels to apply to this instance. These can be later modified
       by the UpdateInstance method.
-    diff_suppress_func: 'WorkbenchInstanceLabelsDiffSuppress'
   - name: 'enableThirdPartyIdentity'
     type: Boolean
     description: |
