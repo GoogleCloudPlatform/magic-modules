@@ -90,6 +90,15 @@
 			if len(transformed) > 0 {
 				_, okEndpoint := d.GetOk("desired_auto_created_endpoints")
 				_, okPsc := d.GetOk("desired_psc_auto_connections")
+				// pwWo, _ := d.GetRawConfigAt(cty.GetAttrPath("password_wo"))
+				// hasConfigEndpoint := false
+				configPSCRaw, _ := d.GetRawConfigAt(cty.GetAttrPath("desired_psc_auto_connections"))
+				log.Printf("[DEBUG] Rawconfig %#v", configPSCRaw.AsValueSlice())
+				if !configPSCRaw.IsNull() && configPSCRaw.IsKnown() {
+					log.Printf("[DEBUG] Rawconfig %#v", configPSCRaw)
+					// hasConfigEndpoint = len(configEndpointRaw.AsValueSlice()) > 0
+				}
+
 				modeValue, _ := d.GetOk("mode")
 
 				if okEndpoint && modeValue != "CLUSTER_DISABLED" {
