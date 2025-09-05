@@ -14486,13 +14486,13 @@ func TestAccContainerCluster_auto_ipam_config_enabled(t *testing.T) {
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck: func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-   		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
+		CheckDestroy: testAccCheckContainerClusterDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccContainerCluster_auto_ipam_config_enabled(clusterName, networkName, subnetworkName, true),
 				Check: resource.ComposeTestCheckFunc(
-                    resource.TestCheckResourceAttr("google_container_cluster.primary", "ip_allocation_policy.0.auto_ipam_config.0.enabled", "true"),
-                ),
+					resource.TestCheckResourceAttr("google_container_cluster.primary", "ip_allocation_policy.0.auto_ipam_config.0.enabled", "true"),
+				),
 			},
 			{
 				ResourceName: "google_container_cluster.primary",
@@ -14504,7 +14504,7 @@ func TestAccContainerCluster_auto_ipam_config_enabled(t *testing.T) {
 				Config: testAccContainerCluster_auto_ipam_config_enabled(clusterName, networkName, subnetworkName, false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "ip_allocation_policy.0.auto_ipam_config.0.enabled", "false"),
-                ),
+				),
 			},
 			{
 				ResourceName: "google_container_cluster.primary",
@@ -14516,7 +14516,7 @@ func TestAccContainerCluster_auto_ipam_config_enabled(t *testing.T) {
 				Config: testAccContainerCluster_auto_ipam_config_enabled(clusterName, networkName, subnetworkName, true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_container_cluster.primary", "ip_allocation_policy.0.auto_ipam_config.0.enabled", "true"),
-                ),
+				),
 			},
 			{
 				ResourceName: "google_container_cluster.primary",
