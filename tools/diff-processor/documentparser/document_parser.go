@@ -66,7 +66,7 @@ func traverse(paths *[]string, path string, n *node) {
 // Parse parse a resource document markdown's arguments and attributes section.
 // The parsed file format is defined in mmv1/templates/terraform/resource.html.markdown.tmpl.
 func (d *DocumentParser) Parse(src []byte) error {
-	var argument, attribute string
+	var argument, attribute, ephemeralAttribute string
 	for _, p := range strings.Split(string(src), "\n"+sectionSeparator) {
 		if strings.HasPrefix(p, "Attributes Reference") {
 			attribute = p
@@ -75,10 +75,10 @@ func (d *DocumentParser) Parse(src []byte) error {
 			argument = p
 		}
 		if strings.HasPrefix(p, "Ephemeral Attributes Reference") {
-			argument = p
+			ephemeralAttribute = p
 		}
 	}
-	for _, text := range []string{argument, attribute} {
+	for _, text := range []string{argument, attribute, ephemeralAttribute} {
 		if len(text) != 0 {
 			sections := horizontalLineRegex.Split(text, -1)
 			var allTopLevelFieldSections string
