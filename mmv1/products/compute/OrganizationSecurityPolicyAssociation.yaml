@@ -45,6 +45,8 @@ examples:
   - name: 'organization_security_policy_association_basic'
     primary_resource_id: 'policy'
     min_version: 'beta'
+    external_providers:
+      - "time"
     test_env_vars:
       org_id: 'ORG_ID'
 parameters:
@@ -73,5 +75,12 @@ properties:
     type: String
     description: |
       The display name of the security policy of the association.
+    min_version: 'beta'
+    deprecation_message: '`display_name` is deprecated and will be removed in a future release, use `short_name` instead.'
+    output: true
+  - name: 'shortName'
+    type: String
+    description: |
+      The short name of the security policy of the association.
     min_version: 'beta'
     output: true
