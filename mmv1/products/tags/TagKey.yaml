@@ -117,6 +117,7 @@ properties:
     immutable: true
     enum_values:
       - 'GCE_FIREWALL'
+      - 'DATA_GOVERNANCE'
   - name: 'purposeData'
     type: KeyValuePairs
     description: |
