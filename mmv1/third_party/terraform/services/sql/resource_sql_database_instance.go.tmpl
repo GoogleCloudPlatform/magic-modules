@@ -17,7 +17,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
-	"github.com/hashicorp/terraform-provider-google/google/services/compute"
 	"github.com/hashicorp/terraform-provider-google/google/services/servicenetworking"
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
@@ -127,6 +126,41 @@ var (
 	}
 )
 
+func diskSizeCutomizeDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	key := "settings.0.disk_size"
+
+	old, new := d.GetChange(key)
+	// It's okay to remove size entirely.
+	if old == nil || new == nil {
+		return nil
+	}
+	autoResizeI, exists := d.GetOkExists("settings.0.disk_autoresize")
+	autoResize := !exists || autoResizeI.(bool)
+
+	if old.(int) <= new.(int) {
+		// If a resize up, always allow it - keep the diff.
+		return nil
+	}
+
+	if autoResize {
+		// Allow having disk size larger in the state than in config if auto resize is enabled.
+		// Delete the diff.
+		err := d.Clear(key)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	// If we are here, we are trying to shrink the disk with auto resize disabled and no ignore changes on disk size.
+	// This will force a new resource.
+	if err := d.ForceNew(key); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func ResourceSqlDatabaseInstance() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceSqlDatabaseInstanceCreate,
@@ -145,7 +179,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 
 		CustomizeDiff: customdiff.All(
 			tpgresource.DefaultProviderProject,
-			customdiff.ForceNewIfChange("settings.0.disk_size", compute.IsDiskShrinkage),
+			diskSizeCutomizeDiff,
 			customdiff.ForceNewIf("master_instance_name", func(_ context.Context, d *schema.ResourceDiff, meta interface{}) bool {
 				// If we set master but this is not the new master of a switchover, require replacement and warn user.
 				return !isSwitchoverFromOldPrimarySide(d)
@@ -2068,6 +2102,14 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 
 	databaseVersion := d.Get("database_version").(string)
 
+	// Always read the instance before updating it.
+	// In cases where the instance was edited outside of Terraform, this will ensure that
+	// the we grab the latest settingsVersion in case we need to update the settings.
+	err = resourceSqlDatabaseInstanceRead(d, meta)
+	if err != nil {
+		return err
+	}
+
 	// Check if the activation policy is being updated. If it is being changed to ALWAYS this should be done first.
 	if d.HasChange("settings.0.activation_policy") && d.Get("settings.0.activation_policy").(string) == "ALWAYS" {
 		instance = &sqladmin.DatabaseInstance{Settings: &sqladmin.Settings{ActivationPolicy: "ALWAYS"}}
@@ -2269,10 +2311,27 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	s := d.Get("settings")
 	instance = &sqladmin.DatabaseInstance{
 		Settings: expandSqlDatabaseInstanceSettings(desiredSetting.([]interface{}), databaseVersion),
 	}
+
+	autoResize := true
+	_, autoResizeI := d.GetChange("settings.0.disk_autoresize")
+	if autoResizeI != nil {
+		autoResize = autoResizeI.(bool)
+	}
+
+	// Updated after previous `resourceSqlDatabaseInstanceRead` call.
+	actualDiskSize := d.Get("settings.0.disk_size").(int)
+	_, newDiskSizeI := d.GetChange("settings.0.disk_size")
+
+	if newDiskSizeI.(int) <= actualDiskSize && autoResize {
+		// If disk size is smaller than actual and storage auto resize is enabled, we do not need to send the disk size in the update request.
+		// Otherwise, the update will error with `The disk size cannot decrease` if the disk size was increased.
+		instance.Settings.DataDiskSizeGb = 0
+	}
+
+	s := d.Get("settings")
 	_settings := s.([]interface{})[0].(map[string]interface{})
 	// Instance.Patch operation on completion updates the settings proto version by +8. As terraform does not know this it tries
 	// to make an update call with the proto version before patch and fails. To resolve this issue we update the setting version
