@@ -112,6 +112,7 @@ func TestExecGenerateComment(t *testing.T) {
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"breaking-changes"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-tests", "/mock/dir/tpgb/google-beta/services"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-docs", "/mock/dir/tpgb"}, map[string]string(nil)},
+			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"detect-missing-apis", "/mock/dir/magic-modules/.ci/infra/terraform/main.tf"}, map[string]string(nil)},
 			{"/mock/dir/magic-modules/tools/diff-processor", "bin/diff-processor", []string{"schema-diff"}, map[string]string(nil)},
 		},
 	} {
@@ -329,6 +330,16 @@ func TestFormatDiffComment(t *testing.T) {
 			data: diffCommentData{},
 			notExpectedStrings: []string{
 				"## Missing doc report",
+			},
+		},
+		"missing APIs in test infra": {
+			data: diffCommentData{
+				MissingAPIs: []string{"a.googleapis.com"},
+			},
+			expectedStrings: []string{
+				"## Missing APIs in test terraform file",
+				"The following APIs are not enabled in .ci/infra/terraform/main.tf and may cause test failure:",
+				"- `a.googleapis.com`",
 			},
 		},
 	}
