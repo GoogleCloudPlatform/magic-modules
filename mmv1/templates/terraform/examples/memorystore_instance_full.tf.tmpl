@@ -39,6 +39,17 @@ resource "google_memorystore_instance" "{{$.PrimaryResourceId}}" {
       rdb_snapshot_start_time = "2024-10-02T15:01:23Z"
     }
   }
+  automated_backup_config {
+    retention = "3024000s"  # 35 days
+    fixed_frequency_schedule {
+      start_time {
+        hours = 20  # UTC
+      }
+    }
+  }
+  gcs_source {
+    uris = ["gs://bucket/dump1.rdb", "gs://bucket/dump2.rdb"]
+  }
   labels = {
     "abc" : "xyz"
   }
