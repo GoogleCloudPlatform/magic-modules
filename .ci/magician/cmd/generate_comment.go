@@ -89,6 +89,7 @@ type diffCommentData struct {
 	MissingServiceLabels []string
 	MissingTests         map[string]*MissingTestInfo
 	MissingDocs          *MissingDocsSummary
+	MissingAPIs          []string
 	AddedResources       []string
 	Errors               []Errors
 }
@@ -349,6 +350,14 @@ func execGenerateComment(prNumber int, ghTokenMagicModules, buildId, buildStep, 
 				errors[repo.Title] = append(errors[repo.Title], "The missing doc detector failed to run.")
 			}
 			data.MissingDocs = missingDocs
+
+			infraTerraformFilePath := filepath.Join(mmLocalPath, ".ci", "infra", "terraform", "main.tf")
+			missingAPIs, err := detectMissingAPIs(diffProcessorPath, infraTerraformFilePath, rnr)
+			if err != nil {
+				fmt.Println("Error running missing api detector: ", err)
+				errors[repo.Title] = append(errors[repo.Title], "The missing api detector failed to run.")
+			}
+			data.MissingAPIs = missingAPIs
 
 			errStrs := checkDocumentFrontmatter(repo)
 			if len(errStrs) > 0 {
@@ -629,7 +638,26 @@ func detectMissingDocs(diffProcessorPath, tpgbLocalPath string, rnr ExecRunner) 
 	return missingDocs, rnr.PopDir()
 }
 
+func detectMissingAPIs(diffProcessorPath, infraTerraformPath string, rnr ExecRunner) ([]string, error) {
+	if err := rnr.PushDir(diffProcessorPath); err != nil {
+		return nil, err
+	}
+
+	output, err := rnr.Run("bin/diff-processor", []string{"detect-missing-apis", infraTerraformPath}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var missingAPIs []string
+	if err = json.Unmarshal([]byte(output), &missingAPIs); err != nil {
+		return nil, err
+	}
+	return missingAPIs, nil
+}
+
 func formatDiffComment(data diffCommentData) (string, error) {
+	fmt.Println("debug")
+	fmt.Println(data.MissingAPIs)
 	tmpl, err := template.New("DIFF_COMMENT.md.tmpl").Parse(diffComment)
 	if err != nil {
 		return "", fmt.Errorf("unable to parse template DIFF_COMMENT.md.tmpl: %s", err)
