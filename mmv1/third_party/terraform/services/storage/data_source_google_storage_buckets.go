@@ -1,5 +1,3 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package storage
 
 import (
@@ -63,44 +61,34 @@ func datasourceGoogleStorageBucketsRead(d *schema.ResourceData, meta interface{}
 	}
 
 	params := make(map[string]string)
-	buckets := make([]map[string]interface{}, 0)
 
-	for {
-		url := "https://storage.googleapis.com/storage/v1/b"
+	url := "https://storage.googleapis.com/storage/v1/b"
 
-		params["project"], err = tpgresource.GetProject(d, config)
-		if err != nil {
-			return fmt.Errorf("Error fetching project for bucket: %s", err)
-		}
+	params["project"], err = tpgresource.GetProject(d, config)
+	if err != nil {
+		return fmt.Errorf("Error fetching project for bucket: %s", err)
+	}
 
-		if v, ok := d.GetOk("prefix"); ok {
-			params["prefix"] = v.(string)
-		}
+	if v, ok := d.GetOk("prefix"); ok {
+		params["prefix"] = v.(string)
+	}
 
-		url, err = transport_tpg.AddQueryParams(url, params)
-		if err != nil {
-			return err
-		}
+	url, err = transport_tpg.AddQueryParams(url, params)
+	if err != nil {
+		return err
+	}
 
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			RawURL:    url,
-			UserAgent: userAgent,
-		})
-		if err != nil {
-			return fmt.Errorf("Error retrieving buckets: %s", err)
-		}
-
-		pageBuckets := flattenDatasourceGoogleBucketsList(res["items"])
-		buckets = append(buckets, pageBuckets...)
-
-		pToken, ok := res["nextPageToken"]
-		if ok && pToken != nil && pToken.(string) != "" {
-			params["pageToken"] = pToken.(string)
-		} else {
-			break
-		}
+	opts := transport_tpg.GetPaginatedItemsOptions{
+		ResourceData:   d,
+		Config:         config,
+		BillingProject: nil,
+		UserAgent:      userAgent,
+		URL:            url,
+		ResourceToList: "items",
+	}
+	buckets, err := transport_tpg.GetPaginatedItems(opts)
+	if err != nil {
+		return fmt.Errorf("Error retrieving buckets: %s", err)
 	}
 
 	if err := d.Set("buckets", buckets); err != nil {
@@ -112,22 +100,21 @@ func datasourceGoogleStorageBucketsRead(d *schema.ResourceData, meta interface{}
 	return nil
 }
 
-func flattenDatasourceGoogleBucketsList(v interface{}) []map[string]interface{} {
+func flattenDatasourceGoogleBucketsList(config *transport_tpg.Config, v []map[string]interface{}) ([]map[string]interface{}, error) {
 	if v == nil {
-		return make([]map[string]interface{}, 0)
+		return make([]map[string]interface{}, 0), nil
 	}
 
-	ls := v.([]interface{})
-	buckets := make([]map[string]interface{}, 0, len(ls))
-	for _, raw := range ls {
-		o := raw.(map[string]interface{})
+	bucketObjects := make([]map[string]interface{}, 0, len(v))
+	for _, raw := range v {
+		o := raw
 
-		var mLabels, mLocation, mName, mSelfLink, mStorageClass interface{}
-		if oLabels, ok := o["labels"]; ok {
-			mLabels = oLabels
+		var mContentType, mMediaLink, mName, mSelfLink, mStorageClass interface{}
+		if oContentType, ok := o["contentType"]; ok {
+			mContentType = oContentType
 		}
-		if oLocation, ok := o["location"]; ok {
-			mLocation = oLocation
+		if oMediaLink, ok := o["mediaLink"]; ok {
+			mMediaLink = oMediaLink
 		}
 		if oName, ok := o["name"]; ok {
 			mName = oName
@@ -138,14 +125,14 @@ func flattenDatasourceGoogleBucketsList(v interface{}) []map[string]interface{} 
 		if oStorageClass, ok := o["storageClass"]; ok {
 			mStorageClass = oStorageClass
 		}
-		buckets = append(buckets, map[string]interface{}{
-			"labels":        mLabels,
-			"location":      mLocation,
+		bucketObjects = append(bucketObjects, map[string]interface{}{
+			"content_type":  mContentType,
+			"media_link":    mMediaLink,
 			"name":          mName,
 			"self_link":     mSelfLink,
 			"storage_class": mStorageClass,
 		})
 	}
 
-	return buckets
+	return bucketObjects, nil
 }

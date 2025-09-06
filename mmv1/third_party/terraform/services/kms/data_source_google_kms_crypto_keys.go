@@ -3,7 +3,6 @@ package kms
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -95,7 +94,7 @@ func dataSourceGoogleKmsCryptoKeysRead(d *schema.ResourceData, meta interface{})
 // dataSourceKMSCryptoKeysList calls the list endpoint for Crypto Key resources and collects all keys in a slice.
 // This function handles pagination by collecting the resources returned by multiple calls to the list endpoint.
 // This function also handles server-side filtering by setting the filter query parameter on each API call.
-func dataSourceKMSCryptoKeysList(d *schema.ResourceData, meta interface{}, keyRingId string) ([]interface{}, error) {
+func dataSourceKMSCryptoKeysList(d *schema.ResourceData, meta interface{}, keyRingId string) ([]map[string]interface{}, error) {
 	config := meta.(*transport_tpg.Config)
 	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
 	if err != nil {
@@ -125,58 +124,29 @@ func dataSourceKMSCryptoKeysList(d *schema.ResourceData, meta interface{}, keyRi
 		params["filter"] = filter.(string)
 	}
 
-	cryptoKeys := make([]interface{}, 0)
-	for {
-		// Depending on previous iterations, params might contain a pageToken param
-		url, err = transport_tpg.AddQueryParams(url, params)
-		if err != nil {
-			return nil, err
-		}
-
-		headers := make(http.Header)
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			Project:   billingProject,
-			RawURL:    url,
-			UserAgent: userAgent,
-			Headers:   headers,
-			// ErrorRetryPredicates used to allow retrying if rate limits are hit when requesting multiple pages in a row
-			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.Is429RetryableQuotaError},
-		})
-		if err != nil {
-			return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("KMSCryptoKeys %q", d.Id()))
-		}
-
-		if res == nil {
-			// Decoding the object has resulted in it being gone. It may be marked deleted
-			log.Printf("[DEBUG] Removing KMSCryptoKey because it no longer exists.")
-			d.SetId("")
-			return nil, nil
-		}
-
-		// Store info from this page
-		if v, ok := res["cryptoKeys"].([]interface{}); ok {
-			cryptoKeys = append(cryptoKeys, v...)
-		}
-
-		// Handle pagination for next loop, or break loop
-		v, ok := res["nextPageToken"]
-		if ok {
-			params["pageToken"] = v.(string)
-		}
-		if !ok {
-			break
-		}
+	opt := transport_tpg.GetPaginatedItemsOptions{
+		ResourceData:         d,
+		Config:               config,
+		BillingProject:       &billingProject,
+		UserAgent:            userAgent,
+		URL:                  url,
+		Params:               params,
+		ResourceToList:       "cryptoKeys",
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.Is429RetryableQuotaError},
 	}
-	return cryptoKeys, nil
+	resp, err := transport_tpg.GetPaginatedItems(opt)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }
 
 // flattenKMSKeysList flattens a list of crypto keys from a given crypto key ring
-func flattenKMSKeysList(d *schema.ResourceData, config *transport_tpg.Config, keysList []interface{}, keyRingId string) ([]interface{}, error) {
-	var keys []interface{}
+func flattenKMSKeysList(d *schema.ResourceData, config *transport_tpg.Config, keysList []map[string]interface{}, keyRingId string) ([]map[string]interface{}, error) {
+	var keys []map[string]interface{}
 	for _, k := range keysList {
-		key := k.(map[string]interface{})
+		key := k
 		parsedId, err := ParseKmsCryptoKeyId(key["name"].(string), config)
 		if err != nil {
 			return nil, err
