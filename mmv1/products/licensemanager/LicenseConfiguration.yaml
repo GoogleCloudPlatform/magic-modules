@@ -1,0 +1,98 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'LicenseConfiguration'
+kind: 'licensemanager#licenseconfiguration'
+description: |
+  A configuration to purchase licenses for a single third-party product. License Configurations are
+  unique per project and region.
+references:
+  guides:
+    'About License Manager': 'https://cloud.google.com/compute/docs/instances/windows/license-manager'
+    'Use License Manager for Microsoft Office': 'https://cloud.google.com/compute/docs/instances/windows/ms-office'
+  api: 'https://cloud.google.com/licensemanager/docs/reference/rest/v1/projects.locations.configurations'
+min_version: beta
+base_url: 'projects/{{project}}/locations/{{location}}/configurations'
+self_link: 'projects/{{project}}/locations/{{location}}/configurations/{{license_configuration_name}}'
+immutable: false
+create_url: 'projects/{{project}}/locations/{{location}}/configurations?configurationId={{license_configuration_name}}'
+update_verb: 'PATCH'
+update_mask: true
+autogen_async: true
+async:
+  actions: ['create', 'delete', 'update']
+  operation:
+    base_url: '{{op_id}}'
+  result:
+    resource_inside_response: true
+parameters:
+  - name: 'location'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The region for which the licenses are provisioned.
+  - name: 'license_configuration_name'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The name to identify the license configuration.
+
+properties:
+  - name: 'product'
+    type: String
+    required: true
+    description: |
+      The product code that this configuration is licensing.
+  - name: 'display_name'
+    type: String
+    required: true
+  - name: 'next_billing_info'
+    type: NestedObject
+    required: true
+    description: |
+      Billing info for the current month (important for creation).
+    properties:
+      - name: 'user_count_billing'
+        type: NestedObject
+        required: true
+        properties:
+        - name: 'user_count'
+          type: Integer
+          required: true
+  - name: 'current_billing_info'
+    type: NestedObject
+    required: true
+    description: |
+      Billing info for the current month (important for creation).
+    properties:
+      - name: 'user_count_billing'
+        type: NestedObject
+        required: true
+        properties:
+        - name: 'user_count'
+          type: Integer
+          required: true
+
+examples:
+  - name: "licensemanager_license_configuration_basic"
+    # primary_resource_id will be used for the Terraform resource id in the configuration file.
+    primary_resource_id: "example"
+    vars:
+      network_name: "example-network"
+    # Set min_version: beta if the resource is not beta-only and any beta-only fields are being tested.
+    min_version: beta
