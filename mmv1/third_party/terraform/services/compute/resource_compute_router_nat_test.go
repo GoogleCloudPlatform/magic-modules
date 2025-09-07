@@ -887,6 +887,82 @@ func testAccCheckComputeRouterNatDelete(t *testing.T, n string) resource.TestChe
 	}
 }
 
+func TestAccComputeRouterNat_missingNatIpAllocateOption_applyFails(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeRouterNat_missingAllocateOption(randomSuffix),
+				ExpectError: regexp.MustCompile(`(?i)(natIpAllocateOption|missing|required|invalid)`),
+			},
+		},
+	})
+}
+
+func TestAccComputeRouterNat_missingNatIpAllocateOption_planFails(t *testing.T) {
+	t.Parallel()
+
+	randomSuffix := acctest.RandString(t, 10)
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccComputeRouterNat_missingAllocateOption(randomSuffix),
+				PlanOnly:    true,
+				ExpectError: regexp.MustCompile(`(?i)Missing required argument.*nat_ip_allocate_option`),
+			},
+		},
+	})
+}
+
+func testAccComputeRouterNat_missingAllocateOption(randomSuffix string) string {
+	return fmt.Sprintf(`
+variable "region" {
+  type    = string
+  default = "us-central1"
+}
+
+resource "google_compute_network" "vpc" {
+  name                    = "tf-nat-net-%[1]s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  name          = "tf-nat-subnet-%[1]s"
+  ip_cidr_range = "10.0.0.0/24"
+  region        = var.region
+  network       = google_compute_network.vpc.self_link
+}
+
+resource "google_compute_router" "router" {
+  name    = "tf-nat-router-%[1]s"
+  region  = var.region
+  network = google_compute_network.vpc.self_link
+}
+
+# ERRO proposital: faltando nat_ip_allocate_option
+resource "google_compute_router_nat" "nat" {
+  name   = "tf-nat-%[1]s"
+  region = var.region
+  router = google_compute_router.router.name
+
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+
+  log_config {
+    enable = false
+    filter = "ERRORS_ONLY"
+  }
+}
+`, randomSuffix)
+}
+
 func TestAccComputeRouterNat_withNat64Configuration(t *testing.T) {
 	t.Parallel()
 
