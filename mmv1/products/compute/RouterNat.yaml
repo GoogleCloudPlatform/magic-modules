@@ -60,6 +60,7 @@ custom_code:
   pre_update: 'templates/terraform/constants/router_nat_validate_action_active_range.go.tmpl'
 custom_diff:
   - 'resourceComputeRouterNatDrainNatIpsCustomDiff'
+  - 'resourceComputeRouterNatNatIpAllocateOptionCustomDiff'
 exclude_tgc: true
 examples:
   # These examples are not used to autogenerate tests, as fine-grained
