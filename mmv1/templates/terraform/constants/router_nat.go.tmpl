@@ -87,6 +87,152 @@ func computeRouterNatSubnetworkHash(v interface{}) int {
 	return schema.HashString(tpgresource.GetResourceNameFromSelfLink(name.(string))) + sourceIpRangesHash + secondaryIpRangeHash
 }
 
+func resourceComputeRouterNatNatIpAllocateOptionCustomDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	// -------- nat_ip_allocate_option x nat_ips --------
+	optRaw, ok := diff.GetOk("nat_ip_allocate_option")
+	if !ok {
+		return fmt.Errorf("Missing required argument: nat_ip_allocate_option")
+	}
+	opt := optRaw.(string)
+
+	natIPsCount := 0
+	if v, ok := diff.GetOk("nat_ips"); ok && v != nil {
+		if set, ok := v.(*schema.Set); ok && set != nil {
+			natIPsCount = set.Len()
+		}
+	}
+
+	switch opt {
+	case "MANUAL_ONLY":
+		if natIPsCount == 0 {
+			return fmt.Errorf("when nat_ip_allocate_option is MANUAL_ONLY, at least one entry in nat_ips must be provided")
+		}
+	case "AUTO_ONLY":
+		if natIPsCount > 0 {
+			return fmt.Errorf("when nat_ip_allocate_option is AUTO_ONLY, nat_ips must be empty")
+		}
+	default:
+		return fmt.Errorf("invalid nat_ip_allocate_option %q: expected AUTO_ONLY or MANUAL_ONLY", opt)
+	}
+
+	// -------- source_subnetwork_ip_ranges_to_nat rules --------
+	ssrRaw, ok := diff.GetOk("source_subnetwork_ip_ranges_to_nat")
+	if !ok {
+		return fmt.Errorf("Missing required argument: source_subnetwork_ip_ranges_to_nat")
+	}
+	ssr := ssrRaw.(string)
+
+	// Helper para pegar blocos "subnetwork" como slice
+	getSubnetBlocks := func() []interface{} {
+		if v, ok := diff.GetOk("subnetwork"); ok && v != nil {
+			switch vv := v.(type) {
+			case []interface{}:
+				return vv
+			case *schema.Set:
+				return vv.List()
+			}
+		}
+		return nil
+	}
+	subnets := getSubnetBlocks()
+
+	switch ssr {
+	case "LIST_OF_SUBNETWORKS":
+		if len(subnets) == 0 {
+			return fmt.Errorf("when source_subnetwork_ip_ranges_to_nat is LIST_OF_SUBNETWORKS, at least one subnetwork{} block must be provided")
+		}
+		// Validar cada bloco subnetwork
+		for i, it := range subnets {
+			m, ok := it.(map[string]interface{})
+			if !ok || m == nil {
+				return fmt.Errorf("invalid subnetwork[%d] block", i)
+			}
+
+			// name/subnetwork (aceita qualquer um dos dois, conforme schema)
+			hasRef := false
+			if s, ok := m["subnetwork"].(string); ok && s != "" {
+				hasRef = true
+			}
+			if s, ok := m["name"].(string); ok && s != "" {
+				hasRef = true
+			}
+			if !hasRef {
+				return fmt.Errorf("subnetwork[%d]: either 'subnetwork' or 'name' must be set", i)
+			}
+
+			// source_ip_ranges_to_nat (list/set/string)
+			rangesRaw, ok := m["source_ip_ranges_to_nat"]
+			if !ok {
+				return fmt.Errorf("subnetwork[%d]: source_ip_ranges_to_nat must be set (ALL_IP_RANGES, PRIMARY_IP_RANGE, or LIST_OF_SECONDARY_IP_RANGES)", i)
+			}
+			// normaliza para slice de strings
+			var ranges []string
+			switch rv := rangesRaw.(type) {
+			case []interface{}:
+				for _, x := range rv {
+					if xs, ok := x.(string); ok && xs != "" {
+						ranges = append(ranges, xs)
+					}
+				}
+			case *schema.Set:
+				for _, x := range rv.List() {
+					if xs, ok := x.(string); ok && xs != "" {
+						ranges = append(ranges, xs)
+					}
+				}
+			case string:
+				if rv != "" {
+					ranges = append(ranges, rv)
+				}
+			}
+			if len(ranges) == 0 {
+				return fmt.Errorf("subnetwork[%d]: source_ip_ranges_to_nat must contain at least one of: ALL_IP_RANGES, PRIMARY_IP_RANGE, LIST_OF_SECONDARY_IP_RANGES", i)
+			}
+			valid := map[string]bool{
+				"ALL_IP_RANGES":                 true,
+				"PRIMARY_IP_RANGE":              true,
+				"LIST_OF_SECONDARY_IP_RANGES":   true,
+			}
+			needsSecondary := false
+			for _, r := range ranges {
+				if !valid[r] {
+					return fmt.Errorf("subnetwork[%d]: invalid source_ip_ranges_to_nat value %q", i, r)
+				}
+				if r == "LIST_OF_SECONDARY_IP_RANGES" {
+					needsSecondary = true
+				}
+			}
+			if needsSecondary {
+				secRaw, ok := m["secondary_ip_range_names"]
+				if !ok {
+					return fmt.Errorf("subnetwork[%d]: secondary_ip_range_names must be provided when source_ip_ranges_to_nat contains LIST_OF_SECONDARY_IP_RANGES", i)
+				}
+				secLen := 0
+				switch sv := secRaw.(type) {
+				case []interface{}:
+					secLen = len(sv)
+				case *schema.Set:
+					secLen = sv.Len()
+				}
+				if secLen == 0 {
+					return fmt.Errorf("subnetwork[%d]: secondary_ip_range_names must not be empty when using LIST_OF_SECONDARY_IP_RANGES", i)
+				}
+			}
+		}
+
+	case "ALL_SUBNETWORKS_ALL_IP_RANGES", "ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES":
+		// Não pode haver blocos subnetwork
+		if len(subnets) > 0 {
+			return fmt.Errorf("when source_subnetwork_ip_ranges_to_nat is %s, subnetwork{} blocks must not be set", ssr)
+		}
+
+	default:
+		return fmt.Errorf("invalid source_subnetwork_ip_ranges_to_nat %q: expected one of ALL_SUBNETWORKS_ALL_IP_RANGES, ALL_SUBNETWORKS_ALL_PRIMARY_IP_RANGES, LIST_OF_SUBNETWORKS", ssr)
+	}
+
+	return nil
+}
+
 func computeRouterNatIPsHash(v interface{}) int {
 	val := (v.(string))
 	newParts := strings.Split(val, "/")
