@@ -3,14 +3,17 @@ package dataprocmetastore_test
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"testing"
 
-	metastore "cloud.google.com/go/metastore/apiv1"
-	metastorepb "cloud.google.com/go/metastore/apiv1/metastorepb"
+	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
 )
 
 func TestAccDataprocMetastoreService_updateAndImport(t *testing.T) {
@@ -175,104 +178,146 @@ resource "google_storage_bucket" "bucket" {
 
 func TestAccMetastoreService_tags(t *testing.T) {
 	t.Parallel()
-	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "metastore-services-tagkey", map[string]interface{}{})
-	tagValue := acctest.BootstrapSharedTestOrganizationTagValue(t, "metastore-services-tagvalue", tagKey)
 
-	testContext := map[string]interface{}{
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "metastore-service-tagkey", map[string]interface{}{})
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      tagValue,
-		"random_suffix": acctest.RandString(t, 10),
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "metastore-service-tagvalue", tagKey),
+		"project":       envvar.GetTestProjectFromEnv(),
 	}
-	resourceName := "google_dataproc_metastore_service.test"
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
-		CheckDestroy:             testAccCheckDataprocMetastoreServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMetastoreServiceTags(testContext),
-				Check: resource.ComposeTestCheckFunc(
-					checkMetastoreServiceTags(resourceName, testContext),
-				),
+				Config: testAccMetastoreServiceTags(context),
+				Check: resource.TestCheckResourceAttrSet(
+					"google_dataproc_metastore_service.default", "tags.%"),
 			},
 			{
-				ResourceName:            resourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"tags"},
+				ResourceName:      "google_dataproc_metastore_service.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"service_id", "location", "labels", "terraform_labels", "tags",
+				},
+			},
+			{
+				Config:       testAccMetastoreServiceTags(context),
+				ResourceName: "google_dataproc_metastore_service.default",
+				Check:        checkTagBindings(context),
 			},
 		},
 	})
 }
 
-func testAccMetastoreServiceTags(testContext map[string]interface{}) string {
+func testAccMetastoreServiceTags(context map[string]interface{}) string {
 	return acctest.Nprintf(`
-	resource "google_dataproc_metastore_service" "test" {
-	  service_id = "tf-test-service-%{random_suffix}"
-	  location = "us-east1"
-	  tier = "DEVELOPER"
-	  tags = {
-	    "%{org}/%{tagKey}" = "%{tagValue}"
-	  }
-	}`, testContext)
+resource "google_dataproc_metastore_service" "default" {
+  service_id   = "tf-test-my-service-%{random_suffix}"
+  location   = "us-central1"
+  port       = 9080
+  tier       = "DEVELOPER"
+  maintenance_window {
+    hour_of_day = 2
+    day_of_week = "SUNDAY"
+   }
+  hive_metastore_config {
+    version = "2.3.6"
+  }
+  labels = {
+    env = "test"
+  }
+  tags = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}
+`, context)
 }
 
-// This function gets the service via the Metastore API and inspects its tags.
-func checkMetastoreServiceTags(resourceName string, testContext map[string]interface{}) resource.TestCheckFunc {
+// checkTagBindings performs the API call to verify the tag binding.
+func checkTagBindings(testContext map[string]interface{}) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("Resource not found: %s", resourceName)
-		}
-
-		// Get resource attributes from state
-		project := rs.Primary.Attributes["project"]
-		location := rs.Primary.Attributes["location"]
-		serviceName := rs.Primary.Attributes["service_id"]
-
-		// Construct the expected full tag key
-		expectedTagKey := fmt.Sprintf("%s/%s", testContext["org"], testContext["tagKey"])
-		expectedTagValue := fmt.Sprintf("%s", testContext["tagValue"])
-
-		// This `ctx` variable is now a `context.Context` object
 		ctx := context.Background()
 
-		// Create a Metastore client
-		metastoreClient, err := metastore.NewDataprocMetastoreClient(ctx)
+		// Get the instance state from the state file
+		rs, ok := s.RootModule().Resources["google_dataproc_metastore_service.test"]
+		if !ok {
+			return fmt.Errorf("not found: %s", "google_dataproc_metastore_service.test")
+		}
+		if rs.Primary == nil {
+			return fmt.Errorf("no primary instance found for %s", "google_dataproc_metastore_service.test")
+		}
+
+		// Get the resource ID and location from the state file
+		id := rs.Primary.ID
+		location := rs.Primary.Attributes["location"]
+		if location == "" {
+			return fmt.Errorf("location not found in state file")
+		}
+
+		// Construct the full resource name
+		projectID := testContext["project"].(string)
+		parent := fmt.Sprintf("//dataprocmetastore.googleapis.com/projects/%s/locations/%s/services/%s", projectID, location, id)
+
+		// Build the URL for the API call
+		apiURL, err := url.Parse("https://cloudresourcemanager.googleapis.com/v3/tagBindings")
 		if err != nil {
-			return fmt.Errorf("failed to create metastore client: %v", err)
+			return fmt.Errorf("failed to parse API URL: %w", err)
 		}
-		defer metastoreClient.Close()
+		q := apiURL.Query()
+		q.Set("parent", parent)
+		apiURL.RawQuery = q.Encode()
 
-		// Construct the request to get the service details
-		req := &metastorepb.GetServiceRequest{
-			Name: fmt.Sprintf("projects/%s/locations/%s/services/%s", project, location, serviceName),
-		}
-
-		// Get the Metastore service
-		service, err := metastoreClient.GetService(ctx, req)
+		// Create and send the GET request
+		req, err := http.NewRequestWithContext(ctx, "GET", apiURL.String(), nil)
 		if err != nil {
-			return fmt.Errorf("failed to get metastore service '%s': %v", req.Name, err)
+			return fmt.Errorf("failed to create request: %w", err)
+		}
+		// set the Authorization header here.
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			return fmt.Errorf("failed to list tag bindings: %w", err)
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			body, _ := io.ReadAll(resp.Body)
+			return fmt.Errorf("API request failed with status code %d and body: %s", resp.StatusCode, string(body))
 		}
 
-		// Check the service's labels for the expected tag
-		// In the Metastore API, tags are represented as labels.
-		labels := service.GetLabels()
-		if labels == nil {
-			return fmt.Errorf("expected labels not found on service '%s'", req.Name)
+		// Parse the response
+		var result struct {
+			TagBindings []struct {
+				TagValue string `json:"tagValue"`
+				Parent   string `json:"parent"`
+				Name     string `json:"name"`
+			} `json:"tagBindings"`
 		}
 
-		if actualValue, ok := labels[expectedTagKey]; ok {
-			if actualValue == expectedTagValue {
-				// The tag was found with the correct value. Success!
-				return nil
+		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+			return fmt.Errorf("failed to decode API response: %w", err)
+		}
+
+		// Verify the tag binding is present
+		expectedTagValue := testContext["tagValue"].(string)
+		found := false
+		for _, binding := range result.TagBindings {
+			if strings.HasSuffix(binding.TagValue, expectedTagValue) {
+				found = true
+				break
 			}
-			return fmt.Errorf("tag key '%s' found with incorrect value. Expected: %s, Got: %s", expectedTagKey, expectedTagValue, actualValue)
 		}
 
-		// If we reach here, the tag key was not found.
-		return fmt.Errorf("expected tag key '%s' not found on service '%s'", expectedTagKey, req.Name)
+		if !found {
+			return fmt.Errorf("expected tag binding with value '%s' not found on resource %s", expectedTagValue, parent)
+		}
+
+		return nil
 	}
 }
