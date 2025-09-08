@@ -2297,35 +2297,13 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		}
 	}
 
-	updateFunc := func() error {
-	    log.Printf("[DEBUG] Updating instance %s", d.Get("name").(string))
-		op, err = config.NewSqlAdminClient(userAgent).Instances.Update(project, d.Get("name").(string), instance).Do()
-		if err != nil {
-			// Check for the specific 412 Precondition Failed error. A 412 Precondition Failed error, especially with a staleData reason, indicates an optimistic locking failure.
-			// This means the resource was modified by another process after Terraform read its state but before it applied the update.
-			// In this case, we want to retry the update after refreshing the state.
-			if gerr, ok := err.(*googleapi.Error); ok && gerr.Code == 412 {
-				log.Printf("[DEBUG] SQL instance %q was modified concurrently, retrying update.", d.Id())
-
-				// Re-fetch the instance to get the latest settingsVersion.
-				latestInstance, getErr := config.NewSqlAdminClient(userAgent).Instances.Get(project, d.Id()).Do()
-				if getErr != nil {
-					// If we can't get the latest state, it's a terminal error.
-					return getErr
-				}
-
-				// Update the instance object with the latest settingsVersion for the next retry attempt.
-				instance.Settings.SettingsVersion = latestInstance.Settings.SettingsVersion
-				return err // Return the original 412 error to signal a retry is needed.
-			}
-		}
-		return err // Return any other error or nil for success.
-	}
-
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
-		RetryFunc: 			  updateFunc,
+		RetryFunc: func() (rerr error) {
+			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Update(project, d.Get("name").(string), instance).Do()
+			return rerr
+		},
 		Timeout:              d.Timeout(schema.TimeoutUpdate),
-		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError, transport_tpg.IsFingerprintError},
 	})
 	if err != nil {
 		return fmt.Errorf("Error, failed to update instance settings for %s: %s", instance.Name, err)
