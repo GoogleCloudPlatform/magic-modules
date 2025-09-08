@@ -22,6 +22,7 @@ import (
 {{ if eq $.TargetVersionName `ga` }}
 	"google.golang.org/api/container/v1"
 {{- else }}
+  compute "google.golang.org/api/compute/v0.beta"
 	container "google.golang.org/api/container/v1beta1"
 {{- end }}
 )
@@ -92,10 +93,74 @@ func (nodePoolCache *nodePoolCache) remove(nodePool string) {
 	delete(nodePoolCache.nodePools, nodePool)
 }
 
-var npCache = &nodePoolCache{
-	nodePools: make(map[string]*nodePoolWithUpdateTime),
-	ttl:       30 * time.Second,
+type instanceGroupManagerWithUpdateTime struct {
+  instanceGroupManager *compute.InstanceGroupManager
+  updateTime           time.Time
 }
+
+type instanceGroupManagerCache struct {
+  instanceGroupManagers map[string]*instanceGroupManagerWithUpdateTime
+  ttl                   time.Duration
+  mutex                 sync.RWMutex
+}
+
+func (instanceGroupManagerCache *instanceGroupManagerCache) get(fullyQualifiedName string) (*compute.InstanceGroupManager, error) {
+  instanceGroupManagerCache.mutex.RLock()
+  defer instanceGroupManagerCache.mutex.RUnlock()
+  igm, ok := instanceGroupManagerCache.instanceGroupManagers[fullyQualifiedName]
+  if !ok {
+    return nil, fmt.Errorf("InstanceGroupManager %q was not found", fullyQualifiedName)
+  }
+  return igm.instanceGroupManager, nil
+}
+
+func (instanceGroupManagerCache *instanceGroupManagerCache) refreshIfNeeded(d *schema.ResourceData, config *transport_tpg.Config, userAgent string, npName string, igmUrl string) error {
+  instanceGroupManagerCache.mutex.Lock()
+  defer instanceGroupManagerCache.mutex.Unlock()
+
+  matches := instanceGroupManagerURL.FindStringSubmatch(igmUrl)
+  if len(matches) < 4 {
+    return fmt.Errorf("Error reading instance group manager URL %q", igmUrl)
+  }
+
+  if !instanceGroupManagerCache.needsRefresh(matches[0]) {
+    return nil
+  }
+
+  igms, err := config.NewComputeClient(userAgent).InstanceGroupManagers.List(matches[1], matches[2]).Do()
+  if err != nil {
+    return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("InstanceGroupManagers for node pool %q", npName))
+  }
+
+  updateTime := time.Now()
+  for _, instanceGroupManager := range igms.Items {
+    fullyQualifiedName := instanceGroupManagerURL.FindString(instanceGroupManager.SelfLink)
+    instanceGroupManagerCache.instanceGroupManagers[fullyQualifiedName] = &instanceGroupManagerWithUpdateTime{
+      instanceGroupManager: instanceGroupManager,
+      updateTime:           updateTime,
+    }
+  }
+  return nil
+}
+
+func (instanceGroupManagerCache *instanceGroupManagerCache) needsRefresh(fullyQualifiedName string) bool {
+  igm, ok := instanceGroupManagerCache.instanceGroupManagers[fullyQualifiedName]
+  if !ok {
+    return true
+  }
+  return time.Since(igm.updateTime) > instanceGroupManagerCache.ttl
+}
+
+var (
+  npCache = &nodePoolCache{
+	  nodePools: make(map[string]*nodePoolWithUpdateTime),
+	  ttl:       30 * time.Second,
+  }
+  igmCache = &instanceGroupManagerCache{
+    instanceGroupManagers: make(map[string]*instanceGroupManagerWithUpdateTime),
+    ttl:                   30 * time.Second,
+  }
+)
 {{- end }}
 
 func ResourceContainerNodePool() *schema.Resource {
@@ -1241,11 +1306,18 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		if len(matches) < 4 {
 			return nil, fmt.Errorf("Error reading instance group manage URL '%q'", url)
 		}
+{{ if eq $.TargetVersionName `ga` }}
 		igm, err := config.NewComputeClient(userAgent).InstanceGroupManagers.Get(matches[1], matches[2], matches[3]).Do()
 		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 			// The IGM URL in is stale; don't include it
 			continue
 		}
+{{- else }}
+    if err := igmCache.refreshIfNeeded(d, config, userAgent, np.Name, url); err != nil {
+      return nil, err
+    }
+    igm, err := igmCache.get(matches[0])
+{{- end }}
 		if err != nil {
 			return nil, fmt.Errorf("Error reading instance group manager returned as an instance group URL: %q", err)
 		}
