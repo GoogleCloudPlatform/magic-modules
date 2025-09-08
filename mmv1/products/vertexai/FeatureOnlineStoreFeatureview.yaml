@@ -113,10 +113,10 @@ properties:
     description: |
       A set of key/value label pairs to assign to this FeatureView.
   - name: 'syncConfig'
-  type: NestedObject
-  description: |
-    Configures when data is to be synced/updated for this FeatureView. At the end of the sync the latest featureValues for each entityId of this FeatureView are made ready for online serving.
-  properties:
+    type: NestedObject
+    description: |
+      Configures when data is to be synced/updated for this FeatureView. At the end of the sync the latest featureValues for each entityId of this FeatureView are made ready for online serving.
+    properties:
     - name: 'cron'
       type: String
       description: |
