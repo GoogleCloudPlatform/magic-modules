@@ -1338,27 +1338,15 @@ func expandCors(configured []interface{}) []*storage.BucketCors {
 		data := raw.(map[string]interface{})
 		corsRule := storage.BucketCors{}
 		if v, ok := data["method"].([]interface{}); ok {
-			methods := make([]string, 0, len(v))
-			for _, m := range v {
-				methods = append(methods, m.(string))
-			}
-			corsRule.Method = methods
+			corsRule.Method = tpgresource.ConvertStringArr(v)
 		}
 
 		if v, ok := data["origin"].([]interface{}); ok {
-			origins := make([]string, 0, len(v))
-			for _, o := range v {
-				origins = append(origins, o.(string))
-			}
-			corsRule.Origin = origins
+			corsRule.Origin = tpgresource.ConvertStringArr(v)
 		}
 
 		if v, ok := data["response_header"].([]interface{}); ok {
-			headers := make([]string, 0, len(v))
-			for _, h := range v {
-				headers = append(headers, h.(string))
-			}
-			corsRule.ResponseHeader = headers
+			corsRule.ResponseHeader = tpgresource.ConvertStringArr(v)
 		}
 
 		if v, ok := data["max_age_seconds"].(int); ok {
