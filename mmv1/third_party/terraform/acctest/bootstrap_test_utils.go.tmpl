@@ -1217,6 +1217,7 @@ func BootstrapMySQLInstance(t *testing.T, instanceName string) *sqladmin.Databas
 	return instance
 }
 
+// waitForBackupdrOperation polls the operation until it is done or times out.
 func waitForBackupdrOperation(ctx context.Context, t *testing.T, backupdrService *backupdr.Service, op *backupdr.Operation) (*backupdr.Operation, error) {
 	t.Helper()
 	opService := backupdr.NewProjectsLocationsOperationsService(backupdrService)
