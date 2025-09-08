@@ -3,7 +3,6 @@ package healthcare_test
 import (
 	"fmt"
 	"path"
-	"slices"
 	"testing"
 
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
@@ -310,7 +309,7 @@ func testAccCheckGoogleHealthcareFhirStoreUpdate(t *testing.T, pubsubTopic strin
 	}
 }
 
-// Returns true if the size and contents (order independent) of enabledImplementationGuides1 and enabledImplementationGuides2 are identical,
+// Returns true if the size and contents (order dependent) of enabledImplementationGuides1 and enabledImplementationGuides2 are identical,
 // else false.
 func checkEnabledImplementationGuidesArraysAreEqual(enabledImplementationGuides1 []string, enabledImplementationGuides2 []string) bool {
 	// Same length?
@@ -318,17 +317,9 @@ func checkEnabledImplementationGuidesArraysAreEqual(enabledImplementationGuides1
 		return false
 	}
 
-	// Same contents - sort and compare temp copies
-	copy1 := make([]string, len(enabledImplementationGuides1))
-	copy(copy1, enabledImplementationGuides1)
-	slices.Sort(copy1)
-
-	copy2 := make([]string, len(enabledImplementationGuides2))
-	copy(copy2, enabledImplementationGuides2)
-	slices.Sort(copy2)
-
-	for i1, v1 := range copy1 {
-		if v1 != copy2[i1] {
+	// Same contents - do NOT sort to ensure order is identical and avoid permadiff risk
+	for i1, v1 := range enabledImplementationGuides1 {
+		if v1 != enabledImplementationGuides2[i1] {
 			return false
 		}
 	}
