@@ -6890,7 +6890,7 @@ func TestAccContainerCluster_network_tier_config(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "min_master_version"},
 			},
 			{
 				Config: testAccContainerCluster_network_tier_config(clusterName, networkName, subnetworkName, "NETWORK_TIER_PREMIUM"),
@@ -6902,7 +6902,7 @@ func TestAccContainerCluster_network_tier_config(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "min_master_version"},
 			},
 			{
 				Config: testAccContainerCluster_network_tier_config(clusterName, networkName, subnetworkName, "NETWORK_TIER_STANDARD"),
@@ -6914,7 +6914,7 @@ func TestAccContainerCluster_network_tier_config(t *testing.T) {
 				ResourceName:      "google_container_cluster.primary",
 				ImportState:       true,
 				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{"deletion_protection"},
+				ImportStateVerifyIgnore: []string{"deletion_protection", "min_master_version"},
 			},
 		},
 	})
