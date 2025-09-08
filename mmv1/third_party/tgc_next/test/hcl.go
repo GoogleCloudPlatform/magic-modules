@@ -86,7 +86,7 @@ func parseHCLBody(body hcl.Body) (
 func insert(data any, key string, parent map[string]any) {
 	if existing, ok := parent[key]; ok {
 		if existingSlice, ok := existing.([]any); ok {
-			existingSlice = append(existingSlice, data)
+			parent[key] = append(existingSlice, data)
 		} else {
 			// Until we see a second instance of a repeated block or attribute, it will look non-repeated.
 			parent[key] = []any{existing, data}

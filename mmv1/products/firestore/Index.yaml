@@ -92,6 +92,12 @@ examples:
       database_id: 'database-id-sparse-any'
     test_env_vars:
       project_id: 'PROJECT_NAME'
+  - name: 'firestore_index_unique'
+    primary_resource_id: 'my-index'
+    vars:
+      database_id: 'database-id-unique'
+    test_env_vars:
+      project_id: 'PROJECT_NAME'
 parameters:
 properties:
   - name: 'name'
@@ -152,6 +158,12 @@ properties:
       definition reach or traverse an array, except via an explicit array
       index. Violations will result in errors. Note this field only applies to
       indexes with MONGODB_COMPATIBLE_API ApiScope.
+  - name: 'unique'
+    type: Boolean
+    default_from_api: true
+    description:
+      Whether it is an unique index. Unique index ensures all values for the
+      indexed field(s) are unique across documents.
   - name: 'fields'
     type: Array
     description: |
@@ -206,7 +218,7 @@ properties:
               send_empty_value: true
               allow_empty_object: true
               properties:
- # Meant to be an empty object with no properties.
+                # Meant to be an empty object with no properties.
                 []
     # Most composite indexes require at least two fields, but it is possible
     # for a user to require a single field index such as `__name__ DESC`.

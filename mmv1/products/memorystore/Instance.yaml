@@ -108,8 +108,8 @@ examples:
       'secondary_instance_prevent_destroy': 'false'
 virtual_fields:
   - name: 'desired_psc_auto_connections'
-    description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead."
-    deprecation_message: '`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead.'
+    description: "`desired_psc_auto_connections` is deprecated  Use `desired_auto_created_endpoints` instead `terraform import` will only work with desired_auto_created_endpoints`."
+    deprecation_message: '`desired_psc_auto_connections` is deprecated. Use `desired_auto_created_endpoints` instead. `terraform import` will only work with desired_auto_created_endpoints`.'
     type: Array
     immutable: true
     conflicts:
@@ -517,14 +517,6 @@ properties:
         enum_values:
           - 'MULTI_ZONE'
           - 'SINGLE_ZONE'
-  - name: 'allowFewerZonesDeployment'
-    type: Boolean
-    description: |
-      Allows customers to specify if they are okay with deploying a multi-zone
-      instance in less than 3 zones. Once set, if there is a zonal outage during
-      the instance creation, the instance will only be deployed in 2 zones, and
-      stay within the 2 zones for its lifecycle.
-    immutable: true
   - name: 'deletionProtectionEnabled'
     type: Boolean
     description: "Optional. If set to true deletion of the instance will fail. "
