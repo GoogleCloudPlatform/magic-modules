@@ -53,6 +53,11 @@ examples:
     primary_resource_id: 'jira-basic'
     vars:
       collection_id: 'collection-id'
+      client_id: 'client-id'
+      client_secret: 'client-secret'
+    test_vars_overrides:
+      client_id: '"YPadCV8GGM5GOik1hYRjaC98tG7ChRo6"'
+      client_secret: '"ATOAGAf7J5OIiM_q-fmgSZjbh0lWxOkj3-P-KgGK5Q2yRmAJkEWqiFWuVK4fjfwtTSqFEBDE636D"'
 parameters:
   - name: 'location'
     type: String
