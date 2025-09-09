@@ -111,6 +111,41 @@ func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.Resourc
 	return false
 }
 
+// ValidateWorkbenchInstanceMetadata ensures that protected metadata keys are not set in the Terraform configuration.
+// It checks user-provided metadata keys against a predefined list of server-managed keys - WorkbenchInstanceProvidedMetadata.
+// If any protected keys are found, it returns a validation error listing all invalid keys.
+func ValidateWorkbenchInstanceMetadata(i interface{}, k string) (warnings []string, errors []error) {
+    metadata, ok := i.(map[string]interface{})
+    if !ok {
+        errors = append(errors, fmt.Errorf("invalid metadata format"))
+        return
+    }
+
+    var invalidKeys []string
+
+    for key := range metadata {
+        for _, protectedKey := range WorkbenchInstanceProvidedMetadata {
+            if key == protectedKey {
+                invalidKeys = append(invalidKeys, key)
+            }
+        }
+    }
+
+	if d.Get("enable_managed_euc").(bool){
+		for _, metadata := range WorkbenchInstanceEUCProvidedAdditionalMetadata {
+			if key == metadata {
+				return true
+			}
+		}
+	}
+
+    if len(invalidKeys) > 0 {
+        errors = append(errors, fmt.Errorf("the following metadata keys are protected and cannot be set: %v", invalidKeys))
+    }
+
+    return
+}
+
 var WorkbenchInstanceProvidedTags = []string{
 	"deeplearning-vm",
 	"notebook-instance",

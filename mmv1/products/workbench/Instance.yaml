@@ -459,6 +459,8 @@ properties:
           Optional. Custom metadata to apply to this instance.
         default_from_api: true
         diff_suppress_func: 'WorkbenchInstanceMetadataDiffSuppress'
+        validation:
+          function: 'ValidateWorkbenchInstanceMetadata'
       - name: 'enableIpForwarding'
         type: Boolean
         description: |
