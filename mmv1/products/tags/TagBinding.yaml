@@ -83,3 +83,12 @@ properties:
     description: |
       The TagValue of the TagBinding. Must be of the form tagValues/456.
     required: true
+  - name: 'tagValueNamespacedName'
+    type: String
+    description: |
+      The namespaced name for the TagValue of the TagBinding. Must be in the format {parent_id}/{tag_key_short_name}/{shortName}.
+      For methods that support TagValue namespaced name, only one of tagValueNamespacedName or tagValue may be filled. Requests with both fields will be rejected.
+    required: true
+    exactly_one_of:
+      - tagValueNamespacedName
+      - tagValue
