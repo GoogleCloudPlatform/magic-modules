@@ -244,12 +244,12 @@ func checkTagBindings(testContext map[string]interface{}) resource.TestCheckFunc
 		ctx := context.Background()
 
 		// Get the instance state from the state file
-		rs, ok := s.RootModule().Resources["google_dataproc_metastore_service.test"]
+		rs, ok := s.RootModule().Resources["google_dataproc_metastore_service.default"]
 		if !ok {
-			return fmt.Errorf("not found: %s", "google_dataproc_metastore_service.test")
+			return fmt.Errorf("not found: %s", "google_dataproc_metastore_service.default")
 		}
 		if rs.Primary == nil {
-			return fmt.Errorf("no primary instance found for %s", "google_dataproc_metastore_service.test")
+			return fmt.Errorf("no primary instance found for %s", "google_dataproc_metastore_service.default")
 		}
 
 		// Get the resource ID and location from the state file
