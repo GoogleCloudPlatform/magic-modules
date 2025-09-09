@@ -1175,7 +1175,7 @@ func TestAccStorageBucket_emptyCors(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "cors"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "cors.1"},
 			},
 			{
 				Config: testGoogleStorageBucketPartialCors(bucketName),
@@ -2279,8 +2279,6 @@ resource "google_storage_bucket" "bucket" {
   cors {
     origin          = ["*"]
     method          = ["GET"]
-    response_header = []
-    max_age_seconds = 0
   }
   cors{}
   cors{}
