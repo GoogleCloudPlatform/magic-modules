@@ -60,6 +60,8 @@ examples:
       'deletion_policy': '"DELETE"'
     oics_vars_overrides:
       'deletion_policy': '"DELETE"'
+    ignore_read_extra:
+      - 'deletion_policy'
   - name: 'secure_source_manager_repository_initial_config'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-my-repository%s", context["random_suffix"])'
@@ -71,6 +73,8 @@ examples:
       'deletion_policy': '"DELETE"'
     oics_vars_overrides:
       'deletion_policy': '"DELETE"'
+    ignore_read_extra:
+      - 'deletion_policy'
 parameters:
   - name: 'location'
     type: String
@@ -94,11 +98,11 @@ virtual_fields:
       to be abandoned, rather than deleted. Setting `DELETE` deletes the resource
       and all its contents. Setting `PREVENT` prevents the resource from accidental deletion
       by erroring out during plan.
-      Default is `DELETE`.  Possible values are:
+      Default is `PREVENT`.  Possible values are:
         * DELETE
         * PREVENT
         * ABANDON
-    default_value: 'DELETE'
+    default_value: 'PREVENT'
 properties:
   - name: 'name'
     type: String
