@@ -1178,16 +1178,16 @@ func TestAccStorageBucket_emptyCors(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy", "cors"},
 			},
 			{
-				Config: testGoogleStorageBucketsRemoveCorsCompletely(bucketName),
+				Config: testGoogleStorageBucketPartialCors(bucketName),
 			},
 			{
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "cors.1", "cors.2"},
 			},
 			{
-				Config: testGoogleStorageBucketPartialCors(bucketName),
+				Config: testGoogleStorageBucketsRemoveCorsCompletely(bucketName),
 			},
 			{
 				ResourceName:            "google_storage_bucket.bucket",
@@ -2282,6 +2282,8 @@ resource "google_storage_bucket" "bucket" {
     response_header = []
     max_age_seconds = 0
   }
+  cors{}
+  cors{}
 }
 `, bucketName)
 }
