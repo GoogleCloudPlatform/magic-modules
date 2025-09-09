@@ -126,7 +126,7 @@ be obscured in Terraform output as well as not be stored in state. This field is
 See [Ephemerality in Resources - Use Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral/write-only)
 for more information.
 
-Write-only arguments are only supported in Terraform v1.11+. Because the provider supports earlier Terraform versions, write only fields must be paired with (mutually exclusive) `sensitive` fields covering the same functionality for compatibility with those older versions.
+Write-only fields are only supported in Terraform v1.11+. Because the provider supports earlier Terraform versions, write only fields must be paired with (mutually exclusive) `sensitive` fields covering the same functionality for compatibility with those older versions.
 This field cannot be used in conjunction with `immutable` or `sensitive`.
 
 **Note**: Due to write-only not being read from the API, it is not possible to update the field directly unless a sidecar field is used. (e.g. `password` as a write-only field and `password_wo_version` as an immutable field meant for updating).
