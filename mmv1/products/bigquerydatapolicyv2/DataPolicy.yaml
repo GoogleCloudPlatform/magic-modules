@@ -1,0 +1,168 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: DataPolicy
+description: BigQuery Data Policy
+references:
+  guides:
+    'Official Documentation': 'https://cloud.google.com/bigquery/docs/column-data-masking-intro'
+  api: 'https://cloud.google.com/bigquery/docs/reference/bigquerydatapolicy/rest/v2/projects.locations.dataPolicies'
+docs: null
+id_format: 'projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/dataPolicies'
+self_link: 'projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/dataPolicies'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}'
+  - '{{project}}/{{location}}/{{data_policy_id}}'
+  - '{{location}}/{{data_policy_id}}'
+timeouts:
+  insert_minutes: 20
+  update_minutes: 20
+  delete_minutes: 20
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'data_policy_id'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{location}}/dataPolicies/{{data_policy_id}}'
+    - '{{data_policy_id}}'
+custom_code:
+  encoder: templates/terraform/encoders/bigquery_datapolicyv2_datapolicy.go.tmpl
+  update_encoder: templates/terraform/update_encoder/bigquery_datapolicyv2_datapolicy.go.tmpl
+examples:
+  - name: 'bigquery_datapolicyv2_datapolicy_basic'
+    primary_resource_id: 'basic_data_policy'
+    primary_resource_name: 'fmt.Sprintf("tf_test_basic_data_policy%s", context["random_suffix"])'
+    vars:
+      data_policy_id: 'basic_data_policy'
+  - name: 'bigquery_datapolicyv2_datapolicy_predefined_masking'
+    primary_resource_id: 'predefined_masking_data_policy'
+    primary_resource_name: 'fmt.Sprintf("tf_test_predefined_masking_data_policy%s", context["random_suffix"])'
+    vars:
+      data_policy_id: 'predefined_masking_data_policy'
+  - name: 'bigquery_datapolicyv2_datapolicy_routine'
+    primary_resource_id: 'routine_data_policy'
+    primary_resource_name: 'fmt.Sprintf("tf_test_routine_data_policy%s", context["random_suffix"])'
+    vars:
+      data_policy_id: 'routine_data_policy'
+      dataset_id: 'dataset_id'
+  - name: 'bigquery_datapolicyv2_datapolicy_withgrantees'
+    primary_resource_id: 'data_policy_with_grantees'
+    primary_resource_name: 'fmt.Sprintf("tf_test_data_policy_with_grantees%s", context["random_suffix"])'
+    exclude_test: true
+    vars:
+      data_policy_id: 'data_policy_with_grantees'
+  - name: 'bigquery_datapolicyv2_datapolicy_withgrantees_test'
+    primary_resource_id: 'data_policy_with_grantees'
+    primary_resource_name: 'fmt.Sprintf("tf_test_data_policy_with_grantees%s", context["random_suffix"])'
+    exclude_docs: true
+    vars:
+      data_policy_id: 'data_policy_with_grantees'
+parameters:
+  - name: location
+    type: String
+    description: Resource ID segment making up resource `name`. It identifies the resource
+      within its parent collection as described in https://google.aip.dev/122.
+    immutable: true
+    url_param_only: true
+    required: true
+properties:
+  - name: dataMaskingPolicy
+    type: NestedObject
+    description: The policy used to specify data masking rule.
+    properties:
+      - name: predefinedExpression
+        type: String
+        description: |-
+          A predefined masking expression.
+          Possible values:
+          SHA256
+          ALWAYS_NULL
+          DEFAULT_MASKING_VALUE
+          LAST_FOUR_CHARACTERS
+          FIRST_FOUR_CHARACTERS
+          EMAIL_MASK
+          DATE_YEAR_MASK
+          RANDOM_HASH
+      - name: routine
+        type: String
+        description: |-
+          The name of the BigQuery routine that contains the custom masking
+          routine, in the format of
+          `projects/{project_number}/datasets/{dataset_id}/routines/{routine_id}`.
+        diff_suppress_func: 'tpgresource.ProjectNumberDiffSuppress'
+  - name: dataPolicyType
+    type: String
+    description: |-
+      Type of data policy.
+      Possible values:
+      DATA_MASKING_POLICY
+      RAW_DATA_ACCESS_POLICY
+      COLUMN_LEVEL_SECURITY_POLICY
+    required: true
+  - name: etag
+    type: Fingerprint
+    description: |-
+      The etag for this Data Policy.
+      This field is used for UpdateDataPolicy calls. If Data Policy exists, this
+      field is required and must match the server's etag. It will also be
+      populated in the response of GetDataPolicy, CreateDataPolicy, and
+      UpdateDataPolicy calls.
+    default_from_api: true
+  - name: grantees
+    type: Array
+    description: |-
+      The list of IAM principals that have Fine Grained Access to the underlying
+      data goverened by this data policy.
+
+      Uses the [IAM V2 principal
+      syntax](https://cloud.google.com/iam/docs/principal-identifiers#v2) Only
+      supports principal types users, groups, serviceaccounts, cloudidentity.
+      This field is supported in V2 Data Policy only. In case of V1 data policies
+      (i.e. verion = 1 and policy_tag is set), this field is not populated.
+    item_type:
+      type: String
+    default_from_api: true
+  - name: name
+    type: String
+    description: |-
+      Identifier. Resource name of this data policy, in the format of
+      `projects/{project_number}/locations/{location_id}/dataPolicies/{data_policy_id}`.
+    output: true
+  - name: policyTag
+    type: String
+    description: |-
+      Policy tag resource name, in the format of
+      `projects/{project_number}/locations/{location_id}/taxonomies/{taxonomy_id}/policyTags/{policyTag_id}`.
+      policy_tag is supported only for V1 data policies.
+    output: true
+  - name: version
+    type: String
+    description: |-
+      The version of the Data Policy resource.
+      Possible values:
+      V1
+      V2
+    output: true
+  - name: dataPolicyId
+    type: String
+    description: |-
+      User-assigned (human readable) ID of the data policy that needs to be
+      unique within a project. Used as {data_policy_id} in part of the resource
+      name.
+    required: true

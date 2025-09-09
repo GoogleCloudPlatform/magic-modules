@@ -10,10 +10,10 @@
 	See the License for the specific language governing permissions and
 	limitations under the License.
 */ -}}
-// TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/184): Handle fingerprint consistently
+// TODO: https://github.com/GoogleCloudPlatform/magic-modules/issues/184 Handle fingerprint consistently
 obj["fingerprint"] = d.Get("fingerprint")
 
-// TODO(https://github.com/GoogleCloudPlatform/magic-modules/issues/183): Can we generalize this
+// TODO: https://github.com/GoogleCloudPlatform/magic-modules/issues/183 Can we generalize this
 // Send a null fields if customFeatures is empty.
 if v, ok := obj["customFeatures"]; ok && len(v.([]interface{})) == 0 {
 	obj["customFeatures"] = nil

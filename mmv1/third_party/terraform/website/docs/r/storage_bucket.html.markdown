@@ -121,7 +121,7 @@ resource "google_storage_bucket" "hns-enabled" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the bucket.
+* `name` - (Required) The name of the bucket. Bucket names must be in lowercase and no more than 63 characters long. You can find the complete list of bucket naming rules [here](https://cloud.google.com/storage/docs/buckets#naming).
 
 * `location` - (Required) The [GCS location](https://cloud.google.com/storage/docs/bucket-locations).
 
@@ -255,7 +255,7 @@ The following arguments are supported:
 
 * `is_locked` - (Optional) If set to `true`, the bucket will be [locked](https://cloud.google.com/storage/docs/using-bucket-lock#lock-bucket) and permanently restrict edits to the bucket's retention policy.  Caution: Locking a bucket is an irreversible action.
 
-* `retention_period` - (Required) The period of time, in seconds, that objects in the bucket must be retained and cannot be deleted, overwritten, or archived. The value must be less than 2,147,483,647 seconds.
+* `retention_period` - (Required) The period of time, in seconds, that objects in the bucket must be retained and cannot be deleted, overwritten, or archived. The value must be less than 3,155,760,000 seconds.
 
 <a name="nested_logging"></a>The `logging` block supports:
 
