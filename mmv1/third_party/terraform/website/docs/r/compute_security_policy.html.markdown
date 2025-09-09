@@ -199,6 +199,8 @@ The following arguments are supported:
 
 * `terraform_labels` - The combination of labels configured directly on the resource and default labels configured on the provider.
 
+* `label_fingerprint` - The unique fingerprint of the labels.
+
 <a name="nested_advanced_options_config"></a>The `advanced_options_config` block supports:
 
 * `json_parsing` - Whether or not to JSON parse the payload body. Defaults to `DISABLED`.
