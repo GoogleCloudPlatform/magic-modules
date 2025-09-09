@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"regexp"
+	"strconv"
 	"testing"
 	"time"
 
@@ -1175,16 +1176,19 @@ func TestAccStorageBucket_emptyCors(t *testing.T) {
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "cors.1"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "cors"},
 			},
 			{
 				Config: testGoogleStorageBucketPartialCors(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCors(t),
+				),
 			},
 			{
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "cors.1", "cors.2"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "cors.2", "cors.#"},
 			},
 			{
 				Config: testGoogleStorageBucketsRemoveCorsCompletely(bucketName),
@@ -2280,10 +2284,38 @@ resource "google_storage_bucket" "bucket" {
     origin          = ["*"]
     method          = ["GET"]
   }
-  cors{}
+  cors {
+    origin  = ["https://sample.com"]
+    method  = ["GET"]
+  }
   cors{}
 }
 `, bucketName)
+}
+
+func testAccCheckCors(t *testing.T) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources["google_storage_bucket.bucket"]
+		if !ok {
+			return fmt.Errorf("Bucket not found: %s", "google_storage_bucket.bucket")
+		}
+		corsInConfig, err := strconv.Atoi(rs.Primary.Attributes["cors.#"])
+		if err != nil {
+			return fmt.Errorf("Error conersion string to int %s", err)
+		}
+
+		config := acctest.GoogleProviderConfig(t)
+		bucketClient := config.NewStorageClient(config.UserAgent)
+		res, err := bucketClient.Buckets.Get(rs.Primary.Attributes["name"]).Do()
+		if err != nil {
+			return fmt.Errorf("Error fetching bucket %s", err)
+		}
+
+		if corsInConfig < len(res.Cors) {
+			return fmt.Errorf("Cors in terraform config cannot be less than cors in API response")
+		}
+		return nil
+	}
 }
 
 func testAccStorageBucket_defaultEventBasedHold(bucketName string) string {
