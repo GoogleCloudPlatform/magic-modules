@@ -65,7 +65,7 @@ examples:
       'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
       'project_id': '"tf-test-" + acctest.RandString(t, 10)'
     exclude_test: true
-  - name: 'tag_binding_nameفspaced'
+  - name: 'tag_binding_namespaced'
     primary_resource_id: 'binding_namespaced'
     vars:
       key_short_name: 'keyname'
