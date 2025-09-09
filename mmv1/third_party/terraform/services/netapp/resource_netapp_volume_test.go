@@ -599,7 +599,7 @@ func testAccNetappVolume_volumeBasicExample_cleanupScheduledBackup(t *testing.T,
 		if !ok {
 			return fmt.Errorf("Not found: %v", vault)
 		}
-        url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{NetappBasePath}}projects/{{project}}/locations/{{location}}/backupVaults/{{name}}/backups")
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{NetappBasePath}}projects/{{project}}/locations/{{location}}/backupVaults/{{name}}/backups")
 		if err != nil {
 			return fmt.Errorf("Error : %v", err)
 		}
