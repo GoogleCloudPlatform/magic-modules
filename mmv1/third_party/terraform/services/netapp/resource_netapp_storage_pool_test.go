@@ -631,6 +631,7 @@ data "google_compute_network" "default" {
 }
 `, context)
 }
+<<<<<<< HEAD
 
 func TestAccNetappStoragePool_ManualQos(t *testing.T) {
 	context := map[string]interface{}{
@@ -727,3 +728,8 @@ data "google_compute_network" "default" {
 }
 `, context)
 }
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> 913406ba1 (enter empty line in storage pool test file)
+>>>>>>> 4247ed3e7 (enter empty line in storage pool test file)
