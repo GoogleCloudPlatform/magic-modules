@@ -107,14 +107,14 @@ type instanceGroupManagerCache struct {
 	mutex                 sync.RWMutex
 }
 
-func (instanceGroupManagerCache *instanceGroupManagerCache) get(fullyQualifiedName string) (*compute.InstanceGroupManager, error) {
+func (instanceGroupManagerCache *instanceGroupManagerCache) get(fullyQualifiedName string) (*compute.InstanceGroupManager, bool) {
 	instanceGroupManagerCache.mutex.RLock()
 	defer instanceGroupManagerCache.mutex.RUnlock()
 	igm, ok := instanceGroupManagerCache.instanceGroupManagers[fullyQualifiedName]
 	if !ok {
-		return nil, fmt.Errorf("InstanceGroupManager %q was not found", fullyQualifiedName)
+		return nil, false
 	}
-	return igm.instanceGroupManager, nil
+	return igm.instanceGroupManager, true
 }
 
 func (instanceGroupManagerCache *instanceGroupManagerCache) refreshIfNeeded(d *schema.ResourceData, config *transport_tpg.Config, userAgent string, npName string, igmUrl string) error {
@@ -1314,21 +1314,29 @@ func flattenNodePool(d *schema.ResourceData, config *transport_tpg.Config, np *c
 		if len(matches) < 4 {
 			return nil, fmt.Errorf("Error reading instance group manage URL '%q'", url)
 		}
-{{ if eq $.TargetVersionName `ga` }}
+{{- if eq $.TargetVersionName `ga` }}
 		igm, err := config.NewComputeClient(userAgent).InstanceGroupManagers.Get(matches[1], matches[2], matches[3]).Do()
 		if transport_tpg.IsGoogleApiErrorWithCode(err, 404) {
 			// The IGM URL in is stale; don't include it
 			continue
 		}
-{{- else }}
-		if err := igmCache.refreshIfNeeded(d, config, userAgent, np.Name, url); err != nil {
-			return nil, err
-		}
-		igm, err := igmCache.get(matches[0])
-{{- end }}
 		if err != nil {
 			return nil, fmt.Errorf("Error reading instance group manager returned as an instance group URL: %q", err)
 		}
+{{- else }}
+        if strings.HasPrefix("gk3", matches[3]) {
+            // IGM is autopilot so we know it will not be found, skip it
+            continue
+        }
+		if err := igmCache.refreshIfNeeded(d, config, userAgent, np.Name, url); err != nil {
+			return nil, err
+		}
+		igm, ok := igmCache.get(matches[0])
+		if !ok {
+		    // The IGM URL is stale; don't include it
+		    continue
+		}
+{{- end }}
 		size += int(igm.TargetSize)
 		igmUrls = append(igmUrls, url)
 		managedIgmUrls = append(managedIgmUrls, igm.InstanceGroup)
