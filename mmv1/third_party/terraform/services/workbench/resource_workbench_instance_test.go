@@ -892,7 +892,7 @@ func TestAccWorkbenchInstance_metadataValidation(t *testing.T) {
 			{
 				// Invalid metadata keys should trigger an error
 				Config:      testAccWorkbenchInstance_invalidMetadata(context),
-				ExpectError: regexp.MustCompile(`the following metadata keys are protected and cannot be set: \[image-url proxy-url\]`),
+				ExpectError: regexp.MustCompile(`the following metadata keys are protected and cannot be set: \[image-url proxy-url gce-software-declaration\]`),
 			},
 		},
 	})
@@ -909,8 +909,10 @@ resource "google_workbench_instance" "instance" {
         "proxy-url"  = "https://custom.proxy"
         "image-url"  = "https://custom.image"
         "custom-key" = "custom-value"
+		"gce-software-declaration" = "custom-value"
 	}
   }
+  enable_managed_euc = true
 }
 `, context)
 }

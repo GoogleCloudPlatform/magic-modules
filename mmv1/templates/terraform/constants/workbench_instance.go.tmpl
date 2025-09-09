@@ -123,19 +123,25 @@ func ValidateWorkbenchInstanceMetadata(i interface{}, k string) (warnings []stri
 
     var invalidKeys []string
 
-    for key := range metadata {
-        for _, protectedKey := range WorkbenchInstanceProvidedMetadata {
-            if key == protectedKey {
-                invalidKeys = append(invalidKeys, key)
-            }
-        }
-    }
+    // Create a set to hold all protected keys for efficient lookup.
+	protectedKeys := make(map[string]struct{})
 
-	if d.Get("enable_managed_euc").(bool){
-		for _, metadata := range WorkbenchInstanceEUCProvidedAdditionalMetadata {
-			if key == metadata {
-				return true
-			}
+	// Add the default protected keys to the set.
+	for _, key := range WorkbenchInstanceProvidedMetadata {
+		protectedKeys[key] = struct{}{}
+	}
+
+	// If EUC is enabled, add the additional protected keys.
+	if d.Get("enable_managed_euc").(bool) {
+		for _, key := range WorkbenchInstanceEUCProvidedAdditionalMetadata {
+			protectedKeys[key] = struct{}{}
+		}
+	}
+
+	// Iterate through the metadata keys once and check against the protected set.
+	for key := range metadata {
+		if _, isProtected := protectedKeys[key]; isProtected {
+			invalidKeys = append(invalidKeys, key)
 		}
 	}
 
