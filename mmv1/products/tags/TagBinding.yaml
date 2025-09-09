@@ -65,6 +65,19 @@ examples:
       'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
       'project_id': '"tf-test-" + acctest.RandString(t, 10)'
     exclude_test: true
+  - name: 'tag_binding_namespaced'
+    primary_resource_id: 'binding_namespaced'
+    vars:
+      key_short_name: 'keyname'
+      value_short_name: 'valuename'
+      project_id: 'project_id'
+    test_env_vars:
+      org_id: 'ORG_ID'
+    test_vars_overrides:
+      'key_short_name': '"tf-test-key-" + acctest.RandString(t, 10)'
+      'value_short_name': '"tf-test-value-" + acctest.RandString(t, 10)'
+      'project_id': '"tf-test-" + acctest.RandString(t, 10)'
+
 parameters:
 properties:
   - name: 'name'
@@ -82,7 +95,6 @@ properties:
     type: String
     description: |
       The TagValue of the TagBinding. Must be of the form tagValues/456.
-    required: false
     at_least_one_of:
       - tagValueNamespacedName
       - tagValue
@@ -91,7 +103,6 @@ properties:
     description: |
       The namespaced name for the TagValue of the TagBinding. Must be in the format {parent_id}/{tag_key_short_name}/{shortName}.
       For methods that support TagValue namespaced name, only one of tagValueNamespacedName or tagValue may be filled. Requests with both fields will be rejected.
-    required: false
     at_least_one_of:
       - tagValueNamespacedName
       - tagValue
