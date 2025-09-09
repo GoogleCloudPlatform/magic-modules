@@ -786,6 +786,7 @@ func buildWriteOnlyField(name string, versionFieldName string, originalField *Ty
 	if originalField.Required {
 		exactlyOneOf := append(originalField.ExactlyOneOf, fieldPathOriginalField, fieldPathCurrentField)
 		options = append(options, propertyWithExactlyOneOf(deduplicateSliceOfStrings(exactlyOneOf)))
+		originalField.ExactlyOneOf = deduplicateSliceOfStrings(exactlyOneOf)
 	} else {
 		conflicts := append(originalField.Conflicts, fieldPathOriginalField)
 		options = append(options, propertyWithConflicts(deduplicateSliceOfStrings(conflicts)))
