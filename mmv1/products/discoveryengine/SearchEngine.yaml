@@ -49,6 +49,11 @@ examples:
     vars:
       engine_id: 'example-engine-id'
       data_store_id: 'example-datastore-id'
+  - name: 'discoveryengine_searchengine_agentspace_basic'
+    primary_resource_id: 'agentspace_basic'
+    vars:
+      engine_id: 'example-engine-id'
+      data_store_id: 'example-datastore-id'
 parameters:
   - name: 'engineId'
     type: String
@@ -147,3 +152,9 @@ properties:
         description: |
           The name of the company, business or entity that is associated with the engine. Setting this may help improve LLM related features.cd
         immutable: true
+  - name: 'appType'
+    type: String
+    description: |
+      This is the application type this engine resource represents.
+      The supported values: 'APP_TYPE_UNSPECIFIED', 'APP_TYPE_INTRANET'.
+    immutable: true
