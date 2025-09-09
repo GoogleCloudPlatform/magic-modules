@@ -118,7 +118,7 @@ Example:
 write_only: true
 ```
 
-**Warning:** This field cannot be used in combination with `exactly_one_of` on multiple write-only fields. This is planned to be fixed in the future.
+**Warning:** This field cannot be used in combination with `exactly_one_of` on multiple write-only fields. This is planned to be [fixed in the future](https://github.com/hashicorp/terraform-provider-google/issues/24327).
 
 ### `write_only_legacy` (deprecated)
 If true, the field is considered "write-only", which means that its value will
