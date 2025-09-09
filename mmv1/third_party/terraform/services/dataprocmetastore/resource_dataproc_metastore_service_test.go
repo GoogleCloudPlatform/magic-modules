@@ -261,7 +261,7 @@ func checkTagBindings(testContext map[string]interface{}) resource.TestCheckFunc
 
 		// Construct the full resource name
 		projectID := testContext["project"].(string)
-		parent := fmt.Sprintf("//dataprocmetastore.googleapis.com/projects/%s/locations/%s/services/%s", projectID, location, id)
+		parent := fmt.Sprintf("//metastore.googleapis.com/projects/%s/locations/%s/services/%s", projectID, location, id)
 
 		// Build the URL for the API call
 		apiURL, err := url.Parse("https://cloudresourcemanager.googleapis.com/v3/tagBindings")
