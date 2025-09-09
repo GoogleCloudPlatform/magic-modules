@@ -1187,7 +1187,7 @@ func TestAccStorageBucket_emptyCors(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy"},
 			},
 			{
-				Config: testGoogleStorageBucketPartiallyEmptyCors(bucketName),
+				Config: testGoogleStorageBucketPartialCors(bucketName),
 			},
 			{
 				ResourceName:            "google_storage_bucket.bucket",
@@ -2270,7 +2270,7 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
-func testGoogleStorageBucketPartiallyEmptyCors(bucketName string) string {
+func testGoogleStorageBucketPartialCors(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name          = "%s"
