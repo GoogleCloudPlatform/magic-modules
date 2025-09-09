@@ -139,6 +139,7 @@ properties:
           - 'schedule_options.0.disable_auto_scheduling'
           - 'schedule_options.0.start_time'
           - 'schedule_options.0.end_time'
+          - 'schedule_options.0.event_driven_schedule'
       - name: 'startTime'
         type: Time
         description: |
@@ -151,6 +152,7 @@ properties:
           - 'schedule_options.0.disable_auto_scheduling'
           - 'schedule_options.0.start_time'
           - 'schedule_options.0.end_time'
+          - 'schedule_options.0.event_driven_schedule'
       - name: 'endTime'
         type: Time
         description: |
@@ -162,6 +164,22 @@ properties:
           - 'schedule_options.0.disable_auto_scheduling'
           - 'schedule_options.0.start_time'
           - 'schedule_options.0.end_time'
+          - 'schedule_options.0.event_driven_schedule'
+      - name: 'eventDrivenSchedule'
+        type: NestedObject
+        description: |
+          Event driven transfer schedule options. If set, the transfer will be scheduled upon events arrial.
+        at_least_one_of:
+          - 'schedule_options.0.disable_auto_scheduling'
+          - 'schedule_options.0.start_time'
+          - 'schedule_options.0.end_time'
+          - 'schedule_options.0.event_driven_schedule'
+        properties:
+          - name: 'pubsubSubscription'
+            type: string
+            description: |
+              Pub/Sub subscription name used to receive events. Only Google Cloud Storage data source support this option. Format: projects/{project}/subscriptions/{subscription}.
+
   - name: 'emailPreferences'
     type: NestedObject
     description: |
