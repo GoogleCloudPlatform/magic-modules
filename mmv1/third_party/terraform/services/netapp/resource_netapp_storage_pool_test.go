@@ -181,7 +181,6 @@ resource "google_netapp_storage_pool" "test_pool" {
 `, context)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_update(t *testing.T) {
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-2", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
@@ -190,7 +189,7 @@ func TestAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_update(t *tes
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetappStoragePoolDestroyProducer(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
@@ -231,12 +230,10 @@ func TestAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_update(t *tes
 func testAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_full(context map[string]interface{}) string {
   return acctest.Nprintf(`
 data "google_compute_network" "default" {
-  provider = google-beta
   name = "%{network_name}"
 }
 
 resource "google_netapp_storage_pool" "test_pool" {
-  provider = google-beta
   name = "tf-test-pool%{random_suffix}"
   location = "us-south1-a"
   service_level = "FLEX"
@@ -263,12 +260,10 @@ resource "google_netapp_storage_pool" "test_pool" {
 func testAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_update(context map[string]interface{}) string {
   return acctest.Nprintf(`
 data "google_compute_network" "default" {
-  provider = google-beta
   name = "%{network_name}"
 }
 
 resource "google_netapp_storage_pool" "test_pool" {
-  provider = google-beta
   name = "tf-test-pool%{random_suffix}"
   location = "us-south1-a"
   service_level = "FLEX"
@@ -295,12 +290,10 @@ resource "google_netapp_storage_pool" "test_pool" {
 func testAccNetappStoragePool_flexAutoTierStoragePoolCreateExample_update_2(context map[string]interface{}) string {
   return acctest.Nprintf(`
 data "google_compute_network" "default" {
-  provider = google-beta
   name = "%{network_name}"
 }
 
 resource "google_netapp_storage_pool" "test_pool" {
-  provider = google-beta
   name = "tf-test-pool%{random_suffix}"
   location = "us-south1-a"
   service_level = "FLEX"
@@ -322,7 +315,6 @@ resource "google_netapp_storage_pool" "test_pool" {
 }
 `, context)
 }
-{{ end }}
 
 func TestAccNetappStoragePool_FlexRegionalStoragePoolCreateExample_update(t *testing.T) {
 	context := map[string]interface{}{
