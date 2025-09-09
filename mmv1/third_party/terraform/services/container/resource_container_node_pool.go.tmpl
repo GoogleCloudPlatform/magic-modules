@@ -1,6 +1,9 @@
 package container
 
 import (
+{{- if ne $.TargetVersionName `ga` }}
+    "context"
+{{- end }}
 	"fmt"
 	"log"
 	"regexp"
@@ -127,20 +130,25 @@ func (instanceGroupManagerCache *instanceGroupManagerCache) refreshIfNeeded(d *s
 		return nil
 	}
 
-	igms, err := config.NewComputeClient(userAgent).InstanceGroupManagers.List(matches[1], matches[2]).Do()
+    updateTime := time.Now()
+	err := config.NewComputeClient(userAgent).InstanceGroupManagers.List(matches[1], matches[2]).Pages(context.Background(), instanceGroupManagerCache.processList(updateTime))
 	if err != nil {
 		return transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("InstanceGroupManagers for node pool %q", npName))
 	}
-
-	updateTime := time.Now()
-	for _, instanceGroupManager := range igms.Items {
-		fullyQualifiedName := instanceGroupManagerURL.FindString(instanceGroupManager.SelfLink)
-		instanceGroupManagerCache.instanceGroupManagers[fullyQualifiedName] = &instanceGroupManagerWithUpdateTime{
-			instanceGroupManager: instanceGroupManager,
-			updateTime:           updateTime,
-		}
-	}
 	return nil
+}
+
+func (instanceGroupManagerCache *instanceGroupManagerCache) processList(updateTime time.Time) func(*compute.InstanceGroupManagerList) error {
+    return func(igmList *compute.InstanceGroupManagerList) error {
+        for _, instanceGroupManager := range igmList.Items {
+            fullyQualifiedName := instanceGroupManagerURL.FindString(instanceGroupManager.SelfLink)
+            instanceGroupManagerCache.instanceGroupManagers[fullyQualifiedName] = &instanceGroupManagerWithUpdateTime{
+                instanceGroupManager: instanceGroupManager,
+                updateTime:           updateTime,
+            }
+        }
+        return nil
+    }
 }
 
 func (instanceGroupManagerCache *instanceGroupManagerCache) needsRefresh(fullyQualifiedName string) bool {
@@ -1042,7 +1050,7 @@ func resourceContainerNodePoolExists(d *schema.ResourceData, meta interface{}) (
 	}
 {{- else }}
 	if err := npCache.refreshIfNeeded(d, config, userAgent, nodePoolInfo, name); err != nil {
-    return false, err
+        return false, err
 	}
 	_, err = npCache.get(nodePoolInfo.fullyQualifiedName(name))
 	if err != nil {
