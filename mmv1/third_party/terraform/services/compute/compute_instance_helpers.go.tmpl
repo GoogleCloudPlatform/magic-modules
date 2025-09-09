@@ -352,9 +352,6 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 		"provisioning_model":          resp.ProvisioningModel,
 		"instance_termination_action": resp.InstanceTerminationAction,
 		"availability_domain":         resp.AvailabilityDomain,
-{{ if ne $.TargetVersionName `ga` -}}
-		"skip_guest_os_shutdown":      resp.SkipGuestOsShutdown,
-{{ end }}
 		"termination_time":            resp.TerminationTime,
 	}
 
@@ -371,6 +368,8 @@ func flattenScheduling(resp *compute.Scheduling) []map[string]interface{} {
 	}
 
 {{ if ne $.TargetVersionName `ga` -}}
+	schedulingMap["skip_guest_os_shutdown"] = resp.SkipGuestOsShutdown
+
 	if resp.HostErrorTimeoutSeconds != 0 {
 		schedulingMap["host_error_timeout_seconds"] = resp.HostErrorTimeoutSeconds
 	}
