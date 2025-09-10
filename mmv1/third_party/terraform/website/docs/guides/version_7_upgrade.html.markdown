@@ -324,4 +324,8 @@ A state upgrader will automatically migrate the `topic` field's format in your T
 
 `enable_secure_private_service_connect` has been removed from the GA provider it is not available in the GA version of the API. The field is still available when using the beta provider. 
 
-Now, destroying the resource will only remove it from Terraform's state and leave the service enabled. To disable a service when the resource is destroyed, you must now make an explicit decision by setting `disable_on_destroy = true`.
+## Resource: `google_vertex_ai_index`
+
+### `metadata`, and `metadata.config` are now required.
+
+`metadata`, and `metadata.config` are now required. These fields were already required for resource functionality, so no change is necessary to existing configurations.
