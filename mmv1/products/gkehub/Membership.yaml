@@ -122,12 +122,6 @@ properties:
     description: |
       The unique identifier of the membership.
     output: true
-  - name: 'description'
-    type: String
-    description: |
-      The name of this entity type to be displayed on the console. This field is unavailable in v1 of the API.
-    min_version: 'beta'
-    deprecation_message: '`description` is deprecated and will be removed in a future major release.'
   - name: 'labels'
     type: KeyValueLabels
     description: |
