@@ -2296,9 +2296,6 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
-/*
-Checks the length of cors in is equal to
-*/
 func testAccCheckCors(t *testing.T, corsInConfig int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources["google_storage_bucket.bucket"]
