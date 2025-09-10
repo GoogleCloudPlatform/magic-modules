@@ -1085,7 +1085,7 @@ func testAccNetappVolume_volumeExportPolicyWithSquashMode_allSquash(context map[
       protocols = ["NFSV3"]
       export_policy {
           rules {
-              access_type     = "READ_WRITE"
+              access_type     = "READ_NONE"
               allowed_clients = "0.0.0.0/0"
               has_root_access       = "false"
               kerberos5_read_only   = false
