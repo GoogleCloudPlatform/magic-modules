@@ -2296,6 +2296,9 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
+/*
+Checks the length of cors in is equal to
+*/
 func testAccCheckCors(t *testing.T, corsInConfig int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources["google_storage_bucket.bucket"]
@@ -2308,7 +2311,7 @@ func testAccCheckCors(t *testing.T, corsInConfig int) resource.TestCheckFunc {
 		}
 
 		if corsInConfig != corsInState {
-			return fmt.Errorf("Cors in terraform config should be equal to cors in state file")
+			return fmt.Errorf("Length of Cors in terraform state file and config should be equal")
 		}
 		return nil
 	}
