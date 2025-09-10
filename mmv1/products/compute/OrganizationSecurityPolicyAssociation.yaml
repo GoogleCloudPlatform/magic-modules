@@ -77,7 +77,7 @@ properties:
       The display name of the security policy of the association.
     min_version: 'beta'
     deprecation_message: '`display_name` is deprecated and will be removed in a future release, use `short_name` instead.'
-    output: true
+    default_from_api: true
   - name: 'shortName'
     type: String
     description: |
