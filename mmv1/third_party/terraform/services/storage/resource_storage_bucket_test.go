@@ -1171,6 +1171,9 @@ func TestAccStorageBucket_emptyCors(t *testing.T) {
 			},
 			{
 				Config: testGoogleStorageBucketsEmptyCors(bucketName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckCors(t, 2),
+				),
 			},
 			{
 				ResourceName:            "google_storage_bucket.bucket",
@@ -1181,7 +1184,7 @@ func TestAccStorageBucket_emptyCors(t *testing.T) {
 			{
 				Config: testGoogleStorageBucketPartialCors(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCors(t),
+					testAccCheckCors(t, 3),
 				),
 			},
 			{
@@ -2293,26 +2296,19 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
-func testAccCheckCors(t *testing.T) resource.TestCheckFunc {
+func testAccCheckCors(t *testing.T, corsInConfig int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources["google_storage_bucket.bucket"]
 		if !ok {
 			return fmt.Errorf("Bucket not found: %s", "google_storage_bucket.bucket")
 		}
-		corsInConfig, err := strconv.Atoi(rs.Primary.Attributes["cors.#"])
+		corsInState, err := strconv.Atoi(rs.Primary.Attributes["cors.#"])
 		if err != nil {
 			return fmt.Errorf("Error conersion string to int %s", err)
 		}
 
-		config := acctest.GoogleProviderConfig(t)
-		bucketClient := config.NewStorageClient(config.UserAgent)
-		res, err := bucketClient.Buckets.Get(rs.Primary.Attributes["name"]).Do()
-		if err != nil {
-			return fmt.Errorf("Error fetching bucket %s", err)
-		}
-
-		if corsInConfig < len(res.Cors) {
-			return fmt.Errorf("Cors in terraform config cannot be less than cors in API response")
+		if corsInConfig != corsInState {
+			return fmt.Errorf("Cors in terraform config should be equal to cors in state file")
 		}
 		return nil
 	}
