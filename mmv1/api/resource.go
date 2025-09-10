@@ -308,6 +308,9 @@ type Resource struct {
 	// control if a resource is continuously generated from public OpenAPI docs
 	AutogenStatus string `yaml:"autogen_status"`
 
+	// If true, this resource generates with the new plugin framework resource template
+	FrameworkResource bool `yaml:"plugin_framework,omitempty"`
+
 	// The three groups of []*Type fields are expected to be strictly ordered within a yaml file
 	// in the sequence of Virtual Fields -> Parameters -> Properties
 
@@ -382,6 +385,12 @@ type TGCResource struct {
 
 	// If true, the Terraform custom encoder is not applied during tfplan2cai
 	TGCIgnoreTerraformEncoder bool `yaml:"tgc_ignore_terraform_encoder,omitempty"`
+
+	// [Optional] The parameter that uniquely identifies the resource.
+	// Generally, it's safe to leave empty, in which case it defaults to `name`.
+	// Other values are normally useful in cases where an object has a parent
+	// and is identified by some non-name value, such as an ip+port pair.
+	CaiIdentity string `yaml:"cai_identity,omitempty"`
 }
 
 func (r *Resource) UnmarshalYAML(unmarshal func(any) error) error {
@@ -608,7 +617,7 @@ func (r Resource) SensitiveProps() []*Type {
 func (r Resource) WriteOnlyProps() []*Type {
 	props := r.AllNestedProperties(r.RootProperties())
 	return google.Select(props, func(p *Type) bool {
-		return p.WriteOnly
+		return p.WriteOnlyLegacy
 	})
 }
 
@@ -1194,29 +1203,40 @@ func ImportIdFormats(importFormat, identity []string, baseUrl string) []string {
 	return uniq
 }
 
-func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
+// IgnoreReadProperties returns a sorted slice of property names (snake_case) that should be ignored when reading.
+// This is useful for downstream code that needs to iterate over these properties.
+func (r Resource) IgnoreReadProperties(e resource.Examples) []string {
 	var props []string
 	for _, tp := range r.AllUserProperties() {
 		if tp.UrlParamOnly || tp.IsA("ResourceRef") {
-			props = append(props, fmt.Sprintf("\"%s\"", google.Underscore(tp.Name)))
+			props = append(props, google.Underscore(tp.Name))
 		}
 	}
-	for _, tp := range e.IgnoreReadExtra {
-		props = append(props, fmt.Sprintf("\"%s\"", tp))
-	}
-	for _, tp := range r.IgnoreReadLabelsFields(r.PropertiesWithExcluded()) {
-		props = append(props, fmt.Sprintf("\"%s\"", tp))
-	}
-	for _, tp := range ignoreReadFields(r.AllUserProperties()) {
-		props = append(props, fmt.Sprintf("\"%s\"", tp))
-	}
+	props = append(props, e.IgnoreReadExtra...)
+	props = append(props, r.IgnoreReadLabelsFields(r.PropertiesWithExcluded())...)
+	props = append(props, ignoreReadFields(r.AllUserProperties())...)
 
 	slices.Sort(props)
+	return props
+}
 
+// IgnoreReadPropertiesToString returns the ignore read properties as a Go-syntax string slice.
+// This is a wrapper around IgnoreReadProperties for backwards compatibility.
+func (r Resource) IgnoreReadPropertiesToString(e resource.Examples) string {
+	props := r.IgnoreReadProperties(e)
 	if len(props) > 0 {
-		return fmt.Sprintf("[]string{%s}", strings.Join(props, ", "))
+		return fmt.Sprintf("[]string{%s}", strings.Join(quoteStrings(props), ", "))
 	}
 	return ""
+}
+
+// quoteStrings returns a new slice with each string quoted.
+func quoteStrings(strs []string) []string {
+	quoted := make([]string, len(strs))
+	for i, s := range strs {
+		quoted[i] = fmt.Sprintf("\"%s\"", s)
+	}
+	return quoted
 }
 
 func ignoreReadFields(props []*Type) []string {
@@ -1890,14 +1910,18 @@ func (r Resource) DefineAssetTypeForResourceInProduct() bool {
 // For example: //monitoring.googleapis.com/v3/projects/{{project}}/services/{{service_id}}
 func (r Resource) rawCaiAssetNameTemplate(productBackendName string) string {
 	caiBaseUrl := ""
+	caiId := "name"
+	if r.CaiIdentity != "" {
+		caiId = r.CaiIdentity
+	}
 	if r.CaiBaseUrl != "" {
-		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.CaiBaseUrl)
+		caiBaseUrl = fmt.Sprintf("%s/{{%s}}", r.CaiBaseUrl, caiId)
 	}
 	if caiBaseUrl == "" {
 		caiBaseUrl = r.SelfLink
 	}
 	if caiBaseUrl == "" {
-		caiBaseUrl = fmt.Sprintf("%s/{{name}}", r.BaseUrl)
+		caiBaseUrl = fmt.Sprintf("%s/{{%s}}", r.BaseUrl, caiId)
 	}
 	return fmt.Sprintf("//%s.googleapis.com/%s", productBackendName, caiBaseUrl)
 }
@@ -2008,6 +2032,13 @@ func (r *Resource) ShouldGenerateSingularDataSource() bool {
 	return r.Datasource.Generate
 }
 
+func (r *Resource) ShouldGenerateSingularDataSourceTests() bool {
+	if r.Datasource == nil {
+		return false
+	}
+	return !r.Datasource.ExcludeTest
+}
+
 func (r Resource) ShouldDatasourceSetLabels() bool {
 	for _, p := range r.Properties {
 		if p.Name == "labels" && p.Type == "KeyValueLabels" {
@@ -2030,7 +2061,7 @@ func (r Resource) ShouldDatasourceSetAnnotations() bool {
 // that should be marked as "Required".
 func (r Resource) DatasourceRequiredFields() []string {
 	requiredFields := []string{}
-	uriParts := strings.Split(r.SelfLink, "/")
+	uriParts := strings.Split(r.IdFormat, "/")
 
 	for _, part := range uriParts {
 		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
@@ -2047,7 +2078,7 @@ func (r Resource) DatasourceRequiredFields() []string {
 // that should be marked as "Optional".
 func (r Resource) DatasourceOptionalFields() []string {
 	optionalFields := []string{}
-	uriParts := strings.Split(r.SelfLink, "/")
+	uriParts := strings.Split(r.IdFormat, "/")
 
 	for _, part := range uriParts {
 		if strings.HasPrefix(part, "{{") && strings.HasSuffix(part, "}}") {
@@ -2133,7 +2164,7 @@ func (r Resource) TGCTestIgnorePropertiesToStrings(e resource.Examples) []string
 // Filters out computed properties during cai2hcl
 func (r Resource) ReadPropertiesForTgc() []*Type {
 	return google.Reject(r.AllUserProperties(), func(v *Type) bool {
-		return v.Output || v.UrlParamOnly
+		return v.Output || v.UrlParamOnly || v.TGCIgnoreRead
 	})
 }
 
