@@ -1172,7 +1172,7 @@ func TestAccStorageBucket_emptyCors(t *testing.T) {
 			{
 				Config: testGoogleStorageBucketsEmptyCors(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCors(t, 2),
+					testAccCheckBucketCorsCount(t, 2),
 				),
 			},
 			{
@@ -1184,7 +1184,7 @@ func TestAccStorageBucket_emptyCors(t *testing.T) {
 			{
 				Config: testGoogleStorageBucketPartialCors(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckCors(t, 3),
+					testAccCheckBucketCorsCount(t, 3),
 				),
 			},
 			{
@@ -2296,7 +2296,7 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
-func testAccCheckCors(t *testing.T, corsInConfig int) resource.TestCheckFunc {
+func testAccCheckBucketCorsCount(t *testing.T, corsInConfig int) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources["google_storage_bucket.bucket"]
 		if !ok {
