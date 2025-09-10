@@ -332,6 +332,10 @@ properties:
         description: |-
           VPC Access configuration to use for this Revision. For more information, visit https://cloud.google.com/run/docs/configuring/connecting-vpc.
         properties:
+          - name: 'connector'
+            type: String
+            description: |-
+              VPC Access connector name. Format: projects/{project}/locations/{location}/connectors/{connector}, where {project} can be project id or number.
           - name: 'egress'
             type: Enum
             description: |-
@@ -478,6 +482,12 @@ properties:
               type: String
               description: |-
                 Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image.
+            - name: 'dependsOn'
+              type: Array
+              description: |-
+                Containers which should be started before this container. If specified the container will wait to start until all containers with the listed names are healthy.
+              item_type:
+                type: String
       - name: 'volumes'
         type: Array
         description: |-
