@@ -11,6 +11,7 @@ import (
 
 func TestAccEphemeralSecretManagerSecretVersion_basic(t *testing.T) {
 	t.Parallel()
+	acctest.SkipIfVcr(t)
 
 	secret := "tf-test-secret-" + acctest.RandString(t, 10)
 	secretData := "secret-data"
