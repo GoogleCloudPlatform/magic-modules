@@ -1864,8 +1864,8 @@ func ResourceContainerCluster() *schema.Resource {
 							Type: schema.TypeList,
 							MaxItems: 1,
 							Optional: true,
+							Computed: true,
 							Description: `AutoIpamConfig contains all information related to Auto IPAM.`,
-							DiffSuppressFunc: autoIpamConfigSupressDiff,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"enabled": {
@@ -8081,18 +8081,6 @@ func BinaryAuthorizationDiffSuppress(k, old, new string, r *schema.ResourceData)
 	if k == "binary_authorization.#" && old == "1" && new == "0" {
 		o, _ := r.GetChange("binary_authorization.0.enabled")
 		if !o.(bool) && !r.HasChange("binary_authorization.0.evaluation_mode") {
-			return true
-		}
-	}
-
-	return false
-}
-
-func autoIpamConfigSupressDiff(k, old, new string, d *schema.ResourceData) bool {
-	// An empty config is equivalent to a config with enabled set to false.
-	if k == "ip_allocation_policy.0.auto_ipam_config.#" && old == "1" && new == "0" {
-		o, _ := d.GetChange("ip_allocation_policy.0.auto_ipam_config.0.enabled")
-		if !o.(bool) && !d.HasChange("ip_allocation_policy.0.auto_ipam_config.0.enabled") {
 			return true
 		}
 	}
