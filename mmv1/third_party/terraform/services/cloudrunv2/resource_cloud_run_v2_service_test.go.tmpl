@@ -13,6 +13,88 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/services/cloudrunv2"
 )
 
+func TestAccCloudRunV2WorkerPool_vpcAccessUpdate(t *testing.T) {
+	t.Parallel()
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+		"region":        "us-central1",
+	}
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckCloudRunV2WorkerPoolDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCloudRunV2WorkerPool_vpcAccessConfig(context, "PRIVATE_RANGES_ONLY"),
+			},
+			{
+				ResourceName:      "google_cloud_run_v2_worker_pool.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"name", "location", "annotations", "labels", "terraform_labels", "deletion_protection",
+				},
+			},
+			{
+				Config: testAccCloudRunV2WorkerPool_vpcAccessConfig(context, "ALL_TRAFFIC"),
+			},
+			{
+				ResourceName:      "google_cloud_run_v2_worker_pool.default",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{
+					"name", "location", "annotations", "labels", "terraform_labels", "deletion_protection",
+				},
+			},
+		},
+	})
+}
+
+func testAccCloudRunV2WorkerPool_vpcAccessConfig(ctx map[string]interface{}, egress string) string {
+	return fmt.Sprintf(`
+resource "google_compute_network" "vpc" {
+  name                    = "tf-crwp-vpc-%[1]s"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "subnet" {
+  name          = "tf-crwp-subnet-%[1]s"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "%[2]s"
+  network       = google_compute_network.vpc.id
+}
+
+resource "google_vpc_access_connector" "connector" {
+  name          = "tf-crwp-conn-%[1]s"
+  region        = "%[2]s"
+  network       = google_compute_network.vpc.name
+  ip_cidr_range = "10.8.0.0/28"
+
+  min_instances = 2
+  max_instances = 3
+}
+
+resource "google_cloud_run_v2_worker_pool" "default" {
+  name                = "tf-crwp-%[1]s"
+  location            = "%[2]s"
+  deletion_protection = false
+  launch_stage        = "BETA"
+
+  template {
+    containers {
+      image = "gcr.io/cloudrun/hello"
+    }
+    vpc_access {
+      connector = google_vpc_access_connector.connector.id
+      egress    = "%[3]s"
+    }
+  }
+}
+`, ctx["random_suffix"], ctx["region"], egress)
+}
+
 func TestAccCloudRunV2Service_cloudrunv2ServiceFullUpdate(t *testing.T) {
 	t.Parallel()
 
