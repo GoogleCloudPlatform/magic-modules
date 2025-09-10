@@ -561,7 +561,7 @@ func TestAccBigtableInstance_createWithNodeScalingFactorDefault(t *testing.T) {
 			{
 				// Create config with nothing specified for node scaling factor.
 				// Ensure that we get 1X back.
-				Config: testAccBigtableInstance_nodeScalingFactor_allowDestroy(instanceName, 2, ""),
+				Config: testAccBigtableInstance_nodeScalingFactor(instanceName, 2, "", false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.num_nodes", "2"),
 					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.node_scaling_factor", "NodeScalingFactor1X"),
@@ -591,7 +591,7 @@ func TestAccBigtableInstance_createWithNodeScalingFactorThenUpdateViaForceNew(t 
 		Steps: []resource.TestStep{
 			{
 				// Create config with node scaling factor as 2x.
-				Config: testAccBigtableInstance_nodeScalingFactor_allowDestroy(instanceName, 2, "NodeScalingFactor2X"),
+				Config: testAccBigtableInstance_nodeScalingFactor(instanceName, 2, "NodeScalingFactor2X", false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.num_nodes", "2"),
 					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.node_scaling_factor", "NodeScalingFactor2X"),
@@ -605,7 +605,7 @@ func TestAccBigtableInstance_createWithNodeScalingFactorThenUpdateViaForceNew(t 
 			},
 			{
 				// Updating the node scaling factor only possible without delete protection, as we need ForceNew
-				Config: testAccBigtableInstance_nodeScalingFactor_allowDestroy(instanceName, 2, "NodeScalingFactor1X"),
+				Config: testAccBigtableInstance_nodeScalingFactor(instanceName, 2, "NodeScalingFactor1X", false),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.num_nodes", "2"),
 					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.node_scaling_factor", "NodeScalingFactor1X"),
@@ -621,7 +621,51 @@ func TestAccBigtableInstance_createWithNodeScalingFactorThenUpdateViaForceNew(t 
 	})
 }
 
-func testAccBigtableInstance_nodeScalingFactor_allowDestroy(instanceName string, numNodes int, nodeScalingFactor string) string {
+func TestAccBigtableInstance_addNewClusterWithoutDeletionProtection(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-nsf-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// Create config with node scaling factor as 2x.
+				Config: testAccBigtableInstance_nodeScalingFactor(instanceName, 2, "NodeScalingFactor2X", false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.num_nodes", "2"),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.node_scaling_factor", "NodeScalingFactor2X"),
+				),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
+			},
+			{
+				// Updating the node scaling factor only possible without delete protection, as we need ForceNew
+				Config: testAccBigtableInstance_nodeScalingFactor(instanceName, 2, "NodeScalingFactor1X", false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.num_nodes", "2"),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.node_scaling_factor", "NodeScalingFactor1X"),
+				),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
+			},
+		},
+	})
+}
+
+func testAccBigtableInstance_nodeScalingFactor(instanceName string, numNodes int, nodeScalingFactor string, allowDestroy bool) string {
 	nodeScalingFactorAttribute := ""
 	if nodeScalingFactor != "" {
 		nodeScalingFactorAttribute = fmt.Sprintf("node_scaling_factor = \"%s\"", nodeScalingFactor)
@@ -636,9 +680,9 @@ resource "google_bigtable_instance" "instance" {
     storage_type = "SSD"
 	%s
   }
-  deletion_protection = false
+  deletion_protection = %t
 }
-`, instanceName, instanceName, numNodes, nodeScalingFactorAttribute)
+`, instanceName, instanceName, numNodes, nodeScalingFactorAttribute, allowDestroy)
 }
 
 func testAccBigtableInstance_multipleClustersSameID(instanceName string) string {
