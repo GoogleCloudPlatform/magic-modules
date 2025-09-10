@@ -49,7 +49,7 @@ func TestAccDataSourceGoogleStorageBucketObjects_basic(t *testing.T) {
 					// Test match_glob
 					resource.TestCheckResourceAttr("data.google_storage_bucket_objects.my_bee_glob", "bucket_objects.0.name", context["object_0_name"].(string)),
 					// Test prefix
-					resource.TestCheckResourceAttr("data.google_storage_bucket_objects.my_fly_prefix", "bucket_objects.0.name", context["object_1_name"].(string)),
+					resource.TestCheckResourceAttr("data.google_storage_bucket_objects.my_fly_prefix", "bucket_objects.1.name", context["object_1_name"].(string)),
 				),
 			},
 		},
