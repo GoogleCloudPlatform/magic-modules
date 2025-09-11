@@ -34,14 +34,14 @@ For more information about types of resources and the generation process overall
 
 1. Complete the steps in [Set up your development environment]({{< ref "/develop/set-up-dev-environment" >}}) to set up your environment and your Google Cloud project.
 1. Ensure that your `magic-modules`, `terraform-provider-google`, and `terraform-provider-google-beta` repositories are up to date.
-   ```
-   cd ~/magic-modules
-   git checkout main && git clean -f . && git checkout -- . && git pull
-   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
-   git checkout main && git clean -f . && git checkout -- . && git pull
-   cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
-   git checkout main && git clean -f . && git checkout -- . && git pull
-   ```
+    ```bash
+    cd ~/magic-modules
+    git checkout main && git clean -f . && git checkout -- . && git pull
+    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google
+    git checkout main && git clean -f . && git checkout -- . && git pull
+    cd $GOPATH/src/github.com/hashicorp/terraform-provider-google-beta
+    git checkout main && git clean -f . && git checkout -- . && git pull
+    ```
 
 ## Add a resource
 
@@ -163,9 +163,8 @@ For more information about types of resources and the generation process overall
    - Replace all occurrences of `github.com/hashicorp/terraform-provider-google-beta/google-beta` with `github.com/hashicorp/terraform-provider-google/google`
    - Remove the `Example` suffix from all test function names.
    - Remove the comments at the top of the file.
-   - If beta-only fields are being tested, do the following:
-     - Change the file suffix to `.go.tmpl`
-     - Wrap each beta-only test in a separate version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`
+   - If any of the added Go code (including any imports) is beta-only, change the file suffix to `.go.tmpl` and wrap the beta-only code in a version guard: `{{- if ne $.TargetVersionName "ga" -}}...{{- else }}...{{- end }}`.
+     - If the whole resource is beta-only, wrap everything except package declarations. Otherwise, individually wrap each logically-related block of code in a version guard (field, test, etc) rather than grouping adjacent version-guarded sections - it's easier to read and easier to modify as things move out of beta.
 5. Register the resource `handwrittenResources` in [`magic-modules/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl`](https://github.com/GoogleCloudPlatform/magic-modules/blob/main/mmv1/third_party/terraform/provider/provider_mmv1_resources.go.tmpl)
    - Add a version guard for any beta-only resources.
 6. Optional: Complete other handwritten tasks that require the MMv1 configuration file.

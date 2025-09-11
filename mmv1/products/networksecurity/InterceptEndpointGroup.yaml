@@ -19,7 +19,6 @@ description: |-
   - An association between their network and the endpoint group.
   - A security profile that points to the endpoint group.
   - A firewall rule that references the security profile (group).
-min_version: 'beta'
 docs:
 id_format: 'projects/{{project}}/locations/{{location}}/interceptEndpointGroups/{{intercept_endpoint_group_id}}'
 base_url: 'projects/{{project}}/locations/{{location}}/interceptEndpointGroups'
@@ -60,7 +59,6 @@ parameters:
     type: String
     description: |-
       The cloud location of the endpoint group, currently restricted to `global`.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -69,7 +67,6 @@ parameters:
     description: |-
       The ID to use for the endpoint group, which will become the final component
       of the endpoint group's resource name.
-    min_version: 'beta'
     url_param_only: true
     required: true
     immutable: true
@@ -80,34 +77,29 @@ properties:
       The resource name of this endpoint group, for example:
       `projects/123456789/locations/global/interceptEndpointGroups/my-eg`.
       See https://google.aip.dev/122 for more details.
-    min_version: 'beta'
     output: true
   - name: 'createTime'
     type: String
     description: |-
       The timestamp when the resource was created.
       See https://google.aip.dev/148#timestamps.
-    min_version: 'beta'
     output: true
   - name: 'updateTime'
     type: String
     description: |-
       The timestamp when the resource was most recently updated.
       See https://google.aip.dev/148#timestamps.
-    min_version: 'beta'
     output: true
   - name: 'labels'
     type: KeyValueLabels
     description: |-
       Labels are key/value pairs that help to organize and filter resources.
-    min_version: 'beta'
   - name: 'interceptDeploymentGroup'
     type: String
     description: |-
       The deployment group that this endpoint group is connected to, for example:
       `projects/123456789/locations/global/interceptDeploymentGroups/my-dg`.
       See https://google.aip.dev/124.
-    min_version: 'beta'
     required: true
     immutable: true
   - name: 'state'
@@ -123,7 +115,6 @@ properties:
       DELETING
       OUT_OF_SYNC
       DELETE_FAILED
-    min_version: 'beta'
     output: true
   - name: 'reconciling'
     type: Boolean
@@ -132,20 +123,17 @@ properties:
       and the system is working to reconcile them. This is part of the normal
       operation (e.g. adding a new association to the group).
       See https://google.aip.dev/128.
-    min_version: 'beta'
     output: true
   - name: description
     type: String
     description: |-
       User-provided description of the endpoint group.
       Used as additional context for the endpoint group.
-    min_version: 'beta'
   - name: associations
     type: Array
     is_set: true
     description: |-
       List of associations to this endpoint group.
-    min_version: 'beta'
     output: true
     item_type:
       type: NestedObject
@@ -156,7 +144,6 @@ properties:
             The connected association's resource name, for example:
             `projects/123456789/locations/global/interceptEndpointGroupAssociations/my-ega`.
             See https://google.aip.dev/124.
-          min_version: 'beta'
           output: true
         - name: network
           type: String
@@ -164,7 +151,6 @@ properties:
             The associated network, for example:
             projects/123456789/global/networks/my-network.
             See https://google.aip.dev/124.
-          min_version: 'beta'
           output: true
         - name: state
           type: String
@@ -178,13 +164,11 @@ properties:
             CLOSED
             OUT_OF_SYNC
             DELETE_FAILED
-          min_version: 'beta'
           output: true
   - name: connectedDeploymentGroup
     type: NestedObject
     description: |-
       The endpoint group's view of a connected deployment group.
-    min_version: 'beta'
     output: true
     properties:
       - name: name
@@ -193,14 +177,12 @@ properties:
           The connected deployment group's resource name, for example:
           `projects/123456789/locations/global/interceptDeploymentGroups/my-dg`.
           See https://google.aip.dev/124.
-        min_version: 'beta'
         output: true
       - name: locations
         type: Array
         is_set: true
         description: |-
           The list of locations where the deployment group is present.
-        min_version: 'beta'
         output: true
         item_type:
           type: NestedObject
@@ -218,5 +200,4 @@ properties:
                 STATE_UNSPECIFIED
                 ACTIVE
                 OUT_OF_SYNC
-              min_version: 'beta'
               output: true

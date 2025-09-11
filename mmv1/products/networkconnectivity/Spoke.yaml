@@ -226,7 +226,6 @@ properties:
         type: Array
         description: The list of router appliance instances
         required: true
-        immutable: true
         item_type:
           description: The list of router appliance instances
           type: NestedObject
@@ -234,13 +233,11 @@ properties:
             - name: 'virtualMachine'
               type: String
               description: The URI of the virtual machine resource
-              immutable: true
               required: true
               diff_suppress_func: 'tpgresource.CompareSelfLinkOrResourceName'
             - name: 'ipAddress'
               type: String
               description: The IP address on the VM to use for peering.
-              immutable: true
               required: true
       - name: 'siteToSiteDataTransfer'
         type: Boolean
@@ -257,12 +254,14 @@ properties:
   - name: 'linkedVpcNetwork'
     type: NestedObject
     description: VPC network that is associated with the spoke.
-    immutable: true
     conflicts:
       - linked_interconnect_attachments
       - linked_router_appliance_instances
       - linked_vpn_tunnels
       - linked_producer_vpc_network
+    update_mask_fields:
+      - 'linkedVpcNetwork.excludeExportRanges'
+      - 'linkedVpcNetwork.includeExportRanges'
     properties:
       - name: 'uri'
         type: String

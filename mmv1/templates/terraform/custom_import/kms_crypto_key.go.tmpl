@@ -13,10 +13,6 @@
 		return nil, fmt.Errorf("Error setting name: %s", err)
 	}
 
-	if err := d.Set("skip_initial_version_creation", false); err != nil {
-		return nil, fmt.Errorf("Error setting skip_initial_version_creation: %s", err)
-	}
-
 	id, err := tpgresource.ReplaceVars(d, config, "{{$.GetIdFormat}}")
 	if err != nil {
 		return nil, fmt.Errorf("Error constructing id: %s", err)

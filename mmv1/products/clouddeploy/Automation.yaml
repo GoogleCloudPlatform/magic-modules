@@ -104,7 +104,6 @@ properties:
   - name: 'suspended'
     type: Boolean
     description: "Optional. When Suspended, automation is deactivated from execution."
-    send_empty_value: true
   - name: 'serviceAccount'
     type: String
     description: "Required. Email address of the user-managed IAM service account that creates Cloud Deploy release and rollout resources."
@@ -242,7 +241,6 @@ properties:
                         description: "Optional. The starting phase ID for the Rollout. If unspecified, the Rollout will start in the stable phase."
                       - name: 'disableRollbackIfRolloutPending'
                         type: Boolean
-                        send_empty_value: true
                         description: "Optional. If pending rollout exists on the target, the rollback operation will be aborted."
         - name: 'timedPromoteReleaseRule'
           type: NestedObject

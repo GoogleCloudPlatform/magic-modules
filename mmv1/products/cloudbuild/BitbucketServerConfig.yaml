@@ -40,6 +40,7 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+include_in_tgc_next_DO_NOT_USE: true
 custom_code:
   encoder: 'templates/terraform/encoders/cloudbuild_bitbucketserver_config.go.tmpl'
   post_create: 'templates/terraform/post_create/cloudbuild_bitbucketserver_config.go.tmpl'

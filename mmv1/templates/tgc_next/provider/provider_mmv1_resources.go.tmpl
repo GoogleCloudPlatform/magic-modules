@@ -1,0 +1,26 @@
+package provider
+
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	{{- range $object := $.ResourcesForVersion }}
+	  "github.com/hashicorp/terraform-provider-google/google/services/{{ $object.ServiceName }}"
+	{{- end }}
+	"github.com/GoogleCloudPlatform/terraform-google-conversion/v6/pkg/services/resourcemanager"
+)
+
+var handwrittenTfplan2caiResources = map[string]*schema.Resource{
+	// ####### START handwritten resources ###########
+	"google_compute_instance": compute.ResourceComputeInstance(),
+	"google_project":          resourcemanager.ResourceGoogleProject(),
+	// ####### END handwritten resources ###########
+}
+
+// Generated resources: {{ $.ResourceCount }}
+var generatedResources = map[string]*schema.Resource{
+	{{- range $object := $.ResourcesForVersion }}
+		{{- if $object.ResourceName }}
+			"{{ $object.TerraformName }}": {{ $object.ServiceName }}.Resource{{ $object.ResourceName -}}(),
+		{{- end }}
+	{{- end }}
+}

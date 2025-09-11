@@ -12,7 +12,7 @@ func TestAccAlloydbDatabaseInstanceDatasourceConfig(t *testing.T) {
 
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
-		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-instance-mandatory-1"),
+		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "alloydb-1"),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
@@ -48,6 +48,8 @@ resource "google_alloydb_cluster" "default" {
   initial_user {
     password = "tf-test-alloydb-cluster%{random_suffix}"
   }
+
+  deletion_protection = false
 }
 
 data "google_compute_network" "default" {

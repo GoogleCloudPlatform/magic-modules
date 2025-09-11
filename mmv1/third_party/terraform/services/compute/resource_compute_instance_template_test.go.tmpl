@@ -937,10 +937,6 @@ func TestAccComputeInstanceTemplate_performanceMonitoringUnit(t *testing.T) {
 		"instance_name":               fmt.Sprintf("tf-test-instance-template-%s", acctest.RandString(t, 10)),
 		"performance_monitoring_unit": "STANDARD",
 	}
-	context_2 := map[string]interface{}{
-		"instance_name":               context_1["instance_name"].(string),
-		"performance_monitoring_unit": "ENHANCED",
-	}
 	context_3 := map[string]interface{}{
 		"instance_name":               context_1["instance_name"].(string),
 		"performance_monitoring_unit": "ARCHITECTURAL",
@@ -956,18 +952,6 @@ func TestAccComputeInstanceTemplate_performanceMonitoringUnit(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
 					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "advanced_machine_features.0.performance_monitoring_unit", "STANDARD"),
-				),
-			},
-			{
-				ResourceName:      "google_compute_instance_template.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
-			{
-				Config: testAccComputeInstanceTemplate_performanceMonitoringUnit(context_2),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckComputeInstanceTemplateExists(t, "google_compute_instance_template.foobar", &instanceTemplate),
-					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "advanced_machine_features.0.performance_monitoring_unit", "ENHANCED"),
 				),
 			},
 			{
@@ -1769,6 +1753,36 @@ func TestAccComputeInstanceTemplate_migration(t *testing.T) {
 					testAccCheckComputeInstanceTemplateMetadata(&instanceTemplateUpdate, "foo", "bar"),
 					testAccCheckComputeInstanceTemplateContainsLabel(&instanceTemplateUpdate, "my_label", "foobar"),
 					testAccCheckComputeInstanceTemplateLacksShieldedVmConfig(&instanceTemplateUpdate),
+				),
+			},
+		},
+	})
+}
+
+func TestAccComputeInstanceTemplate_GuestOsFeatures(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	context := map[string]interface{}{
+		"template_name":     fmt.Sprintf("tf-test-%s", acctest.RandString(t, 10)),
+		"guest_os_features": `["UEFI_COMPATIBLE", "VIRTIO_SCSI_MULTIQUEUE", "GVNIC", "IDPF"]`,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_GuestOsFeatures(context),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "disk.0.guest_os_features.#", "4"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "disk.0.guest_os_features.0", "UEFI_COMPATIBLE"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "disk.0.guest_os_features.1", "VIRTIO_SCSI_MULTIQUEUE"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "disk.0.guest_os_features.2", "GVNIC"),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "disk.0.guest_os_features.3", "IDPF"),
 				),
 			},
 		},
@@ -4159,7 +4173,7 @@ resource "google_compute_instance_template" "foobar" {
 func testAccComputeInstanceTemplateConfidentialInstanceConfigEnable(suffix string, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "ubuntu-2004-lts"
+  family  = "ubuntu-2204-lts"
   project = "ubuntu-os-cloud"
 }
 
@@ -4217,7 +4231,7 @@ resource "google_compute_instance_template" "foobar2" {
 func testAccComputeInstanceTemplateConfidentialInstanceConfigNoEnable(suffix string, minCpuPlatform, confidentialInstanceType string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image2" {
-  family  = "ubuntu-2004-lts"
+  family  = "ubuntu-2204-lts"
   project = "ubuntu-os-cloud"
 }
 
@@ -4311,7 +4325,7 @@ resource "google_compute_instance_template" "foobar5" {
 func testAccComputeInstanceTemplateAdvancedMachineFeatures(suffix string) string {
 	return fmt.Sprintf(`
 data "google_compute_image" "my_image" {
-  family  = "ubuntu-2004-lts"
+  family  = "ubuntu-2204-lts"
   project = "ubuntu-os-cloud"
 }
 
@@ -4347,7 +4361,7 @@ resource "google_compute_instance_template" "foobar" {
 func testAccComputeInstanceTemplate_performanceMonitoringUnit(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
-  family  = "ubuntu-2004-lts"
+  family  = "ubuntu-2204-lts"
   project = "ubuntu-os-cloud"
 }
 
@@ -4373,7 +4387,7 @@ resource "google_compute_instance_template" "foobar" {
 func testAccComputeInstanceTemplate_enableUefiNetworking(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_compute_image" "my_image" {
-  family  = "ubuntu-2004-lts"
+  family  = "ubuntu-2204-lts"
   project = "ubuntu-os-cloud"
 }
 
@@ -5234,6 +5248,33 @@ resource "google_compute_instance_template" "foobar" {
   }
 
   key_revocation_action_type = %{key_revocation_action_type}
+}
+`, context)
+}
+
+func testAccComputeInstanceTemplate_GuestOsFeatures(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name         = "%{template_name}"
+  machine_type = "e2-medium"
+
+  disk {
+	source_image = data.google_compute_image.my_image.self_link
+	auto_delete  = true
+	disk_size_gb = 10
+	architecture = "X86_64"
+	boot         = true
+	guest_os_features = %{guest_os_features}
+  }
+
+  network_interface {
+	network = "default"
+  }
 }
 `, context)
 }

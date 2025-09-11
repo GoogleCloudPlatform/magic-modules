@@ -5,7 +5,7 @@ import (
 )
 
 // Converter interface for resources.
-type Converter interface {
+type Cai2hclConverter interface {
 	// Convert turns asset into hcl blocks.
 	Convert(asset caiasset.Asset) ([]*TerraformResourceBlock, error)
 }

@@ -21,6 +21,7 @@ The following types of PRs may require additional scrutiny and/or multiple revie
 1. Read the PR description to understand the context and ensure the PR either
    * is linked to a GitHub issue or an internal bug
       * if not, check the [issue tracker](https://github.com/hashicorp/terraform-provider-google/issues) to see whether the feature has already been requested and add the issues in the description, if any.
+      * "Fixes {github_issue_link}" is preferred if an external issue is available because it will [auto-close the issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue) when the PR is merged. However, there's no need to create an external issue solely for this purpose.
    * establishes clear context itself via title or description.
 2. If the PR adds any new resource, ensure that the resource does not already exist in the [GA provider](https://github.com/hashicorp/terraform-provider-google) or [beta provider](https://github.com/hashicorp/terraform-provider-google-beta)
 1. Read through all the changes in the PR, generated code in the downstreams and the API documentation to ensure that:

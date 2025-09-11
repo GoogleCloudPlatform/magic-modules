@@ -1,0 +1,164 @@
+package saasruntime_test
+
+{{ if ne $.TargetVersionName `ga` -}}
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
+
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+)
+
+func TestAccSaasRuntimeUnitKind_update(t *testing.T) {
+	t.Parallel()
+	acctest.BootstrapIamMembers(t, []acctest.IamMember{
+		{
+			Member: "serviceAccount:service-{project_number}@gcp-sa-saasservicemgmt.iam.gserviceaccount.com",
+			Role:   "roles/saasservicemgmt.serviceAgent",
+		},
+	})
+
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccSaasRuntimeUnitKind_basic(context),
+			},
+			{
+				ResourceName:            "google_saas_runtime_unit_kind.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "terraform_labels", "unit_kind_id"},
+			},
+			{
+				Config: testAccSaasRuntimeUnitKind_update(context),
+				ConfigPlanChecks: resource.ConfigPlanChecks{
+					PreApply: []plancheck.PlanCheck{
+						plancheck.ExpectResourceAction("google_saas_runtime_unit_kind.example", plancheck.ResourceActionUpdate),
+					},
+				},
+			},
+			{
+				ResourceName:            "google_saas_runtime_unit_kind.example",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"annotations", "labels", "location", "terraform_labels", "unit_kind_id"},
+			},
+		},
+	})
+}
+
+func testAccSaasRuntimeUnitKind_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_saas_runtime_saas" "example_saas" {
+  provider = google-beta
+  saas_id  = "tf-test-example-saas%{random_suffix}"
+  location = "global"
+
+  locations {
+    name = "us-central1"
+  }
+}
+
+resource "google_saas_runtime_unit_kind" "cluster_unit_kind" {
+  provider = google-beta
+  location = "global"
+  unit_kind_id = "tf-test-cluster-unitkind%{random_suffix}"
+  saas = google_saas_runtime_saas.example_saas.id
+}
+
+resource "google_saas_runtime_unit_kind" "example" {
+  provider = google-beta
+  location = "global"
+  unit_kind_id = "tf-test-app-unitkind%{random_suffix}"
+  saas = google_saas_runtime_saas.example_saas.id
+
+  dependencies {
+    unit_kind = google_saas_runtime_unit_kind.cluster_unit_kind.id
+    alias     = "cluster"
+  }
+}
+`, context)
+}
+
+func testAccSaasRuntimeUnitKind_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_saas_runtime_saas" "example_saas" {
+  provider = google-beta
+  saas_id  = "tf-test-example-saas%{random_suffix}"
+  location = "global"
+
+  locations {
+    name = "us-central1"
+  }
+}
+
+resource "google_saas_runtime_unit_kind" "cluster_unit_kind" {
+  provider = google-beta
+  location = "global"
+  unit_kind_id = "tf-test-cluster-unitkind%{random_suffix}"
+  saas = google_saas_runtime_saas.example_saas.id
+}
+
+resource "google_saas_runtime_unit_kind" "example" {
+  provider = google-beta
+  location = "global"
+  unit_kind_id = "tf-test-app-unitkind%{random_suffix}"
+  saas = google_saas_runtime_saas.example_saas.id
+
+  dependencies {
+    unit_kind = google_saas_runtime_unit_kind.cluster_unit_kind.id
+    alias     = "cluster"
+  }
+
+  input_variable_mappings {
+    variable = "cluster_endpoint"
+    from {
+      dependency      = "cluster"
+      output_variable = "endpoint"
+    }
+  }
+
+  input_variable_mappings {
+    variable = "tenant_project_number"
+    to {
+      dependency        = "cluster"
+      input_variable    = "tenant_project_number"
+      ignore_for_lookup = true
+    }
+  }
+
+  input_variable_mappings {
+    variable = "tenant_project_id"
+    to {
+      dependency     = "cluster"
+      input_variable = "tenant_project_id"
+    }
+  }
+
+  output_variable_mappings {
+    variable = "app_cluster_endpoint"
+    from {
+      dependency      = "cluster"
+      output_variable = "endpoint"
+    }
+  }
+
+  labels = {
+    "label-one": "foo"
+  }
+  
+  annotations = {
+    "annotation-one": "bar"
+  }
+}
+`, context)
+}
+{{- end }}

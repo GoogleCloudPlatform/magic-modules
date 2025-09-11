@@ -73,6 +73,11 @@ var (
 		"settings.0.backup_configuration.0.transaction_log_retention_days",
 	}
 
+	connectionPoolConfigKeys = []string{
+		"settings.0.connection_pool_config.0.connection_pooling_enabled",
+		"settings.0.connection_pool_config.0.flags",
+	}
+
 	ipConfigurationKeys = []string{
 		"settings.0.ip_configuration.0.authorized_networks",
 		"settings.0.ip_configuration.0.ipv4_enabled",
@@ -166,6 +171,12 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 				Default:     true,
 				Optional:    true,
 				Description: `Used to block Terraform from deleting a SQL Instance. Defaults to true.`,
+			},
+			"final_backup_description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The description of final backup if instance enable create final backup during instance deletion. `,
+
 			},
 			"settings": {
 				Type:         schema.TypeList,
@@ -309,7 +320,16 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 settings.backup_configuration.enabled is set to true.
 For MySQL instances, ensure that settings.backup_configuration.binary_log_enabled is set to true.
 For Postgres instances, ensure that settings.backup_configuration.point_in_time_recovery_enabled
-is set to true. Defaults to ZONAL.`,
+is set to true. Defaults to ZONAL.
+For read pool instances, this field is read-only. The availability type is changed by specifying
+the number of nodes (node_count).`,
+						},
+						"effective_availability_type": {
+							Type:         schema.TypeString,
+							Computed:     true,
+							Description: `The availability type of the Cloud SQL instance, high availability
+(REGIONAL) or single zone (ZONAL). This field always contains the value that is reported by the
+API (for read pools, effective_availability_type may differ from availability_type).`,
 						},
 						"backup_configuration": {
 							Type:     schema.TypeList,
@@ -419,7 +439,6 @@ is set to true. Defaults to ZONAL.`,
 						"disk_size": {
 							Type:     schema.TypeInt,
 							Optional: true,
-							// Default is likely 10gb, but it is undocumented and may change.
 							Computed:    true,
 							Description: `The size of data disk, in GB. Size of a running instance cannot be reduced but can be increased. The minimum value is 10GB for PD_SSD, PD_HDD and 20GB for HYPERDISK_BALANCED.`,
 						},
@@ -429,7 +448,7 @@ is set to true. Defaults to ZONAL.`,
 							Computed:         true,
 							ForceNew:         true,
 							DiffSuppressFunc: caseDiffDashSuppress,
-							Description:      `The type of supported data disk is tier dependent and can be PD_SSD or PD_HDD or HyperDisk_Balanced `,
+							Description:      `The type of supported data disk is tier dependent and can be PD_SSD or PD_HDD or HYPERDISK_BALANCED.`,
 						},
 {{- if ne $.TargetVersionName "ga" }}
 						"data_disk_provisioned_iops": {
@@ -445,6 +464,28 @@ is set to true. Defaults to ZONAL.`,
 							Description: `Provisioned throughput measured in MiB per second for the data disk. This field is only used for HYPERDISK_BALANCED disk types.`,
 						},
 {{- end }}
+						"connection_pool_config": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Computed: true,
+							Description: `The managed connection pool setting for a Cloud SQL instance.`,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"connection_pooling_enabled": {
+										Type:         schema.TypeBool,
+                                        Optional:     true,
+                                        Description:  `Whether Managed Connection Pool is enabled for this instance.`,
+									},
+									"flags": {
+										Type:         schema.TypeSet,
+										Optional:     true,
+										Set:          schema.HashResource(sqlDatabaseFlagSchemaElem),
+										Elem:         sqlDatabaseFlagSchemaElem,
+										Description:  `List of connection pool configuration flags`,
+									},
+								},
+							},
+						},
 						"ip_configuration": {
 							Type:     schema.TypeList,
 							Optional: true,
@@ -506,6 +547,11 @@ is set to true. Defaults to ZONAL.`,
 													Set:         schema.HashString,
 													Description: `List of consumer projects that are allow-listed for PSC connections to this instance. This instance can be connected to with PSC from any network in these projects. Each consumer project in this list may be represented by a project number (numeric) or by a project id (alphanumeric).`,
 												},
+												"network_attachment_uri": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Description: `Name of network attachment resource used to authorize a producer service to connect a PSC interface to the consumer's VPC. For example: "projects/myProject/regions/myRegion/networkAttachments/myNetworkAttachment". This is required to enable outbound connection on a PSC instance.`,
+												},
 												"psc_auto_connections": {
 													Type:     schema.TypeList,
 													Optional: true,
@@ -520,6 +566,21 @@ is set to true. Defaults to ZONAL.`,
                                                                                                                                 Type:         schema.TypeString,
                                                                                                                                 Required:     true,
                                                                                                                                 Description:  `The consumer network of this consumer endpoint. This must be a resource path that includes both the host project and the network name. The consumer host project of this network might be different from the consumer service project.`,
+                                                                                                                        },
+                                                                                                                        "consumer_network_status": {
+                                                                                                                                Type:         schema.TypeString,
+                                                                                                                                Computed:     true,
+                                                                                                                                Description:  `The connection policy status of the consumer network.`,
+                                                                                                                        },
+                                                                                                                        "ip_address": {
+                                                                                                                                Type:         schema.TypeString,
+                                                                                                                                Computed:     true,
+                                                                                                                                Description:  `The IP address of the consumer endpoint.`,
+                                                                                                                        },
+                                                                                                                        "status": {
+                                                                                                                                Type:         schema.TypeString,
+                                                                                                                                Computed:     true,
+                                                                                                                                Description:  `The connection status of the consumer endpoint.`,
                                                                                                                         },
                                                                                                                 },
 													},
@@ -737,6 +798,28 @@ is set to true. Defaults to ZONAL.`,
 							Optional:    true,
 							Description: `When this parameter is set to true, Cloud SQL retains backups of the instance even after the instance is deleted. The ON_DEMAND backup will be retained until customer deletes the backup or the project. The AUTOMATED backup will be retained based on the backups retention setting.`,
 						},
+						"final_backup_config": {
+							Type:     schema.TypeList,
+							Optional: true,
+							MaxItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:         schema.TypeBool,
+										Optional:     true,
+										Description:  `When this parameter is set to true, the final backup is enabled for the instance`,
+									},
+									"retention_days": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										ValidateFunc: validation.IntBetween(1, 36135),
+										Description:  `The number of days to retain the final backup after the instance deletion. The valid range is between 1 and 365. For instances managed by BackupDR, the valid range is between 1 day and 99 years. The final backup will be purged at (time_of_instance_deletion + retention_days).`,
+									},
+								},
+							},
+							Description: `Config used to determine the final backup settings for the instance`,
+
+						},
 					},
 				},
 				Description: `The settings to use for the database. The configuration is detailed below.`,
@@ -848,7 +931,14 @@ is set to true. Defaults to ZONAL.`,
 				Type:        schema.TypeString,
 				Computed:    true,
 				Optional:    true,
-				Description: `The type of the instance. The valid values are:- 'SQL_INSTANCE_TYPE_UNSPECIFIED', 'CLOUD_SQL_INSTANCE', 'ON_PREMISES_INSTANCE' and 'READ_REPLICA_INSTANCE'.`,
+				Description: `The type of the instance. See https://cloud.google.com/sql/docs/mysql/admin-api/rest/v1/instances#SqlInstanceType for supported values.`,
+			},
+
+			"node_count": {
+				Type:             schema.TypeInt,
+				Computed:         true,
+				Optional:         true,
+				Description:      `For a read pool instance, the number of nodes in the read pool.`,
 			},
 
 			"replica_configuration": {
@@ -964,6 +1054,11 @@ is set to true. Defaults to ZONAL.`,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"psa_write_endpoint": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: fmt.Sprintf(`If set, this field indicates this instance has a private service access (PSA) DNS endpoint that is pointing to the primary instance of the cluster. If this instance is the primary, then the DNS endpoint points to this instance. After a switchover or replica failover operation, this DNS endpoint points to the promoted instance. This is a read-only field, returned to the user as information. This field can exist even if a standalone instance doesn't have a DR replica yet or the DR replica is deleted.`),
+						},
 						"failover_dr_replica_name": {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -1078,6 +1173,11 @@ is set to true. Defaults to ZONAL.`,
 						},
 					},
 				},
+			},
+			"backupdr_backup": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: `The name of the BackupDR backup to restore from.`,
 			},
 			"clone": {
 				Type:         schema.TypeList,
@@ -1225,6 +1325,10 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	if _, ok := d.GetOk("instance_type"); ok {
 		instance.InstanceType = d.Get("instance_type").(string)
+	}
+
+	if _, ok := d.GetOk("node_count"); ok {
+		instance.NodeCount = int64(d.Get("node_count").(int))
 	}
 
 	instance.RootPassword = d.Get("root_password").(string)
@@ -1381,7 +1485,14 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	// Perform a backup restore if the backup context exists
 	if r, ok := d.GetOk("restore_backup_context"); ok {
-		err = sqlDatabaseInstanceRestoreFromBackup(d, config, userAgent, project, name, r)
+		log.Printf("[DEBUG] Restoring instance %s from backup context: %v", name, r)
+		err = sqlDatabaseInstanceRestoreFromBackup(d, config, userAgent, project, name, r, "")
+		if err != nil {
+			return err
+		}
+	} else if b, ok := d.GetOk("backupdr_backup"); ok && b.(string) != "" {
+		log.Printf("[DEBUG] Restoring instance %s from BackupDR backup: %s", name, b.(string))
+		err = sqlDatabaseInstanceRestoreFromBackup(d, config, userAgent, project, name, nil, b)
 		if err != nil {
 			return err
 		}
@@ -1424,6 +1535,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		EnableGoogleMlIntegration:     _settings["enable_google_ml_integration"].(bool),
 		EnableDataplexIntegration:     _settings["enable_dataplex_integration"].(bool),
 		RetainBackupsOnDelete:         _settings["retain_backups_on_delete"].(bool),
+		FinalBackupConfig:			   expandFinalBackupConfig(_settings["final_backup_config"].([]interface{})),
 		UserLabels:                    tpgresource.ConvertStringMap(_settings["user_labels"].(map[string]interface{})),
 		BackupConfiguration:           expandBackupConfiguration(_settings["backup_configuration"].([]interface{})),
 		DatabaseFlags:                 expandDatabaseFlags(_settings["database_flags"].(*schema.Set).List()),
@@ -1432,6 +1544,7 @@ func expandSqlDatabaseInstanceSettings(configured []interface{}, databaseVersion
 		MaintenanceWindow:             expandMaintenanceWindow(_settings["maintenance_window"].([]interface{})),
 		InsightsConfig:                expandInsightsConfig(_settings["insights_config"].([]interface{})),
 		PasswordValidationPolicy:      expandPasswordValidationPolicy(_settings["password_validation_policy"].([]interface{})),
+		ConnectionPoolConfig:          expandConnectionPoolConfig(_settings["connection_pool_config"].(*schema.Set).List()),
 	}
 
 	resize := _settings["disk_autoresize"].(bool)
@@ -1569,11 +1682,41 @@ func expandPscConfig(configured []interface{}) *sqladmin.PscConfig {
 		return &sqladmin.PscConfig{
 			PscEnabled:              _entry["psc_enabled"].(bool),
 			AllowedConsumerProjects: tpgresource.ConvertStringArr(_entry["allowed_consumer_projects"].(*schema.Set).List()),
+			NetworkAttachmentUri:    _entry["network_attachment_uri"].(string),
 			PscAutoConnections:      expandPscAutoConnectionConfig(_entry["psc_auto_connections"].([]interface{})),
 		}
 	}
 
 	return nil
+}
+
+func expandFlags(configured []interface{}) []*sqladmin.ConnectionPoolFlags {
+	connectionPoolFlags := make([]*sqladmin.ConnectionPoolFlags, 0, len(configured))
+	for _, _flag := range configured {
+		if _flag == nil {
+			continue
+		}
+		_entry := _flag.(map[string]interface{})
+
+		connectionPoolFlags = append(connectionPoolFlags, &sqladmin.ConnectionPoolFlags{
+			Name:  _entry["name"].(string),
+			Value: _entry["value"].(string),
+		})
+	}
+	return connectionPoolFlags
+}
+
+func expandConnectionPoolConfig(configured []interface{}) *sqladmin.ConnectionPoolConfig {
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	_connectionPoolConfig := configured[0].(map[string]interface{})
+
+	return &sqladmin.ConnectionPoolConfig{
+		ConnectionPoolingEnabled:		_connectionPoolConfig["connection_pooling_enabled"].(bool),
+		Flags:			expandFlags(_connectionPoolConfig["flags"].(*schema.Set).List()),
+	}
 }
 
 func expandAuthorizedNetworks(configured []interface{}) []*sqladmin.AclEntry {
@@ -1632,6 +1775,19 @@ func expandBackupConfiguration(configured []interface{}) *sqladmin.BackupConfigu
 		TransactionLogRetentionDays: int64(_backupConfiguration["transaction_log_retention_days"].(int)),
 		PointInTimeRecoveryEnabled:  _backupConfiguration["point_in_time_recovery_enabled"].(bool),
 		ForceSendFields:             []string{"BinaryLogEnabled", "Enabled", "PointInTimeRecoveryEnabled"},
+	}
+}
+
+func expandFinalBackupConfig(configured []interface{}) *sqladmin.FinalBackupConfig{
+	if len(configured) == 0 || configured[0] == nil {
+		return nil
+	}
+
+	_finalBackupConfig := configured[0].(map[string]interface{})
+	return &sqladmin.FinalBackupConfig{
+		Enabled: _finalBackupConfig["enabled"].(bool),
+		RetentionDays: int64(_finalBackupConfig["retention_days"].(int)),
+		ForceSendFields:             []string{"Enabled"},
 	}
 }
 
@@ -1784,10 +1940,12 @@ func resourceSqlDatabaseInstanceRead(d *schema.ResourceData, meta interface{}) e
 	if err := d.Set("instance_type", instance.InstanceType); err != nil {
 		return fmt.Errorf("Error setting instance_type: %s", err)
 	}
-	if err := d.Set("settings", flattenSettings(instance.Settings, d)); err != nil {
+	if err := d.Set("node_count", instance.NodeCount); err != nil {
+		return fmt.Errorf("Error setting node_count: %s", err)
+	}
+	if err := d.Set("settings", flattenSettings(instance.Settings, instance.InstanceType, d)); err != nil {
 		log.Printf("[WARN] Failed to set SQL Database Instance Settings")
 	}
-
 	if instance.DiskEncryptionConfiguration != nil {
 		if err := d.Set("encryption_key_name", instance.DiskEncryptionConfiguration.KmsKeyName); err != nil {
 			return fmt.Errorf("Error setting encryption_key_name: %s", err)
@@ -2135,9 +2293,13 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 		instance.InstanceType = d.Get("instance_type").(string)
 	}
 
+	if _, ok := d.GetOk("node_count"); ok {
+		instance.NodeCount = int64(d.Get("node_count").(int))
+	}
+
 	// Database Version is required for all calls with Google ML integration enabled or it will be rejected by the API.
-	if d.Get("settings.0.enable_google_ml_integration").(bool) {
-		instance.DatabaseVersion = databaseVersion
+	if d.Get("settings.0.enable_google_ml_integration").(bool) || len(_settings["connection_pool_config"].(*schema.Set).List()) > 0 {
+			instance.DatabaseVersion = databaseVersion
 	}
 
 	failoverDrReplicaName := d.Get("replication_cluster.0.failover_dr_replica_name").(string)
@@ -2167,7 +2329,14 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	// Perform a backup restore if the backup context exists and has changed
 	if r, ok := d.GetOk("restore_backup_context"); ok {
 		if d.HasChange("restore_backup_context") {
-			err = sqlDatabaseInstanceRestoreFromBackup(d, config, userAgent, project, d.Get("name").(string), r)
+			err = sqlDatabaseInstanceRestoreFromBackup(d, config, userAgent, project, d.Get("name").(string), r, "")
+			if err != nil {
+				return err
+			}
+		}
+	} else if b, ok := d.GetOk("backupdr_backup"); ok && b.(string) != "" {
+		if d.HasChange("backupdr_backup") {
+			err = sqlDatabaseInstanceRestoreFromBackup(d, config, userAgent, project, d.Get("name").(string), nil, b)
 			if err != nil {
 				return err
 			}
@@ -2250,9 +2419,13 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 	}
 
 	var op *sqladmin.Operation
+	finalBackupDescription := ""
+	if v, ok := d.GetOk("finalBackupDescription"); ok {
+		finalBackupDescription = v.(string)
+	}
 	err = transport_tpg.Retry(transport_tpg.RetryOptions{
 		RetryFunc: func() (rerr error) {
-			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Delete(project, d.Get("name").(string)).Do()
+			op, rerr = config.NewSqlAdminClient(userAgent).Instances.Delete(project, d.Get("name").(string)).FinalBackupDescription(finalBackupDescription).Do()
 			if rerr != nil {
 				return rerr
 			}
@@ -2274,9 +2447,9 @@ func resourceSqlDatabaseInstanceDelete(d *schema.ResourceData, meta interface{})
 func resourceSqlDatabaseInstanceImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	config := meta.(*transport_tpg.Config)
 	if err := tpgresource.ParseImportId([]string{
-		"projects/(?P<project>[^/]+)/instances/(?P<name>[^/]+)",
-		"(?P<project>[^/]+)/(?P<name>[^/]+)",
-		"(?P<name>[^/]+)"}, d, config); err != nil {
+		"^projects/(?P<project>[^/]+)/instances/(?P<name>[^/]+)$",
+		"^(?P<project>[^/]+)/(?P<name>[^/]+)$",
+		"^(?P<name>[^/]+)$"}, d, config); err != nil {
 		return nil, err
 	}
 
@@ -2294,13 +2467,14 @@ func resourceSqlDatabaseInstanceImport(d *schema.ResourceData, meta interface{})
 	return []*schema.ResourceData{d}, nil
 }
 
-func flattenSettings(settings *sqladmin.Settings, d *schema.ResourceData) []map[string]interface{} {
+func flattenSettings(settings *sqladmin.Settings, iType string, d *schema.ResourceData) []map[string]interface{} {
 	data := map[string]interface{}{
 		"version":                          settings.SettingsVersion,
 		"tier":                             settings.Tier,
 		"edition":                          flattenEdition(settings.Edition),
 		"activation_policy":                settings.ActivationPolicy,
-		"availability_type":                settings.AvailabilityType,
+		"availability_type":                d.Get("settings.0.availability_type"),
+		"effective_availability_type":      settings.AvailabilityType,
 		"collation":                        settings.Collation,
 		"connector_enforcement":            settings.ConnectorEnforcement,
 		"disk_type":                        settings.DataDiskType,
@@ -2315,6 +2489,19 @@ func flattenSettings(settings *sqladmin.Settings, d *schema.ResourceData) []map[
 		"time_zone":                        settings.TimeZone,
 		"deletion_protection_enabled":      settings.DeletionProtectionEnabled,
 		"retain_backups_on_delete":         settings.RetainBackupsOnDelete,
+		"final_backup_config": settings.FinalBackupConfig,
+	}
+
+	if data["availability_type"] == "" {
+		data["availability_type"] = "ZONAL"
+	}
+	// For read pools, availability type is server managed. Above, we
+	// pull it from the old TF resource so that it never shows a
+	// diff. Now, here, for non-pool instances, we overwrite it with the
+	// value obtained from the API (which would be the typical way to
+	// populate the field).
+	if iType != "READ_POOL_INSTANCE" {
+		data["availability_type"] = settings.AvailabilityType
 	}
 
 	if settings.ActiveDirectoryConfig != nil {
@@ -2333,8 +2520,16 @@ func flattenSettings(settings *sqladmin.Settings, d *schema.ResourceData) []map[
 		data["backup_configuration"] = flattenBackupConfiguration(settings.BackupConfiguration)
 	}
 
+	if settings.FinalBackupConfig != nil {
+		data["final_backup_config"] = flattenFinalBackupConfig(settings.FinalBackupConfig)
+	}
+
 	if settings.DatabaseFlags != nil {
 		data["database_flags"] = flattenDatabaseFlags(settings.DatabaseFlags)
+	}
+
+	if settings.ConnectionPoolConfig != nil {
+		data["connection_pool_config"] = flattenConnectionPoolConfig(settings.ConnectionPoolConfig)
 	}
 
 	if settings.IpConfiguration != nil {
@@ -2408,6 +2603,15 @@ func flattenBackupConfiguration(backupConfiguration *sqladmin.BackupConfiguratio
 		"point_in_time_recovery_enabled": backupConfiguration.PointInTimeRecoveryEnabled,
 		"backup_retention_settings":      flattenBackupRetentionSettings(backupConfiguration.BackupRetentionSettings),
 		"transaction_log_retention_days": backupConfiguration.TransactionLogRetentionDays,
+	}
+
+	return []map[string]interface{}{data}
+}
+
+func flattenFinalBackupConfig(finalBackupConfig *sqladmin.FinalBackupConfig) []map[string]interface{} {
+	data := map[string]interface{}{
+		"enabled":             finalBackupConfig.Enabled,
+		"retention_days":                        finalBackupConfig.RetentionDays,
 	}
 
 	return []map[string]interface{}{data}
@@ -2496,6 +2700,10 @@ func flattenDatabaseFlags(databaseFlags []*sqladmin.DatabaseFlags) []map[string]
 // is nil since replication_cluster is computed+optional.
 func flattenReplicationCluster(replicationCluster *sqladmin.ReplicationCluster, d *schema.ResourceData) []map[string]interface{} {
 	data := make(map[string]interface{})
+	data["psa_write_endpoint"] = ""
+	if replicationCluster != nil && replicationCluster.PsaWriteEndpoint != "" {
+		data["psa_write_endpoint"] = replicationCluster.PsaWriteEndpoint
+	}
 	data["failover_dr_replica_name"] = ""
 	if replicationCluster != nil && replicationCluster.FailoverDrReplicaName != "" {
 		data["failover_dr_replica_name"] = replicationCluster.FailoverDrReplicaName
@@ -2505,6 +2713,38 @@ func flattenReplicationCluster(replicationCluster *sqladmin.ReplicationCluster, 
 		data["dr_replica"] = replicationCluster.DrReplica
 	}
 	return []map[string]interface{}{data}
+}
+
+func flattenConnectionPoolFlags(connectionPoolFlags []*sqladmin.ConnectionPoolFlags) []interface{} {
+	if len(connectionPoolFlags) == 0 { // Handles nil or empty slice
+        return make([]interface{}, 0) // Explicitly return empty slice
+    }
+
+    mcpflags := make([]interface{}, len(connectionPoolFlags)) // Pre-allocate for efficiency
+    for i, mcpflag := range connectionPoolFlags {
+        data := map[string]interface{}{
+            "name":  mcpflag.Name,
+            "value": mcpflag.Value,
+        }
+        mcpflags[i] = data
+    }
+    return mcpflags
+}
+
+func flattenConnectionPoolConfig(connectionPoolConfig *sqladmin.ConnectionPoolConfig) []interface{}{
+	if connectionPoolConfig == nil {
+        return []interface{}{
+            map[string]interface{}{
+                "connection_pooling_enabled": false,
+                "flags":                      make([]interface{}, 0), // Default to empty flags
+            },
+        }
+    }
+    data := map[string]interface{}{
+        "connection_pooling_enabled": connectionPoolConfig.ConnectionPoolingEnabled, // Corrected key
+        "flags":                      flattenConnectionPoolFlags(connectionPoolConfig.Flags), // Corrected key
+    }
+    return []interface{}{data}
 }
 
 func flattenIpConfiguration(ipConfiguration *sqladmin.IpConfiguration, d *schema.ResourceData) interface{} {
@@ -2536,7 +2776,10 @@ func flattenPscAutoConnections(pscAutoConnections []*sqladmin.PscAutoConnectionC
         for _, flag := range pscAutoConnections {
                 data := map[string]interface{}{
                         "consumer_network":   flag.ConsumerNetwork,
+                        "consumer_network_status":   flag.ConsumerNetworkStatus,
                         "consumer_service_project_id":   flag.ConsumerProject,
+                        "ip_address":   flag.IpAddress,
+                        "status":   flag.Status,
                 }
 
                 flags = append(flags, data)
@@ -2549,6 +2792,7 @@ func flattenPscConfigs(pscConfig *sqladmin.PscConfig) interface{} {
 	data := map[string]interface{}{
 		"psc_enabled":               pscConfig.PscEnabled,
 		"allowed_consumer_projects": schema.NewSet(schema.HashString, tpgresource.ConvertStringArrToInterface(pscConfig.AllowedConsumerProjects)),
+		"network_attachment_uri":    pscConfig.NetworkAttachmentUri,
 		"psc_auto_connections":      flattenPscAutoConnections(pscConfig.PscAutoConnections),
 	}
 
@@ -2758,12 +3002,16 @@ func expandRestoreBackupContext(configured []interface{}) *sqladmin.RestoreBacku
 	}
 }
 
-func sqlDatabaseInstanceRestoreFromBackup(d *schema.ResourceData, config *transport_tpg.Config, userAgent, project, instanceId string, r interface{}) error {
+func sqlDatabaseInstanceRestoreFromBackup(d *schema.ResourceData, config *transport_tpg.Config, userAgent, project, instanceId string, r interface{}, backupdrBackup interface{}) error {
 	log.Printf("[DEBUG] Initiating SQL database instance backup restore")
-	restoreContext := r.([]interface{})
 
-	backupRequest := &sqladmin.InstancesRestoreBackupRequest{
-		RestoreBackupContext: expandRestoreBackupContext(restoreContext),
+	backupRequest := &sqladmin.InstancesRestoreBackupRequest{}
+
+    if r != nil {
+		restoreContext := r.([]interface{})
+		backupRequest.RestoreBackupContext = expandRestoreBackupContext(restoreContext)
+	} else if backupdrBackup != nil && backupdrBackup.(string) != "" {
+		backupRequest.BackupdrBackup = backupdrBackup.(string)
 	}
 
 	var op *sqladmin.Operation

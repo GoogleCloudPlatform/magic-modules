@@ -19,7 +19,7 @@ jobs:
       - name: Run magician unit tests
         run: |
           cd .ci/magician
-          go test ./... -v
+          go test ./...
         env:
           GITHUB_TOKEN_CLASSIC: ${{ secrets.GITHUB_TOKEN }}
 
