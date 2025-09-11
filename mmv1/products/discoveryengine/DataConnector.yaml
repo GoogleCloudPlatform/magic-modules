@@ -31,7 +31,7 @@ create_url: 'projects/{{project}}/locations/{{location}}:setUpDataConnector'
 update_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
 update_verb: 'PATCH'
 update_mask: true
-delete_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id_url_param}}'
+delete_url: 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}'
 import_format:
   - 'projects/{{project}}/locations/{{location}}/collections/{{collection_id}}/dataConnector'
 timeouts:
@@ -67,18 +67,6 @@ parameters:
     url_param_only: true
     required: true
     immutable: true
-  - name: 'collectionIdUrlParam'
-    type: String
-    description: |
-      The ID to use for the Collection, which will become the final component
-      of the Collection's resource name. A new Collection is created as
-      part of the DataConnector setup. DataConnector is a singleton
-      resource under Collection, managing all DataStores of the Collection.
-      This field must conform to [RFC-1034](https://tools.ietf.org/html/rfc1034)
-      standard with a length limit of 63 characters. Otherwise, an
-      INVALID_ARGUMENT error is returned.
-    url_param_only: true
-    required: true
 properties:
   - name: 'collectionId'
     type: String
@@ -90,7 +78,6 @@ properties:
       This field must conform to [RFC-1034](https://tools.ietf.org/html/rfc1034)
       standard with a length limit of 63 characters. Otherwise, an
       INVALID_ARGUMENT error is returned.
-    required: true
     ignore_read: true
   - name: 'collectionDisplayName'
     type: String
@@ -98,7 +85,6 @@ properties:
       The display name of the Collection.
       Should be human readable, used to display collections in the Console
       Dashboard. UTF-8 encoded string with limit of 1024 characters.
-    required: true
     ignore_read: true
   - name: 'dataConnector'
     type: NestedObject

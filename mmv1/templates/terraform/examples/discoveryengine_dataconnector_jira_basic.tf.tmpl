@@ -2,7 +2,6 @@ resource "google_discovery_engine_data_connector" "jira-basic" {
   provider                  = google-beta
   location                  = "global"
   collection_id             = "{{index $.Vars "collection_id"}}"
-  collection_id_url_param   = "{{index $.Vars "collection_id"}}"
   collection_display_name   = "tf-test-dataconnector-jira"
   data_connector {
     data_source             = "jira"
