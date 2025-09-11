@@ -623,7 +623,7 @@ func TestAccBigtableInstance_createWithNodeScalingFactorThenUpdateViaForceNew(t 
 
 func TestAccBigtableInstance_createWithNodeScalingFactorThenFailFromDeletionProtection(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	acctest.SkipIfVcr(t)
+	//acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-nsf-%s", acctest.RandString(t, 10))
@@ -667,7 +667,7 @@ func TestAccBigtableInstance_createWithNodeScalingFactorThenFailFromDeletionProt
 
 func TestAccBigtableInstance_addNewClusterWithoutDeletionProtection(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	acctest.SkipIfVcr(t)
+	//acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-nsf-%s", acctest.RandString(t, 10))
