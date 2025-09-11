@@ -763,7 +763,7 @@ func (t Terraform) ProviderFromVersion() string {
 func (t Terraform) GetMmv1ServicesInVersion(products []*api.Product) []string {
 	var services []string
 	for _, product := range products {
-		if (string(t.Product.ApiName)[0] < 'a' || string(t.Product.ApiName)[0] > 'd') && string(t.Product.ApiName)[0] != 'g' && string(t.Product.ApiName)[0] != 's' {
+		if (string(product.ApiName)[0] < 'a' || string(product.ApiName)[0] > 'd') && string(product.ApiName)[0] != 'g' && string(product.ApiName)[0] != 's' {
 			continue
 		}
 		if t.TargetVersionName == "ga" {
