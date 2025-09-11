@@ -1,0 +1,178 @@
+---
+name: iam.workforcePoolProviderSCIMTenant
+base_url: projects/{{project}}/locations/{{location}}/workforcePools/{{workforce_pool_id}}/providers/{{workforce_pool_provider_id}}/scimTenants/{{scim_tenant_id}}
+description: Manages a SCIM Tenant.
+documentation_url: https://cloud.google.com/iam/docs/reference/workforce-pools/rest/v1/projects.locations.workforcePools.providers.scimTenants
+short_description: 'Manages a SCIM Tenant.'
+api: https://cloud.google.com/iam/docs/reference/rest/v1/locations.workforcePools.providers.scimTenants
+iam_policy:
+  parent_resource_attribute: 'workforce_pool_id'
+  method_name_separator: ':'
+  example_config_body: 'templates/terraform/iam/iam_attributes.go.tmpl'
+  allowed_iam_role: 'roles/iam.workforcePoolViewer'
+  admin_iam_role: 'roles/iam.workforcePoolAdmin'
+  fetch_iam_policy_verb: 'POST'
+  import_format:
+    - 'locations/{{location}}/workforcePools/{{workforce_pool_id}}'
+    - '{{workforce_pool_id}}'
+create:
+  method: POST
+  relative_path: v1/{parent=projects/*/locations/*/workforcePools/*/providers/*}/scimTenants
+  body: request_body
+  scopes:
+  - https://www.googleapis.com/auth/iam
+update:
+  method: PATCH
+  relative_path: v1/{name=projects/*/locations/*/workforcePools/*/providers/*/scimTenants/*}
+  body: request_body
+  scopes:
+  - https://www.googleapis.com/auth/iam
+delete:
+  method: DELETE
+  relative_path: v1/{name=projects/*/locations/*/workforcePools/*/providers/*/scimTenants/*}
+  scopes:
+  - https://www.googleapis.com/auth/iam
+get:
+  method: GET
+  relative_path: v1/{name=projects/*/locations/*/workforcePools/*/providers/*/scimTenants/*}
+  scopes:
+  - https://www.googleapis.com/auth/iam
+list:
+  method: GET
+  relative_path: v1/{parent=projects/*/locations/*/workforcePools/*/providers/*}/scimTenants
+  scopes:
+  - https://www.googleapis.com/auth/iam
+  query_params:
+  - name: pageSize
+    type: integer
+  - name: pageToken
+    type: string
+properties:
+ - name: name
+   schema:
+    type: string
+    description: The resource name of the SCIM tenant, of the form `projects/{project_number}/locations/{location}/workforcePools/{workforce_pool_id}/providers/{workforce_pool_provider_id}/scimTenants/{scim_tenant_id}`.
+    output: true
+ - name: project
+   schema:
+    type: string
+    description: Project ID.
+    default: '{{project}}'
+ - name: location
+   schema:
+    type: string
+    description: Location.
+ - name: workforce_pool_id
+   schema:
+    type: string
+    description: Workforce Pool ID.
+ - name: workforce_pool_provider_id
+   schema:
+    type: string
+    description: Workforce Pool Provider ID.
+ - name: scim_tenant_id
+   schema:
+    type: string
+    description: SCIM Tenant ID.
+ - name: display_name
+   schema:
+    type: string
+    description: The display name of the SCIM tenant.
+ - name: etag
+   schema:
+    type: string
+    description: |-
+      An etag used for optimistic concurrency control when updating the SCIM tenant.
+
+      Can be specified in the Update request to ensure the update only happens if existing etag matches specified etag.
+    output: true
+ - name: client_id
+   schema:
+    type: string
+    description: The OAuth 2.0 client ID.
+parameters:
+ - name: project
+   schema:
+    type: string
+    description: Project ID.
+ - name: location
+   schema:
+    type: string
+    description: Location.
+ - name: workforce_pool_id
+   schema:
+    type: string
+    description: Workforce Pool ID.
+ - name: workforce_pool_provider_id
+   schema:
+    type: string
+    description: Workforce Pool Provider ID.
+ - name: scim_tenant_id
+   schema:
+    type: string
+    description: SCIM Tenant ID.
+ - name: display_name
+   schema:
+    type: string
+    description: The display name of the SCIM tenant.
+ - name: client_id
+   schema:
+    type: string
+    description: The OAuth 2.0 client ID.
+examples:
+  - name: Create SCIM Tenant
+    description: Example to create a SCIM Tenant.
+    resource: iam.workforcePoolProviderSCIMTenant
+    properties:
+      project: "my-project"
+      location: "us-central1"
+      workforce_pool_id: "my-pool"
+      workforce_pool_provider_id: "my-provider"
+      scim_tenant_id: "my-tenant"
+      display_name: "My SCIM Tenant"
+      client_id: "1234567890.apps.googleusercontent.com"
+
+  - name: Get SCIM Tenant
+    description: Example to get a SCIM Tenant.
+    resource: iam.workforcePoolProviderSCIMTenant
+    properties:
+      project: "my-project"
+      location: "us-central1"
+      workforce_pool_id: "my-pool"
+      workforce_pool_provider_id: "my-provider"
+      scim_tenant_id: "my-tenant"
+
+  - name: Update SCIM Tenant
+    description: Example to update a SCIM Tenant.
+    resource: iam.workforcePoolProviderSCIMTenant
+    properties:
+      project: "my-project"
+      location: "us-central1"
+      workforce_pool_id: "my-pool"
+      workforce_pool_provider_id: "my-provider"
+      scim_tenant_id: "my-tenant"
+      display_name: "Updated SCIM Tenant"
+      client_id: "0987654321.apps.googleusercontent.com"
+      etag: "etag-value"
+
+  - name: Delete SCIM Tenant
+    description: Example to delete a SCIM Tenant.
+    resource: iam.workforcePoolProviderSCIMTenant
+    properties:
+      project: "my-project"
+      location: "us-central1"
+      workforce_pool_id: "my-pool"
+      workforce_pool_provider_id: "my-provider"
+      scim_tenant_id: "my-tenant"
+
+  - name: List SCIM Tenants
+    description: Example to list SCIM Tenants.
+    resource: iam.workforcePoolProviderSCIMTenant
+    properties:
+      project: "my-project"
+      location: "us-central1"
+      workforce_pool_id: "my-pool"
+      workforce_pool_provider_id: "my-provider"
+      # Optional query params
+      pageSize: 10
+      pageToken: ""
