@@ -100,19 +100,12 @@ properties:
           Format: `projects/*/locations/*/collections/*/dataConnector`.
         output: true
       - name: 'state'
-        type: Enum
+        type: String
         description: |
-          The state of connector.
+          The state of connector. The possible value can be:
+          'STATE_UNSPECIFIED', 'CREATING', 'ACTIVE', 'FAILED', 'RUNNING', 'WARNING',
+          'INITIALIZATION_FAILED', 'UPDATING'.
         output: true
-        enum_values:
-          - 'STATE_UNSPECIFIED'
-          - 'CREATING'
-          - 'ACTIVE'
-          - 'FAILED'
-          - 'RUNNING'
-          - 'WARNING'
-          - 'INITIALIZATION_FAILED'
-          - 'UPDATING'
       - name: 'dataSource'
         type: String
         description: |
@@ -240,20 +233,13 @@ properties:
           If this field is set and processed successfully, the DataStores created by
           this connector will be protected by the KMS key.
       - name: 'actionState'
-        type: Enum
+        type: String
         description: |
           State of the action connector. This reflects whether the action connector
-          is initializing, active or has encountered errors.
+          is initializing, active or has encountered errors. The possible value can be:
+          'STATE_UNSPECIFIED', 'CREATING', 'ACTIVE', 'FAILED', 'RUNNING', 'WARNING',
+          'INITIALIZATION_FAILED', 'UPDATING'.
         output: true
-        enum_values:
-          - 'STATE_UNSPECIFIED'
-          - 'CREATING'
-          - 'ACTIVE'
-          - 'FAILED'
-          - 'RUNNING'
-          - 'WARNING'
-          - 'INITIALIZATION_FAILED'
-          - 'UPDATING'
       - name: 'staticIpEnabled'
         type: Boolean
         description: |
@@ -269,12 +255,10 @@ properties:
         type: Array
         description: |
           User actions that must be completed before the connector can start syncing data.
+          The possible values can be: 'ALLOWLIST_STATIC_IP', 'ALLOWLIST_IN_SERVICE_ATTACHMENT'.
         output: true
         item_type:
-          type: Enum
-          enum_values:
-            - 'ALLOWLIST_STATIC_IP'
-            - 'ALLOWLIST_IN_SERVICE_ATTACHMENT'
+          type: String
       - name: 'privateConnectivityProjectId'
         type: String
         description: |
@@ -282,36 +266,19 @@ properties:
           This project must be allowlisted by in order for the connector to function.
         output: true
       - name: 'connectorType'
-        type: Enum
+        type: String
         description: |
           The type of connector. Each source can only map to one type.
           For example, salesforce, confluence and jira have THIRD_PARTY connector
-          type. It is not mutable once set by system.
+          type. It is not mutable once set by system. The possible value can be:
+          'CONNECTOR_TYPE_UNSPECIFIED', 'THIRD_PARTY', 'GCP_FHIR', 'BIG_QUERY',
+          'GCS', 'GOOGLE_MAIL', 'GOOGLE_CALENDAR', 'GOOGLE_DRIVE',
+          'NATIVE_CLOUD_IDENTITY', 'THIRD_PARTY_FEDERATED', 'THIRD_PARTY_EUA', 'GCNV'.
         output: true
-        enum_values:
-          - 'CONNECTOR_TYPE_UNSPECIFIED'
-          - 'THIRD_PARTY'
-          - 'GCP_FHIR'
-          - 'BIG_QUERY'
-          - 'GCS'
-          - 'GOOGLE_MAIL'
-          - 'GOOGLE_CALENDAR'
-          - 'GOOGLE_DRIVE'
-          - 'NATIVE_CLOUD_IDENTITY'
-          - 'THIRD_PARTY_FEDERATED'
-          - 'THIRD_PARTY_EUA'
-          - 'GCNV'
       - name: 'realtimeState'
-        type: Enum
+        type: String
         description: |
-          The real-time sync state.
+          The real-time sync state. The possible values can be:
+          'STATE_UNSPECIFIED', 'CREATING', 'ACTIVE', 'FAILED', 'RUNNING', 'WARNING',
+          'INITIALIZATION_FAILED', 'UPDATING'.
         output: true
-        enum_values:
-          - 'STATE_UNSPECIFIED'
-          - 'CREATING'
-          - 'ACTIVE'
-          - 'FAILED'
-          - 'RUNNING'
-          - 'WARNING'
-          - 'INITIALIZATION_FAILED'
-          - 'UPDATING'
