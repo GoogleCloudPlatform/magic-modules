@@ -1372,8 +1372,8 @@ func flattenMatchExprOptions(exprOptions *compute.SecurityPolicyRuleMatcherExprO
 		return nil
 	}
 
-  // We check if the API is returning a empty non-null value then we find the current value for this field in the rule config and check if its empty
-	if (tpgresource.IsEmptyValue(reflect.ValueOf(exprOptions.RecaptchaOptions.ActionTokenSiteKeys)) &&
+	if (exprOptions.RecaptchaOptions != nil &&
+		tpgresource.IsEmptyValue(reflect.ValueOf(exprOptions.RecaptchaOptions.ActionTokenSiteKeys)) &&
 		tpgresource.IsEmptyValue(reflect.ValueOf(exprOptions.RecaptchaOptions.SessionTokenSiteKeys))) &&
 		verifyRulePriorityCompareEmptyValues(d, rulePriority, "recaptcha_options") {
 		return nil
