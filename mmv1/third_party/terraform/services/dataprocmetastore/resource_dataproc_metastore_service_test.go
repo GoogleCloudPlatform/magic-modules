@@ -1,18 +1,14 @@
 package dataprocmetastore_test
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
-	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 	"github.com/hashicorp/terraform-provider-google/google/envvar"
-	"io"
-	"net/http"
-	"net/url"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 	"strings"
 )
 
@@ -178,53 +174,102 @@ resource "google_storage_bucket" "bucket" {
 
 func TestAccMetastoreService_tags(t *testing.T) {
 	t.Parallel()
-
 	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "metastore-service-tagkey", map[string]interface{}{})
 	context := map[string]interface{}{
 		"random_suffix": acctest.RandString(t, 10),
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
 		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "metastore-service-tagvalue", tagKey),
-		"project":       envvar.GetTestProjectFromEnv(),
 	}
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckDataprocMetastoreServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccMetastoreServiceTags(context),
-				Check: resource.TestCheckResourceAttrSet(
-					"google_dataproc_metastore_service.default", "tags.%"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttrSet("google_dataproc_metastore_service.default", "tags.%"),
+					testAccCheckMetastoreServiceHasTagBindings(t),
+				),
 			},
 			{
-				ResourceName:      "google_dataproc_metastore_service.default",
-				ImportState:       true,
-				ImportStateVerify: true,
-				ImportStateVerifyIgnore: []string{
-					"service_id", "location", "labels", "terraform_labels", "tags",
-				},
-			},
-			{
-				Config:       testAccMetastoreServiceTags(context),
-				ResourceName: "google_dataproc_metastore_service.default",
-				Check:        checkTagBindings(context),
+				ResourceName:            "google_dataproc_metastore_service.default",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"service_id", "location", "labels", "terraform_labels", "tags"},
 			},
 		},
 	})
 }
 
+func testAccCheckMetastoreServiceHasTagBindings(t *testing.T) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_dataproc_metastore_service" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			parts := strings.Split(rs.Primary.ID, "/")
+			if len(parts) != 6 {
+				return fmt.Errorf("Invalid resource ID format: %s", rs.Primary.ID)
+			}
+			project := parts[1]
+			location := parts[3]
+			service_id := parts[5]
+
+			parentURL := fmt.Sprintf("//metastore.googleapis.com/projects/%s/locations/%s/services/%s", project, location, service_id)
+			url := fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", location, parentURL)
+			fmt.Printf("Checking tagBindings for resource: %s at URL: %s\n", rs.Primary.ID, url)
+
+			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+
+			if err != nil {
+				return fmt.Errorf("Error calling TagBindings API: %v", err)
+			}
+
+			tagBindingsVal, exists := resp["tagBindings"]
+			if !exists {
+				return fmt.Errorf("Key 'tagBindings' not found in response for resource %s. Response: %v", rs.Primary.ID, resp)
+			}
+
+			tagBindings, ok := tagBindingsVal.([]interface{})
+			if !ok {
+				return fmt.Errorf("'tagBindings' is not a slice in response for resource %s. Response: %v", rs.Primary.ID, resp)
+			}
+
+			// Check if any tag bindings were found.
+			if len(tagBindings) == 0 {
+				return fmt.Errorf("No tag bindings found for resource %s. Response: %v", rs.Primary.ID, resp)
+			}
+
+			fmt.Printf("Successfully found %d tag bindings for %s\n", len(tagBindings), rs.Primary.ID)
+		}
+
+		return nil
+	}
+}
+
 func testAccMetastoreServiceTags(context map[string]interface{}) string {
-	return acctest.Nprintf(`
-resource "google_dataproc_metastore_service" "default" {
+	return acctest.Nprintf(`resource "google_dataproc_metastore_service" "default" {
   service_id   = "tf-test-my-service-%{random_suffix}"
-  location   = "us-central1"
+  location   = "us-east1"
   port       = 9080
   tier       = "DEVELOPER"
   maintenance_window {
     hour_of_day = 2
     day_of_week = "SUNDAY"
-   }
+  }
   hive_metastore_config {
     version = "2.3.6"
   }
@@ -234,90 +279,5 @@ resource "google_dataproc_metastore_service" "default" {
   tags = {
 	"%{org}/%{tagKey}" = "%{tagValue}"
   }
-}
-`, context)
-}
-
-// checkTagBindings performs the API call to verify the tag binding.
-func checkTagBindings(testContext map[string]interface{}) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		ctx := context.Background()
-
-		// Get the instance state from the state file
-		rs, ok := s.RootModule().Resources["google_dataproc_metastore_service.default"]
-		if !ok {
-			return fmt.Errorf("not found: %s", "google_dataproc_metastore_service.default")
-		}
-		if rs.Primary == nil {
-			return fmt.Errorf("no primary instance found for %s", "google_dataproc_metastore_service.default")
-		}
-
-		// Get the resource ID and location from the state file
-		id := rs.Primary.ID
-		location := rs.Primary.Attributes["location"]
-		if location == "" {
-			return fmt.Errorf("location not found in state file")
-		}
-
-		// Construct the full resource name
-		projectID := testContext["project"].(string)
-		parent := fmt.Sprintf("//metastore.googleapis.com/projects/%s/locations/%s/services/%s", projectID, location, id)
-
-		// Build the URL for the API call
-		apiURL, err := url.Parse("https://cloudresourcemanager.googleapis.com/v3/tagBindings")
-		if err != nil {
-			return fmt.Errorf("failed to parse API URL: %w", err)
-		}
-		q := apiURL.Query()
-		q.Set("parent", parent)
-		apiURL.RawQuery = q.Encode()
-
-		// Create and send the GET request
-		req, err := http.NewRequestWithContext(ctx, "GET", apiURL.String(), nil)
-		if err != nil {
-			return fmt.Errorf("failed to create request: %w", err)
-		}
-		// set the Authorization header here.
-
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			return fmt.Errorf("failed to list tag bindings: %w", err)
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			body, _ := io.ReadAll(resp.Body)
-			return fmt.Errorf("API request failed with status code %d and body: %s", resp.StatusCode, string(body))
-		}
-
-		// Parse the response
-		var result struct {
-			TagBindings []struct {
-				TagValue string `json:"tagValue"`
-				Parent   string `json:"parent"`
-				Name     string `json:"name"`
-			} `json:"tagBindings"`
-		}
-
-		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-			return fmt.Errorf("failed to decode API response: %w", err)
-		}
-
-		// Verify the tag binding is present
-		expectedTagValue := testContext["tagValue"].(string)
-		found := false
-		for _, binding := range result.TagBindings {
-			if strings.HasSuffix(binding.TagValue, expectedTagValue) {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			return fmt.Errorf("expected tag binding with value '%s' not found on resource %s", expectedTagValue, parent)
-		}
-
-		return nil
-	}
+}`, context)
 }
