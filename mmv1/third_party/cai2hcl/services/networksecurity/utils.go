@@ -14,3 +14,11 @@ func flattenProjectName(name string) string {
 	}
 	return tokens[1]
 }
+
+func flattenLocation(name string) string {
+	tokens := strings.Split(name, "/")
+	if len(tokens) < 6 || tokens[2] != "locations" {
+		return ""
+	}
+	return tokens[3]
+}
