@@ -92,7 +92,7 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 	hclData := make(map[string]interface{})
 
 {{ if $.CustomCode.TgcDecoder -}}
-	res, err = resource{{ $.ResourceName -}}TgcDecoder(d, config, res)
+	res, hclData, err = resource{{ $.ResourceName -}}TgcDecoder(d, config, res, hclData)
 	if err != nil {
 		return nil, err
 	}
@@ -140,7 +140,7 @@ func (c *{{ $.ResourceName -}}Cai2hclConverter) convertResourceData(asset caiass
 {{- end }}
 
 {{- if $.CustomCode.TgcDecoder }}
-func resource{{ $.ResourceName -}}TgcDecoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}) (map[string]interface{}, error) {
+func resource{{ $.ResourceName -}}TgcDecoder(d *schema.ResourceData, meta interface{}, res map[string]interface{}, hclData map[string]interface{}) (map[string]interface{}, map[string]interface{}, error) {
 	{{ $.CustomTemplate $.CustomCode.TgcDecoder false -}}
 }
 {{- end }}
