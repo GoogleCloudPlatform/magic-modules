@@ -599,7 +599,7 @@ func testAccNetappVolume_volumeBasicExample_cleanupScheduledBackup(t *testing.T,
 		if !ok {
 			return fmt.Errorf("Not found: %v", vault)
 		}
-		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}NetappBasePath{{"}}"}}projects/{{"{{"}}project{{"}}"}}/locations/{{"{{"}}location{{"}}"}}/backupVaults/{{"{{"}}name{{"}}"}}/backups")
+		url, err := tpgresource.ReplaceVarsForTest(config, rs, "{{NetappBasePath}}projects/{{project}}/locations/{{location}}/backupVaults/{{name}}/backups")
 		if err != nil {
 			return fmt.Errorf("Error : %v", err)
 		}
@@ -636,7 +636,7 @@ func testAccNetappVolume_volumeBasicExample_cleanupScheduledBackup(t *testing.T,
 			return backupDataList[i].createTime.After(backupDataList[j].createTime)
 		})
 		for i := range backupDataList {
-			baseUrl, err := tpgresource.ReplaceVarsForTest(config, rs, "{{"{{"}}NetappBasePath{{"}}"}}")
+			baseUrl, err := tpgresource.ReplaceVarsForTest(config, rs, "{{NetappBasePath}}")
 			if err != nil {
 				return fmt.Errorf("Error : %v", err)
 			}
@@ -760,7 +760,6 @@ data "google_compute_network" "default" {
 `, context)
 }
 
-{{ if ne $.TargetVersionName `ga` -}}
 func TestAccNetappVolume_flexAutoTierNetappVolume_update(t *testing.T) {
 	context := map[string]interface{}{
 		"network_name":  acctest.BootstrapSharedServiceNetworkingConnection(t, "gcnv-network-config-3", acctest.ServiceNetworkWithParentService("netapp.servicenetworking.goog")),
@@ -769,7 +768,7 @@ func TestAccNetappVolume_flexAutoTierNetappVolume_update(t *testing.T) {
 
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
-		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckNetappVolumeDestroyProducer(t),
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"time": {},
@@ -800,7 +799,6 @@ func TestAccNetappVolume_flexAutoTierNetappVolume_update(t *testing.T) {
 func testAccNetappVolume_flexAutoTierVolume_default(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default" {
-    provider = google-beta
     name = "tf-test-pool%{random_suffix}"
     location = "us-south1-a"
     service_level = "FLEX"
@@ -814,7 +812,6 @@ resource "google_netapp_storage_pool" "default" {
     enable_hot_tier_auto_resize = true
 }
 resource "google_netapp_volume" "test_volume" {
-    provider = google-beta
     location = "us-south1-a"
     name = "tf-test-volume%{random_suffix}"
     capacity_gib = "100"
@@ -828,7 +825,6 @@ resource "google_netapp_volume" "test_volume" {
     }
 }
 data "google_compute_network" "default" {
-    provider = google-beta
     name = "%{network_name}"
 }
 `, context)
@@ -837,7 +833,6 @@ data "google_compute_network" "default" {
 func testAccNetappVolume_flexAutoTierVolume_update(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 resource "google_netapp_storage_pool" "default" {
-    provider = google-beta
     name = "tf-test-pool%{random_suffix}"
     location = "us-south1-a"
     service_level = "FLEX"
@@ -851,7 +846,6 @@ resource "google_netapp_storage_pool" "default" {
     enable_hot_tier_auto_resize = true
 }
 resource "google_netapp_volume" "test_volume" {
-    provider = google-beta
     location = "us-south1-a"
     name = "tf-test-volume%{random_suffix}"
     capacity_gib = "100"
@@ -865,7 +859,6 @@ resource "google_netapp_volume" "test_volume" {
     }
 }
 data "google_compute_network" "default" {
-    provider = google-beta
     name = "%{network_name}"
 }
 `, context)
@@ -970,4 +963,3 @@ data "google_compute_network" "default" {
 }
 `, context)
 }
-{{ end }}
