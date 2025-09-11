@@ -124,6 +124,9 @@ resource "google_saas_runtime_rollout_kind" "example" {
   labels = {
     updated = "true"
   }
+  annotations = {
+    "annotation-one": "bar"
+  }
 }
 `, context)
 }
