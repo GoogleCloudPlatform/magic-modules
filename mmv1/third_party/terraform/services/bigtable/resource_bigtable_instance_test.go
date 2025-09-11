@@ -621,7 +621,7 @@ func TestAccBigtableInstance_createWithNodeScalingFactorThenUpdateViaForceNew(t 
 	})
 }
 
-func TestAccBigtableInstance_addNewClusterWithoutDeletionProtection(t *testing.T) {
+func TestAccBigtableInstance_createWithNodeScalingFactorThenFailFromDeletionProtection(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
 	acctest.SkipIfVcr(t)
 	t.Parallel()
@@ -648,7 +648,51 @@ func TestAccBigtableInstance_addNewClusterWithoutDeletionProtection(t *testing.T
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
 			{
-				// Updating with new cluster but not changing existing
+				// Updating the node scaling factor only possible without delete protection, should fail
+				Config: testAccBigtableInstance_nodeScalingFactor(instanceName, 2, "NodeScalingFactor1X", true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.num_nodes", "2"),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.node_scaling_factor", "NodeScalingFactor1X"),
+				),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
+			},
+		},
+	})
+}
+
+func TestAccBigtableInstance_addNewClusterWithoutDeletionProtection(t *testing.T) {
+	// bigtable instance does not use the shared HTTP client, this test creates an instance
+	acctest.SkipIfVcr(t)
+	t.Parallel()
+
+	instanceName := fmt.Sprintf("tf-test-nsf-%s", acctest.RandString(t, 10))
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckBigtableInstanceDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				// creates new instance, single cluster, deletion protection enabled
+				Config: testAccBigtableInstance_nodeScalingFactor(instanceName, 2, "NodeScalingFactor2X", true),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.num_nodes", "2"),
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.node_scaling_factor", "NodeScalingFactor2X"),
+				),
+			},
+			{
+				ResourceName:            "google_bigtable_instance.instance",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
+			},
+			{
+				// adds new cluster to instance (does not require recreate)
 				Config: testAccBigtableInstance_nodeScalingFactor_multipleClusters(instanceName, 2, "NodeScalingFactor2X", true),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.1.num_nodes", "2"),
@@ -664,9 +708,6 @@ func TestAccBigtableInstance_addNewClusterWithoutDeletionProtection(t *testing.T
 		},
 	})
 }
-
-// New test Cases:
-// 1. Create new instance with single cluster -> add new cluster (with deletion protection = true) -> no errors
 
 func testAccBigtableInstance_nodeScalingFactor(instanceName string, numNodes int, nodeScalingFactor string, deletionProtection bool) string {
 	nodeScalingFactorAttribute := ""
