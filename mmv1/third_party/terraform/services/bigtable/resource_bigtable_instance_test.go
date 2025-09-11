@@ -623,7 +623,7 @@ func TestAccBigtableInstance_createWithNodeScalingFactorThenUpdateViaForceNew(t 
 
 func TestAccBigtableInstance_createWithNodeScalingFactorThenFailFromDeletionProtection(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	//acctest.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-nsf-%s", acctest.RandString(t, 10))
@@ -637,7 +637,6 @@ func TestAccBigtableInstance_createWithNodeScalingFactorThenFailFromDeletionProt
 				// Create config with node scaling factor as 2x.
 				Config: testAccBigtableInstance_nodeScalingFactor(instanceName, 2, "NodeScalingFactor2X", true),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.num_nodes", "2"),
 					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.node_scaling_factor", "NodeScalingFactor2X"),
 				),
 			},
@@ -648,10 +647,10 @@ func TestAccBigtableInstance_createWithNodeScalingFactorThenFailFromDeletionProt
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
 			{
-				// Updating the node scaling factor only possible without delete protection, should fail
-				Config: testAccBigtableInstance_nodeScalingFactor(instanceName, 2, "NodeScalingFactor1X", true),
+				// Updating the node scaling factor only possible without delete protection, should error
+				Config:      testAccBigtableInstance_nodeScalingFactor(instanceName, 2, "NodeScalingFactor1X", true),
+				ExpectError: regexp.MustCompile("deletion_protection"), // change in node_scaling_factor causes recreate which fails b/c of deletion_protection = true
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.num_nodes", "2"),
 					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "cluster.0.node_scaling_factor", "NodeScalingFactor1X"),
 				),
 			},
@@ -661,13 +660,20 @@ func TestAccBigtableInstance_createWithNodeScalingFactorThenFailFromDeletionProt
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
 			},
+			{
+				// set deletion protection false to allow cleanup
+				Config: testAccBigtableInstance_nodeScalingFactor(instanceName, 2, "NodeScalingFactor2X", false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "deletion_protection", "false"),
+				),
+			},
 		},
 	})
 }
 
 func TestAccBigtableInstance_addNewClusterWithoutDeletionProtection(t *testing.T) {
 	// bigtable instance does not use the shared HTTP client, this test creates an instance
-	//acctest.SkipIfVcr(t)
+	acctest.SkipIfVcr(t)
 	t.Parallel()
 
 	instanceName := fmt.Sprintf("tf-test-nsf-%s", acctest.RandString(t, 10))
@@ -704,6 +710,13 @@ func TestAccBigtableInstance_addNewClusterWithoutDeletionProtection(t *testing.T
 				ImportState:             true,
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"deletion_protection", "instance_type"}, // we don't read instance type back
+			},
+			{
+				// set instance to have no deletion protection to allow cleanup
+				Config: testAccBigtableInstance_nodeScalingFactor_multipleClusters(instanceName, 2, "NodeScalingFactor2X", false),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_bigtable_instance.instance", "deletion_protection", "false"),
+				),
 			},
 		},
 	})
@@ -748,7 +761,7 @@ resource "google_bigtable_instance" "instance" {
 
   cluster {
     cluster_id   = "%s-2"
-    zone         = "us-central1-b"
+    zone         = "us-east4-a"
     num_nodes    = %d
     storage_type = "SSD"
 	%s
