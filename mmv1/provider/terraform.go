@@ -71,7 +71,7 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 }
 
 func (t Terraform) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
-	if (string(t.Product.ApiName)[0] < 'a' || string(t.Product.ApiName)[0] > 'd') || string(t.Product.ApiName)[0] != 'g' || string(t.Product.ApiName)[0] != 's' {
+	if (string(t.Product.ApiName)[0] >= 'a' && string(t.Product.ApiName)[0] <= 'd') || string(t.Product.ApiName)[0] == 'g' || string(t.Product.ApiName)[0] == 's' {
 		if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 			log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
 		}
@@ -107,7 +107,7 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 
 		if generateCode {
 			// log.Printf("Generating %s tests", object.Name)
-			if (string(object.ApiName)[0] < 'a' || string(object.ApiName)[0] > 'd') || string(object.ApiName)[0] != 'g' || string(object.ApiName)[0] != 's' {
+			if (string(t.Product.ApiName)[0] >= 'a' && string(t.Product.ApiName)[0] <= 'd') || string(t.Product.ApiName)[0] == 'g' || string(t.Product.ApiName)[0] == 's' {
 
 				t.GenerateResourceTests(object, *templateData, outputFolder)
 			}
@@ -760,26 +760,25 @@ func (t Terraform) ProviderFromVersion() string {
 func (t Terraform) GetMmv1ServicesInVersion(products []*api.Product) []string {
 	var services []string
 	for _, product := range products {
-		if (string(product.ApiName)[0] < 'a' || string(product.ApiName)[0] > 'd') || string(product.ApiName)[0] != 'g' || string(product.ApiName)[0] != 's' {
-			continue
-		}
-		if t.TargetVersionName == "ga" {
-			someResourceInGA := false
-			for _, object := range product.Objects {
+		if (string(t.Product.ApiName)[0] >= 'a' && string(t.Product.ApiName)[0] <= 'd') || string(t.Product.ApiName)[0] == 'g' || string(t.Product.ApiName)[0] == 's' {
+			if t.TargetVersionName == "ga" {
+				someResourceInGA := false
+				for _, object := range product.Objects {
+					if someResourceInGA {
+						break
+					}
+
+					if !object.Exclude && !object.NotInVersion(product.VersionObjOrClosest(t.TargetVersionName)) {
+						someResourceInGA = true
+					}
+				}
+
 				if someResourceInGA {
-					break
+					services = append(services, strings.ToLower(product.Name))
 				}
-
-				if !object.Exclude && !object.NotInVersion(product.VersionObjOrClosest(t.TargetVersionName)) {
-					someResourceInGA = true
-				}
-			}
-
-			if someResourceInGA {
+			} else {
 				services = append(services, strings.ToLower(product.Name))
 			}
-		} else {
-			services = append(services, strings.ToLower(product.Name))
 		}
 	}
 	return services
@@ -797,37 +796,37 @@ func (t Terraform) GetMmv1ServicesInVersion(products []*api.Product) []string {
 // # mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb
 func (t *Terraform) generateResourcesForVersion(products []*api.Product) {
 	for _, productDefinition := range products {
-		if (string(productDefinition.ApiName)[0] < 'a' || string(productDefinition.ApiName)[0] > 'd') || string(productDefinition.ApiName)[0] != 'g' || string(productDefinition.ApiName)[0] != 's' {
-			continue
-		}
-		service := strings.ToLower(productDefinition.Name)
-		for _, object := range productDefinition.Objects {
-			if object.Exclude || object.NotInVersion(productDefinition.VersionObjOrClosest(t.TargetVersionName)) {
-				continue
-			}
+		if (string(t.Product.ApiName)[0] >= 'a' && string(t.Product.ApiName)[0] <= 'd') || string(t.Product.ApiName)[0] == 'g' || string(t.Product.ApiName)[0] == 's' {
 
-			var resourceName string
-
-			if !object.IsExcluded() {
-				t.ResourceCount++
-				resourceName = fmt.Sprintf("%s.Resource%s", service, object.ResourceName())
-			}
-
-			var iamClassName string
-			iamPolicy := object.IamPolicy
-			if iamPolicy != nil && !iamPolicy.Exclude {
-				t.IAMResourceCount += 3
-
-				if slices.Index(product.ORDER, iamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName) {
-					iamClassName = fmt.Sprintf("%s.%s", service, object.ResourceName())
+			service := strings.ToLower(productDefinition.Name)
+			for _, object := range productDefinition.Objects {
+				if object.Exclude || object.NotInVersion(productDefinition.VersionObjOrClosest(t.TargetVersionName)) {
+					continue
 				}
-			}
 
-			t.ResourcesForVersion = append(t.ResourcesForVersion, map[string]string{
-				"TerraformName": object.TerraformName(),
-				"ResourceName":  resourceName,
-				"IamClassName":  iamClassName,
-			})
+				var resourceName string
+
+				if !object.IsExcluded() {
+					t.ResourceCount++
+					resourceName = fmt.Sprintf("%s.Resource%s", service, object.ResourceName())
+				}
+
+				var iamClassName string
+				iamPolicy := object.IamPolicy
+				if iamPolicy != nil && !iamPolicy.Exclude {
+					t.IAMResourceCount += 3
+
+					if slices.Index(product.ORDER, iamPolicy.MinVersion) <= slices.Index(product.ORDER, t.TargetVersionName) {
+						iamClassName = fmt.Sprintf("%s.%s", service, object.ResourceName())
+					}
+				}
+
+				t.ResourcesForVersion = append(t.ResourcesForVersion, map[string]string{
+					"TerraformName": object.TerraformName(),
+					"ResourceName":  resourceName,
+					"IamClassName":  iamClassName,
+				})
+			}
 		}
 	}
 }
