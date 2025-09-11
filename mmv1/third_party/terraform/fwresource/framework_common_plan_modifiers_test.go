@@ -5,14 +5,14 @@ import (
 	"strings"
 	"testing"
 
-    "github.com/hashicorp/terraform-plugin-go/tftypes"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-    "github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
 )
@@ -44,152 +44,152 @@ func TestDefaultProjectModify(t *testing.T) {
 				Project: "default-provider-project",
 			},
 			expectedAttribute: types.StringValue("plan-project"),
-    		req:    resource.ModifyPlanRequest{
-                        Config: tfsdk.Config{
-                            Raw: tftypes.NewValue(tftypes.Object{
-                                AttributeTypes: map[string]tftypes.Type{
-                                    "project": tftypes.String,
-                                },
-                            }, map[string]tftypes.Value{
-                                "project": tftypes.NewValue(tftypes.String, "plan-project"),
-                            }),
-                            Schema: testSchema,
-                        },
-                        Plan: tfsdk.Plan{
-                                Raw: tftypes.NewValue(tftypes.Object{
-                                    AttributeTypes: map[string]tftypes.Type{
-                                        "project": tftypes.String,
-                                    },
-                                }, map[string]tftypes.Value{
-                                    "project": tftypes.NewValue(tftypes.String, "plan-project"),
-                            }),
-                            Schema: testSchema,
-                        },
-                        State: tfsdk.State{
-                            Raw: tftypes.NewValue(tftypes.Object{
-                                AttributeTypes: map[string]tftypes.Type{
-                                    "project": tftypes.String,
-                                },
-                            }, map[string]tftypes.Value{
-                                "project": tftypes.NewValue(tftypes.String, nil),
-                            }),
-                            Schema: testSchema,
-                        },
-                },
+			req: resource.ModifyPlanRequest{
+				Config: tfsdk.Config{
+					Raw: tftypes.NewValue(tftypes.Object{
+						AttributeTypes: map[string]tftypes.Type{
+							"project": tftypes.String,
+						},
+					}, map[string]tftypes.Value{
+						"project": tftypes.NewValue(tftypes.String, "plan-project"),
+					}),
+					Schema: testSchema,
+				},
+				Plan: tfsdk.Plan{
+					Raw: tftypes.NewValue(tftypes.Object{
+						AttributeTypes: map[string]tftypes.Type{
+							"project": tftypes.String,
+						},
+					}, map[string]tftypes.Value{
+						"project": tftypes.NewValue(tftypes.String, "plan-project"),
+					}),
+					Schema: testSchema,
+				},
+				State: tfsdk.State{
+					Raw: tftypes.NewValue(tftypes.Object{
+						AttributeTypes: map[string]tftypes.Type{
+							"project": tftypes.String,
+						},
+					}, map[string]tftypes.Value{
+						"project": tftypes.NewValue(tftypes.String, nil),
+					}),
+					Schema: testSchema,
+				},
+			},
 
-			resp:    &resource.ModifyPlanResponse{
-                        Plan: tfsdk.Plan{
-                                Raw: tftypes.NewValue(tftypes.Object{
-                                    AttributeTypes: map[string]tftypes.Type{
-                                        "project": tftypes.String,
-                                    },
-                                }, map[string]tftypes.Value{
-                                    "project": tftypes.NewValue(tftypes.String, "plan-project"),
-                            }),
-                            Schema: testSchema,
-                        },
-                    },
+			resp: &resource.ModifyPlanResponse{
+				Plan: tfsdk.Plan{
+					Raw: tftypes.NewValue(tftypes.Object{
+						AttributeTypes: map[string]tftypes.Type{
+							"project": tftypes.String,
+						},
+					}, map[string]tftypes.Value{
+						"project": tftypes.NewValue(tftypes.String, "plan-project"),
+					}),
+					Schema: testSchema,
+				},
+			},
 		},
 		"Falls back on provider default": {
 			providerConfig: &transport_tpg.Config{
 				Project: "default-provider-project",
 			},
 			expectedAttribute: types.StringValue("default-provider-project"),
-			req:    resource.ModifyPlanRequest{
-                        Config: tfsdk.Config{
-                            Raw: tftypes.NewValue(tftypes.Object{
-                                AttributeTypes: map[string]tftypes.Type{
-                                    "project": tftypes.String,
-                                },
-                            }, map[string]tftypes.Value{
-                                "project": tftypes.NewValue(tftypes.String, nil),
-                            }),
-                            Schema: testSchema,
-                        },
-                        Plan: tfsdk.Plan{
-                                Raw: tftypes.NewValue(tftypes.Object{
-                                    AttributeTypes: map[string]tftypes.Type{
-                                        "project": tftypes.String,
-                                    },
-                                }, map[string]tftypes.Value{
-                                    "project": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
-                            }),
-                            Schema: testSchema,
-                        },
-                        State: tfsdk.State{
-                            Raw: tftypes.NewValue(tftypes.Object{
-                                AttributeTypes: map[string]tftypes.Type{
-                                    "project": tftypes.String,
-                                },
-                            }, map[string]tftypes.Value{
-                                "project": tftypes.NewValue(tftypes.String, nil),
-                            }),
-                            Schema: testSchema,
-                        },
-                },
+			req: resource.ModifyPlanRequest{
+				Config: tfsdk.Config{
+					Raw: tftypes.NewValue(tftypes.Object{
+						AttributeTypes: map[string]tftypes.Type{
+							"project": tftypes.String,
+						},
+					}, map[string]tftypes.Value{
+						"project": tftypes.NewValue(tftypes.String, nil),
+					}),
+					Schema: testSchema,
+				},
+				Plan: tfsdk.Plan{
+					Raw: tftypes.NewValue(tftypes.Object{
+						AttributeTypes: map[string]tftypes.Type{
+							"project": tftypes.String,
+						},
+					}, map[string]tftypes.Value{
+						"project": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+					}),
+					Schema: testSchema,
+				},
+				State: tfsdk.State{
+					Raw: tftypes.NewValue(tftypes.Object{
+						AttributeTypes: map[string]tftypes.Type{
+							"project": tftypes.String,
+						},
+					}, map[string]tftypes.Value{
+						"project": tftypes.NewValue(tftypes.String, nil),
+					}),
+					Schema: testSchema,
+				},
+			},
 
-            resp:    &resource.ModifyPlanResponse{
-                        Plan: tfsdk.Plan{
-                                Raw: tftypes.NewValue(tftypes.Object{
-                                    AttributeTypes: map[string]tftypes.Type{
-                                        "project": tftypes.String,
-                                    },
-                                }, map[string]tftypes.Value{
-                                    "project": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
-                            }),
-                            Schema: testSchema,
-                        },
-                    },
+			resp: &resource.ModifyPlanResponse{
+				Plan: tfsdk.Plan{
+					Raw: tftypes.NewValue(tftypes.Object{
+						AttributeTypes: map[string]tftypes.Type{
+							"project": tftypes.String,
+						},
+					}, map[string]tftypes.Value{
+						"project": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+					}),
+					Schema: testSchema,
+				},
+			},
 		},
 		"Errors if there is no config value or provider default": {
 			providerConfig: &transport_tpg.Config{},
-            req:    resource.ModifyPlanRequest{
-                        Config: tfsdk.Config{
-                            Raw: tftypes.NewValue(tftypes.Object{
-                                AttributeTypes: map[string]tftypes.Type{
-                                    "project": tftypes.String,
-                                },
-                            }, map[string]tftypes.Value{
-                                "project": tftypes.NewValue(tftypes.String, nil),
-                            }),
-                            Schema: testSchema,
-                        },
-                        Plan: tfsdk.Plan{
-                                Raw: tftypes.NewValue(tftypes.Object{
-                                    AttributeTypes: map[string]tftypes.Type{
-                                        "project": tftypes.String,
-                                    },
-                                }, map[string]tftypes.Value{
-                                    "project": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
-                            }),
-                            Schema: testSchema,
-                        },
-                        State: tfsdk.State{
-                            Raw: tftypes.NewValue(tftypes.Object{
-                                AttributeTypes: map[string]tftypes.Type{
-                                    "project": tftypes.String,
-                                },
-                            }, map[string]tftypes.Value{
-                                "project": tftypes.NewValue(tftypes.String, nil),
-                            }),
-                            Schema: testSchema,
-                        },
-                },
+			req: resource.ModifyPlanRequest{
+				Config: tfsdk.Config{
+					Raw: tftypes.NewValue(tftypes.Object{
+						AttributeTypes: map[string]tftypes.Type{
+							"project": tftypes.String,
+						},
+					}, map[string]tftypes.Value{
+						"project": tftypes.NewValue(tftypes.String, nil),
+					}),
+					Schema: testSchema,
+				},
+				Plan: tfsdk.Plan{
+					Raw: tftypes.NewValue(tftypes.Object{
+						AttributeTypes: map[string]tftypes.Type{
+							"project": tftypes.String,
+						},
+					}, map[string]tftypes.Value{
+						"project": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+					}),
+					Schema: testSchema,
+				},
+				State: tfsdk.State{
+					Raw: tftypes.NewValue(tftypes.Object{
+						AttributeTypes: map[string]tftypes.Type{
+							"project": tftypes.String,
+						},
+					}, map[string]tftypes.Value{
+						"project": tftypes.NewValue(tftypes.String, nil),
+					}),
+					Schema: testSchema,
+				},
+			},
 
-            resp:    &resource.ModifyPlanResponse{
-                        Plan: tfsdk.Plan{
-                                Raw: tftypes.NewValue(tftypes.Object{
-                                    AttributeTypes: map[string]tftypes.Type{
-                                        "project": tftypes.String,
-                                    },
-                                }, map[string]tftypes.Value{
-                                    "project": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
-                            }),
-                            Schema: testSchema,
-                        },
-                    },
-			expectError:    true,
-			errorContains:  "must be set",
+			resp: &resource.ModifyPlanResponse{
+				Plan: tfsdk.Plan{
+					Raw: tftypes.NewValue(tftypes.Object{
+						AttributeTypes: map[string]tftypes.Type{
+							"project": tftypes.String,
+						},
+					}, map[string]tftypes.Value{
+						"project": tftypes.NewValue(tftypes.String, tftypes.UnknownValue),
+					}),
+					Schema: testSchema,
+				},
+			},
+			expectError:   true,
+			errorContains: "must be set",
 		},
 	}
 
