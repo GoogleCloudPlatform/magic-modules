@@ -324,7 +324,7 @@ func (tgc *TerraformGoogleConversionNext) generateResourcesForVersion(products [
 	resourcesByCaiResourceType := make(map[string][]ResourceIdentifier)
 
 	for _, productDefinition := range products {
-		if string(productDefinition.ApiName)[0] < 'a' || string(productDefinition.ApiName)[0] > 'd' {
+		if (string(productDefinition.ApiName)[0] >= 'a' && string(productDefinition.ApiName)[0] <= 'd') || string(productDefinition.ApiName)[0] == 'g' || string(productDefinition.ApiName)[0] == 's' {
 			continue
 		}
 		service := strings.ToLower(productDefinition.Name)
