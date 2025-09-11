@@ -1,7 +1,7 @@
 ---
 subcategory: "Apigee"
 description: |-
-  Deploys a revision of a sharedflow.
+  Deploys a revision of an api proxy.
 ---
 
 # google_apigee_api_deployment
@@ -77,6 +77,7 @@ This resource provides the following
 API Proxy Deployments can be imported using any of these accepted formats:
 
 * `organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments`
+* `organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}`
 * `{{org_id}}/{{environment}}/{{proxy_id}}/{{revision}}`
 
 In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import ApiDeployment using one of the formats above. For example:
@@ -84,6 +85,16 @@ In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashico
 ```tf
 import {
   id = "organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments"
+  to = google_apigee_api_deployment.default
+}
+
+import {
+  id = "organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}"
+  to = google_apigee_api_deployment.default
+}
+
+import {
+  id = "{{org_id}}/{{environment}}/{{proxy_id}}/{{revision}}"
   to = google_apigee_api_deployment.default
 }
 ```
