@@ -559,6 +559,10 @@ properties:
                               Path within the container at which the volume should be mounted.  Must
                               not contain ':'.
                             required: true
+                          - name: 'subPath'
+                            type: String
+                            description: |-
+                              Path within the volume from which the container's volume should be mounted.
                           - name: 'name'
                             type: String
                             description: |-

@@ -50,6 +50,7 @@ iam_policy:
     - 'projects/{{project}}/locations/{{location}}/customTargetTypes/{{name}}'
     - '{{name}}'
 custom_code:
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'clouddeploy_custom_target_type_basic'
     primary_resource_id: 'custom-target-type'

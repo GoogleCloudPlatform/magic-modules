@@ -40,6 +40,7 @@ async:
     resource_inside_response: false
   include_project: true
 custom_code:
+include_in_tgc_next_DO_NOT_USE: true
 sweeper:
   url_substitutions:
     - parent: "organizations/${ORG_ID}"
