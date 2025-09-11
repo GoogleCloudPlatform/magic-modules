@@ -71,15 +71,17 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 }
 
 func (t Terraform) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
-	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
-		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
-	}
+	if string(t.Product.ApiName)[0] >= 'a' && string(t.Product.ApiName)[0] <= 'd' {
+		if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
+			log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
+		}
 
-	t.GenerateObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
+		t.GenerateObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
+		if generateCode {
 
-	if generateCode {
-		t.GenerateProduct(outputFolder)
-		t.GenerateOperation(outputFolder)
+			t.GenerateProduct(outputFolder)
+			t.GenerateOperation(outputFolder)
+		}
 	}
 }
 
@@ -105,7 +107,10 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 
 		if generateCode {
 			// log.Printf("Generating %s tests", object.Name)
-			t.GenerateResourceTests(object, *templateData, outputFolder)
+			if string(object.ApiName)[0] >= 'a' && string(object.ApiName)[0] <= 'd' {
+
+				t.GenerateResourceTests(object, *templateData, outputFolder)
+			}
 			t.GenerateResourceSweeper(object, *templateData, outputFolder)
 			t.GenerateSingularDataSource(object, *templateData, outputFolder)
 			// log.Printf("Generating %s metadata", object.Name)
@@ -119,6 +124,7 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 	}
 
 	t.GenerateIamPolicy(object, *templateData, outputFolder, generateCode, generateDocs)
+
 }
 
 func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
@@ -754,6 +760,9 @@ func (t Terraform) ProviderFromVersion() string {
 func (t Terraform) GetMmv1ServicesInVersion(products []*api.Product) []string {
 	var services []string
 	for _, product := range products {
+		if string(product.ApiName)[0] < 'a' || string(product.ApiName)[0] > 'd' {
+			continue
+		}
 		if t.TargetVersionName == "ga" {
 			someResourceInGA := false
 			for _, object := range product.Objects {
@@ -788,6 +797,9 @@ func (t Terraform) GetMmv1ServicesInVersion(products []*api.Product) []string {
 // # mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb
 func (t *Terraform) generateResourcesForVersion(products []*api.Product) {
 	for _, productDefinition := range products {
+		if string(productDefinition.ApiName)[0] < 'a' || string(productDefinition.ApiName)[0] > 'd' {
+			continue
+		}
 		service := strings.ToLower(productDefinition.Name)
 		for _, object := range productDefinition.Objects {
 			if object.Exclude || object.NotInVersion(productDefinition.VersionObjOrClosest(t.TargetVersionName)) {
