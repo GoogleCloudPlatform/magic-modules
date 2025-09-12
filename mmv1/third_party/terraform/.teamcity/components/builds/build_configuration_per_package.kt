@@ -20,7 +20,7 @@ import replaceCharsId
 
 // BuildConfigurationsForPackages accepts a map containing details of multiple packages in a provider and returns a list of build configurations for them all.
 // Intended to be used in projects where we're testing all packages, e.g. the nightly test projects
-fun BuildConfigurationsForPackages(packages: Map<String, Map<String, String>>, providerName: String, parentProjectName: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration, testPrefix: String = "TestAcc", releaseDiffTest: String = "false"): List<BuildType> {
+fun BuildConfigurationsForPackages(packages: Map<String, Map<String, String>>, providerName: String, parentProjectName: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration, testPrefix: String = "TestAcc", releaseDiffTest: Boolean = false): List<BuildType> {
     val list = ArrayList<BuildType>()
 
     // Create build configurations for all packages, except sweeper
@@ -38,7 +38,7 @@ fun BuildConfigurationsForPackages(packages: Map<String, Map<String, String>>, p
 
 // BuildConfigurationForSinglePackage accepts details of a single package in a provider and returns a build configuration for it
 // Intended to be used in short-lived projects where we're testing specific packages, e.g. feature branch testing
-fun BuildConfigurationForSinglePackage(packageName: String, packagePath: String, packageDisplayName: String, providerName: String, parentProjectName: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration, testPrefix: String = "TestAcc", releaseDiffTest: String = "false"): BuildType{
+fun BuildConfigurationForSinglePackage(packageName: String, packagePath: String, packageDisplayName: String, providerName: String, parentProjectName: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration, testPrefix: String = "TestAcc", releaseDiffTest: Boolean = false): BuildType{
     val pkg = PackageDetails(packageName, packageDisplayName, providerName, parentProjectName, releaseDiffTest = releaseDiffTest)
     return pkg.buildConfiguration(packagePath, vcsRoot, sharedResources, environmentVariables, testPrefix = testPrefix, releaseDiffTest = releaseDiffTest)
 }
@@ -72,7 +72,7 @@ class PackageDetails(private val packageName: String, private val displayName: S
                 tagBuildToIndicateTriggerMethod()
                 configureGoEnv()
                 downloadTerraformBinary()
-                if (releaseDiffTest.toBoolean()) {
+                if (releaseDiffTest) {
                     runDiffTests()
                 } else {
                     runAcceptanceTests()
