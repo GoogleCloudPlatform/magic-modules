@@ -71,13 +71,16 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 }
 
 func (t Terraform) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
+	if (string(t.Product.ApiName)[0] < 'a' || string(t.Product.ApiName)[0] > 'd') && string(t.Product.ApiName)[0] != 'g' && string(t.Product.ApiName)[0] != 's' && string(t.Product.ApiName)[0] != 'p' && string(t.Product.ApiName)[0] != 'k' && string(t.Product.ApiName)[0] != 't' {
+		return
+	}
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
 		log.Println(fmt.Errorf("error creating output directory %v: %v", outputFolder, err))
 	}
 
 	t.GenerateObjects(outputFolder, resourceToGenerate, generateCode, generateDocs)
-
 	if generateCode {
+
 		t.GenerateProduct(outputFolder)
 		t.GenerateOperation(outputFolder)
 	}
@@ -99,26 +102,31 @@ func (t *Terraform) GenerateObjects(outputFolder, resourceToGenerate string, gen
 func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
 	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
 
-	if !object.IsExcluded() {
-		log.Printf("Generating %s resource", object.Name)
-		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
-
-		if generateCode {
-			// log.Printf("Generating %s tests", object.Name)
-			t.GenerateResourceTests(object, *templateData, outputFolder)
-			t.GenerateResourceSweeper(object, *templateData, outputFolder)
-			t.GenerateSingularDataSource(object, *templateData, outputFolder)
-			// log.Printf("Generating %s metadata", object.Name)
-			t.GenerateResourceMetadata(object, *templateData, outputFolder)
-		}
-	}
-
 	// if iam_policy is not defined or excluded, don't generate it
 	if object.IamPolicy == nil || object.IamPolicy.Exclude {
 		return
 	}
 
 	t.GenerateIamPolicy(object, *templateData, outputFolder, generateCode, generateDocs)
+
+	if !object.IsExcluded() {
+		log.Printf("Generating %s resource", object.Name)
+		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
+
+		if generateCode {
+			// log.Printf("Generating %s tests", object.Name)
+			t.GenerateResourceSweeper(object, *templateData, outputFolder)
+			t.GenerateSingularDataSource(object, *templateData, outputFolder)
+			// log.Printf("Generating %s metadata", object.Name)
+
+			if (string(object.ApiName)[0] < 'a' || string(object.ApiName)[0] > 'd') && string(object.ApiName)[0] != 'g' && string(object.ApiName)[0] != 's' && string(object.ApiName)[0] != 'p' && string(object.ApiName)[0] != 'k' && string(object.ApiName)[0] != 't' {
+				return
+			}
+			t.GenerateResourceTests(object, *templateData, outputFolder)
+			t.GenerateResourceMetadata(object, *templateData, outputFolder)
+		}
+	}
+
 }
 
 func (t *Terraform) GenerateResource(object api.Resource, templateData TemplateData, outputFolder string, generateCode, generateDocs bool) {
@@ -754,6 +762,9 @@ func (t Terraform) ProviderFromVersion() string {
 func (t Terraform) GetMmv1ServicesInVersion(products []*api.Product) []string {
 	var services []string
 	for _, product := range products {
+		if (string(product.ApiName)[0] < 'a' || string(product.ApiName)[0] > 'd') && string(product.ApiName)[0] != 'g' && string(product.ApiName)[0] != 's' && string(product.ApiName)[0] != 'p' && string(product.ApiName)[0] != 'k' && string(product.ApiName)[0] != 't' {
+			continue
+		}
 		if t.TargetVersionName == "ga" {
 			someResourceInGA := false
 			for _, object := range product.Objects {
@@ -788,6 +799,9 @@ func (t Terraform) GetMmv1ServicesInVersion(products []*api.Product) []string {
 // # mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb
 func (t *Terraform) generateResourcesForVersion(products []*api.Product) {
 	for _, productDefinition := range products {
+		if (string(t.Product.ApiName)[0] < 'a' || string(t.Product.ApiName)[0] > 'd') && string(t.Product.ApiName)[0] != 'g' && string(t.Product.ApiName)[0] != 's' && string(t.Product.ApiName)[0] != 'p' && string(t.Product.ApiName)[0] != 'k' && string(t.Product.ApiName)[0] != 't' {
+			continue
+		}
 		service := strings.ToLower(productDefinition.Name)
 		for _, object := range productDefinition.Objects {
 			if object.Exclude || object.NotInVersion(productDefinition.VersionObjOrClosest(t.TargetVersionName)) {
