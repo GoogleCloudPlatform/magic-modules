@@ -38,6 +38,12 @@ base_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id
 # the field values from the resource at runtime.
 self_link: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/deployments'
 
+import_format:
+  - 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
+  - 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}'
+  - '{{org_id}}/{{environment}}/{{proxy_id}}/{{revision}}/deployments'
+  - '{{org_id}}/{{environment}}/{{proxy_id}}/{{revision}}'
+
 # If true, the resource and all its fields are considered immutable - that is,
 # only creatable, not updatable. Individual fields can override this if they
 # have a custom update method in the API.
@@ -64,12 +70,12 @@ update_mask: false
 # the resource. If false, that code is not generated.
 autogen_async: true
 # Sets parameters for handling operations returned by the API.
-# async:
-#   # Overrides which API calls return operations. Default: ['create',
-#   # 'update', 'delete']
-#   # actions: ['create', 'update', 'delete']
-#   operation:
-#     base_url: '{{op_id}}'
+async:
+  # Overrides which API calls return operations. Default: ['create',
+  # 'update', 'delete']
+  # actions: ['create', 'update', 'delete']
+  operation:
+    base_url: '{{op_id}}'
 
 parameters:
   - name: 'org_id'
@@ -105,9 +111,19 @@ parameters:
       The revision of the API proxy to be deployed.
 
 properties:
-  # Fields go here
   - name: 'id'
     type: String
     description: |
-      The ID of the API deployment in the format `organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments`
+      The ID of the API deployment in the format `organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments`.
     output: true
+
+examples:
+  - name: 'apigee_api_deployment_basic'
+    primary_resource_id: 'apigee_api_deployment'
+    vars:
+      proxy_id: 'example-proxy'
+      revision: 'example-revision'
+      environment: 'example-environment'
+      org_id: 'example-org'
+    exclude_docs: true
+    external_providers: ['time']
