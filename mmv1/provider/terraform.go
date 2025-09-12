@@ -71,7 +71,7 @@ func NewTerraform(product *api.Product, versionName string, startTime time.Time)
 }
 
 func (t Terraform) Generate(outputFolder, productPath, resourceToGenerate string, generateCode, generateDocs bool) {
-	if (string(t.Product.ApiName)[0] < 'a' || string(t.Product.ApiName)[0] > 'd') && string(t.Product.ApiName)[0] != 'g' && string(t.Product.ApiName)[0] != 's' && string(t.Product.ApiName)[0] != 'p' {
+	if (string(t.Product.ApiName)[0] < 'a' || string(t.Product.ApiName)[0] > 'd') && string(t.Product.ApiName)[0] != 'g' && string(t.Product.ApiName)[0] != 's' && string(t.Product.ApiName)[0] != 'p' && string(t.Product.ApiName)[0] != 'k' && string(t.Product.ApiName)[0] != 't' {
 		return
 	}
 	if err := os.MkdirAll(outputFolder, os.ModePerm); err != nil {
@@ -102,7 +102,7 @@ func (t *Terraform) GenerateObjects(outputFolder, resourceToGenerate string, gen
 func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
 	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
 
-	if (string(t.Product.ApiName)[0] < 'a' || string(t.Product.ApiName)[0] > 'd') && string(t.Product.ApiName)[0] != 'g' && string(t.Product.ApiName)[0] != 's' && string(t.Product.ApiName)[0] != 'p' {
+	if (string(t.Product.ApiName)[0] < 'a' || string(t.Product.ApiName)[0] > 'd') && string(t.Product.ApiName)[0] != 'g' && string(t.Product.ApiName)[0] != 's' && string(t.Product.ApiName)[0] != 'p' && string(t.Product.ApiName)[0] != 'k' && string(t.Product.ApiName)[0] != 't' {
 		return
 	}
 
@@ -763,7 +763,7 @@ func (t Terraform) ProviderFromVersion() string {
 func (t Terraform) GetMmv1ServicesInVersion(products []*api.Product) []string {
 	var services []string
 	for _, product := range products {
-		if (string(product.ApiName)[0] < 'a' || string(product.ApiName)[0] > 'd') && string(product.ApiName)[0] != 'g' && string(product.ApiName)[0] != 's' && string(product.ApiName)[0] != 'p' {
+		if (string(product.ApiName)[0] < 'a' || string(product.ApiName)[0] > 'd') && string(product.ApiName)[0] != 'g' && string(product.ApiName)[0] != 's' && string(product.ApiName)[0] != 'p' && string(product.ApiName)[0] != 'k' && string(product.ApiName)[0] != 't' {
 			continue
 		}
 		if t.TargetVersionName == "ga" {
@@ -800,7 +800,7 @@ func (t Terraform) GetMmv1ServicesInVersion(products []*api.Product) []string {
 // # mmv1/third_party/terraform/provider/provider_mmv1_resources.go.erb
 func (t *Terraform) generateResourcesForVersion(products []*api.Product) {
 	for _, productDefinition := range products {
-		if (string(productDefinition.ApiName)[0] < 'a' || string(productDefinition.ApiName)[0] > 'd') && string(productDefinition.ApiName)[0] != 'g' && string(productDefinition.ApiName)[0] != 's' && string(productDefinition.ApiName)[0] != 'p' {
+		if (string(t.Product.ApiName)[0] < 'a' || string(t.Product.ApiName)[0] > 'd') && string(t.Product.ApiName)[0] != 'g' && string(t.Product.ApiName)[0] != 's' && string(t.Product.ApiName)[0] != 'p' && string(t.Product.ApiName)[0] != 'k' && string(t.Product.ApiName)[0] != 't' {
 			continue
 		}
 		service := strings.ToLower(productDefinition.Name)
