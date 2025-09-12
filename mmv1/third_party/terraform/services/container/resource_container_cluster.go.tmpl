@@ -1870,7 +1870,7 @@ func ResourceContainerCluster() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"enabled": {
 										Type: schema.TypeBool,
-										Optional: true,
+										Required: true,
 										Description: `The flag that enables Auto IPAM on this cluster.`,
 									},
 								},

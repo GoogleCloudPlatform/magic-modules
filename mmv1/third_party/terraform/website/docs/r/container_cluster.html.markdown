@@ -833,7 +833,7 @@ Structure is [documented below](#nested_additional_ip_ranges_config).
 
 <a name="nested_auto_ipam_config"></a>The auto ipam config supports:
 
-* `enabled` - (Optional) The flag that enables Auto IPAM on this cluster.
+* `enabled` - (Required) The flag that enables Auto IPAM on this cluster.
 
 
 <a name="nested_additional_pod_ranges_config"></a>The `additional_pod_ranges_config` block supports:
