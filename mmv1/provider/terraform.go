@@ -111,13 +111,12 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 			t.GenerateResourceSweeper(object, *templateData, outputFolder)
 			t.GenerateSingularDataSource(object, *templateData, outputFolder)
 			// log.Printf("Generating %s metadata", object.Name)
-			t.GenerateResourceMetadata(object, *templateData, outputFolder)
 
 			if (string(object.ApiName)[0] < 'a' || string(object.ApiName)[0] > 'd') && string(object.ApiName)[0] != 'g' && string(object.ApiName)[0] != 's' && string(object.ApiName)[0] != 'p' && string(object.ApiName)[0] != 'k' && string(object.ApiName)[0] != 't' {
 				return
 			}
 			t.GenerateResourceTests(object, *templateData, outputFolder)
-
+			t.GenerateResourceMetadata(object, *templateData, outputFolder)
 		}
 	}
 
