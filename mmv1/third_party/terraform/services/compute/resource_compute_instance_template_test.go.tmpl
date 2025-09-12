@@ -1998,6 +1998,40 @@ func TestAccComputeInstanceTemplate_gracefulShutdown(t *testing.T) {
 		},
 	})
 }
+
+func TestAccComputeInstanceTemplate_schedulingSkipGuestOSShutdown(t *testing.T) {
+	t.Parallel()
+
+	var instanceTemplate compute.InstanceTemplate
+	instanceName := fmt.Sprintf("tf-test-instance-%s", acctest.RandString(t, 10))
+
+	variant_1 := map[string]interface{}{
+		"instance_name": instanceName,
+		"skip_guest_os_shutdown": true,
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		CheckDestroy:             testAccCheckComputeInstanceTemplateDestroyProducer(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccComputeInstanceTemplate_schedulingSkipGuestOSShutdown(variant_1),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckComputeInstanceTemplateExists(
+						t, "google_compute_instance_template.foobar", &instanceTemplate),
+					resource.TestCheckResourceAttr("google_compute_instance_template.foobar", "scheduling.0.skip_guest_os_shutdown", "true"),
+				),
+			},
+			{
+				ResourceName:      "google_compute_instance_template.foobar",
+				ImportState:       true,
+				ImportStateVerify: true,
+				ImportStateVerifyIgnore: []string{"labels", "terraform_labels"},
+			},
+		},
+	})
+}
 {{- end }}
 
 func TestUnitComputeInstanceTemplate_IpCidrRangeDiffSuppress(t *testing.T) {
@@ -5206,6 +5240,48 @@ resource "google_compute_instance_template" "foobar" {
 		%{nanos}
 	  }
 	}
+  }
+
+  metadata = {
+    foo = "bar"
+  }
+
+  service_account {
+    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
+  }
+
+  labels = {
+    my_label = "foobar"
+  }
+}
+`, context)
+}
+
+func testAccComputeInstanceTemplate_schedulingSkipGuestOSShutdown(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_compute_image" "my_image" {
+  family  = "debian-11"
+  project = "debian-cloud"
+}
+
+resource "google_compute_instance_template" "foobar" {
+  name           = "%{instance_name}"
+  machine_type   = "e2-medium"
+  can_ip_forward = false
+  tags           = ["foo", "bar"]
+
+  disk {
+    source_image = data.google_compute_image.my_image.self_link
+    auto_delete  = true
+    boot         = true
+  }
+
+  network_interface {
+    network = "default"
+  }
+
+  scheduling {
+	skip_guest_os_shutdown = %{skip_guest_os_shutdown}
   }
 
   metadata = {
