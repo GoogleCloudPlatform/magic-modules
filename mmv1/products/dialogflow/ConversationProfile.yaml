@@ -656,3 +656,23 @@ properties:
               - SSML_VOICE_GENDER_MALE
               - SSML_VOICE_GENDER_FEMALE
               - SSML_VOICE_GENDER_NEUTRAL
+  - type: NestedObject
+    name: 'newRecognitionResultNotificationConfig'
+    description: |
+      Optional. Configuration for publishing transcription intermediate results. Event will be sent in format of ConversationEvent. If configured, the following information will be populated as ConversationEvent Pub/Sub message attributes: - "participant_id" - "participantRole" - "message_id"
+    properties:
+      - type: string
+        name: 'topic'
+        description: |
+          Name of the Pub/Sub topic to publish conversation events like CONVERSATION_STARTED as serialized ConversationEvent protos.
+          For telephony integration to receive notification, make sure either this topic is in the same project as the conversation or you grant service-<Conversation Project Number>@gcp-sa-dialogflow.iam.gserviceaccount.com the Dialogflow Service Agent role in the topic project.
+          For chat integration to receive notification, make sure API caller has been granted the Dialogflow Service Agent role for the topic.
+          Format: projects/<Project ID>/locations/<Location ID>/topics/<Topic ID>.
+      - name: 'messageFormat'
+        type: Enum
+        description: |
+          Format of message.
+        enum_values:
+          - 'MESSAGE_FORMAT_UNSPECIFIED'
+          - 'PROTO'
+          - 'JSON'
