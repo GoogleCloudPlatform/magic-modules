@@ -102,22 +102,22 @@ func (t *Terraform) GenerateObjects(outputFolder, resourceToGenerate string, gen
 func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
 	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
 
-	if (string(t.Product.ApiName)[0] < 'a' || string(t.Product.ApiName)[0] > 'd') && string(t.Product.ApiName)[0] != 'g' && string(t.Product.ApiName)[0] != 's' && string(t.Product.ApiName)[0] != 'p' && string(t.Product.ApiName)[0] != 'k' && string(t.Product.ApiName)[0] != 't' {
-		return
-	}
-
 	if !object.IsExcluded() {
 		log.Printf("Generating %s resource", object.Name)
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
 
 		if generateCode {
 			// log.Printf("Generating %s tests", object.Name)
-
-			t.GenerateResourceTests(object, *templateData, outputFolder)
 			t.GenerateResourceSweeper(object, *templateData, outputFolder)
 			t.GenerateSingularDataSource(object, *templateData, outputFolder)
 			// log.Printf("Generating %s metadata", object.Name)
 			t.GenerateResourceMetadata(object, *templateData, outputFolder)
+
+			if (string(object.ApiName)[0] < 'a' || string(object.ApiName)[0] > 'd') && string(object.ApiName)[0] != 'g' && string(object.ApiName)[0] != 's' && string(object.ApiName)[0] != 'p' && string(object.ApiName)[0] != 'k' && string(object.ApiName)[0] != 't' {
+				return
+			}
+			t.GenerateResourceTests(object, *templateData, outputFolder)
+
 		}
 	}
 
