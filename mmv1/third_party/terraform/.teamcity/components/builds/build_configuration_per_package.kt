@@ -43,11 +43,11 @@ fun BuildConfigurationForSinglePackage(packageName: String, packagePath: String,
     return pkg.buildConfiguration(packagePath, vcsRoot, sharedResources, environmentVariables, testPrefix = testPrefix, releaseDiffTest = releaseDiffTest)
 }
 
-class PackageDetails(private val packageName: String, private val displayName: String, private val providerName: String, private val parentProjectName: String, private val releaseDiffTest: String) {
+class PackageDetails(private val packageName: String, private val displayName: String, private val providerName: String, private val parentProjectName: String, private val releaseDiffTest: Boolean) {
 
     // buildConfiguration returns a BuildType for a service package
     // For BuildType docs, see https://teamcity.jetbrains.com/app/dsl-documentation/root/build-type/index.html
-    fun buildConfiguration(path: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration, buildTimeout: Int = DefaultBuildTimeoutDuration, testPrefix: String, releaseDiffTest: String): BuildType {
+    fun buildConfiguration(path: String, vcsRoot: GitVcsRoot, sharedResources: List<String>, environmentVariables: AccTestConfiguration, buildTimeout: Int = DefaultBuildTimeoutDuration, testPrefix: String, releaseDiffTest: Boolean): BuildType {
         val testPrefix = "TestAcc"
         val testTimeout = "12"
 

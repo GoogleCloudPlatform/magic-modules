@@ -210,7 +210,7 @@ fun ParametrizedWithType.acceptanceTestBuildParams(parallelism: Int, prefix: Str
     text("PARALLELISM", "%d".format(parallelism))
     text("TEST_PREFIX", prefix)
     text("TIMEOUT", timeout)
-    if releaseDiffTest {
+    if (releaseDiffTest) {
         text("env.RELEASE_DIFF", "true")
     } else {
         // Use an empty string for backwards-compatibility with pre-7.X release diff behavior.
