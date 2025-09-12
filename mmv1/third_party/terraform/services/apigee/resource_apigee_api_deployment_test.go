@@ -130,7 +130,7 @@ resource "google_apigee_environment" "apigee_environment" {
 resource "google_apigee_api" "test_apigee_api" {
   name            = "tf-test-apigee-api"
   org_id          = google_project.project.project_id
-  config_bundle   = "./test-fixtures/apigee_api_bundle.zip"
+  config_bundle   = "%{config_bundle}"
   depends_on      = [google_apigee_organization.apigee_org]
 }
 
