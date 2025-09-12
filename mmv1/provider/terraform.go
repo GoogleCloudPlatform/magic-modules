@@ -102,6 +102,13 @@ func (t *Terraform) GenerateObjects(outputFolder, resourceToGenerate string, gen
 func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPath string, generateCode, generateDocs bool) {
 	templateData := NewTemplateData(outputFolder, t.TargetVersionName)
 
+	// if iam_policy is not defined or excluded, don't generate it
+	if object.IamPolicy == nil || object.IamPolicy.Exclude {
+		return
+	}
+
+	t.GenerateIamPolicy(object, *templateData, outputFolder, generateCode, generateDocs)
+
 	if !object.IsExcluded() {
 		log.Printf("Generating %s resource", object.Name)
 		t.GenerateResource(object, *templateData, outputFolder, generateCode, generateDocs)
@@ -119,13 +126,6 @@ func (t *Terraform) GenerateObject(object api.Resource, outputFolder, productPat
 			t.GenerateResourceMetadata(object, *templateData, outputFolder)
 		}
 	}
-
-	// if iam_policy is not defined or excluded, don't generate it
-	if object.IamPolicy == nil || object.IamPolicy.Exclude {
-		return
-	}
-
-	t.GenerateIamPolicy(object, *templateData, outputFolder, generateCode, generateDocs)
 
 }
 
