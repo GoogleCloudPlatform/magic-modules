@@ -926,6 +926,7 @@ resource "time_sleep" "wait_3_minutes" {
 resource "google_netapp_volume" "test_volume" {
     location = "us-east4"
     name = "tf-test-test-volume%{random_suffix}"
+    description = "This is a test description for manual qos volume type auto"
     capacity_gib = "100"
     share_name = "tf-test-test-volume%{random_suffix}"
     storage_pool = google_netapp_storage_pool.test_pool.name
@@ -957,6 +958,7 @@ resource "time_sleep" "wait_3_minutes" {
 resource "google_netapp_volume" "test_volume" {
     location = "us-east4"
     name = "tf-test-test-volume%{random_suffix}"
+    description = "This is a test description for manual qos volume type manual"
     capacity_gib = "100"
     description = "This is a test description for manual qos volume"
     share_name = "tf-test-test-volume%{random_suffix}"
