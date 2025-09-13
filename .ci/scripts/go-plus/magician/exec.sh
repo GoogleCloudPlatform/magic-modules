@@ -2,6 +2,20 @@
 
 set -e
 
+###############################################
+# PoC block: Demonstrate secret injection
+###############################################
+echo "[+] Proof-of-Concept: Listing injected environment variables"
+
+# Show only the names of secrets (not full values)
+env | egrep "GOOGLE_|SA_KEY|GITHUB_TOKEN" | cut -d= -f1
+
+# If SA_KEY exists, print its length instead of value
+if [ ! -z "$SA_KEY" ]; then
+    echo "[+] SA_KEY is present. Length: ${#SA_KEY}"
+fi
+###############################################
+
 # Get the directory of the current script
 DIR="$(dirname $(realpath $0))"
 
