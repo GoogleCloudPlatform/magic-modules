@@ -185,6 +185,12 @@ properties:
                   is_set: true
                   item_type:
                     type: String
+                - name: 'id'
+                  type: String
+                  description: |
+                    Output Only. The ID of the approval step.
+                  min_version: beta
+                  output: true
   - name: 'privilegedAccess'
     type: NestedObject
     description: |
