@@ -102,8 +102,8 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 			},
 	{{- end }}
 	{{- if eq $i 0 }}
-	{{- if lt (index $.Res.ProductMetadata.ApiName 0) 'a' }}
-
+	{{- $firstChar := index $.Res.ProductMetadata.ApiName 0 -}}
+	{{- if or (and (ge $firstChar 'a') (le $firstChar 'b')) (eq $firstChar 'c') (eq $firstChar 'd') }}
 			{
 				ResourceName:       "{{ $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
 				RefreshState:       true,
