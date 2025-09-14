@@ -74,7 +74,7 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   spec {
     agent_framework = "google-adk"
     class_methods   = jsonencode(local.class_methods)
-    # service_account = google_service_account.service_account.email
+    service_account = google_service_account.service_account.email
 
     deployment_spec {
 
@@ -117,9 +117,9 @@ resource "time_sleep" "wait_5_minutes" {
 
   depends_on = [
     google_kms_crypto_key_iam_member.sa_iam_key_crypter_decrypter,
-    # google_project_iam_member.sa_iam_ai_platform_user,
-    # google_project_iam_member.sa_iam_object_viewer,
-    # google_project_iam_member.sa_iam_editor,
+    google_project_iam_member.sa_iam_ai_platform_user,
+    google_project_iam_member.sa_iam_object_viewer,
+    google_project_iam_member.sa_iam_viewer,
     google_secret_manager_secret_iam_member.secret_access,
     google_secret_manager_secret_version.secret_version
   ]
@@ -141,8 +141,7 @@ resource "google_secret_manager_secret_version" "secret_version" {
 resource "google_secret_manager_secret_iam_member" "secret_access" {
   secret_id  = google_secret_manager_secret.secret.id
   role       = "roles/secretmanager.secretAccessor"
-  # member     = google_service_account.service_account.member
-  member     = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
+  member     = google_service_account.service_account.member
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -170,27 +169,27 @@ resource "google_storage_bucket_object" "bucket_obj_dependencies_adk" {
   source = "./test-fixtures/dependencies_adk.tar.gz"
 }
 
-# resource "google_service_account" "service_account" {
-#   account_id = "reasoning-sa"
-# }
+resource "google_service_account" "service_account" {
+  account_id = "reasoning-sa"
+}
 
-# resource "google_project_iam_member" "sa_iam_object_viewer" {
-#   role    = "roles/storage.objectViewer"
-#   project = data.google_project.project.id
-#   member  = google_service_account.service_account.member
-# }
+resource "google_project_iam_member" "sa_iam_object_viewer" {
+  role    = "roles/storage.objectViewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
 
-# resource "google_project_iam_member" "sa_iam_ai_platform_user" {
-#   role    = "roles/aiplatform.user"
-#   project = data.google_project.project.id
-#   member  = google_service_account.service_account.member
-# }
+resource "google_project_iam_member" "sa_iam_ai_platform_user" {
+  role    = "roles/aiplatform.user"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
 
-# resource "google_project_iam_member" "sa_iam_editor" {
-#   role    = "roles/editor"
-#   project = data.google_project.project.id
-#   member  = google_service_account.service_account.member
-# }
+resource "google_project_iam_member" "sa_iam_viewer" {
+  role    = "roles/viewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
 
 resource "google_kms_crypto_key_iam_member" "sa_iam_key_crypter_decrypter" {
   crypto_key_id = "%{kms_key_name}"
@@ -253,7 +252,7 @@ resource "google_vertex_ai_reasoning_engine" "reasoning_engine" {
   spec {
     agent_framework = "langchain"
     class_methods   = jsonencode(local.class_methods_new)
-    # service_account = google_service_account.service_account_new.email
+    service_account = google_service_account.service_account_new.email
 
     deployment_spec {
 
@@ -305,9 +304,9 @@ resource "time_sleep" "wait_5_minutes" {
 
   depends_on = [
     google_kms_crypto_key_iam_member.sa_iam_key_crypter_decrypter,
-    # google_project_iam_member.sa_iam_ai_platform_user_new,
-    # google_project_iam_member.sa_iam_object_viewer_new,
-    # google_project_iam_member.sa_iam_editor_new,
+    google_project_iam_member.sa_iam_ai_platform_user_new,
+    google_project_iam_member.sa_iam_object_viewer_new,
+    google_project_iam_member.sa_iam_viewer_new,
     google_secret_manager_secret_iam_member.secret_access_new,
     google_secret_manager_secret_iam_member.secret_new_access,
     google_secret_manager_secret_version.secret_new_version_2,
@@ -331,15 +330,13 @@ resource "google_secret_manager_secret_version" "secret_version" {
 resource "google_secret_manager_secret_iam_member" "secret_access" {
   secret_id  = google_secret_manager_secret.secret.id
   role       = "roles/secretmanager.secretAccessor"
-  # member     = google_service_account.service_account.member
-  member     = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
+  member     = google_service_account.service_account.member
 }
 
 resource "google_secret_manager_secret_iam_member" "secret_access_new" {
   secret_id  = google_secret_manager_secret.secret.id
   role       = "roles/secretmanager.secretAccessor"
-  # member     = google_service_account.service_account_new.member
-  member     = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
+  member     = google_service_account.service_account_new.member
 }
 
 resource "google_secret_manager_secret" "secret_new" {
@@ -367,8 +364,7 @@ resource "google_secret_manager_secret_version" "secret_new_version_2" {
 resource "google_secret_manager_secret_iam_member" "secret_new_access" {
   secret_id  = google_secret_manager_secret.secret_new.id
   role       = "roles/secretmanager.secretAccessor"
-  # member     = google_service_account.service_account_new.member
-  member     = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
+  member     = google_service_account.service_account_new.member
 }
 
 resource "google_storage_bucket" "bucket" {
@@ -414,49 +410,49 @@ resource "google_storage_bucket_object" "bucket_obj_dependencies_langchain" {
   source = "./test-fixtures/dependencies_langchain.tar.gz"
 }
 
-# resource "google_service_account" "service_account" {
-#   account_id = "reasoning-sa"
-# }
+resource "google_service_account" "service_account" {
+  account_id = "reasoning-sa"
+}
 
-# resource "google_project_iam_member" "sa_iam_object_viewer" {
-#   role    = "roles/storage.objectViewer"
-#   project = data.google_project.project.id
-#   member  = google_service_account.service_account.member
-# }
+resource "google_project_iam_member" "sa_iam_object_viewer" {
+  role    = "roles/storage.objectViewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
 
-# resource "google_project_iam_member" "sa_iam_ai_platform_user" {
-#   role    = "roles/aiplatform.user"
-#   project = data.google_project.project.id
-#   member  = google_service_account.service_account.member
-# }
+resource "google_project_iam_member" "sa_iam_ai_platform_user" {
+  role    = "roles/aiplatform.user"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
 
-# resource "google_project_iam_member" "sa_iam_editor" {
-#   role    = "roles/editor"
-#   project = data.google_project.project.id
-#   member  = google_service_account.service_account.member
-# }
+resource "google_project_iam_member" "sa_iam_viewer" {
+  role    = "roles/viewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account.member
+}
 
-# resource "google_service_account" "service_account_new" {
-#   account_id = "reasoning-sa-new"
-# }
+resource "google_service_account" "service_account_new" {
+  account_id = "reasoning-sa-new"
+}
 
-# resource "google_project_iam_member" "sa_iam_object_viewer_new" {
-#   role    = "roles/storage.objectViewer"
-#   project = data.google_project.project.id
-#   member  = google_service_account.service_account_new.member
-# }
+resource "google_project_iam_member" "sa_iam_object_viewer_new" {
+  role    = "roles/storage.objectViewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account_new.member
+}
 
-# resource "google_project_iam_member" "sa_iam_ai_platform_user_new" {
-#   role    = "roles/aiplatform.user"
-#   project = data.google_project.project.id
-#   member  = google_service_account.service_account_new.member
-# }
+resource "google_project_iam_member" "sa_iam_ai_platform_user_new" {
+  role    = "roles/aiplatform.user"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account_new.member
+}
 
-# resource "google_project_iam_member" "sa_iam_editor_new" {
-#   role    = "roles/editor"
-#   project = data.google_project.project.id
-#   member  = google_service_account.service_account_new.member
-# }
+resource "google_project_iam_member" "sa_iam_viewer_new" {
+  role    = "roles/viewer"
+  project = data.google_project.project.id
+  member  = google_service_account.service_account_new.member
+}
 
 resource "google_kms_crypto_key_iam_member" "sa_iam_key_crypter_decrypter" {
   crypto_key_id = "%{kms_key_name}"
