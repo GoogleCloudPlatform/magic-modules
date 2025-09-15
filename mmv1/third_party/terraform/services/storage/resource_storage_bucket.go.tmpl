@@ -1374,18 +1374,37 @@ func flattenCors(d *schema.ResourceData, corsRules []*storage.BucketCors) []map[
 	}
 
 	if len(corsRules) < len(cors.([]interface{})) {
-		differnce := len(cors.([]interface{})) - len(corsRules)
-		for ; differnce > 0; differnce-- {
-			cors := map[string]interface{}{
-				"origin":          []string{},
-				"method":          []string{},
-				"response_header": []string{},
-				"max_age_seconds": 0,
+		emptyCors := map[string]interface{}{
+			"origin":          []string{},
+			"method":          []string{},
+			"response_header": []string{},
+			"max_age_seconds": 0,
+		}
+		for k, v := range cors.([]interface{}) {
+			if isCorsRuleEmpty(v) {
+				corsRulesSchema = append(corsRulesSchema[:k], append([]map[string]interface{}{emptyCors}, corsRulesSchema[k:]...)...)
 			}
-			corsRulesSchema = append(corsRulesSchema, cors)
 		}
 	}
 	return corsRulesSchema
+}
+
+func isCorsRuleEmpty(rule interface{}) bool {
+	if rule == nil {
+		return true
+	}
+	corsRule, ok := rule.(map[string]interface{})
+	if !ok {
+		return true
+	}
+	method := corsRule["method"] == nil || len(corsRule["method"].([]interface{})) == 0
+	origin := corsRule["origin"] == nil || len(corsRule["origin"].([]interface{})) == 0
+	responseHeader := corsRule["response_header"] == nil || len(corsRule["response_header"].([]interface{})) == 0
+	maxAgeSeconds := corsRule["max_age_seconds"] == 0
+	if method && origin && responseHeader && maxAgeSeconds {
+		return true
+	}
+	return false
 }
 
 func expandBucketEncryption(configured interface{}) *storage.BucketEncryption {

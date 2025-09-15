@@ -1172,7 +1172,7 @@ func TestAccStorageBucket_emptyCors(t *testing.T) {
 			{
 				Config: testGoogleStorageBucketsEmptyCors(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBucketCorsCount(t, 2),
+					testAccCheckBucketCorsCount(t, 3),
 				),
 			},
 			{
@@ -1182,16 +1182,16 @@ func TestAccStorageBucket_emptyCors(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"force_destroy", "cors"},
 			},
 			{
-				Config: testGoogleStorageBucketPartialCors(bucketName),
+				Config: testGoogleStorageBucketPartiallyEmptyCors(bucketName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckBucketCorsCount(t, 3),
+					testAccCheckBucketCorsCount(t, 4),
 				),
 			},
 			{
 				ResourceName:            "google_storage_bucket.bucket",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"force_destroy", "cors.2", "cors.#"},
+				ImportStateVerifyIgnore: []string{"force_destroy", "cors"},
 			},
 			{
 				Config: testGoogleStorageBucketsRemoveCorsCompletely(bucketName),
@@ -2263,6 +2263,10 @@ resource "google_storage_bucket" "bucket" {
     max_age_seconds = 0
   }
   cors {}
+  cors {
+    origin  = []
+    method  = []
+  }
 }
 `, bucketName)
 }
@@ -2277,7 +2281,7 @@ resource "google_storage_bucket" "bucket" {
 `, bucketName)
 }
 
-func testGoogleStorageBucketPartialCors(bucketName string) string {
+func testGoogleStorageBucketPartiallyEmptyCors(bucketName string) string {
 	return fmt.Sprintf(`
 resource "google_storage_bucket" "bucket" {
   name          = "%s"
@@ -2287,6 +2291,7 @@ resource "google_storage_bucket" "bucket" {
     origin          = ["*"]
     method          = ["GET"]
   }
+  cors{}
   cors {
     origin  = ["https://sample.com"]
     method  = ["GET"]
