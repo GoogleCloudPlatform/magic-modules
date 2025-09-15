@@ -44,6 +44,11 @@ examples:
     primary_resource_id: 'basic_profile'
     vars:
       profile_name: 'dialogflow-profile'
+  - name: 'dialogflow_conversation_profile_recognition_result_notification'
+    primary_resource_id: 'basic_profile'
+    vars:
+      profile_name: 'dialogflow-profile'
+      topic_name: 'dialogflow-profile'
 parameters:
   - name: 'location'
     type: String
@@ -536,7 +541,7 @@ properties:
         description: |
           Whether to log conversation events
   - type: NestedObject
-    name: newMessageEventNotificationConfig
+    name: 'newMessageEventNotificationConfig'
     description: |
       Pub/Sub topic on which to publish new agent assistant events.
       Expects the format "projects/<Project ID>/locations/<Location ID>/topics/<Topic ID>"
