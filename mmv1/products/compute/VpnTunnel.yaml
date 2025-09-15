@@ -53,7 +53,6 @@ examples:
       udp4500_forwarding_rule_name: 'fr-udp4500'
       route_name: 'route1'
   - name: 'vpn_tunnel_cipher_suite'
-    min_version: 'beta'
     primary_resource_id: 'tunnel1'
     vars:
       vpn_tunnel_name: 'tunnel-cipher'
@@ -233,66 +232,56 @@ properties:
     output: true
   - name: 'cipherSuite'
     type: NestedObject
-    min_version: 'beta'
     description: |
       User specified list of ciphers to use for the phase 1 and phase 2 of the IKE protocol.
     properties:
       - name: 'phase1'
         type: NestedObject
         description: 'Cipher configuration for phase 1 of the IKE protocol.'
-        min_version: 'beta'
         properties:
           - name: 'encryption'
             type: Array
             description: 'Encryption algorithms.'
             is_set: true
-            min_version: 'beta'
             item_type:
               type: String
           - name: 'integrity'
             type: Array
             description: 'Integrity algorithms.'
             is_set: true
-            min_version: 'beta'
             item_type:
               type: String
           - name: 'prf'
             type: Array
             description: 'Pseudo-random functions.'
             is_set: true
-            min_version: 'beta'
             item_type:
               type: String
           - name: 'dh'
             type: Array
             description: 'Diffie-Hellman groups.'
             is_set: true
-            min_version: 'beta'
             item_type:
               type: String
       - name: 'phase2'
         type: NestedObject
         description: 'Cipher configuration for phase 2 of the IKE protocol.'
-        min_version: 'beta'
         properties:
           - name: 'encryption'
             type: Array
             description: 'Encryption algorithms.'
             is_set: true
-            min_version: 'beta'
             item_type:
               type: String
           - name: 'integrity'
             type: Array
             description: 'Integrity algorithms.'
             is_set: true
-            min_version: 'beta'
             item_type:
               type: String
           - name: 'pfs'
             type: Array
             description: 'Perfect forward secrecy groups.'
             is_set: true
-            min_version: 'beta'
             item_type:
               type: String
