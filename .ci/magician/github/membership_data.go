@@ -140,6 +140,10 @@ var (
 					startDate: newDate(2025, 8, 7),
 					endDate:   newDate(2025, 8, 10),
 				},
+				{
+					startDate: newDate(2025, 9, 18),
+					endDate:   newDate(2025, 9, 28),
+				},
 			},
 		},
 		"zli82016": {
