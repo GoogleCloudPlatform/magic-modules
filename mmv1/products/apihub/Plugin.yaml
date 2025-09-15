@@ -31,6 +31,8 @@ examples:
     external_providers: ["time"]
 autogen_async: true
 autogen_status: UGx1Z2lu
+custom_code:
+  decoder: 'templates/terraform/decoders/apihub_plugin_auth_config_template.go.tmpl'
 parameters:
   - name: location
     type: String
