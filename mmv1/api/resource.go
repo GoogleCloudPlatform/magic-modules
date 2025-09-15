@@ -807,7 +807,7 @@ func buildWriteOnlyVersionField(name string, originalField *Type, writeOnlyField
 
 	options := []func(*Type){
 		propertyWithType("Int"),
-		propertyWithImmutable(originalField.Immutable),
+		propertyWithImmutable(originalField.IsForceNew()),
 		propertyWithDescription(description),
 		propertyWithRequiredWith([]string{requiredWith}),
 		propertyWithClientSide(true),
