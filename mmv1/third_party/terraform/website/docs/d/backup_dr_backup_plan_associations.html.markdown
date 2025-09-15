@@ -18,6 +18,7 @@ data "google_backup_dr_backup_plan_associations" "compute_instance_associations"
   location      = "us-central1"
   resource_type = "compute.googleapis.com/Instance"
 }
+```
 
 ## Argument Reference
 

@@ -9,6 +9,99 @@ import (
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
 )
 
+func TestAccDataSourceGoogleBackupDRListDataSourceReferences_basic(t *testing.T) {
+	t.Parallel()
+
+	projectDsName := "data.google_project.project"
+	var projectID string
+	context := map[string]interface{}{
+		"location":      "us-central1",
+		"random_suffix": acctest.RandString(t, 10),
+	}
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceGoogleBackupDRListDataSourceReferences_basic(context),
+				Check: func(s *terraform.State) error {
+					project, ok := s.RootModule().Resources[projectDsName]
+					if !ok {
+						return fmt.Errorf("project data source not found: %s", projectDsName)
+					}
+					projectID = project.Primary.Attributes["project_id"]
+
+					return resource.ComposeTestCheckFunc(
+						resource.TestCheckResourceAttr("data.google_backup_dr_list_data_source_references.all", "project", projectID),
+						resource.TestCheckResourceAttr("data.google_backup_dr_list_data_source_references.all", "location", context["location"].(string)),
+						resource.TestCheckResourceAttrSet("data.google_backup_dr_list_data_source_references.all", "data_source_references.#"),
+					)(s)
+				},
+			},
+		},
+	})
+}
+
+func testAccDataSourceGoogleBackupDRListDataSourceReferences_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+data "google_project" "project" {
+  provider = google-beta
+}
+
+resource "google_sql_database_instance" "instance" {
+  name                = "tf-test-ds-list-%{random_suffix}"
+  database_version    = "MYSQL_8_0"
+  region              = "%{location}"
+  deletion_protection = false
+
+  settings {
+    tier              = "db-n1-standard-1"
+    availability_type = "ZONAL"
+  }
+}
+
+resource "google_backup_dr_backup_vault" "vault" {
+  location          = "%{location}"
+  backup_vault_id   = "tf-test-bv-list-%{random_suffix}"
+  description       = "Acceptance test vault"
+  force_delete      = true
+}
+
+resource "google_backup_dr_backup_plan" "plan" {
+  location        = "%{location}"
+  backup_plan_id  = "tf-test-bp-list-%{random_suffix}"
+  resource_type   = "sqladmin.googleapis.com/Instance"
+  backup_vault    = google_backup_dr_backup_vault.vault.name
+  backup_rules {
+    rule_id               = "daily-backups"
+    backup_retention_days = 1
+    standard_schedule {
+      recurrence_type = "DAILY"
+			backup_window {
+				start_hour_of_day = 0
+				end_hour_of_day = 6
+			}
+			time_zone = "UTC"
+    }
+  }
+}
+
+resource "google_backup_dr_backup_plan_association" "bpa" {
+  location                   = "%{location}"
+  backup_plan_association_id = "tf-test-bpa-list-%{random_suffix}"
+  resource                   = google_sql_database_instance.instance.self_link
+  backup_plan                = google_backup_dr_backup_plan.plan.name
+}
+
+data "google_backup_dr_list_data_source_references" "all" {
+  project    = data.google_project.project.project_id
+  location   = "%{location}"
+  depends_on = [google_backup_dr_backup_plan_association.bpa]
+}
+`, context)
+}
+
 func TestAccDataSourceGoogleBackupDRDataSourceReferences_basic(t *testing.T) {
 	t.Parallel()
 
