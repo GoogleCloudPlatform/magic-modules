@@ -469,6 +469,7 @@ type IamSettings struct {
 	EnableBatching     bool
 	StateUpgraders     []schema.StateUpgrader
 	SchemaVersion      int
+	CreateTimeOut      int64
 }
 
 func NewIamSettings(options ...func(*IamSettings)) *IamSettings {
@@ -507,6 +508,12 @@ func IamWithSchemaVersion(version int) func(*IamSettings) {
     return func(s *IamSettings) {
         s.SchemaVersion = version
     }
+}
+
+func IamCreateTimeOut(createTimeout int64) func(s *IamSettings) {
+	return func(s *IamSettings) {
+		s.CreateTimeOut = createTimeout
+	}
 }
 
 // Util to deref and print auditConfigs
