@@ -583,3 +583,8 @@ properties:
     description: |
       Optional. Custom Performance Total Throughput of the pool (in MiB/s).
     default_from_api: true
+  - name: 'hotTierSizeUsedGib'
+    type: String
+    description: |
+      Total hot tier data rounded down to the nearest GiB used by the volume. This field is only used for flex Service Level
+    output: true

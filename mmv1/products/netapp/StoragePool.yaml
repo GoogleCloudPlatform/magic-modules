@@ -221,3 +221,13 @@ properties:
     description: |
       Available throughput of the storage pool (in MiB/s).
     output: true
+  - name: 'coldTierSizeUsedGib'
+    type: String
+    description: |
+      Total cold tier data rounded down to the nearest GiB used by the storage pool.
+    output: true
+  - name: 'hotTierSizeUsedGib'
+    type: String
+    description: |
+      Total hot tier data rounded down to the nearest GiB used by the storage pool.
+    output: true
