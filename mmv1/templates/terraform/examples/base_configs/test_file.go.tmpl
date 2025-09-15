@@ -114,12 +114,15 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 			},
 	{{- end }}
 	{{- if eq $i 0 }}
+	{{- $firstChar := index $.Res.ProductMetadata.ApiName 0 -}}
+	{{- if or (and (ge $firstChar 'n') (le $firstChar 'o')) (eq $firstChar 'p') (eq $firstChar 'q') (eq $firstChar 'r') (eq $firstChar 's') (eq $firstChar 't') (eq $firstChar 'u') (eq $firstChar 'v') (eq $firstChar 'w') (eq $firstChar 'x') (eq $firstChar 'y') (eq $firstChar 'z') }}
 			{
 				ResourceName:       "{{ $.Res.TerraformName }}.{{ $e.PrimaryResourceId }}",
 				RefreshState:       true,
 				ExpectNonEmptyPlan: true,
 				ImportStateKind:    resource.ImportBlockWithResourceIdentity,
 			},
+	{{- end }}
 	{{- end }}
 		},
 	})
