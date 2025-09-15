@@ -20,7 +20,7 @@ EOF
 }
 
 resource "google_kms_crypto_key_iam_member" "vertexai_encrypterdecrypter" {
-  crypto_key_id = "{{index $.Vars "cloud_kms_key"}}"
+  crypto_key_id = "{{index $.Vars "kms_key_name"}}"
   role          = "roles/cloudkms.cryptoKeyEncrypterDecrypter"
   member        =  google_project_service_identity.vertexai_sa.member
 }
@@ -48,7 +48,7 @@ resource "google_vertex_ai_index" "index" {
     }
   }
   encryption_spec {
-  cloud_kms_key = "{{index $.Vars "cloud_kms_key"}}"
+  kms_key_name = "{{index $.Vars "kms_key_name"}}"
   }
   index_update_method = "BATCH_UPDATE"
 
