@@ -62,24 +62,12 @@ func TestAcc{{ $e.TestSlug $.Res.ProductMetadata.Name $.Res.Name }}(t *testing.T
 	})
 	{{- end }}
 
-	randomSuffix := acctest.RandString(t, 10)
-	context := make(map[string]interface{})
-	context["random_suffix"] = randomSuffix
-
-	envVars := map[string]interface{}{
-		{{- template "EnvVarContext" dict "TestEnvVars" $e.TestEnvVars "HasNewLine" false}}
-	}
-	for k, v := range envVars {
-		context[k] = v
-	}
-
-	overrides := map[string]interface{}{
-		{{- range $varKey, $varVal := $e.TestVarsOverrides }}
+	context := map[string]interface{}{
+	{{- template "EnvVarContext" dict "TestEnvVars" $e.TestEnvVars "HasNewLine" false}}
+	{{- range $varKey, $varVal := $e.TestVarsOverrides }}
 		"{{$varKey}}": {{$varVal}},
-		{{- end }}
-	}
-	for k, v := range overrides {
-		context[k] = v
+	{{- end }}
+		"random_suffix": acctest.RandString(t, 10),
 	}
 
 	acctest.VcrTest(t, resource.TestCase{
