@@ -2,8 +2,6 @@ module github.com/hashicorp/terraform-provider-google
 
 go 1.24.0
 
-toolchain go1.24.4
-
 require (
 	cloud.google.com/go/auth v0.16.5
 	cloud.google.com/go/auth/oauth2adapt v0.2.8
