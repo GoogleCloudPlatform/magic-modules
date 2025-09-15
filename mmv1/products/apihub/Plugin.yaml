@@ -31,8 +31,6 @@ examples:
     external_providers: ["time"]
 autogen_async: true
 autogen_status: UGx1Z2lu
-custom_code:
-  decoder: 'templates/terraform/decoders/apihub_plugin_auth_config_template.go.tmpl'
 parameters:
   - name: location
     type: String
@@ -132,6 +130,7 @@ properties:
   - name: configTemplate
     type: NestedObject
     description: ConfigTemplate represents the configuration template for a plugin.
+    custom_flatten: 'templates/terraform/custom_flatten/apihub_plugin_config_template.go.tmpl'
     properties:
       - name: authConfigTemplate
         type: NestedObject
