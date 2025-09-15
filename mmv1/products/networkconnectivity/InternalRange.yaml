@@ -71,6 +71,16 @@ examples:
       internal_range_name: 'migration'
       network_name: 'internal-ranges'
       source_subnet_name: 'source-subnet'
+  - name: 'network_connectivity_internal_ranges_allocation_algoritms'
+    primary_resource_id: 'default'
+    vars:
+      internal_range_name: 'allocation-algorithms'
+      network_name: 'internal-ranges'
+  - name: 'network_connectivity_internal_ranges_allocation_algoritms_random_first_n'
+    primary_resource_id: 'default'
+    vars:
+      internal_range_name: 'allocation-algorithms-random-first-n'
+      network_name: 'internal-ranges'
 parameters:
 properties:
   - name: 'name'
@@ -92,6 +102,8 @@ properties:
     type: String
     description: |
       The IP range that this internal range defines.
+      NOTE: IPv6 ranges are limited to usage=EXTERNAL_TO_VPC and peering=FOR_SELF
+      NOTE: For IPv6 Ranges this field is compulsory, i.e. the address range must be specified explicitly.
     default_from_api: true
   - name: 'network'
     type: ResourceRef
@@ -123,6 +135,8 @@ properties:
     description: |
       An alternate to ipCidrRange. Can be set when trying to create a reservation that automatically finds a free range of the given size.
       If both ipCidrRange and prefixLength are set, there is an error if the range sizes do not match. Can also be used during updates to change the range size.
+      NOTE: For IPv6 this field only works if ip_cidr_range is set as well, and both fields must match. In other words, with IPv6 this field only works as
+      a redundant parameter.
   - name: 'targetCidrRange'
     type: Array
     description: |
@@ -130,6 +144,37 @@ properties:
       If not set, defaults to the "10.0.0.0/8" address space. This can be used to search in other rfc-1918 address spaces like "172.16.0.0/12" and "192.168.0.0/16" or non-rfc-1918 address spaces used in the VPC.
     item_type:
       type: String
+  - name: 'excludeCidrRanges'
+    type: Array
+    description: |
+      Optional. List of IP CIDR ranges to be excluded. Resulting reserved Internal Range will not overlap with any CIDR blocks mentioned in this list.
+      Only IPv4 CIDR ranges are supported.
+    item_type:
+      type: String
+  - name: 'allocationOptions'
+    type: NestedObject
+    description: |
+      Options for automatically allocating a free range with a size given by prefixLength.
+    immutable: true
+    properties:
+      - name: 'allocationStrategy'
+        type: Enum
+        enum_values:
+          - 'RANDOM'
+          - 'FIRST_AVAILABLE'
+          - 'RANDOM_FIRST_N_AVAILABLE'
+          - 'FIRST_SMALLEST_FITTING'
+        description: |
+          Optional. Sets the strategy used to automatically find a free range of a size given by prefixLength. Can be set only when trying to create a reservation that automatically finds the free range to reserve.
+        immutable: true
+      - name: 'firstAvailableRangesLookupSize'
+        type: Integer
+        description: |
+          Must be set when allocation_strategy is RANDOM_FIRST_N_AVAILABLE, otherwise must remain unset. Defines the size of the set of free ranges from which RANDOM_FIRST_N_AVAILABLE strategy randomy selects one,
+          in other words it sets the N in the RANDOM_FIRST_N_AVAILABLE.
+        validation:
+          function: 'validation.IntAtLeast(1)'
+        immutable: true
   - name: 'users'
     type: Array
     description: |
@@ -172,3 +217,8 @@ properties:
           may not exist yet.
           For example /projects/{project}/regions/{region}/subnetworks/{subnet}
         required: true
+  - name: 'immutable'
+    type: Boolean
+    description: |
+      Immutable ranges cannot have their fields modified, except for labels and description.
+    immutable: true

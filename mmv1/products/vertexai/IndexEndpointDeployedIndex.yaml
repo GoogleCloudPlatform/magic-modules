@@ -108,6 +108,11 @@ parameters:
     immutable: true
     resource: 'IndexEndpoint'
     imports: 'name'
+  - name: 'region'
+    type: String
+    description: The region of the index endpoint deployment. eg us-central1
+    url_param_only: true
+    immutable: true
 properties:
   - name: 'name'
     type: String

@@ -8,9 +8,6 @@ description: |-
 
 Use this data source to list the Parameter Manager Parameters.
 
-~> **Warning:** This datasource is in beta, and should be used with the terraform-provider-google-beta provider.
-See [Provider Versions](https://terraform.io/docs/providers/google/guides/provider_versions.html) for more details on beta datasources.
-
 ## Example Usage 
 
 ```hcl
@@ -48,6 +45,8 @@ exported:
 * `parameter_id` - The unique name of the resource.
 
 * `name` - The resource name of the parameter. Format: `projects/{{project}}/locations/global/parameters/{{parameter_id}}`
+
+* `kms_key` - The resource name of the Cloud KMS CryptoKey used to encrypt parameter version payload. Format `projects/{{project}}/locations/global/keyRings/{{key_ring}}/cryptoKeys/{{crypto_key}}`
 
 * `policy_member` - An object containing a unique resource identity tied to the parameter. Structure is [documented below](#nested_policy_member).
 

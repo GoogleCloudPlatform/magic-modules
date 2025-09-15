@@ -42,6 +42,10 @@ description: |-
 ---
 
 # IAM policy for {{$.ProductMetadata.DisplayName}} {{$.Name}}
+{{- if $.IamPolicy.DeprecationMessage }}
+~> **Warning:** {{$.IamPolicy.DeprecationMessage}}
+{{- end }}
+
 Three different resources help you manage your IAM policy for {{$.ProductMetadata.DisplayName}} {{$.Name}}. Each of these resources serves a different use case:
 
 * `{{ $.IamTerraformName }}_policy`: Authoritative. Sets the IAM policy for the {{ lower $.Name }} and replaces any existing policy already attached.
@@ -189,15 +193,16 @@ resource "{{ $.IamTerraformName }}_member" "member" {
 ## Argument Reference
 
 The following arguments are supported:
-{{ range $param := $.IamSelfLinkProperties }}
-{{-   if eq $param.Name "name" }}
-* `{{ $.IamParentResourceName }}` - (Required) Used to find the parent resource to bind the IAM policy to
-{{-   else if or (or (eq (underscore $param.Name) "region") (eq (underscore $param.Name) "zone")) (eq (underscore $param.Name) "location") }}
-* `{{ underscore $param.Name }}` - (Optional) {{ $param.Description }} Used to find the parent resource to bind the IAM policy to. If not specified,
-  the value will be parsed from the identifier of the parent resource. If no {{ underscore $param.Name }} is provided in the parent identifier and no
-  {{ underscore $param.Name }} is specified, it is taken from the provider configuration.
+{{ range $param := $.IamResourceProperties }}
+  {{- $n := underscore $param.Name }}
+{{-   if eq $n $.IamParentResourceName }}
+* `{{ $n }}` - (Required) Used to find the parent resource to bind the IAM policy to
+{{-   else if or (or (eq $n "region") (eq $n "zone")) (eq $n "location") }}
+* `{{ $n }}` - (Optional) {{ $param.Description }} Used to find the parent resource to bind the IAM policy to. If not specified,
+  the value will be parsed from the identifier of the parent resource. If no {{ $n }} is provided in the parent identifier and no
+  {{ $n }} is specified, it is taken from the provider configuration.
 {{-  else }}
-* `{{ underscore $param.Name }}` - (Required) {{ $param.Description }} Used to find the parent resource to bind the IAM policy to
+* `{{ $n }}` - (Required) {{ $param.Description }} Used to find the parent resource to bind the IAM policy to
 {{-  end }}
 {{- end }}
 {{- if $.IamPolicy.BaseUrl }}
@@ -225,6 +230,7 @@ The following arguments are supported:
   * **projectOwner:projectid**: Owners of the given project. For example, "projectOwner:my-example-project"
   * **projectEditor:projectid**: Editors of the given project. For example, "projectEditor:my-example-project"
   * **projectViewer:projectid**: Viewers of the given project. For example, "projectViewer:my-example-project"
+  * **Federated identities**: One or more federated identities in a workload or workforce identity pool, workload running on GKE, etc. Refer to the [Principal identifiers documentation](https://cloud.google.com/iam/docs/principal-identifiers#allow) for examples of targets and valid configuration. For example, "principal://iam.googleapis.com/locations/global/workforcePools/example-contractors/subject/joe@example.com"
 
 * `role` - (Required) The role that should be applied. Only one
     `{{ $.IamTerraformName }}_binding` can be used per role. Note that custom roles must be of the format

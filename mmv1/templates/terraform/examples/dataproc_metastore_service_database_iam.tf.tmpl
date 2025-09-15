@@ -1,0 +1,59 @@
+resource "google_dataproc_metastore_service" "dpms_service" {
+  service_id = "tf-test-metastore-srv-%{random_suffix}"
+  location   = "us-central1"
+
+  tier       = "DEVELOPER"
+
+  hive_metastore_config {
+    version = "3.1.2"
+  }
+}
+
+resource "google_dataproc_cluster" "dp_cluster" {
+  name   = "tf-test-dpms-tbl-creator-%{random_suffix}"
+  region = google_dataproc_metastore_service.dpms_service.location
+
+  cluster_config {
+    # Keep the costs down with smallest config we can get away with
+    software_config {
+      override_properties = {
+        "dataproc:dataproc.allow.zero.workers" = "true"
+      }
+    }
+
+    endpoint_config {
+      enable_http_port_access = true
+    }
+
+    master_config {
+      num_instances = 1
+      machine_type  = "e2-standard-2"
+      disk_config {
+        boot_disk_size_gb = 35
+      }
+    }
+
+    metastore_config {
+      dataproc_metastore_service = google_dataproc_metastore_service.dpms_service.name
+    }
+  }
+}
+
+resource "google_dataproc_job" "hive" {
+  region = google_dataproc_cluster.dp_cluster.region
+
+  force_delete = true
+  placement {
+    cluster_name = google_dataproc_cluster.dp_cluster.name
+  }
+
+  hive_config {
+    properties = {
+      "database" = "testdb"
+    }
+    query_list = [
+      "DROP DATABASE IF EXISTS testdb CASCADE",
+      "CREATE DATABASE testdb",
+    ]
+  }
+}

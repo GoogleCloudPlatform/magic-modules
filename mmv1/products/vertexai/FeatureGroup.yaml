@@ -35,10 +35,19 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
+iam_policy:
+  method_name_separator: ':'
+  fetch_iam_policy_verb: 'POST'
+  parent_resource_attribute: 'feature_group'
+  example_config_body: 'templates/terraform/iam/example_config_body/vertex_ai_feature_group.tf.tmpl'
+  import_format:
+    - 'projects/{{project}}/locations/{{region}}/featureGroups/{{name}}'
+  min_version: 'beta'
 custom_code:
 examples:
   - name: 'vertex_ai_feature_group'
     primary_resource_id: 'feature_group'
+    primary_resource_name: 'fmt.Sprintf("tf_test_example_feature_group%s", context["random_suffix"])'
     vars:
       job_id: 'job_load'
       feature_group_name: 'example_feature_group'
@@ -50,6 +59,7 @@ parameters:
     description: The region of feature group. eg us-central1
     url_param_only: true
     immutable: true
+    default_from_api: true
 properties:
   - name: 'name'
     type: String

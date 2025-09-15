@@ -1,0 +1,95 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'Connector'
+description: A Managed Service for Kafka Connect Connectors.
+min_version: 'beta'
+docs:
+id_format: 'projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster}}/connectors/{{connector_id}}'
+base_url: 'projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster}}/connectors'
+self_link: 'projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster}}/connectors/{{connector_id}}'
+create_url: 'projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster}}/connectors?connectorId={{connector_id}}'
+update_verb: 'PATCH'
+update_mask: true
+import_format:
+  - 'projects/{{project}}/locations/{{location}}/connectClusters/{{connect_cluster}}/connectors/{{connector_id}}'
+timeouts:
+  insert_minutes: 60
+  update_minutes: 30
+  delete_minutes: 30
+examples:
+  - name: 'managedkafka_connector_basic'
+    primary_resource_id: 'example'
+    min_version: 'beta'
+    vars:
+      connector_id: 'my-connector'
+      connect_cluster_id: 'my-connect-cluster'
+      topic_id: 'my-topic'
+      cluster_id: 'my-cluster'
+      cps_topic_name: 'my-cps-topic'
+      secondary_subnet_id: 'my-secondary-subnetwork-00'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    external_providers: ["time"]
+parameters:
+  - name: 'location'
+    type: String
+    description: "ID of the location of the Kafka Connect resource. See
+      https://cloud.google.com/managed-kafka/docs/locations for a list of
+      supported locations."
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'connectCluster'
+    type: String
+    description: "The connect cluster name."
+    url_param_only: true
+    required: true
+    immutable: true
+  - name: 'connectorId'
+    type: String
+    description: "The ID to use for the connector, which will become the final
+      component of the connector's name. This value is structured like: `my-connector-id`."
+    url_param_only: true
+    required: true
+    immutable: true
+properties:
+  - name: 'name'
+    type: String
+    description: "The name of the connector. The `connector` segment is used when
+      connecting directly to the connect cluster. Structured like: `projects/PROJECT_ID/locations/LOCATION/connectClusters/CONNECT_CLUSTER/connectors/CONNECTOR_ID`."
+    output: true
+  - name: 'configs'
+    type: KeyValuePairs
+    description: "Connector config as keys/values. The keys of the map are connector property names, for example:
+      `connector.class`, `tasks.max`, `key.converter`."
+  - name: 'state'
+    type: String
+    description: "The current state of the connect. Possible values: `STATE_UNSPECIFIED`, `UNASSIGNED`, `RUNNING`, `PAUSED`, `FAILED`, `RESTARTING`, and `STOPPED`."
+    output: true
+  - name: 'taskRestartPolicy'
+    type: NestedObject
+    description: "A policy that specifies how to restart the failed connectors/tasks in a Cluster resource. If not set, the failed connectors/tasks won't be restarted."
+    properties:
+      - name: 'minimumBackoff'
+        type: String
+        description: |
+          The minimum amount of time to wait before retrying a failed task. This sets a lower bound for the backoff delay.
+          A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".
+      - name: 'maximumBackoff'
+        type: String
+        description: |
+          The maximum amount of time to wait before retrying a failed task. This sets an upper bound for the backoff delay.
+          A duration in seconds with up to nine fractional digits, terminated by 's'. Example: "3.5s".

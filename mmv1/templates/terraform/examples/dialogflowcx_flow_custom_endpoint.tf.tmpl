@@ -1,0 +1,47 @@
+provider "google" {
+  dialogflow_cx_custom_endpoint = "https://us-central1-dialogflow.googleapis.com/v3/"
+}
+
+resource "google_dialogflow_cx_agent" "agent" {
+  display_name               = "{{index $.Vars "agent_name"}}"
+  location                   = "us-central1"
+  default_language_code      = "en"
+  time_zone                  = "America/New_York"
+  description                = "Example description."
+}
+
+
+resource "google_dialogflow_cx_flow" "{{$.PrimaryResourceId}}" {
+  parent       = google_dialogflow_cx_agent.agent.id
+  display_name = "MyFlow"
+  description  = "Test Flow"
+
+  nlu_settings {
+    classification_threshold = 0.3
+    model_type               = "MODEL_TYPE_STANDARD"
+  }
+
+  event_handlers {
+    event = "sys.no-match-default"
+    trigger_fulfillment {
+      return_partial_responses = false
+      messages {
+        text {
+          text = ["Sorry, could you say that again?"]
+        }
+      }
+    }
+  }
+
+  event_handlers {
+    event = "sys.no-input-default"
+    trigger_fulfillment {
+      return_partial_responses = false
+      messages {
+        text {
+          text = ["One more time?"]
+        }
+      }
+    }
+  }
+}

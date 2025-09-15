@@ -1,0 +1,23 @@
+data "google_client_config" "current" {}
+
+resource "google_compute_network" "apigee_network" {
+  name = "apigee-network"
+}
+
+resource "google_apigee_organization" "org" {
+  description         = "Terraform-provisioned basic Apigee Org without VPC Peering."
+  analytics_region    = "us-central1"
+  project_id          = data.google_client_config.current.project
+  disable_vpc_peering = true
+}
+
+resource "google_apigee_dns_zone" "apigee_dns_zone" {
+  org_id                 = google_apigee_organization.apigee_org.id
+  dns_zone_id = "test1"
+  domain = "foo.com"
+  description = "test"
+  peering_config {
+    target_project_id = data.google_client_config.current.project
+    target_network_id = google_compute_network.apigee_network.id
+  }
+}

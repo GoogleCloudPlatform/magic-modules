@@ -1,11 +1,9 @@
 resource "google_compute_network" "default" {
-  provider = google-beta
   name                    = "{{index $.Vars "network_name"}}"
 }
 
 // Zonal NEG with GCE_VM_IP_PORT
 resource "google_compute_network_endpoint_group" "default" {
-  provider = google-beta
   name                  = "{{index $.Vars "default_neg_name"}}"
   network               = google_compute_network.default.id
   default_port          = "90"
@@ -14,7 +12,6 @@ resource "google_compute_network_endpoint_group" "default" {
 }
 
 resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   name                  = "{{index $.Vars "backend_service_name"}}"
   health_checks = [google_compute_health_check.default.id]
 
@@ -40,10 +37,14 @@ resource "google_compute_backend_service" "{{$.PrimaryResourceId}}" {
       dry_run = false
     }
   }
+  log_config {
+    enable          = true
+    optional_mode   = "CUSTOM"
+    optional_fields = [ "orca_load_report", "tls.protocol" ]
+  }  
 }
 
 resource "google_compute_health_check" "default" {
-  provider = google-beta
   name               = "{{index $.Vars "health_check_name"}}"
   timeout_sec        = 1
   check_interval_sec = 1

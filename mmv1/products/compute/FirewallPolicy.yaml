@@ -20,7 +20,6 @@ description: |
   This resource should be generally be used with `google_compute_firewall_policy_association` and `google_compute_firewall_policy_rule`
 
   For more information see the [official documentation](https://cloud.google.com/vpc/docs/firewall-policies)
-min_version: 'beta'
 references:
   guides:
   api: 'https://cloud.google.com/compute/docs/reference/rest/v1/firewallPolicies'
@@ -42,6 +41,8 @@ custom_code:
   post_update: 'templates/terraform/constants/compute_firewall_policy_operation.go.tmpl'
 custom_diff:
   - 'tpgresource.DefaultProviderProject'
+include_in_tgc_next_DO_NOT_USE: true
+tgc_hcl_block_name: 'shortName'
 examples:
   - name: 'firewall_policy'
     primary_resource_id: 'default'

@@ -258,10 +258,20 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 		ingress_policies {
 			title = "ingress policy 2"
 			ingress_from {
-				identities = ["user:test@google.com"]
+				identities = ["group:test@google.com"]
 			}
 			ingress_to {
 				resources = ["*"]
+			}
+		}
+		ingress_policies {
+			title = "ingress policy 3"
+			ingress_from {
+				identities = ["group:test@google.com"]
+			}
+			ingress_to {
+				resources = ["*"]
+				roles = ["roles/bigquery.admin"]
 			}
 		}
 
@@ -292,10 +302,20 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 		egress_policies {
 			title = "egress policy 2"
 			egress_from {
-				identities = ["user:test@google.com"]
+				identities = ["group:test@google.com"]
 			}
 			egress_to {
 				resources = ["*"]
+			}
+		}
+		egress_policies {
+			title = "egress policy 3"
+			egress_from {
+				identities = ["group:test@google.com"]
+			}
+			egress_to {
+				resources = ["*"]
+				roles = ["roles/bigquery.admin"]
 			}
 		}
   }
@@ -348,10 +368,11 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 		ingress_policies {
 			title = "ingress policy 2"
 			ingress_from {
-				identities = ["user:test@google.com"]
+				identities = ["group:test@google.com"]
 			}
 			ingress_to {
 				resources = ["*"]
+				roles = ["roles/bigquery.admin"]
 			}
 		}
 
@@ -382,10 +403,19 @@ resource "google_access_context_manager_service_perimeter" "test-access" {
 		egress_policies {
 			title = "egress policy 2"
 			egress_from {
-				identities = ["user:test@google.com"]
+				identities = ["group:test@google.com"]
 			}
 			egress_to {
 				resources = ["*"]
+			}
+		}
+		egress_policies {
+			egress_from {
+				identity_type = "ANY_IDENTITY"
+			}
+			egress_to {
+				resources = ["*"]
+				roles = ["roles/bigquery.admin"]
 			}
 		}
   }

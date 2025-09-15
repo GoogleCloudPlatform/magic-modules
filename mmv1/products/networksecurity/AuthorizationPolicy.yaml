@@ -45,6 +45,7 @@ async:
 sweeper:
   url_substitutions:
     - region: "global"
+include_in_tgc_next_DO_NOT_USE: true
 examples:
   - name: 'network_security_authorization_policy_basic'
     primary_resource_id: 'default'

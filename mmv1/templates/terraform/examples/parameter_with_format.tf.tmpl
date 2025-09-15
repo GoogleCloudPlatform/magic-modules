@@ -1,5 +1,4 @@
 resource "google_parameter_manager_parameter" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   parameter_id = "{{index $.Vars "parameter_id"}}"
   format = "JSON"
 }

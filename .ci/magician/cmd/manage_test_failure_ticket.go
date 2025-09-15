@@ -18,6 +18,8 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"magician/cloudstorage"
+	"magician/provider"
 	"os"
 	"time"
 
@@ -40,6 +42,7 @@ var manageTestFailureTicketCmd = &cobra.Command{
 	 It performs the following operations:
 	 1. Lists out GitHub issues with test-failure and forward/review labels.
 	 2. Removes forward/review labels from these issues.
+	 3. Closes 100% test ticket if it starts to pass for 3 days
  
 	 The following environment variables are required:
  ` + listMTFTRequiredEnvironmentVariables(),
@@ -55,6 +58,8 @@ var manageTestFailureTicketCmd = &cobra.Command{
 
 		gh := github.NewClient(nil).WithAuthToken(env["GITHUB_TOKEN"])
 
+		gcs := cloudstorage.NewClient()
+
 		now := time.Now()
 
 		loc, err := time.LoadLocation("America/Los_Angeles")
@@ -63,7 +68,7 @@ var manageTestFailureTicketCmd = &cobra.Command{
 		}
 		date := now.In(loc)
 
-		return execManageTestFailureTicket(date, gh)
+		return execManageTestFailureTicket(date, gh, gcs)
 	},
 }
 
@@ -75,8 +80,10 @@ func listMTFTRequiredEnvironmentVariables() string {
 	return result
 }
 
-func execManageTestFailureTicket(now time.Time, gh *github.Client) error {
+func execManageTestFailureTicket(now time.Time, gh *github.Client, gcs CloudstorageClient) error {
 	ctx := context.Background()
+
+	// Get test tickets with "forward/review" labels
 	opts := &github.IssueListByRepoOptions{
 		State:       "open",
 		Labels:      []string{"test-failure", "forward/review"},
@@ -94,7 +101,109 @@ func execManageTestFailureTicket(now time.Time, gh *github.Client) error {
 			return err
 		}
 	}
+
+	// Get Test status for past 3 days
+	gaTestFailuresMap := make(map[string][]bool)
+	betaTestFailuresMap := make(map[string][]bool)
+
+	lastNDaysTestNonSuccessMap(provider.GA, 3, now, gcs, gaTestFailuresMap)
+	lastNDaysTestNonSuccessMap(provider.Beta, 3, now, gcs, betaTestFailuresMap)
+
+	// Get 100% failing test tickets
+	opts = &github.IssueListByRepoOptions{
+		State:       "open",
+		Labels:      []string{"test-failure-100"},
+		ListOptions: github.ListOptions{PerPage: 100},
+	}
+	issues, err = ListIssuesWithOpts(ctx, gh, opts)
+	if err != nil {
+		return err
+	}
+
+	var shouldCloseTickets []int // store GH issue number
+
+	for _, issue := range issues {
+		// Get failing test names
+		tests, err := testNamesFromIssue(issue)
+		if err != nil {
+			return err
+		}
+		if len(tests) == 0 {
+			fmt.Println("No tests found for issue ", issue.GetNumber())
+			continue
+		}
+
+		if shouldCloseTestTicket(tests, gaTestFailuresMap, betaTestFailuresMap) {
+			shouldCloseTickets = append(shouldCloseTickets, issue.GetNumber())
+		}
+	}
+
+	comment := "All failing tests listed in this ticket have passed in the last three consecutive nightly runs. Closing the ticket."
+	for _, ticketNumber := range shouldCloseTickets {
+		fmt.Println("Closing ticket ", ticketNumber)
+		issueComment := &github.IssueComment{
+			Body: github.String(comment),
+		}
+		_, _, err = gh.Issues.CreateComment(ctx, GithubOwner, GithubRepo, ticketNumber, issueComment)
+		if err != nil {
+			return fmt.Errorf("error posting comment to issue %d: %w", ticketNumber, err)
+		}
+		issueRquest := &github.IssueRequest{
+			State: github.String("closed"),
+		}
+		_, _, err = gh.Issues.Edit(ctx, GithubOwner, GithubRepo, ticketNumber, issueRquest)
+		if err != nil {
+			return fmt.Errorf("error closing issue %d: %w", ticketNumber, err)
+		}
+	}
+
 	return nil
+}
+
+func lastNDaysTestNonSuccessMap(pVersion provider.Version, n int, now time.Time, gcs CloudstorageClient, testFailuresMap map[string][]bool) error {
+	for i := 0; i < n; i++ {
+		date := now.AddDate(0, 0, -i)
+		testInfoList, err := getTestInfoList(pVersion, date, gcs)
+		if err != nil {
+			return fmt.Errorf("error getting test info list: %w", err)
+		}
+		for _, testInfo := range testInfoList {
+			testName := testInfo.Name
+			if _, ok := testFailuresMap[testName]; !ok {
+				testFailuresMap[testName] = make([]bool, n)
+			}
+			testFailuresMap[testName][i] = (testInfo.Status == "FAILURE" || testInfo.Status == "UNKNOWN") // failed or skipped
+		}
+	}
+	return nil
+}
+
+func shouldCloseTestTicket(tests []string, gaTestFailuresMap, betaTestFailuresMap map[string][]bool) bool {
+	for _, test := range tests {
+		gaFailures, foundGaTest := gaTestFailuresMap[test]
+		betaFailures, foundBetaTest := betaTestFailuresMap[test]
+
+		if !foundGaTest && !foundBetaTest {
+			fmt.Printf("test %s not found in either GA or Beta, might be skipped\n", test)
+			return false
+		}
+
+		if foundGaTest {
+			for _, fail := range gaFailures {
+				if fail {
+					return false
+				}
+			}
+		}
+		if foundBetaTest {
+			for _, fail := range betaFailures {
+				if fail {
+					return false
+				}
+			}
+		}
+	}
+	return true
 }
 
 func init() {

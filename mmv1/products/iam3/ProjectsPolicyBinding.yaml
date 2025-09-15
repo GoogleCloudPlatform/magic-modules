@@ -14,6 +14,8 @@
 ---
 name: 'ProjectsPolicyBinding'
 api_resource_type_kind: PolicyBinding
+api_variant_patterns:
+  - 'projects/{project}/locations/{location}/policyBindings/{policyBinding}'
 description: |
   A policy binding to a project. This is a Terraform resource, and maps to a policy binding resource in GCP.
 references:

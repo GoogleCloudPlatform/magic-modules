@@ -7,6 +7,8 @@ api_version: 'beta'
 api_version: 'v1'
 {{- end }}
 api_resource_type_kind: 'InstanceGroupManager'
+api_variant_patterns:
+  - 'projects/{project}/zones/{zone}/instanceGroupManagers/{instanceGroupManager}'
 fields:
   - field: 'all_instances_config.labels'
   - field: 'all_instances_config.metadata'
@@ -19,6 +21,9 @@ fields:
   - field: 'instance_group'
   - field: 'instance_group_manager_id'
   - field: 'instance_lifecycle_policy.default_action_on_failure'
+{{- if ne $.TargetVersionName "ga" }}
+  - field: 'instance_lifecycle_policy.on_failed_health_check'
+{{- end }}
   - field: 'instance_lifecycle_policy.force_update_on_repair'
   - field: 'list_managed_instances_results'
   - field: 'name'

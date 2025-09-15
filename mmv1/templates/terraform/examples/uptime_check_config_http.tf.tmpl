@@ -1,6 +1,7 @@
 resource "google_monitoring_uptime_check_config" "{{$.PrimaryResourceId}}" {
-  display_name = "{{index $.Vars "display_name"}}"
-  timeout      = "60s"
+  display_name       = "{{index $.Vars "display_name"}}"
+  timeout            = "60s"
+  log_check_failures = true
   user_labels  = {
     example-key = "example-value"
   }

@@ -37,7 +37,8 @@ identity:
   - bucket
   - anywhereCacheId
 custom_code:
-  post_create: templates/terraform/post_create/storage_anywhere_cache_post_create.go.tmpl
+  custom_create: templates/terraform/custom_create/storage_anywhere_cache.go.tmpl
+  custom_update: templates/terraform/custom_update/storage_anywhere_cache.go.tmpl
 autogen_async: false
 timeouts:
   insert_minutes: 240

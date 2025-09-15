@@ -58,6 +58,13 @@ examples:
     vars:
       target_http_proxy_name: 'test-https-redirect-proxy'
       url_map_name: 'url-map'
+  - name: 'target_http_proxy_fingerprint'
+    primary_resource_id: 'default'
+    vars:
+      target_http_proxy_name: 'test-fingerprint-proxy'
+      url_map_name: 'url-map'
+      backend_service_name: 'backend-service'
+      http_health_check_name: 'http-health-check'
 parameters:
 properties:
   - name: 'creationTimestamp'
@@ -112,3 +119,12 @@ properties:
       value is 600 seconds, the minimum allowed value is 5 seconds, and the
       maximum allowed value is 600 seconds. For Global external HTTP(S) load
       balancer (classic), this option is not available publicly.
+  - name: 'fingerprint'
+    type: Fingerprint
+    description: |
+      Fingerprint of this resource. A hash of the contents stored in this object. This field is used in optimistic locking.
+      This field will be ignored when inserting a TargetHttpProxy. An up-to-date fingerprint must be provided in order to
+      patch/update the TargetHttpProxy; otherwise, the request will fail with error 412 conditionNotMet.
+      To see the latest fingerprint, make a get() request to retrieve the TargetHttpProxy.
+      A base64-encoded string.
+    output: true

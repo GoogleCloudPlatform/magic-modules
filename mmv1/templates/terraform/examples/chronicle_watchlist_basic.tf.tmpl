@@ -1,5 +1,4 @@
 resource "google_chronicle_watchlist" "{{$.PrimaryResourceId}}" {
-  provider = "google-beta"
   location = "us"
   instance = "{{index $.TestEnvVars "chronicle_id"}}"
   watchlist_id = "{{index $.Vars "watchlist_id"}}"

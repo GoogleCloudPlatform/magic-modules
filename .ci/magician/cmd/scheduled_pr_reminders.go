@@ -26,7 +26,7 @@ import (
 
 	membership "magician/github"
 
-	"github.com/google/go-github/v61/github"
+	"github.com/google/go-github/v68/github"
 	"github.com/spf13/cobra"
 
 	"golang.org/x/exp/slices"

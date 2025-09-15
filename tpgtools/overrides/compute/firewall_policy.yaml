@@ -1,4 +1,0 @@
-- type: CUSTOMIZE_DIFF
-  details:
-    functions: 
-    - tpgresource.DefaultProviderProject

@@ -1,5 +1,4 @@
 resource "google_dataproc_metastore_service" "{{$.PrimaryResourceId}}" {
-  provider = google-beta
   service_id = "{{index $.Vars "metastore_service_name"}}"
   location   = "us-central1"
 
