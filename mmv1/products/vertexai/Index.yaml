@@ -43,8 +43,11 @@ examples:
     vars:
       display_name: 'test-index'
       bucket_name: 'vertex-ai-index-test'
+      kms_key_name: 'kms-name'
     test_env_vars:
       project: 'PROJECT_NAME'
+    test_vars_overrides:
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'metadata.0.contents_delta_uri'
       - 'metadata.0.is_complete_overwrite'
@@ -53,8 +56,11 @@ examples:
     vars:
       display_name: 'test-index'
       bucket_name: 'vertex-ai-index-test'
+      kms_key_name: 'kms-name'
     test_env_vars:
       project: 'PROJECT_NAME'
+    test_vars_overrides:
+      'kms_key_name': 'acctest.BootstrapKMSKeyInLocation(t, "us-central1").CryptoKey.Name'
     ignore_read_extra:
       - 'metadata.0.contents_delta_uri'
       - 'metadata.0.is_complete_overwrite'
