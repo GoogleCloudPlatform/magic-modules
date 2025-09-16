@@ -111,6 +111,7 @@ resource "google_backup_dr_backup_plan_association" "bpa" {
   location                   = "%{location}"
   backup_plan_association_id = "tf-test-bpa-list-%{random_suffix}"
   resource                   = google_sql_database_instance.instance.self_link
+  resource_type              = "sqladmin.googleapis.com/Instance"
   backup_plan                = google_backup_dr_backup_plan.plan.name
   depends_on                 = [google_sql_database_instance.instance]
 }
