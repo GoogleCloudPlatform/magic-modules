@@ -26,20 +26,19 @@ func TestAccDialogflowVersion_update(t *testing.T) {
 				Config: testAccDialogflowVersion_full1(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_version.foobar",
-				RefreshState:true,
+				ResourceName: "google_dialogflow_version.foobar",
+				RefreshState: true,
 			},
 			{
 				Config: testAccDialogflowVersion_full2(context),
 			},
 			{
-				ResourceName:      "google_dialogflow_version.foobar",
-				RefreshState:true,
+				ResourceName: "google_dialogflow_version.foobar",
+				RefreshState: true,
 			},
 		},
 	})
 }
-
 
 func testAccDialogflowVersion_full1(context map[string]interface{}) string {
 	return acctest.Nprintf(`
