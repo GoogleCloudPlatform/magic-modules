@@ -1,17 +1,16 @@
 package discoveryengine_test
 
 import (
-	"testing"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"testing"
 )
 
 func TestAccDiscoveryEngineDataConnector_discoveryengineDataconnectorJiraBasicExample_update(t *testing.T) {
 	t.Parallel()
 
 	context := map[string]interface{}{
-		"kms_key_name": acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-dataconnector-0").CryptoKey.Name,
+		"kms_key_name":  acctest.BootstrapKMSKeyWithPurposeInLocationAndName(t, "ENCRYPT_DECRYPT", "us", "tftest-shared-key-dataconnector-0").CryptoKey.Name,
 		"client_id":     "tf-test-client-id",
 		"client_secret": "tf-test-client-secret",
 		"random_suffix": acctest.RandString(t, 10),
