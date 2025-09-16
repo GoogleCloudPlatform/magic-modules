@@ -132,7 +132,7 @@ examples:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
       - 'deletion_protection'
-  - name: 'cloudrunv2_worker_service_startup_liveness_probe'
+  - name: 'cloudrunv2_worker_pool_startup_liveness_probe'
     primary_resource_id: 'default'
     primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
     vars:
