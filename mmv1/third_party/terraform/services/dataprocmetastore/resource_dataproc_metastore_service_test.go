@@ -1,16 +1,15 @@
 package dataprocmetastore_test
 
 import (
-	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-provider-google/google/acctest"
-	"github.com/hashicorp/terraform-provider-google/google/envvar"
 	"testing"
 
-	metastore "cloud.google.com/go/metastore/apiv1"
-	metastorepb "cloud.google.com/go/metastore/apiv1/metastorepb"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/hashicorp/terraform-provider-google/google/acctest"
+	"github.com/hashicorp/terraform-provider-google/google/envvar"
+	transport_tpg "github.com/hashicorp/terraform-provider-google/google/transport"
+	"strings"
 )
 
 func TestAccDataprocMetastoreService_updateAndImport(t *testing.T) {
@@ -175,104 +174,129 @@ resource "google_storage_bucket" "bucket" {
 
 func TestAccMetastoreService_tags(t *testing.T) {
 	t.Parallel()
-	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "metastore-services-tagkey", map[string]interface{}{})
-	tagValue := acctest.BootstrapSharedTestOrganizationTagValue(t, "metastore-services-tagvalue", tagKey)
-
-	testContext := map[string]interface{}{
+	tagKey := acctest.BootstrapSharedTestOrganizationTagKey(t, "metastore-service-tagkey", map[string]interface{}{})
+	context := map[string]interface{}{
+		"random_suffix": acctest.RandString(t, 10),
 		"org":           envvar.GetTestOrgFromEnv(t),
 		"tagKey":        tagKey,
-		"tagValue":      tagValue,
-		"random_suffix": acctest.RandString(t, 10),
+		"tagValue":      acctest.BootstrapSharedTestOrganizationTagValue(t, "metastore-service-tagvalue", tagKey),
 	}
-	resourceName := "google_dataproc_metastore_service.test"
-
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckDataprocMetastoreServiceDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccMetastoreServiceTags(testContext),
+				Config: testAccMetastoreServiceTags(context),
 				Check: resource.ComposeTestCheckFunc(
-					checkMetastoreServiceTags(resourceName, testContext),
+					resource.TestCheckResourceAttrSet("google_dataproc_metastore_service.default", "tags.%"),
+					testAccCheckMetastoreServiceHasTagBindings(t, map[string]bool{
+						context["tagValue"].(string): true,
+					}),
 				),
 			},
 			{
-				ResourceName:            resourceName,
+				ResourceName:            "google_dataproc_metastore_service.default",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"tags"},
+				ImportStateVerifyIgnore: []string{"service_id", "location", "labels", "terraform_labels", "tags"},
 			},
 		},
 	})
 }
 
-func testAccMetastoreServiceTags(testContext map[string]interface{}) string {
-	return acctest.Nprintf(`
-	resource "google_dataproc_metastore_service" "test" {
-	  service_id = "tf-test-service-%{random_suffix}"
-	  location = "us-east1"
-	  tier = "DEVELOPER"
-	  tags = {
-	    "%{org}/%{tagKey}" = "%{tagValue}"
-	  }
-	}`, testContext)
+func testAccCheckMetastoreServiceHasTagBindings(t *testing.T, expectedTags map[string]bool) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		for name, rs := range s.RootModule().Resources {
+			if rs.Type != "google_dataproc_metastore_service" {
+				continue
+			}
+			if strings.HasPrefix(name, "data.") {
+				continue
+			}
+
+			config := acctest.GoogleProviderConfig(t)
+
+			parts := strings.Split(rs.Primary.ID, "/")
+			if len(parts) != 6 {
+				return fmt.Errorf("Invalid resource ID format: %s", rs.Primary.ID)
+			}
+			project := parts[1]
+			location := parts[3]
+			service_id := parts[5]
+
+			parentURL := fmt.Sprintf("//metastore.googleapis.com/projects/%s/locations/%s/services/%s", project, location, service_id)
+			url := fmt.Sprintf("https://%s-cloudresourcemanager.googleapis.com/v3/tagBindings?parent=%s", location, parentURL)
+			fmt.Printf("Checking tagBindings for resource: %s at URL: %s\n", rs.Primary.ID, url)
+
+			resp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+				Config:    config,
+				Method:    "GET",
+				RawURL:    url,
+				UserAgent: config.UserAgent,
+			})
+
+			if err != nil {
+				return fmt.Errorf("Error calling TagBindings API: %v", err)
+			}
+
+			tagBindingsVal, exists := resp["tagBindings"]
+			if !exists {
+				return fmt.Errorf("Key 'tagBindings' not found in response for resource %s. Response: %v", rs.Primary.ID, resp)
+			}
+
+			tagBindings, ok := tagBindingsVal.([]interface{})
+			if !ok {
+				return fmt.Errorf("'tagBindings' is not a slice in response for resource %s. Response: %v", rs.Primary.ID, resp)
+			}
+
+			// Check if any tag bindings were found.
+			if len(tagBindings) == 0 {
+				return fmt.Errorf("No tag bindings found for resource %s. Response: %v", rs.Primary.ID, resp)
+			}
+
+			foundTags := make(map[string]bool)
+		for _, tb := range tagBindings {
+			tbMap, ok := tb.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			if tag, ok := tbMap["tagValue"].(string); ok {
+				foundTags[tag] = true
+			}
+		}
+
+			for expectedTagValue := range expectedTags {
+			if !foundTags[expectedTagValue] && !foundTags["tagValues/"+expectedTagValue] {
+				return fmt.Errorf("Expected tag binding %s not found in resource %s. Got %v", expectedTagValue, rs.Primary.ID, foundTags)
+			}
+		}
+		
+		fmt.Printf("Successfully found %v tag bindings for %s\n", expectedTags, rs.Primary.ID)
+		}
+
+		return nil
+	}
 }
 
-// This function gets the service via the Metastore API and inspects its tags.
-func checkMetastoreServiceTags(resourceName string, testContext map[string]interface{}) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[resourceName]
-		if !ok {
-			return fmt.Errorf("Resource not found: %s", resourceName)
-		}
-
-		// Get resource attributes from state
-		project := rs.Primary.Attributes["project"]
-		location := rs.Primary.Attributes["location"]
-		serviceName := rs.Primary.Attributes["service_id"]
-
-		// Construct the expected full tag key
-		expectedTagKey := fmt.Sprintf("%s/%s", testContext["org"], testContext["tagKey"])
-		expectedTagValue := fmt.Sprintf("%s", testContext["tagValue"])
-
-		// This `ctx` variable is now a `context.Context` object
-		ctx := context.Background()
-
-		// Create a Metastore client
-		metastoreClient, err := metastore.NewDataprocMetastoreClient(ctx)
-		if err != nil {
-			return fmt.Errorf("failed to create metastore client: %v", err)
-		}
-		defer metastoreClient.Close()
-
-		// Construct the request to get the service details
-		req := &metastorepb.GetServiceRequest{
-			Name: fmt.Sprintf("projects/%s/locations/%s/services/%s", project, location, serviceName),
-		}
-
-		// Get the Metastore service
-		service, err := metastoreClient.GetService(ctx, req)
-		if err != nil {
-			return fmt.Errorf("failed to get metastore service '%s': %v", req.Name, err)
-		}
-
-		// Check the service's labels for the expected tag
-		// In the Metastore API, tags are represented as labels.
-		labels := service.GetLabels()
-		if labels == nil {
-			return fmt.Errorf("expected labels not found on service '%s'", req.Name)
-		}
-
-		if actualValue, ok := labels[expectedTagKey]; ok {
-			if actualValue == expectedTagValue {
-				// The tag was found with the correct value. Success!
-				return nil
-			}
-			return fmt.Errorf("tag key '%s' found with incorrect value. Expected: %s, Got: %s", expectedTagKey, expectedTagValue, actualValue)
-		}
-
-		// If we reach here, the tag key was not found.
-		return fmt.Errorf("expected tag key '%s' not found on service '%s'", expectedTagKey, req.Name)
-	}
+func testAccMetastoreServiceTags(context map[string]interface{}) string {
+	return acctest.Nprintf(`resource "google_dataproc_metastore_service" "default" {
+  service_id   = "tf-test-my-service-%{random_suffix}"
+  location   = "us-east1"
+  port       = 9080
+  tier       = "DEVELOPER"
+  maintenance_window {
+    hour_of_day = 2
+    day_of_week = "SUNDAY"
+  }
+  hive_metastore_config {
+    version = "2.3.6"
+  }
+  labels = {
+    env = "test"
+  }
+  tags = {
+	"%{org}/%{tagKey}" = "%{tagValue}"
+  }
+}`, context)
 }
