@@ -680,7 +680,6 @@ resource "google_storage_bucket" "bucket" {
   name          = "%s"
   location      = "US"
   force_destroy = true
-  uniform_bucket_level_access=true
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -697,7 +696,6 @@ resource "google_storage_bucket" "bucket" {
   name          = "%s"
   location      = "US"
   force_destroy = true
-  uniform_bucket_level_access=true
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -714,7 +712,6 @@ resource "google_storage_bucket" "bucket" {
   name          = "%s"
   location      = "US"
   force_destroy = true
-   uniform_bucket_level_access=true
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -762,7 +759,6 @@ func testGoogleStorageBucketsObjectBasic(bucketName, sourceFilename string) stri
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
-  uniform_bucket_level_access=true
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -779,7 +775,6 @@ func testGoogleStorageBucketsObjectOptionalContentFields(
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
-  uniform_bucket_level_access=true
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -799,7 +794,6 @@ func testGoogleStorageBucketsObjectCacheControl(bucketName, sourceFilename, cach
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
-  uniform_bucket_level_access=true
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -816,7 +810,6 @@ func testGoogleStorageBucketsObjectStorageClass(bucketName string, storageClass 
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
-  uniform_bucket_level_access=true
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -833,7 +826,6 @@ func testGoogleStorageBucketsObjectMetadata(bucketName string) string {
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
-  uniform_bucket_level_access=true
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -853,7 +845,6 @@ func testGoogleStorageBucketsObjectCustomerEncryption(bucketName string, custome
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
-  uniform_bucket_level_access=true
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -874,7 +865,6 @@ resource "google_storage_bucket" "bucket" {
   location                = "US"
   force_destroy           = true
   enable_object_retention = true
-  uniform_bucket_level_access=true
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -896,7 +886,6 @@ resource "google_storage_bucket" "bucket" {
   location                = "US"
   force_destroy           = true
   enable_object_retention = true
-  uniform_bucket_level_access=true
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -913,7 +902,6 @@ resource "google_storage_bucket" "bucket" {
   name          = "%s"
   location      = "US"
   force_destroy = true
-  uniform_bucket_level_access=true
 }
 
 resource "google_storage_bucket_object" "object" {
@@ -932,7 +920,6 @@ func testGoogleStorageBucketsObjectKms(bucketName, sourceFilename, kmsKey string
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
-  uniform_bucket_level_access=true
 }
 
 data "google_storage_project_service_account" "gcs" {
@@ -968,7 +955,6 @@ func testGoogleStorageBucketsObjectFileMd5(bucketName, sourceFilename, md5hash s
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
-  uniform_bucket_level_access=true
 }
 
 resource "google_storage_bucket_object" "bo_1861894" {
@@ -1005,7 +991,6 @@ func testGoogleStorageBucketObject(bucketName, content, filename string) string 
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
-  uniform_bucket_level_access=true
 }
 
 resource "google_storage_bucket_object" "changing" {
@@ -1042,7 +1027,6 @@ func testGoogleStorageBucketObjectKnownAfterApply(bucketName, content, filename 
 resource "google_storage_bucket" "bucket" {
   name     = "%s"
   location = "US"
-  uniform_bucket_level_access=true
 }
 
 resource "google_storage_bucket_object" "changing" {
