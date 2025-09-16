@@ -340,6 +340,10 @@ properties:
         type: Integer
         description: |
           Minimum number of instances for the service, to be divided among all revisions receiving traffic.
+      - name: 'maxInstanceCount'
+        type: Integer
+        description: |
+          Combined maximum number of instances for all revisions receiving traffic.
       - name: 'scalingMode'
         type: Enum
         description: |
@@ -587,6 +591,10 @@ properties:
                     description: |-
                       Path within the container at which the volume should be mounted. Must not contain ':'. For Cloud SQL volumes, it can be left empty, or must otherwise be /cloudsql. All instances defined in the Volume will be available as /cloudsql/[instance]. For more information on Cloud SQL volumes, visit https://cloud.google.com/sql/docs/mysql/connect-run
                     required: true
+                  - name: 'subPath'
+                    type: String
+                    description: |-
+                      Path within the volume from which the container's volume should be mounted.
             - name: 'workingDir'
               type: String
               description: |-
@@ -1217,6 +1225,22 @@ properties:
         type: String
         description: |-
           Service account to be used for building the container. The format of this field is `projects/{projectId}/serviceAccounts/{serviceAccountEmail}`.
+  - name: 'multiRegionSettings'
+    type: NestedObject
+    description: |-
+      Settings for creating a Multi-Region Service. Make sure to use region = 'global' when using them. For more information, visit https://cloud.google.com/run/docs/multiple-regions#deploy
+    properties:
+      - name: 'regions'
+        type: Array
+        item_type:
+          type: String
+        description: |-
+          The list of regions to deploy the multi-region Service.
+      - name: 'multiRegionId'
+        type: String
+        description: |-
+          System-generated unique id for the multi-region Service.
+        output: true
   - name: 'reconciling'
     type: Boolean
     description: |

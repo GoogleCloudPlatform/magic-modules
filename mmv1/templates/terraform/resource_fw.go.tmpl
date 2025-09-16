@@ -1,0 +1,784 @@
+{{/* The license inside this block applies to this file
+  Copyright 2025 Google LLC. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. */ -}}
+// Copyright (c) HashiCorp, Inc.
+// SPDX-License-Identifier: MPL-2.0
+
+{{/*{{$.CodeHeader TemplatePath}}*/}}
+
+package {{ lower $.ProductMetadata.Name }}
+
+import (
+
+    "fmt"
+    "log"
+    "net/http"
+    "reflect"
+{{- if $.SupportsIndirectUserProjectOverride }}
+    "regexp"
+{{- end }}
+{{- if or (and (not $.Immutable) ($.UpdateMask)) $.LegacyLongFormProject }}
+    "strings"
+{{- end }}
+    "time"
+
+{{/*     # We list all the v2 imports here, because we run 'goimports' to guess the correct */}}
+{{/*     # set of imports, which will never guess the major version correctly. */}}
+{{/*
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+    "github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+     */}}
+    "github.com/hashicorp/go-cty/cty"
+
+    "github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+
+	"github.com/hashicorp/terraform-plugin-framework-timeouts/resource/timeouts"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"{{ $.ImportPath }}/fwmodels"
+	"{{ $.ImportPath }}/fwresource"
+	"{{ $.ImportPath }}/fwtransport"
+
+    "{{ $.ImportPath }}/tpgresource"
+    transport_tpg "{{ $.ImportPath }}/transport"
+    "{{ $.ImportPath }}/verify"
+
+{{ if $.FlattenedProperties }}
+    "google.golang.org/api/googleapi"
+{{- end}}
+)
+
+{{if $.CustomCode.Constants -}} 
+    {{- $.CustomTemplate $.CustomCode.Constants true -}}
+{{- end}}
+
+var (
+	_ resource.Resource                = &{{$.ResourceName}}FWResource{}
+	_ resource.ResourceWithConfigure   = &{{$.ResourceName}}FWResource{}
+{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff }}
+	_ resource.ResourceWithModifyPlan  = &{{$.ResourceName}}FWResource{}
+{{- end}}
+)
+
+func New{{$.ResourceName}}FWResource() resource.Resource {
+	return &{{$.ResourceName}}FWResource{}
+}
+
+type {{$.ResourceName}}FWResource struct {
+	{{/*client         *sqladmin.Service*/}}
+	providerConfig *transport_tpg.Config
+}
+
+type {{$.ResourceName}}FWModel struct {
+    {{- range $prop := $.OrderProperties $.AllUserProperties }}
+    {{camelize $prop.Name "upper"}}     types.{{$prop.GetFWType}} `tfsdk:"{{underscore $prop.Name}}"`
+    {{- end }}
+	{{ if $.HasProject -}}
+	Project            types.String `tfsdk:"project"`
+    {{- end }}
+
+	Id       types.String `tfsdk:"id"`{{/* TODO should this be gated behind a greenfield/brownfield flag? */}}
+	Timeouts timeouts.Value `tfsdk:"timeouts"`
+}
+
+// Metadata returns the resource type name.
+func (d *{{$.ResourceName}}FWResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_fw_{{ underscore $.ResourceName}}"
+}
+
+func (r *{{$.ResourceName}}FWResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	// Prevent panic if the provider has not been configured.
+	if req.ProviderData == nil {
+		return
+	}
+
+	p, ok := req.ProviderData.(*transport_tpg.Config)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *transport_tpg.Config, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+		return
+	}
+
+    {{/* TODO non-client equivalent? */}}
+    {{/* 
+	r.client = p.NewSqlAdminClient(p.UserAgent)
+	if resp.Diagnostics.HasError() {
+		return
+	}*/}}
+	r.providerConfig = p
+}
+
+{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff }}
+func (r *{{$.ResourceName}}FWResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+{{- if and ($.HasProject) (not $.ExcludeDefaultCdiff) }}
+	fwresource.DefaultProjectModify(ctx, req, resp, r.providerConfig.Project)
+{{- end -}}
+{{if and ($.HasRegion) (not $.ExcludeDefaultCdiff)  }}
+	fwresource.DefaultRegionModify(ctx, req, resp, r.providerConfig.Region)
+{{- end -}}
+{{if and ($.HasZone) (not $.ExcludeDefaultCdiff)  }}
+	fwresource.DefaultZoneModify(ctx, req, resp, r.providerConfig.Zone)
+{{- end }}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
+{{- end}}
+
+func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		MarkdownDescription: "A resource to represent a SQL User object.",
+
+		Attributes: map[string]schema.Attribute{
+{{- range $prop := $.OrderProperties $.AllUserProperties }}
+    {{template "SchemaFieldsFW" $prop -}}
+{{- end }}
+{{- range $prop := $.VirtualFields }}
+    {{template "SchemaFieldsFW" $prop -}}
+{{- end }}
+{{- if $.CustomCode.ExtraSchemaEntry }} 
+    {{ $.CustomTemplate $.CustomCode.ExtraSchemaEntry false -}}
+{{- end}}
+{{ if $.HasProject -}}
+			"project": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+{{- end}}
+{{- if $.HasSelfLink }}
+			"self_link": schema.StringAttribute{
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+{{- end}}
+			// This is included for backwards compatibility with the original, SDK-implemented resource.
+			"id": schema.StringAttribute{
+				Description:         "Project identifier",
+				MarkdownDescription: "Project identifier",
+				Computed:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+        },
+	}
+}
+
+func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data {{$.ResourceName}}FWModel
+	var metaData *fwmodels.ProviderMetaModel
+{{ if $.CustomCode.CustomCreate -}}
+    {{ $.CustomTemplate $.CustomCode.CustomCreate false -}}
+{{  else  -}}
+
+    // Read Provider meta into the meta model
+	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var project, billingProject types.String
+{{ if $.HasProject -}}
+    project = fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{ if $.LegacyLongFormProject -}}
+    billingProject = strings.TrimPrefix(project, "projects/")
+{{      else -}}
+    billingProject = project
+{{- end }}
+{{- end }}
+{{ if $.HasRegion -}}
+	region := fwresource.GetRegionFramework(data.Region, types.StringValue(r.providerConfig.Region), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{- end }}
+{{ if $.HasZone -}}
+	zone := fwresource.GetZoneFramework(data.Zone, types.StringValue(r.providerConfig.Zone), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{- end }}
+
+	var schemaDefaultVals fwtransport.DefaultVars
+{{ if $.HasProject -}}
+	schemaDefaultVals.Project = project
+{{- end }}
+{{ if $.HasRegion -}}
+	schemaDefaultVals.Region = region
+{{- end }}
+{{ if $.HasZone -}}
+	schemaDefaultVals.Zone = zone
+{{- end }}
+
+	// Use provider_meta to set User-Agent
+	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
+
+    obj := make(map[string]interface{})
+
+{{- range $prop := $.OrderProperties $.AllUserProperties }}
+    {{$prop.ApiName}}Prop, diags := data.{{camelize $prop.Name "upper"}}.To{{$prop.GetFWType}}Value(ctx)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+    obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
+{{- end }}
+
+
+	{{/* TODO default timeouts */}}
+    createTimeout, diags := data.Timeouts.Create(ctx, 20*time.Minute)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+    url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.CreateUri}}")
+    if resp.Diagnostics.HasError() {
+        return
+    }
+
+    log.Printf("[DEBUG] Creating new {{ $.Name -}}: %#v", obj)
+
+	{{/* Nested Query block */}}
+
+    headers := make(http.Header)
+{{- if $.CustomCode.PreCreate }}
+    {{ $.CustomTemplate $.CustomCode.PreCreate false -}}
+{{- end}}
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+        Config: r.providerConfig,
+        Method: "{{ upper $.CreateVerb -}}",
+        Project: billingProject.ValueString(),
+        RawURL: url,
+        UserAgent: userAgent,
+        Body: obj,
+        Timeout: createTimeout,
+        Headers: headers,
+{{- if $.ErrorRetryPredicates }}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{- if $.ErrorAbortPredicates }}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{- end}}
+    }, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+{{- if and ($.CustomCode.PostCreateFailure) (not $.GetAsync) -}}
+        resource{{ $.ResourceName -}}PostCreateFailure(d, meta)
+{{- end}}
+        return 
+    }
+
+	tflog.Trace(ctx, "created {{$.Name}} resource")
+
+    data.Id = types.StringValue("{{ $.IdFormat -}}")
+{{ if $.HasProject -}}
+	data.Project = project
+{{- end }}
+{{ if $.HasRegion -}}
+	data.Region = region
+{{- end }}
+{{ if $.HasZone -}}
+	data.Zone = zone
+{{- end }}
+
+{{if and $.GetAsync ($.GetAsync.Allow "Create") -}}
+{{  if ($.GetAsync.IsA "OpAsync") -}}
+{{    if and $.GetAsync.Result.ResourceInsideResponse $.HasPostCreateComputedFields -}}
+    // Use the resource in the operation response to populate
+    // identity fields and d.Id() before read
+    var opRes map[string]interface{}
+    err = {{ $.ClientNamePascal -}}OperationWaitTimeWithResponse(
+    r.providerConfig, res, &opRes, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project.ValueString()){{ else }}project.ValueString(){{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
+        createTimeout)
+    if err != nil {
+      {{/* Postcreate Failure */}}
+{{-     if not $.TaintResourceOnFailedCreate -}}
+        // The resource didn't actually create
+        resp.State.RemoveResource(ctx){{/* TODO verify this works */}}
+{{      end -}}
+		resp.Diagnostics.AddError("Error, failure waiting to create {{ $.Name -}}", err.Error())
+		return
+    }
+
+        {{/* CustomCode.Decoder */}}
+        {{/* NestedQuery */}}
+        {{/* if $.HasPostCreateComputedFields */}}
+		{{/* This may have caused the ID to update - update it if so. */}}
+{{    else -}}{{/* $.GetAsync.Result.ResourceInsideResponse */}}
+    err := {{ $.ClientNamePascal -}}OperationWaitTime(
+    r.providerConfig, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project.ValueString()){{ else }}project.ValueString(){{ end }}, {{ end -}} "Creating {{ $.Name -}}", userAgent,
+        createTimeout)
+
+    if err != nil {
+
+        {{/* Postcreate Failure */}}
+{{-     if not $.TaintResourceOnFailedCreate -}}
+        // The resource didn't actually create
+        resp.State.RemoveResource(ctx){{/* TODO verify this works */}}
+{{      end -}}
+		resp.Diagnostics.AddError("Error, failure waiting to create {{ $.Name -}}", err.Error())
+		return
+    }
+
+{{    end  -}}{{/* $.GetAsync.Result.ResourceInsideResponse */}}
+{{  end -}}{{/*if ($.GetAsync.IsA "OpAsync")*/}}
+{{end -}}{{/*if and $.GetAsync ($.GetAsync.Allow "Create")*/}}
+{{if $.CustomCode.PostCreate -}} 
+    {{- $.CustomTemplate $.CustomCode.PostCreate false -}}
+{{- end}}
+
+
+	// read back {{$.Name}}
+	r.{{$.ResourceName}}FWRefresh(ctx, &data, &resp.State, req, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Save data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+
+    log.Printf("[DEBUG] Finished creating {{ $.Name }} %q: %#v", data.Id.ValueString(), res)
+{{ end }} {{/* if CustomCreate */}}
+}
+
+
+func (r *{{$.ResourceName}}FWResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data {{$.ResourceName}}FWModel
+	var metaData *fwmodels.ProviderMetaModel
+
+    // Read Provider meta into the meta model
+	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Read Terraform configuration data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	tflog.Trace(ctx, "read {{$.Name}} resource")
+
+    // read back {{$.Name}}
+	r.{{$.ResourceName}}FWRefresh(ctx, &data, &resp.State, req, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Save data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+}
+
+
+func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var state, plan {{$.ResourceName}}FWModel
+	var metaData *fwmodels.ProviderMetaModel
+    // Read Provider meta into the meta model
+	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+    resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var project, billingProject types.String
+{{ if $.HasProject -}}
+    project = fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{ if $.LegacyLongFormProject -}}
+    billingProject = strings.TrimPrefix(project, "projects/")
+{{      else -}}
+    billingProject = project
+{{- end }}
+{{- end }}
+{{ if $.HasRegion -}}
+	region := fwresource.GetRegionFramework(plan.Region, types.StringValue(r.providerConfig.Region), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{- end }}
+{{ if $.HasZone -}}
+	zone := fwresource.GetZoneFramework(plan.Zone, types.StringValue(r.providerConfig.Zone), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{- end }}
+
+	var schemaDefaultVals fwtransport.DefaultVars
+{{ if $.HasProject -}}
+	schemaDefaultVals.Project = project
+{{- end }}
+{{ if $.HasRegion -}}
+	schemaDefaultVals.Region = region
+{{- end }}
+{{ if $.HasZone -}}
+	schemaDefaultVals.Zone = zone
+{{- end }}
+
+	// Use provider_meta to set User-Agent
+	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
+
+    obj := make(map[string]interface{})
+
+{{- range $prop := $.OrderProperties $.UpdateBodyProperties }}
+	if !plan.{{camelize $prop.Name "upper"}}.Equal(state.{{camelize $prop.Name "upper"}}) {
+	    {{$prop.ApiName}}Prop, diags := plan.{{camelize $prop.Name "upper"}}.To{{$prop.GetFWType}}Value(ctx)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+		obj["{{ $prop.ApiName -}}"] = {{ $prop.ApiName -}}Prop
+	}
+{{- end }}
+
+	{{/* TODO default timeouts */}}
+    updateTimeout, diags := data.Timeouts.Update(ctx, 20*time.Minute)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+    url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.CreateUri}}")
+    if resp.Diagnostics.HasError() {
+        return
+    }
+
+    log.Printf("[DEBUG] Updating {{ $.Name -}}: %#v", obj)
+
+    headers := make(http.Header)
+
+{{- if $.UpdateMask }}
+{{ $.CustomTemplate "templates/terraform/update_mask_fw.go.tmpl" false -}}
+{{  end}}
+
+{{- if $.CustomCode.PreUpdate }}
+    {{ $.CustomTemplate $.CustomCode.PreUpdate false -}}
+{{- end}}
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+        Config: r.providerConfig,
+        Method: "{{ upper $.UpdateVerb -}}",
+        Project: billingProject.ValueString(),
+        RawURL: url,
+        UserAgent: userAgent,
+        Body: obj,
+        Timeout: updateTimeout,
+        Headers: headers,
+{{- if $.ErrorRetryPredicates }}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{- if $.ErrorAbortPredicates }}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{- end}}
+    }, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+        return 
+    }
+
+{{if and ($.GetAsync) ($.GetAsync.Allow "update") -}}
+{{  if $.GetAsync.IsA "OpAsync" -}}
+	    err = {{ $.ClientNamePascal -}}OperationWaitTime(
+	        r.providerConfig, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project.ValueString()){{ else }}project.ValueString(){{ end }}, {{ end -}} "Updating {{ $.Name -}}", userAgent,
+	        updateTimeout)
+	    if err != nil {
+			resp.Diagnostics.AddError("Error, failure waiting to update {{ $.Name -}}", err.Error())
+			return
+	    }
+{{- else if $.GetAsync.IsA "PollAsync" -}}
+	    err = transport_tpg.PollingWaitTime(resource{{ $.ResourceName -}}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncExistence -}}, "Updating {{ $.Name -}}", d.Timeout(schema.TimeoutUpdate), {{ $.GetAsync.TargetOccurrences -}})
+	    if err != nil {
+{{-   if $.GetAsync.SuppressError -}}
+	        log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", data.Id.ValueString(), err)
+{{-   else -}}
+			resp.Diagnostics.AddError("Error, failure polling for update in {{ $.Name -}}", err.Error())
+			return
+{{-   end}}
+        }
+{{- end}}{{/* if $.GetAsync.IsA "OpAsync" */}}
+{{- end}}{{/* if and ($.GetAsync) ($.GetAsync.Allow "update") */}}
+
+	tflog.Trace(ctx, "updated {{$.Name}} resource")
+
+    // read back {{$.Name}}
+	r.{{$.ResourceName}}FWRefresh(ctx, &plan, &resp.State, req, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Save updated data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+}
+
+
+func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data {{$.ResourceName}}FWModel
+	var metaData *fwmodels.ProviderMetaModel
+    // Read Provider meta into the meta model
+	resp.Diagnostics.Append(req.ProviderMeta.Get(ctx, &metaData)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{- if $.ExcludeDelete }}
+    log.Printf("[WARNING] {{ $.ProductMetadata.Name }}{{" "}}{{ $.Name }} resources" +
+    " cannot be deleted from Google Cloud. The resource %s will be removed from Terraform" +
+    " state, but will still be present on Google Cloud.", data.Id.ValueString())
+    r.SetId("")
+
+    return nil
+{{- else }}
+
+    // Read Terraform prior state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var project, billingProject types.String
+{{ if $.HasProject -}}
+    project = fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{ if $.LegacyLongFormProject -}}
+    billingProject = strings.TrimPrefix(project, "projects/")
+{{      else -}}
+    billingProject = project
+{{- end }}
+{{- end }}
+{{ if $.HasRegion -}}
+	region := fwresource.GetRegionFramework(data.Region, types.StringValue(r.providerConfig.Region), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{- end }}
+{{ if $.HasZone -}}
+	zone := fwresource.GetZoneFramework(data.Zone, types.StringValue(r.providerConfig.Zone), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{- end }}
+
+	var schemaDefaultVals fwtransport.DefaultVars
+{{ if $.HasProject -}}
+	schemaDefaultVals.Project = project
+{{- end }}
+{{ if $.HasRegion -}}
+	schemaDefaultVals.Region = region
+{{- end }}
+{{ if $.HasZone -}}
+	schemaDefaultVals.Zone = zone
+{{- end }}
+
+	// Use provider_meta to set User-Agent
+	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
+
+	obj := make(map[string]interface{})
+
+    deleteTimeout, diags := data.Timeouts.Delete(ctx, 20*time.Minute)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+    url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.DeleteUri}}")
+    if resp.Diagnostics.HasError() {
+        return
+    }
+
+{{ if $.CustomCode.CustomDelete }} 
+{{ $.CustomTemplate $.CustomCode.CustomDelete false -}}
+{{- else }}
+    headers := make(http.Header)
+    {{- if $.CustomCode.PreDelete }} 
+        {{ $.CustomTemplate $.CustomCode.PreDelete false -}}
+    {{- end }}
+
+    log.Printf("[DEBUG] Deleting {{ $.Name }} %q", data.Id.ValueString())
+    _, _ := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+        Config: r.providerConfig,
+        Method: "{{ upper $.DeleteVerb -}}",
+        Project: billingProject.ValueString(),
+        RawURL: url,
+        UserAgent: userAgent,
+        Body: obj,
+        Timeout: deleteTimeout,
+        Headers: headers,
+{{- if $.ErrorRetryPredicates }}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{- if $.ErrorAbortPredicates }}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{- end}}
+    }, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		diags.AddError(fmt.Sprintf("Error deleting {{ $.Name -}}: %s", data.Id.ValueString()), err.Error())
+        return 
+    }
+{{if and $.GetAsync ($.GetAsync.Allow "Delete") -}}
+{{  if $.GetAsync.IsA "PollAsync" }}
+    err := transport_tpg.PollingWaitTime(resource{{ $.ResourceName }}PollRead(d, meta), {{ $.GetAsync.CheckResponseFuncAbsence }}, "Deleting {{ $.Name }}", d.Timeout(schema.TimeoutCreate), {{ $.Async.TargetOccurrences }})
+    if err != nil {
+{{-   if $.Async.SuppressError }}
+		log.Printf("[ERROR] Unable to confirm eventually consistent {{ $.Name -}} %q finished updating: %q", data.Id.ValueString(), err)
+{{-   else }}
+		resp.Diagnostics.AddError("Error, failure polling for delete in {{ $.Name -}}", err.Error())
+		return
+{{-   end }}
+    }
+{{- else }}
+    err := {{ $.ClientNamePascal }}OperationWaitTime(
+        r.providerConfig, res, {{if or $.HasProject $.GetAsync.IncludeProject -}} {{if $.LegacyLongFormProject -}}tpgresource.GetResourceNameFromSelfLink(project.ValueString()){{ else }}project.ValueString(){{ end }}, {{ end -}} "Deleting {{ $.Name -}}", userAgent,
+        deleteTimeout)
+
+    if err != nil {
+		resp.Diagnostics.AddError("Error, failure waiting to delete {{ $.Name -}}", err.Error())
+		return
+    }
+{{- end }}{{/* if $.GetAsync.IsA "PollAsync" */}}
+{{- end }}{{/* if and $.GetAsync ($.GetAsync.Allow "Delete") */}}
+
+{{- if $.CustomCode.PostDelete }}
+    {{ $.CustomTemplate $.CustomCode.PostDelete false -}}
+{{- end }}
+
+    log.Printf("[DEBUG] Finished deleting {{ $.Name }} %q: %#v", data.Id.ValueString(), res)
+
+
+{{- end }}{{/* if CustomCode.CustomDelete */}}
+{{- end }}{{/* if ExcludeDelete */}}
+}
+
+func (r *{{$.ResourceName}}FWResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.Context, data *{{$.ResourceName}}FWModel, state *tfsdk.State, req interface{}, diag *diag.Diagnostics) {
+	var metaData *fwmodels.ProviderMetaModel
+    //load default values
+{{ if $.HasProject -}}
+    project := fwresource.GetProjectFramework(data.Project, types.StringValue(r.providerConfig.Project), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{- end }}
+{{ if $.HasRegion -}}
+	region := fwresource.GetRegionFramework(data.Region, types.StringValue(r.providerConfig.Region), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{- end }}
+{{ if $.HasZone -}}
+	zone := fwresource.GetZoneFramework(data.Zone, types.StringValue(r.providerConfig.Zone), &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{- end }}
+
+	var schemaDefaultVals fwtransport.DefaultVars
+{{ if $.HasProject -}}
+	schemaDefaultVals.Project = project
+{{- end }}
+{{ if $.HasRegion -}}
+	schemaDefaultVals.Region = region
+{{- end }}
+{{ if $.HasZone -}}
+	schemaDefaultVals.Zone = zone
+{{- end }}
+
+	// Use provider_meta to set User-Agent
+	userAgent := fwtransport.GenerateFrameworkUserAgentString(metaData, r.providerConfig.UserAgent)
+
+	url := fwtransport.ReplaceVars(ctx, req, &resp.Diagnostics, schemaDefaultVals, r.providerConfig, "{{"{{"}}{{$.ProductMetadata.Name}}BasePath{{"}}"}}{{$.SelfLinkUri}}{{$.ReadQueryParams}}")
+    if resp.Diagnostics.HasError() {
+        return
+    }
+
+    log.Printf("[DEBUG] Refreshing {{ $.Name -}} data: %s", data.Id.ValueString())
+
+    headers := make(http.Header)
+{{- if $.CustomCode.PreRead }}
+    {{ $.CustomTemplate $.CustomCode.PreRead false -}}
+{{- end}}
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+        Config: r.providerConfig,
+        Method: "{{ upper $.ReadVerb -}}",
+        Project: billingProject.ValueString(),
+        RawURL: url,
+        UserAgent: userAgent,
+        Timeout: createTimeout,
+        Headers: headers,
+{{- if $.ErrorRetryPredicates }}
+        ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{  join $.ErrorRetryPredicates "," -}}{{"}"}},
+{{- end}}
+{{- if $.ErrorAbortPredicates }}
+        ErrorAbortPredicates: []transport_tpg.RetryErrorPredicateFunc{{"{"}}{{ join $.ErrorAbortPredicates "," -}}{{"}"}},
+{{- end}}
+    }, &resp.Diagnostics)
+	if resp.Diagnostics.HasError() {
+		fwtransport.HandleNotFoundError(ctx, err, &resp.State, fmt.Sprintf("{{ $.ResourceName }} %s", data.Id.ValueString()), &resp.Diagnostics)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+    }
+
+{{ range $prop := $.OrderProperties $.AllUserProperties }}
+	data.{{camelize $prop.Name "upper"}} = res["{{ $prop.ApiName -}}"]
+    {{$prop.ApiName}}Prop, diags := data.{{camelize $prop.Name "upper"}}.To{{$prop.GetFWType}}Value(ctx)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+{{ end }}
+
+	tflog.Trace(ctx, "refreshed {{$.Name}} resource data")
+
+
+}

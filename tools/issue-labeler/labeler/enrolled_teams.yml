@@ -7,6 +7,9 @@ service/accessapproval:
 service/accesscontextmanager:
   resources:
   - google_access_context_manager_.*
+service/aiplatform-agent-engine:
+  resources:
+  - google_vertex_ai_reasoning_engine
 service/aiplatform-colab-enterprise:
   resources:
   - google_colab_.*
