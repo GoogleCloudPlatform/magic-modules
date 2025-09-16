@@ -32,7 +32,7 @@ func calculateCrc32cHash(data []byte) string {
 	return encodedCrc32c
 }
 
-func TestAccStorageObject_basic_g(t *testing.T) {
+func TestAccStorageObject_basic(t *testing.T) {
 	t.Parallel()
 
 	bucketName := acctest.TestBucketName(t)
@@ -492,7 +492,7 @@ func TestResourceStorageBucketObjectUpdate_ContentChange(t *testing.T) {
 	})
 }
 
-func TestAccStorageObject_sourceMd5Hash_g(t *testing.T) {
+func TestAccStorageObject_sourceMd5Hash(t *testing.T) {
 	t.Parallel()
 
 	bucketName := acctest.TestBucketName(t)
@@ -531,8 +531,8 @@ func TestAccStorageObject_sourceMd5Hash_g(t *testing.T) {
 				Check:  testAccCheckGoogleStorageObjectCrc32cHash(t, bucketName, objectName, updatedDataCrc32c),
 			},
 			{
-				Config: testGoogleStorageBucketsObjectFileMd5(bucketName, testFile.Name(), "xyz=="),
-				Check:  testAccCheckGoogleStorageObjectCrc32cHash(t, bucketName, objectName, newCrc32c),
+				Config: testGoogleStorageBucketsObjectFileMd5(bucketName, testFile.Name(), newCrc32c),
+				Check:  testAccCheckGoogleStorageObjectCrc32cHash(t, bucketName, objectName, updatedDataCrc32c),
 			},
 		},
 	})
