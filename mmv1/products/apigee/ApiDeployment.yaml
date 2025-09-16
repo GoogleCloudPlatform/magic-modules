@@ -120,13 +120,10 @@ properties:
 examples:
   - name: 'apigee_api_deployment_basic'
     primary_resource_id: 'apigee_api_deployment'
-    vars:
-      proxy_id: 'example-proxy'
-      revision: 'example-revision'
-      environment: 'example-environment'
-      instance_name: 'example-instance'
+
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
     exclude_docs: true
     external_providers: ['time']
+    skip_vcr: true

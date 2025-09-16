@@ -1,8 +1,8 @@
 resource "google_project" "project" {
   project_id      = "tf-test%{random_suffix}"
   name            = "tf-test%{random_suffix}"
-  org_id          = "%{org_id}"
-  billing_account = "%{billing_account}"
+  org_id          = "{{index $.TestEnvVars "org_id"}}"
+  billing_account = "{{index $.TestEnvVars "billing_account"}}"
   deletion_policy = "DELETE"
 }
 
@@ -62,13 +62,13 @@ resource "google_apigee_organization" "apigee_org" {
 
 resource "google_apigee_environment" "apigee_environment" {
   org_id   = google_apigee_organization.apigee_org.id
-  name         = "tf-test%{random_suffix}"
+  name         = "test-env"
   description  = "Apigee Environment"
   display_name = "environment-1"
 }
 
 resource "google_apigee_api" "test_apigee_api" {
-  name            = "tf-test-apigee-api"
+  name            = "test-proxy"
   org_id          = google_project.project.project_id
   config_bundle   = "./test-fixtures/apigee_api_bundle.zip"
   depends_on      = [google_apigee_organization.apigee_org]
