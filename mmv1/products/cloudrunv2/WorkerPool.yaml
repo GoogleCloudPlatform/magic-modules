@@ -524,7 +524,6 @@ properties:
                       type: Integer
                     - name: 'service'
                       type: String
-
             - name: 'livenessProbe'
               type: NestedObject
               description: |-
