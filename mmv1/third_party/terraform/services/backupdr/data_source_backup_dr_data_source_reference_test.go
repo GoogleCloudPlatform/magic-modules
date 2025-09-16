@@ -46,7 +46,6 @@ func TestAccDataSourceGoogleBackupDRListDataSourceReferences_basic(t *testing.T)
 func testAccDataSourceGoogleBackupDRListDataSourceReferences_basic(context map[string]interface{}) string {
 	return acctest.Nprintf(`
 data "google_project" "project" {
-  provider = google-beta
 }
 
 resource "google_sql_database_instance" "instance" {
