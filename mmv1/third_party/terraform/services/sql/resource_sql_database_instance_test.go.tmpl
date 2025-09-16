@@ -6949,7 +6949,7 @@ resource "google_sql_database_instance" "instance" {
   region           = "us-central1"
 
   point_in_time_restore_context {
-    datasource      = "projects/689326109739/locations/us-central1/backupVaults/bv-test/dataSources/259162d2a0035f79a773f3d368dec93c8484c9b4"
+    datasource      = google_backup_dr_backup_plan_association.association.data_source
 	target_instance = "%{project}:tf-test-%{random_suffix}"
 	point_in_time   = timestamp()
   }
@@ -7069,7 +7069,7 @@ resource "google_sql_database_instance" "instance" {
   }
 
   point_in_time_restore_context {
-    datasource      = "projects/689326109739/locations/us-central1/backupVaults/bv-test/dataSources/259162d2a0035f79a773f3d368dec93c8484c9b4"
+    datasource      = google_backup_dr_backup_plan_association.association.data_source
 	target_instance = "%{project}:tf-test-%{random_suffix}"
 	point_in_time   = timestamp()
   }
