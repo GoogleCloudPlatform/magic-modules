@@ -90,32 +90,19 @@
 			if len(transformed) > 0 {
 				_, okEndpoint := d.GetOk("desired_auto_created_endpoints")
 				_, okPsc := d.GetOk("desired_psc_auto_connections")
-				hasConfigEndpoint := false
-				hasConfigPsc := false
-				configEndpointRaw, _ := d.GetRawConfigAt(cty.GetAttrPath("desired_auto_created_endpoints"))
-				configPscRaw, _ := d.GetRawConfigAt(cty.GetAttrPath("desired_psc_auto_connections"))
 
-				if !configEndpointRaw.IsNull() && configEndpointRaw.IsKnown() {
-					hasConfigEndpoint = len(configEndpointRaw.AsValueSlice()) > 0
-				}
-
-				if !configPscRaw.IsNull() && configEndpointRaw.IsKnown() {
-					hasConfigPsc = len(configEndpointRaw.AsValueSlice()) > 0
-				}
-
-				log.Printf("[DEBUG] hasConfigEndpoint value in rawconfig is  %#v", hasConfigPsc)
-				log.Printf("[DEBUG] hasConfigPsc value in rawconfig is %#v", hasConfigEndpoint)
-
-				if hasConfigEndpoint {
+				if okEndpoint {
 					d.Set("desired_auto_created_endpoints", transformed)
 					log.Printf("[DEBUG] Setting desired_auto_created_endpoints in decoder within endpoints for %#v", transformed)
-				} else if hasConfigPsc {
+					// log.Printf("[DEBUG] Value of EndpointRawValue %#v", EndpointRawValue)
+				} else if okPsc {
 					d.Set("desired_auto_created_endpoints", []interface{}{})
 				}
-				if hasConfigPsc {
+				if okPsc {
 					d.Set("desired_psc_auto_connections", transformed)
 					log.Printf("[DEBUG] Setting desired_psc_auto_connections in decoder within endpoints for %#v", transformed)
-				} else if hasConfigEndpoint {
+					// log.Printf("[DEBUG] Value of PscRawValue %#v", PscRawValue)
+				} else if okEndpoint {
 					d.Set("desired_psc_auto_connections", []interface{}{})
 				}
 				// Set preferred field on import
