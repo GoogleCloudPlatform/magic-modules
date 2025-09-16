@@ -17,8 +17,9 @@ func DataSourceGoogleCloudBuildTrigger() *schema.Resource {
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
-		Read:   dataSourceGoogleCloudBuildTriggerRead,
-		Schema: dsSchema,
+		Read:     dataSourceGoogleCloudBuildTriggerRead,
+		Schema:   dsSchema,
+		Identity: ResourceCloudBuildTrigger().Identity,
 	}
 
 }
