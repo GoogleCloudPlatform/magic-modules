@@ -159,7 +159,7 @@ properties:
       The supported values: 'APP_TYPE_UNSPECIFIED', 'APP_TYPE_INTRANET'.
     immutable: true
   - name: 'features'
-    type: 
+    type: Map
     description: |
       A map of the feature config for the engine to opt in or opt out of features.
     required: false
@@ -172,4 +172,4 @@ properties:
       enum_values:
         - 'FEATURE_STATE_UNSPECIFIED'
         - 'FEATURE_STATE_ON'
-        - 'FEATURE_STATE_OFF' 
+        - 'FEATURE_STATE_OFF'
