@@ -67,6 +67,13 @@ examples:
       display_name: 'my-salesforce-config'
       dataset_id: 'my_dataset'
     exclude_test: true
+  - name: bigquerydatatransfer_config_pub_sub
+    primary_resource_id: 'query_config'
+    vars:
+      display_name: 'my-query'
+      dataset_id: 'my_dataset'
+      topic_name: 'my_dataset_topic'
+      subscription_name: 'my_dataset_topic_subscription'
 parameters:
   - name: 'location'
     type: String
