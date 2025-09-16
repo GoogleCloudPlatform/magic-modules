@@ -32,11 +32,11 @@ references:
 # URL for the resource's standard List method. https://google.aip.dev/132
 # Terraform field names enclosed in double curly braces are replaced with
 # the field values from the resource at runtime.
-base_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/deployments'
+base_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
 # URL for the resource's standard Get method. https://google.aip.dev/131
 # Terraform field names enclosed in double curly braces are replaced with
 # the field values from the resource at runtime.
-self_link: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/deployments'
+self_link: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
 
 import_format:
   - 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
@@ -53,7 +53,7 @@ immutable: true
 # https://google.aip.dev/133
 # Terraform field names enclosed in double curly braces are replaced with
 # the field values from the resource at runtime.
-create_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/deployments'
+create_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
 
 # Overrides the URL for the resource's standard Update method. (If unset, the
 # self_link URL is used by default.) https://google.aip.dev/134
@@ -124,6 +124,9 @@ examples:
       proxy_id: 'example-proxy'
       revision: 'example-revision'
       environment: 'example-environment'
-      org_id: 'example-org'
+      instance_name: 'example-instance'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
     exclude_docs: true
     external_providers: ['time']
