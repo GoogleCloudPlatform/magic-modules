@@ -903,6 +903,24 @@ func TestAccNetappStoragePool_ManualQos(t *testing.T) {
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
 			},
+            {
+				Config: testAccNetappStoragePool_PODefaultQos(context),
+			},
+			{
+				ResourceName:            "google_netapp_volume.test_volume",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
+			},
+            {
+				Config: testAccNetappStoragePool_FlexDefaultQos(context),
+			},
+			{
+				ResourceName:            "google_netapp_volume.test_volume",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
+			},
 		},
 	})
 }
@@ -963,6 +981,41 @@ resource "google_netapp_volume" "test_volume" {
     storage_pool = google_netapp_storage_pool.test_pool.name
     protocols = ["NFSV3"]
     throughput_mibps = 12.5
+}
+
+data "google_compute_network" "default" {
+    name = "%{network_name}"
+}
+`, context)
+}
+
+// Configuration for PO pool with no qos_type
+func testAccNetappStoragePool_PODefaultQos(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_netapp_storage_pool" "test_pool_po_default" {
+  name          = "tf-test-po-default-%{random_suffix}"
+  location      = "us-east4"
+  service_level = "EXTREME"
+  capacity_gib  = "2048"
+  network       = data.google_compute_network.default.id
+}
+
+data "google_compute_network" "default" {
+    name = "%{network_name}"
+}
+`, context)
+}
+
+// Configuration for FLEX pool with no qos_type
+func testAccNetappStoragePool_FlexDefaultQos(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_netapp_storage_pool" "test_pool_flex_default" {
+  name          = "tf-test-flex-default-%{random_suffix}"
+  location      = "us-east4"
+  service_level = "FLEX"
+  capacity_gib  = "2048"
+  network       = data.google_compute_network.default.id
+  zone          = "us-east4-a"
 }
 
 data "google_compute_network" "default" {
