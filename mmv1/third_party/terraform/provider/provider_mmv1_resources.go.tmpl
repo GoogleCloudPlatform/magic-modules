@@ -452,6 +452,9 @@ var handwrittenResources = map[string]*schema.Resource{
 	"google_storage_default_object_acl":            storage.ResourceStorageDefaultObjectAcl(),
 	"google_storage_transfer_job":                  storagetransfer.ResourceStorageTransferJob(),
 	"google_tags_location_tag_binding":             tags.ResourceTagsLocationTagBinding(),
+	{{- if ne $.TargetVersionName "ga" }}
+	"google_tags_tag_binding_collection":   		tags.ResourceTagsTagBindingCollection(),
+	{{- end }}
 	// ####### END handwritten resources ###########
 }
 

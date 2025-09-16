@@ -1,0 +1,364 @@
+{{- if ne $.TargetVersionName "ga" }}
+
+package tags_test
+
+import (
+	"context"
+	"fmt"
+	"regexp"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/acctest"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/envvar"
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/services/tags"
+)
+
+// Acceptance Tests
+func TestAccTagsTagBindingCollection_basic(t *testing.T) {
+	t.Parallel()
+
+	orgId := envvar.GetTestOrgFromEnv(t)
+	context := map[string]interface{}{
+		"org_id":                         orgId,
+		"cc_key_short_name":              "tf-test-cc-" + acctest.RandString(t, 6),
+		"cc_marketing_value_short_name":  "tf-test-mkt-" + acctest.RandString(t, 6),
+		"cc_finance_value_short_name":    "tf-test-fin-" + acctest.RandString(t, 6),
+		"env_key_short_name":             "tf-test-env-" + acctest.RandString(t, 6),
+		"env_prod_value_short_name":      "tf-test-prod-" + acctest.RandString(t, 6),
+		"new_key_short_name":             "tf-test-new-" + acctest.RandString(t, 6),
+		"new_value_short_name":           "tf-test-newval-" + acctest.RandString(t, 6),
+		"project_id":                     "tf-test-" + acctest.RandString(t, 10),
+	}
+
+	// Expected namespaced keys
+	envKeyNamespaced := fmt.Sprintf("%s/%s", orgId, context["env_key_short_name"])
+	ccKeyNamespaced := fmt.Sprintf("%s/%s", orgId, context["cc_key_short_name"])
+	newKeyNamespaced := fmt.Sprintf("%s/%s", orgId, context["new_key_short_name"])
+
+	acctest.VcrTest(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
+		ProtoV5ProviderFactories: acctest.ProtoV5ProviderBetaFactories(t),
+		Steps: []resource.TestStep{
+			// Step 1: Create with initial set of tags
+			{
+				Config: testAccTagsTagBindingCollection_basic(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", "tags.%", "2"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", "active_tags.%", "2"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", fmt.Sprintf("tags.%s", envKeyNamespaced), context["env_prod_value_short_name"].(string)),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", fmt.Sprintf("tags.%s", ccKeyNamespaced), context["cc_marketing_value_short_name"].(string)),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", fmt.Sprintf("active_tags.%s", envKeyNamespaced), context["env_prod_value_short_name"].(string)),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", fmt.Sprintf("active_tags.%s", ccKeyNamespaced), context["cc_marketing_value_short_name"].(string)),
+					resource.TestMatchResourceAttr("google_tags_tag_binding_collection.basic", "id", regexp.MustCompile(fmt.Sprintf("locations/global/tagBindingCollections/.+"))),
+					resource.TestMatchResourceAttr("google_tags_tag_binding_collection.basic", "name", regexp.MustCompile(fmt.Sprintf("locations/global/tagBindingCollections/.+"))),
+				),
+			},
+			// Step 2: Import
+			{
+				ResourceName:            "google_tags_tag_binding_collection.basic",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"location"}, // location defaults to global
+			},
+			// Step 3: Update - modify one tag, remove one tag, add one tag
+			{
+				Config: testAccTagsTagBindingCollection_update(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", "tags.%", "2"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", "active_tags.%", "2"),
+					// env_key was removed from config, should be gone
+					resource.TestCheckNoResourceAttr("google_tags_tag_binding_collection.basic", fmt.Sprintf("tags.%s", envKeyNamespaced)),
+					// cc_key value changed
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", fmt.Sprintf("tags.%s", ccKeyNamespaced), context["cc_finance_value_short_name"].(string)),
+					// new_key was added
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", fmt.Sprintf("tags.%s", newKeyNamespaced), context["new_value_short_name"].(string)),
+					// Check active_tags
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", fmt.Sprintf("active_tags.%s", ccKeyNamespaced), context["cc_finance_value_short_name"].(string)),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", fmt.Sprintf("active_tags.%s", newKeyNamespaced), context["new_value_short_name"].(string)),
+				),
+			},
+			// Step 4: Empty - Remove all Terraform-managed tags
+			{
+				Config: testAccTagsTagBindingCollection_empty(context),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", "tags.%", "0"),
+					resource.TestCheckResourceAttr("google_tags_tag_binding_collection.basic", "active_tags.%", "0"),
+				),
+			},
+		},
+	})
+}
+
+func testAccTagsTagBindingCollection_basic(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+  project_id = "%{project_id}"
+  name       = "%{project_id}"
+  org_id     = "%{org_id}"
+  billing_account = acctest.GetBillingAccountFromEnv(t)
+}
+
+resource "google_tags_tag_key" "env_key" {
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{env_key_short_name}"
+}
+resource "google_tags_tag_value" "env_prod_value" {
+  parent      = google_tags_tag_key.env_key.id
+  short_name  = "%{env_prod_value_short_name}"
+}
+
+resource "google_tags_tag_key" "cost_center_key" {
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{cc_key_short_name}"
+}
+resource "google_tags_tag_value" "cc_marketing_value" {
+  parent      = google_tags_tag_key.cost_center_key.id
+  short_name  = "%{cc_marketing_value_short_name}"
+}
+
+# Resources for update test
+resource "google_tags_tag_value" "cc_finance_value" {
+  parent      = google_tags_tag_key.cost_center_key.id
+  short_name  = "%{cc_finance_value_short_name}"
+}
+resource "google_tags_tag_key" "new_key" {
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{new_key_short_name}"
+}
+resource "google_tags_tag_value" "new_value" {
+  parent      = google_tags_tag_key.new_key.id
+  short_name  = "%{new_value_short_name}"
+}
+
+resource "google_tags_tag_binding_collection" "basic" {
+  full_resource_name    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+  location  = "global"
+  tags      = {
+    "${google_tags_tag_key.env_key.namespaced_name}"        = google_tags_tag_value.env_prod_value.short_name
+    "${google_tags_tag_key.cost_center_key.namespaced_name}" = google_tags_tag_value.cc_marketing_value.short_name
+  }
+
+  depends_on = [
+    google_tags_tag_value.env_prod_value,
+    google_tags_tag_value.cc_marketing_value,
+    google_tags_tag_value.cc_finance_value,
+    google_tags_tag_value.new_value,
+  ]
+}
+`, context)
+}
+
+func testAccTagsTagBindingCollection_update(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+  project_id = "%{project_id}"
+  name       = "%{project_id}"
+  org_id     = "%{org_id}"
+  billing_account = acctest.GetBillingAccountFromEnv(t)
+}
+
+resource "google_tags_tag_key" "env_key" {
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{env_key_short_name}"
+}
+resource "google_tags_tag_value" "env_prod_value" {
+  parent      = google_tags_tag_key.env_key.id
+  short_name  = "%{env_prod_value_short_name}"
+}
+
+resource "google_tags_tag_key" "cost_center_key" {
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{cc_key_short_name}"
+}
+resource "google_tags_tag_value" "cc_marketing_value" {
+  parent      = google_tags_tag_key.cost_center_key.id
+  short_name  = "%{cc_marketing_value_short_name}"
+}
+resource "google_tags_tag_value" "cc_finance_value" {
+  parent      = google_tags_tag_key.cost_center_key.id
+  short_name  = "%{cc_finance_value_short_name}"
+}
+
+resource "google_tags_tag_key" "new_key" {
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{new_key_short_name}"
+}
+resource "google_tags_tag_value" "new_value" {
+  parent      = google_tags_tag_key.new_key.id
+  short_name  = "%{new_value_short_name}"
+}
+
+resource "google_tags_tag_binding_collection" "basic" {
+  full_resource_name    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+  location  = "global"
+  tags      = {
+    // env_key removed
+    "${google_tags_tag_key.cost_center_key.namespaced_name}" = google_tags_tag_value.cc_finance_value.short_name # Changed value
+    "${google_tags_tag_key.new_key.namespaced_name}"         = google_tags_tag_value.new_value.short_name        # Added tag
+  }
+
+  depends_on = [
+    google_tags_tag_value.env_prod_value,
+    google_tags_tag_value.cc_marketing_value,
+    google_tags_tag_value.cc_finance_value,
+    google_tags_tag_value.new_value,
+  ]
+}
+`, context)
+}
+
+func testAccTagsTagBindingCollection_empty(context map[string]interface{}) string {
+	return acctest.Nprintf(`
+resource "google_project" "project" {
+  project_id = "%{project_id}"
+  name       = "%{project_id}"
+  org_id     = "%{org_id}"
+  billing_account = acctest.GetBillingAccountFromEnv(t)
+}
+
+resource "google_tags_tag_key" "env_key" {
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{env_key_short_name}"
+}
+resource "google_tags_tag_value" "env_prod_value" {
+  parent      = google_tags_tag_key.env_key.id
+  short_name  = "%{env_prod_value_short_name}"
+}
+
+resource "google_tags_tag_key" "cost_center_key" {
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{cc_key_short_name}"
+}
+resource "google_tags_tag_value" "cc_marketing_value" {
+  parent      = google_tags_tag_key.cost_center_key.id
+  short_name  = "%{cc_marketing_value_short_name}"
+}
+resource "google_tags_tag_value" "cc_finance_value" {
+  parent      = google_tags_tag_key.cost_center_key.id
+  short_name  = "%{cc_finance_value_short_name}"
+}
+
+resource "google_tags_tag_key" "new_key" {
+  parent      = "organizations/%{org_id}"
+  short_name  = "%{new_key_short_name}"
+}
+resource "google_tags_tag_value" "new_value" {
+  parent      = google_tags_tag_key.new_key.id
+  short_name  = "%{new_value_short_name}"
+}
+
+resource "google_tags_tag_binding_collection" "basic" {
+  full_resource_name    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+  location  = "global"
+  tags      = {} # Empty map
+
+  depends_on = [
+    google_tags_tag_value.env_prod_value,
+    google_tags_tag_value.cc_marketing_value,
+    google_tags_tag_value.cc_finance_value,
+    google_tags_tag_value.new_value,
+  ]
+}
+`, context)
+}
+
+// Unit Tests
+
+func TestResourceTagsTagBindingCollectionImport(t *testing.T) {
+	// This test function is defined in the package 'tags', so we can call the function directly.
+	importer := tags.ResourceTagsTagBindingCollection().Importer
+	if importer == nil || importer.StateContext == nil {
+		t.Fatalf("Importer not configured for google_tags_tag_binding_collection")
+	}
+	StateContext := importer.StateContext
+
+	cases := []struct {
+		Name          string
+		ImportID      string
+		ExpectedID    string
+		ExpectedLoc   string
+		ExpectedResourceName  string
+		ExpectError   bool
+	}{
+		{
+			Name:          "StandardImportProject",
+			ImportID:      "locations/global/tagBindingCollections/%2F%2Fcloudresourcemanager.googleapis.com%2Fprojects%2F123",
+			ExpectedID:    "locations/global/tagBindingCollections/%2F%2Fcloudresourcemanager.googleapis.com%2Fprojects%2F123",
+			ExpectedLoc:   "global",
+			ExpectedResourceName:  "//cloudresourcemanager.googleapis.com/projects/123",
+			ExpectError:   false,
+		},
+		{
+			Name:          "RegionalImportFolder",
+			ImportID:      "locations/us-central1/tagBindingCollections/%2F%2Fcloudresourcemanager.googleapis.com%2Ffolders%2F456",
+			ExpectedID:    "locations/us-central1/tagBindingCollections/%2F%2Fcloudresourcemanager.googleapis.com%2Ffolders%2F456",
+			ExpectedLoc:   "us-central1",
+			ExpectedResourceName:  "//cloudresourcemanager.googleapis.com/folders/456",
+			ExpectError:   false,
+		},
+		{
+			Name:         "InvalidFormatMissingLocationPrefix",
+			ImportID:     "global/tagBindingCollections/%2F%2Fcloudresourcemanager.googleapis.com%2Fprojects%2F123",
+			ExpectError:  true,
+		},
+		{
+			Name:         "InvalidFormatMissingCollectionKeyword",
+			ImportID:     "locations/global/%2F%2Fcloudresourcemanager.googleapis.com%2Fprojects%2F123",
+			ExpectError:  true,
+		},
+		{
+			Name:         "InvalidEncodedResourceName",
+			ImportID:     "locations/global/tagBindingCollections/%invalid",
+			ExpectError:  true,
+		},
+		{
+			Name:         "EmptyResourceName",
+			ImportID:     "locations/global/tagBindingCollections/",
+			ExpectError:  true,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.Name, func(t *testing.T) {
+			d := schema.TestResourceDataRaw(t, tags.ResourceTagsTagBindingCollection().Schema, nil)
+			d.SetId(tc.ImportID)
+
+			newData, err := StateContext(context.Background(), d, nil)
+
+			if tc.ExpectError {
+				if err == nil {
+					t.Errorf("Expected error but got none")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
+			if len(newData) != 1 {
+				t.Fatalf("Expected 1 ResourceData to be returned, got %d", len(newData))
+			}
+
+			data := newData[0]
+			if data.Id() != tc.ExpectedID {
+				t.Errorf("Expected ID %q, got %q", tc.ExpectedID, data.Id())
+			}
+			if got := data.Get("location").(string); got != tc.ExpectedLoc {
+				t.Errorf("Expected location %q, got %q", tc.ExpectedLoc, got)
+			}
+			if got := data.Get("full_resource_name").(string); got != tc.ExpectedResourceName {
+				t.Errorf("Expected full_resource_name %q, got %q", tc.ExpectedResourceName, got)
+			}
+		})
+	}
+}
+
+// TODO: Add more unit tests for Upsert logic, mocking API calls.
+// func TestResourceTagsTagBindingCollectionUpsert_MergeLogic(t *testing.T) { ... }
+
+
+
+
+{{- end }}

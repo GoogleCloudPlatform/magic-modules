@@ -1,0 +1,346 @@
+{{- if ne $.TargetVersionName "ga" }}
+
+package tags
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"net/http"
+	"net/url"
+	"strings"
+	"time"
+
+	dcl "github.com/GoogleCloudPlatform/declarative-resource-client-library/dcl"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/hashicorp/terraform-provider-google-beta/google-beta/tpgresource"
+	transport_tpg "github.com/hashicorp/terraform-provider-google-beta/google-beta/transport"
+)
+
+func ResourceTagsTagBindingCollection() *schema.Resource {
+	return &schema.Resource{
+		CreateContext: resourceTagsTagBindingCollectionUpsert, // Use Upsert
+		ReadContext:   resourceTagsTagBindingCollectionRead,
+		UpdateContext: resourceTagsTagBindingCollectionUpsert, // Use Upsert
+		DeleteContext: resourceTagsTagBindingCollectionDelete,
+
+		Importer: &schema.ResourceImporter{
+			StateContext: resourceTagsTagBindingCollectionImport,
+		},
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(20 * time.Minute),
+			Update: schema.DefaultTimeout(20 * time.Minute),
+			Delete: schema.DefaultTimeout(0 * time.Minute),
+		},
+
+		Schema: map[string]*schema.Schema{
+			"location": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: `The location of the TagBindingCollection. Defaults to 'global'.`,
+				Default:     "global",
+			},
+			"full_resource_name": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: `The full resource name of the resource to which the tags are bound. E.g. //cloudresourcemanager.googleapis.com/projects/123`,
+			},
+			"tags": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Description: `A map of tag keys to values directly bound to this resource, specified in namespaced format.
+For example:
+  "123/environment": "production"
+This field is non-authoritative. Terraform will only manage the tags present in this map.`,
+				Elem: &schema.Schema{Type: schema.TypeString},
+			},
+			"active_tags": {
+				Type:     schema.TypeMap,
+				Computed: true,
+				Description: `(Output) The most recent state of all direct tags on the resource, as reported by the API.`,
+				Elem: &schema.Schema{Type: schema.TypeString},
+			},
+			"name": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: `The name of the TagBindingCollection, in the format:
+locations/{location}/tagBindingCollections/{encoded_full_resource_name}`,
+			},
+		},
+		UseJSONNumber: true,
+	}
+}
+
+// Custom Read Function - Essential for non-authoritative sync
+func resourceTagsTagBindingCollectionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	resourceName := d.Get("full_resource_name").(string)
+	encodedResourceName := url.PathEscape(resourceName)
+	location := d.Get("location").(string)
+	if location == "" {
+		location = "global"
+	}
+
+	rawUrl := fmt.Sprintf("%slocations/%s/tagBindingCollections/%s", config.TagsBasePath, location, encodedResourceName)
+
+	billingProject := ""
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	headers := make(http.Header)
+
+	log.Printf("[DEBUG] Reading TagBindingCollection with URL %s", rawUrl)
+	res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		Project:   billingProject,
+		RawURL:    rawUrl,
+		UserAgent: userAgent,
+		Headers:   headers,
+	})
+	if err != nil {
+		return diag.FromErr(transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("TagBindingCollection %q", d.Id())))
+	}
+
+	if err := d.Set("location", location); err != nil {
+		return diag.Errorf("error setting location: %s", err)
+	}
+	if err := d.Set("full_resource_name", resourceName); err != nil {
+		return diag.Errorf("error setting full_resource_name: %s", err)
+	}
+	if err := d.Set("name", res["name"]); err != nil {
+		return diag.Errorf("error setting name: %s", err)
+	}
+
+	apiTags := flattenTagsTagBindingCollectionTags(res["tags"], d, config)
+	if err := d.Set("active_tags", apiTags); err != nil {
+		return diag.Errorf("error setting active_tags: %s", err)
+	}
+	if err := d.Set("tags", apiTags); err != nil {
+		return diag.Errorf("error setting tags: %s", err)
+	}
+
+	return nil
+}
+
+// Custom Upsert Function for Create and Update
+func resourceTagsTagBindingCollectionUpsert(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	config := meta.(*transport_tpg.Config)
+	userAgent, err := tpgresource.GenerateUserAgentString(d, config.UserAgent)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	resourceName := d.Get("full_resource_name").(string)
+	encodedResourceName := url.PathEscape(resourceName)
+	location := d.Get("location").(string)
+	if location == "" {
+		location = "global"
+		d.Set("location", location) // Ensure location is set in state
+	}
+
+	// Step 1: Read current state
+	headers := make(http.Header)
+	readUrl := fmt.Sprintf("%slocations/%s/tagBindingCollections/%s", config.TagsBasePath, location, encodedResourceName)
+	currentRes, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "GET",
+		RawURL:    readUrl,
+		UserAgent: userAgent,
+		Headers:   headers,
+	})
+
+	currentEtag := ""
+	currentTags := make(map[string]string)
+
+	if err == nil {
+		var ok bool
+		currentEtag, ok = currentRes["etag"].(string)
+		if !ok {
+			// This case should ideally not happen if the GET is successful
+			log.Printf("[WARN] Etag not found in GET response for %s", resourceName)
+		}
+		currentApiTags := flattenTagsTagBindingCollectionTags(currentRes["tags"], d, config)
+		if currentApiTags != nil {
+			currentTagsIFace, ok := currentApiTags.(map[string]interface{})
+			if !ok {
+				return diag.Errorf("API returned 'tags' in an unexpected format: %T", currentApiTags)
+			}
+			var convErr error
+			currentTags, convErr = convertToStringMap(currentTagsIFace)
+			if convErr != nil {
+				return diag.Errorf("Error converting current API tags: %s", convErr)
+			}
+		}
+	} else if !dcl.IsNotFound(err) {
+		return diag.Errorf("Error reading current state for upsert: %s", err)
+	} else {
+		// Etag remains empty, currentTags remains empty
+		log.Printf("[DEBUG] TagBindingCollection not found for %s during upsert, will create.", resourceName)
+	}
+
+	// Step 2: Modify
+	obj := make(map[string]interface{})
+	obj["full_resource_name"] = resourceName
+	if currentEtag != "" {
+		obj["etag"] = currentEtag
+	}
+
+	configuredTagsIFace := d.Get("tags")
+	configuredTagsMapIFace, ok := configuredTagsIFace.(map[string]interface{})
+	if !ok && configuredTagsIFace != nil {
+		return diag.Errorf("Configured 'tags' is not a map: %T", configuredTagsIFace)
+	}
+	configuredTags, convErr := convertToStringMap(configuredTagsMapIFace)
+	if convErr != nil {
+		return diag.Errorf("Error converting configured tags: %s", convErr)
+	}
+
+	mergedTags := make(map[string]interface{})
+	for k, v := range currentTags {
+		mergedTags[k] = v
+	}
+	for k, v := range configuredTags {
+		mergedTags[k] = v
+	}
+
+	oldTags := make(map[string]string)
+	oldTagsIFace, _ := d.GetChange("tags")
+	oldTagsMapIFace, ok := oldTagsIFace.(map[string]interface{})
+	if !ok && oldTagsIFace != nil {
+		return diag.Errorf("Old 'tags' value is not a map: %T", oldTagsIFace)
+	}
+	oldTags, convErr = convertToStringMap(oldTagsMapIFace)
+	if convErr != nil {
+		return diag.Errorf("Error converting old tags: %s", convErr)
+	}
+
+	for k := range oldTags {
+		if _, existsInNewConfig := configuredTags[k]; !existsInNewConfig {
+			delete(mergedTags, k)
+		}
+	}
+	obj["tags"] = mergedTags
+
+	// Step 3: Write
+	patchUrl := fmt.Sprintf("%slocations/%s/tagBindingCollections/%s", config.TagsBasePath, location, encodedResourceName)
+	patchUrl, err = transport_tpg.AddQueryParams(patchUrl, map[string]string{"updateMask": "*"})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	billingProject := ""
+	if bp, err := tpgresource.GetBillingProject(d, config); err == nil {
+		billingProject = bp
+	}
+
+	timeout := d.Timeout(schema.TimeoutUpdate)
+	if d.IsNewResource() {
+		timeout = d.Timeout(schema.TimeoutCreate)
+	}
+
+	log.Printf("[DEBUG] Upserting TagBindingCollection with URL %s: %#v", patchUrl, obj)
+	// SendRequest for PATCH returns the initial LRO object
+	initialOp, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
+		Config:    config,
+		Method:    "PATCH",
+		Project:   billingProject,
+		RawURL:    patchUrl,
+		UserAgent: userAgent,
+		Body:      obj,
+		Timeout:   timeout,
+		Headers:   headers,
+	})
+
+	if err != nil {
+		return diag.Errorf("Error upserting TagBindingCollection %q: %s", d.Id(), err)
+	}
+
+	err = TagsOperationWaitTime(
+		config, initialOp, "Upserting TagBindingCollection", userAgent,
+		timeout)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if d.IsNewResource() {
+		d.SetId(fmt.Sprintf("locations/%s/tagBindingCollections/%s", location, encodedResourceName))
+	}
+
+	return resourceTagsTagBindingCollectionRead(ctx, d, meta)
+}
+
+func resourceTagsTagBindingCollectionDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	log.Printf("[WARNING] Tag bindings in TagBindingCollection resource cannot be"+
+		" deleted from Google Cloud. The tag bindings %s will be removed from Terraform"+
+		" state, but will still be present on Google Cloud.", d.Id())
+	d.SetId("")
+
+	return nil
+}
+
+func resourceTagsTagBindingCollectionImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	// Import ID format: locations/{location}/tagBindingCollections/{encoded_full_resource_name}
+	// The {encoded_full_resource_name} part is a encoded full resource name.
+	id := d.Id()
+    parts := strings.SplitN(id, "/", 4)
+    if len(parts) != 4 || parts[0] != "locations" || parts[2] != "tagBindingCollections" {
+        return nil, fmt.Errorf("invalid import ID: %s. Expected format: locations/{location}/tagBindingCollections/{encoded_full_resource_name}", id)
+    }
+
+	location := parts[1]
+    encodedResourceName := parts[3]
+
+	if location == "" || encodedResourceName == "" {
+         return nil, fmt.Errorf("invalid import ID: %s. Location and encoded_full_resource_name cannot be empty", id)
+    }
+
+    resourceName, err := url.PathUnescape(encodedResourceName)
+    if err != nil {
+        return nil, fmt.Errorf("error decoding full_resource_name from import ID %q: %s", encodedResourceName, err)
+    }
+
+	if err := d.Set("location", location); err != nil {
+        return nil, err
+    }
+    if err := d.Set("full_resource_name", resourceName); err != nil {
+        return nil, err
+    }
+
+	// The ID is already in the desired format, so no need to d.SetId(id) again
+    return []*schema.ResourceData{d}, nil
+}
+
+func expandTagsTagBindingCollectionTags(v interface{}, d tpgresource.TerraformResourceData, config *transport_tpg.Config) (interface{}, error) {
+	return v, nil
+}
+
+func flattenTagsTagBindingCollectionTags(v interface{}, d *schema.ResourceData, config *transport_tpg.Config) interface{} {
+	return v
+}
+
+// convertToStringMap safely converts a map[string]interface{} to map[string]string.
+// It returns an error if any value in the map is not a string.
+func convertToStringMap(in map[string]interface{}) (map[string]string, error) {
+	out := make(map[string]string)
+	for k, v := range in {
+		s, ok := v.(string)
+		if !ok {
+			return nil, fmt.Errorf("value for key %q is not a string (got %T)", k, v)
+		}
+		out[k] = s
+	}
+	return out, nil
+}
+
+{{- end }}

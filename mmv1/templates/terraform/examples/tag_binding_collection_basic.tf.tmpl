@@ -1,0 +1,50 @@
+resource "google_project" "project" {
+  project_id = "{{index $.Vars "project_id"}}"
+  name       = "{{index $.Vars "project_id"}}"
+  org_id     = "{{index $.TestEnvVars "org_id"}}"
+
+  deletion_policy = "DELETE"
+}
+
+# Define TagKey 1
+resource "google_tags_tag_key" "env_key" {
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  short_name  = "{{index $.Vars "env_key_short_name"}}"
+  description = "Environment key for testing"
+}
+
+# Define TagValue for Key 1
+resource "google_tags_tag_value" "env_prod_value" {
+  parent      = google_tags_tag_key.env_key.id
+  short_name  = "{{index $.Vars "env_prod_value_short_name"}}"
+  description = "Production environment value"
+}
+
+# Define TagKey 2
+resource "google_tags_tag_key" "cost_center_key" {
+  parent      = "organizations/{{index $.TestEnvVars "org_id"}}"
+  short_name  = "{{index $.Vars "cc_key_short_name"}}"
+  description = "Cost center key for testing"
+}
+
+# Define TagValue for Key 2
+resource "google_tags_tag_value" "cc_marketing_value" {
+  parent      = google_tags_tag_key.cost_center_key.id
+  short_name  = "{{index $.Vars "cc_marketing_value_short_name"}}"
+  description = "Marketing cost center value"
+}
+
+resource "google_tags_tag_binding_collection" "{{$.PrimaryResourceId}}" {
+  parent    = "//cloudresourcemanager.googleapis.com/projects/${google_project.project.number}"
+  location  = "{{index $.Vars "location"}}"
+  tags      = {
+    # Format: "{TagKey.namespaced_name}" = "{TagValue.short_name}"
+    "${google_tags_tag_key.env_key.namespaced_name}"        = google_tags_tag_value.env_prod_value.short_name
+    "${google_tags_tag_key.cost_center_key.namespaced_name}" = google_tags_tag_value.cc_marketing_value.short_name
+  }
+
+  depends_on = [
+    google_tags_tag_value.env_prod_value,
+    google_tags_tag_value.cc_marketing_value,
+  ]
+}
