@@ -1,45 +1,6 @@
-resource "google_cloud_run_v2_worker_pool" "{{$.PrimaryResourceId}}" {
-  name         = "{{index $.Vars "cloud_run_worker_pool_name"}}"
-  location     = "us-central1"
-  launch_stage = "BETA"
-
-  template {
-    containers {
-      image = "us-docker.pkg.dev/cloudrun/container/hello"
-
-      startup_probe {
-        initial_delay_seconds = 0
-        timeout_seconds       = 1
-        period_seconds        = 3
-        failure_threshold     = 1
-        tcp_socket {
-          port = 8080
-        }
-      }
-
-      liveness_probe {
-        http_get {
-          path = "/"
-        }
-      }
-    }
-
-    vpc_access {
-      connector = google_vpc_access_connector.connector.id
-      egress    = "ALL_TRAFFIC"
-    }
-  }
-}
-
-resource "google_vpc_access_connector" "connector" {
-  name          = "{{index $.Vars "vpc_access_connector_name"}}"
-  subnet {
-    name = google_compute_subnetwork.custom_test.name
-  }
-  machine_type  = "e2-standard-4"
-  min_instances = 2
-  max_instances = 3
-  region        = "us-central1"
+resource "google_compute_network" "custom_test" {
+  name                    = "{{index $.Vars "compute_network_name"}}"
+  auto_create_subnetworks = false
 }
 
 resource "google_compute_subnetwork" "custom_test" {
@@ -49,7 +10,53 @@ resource "google_compute_subnetwork" "custom_test" {
   network       = google_compute_network.custom_test.id
 }
 
-resource "google_compute_network" "custom_test" {
-  name                    = "{{index $.Vars "compute_network_name"}}"
-  auto_create_subnetworks = false
+resource "google_cloud_run_v2_worker_pool" "default" {
+  name                = "{{index $.Vars "cloud_run_worker_pool_name"}}"
+  location            = "us-central1"
+  launch_stage        = "BETA"
+  deletion_protection = false
+
+  template {
+    annotations = {}
+    labels      = {}
+
+    containers {
+      image = "us-docker.pkg.dev/cloudrun/container/hello"
+
+      command    = []
+      args       = []
+      depends_on = []
+
+      startup_probe {
+        initial_delay_seconds = 0
+        timeout_seconds       = 1
+        period_seconds        = 3
+        failure_threshold     = 3
+
+        tcp_socket {
+          port = 8080
+        }
+      }
+
+      liveness_probe {
+        initial_delay_seconds = 0
+        timeout_seconds       = 1
+        period_seconds        = 10
+        failure_threshold     = 3
+
+        http_get {
+          path = "/"
+          port = 8080
+        }
+      }
+    }
+
+    vpc_access {
+      network_interfaces {
+        network    = google_compute_network.custom_test.id
+        subnetwork = google_compute_subnetwork.custom_test.id
+        tags       = []
+      }
+    }
+  }
 }
