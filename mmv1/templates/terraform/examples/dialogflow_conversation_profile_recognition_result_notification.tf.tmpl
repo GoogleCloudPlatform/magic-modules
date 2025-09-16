@@ -17,6 +17,7 @@ resource "google_dialogflow_conversation_profile" "{{$.PrimaryResourceId}}" {
   }
   new_recognition_result_notification_config {
     topic = google_pubsub_topic.{{$.PrimaryResourceId}}.id
+    message_format = "JSON"
   }
 }
 
