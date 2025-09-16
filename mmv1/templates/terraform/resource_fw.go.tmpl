@@ -74,8 +74,11 @@ import (
 {{- end}}
 
 var (
-	_ resource.Resource              = &{{$.ResourceName}}FWResource{}
-	_ resource.ResourceWithConfigure = &{{$.ResourceName}}FWResource{}
+	_ resource.Resource                = &{{$.ResourceName}}FWResource{}
+	_ resource.ResourceWithConfigure   = &{{$.ResourceName}}FWResource{}
+{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff }}
+	_ resource.ResourceWithModifyPlan  = &{{$.ResourceName}}FWResource{}
+{{- end}}
 )
 
 func New{{$.ResourceName}}FWResource() resource.Resource {
@@ -127,6 +130,23 @@ func (r *{{$.ResourceName}}FWResource) Configure(ctx context.Context, req resour
 	}*/}}
 	r.providerConfig = p
 }
+
+{{- if or (and (or $.HasProject $.HasRegion $.HasZone) (not $.ExcludeDefaultCdiff)) $.CustomDiff }}
+func (r *{{$.ResourceName}}FWResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+{{- if and ($.HasProject) (not $.ExcludeDefaultCdiff) }}
+	fwresource.DefaultProjectModify(ctx, req, resp, r.providerConfig.Project)
+{{- end -}}
+{{if and ($.HasRegion) (not $.ExcludeDefaultCdiff)  }}
+	fwresource.DefaultRegionModify(ctx, req, resp, r.providerConfig.Region)
+{{- end -}}
+{{if and ($.HasZone) (not $.ExcludeDefaultCdiff)  }}
+	fwresource.DefaultZoneModify(ctx, req, resp, r.providerConfig.Zone)
+{{- end }}
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
+{{- end}}
 
 func (d *{{$.ResourceName}}FWResource) Schema(ctx context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
@@ -263,7 +283,7 @@ func (r *{{$.ResourceName}}FWResource) Create(ctx context.Context, req resource.
 {{- if $.CustomCode.PreCreate }}
     {{ $.CustomTemplate $.CustomCode.PreCreate false -}}
 {{- end}}
-    res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.CreateVerb -}}",
         Project: billingProject.ValueString(),
@@ -483,7 +503,7 @@ func (r *{{$.ResourceName}}FWResource) Update(ctx context.Context, req resource.
 {{- if $.CustomCode.PreUpdate }}
     {{ $.CustomTemplate $.CustomCode.PreUpdate false -}}
 {{- end}}
-    res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.UpdateVerb -}}",
         Project: billingProject.ValueString(),
@@ -622,7 +642,7 @@ func (r *{{$.ResourceName}}FWResource) Delete(ctx context.Context, req resource.
     {{- end }}
 
     log.Printf("[DEBUG] Deleting {{ $.Name }} %q", data.Id.ValueString())
-    res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+    _, _ := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.DeleteVerb -}}",
         Project: billingProject.ValueString(),
@@ -727,7 +747,7 @@ func (r *{{$.ResourceName}}FWResource) {{$.ResourceName}}FWRefresh(ctx context.C
 {{- if $.CustomCode.PreRead }}
     {{ $.CustomTemplate $.CustomCode.PreRead false -}}
 {{- end}}
-    res := fwtransport.SendRequest(fwtransport.SendRequestOptions{
+    res, err := fwtransport.SendRequest(fwtransport.SendRequestOptions{
         Config: r.providerConfig,
         Method: "{{ upper $.ReadVerb -}}",
         Project: billingProject.ValueString(),
