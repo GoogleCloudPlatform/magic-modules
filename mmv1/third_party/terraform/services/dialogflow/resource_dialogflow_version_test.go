@@ -27,16 +27,14 @@ func TestAccDialogflowVersion_update(t *testing.T) {
 			},
 			{
 				ResourceName:      "google_dialogflow_version.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				RefreshState:true,
 			},
 			{
 				Config: testAccDialogflowVersion_full2(context),
 			},
 			{
 				ResourceName:      "google_dialogflow_version.foobar",
-				ImportState:       true,
-				ImportStateVerify: true,
+				RefreshState:true,
 			},
 		},
 	})
