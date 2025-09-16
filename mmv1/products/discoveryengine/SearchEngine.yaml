@@ -173,4 +173,3 @@ properties:
         - 'FEATURE_STATE_UNSPECIFIED'
         - 'FEATURE_STATE_ON'
         - 'FEATURE_STATE_OFF' 
-
