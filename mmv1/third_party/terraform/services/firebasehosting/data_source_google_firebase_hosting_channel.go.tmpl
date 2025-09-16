@@ -18,6 +18,7 @@ func DataSourceGoogleFirebaseHostingChannel() *schema.Resource {
 	return &schema.Resource{
 		Read:   dataSourceGoogleFirebaseHostingChannelRead,
 		Schema: dsSchema,
+		Identity: ResourceFirebaseHostingChannel().Identity,
 	}
 }
 

@@ -16,8 +16,9 @@ func DataSourceGoogleFirestoreDocument() *schema.Resource {
 	tpgresource.AddOptionalFieldsToSchema(dsSchema, "project")
 
 	return &schema.Resource{
-		Read:   DataSourceGoogleFirestoreDocumentRead,
-		Schema: dsSchema,
+		Read:     DataSourceGoogleFirestoreDocumentRead,
+		Schema:   dsSchema,
+		Identity: ResourceFirestoreDocument().Identity,
 	}
 }
 
