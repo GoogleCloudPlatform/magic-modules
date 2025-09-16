@@ -16,7 +16,7 @@ timeout: 50000s
 options:
     machineType: 'N1_HIGHCPU_32'
 
-# logsBucket: 'gs://'
+logsBucket: 'gs://cloudbuild-test-nightly-logs'
 availableSecrets:
   secretManager:
     - versionName: projects/673497134629/secrets/ci-test-billing-account/versions/latest
