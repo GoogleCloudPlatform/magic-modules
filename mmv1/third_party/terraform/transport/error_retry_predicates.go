@@ -182,7 +182,7 @@ func is403QuotaExceededPerMinuteError(err error) (bool, string) {
 
 // We've encountered a few common fingerprint-related strings; if this is one of
 // them, we're confident this is an error due to fingerprints.
-var FINGERPRINT_FAIL_ERRORS = []string{"Invalid fingerprint.", "Supplied fingerprint does not match current metadata fingerprint.", "Condition does not match."}
+var FINGERPRINT_FAIL_ERRORS = []string{"Invalid fingerprint.", "Supplied fingerprint does not match current metadata fingerprint."}
 
 // Retry the operation if it looks like a fingerprint mismatch.
 func IsFingerprintError(err error) (bool, string) {

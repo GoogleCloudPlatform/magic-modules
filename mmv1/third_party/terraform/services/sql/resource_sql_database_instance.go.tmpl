@@ -176,7 +176,7 @@ func ResourceSqlDatabaseInstance() *schema.Resource {
 				Type:         schema.TypeList,
 				Optional:     true,
 				Computed:     true,
-				AtLeastOneOf: []string{"settings", "clone"},
+				AtLeastOneOf: []string{"settings", "clone", "point_in_time_restore_context"},
 				MaxItems:     1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -1140,7 +1140,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
 				Type:         schema.TypeList,
 				Optional:     true,
 				Computed:     false,
-				AtLeastOneOf: []string{"settings", "clone"},
+				AtLeastOneOf: []string{"settings", "clone", "point_in_time_restore_context"},
 				Description:  `Configuration for creating a new instance as a clone of another instance.`,
 				MaxItems:     1,
 				Elem: &schema.Resource{
@@ -1181,6 +1181,7 @@ API (for read pools, effective_availability_type may differ from availability_ty
 				Type:         schema.TypeList,
 				Optional:     true,
 				Computed:     false,
+				AtLeastOneOf: []string{"settings", "clone", "point_in_time_restore_context"},
 				Description:  `Configuration for creating a new instance using point-in-time-restore from backupdr backup.`,
 				MaxItems:     1,
 				Elem: &schema.Resource{
@@ -1306,6 +1307,7 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	}
 
 	cloneContext, cloneSource := expandCloneContext(d.Get("clone").([]interface{}))
+	pointInTimeRestoreContext := expandPointInTimeRestoreContext(d.Get("point_in_time_restore_context").([]interface{}))
 
 	s, ok := d.GetOk("settings")
 	desiredSettings := expandSqlDatabaseInstanceSettings(s.([]interface{}), databaseVersion)
@@ -1359,6 +1361,9 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 				cloneContext.DestinationInstanceName = name
 				clodeReq := sqladmin.InstancesCloneRequest{CloneContext: cloneContext}
 				op, operr = config.NewSqlAdminClient(userAgent).Instances.Clone(project, cloneSource, &clodeReq).Do()
+			} else if pointInTimeRestoreContext != nil {
+				parent := fmt.Sprintf("projects/%s", project)
+				op, operr = config.NewSqlAdminClient(userAgent).Instances.PointInTimeRestore(parent, pointInTimeRestoreContext).Do()
 			} else {
 				op, operr = config.NewSqlAdminClient(userAgent).Instances.Insert(project, instance).Do()
 			}
@@ -1445,8 +1450,8 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 
 	// Refresh settings from read as they may have defaulted from the API
 	s = d.Get("settings")
-	// If we've created an instance as a clone, we need to update it to set any user defined settings
-	if len(s.([]interface{})) != 0 && cloneContext != nil && desiredSettings != nil {
+	// If we've created an instance as a clone or pitr, we need to update it to set any user defined settings
+	if len(s.([]interface{})) != 0 && (cloneContext != nil || pointInTimeRestoreContext != nil) && desiredSettings != nil {
 		instanceUpdate := &sqladmin.DatabaseInstance{
 			Settings: desiredSettings,
 		}
@@ -1487,14 +1492,6 @@ func resourceSqlDatabaseInstanceCreate(d *schema.ResourceData, meta interface{})
 	} else if b, ok := d.GetOk("backupdr_backup"); ok && b.(string) != "" {
 		log.Printf("[DEBUG] Restoring instance %s from BackupDR backup: %s", name, b.(string))
 		err = sqlDatabaseInstanceRestoreFromBackup(d, config, userAgent, project, name, nil, b)
-		if err != nil {
-			return err
-		}
-	}
-
-	// Perform a point-in-time restore of an instance managed by Google Cloud Backup and Disaster Recovery.
-	if r, ok := d.GetOk("point_in_time_restore_context"); ok {
-		err = sqlDatabaseInstancePointInTimeRestore(d, config, userAgent, project, name, r)
 		if err != nil {
 			return err
 		}
@@ -2303,7 +2300,7 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 			return rerr
 		},
 		Timeout:              d.Timeout(schema.TimeoutUpdate),
-		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError, transport_tpg.IsFingerprintError},
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.IsSqlOperationInProgressError},
 	})
 	if err != nil {
 		return fmt.Errorf("Error, failed to update instance settings for %s: %s", instance.Name, err)
@@ -2325,16 +2322,6 @@ func resourceSqlDatabaseInstanceUpdate(d *schema.ResourceData, meta interface{})
 	} else if b, ok := d.GetOk("backupdr_backup"); ok && b.(string) != "" {
 		if d.HasChange("backupdr_backup") {
 			err = sqlDatabaseInstanceRestoreFromBackup(d, config, userAgent, project, d.Get("name").(string), nil, b)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	// Perform a point-in-time-restore if the instance is managed by gcbdr and point-in-time-restore context exists and has changed
-	if r, ok := d.GetOk("point_in_time_restore_context"); ok {
-		if d.HasChange("point_in_time_restore_context") {
-			err = sqlDatabaseInstancePointInTimeRestore(d, config, userAgent, project, d.Get("name").(string), r)
 			if err != nil {
 				return err
 			}
