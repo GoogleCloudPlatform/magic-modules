@@ -13,6 +13,7 @@ import (
 func TestAccComputeVpnTunnel_regionFromGateway(t *testing.T) {
 	t.Parallel()
 	region := "us-central1"
+	suffix := acctest.RandString(t, 10)
 	if envvar.GetTestRegionFromEnv() == region {
 		// Make sure we choose a region that isn't the provider default
 		// in order to test getting the region from the gateway and not the
@@ -26,7 +27,7 @@ func TestAccComputeVpnTunnel_regionFromGateway(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeVpnTunnel_regionFromGateway(acctest.RandString(t, 10), region),
+				Config: testAccComputeVpnTunnel_regionFromGateway(suffix, region),
 			},
 			{
 				ResourceName:            "google_compute_vpn_tunnel.foobar",
@@ -41,6 +42,7 @@ func TestAccComputeVpnTunnel_regionFromGateway(t *testing.T) {
 func TestAccComputeVpnTunnel_router(t *testing.T) {
 	t.Parallel()
 
+	suffix := acctest.RandString(t, 10)
 	router := fmt.Sprintf("tf-test-tunnel-%s", acctest.RandString(t, 10))
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
@@ -48,7 +50,7 @@ func TestAccComputeVpnTunnel_router(t *testing.T) {
 		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeVpnTunnelRouter(acctest.RandString(t, 10), router),
+				Config: testAccComputeVpnTunnelRouter(suffix, router),
 			},
 			{
 				ResourceName:            "google_compute_vpn_tunnel.foobar",
@@ -64,13 +66,14 @@ func TestAccComputeVpnTunnel_routerWithSharedSecretWo_update(t *testing.T) {
 	t.Parallel()
 
 	router := fmt.Sprintf("tf-test-tunnel-%s", acctest.RandString(t, 10))
+	suffix := acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeVpnTunnelRouterWithSharedSecretWo(acctest.RandString(t, 10), router),
+				Config: testAccComputeVpnTunnelRouterWithSharedSecretWo(suffix, router),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckNoResourceAttr("google_compute_vpn_tunnel.foobar", "shared_secret_wo"),
 					resource.TestCheckResourceAttr("google_compute_vpn_tunnel.foobar", "shared_secret_wo_version", "1"),
@@ -83,7 +86,7 @@ func TestAccComputeVpnTunnel_routerWithSharedSecretWo_update(t *testing.T) {
 				ImportStateVerifyIgnore: []string{"shared_secret", "detailed_status"},
 			},
 			{
-				Config: testAccComputeVpnTunnelRouterWithSharedSecretWo_update(acctest.RandString(t, 10), router),
+				Config: testAccComputeVpnTunnelRouterWithSharedSecretWo_update(suffix, router),
 				ConfigPlanChecks: resource.ConfigPlanChecks{
 					PreApply: []plancheck.PlanCheck{
 						plancheck.ExpectResourceAction("google_compute_vpn_tunnel.foobar", plancheck.ResourceActionDestroyBeforeCreate),
@@ -107,13 +110,14 @@ func TestAccComputeVpnTunnel_routerWithSharedSecretWo_update(t *testing.T) {
 func TestAccComputeVpnTunnel_defaultTrafficSelectors(t *testing.T) {
 	t.Parallel()
 
+	suffix := acctest.RandString(t, 10)
 	acctest.VcrTest(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccTestPreCheck(t) },
 		ProtoV5ProviderFactories: acctest.ProtoV5ProviderFactories(t),
 		CheckDestroy:             testAccCheckComputeVpnTunnelDestroyProducer(t),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccComputeVpnTunnelDefaultTrafficSelectors(acctest.RandString(t, 10)),
+				Config: testAccComputeVpnTunnelDefaultTrafficSelectors(suffix),
 			},
 			{
 				ResourceName:            "google_compute_vpn_tunnel.foobar",

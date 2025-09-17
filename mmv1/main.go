@@ -235,7 +235,10 @@ func GenerateProduct(version, providerName, productName, outputPath string, prod
 		resource.SourceYamlFile = resourceYamlPath
 
 		resource.TargetVersionName = version
-		resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil, "")
+		// SetDefault before AddExtraFields to ensure relevant metadata is available on existing fields
+		resource.SetDefault(productApi)
+		resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
+		// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
 		resource.SetDefault(productApi)
 		resource.Validate()
 		resources = append(resources, resource)
@@ -268,7 +271,10 @@ func GenerateProduct(version, providerName, productName, outputPath string, prod
 			}
 
 			resource.TargetVersionName = version
-			resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil, "")
+			// SetDefault before AddExtraFields to ensure relevant metadata is available on existing fields
+			resource.SetDefault(productApi)
+			resource.Properties = resource.AddExtraFields(resource.PropertiesWithExcluded(), nil)
+			// SetDefault after AddExtraFields to ensure relevant metadata is available for the newly generated fields
 			resource.SetDefault(productApi)
 			resource.Validate()
 			resources = append(resources, resource)
