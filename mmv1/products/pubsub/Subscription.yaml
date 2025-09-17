@@ -45,6 +45,7 @@ custom_code:
   constants: 'templates/terraform/constants/subscription.go.tmpl'
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/pubsub_subscription.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/pubsub_subscription.go.tmpl'
 tgc_ignore_terraform_encoder: true
 examples:
   - name: 'pubsub_subscription_push'
@@ -52,6 +53,8 @@ examples:
     vars:
       topic_name: 'example-topic'
       subscription_name: 'example-subscription'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'pubsub_subscription_pull'
     primary_resource_id: 'example'
     vars:
@@ -583,3 +586,11 @@ properties:
           description: |
             Controls whether or not to use this transform. If not set or `false`,
             the transform will be applied to messages. Default: `true`.
+virtual_fields:
+  - name: 'deletion_protection'
+    description: |
+      Whether Terraform will be prevented from destroying the subscription. Defaults to false.
+      When the field is set to true in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the subscription will fail.
+    type: Boolean
+    default_value: false

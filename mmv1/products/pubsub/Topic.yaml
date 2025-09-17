@@ -52,6 +52,7 @@ iam_policy:
 custom_code:
   encoder: 'templates/terraform/encoders/no_send_name.go.tmpl'
   update_encoder: 'templates/terraform/update_encoder/pubsub_topic.tmpl'
+  pre_delete: 'templates/terraform/pre_delete/pubsub_topic.go.tmpl'
 tgc_ignore_terraform_encoder: true
 error_retry_predicates:
   - 'transport_tpg.PubsubTopicProjectNotReady'
@@ -62,6 +63,8 @@ examples:
     primary_resource_name: 'fmt.Sprintf("tf-test-example-topic%s", context["random_suffix"])'
     vars:
       topic_name: 'example-topic'
+    ignore_read_extra:
+      - 'deletion_protection'
   - name: 'pubsub_topic_cmek'
     primary_resource_id: 'example'
     vars:
@@ -508,3 +511,11 @@ properties:
           description: |
             Controls whether or not to use this transform. If not set or `false`,
             the transform will be applied to messages. Default: `true`.
+virtual_fields:
+  - name: 'deletion_protection'
+    description: |
+      Whether Terraform will be prevented from destroying the topic. Defaults to false.
+      When the field is set to true in Terraform state, a `terraform apply`
+      or `terraform destroy` that would delete the topic will fail.
+    type: Boolean
+    default_value: false
