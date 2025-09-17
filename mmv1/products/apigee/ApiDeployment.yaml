@@ -1,0 +1,110 @@
+# Copyright 2025 Google Inc.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+name: 'ApiDeployment'
+description: |
+  Manages a deployment of an API proxy.
+references:
+  guides:
+    'QUICKSTART_TITLE': 'QUICKSTART_URL'
+  api: 'API_REFERENCE_URL'
+base_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
+self_link: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
+import_format:
+  - 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
+  - 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}'
+  - '{{org_id}}/{{environment}}/{{proxy_id}}/{{revision}}/deployments'
+  - '{{org_id}}/{{environment}}/{{proxy_id}}/{{revision}}'
+# If true, the resource and all its fields are considered immutable - that is,
+# only creatable, not updatable. Individual fields can override this if they
+# have a custom update method in the API.
+immutable: true
+
+# URL for the resource's standard Create method, including query parameters.
+# https://google.aip.dev/133
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+create_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
+
+# Overrides the URL for the resource's standard Update method. (If unset, the
+# self_link URL is used by default.) https://google.aip.dev/134
+# Terraform field names enclosed in double curly braces are replaced with
+# the field values from the resource at runtime.
+# update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
+# The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
+update_verb: 'POST'
+# If true, the resource sets an `updateMask` query parameter listing modified
+# fields when updating the resource. If false, it does not.
+update_mask: false
+
+# If true, code for handling long-running operations is generated along with
+# the resource. If false, that code is not generated.
+# autogen_async: true
+# Sets parameters for handling operations returned by the API.
+# async:
+#   # Overrides which API calls return operations. Default: ['create',
+#   # 'update', 'delete']
+#   actions: ['create', 'update', 'delete']
+#   operation:
+#     base_url: '{{op_id}}'
+
+parameters:
+  - name: 'org_id'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The Apigee Organization associated with the Apigee API deployment,
+      in the format `organizations/{{org_name}}`.
+  - name: 'environment'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The Apigee Environment associated with the Apigee API deployment,
+      in the format `environments/{{environment_name}}`.
+  - name: 'proxy_id'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The Apigee API associated with the Apigee API deployment,
+      in the format `apis/{{proxy_name}}`.
+  - name: 'revision'
+    type: String
+    required: true
+    immutable: true
+    url_param_only: true
+    description: |
+      The revision of the API proxy to be deployed.
+
+properties:
+  - name: 'id'
+    type: String
+    description: |
+      The ID of the API deployment in the format `organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments`.
+    output: true
+
+examples:
+  - name: 'apigee_api_deployment_basic'
+    primary_resource_id: 'api_deployment_test'
+    test_env_vars:
+      org_id: 'ORG_ID'
+      billing_account: 'BILLING_ACCT'
+    exclude_docs: true
+    external_providers: ['time']
+    skip_vcr: true
