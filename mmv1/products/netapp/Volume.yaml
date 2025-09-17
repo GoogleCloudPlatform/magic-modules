@@ -151,6 +151,7 @@ properties:
               type: String
               description: |-
                  If enabled, the root user (UID = 0) of the specified clients doesn't get mapped to nobody (UID = 65534). This is also known as no_root_squash.
+              default_from_api: true
             - name: 'accessType'
               type: Enum
               description: |
@@ -159,6 +160,7 @@ properties:
                 - 'READ_ONLY'
                 - 'READ_WRITE'
                 - 'READ_NONE'
+              default_from_api: true
             - name: 'nfsv3'
               type: Boolean
               description: |
@@ -199,6 +201,7 @@ properties:
                 - 'NO_ROOT_SQUASH'
                 - 'ROOT_SQUASH'
                 - 'ALL_SQUASH'
+              default_from_api: true
             - name: 'anonUid'
               type: Integer
               description: |-
