@@ -167,6 +167,7 @@ resource "google_storage_insights_report_config" "config" {
   depends_on = [
 	google_storage_bucket_iam_member.admin,
   ]
+  force_destroy = true
 }
 
 resource "google_storage_bucket" "report_bucket" {
@@ -275,6 +276,7 @@ resource "google_storage_insights_report_config" "config" {
   depends_on = [
 	google_storage_bucket_iam_member.admin,
   ]
+  force_destroy = true
 }
 
 resource "google_storage_bucket" "report_bucket" {
