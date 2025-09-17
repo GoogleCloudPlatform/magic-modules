@@ -111,47 +111,6 @@ func WorkbenchInstanceMetadataDiffSuppress(k, old, new string, d *schema.Resourc
 	return false
 }
 
-// ValidateWorkbenchInstanceMetadata ensures that protected metadata keys are not set in the Terraform configuration.
-// It checks user-provided metadata keys against a predefined list of server-managed keys - WorkbenchInstanceProvidedMetadata.
-// If any protected keys are found, it returns a validation error listing all invalid keys.
-func ValidateWorkbenchInstanceMetadata(i interface{}, k string) (warnings []string, errors []error) {
-    metadata, ok := i.(map[string]interface{})
-    if !ok {
-        errors = append(errors, fmt.Errorf("invalid metadata format"))
-        return
-    }
-
-    var invalidKeys []string
-
-    // Create a set to hold all protected keys for efficient lookup.
-	protectedKeys := make(map[string]struct{})
-
-	// Add the default protected keys to the set.
-	for _, key := range WorkbenchInstanceProvidedMetadata {
-		protectedKeys[key] = struct{}{}
-	}
-
-	// If EUC is enabled, add the additional protected keys.
-	if d.Get("enable_managed_euc").(bool) {
-		for _, key := range WorkbenchInstanceEUCProvidedAdditionalMetadata {
-			protectedKeys[key] = struct{}{}
-		}
-	}
-
-	// Iterate through the metadata keys once and check against the protected set.
-	for key := range metadata {
-		if _, isProtected := protectedKeys[key]; isProtected {
-			invalidKeys = append(invalidKeys, key)
-		}
-	}
-
-    if len(invalidKeys) > 0 {
-        errors = append(errors, fmt.Errorf("the following metadata keys are protected and cannot be set: %v", invalidKeys))
-    }
-
-    return
-}
-
 var WorkbenchInstanceProvidedTags = []string{
 	"deeplearning-vm",
 	"notebook-instance",
@@ -340,6 +299,34 @@ func workbenchMetadataCustomizeDiff(_ context.Context, diff *schema.ResourceDiff
 				}
 				return nil // Return nil immediately after forcing new
 			}
+		}
+
+		var invalidKeys []string
+
+		// Create a set to hold all protected keys for efficient lookup.
+		protectedKeys := make(map[string]struct{})
+
+		// Add the default protected keys to the set.
+		for _, key := range WorkbenchInstanceProvidedMetadata {
+			protectedKeys[key] = struct{}{}
+		}
+
+		// If EUC is enabled, add the additional protected keys.
+		if eucEnabled := diff.Get("enable_managed_euc").(bool); eucEnabled {
+			for _, key := range WorkbenchInstanceEUCProvidedAdditionalMetadata {
+				protectedKeys[key] = struct{}{}
+			}
+		}
+
+		// Iterate through the metadata keys once and check against the protected set.
+		for key := range oldMetadata {
+			if _, isProtected := protectedKeys[key]; isProtected {
+				invalidKeys = append(invalidKeys, key)
+			}
+		}
+
+		if len(invalidKeys) > 0 {
+			return fmt.Errorf("the following metadata keys are protected and cannot be set: %v", invalidKeys)
 		}
 	}
 	return nil
