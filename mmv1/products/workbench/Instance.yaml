@@ -130,6 +130,8 @@ virtual_fields:
       Desired state of the Workbench Instance. Set this field to `ACTIVE` to start the Instance, and `STOPPED` to stop the Instance.
     type: String
     default_value: "ACTIVE"
+error_retry_predicates:
+  - 'transport_tpg.IsWorkbenchQueueError'
 parameters:
   - name: 'location'
     type: String
