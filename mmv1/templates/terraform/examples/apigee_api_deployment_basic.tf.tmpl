@@ -74,7 +74,7 @@ resource "google_apigee_api" "test_apigee_api" {
   depends_on      = [google_apigee_organization.apigee_org]
 }
 
-resource "google_apigee_api_deployment" "api_deployment_test" {
+resource "google_apigee_api_deployment" "{{$.PrimaryResourceId}}" {
   environment = google_apigee_environment.apigee_environment.name
   org_id = google_apigee_api.test_apigee_api.org_id
   revision = google_apigee_api.test_apigee_api.latest_revision_id

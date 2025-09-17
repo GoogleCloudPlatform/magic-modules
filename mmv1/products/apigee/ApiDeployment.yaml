@@ -12,38 +12,20 @@
 # limitations under the License.
 
 ---
-# API resource name
 name: 'ApiDeployment'
-# Resource description for the provider documentation.
 description: |
   Manages a deployment of an API proxy.
 references:
   guides:
-   # Link to quickstart in the API's Guides section. For example:
-   # 'Create and connect to a database': 'https://cloud.google.com/alloydb/docs/quickstart/create-and-connect'
     'QUICKSTART_TITLE': 'QUICKSTART_URL'
-  # Link to the REST API reference for the resource. For example,
-  # https://cloud.google.com/alloydb/docs/reference/rest/v1/projects.locations.backups
   api: 'API_REFERENCE_URL'
-# Marks the resource as beta-only. Ensure a beta version block is present in
-# provider.yaml.
-# min_version: beta
-
-# URL for the resource's standard List method. https://google.aip.dev/132
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
 base_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
-# URL for the resource's standard Get method. https://google.aip.dev/131
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
 self_link: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
-
 import_format:
   - 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
   - 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}'
   - '{{org_id}}/{{environment}}/{{proxy_id}}/{{revision}}/deployments'
   - '{{org_id}}/{{environment}}/{{proxy_id}}/{{revision}}'
-
 # If true, the resource and all its fields are considered immutable - that is,
 # only creatable, not updatable. Individual fields can override this if they
 # have a custom update method in the API.
@@ -119,8 +101,7 @@ properties:
 
 examples:
   - name: 'apigee_api_deployment_basic'
-    primary_resource_id: 'apigee_api_deployment'
-
+    primary_resource_id: 'api_deployment_test'
     test_env_vars:
       org_id: 'ORG_ID'
       billing_account: 'BILLING_ACCT'
