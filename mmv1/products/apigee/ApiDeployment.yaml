@@ -66,24 +66,21 @@ parameters:
     immutable: true
     url_param_only: true
     description: |
-      The Apigee Organization associated with the Apigee API deployment,
-      in the format `organizations/{{org_name}}`.
+      The Apigee Organization associated with the Apigee API deployment.
   - name: 'environment'
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
-      The Apigee Environment associated with the Apigee API deployment,
-      in the format `environments/{{environment_name}}`.
+      The Apigee Environment associated with the Apigee API deployment.
   - name: 'proxy_id'
     type: String
     required: true
     immutable: true
     url_param_only: true
     description: |
-      The Apigee API associated with the Apigee API deployment,
-      in the format `apis/{{proxy_name}}`.
+      The Apigee API associated with the Apigee API deployment.
   - name: 'revision'
     type: String
     required: true
