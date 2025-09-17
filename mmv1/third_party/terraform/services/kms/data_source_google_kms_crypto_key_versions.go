@@ -1,11 +1,8 @@
-// Copyright (c) HashiCorp, Inc.
-// SPDX-License-Identifier: MPL-2.0
 package kms
 
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"regexp"
 
 	"github.com/hashicorp/terraform-provider-google/google/tpgresource"
@@ -156,7 +153,7 @@ func dataSourceGoogleKmsCryptoKeyVersionsRead(d *schema.ResourceData, meta inter
 	return nil
 }
 
-func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, cryptoKeyId string, userAgent string) ([]interface{}, error) {
+func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, cryptoKeyId string, userAgent string) ([]map[string]interface{}, error) {
 	config := meta.(*transport_tpg.Config)
 
 	url, err := tpgresource.ReplaceVars(d, config, "{{KMSBasePath}}{{crypto_key}}/cryptoKeyVersions")
@@ -182,58 +179,29 @@ func dataSourceKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}
 		params["filter"] = filter.(string)
 	}
 
-	cryptoKeyVersions := make([]interface{}, 0)
-	for {
-		// Depending on previous iterations, params might contain a pageToken param
-		url, err = transport_tpg.AddQueryParams(url, params)
-		if err != nil {
-			return nil, err
-		}
-
-		headers := make(http.Header)
-		res, err := transport_tpg.SendRequest(transport_tpg.SendRequestOptions{
-			Config:    config,
-			Method:    "GET",
-			Project:   billingProject,
-			RawURL:    url,
-			UserAgent: userAgent,
-			Headers:   headers,
-			// ErrorRetryPredicates used to allow retrying if rate limits are hit when requesting multiple pages in a row
-			ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.Is429RetryableQuotaError},
-		})
-		if err != nil {
-			return nil, transport_tpg.HandleNotFoundError(err, d, fmt.Sprintf("KMSCryptoKeyVersions %q", d.Id()))
-		}
-
-		if res == nil {
-			// Decoding the object has resulted in it being gone. It may be marked deleted
-			log.Printf("[DEBUG] Removing KMSCryptoKeyVersion because it no longer exists.")
-			d.SetId("")
-			return nil, nil
-		}
-
-		// Store info from this page
-		if v, ok := res["cryptoKeyVersions"].([]interface{}); ok {
-			cryptoKeyVersions = append(cryptoKeyVersions, v...)
-		}
-
-		// Handle pagination for next loop, or break loop
-		v, ok := res["nextPageToken"]
-		if ok {
-			params["pageToken"] = v.(string)
-		}
-		if !ok {
-			break
-		}
+	var cryptoKeyVersions []map[string]interface{}
+	opts := transport_tpg.GetPaginatedItemsOptions{
+		ResourceData:         d,
+		Config:               config,
+		BillingProject:       &billingProject,
+		UserAgent:            userAgent,
+		URL:                  url,
+		ResourceToList:       "cryptoKeyVersions",
+		Params:               params,
+		ErrorRetryPredicates: []transport_tpg.RetryErrorPredicateFunc{transport_tpg.Is429RetryableQuotaError},
+	}
+	cryptoKeyVersions, err = transport_tpg.GetPaginatedItems(opts)
+	if err != nil {
+		return nil, err
 	}
 
 	return cryptoKeyVersions, nil
 }
 
-func flattenKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, versionsList []interface{}, cryptoKeyId string) ([]interface{}, error) {
-	var versions []interface{}
+func flattenKMSCryptoKeyVersionsList(d *schema.ResourceData, meta interface{}, versionsList []map[string]interface{}, cryptoKeyId string) ([]map[string]interface{}, error) {
+	var versions []map[string]interface{}
 	for _, v := range versionsList {
-		version := v.(map[string]interface{})
+		version := v
 
 		data := map[string]interface{}{}
 		// The google_kms_crypto_key resource and dataset set
