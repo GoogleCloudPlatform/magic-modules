@@ -525,6 +525,11 @@ func TestResourceAddExtraFields(t *testing.T) {
 		for _, option := range options {
 			option(t)
 		}
+		if t.ResourceMetadata == nil {
+			t.ResourceMetadata = &Resource{
+				Immutable: false,
+			}
+		}
 		return t
 	}
 
