@@ -214,6 +214,7 @@ properties:
     description: |
       QoS (Quality of Service) type of the storage pool.
       Possible values are: AUTO, MANUAL.
+    default_from_api: true
     enum_values:
       - 'QOS_TYPE_UNSPECIFIED'
       - 'AUTO'
