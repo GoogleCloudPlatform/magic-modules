@@ -168,11 +168,11 @@ properties:
       name: featureState
       type: NestedObject
       properties:
-      - name: 'feature'
-        type: Enum
-        description: |
-          The state of the feature for the engine.
-        enum_values:
-          - 'FEATURE_STATE_UNSPECIFIED'
-          - 'FEATURE_STATE_ON'
-          - 'FEATURE_STATE_OFF'
+        - name: 'feature'
+          type: Enum
+          description: |
+            The state of the feature for the engine.
+          enum_values:
+            - 'FEATURE_STATE_UNSPECIFIED'
+            - 'FEATURE_STATE_ON'
+            - 'FEATURE_STATE_OFF'
