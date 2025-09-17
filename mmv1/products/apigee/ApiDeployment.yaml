@@ -26,38 +26,12 @@ import_format:
   - 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}'
   - '{{org_id}}/{{environment}}/{{proxy_id}}/{{revision}}/deployments'
   - '{{org_id}}/{{environment}}/{{proxy_id}}/{{revision}}'
-# If true, the resource and all its fields are considered immutable - that is,
-# only creatable, not updatable. Individual fields can override this if they
-# have a custom update method in the API.
 immutable: true
 
-# URL for the resource's standard Create method, including query parameters.
-# https://google.aip.dev/133
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
 create_url: 'organizations/{{org_id}}/environments/{{environment}}/apis/{{proxy_id}}/revisions/{{revision}}/deployments'
 
-# Overrides the URL for the resource's standard Update method. (If unset, the
-# self_link URL is used by default.) https://google.aip.dev/134
-# Terraform field names enclosed in double curly braces are replaced with
-# the field values from the resource at runtime.
-# update_url: 'projects/{{project}}/locations/{{location}}/resourcenames/{{name}}'
-# The HTTP verb used to update a resource. Allowed values: :POST, :PUT, :PATCH. Default: :PUT.
 update_verb: 'POST'
-# If true, the resource sets an `updateMask` query parameter listing modified
-# fields when updating the resource. If false, it does not.
 update_mask: false
-
-# If true, code for handling long-running operations is generated along with
-# the resource. If false, that code is not generated.
-# autogen_async: true
-# Sets parameters for handling operations returned by the API.
-# async:
-#   # Overrides which API calls return operations. Default: ['create',
-#   # 'update', 'delete']
-#   actions: ['create', 'update', 'delete']
-#   operation:
-#     base_url: '{{op_id}}'
 
 parameters:
   - name: 'org_id'
