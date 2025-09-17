@@ -160,7 +160,6 @@ properties:
                 - 'READ_ONLY'
                 - 'READ_WRITE'
                 - 'READ_NONE'
-              default_from_api: true
             - name: 'nfsv3'
               type: Boolean
               description: |
