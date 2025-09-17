@@ -1142,7 +1142,7 @@ properties:
             allow_empty_object: true
             properties:
               []
-      - name: 'MongodbSourceConfig'
+      - name: 'salesforceSourceConfig'
         type: NestedObject
         description: |
           Salesforce data source configuration.
@@ -1229,7 +1229,7 @@ properties:
             description: |
               Salesforce objects polling interval. The interval at which new changes will be polled for each object. The duration must be between 5 minutes and 24 hours.
             required: true
-      - name: 'MongodbSourceConfig'
+      - name: 'mongodbSourceConfig'
         type: NestedObject
         description: |
           MongoDB source configuration.
@@ -1255,7 +1255,7 @@ properties:
                 item_type:
                   type: NestedObject
                   description: |
-                   MongoDB database. 
+                    MongoDB database.
                   properties:
                     - name: 'database'
                       type: String
@@ -1288,7 +1288,7 @@ properties:
                                 - name: 'field'
                                   type: String
                                   description: |
-                                    Field name.   
+                                    Field name.
           - name: 'excludeObjects'
             type: NestedObject
             description: |
@@ -1303,7 +1303,7 @@ properties:
                 item_type:
                   type: NestedObject
                   description: |
-                   MongoDB database. 
+                    MongoDB database.
                   properties:
                     - name: 'database'
                       type: String
@@ -1336,7 +1336,7 @@ properties:
                                 - name: 'field'
                                   type: String
                                   description: |
-                                    Field name.   
+                                    Field name.
           - name: 'maxConcurrentBackfillTasks'
             type: Integer
             description: |
