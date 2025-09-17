@@ -658,28 +658,28 @@ func TestAccNetappStoragePool_ManualQos(t *testing.T) {
 				Config: testAccNetappVolume_ManualQosAuto(context),
 			},
 			{
-				ResourceName:            "google_netapp_volume.test_volume",
+				ResourceName:            "google_netapp_storage_pool.test_pool",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetappVolume_ManualQosManual(context),
 			},
 			{
-				ResourceName:            "google_netapp_volume.test_volume",
+				ResourceName:            "google_netapp_storage_pool.test_pool",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
 			},
 			{
 				Config: testAccNetappVolume_ManualQosManual_update(context),
 			},
 			{
-				ResourceName:            "google_netapp_volume.test_volume",
+				ResourceName:            "google_netapp_storage_pool.test_pool",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"restore_parameters", "location", "name", "deletion_policy", "labels", "terraform_labels"},
+				ImportStateVerifyIgnore: []string{"location", "name", "labels", "terraform_labels"},
 			},
 		},
 	})
