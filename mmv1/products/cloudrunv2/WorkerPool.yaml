@@ -132,6 +132,16 @@ examples:
       cloud_run_worker_pool_name: 'cloudrun-worker-pool'
     ignore_read_extra:
       - 'deletion_protection'
+  - name: 'cloudrunv2_worker_pool_startup_liveness_probe'
+    primary_resource_id: 'default'
+    primary_resource_name: 'fmt.Sprintf("tf-test-cloudrun-wp%s", context["random_suffix"])'
+    vars:
+      cloud_run_worker_pool_name: 'cloudrun-worker-pool'
+      vpc_access_connector_name: 'wp-connector'
+      compute_network_name: 'wp-net'
+      vpc_compute_subnetwork_name: 'wp-subnet'
+    ignore_read_extra:
+      - 'deletion_protection'
 virtual_fields:
   - name: 'deletion_protection'
     description: |
@@ -526,6 +536,7 @@ properties:
                       type: NestedObject
                       properties:
                         - name: 'port'
+                          required: true
                           description: |-
                             Required. The header field name
                           type: Integer
@@ -539,6 +550,8 @@ properties:
                   type: NestedObject
                   properties:
                     - name: 'port'
+                      description: |-
+                        Optional. Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to the exposed port of the container, which is the value of container.ports[0].containerPort.
                       type: Integer
                 - name: 'grpc'
                   description: |-
@@ -593,6 +606,7 @@ properties:
                       type: NestedObject
                       properties:
                         - name: 'port'
+                          required: true
                           description: |-
                             Required. The header field name
                           type: Integer
@@ -606,6 +620,8 @@ properties:
                   type: NestedObject
                   properties:
                     - name: 'port'
+                      description: |-
+                        Optional. Port number to access on the container. Must be in the range 1 to 65535. If not specified, defaults to the exposed port of the container, which is the value of container.ports[0].containerPort.
                       type: Integer
                 - name: 'grpc'
                   description: |-
