@@ -20,8 +20,8 @@ references:
     'Develop and deploy agents on Vertex AI Agent Engine': 'https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/quickstart'
   api: 'https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.reasoningEngines/'
 docs:
-base_url: '{{name}}'
-self_link: '{{name}}'
+base_url: 'projects/{{project}}/locations/{{region}}/reasoningEngines'
+self_link: 'projects/{{project}}/locations/{{region}}/reasoningEngines/{{name}}'
 create_url: 'projects/{{project}}/locations/{{region}}/reasoningEngines'
 update_verb: 'PATCH'
 update_mask: true
@@ -36,8 +36,6 @@ async:
     base_url: '{{op_id}}'
   result:
     resource_inside_response: true
-custom_code:
-  custom_import: 'templates/terraform/custom_import/self_link_as_name.tmpl'
 examples:
   - name: 'vertex_ai_reasoning_engine_basic'
     primary_resource_id: 'reasoning_engine'
@@ -68,6 +66,7 @@ properties:
       The generated name of the ReasoningEngine, in the format
       'projects/{project}/locations/{location}/reasoningEngines/{reasoningEngine}'
     output: true
+    custom_flatten: 'templates/terraform/custom_flatten/name_from_self_link.tmpl'
   - name: 'displayName'
     type: String
     description: The display name of the ReasoningEngine.
@@ -75,11 +74,6 @@ properties:
   - name: 'description'
     type: String
     description: The description of the ReasoningEngine.
-  - name: 'etag'
-    type: String
-    description: Used to perform consistent read-modify-write updates.
-    ignore_read: true
-    output: true
   - name: 'createTime'
     type: String
     description: |-
