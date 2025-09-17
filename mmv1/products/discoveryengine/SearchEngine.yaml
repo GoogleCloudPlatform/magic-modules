@@ -163,13 +163,16 @@ properties:
     description: |
       A map of the feature config for the engine to opt in or opt out of features.
     required: false
-    key_name: 'feature'
+    key_name: 'features'
     value_type:
       name: featureState
-      type: Enum
-      description: |
-        The state of the feature for the engine.
-      enum_values:
-        - 'FEATURE_STATE_UNSPECIFIED'
-        - 'FEATURE_STATE_ON'
-        - 'FEATURE_STATE_OFF'
+      type: NestedObject
+      properties:
+      - name: 'feature'
+        type: Enum
+        description: |
+          The state of the feature for the engine.
+        enum_values:
+          - 'FEATURE_STATE_UNSPECIFIED'
+          - 'FEATURE_STATE_ON'
+          - 'FEATURE_STATE_OFF'
