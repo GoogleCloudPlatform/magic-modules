@@ -732,7 +732,7 @@ func resource{{ $.ResourceName -}}Read(d *schema.ResourceData, meta interface{})
     }
     {{- end }}
     } else {
-        fmt.Printf("identity not set: %s", err)
+        fmt.Printf("[DEBUG] identity not set: %s", err)
     }
 {{- end }}
 {{  end -}}
